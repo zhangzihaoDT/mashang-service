@@ -629,14 +629,63 @@ def run_dsl_step(
     if not isinstance(plan, dict) or not plan:
         return {"status": "error", "message": "未能生成有效的规划 DSL。"}
 
+    working_memory = None
+    if isinstance(memory_context, dict) and isinstance(memory_context.get("working_memory"), dict):
+        working_memory = memory_context.get("working_memory")
+
+    try:
+        plan_fingerprint_payload = {
+            "dataset": plan.get("dataset"),
+            "metric": plan.get("metric"),
+            "time": plan.get("time"),
+            "dimensions": plan.get("dimensions"),
+            "filters": plan.get("filters"),
+            "comparison": plan.get("comparison"),
+            "statistics": (plan.get("statistics") or {}).get("type") if isinstance(plan.get("statistics"), dict) else None,
+        }
+        plan_fingerprint = json.dumps(plan_fingerprint_payload, ensure_ascii=False, sort_keys=True)
+    except Exception:
+        plan_fingerprint = None
+
+    if isinstance(working_memory, dict) and plan_fingerprint:
+        last_fp = working_memory.get("last_plan_fingerprint")
+        last_q = working_memory.get("last_action_query")
+        if last_fp == plan_fingerprint:
+            repeated = int(working_memory.get("repeated_plan_count") or 0) + 1
+            working_memory["repeated_plan_count"] = repeated
+            if last_q and last_q != action_query:
+                fallback = planning_agent._rule_based_plan(action_query)
+                if isinstance(fallback, dict) and fallback:
+                    plan = fallback
+                    try:
+                        plan_fingerprint_payload = {
+                            "dataset": plan.get("dataset"),
+                            "metric": plan.get("metric"),
+                            "time": plan.get("time"),
+                            "dimensions": plan.get("dimensions"),
+                            "filters": plan.get("filters"),
+                            "comparison": plan.get("comparison"),
+                            "statistics": (plan.get("statistics") or {}).get("type") if isinstance(plan.get("statistics"), dict) else None,
+                        }
+                        plan_fingerprint = json.dumps(plan_fingerprint_payload, ensure_ascii=False, sort_keys=True)
+                    except Exception:
+                        plan_fingerprint = None
+        else:
+            working_memory["repeated_plan_count"] = 0
+        working_memory["last_plan_fingerprint"] = plan_fingerprint
+        working_memory["last_action_query"] = action_query
+
     goal_time_window = None
+    goal_time_window_confidence = None
     if isinstance(memory_context, dict):
         goal_time_window = memory_context.get("goal_time_window")
+        goal_time_window_confidence = memory_context.get("goal_time_window_confidence")
 
     if (
         goal_time_window
         and isinstance(goal_time_window, (tuple, list))
         and len(goal_time_window) == 2
+        and goal_time_window_confidence in {"high", "medium"}
         and isinstance(plan.get("time"), dict)
     ):
         try:

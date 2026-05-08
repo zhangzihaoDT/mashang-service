@@ -5,6 +5,7 @@ import re
 from openai import OpenAI
 from agent.llm_config import DEEPSEEK_PLANNER_MODEL
 from agent.state import AgentRuntimeState
+from operators.time_windows import resolve_time_window
 
 LOOP_RUNTIME_SYSTEM_PROMPT = """
 你是一个数据分析 Agent Loop 调度器。
@@ -182,11 +183,51 @@ class PlanningAgent:
         "date",
         "date_range",
     }
+    _DIMENSION_SYNONYMS = {
+        "product_name": ["按产品名称", "分产品名称", "产品名称", "按产品", "分产品", "产品名", "product name", "product_name", "productname"],
+        "series": ["分车型", "按车型", "车型分别", "分车系", "按车系", "车系分别", "按系列", "分系列", "series"],
+        "parent_region_name": ["按大区", "分大区", "大区分别", "region"],
+        "store_name": ["按门店", "分门店", "门店分别", "store"],
+        "store_city": ["按门店城市", "分门店城市", "门店城市分别", "store city", "store_city"],
+        "license_city": ["按上牌城市", "分上牌城市", "上牌城市分别", "license city", "license_city"],
+    }
 
     def __init__(self, client: OpenAI, schema_md: str, business_definition: str):
         self.client = client
         self.schema_md = schema_md or ""
         self.business_definition = business_definition or ""
+        self.business_definition_obj: dict = {}
+        try:
+            raw = (self.business_definition or "").strip()
+            if raw:
+                self.business_definition_obj = json.loads(raw)
+        except Exception:
+            self.business_definition_obj = {}
+
+    @staticmethod
+    def _contains_any_token(user_query: str, tokens: list[str]) -> bool:
+        q = (user_query or "").replace(" ", "")
+        q_lower = q.lower()
+        if not q_lower:
+            return False
+        if not isinstance(tokens, list) or not tokens:
+            return False
+        for t in tokens:
+            if not isinstance(t, str):
+                continue
+            raw = t.strip()
+            if not raw:
+                continue
+            if raw.lower() in q_lower:
+                return True
+        return False
+
+    def _parse_time_window_with_business(self, user_query: str, today: datetime.date) -> tuple[str, str] | None:
+        if isinstance(self.business_definition_obj, dict):
+            window = resolve_time_window(user_query=user_query, today=today, business_definition=self.business_definition_obj)
+            if window:
+                return window
+        return PlanningAgent._parse_time_window(user_query, today)
 
     @staticmethod
     def _parse_comparison_type(user_query: str) -> str:
@@ -233,7 +274,7 @@ class PlanningAgent:
         has_stat_keyword = any(k in q for k in stat_keywords)
         has_explicit_window = PlanningAgent._parse_time_window(q, datetime.date.today()) is not None
         has_time_window = has_explicit_window or bool(re.search(r"近\s*\d+\s*(日|天|周|月)", q)) or any(
-            k in q for k in ["昨天", "昨日", "本周", "上周", "本月", "上月", "今年", "去年"]
+            k in q for k in ["昨天", "昨日", "本周", "上周", "本月", "上月", "今年", "去年", "上市至今", "上市以来", "预售至今", "预售以来"]
         )
         if has_stat_keyword and has_time_window:
             return "statistics"
@@ -360,7 +401,24 @@ class PlanningAgent:
                 return window
 
         m = re.search(
+            r"(?P<y>\d{2,4})\s*年\s*(?P<m>\d{1,2})\s*月\s*(?P<d>\d{1,2})\s*[日号]?\s*(?:到|至|[-~—–－])\s*(?P<iso>\d{4}-\d{2}-\d{2})",
+            q,
+        )
+        if m:
+            y1 = _normalize_year(m.group("y")) or today.year
+            m1 = int(m.group("m"))
+            d1 = int(m.group("d"))
+            start_date = _safe_date(y1, m1, d1)
+            end_date = datetime.date.fromisoformat(m.group("iso"))
+            if start_date and end_date:
+                if "留存" in q or "预售期" in q:
+                    return (start_date.isoformat(), end_date.isoformat())
+                end_open = end_date + datetime.timedelta(days=1)
+                return (start_date.isoformat(), end_open.isoformat())
+
+        m = re.search(
             r"(?P<y>\d{2,4})\s*年\s*(?P<m>\d{1,2})\s*月\s*(?P<d>\d{1,2})\s*[日号]?\s*(?:到|至|[-~—–－])\s*"
+            r"(?!\d{4}-\d{2}-\d{2})"
             r"(?:(?P<y2>\d{2,4})\s*年\s*)?(?:(?P<m2>\d{1,2})\s*月\s*)?(?P<d2>\d{1,2})\s*[日号]?",
             q,
         )
@@ -456,6 +514,87 @@ class PlanningAgent:
         return None
 
     @staticmethod
+    def infer_goal_time_window_rule(user_query: str, today: datetime.date) -> dict:
+        q = user_query or ""
+        has_retention_hint = ("留存" in q) or ("预售期" in q)
+
+        m = re.search(r"(\d{4}-\d{2}-\d{2})\s*(?:到|至|[-~—–－])\s*(\d{4}-\d{2}-\d{2})", q)
+        if m:
+            start_date = datetime.date.fromisoformat(m.group(1))
+            end_date = datetime.date.fromisoformat(m.group(2))
+            if has_retention_hint:
+                return {"window": (start_date.isoformat(), end_date.isoformat()), "confidence": "high", "source": "iso_range"}
+            end_open = end_date + datetime.timedelta(days=1)
+            return {"window": (start_date.isoformat(), end_open.isoformat()), "confidence": "high", "source": "iso_range"}
+
+        m = re.search(
+            r"(?P<y>\d{2,4})\s*年\s*(?P<m>\d{1,2})\s*月\s*(?P<d>\d{1,2})\s*[日号]?\s*(?:到|至|[-~—–－])\s*(?P<iso>\d{4}-\d{2}-\d{2})",
+            q,
+        )
+        if m:
+            y1 = m.group("y")
+            start_date = datetime.date(int(y1) if len(str(y1)) == 4 else 2000 + int(y1), int(m.group("m")), int(m.group("d")))
+            end_date = datetime.date.fromisoformat(m.group("iso"))
+            if has_retention_hint:
+                return {"window": (start_date.isoformat(), end_date.isoformat()), "confidence": "high", "source": "mixed_cn_iso"}
+            end_open = end_date + datetime.timedelta(days=1)
+            return {"window": (start_date.isoformat(), end_open.isoformat()), "confidence": "high", "source": "mixed_cn_iso"}
+
+        window = PlanningAgent._parse_time_window(q, today)
+        if not window:
+            return {"window": None, "confidence": "low", "source": "none"}
+
+        iso_dates = []
+        for raw in re.findall(r"\d{4}-\d{2}-\d{2}", q):
+            try:
+                iso_dates.append(datetime.date.fromisoformat(raw))
+            except Exception:
+                pass
+        cn_dates = []
+        for m_cn in re.finditer(r"(?P<y>\d{2,4})\s*年\s*(?P<m>\d{1,2})\s*月\s*(?P<d>\d{1,2})\s*[日号]?", q):
+            yv = m_cn.group("y")
+            y = int(yv) if len(str(yv)) == 4 else 2000 + int(yv)
+            try:
+                cn_dates.append(datetime.date(y, int(m_cn.group("m")), int(m_cn.group("d"))))
+            except Exception:
+                pass
+
+        confidence = "low"
+        source = "fallback"
+        if any(k in q for k in ["昨天", "昨日", "今天", "今日", "本周", "上周", "本月", "上月", "今年", "去年", "前年", "至今", "截至", "目前", "现在"]):
+            confidence = "medium"
+            source = "relative"
+        elif ("到" in q or "至" in q or "-" in q or "~" in q or "—" in q or "–" in q or "－" in q) and (len(cn_dates) >= 2):
+            confidence = "high"
+            source = "cn_range"
+        elif len(iso_dates) == 1 and len(cn_dates) >= 1 and ("到" in q or "至" in q):
+            try:
+                parsed_end = datetime.date.fromisoformat(window[1])
+                max_iso = max(iso_dates)
+                if parsed_end <= max_iso:
+                    start_date = min(cn_dates)
+                    end_date = max_iso
+                    if has_retention_hint:
+                        return {"window": (start_date.isoformat(), end_date.isoformat()), "confidence": "medium", "source": "mixed_fallback"}
+                    end_open = end_date + datetime.timedelta(days=1)
+                    return {"window": (start_date.isoformat(), end_open.isoformat()), "confidence": "medium", "source": "mixed_fallback"}
+            except Exception:
+                pass
+        elif len(iso_dates) == 1 or len(cn_dates) == 1:
+            confidence = "medium"
+            source = "single_date"
+
+        return {"window": window, "confidence": confidence, "source": source}
+
+    def infer_goal_time_window(self, user_query: str, today: datetime.date) -> dict:
+        window = None
+        if isinstance(self.business_definition_obj, dict):
+            window = resolve_time_window(user_query=user_query, today=today, business_definition=self.business_definition_obj)
+        if window:
+            return {"window": window, "confidence": "high", "source": "operators.time_windows.resolve_time_window"}
+        return PlanningAgent.infer_goal_time_window_rule(user_query, today)
+
+    @staticmethod
     def _metric_defaults(user_query: str) -> dict | None:
         q = user_query or ""
         if "在营门店" in q:
@@ -464,6 +603,13 @@ class PlanningAgent:
                 "metric": {"field": "store_name", "agg": "count", "alias": "在营门店数", "business_name": "在营门店数"},
                 "time_field": "order_create_date",
                 "non_null_field": "order_create_date",
+            }
+        if "下发线索" in q:
+            return {
+                "dataset": "assign_data",
+                "metric": {"field": "下发线索数", "agg": "sum", "alias": "下发线索数", "business_name": "下发线索数"},
+                "time_field": "Assign Time 年/月/日",
+                "non_null_field": "Assign Time 年/月/日",
             }
         if "锁单" in q:
             return {
@@ -577,10 +723,8 @@ class PlanningAgent:
                 filters.append({"field": "order_type", "op": "!=", "value": "试驾车"})
 
         series_tokens = PlanningAgent._infer_series_tokens(q)
-        has_series_filter = PlanningAgent._has_field_filter(
-            filters, {"series", "product_name", "drive_series_cn", "belong_intent_series"}
-        )
-        if (not has_series_filter) and series_tokens:
+        has_series_filter = PlanningAgent._has_field_filter(filters, {"series", "product_name", "drive_series_cn", "belong_intent_series"})
+        if (not has_series_filter) and series_tokens and ("下发线索" not in q):
             if len(series_tokens) == 1:
                 filters.append({"field": "series", "op": "==", "value": series_tokens[0]})
             elif len(series_tokens) > 1:
@@ -781,8 +925,8 @@ class PlanningAgent:
         if not q:
             return False
         has_mean = any(k in q for k in ["日均", "均值", "平均值", "平均"])
-        has_recent_day = bool(re.search(r"近\s*\d+\s*(日|天)", q))
-        has_relative_day = any(k in q for k in ["昨天", "昨日", "今天", "今日", "本周", "上周", "本月", "上月"])
+        has_recent_day = bool(re.search(r"近\s*(?:\d+|[一二两三四五六七八九十])\s*(日|天|周|月)", q))
+        has_relative_day = any(k in q for k in ["昨天", "昨日", "今天", "今日", "本周", "上周", "本月", "上月", "上市至今", "上市以来", "预售至今", "预售以来", "至今", "截至", "目前", "现在"])
         has_explicit_window = PlanningAgent._extract_explicit_time_window(q, datetime.date.today()) is not None
         return has_mean and (has_recent_day or has_relative_day or has_explicit_window)
 
@@ -953,9 +1097,16 @@ class PlanningAgent:
             end = datetime.date.fromisoformat(end_s)
             days = max(1, (end - start).days)
         else:
-            days = self._parse_recent_days(user_query) or 30
-            start = today - datetime.timedelta(days=days)
-            end = today
+            macro_window = self._parse_time_window_with_business(user_query, today)
+            if macro_window:
+                start_s, end_s = macro_window
+                start = datetime.date.fromisoformat(start_s)
+                end = datetime.date.fromisoformat(end_s)
+                days = max(1, (end - start).days)
+            else:
+                days = self._parse_recent_days(user_query) or 30
+                start = today - datetime.timedelta(days=days)
+                end = today
         time_field = metric_defaults["time_field"]
         value_metric = metric_defaults["metric"]
         plan = {
@@ -1372,7 +1523,7 @@ class PlanningAgent:
         if not metric_defaults:
             return None
 
-        time_window = self._parse_time_window(user_query, today) or (
+        time_window = self._parse_time_window_with_business(user_query, today) or (
             (today - datetime.timedelta(days=1)).isoformat(),
             today.isoformat(),
         )
@@ -1653,7 +1804,7 @@ class PlanningAgent:
             filters = []
 
         time_field = time.get("field")
-        if isinstance(time_field, str) and time_field in {"lock_time", "delivery_date", "invoice_upload_time", "intention_payment_time"}:
+        if isinstance(time_field, str) and time_field in {"lock_time", "delivery_date", "invoice_upload_time", "intention_payment_time", "Assign Time 年/月/日"}:
             has_non_null = any(
                 isinstance(f, dict) and f.get("field") == time_field and f.get("op") == "!=" and f.get("value") is None
                 for f in filters
@@ -1682,12 +1833,12 @@ class PlanningAgent:
         if not dims:
             q = (user_query or "").replace(" ", "")
             dataset = str(plan.get("dataset") or "")
-            want_series = any(k in q for k in ["分车型", "按车型", "车型分别", "分车系", "按车系", "车系分别", "按系列", "分系列"])
-            want_product = any(k in q for k in ["按产品名称", "分产品名称", "产品名称", "按产品", "分产品"])
-            want_region = any(k in q for k in ["按大区", "分大区", "大区分别"])
-            want_store = any(k in q for k in ["按门店", "分门店", "门店分别"])
-            want_store_city = any(k in q for k in ["按门店城市", "分门店城市", "门店城市分别"])
-            want_license_city = any(k in q for k in ["按上牌城市", "分上牌城市", "上牌城市分别"])
+            want_series = self._contains_any_token(q, self._DIMENSION_SYNONYMS.get("series") or [])
+            want_product = self._contains_any_token(q, self._DIMENSION_SYNONYMS.get("product_name") or [])
+            want_region = self._contains_any_token(q, self._DIMENSION_SYNONYMS.get("parent_region_name") or [])
+            want_store = self._contains_any_token(q, self._DIMENSION_SYNONYMS.get("store_name") or [])
+            want_store_city = self._contains_any_token(q, self._DIMENSION_SYNONYMS.get("store_city") or [])
+            want_license_city = self._contains_any_token(q, self._DIMENSION_SYNONYMS.get("license_city") or [])
             if dataset == "order_data":
                 if want_product:
                     plan["dimensions"] = ["product_name"]
@@ -1852,7 +2003,7 @@ class PlanningAgent:
         if not isinstance(time, dict):
             return plan
         today = today or datetime.date.today()
-        rule_window = self._parse_time_window(user_query, today)
+        rule_window = self._parse_time_window_with_business(user_query, today)
         if not rule_window:
             return plan
         time_type = self._infer_time_window_type(user_query)

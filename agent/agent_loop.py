@@ -321,7 +321,9 @@ def run_main_agent(user_query: str) -> str:
     comparison_tool = ComparisonTool(query_tool=query_tool)
     statistics_tool = StatisticsTool()
     state = AgentRuntimeState(goal=user_query, max_steps=5)
-    goal_time_window = PlanningAgent._parse_time_window(user_query, datetime.date.today())
+    goal_time_info = planning_agent.infer_goal_time_window(user_query, datetime.date.today())
+    goal_time_window = goal_time_info.get("window") if isinstance(goal_time_info, dict) else None
+    goal_time_window_confidence = goal_time_info.get("confidence") if isinstance(goal_time_info, dict) else None
     finish_grounded_answer = ""
     while not state.done and state.iteration < state.max_steps:
         print(f"\n=== Loop Step {state.iteration + 1}/{state.max_steps} ===")
@@ -341,6 +343,7 @@ def run_main_agent(user_query: str) -> str:
                     "working_memory": state.working_memory,
                     "execution_log": memory.get("execution_log") if isinstance(memory, dict) else [],
                     "goal_time_window": goal_time_window,
+                    "goal_time_window_confidence": goal_time_window_confidence,
                 },
             )
             status = step_result.get("status")
