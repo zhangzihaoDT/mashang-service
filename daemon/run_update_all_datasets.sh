@@ -1,4 +1,17 @@
 #!/bin/bash
+# ---
+# name: mashang_dataset_daily_update
+# description: Update local datasets from Tableau and run daily order observation.
+# schedule:
+#   time: "08:30"
+#   start_interval_seconds: 300
+# gate:
+#   policy: "once_per_day_after_time"
+#   timezone: "local"
+# outputs:
+#   log_dir: daemon/logs
+#   state_dir: daemon/state
+# ---
 set -euo pipefail
 
 script_dir="$(cd "$(dirname "$0")" && pwd)"
@@ -42,7 +55,17 @@ if [[ ! -x "$python_bin" ]]; then
   python_bin="$(command -v python3)"
 fi
 
-"$python_bin" "$repo_root/dataset/updater/update_all_datasets.py" >>"$log_dir/update_all.log" 2>&1
+{
+  echo ""
+  echo "===== $(/bin/date '+%Y-%m-%d %H:%M:%S%z') START update_all_datasets ====="
+  "$python_bin" "$repo_root/dataset/updater/update_all_datasets.py"
+  echo "===== $(/bin/date '+%Y-%m-%d %H:%M:%S%z') END update_all_datasets ====="
+  echo ""
+  echo "===== $(/bin/date '+%Y-%m-%d %H:%M:%S%z') START skills_order_observation_daily ====="
+  "$python_bin" "$repo_root/daemon/skills_order_observation_daily.py"
+  echo "===== $(/bin/date '+%Y-%m-%d %H:%M:%S%z') END skills_order_observation_daily ====="
+  echo ""
+} >>"$log_dir/update_all.log" 2>&1
 ts="$(/bin/date '+%Y-%m-%dT%H:%M:%S%z' 2>/dev/null || true)"
 if [[ -z "$ts" ]]; then
   ts="$(/bin/date +%s)"
