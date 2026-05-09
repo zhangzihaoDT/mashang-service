@@ -3,6 +3,8 @@
 .env
 .env.*
 
+/dataset/
+
 __pycache__/
 *.py[cod]
 *$py.class
