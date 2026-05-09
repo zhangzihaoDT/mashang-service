@@ -627,7 +627,13 @@ def run_dsl_step(
     print("\n[Thinking] PlanningAgent 正在构建执行规划并路由...")
     plan = planning_agent.create_plan(action_query, memory_context=memory_context)
     if not isinstance(plan, dict) or not plan:
-        return {"status": "error", "message": "未能生成有效的规划 DSL。"}
+        planning_error = ""
+        try:
+            planning_error = str(getattr(planning_agent, "last_planning_error", "") or "").strip()
+        except Exception:
+            planning_error = ""
+        suffix = f" 规划器错误信息: {planning_error}" if planning_error else ""
+        return {"status": "error", "message": f"未能生成有效的规划 DSL。{suffix}"}
 
     working_memory = None
     if isinstance(memory_context, dict) and isinstance(memory_context.get("working_memory"), dict):

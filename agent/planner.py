@@ -5,7 +5,7 @@ import re
 from openai import OpenAI
 from agent.llm_config import DEEPSEEK_PLANNER_MODEL
 from agent.state import AgentRuntimeState
-from operators.time_windows import resolve_time_window
+from operators.time_windows import resolve_time_window, parse_until_end_date
 
 LOOP_RUNTIME_SYSTEM_PROMPT = """
 你是一个数据分析 Agent Loop 调度器。
@@ -196,6 +196,7 @@ class PlanningAgent:
         self.client = client
         self.schema_md = schema_md or ""
         self.business_definition = business_definition or ""
+        self.last_planning_error: str = ""
         self.business_definition_obj: dict = {}
         try:
             raw = (self.business_definition or "").strip()
@@ -203,6 +204,138 @@ class PlanningAgent:
                 self.business_definition_obj = json.loads(raw)
         except Exception:
             self.business_definition_obj = {}
+
+    @staticmethod
+    def _is_dimension_enumeration_query(user_query: str) -> bool:
+        q = (user_query or "").strip()
+        if not q:
+            return False
+        q_no_space = q.replace(" ", "")
+        has_list_intent = any(k in q_no_space for k in ["有哪些", "有什么", "列出", "清单", "都有哪些", "分别有哪些", "包括哪些", "包含哪些"])
+        if not has_list_intent:
+            return False
+        return any(
+            PlanningAgent._contains_any_token(q_no_space, PlanningAgent._DIMENSION_SYNONYMS.get(dim) or [])
+            for dim in ["product_name", "series", "parent_region_name", "store_name", "store_city", "license_city"]
+        )
+
+    def _build_dimension_enumeration_plan(self, user_query: str) -> dict | None:
+        if not self._is_dimension_enumeration_query(user_query):
+            return None
+        today = datetime.date.today()
+        series_tokens = self._infer_series_tokens(user_query)
+        start = (today - datetime.timedelta(days=365)).isoformat()
+        end = (today + datetime.timedelta(days=1)).isoformat()
+        if series_tokens and isinstance(self.business_definition_obj, dict):
+            periods = self.business_definition_obj.get("time_periods")
+            if isinstance(periods, dict):
+                token = series_tokens[0]
+                meta = periods.get(token)
+                if isinstance(meta, dict):
+                    s = meta.get("start")
+                    if isinstance(s, str) and s.strip():
+                        try:
+                            _ = datetime.date.fromisoformat(s.strip())
+                            start = s.strip()
+                        except Exception:
+                            pass
+        plan = {
+            "dataset": "order_data",
+            "metric": {"field": "order_number", "agg": "count", "alias": "count", "business_name": "订单计数"},
+            "time": {"field": "order_create_date", "start": start, "end": end},
+            "dimensions": [],
+            "filters": [{"field": "order_create_date", "op": "!=", "value": None}],
+            "comparison": {"type": "none"},
+        }
+        return self._normalize_plan(plan)
+
+    @staticmethod
+    def _is_retained_intention_query(user_query: str) -> bool:
+        q = (user_query or "").replace(" ", "")
+        if not q:
+            return False
+        if "留存小订" not in q:
+            return False
+        if "转化" in q:
+            return False
+        return True
+
+    def _resolve_retained_intention_time_window(self, user_query: str, today: datetime.date) -> tuple[str, str]:
+        until_end = parse_until_end_date(user_query)
+        if until_end:
+            end_excl = until_end + datetime.timedelta(days=1)
+            series_tokens = self._infer_series_tokens(user_query)
+            if series_tokens and isinstance(self.business_definition_obj, dict):
+                periods = self.business_definition_obj.get("time_periods")
+                if isinstance(periods, dict):
+                    token = series_tokens[0]
+                    meta = periods.get(token)
+                    if isinstance(meta, dict):
+                        s = meta.get("start")
+                        if isinstance(s, str) and s.strip():
+                            try:
+                                start_day = datetime.date.fromisoformat(s.strip())
+                                if start_day < end_excl:
+                                    return (start_day.isoformat(), end_excl.isoformat())
+                            except Exception:
+                                pass
+            fallback_start = until_end - datetime.timedelta(days=30)
+            return (fallback_start.isoformat(), end_excl.isoformat())
+
+        m = re.search(r"(\d{4}-\d{2}-\d{2})\s*(?:到|至|[-~—–－])\s*(\d{4}-\d{2}-\d{2})", user_query or "")
+        if m:
+            try:
+                start_day = datetime.date.fromisoformat(m.group(1))
+                end_day = datetime.date.fromisoformat(m.group(2))
+                end_excl = end_day + datetime.timedelta(days=1)
+                if end_excl > start_day:
+                    return (start_day.isoformat(), end_excl.isoformat())
+            except Exception:
+                pass
+
+        window = self._parse_time_window_with_business(user_query, today)
+        if window:
+            start_s, end_s = window
+            try:
+                end_day = datetime.date.fromisoformat(str(end_s)[:10])
+                start_day = datetime.date.fromisoformat(str(start_s)[:10])
+                if end_day <= start_day:
+                    return window
+                return (start_day.isoformat(), end_day.isoformat())
+            except Exception:
+                return window
+        series_tokens = self._infer_series_tokens(user_query)
+        if series_tokens and isinstance(self.business_definition_obj, dict):
+            periods = self.business_definition_obj.get("time_periods")
+            if isinstance(periods, dict):
+                token = series_tokens[0]
+                meta = periods.get(token)
+                if isinstance(meta, dict):
+                    s = meta.get("start")
+                    if isinstance(s, str) and s.strip():
+                        try:
+                            start_day = datetime.date.fromisoformat(s.strip())
+                            if start_day < today:
+                                return (start_day.isoformat(), today.isoformat())
+                        except Exception:
+                            pass
+        start = (today - datetime.timedelta(days=30)).isoformat()
+        return (start, today.isoformat())
+
+    def _build_retained_intention_plan(self, user_query: str) -> dict | None:
+        if not self._is_retained_intention_query(user_query):
+            return None
+        today = datetime.date.today()
+        start, end = self._resolve_retained_intention_time_window(user_query, today)
+        plan = {
+            "dataset": "order_data",
+            "metric": {"field": "order_number", "agg": "count", "alias": "留存小订数", "business_name": "留存小订数"},
+            "time": {"field": "intention_payment_time", "start": start, "end": end},
+            "dimensions": [],
+            "filters": [],
+            "comparison": {"type": "none"},
+        }
+        return self._normalize_plan(plan)
 
     @staticmethod
     def _contains_any_token(user_query: str, tokens: list[str]) -> bool:
@@ -412,7 +545,8 @@ class PlanningAgent:
             end_date = datetime.date.fromisoformat(m.group("iso"))
             if start_date and end_date:
                 if "留存" in q or "预售期" in q:
-                    return (start_date.isoformat(), end_date.isoformat())
+                    end_open = end_date + datetime.timedelta(days=1)
+                    return (start_date.isoformat(), end_open.isoformat())
                 end_open = end_date + datetime.timedelta(days=1)
                 return (start_date.isoformat(), end_open.isoformat())
 
@@ -433,7 +567,8 @@ class PlanningAgent:
             end_date = _safe_date(y2, m2, d2)
             if start_date and end_date:
                 if "留存" in q or "预售期" in q:
-                    return (start_date.isoformat(), end_date.isoformat())
+                    end_open = end_date + datetime.timedelta(days=1)
+                    return (start_date.isoformat(), end_open.isoformat())
                 end_open = end_date + datetime.timedelta(days=1)
                 return (start_date.isoformat(), end_open.isoformat())
 
@@ -487,7 +622,8 @@ class PlanningAgent:
             start_date = datetime.date.fromisoformat(m.group(1))
             end_date = datetime.date.fromisoformat(m.group(2))
             if "留存" in q or "预售期" in q:
-                return (start_date.isoformat(), end_date.isoformat())
+                end_open = end_date + datetime.timedelta(days=1)
+                return (start_date.isoformat(), end_open.isoformat())
             end_open = end_date + datetime.timedelta(days=1)
             return (start_date.isoformat(), end_open.isoformat())
 
@@ -501,7 +637,8 @@ class PlanningAgent:
             end_date = _safe_date(year, int(m.group("m2")), int(m.group("d2")))
             if start_date and end_date:
                 if "留存" in q or "预售期" in q:
-                    return (start_date.isoformat(), end_date.isoformat())
+                    end_open = end_date + datetime.timedelta(days=1)
+                    return (start_date.isoformat(), end_open.isoformat())
                 end_open = end_date + datetime.timedelta(days=1)
                 return (start_date.isoformat(), end_open.isoformat())
 
@@ -518,12 +655,19 @@ class PlanningAgent:
         q = user_query or ""
         has_retention_hint = ("留存" in q) or ("预售期" in q)
 
+        until_end = parse_until_end_date(q)
+        if until_end:
+            end_open = until_end + datetime.timedelta(days=1)
+            start = until_end - datetime.timedelta(days=30)
+            return {"window": (start.isoformat(), end_open.isoformat()), "confidence": "medium", "source": "until_date"}
+
         m = re.search(r"(\d{4}-\d{2}-\d{2})\s*(?:到|至|[-~—–－])\s*(\d{4}-\d{2}-\d{2})", q)
         if m:
             start_date = datetime.date.fromisoformat(m.group(1))
             end_date = datetime.date.fromisoformat(m.group(2))
             if has_retention_hint:
-                return {"window": (start_date.isoformat(), end_date.isoformat()), "confidence": "high", "source": "iso_range"}
+                end_open = end_date + datetime.timedelta(days=1)
+                return {"window": (start_date.isoformat(), end_open.isoformat()), "confidence": "high", "source": "iso_range"}
             end_open = end_date + datetime.timedelta(days=1)
             return {"window": (start_date.isoformat(), end_open.isoformat()), "confidence": "high", "source": "iso_range"}
 
@@ -536,7 +680,8 @@ class PlanningAgent:
             start_date = datetime.date(int(y1) if len(str(y1)) == 4 else 2000 + int(y1), int(m.group("m")), int(m.group("d")))
             end_date = datetime.date.fromisoformat(m.group("iso"))
             if has_retention_hint:
-                return {"window": (start_date.isoformat(), end_date.isoformat()), "confidence": "high", "source": "mixed_cn_iso"}
+                end_open = end_date + datetime.timedelta(days=1)
+                return {"window": (start_date.isoformat(), end_open.isoformat()), "confidence": "high", "source": "mixed_cn_iso"}
             end_open = end_date + datetime.timedelta(days=1)
             return {"window": (start_date.isoformat(), end_open.isoformat()), "confidence": "high", "source": "mixed_cn_iso"}
 
@@ -587,6 +732,25 @@ class PlanningAgent:
         return {"window": window, "confidence": confidence, "source": source}
 
     def infer_goal_time_window(self, user_query: str, today: datetime.date) -> dict:
+        q = user_query or ""
+        has_retention_hint = ("留存" in q) or ("预售期" in q)
+        until_end = parse_until_end_date(q)
+        if has_retention_hint and until_end and isinstance(self.business_definition_obj, dict):
+            series_tokens = PlanningAgent._infer_series_tokens(q)
+            periods = self.business_definition_obj.get("time_periods")
+            if series_tokens and isinstance(periods, dict):
+                token = series_tokens[0]
+                meta = periods.get(token)
+                if isinstance(meta, dict):
+                    s = meta.get("start")
+                    if isinstance(s, str) and s.strip():
+                        try:
+                            start_day = datetime.date.fromisoformat(s.strip())
+                            end_open = until_end + datetime.timedelta(days=1)
+                            if end_open > start_day:
+                                return {"window": (start_day.isoformat(), end_open.isoformat()), "confidence": "high", "source": "until_date_series_start"}
+                        except Exception:
+                            pass
         window = None
         if isinstance(self.business_definition_obj, dict):
             window = resolve_time_window(user_query=user_query, today=today, business_definition=self.business_definition_obj)
@@ -1554,6 +1718,23 @@ class PlanningAgent:
         parts = re.split(r"[？?\n；;]+", q)
         return [p.strip() for p in parts if p and p.strip()]
 
+    @staticmethod
+    def _looks_like_time_only_clause(text: str) -> bool:
+        q = (text or "").strip()
+        if not q:
+            return False
+        q_nospace = q.replace(" ", "")
+        has_date = bool(re.search(r"\d{4}-\d{2}-\d{2}", q_nospace)) or bool(re.search(r"\d{2,4}年\d{1,2}月\d{1,2}", q_nospace))
+        has_time_keyword = any(k in q_nospace for k in ["截至", "截止", "到", "至", "本月", "上月", "今年", "去年", "昨天", "昨日", "近"])
+        if not (has_date or has_time_keyword):
+            return False
+        metric_markers = ["锁单", "交付", "开票", "小订", "意向金", "大定", "定金", "下发线索", "在营门店", "留存小订", "订单"]
+        if any(k in q_nospace for k in metric_markers):
+            return False
+        if PlanningAgent._infer_series_tokens(q_nospace):
+            return False
+        return True
+
     def _finalize_plans(self, plans: list[dict], user_query: str) -> list[dict]:
         finalized: list[dict] = []
         for plan in plans:
@@ -1605,8 +1786,13 @@ class PlanningAgent:
 
     def create_plans(self, user_query: str, memory_context: dict | None = None) -> list[dict]:
         parts = self._split_user_query(user_query) or [user_query]
+        if len(parts) >= 2 and PlanningAgent._looks_like_time_only_clause(parts[0]):
+            merged = f"{parts[0]} {parts[1]}".strip()
+            rest = parts[2:] if len(parts) > 2 else []
+            parts = [merged, *rest]
         fp = self._parse_fast_path_query(user_query)
         if isinstance(fp, dict) and fp.get("type"):
+            self.last_planning_error = ""
             return [
                 self._normalize_plan(
                     {
@@ -1631,6 +1817,21 @@ class PlanningAgent:
             need, city = self._should_city_clarify(part)
             if need and city:
                 return [{"question": part, "clarification": self._city_clarification(city, part)}]
+
+        retained_plans: list[dict] = []
+        retained_window = None
+        if PlanningAgent._is_retained_intention_query(user_query):
+            retained_window = self._resolve_retained_intention_time_window(user_query, datetime.date.today())
+        for part in parts:
+            retained = self._build_retained_intention_plan(part)
+            if isinstance(retained, dict) and retained:
+                if retained_window and isinstance(retained.get("time"), dict):
+                    retained["time"]["start"], retained["time"]["end"] = retained_window
+                retained["question"] = part
+                retained_plans.append(retained)
+        if retained_plans:
+            self.last_planning_error = ""
+            return self._finalize_plans(retained_plans, user_query)
 
         current_date = datetime.date.today().isoformat()
         memory_context = memory_context if isinstance(memory_context, dict) else {}
@@ -1684,17 +1885,24 @@ class PlanningAgent:
                 messages=messages,
                 tools=[PLANNING_TOOL_SCHEMA],
                 tool_choice={"type": "function", "function": {"name": "create_planning_dsl"}},
+                temperature=0,
             )
 
             message = response.choices[0].message
+            finish_reason = str(getattr(response.choices[0], "finish_reason", "") or "")
             tool_calls = message.tool_calls or []
             for tool_call in tool_calls:
                 if tool_call.function.name != "create_planning_dsl":
                     continue
-                args = json.loads(tool_call.function.arguments or "{}")
+                try:
+                    args = json.loads(tool_call.function.arguments or "{}")
+                except Exception as e:
+                    self.last_planning_error = f"planning_tool_args_parse_failed: {e.__class__.__name__}: {e}"
+                    continue
                 raw_plans = args.get("plans")
                 clarification = args.get("clarification")
                 if isinstance(clarification, dict) and clarification.get("need"):
+                    self.last_planning_error = ""
                     return [{"question": user_query, "clarification": clarification}]
                 if isinstance(raw_plans, list):
                     plans: list[dict] = []
@@ -1702,26 +1910,114 @@ class PlanningAgent:
                         if not isinstance(p, dict):
                             continue
                         plans.append(p)
+                    self.last_planning_error = ""
                     return self._finalize_plans(plans, user_query)
                 raw_plan = args.get("plan")
                 if isinstance(raw_plan, dict):
+                    self.last_planning_error = ""
                     return self._finalize_plans([raw_plan], user_query)
 
             content = message.content or ""
-            obj = json.loads(content)
+            try:
+                obj = json.loads(content)
+            except Exception as e:
+                self.last_planning_error = f"planning_content_json_parse_failed: {e.__class__.__name__}: {e}"
+                obj = None
             if isinstance(obj, dict) and isinstance(obj.get("plans"), list):
                 plans: list[dict] = []
                 for p in obj["plans"]:
                     if not isinstance(p, dict):
                         continue
                     plans.append(p)
+                self.last_planning_error = ""
                 return self._finalize_plans(plans, user_query)
             if isinstance(obj, dict) and isinstance(obj.get("clarification"), dict) and obj["clarification"].get("need"):
+                self.last_planning_error = ""
                 return [{"question": user_query, "clarification": obj["clarification"]}]
             if isinstance(obj, dict) and isinstance(obj.get("plan"), dict):
+                self.last_planning_error = ""
                 return self._finalize_plans([obj["plan"]], user_query)
-        except Exception:
-            pass
+            if not tool_calls:
+                preview = (content or "").strip().replace("\n", " ")
+                if len(preview) > 240:
+                    preview = preview[:240] + "...(truncated)"
+                self.last_planning_error = f"planning_no_tool_calls: finish_reason={finish_reason} content_preview={preview}"
+
+                retry_messages = [
+                    {
+                        "role": "system",
+                        "content": (
+                            "你是一个智能数据分析助手 (Planning Agent)。"
+                            "必须调用 create_planning_dsl 工具返回 plans 或 clarification。"
+                            "不要输出任何非工具调用文本。"
+                        ),
+                    },
+                    {"role": "user", "content": user_query},
+                ]
+                try:
+                    retry = self.client.chat.completions.create(
+                        model=DEEPSEEK_PLANNER_MODEL,
+                        messages=retry_messages,
+                        tools=[PLANNING_TOOL_SCHEMA],
+                        tool_choice={"type": "function", "function": {"name": "create_planning_dsl"}},
+                        temperature=0,
+                    )
+                    retry_msg = retry.choices[0].message
+                    retry_tool_calls = retry_msg.tool_calls or []
+                    for tool_call in retry_tool_calls:
+                        if tool_call.function.name != "create_planning_dsl":
+                            continue
+                        try:
+                            args = json.loads(tool_call.function.arguments or "{}")
+                        except Exception as e:
+                            self.last_planning_error = f"planning_retry_tool_args_parse_failed: {e.__class__.__name__}: {e}"
+                            continue
+                        raw_plans = args.get("plans")
+                        clarification = args.get("clarification")
+                        if isinstance(clarification, dict) and clarification.get("need"):
+                            self.last_planning_error = ""
+                            return [{"question": user_query, "clarification": clarification}]
+                        if isinstance(raw_plans, list):
+                            plans: list[dict] = []
+                            for p in raw_plans:
+                                if not isinstance(p, dict):
+                                    continue
+                                plans.append(p)
+                            self.last_planning_error = ""
+                            return self._finalize_plans(plans, user_query)
+                        raw_plan = args.get("plan")
+                        if isinstance(raw_plan, dict):
+                            self.last_planning_error = ""
+                            return self._finalize_plans([raw_plan], user_query)
+                    retry_content = retry_msg.content or ""
+                    try:
+                        obj = json.loads(retry_content)
+                    except Exception:
+                        obj = None
+                    if isinstance(obj, dict) and isinstance(obj.get("plans"), list):
+                        plans: list[dict] = []
+                        for p in obj["plans"]:
+                            if not isinstance(p, dict):
+                                continue
+                            plans.append(p)
+                        self.last_planning_error = ""
+                        return self._finalize_plans(plans, user_query)
+                    if isinstance(obj, dict) and isinstance(obj.get("clarification"), dict) and obj["clarification"].get("need"):
+                        self.last_planning_error = ""
+                        return [{"question": user_query, "clarification": obj["clarification"]}]
+                    if isinstance(obj, dict) and isinstance(obj.get("plan"), dict):
+                        self.last_planning_error = ""
+                        return self._finalize_plans([obj["plan"]], user_query)
+                    if not retry_tool_calls:
+                        rf = str(getattr(retry.choices[0], "finish_reason", "") or "")
+                        p2 = (retry_content or "").strip().replace("\n", " ")
+                        if len(p2) > 240:
+                            p2 = p2[:240] + "...(truncated)"
+                        self.last_planning_error = f"planning_retry_no_tool_calls: finish_reason={rf} content_preview={p2}"
+                except Exception as e:
+                    self.last_planning_error = f"planning_retry_call_failed: {e.__class__.__name__}: {e}"
+        except Exception as e:
+            self.last_planning_error = f"planning_llm_call_failed: {e.__class__.__name__}: {e}"
 
         for part in parts:
             intent = self._classify_intent(part)
@@ -1771,6 +2067,14 @@ class PlanningAgent:
             if isinstance(plan, dict) and plan:
                 plan["question"] = part
                 rule_plans.append(plan)
+        if rule_plans:
+            self.last_planning_error = ""
+            return self._finalize_plans(rule_plans, user_query)
+        enum_plan = self._build_dimension_enumeration_plan(user_query)
+        if isinstance(enum_plan, dict) and enum_plan:
+            enum_plan["question"] = user_query
+            self.last_planning_error = ""
+            return self._finalize_plans([enum_plan], user_query)
         return self._finalize_plans(rule_plans, user_query)
 
     def _fill_defaults(self, plan: dict, user_query: str) -> dict:
@@ -1879,6 +2183,18 @@ class PlanningAgent:
         if plans:
             first = plans[0]
             if isinstance(first, dict) and first:
+                metric = first.get("metric")
+                metric_text = ""
+                if isinstance(metric, dict):
+                    metric_text = " ".join(
+                        [
+                            str(metric.get("alias") or ""),
+                            str(metric.get("business_name") or ""),
+                            str(metric.get("field") or ""),
+                        ]
+                    )
+                if "留存小订" in metric_text:
+                    return first
                 return self._validate_and_rewrite_time(first, user_query)
             return first
         return {}

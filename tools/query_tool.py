@@ -97,6 +97,73 @@ def _try_parse_numeric_series(series: pd.Series) -> pd.Series | None:
     return None
 
 
+def _extract_md_section(text: str, header_prefix: str) -> str:
+    if not text:
+        return ""
+    lines = text.splitlines()
+    start_idx = None
+    for i, line in enumerate(lines):
+        if line.startswith(header_prefix):
+            start_idx = i
+            break
+    if start_idx is None:
+        return ""
+    end_idx = len(lines)
+    for j in range(start_idx + 1, len(lines)):
+        if lines[j].startswith("## "):
+            end_idx = j
+            break
+    return "\n".join(lines[start_idx:end_idx]).strip()
+
+
+def _trim_schema_md(schema_md: str, max_chars: int = 8000) -> str:
+    raw = (schema_md or "").strip()
+    if not raw:
+        return ""
+    m = re.search(r"^##\s*附录", raw, flags=re.MULTILINE)
+    if m:
+        raw = raw[: m.start()].rstrip()
+    if len(raw) <= max_chars:
+        return raw
+    head = "\n".join(raw.splitlines()[:30]).strip()
+    clarifications = _extract_md_section(raw, "## 0.")
+    dimensions = _extract_md_section(raw, "## 3.")
+    assembled = "\n\n".join([p for p in [head, clarifications, dimensions] if p]).strip()
+    if not assembled:
+        assembled = raw
+    if len(assembled) > max_chars:
+        assembled = assembled[:max_chars].rstrip() + "...(truncated)"
+    return assembled
+
+
+def _compact_business_definition_text(business_text: str, max_chars: int = 8000) -> str:
+    raw = (business_text or "").strip()
+    if not raw:
+        return ""
+    try:
+        obj = json.loads(raw)
+    except Exception:
+        obj = None
+    if not isinstance(obj, dict):
+        return raw[:max_chars].rstrip() + ("...(truncated)" if len(raw) > max_chars else "")
+    keep_keys = [
+        "time_periods",
+        "battery_capacity",
+        "product_type_logic",
+        "seat_count_logic",
+        "series_group_logic",
+        "model_series_mapping",
+        "age_limit",
+    ]
+    compact = {k: obj.get(k) for k in keep_keys if k in obj}
+    out = json.dumps(compact, ensure_ascii=False, indent=2)
+    if len(out) > max_chars:
+        out = json.dumps({k: compact.get(k) for k in ["time_periods", "series_group_logic"] if k in compact}, ensure_ascii=False, indent=2)
+    if len(out) > max_chars:
+        out = out[:max_chars].rstrip() + "...(truncated)"
+    return out
+
+
 class QueryTool:
     def __init__(self, data_path_file: str, schema_dir: str):
         self.data_path_file = Path(data_path_file)
@@ -160,8 +227,10 @@ class QueryTool:
         schema: dict[str, str] = {}
         schema_file = self.schema_dir / "schema.md"
         business_file = self.schema_dir / "business_definition.json"
-        schema["schema_md"] = schema_file.read_text(encoding="utf-8") if schema_file.exists() else ""
-        schema["business_definition"] = business_file.read_text(encoding="utf-8") if business_file.exists() else ""
+        schema_md = schema_file.read_text(encoding="utf-8") if schema_file.exists() else ""
+        business_text = business_file.read_text(encoding="utf-8") if business_file.exists() else ""
+        schema["schema_md"] = _trim_schema_md(schema_md)
+        schema["business_definition"] = _compact_business_definition_text(business_text)
         return schema
 
     def answer_question(self, question: str) -> str:

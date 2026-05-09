@@ -30,6 +30,37 @@ def _parse_int_token(token: str) -> int | None:
     return None
 
 
+def parse_until_end_date(user_query: str) -> datetime.date | None:
+    import re
+
+    q = (user_query or "").replace(" ", "")
+    if not q:
+        return None
+    if not any(k in q for k in ["截至", "截止", "到", "至"]):
+        return None
+    m = re.search(r"(?:截至|截止)(\d{4}-\d{2}-\d{2})", q)
+    if m:
+        try:
+            return datetime.date.fromisoformat(m.group(1))
+        except Exception:
+            return None
+    m = re.search(r"(?:截至|截止)(?P<y>\d{2,4})年(?P<m>\d{1,2})月(?P<d>\d{1,2})", q)
+    if m:
+        try:
+            yv = m.group("y")
+            y = int(yv) if len(str(yv)) == 4 else 2000 + int(yv)
+            return datetime.date(y, int(m.group("m")), int(m.group("d")))
+        except Exception:
+            return None
+    m = re.search(r"(?:到|至)(\d{4}-\d{2}-\d{2})(?:为止|截止|之前|以前)", q)
+    if m:
+        try:
+            return datetime.date.fromisoformat(m.group(1))
+        except Exception:
+            return None
+    return None
+
+
 def resolve_listed_since_window(user_query: str, today: datetime.date, business_definition: dict) -> tuple[str, str] | None:
     q = user_query or ""
     want_listed_since = any(k in q for k in ["上市至今", "上市以来"])
