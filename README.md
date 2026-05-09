@@ -4,8 +4,8 @@
 
 本仓库有两个对外入口：
 
-- [main.py]：命令行单次问答（适合调试/本地跑）。
-- [feishu_bot.py]：飞书机器人（WebSocket 长连接收消息，调用同一套 Agent 能力回复）。
+- [main.py](main.py)：命令行单次问答（适合调试/本地跑）。
+- [feishu_bot.py](feishu_bot.py)：飞书机器人（WebSocket 长连接收消息，调用同一套 Agent 能力回复）。
 
 ## 总体架构
 
@@ -31,29 +31,29 @@ Answer（LLM 总结 或 Grounded Summary）
 
 本项目默认在本地加载 CSV/Parquet 数据集：
 
-- 数据路径配置： [schema/data_path.md]
+- 数据路径配置： [schema/data_path.md](schema/data_path.md)
   - 支持绝对路径与通配符（例如 `assign*data.csv`）
   - 该文件当前包含本机路径示例，换机器需要自行修改
 - Schema 与业务定义：
-  - [schema/schema.md]
-  - [schema/business_definition.json]
+  - [schema/schema.md](schema/schema.md)
+  - [schema/business_definition.json](schema/business_definition.json)
 
 ## 支持的能力（路由一览）
 
-- Fast Path（[tools/fast_path_tool.py]）
+- Fast Path（[tools/fast_path_tool.py](tools/fast_path_tool.py)）
   - `numeric_ratio`：纯数字环比/同比直算
   - `current_iso_week`：当前日期 ISO 周
   - `small_talk_contextual`：致谢/闲聊（结合最近 memory）
-- Comparison（[tools/comparison_tool.py]）
+- Comparison（[tools/comparison_tool.py](tools/comparison_tool.py)）
   - `yoy` / `wow` / `dod`
-- Statistics（[tools/statistics_tool.py]）
+- Statistics（[tools/statistics_tool.py](tools/statistics_tool.py)）
   - `weekly_decline_ratio`：周序列环比 + 下降周数占比
   - `daily_threshold_count`：近 N 日阈值计数（支持 `> >= < <= == !=`）
   - `daily_mean`：近 N 日（或指定窗）按日聚合后的日均
   - `daily_percentile_rank`：参考日在近 N 日分布中的分位
   - `weekend_percentile_rank`：参考周末在近 N 个周末分布中的分位
   - `weekday_percentile_rank`：参考“某个星期几”在近 N 次该 weekday 分布中的分位
-- Operators（[operators/registry.py]）
+- Operators（[operators/registry.py](operators/registry.py)）
   - 用于承接强业务口径的固定算子（例如在营门店等）
 
 ## 环境变量
@@ -67,9 +67,12 @@ DEEPSEEK_API_KEY=sk-xxx
 # 飞书 Bot（仅运行飞书入口需要）
 FEISHU_APP_ID=cli_xxx
 FEISHU_APP_SECRET=xxx
+
+# 可选：E2B Code Interpreter（当前未接入主流程；仅 tools/code_interpreter.py 使用）
+E2B_API_KEY=xxx
 ```
 
-模型配置位于 [agent/llm_config.py]。
+模型配置位于 [agent/llm_config.py](agent/llm_config.py)。
 
 ## 安装与运行
 
@@ -99,11 +102,12 @@ python3 feishu_bot.py
 
 ```text
 .
-├── main.py                # 入口：命令行单次问答（代理到 agent.run_main_agent）
+├── main.py                # 入口：命令行单次问答（代理到 agent.agent_loop.run_main_agent）
 ├── feishu_bot.py          # 入口：飞书机器人
 ├── agent/                 # Agent 主循环、规划与状态
 │   ├── agent_loop.py       # run_main_agent：主循环入口
 │   ├── planner.py          # PlanningAgent：NL → plan（规划 DSL）
+│   ├── schema.py           # schema/data_path 等加载约定
 │   ├── tool_router.py      # 路由与编排（fast_path/operator/comparison/statistics/query）
 │   ├── state.py            # 运行时状态（history/facts/working_memory/result_blocks）
 │   ├── memory_extractor.py # 对话记忆抽取与更新
