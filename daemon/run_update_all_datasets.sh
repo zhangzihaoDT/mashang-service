@@ -52,13 +52,75 @@ fi
 
 python_bin="$repo_root/.venv/bin/python"
 if [[ ! -x "$python_bin" ]]; then
-  python_bin="$(command -v python3)"
+  python_bin="/usr/bin/python3"
+  if [[ ! -x "$python_bin" ]]; then
+    python_bin="$(command -v python3)"
+  fi
 fi
 
 {
   echo ""
   echo "===== $(/bin/date '+%Y-%m-%d %H:%M:%S%z') START update_all_datasets ====="
-  "$python_bin" "$repo_root/dataset/updater/update_all_datasets.py"
+
+  rc=1
+  attempts="${UPDATE_ALL_ATTEMPTS:-3}"
+  sleep_seconds="${UPDATE_ALL_RETRY_SLEEP_SECONDS:-120}"
+  base_timeout="${TABLEAU_TIMEOUT_SECONDS:-900}"
+  retry_timeout="${TABLEAU_TIMEOUT_RETRY_SECONDS:-1800}"
+
+  host="${TABLEAU_HOSTNAME:-tableau-hs.immotors.com}"
+  dns_tries="${TABLEAU_DNS_RETRY_COUNT:-5}"
+  dns_sleep="${TABLEAU_DNS_RETRY_SLEEP_SECONDS:-3}"
+  i=1
+  while (( i <= dns_tries )); do
+    set +e
+    "$python_bin" - <<PY >/dev/null 2>&1
+import socket
+socket.getaddrinfo("${host}", 443)
+PY
+    dns_rc=$?
+    set -e
+    if (( dns_rc == 0 )); then
+      break
+    fi
+    echo "[preflight] dns resolve failed (${host}) try=${i}/${dns_tries}"
+    /bin/sleep "$dns_sleep"
+    i=$((i + 1))
+  done
+
+  attempt=1
+  while (( attempt <= attempts )); do
+    timeout="$base_timeout"
+    extra_args=()
+    if (( attempt >= 2 )); then
+      timeout="$retry_timeout"
+    fi
+    if (( attempt == attempts )); then
+      if [[ -n "${TABLEAU_SERVER_URL_MOBILE:-}" || "${UPDATE_ALL_USE_MOBILE_FALLBACK:-0}" == "1" ]]; then
+        extra_args+=(--mobile)
+      fi
+    fi
+
+    echo "[update_all] attempt=${attempt}/${attempts} timeout=${timeout} args=${extra_args[*]:-}"
+    set +e
+    "$python_bin" "$repo_root/dataset/updater/update_all_datasets.py" --timeout "$timeout" "${extra_args[@]}"
+    rc=$?
+    set -e
+    if (( rc == 0 )); then
+      break
+    fi
+    echo "[update_all] failed rc=${rc}"
+    if (( attempt < attempts )); then
+      /bin/sleep "$sleep_seconds"
+    fi
+    attempt=$((attempt + 1))
+  done
+
+  if (( rc != 0 )); then
+    echo "===== $(/bin/date '+%Y-%m-%d %H:%M:%S%z') FAILED update_all_datasets rc=${rc} ====="
+    exit "$rc"
+  fi
+
   echo "===== $(/bin/date '+%Y-%m-%d %H:%M:%S%z') END update_all_datasets ====="
   echo ""
   echo "===== $(/bin/date '+%Y-%m-%d %H:%M:%S%z') START skills_order_observation_daily ====="

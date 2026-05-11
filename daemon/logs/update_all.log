@@ -1,0 +1,338 @@
+
+===== 2026-05-10 08:42:37+0800 START update_all_datasets =====
+
+============================================================
+步骤 0: 从 Tableau 导出最新 order_data_2026.csv
+============================================================
+目标文件: /Users/zihao_/Documents/github/mashang-service：0.1/dataset/order_data_2026.csv
+❌ Tableau 数据导出失败: The read operation timed out
+
+================================================================================
+STEP 1/3: 更新订单数据 (order_data.parquet)
+================================================================================
+
+===== 2026-05-10 12:30:53+0800 START update_all_datasets =====
+/Users/zihao_/Documents/github/mashang-service：0.1/dataset/updater/order_data_to_parquet.py:81: DtypeWarning: Columns (0: Vin, 1: Actual Refund Time 年/月/日, 2: Apply Refund Time 年/月/日, 3: Approve Refund Time 年/月/日, 4: Delivery Date 年/月/日, 5: deposit_refund_time 年/月/日, 6: Final Payment Time 年/月/日, 7: intention_refund_time 年/月/日) have mixed types. Specify dtype option on import or set low_memory=False.
+  df = pd.read_csv(file_path, encoding=enc, sep=sep)
+
+============================================================
+步骤 0: 从 Tableau 导出最新 order_data_2026.csv
+============================================================
+目标文件: /Users/zihao_/Documents/github/mashang-service：0.1/dataset/order_data_2026.csv
+✅ Tableau 数据导出成功: /Users/zihao_/Documents/github/mashang-service：0.1/dataset/order_data_2026.csv
+📖 正在读取: order_data_2023.csv ...
+✅ 读取成功 (编码: utf-16, 分隔符: '\t') - 形状: (85238, 35)
+📖 正在读取: order_data_2024.csv ...
+✅ 读取成功 (编码: utf-16, 分隔符: '\t') - 形状: (138505, 35)
+📖 正在读取: order_data_2025.csv ...
+✅ 读取成功 (编码: utf-16, 分隔符: '\t') - 形状: (186785, 35)
+📖 正在读取: order_data_2026.csv ...
+✅ 读取成功 (编码: utf-8, 分隔符: ',') - 形状: (52452, 35)
+✅ 合并完成: 462980 行, 35 列
+✂️ 去重(order_number): 462980 -> 462980 (移除 0)
+💾 保存到: /Users/zihao_/Documents/github/mashang-service：0.1/dataset/order_data.parquet
+
+🔎 数据检查（Max 时间）
+ - max order_create_date: 2026-05-10 00:00:00
+ - max intention_payment_time: 2026-05-09 14:19:18
+ - max lock_time: 2026-05-10 12:25:29
+✅ 保存成功! 文件大小: 32.10 MB
+正在从 Tableau 导出数据: https://tableau-hs.immotors.com/#/views/17/config_attribute
+✅ 导出成功
+正在加载并合并所有年份的配置文件...
+ - 读取: config_attribute_data_2023.csv
+ - 读取: config_attribute_data_2024.csv
+ - 读取: config_attribute_data_2025.csv
+ - 读取: config_attribute_data_2026.csv
+✅ 合并完成，总行数: 318135
+正在解析 Attribute 列...
+✅ 解析完成，长表格式总行数: 2227259
+✅ 合并解析后的配置文件已保存至 /Users/zihao_/Documents/github/mashang-service：0.1/dataset/config_attribute.parquet
+正在准备最终统计...
+
+====================================================================================================
+车型       | 订单数        | 选配数        | 小订数        | 留存小订数        | 小订留存选配数        | 锁单选配数       
+----------------------------------------------------------------------------------------------------
+CM0        | 81195         | 56991      | 32526         | 24399           | 7873              | 41778         
+DM0        | 66314         | 46967      | 20966         | 14845           | 5546              | 28998         
+CM1        | 74939         | 53689      | 27901         | 21113           | 5446              | 40903         
+DM1        | 41743         | 27771      | 18599         | 14991           | 4189              | 19451         
+CM2        | 102759        | 63490      | 59955         | 49993           | 11152             | 48754         
+LS9        | 31162         | 24880      | 10057         | 8849            | 3440              | 17891         
+LS8        | 29410         | 14490      | 20355         | 15366           | 5306              | 6627          
+====================================================================================================
+
+🚀 开始锁单归因数据更新流水线
+
+============================================================
+步骤 1: 从 Tableau 导出最新数据
+============================================================
+视图: https://tableau-hs.immotors.com/#/views/core_metric_observation/7
+目标文件: /Users/zihao_/Documents/github/mashang-service：0.1/dataset/test_drive_data.csv
+✅ Tableau 数据导出成功: /Users/zihao_/Documents/github/mashang-service：0.1/dataset/test_drive_data.csv
+视图: https://tableau-hs.immotors.com/#/views/core_metric_observation/assign
+目标文件: /Users/zihao_/Documents/github/mashang-service：0.1/dataset/assign_data.csv
+✅ Tableau 数据导出成功: /Users/zihao_/Documents/github/mashang-service：0.1/dataset/assign_data.csv
+视图: https://tableau-hs.immotors.com/#/views/1h/sheet10
+目标文件: /Users/zihao_/Documents/github/mashang-service：0.1/dataset/锁单归因_data_2026.csv
+✅ Tableau 数据导出成功: /Users/zihao_/Documents/github/mashang-service：0.1/dataset/锁单归因_data_2026.csv
+
+============================================================
+步骤 2: 合并并更新 Parquet 文件
+============================================================
+🔍 找到 1 个年度数据文件，将按以下顺序处理:
+   - 锁单归因_data_2026.csv
+📖 正在读取: 锁单归因_data_2026.csv ...
+✅ 读取成功 (编码: utf-8, 分隔符: ',') - 形状: (127898, 7)
+🔄 开始类型转换...
+✅ 合并完成: 63949 行, 7 列
+📚 发现现有 Parquet 文件: /Users/zihao_/Documents/github/mashang-service：0.1/dataset/lock_attribution_data.parquet
+   现有数据: 63591 行
+✂️  执行最终去重 (键: ['lc_user_phone_md5', 'lc_main_code']) ...
+   去重前: 127540, 去重后: 63949, 移除: 63591
+💾 保存到: /Users/zihao_/Documents/github/mashang-service：0.1/dataset/lock_attribution_data.parquet ...
+✅ 保存成功! 文件大小: 1.73 MB
+   最终行数: 63949
+⏰ 总耗时: 45.5 秒
+
+================================================================================
+STEP 1/3: 更新订单数据 (order_data.parquet)
+================================================================================
+
+================================================================================
+STEP 2/3: 更新选配信息 (config_attribute.parquet)
+================================================================================
+
+================================================================================
+STEP 3/3: 更新 assign/test_drive + 锁单归因 (lock_attribution_data.parquet)
+================================================================================
+
+================================================================================
+DONE: 输出文件
+================================================================================
+✅ assign_data.csv  size=0.12MB  mtime=1778387550
+✅ test_drive_data.csv  size=0.10MB  mtime=1778387544
+✅ lock_attribution_data.parquet  size=1.73MB  mtime=1778387585
+✅ order_data.parquet  size=32.10MB  mtime=1778387515
+✅ config_attribute.parquet  size=7.92MB  mtime=1778387526
+===== 2026-05-10 12:33:04+0800 END update_all_datasets =====
+
+===== 2026-05-10 12:33:04+0800 START skills_order_observation_daily =====
+正在加载数据: /Users/zihao_/Documents/github/mashang-service：0.1/dataset/order_data.parquet
+✅ 数据加载成功，共 462980 行
+正在分析 2026-05-09 至 2026-05-09 的锁单数据...
+正在分析 2026-05-09 至 2026-05-09 的开票数据...
+
+==============================
+📅 日期: 2026-05-09
+ 总锁单数: 150
+   车型分布:
+   - LS6: 67｜52kw：11，66kw：8，76kw：34，103kw：14
+   - L6: 9
+   - LS8: 47｜五座：40，六座：7
+   - LS9: 27｜52kw：17，66kw：10
+------------------------------
+🚚 总开票数: 377 (370) 台
+   车型分布 (开票):
+   - LS6: 135 (132) 台｜平均开票价格：19.9w
+   - L6: 30 (29) 台｜平均开票价格：19.1w
+   - LS8: 150 (147) 台｜平均开票价格：28.0w
+   - LS9: 61 (61) 台｜平均开票价格：31.7w
+==============================
+
+✅ 飞书消息发送成功
+===== 2026-05-10 12:33:06+0800 END skills_order_observation_daily =====
+
+
+===== 2026-05-11 08:41:56+0800 START update_all_datasets =====
+
+============================================================
+步骤 0: 从 Tableau 导出最新 order_data_2026.csv
+============================================================
+目标文件: /Users/zihao_/Documents/github/mashang-service：0.1/dataset/order_data_2026.csv
+❌ Tableau 数据导出失败: The read operation timed out
+
+================================================================================
+STEP 1/3: 更新订单数据 (order_data.parquet)
+================================================================================
+
+===== 2026-05-11 09:09:44+0800 START update_all_datasets =====
+
+============================================================
+步骤 0: 从 Tableau 导出最新 order_data_2026.csv
+============================================================
+目标文件: /Users/zihao_/Documents/github/mashang-service：0.1/dataset/order_data_2026.csv
+❌ Tableau 数据导出失败: Tableau 登录失败 (HTTP 0): <urlopen error [Errno 8] nodename nor servname provided, or not known>
+
+================================================================================
+STEP 1/3: 更新订单数据 (order_data.parquet)
+================================================================================
+
+===== 2026-05-11 09:14:45+0800 START update_all_datasets =====
+
+============================================================
+步骤 0: 从 Tableau 导出最新 order_data_2026.csv
+============================================================
+目标文件: /Users/zihao_/Documents/github/mashang-service：0.1/dataset/order_data_2026.csv
+❌ Tableau 数据导出失败: Tableau 登录失败 (HTTP 0): <urlopen error [Errno 8] nodename nor servname provided, or not known>
+
+================================================================================
+STEP 1/3: 更新订单数据 (order_data.parquet)
+================================================================================
+
+===== 2026-05-11 09:17:10+0800 START update_all_datasets =====
+
+============================================================
+步骤 0: 从 Tableau 导出最新 order_data_2026.csv
+============================================================
+目标文件: /Users/zihao_/Documents/github/mashang-service：0.1/dataset/order_data_2026.csv
+❌ Tableau 数据导出失败: Tableau 登录失败 (HTTP 0): <urlopen error [Errno 8] nodename nor servname provided, or not known>
+
+================================================================================
+STEP 1/3: 更新订单数据 (order_data.parquet)
+================================================================================
+
+===== 2026-05-11 09:18:17+0800 START update_all_datasets =====
+
+============================================================
+步骤 0: 从 Tableau 导出最新 order_data_2026.csv
+============================================================
+目标文件: /Users/zihao_/Documents/github/mashang-service：0.1/dataset/order_data_2026.csv
+❌ Tableau 数据导出失败: Tableau 登录失败 (HTTP 0): <urlopen error [Errno 8] nodename nor servname provided, or not known>
+
+================================================================================
+STEP 1/3: 更新订单数据 (order_data.parquet)
+================================================================================
+
+===== 2026-05-11 09:19:16+0800 START update_all_datasets =====
+/Users/zihao_/Documents/github/mashang-service：0.1/dataset/updater/order_data_to_parquet.py:81: DtypeWarning: Columns (0: Vin, 1: Actual Refund Time 年/月/日, 2: Apply Refund Time 年/月/日, 3: Approve Refund Time 年/月/日, 4: Delivery Date 年/月/日, 5: deposit_refund_time 年/月/日, 6: Final Payment Time 年/月/日, 7: intention_refund_time 年/月/日) have mixed types. Specify dtype option on import or set low_memory=False.
+  df = pd.read_csv(file_path, encoding=enc, sep=sep)
+
+============================================================
+步骤 0: 从 Tableau 导出最新 order_data_2026.csv
+============================================================
+目标文件: /Users/zihao_/Documents/github/mashang-service：0.1/dataset/order_data_2026.csv
+✅ Tableau 数据导出成功: /Users/zihao_/Documents/github/mashang-service：0.1/dataset/order_data_2026.csv
+📖 正在读取: order_data_2023.csv ...
+✅ 读取成功 (编码: utf-16, 分隔符: '\t') - 形状: (85238, 35)
+📖 正在读取: order_data_2024.csv ...
+✅ 读取成功 (编码: utf-16, 分隔符: '\t') - 形状: (138505, 35)
+📖 正在读取: order_data_2025.csv ...
+✅ 读取成功 (编码: utf-16, 分隔符: '\t') - 形状: (186785, 35)
+📖 正在读取: order_data_2026.csv ...
+✅ 读取成功 (编码: utf-8, 分隔符: ',') - 形状: (52718, 35)
+✅ 合并完成: 463246 行, 35 列
+✂️ 去重(order_number): 463246 -> 463246 (移除 0)
+💾 保存到: /Users/zihao_/Documents/github/mashang-service：0.1/dataset/order_data.parquet
+
+🔎 数据检查（Max 时间）
+ - max order_create_date: 2026-05-11 00:00:00
+ - max intention_payment_time: 2026-05-10 14:25:35
+ - max lock_time: 2026-05-11 09:06:41
+✅ 保存成功! 文件大小: 32.12 MB
+正在从 Tableau 导出数据: https://tableau-hs.immotors.com/#/views/17/config_attribute
+✅ 导出成功
+正在加载并合并所有年份的配置文件...
+ - 读取: config_attribute_data_2023.csv
+ - 读取: config_attribute_data_2024.csv
+ - 读取: config_attribute_data_2025.csv
+ - 读取: config_attribute_data_2026.csv
+✅ 合并完成，总行数: 318415
+正在解析 Attribute 列...
+✅ 解析完成，长表格式总行数: 2229332
+✅ 合并解析后的配置文件已保存至 /Users/zihao_/Documents/github/mashang-service：0.1/dataset/config_attribute.parquet
+正在准备最终统计...
+
+====================================================================================================
+车型       | 订单数        | 选配数        | 小订数        | 留存小订数        | 小订留存选配数        | 锁单选配数       
+----------------------------------------------------------------------------------------------------
+CM0        | 81195         | 56991      | 32526         | 24399           | 7873              | 41778         
+DM0        | 66314         | 46967      | 20966         | 14845           | 5546              | 28998         
+CM1        | 74939         | 53689      | 27901         | 21113           | 5446              | 40903         
+DM1        | 41774         | 27802      | 18599         | 14991           | 4189              | 19480         
+CM2        | 102883        | 63614      | 59955         | 49993           | 11152             | 48870         
+LS9        | 31208         | 24926      | 10057         | 8849            | 3440              | 17935         
+LS8        | 29475         | 14569      | 20356         | 15366           | 5300              | 6706          
+====================================================================================================
+
+🚀 开始锁单归因数据更新流水线
+
+============================================================
+步骤 1: 从 Tableau 导出最新数据
+============================================================
+视图: https://tableau-hs.immotors.com/#/views/core_metric_observation/7
+目标文件: /Users/zihao_/Documents/github/mashang-service：0.1/dataset/test_drive_data.csv
+✅ Tableau 数据导出成功: /Users/zihao_/Documents/github/mashang-service：0.1/dataset/test_drive_data.csv
+视图: https://tableau-hs.immotors.com/#/views/core_metric_observation/assign
+目标文件: /Users/zihao_/Documents/github/mashang-service：0.1/dataset/assign_data.csv
+✅ Tableau 数据导出成功: /Users/zihao_/Documents/github/mashang-service：0.1/dataset/assign_data.csv
+视图: https://tableau-hs.immotors.com/#/views/1h/sheet10
+目标文件: /Users/zihao_/Documents/github/mashang-service：0.1/dataset/锁单归因_data_2026.csv
+✅ Tableau 数据导出成功: /Users/zihao_/Documents/github/mashang-service：0.1/dataset/锁单归因_data_2026.csv
+
+============================================================
+步骤 2: 合并并更新 Parquet 文件
+============================================================
+🔍 找到 1 个年度数据文件，将按以下顺序处理:
+   - 锁单归因_data_2026.csv
+📖 正在读取: 锁单归因_data_2026.csv ...
+✅ 读取成功 (编码: utf-8, 分隔符: ',') - 形状: (129408, 7)
+🔄 开始类型转换...
+✅ 合并完成: 64704 行, 7 列
+📚 发现现有 Parquet 文件: /Users/zihao_/Documents/github/mashang-service：0.1/dataset/lock_attribution_data.parquet
+   现有数据: 63949 行
+✂️  执行最终去重 (键: ['lc_user_phone_md5', 'lc_main_code']) ...
+   去重前: 128653, 去重后: 64704, 移除: 63949
+💾 保存到: /Users/zihao_/Documents/github/mashang-service：0.1/dataset/lock_attribution_data.parquet ...
+✅ 保存成功! 文件大小: 1.75 MB
+   最终行数: 64704
+⏰ 总耗时: 44.2 秒
+
+================================================================================
+STEP 1/3: 更新订单数据 (order_data.parquet)
+================================================================================
+
+================================================================================
+STEP 2/3: 更新选配信息 (config_attribute.parquet)
+================================================================================
+
+================================================================================
+STEP 3/3: 更新 assign/test_drive + 锁单归因 (lock_attribution_data.parquet)
+================================================================================
+
+================================================================================
+DONE: 输出文件
+================================================================================
+✅ assign_data.csv  size=0.12MB  mtime=1778462453
+✅ test_drive_data.csv  size=0.10MB  mtime=1778462449
+✅ lock_attribution_data.parquet  size=1.75MB  mtime=1778462489
+✅ order_data.parquet  size=32.12MB  mtime=1778462419
+✅ config_attribute.parquet  size=7.93MB  mtime=1778462430
+===== 2026-05-11 09:21:28+0800 END update_all_datasets =====
+
+===== 2026-05-11 09:21:28+0800 START skills_order_observation_daily =====
+正在加载数据: /Users/zihao_/Documents/github/mashang-service：0.1/dataset/order_data.parquet
+✅ 数据加载成功，共 463246 行
+正在分析 2026-05-10 至 2026-05-10 的锁单数据...
+正在分析 2026-05-10 至 2026-05-10 的开票数据...
+
+==============================
+📅 日期: 2026-05-10
+ 总锁单数: 325
+   车型分布:
+   - LS6: 137｜52kw：21，66kw：5，76kw：88，103kw：23
+   - L6: 35
+   - LS8: 99｜五座：83，六座：16
+   - LS9: 54｜52kw：36，66kw：18
+------------------------------
+🚚 总开票数: 190 (189) 台
+   车型分布 (开票):
+   - LS6: 79 (79) 台｜平均开票价格：19.9w
+   - L6: 14 (14) 台｜平均开票价格：18.8w
+   - LS8: 78 (77) 台｜平均开票价格：27.8w
+   - LS9: 19 (19) 台｜平均开票价格：31.9w
+==============================
+
+✅ 飞书消息发送成功
+===== 2026-05-11 09:21:29+0800 END skills_order_observation_daily =====
+
