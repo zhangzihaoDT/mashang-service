@@ -896,6 +896,54 @@ class PlanningAgent:
 
         return filters
 
+    def _infer_series_group_tokens(self, user_query: str) -> list[str]:
+        q_upper = (user_query or "").upper()
+        candidates: list[str] = []
+        if isinstance(self.business_definition_obj, dict):
+            logic = self.business_definition_obj.get("series_group_logic")
+            if isinstance(logic, dict):
+                for k in logic.keys():
+                    if not isinstance(k, str):
+                        continue
+                    kk = k.strip()
+                    if not kk or kk == "其他":
+                        continue
+                    candidates.append(kk.upper())
+        if not candidates:
+            candidates = ["CM0", "CM1", "CM2", "DM0", "DM1"]
+        tokens: list[str] = []
+        for tok in candidates:
+            if tok and tok in q_upper:
+                tokens.append(tok)
+        return list(dict.fromkeys(tokens))
+
+    def _apply_business_semantic_filters(self, filters: list, user_query: str) -> list:
+        q = (user_query or "").replace(" ", "")
+        q_upper = q.upper()
+
+        series_group_tokens = self._infer_series_group_tokens(q_upper)
+        if series_group_tokens:
+            for tok in series_group_tokens:
+                filters = PlanningAgent._append_filter(filters, {"field": "series_group_logic", "op": "==", "value": tok})
+
+        has_product_name_regex_filter = any(
+            isinstance(f, dict)
+            and f.get("field") == "product_name"
+            and f.get("op") in {"matches", "not matches"}
+            and isinstance(f.get("value"), str)
+            for f in (filters or [])
+        )
+
+        exclude_reev = any(k in q for k in ["非增程", "不是增程", "排除增程", "不含增程", "剔除增程"])
+        exclude_ev = any(k in q for k in ["非纯电", "不是纯电", "排除纯电", "不含纯电", "剔除纯电"])
+
+        if ("增程" in q) and (not exclude_reev) and (not has_product_name_regex_filter) and ("纯电" not in q):
+            filters = PlanningAgent._append_filter(filters, {"field": "product_name", "op": "matches", "value": "52|66"})
+        elif ("纯电" in q) and (not exclude_ev) and (not has_product_name_regex_filter) and ("增程" not in q):
+            filters = PlanningAgent._append_filter(filters, {"field": "product_name", "op": "not matches", "value": "52|66"})
+
+        return filters
+
     @staticmethod
     def _should_sales_clarify(user_query: str) -> bool:
         q = user_query or ""
@@ -2157,6 +2205,7 @@ class PlanningAgent:
                 elif want_region:
                     plan["dimensions"] = ["parent_region_name"]
         filters = self._apply_semantic_filters(filters, user_query)
+        filters = self._apply_business_semantic_filters(filters, user_query)
         plan["filters"] = filters
 
 

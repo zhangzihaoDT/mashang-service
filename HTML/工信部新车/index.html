@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>神行者8 | 工信部新车前瞻</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #faf9f5;
+      --bg-elevated: rgba(255, 255, 255, 0.82);
+      --bg-strong: #ffffff;
+      --panel: rgba(240, 238, 230, 0.74);
+      --panel-strong: #f0eee6;
+      --line: rgba(61, 61, 58, 0.12);
+      --text: #141413;
+      --text-muted: #5f5e58;
+      --primary: #d97757;
+      --primary-soft: rgba(217, 119, 87, 0.12);
+      --secondary: #e3dacc;
+      --success: #788c5d;
+      --warning: #c78e3f;
+      --danger: #b04a4a;
+      --info: #5c7ca3;
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-5: 24px;
+      --space-6: 32px;
+      --space-7: 48px;
+      --space-8: 64px;
+      --radius-xs: 4px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 20px;
+      --shadow-sm: 0 1px 2px rgba(20, 20, 19, 0.06);
+      --shadow-md: 0 8px 24px rgba(20, 20, 19, 0.08);
+      --shadow-lg: 0 16px 42px rgba(20, 20, 19, 0.12);
+      --display: 500 48px/1.08 "SF Pro Display", "PingFang SC", "Noto Sans SC", sans-serif;
+      --h1: 500 32px/1.2 "SF Pro Display", "PingFang SC", "Noto Sans SC", sans-serif;
+      --h2: 500 24px/1.3 "SF Pro Display", "PingFang SC", "Noto Sans SC", sans-serif;
+      --body: 430 16px/1.55 "SF Pro Display", "PingFang SC", "Noto Sans SC", sans-serif;
+      --small: 430 14px/1.5 "SF Pro Display", "PingFang SC", "Noto Sans SC", sans-serif;
+      --caption: 500 12px/1.4 "SF Pro Display", "PingFang SC", "Noto Sans SC", sans-serif;
+      --max-width: 1280px;
+    }
+
+    body.dark {
+      --bg: #141413;
+      --bg-elevated: rgba(29, 29, 27, 0.84);
+      --bg-strong: #1b1b19;
+      --panel: rgba(44, 44, 40, 0.82);
+      --panel-strong: #242421;
+      --line: rgba(240, 238, 230, 0.1);
+      --text: #faf9f5;
+      --text-muted: #d1cfc5;
+      --secondary: rgba(227, 218, 204, 0.14);
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.28);
+      --shadow-md: 0 10px 28px rgba(0, 0, 0, 0.3);
+      --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.36);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font: var(--body);
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(217, 119, 87, 0.16), transparent 34%),
+        radial-gradient(circle at top right, rgba(92, 124, 163, 0.12), transparent 26%),
+        linear-gradient(180deg, var(--bg), color-mix(in srgb, var(--bg) 88%, #fff 12%));
+      transition: background 240ms ease, color 240ms ease;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    img {
+      display: block;
+      max-width: 100%;
+    }
+
+    button {
+      font: inherit;
+      cursor: pointer;
+      border: 0;
+      background: none;
+      color: inherit;
+    }
+
+    .progress-bar {
+      position: fixed;
+      inset: 0 0 auto 0;
+      z-index: 100;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary), #f4b56b);
+      transform-origin: left center;
+      transform: scaleX(0);
+    }
+
+    .shell {
+      width: min(calc(100% - 32px), var(--max-width));
+      margin: 0 auto;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 90;
+      backdrop-filter: blur(16px);
+      background: color-mix(in srgb, var(--bg-elevated) 82%, transparent);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .topbar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-4);
+      padding: 14px 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    .brand-mark {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), #f4b56b);
+      color: #fff;
+      box-shadow: var(--shadow-sm);
+      font: var(--caption);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .brand-copy strong {
+      display: block;
+      font: var(--small);
+      font-weight: 600;
+    }
+
+    .brand-copy span {
+      display: block;
+      color: var(--text-muted);
+      font: var(--caption);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .pill,
+    .tab-btn,
+    .toggle-btn {
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: color-mix(in srgb, var(--bg-strong) 86%, transparent);
+      box-shadow: var(--shadow-sm);
+      transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+    }
+
+    .pill:hover,
+    .tab-btn:hover,
+    .toggle-btn:hover {
+      transform: translateY(-1px);
+      border-color: color-mix(in srgb, var(--primary) 42%, var(--line));
+    }
+
+    .hero {
+      padding: var(--space-8) 0 var(--space-7);
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.16fr 0.84fr;
+      gap: var(--space-6);
+      align-items: stretch;
+    }
+
+    .hero-copy,
+    .hero-visual,
+    .panel,
+    .table-panel,
+    .code-panel,
+    .flow-card,
+    .compare-card,
+    .story-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: color-mix(in srgb, var(--bg-elevated) 92%, transparent);
+      box-shadow: var(--shadow-md);
+      backdrop-filter: blur(18px);
+    }
+
+    .hero-copy {
+      padding: var(--space-7);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-copy::after {
+      content: "";
+      position: absolute;
+      inset: auto -10% -20% auto;
+      width: 260px;
+      height: 260px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(217, 119, 87, 0.2), transparent 70%);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      font: var(--caption);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: var(--space-4);
+    }
+
+    h1 {
+      margin: 0 0 var(--space-4);
+      font: var(--display);
+      letter-spacing: -0.04em;
+    }
+
+    .lead {
+      max-width: 58ch;
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 17px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-3);
+      margin-top: var(--space-6);
+    }
+
+    .pill.primary {
+      background: linear-gradient(135deg, var(--primary), #f4b56b);
+      border-color: transparent;
+      color: #fff;
+    }
+
+    .meta-row,
+    .stat-grid,
+    .gallery-grid,
+    .story-grid,
+    .details-grid,
+    .compare-grid {
+      display: grid;
+      gap: var(--space-4);
+    }
+
+    .meta-row {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      margin-top: var(--space-6);
+    }
+
+    .meta-card,
+    .stat-card,
+    .story-card {
+      padding: var(--space-4);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--line);
+      background: color-mix(in srgb, var(--bg-strong) 80%, transparent);
+    }
+
+    .meta-card span,
+    .stat-card span,
+    .story-card span,
+    .section-label {
+      display: block;
+      color: var(--text-muted);
+      font: var(--caption);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: var(--space-2);
+    }
+
+    .meta-card strong,
+    .stat-card strong,
+    .story-card strong {
+      font-size: 20px;
+      letter-spacing: -0.02em;
+    }
+
+    .hero-visual {
+      padding: var(--space-4);
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: var(--space-4);
+    }
+
+    .visual-main {
+      position: relative;
+      min-height: 360px;
+      overflow: hidden;
+      border-radius: 18px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(0, 0, 0, 0.04)),
+        linear-gradient(180deg, rgba(227, 218, 204, 0.36), rgba(255, 255, 255, 0.02));
+      border: 1px solid var(--line);
+    }
+
+    .visual-main img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 500ms ease;
+    }
+
+    .visual-main:hover img {
+      transform: scale(1.03);
+    }
+
+    .visual-badge {
+      position: absolute;
+      top: var(--space-4);
+      left: var(--space-4);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(20, 20, 19, 0.76);
+      color: #faf9f5;
+      font: var(--small);
+      backdrop-filter: blur(8px);
+    }
+
+    .visual-note {
+      position: absolute;
+      right: var(--space-4);
+      bottom: var(--space-4);
+      width: min(240px, 58%);
+      padding: 14px;
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.84);
+      color: #141413;
+      box-shadow: var(--shadow-md);
+    }
+
+    .gallery-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .gallery-card {
+      overflow: hidden;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--line);
+      background: color-mix(in srgb, var(--bg-strong) 80%, transparent);
+    }
+
+    .gallery-card img {
+      height: 168px;
+      width: 100%;
+      object-fit: cover;
+    }
+
+    .gallery-card figcaption {
+      padding: 12px 14px;
+      color: var(--text-muted);
+      font: var(--small);
+    }
+
+    .section {
+      padding: 0 0 var(--space-7);
+    }
+
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: var(--space-4);
+      margin-bottom: var(--space-5);
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font: var(--h1);
+      letter-spacing: -0.03em;
+    }
+
+    .section-head p {
+      margin: var(--space-2) 0 0;
+      color: var(--text-muted);
+      max-width: 56ch;
+    }
+
+    .tabs {
+      display: flex;
+      gap: var(--space-2);
+      flex-wrap: wrap;
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: transparent;
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+      animation: fadeIn 240ms ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .stat-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .stat-card {
+      min-height: 168px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .stat-card strong {
+      font-size: 34px;
+      line-height: 1;
+      letter-spacing: -0.04em;
+    }
+
+    .stat-card em {
+      margin-top: var(--space-2);
+      color: var(--text-muted);
+      font-style: normal;
+      font-size: 13px;
+    }
+
+    .details-grid {
+      grid-template-columns: 1.05fr 0.95fr;
+    }
+
+    .panel,
+    .table-panel,
+    .code-panel,
+    .flow-card,
+    .compare-card {
+      padding: var(--space-5);
+    }
+
+    .dimension-board {
+      position: relative;
+      min-height: 380px;
+      padding: var(--space-5);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background:
+        linear-gradient(180deg, rgba(217, 119, 87, 0.06), transparent),
+        color-mix(in srgb, var(--panel) 85%, transparent);
+      border: 1px solid var(--line);
+    }
+
+    .dimension-board svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .pin {
+      position: absolute;
+      display: inline-flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 120px;
+      padding: 10px 12px;
+      border-radius: var(--radius-md);
+      background: color-mix(in srgb, var(--bg-strong) 92%, transparent);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .pin small {
+      color: var(--text-muted);
+      font: var(--caption);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .pin strong {
+      font-size: 18px;
+    }
+
+    .table-panel table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .table-panel th,
+    .table-panel td {
+      padding: 14px 0;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .table-panel th {
+      width: 34%;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .badge-row,
+    .chip-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--primary) 12%, transparent);
+      color: var(--primary);
+      font: var(--small);
+      border: 1px solid color-mix(in srgb, var(--primary) 24%, var(--line));
+    }
+
+    .story-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .story-card p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 15px;
+    }
+
+    .flow-card svg {
+      width: 100%;
+      height: auto;
+      margin-top: var(--space-4);
+    }
+
+    .compare-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .compare-card ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 12px;
+    }
+
+    .compare-card li {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px dashed var(--line);
+      color: var(--text-muted);
+    }
+
+    .compare-card li strong {
+      color: var(--text);
+    }
+
+    .code-panel pre {
+      margin: var(--space-4) 0 0;
+      padding: 18px;
+      overflow: auto;
+      border-radius: var(--radius-md);
+      background: #111111;
+      color: #f0eee6;
+      font: 13px/1.65 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    .code-tags {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .code-tag {
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(17, 17, 17, 0.08);
+      border: 1px solid var(--line);
+      font: var(--caption);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .footer {
+      padding: 0 0 var(--space-7);
+      color: var(--text-muted);
+      font: var(--small);
+      text-align: center;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 420ms ease, transform 420ms ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 1120px) {
+      .hero-grid,
+      .details-grid,
+      .compare-grid,
+      .story-grid,
+      .stat-grid,
+      .meta-row {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 820px) {
+      .shell {
+        width: min(calc(100% - 20px), var(--max-width));
+      }
+
+      .topbar-inner,
+      .section-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .hero {
+        padding-top: var(--space-6);
+      }
+
+      .hero-grid,
+      .details-grid,
+      .compare-grid,
+      .story-grid,
+      .stat-grid,
+      .meta-row,
+      .gallery-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-copy,
+      .panel,
+      .table-panel,
+      .code-panel,
+      .flow-card,
+      .compare-card {
+        padding: var(--space-4);
+      }
+
+      h1 {
+        font-size: 38px;
+      }
+
+      .visual-main {
+        min-height: 280px;
+      }
+
+      .visual-note {
+        width: calc(100% - 32px);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="progress-bar" id="progressBar"></div>
+
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <div class="brand">
+        <div class="brand-mark">MIIT</div>
+        <div class="brand-copy">
+          <strong>神行者8</strong>
+          <span>工信部新车观察</span>
+        </div>
+      </div>
+      <nav class="nav">
+        <a class="pill" href="#overview">概览</a>
+        <a class="pill" href="#specs">参数</a>
+        <a class="pill" href="#compare">竞品</a>
+        <a class="pill" href="#signals">判断</a>
+        <button class="toggle-btn" id="themeToggle" type="button">切换明暗</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="hero reveal" id="hero">
+      <div class="hero-grid">
+        <article class="hero-copy">
+          <div class="eyebrow">Premium SUV / Data Storytelling</div>
+          <h1 id="heroTitle">神行者8</h1>
+          <p class="lead" id="heroLead"></p>
+          <div class="hero-actions">
+            <a class="pill primary" href="#specs">查看核心参数</a>
+            <a class="pill" href="#compare">查看竞品对比</a>
+          </div>
+          <div class="meta-row">
+            <div class="meta-card">
+              <span>上市时间</span>
+              <strong id="launchDate"></strong>
+            </div>
+            <div class="meta-card">
+              <span>预计售价</span>
+              <strong id="price"></strong>
+            </div>
+            <div class="meta-card">
+              <span>纯电续航</span>
+              <strong id="range"></strong>
+            </div>
+          </div>
+        </article>
+
+        <aside class="hero-visual">
+          <div class="visual-main">
+            <img src="./images/359b033b5bb5c9eac46135650f1f1f113bf3b35a.webp" alt="神行者8 前侧视角" />
+            <div class="visual-badge">发布页主视觉 / 正侧前视图</div>
+            <div class="visual-note">
+              <strong>设计判断</strong>
+              <div>方正车体轮廓、宽体姿态和高离地视觉，为高端新能源硬派 SUV 叙事提供了明确基础。</div>
+            </div>
+          </div>
+          <div class="gallery-grid">
+            <figure class="gallery-card">
+              <img src="./images/359b033b5bb5c9eac46135650f1f1f113bf3b35a.webp" alt="神行者8 侧前图" />
+              <figcaption>前侧视角强调体量、姿态与封闭式前脸设计。</figcaption>
+            </figure>
+            <figure class="gallery-card">
+              <img src="./images/3c6d55fbb2fb43161564740bfb82ef3209f7d304.webp" alt="神行者8 尾部图" />
+              <figcaption>尾部视图突出尾门横向标识与稳重车尾比例。</figcaption>
+            </figure>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section reveal" id="overview">
+      <div class="section-head">
+        <div>
+          <span class="section-label">Overview</span>
+          <h2>高端发布页 + 数据卡片 Dashboard</h2>
+          <p>围绕上市节点、续航、电池、尺寸和竞品，构建一个兼具品牌氛围与信息密度的单页叙事。</p>
+        </div>
+        <div class="tabs" role="tablist" aria-label="信息视图切换">
+          <button class="tab-btn active" type="button" data-tab="dashboard">Dashboard</button>
+          <button class="tab-btn" type="button" data-tab="story">Story</button>
+          <button class="tab-btn" type="button" data-tab="signals">Signals</button>
+        </div>
+      </div>
+
+      <div class="tab-panel active" data-panel="dashboard">
+        <div class="stat-grid" id="statGrid"></div>
+      </div>
+
+      <div class="tab-panel" data-panel="story">
+        <div class="story-grid">
+          <article class="story-card">
+            <span>体量感</span>
+            <strong>3040mm 轴距</strong>
+            <p>长轴距与 5 米级车长共同建立行政级空间预期，形成与主流硬派新能源 SUV 的直接竞争姿态。</p>
+          </article>
+          <article class="story-card">
+            <span>电动化</span>
+            <strong>60.3kWh 电池</strong>
+            <p>在高车重、高体量车型中，60.3kWh 电池与 221km 纯电续航构成插混或增程语境下的核心效率卖点。</p>
+          </article>
+          <article class="story-card">
+            <span>定价带</span>
+            <strong>30 万级</strong>
+            <p>价格锚点进入中高端家庭与越野风格人群交集区间，竞品关系自然落在豹8与坦克500一线。</p>
+          </article>
+        </div>
+      </div>
+
+      <div class="tab-panel" data-panel="signals">
+        <div class="compare-grid">
+          <article class="compare-card">
+            <span class="section-label">Positive Signals</span>
+            <ul>
+              <li><span>尺寸与姿态</span><strong>视觉辨识度强</strong></li>
+              <li><span>上市时间</span><strong>2026年8月</strong></li>
+              <li><span>市场锚定</span><strong>30万级高关注带</strong></li>
+              <li><span>竞品选择</span><strong>目标画像清晰</strong></li>
+            </ul>
+          </article>
+          <article class="compare-card">
+            <span class="section-label">Watch Points</span>
+            <ul>
+              <li><span>最大功率</span><strong>105kW 单值信息仍有限</strong></li>
+              <li><span>配置披露</span><strong>智能化细节待补充</strong></li>
+              <li><span>价格兑现</span><strong>需关注实际上市策略</strong></li>
+              <li><span>差异化表达</span><strong>品牌故事需继续强化</strong></li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section reveal" id="specs">
+      <div class="section-head">
+        <div>
+          <span class="section-label">Specs</span>
+          <h2>尺寸、参数与空间关系</h2>
+          <p>用 SVG + HTML 的方式将车身尺度与关键指标转化为更易阅读的空间信息。</p>
+        </div>
+      </div>
+
+      <div class="details-grid">
+        <article class="panel">
+          <div class="dimension-board">
+            <svg viewBox="0 0 720 360" aria-label="神行者8 尺寸示意图">
+              <defs>
+                <linearGradient id="carGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#d97757" stop-opacity="0.25"></stop>
+                  <stop offset="100%" stop-color="#5c7ca3" stop-opacity="0.15"></stop>
+                </linearGradient>
+              </defs>
+              <rect x="32" y="120" width="656" height="120" rx="28" fill="url(#carGlow)" opacity="0.28"></rect>
+              <rect x="88" y="132" width="510" height="86" rx="28" fill="none" stroke="currentColor" stroke-opacity="0.3" stroke-width="2"></rect>
+              <rect x="196" y="86" width="205" height="74" rx="22" fill="none" stroke="currentColor" stroke-opacity="0.3" stroke-width="2"></rect>
+              <circle cx="198" cy="247" r="42" fill="none" stroke="currentColor" stroke-opacity="0.38" stroke-width="8"></circle>
+              <circle cx="510" cy="247" r="42" fill="none" stroke="currentColor" stroke-opacity="0.38" stroke-width="8"></circle>
+              <line x1="88" y1="292" x2="598" y2="292" stroke="#d97757" stroke-width="3" stroke-dasharray="8 7"></line>
+              <line x1="198" y1="310" x2="510" y2="310" stroke="#5c7ca3" stroke-width="3" stroke-dasharray="8 7"></line>
+              <line x1="614" y1="132" x2="614" y2="218" stroke="#c78e3f" stroke-width="3" stroke-dasharray="8 7"></line>
+            </svg>
+            <div class="pin" style="left: 24px; bottom: 18px;">
+              <small>Length</small>
+              <strong id="lengthPin"></strong>
+            </div>
+            <div class="pin" style="left: 41%; bottom: 0;">
+              <small>Wheelbase</small>
+              <strong id="wheelbasePin"></strong>
+            </div>
+            <div class="pin" style="right: 16px; top: 16px;">
+              <small>Height</small>
+              <strong id="heightPin"></strong>
+            </div>
+          </div>
+        </article>
+
+        <article class="table-panel">
+          <span class="section-label">Parameter Table</span>
+          <table>
+            <tbody id="specTable"></tbody>
+          </table>
+        </article>
+      </div>
+    </section>
+
+    <section class="section reveal" id="compare">
+      <div class="section-head">
+        <div>
+          <span class="section-label">Competition</span>
+          <h2>竞品带与产品切入点</h2>
+          <p>不做绝对参数胜负，而是用市场语言展示神行者8所在价格带和产品叙事位置。</p>
+        </div>
+      </div>
+
+      <div class="compare-grid">
+        <article class="compare-card">
+          <span class="section-label">核心竞品</span>
+          <div class="badge-row" id="rivalBadges"></div>
+          <ul style="margin-top: 18px;">
+            <li><span>方程豹豹8</span><strong>新能源硬派 + 高话题度</strong></li>
+            <li><span>坦克500</span><strong>传统强认知 + 中大型豪华越野</strong></li>
+            <li><span>神行者8</span><strong>电动化效率 + 家用豪华感平衡</strong></li>
+          </ul>
+        </article>
+
+        <article class="flow-card">
+          <span class="section-label">Workflow</span>
+          <strong>从工信部信息到发布页叙事</strong>
+          <svg viewBox="0 0 720 220" aria-label="数据工作流">
+            <defs>
+              <linearGradient id="flowLine" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#d97757"></stop>
+                <stop offset="100%" stop-color="#5c7ca3"></stop>
+              </linearGradient>
+            </defs>
+            <line x1="84" y1="110" x2="636" y2="110" stroke="url(#flowLine)" stroke-width="6" stroke-linecap="round"></line>
+            <circle cx="104" cy="110" r="26" fill="#d97757"></circle>
+            <circle cx="284" cy="110" r="26" fill="#c78e3f"></circle>
+            <circle cx="464" cy="110" r="26" fill="#788c5d"></circle>
+            <circle cx="616" cy="110" r="26" fill="#5c7ca3"></circle>
+            <text x="104" y="116" text-anchor="middle" fill="#fff" font-size="13">1</text>
+            <text x="284" y="116" text-anchor="middle" fill="#fff" font-size="13">2</text>
+            <text x="464" y="116" text-anchor="middle" fill="#fff" font-size="13">3</text>
+            <text x="616" y="116" text-anchor="middle" fill="#fff" font-size="13">4</text>
+            <text x="104" y="56" text-anchor="middle" font-size="15" fill="currentColor">工信部参数</text>
+            <text x="284" y="56" text-anchor="middle" font-size="15" fill="currentColor">设计系统映射</text>
+            <text x="464" y="56" text-anchor="middle" font-size="15" fill="currentColor">视觉叙事编排</text>
+            <text x="616" y="56" text-anchor="middle" font-size="15" fill="currentColor">单页交互输出</text>
+            <text x="104" y="164" text-anchor="middle" font-size="13" fill="currentColor" opacity="0.7">尺寸 / 电池 / 续航</text>
+            <text x="284" y="164" text-anchor="middle" font-size="13" fill="currentColor" opacity="0.7">Color / Type / Space</text>
+            <text x="464" y="164" text-anchor="middle" font-size="13" fill="currentColor" opacity="0.7">Hero / Cards / Table</text>
+            <text x="616" y="164" text-anchor="middle" font-size="13" fill="currentColor" opacity="0.7">Tabs / Theme / Motion</text>
+          </svg>
+        </article>
+      </div>
+    </section>
+
+    <section class="section reveal" id="signals">
+      <div class="section-head">
+        <div>
+          <span class="section-label">Data Snippet</span>
+          <h2>结构化数据摘要</h2>
+          <p>保留一个带 tags 的脚本片段区块，用于表现原始输入数据与页面展示之间的映射关系。</p>
+        </div>
+      </div>
+
+      <article class="code-panel">
+        <div class="code-tags">
+          <span class="code-tag">json</span>
+          <span class="code-tag">miit</span>
+          <span class="code-tag">artifact</span>
+          <span class="code-tag">inline data</span>
+        </div>
+        <pre id="codeBlock"></pre>
+      </article>
+    </section>
+  </main>
+
+  <footer class="footer">
+    神行者8 单文件 HTML Artifact · 本地图片路径来自 `./images` · 数据内容基于 `神行者8.json`
+  </footer>
+
+  <script>
+    const vehicleData = {
+      model: "神行者8",
+      launchDate: "2026年8月",
+      estimatedPrice: "30万",
+      rivals: ["方程豹豹8", "坦克500"],
+      dimensions: {
+        unit: "mm",
+        length: [5118, 5185],
+        width: 2050,
+        height: 1898,
+        wheelbase: 3040,
+        raw: "5118/5185*2050*1898-3040"
+      },
+      battery: { unit: "kWh", value: 60.3 },
+      power: { unit: "kW", value: 105 },
+      range: { unit: "km", value: 221 }
+    };
+
+    const statConfig = [
+      {
+        label: "车身长度",
+        value: `${vehicleData.dimensions.length[0]}-${vehicleData.dimensions.length[1]}`,
+        unit: vehicleData.dimensions.unit,
+        note: "双长度口径，保留工信部原始描述差异"
+      },
+      {
+        label: "车身宽度",
+        value: vehicleData.dimensions.width,
+        unit: vehicleData.dimensions.unit,
+        note: "2050mm 宽体姿态，强调横向稳定感"
+      },
+      {
+        label: "电池容量",
+        value: vehicleData.battery.value,
+        unit: vehicleData.battery.unit,
+        note: "高体量新能源 SUV 的能量储备指标"
+      },
+      {
+        label: "纯电续航",
+        value: vehicleData.range.value,
+        unit: vehicleData.range.unit,
+        note: "适合城市通勤和短途高频使用"
+      }
+    ];
+
+    const specRows = [
+      ["车型", vehicleData.model],
+      ["上市时间", vehicleData.launchDate],
+      ["预计售价", vehicleData.estimatedPrice],
+      ["核心竞品", vehicleData.rivals.join(" / ")],
+      ["整车尺寸", vehicleData.dimensions.raw],
+      ["轴距", `${vehicleData.dimensions.wheelbase}${vehicleData.dimensions.unit}`],
+      ["电池容量", `${vehicleData.battery.value}${vehicleData.battery.unit}`],
+      ["最大功率", `${vehicleData.power.value}${vehicleData.power.unit}`],
+      ["纯电续航", `${vehicleData.range.value}${vehicleData.range.unit}`]
+    ];
+
+    const codePayload = {
+      "车型": vehicleData.model,
+      "上市时间": vehicleData.launchDate,
+      "预计售价": vehicleData.estimatedPrice,
+      "核心竞品": vehicleData.rivals,
+      "整车尺寸": vehicleData.dimensions.raw,
+      "电池容量": `${vehicleData.battery.value}${vehicleData.battery.unit}`,
+      "最大功率": `${vehicleData.power.value}${vehicleData.power.unit}`,
+      "纯电续航里程": `${vehicleData.range.value}${vehicleData.range.unit}`
+    };
+
+    const $ = (selector) => document.querySelector(selector);
+
+    $("#heroLead").textContent =
+      `${vehicleData.model} 以 5 米级尺寸、30 万级价格带和 ${vehicleData.range.value}${vehicleData.range.unit} 纯电续航，切入新能源硬派 SUV 与家庭旗舰 SUV 的交叉市场。`;
+    $("#launchDate").textContent = vehicleData.launchDate;
+    $("#price").textContent = vehicleData.estimatedPrice;
+    $("#range").textContent = `${vehicleData.range.value}${vehicleData.range.unit}`;
+    $("#lengthPin").textContent = `${vehicleData.dimensions.length[0]}-${vehicleData.dimensions.length[1]}${vehicleData.dimensions.unit}`;
+    $("#wheelbasePin").textContent = `${vehicleData.dimensions.wheelbase}${vehicleData.dimensions.unit}`;
+    $("#heightPin").textContent = `${vehicleData.dimensions.height}${vehicleData.dimensions.unit}`;
+
+    const statGrid = $("#statGrid");
+    statConfig.forEach((item) => {
+      const card = document.createElement("article");
+      card.className = "stat-card";
+      card.innerHTML = `
+        <div>
+          <span>${item.label}</span>
+          <strong>${item.value}</strong>
+          <em>${item.unit}</em>
+        </div>
+        <div>${item.note}</div>
+      `;
+      statGrid.appendChild(card);
+    });
+
+    const specTable = $("#specTable");
+    specRows.forEach(([key, value]) => {
+      const row = document.createElement("tr");
+      row.innerHTML = `<th>${key}</th><td>${value}</td>`;
+      specTable.appendChild(row);
+    });
+
+    const rivalBadges = $("#rivalBadges");
+    vehicleData.rivals.forEach((name) => {
+      const badge = document.createElement("span");
+      badge.className = "badge";
+      badge.textContent = name;
+      rivalBadges.appendChild(badge);
+    });
+
+    $("#codeBlock").textContent = JSON.stringify(codePayload, null, 2);
+
+    const tabButtons = document.querySelectorAll("[data-tab]");
+    const tabPanels = document.querySelectorAll("[data-panel]");
+    tabButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const target = button.dataset.tab;
+        tabButtons.forEach((node) => node.classList.toggle("active", node === button));
+        tabPanels.forEach((panel) => {
+          panel.classList.toggle("active", panel.dataset.panel === target);
+        });
+      });
+    });
+
+    const themeToggle = $("#themeToggle");
+    const savedTheme = localStorage.getItem("shenxingzhe-theme");
+    if (savedTheme === "dark") {
+      document.body.classList.add("dark");
+    }
+    themeToggle.addEventListener("click", () => {
+      document.body.classList.toggle("dark");
+      localStorage.setItem(
+        "shenxingzhe-theme",
+        document.body.classList.contains("dark") ? "dark" : "light"
+      );
+    });
+
+    const progressBar = $("#progressBar");
+    const updateProgress = () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = docHeight > 0 ? scrollTop / docHeight : 0;
+      progressBar.style.transform = `scaleX(${Math.min(progress, 1)})`;
+    };
+    window.addEventListener("scroll", updateProgress, { passive: true });
+    updateProgress();
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+          }
+        });
+      },
+      { threshold: 0.16 }
+    );
+    document.querySelectorAll(".reveal").forEach((node) => observer.observe(node));
+  </script>
+</body>
+</html>
