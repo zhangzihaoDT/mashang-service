@@ -11,12 +11,45 @@
       }
 
       .core-param-card {
-        flex: 1 1 calc((100% - 30px) / 4);
+        flex: 1 1 calc((100% - 10px) / 2);
         min-width: 0;
       }
 
-      .core-param-grid:has(> .core-param-card:nth-child(5)) .core-param-card {
-        flex-basis: calc((100% - 20px) / 3);
+      .core-param-two-col {
+        display: flex;
+        gap: 10px;
+      }
+
+      .core-param-section {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .core-param-title {
+        font-size: 17px;
+        font-weight: 900;
+        color: #1d2431;
+        margin: 0 0 10px;
+        padding: 8px 10px;
+        border-radius: 8px;
+      }
+
+      .core-param-title--bluegray {
+        background: linear-gradient(
+          90deg,
+          rgba(74, 103, 129, 0.26) 0%,
+          rgba(239, 241, 244, 0) 72%
+        );
+        border: 1px solid rgba(74, 103, 129, 0.18);
+      }
+
+      .core-param-title--greengray {
+        background: linear-gradient(
+          90deg,
+          rgba(86, 122, 98, 0.26) 0%,
+          rgba(239, 241, 244, 0) 72%
+        );
+        border: 1px solid rgba(86, 122, 98, 0.18);
       }
     </style>
   </head>
@@ -329,623 +362,612 @@
           padding: 14px 14px;
         "
       >
-        <div
-          style="
-            background: rgba(239, 241, 244, 0.78);
-            border: 1px solid rgba(199, 203, 209, 0.9);
-            border-radius: 10px;
-            padding: 14px 12px 12px;
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
-          "
-        >
+        <div class="core-param-two-col">
           <div
+            class="core-param-section"
             style="
-              font-size: 17px;
-              font-weight: 900;
-              color: #1d2431;
-              margin: 0 0 10px 4px;
+              background: rgba(239, 241, 244, 0.78);
+              border: 1px solid rgba(199, 203, 209, 0.9);
+              border-radius: 10px;
+              padding: 14px 12px 12px;
+              box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
             "
           >
-            核心参数（插混）
+            <div class="core-param-title core-param-title--greengray">
+              核心参数（增程）
+            </div>
+
+            <div class="core-param-grid">
+              <div
+                class="core-param-card"
+                style="
+                  min-height: 92px;
+                  background: rgba(242, 243, 246, 0.95);
+                  border: 1px solid rgba(210, 214, 220, 0.85);
+                  border-radius: 10px;
+                  padding: 16px 18px;
+                  box-sizing: border-box;
+                  display: flex;
+                  align-items: center;
+                  gap: 14px;
+                "
+              >
+                <svg
+                  width="44"
+                  height="44"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#2a3441"
+                  stroke-width="1.6"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  style="flex: none"
+                >
+                  <path
+                    d="M3 17l4 4 14-14-4-4L3 17zM14 6l4 4M7 21l-3-3M12 4l4 4"
+                  ></path>
+                </svg>
+                <div>
+                  <div
+                    style="
+                      font-size: 12px;
+                      color: #394252;
+                      font-weight: 700;
+                      margin-bottom: 6px;
+                    "
+                  >
+                    整车尺寸 (mm)
+                  </div>
+                  <div
+                    style="
+                      font-size: 18px;
+                      color: #101827;
+                      font-weight: 900;
+                      line-height: 1.25;
+                    "
+                  >
+                    5115*1999*1800
+                  </div>
+                  <div
+                    style="
+                      font-size: 17px;
+                      color: #101827;
+                      font-weight: 800;
+                      margin-top: 4px;
+                    "
+                  >
+                    轴距: 3030mm
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="core-param-card"
+                style="
+                  min-height: 92px;
+                  background: rgba(242, 243, 246, 0.95);
+                  border: 1px solid rgba(210, 214, 220, 0.85);
+                  border-radius: 10px;
+                  padding: 16px 18px;
+                  box-sizing: border-box;
+                  display: flex;
+                  align-items: center;
+                  gap: 14px;
+                "
+              >
+                <svg
+                  width="44"
+                  height="44"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#2a3441"
+                  stroke-width="1.6"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  style="flex: none"
+                >
+                  <path d="M7 4h10v4"></path>
+                  <path d="M9 3v3"></path>
+                  <path d="M17 8v12a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V8z"></path>
+                  <path d="M10 12h4"></path>
+                  <path d="M10 16l4-4"></path>
+                </svg>
+                <div>
+                  <div
+                    style="
+                      font-size: 12px;
+                      color: #394252;
+                      font-weight: 700;
+                      margin-bottom: 8px;
+                    "
+                  >
+                    电池容量 (kWh)
+                  </div>
+                  <div
+                    style="
+                      font-size: 28px;
+                      color: #101827;
+                      font-weight: 900;
+                      line-height: 1;
+                    "
+                  >
+                    55.8
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="core-param-card"
+                style="
+                  min-height: 92px;
+                  background: rgba(242, 243, 246, 0.95);
+                  border: 1px solid rgba(210, 214, 220, 0.85);
+                  border-radius: 10px;
+                  padding: 16px 18px;
+                  box-sizing: border-box;
+                  display: flex;
+                  align-items: center;
+                  gap: 14px;
+                "
+              >
+                <svg
+                  width="44"
+                  height="44"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#2a3441"
+                  stroke-width="1.6"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  style="flex: none"
+                >
+                  <path d="M4 14h3l2-3 3 7 2-4h6"></path>
+                  <path d="M5 18H3V9h2"></path>
+                  <path d="M21 18h-2V9h2"></path>
+                  <path d="M7 8V6h4"></path>
+                  <path d="M13 6h4v2"></path>
+                </svg>
+                <div>
+                  <div
+                    style="
+                      font-size: 12px;
+                      color: #394252;
+                      font-weight: 700;
+                      margin-bottom: 8px;
+                    "
+                  >
+                    发动机最大功率 (kW)
+                  </div>
+                  <div
+                    style="
+                      font-size: 12px;
+                      color: #101827;
+                      font-weight: 900;
+                      line-height: 1;
+                    "
+                  >
+                    200/200kW+200kW
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="core-param-card"
+                style="
+                  min-height: 92px;
+                  background: rgba(242, 243, 246, 0.95);
+                  border: 1px solid rgba(210, 214, 220, 0.85);
+                  border-radius: 10px;
+                  padding: 16px 18px;
+                  box-sizing: border-box;
+                  display: flex;
+                  align-items: center;
+                  gap: 14px;
+                "
+              >
+                <svg
+                  width="44"
+                  height="44"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#2a3441"
+                  stroke-width="1.6"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  style="flex: none"
+                >
+                  <path d="M6 18L12 6l6 12"></path>
+                  <path d="M9 18V9"></path>
+                  <path d="M15 18V9"></path>
+                </svg>
+                <div>
+                  <div
+                    style="
+                      font-size: 12px;
+                      color: #394252;
+                      font-weight: 700;
+                      margin-bottom: 8px;
+                    "
+                  >
+                    纯电续航里程 (km)
+                  </div>
+                  <div
+                    style="
+                      font-size: 28px;
+                      color: #101827;
+                      font-weight: 900;
+                      line-height: 1;
+                    "
+                  >
+                    300/275
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="core-param-card"
+                style="
+                  min-height: 92px;
+                  background: rgba(242, 243, 246, 0.95);
+                  border: 1px solid rgba(210, 214, 220, 0.85);
+                  border-radius: 10px;
+                  padding: 16px 18px;
+                  box-sizing: border-box;
+                  display: flex;
+                  align-items: center;
+                  gap: 14px;
+                "
+              >
+                <svg
+                  width="44"
+                  height="44"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#2a3441"
+                  stroke-width="1.6"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  style="flex: none"
+                >
+                  <path
+                    d="M16 11c1.66 0 3-1.34 3-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3z"
+                  ></path>
+                  <path
+                    d="M8 11c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3z"
+                  ></path>
+                  <path
+                    d="M8 13c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13z"
+                  ></path>
+                  <path
+                    d="M16 13c-.29 0-.62.02-.97.05 1.16.84 1.97 1.94 1.97 3.45V19h7v-2.5c0-2.33-4.67-3.5-7-3.5z"
+                  ></path>
+                </svg>
+                <div>
+                  <div
+                    style="
+                      font-size: 12px;
+                      color: #394252;
+                      font-weight: 700;
+                      margin-bottom: 8px;
+                    "
+                  >
+                    座位数 (座)
+                  </div>
+                  <div
+                    style="
+                      font-size: 28px;
+                      color: #101827;
+                      font-weight: 900;
+                      line-height: 1;
+                    "
+                  >
+                    5/6
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div class="core-param-grid">
-            <div
-              class="core-param-card"
-              style="
-                min-height: 92px;
-                background: rgba(242, 243, 246, 0.95);
-                border: 1px solid rgba(210, 214, 220, 0.85);
-                border-radius: 10px;
-                padding: 16px 18px;
-                box-sizing: border-box;
-                display: flex;
-                align-items: center;
-                gap: 14px;
-              "
-            >
-              <svg
-                width="44"
-                height="44"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#2a3441"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                style="flex: none"
-              >
-                <path
-                  d="M3 17l4 4 14-14-4-4L3 17zM14 6l4 4M7 21l-3-3M12 4l4 4"
-                ></path>
-              </svg>
-              <div>
-                <div
-                  style="
-                    font-size: 12px;
-                    color: #394252;
-                    font-weight: 700;
-                    margin-bottom: 6px;
-                  "
-                >
-                  整车尺寸 (mm)
-                </div>
-                <div
-                  style="
-                    font-size: 18px;
-                    color: #101827;
-                    font-weight: 900;
-                    line-height: 1.25;
-                  "
-                >
-                  5115*1999*1800
-                </div>
-                <div
-                  style="
-                    font-size: 17px;
-                    color: #101827;
-                    font-weight: 800;
-                    margin-top: 4px;
-                  "
-                >
-                  轴距: 3030mm
-                </div>
-              </div>
-            </div>
-
-            <div
-              class="core-param-card"
-              style="
-                min-height: 92px;
-                background: rgba(242, 243, 246, 0.95);
-                border: 1px solid rgba(210, 214, 220, 0.85);
-                border-radius: 10px;
-                padding: 16px 18px;
-                box-sizing: border-box;
-                display: flex;
-                align-items: center;
-                gap: 14px;
-              "
-            >
-              <svg
-                width="44"
-                height="44"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#2a3441"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                style="flex: none"
-              >
-                <path d="M7 4h10v4"></path>
-                <path d="M9 3v3"></path>
-                <path d="M17 8v12a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V8z"></path>
-                <path d="M10 12h4"></path>
-                <path d="M10 16l4-4"></path>
-              </svg>
-              <div>
-                <div
-                  style="
-                    font-size: 12px;
-                    color: #394252;
-                    font-weight: 700;
-                    margin-bottom: 8px;
-                  "
-                >
-                  电池容量 (kWh)
-                </div>
-                <div
-                  style="
-                    font-size: 28px;
-                    color: #101827;
-                    font-weight: 900;
-                    line-height: 1;
-                  "
-                >
-                  55.8
-                </div>
-              </div>
-            </div>
-
-            <div
-              class="core-param-card"
-              style="
-                min-height: 92px;
-                background: rgba(242, 243, 246, 0.95);
-                border: 1px solid rgba(210, 214, 220, 0.85);
-                border-radius: 10px;
-                padding: 16px 18px;
-                box-sizing: border-box;
-                display: flex;
-                align-items: center;
-                gap: 14px;
-              "
-            >
-              <svg
-                width="44"
-                height="44"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#2a3441"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                style="flex: none"
-              >
-                <path d="M4 14h3l2-3 3 7 2-4h6"></path>
-                <path d="M5 18H3V9h2"></path>
-                <path d="M21 18h-2V9h2"></path>
-                <path d="M7 8V6h4"></path>
-                <path d="M13 6h4v2"></path>
-              </svg>
-              <div>
-                <div
-                  style="
-                    font-size: 12px;
-                    color: #394252;
-                    font-weight: 700;
-                    margin-bottom: 8px;
-                  "
-                >
-                  发动机最大功率 (kW)
-                </div>
-                <div
-                  style="
-                    font-size: 16px;
-                    color: #101827;
-                    font-weight: 900;
-                    line-height: 1;
-                  "
-                >
-                  200/200kW+200kW
-                </div>
-              </div>
-            </div>
-
-            <div
-              class="core-param-card"
-              style="
-                min-height: 92px;
-                background: rgba(242, 243, 246, 0.95);
-                border: 1px solid rgba(210, 214, 220, 0.85);
-                border-radius: 10px;
-                padding: 16px 18px;
-                box-sizing: border-box;
-                display: flex;
-                align-items: center;
-                gap: 14px;
-              "
-            >
-              <svg
-                width="44"
-                height="44"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#2a3441"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                style="flex: none"
-              >
-                <path d="M6 18L12 6l6 12"></path>
-                <path d="M9 18V9"></path>
-                <path d="M15 18V9"></path>
-              </svg>
-              <div>
-                <div
-                  style="
-                    font-size: 12px;
-                    color: #394252;
-                    font-weight: 700;
-                    margin-bottom: 8px;
-                  "
-                >
-                  纯电续航里程 (km)
-                </div>
-                <div
-                  style="
-                    font-size: 28px;
-                    color: #101827;
-                    font-weight: 900;
-                    line-height: 1;
-                  "
-                >
-                  300/275
-                </div>
-              </div>
-            </div>
-
-            <div
-              class="core-param-card"
-              style="
-                min-height: 92px;
-                background: rgba(242, 243, 246, 0.95);
-                border: 1px solid rgba(210, 214, 220, 0.85);
-                border-radius: 10px;
-                padding: 16px 18px;
-                box-sizing: border-box;
-                display: flex;
-                align-items: center;
-                gap: 14px;
-              "
-            >
-              <svg
-                width="44"
-                height="44"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#2a3441"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                style="flex: none"
-              >
-                <path
-                  d="M16 11c1.66 0 3-1.34 3-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3z"
-                ></path>
-                <path
-                  d="M8 11c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3z"
-                ></path>
-                <path
-                  d="M8 13c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13z"
-                ></path>
-                <path
-                  d="M16 13c-.29 0-.62.02-.97.05 1.16.84 1.97 1.94 1.97 3.45V19h7v-2.5c0-2.33-4.67-3.5-7-3.5z"
-                ></path>
-              </svg>
-              <div>
-                <div
-                  style="
-                    font-size: 12px;
-                    color: #394252;
-                    font-weight: 700;
-                    margin-bottom: 8px;
-                  "
-                >
-                  座位数 (座)
-                </div>
-                <div
-                  style="
-                    font-size: 28px;
-                    color: #101827;
-                    font-weight: 900;
-                    line-height: 1;
-                  "
-                >
-                  5/6
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div
-          style="
-            margin-top: 10px;
-            background: rgba(239, 241, 244, 0.78);
-            border: 1px solid rgba(199, 203, 209, 0.9);
-            border-radius: 10px;
-            padding: 14px 12px 12px;
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
-          "
-        >
           <div
+            class="core-param-section"
             style="
-              font-size: 17px;
-              font-weight: 900;
-              color: #1d2431;
-              margin: 0 0 10px 4px;
+              background: rgba(239, 241, 244, 0.78);
+              border: 1px solid rgba(199, 203, 209, 0.9);
+              border-radius: 10px;
+              padding: 14px 12px 12px;
+              box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
             "
           >
-            核心参数（纯电）
-          </div>
-
-          <div class="core-param-grid">
-            <div
-              class="core-param-card"
-              style="
-                min-height: 92px;
-                background: rgba(242, 243, 246, 0.95);
-                border: 1px solid rgba(210, 214, 220, 0.85);
-                border-radius: 10px;
-                padding: 16px 18px;
-                box-sizing: border-box;
-                display: flex;
-                align-items: center;
-                gap: 14px;
-              "
-            >
-              <svg
-                width="44"
-                height="44"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#2a3441"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                style="flex: none"
-              >
-                <path
-                  d="M3 17l4 4 14-14-4-4L3 17zM14 6l4 4M7 21l-3-3M12 4l4 4"
-                ></path>
-              </svg>
-              <div>
-                <div
-                  style="
-                    font-size: 12px;
-                    color: #394252;
-                    font-weight: 700;
-                    margin-bottom: 6px;
-                  "
-                >
-                  整车尺寸 (mm)
-                </div>
-                <div
-                  style="
-                    font-size: 18px;
-                    color: #101827;
-                    font-weight: 900;
-                    line-height: 1.25;
-                  "
-                >
-                  5115*1999*1800
-                </div>
-                <div
-                  style="
-                    font-size: 17px;
-                    color: #101827;
-                    font-weight: 800;
-                    margin-top: 4px;
-                  "
-                >
-                  轴距: 3030mm
-                </div>
-              </div>
+            <div class="core-param-title core-param-title--bluegray">
+              核心参数（纯电）
             </div>
 
-            <div
-              class="core-param-card"
-              style="
-                min-height: 92px;
-                background: rgba(242, 243, 246, 0.95);
-                border: 1px solid rgba(210, 214, 220, 0.85);
-                border-radius: 10px;
-                padding: 16px 18px;
-                box-sizing: border-box;
-                display: flex;
-                align-items: center;
-                gap: 14px;
-              "
-            >
-              <svg
-                width="44"
-                height="44"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#2a3441"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                style="flex: none"
+            <div class="core-param-grid">
+              <div
+                class="core-param-card"
+                style="
+                  min-height: 92px;
+                  background: rgba(242, 243, 246, 0.95);
+                  border: 1px solid rgba(210, 214, 220, 0.85);
+                  border-radius: 10px;
+                  padding: 16px 18px;
+                  box-sizing: border-box;
+                  display: flex;
+                  align-items: center;
+                  gap: 14px;
+                "
               >
-                <path d="M7 4h10v4"></path>
-                <path d="M9 3v3"></path>
-                <path d="M17 8v12a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V8z"></path>
-                <path d="M10 12h4"></path>
-                <path d="M10 16l4-4"></path>
-              </svg>
-              <div>
-                <div
-                  style="
-                    font-size: 12px;
-                    color: #394252;
-                    font-weight: 700;
-                    margin-bottom: 8px;
-                  "
+                <svg
+                  width="44"
+                  height="44"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#2a3441"
+                  stroke-width="1.6"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  style="flex: none"
                 >
-                  电池容量 (kWh)
-                </div>
-                <div
-                  style="
-                    font-size: 28px;
-                    color: #101827;
-                    font-weight: 900;
-                    line-height: 1;
-                  "
-                >
-                  —
+                  <path
+                    d="M3 17l4 4 14-14-4-4L3 17zM14 6l4 4M7 21l-3-3M12 4l4 4"
+                  ></path>
+                </svg>
+                <div>
+                  <div
+                    style="
+                      font-size: 12px;
+                      color: #394252;
+                      font-weight: 700;
+                      margin-bottom: 6px;
+                    "
+                  >
+                    整车尺寸 (mm)
+                  </div>
+                  <div
+                    style="
+                      font-size: 18px;
+                      color: #101827;
+                      font-weight: 900;
+                      line-height: 1.25;
+                    "
+                  >
+                    5115*1999*1800
+                  </div>
+                  <div
+                    style="
+                      font-size: 17px;
+                      color: #101827;
+                      font-weight: 800;
+                      margin-top: 4px;
+                    "
+                  >
+                    轴距: 3030mm
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div
-              class="core-param-card"
-              style="
-                min-height: 92px;
-                background: rgba(242, 243, 246, 0.95);
-                border: 1px solid rgba(210, 214, 220, 0.85);
-                border-radius: 10px;
-                padding: 16px 18px;
-                box-sizing: border-box;
-                display: flex;
-                align-items: center;
-                gap: 14px;
-              "
-            >
-              <svg
-                width="44"
-                height="44"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#2a3441"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                style="flex: none"
+              <div
+                class="core-param-card"
+                style="
+                  min-height: 92px;
+                  background: rgba(242, 243, 246, 0.95);
+                  border: 1px solid rgba(210, 214, 220, 0.85);
+                  border-radius: 10px;
+                  padding: 16px 18px;
+                  box-sizing: border-box;
+                  display: flex;
+                  align-items: center;
+                  gap: 14px;
+                "
               >
-                <path d="M4 14h3l2-3 3 7 2-4h6"></path>
-                <path d="M5 18H3V9h2"></path>
-                <path d="M21 18h-2V9h2"></path>
-                <path d="M7 8V6h4"></path>
-                <path d="M13 6h4v2"></path>
-              </svg>
-              <div>
-                <div
-                  style="
-                    font-size: 12px;
-                    color: #394252;
-                    font-weight: 700;
-                    margin-bottom: 8px;
-                  "
+                <svg
+                  width="44"
+                  height="44"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#2a3441"
+                  stroke-width="1.6"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  style="flex: none"
                 >
-                  电机最大功率 (kW)
-                </div>
-                <div
-                  style="
-                    font-size: 16px;
-                    color: #101827;
-                    font-weight: 900;
-                    line-height: 1;
-                  "
-                >
-                  320/370/210kW+370kW
+                  <path d="M7 4h10v4"></path>
+                  <path d="M9 3v3"></path>
+                  <path d="M17 8v12a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V8z"></path>
+                  <path d="M10 12h4"></path>
+                  <path d="M10 16l4-4"></path>
+                </svg>
+                <div>
+                  <div
+                    style="
+                      font-size: 12px;
+                      color: #394252;
+                      font-weight: 700;
+                      margin-bottom: 8px;
+                    "
+                  >
+                    电池容量 (kWh)
+                  </div>
+                  <div
+                    style="
+                      font-size: 28px;
+                      color: #101827;
+                      font-weight: 900;
+                      line-height: 1;
+                    "
+                  >
+                    —
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div
-              class="core-param-card"
-              style="
-                min-height: 92px;
-                background: rgba(242, 243, 246, 0.95);
-                border: 1px solid rgba(210, 214, 220, 0.85);
-                border-radius: 10px;
-                padding: 16px 18px;
-                box-sizing: border-box;
-                display: flex;
-                align-items: center;
-                gap: 14px;
-              "
-            >
-              <svg
-                width="44"
-                height="44"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#2a3441"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                style="flex: none"
+              <div
+                class="core-param-card"
+                style="
+                  min-height: 92px;
+                  background: rgba(242, 243, 246, 0.95);
+                  border: 1px solid rgba(210, 214, 220, 0.85);
+                  border-radius: 10px;
+                  padding: 16px 18px;
+                  box-sizing: border-box;
+                  display: flex;
+                  align-items: center;
+                  gap: 14px;
+                "
               >
-                <path d="M6 18L12 6l6 12"></path>
-                <path d="M9 18V9"></path>
-                <path d="M15 18V9"></path>
-              </svg>
-              <div>
-                <div
-                  style="
-                    font-size: 12px;
-                    color: #394252;
-                    font-weight: 700;
-                    margin-bottom: 8px;
-                  "
+                <svg
+                  width="44"
+                  height="44"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#2a3441"
+                  stroke-width="1.6"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  style="flex: none"
                 >
-                  纯电续航里程 (km)
-                </div>
-                <div
-                  style="
-                    font-size: 28px;
-                    color: #101827;
-                    font-weight: 900;
-                    line-height: 1;
-                  "
-                >
-                  —
+                  <path d="M4 14h3l2-3 3 7 2-4h6"></path>
+                  <path d="M5 18H3V9h2"></path>
+                  <path d="M21 18h-2V9h2"></path>
+                  <path d="M7 8V6h4"></path>
+                  <path d="M13 6h4v2"></path>
+                </svg>
+                <div>
+                  <div
+                    style="
+                      font-size: 12px;
+                      color: #394252;
+                      font-weight: 700;
+                      margin-bottom: 8px;
+                    "
+                  >
+                    电机最大功率 (kW)
+                  </div>
+                  <div
+                    style="
+                      font-size: 10px;
+                      color: #101827;
+                      font-weight: 900;
+                      line-height: 1;
+                    "
+                  >
+                    320/370/210kW+370kW
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div
-              class="core-param-card"
-              style="
-                min-height: 92px;
-                background: rgba(242, 243, 246, 0.95);
-                border: 1px solid rgba(210, 214, 220, 0.85);
-                border-radius: 10px;
-                padding: 16px 18px;
-                box-sizing: border-box;
-                display: flex;
-                align-items: center;
-                gap: 14px;
-              "
-            >
-              <svg
-                width="44"
-                height="44"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#2a3441"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                style="flex: none"
+              <div
+                class="core-param-card"
+                style="
+                  min-height: 92px;
+                  background: rgba(242, 243, 246, 0.95);
+                  border: 1px solid rgba(210, 214, 220, 0.85);
+                  border-radius: 10px;
+                  padding: 16px 18px;
+                  box-sizing: border-box;
+                  display: flex;
+                  align-items: center;
+                  gap: 14px;
+                "
               >
-                <path
-                  d="M16 11c1.66 0 3-1.34 3-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3z"
-                ></path>
-                <path
-                  d="M8 11c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3z"
-                ></path>
-                <path
-                  d="M8 13c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13z"
-                ></path>
-                <path
-                  d="M16 13c-.29 0-.62.02-.97.05 1.16.84 1.97 1.94 1.97 3.45V19h7v-2.5c0-2.33-4.67-3.5-7-3.5z"
-                ></path>
-              </svg>
-              <div>
-                <div
-                  style="
-                    font-size: 12px;
-                    color: #394252;
-                    font-weight: 700;
-                    margin-bottom: 8px;
-                  "
+                <svg
+                  width="44"
+                  height="44"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#2a3441"
+                  stroke-width="1.6"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  style="flex: none"
                 >
-                  座位数 (座)
+                  <path d="M6 18L12 6l6 12"></path>
+                  <path d="M9 18V9"></path>
+                  <path d="M15 18V9"></path>
+                </svg>
+                <div>
+                  <div
+                    style="
+                      font-size: 12px;
+                      color: #394252;
+                      font-weight: 700;
+                      margin-bottom: 8px;
+                    "
+                  >
+                    纯电续航里程 (km)
+                  </div>
+                  <div
+                    style="
+                      font-size: 28px;
+                      color: #101827;
+                      font-weight: 900;
+                      line-height: 1;
+                    "
+                  >
+                    —
+                  </div>
                 </div>
-                <div
-                  style="
-                    font-size: 28px;
-                    color: #101827;
-                    font-weight: 900;
-                    line-height: 1;
-                  "
+              </div>
+
+              <div
+                class="core-param-card"
+                style="
+                  min-height: 92px;
+                  background: rgba(242, 243, 246, 0.95);
+                  border: 1px solid rgba(210, 214, 220, 0.85);
+                  border-radius: 10px;
+                  padding: 16px 18px;
+                  box-sizing: border-box;
+                  display: flex;
+                  align-items: center;
+                  gap: 14px;
+                "
+              >
+                <svg
+                  width="44"
+                  height="44"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#2a3441"
+                  stroke-width="1.6"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  style="flex: none"
                 >
-                  5/6
+                  <path
+                    d="M16 11c1.66 0 3-1.34 3-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3z"
+                  ></path>
+                  <path
+                    d="M8 11c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3z"
+                  ></path>
+                  <path
+                    d="M8 13c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13z"
+                  ></path>
+                  <path
+                    d="M16 13c-.29 0-.62.02-.97.05 1.16.84 1.97 1.94 1.97 3.45V19h7v-2.5c0-2.33-4.67-3.5-7-3.5z"
+                  ></path>
+                </svg>
+                <div>
+                  <div
+                    style="
+                      font-size: 12px;
+                      color: #394252;
+                      font-weight: 700;
+                      margin-bottom: 8px;
+                    "
+                  >
+                    座位数 (座)
+                  </div>
+                  <div
+                    style="
+                      font-size: 28px;
+                      color: #101827;
+                      font-weight: 900;
+                      line-height: 1;
+                    "
+                  >
+                    5/6
+                  </div>
                 </div>
               </div>
             </div>
