@@ -88,6 +88,7 @@ PLANNING_TOOL_SCHEMA = {
                                             "weekly_decline_ratio",
                                             "daily_threshold_count",
                                             "daily_mean",
+                                            "daily_mean_median",
                                             "daily_percentile_rank",
                                             "weekend_percentile_rank",
                                             "weekday_percentile_rank",
@@ -399,6 +400,8 @@ class PlanningAgent:
             "均值",
             "平均值",
             "平均",
+            "中位数",
+            "中值",
             "分位",
             "百分位",
             "处于什么水平",
@@ -406,7 +409,7 @@ class PlanningAgent:
         ]
         has_stat_keyword = any(k in q for k in stat_keywords)
         has_explicit_window = PlanningAgent._parse_time_window(q, datetime.date.today()) is not None
-        has_time_window = has_explicit_window or bool(re.search(r"近\s*\d+\s*(日|天|周|月)", q)) or any(
+        has_time_window = has_explicit_window or bool(re.search(r"近\s*\d+\s*(日|天|周|月|年)", q)) or any(
             k in q for k in ["昨天", "昨日", "本周", "上周", "本月", "上月", "今年", "去年", "上市至今", "上市以来", "预售至今", "预售以来"]
         )
         if has_stat_keyword and has_time_window:
@@ -422,6 +425,10 @@ class PlanningAgent:
             start = today - datetime.timedelta(days=1)
             end = today
             return (start.isoformat(), end.isoformat())
+
+        window = resolve_time_window(user_query=user_query, today=today, business_definition={})
+        if window:
+            return window
 
         def _normalize_year(y: str) -> int | None:
             if not y:
@@ -1137,10 +1144,24 @@ class PlanningAgent:
         if not q:
             return False
         has_mean = any(k in q for k in ["日均", "均值", "平均值", "平均"])
-        has_recent_day = bool(re.search(r"近\s*(?:\d+|[一二两三四五六七八九十])\s*(日|天|周|月)", q))
+        has_recent_day = bool(re.search(r"近\s*(?:\d+|[一二两三四五六七八九十])\s*(日|天|周|月|年)", q))
         has_relative_day = any(k in q for k in ["昨天", "昨日", "今天", "今日", "本周", "上周", "本月", "上月", "上市至今", "上市以来", "预售至今", "预售以来", "至今", "截至", "目前", "现在"])
         has_explicit_window = PlanningAgent._extract_explicit_time_window(q, datetime.date.today()) is not None
         return has_mean and (has_recent_day or has_relative_day or has_explicit_window)
+
+    @staticmethod
+    def _is_daily_mean_median_query(user_query: str) -> bool:
+        q = user_query or ""
+        if not q:
+            return False
+        has_mean = any(k in q for k in ["日均", "均值", "平均值", "平均"])
+        has_median = any(k in q for k in ["中位数", "中值"])
+        if not (has_mean and has_median):
+            return False
+        has_recent = bool(re.search(r"近\s*(?:\d+|[一二两三四五六七八九十])\s*(日|天|周|月|年)", q))
+        has_relative = any(k in q for k in ["昨天", "昨日", "今天", "今日", "本周", "上周", "本月", "上月", "上市至今", "上市以来", "预售至今", "预售以来", "至今", "截至", "目前", "现在"])
+        has_explicit = PlanningAgent._extract_explicit_time_window(q, datetime.date.today()) is not None
+        return has_recent or has_relative or has_explicit
 
     @staticmethod
     def _is_daily_percentile_rank_query(user_query: str) -> bool:
@@ -1337,6 +1358,46 @@ class PlanningAgent:
         }
         return self._fill_defaults(self._normalize_plan(plan), user_query)
 
+    def _build_daily_mean_median_plan(self, user_query: str) -> dict | None:
+        metric_defaults = self._metric_defaults(user_query)
+        if not metric_defaults:
+            return None
+        today = datetime.date.today()
+        explicit_window = self._extract_explicit_time_window(user_query, today)
+        if explicit_window:
+            start_s, end_s = explicit_window
+            start = datetime.date.fromisoformat(start_s)
+            end = datetime.date.fromisoformat(end_s)
+            days = max(1, (end - start).days)
+        else:
+            macro_window = self._parse_time_window_with_business(user_query, today)
+            if macro_window:
+                start_s, end_s = macro_window
+                start = datetime.date.fromisoformat(start_s)
+                end = datetime.date.fromisoformat(end_s)
+                days = max(1, (end - start).days)
+            else:
+                days = self._parse_recent_days(user_query) or 30
+                start = today - datetime.timedelta(days=days)
+                end = today
+        time_field = metric_defaults["time_field"]
+        value_metric = metric_defaults["metric"]
+        plan = {
+            "dataset": metric_defaults["dataset"],
+            "metric": value_metric,
+            "time": {"field": time_field, "start": start.isoformat(), "end": end.isoformat()},
+            "dimensions": [time_field],
+            "filters": [{"field": time_field, "op": "!=", "value": None}],
+            "comparison": {"type": "none"},
+            "statistics": {
+                "type": "daily_mean_median",
+                "time_field": time_field,
+                "window_days": days,
+                "value_metric": value_metric,
+            },
+        }
+        return self._fill_defaults(self._normalize_plan(plan), user_query)
+
     def _build_daily_percentile_rank_plan(self, user_query: str) -> dict | None:
         metric_defaults = self._metric_defaults(user_query)
         if not metric_defaults:
@@ -1432,12 +1493,17 @@ class PlanningAgent:
     @staticmethod
     def _statistics_plan_valid(statistics: dict, plan: dict) -> bool:
         stype = statistics.get("type")
+        dims = plan.get("dimensions")
+        if not isinstance(dims, list):
+            dims = []
         if stype == "weekly_decline_ratio":
             time_field = statistics.get("time_field") or (plan.get("time", {}) or {}).get("field")
             weekdays = statistics.get("weekdays")
             numerator = statistics.get("numerator_metric")
             denominator = statistics.get("denominator_metric")
             if not isinstance(time_field, str) or not time_field:
+                return False
+            if time_field not in dims:
                 return False
             if not isinstance(weekdays, list) or not weekdays:
                 return False
@@ -1462,6 +1528,8 @@ class PlanningAgent:
             value_metric = statistics.get("value_metric")
             if not isinstance(time_field, str) or not time_field:
                 return False
+            if time_field not in dims:
+                return False
             if op not in {">", ">=", "<", "<=", "==", "!="}:
                 return False
             if not isinstance(value_metric, dict):
@@ -1479,6 +1547,21 @@ class PlanningAgent:
             value_metric = statistics.get("value_metric")
             if not isinstance(time_field, str) or not time_field:
                 return False
+            if time_field not in dims:
+                return False
+            if not isinstance(value_metric, dict):
+                return False
+            if not value_metric.get("field") or not value_metric.get("agg"):
+                return False
+            return True
+
+        if stype == "daily_mean_median":
+            time_field = statistics.get("time_field") or (plan.get("time", {}) or {}).get("field")
+            value_metric = statistics.get("value_metric")
+            if not isinstance(time_field, str) or not time_field:
+                return False
+            if time_field not in dims:
+                return False
             if not isinstance(value_metric, dict):
                 return False
             if not value_metric.get("field") or not value_metric.get("agg"):
@@ -1492,6 +1575,8 @@ class PlanningAgent:
             window_weeks = statistics.get("window_weeks")
             reference_date = statistics.get("reference_date")
             if not isinstance(time_field, str) or not time_field:
+                return False
+            if time_field not in dims:
                 return False
             if not isinstance(value_metric, dict):
                 return False
@@ -1513,6 +1598,8 @@ class PlanningAgent:
             reference_date = statistics.get("reference_date")
             if not isinstance(time_field, str) or not time_field:
                 return False
+            if time_field not in dims:
+                return False
             if not isinstance(value_metric, dict):
                 return False
             if not value_metric.get("field") or not value_metric.get("agg"):
@@ -1526,6 +1613,8 @@ class PlanningAgent:
             value_metric = statistics.get("value_metric")
             reference_date = statistics.get("reference_date")
             if not isinstance(time_field, str) or not time_field:
+                return False
+            if time_field not in dims:
                 return False
             if not isinstance(value_metric, dict):
                 return False
@@ -1654,6 +1743,7 @@ class PlanningAgent:
                 "weekly_decline_ratio",
                 "daily_threshold_count",
                 "daily_mean",
+                "daily_mean_median",
                 "daily_percentile_rank",
                 "weekend_percentile_rank",
                 "weekday_percentile_rank",
@@ -1685,6 +1775,10 @@ class PlanningAgent:
                 if isinstance(wdays, str) and wdays.isdigit():
                     statistics["window_days"] = int(wdays)
             elif stype == "daily_mean":
+                wdays = statistics.get("window_days")
+                if isinstance(wdays, str) and wdays.isdigit():
+                    statistics["window_days"] = int(wdays)
+            elif stype == "daily_mean_median":
                 wdays = statistics.get("window_days")
                 if isinstance(wdays, str) and wdays.isdigit():
                     statistics["window_days"] = int(wdays)
@@ -1807,6 +1901,14 @@ class PlanningAgent:
                         weekend_plan["question"] = q
                         finalized.append(weekend_plan)
                         continue
+            if self._is_daily_mean_median_query(q) and not has_compare:
+                stat = normalized.get("statistics")
+                if not isinstance(stat, dict) or stat.get("type") != "daily_mean_median":
+                    summary_plan = self._build_daily_mean_median_plan(q)
+                    if isinstance(summary_plan, dict) and summary_plan:
+                        summary_plan["question"] = q
+                        finalized.append(summary_plan)
+                        continue
             if self._is_daily_mean_query(q):
                 stat = normalized.get("statistics")
                 if has_compare and any(k in q for k in ["昨天", "昨日"]):
@@ -1920,7 +2022,7 @@ class PlanningAgent:
                     "- 若用户出现 CM0/CM1/CM2/DM0/DM1 这类二级车型分组，需使用 business_definition.series_group_logic（product_name 逻辑）生成 filters，禁止把这些 token 直接写到 series 字段。\n"
                     "- 注意：LS6/L6 是 series 车系，不要按 model_series_mapping 展开成 CM0/CM1/CM2 或 DM0/DM1；只有当用户明确问 CM0/CM1/CM2/DM0/DM1 时才使用 series_group_logic。\n"
                     "- 同比/年同比用 comparison.type=yoy；周环比用 comparison.type=wow；日环比（如“昨天日环比”）用 comparison.type=dod。\n"
-                    "- 时序统计类按类型输出 statistics：weekly_decline_ratio / daily_threshold_count / daily_mean / daily_percentile_rank / weekend_percentile_rank / weekday_percentile_rank，并补齐各自必需字段。\n"
+                    "- 时序统计类按类型输出 statistics：weekly_decline_ratio / daily_threshold_count / daily_mean / daily_mean_median / daily_percentile_rank / weekend_percentile_rank / weekday_percentile_rank，并补齐各自必需字段。\n"
                     "- 若用户问“近 N 个周的周日/周一..周日 处于什么水平”，使用 weekday_percentile_rank，并设置 window_weeks=N、weekdays=[对应周内日]、reference_date=昨天/今天。\n"
                 ),
             },
@@ -2082,6 +2184,11 @@ class PlanningAgent:
                 if isinstance(p, dict) and p:
                     p["question"] = part
                     return [p]
+            if intent == "statistics" and self._is_daily_mean_median_query(part) and not any(k in part for k in ["对比", "相比", "对照", "较"]):
+                p = self._build_daily_mean_median_plan(part)
+                if isinstance(p, dict) and p:
+                    p["question"] = part
+                    return [p]
             if intent == "statistics" and self._is_daily_mean_query(part) and not any(k in part for k in ["对比", "相比", "对照", "较"]):
                 p = self._build_daily_mean_plan(part)
                 if isinstance(p, dict) and p:
@@ -2163,6 +2270,18 @@ class PlanningAgent:
             )
             if not has_non_null:
                 filters.append({"field": time_field, "op": "!=", "value": None})
+        statistics = plan.get("statistics")
+        if isinstance(statistics, dict) and statistics.get("type") in {
+            "weekly_decline_ratio",
+            "daily_threshold_count",
+            "daily_mean",
+            "daily_mean_median",
+            "daily_percentile_rank",
+            "weekend_percentile_rank",
+            "weekday_percentile_rank",
+        }:
+            if isinstance(time_field, str) and time_field:
+                plan["dimensions"] = [time_field]
         if metric_defaults and (metric_defaults.get("metric") or {}).get("alias") == "在营门店数":
             if isinstance(time, dict):
                 time["field"] = "order_create_date"

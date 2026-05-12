@@ -27,6 +27,11 @@ Answer（LLM 总结 或 Grounded Summary）
 - 时间窗口统一按左闭右开 `[start, end)` 执行过滤（`>= start` 且 `< end`）。
 - 数据执行尽量保持确定性：LLM 做规划与总结，代码做查询与计算。
 
+## 更新日志
+
+- 2026-05-12
+  - 拆分“时间窗口 / 统计函数 / 维度（分组）”职责：时间窗口解析收敛到 `operators/time_windows.py`，统计计算收敛到 `tools/statistics_tool.py`，维度分组由 `agent/planner.py` 统一产出（统计类计划强制按时间字段分组）。
+
 ## 数据与 Schema
 
 本项目默认在本地加载 CSV/Parquet 数据集：

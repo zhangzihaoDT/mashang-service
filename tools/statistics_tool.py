@@ -10,6 +10,8 @@ class StatisticsTool:
             return self._daily_threshold_count(request, input_df)
         if stat_type == "daily_mean":
             return self._daily_mean(request, input_df)
+        if stat_type == "daily_mean_median":
+            return self._daily_mean_median(request, input_df)
         if stat_type == "daily_percentile_rank":
             return self._daily_percentile_rank(request, input_df)
         if stat_type == "weekend_percentile_rank":
@@ -320,6 +322,86 @@ class StatisticsTool:
             "window_days": int(window_days),
             "metric_alias": metric_alias,
             "daily_mean": daily_mean,
+            "total_days": total_days,
+            "daily_rows": daily_rows,
+        }
+
+    @staticmethod
+    def _daily_mean_median(request: dict, input_df: pd.DataFrame) -> dict | str:
+        if input_df is None or input_df.empty:
+            return "统计分析无可用数据。"
+
+        time_field = request.get("time_field")
+        metric_alias = request.get("metric_alias")
+        if not isinstance(time_field, str) or not time_field:
+            return "统计分析缺少必要参数: time_field"
+        if not isinstance(metric_alias, str) or not metric_alias:
+            return "统计分析缺少必要参数: metric_alias"
+        if time_field not in input_df.columns:
+            return f"统计分析缺少时间列: {time_field}"
+        if metric_alias not in input_df.columns:
+            return f"统计分析缺少指标列: {metric_alias}"
+
+        window_days = request.get("window_days")
+        if isinstance(window_days, str) and window_days.isdigit():
+            window_days = int(window_days)
+        if not isinstance(window_days, int) or window_days <= 0:
+            window_days = 30
+
+        df = input_df.copy()
+        raw_time = df[time_field].astype(str).str.strip()
+        parsed_cn = pd.to_datetime(raw_time, errors="coerce", format="%Y年%m月%d日")
+        if float(parsed_cn.notna().mean()) >= 0.8:
+            df[time_field] = parsed_cn
+        else:
+            df[time_field] = pd.to_datetime(raw_time, errors="coerce")
+        df = df[df[time_field].notna()]
+        if df.empty:
+            return "统计分析时间列无法解析为日期。"
+
+        df["date"] = df[time_field].dt.normalize()
+        grouped = (
+            df.groupby("date", as_index=False)
+            .agg({metric_alias: "sum"})
+            .sort_values("date")
+            .tail(window_days)
+            .reset_index(drop=True)
+        )
+        if grouped.empty:
+            return "统计分析在窗口内无可用日期数据。"
+
+        grouped["value"] = grouped[metric_alias].astype(float)
+        date_start_raw = request.get("date_start")
+        date_end_raw = request.get("date_end")
+        date_start = pd.to_datetime(date_start_raw, errors="coerce") if isinstance(date_start_raw, str) else pd.NaT
+        date_end = pd.to_datetime(date_end_raw, errors="coerce") if isinstance(date_end_raw, str) else pd.NaT
+        if pd.notna(date_start) and pd.notna(date_end) and pd.Timestamp(date_end) > pd.Timestamp(date_start):
+            start = pd.Timestamp(date_start).normalize()
+            end = pd.Timestamp(date_end).normalize()
+        else:
+            end = pd.Timestamp(grouped["date"].max()).normalize() + pd.Timedelta(days=1)
+            start = end - pd.Timedelta(days=int(window_days))
+        date_index = pd.date_range(start=start, end=end - pd.Timedelta(days=1), freq="D")
+        series = grouped.set_index("date")["value"].reindex(date_index, fill_value=0.0)
+        total_days = int(len(series))
+        daily_mean = float(series.mean()) if total_days else 0.0
+        daily_median = float(series.median()) if total_days else 0.0
+
+        daily_rows: list[dict] = []
+        for date, value in series.items():
+            daily_rows.append(
+                {
+                    "date": pd.Timestamp(date).strftime("%Y-%m-%d"),
+                    "value": float(value),
+                }
+            )
+
+        return {
+            "type": "daily_mean_median",
+            "window_days": int(window_days),
+            "metric_alias": metric_alias,
+            "daily_mean": daily_mean,
+            "daily_median": daily_median,
             "total_days": total_days,
             "daily_rows": daily_rows,
         }

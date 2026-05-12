@@ -103,7 +103,7 @@ def resolve_recent_window(user_query: str, today: datetime.date) -> tuple[str, s
     q = (user_query or "").replace(" ", "")
     if not q:
         return None
-    m = re.search(r"近(?P<n>\d+|[一二两三四五六七八九十])(?P<u>日|天|周)", q)
+    m = re.search(r"近(?P<n>\d+|[一二两三四五六七八九十])(?P<u>日|天|周|月|年)", q)
     if not m:
         return None
     n = _parse_int_token(m.group("n"))
@@ -113,6 +113,10 @@ def resolve_recent_window(user_query: str, today: datetime.date) -> tuple[str, s
     days = n
     if unit == "周":
         days = n * 7
+    elif unit == "月":
+        days = n * 30
+    elif unit == "年":
+        days = n * 365
     start = today - datetime.timedelta(days=days)
     end = today
     if end <= start:

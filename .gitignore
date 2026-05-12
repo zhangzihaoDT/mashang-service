@@ -4,6 +4,7 @@
 .env.*
 
 /dataset/
+/daemon/
 
 __pycache__/
 *.py[cod]

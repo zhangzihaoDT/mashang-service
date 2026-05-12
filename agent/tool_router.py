@@ -241,14 +241,6 @@ def _execute_single_plan(
                 window_days = 30
             query_time_start = time_start
             query_time_end = time_end
-            try:
-                if time_end:
-                    end_day = datetime.date.fromisoformat(str(time_end)[:10])
-                    start_day = end_day - datetime.timedelta(days=max(int(window_days), 1))
-                    query_time_start = start_day.isoformat()
-                    query_time_end = end_day.isoformat()
-            except Exception:
-                pass
             query_plan = {
                 "dataset": dataset,
                 "metrics": [
@@ -258,7 +250,7 @@ def _execute_single_plan(
                         "alias": metric_alias,
                     }
                 ],
-                "dimensions": ([time_field] if time_field else []),
+                "dimensions": dimensions,
                 "filters": [
                     *filters_without_time,
                     {"field": time_field, "op": ">=", "value": query_time_start},
@@ -313,14 +305,6 @@ def _execute_single_plan(
                 window_days = 30
             query_time_start = time_start
             query_time_end = time_end
-            try:
-                if time_end:
-                    end_day = datetime.date.fromisoformat(str(time_end)[:10])
-                    start_day = end_day - datetime.timedelta(days=max(int(window_days), 1))
-                    query_time_start = start_day.isoformat()
-                    query_time_end = end_day.isoformat()
-            except Exception:
-                pass
             query_plan = {
                 "dataset": dataset,
                 "metrics": [
@@ -330,7 +314,7 @@ def _execute_single_plan(
                         "alias": metric_alias,
                     }
                 ],
-                "dimensions": ([time_field] if time_field else []),
+                "dimensions": dimensions,
                 "filters": [
                     *filters_without_time,
                     {"field": time_field, "op": ">=", "value": query_time_start},
@@ -364,6 +348,68 @@ def _execute_single_plan(
                         tool_result = statistics_tool.perform_statistics(stat_request, raw_df)
                     except Exception as e:
                         tool_result = {"type": "daily_mean", "error": "statistics_execution_failed", "message": str(e)}
+    elif stats_type == "daily_mean_median" and tool_result is None:
+        execution_meta = {"engine": "statistics", "route": "statistics.daily_mean_median"}
+        print("\n[Thinking] 执行统计型日均/中位数分析...")
+        value_metric = statistics.get("value_metric", {}) if isinstance(statistics, dict) else {}
+        metric_alias = value_metric.get("alias") or metric.get("alias") or "value"
+        if comparison_df is not None:
+            tool_result = {
+                "type": "daily_mean_median",
+                "error": "unsupported_pipeline_input",
+                "message": "daily_mean_median 暂不支持 comparison 联动，请使用单窗口查询。",
+            }
+        else:
+            window_days = statistics.get("window_days") or 30
+            try:
+                window_days = int(window_days)
+            except Exception:
+                window_days = 30
+            query_time_start = time_start
+            query_time_end = time_end
+            query_plan = {
+                "dataset": dataset,
+                "metrics": [
+                    {
+                        "field": value_metric.get("field") or metric.get("field"),
+                        "agg": value_metric.get("agg") or metric.get("agg") or "count",
+                        "alias": metric_alias,
+                    }
+                ],
+                "dimensions": dimensions,
+                "filters": [
+                    *filters_without_time,
+                    {"field": time_field, "op": ">=", "value": query_time_start},
+                    {"field": time_field, "op": "<", "value": query_time_end},
+                ]
+                if time_field and query_time_start and query_time_end
+                else filters_without_time,
+            }
+            raw_df = query_tool.execute_analysis_df(query_plan)
+            if isinstance(raw_df, str):
+                tool_result = raw_df
+            else:
+                daily_missing_cols = [c for c in [statistics.get("time_field") or time_field, metric_alias] if c not in raw_df.columns]
+                if daily_missing_cols:
+                    print(f"  ⚠️  daily_mean_median 输入列缺失，返回结构化错误: {daily_missing_cols}")
+                    tool_result = {
+                        "type": "daily_mean_median",
+                        "error": "invalid_statistics_input_schema",
+                        "missing_columns": daily_missing_cols,
+                    }
+                else:
+                    stat_request = {
+                        "type": "daily_mean_median",
+                        "time_field": statistics.get("time_field") or time_field,
+                        "window_days": window_days,
+                        "date_start": query_time_start,
+                        "date_end": query_time_end,
+                        "metric_alias": metric_alias,
+                    }
+                    try:
+                        tool_result = statistics_tool.perform_statistics(stat_request, raw_df)
+                    except Exception as e:
+                        tool_result = {"type": "daily_mean_median", "error": "statistics_execution_failed", "message": str(e)}
     elif stats_type == "daily_percentile_rank" and tool_result is None:
         execution_meta = {"engine": "statistics", "route": "statistics.daily_percentile_rank"}
         print("\n[Thinking] 执行统计型分位分析...")
@@ -383,14 +429,6 @@ def _execute_single_plan(
                 window_days = 30
             query_time_start = time_start
             query_time_end = time_end
-            try:
-                if time_end:
-                    end_day = datetime.date.fromisoformat(str(time_end)[:10])
-                    start_day = end_day - datetime.timedelta(days=max(int(window_days), 1))
-                    query_time_start = start_day.isoformat()
-                    query_time_end = end_day.isoformat()
-            except Exception:
-                pass
             query_plan = {
                 "dataset": dataset,
                 "metrics": [
@@ -400,7 +438,7 @@ def _execute_single_plan(
                         "alias": metric_alias,
                     }
                 ],
-                "dimensions": ([time_field] if time_field else []),
+                "dimensions": dimensions,
                 "filters": [
                     *filters_without_time,
                     {"field": time_field, "op": ">=", "value": query_time_start},
@@ -455,14 +493,6 @@ def _execute_single_plan(
                 window_weekends = 10
             query_time_start = time_start
             query_time_end = time_end
-            try:
-                if time_end:
-                    end_day = datetime.date.fromisoformat(str(time_end)[:10])
-                    start_day = end_day - datetime.timedelta(days=(max(int(window_weekends), 1) * 7 + 7))
-                    query_time_start = start_day.isoformat()
-                    query_time_end = end_day.isoformat()
-            except Exception:
-                pass
             query_plan = {
                 "dataset": dataset,
                 "metrics": [
@@ -472,7 +502,7 @@ def _execute_single_plan(
                         "alias": metric_alias,
                     }
                 ],
-                "dimensions": ([time_field] if time_field else []),
+                "dimensions": dimensions,
                 "filters": [
                     *filters_without_time,
                     {"field": time_field, "op": ">=", "value": query_time_start},
@@ -526,14 +556,6 @@ def _execute_single_plan(
             weekdays = statistics.get("weekdays") if isinstance(statistics, dict) else None
             query_time_start = time_start
             query_time_end = time_end
-            try:
-                if time_end:
-                    end_day = datetime.date.fromisoformat(str(time_end)[:10])
-                    start_day = end_day - datetime.timedelta(days=(max(int(window_weeks), 1) * 7 + 7))
-                    query_time_start = start_day.isoformat()
-                    query_time_end = end_day.isoformat()
-            except Exception:
-                pass
             query_plan = {
                 "dataset": dataset,
                 "metrics": [
@@ -543,7 +565,7 @@ def _execute_single_plan(
                         "alias": metric_alias,
                     }
                 ],
-                "dimensions": ([time_field] if time_field else []),
+                "dimensions": dimensions,
                 "filters": [
                     *filters_without_time,
                     {"field": time_field, "op": ">=", "value": query_time_start},
