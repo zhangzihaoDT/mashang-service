@@ -410,6 +410,67 @@ def _execute_single_plan(
                         tool_result = statistics_tool.perform_statistics(stat_request, raw_df)
                     except Exception as e:
                         tool_result = {"type": "daily_mean_median", "error": "statistics_execution_failed", "message": str(e)}
+    elif stats_type == "category_share" and tool_result is None:
+        execution_meta = {"engine": "statistics", "route": "statistics.category_share"}
+        print("\n[Thinking] 执行分类占比分析...")
+        metric_alias = metric.get("alias") or metric.get("business_name") or "value"
+        if isinstance(statistics, dict):
+            metric_alias = (statistics.get("value_metric") or {}).get("alias") or metric_alias
+        if comparison_df is not None:
+            tool_result = {
+                "type": "category_share",
+                "error": "unsupported_pipeline_input",
+                "message": "category_share 暂不支持 comparison 联动，请使用单窗口查询。",
+            }
+        else:
+            category_field = None
+            if isinstance(statistics, dict):
+                category_field = statistics.get("category_field")
+            if not category_field and isinstance(dimensions, list) and len(dimensions) == 1:
+                category_field = dimensions[0]
+            top_k = None
+            if isinstance(statistics, dict):
+                top_k = statistics.get("top_k")
+            query_plan = {
+                "dataset": dataset,
+                "metrics": [
+                    {
+                        "field": metric.get("field"),
+                        "agg": metric.get("agg") or "count",
+                        "alias": metric_alias,
+                    }
+                ],
+                "dimensions": dimensions,
+                "filters": [
+                    *filters_without_time,
+                    {"field": time_field, "op": ">=", "value": time_start},
+                    {"field": time_field, "op": "<", "value": time_end},
+                ]
+                if time_field and time_start and time_end
+                else filters_without_time,
+            }
+            raw_df = query_tool.execute_analysis_df(query_plan)
+            if isinstance(raw_df, str):
+                tool_result = raw_df
+            else:
+                missing_cols = [c for c in [category_field, metric_alias] if c and c not in raw_df.columns]
+                if missing_cols:
+                    tool_result = {
+                        "type": "category_share",
+                        "error": "invalid_statistics_input_schema",
+                        "missing_columns": missing_cols,
+                    }
+                else:
+                    stat_request = {
+                        "type": "category_share",
+                        "category_field": category_field,
+                        "value_field": metric_alias,
+                        "top_k": top_k,
+                    }
+                    try:
+                        tool_result = statistics_tool.perform_statistics(stat_request, raw_df)
+                    except Exception as e:
+                        tool_result = {"type": "category_share", "error": "statistics_execution_failed", "message": str(e)}
     elif stats_type == "daily_percentile_rank" and tool_result is None:
         execution_meta = {"engine": "statistics", "route": "statistics.daily_percentile_rank"}
         print("\n[Thinking] 执行统计型分位分析...")

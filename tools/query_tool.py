@@ -400,6 +400,14 @@ class QueryTool:
                 valid_dims = [d for d in dimensions if d in df.columns]
                 if valid_dims:
                     try:
+                        for dim in valid_dims:
+                            try:
+                                col = df[dim]
+                                if pd.api.types.is_datetime64_any_dtype(col) or pd.api.types.is_numeric_dtype(col):
+                                    continue
+                                df[dim] = col.fillna("未知")
+                            except Exception:
+                                continue
                         result_df = df.groupby(valid_dims).agg(agg_dict).reset_index()
                     except Exception as e:
                         return f"聚合计算失败: {e}"

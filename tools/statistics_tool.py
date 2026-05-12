@@ -12,6 +12,8 @@ class StatisticsTool:
             return self._daily_mean(request, input_df)
         if stat_type == "daily_mean_median":
             return self._daily_mean_median(request, input_df)
+        if stat_type == "category_share":
+            return self._category_share(request, input_df)
         if stat_type == "daily_percentile_rank":
             return self._daily_percentile_rank(request, input_df)
         if stat_type == "weekend_percentile_rank":
@@ -405,6 +407,63 @@ class StatisticsTool:
             "total_days": total_days,
             "daily_rows": daily_rows,
         }
+
+    @staticmethod
+    def _category_share(request: dict, input_df: pd.DataFrame) -> dict | str:
+        if input_df is None or input_df.empty:
+            return "统计分析无可用数据。"
+        category_field = request.get("category_field")
+        value_field = request.get("value_field")
+        if not isinstance(category_field, str) or not category_field:
+            return "统计分析缺少必要参数: category_field"
+        if not isinstance(value_field, str) or not value_field:
+            return "统计分析缺少必要参数: value_field"
+        if category_field not in input_df.columns:
+            return f"统计分析缺少必要列: {category_field}"
+        if value_field not in input_df.columns:
+            return f"统计分析缺少必要列: {value_field}"
+
+        top_k = request.get("top_k")
+        if top_k is None or top_k == "":
+            top_k = None
+        else:
+            try:
+                top_k = int(top_k)
+            except Exception:
+                top_k = None
+            if isinstance(top_k, int) and top_k <= 0:
+                top_k = None
+
+        df = input_df[[category_field, value_field]].copy()
+        df[value_field] = pd.to_numeric(df[value_field], errors="coerce").fillna(0.0)
+        grouped = df.groupby(category_field, as_index=False).agg({value_field: "sum"})
+        grouped = grouped.sort_values(value_field, ascending=False).reset_index(drop=True)
+        total = float(grouped[value_field].sum())
+        if total <= 0:
+            rows: list[dict] = []
+            for _, r in grouped.iterrows():
+                rows.append({"category": str(r[category_field]), "count": float(r[value_field]), "share": 0.0})
+            return {"type": "category_share", "total": 0.0, "rows": rows}
+
+        grouped["share"] = grouped[value_field] / total
+        rows: list[dict] = []
+        if isinstance(top_k, int):
+            top = grouped.head(top_k)
+            for _, r in top.iterrows():
+                rows.append({"category": str(r[category_field]), "count": float(r[value_field]), "share": float(r["share"])})
+            others_count = float(grouped.iloc[top_k:][value_field].sum()) if len(grouped) > top_k else 0.0
+            others_share = float(others_count / total) if total > 0 else 0.0
+            return {
+                "type": "category_share",
+                "top_k": int(top_k),
+                "total": float(total),
+                "rows": rows,
+                "others": {"count": others_count, "share": others_share},
+            }
+
+        for _, r in grouped.iterrows():
+            rows.append({"category": str(r[category_field]), "count": float(r[value_field]), "share": float(r["share"])})
+        return {"type": "category_share", "total": float(total), "rows": rows}
 
     @staticmethod
     def _daily_percentile_rank(request: dict, input_df: pd.DataFrame) -> dict | str:

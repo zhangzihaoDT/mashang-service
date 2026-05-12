@@ -89,6 +89,7 @@ PLANNING_TOOL_SCHEMA = {
                                             "daily_threshold_count",
                                             "daily_mean",
                                             "daily_mean_median",
+                                        "category_share",
                                             "daily_percentile_rank",
                                             "weekend_percentile_rank",
                                             "weekday_percentile_rank",
@@ -98,6 +99,8 @@ PLANNING_TOOL_SCHEMA = {
                                     "window_weeks": {"type": "integer"},
                                     "window_days": {"type": "integer"},
                                     "window_weekends": {"type": "integer"},
+                                    "category_field": {"type": "string"},
+                                    "top_k": {"type": "integer"},
                                     "reference_date": {"type": "string"},
                                     "weekdays": {"type": "array", "items": {"type": "integer"}},
                                     "op": {"type": "string", "enum": [">", ">=", "<", "<=", "==", "!="]},
@@ -191,6 +194,8 @@ class PlanningAgent:
         "store_name": ["按门店", "分门店", "门店分别", "store"],
         "store_city": ["按门店城市", "分门店城市", "门店城市分别", "store city", "store_city"],
         "license_city": ["按上牌城市", "分上牌城市", "上牌城市分别", "license city", "license_city"],
+        "order_gender": ["订单用户", "订单性别", "订单性别占比", "订单用户性别", "购车人性别", "用户性别", "order_gender"],
+        "owner_gender": ["按性别", "分性别", "性别", "男女", "男女比例", "男女占比", "性别占比", "车主", "车主性别", "owner_gender"],
     }
 
     def __init__(self, client: OpenAI, schema_md: str, business_definition: str):
@@ -915,6 +920,8 @@ class PlanningAgent:
                     kk = k.strip()
                     if not kk or kk == "其他":
                         continue
+                    if not re.fullmatch(r"(?:CM|DM)\d+", kk.upper()):
+                        continue
                     candidates.append(kk.upper())
         if not candidates:
             candidates = ["CM0", "CM1", "CM2", "DM0", "DM1"]
@@ -1017,6 +1024,113 @@ class PlanningAgent:
             "options": ["门店城市", "上牌城市", "两者都要"],
             "context": {"city": city, "original_question": original_question},
         }
+
+    @staticmethod
+    def _resolve_gender_dimension(user_query: str) -> str | None:
+        q = (user_query or "").replace(" ", "")
+        if not q:
+            return None
+        if any(k in q for k in ["订单用户", "订单性别", "订单性别占比", "订单用户性别", "购车人性别", "下单用户性别", "锁单用户性别", "order_gender"]):
+            return "order_gender"
+        if any(k in q for k in ["车主性别", "owner_gender", "车主"]):
+            return "owner_gender"
+        if any(k in q for k in ["性别", "男女", "男女比例", "男女占比", "性别占比"]):
+            return "owner_gender"
+        return None
+
+    @staticmethod
+    def _parse_top_k_token(user_query: str) -> int | None:
+        q = (user_query or "").upper().replace(" ", "")
+        m = re.search(r"TOP\s*(\d{1,3})", q)
+        if not m:
+            m = re.search(r"前\s*(\d{1,3})\s*个", (user_query or "").replace(" ", ""))
+        if not m:
+            m = re.search(r"TOP(\d{1,3})", q)
+        if not m:
+            return None
+        try:
+            v = int(m.group(1))
+            return v if 1 <= v <= 200 else None
+        except Exception:
+            return None
+
+    @staticmethod
+    def _resolve_category_share_dimension(user_query: str) -> str | None:
+        q = (user_query or "").replace(" ", "")
+        if not q:
+            return None
+        if any(k in q for k in ["线级", "一线", "新一线", "二线", "三线"]):
+            return None
+        if any(k in q.upper() for k in ["TOP"]) and any(k in q for k in ["省", "省份"]):
+            return None
+        gender_dim = PlanningAgent._resolve_gender_dimension(q)
+        if gender_dim:
+            return gender_dim
+        if any(k in q for k in ["订单类型", "order_type"]):
+            return "order_type"
+        if any(k in q for k in ["尾款支付方式", "支付方式", "final_payment_way"]):
+            return "final_payment_way"
+        if any(k in q for k in ["金融产品", "finance_product"]):
+            return "finance_product"
+        return None
+
+    @staticmethod
+    def _is_category_share_query(user_query: str) -> bool:
+        q = (user_query or "").replace(" ", "")
+        if not q:
+            return False
+        if not any(k in q for k in ["占比", "比例", "分布"]):
+            return False
+        return PlanningAgent._resolve_category_share_dimension(q) is not None
+
+    def _build_category_share_plan(self, user_query: str) -> dict | None:
+        today = datetime.date.today()
+        metric_defaults = self._metric_defaults(user_query)
+        if not metric_defaults:
+            return None
+        dim = PlanningAgent._resolve_category_share_dimension(user_query)
+        if not dim:
+            return None
+        time_window = self._parse_time_window_with_business(user_query, today) or (
+            (today - datetime.timedelta(days=1)).isoformat(),
+            today.isoformat(),
+        )
+        start, end = time_window
+        time_field = metric_defaults["time_field"]
+        metric_obj = metric_defaults.get("metric") if isinstance(metric_defaults.get("metric"), dict) else {}
+        non_null_field = metric_defaults.get("non_null_field")
+        filters: list[dict] = []
+        if non_null_field:
+            filters = PlanningAgent._append_filter(filters, {"field": non_null_field, "op": "!=", "value": None})
+        series_tokens = PlanningAgent._infer_series_tokens(user_query)
+        if len(series_tokens) == 1:
+            filters = PlanningAgent._append_filter(filters, {"field": "series", "op": "==", "value": series_tokens[0]})
+        top_k = PlanningAgent._parse_top_k_token(user_query)
+        plan = {
+            "dataset": metric_defaults["dataset"],
+            "metric": {
+                "field": metric_obj.get("field") or "order_number",
+                "agg": metric_obj.get("agg") or "count",
+                "alias": metric_obj.get("alias") or "value",
+                "business_name": metric_obj.get("business_name") or metric_obj.get("alias") or "value",
+            },
+            "time": {"field": time_field, "start": start, "end": end},
+            "dimensions": [dim],
+            "filters": filters,
+            "comparison": {"type": "none"},
+            "statistics": {
+                "type": "category_share",
+                "category_field": dim,
+                "top_k": top_k,
+                "value_metric": {
+                    "field": metric_obj.get("field") or "order_number",
+                    "agg": metric_obj.get("agg") or "count",
+                    "alias": metric_obj.get("alias") or "value",
+                },
+            },
+            "question": "分类占比",
+        }
+        return self._fill_defaults(self._normalize_plan(plan), user_query)
 
     @staticmethod
     def _append_filter(filters: list[dict], new_filter: dict) -> list[dict]:
@@ -1568,6 +1682,20 @@ class PlanningAgent:
                 return False
             return True
 
+        if stype == "category_share":
+            category_field = statistics.get("category_field")
+            if not isinstance(category_field, str) or not category_field:
+                return False
+            if category_field not in dims:
+                return False
+            top_k = statistics.get("top_k")
+            if top_k is not None:
+                try:
+                    _ = int(top_k)
+                except Exception:
+                    return False
+            return True
+
         if stype == "weekday_percentile_rank":
             time_field = statistics.get("time_field") or (plan.get("time", {}) or {}).get("field")
             value_metric = statistics.get("value_metric")
@@ -1744,6 +1872,7 @@ class PlanningAgent:
                 "daily_threshold_count",
                 "daily_mean",
                 "daily_mean_median",
+                "category_share",
                 "daily_percentile_rank",
                 "weekend_percentile_rank",
                 "weekday_percentile_rank",
@@ -1782,6 +1911,10 @@ class PlanningAgent:
                 wdays = statistics.get("window_days")
                 if isinstance(wdays, str) and wdays.isdigit():
                     statistics["window_days"] = int(wdays)
+            elif stype == "category_share":
+                top_k = statistics.get("top_k")
+                if isinstance(top_k, str) and top_k.isdigit():
+                    statistics["top_k"] = int(top_k)
             elif stype == "daily_percentile_rank":
                 wdays = statistics.get("window_days")
                 if isinstance(wdays, str) and wdays.isdigit():
@@ -1883,49 +2016,58 @@ class PlanningAgent:
             if not isinstance(plan, dict) or not plan:
                 continue
             q = plan.get("question") or user_query
-            normalized = self._fill_defaults(self._normalize_plan(plan), q)
-            has_compare = any(k in q for k in ["对比", "相比", "对照", "较"])
-            if self._is_weekday_percentile_rank_query(q):
+            semantic_q = user_query if q == user_query else f"{user_query}；{q}"
+            normalized = self._fill_defaults(self._normalize_plan(plan), semantic_q)
+            has_compare = any(k in semantic_q for k in ["对比", "相比", "对照", "较"])
+            if self._is_weekday_percentile_rank_query(semantic_q):
                 stat = normalized.get("statistics")
                 if not isinstance(stat, dict) or stat.get("type") != "weekday_percentile_rank":
-                    weekday_plan = self._build_weekday_percentile_rank_plan(q)
+                    weekday_plan = self._build_weekday_percentile_rank_plan(semantic_q)
                     if isinstance(weekday_plan, dict) and weekday_plan:
                         weekday_plan["question"] = q
                         finalized.append(weekday_plan)
                         continue
-            if self._is_weekend_percentile_rank_query(q):
+            if self._is_weekend_percentile_rank_query(semantic_q):
                 stat = normalized.get("statistics")
                 if not isinstance(stat, dict) or stat.get("type") != "weekend_percentile_rank":
-                    weekend_plan = self._build_weekend_percentile_rank_plan(q)
+                    weekend_plan = self._build_weekend_percentile_rank_plan(semantic_q)
                     if isinstance(weekend_plan, dict) and weekend_plan:
                         weekend_plan["question"] = q
                         finalized.append(weekend_plan)
                         continue
-            if self._is_daily_mean_median_query(q) and not has_compare:
+            if self._is_category_share_query(semantic_q) and not has_compare:
+                stat = normalized.get("statistics")
+                if not isinstance(stat, dict) or stat.get("type") != "category_share":
+                    share_plan = self._build_category_share_plan(semantic_q)
+                    if isinstance(share_plan, dict) and share_plan:
+                        share_plan["question"] = q
+                        finalized.append(share_plan)
+                        continue
+            if self._is_daily_mean_median_query(semantic_q) and not has_compare:
                 stat = normalized.get("statistics")
                 if not isinstance(stat, dict) or stat.get("type") != "daily_mean_median":
-                    summary_plan = self._build_daily_mean_median_plan(q)
+                    summary_plan = self._build_daily_mean_median_plan(semantic_q)
                     if isinstance(summary_plan, dict) and summary_plan:
                         summary_plan["question"] = q
                         finalized.append(summary_plan)
                         continue
-            if self._is_daily_mean_query(q):
+            if self._is_daily_mean_query(semantic_q):
                 stat = normalized.get("statistics")
-                if has_compare and any(k in q for k in ["昨天", "昨日"]):
-                    pair = self._build_yesterday_vs_range_daily_mean_plans(q)
+                if has_compare and any(k in semantic_q for k in ["昨天", "昨日"]):
+                    pair = self._build_yesterday_vs_range_daily_mean_plans(semantic_q)
                     if isinstance(pair, list) and pair:
                         finalized.extend(pair)
                         continue
                 if not has_compare and (not isinstance(stat, dict) or stat.get("type") != "daily_mean"):
-                    daily_plan = self._build_daily_mean_plan(q)
+                    daily_plan = self._build_daily_mean_plan(semantic_q)
                     if isinstance(daily_plan, dict) and daily_plan:
                         daily_plan["question"] = q
                         finalized.append(daily_plan)
                         continue
-            if self._is_daily_percentile_rank_query(q):
+            if self._is_daily_percentile_rank_query(semantic_q):
                 stat = normalized.get("statistics")
                 if not isinstance(stat, dict) or stat.get("type") != "daily_percentile_rank":
-                    percentile_plan = self._build_daily_percentile_rank_plan(q)
+                    percentile_plan = self._build_daily_percentile_rank_plan(semantic_q)
                     if isinstance(percentile_plan, dict) and percentile_plan:
                         percentile_plan["question"] = q
                         finalized.append(percentile_plan)
@@ -2021,6 +2163,8 @@ class PlanningAgent:
                     "- 用户出现系列词（L6/L7/LS6/LS7/LS8/LS9）时，filters 应补充 series 约束。\n"
                     "- 若用户出现 CM0/CM1/CM2/DM0/DM1 这类二级车型分组，需使用 business_definition.series_group_logic（product_name 逻辑）生成 filters，禁止把这些 token 直接写到 series 字段。\n"
                     "- 注意：LS6/L6 是 series 车系，不要按 model_series_mapping 展开成 CM0/CM1/CM2 或 DM0/DM1；只有当用户明确问 CM0/CM1/CM2/DM0/DM1 时才使用 series_group_logic。\n"
+                    "- 用户问性别/男女比例时，默认使用 owner_gender 作为分组维度；只有明确提到订单用户/订单性别时才使用 order_gender。\n"
+                    "- 城市线级划分（如一线/新一线/二线/三线及以下/线级分布占比）优先走固定算子；默认使用 license_city，除非用户明确指定门店城市(store_city)。\n"
                     "- 同比/年同比用 comparison.type=yoy；周环比用 comparison.type=wow；日环比（如“昨天日环比”）用 comparison.type=dod。\n"
                     "- 时序统计类按类型输出 statistics：weekly_decline_ratio / daily_threshold_count / daily_mean / daily_mean_median / daily_percentile_rank / weekend_percentile_rank / weekday_percentile_rank，并补齐各自必需字段。\n"
                     "- 若用户问“近 N 个周的周日/周一..周日 处于什么水平”，使用 weekday_percentile_rank，并设置 window_weeks=N、weekdays=[对应周内日]、reference_date=昨天/今天。\n"
@@ -2304,6 +2448,7 @@ class PlanningAgent:
         if not dims:
             q = (user_query or "").replace(" ", "")
             dataset = str(plan.get("dataset") or "")
+            gender_dimension = self._resolve_gender_dimension(q)
             want_series = self._contains_any_token(q, self._DIMENSION_SYNONYMS.get("series") or [])
             want_product = self._contains_any_token(q, self._DIMENSION_SYNONYMS.get("product_name") or [])
             want_region = self._contains_any_token(q, self._DIMENSION_SYNONYMS.get("parent_region_name") or [])
@@ -2311,7 +2456,9 @@ class PlanningAgent:
             want_store_city = self._contains_any_token(q, self._DIMENSION_SYNONYMS.get("store_city") or [])
             want_license_city = self._contains_any_token(q, self._DIMENSION_SYNONYMS.get("license_city") or [])
             if dataset == "order_data":
-                if want_product:
+                if gender_dimension:
+                    plan["dimensions"] = [gender_dimension]
+                elif want_product:
                     plan["dimensions"] = ["product_name"]
                 elif want_series:
                     plan["dimensions"] = ["series"]
