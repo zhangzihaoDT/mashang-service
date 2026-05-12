@@ -21,4 +21,6 @@ coverage.xml
 /.query_agent_memory.json
 /agent/.query_agent_memory.json
 
+/logs/
+
 /HTML/工信部新车/images/

@@ -30,6 +30,65 @@ def _parse_int_token(token: str) -> int | None:
     return None
 
 
+def extract_listed_dates(user_query: str, today: datetime.date) -> list[str]:
+    import re
+
+    q = (user_query or "").replace(" ", "")
+    if not q:
+        return []
+
+    dates: list[datetime.date] = []
+    for raw in re.findall(r"\d{4}-\d{2}-\d{2}", q):
+        try:
+            dates.append(datetime.date.fromisoformat(raw))
+        except Exception:
+            continue
+
+    mds = list(
+        re.finditer(
+            r"(?:(?P<y>\d{2,4})\s*年\s*)?(?P<m>\d{1,2})\s*月\s*(?P<d>\d{1,2})\s*[日号]?",
+            q,
+        )
+    )
+    if mds:
+        def _normalize_year(y: str) -> int | None:
+            if not y:
+                return None
+            y = str(y).strip()
+            if not y.isdigit():
+                return None
+            if len(y) == 2:
+                return 2000 + int(y)
+            if len(y) == 4:
+                return int(y)
+            return None
+
+        base_year = None
+        for mt in mds:
+            yv = _normalize_year(mt.group("y"))
+            if yv:
+                base_year = yv
+                break
+        if base_year is None:
+            base_year = today.year
+
+        for mt in mds:
+            yv = _normalize_year(mt.group("y")) or base_year
+            try:
+                mv = int(mt.group("m"))
+                dv = int(mt.group("d"))
+            except Exception:
+                continue
+            try:
+                dates.append(datetime.date(int(yv), int(mv), int(dv)))
+            except Exception:
+                continue
+
+    if not dates:
+        return []
+    uniq = sorted(set(dates))
+    return [d.isoformat() for d in uniq]
+
 def parse_until_end_date(user_query: str) -> datetime.date | None:
     import re
 
@@ -128,6 +187,16 @@ def resolve_time_window(user_query: str, today: datetime.date, business_definiti
     window = resolve_listed_since_window(user_query=user_query, today=today, business_definition=business_definition)
     if window:
         return window
+    dates = extract_listed_dates(user_query=user_query, today=today)
+    if len(dates) >= 2:
+        try:
+            start_day = datetime.date.fromisoformat(dates[0])
+            end_day = datetime.date.fromisoformat(dates[-1])
+            end_open = end_day + datetime.timedelta(days=1)
+            if end_open > start_day:
+                return (start_day.isoformat(), end_open.isoformat())
+        except Exception:
+            pass
     window = resolve_recent_window(user_query=user_query, today=today)
     if window:
         return window

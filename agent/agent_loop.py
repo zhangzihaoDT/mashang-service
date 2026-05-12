@@ -2,6 +2,7 @@ import json
 import os
 import sys
 import datetime
+import time
 
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -202,6 +203,38 @@ def _trim_text(text: str, limit: int = 1800) -> str:
     return text[:limit] + "...(truncated)"
 
 
+def _normalize_question_text(text: str) -> str:
+    raw = str(text or "").replace("\n", " ").strip()
+    if not raw:
+        return ""
+    while "  " in raw:
+        raw = raw.replace("  ", " ")
+    return raw
+
+
+def _query_log_path() -> str:
+    root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    logs_dir = os.path.join(root_dir, "logs")
+    try:
+        os.makedirs(logs_dir, exist_ok=True)
+    except Exception:
+        pass
+    return os.path.join(logs_dir, "query_log.jsonl")
+
+
+def _append_query_log(entry: dict) -> None:
+    if not os.getenv("ENABLE_QUERY_LOG"):
+        return
+    if not isinstance(entry, dict) or not entry:
+        return
+    path = _query_log_path()
+    try:
+        with open(path, "a", encoding="utf-8") as f:
+            f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+    except Exception:
+        return
+
+
 def _generate_final_answer(client: OpenAI, user_query: str, result_blocks: list[str]) -> str:
     print("\n[Thinking] AnalysisAgent 正在生成最终回答...")
     joined_results = '\n\n---\n\n'.join(result_blocks)
@@ -282,6 +315,17 @@ def _format_execution_meta(meta: dict) -> str:
 
 
 def run_main_agent(user_query: str) -> str:
+    started_at = time.time()
+    original_question = str(user_query or "")
+    query_log_steps: list[dict] = []
+    query_log_clarification: dict | None = None
+    query_rounds = 0
+    query_rounds_max = 5
+    dsl_rounds = 0
+    final_execution_success = False
+    final_answer_text = ""
+    final_error_text = ""
+
     print(f"\n{'='*60}")
     print(f"用户提问: '{user_query}'")
 
@@ -301,117 +345,189 @@ def run_main_agent(user_query: str) -> str:
     elif memory.get("pending") and _looks_like_new_question(user_query):
         _clear_pending(memory)
 
-    api_key = _load_api_key()
-    if not api_key:
-        return "Error: Could not find API key in .env"
+    try:
+        api_key = _load_api_key()
+        if not api_key:
+            final_error_text = "Error: Could not find API key in .env"
+            return final_error_text
 
-    client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
-    query_tool = QueryTool(
-        data_path_file=str(DATA_PATH_FILE),
-        schema_dir=str(SCHEMA_DIR),
-    )
+        client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
+        query_tool = QueryTool(
+            data_path_file=str(DATA_PATH_FILE),
+            schema_dir=str(SCHEMA_DIR),
+        )
 
-    schema_context = query_tool._schema_context()
+        schema_context = query_tool._schema_context()
 
-    planning_agent = PlanningAgent(
-        client=client,
-        schema_md=schema_context.get("schema_md", ""),
-        business_definition=schema_context.get("business_definition", ""),
-    )
-    comparison_tool = ComparisonTool(query_tool=query_tool)
-    statistics_tool = StatisticsTool()
-    state = AgentRuntimeState(goal=user_query, max_steps=5)
-    goal_time_info = planning_agent.infer_goal_time_window(user_query, datetime.date.today())
-    goal_time_window = goal_time_info.get("window") if isinstance(goal_time_info, dict) else None
-    goal_time_window_confidence = goal_time_info.get("confidence") if isinstance(goal_time_info, dict) else None
-    finish_grounded_answer = ""
-    while not state.done and state.iteration < state.max_steps:
-        print(f"\n=== Loop Step {state.iteration + 1}/{state.max_steps} ===")
-        action = plan_runtime_action(client, state)
-        print(f"[Loop] action={json.dumps(action, ensure_ascii=False)}")
+        planning_agent = PlanningAgent(
+            client=client,
+            schema_md=schema_context.get("schema_md", ""),
+            business_definition=schema_context.get("business_definition", ""),
+        )
+        comparison_tool = ComparisonTool(query_tool=query_tool)
+        statistics_tool = StatisticsTool()
+        state = AgentRuntimeState(goal=user_query, max_steps=5)
+        query_rounds_max = int(state.max_steps or 5)
+        goal_time_info = planning_agent.infer_goal_time_window(user_query, datetime.date.today())
+        goal_time_window = goal_time_info.get("window") if isinstance(goal_time_info, dict) else None
+        goal_time_window_confidence = goal_time_info.get("confidence") if isinstance(goal_time_info, dict) else None
+        finish_grounded_answer = ""
+        while not state.done and state.iteration < state.max_steps:
+            query_rounds += 1
+            print(f"\n=== Loop Step {state.iteration + 1}/{state.max_steps} ===")
+            action = plan_runtime_action(client, state)
+            print(f"[Loop] action={json.dumps(action, ensure_ascii=False)}")
 
-        if action.get("action") == "run_dsl":
-            action_query = str(action.get("query") or state.goal).strip() or state.goal
-            step_result = run_dsl_step(
-                action_query=action_query,
-                planning_agent=planning_agent,
-                query_tool=query_tool,
-                comparison_tool=comparison_tool,
-                statistics_tool=statistics_tool,
-                memory_context={
-                    "facts": state.facts,
-                    "working_memory": state.working_memory,
-                    "execution_log": memory.get("execution_log") if isinstance(memory, dict) else [],
-                    "goal_time_window": goal_time_window,
-                    "goal_time_window_confidence": goal_time_window_confidence,
-                },
-            )
-            status = step_result.get("status")
-            if status == "clarification":
-                clarification = step_result.get("clarification") or {}
-                _save_memory(
-                    {
-                        "pending": {
-                            "type": "clarification",
-                            "clarification": clarification,
-                            "original_question": step_result.get("original_question") or action_query,
-                            "created_at": datetime.datetime.now().isoformat(timespec="seconds"),
+            if action.get("action") == "run_dsl":
+                dsl_rounds += 1
+                action_query = str(action.get("query") or state.goal).strip() or state.goal
+                step_result = run_dsl_step(
+                    action_query=action_query,
+                    planning_agent=planning_agent,
+                    query_tool=query_tool,
+                    comparison_tool=comparison_tool,
+                    statistics_tool=statistics_tool,
+                    memory_context={
+                        "facts": state.facts,
+                        "working_memory": state.working_memory,
+                        "execution_log": memory.get("execution_log") if isinstance(memory, dict) else [],
+                        "goal_time_window": goal_time_window,
+                        "goal_time_window_confidence": goal_time_window_confidence,
+                    },
+                )
+                status = step_result.get("status")
+                if isinstance(step_result.get("plan"), dict):
+                    query_log_steps.append(
+                        {
+                            "action_query": action_query,
+                            "plan": step_result.get("plan") or {},
+                            "execution_meta": step_result.get("execution_meta") or {},
+                            "status": status,
                         }
+                    )
+                if status == "clarification":
+                    clarification = step_result.get("clarification") or {}
+                    query_log_clarification = clarification if isinstance(clarification, dict) else {}
+                    _save_memory(
+                        {
+                            "pending": {
+                                "type": "clarification",
+                                "clarification": clarification,
+                                "original_question": step_result.get("original_question") or action_query,
+                                "created_at": datetime.datetime.now().isoformat(timespec="seconds"),
+                            }
+                        }
+                    )
+                    opts = clarification.get("options") or []
+                    opts_text = " / ".join([str(o) for o in opts]) if isinstance(opts, list) else ""
+                    qtext = clarification.get("question") or "需要你补充信息后才能继续。"
+                    state.add_step(action, _trim_text(f"clarification: {qtext}"))
+                    if opts_text:
+                        final_answer_text = f"{qtext}\n请选择其一回复：{opts_text}"
+                        return final_answer_text
+                    final_answer_text = str(qtext)
+                    return final_answer_text
+                if status == "error":
+                    err_text = str(step_result.get("message") or "执行失败")
+                    state.add_step(action, _trim_text(err_text))
+                    state.done = True
+                    break
+
+                step_blocks = step_result.get("result_blocks") or []
+                execution_meta = step_result.get("execution_meta") or {}
+                print(f"[Loop] execution={_format_execution_meta(execution_meta)}")
+                state.result_blocks.extend(step_blocks)
+                merged_step_text = "\n\n---\n\n".join(step_blocks)
+                state.add_step(action, _trim_text(merged_step_text))
+                memory_update = extract_memory_update(client=client, state=state, last_result=merged_step_text)
+                apply_memory_update(state, memory_update)
+            elif action.get("action") == "finish":
+                combined_results = "\n\n---\n\n".join([_extract_result_text(b) for b in state.result_blocks if b]) if state.result_blocks else ""
+                last_block = f"执行结果:\n{combined_results}" if combined_results else ""
+                finish_grounded_answer = _generate_finish_summary(
+                    client=client,
+                    user_query=user_query,
+                    action=action,
+                    last_result_block=last_block,
+                )
+                state.add_step(action, _trim_text(str(action.get("analysis") or "完成")))
+                state.done = True
+                print("[Loop] execution=finish::answer_summarization")
+            else:
+                state.add_step(action, "未知 action，终止。")
+                state.done = True
+
+        if not state.result_blocks:
+            fallback = "未产出可用查询结果。"
+            if state.history:
+                last_result = str(state.history[-1].get("result") or "")
+                if last_result:
+                    fallback = last_result
+            print(f"\n{'='*60}")
+            final_answer_text = fallback
+            return fallback
+
+        if finish_grounded_answer:
+            print(f"\n{'='*60}")
+            final_execution_success = True
+            final_answer_text = finish_grounded_answer
+            return finish_grounded_answer
+
+        final_text = _generate_final_answer(client=client, user_query=user_query, result_blocks=state.result_blocks)
+        print(f"\n{'='*60}")
+        final_execution_success = True
+        final_answer_text = final_text
+        return final_text
+    except Exception as e:
+        final_error_text = f"系统处理出错: {str(e)}"
+        raise
+    finally:
+        latency_ms = int(max(0.0, (time.time() - started_at) * 1000.0))
+        used_dataset = None
+        used_metrics: list[dict] = []
+        used_dimensions: list[str] = []
+        for s in query_log_steps:
+            plan = s.get("plan") if isinstance(s, dict) else None
+            if not isinstance(plan, dict):
+                continue
+            if used_dataset is None and plan.get("dataset"):
+                used_dataset = str(plan.get("dataset"))
+            metric = plan.get("metric")
+            if isinstance(metric, dict) and metric.get("field") and metric.get("agg"):
+                used_metrics.append(
+                    {
+                        "field": metric.get("field"),
+                        "agg": metric.get("agg"),
+                        "alias": metric.get("alias") or metric.get("business_name") or "",
                     }
                 )
-                opts = clarification.get("options") or []
-                opts_text = " / ".join([str(o) for o in opts]) if isinstance(opts, list) else ""
-                qtext = clarification.get("question") or "需要你补充信息后才能继续。"
-                state.add_step(action, _trim_text(f"clarification: {qtext}"))
-                if opts_text:
-                    return f"{qtext}\n请选择其一回复：{opts_text}"
-                return str(qtext)
-            if status == "error":
-                err_text = str(step_result.get("message") or "执行失败")
-                state.add_step(action, _trim_text(err_text))
-                state.done = True
-                break
-
-            step_blocks = step_result.get("result_blocks") or []
-            execution_meta = step_result.get("execution_meta") or {}
-            print(f"[Loop] execution={_format_execution_meta(execution_meta)}")
-            state.result_blocks.extend(step_blocks)
-            merged_step_text = "\n\n---\n\n".join(step_blocks)
-            state.add_step(action, _trim_text(merged_step_text))
-            memory_update = extract_memory_update(client=client, state=state, last_result=merged_step_text)
-            apply_memory_update(state, memory_update)
-        elif action.get("action") == "finish":
-            combined_results = "\n\n---\n\n".join([_extract_result_text(b) for b in state.result_blocks if b]) if state.result_blocks else ""
-            last_block = f"执行结果:\n{combined_results}" if combined_results else ""
-            finish_grounded_answer = _generate_finish_summary(
-                client=client,
-                user_query=user_query,
-                action=action,
-                last_result_block=last_block,
-            )
-            state.add_step(action, _trim_text(str(action.get("analysis") or "完成")))
-            state.done = True
-            print("[Loop] execution=finish::answer_summarization")
-        else:
-            state.add_step(action, "未知 action，终止。")
-            state.done = True
-
-    if not state.result_blocks:
-        fallback = "未产出可用查询结果。"
-        if state.history:
-            last_result = str(state.history[-1].get("result") or "")
-            if last_result:
-                fallback = last_result
-        print(f"\n{'='*60}")
-        return fallback
-
-    if finish_grounded_answer:
-        print(f"\n{'='*60}")
-        return finish_grounded_answer
-
-    final_text = _generate_final_answer(client=client, user_query=user_query, result_blocks=state.result_blocks)
-    print(f"\n{'='*60}")
-    return final_text
+            dims = plan.get("dimensions")
+            if isinstance(dims, list):
+                for d in dims:
+                    if isinstance(d, str) and d:
+                        used_dimensions.append(d)
+        used_dimensions = list(dict.fromkeys(used_dimensions))
+        normalized_question = _normalize_question_text(user_query)
+        result_summary = _trim_text(final_answer_text or final_error_text, limit=1800)
+        entry = {
+            "timestamp": datetime.datetime.now().isoformat(timespec="seconds"),
+            "question": _normalize_question_text(original_question),
+            "normalized_question": normalized_question,
+            "query_rounds": query_rounds,
+            "query_rounds_max": query_rounds_max,
+            "dsl_rounds": dsl_rounds,
+            "generated_plan": {"steps": query_log_steps},
+            "clarification": query_log_clarification or {},
+            "execution_success": bool(final_execution_success),
+            "used_dataset": used_dataset or "",
+            "used_metrics": used_metrics,
+            "used_dimensions": used_dimensions,
+            "latency_ms": latency_ms,
+            "token_usage": {},
+            "result_summary": result_summary,
+            "user_feedback": None,
+        }
+        _append_query_log(entry)
 
 
 if __name__ == "__main__":

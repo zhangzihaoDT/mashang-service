@@ -12,7 +12,7 @@
 ```text
 用户问题
   ↓
-PlanningAgent（LLM 规划）→ 生成 plan（dataset/metric/time/filters/dimensions/comparison/statistics/fast_path）
+PlanningAgent（LLM 规划）→ 生成 plan / clarification（dataset/metric/time/filters/dimensions/comparison/statistics/fast_path）
   ↓
 Tool Router（确定性路由与执行）
   - Fast Path：纯计算/闲聊/ISO 周数等轻量直算
@@ -20,12 +20,41 @@ Tool Router（确定性路由与执行）
   - Query / Comparison / Statistics：通用 DSL 执行与统计后处理
   ↓
 Answer（LLM 总结 或 Grounded Summary）
+
+旁路（强烈建议落盘）：
+  Query Log（规划与执行日志，append-only）
+    ↓
+  Question Pattern → DSL Prior（planner examples），用于提升规划稳定性（而不是长文本聊天记忆）
 ```
 
 关键约定：
 
 - 时间窗口统一按左闭右开 `[start, end)` 执行过滤（`>= start` 且 `< end`）。
 - 数据执行尽量保持确定性：LLM 做规划与总结，代码做查询与计算。
+
+## Query Log（规划与执行日志）
+
+最优先记录的不是“用户偏好”，而是“问题模式（Question Pattern）”：例如“最近 7 天 + 某车型 + 区域趋势”、或“当前值 vs 近 30 日日均”。这些模式最终会沉淀为 DSL Prior（planner examples），用于提升 PlanningAgent 的稳定性与可控性。
+
+推荐日志结构（建议按 JSONL / SQLite / ClickHouse 这类 append-only 存储）：
+
+```json
+{
+  "timestamp": "...",
+  "question": "...",
+  "normalized_question": "...",
+  "generated_plan": {},
+  "clarification": {},
+  "execution_success": true,
+  "used_dataset": "...",
+  "used_metrics": [],
+  "used_dimensions": [],
+  "latency_ms": 1200,
+  "token_usage": {},
+  "result_summary": "...",
+  "user_feedback": null
+}
+```
 
 ## 更新日志
 

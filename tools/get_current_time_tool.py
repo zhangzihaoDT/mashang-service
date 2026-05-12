@@ -1,14 +1,11 @@
 from datetime import datetime
 
-# 3. 定义工具函数 (Define Tool Function)
-# 这是一个简单的获取当前时间的函数
+
 def get_current_time(format="%Y-%m-%d %H:%M:%S"):
-    """Get the current time."""
     return datetime.now().strftime(format)
 
-# 4. 定义工具描述 (Define Tool Schema)
-# 告诉模型有哪些工具可用，以及如何调用它们
-TIME_TOOL_SCHEMA = {
+
+GET_CURRENT_TIME_TOOL_SCHEMA = {
     "type": "function",
     "function": {
         "name": "get_current_time",
@@ -25,3 +22,6 @@ TIME_TOOL_SCHEMA = {
         },
     },
 }
+
+
+TIME_TOOL_SCHEMA = GET_CURRENT_TIME_TOOL_SCHEMA

@@ -1,9 +1,11 @@
 import json
 import datetime
 import re
+import copy
 
 from agent.planner import PlanningAgent
 from operators import run_registered_operator
+from operators.time_windows import extract_listed_dates
 from tools import ComparisonTool, FastPathTool, QueryTool, StatisticsTool
 
 
@@ -745,7 +747,7 @@ def run_dsl_step(
             if last_q and last_q != action_query:
                 fallback = planning_agent._rule_based_plan(action_query)
                 if isinstance(fallback, dict) and fallback:
-                    plan = fallback
+                    plan = planning_agent._fill_defaults(planning_agent._normalize_plan(fallback), action_query)
                     try:
                         plan_fingerprint_payload = {
                             "dataset": plan.get("dataset"),
@@ -823,7 +825,54 @@ def run_dsl_step(
                 "status": "clarification",
                 "clarification": clarification,
                 "original_question": plan.get("question") or action_query,
+                "plan": plan,
             }
+
+    if (
+        isinstance(plan.get("comparison"), dict)
+        and plan["comparison"].get("type") == "none"
+        and not (isinstance(plan.get("statistics"), dict) and plan["statistics"].get("type"))
+        and not (isinstance(plan.get("fast_path"), dict) and plan["fast_path"].get("type"))
+    ):
+        dates = extract_listed_dates(action_query, datetime.date.today())
+        time = plan.get("time")
+        if isinstance(time, dict) and isinstance(time.get("field"), str) and time.get("field"):
+            time_field = time.get("field")
+        else:
+            time_field = None
+        dims = plan.get("dimensions")
+        has_time_dim = isinstance(dims, list) and isinstance(time_field, str) and time_field in dims
+        has_other_dim = isinstance(dims, list) and any(isinstance(d, str) and d and d != time_field for d in dims)
+        if len(dates) >= 2 and len(dates) <= 10 and has_time_dim and has_other_dim:
+            result_blocks: list[str] = []
+            for day in dates:
+                try:
+                    day_date = datetime.date.fromisoformat(day)
+                except Exception:
+                    continue
+                sub_plan = copy.deepcopy(plan)
+                if isinstance(sub_plan.get("time"), dict):
+                    sub_plan["time"]["start"] = day_date.isoformat()
+                    sub_plan["time"]["end"] = (day_date + datetime.timedelta(days=1)).isoformat()
+                if isinstance(sub_plan.get("dimensions"), list) and time_field:
+                    sub_plan["dimensions"] = [d for d in sub_plan["dimensions"] if d != time_field]
+                sub_plan["question"] = f"{action_query}（{day_date.isoformat()}）"
+                execution = _execute_single_plan(
+                    plan=sub_plan,
+                    user_query=sub_plan["question"],
+                    query_tool=query_tool,
+                    comparison_tool=comparison_tool,
+                    statistics_tool=statistics_tool,
+                    memory_context=memory_context,
+                )
+                result_blocks.append(execution["block"])
+            if result_blocks:
+                return {
+                    "status": "ok",
+                    "result_blocks": result_blocks,
+                    "execution_meta": {"engine": "dsl", "route": "query_tool.multi_date_split", "subqueries": len(result_blocks)},
+                    "plan": plan,
+                }
 
     execution = _execute_single_plan(
         plan=plan,
@@ -837,4 +886,5 @@ def run_dsl_step(
         "status": "ok",
         "result_blocks": [execution["block"]],
         "execution_meta": execution.get("execution_meta") or {},
+        "plan": plan,
     }

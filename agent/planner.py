@@ -189,7 +189,7 @@ class PlanningAgent:
     }
     _DIMENSION_SYNONYMS = {
         "product_name": ["按产品名称", "分产品名称", "产品名称", "按产品", "分产品", "产品名", "product name", "product_name", "productname"],
-        "series": ["分车型", "按车型", "车型分别", "分车系", "按车系", "车系分别", "按系列", "分系列", "series"],
+        "series": ["分车型", "按车型", "车型分别", "车型", "分车系", "按车系", "车系分别", "车系", "按系列", "分系列", "系列", "series"],
         "parent_region_name": ["按大区", "分大区", "大区分别", "region"],
         "store_name": ["按门店", "分门店", "门店分别", "store"],
         "store_city": ["按门店城市", "分门店城市", "门店城市分别", "store city", "store_city"],
@@ -2448,7 +2448,11 @@ class PlanningAgent:
         if not dims:
             q = (user_query or "").replace(" ", "")
             dataset = str(plan.get("dataset") or "")
+            time_field = (plan.get("time", {}) or {}).get("field")
             gender_dimension = self._resolve_gender_dimension(q)
+            want_date = any(k in q for k in ["按日期", "按天", "按日", "每天", "逐日", "分日期", "日维度", "日别"])
+            if not want_date:
+                want_date = len(re.findall(r"\d{4}-\d{2}-\d{2}", q)) >= 2 or len(re.findall(r"\d{1,2}月\d{1,2}[日号]?", q)) >= 2
             want_series = self._contains_any_token(q, self._DIMENSION_SYNONYMS.get("series") or [])
             want_product = self._contains_any_token(q, self._DIMENSION_SYNONYMS.get("product_name") or [])
             want_region = self._contains_any_token(q, self._DIMENSION_SYNONYMS.get("parent_region_name") or [])
@@ -2456,7 +2460,24 @@ class PlanningAgent:
             want_store_city = self._contains_any_token(q, self._DIMENSION_SYNONYMS.get("store_city") or [])
             want_license_city = self._contains_any_token(q, self._DIMENSION_SYNONYMS.get("license_city") or [])
             if dataset == "order_data":
-                if gender_dimension:
+                if want_date and isinstance(time_field, str) and time_field:
+                    inferred_dims = [time_field]
+                    if gender_dimension:
+                        inferred_dims.append(gender_dimension)
+                    elif want_product:
+                        inferred_dims.append("product_name")
+                    elif want_series:
+                        inferred_dims.append("series")
+                    elif want_store_city:
+                        inferred_dims.append("store_city")
+                    elif want_license_city:
+                        inferred_dims.append("license_city")
+                    elif want_store:
+                        inferred_dims.append("store_name")
+                    elif want_region:
+                        inferred_dims.append("parent_region_name")
+                    plan["dimensions"] = inferred_dims
+                elif gender_dimension:
                     plan["dimensions"] = [gender_dimension]
                 elif want_product:
                     plan["dimensions"] = ["product_name"]
