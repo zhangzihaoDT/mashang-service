@@ -7,19 +7,50 @@
 - [main.py](main.py)：命令行单次问答（适合调试/本地跑）。
 - [feishu_bot.py](feishu_bot.py)：飞书机器人（WebSocket 长连接收消息，调用同一套 Agent 能力回复）。
 
-## 总体架构
+## 输入到输出链路
 
 ```text
 用户问题
   ↓
-PlanningAgent（LLM 规划）→ 生成 plan / clarification（dataset/metric/time/filters/dimensions/comparison/statistics/fast_path）
+入口层（main.py / feishu_bot.py）
   ↓
-Tool Router（确定性路由与执行）
-  - Fast Path：纯计算/闲聊/ISO 周数等轻量直算
+Agent Loop（agent/agent_loop.py）
+  - 读取 State（question / loop / planning / results / memory / final）
+  - 决定下一步 action：run_dsl 或 finish（Evidence-driven Runtime Decision）
+  - 最多循环 5 步，避免重复查询
+  ↓
+PlanningAgent（agent/planner.py）
+  - 将自然语言问题转成 plan / clarification
+  - 产出 dataset / metric / time / filters / dimensions / comparison / statistics / fast_path
+  ↓
+Tool Router（agent/tool_router.py，确定性路由与执行）
+  - Fast Path：纯计算 / 闲聊 / ISO 周数等轻量直算
   - Operators：强口径固定算子（避免指标口径漂移）
   - Query / Comparison / Statistics：通用 DSL 执行与统计后处理
   ↓
-Answer（LLM 总结 或 Grounded Summary）
+Structured Result Blocks（结构化执行结果）
+  - legacy blocks：LLM-readable 文本块（用于总结）
+  - structured_blocks：machine-readable 结构化块（用于可追溯与规则判断）
+  - 回写到 Agent State.results，供下一轮 loop 继续决策
+  ↓
+Fact Extraction（agent/memory_extractor.py）
+  - 从 structured_blocks 抽取/生成 Normalized Facts（每条 fact 带 source.block_id）
+  - 信息不足写入 missing_info（而不是编造）
+  ↓
+Evidence Contract（agent/runtime_decision.py）
+  - 不同分析意图需要的证据集合（required_fact_types）
+  - 例如 diagnosis 必须满足 trend_summary + contribution_summary
+  ↓
+Runtime Decision（agent/runtime_decision.py）
+  - 基于 Evidence Contract + Facts 决定继续 run_dsl 或 finish
+  ↓
+Answer / Summarization
+  - 信息不足：回到 Agent Loop 继续 run_dsl
+  - 信息充分：生成 grounded summary / 最终自然语言答案
+  ↓
+Agent 返回
+  - 命令行打印答案
+  - 或由飞书 Bot 回传消息
 
 旁路（强烈建议落盘）：
   Query Log（规划与执行日志，append-only）
@@ -27,10 +58,34 @@ Answer（LLM 总结 或 Grounded Summary）
   Question Pattern → DSL Prior（planner examples），用于提升规划稳定性（而不是长文本聊天记忆）
 ```
 
+可以把这条链路简化理解为：
+
+```text
+input（用户提问）
+  -> Agent Loop 判断要不要查
+  -> PlanningAgent 生成 DSL
+  -> Tool Router 执行工具
+  -> 得到结构化结果
+  -> Agent 总结
+  -> output（Agent 返回）
+```
+
 关键约定：
 
 - 时间窗口统一按左闭右开 `[start, end)` 执行过滤（`>= start` 且 `< end`）。
 - 数据执行尽量保持确定性：LLM 做规划与总结，代码做查询与计算。
+- Agent 的真实输出不是“直接查一次就回答”，而是“循环判断是否已拿到足够事实，再决定继续查还是结束回答”。
+
+## v0.4：Evidence-driven Agentic BI Runtime
+
+本版本开始，主循环从“LLM 判断是否结束”升级为“Evidence-driven Runtime”：
+
+- State-first：所有中间态都落入 AgentState
+- Structured Result Blocks：每次工具执行生成可追溯的 structured_blocks（同时保留 legacy 文本 blocks）
+- Fact Extraction：从 structured_blocks 抽取/生成 Normalized Facts，并强制携带 source.block_id
+- Evidence Contract：用 required_fact_types 固化“什么证据足够回答”
+- Runtime Decision：先走规则判定是否 finish；不足时再继续 run_dsl
+- Grounded Summary：总结层只基于证据输出，并避免将贡献拆解直接表述为因果原因
 
 ## Query Log（规划与执行日志）
 
@@ -60,6 +115,10 @@ Answer（LLM 总结 或 Grounded Summary）
 
 - 2026-05-12
   - 拆分“时间窗口 / 统计函数 / 维度（分组）”职责：时间窗口解析收敛到 `operators/time_windows.py`，统计计算收敛到 `tools/statistics_tool.py`，维度分组由 `agent/planner.py` 统一产出（统计类计划强制按时间字段分组）。
+- 2026-05-13（v0.4）
+  - 引入 Evidence-driven Runtime：structured_blocks → facts → evidence contract → runtime decision
+  - 新增 `statistics.contribution_summary` 用于诊断类问题的贡献拆解（描述性证据）
+  - Facts 升级为 Normalized Facts（values / conclusion / source）
 
 ## 数据与 Schema
 
@@ -84,6 +143,9 @@ Answer（LLM 总结 或 Grounded Summary）
   - `weekly_decline_ratio`：周序列环比 + 下降周数占比
   - `daily_threshold_count`：近 N 日阈值计数（支持 `> >= < <= == !=`）
   - `daily_mean`：近 N 日（或指定窗）按日聚合后的日均
+  - `daily_mean_median`：近 N 日（或指定窗）按日聚合后的日均 + 中位数
+  - `trend_summary`：近 N 日趋势摘要（方向、斜率、波动、连续涨跌、峰谷值等）
+  - `contribution_summary`：贡献拆解摘要（baseline vs target，描述性证据）
   - `daily_percentile_rank`：参考日在近 N 日分布中的分位
   - `weekend_percentile_rank`：参考周末在近 N 个周末分布中的分位
   - `weekday_percentile_rank`：参考“某个星期几”在近 N 次该 weekday 分布中的分位
@@ -143,7 +205,8 @@ python3 feishu_bot.py
 │   ├── planner.py          # PlanningAgent：NL → plan（规划 DSL）
 │   ├── schema.py           # schema/data_path 等加载约定
 │   ├── tool_router.py      # 路由与编排（fast_path/operator/comparison/statistics/query）
-│   ├── state.py            # 运行时状态（history/facts/working_memory/result_blocks）
+│   ├── runtime_decision.py # Evidence Contract + Runtime Decision（should_continue）
+│   ├── state.py            # 运行时状态（question/loop/planning/results/memory/final）
 │   ├── memory_extractor.py # 对话记忆抽取与更新
 │   └── llm_config.py       # DeepSeek 模型名配置
 ├── tools/                 # 确定性执行工具（Query/Comparison/Statistics/FastPath）

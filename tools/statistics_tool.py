@@ -12,6 +12,10 @@ class StatisticsTool:
             return self._daily_mean(request, input_df)
         if stat_type == "daily_mean_median":
             return self._daily_mean_median(request, input_df)
+        if stat_type == "trend_summary":
+            return self._trend_summary(request, input_df)
+        if stat_type == "contribution_summary":
+            return self._contribution_summary(request, input_df)
         if stat_type == "category_share":
             return self._category_share(request, input_df)
         if stat_type == "daily_percentile_rank":
@@ -94,6 +98,107 @@ class StatisticsTool:
         if not normalized:
             return [4, 5]
         return normalized
+
+    @staticmethod
+    def _coerce_positive_int(value: object, default: int) -> int:
+        try:
+            coerced = int(value)
+        except Exception:
+            return default
+        return coerced if coerced > 0 else default
+
+    @staticmethod
+    def _serialize_number(value: object) -> float | None:
+        if value is None or pd.isna(value):
+            return None
+        try:
+            return float(value)
+        except Exception:
+            return None
+
+    @staticmethod
+    def _prepare_daily_series(
+        input_df: pd.DataFrame,
+        time_field: str,
+        metric_alias: str,
+        window_days: int,
+        date_start_raw: str | None = None,
+        date_end_raw: str | None = None,
+    ) -> pd.DataFrame | str:
+        if time_field not in input_df.columns:
+            return f"统计分析缺少时间列: {time_field}"
+        if metric_alias not in input_df.columns:
+            return f"统计分析缺少指标列: {metric_alias}"
+
+        df = input_df.copy()
+        raw_time = df[time_field].astype(str).str.strip()
+        parsed_cn = pd.to_datetime(raw_time, errors="coerce", format="%Y年%m月%d日")
+        if float(parsed_cn.notna().mean()) >= 0.8:
+            df[time_field] = parsed_cn
+        else:
+            df[time_field] = pd.to_datetime(raw_time, errors="coerce")
+        df = df[df[time_field].notna()]
+        if df.empty:
+            return "统计分析时间列无法解析为日期。"
+
+        df["date"] = df[time_field].dt.normalize()
+        grouped = (
+            df.groupby("date", as_index=False)
+            .agg({metric_alias: "sum"})
+            .sort_values("date")
+            .tail(int(window_days))
+            .reset_index(drop=True)
+        )
+        if grouped.empty:
+            return "统计分析在窗口内无可用日期数据。"
+
+        grouped["value"] = grouped[metric_alias].astype(float)
+        date_start = pd.to_datetime(date_start_raw, errors="coerce") if isinstance(date_start_raw, str) else pd.NaT
+        date_end = pd.to_datetime(date_end_raw, errors="coerce") if isinstance(date_end_raw, str) else pd.NaT
+        if pd.notna(date_start) and pd.notna(date_end) and pd.Timestamp(date_end) > pd.Timestamp(date_start):
+            start = pd.Timestamp(date_start).normalize()
+            end = pd.Timestamp(date_end).normalize()
+        else:
+            end = pd.Timestamp(grouped["date"].max()).normalize() + pd.Timedelta(days=1)
+            start = end - pd.Timedelta(days=int(window_days))
+        date_index = pd.date_range(start=start, end=end - pd.Timedelta(days=1), freq="D")
+        series = grouped.set_index("date")["value"].reindex(date_index, fill_value=0.0)
+        series_df = series.reset_index()
+        series_df.columns = ["date", "value"]
+        return series_df
+
+    @staticmethod
+    def _calculate_linear_slope(values: list[float]) -> float:
+        count = len(values)
+        if count <= 1:
+            return 0.0
+        x_mean = (count - 1) / 2.0
+        y_mean = sum(values) / float(count)
+        numerator = sum((idx - x_mean) * (value - y_mean) for idx, value in enumerate(values))
+        denominator = sum((idx - x_mean) ** 2 for idx in range(count))
+        if denominator == 0:
+            return 0.0
+        return float(numerator / denominator)
+
+    @staticmethod
+    def _current_streak(changes: list[float | None]) -> tuple[str, int]:
+        streak_direction = "flat"
+        streak_length = 0
+        for change in reversed(changes):
+            if change is None or pd.isna(change) or change == 0:
+                if streak_length == 0:
+                    streak_direction = "flat"
+                    streak_length = 1
+                break
+            direction = "up" if change > 0 else "down"
+            if streak_length == 0:
+                streak_direction = direction
+                streak_length = 1
+                continue
+            if direction != streak_direction:
+                break
+            streak_length += 1
+        return streak_direction, streak_length
 
     @staticmethod
     def build_weekly_wow_series(
@@ -406,6 +511,254 @@ class StatisticsTool:
             "daily_median": daily_median,
             "total_days": total_days,
             "daily_rows": daily_rows,
+        }
+
+    @staticmethod
+    def _trend_summary(request: dict, input_df: pd.DataFrame) -> dict | str:
+        if input_df is None or input_df.empty:
+            return "统计分析无可用数据。"
+
+        time_field = request.get("time_field") or request.get("date_col")
+        metric_alias = request.get("metric_alias") or request.get("value_col")
+        if not isinstance(time_field, str) or not time_field:
+            return "统计分析缺少必要参数: time_field"
+        if not isinstance(metric_alias, str) or not metric_alias:
+            return "统计分析缺少必要参数: metric_alias"
+
+        window_days = StatisticsTool._coerce_positive_int(
+            request.get("window_days") or request.get("window"),
+            10,
+        )
+        series_df = StatisticsTool._prepare_daily_series(
+            input_df=input_df,
+            time_field=time_field,
+            metric_alias=metric_alias,
+            window_days=window_days,
+            date_start_raw=request.get("date_start"),
+            date_end_raw=request.get("date_end"),
+        )
+        if isinstance(series_df, str):
+            return series_df
+
+        series_df = series_df.tail(window_days).reset_index(drop=True)
+        series_df["pct_change"] = series_df["value"].pct_change()
+        series_df["pct_change"] = series_df["pct_change"].replace([float("inf"), float("-inf")], pd.NA)
+        series_df["delta"] = series_df["value"].diff()
+
+        values = series_df["value"].astype(float)
+        first = float(values.iloc[0])
+        latest = float(values.iloc[-1])
+        mean_value = float(values.mean())
+        median_value = float(values.median())
+        std_value = float(values.std()) if len(values) > 1 else 0.0
+        cv = None if mean_value == 0 else float(std_value / mean_value)
+        total_change = None if first == 0 else float((latest - first) / first)
+        latest_vs_mean = None if mean_value == 0 else float((latest - mean_value) / mean_value)
+        avg_daily_change = float(series_df["delta"].dropna().mean()) if len(series_df) > 1 else 0.0
+        slope = StatisticsTool._calculate_linear_slope(values.tolist())
+        direction = "flat"
+        if slope > 0:
+            direction = "up"
+        elif slope < 0:
+            direction = "down"
+
+        valid_pct = pd.to_numeric(series_df["pct_change"], errors="coerce").dropna()
+        change_volatility = float(valid_pct.std()) if len(valid_pct) > 1 else 0.0
+        latest_rank = int((values <= latest).sum())
+        latest_percentile_rank = float(latest_rank / len(values)) if len(values) else 0.0
+        if latest_percentile_rank >= 2.0 / 3.0:
+            latest_position = "high"
+        elif latest_percentile_rank <= 1.0 / 3.0:
+            latest_position = "low"
+        else:
+            latest_position = "mid"
+
+        change_labels: list[str] = []
+        for change in series_df["pct_change"].tail(3).tolist():
+            if change is None or pd.isna(change):
+                change_labels.append("flat")
+            elif change > 0:
+                change_labels.append("up")
+            elif change < 0:
+                change_labels.append("down")
+            else:
+                change_labels.append("flat")
+        streak_direction, streak_length = StatisticsTool._current_streak(series_df["delta"].tolist())
+
+        max_idx = values.idxmax()
+        min_idx = values.idxmin()
+        max_row = series_df.loc[max_idx]
+        min_row = series_df.loc[min_idx]
+
+        daily_rows: list[dict] = []
+        for _, row in series_df.iterrows():
+            daily_rows.append(
+                {
+                    "date": pd.Timestamp(row["date"]).strftime("%Y-%m-%d"),
+                    "value": float(row["value"]),
+                    "delta": StatisticsTool._serialize_number(row["delta"]),
+                    "pct_change": StatisticsTool._serialize_number(row["pct_change"]),
+                }
+            )
+
+        return {
+            "type": "trend_summary",
+            "window_days": int(window_days),
+            "metric_alias": metric_alias,
+            "direction": direction,
+            "slope": slope,
+            "first": first,
+            "latest": latest,
+            "mean": mean_value,
+            "median": median_value,
+            "std": std_value,
+            "cv": cv,
+            "total_change": total_change,
+            "latest_vs_mean": latest_vs_mean,
+            "avg_daily_change": avg_daily_change,
+            "change_volatility": change_volatility,
+            "latest_percentile_rank": latest_percentile_rank,
+            "latest_position": latest_position,
+            "streak_direction": streak_direction,
+            "streak_length": streak_length,
+            "recent_direction": change_labels,
+            "max_value": float(max_row["value"]),
+            "max_date": pd.Timestamp(max_row["date"]).strftime("%Y-%m-%d"),
+            "min_value": float(min_row["value"]),
+            "min_date": pd.Timestamp(min_row["date"]).strftime("%Y-%m-%d"),
+            "daily_rows": daily_rows,
+        }
+
+    @staticmethod
+    def _contribution_summary(request: dict, input_df: pd.DataFrame) -> dict | str:
+        if input_df is None or input_df.empty:
+            return "统计分析无可用数据。"
+
+        time_field = request.get("time_field") or request.get("date_col")
+        dimension_field = request.get("dimension_field")
+        metric_alias = request.get("metric_alias") or request.get("value_col")
+        if not isinstance(time_field, str) or not time_field:
+            return "统计分析缺少必要参数: time_field"
+        if not isinstance(dimension_field, str) or not dimension_field:
+            return "统计分析缺少必要参数: dimension_field"
+        if not isinstance(metric_alias, str) or not metric_alias:
+            return "统计分析缺少必要参数: metric_alias"
+        if time_field not in input_df.columns:
+            return f"统计分析缺少时间列: {time_field}"
+        if dimension_field not in input_df.columns:
+            return f"统计分析缺少维度列: {dimension_field}"
+        if metric_alias not in input_df.columns:
+            return f"统计分析缺少指标列: {metric_alias}"
+
+        window_days = StatisticsTool._coerce_positive_int(request.get("window_days") or request.get("window"), 10)
+        top_k = request.get("top_k")
+        if top_k is None or top_k == "":
+            top_k = 10
+        try:
+            top_k = int(top_k)
+        except Exception:
+            top_k = 10
+        if top_k <= 0:
+            top_k = 10
+
+        df = input_df.copy()
+        raw_time = df[time_field].astype(str).str.strip()
+        parsed_cn = pd.to_datetime(raw_time, errors="coerce", format="%Y年%m月%d日")
+        if float(parsed_cn.notna().mean()) >= 0.8:
+            df[time_field] = parsed_cn
+        else:
+            df[time_field] = pd.to_datetime(raw_time, errors="coerce")
+        df = df[df[time_field].notna()]
+        if df.empty:
+            return "统计分析时间列无法解析为日期。"
+
+        df["date"] = df[time_field].dt.normalize()
+        df[metric_alias] = pd.to_numeric(df[metric_alias], errors="coerce").fillna(0.0)
+        grouped = (
+            df.groupby(["date", dimension_field], as_index=False)
+            .agg({metric_alias: "sum"})
+            .sort_values(["date", dimension_field])
+            .reset_index(drop=True)
+        )
+        if grouped.empty:
+            return "统计分析在窗口内无可用数据。"
+
+        date_start_raw = request.get("date_start")
+        date_end_raw = request.get("date_end")
+        date_start = pd.to_datetime(date_start_raw, errors="coerce") if isinstance(date_start_raw, str) else pd.NaT
+        date_end = pd.to_datetime(date_end_raw, errors="coerce") if isinstance(date_end_raw, str) else pd.NaT
+        if pd.notna(date_start) and pd.notna(date_end) and pd.Timestamp(date_end) > pd.Timestamp(date_start):
+            start = pd.Timestamp(date_start).normalize()
+            end = pd.Timestamp(date_end).normalize()
+        else:
+            end = pd.Timestamp(grouped["date"].max()).normalize() + pd.Timedelta(days=1)
+            start = end - pd.Timedelta(days=int(window_days))
+
+        date_index = pd.date_range(start=start, end=end - pd.Timedelta(days=1), freq="D")
+        pivot = (
+            grouped.pivot_table(index="date", columns=dimension_field, values=metric_alias, aggfunc="sum")
+            .reindex(date_index)
+            .fillna(0.0)
+        )
+        if pivot.empty:
+            return "统计分析在窗口内无可用数据。"
+
+        first_date = pd.Timestamp(date_index.min()).normalize()
+        last_date = pd.Timestamp(date_index.max()).normalize()
+        baseline_period = {"start": first_date.strftime("%Y-%m-%d"), "end": (first_date + pd.Timedelta(days=1)).strftime("%Y-%m-%d")}
+        target_period = {"start": last_date.strftime("%Y-%m-%d"), "end": (last_date + pd.Timedelta(days=1)).strftime("%Y-%m-%d")}
+        first_series = pivot.loc[first_date]
+        last_series = pivot.loc[last_date]
+        delta_series = last_series - first_series
+        total_delta = float(delta_series.sum())
+        first_total = float(first_series.sum())
+        last_total = float(last_series.sum())
+
+        rows: list[dict] = []
+        for dim_value, delta in delta_series.items():
+            first_v = float(first_series.get(dim_value, 0.0))
+            last_v = float(last_series.get(dim_value, 0.0))
+            d = float(delta)
+            contribution_share = None if total_delta == 0.0 else float(d / total_delta)
+            rows.append(
+                {
+                    "dimension": str(dim_value),
+                    "first": first_v,
+                    "last": last_v,
+                    "delta": d,
+                    "contribution_share": contribution_share,
+                }
+            )
+
+        if total_delta < 0:
+            rows = sorted(rows, key=lambda r: float(r.get("delta") or 0.0))
+        else:
+            rows = sorted(rows, key=lambda r: float(r.get("delta") or 0.0), reverse=True)
+
+        top_rows = rows[: int(top_k)]
+        others = rows[int(top_k) :]
+        others_delta = float(sum(float(r.get("delta") or 0.0) for r in others))
+        others_share = None if total_delta == 0.0 else float(others_delta / total_delta)
+
+        return {
+            "type": "contribution_summary",
+            "window_days": int(window_days),
+            "time_field": time_field,
+            "dimension_field": dimension_field,
+            "metric_alias": metric_alias,
+            "comparison_method": "first_vs_last",
+            "baseline_period": baseline_period,
+            "target_period": target_period,
+            "start": first_date.strftime("%Y-%m-%d"),
+            "end": (last_date + pd.Timedelta(days=1)).strftime("%Y-%m-%d"),
+            "first_date": first_date.strftime("%Y-%m-%d"),
+            "last_date": last_date.strftime("%Y-%m-%d"),
+            "first_total": first_total,
+            "last_total": last_total,
+            "total_delta": total_delta,
+            "top_k": int(top_k),
+            "rows": top_rows,
+            "others": {"delta": others_delta, "contribution_share": others_share, "count": int(len(others))},
         }
 
     @staticmethod
@@ -784,6 +1137,10 @@ STATISTICS_TOOL_SCHEMA = {
                         "weekly_decline_ratio",
                         "daily_threshold_count",
                         "daily_mean",
+                        "daily_mean_median",
+                        "trend_summary",
+                        "contribution_summary",
+                        "category_share",
                         "daily_percentile_rank",
                         "weekend_percentile_rank",
                         "weekday_percentile_rank",
@@ -800,7 +1157,10 @@ STATISTICS_TOOL_SCHEMA = {
                 "op": {"type": "string", "enum": [">", ">=", "<", "<=", "==", "!="]},
                 "threshold": {"type": "number"},
                 "metric_alias": {"type": "string"},
-                "numerator_alias": {"type": "string"},
+                "category_field": {"type": "string"},
+                "value_field": {"type": "string"},
+                "dimension_field": {"type": "string"},
+                "top_k": {"type": "integer"},
                 "numerator_alias": {"type": "string"},
                 "denominator_alias": {"type": "string"},
             },

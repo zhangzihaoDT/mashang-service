@@ -11,11 +11,14 @@ from agent.llm_config import DEEPSEEK_CHAT_MODEL
 from agent.memory_extractor import apply_memory_update, extract_memory_update
 from agent.planner import PlanningAgent, plan_runtime_action
 from agent.schema import DATA_PATH_FILE, SCHEMA_DIR
-from agent.state import AgentRuntimeState
+from agent.state import AgentState, LoopState, ResultBlock
 from agent.tool_router import run_dsl_step
 from tools import QueryTool, ComparisonTool, StatisticsTool
 
-FINAL_ANSWER_SYSTEM_PROMPT = "你是一个智能数据分析助手。请基于给定的规划 DSL 与执行结果，直接回答用户问题，语言简洁，给出关键数值与同比/环比方向与幅度。"
+FINAL_ANSWER_SYSTEM_PROMPT = (
+    "你是一个智能数据分析助手。请基于给定的规划 DSL 与执行结果，直接回答用户问题，语言简洁，给出关键数值与同比/环比方向与幅度。"
+    "如果执行结果包含 contribution_summary/贡献拆解，只能用描述性证据表述（例如“从贡献拆解看……”），禁止将贡献拆解直接表述为因果原因（禁止使用“原因是/导致/因为”）。"
+)
 
 
 def _load_api_key() -> str | None:
@@ -282,6 +285,7 @@ def _generate_finish_summary(client: OpenAI, user_query: str, action: dict, last
                 "你是严格的数据总结助手。只能基于给定查询结果回答。"
                 "必须给出明确结论、关键数字，并尽量列出明细。"
                 "如果问题是“哪些天/哪些项”，必须输出清单（可分点）。"
+                "如果查询结果包含 contribution_summary/贡献拆解，只能用描述性证据表述（例如“从贡献拆解看……”），禁止将贡献拆解直接表述为因果原因（禁止使用“原因是/导致/因为”）。"
                 "禁止编造、禁止只复述过程。"
             ),
         },
@@ -366,21 +370,21 @@ def run_main_agent(user_query: str) -> str:
         )
         comparison_tool = ComparisonTool(query_tool=query_tool)
         statistics_tool = StatisticsTool()
-        state = AgentRuntimeState(goal=user_query, max_steps=5)
-        query_rounds_max = int(state.max_steps or 5)
+        state = AgentState(question=user_query, normalized_question=_normalize_question_text(user_query), loop=LoopState(max_steps=5))
+        query_rounds_max = int(state.loop.max_steps or 5)
         goal_time_info = planning_agent.infer_goal_time_window(user_query, datetime.date.today())
         goal_time_window = goal_time_info.get("window") if isinstance(goal_time_info, dict) else None
         goal_time_window_confidence = goal_time_info.get("confidence") if isinstance(goal_time_info, dict) else None
         finish_grounded_answer = ""
-        while not state.done and state.iteration < state.max_steps:
+        while not state.loop.done and state.loop.iteration < state.loop.max_steps:
             query_rounds += 1
-            print(f"\n=== Loop Step {state.iteration + 1}/{state.max_steps} ===")
+            print(f"\n=== Loop Step {state.loop.iteration + 1}/{state.loop.max_steps} ===")
             action = plan_runtime_action(client, state)
             print(f"[Loop] action={json.dumps(action, ensure_ascii=False)}")
 
             if action.get("action") == "run_dsl":
                 dsl_rounds += 1
-                action_query = str(action.get("query") or state.goal).strip() or state.goal
+                action_query = str(action.get("query") or state.question).strip() or state.question
                 step_result = run_dsl_step(
                     action_query=action_query,
                     planning_agent=planning_agent,
@@ -388,8 +392,8 @@ def run_main_agent(user_query: str) -> str:
                     comparison_tool=comparison_tool,
                     statistics_tool=statistics_tool,
                     memory_context={
-                        "facts": state.facts,
-                        "working_memory": state.working_memory,
+                        "facts": state.memory.facts,
+                        "working_memory": state.memory.working_memory,
                         "execution_log": memory.get("execution_log") if isinstance(memory, dict) else [],
                         "goal_time_window": goal_time_window,
                         "goal_time_window_confidence": goal_time_window_confidence,
@@ -430,19 +434,72 @@ def run_main_agent(user_query: str) -> str:
                 if status == "error":
                     err_text = str(step_result.get("message") or "执行失败")
                     state.add_step(action, _trim_text(err_text))
-                    state.done = True
+                    state.loop.done = True
                     break
 
                 step_blocks = step_result.get("result_blocks") or []
+                step_structured = step_result.get("structured_blocks") or []
                 execution_meta = step_result.get("execution_meta") or {}
                 print(f"[Loop] execution={_format_execution_meta(execution_meta)}")
-                state.result_blocks.extend(step_blocks)
+                state.results.blocks.extend(step_blocks)
+                if isinstance(step_structured, list) and step_structured:
+                    current_step = int(state.loop.iteration) + 1
+                    block_seq = 0
+                    for sb in step_structured:
+                        if not isinstance(sb, dict):
+                            continue
+                        block_seq += 1
+                        question = sb.get("question")
+                        plan = sb.get("plan")
+                        dsl = sb.get("dsl")
+                        meta = sb.get("execution_meta")
+                        result = sb.get("result")
+                        block = sb.get("block")
+                        block_type = sb.get("block_type")
+                        status = sb.get("status")
+                        error = sb.get("error")
+                        statistics = sb.get("statistics")
+                        if not isinstance(question, str) or not question:
+                            continue
+                        if not isinstance(plan, dict):
+                            plan = {}
+                        if not isinstance(dsl, dict):
+                            dsl = {}
+                        if not isinstance(meta, dict):
+                            meta = {}
+                        if not isinstance(block, str):
+                            block = ""
+                        if not isinstance(block_type, str) or not block_type:
+                            block_type = "unknown"
+                        if not isinstance(status, str) or not status:
+                            status = "success"
+                        if statistics is not None and not isinstance(statistics, dict):
+                            statistics = None
+                        block_id = f"step_{current_step}_block_{block_seq}"
+                        state.results.structured_blocks.append(
+                            ResultBlock(
+                                block_id=block_id,
+                                step=current_step,
+                                block_type=block_type,
+                                status=status,
+                                question=question,
+                                plan=plan,
+                                dsl=dsl,
+                                result=result,
+                                statistics=statistics,
+                                execution_meta=meta,
+                                error=error,
+                                block=block,
+                            )
+                        )
                 merged_step_text = "\n\n---\n\n".join(step_blocks)
                 state.add_step(action, _trim_text(merged_step_text))
                 memory_update = extract_memory_update(client=client, state=state, last_result=merged_step_text)
                 apply_memory_update(state, memory_update)
+                facts_text = json.dumps(state.memory.facts, ensure_ascii=False, indent=2) if isinstance(state.memory.facts, (dict, list)) else str(state.memory.facts)
+                print(f"[Loop] state.memory.facts={_trim_text(facts_text, limit=1600)}")
             elif action.get("action") == "finish":
-                combined_results = "\n\n---\n\n".join([_extract_result_text(b) for b in state.result_blocks if b]) if state.result_blocks else ""
+                combined_results = "\n\n---\n\n".join([_extract_result_text(b) for b in state.results.blocks if b]) if state.results.blocks else ""
                 last_block = f"执行结果:\n{combined_results}" if combined_results else ""
                 finish_grounded_answer = _generate_finish_summary(
                     client=client,
@@ -451,16 +508,16 @@ def run_main_agent(user_query: str) -> str:
                     last_result_block=last_block,
                 )
                 state.add_step(action, _trim_text(str(action.get("analysis") or "完成")))
-                state.done = True
+                state.loop.done = True
                 print("[Loop] execution=finish::answer_summarization")
             else:
                 state.add_step(action, "未知 action，终止。")
-                state.done = True
+                state.loop.done = True
 
-        if not state.result_blocks:
+        if not state.results.blocks:
             fallback = "未产出可用查询结果。"
-            if state.history:
-                last_result = str(state.history[-1].get("result") or "")
+            if state.loop.history:
+                last_result = str(state.loop.history[-1].get("result") or "")
                 if last_result:
                     fallback = last_result
             print(f"\n{'='*60}")
@@ -473,7 +530,7 @@ def run_main_agent(user_query: str) -> str:
             final_answer_text = finish_grounded_answer
             return finish_grounded_answer
 
-        final_text = _generate_final_answer(client=client, user_query=user_query, result_blocks=state.result_blocks)
+        final_text = _generate_final_answer(client=client, user_query=user_query, result_blocks=state.results.blocks)
         print(f"\n{'='*60}")
         final_execution_success = True
         final_answer_text = final_text

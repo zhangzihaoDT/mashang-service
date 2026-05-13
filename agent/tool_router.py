@@ -9,6 +9,57 @@ from operators.time_windows import extract_listed_dates
 from tools import ComparisonTool, FastPathTool, QueryTool, StatisticsTool
 
 
+def _infer_block_type(plan: dict) -> str:
+    statistics = plan.get("statistics")
+    if isinstance(statistics, dict) and statistics.get("type"):
+        return str(statistics.get("type"))
+    comparison = plan.get("comparison")
+    if isinstance(comparison, dict) and comparison.get("type") and comparison.get("type") != "none":
+        return str(comparison.get("type"))
+    fast_path = plan.get("fast_path")
+    if isinstance(fast_path, dict) and fast_path.get("type"):
+        return str(fast_path.get("type"))
+    return "query"
+
+
+def _infer_row_count(result: object) -> int | None:
+    if not isinstance(result, dict):
+        return None
+    for key in ["daily_rows", "weekly_rows", "weekend_rows"]:
+        rows = result.get(key)
+        if isinstance(rows, list):
+            return len(rows)
+    data = result.get("data")
+    if isinstance(data, list):
+        return len(data)
+    return None
+
+
+def _extract_statistics_summary(result: object) -> dict | None:
+    if not isinstance(result, dict):
+        return None
+    stype = result.get("type")
+    if stype == "trend_summary":
+        out = {"type": "trend_summary"}
+        for key in ["direction", "latest", "mean", "total_change", "slope", "window_days"]:
+            if key in result:
+                out[key] = result.get(key)
+        return out
+    if stype == "contribution_summary":
+        out = {"type": "contribution_summary"}
+        for key in ["dimension_field", "comparison_method", "baseline_period", "target_period", "first_total", "last_total", "total_delta", "top_k"]:
+            if key in result:
+                out[key] = result.get(key)
+        return out
+    return None
+
+
+def _infer_status_and_error(result: object) -> tuple[str, object]:
+    if isinstance(result, dict) and result.get("error"):
+        return "error", result
+    return "success", None
+
+
 def _execute_single_plan(
     plan: dict,
     user_query: str,
@@ -412,6 +463,134 @@ def _execute_single_plan(
                         tool_result = statistics_tool.perform_statistics(stat_request, raw_df)
                     except Exception as e:
                         tool_result = {"type": "daily_mean_median", "error": "statistics_execution_failed", "message": str(e)}
+    elif stats_type == "trend_summary" and tool_result is None:
+        execution_meta = {"engine": "statistics", "route": "statistics.trend_summary"}
+        print("\n[Thinking] 执行趋势分析汇总...")
+        value_metric = statistics.get("value_metric", {}) if isinstance(statistics, dict) else {}
+        metric_alias = value_metric.get("alias") or metric.get("alias") or "value"
+        if comparison_df is not None:
+            tool_result = {
+                "type": "trend_summary",
+                "error": "unsupported_pipeline_input",
+                "message": "trend_summary 暂不支持 comparison 联动，请使用单窗口查询。",
+            }
+        else:
+            window_days = statistics.get("window_days") or 10
+            try:
+                window_days = int(window_days)
+            except Exception:
+                window_days = 10
+            query_time_start = time_start
+            query_time_end = time_end
+            query_plan = {
+                "dataset": dataset,
+                "metrics": [
+                    {
+                        "field": value_metric.get("field") or metric.get("field"),
+                        "agg": value_metric.get("agg") or metric.get("agg") or "count",
+                        "alias": metric_alias,
+                    }
+                ],
+                "dimensions": dimensions,
+                "filters": [
+                    *filters_without_time,
+                    {"field": time_field, "op": ">=", "value": query_time_start},
+                    {"field": time_field, "op": "<", "value": query_time_end},
+                ]
+                if time_field and query_time_start and query_time_end
+                else filters_without_time,
+            }
+            raw_df = query_tool.execute_analysis_df(query_plan)
+            if isinstance(raw_df, str):
+                tool_result = raw_df
+            else:
+                trend_missing_cols = [c for c in [statistics.get("time_field") or time_field, metric_alias] if c not in raw_df.columns]
+                if trend_missing_cols:
+                    print(f"  ⚠️  trend_summary 输入列缺失，返回结构化错误: {trend_missing_cols}")
+                    tool_result = {
+                        "type": "trend_summary",
+                        "error": "invalid_statistics_input_schema",
+                        "missing_columns": trend_missing_cols,
+                    }
+                else:
+                    stat_request = {
+                        "type": "trend_summary",
+                        "time_field": statistics.get("time_field") or time_field,
+                        "window_days": window_days,
+                        "date_start": query_time_start,
+                        "date_end": query_time_end,
+                        "metric_alias": metric_alias,
+                    }
+                    try:
+                        tool_result = statistics_tool.perform_statistics(stat_request, raw_df)
+                    except Exception as e:
+                        tool_result = {"type": "trend_summary", "error": "statistics_execution_failed", "message": str(e)}
+    elif stats_type == "contribution_summary" and tool_result is None:
+        execution_meta = {"engine": "statistics", "route": "statistics.contribution_summary"}
+        print("\n[Thinking] 执行贡献拆解汇总...")
+        value_metric = statistics.get("value_metric", {}) if isinstance(statistics, dict) else {}
+        metric_alias = value_metric.get("alias") or metric.get("alias") or "value"
+        dimension_field = statistics.get("dimension_field") if isinstance(statistics, dict) else None
+        if not dimension_field and isinstance(dimensions, list) and len(dimensions) >= 2:
+            dimension_field = dimensions[1]
+        if comparison_df is not None:
+            tool_result = {
+                "type": "contribution_summary",
+                "error": "unsupported_pipeline_input",
+                "message": "contribution_summary 暂不支持 comparison 联动，请使用单窗口查询。",
+            }
+        else:
+            window_days = statistics.get("window_days") or 10
+            try:
+                window_days = int(window_days)
+            except Exception:
+                window_days = 10
+            query_time_start = time_start
+            query_time_end = time_end
+            query_plan = {
+                "dataset": dataset,
+                "metrics": [
+                    {
+                        "field": value_metric.get("field") or metric.get("field"),
+                        "agg": value_metric.get("agg") or metric.get("agg") or "count",
+                        "alias": metric_alias,
+                    }
+                ],
+                "dimensions": dimensions,
+                "filters": [
+                    *filters_without_time,
+                    {"field": time_field, "op": ">=", "value": query_time_start},
+                    {"field": time_field, "op": "<", "value": query_time_end},
+                ]
+                if time_field and query_time_start and query_time_end
+                else filters_without_time,
+            }
+            raw_df = query_tool.execute_analysis_df(query_plan)
+            if isinstance(raw_df, str):
+                tool_result = raw_df
+            else:
+                missing_cols = [c for c in [statistics.get("time_field") or time_field, dimension_field, metric_alias] if c and c not in raw_df.columns]
+                if missing_cols:
+                    tool_result = {
+                        "type": "contribution_summary",
+                        "error": "invalid_statistics_input_schema",
+                        "missing_columns": missing_cols,
+                    }
+                else:
+                    stat_request = {
+                        "type": "contribution_summary",
+                        "time_field": statistics.get("time_field") or time_field,
+                        "dimension_field": dimension_field,
+                        "window_days": window_days,
+                        "date_start": query_time_start,
+                        "date_end": query_time_end,
+                        "metric_alias": metric_alias,
+                        "top_k": statistics.get("top_k") if isinstance(statistics, dict) else None,
+                    }
+                    try:
+                        tool_result = statistics_tool.perform_statistics(stat_request, raw_df)
+                    except Exception as e:
+                        tool_result = {"type": "contribution_summary", "error": "statistics_execution_failed", "message": str(e)}
     elif stats_type == "category_share" and tool_result is None:
         execution_meta = {"engine": "statistics", "route": "statistics.category_share"}
         print("\n[Thinking] 执行分类占比分析...")
@@ -698,7 +877,24 @@ def _execute_single_plan(
     sub_query = plan.get("question") or user_query
     tool_result_text = json.dumps(tool_result, ensure_ascii=False, indent=2) if isinstance(tool_result, dict) else str(tool_result)
     block = f"查询: {sub_query}\nDSL: {json.dumps(plan, ensure_ascii=False)}\n执行结果:\n{tool_result_text}"
-    return {"block": block, "execution_meta": execution_meta}
+    status, error = _infer_status_and_error(tool_result)
+    row_count = _infer_row_count(tool_result)
+    enriched_meta = dict(execution_meta or {})
+    if row_count is not None:
+        enriched_meta["row_count"] = int(row_count)
+    structured = {
+        "question": sub_query,
+        "plan": plan,
+        "dsl": plan,
+        "result": tool_result,
+        "statistics": _extract_statistics_summary(tool_result),
+        "execution_meta": enriched_meta,
+        "block_type": _infer_block_type(plan),
+        "status": status,
+        "error": error,
+        "block": block,
+    }
+    return {"block": block, "execution_meta": execution_meta, "structured": structured}
 
 
 def run_dsl_step(
@@ -845,6 +1041,7 @@ def run_dsl_step(
         has_other_dim = isinstance(dims, list) and any(isinstance(d, str) and d and d != time_field for d in dims)
         if len(dates) >= 2 and len(dates) <= 10 and has_time_dim and has_other_dim:
             result_blocks: list[str] = []
+            structured_blocks: list[dict] = []
             for day in dates:
                 try:
                     day_date = datetime.date.fromisoformat(day)
@@ -866,10 +1063,14 @@ def run_dsl_step(
                     memory_context=memory_context,
                 )
                 result_blocks.append(execution["block"])
+                structured = execution.get("structured")
+                if isinstance(structured, dict) and structured:
+                    structured_blocks.append(structured)
             if result_blocks:
                 return {
                     "status": "ok",
                     "result_blocks": result_blocks,
+                    "structured_blocks": structured_blocks,
                     "execution_meta": {"engine": "dsl", "route": "query_tool.multi_date_split", "subqueries": len(result_blocks)},
                     "plan": plan,
                 }
@@ -885,6 +1086,7 @@ def run_dsl_step(
     return {
         "status": "ok",
         "result_blocks": [execution["block"]],
+        "structured_blocks": [execution.get("structured")] if isinstance(execution.get("structured"), dict) else [],
         "execution_meta": execution.get("execution_meta") or {},
         "plan": plan,
     }

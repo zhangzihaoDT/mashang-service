@@ -4,7 +4,8 @@ import re
 
 from openai import OpenAI
 from agent.llm_config import DEEPSEEK_PLANNER_MODEL
-from agent.state import AgentRuntimeState
+from agent.runtime_decision import evaluate_state_readiness
+from agent.state import AgentState
 from operators.time_windows import resolve_time_window, parse_until_end_date
 
 LOOP_RUNTIME_SYSTEM_PROMPT = """
@@ -89,7 +90,9 @@ PLANNING_TOOL_SCHEMA = {
                                             "daily_threshold_count",
                                             "daily_mean",
                                             "daily_mean_median",
-                                        "category_share",
+                                            "trend_summary",
+                                            "contribution_summary",
+                                            "category_share",
                                             "daily_percentile_rank",
                                             "weekend_percentile_rank",
                                             "weekday_percentile_rank",
@@ -100,6 +103,7 @@ PLANNING_TOOL_SCHEMA = {
                                     "window_days": {"type": "integer"},
                                     "window_weekends": {"type": "integer"},
                                     "category_field": {"type": "string"},
+                                    "dimension_field": {"type": "string"},
                                     "top_k": {"type": "integer"},
                                     "reference_date": {"type": "string"},
                                     "weekdays": {"type": "array", "items": {"type": "integer"}},
@@ -407,6 +411,9 @@ class PlanningAgent:
             "平均",
             "中位数",
             "中值",
+            "趋势",
+            "走势",
+            "波动",
             "分位",
             "百分位",
             "处于什么水平",
@@ -1278,6 +1285,26 @@ class PlanningAgent:
         return has_recent or has_relative or has_explicit
 
     @staticmethod
+    def _is_trend_summary_query(user_query: str) -> bool:
+        q = user_query or ""
+        if not q:
+            return False
+        has_trend = any(k in q for k in ["趋势", "走势", "变化趋势", "波动趋势", "波动情况"])
+        has_recent = bool(re.search(r"近\s*(?:\d+|[一二两三四五六七八九十])\s*(日|天|周|月|年)", q))
+        has_relative = any(k in q for k in ["昨天", "昨日", "今天", "今日", "本周", "上周", "本月", "上月", "今年", "去年", "至今", "截至"])
+        has_explicit = PlanningAgent._extract_explicit_time_window(q, datetime.date.today()) is not None
+        return has_trend and (has_recent or has_relative or has_explicit)
+
+    @staticmethod
+    def _is_contribution_summary_query(user_query: str) -> bool:
+        q = user_query or ""
+        if not q:
+            return False
+        has_contrib = any(k in q for k in ["贡献", "拆解", "贡献项", "主要贡献", "贡献度", "贡献来源"])
+        has_recent = bool(re.search(r"近\s*(?:\d+|[一二两三四五六七八九十])\s*(日|天)", q))
+        return has_contrib and has_recent
+
+    @staticmethod
     def _is_daily_percentile_rank_query(user_query: str) -> bool:
         q = user_query or ""
         if not q:
@@ -1512,6 +1539,84 @@ class PlanningAgent:
         }
         return self._fill_defaults(self._normalize_plan(plan), user_query)
 
+    def _build_trend_summary_plan(self, user_query: str) -> dict | None:
+        metric_defaults = self._metric_defaults(user_query)
+        if not metric_defaults:
+            return None
+        today = datetime.date.today()
+        explicit_window = self._extract_explicit_time_window(user_query, today)
+        if explicit_window:
+            start_s, end_s = explicit_window
+            start = datetime.date.fromisoformat(start_s)
+            end = datetime.date.fromisoformat(end_s)
+            days = max(1, (end - start).days)
+        else:
+            macro_window = self._parse_time_window_with_business(user_query, today)
+            if macro_window:
+                start_s, end_s = macro_window
+                start = datetime.date.fromisoformat(start_s)
+                end = datetime.date.fromisoformat(end_s)
+                days = max(1, (end - start).days)
+            else:
+                days = self._parse_recent_days(user_query) or 10
+                start = today - datetime.timedelta(days=days)
+                end = today
+        time_field = metric_defaults["time_field"]
+        value_metric = metric_defaults["metric"]
+        plan = {
+            "dataset": metric_defaults["dataset"],
+            "metric": value_metric,
+            "time": {"field": time_field, "start": start.isoformat(), "end": end.isoformat()},
+            "dimensions": [time_field],
+            "filters": [{"field": time_field, "op": "!=", "value": None}],
+            "comparison": {"type": "none"},
+            "statistics": {
+                "type": "trend_summary",
+                "time_field": time_field,
+                "window_days": days,
+                "value_metric": value_metric,
+            },
+        }
+        return self._fill_defaults(self._normalize_plan(plan), user_query)
+
+    def _build_contribution_summary_plan(self, user_query: str) -> dict | None:
+        metric_defaults = self._metric_defaults(user_query)
+        if not metric_defaults:
+            return None
+        today = datetime.date.today()
+        days = self._parse_recent_days(user_query) or 10
+        start = today - datetime.timedelta(days=days)
+        end = today
+        time_field = metric_defaults["time_field"]
+        value_metric = metric_defaults["metric"]
+        dimension_field = "series"
+        q = (user_query or "").replace(" ", "")
+        if any(k in q for k in ["门店"]):
+            dimension_field = "store_name"
+        elif any(k in q for k in ["门店城市", "店城"]):
+            dimension_field = "store_city"
+        elif any(k in q for k in ["上牌城市", "牌照城市", "城市"]):
+            dimension_field = "license_city"
+        elif any(k in q for k in ["车型", "车系", "系列"]):
+            dimension_field = "series"
+        plan = {
+            "dataset": metric_defaults["dataset"],
+            "metric": value_metric,
+            "time": {"field": time_field, "start": start.isoformat(), "end": end.isoformat()},
+            "dimensions": [time_field, dimension_field],
+            "filters": [{"field": time_field, "op": "!=", "value": None}],
+            "comparison": {"type": "none"},
+            "statistics": {
+                "type": "contribution_summary",
+                "time_field": time_field,
+                "dimension_field": dimension_field,
+                "window_days": days,
+                "top_k": 10,
+                "value_metric": value_metric,
+            },
+        }
+        return self._fill_defaults(self._normalize_plan(plan), user_query)
+
     def _build_daily_percentile_rank_plan(self, user_query: str) -> dict | None:
         metric_defaults = self._metric_defaults(user_query)
         if not metric_defaults:
@@ -1681,6 +1786,47 @@ class PlanningAgent:
             if not value_metric.get("field") or not value_metric.get("agg"):
                 return False
             return True
+
+        if stype == "trend_summary":
+            time_field = statistics.get("time_field") or (plan.get("time", {}) or {}).get("field")
+            value_metric = statistics.get("value_metric")
+            window_days = statistics.get("window_days")
+            if not isinstance(time_field, str) or not time_field:
+                return False
+            if time_field not in dims:
+                return False
+            if not isinstance(value_metric, dict):
+                return False
+            if not value_metric.get("field") or not value_metric.get("agg"):
+                return False
+            try:
+                window_days = int(window_days)
+            except Exception:
+                return False
+            return window_days > 0
+
+        if stype == "contribution_summary":
+            time_field = statistics.get("time_field") or (plan.get("time", {}) or {}).get("field")
+            value_metric = statistics.get("value_metric")
+            window_days = statistics.get("window_days")
+            dimension_field = statistics.get("dimension_field")
+            if not isinstance(time_field, str) or not time_field:
+                return False
+            if time_field not in dims:
+                return False
+            if not isinstance(dimension_field, str) or not dimension_field:
+                return False
+            if dimension_field not in dims:
+                return False
+            if not isinstance(value_metric, dict):
+                return False
+            if not value_metric.get("field") or not value_metric.get("agg"):
+                return False
+            try:
+                window_days = int(window_days)
+            except Exception:
+                return False
+            return window_days > 0
 
         if stype == "category_share":
             category_field = statistics.get("category_field")
@@ -1872,6 +2018,8 @@ class PlanningAgent:
                 "daily_threshold_count",
                 "daily_mean",
                 "daily_mean_median",
+                "trend_summary",
+                "contribution_summary",
                 "category_share",
                 "daily_percentile_rank",
                 "weekend_percentile_rank",
@@ -1911,6 +2059,17 @@ class PlanningAgent:
                 wdays = statistics.get("window_days")
                 if isinstance(wdays, str) and wdays.isdigit():
                     statistics["window_days"] = int(wdays)
+            elif stype == "trend_summary":
+                wdays = statistics.get("window_days")
+                if isinstance(wdays, str) and wdays.isdigit():
+                    statistics["window_days"] = int(wdays)
+            elif stype == "contribution_summary":
+                wdays = statistics.get("window_days")
+                if isinstance(wdays, str) and wdays.isdigit():
+                    statistics["window_days"] = int(wdays)
+                top_k = statistics.get("top_k")
+                if isinstance(top_k, str) and top_k.isdigit():
+                    statistics["top_k"] = int(top_k)
             elif stype == "category_share":
                 top_k = statistics.get("top_k")
                 if isinstance(top_k, str) and top_k.isdigit():
@@ -2043,6 +2202,22 @@ class PlanningAgent:
                         share_plan["question"] = q
                         finalized.append(share_plan)
                         continue
+            if self._is_contribution_summary_query(semantic_q) and not has_compare:
+                stat = normalized.get("statistics")
+                if not isinstance(stat, dict) or stat.get("type") != "contribution_summary":
+                    contrib_plan = self._build_contribution_summary_plan(semantic_q)
+                    if isinstance(contrib_plan, dict) and contrib_plan:
+                        contrib_plan["question"] = q
+                        finalized.append(contrib_plan)
+                        continue
+            if self._is_trend_summary_query(semantic_q) and not has_compare:
+                stat = normalized.get("statistics")
+                if not isinstance(stat, dict) or stat.get("type") != "trend_summary":
+                    trend_plan = self._build_trend_summary_plan(semantic_q)
+                    if isinstance(trend_plan, dict) and trend_plan:
+                        trend_plan["question"] = q
+                        finalized.append(trend_plan)
+                        continue
             if self._is_daily_mean_median_query(semantic_q) and not has_compare:
                 stat = normalized.get("statistics")
                 if not isinstance(stat, dict) or stat.get("type") != "daily_mean_median":
@@ -2166,7 +2341,8 @@ class PlanningAgent:
                     "- 用户问性别/男女比例时，默认使用 owner_gender 作为分组维度；只有明确提到订单用户/订单性别时才使用 order_gender。\n"
                     "- 城市线级划分（如一线/新一线/二线/三线及以下/线级分布占比）优先走固定算子；默认使用 license_city，除非用户明确指定门店城市(store_city)。\n"
                     "- 同比/年同比用 comparison.type=yoy；周环比用 comparison.type=wow；日环比（如“昨天日环比”）用 comparison.type=dod。\n"
-                    "- 时序统计类按类型输出 statistics：weekly_decline_ratio / daily_threshold_count / daily_mean / daily_mean_median / daily_percentile_rank / weekend_percentile_rank / weekday_percentile_rank，并补齐各自必需字段。\n"
+                    "- 时序统计类按类型输出 statistics：weekly_decline_ratio / daily_threshold_count / daily_mean / daily_mean_median / trend_summary / daily_percentile_rank / weekend_percentile_rank / weekday_percentile_rank，并补齐各自必需字段。\n"
+                    "- 若用户问“近 N 日/周/月 的某指标趋势/走势/波动”，优先使用 trend_summary，并设置 window_days 与 value_metric。\n"
                     "- 若用户问“近 N 个周的周日/周一..周日 处于什么水平”，使用 weekday_percentile_rank，并设置 window_weeks=N、weekdays=[对应周内日]、reference_date=昨天/今天。\n"
                 ),
             },
@@ -2333,6 +2509,16 @@ class PlanningAgent:
                 if isinstance(p, dict) and p:
                     p["question"] = part
                     return [p]
+            if intent == "statistics" and self._is_trend_summary_query(part) and not any(k in part for k in ["对比", "相比", "对照", "较"]):
+                p = self._build_trend_summary_plan(part)
+                if isinstance(p, dict) and p:
+                    p["question"] = part
+                    return [p]
+            if intent == "statistics" and self._is_contribution_summary_query(part) and not any(k in part for k in ["对比", "相比", "对照", "较"]):
+                p = self._build_contribution_summary_plan(part)
+                if isinstance(p, dict) and p:
+                    p["question"] = part
+                    return [p]
             if intent == "statistics" and self._is_daily_mean_query(part) and not any(k in part for k in ["对比", "相比", "对照", "较"]):
                 p = self._build_daily_mean_plan(part)
                 if isinstance(p, dict) and p:
@@ -2420,12 +2606,22 @@ class PlanningAgent:
             "daily_threshold_count",
             "daily_mean",
             "daily_mean_median",
+            "trend_summary",
+            "contribution_summary",
             "daily_percentile_rank",
             "weekend_percentile_rank",
             "weekday_percentile_rank",
         }:
             if isinstance(time_field, str) and time_field:
-                plan["dimensions"] = [time_field]
+                stype = statistics.get("type")
+                if stype == "contribution_summary":
+                    dim_field = statistics.get("dimension_field")
+                    if isinstance(dim_field, str) and dim_field:
+                        plan["dimensions"] = [time_field, dim_field]
+                    else:
+                        plan["dimensions"] = [time_field]
+                else:
+                    plan["dimensions"] = [time_field]
         if metric_defaults and (metric_defaults.get("metric") or {}).get("alias") == "在营门店数":
             if isinstance(time, dict):
                 time["field"] = "order_create_date"
@@ -2688,25 +2884,43 @@ def _extract_json_content(text: str) -> str:
     return raw
 
 
-def plan_runtime_action(client: OpenAI, state: AgentRuntimeState) -> dict:
-    if state.iteration == 0 and not state.history:
-        return {
-            "action": "run_dsl",
-            "reason": "首次执行，先获取核心数据事实。",
-            "query": state.goal,
-            "analysis": "开始围绕用户目标进行首轮查询。",
-        }
+def plan_runtime_action(client: OpenAI, state: AgentState) -> dict:
+    readiness = evaluate_state_readiness(state)
+    if isinstance(readiness, dict):
+        recommended = str(readiness.get("recommended_next_action") or "").strip().lower()
+        if recommended in {"run_dsl", "finish"}:
+            if recommended == "finish":
+                return {
+                    "action": "finish",
+                    "reason": str(readiness.get("reason") or "ready"),
+                    "analysis": str(readiness.get("reason") or ""),
+                }
+            recommended_query = readiness.get("recommended_query")
+            query = str(recommended_query or state.question).strip() or state.question
+            if state.loop.iteration == 0 and not state.loop.history:
+                return {
+                    "action": "run_dsl",
+                    "reason": "首次执行，先获取核心数据事实。",
+                    "query": query,
+                    "analysis": "开始围绕用户目标进行首轮查询。",
+                }
+            return {
+                "action": "run_dsl",
+                "reason": str(readiness.get("reason") or "not_ready"),
+                "query": query,
+                "analysis": str(readiness.get("reason") or ""),
+            }
 
-    history_payload = json.dumps(state.history[-3:], ensure_ascii=False)
-    facts_payload = json.dumps(state.facts, ensure_ascii=False)
-    working_payload = json.dumps(state.working_memory, ensure_ascii=False)
+    history_payload = json.dumps(state.loop.history[-3:], ensure_ascii=False)
+    facts_payload = json.dumps(state.memory.facts, ensure_ascii=False)
+    working_payload = json.dumps(state.memory.working_memory, ensure_ascii=False)
     messages = [
         {"role": "system", "content": LOOP_RUNTIME_SYSTEM_PROMPT},
         {
             "role": "user",
             "content": (
-                f"用户目标:\n{state.goal}\n\n"
-                f"已执行步数: {state.iteration}/{state.max_steps}\n"
+                f"用户目标:\n{state.question}\n\n"
+                f"已执行步数: {state.loop.iteration}/{state.loop.max_steps}\n"
                 f"已有 facts:\n{facts_payload}\n\n"
                 f"当前 working_memory:\n{working_payload}\n\n"
                 f"历史:\n{history_payload}\n\n"
@@ -2736,6 +2950,6 @@ def plan_runtime_action(client: OpenAI, state: AgentRuntimeState) -> dict:
         "analysis": str(parsed.get("analysis") or ""),
     }
     if action == "run_dsl":
-        query = str(parsed.get("query") or "").strip() or state.goal
+        query = str(parsed.get("query") or "").strip() or state.question
         out["query"] = query
     return out
