@@ -63,6 +63,64 @@ def _infer_status_and_error(result: object) -> tuple[str, object]:
     return "success", None
 
 
+_EVIDENCE_HINTS: dict[str, dict] = {
+    "trend_summary": {"fact_types": ["trend_summary", "time_grouped_metric"], "grain": "day", "has_series": True, "result_type": "statistics"},
+    "contribution_summary": {"fact_types": ["contribution_summary", "dimension_breakdown", "share_summary"], "result_type": "statistics"},
+    "category_share": {"fact_types": ["share_summary", "dimension_breakdown", "ranking_result"], "result_type": "statistics"},
+    "province_topk_share": {"fact_types": ["share_summary", "dimension_breakdown", "ranking_result"], "dimension": "province", "result_type": "operator"},
+    "city_tier_distribution": {"fact_types": ["share_summary", "dimension_breakdown"], "dimension": "city_tier", "result_type": "operator"},
+    "age_cohort_distribution": {"fact_types": ["share_summary", "dimension_breakdown"], "dimension": "age_cohort", "result_type": "operator"},
+    "retained_intention": {"fact_types": ["metric_value"], "result_type": "operator"},
+    "retained_intention_conversion": {"fact_types": ["metric_value"], "result_type": "operator"},
+    "active_store": {"fact_types": ["time_grouped_metric", "metric_value"], "grain": "day", "has_series": True, "result_type": "operator"},
+    "daily_mean": {"fact_types": ["metric_value", "time_grouped_metric"], "grain": "day", "has_series": True, "result_type": "statistics"},
+    "daily_mean_median": {"fact_types": ["metric_value", "time_grouped_metric"], "grain": "day", "has_series": True, "result_type": "statistics"},
+    "weekly_decline_ratio": {"fact_types": ["metric_value", "time_grouped_metric"], "grain": "week", "has_series": True, "result_type": "statistics"},
+    "daily_threshold_count": {"fact_types": ["metric_value", "time_grouped_metric"], "grain": "day", "has_series": True, "result_type": "statistics"},
+    "daily_percentile_rank": {"fact_types": ["metric_value", "distribution_summary", "time_grouped_metric"], "grain": "day", "has_series": True, "result_type": "statistics"},
+    "weekend_percentile_rank": {"fact_types": ["metric_value", "distribution_summary", "time_grouped_metric"], "grain": "weekend", "has_series": True, "result_type": "statistics"},
+    "weekday_percentile_rank": {"fact_types": ["metric_value", "distribution_summary", "time_grouped_metric"], "grain": "day", "has_series": True, "result_type": "statistics"},
+    "yoy": {"fact_types": ["comparison_result"], "has_comparison": True, "comparison_type": "yoy", "result_type": "comparison"},
+    "wow": {"fact_types": ["comparison_result"], "has_comparison": True, "comparison_type": "wow", "result_type": "comparison"},
+    "dod": {"fact_types": ["comparison_result"], "has_comparison": True, "comparison_type": "dod", "result_type": "comparison"},
+    "numeric_ratio": {"fact_types": ["metric_value"], "result_type": "fast_path"},
+}
+
+
+def _infer_evidence_hints(block_type: str, result: dict | None, plan: dict | None) -> dict | None:
+    hints = _EVIDENCE_HINTS.get(block_type)
+    if hints is None:
+        return None
+    hints = dict(hints)
+    metric = None
+    if isinstance(result, dict):
+        metric = result.get("metric_alias") or result.get("metric")
+    if not metric and isinstance(plan, dict):
+        m = plan.get("metric", {}) or {}
+        metric = m.get("alias") or m.get("business_name")
+    if metric:
+        hints["metric"] = metric
+    if isinstance(result, dict) and result.get("dimension_field"):
+        hints["dimension"] = result["dimension_field"]
+    return hints
+
+
+def _comparison_df_to_dict(df: "pd.DataFrame", comparison_type: str, metric_alias: str) -> dict:
+    cols = [c for c in df.columns if not c.endswith(("_current", "_compare", "_diff", "_diff_pct"))]
+    dim_cols = [c for c in cols if c != metric_alias]
+    has_dims = bool(dim_cols)
+    if has_dims:
+        return {
+            "evidence_hints": {"fact_types": ["comparison_result", "dimension_breakdown"], "has_comparison": True, "comparison_type": comparison_type, "result_type": "comparison"},
+            "rows": df.to_dict(orient="records"),
+        }
+    row = df.iloc[0].to_dict() if not df.empty else {}
+    return {
+        "evidence_hints": {"fact_types": ["comparison_result"], "has_comparison": True, "comparison_type": comparison_type, "result_type": "comparison"},
+        **row,
+    }
+
+
 def _execute_single_plan(
     plan: dict,
     user_query: str,
@@ -173,7 +231,8 @@ def _execute_single_plan(
             else:
                 comparison_df = comparison_result
                 if not stats_type:
-                    tool_result = comparison_df.to_string(index=False)
+                    metric_alias = metric.get("alias") or metric.get("business_name") or "value"
+                    tool_result = _comparison_df_to_dict(comparison_df, comparison_type, metric_alias)
 
     if stats_type == "weekly_decline_ratio" and tool_result is None:
         execution_meta = {"engine": "statistics", "route": "statistics.weekly_decline_ratio"}
@@ -904,6 +963,13 @@ def _execute_single_plan(
     enriched_meta = dict(execution_meta or {})
     if row_count is not None:
         enriched_meta["row_count"] = int(row_count)
+    block_type = _infer_block_type(plan)
+    evidence_hints = _infer_evidence_hints(block_type, tool_result if isinstance(tool_result, dict) else None, plan)
+    if evidence_hints:
+        enriched_meta["evidence_hints"] = evidence_hints
+        if isinstance(tool_result, dict):
+            tool_result = dict(tool_result)
+            tool_result["evidence_hints"] = evidence_hints
     structured = {
         "question": sub_query,
         "plan": plan,
@@ -911,7 +977,7 @@ def _execute_single_plan(
         "result": tool_result,
         "statistics": _extract_statistics_summary(tool_result),
         "execution_meta": enriched_meta,
-        "block_type": _infer_block_type(plan),
+        "block_type": block_type,
         "status": status,
         "error": error,
         "block": block,

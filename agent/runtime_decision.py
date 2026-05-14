@@ -148,14 +148,68 @@ def _generate_repair_query(state: AgentState) -> str | None:
     return "，".join(repair_parts) + "。"
 
 
+# ── Evidence Contract 定稿表 ──────────────────────────────────────────
+# intent              required_fact_types                                 说明
+# ─────────────────────────────────────────────────────────────────────
+# metric              metric_value                                        单指标、总量、当前值
+# trend               trend_summary                                       时间序列趋势、上升下降、波动
+# compare             comparison_result                                   同比、环比、目标 vs 基准
+# composition         dimension_breakdown                                 按维度拆解，但不一定有占比
+# share               dimension_breakdown + share_summary                 按维度拆解并计算占比
+# time_grouped_share  time_grouped_metric + dimension_breakdown +         按时间粒度 + 维度 + 占比
+#                     share_summary
+# ranking             ranking_result                                      TOPN、排名、最高、最低
+# distribution        distribution_summary                                年龄分布、价格分布、分位区间
+# diagnosis           trend_summary + contribution_summary                先确认趋势，再拆解原因
 ANALYSIS_EVIDENCE_CONTRACT = {
+    "metric": {
+        "required_fact_types": ["metric_value"],
+        "finish_reason": "metric_value_found",
+        "repair_query_template": "{question}；请返回核心指标值。",
+    },
     "trend": {
         "required_fact_types": ["trend_summary"],
         "finish_reason": "trend_summary_found",
+        "repair_query_template": "{question}；请补充趋势摘要，包括方向、波动、峰谷和连续变化。",
+    },
+    "compare": {
+        "required_fact_types": ["comparison_result"],
+        "finish_reason": "comparison_result_found",
+        "repair_query_template": "{question}；请补充对比结果，包括基准值、目标值、差值和变化率。",
+    },
+    "composition": {
+        "required_fact_types": ["dimension_breakdown"],
+        "finish_reason": "dimension_breakdown_found",
+        "repair_query_template": "{question}；请按指定维度拆解结果。",
+    },
+    "share": {
+        "required_fact_types": ["dimension_breakdown", "share_summary"],
+        "finish_reason": "share_summary_found",
+        "repair_query_template": "{question}；请补充分组明细和占比字段。",
+    },
+    "time_grouped_share": {
+        "required_fact_types": [
+            "time_grouped_metric",
+            "dimension_breakdown",
+            "share_summary",
+        ],
+        "finish_reason": "time_grouped_share_found",
+        "repair_query_template": "{question}；请按时间粒度和拆解维度分组，并计算每个时间分组内的占比。",
+    },
+    "ranking": {
+        "required_fact_types": ["ranking_result"],
+        "finish_reason": "ranking_result_found",
+        "repair_query_template": "{question}；请返回排序结果，包括排名、维度和指标值。",
+    },
+    "distribution": {
+        "required_fact_types": ["distribution_summary"],
+        "finish_reason": "distribution_summary_found",
+        "repair_query_template": "{question}；请补充分布摘要，包括均值、中位数、分位数或区间分布。",
     },
     "diagnosis": {
         "required_fact_types": ["trend_summary", "contribution_summary"],
         "finish_reason": "trend_and_contribution_found",
+        "repair_query_template": "{question}；请先给出趋势摘要，再按关键维度拆解贡献。",
     },
 }
 
@@ -191,15 +245,60 @@ def infer_intent_from_question(question: str) -> str:
     q = (question or "").strip()
     if not q:
         return "unknown"
+
     q_ns = q.replace(" ", "")
+
+    has_time_group = any(k in q_ns for k in [
+        "按周", "每周", "周度", "逐周", "周别",
+        "按月", "每月", "月度", "逐月", "月别",
+        "按日", "每日", "日度", "逐日", "日别", "按天",
+    ])
+
+    has_breakdown = any(k in q_ns for k in [
+        "分车型", "按车型", "车型",
+        "分车系", "按车系", "车系",
+        "分门店", "按门店",
+        "分大区", "按大区",
+        "分城市", "按城市",
+        "分渠道", "按渠道",
+        "分省份", "按省份",
+        "性别", "男女",
+    ])
+
+    has_share = any(k in q_ns for k in [
+        "占比", "比例", "份额", "构成", "结构",
+    ])
+
     if any(k in q_ns for k in ["为什么", "原因", "怎么回事", "为何", "导致", "怎么导致", "如何导致"]):
         return "diagnosis"
-    if any(k in q_ns for k in ["同比", "年同比", "环比", "周环比", "日环比"]):
+
+    if has_time_group and has_breakdown and has_share:
+        return "time_grouped_share"
+
+    if has_share:
+        return "share"
+
+    if any(k in q_ns for k in ["同比", "年同比", "环比", "周环比", "日环比", "对比", "相比", "vs", "VS"]):
         return "compare"
+
+    if any(k in q_ns for k in ["TOP", "Top", "top", "排名", "排行", "最高", "最低", "前十", "前10"]):
+        return "ranking"
+
+    if any(k in q_ns for k in ["分布", "分位", "中位数", "均值", "平均值", "标准差"]):
+        return "distribution"
+
+    if has_breakdown:
+        return "composition"
+
     if any(k in q_ns for k in ["趋势", "走势", "变化趋势", "波动"]):
         return "trend"
+
     if re.search(r"近\s*\d+\s*(日|天|周|月|年)", q_ns):
         return "trend"
+
+    if any(k in q_ns for k in ["多少", "是多少", "总数", "合计", "数量"]):
+        return "metric"
+
     return "unknown"
 
 
@@ -230,11 +329,56 @@ def latest_intent(state: AgentState) -> str:
     return infer_intent_from_question(getattr(state, "question", ""))
 
 
+def _contract_repair_query(state: AgentState, contract: dict, missing: list[str]) -> str:
+    question = getattr(state, "question", "") or ""
+    template = contract.get("repair_query_template")
+    if isinstance(template, str) and template:
+        return template.format(
+            question=question,
+            missing="、".join(missing),
+        )
+    return f"{question}；当前缺少必要证据：{'、'.join(missing)}，请补充后再回答。"
+
+
+def _available_fact_types(state: AgentState) -> list[str]:
+    facts = getattr(getattr(state, "memory", None), "facts", None)
+    if not isinstance(facts, list):
+        return []
+    seen: set[str] = set()
+    out: list[str] = []
+    for f in facts:
+        if isinstance(f, dict):
+            ft = f.get("fact_type")
+            if isinstance(ft, str) and ft not in seen:
+                seen.add(ft)
+                out.append(ft)
+    return out
+
+
+def _debug_decision_line(
+    question: str,
+    intent: str,
+    required: list[str],
+    available: list[str],
+    missing: list[str],
+    action: str,
+    finish_reason: str,
+) -> None:
+    q = (question or "")[:50].replace("|", "/").replace("\n", " ")
+    r = ",".join(required) if required else "-"
+    a = ",".join(available) if available else "-"
+    m = ",".join(missing) if missing else "-"
+    print(f"[Eval] {q} | {intent} | {r} | {a} | {m} | {action} | {finish_reason}")
+
+
 def evaluate_state_readiness(state: AgentState) -> dict:
     loop = getattr(state, "loop", None)
     iteration = int(getattr(loop, "iteration", 0) or 0)
     max_steps = int(getattr(loop, "max_steps", 5) or 5)
+    question = getattr(state, "question", "") or ""
+
     if iteration >= max_steps:
+        _debug_decision_line(question, "unknown", [], [], [], "finish", "max_steps_reached")
         return {
             "ready": True,
             "reason": "max_steps_reached",
@@ -249,106 +393,34 @@ def evaluate_state_readiness(state: AgentState) -> dict:
         required = contract.get("required_fact_types")
         if not isinstance(required, list):
             required = []
-        missing = [t for t in required if isinstance(t, str) and t and not has_fact_type(state, t)]
+        available = _available_fact_types(state)
+        missing = [t for t in required if isinstance(t, str) and t and t not in available]
+        print(f"[RuntimeDecision] inferred_intent={intent}")
+        print(f"[RuntimeDecision] required_fact_types={required}")
+        print(f"[RuntimeDecision] available_fact_types={available}")
+        print(f"[RuntimeDecision] missing_fact_types={missing}")
         if not missing:
+            finish_reason = str(contract.get("finish_reason") or "ready")
+            _debug_decision_line(question, intent, required, available, missing, "finish", finish_reason)
             return {
                 "ready": True,
-                "reason": str(contract.get("finish_reason") or "ready"),
+                "reason": finish_reason,
                 "missing_info": [],
                 "recommended_next_action": "finish",
             }
-
-        if intent == "diagnosis":
-            if "trend_summary" in missing:
-                return {
-                    "ready": False,
-                    "reason": "missing_trend_summary",
-                    "missing_info": ["trend_summary"],
-                    "recommended_next_action": "run_dsl",
-                    "recommended_query": _rewrite_to_trend_query(getattr(state, "question", "")),
-                }
-            if "contribution_summary" in missing and has_fact_type(state, "trend_summary"):
-                return {
-                    "ready": False,
-                    "reason": "missing_contribution_summary",
-                    "missing_info": ["contribution_summary"],
-                    "recommended_next_action": "run_dsl",
-                    "recommended_query": f"{getattr(state, 'question', '')}；请按关键维度拆解下降贡献（例如车系/城市/门店），并给出主要贡献项。",
-                }
-
-        if intent == "trend":
-            return {
-                "ready": False,
-                "reason": "missing_trend_summary",
-                "missing_info": ["trend_summary"],
-                "recommended_next_action": "run_dsl",
-            }
-
+        missing_str = "_and_".join(missing)
+        _debug_decision_line(question, intent, required, available, missing, "run_dsl", missing_str)
         return {
             "ready": False,
-            "reason": "missing_required_facts",
+            "reason": f"missing_{missing_str}",
             "missing_info": missing,
             "recommended_next_action": "run_dsl",
-        }
-
-    if intent == "trend":
-        if has_block_type(state, "trend_summary"):
-            return {
-                "ready": True,
-                "reason": "trend_summary_found",
-                "missing_info": [],
-                "recommended_next_action": "finish",
-            }
-        return {
-            "ready": False,
-            "reason": "missing_trend_summary",
-            "missing_info": ["trend_summary"],
-            "recommended_next_action": "run_dsl",
-        }
-
-    if intent == "compare":
-        if any(has_block_type(state, t) for t in ["yoy", "wow", "dod"]):
-            return {
-                "ready": True,
-                "reason": "comparison_result_found",
-                "missing_info": [],
-                "recommended_next_action": "finish",
-            }
-        return {
-            "ready": False,
-            "reason": "missing_comparison_result",
-            "missing_info": ["comparison_result"],
-            "recommended_next_action": "run_dsl",
-        }
-
-    if intent == "diagnosis":
-        has_trend = has_block_type(state, "trend_summary")
-        has_contribution = has_block_type(state, "contribution_summary")
-        if has_trend and has_contribution:
-            return {
-                "ready": True,
-                "reason": "trend_and_contribution_found",
-                "missing_info": [],
-                "recommended_next_action": "finish",
-            }
-        if has_trend and not has_contribution:
-            return {
-                "ready": False,
-                "reason": "missing_contribution_summary",
-                "missing_info": ["contribution_summary"],
-                "recommended_next_action": "run_dsl",
-                "recommended_query": f"{getattr(state, 'question', '')}；请按关键维度拆解下降贡献（例如车系/城市/门店），并给出主要贡献项。",
-            }
-        return {
-            "ready": False,
-            "reason": "missing_trend_summary",
-            "missing_info": ["trend_summary"],
-            "recommended_next_action": "run_dsl",
-            "recommended_query": _rewrite_to_trend_query(getattr(state, "question", "")),
+            "recommended_query": _contract_repair_query(state, contract, missing),
         }
 
     has_any_result = bool(getattr(getattr(state, "memory", None), "facts", None) or getattr(getattr(state, "results", None), "structured_blocks", None) or [])
     if not has_any_result:
+        _debug_decision_line(question, intent, [], [], [], "run_dsl", "no_result")
         return {
             "ready": False,
             "reason": "no_result",
@@ -357,6 +429,7 @@ def evaluate_state_readiness(state: AgentState) -> dict:
         }
     repair_count = int(getattr(getattr(state, "memory", None), "working_memory", {}).get("repair_count", 0))
     if repair_count >= 2:
+        _debug_decision_line(question, intent, [], [], [], "finish", "repair_limit_reached")
         return {
             "ready": True,
             "reason": "repair_limit_reached",
@@ -364,6 +437,7 @@ def evaluate_state_readiness(state: AgentState) -> dict:
             "recommended_next_action": "finish",
         }
     if result_satisfies_goal(state):
+        _debug_decision_line(question, intent, [], [], [], "finish", "goal_satisfied")
         return {
             "ready": True,
             "reason": "default_has_result_and_satisfies_goal",
@@ -372,6 +446,7 @@ def evaluate_state_readiness(state: AgentState) -> dict:
         }
     repair_query = _generate_repair_query(state)
     if repair_query:
+        _debug_decision_line(question, intent, [], [], [], "run_dsl", "goal_not_satisfied")
         return {
             "ready": False,
             "reason": "result_does_not_satisfy_goal",
@@ -379,6 +454,7 @@ def evaluate_state_readiness(state: AgentState) -> dict:
             "recommended_next_action": "run_dsl",
             "recommended_query": repair_query,
         }
+    _debug_decision_line(question, intent, [], [], [], "finish", "default_has_result")
     return {
         "ready": True,
         "reason": "default_has_result",

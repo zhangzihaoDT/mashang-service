@@ -92,7 +92,12 @@ input（用户提问）
 ```json
 {
   "post_process": [
-    {"type": "share", "value_col": "锁单数", "partition_by": ["lock_time"], "alias": "占比"}
+    {
+      "type": "share",
+      "value_col": "锁单数",
+      "partition_by": ["lock_time"],
+      "alias": "占比"
+    }
   ]
 }
 ```
@@ -113,6 +118,36 @@ input（用户提问）
 - Evidence Contract：用 required_fact_types 固化“什么证据足够回答”
 - Runtime Decision：先走规则判定是否 finish；不足时再继续 run_dsl
 - Grounded Summary：总结层只基于证据输出，并避免将贡献拆解直接表述为因果原因
+
+## 核心设计原则
+
+```
+intent          →  负责判断问题类型
+fact_type       →  负责判断证据是否足够
+tool            →  负责生成证据
+runtime_decision →  负责是否允许 finish
+```
+
+四层各司其职，不跨层越权：
+
+- **intent**（`infer_intent_from_question`）只做 NL 分类，输出 `metric / trend / compare / share / time_grouped_share / composition / ranking / distribution / diagnosis` 之一，不关心具体数据。
+- **fact_type**（`SUPPORTED_FACT_TYPES`）定义证据语言，作为 contract 匹配的最小原子单位，不关心 LLM 或工具的实现细节。
+- **tool**（QueryTool / Statistics / Composition / Comparison）只负责生成结构化结果，不关心当前缺什么证据、是否应该 finish。
+- **runtime_decision**（`evaluate_state_readiness`）对照 contract 检查已有 fact_type，只回答"证据够不够"，不关心数据内容。
+
+## BI 能力矩阵
+
+| 能力类型                | 典型问题                    | 执行工具                              | Evidence Contract（所需证据类型）                               |
+| ----------------------- | --------------------------- | ------------------------------------- | --------------------------------------------------------------- |
+| 总量查询                | 昨天锁单数是多少            | QueryTool                             | `metric_value`                                                  |
+| 趋势分析                | 近30日锁单趋势如何          | Statistics.trend_summary              | `trend_summary`                                                 |
+| 对比分析                | 本周 vs 上周变化            | Comparison.wow                        | `comparison_result`                                             |
+| 占比分析（share）       | 分车型锁单占比              | Composition.share_by_dimension        | `dimension_breakdown` + `share_summary`                         |
+| 构成分析（composition） | 按城市/门店/渠道拆解结果    | QueryTool + GROUP BY                  | `dimension_breakdown`                                           |
+| 构成分析（含时间+占比） | 每周分车型锁单占比          | Composition.weekly_share_by_dimension | `time_grouped_metric` + `dimension_breakdown` + `share_summary` |
+| 排序分析                | 锁单 TOP10 城市             | QueryTool + ORDER BY                  | `ranking_result`                                                |
+| 分布分析                | 锁单用户年龄分布 / 分位水平 | Statistics                            | `distribution_summary`                                          |
+| 诊断分析                | 为什么最近一周下滑          | Statistics.contribution_summary       | `trend_summary` + `contribution_summary`                        |
 
 ## Query Log（规划与执行日志）
 
@@ -146,14 +181,25 @@ input（用户提问）
   - 引入 Evidence-driven Runtime：structured_blocks → facts → evidence contract → runtime decision
   - 新增 `statistics.contribution_summary` 用于诊断类问题的贡献拆解（描述性证据）
   - Facts 升级为 Normalized Facts（values / conclusion / source）
-- 2026-05-14（v0.5）
-  - 新增 `analysis_intent` + `post_process` DSL 字段，用于表达占比/构成类分析意图
-  - 新增 `CompositionTool`（tools/composition_tool.py）：专用占比分析工具（周/月/日分组占比、Top-N、帕累托累计占比）
-  - 路由：`plan.analysis_intent.type == "share_breakdown"` → CompositionTool
-  - `QueryTool._apply_post_process`：通用 DataFrame 后处理（share 计算）
-  - `runtime_decision.result_satisfies_goal`：基于用户问题提取 required slots，检查结果列是否满足需求；不满足时自动生成 repair query 重试（最多 2 次）
-  - 语义过滤增强：自动识别用户查询中的具体产品名并添加 product_name 过滤条件
-  - 时间窗口增强：`_parse_time_window` 新增"本周"支持（ISO 周 Mon–today）
+- 2026-05-14（v0.4.2 — Fact Production Layer 稳定化）
+  - 工具层与路由
+    - 新增 `analysis_intent` + `post_process` DSL 字段，用于表达占比/构成类分析意图
+    - 新增 `CompositionTool`（tools/composition_tool.py）：专用占比分析工具（周/月/日分组占比、Top-N、帕累托累计占比）
+    - 路由：`plan.analysis_intent.type == "share_breakdown"` → CompositionTool
+    - `QueryTool._apply_post_process`：通用 DataFrame 后处理（share 计算）
+    - `runtime_decision.result_satisfies_goal`：基于用户问题提取 required slots，检查结果列是否满足需求；不满足时自动生成 repair query 重试（最多 2 次）
+    - 语义过滤增强：自动识别用户查询中的具体产品名并添加 product_name 过滤条件
+    - 时间窗口增强：`_parse_time_window` 新增"本周"支持（ISO 周 Mon–today）
+  - 确定性 Fact 抽取
+    - **所有 builder 改为 summary 格式**：每个 block × 每种 fact_type 最多 1 条，含 `content` + `metadata`，旧 `values`/`rows`/`time_series` 数组全部移除
+    - **新增 `_make_fact`**：统一 fact 构造入口
+    - **column-based detection**（`memory_extractor.py`）：7 个 `_detect_*_columns` 函数用 keyword substring 匹配（中英文），替代硬编码列名集合
+    - **`_FALLBACK_HINTS`**：为每个 block_type 声明预期 fact_type 集合
+    - **gap-filling**：block_type handlers 产出不足时，自动用 column-based 补齐缺失的 fact_type（如 `trend_summary` → `trend_summary` + `time_grouped_metric`）
+    - **`evidence_hints`**：工具层注入到 `structured.result`（tool_router.py `_infer_evidence_hints`），fact 抽取从猜测升级为声明
+    - **`_comparison_df_to_dict`**：comparison DataFrame 转为 dict + evidence_hints（保留 rows 结构）
+    - **`[Eval]` debug line**：runtime_decision 每次决策输出 `question | intent | required | available | missing | action | finish_reason` 一行
+  - **10 问题回测全过**：`metric / trend / compare / composition / share / time_grouped_share / ranking / distribution / diagnosis`
 
 ## 数据与 Schema
 
