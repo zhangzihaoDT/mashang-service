@@ -26,6 +26,7 @@ PlanningAgent（agent/planner.py）
 Tool Router（agent/tool_router.py，确定性路由与执行）
   - Fast Path：纯计算 / 闲聊 / ISO 周数等轻量直算
   - Operators：强口径固定算子（避免指标口径漂移）
+  - Composition：占比/构成/份额高频 BI 专用工具（周/月/日分组占比）
   - Query / Comparison / Statistics：通用 DSL 执行与统计后处理
   ↓
 Structured Result Blocks（结构化执行结果）
@@ -43,6 +44,8 @@ Evidence Contract（agent/runtime_decision.py）
   ↓
 Runtime Decision（agent/runtime_decision.py）
   - 基于 Evidence Contract + Facts 决定继续 run_dsl 或 finish
+  - result_satisfies_goal：检查结果列是否满足用户问题所需（时间粒度、拆解维度、占比列等）
+  - 不满足时自动生成 repair query 并重试（最多 2 次 repair 后强制 finish）
   ↓
 Answer / Summarization
   - 信息不足：回到 Agent Loop 继续 run_dsl
@@ -70,11 +73,35 @@ input（用户提问）
   -> output（Agent 返回）
 ```
 
+### DSL 扩展字段
+
+- **`analysis_intent`**：分析意图元信息，用于工具路由与结果校验。
+
+```json
+{
+  "type": "share_breakdown",
+  "numerator_metric": "锁单数",
+  "denominator_scope": "within_each_week",
+  "time_grain": "week",
+  "breakdown_dimension": "product_name"
+}
+```
+
+- **`post_process`**：通用后处理步骤序列，目前支持 `share`（分组占比）与 `window_share`（时间窗口占比）。
+
+```json
+{
+  "post_process": [
+    {"type": "share", "value_col": "锁单数", "partition_by": ["lock_time"], "alias": "占比"}
+  ]
+}
+```
+
 关键约定：
 
 - 时间窗口统一按左闭右开 `[start, end)` 执行过滤（`>= start` 且 `< end`）。
 - 数据执行尽量保持确定性：LLM 做规划与总结，代码做查询与计算。
-- Agent 的真实输出不是“直接查一次就回答”，而是“循环判断是否已拿到足够事实，再决定继续查还是结束回答”。
+- Agent 的真实输出不是"直接查一次就回答"，而是"循环判断是否已拿到足够事实，再决定继续查还是结束回答"。
 
 ## v0.4：Evidence-driven Agentic BI Runtime
 
@@ -119,6 +146,14 @@ input（用户提问）
   - 引入 Evidence-driven Runtime：structured_blocks → facts → evidence contract → runtime decision
   - 新增 `statistics.contribution_summary` 用于诊断类问题的贡献拆解（描述性证据）
   - Facts 升级为 Normalized Facts（values / conclusion / source）
+- 2026-05-14（v0.5）
+  - 新增 `analysis_intent` + `post_process` DSL 字段，用于表达占比/构成类分析意图
+  - 新增 `CompositionTool`（tools/composition_tool.py）：专用占比分析工具（周/月/日分组占比、Top-N、帕累托累计占比）
+  - 路由：`plan.analysis_intent.type == "share_breakdown"` → CompositionTool
+  - `QueryTool._apply_post_process`：通用 DataFrame 后处理（share 计算）
+  - `runtime_decision.result_satisfies_goal`：基于用户问题提取 required slots，检查结果列是否满足需求；不满足时自动生成 repair query 重试（最多 2 次）
+  - 语义过滤增强：自动识别用户查询中的具体产品名并添加 product_name 过滤条件
+  - 时间窗口增强：`_parse_time_window` 新增"本周"支持（ISO 周 Mon–today）
 
 ## 数据与 Schema
 
@@ -151,6 +186,13 @@ input（用户提问）
   - `weekday_percentile_rank`：参考“某个星期几”在近 N 次该 weekday 分布中的分位
 - Operators（[operators/registry.py](operators/registry.py)）
   - 用于承接强业务口径的固定算子（例如在营门店等）
+- Composition（[tools/composition_tool.py](tools/composition_tool.py)）
+  - `share_by_dimension`：简单分组占比
+  - `weekly_share_by_dimension`：按周分拆占比（ISO 周合并，自动重聚合）
+  - `monthly_share_by_dimension`：按月分拆占比
+  - `topn_share`：Top-N 占比
+  - `cumulative_share`：累计占比（帕累托）
+  - 路由条件：`plan.analysis_intent.type == "share_breakdown"`
 
 ## 环境变量
 
@@ -204,12 +246,12 @@ python3 feishu_bot.py
 │   ├── agent_loop.py       # run_main_agent：主循环入口
 │   ├── planner.py          # PlanningAgent：NL → plan（规划 DSL）
 │   ├── schema.py           # schema/data_path 等加载约定
-│   ├── tool_router.py      # 路由与编排（fast_path/operator/comparison/statistics/query）
+│   ├── tool_router.py      # 路由与编排（fast_path/operator/composition/comparison/statistics/query）
 │   ├── runtime_decision.py # Evidence Contract + Runtime Decision（should_continue）
 │   ├── state.py            # 运行时状态（question/loop/planning/results/memory/final）
 │   ├── memory_extractor.py # 对话记忆抽取与更新
 │   └── llm_config.py       # DeepSeek 模型名配置
-├── tools/                 # 确定性执行工具（Query/Comparison/Statistics/FastPath）
+├── tools/                 # 确定性执行工具（Query/Comparison/Statistics/FastPath/Composition）
 ├── operators/             # 强口径固定算子
 ├── schema/                # schema 与数据路径配置
 └── 设计方案/               # 方案与设计文档（可选参考）
@@ -223,4 +265,8 @@ python3 feishu_bot.py
 近30日有多少天锁单数大于120？
 昨天的锁单数在近30日的锁单数中处于什么分位？
 查询近10周周四/周五门店锁单率环比变化，有多少周是下降的？
+输出LS8上市以来，每周分车型的锁单数占比分别是多少？
+本周智己LS8 66 Ultra 奢享大六座的锁单总数
+按月分门店看交付数占比
+各门店锁单量Top-5占比
 ```

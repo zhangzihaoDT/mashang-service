@@ -13,7 +13,7 @@ from agent.planner import PlanningAgent, plan_runtime_action
 from agent.schema import DATA_PATH_FILE, SCHEMA_DIR
 from agent.state import AgentState, LoopState, ResultBlock
 from agent.tool_router import run_dsl_step
-from tools import QueryTool, ComparisonTool, StatisticsTool
+from tools import CompositionTool, ComparisonTool, QueryTool, StatisticsTool
 
 FINAL_ANSWER_SYSTEM_PROMPT = (
     "你是一个智能数据分析助手。请基于给定的规划 DSL 与执行结果，直接回答用户问题，语言简洁，给出关键数值与同比/环比方向与幅度。"
@@ -369,6 +369,7 @@ def run_main_agent(user_query: str) -> str:
             business_definition=schema_context.get("business_definition", ""),
         )
         comparison_tool = ComparisonTool(query_tool=query_tool)
+        composition_tool = CompositionTool(query_tool=query_tool)
         statistics_tool = StatisticsTool()
         state = AgentState(question=user_query, normalized_question=_normalize_question_text(user_query), loop=LoopState(max_steps=5))
         query_rounds_max = int(state.loop.max_steps or 5)
@@ -391,6 +392,7 @@ def run_main_agent(user_query: str) -> str:
                     query_tool=query_tool,
                     comparison_tool=comparison_tool,
                     statistics_tool=statistics_tool,
+                    composition_tool=composition_tool,
                     memory_context={
                         "facts": state.memory.facts,
                         "working_memory": state.memory.working_memory,

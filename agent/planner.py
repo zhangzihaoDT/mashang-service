@@ -143,6 +143,32 @@ PLANNING_TOOL_SCHEMA = {
                                     "base": {"type": "number"},
                                 },
                             },
+                            "analysis_intent": {
+                                "type": "object",
+                                "properties": {
+                                    "type": {"type": "string", "enum": ["share_breakdown"]},
+                                    "numerator_metric": {"type": "string"},
+                                    "denominator_scope": {"type": "string"},
+                                    "time_grain": {"type": "string"},
+                                    "breakdown_dimension": {"type": "string"},
+                                },
+                                "required": ["type"],
+                            },
+                            "post_process": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "type": {"type": "string", "enum": ["window_share", "ratio"]},
+                                        "partition_by": {"type": "array", "items": {"type": "string"}},
+                                        "value_field": {"type": "string"},
+                                        "alias": {"type": "string"},
+                                        "numerator": {"type": "string"},
+                                        "denominator": {"type": "string"},
+                                    },
+                                    "required": ["type"],
+                                },
+                            },
                         },
                         "required": ["dataset", "metric", "time", "comparison"],
                     },
@@ -183,6 +209,7 @@ class PlanningAgent:
     _SERIES_CANDIDATES = ("LS9", "LS8", "LS7", "LS6", "L7", "L6")
     _TIME_REWRITE_WHITELIST = {
         "yesterday",
+        "this_week",
         "this_month_to_today",
         "last_month",
         "month_to_today",
@@ -517,6 +544,10 @@ class PlanningAgent:
             start = _safe_date(today.year, today.month, 1)
             if start:
                 return (start.isoformat(), today.isoformat())
+        if "本周" in q:
+            monday = today - datetime.timedelta(days=today.weekday())
+            if monday:
+                return (monday.isoformat(), today.isoformat())
         if "上月" in q:
             year = today.year
             month = today.month - 1
@@ -877,6 +908,26 @@ class PlanningAgent:
                 tokens.append(s)
         return list(dict.fromkeys(tokens))
 
+    _RE_PRODUCT_NAME = re.compile(
+        r'(智己[\w\u4e00-\u9fff]+(?:\s+[\w\u4e00-\u9fff+]+)*?(?:Max\+?|Pro|Ultra|标准|长续|奢享|科技|大五座|大六座|豪华|性能|续航|光年)(?:\s+[\w\u4e00-\u9fff+]+)*)'
+    )
+    _RE_PRODUCT_NAME_NO_PREFIX = re.compile(
+        r'(LS\d[\w\u4e00-\u9fff\+]*(?:\s+[\w\u4e00-\u9fff+]+)*?(?:Max\+?|Pro|Ultra|标准|长续|奢享|科技|大五座|大六座|豪华|性能|续航|光年)(?:\s+[\w\u4e00-\u9fff+]+)*)'
+    )
+
+    @staticmethod
+    def _infer_product_name_token(user_query: str) -> str | None:
+        q = (user_query or "").strip()
+        if not q:
+            return None
+        m = PlanningAgent._RE_PRODUCT_NAME.search(q)
+        if m:
+            return m.group(1).strip()
+        m = PlanningAgent._RE_PRODUCT_NAME_NO_PREFIX.search(q)
+        if m:
+            return m.group(1).strip()
+        return None
+
     @staticmethod
     def _has_field_filter(filters: list, fields: set[str]) -> bool:
         for f in filters:
@@ -912,6 +963,12 @@ class PlanningAgent:
                 filters.append({"field": "series", "op": "==", "value": series_tokens[0]})
             elif len(series_tokens) > 1:
                 filters.append({"field": "series", "op": "in", "value": series_tokens})
+
+        has_product_name_filter = PlanningAgent._has_field_filter(filters, {"product_name"})
+        if not has_product_name_filter:
+            product_token = PlanningAgent._infer_product_name_token(user_query)
+            if product_token and series_tokens:
+                filters = PlanningAgent._append_filter(filters, {"field": "product_name", "op": "matches", "value": re.escape(product_token)})
 
         return filters
 
@@ -1136,6 +1193,96 @@ class PlanningAgent:
                 },
             },
             "question": "分类占比",
+        }
+        return self._fill_defaults(self._normalize_plan(plan), user_query)
+
+    @staticmethod
+    def _is_share_breakdown_query(user_query: str) -> bool:
+        q = (user_query or "").replace(" ", "")
+        if not q:
+            return False
+        if not any(k in q for k in ["占比", "比例", "份额", "占"]):
+            return False
+        has_dim = any(
+            PlanningAgent._contains_any_token(q, PlanningAgent._DIMENSION_SYNONYMS.get(dim) or [])
+            for dim in ["series", "product_name", "parent_region_name", "store_name", "store_city", "license_city", "order_gender", "owner_gender"]
+        )
+        has_time_grain = any(k in q for k in ["按周", "每周", "周度", "逐周", "按日", "每日", "逐日", "日度", "按天", "每天",
+                                                "按月", "每月", "月度", "逐月", "按季", "每季度", "季度"])
+        return has_dim and has_time_grain
+
+    @staticmethod
+    def _infer_time_grain(user_query: str) -> str:
+        q = (user_query or "").replace(" ", "")
+        if any(k in q for k in ["按周", "每周", "周度", "逐周", "周别"]):
+            return "week"
+        if any(k in q for k in ["按日", "每日", "逐日", "日度", "按天", "每天", "日别"]):
+            return "day"
+        if any(k in q for k in ["按月", "每月", "月度", "逐月", "月别"]):
+            return "month"
+        return "week"
+
+    @staticmethod
+    def _resolve_breakdown_dimension(user_query: str, has_series_filter: bool = False) -> str:
+        q = (user_query or "").replace(" ", "")
+        for dim, synonyms in PlanningAgent._DIMENSION_SYNONYMS.items():
+            if PlanningAgent._contains_any_token(q, synonyms):
+                if dim == "series" and has_series_filter:
+                    return "product_name"
+                return dim
+        return "series"
+
+    def _build_share_breakdown_plan(self, user_query: str) -> dict | None:
+        metric_defaults = self._metric_defaults(user_query)
+        if not metric_defaults:
+            return None
+        today = datetime.date.today()
+        time_window = self._parse_time_window_with_business(user_query, today) or (
+            (today - datetime.timedelta(days=7)).isoformat(),
+            today.isoformat(),
+        )
+        start, end = time_window
+        time_field = metric_defaults["time_field"]
+        non_null_field = metric_defaults.get("non_null_field")
+        metric_obj: dict = metric_defaults.get("metric") or {}
+        metric_alias = metric_obj.get("alias") or "value"
+
+        time_grain = self._infer_time_grain(user_query)
+        time_grain_cn = {"week": "周", "day": "日", "month": "月"}.get(time_grain, "周")
+        series_tokens = PlanningAgent._infer_series_tokens(user_query)
+        breakdown_dim = self._resolve_breakdown_dimension(user_query, has_series_filter=bool(series_tokens))
+
+        filters: list[dict] = []
+        if non_null_field:
+            filters = PlanningAgent._append_filter(filters, {"field": non_null_field, "op": "!=", "value": None})
+
+        plan = {
+            "dataset": metric_defaults["dataset"],
+            "metric": {
+                "field": metric_obj.get("field") or "order_number",
+                "agg": metric_obj.get("agg") or "count",
+                "alias": metric_alias,
+                "business_name": metric_obj.get("business_name") or metric_alias,
+            },
+            "time": {"field": time_field, "start": start, "end": end},
+            "dimensions": [time_field, breakdown_dim],
+            "filters": filters,
+            "comparison": {"type": "none"},
+            "analysis_intent": {
+                "type": "share_breakdown",
+                "numerator_metric": metric_alias,
+                "denominator_scope": f"within_each_{time_grain}",
+                "time_grain": time_grain,
+                "breakdown_dimension": breakdown_dim,
+            },
+            "post_process": [
+                {
+                    "type": "window_share",
+                    "partition_by": [time_field],
+                    "value_field": metric_alias,
+                    "alias": f"每{time_grain_cn}占比",
+                }
+            ],
         }
         return self._fill_defaults(self._normalize_plan(plan), user_query)
 
@@ -2112,6 +2259,47 @@ class PlanningAgent:
                 except Exception:
                     plan["fast_path"] = {}
 
+        analysis_intent = plan.get("analysis_intent")
+        if not isinstance(analysis_intent, dict):
+            plan["analysis_intent"] = {}
+        else:
+            atype = analysis_intent.get("type")
+            if atype not in {"share_breakdown"}:
+                plan["analysis_intent"] = {}
+
+        post_process = plan.get("post_process")
+        if not isinstance(post_process, list):
+            plan["post_process"] = []
+        else:
+                normalized_pp: list[dict] = []
+                for pp in post_process:
+                    if not isinstance(pp, dict):
+                        continue
+                    pptype = pp.get("type")
+                    if pptype == "window_share":
+                        partition_by = pp.get("partition_by")
+                        value_field = pp.get("value_field")
+                        alias = str(pp.get("alias") or "")
+                        if isinstance(partition_by, list) and partition_by and isinstance(value_field, str) and value_field and alias:
+                            normalized_pp.append({
+                                "type": "window_share",
+                                "partition_by": list(partition_by),
+                                "value_field": value_field,
+                                "alias": alias,
+                            })
+                    elif pptype == "ratio":
+                        numerator = pp.get("numerator")
+                        denominator = pp.get("denominator")
+                        alias = str(pp.get("alias") or "")
+                        if isinstance(numerator, str) and isinstance(denominator, str) and alias:
+                            normalized_pp.append({
+                                "type": "ratio",
+                                "numerator": numerator,
+                                "denominator": denominator,
+                                "alias": alias,
+                            })
+                plan["post_process"] = normalized_pp
+
         return plan
 
     def _rule_based_plan(self, user_query: str) -> dict | None:
@@ -2193,6 +2381,14 @@ class PlanningAgent:
                     if isinstance(weekend_plan, dict) and weekend_plan:
                         weekend_plan["question"] = q
                         finalized.append(weekend_plan)
+                        continue
+            if self._is_share_breakdown_query(semantic_q) and not has_compare:
+                stat = normalized.get("statistics")
+                if not isinstance(stat, dict) or stat.get("type") not in ("category_share", "weekly_decline_ratio", "daily_mean"):
+                    sb_plan = self._build_share_breakdown_plan(semantic_q)
+                    if isinstance(sb_plan, dict) and sb_plan:
+                        sb_plan["question"] = q
+                        finalized.append(sb_plan)
                         continue
             if self._is_category_share_query(semantic_q) and not has_compare:
                 stat = normalized.get("statistics")
@@ -2663,7 +2859,10 @@ class PlanningAgent:
                     elif want_product:
                         inferred_dims.append("product_name")
                     elif want_series:
-                        inferred_dims.append("series")
+                        if PlanningAgent._infer_series_tokens(user_query):
+                            inferred_dims.append("product_name")
+                        else:
+                            inferred_dims.append("series")
                     elif want_store_city:
                         inferred_dims.append("store_city")
                     elif want_license_city:
@@ -2678,7 +2877,10 @@ class PlanningAgent:
                 elif want_product:
                     plan["dimensions"] = ["product_name"]
                 elif want_series:
-                    plan["dimensions"] = ["series"]
+                    if PlanningAgent._infer_series_tokens(user_query):
+                        plan["dimensions"] = ["product_name"]
+                    else:
+                        plan["dimensions"] = ["series"]
                 elif want_store_city:
                     plan["dimensions"] = ["store_city"]
                 elif want_license_city:
@@ -2743,6 +2945,8 @@ class PlanningAgent:
             return None
         if "昨天" in q or "昨日" in q:
             return "yesterday"
+        if "本周" in q:
+            return "this_week"
         if "本月" in q:
             return "this_month_to_today"
         if "上月" in q:
@@ -2897,6 +3101,8 @@ def plan_runtime_action(client: OpenAI, state: AgentState) -> dict:
                 }
             recommended_query = readiness.get("recommended_query")
             query = str(recommended_query or state.question).strip() or state.question
+            if readiness.get("reason") == "result_does_not_satisfy_goal":
+                state.memory.working_memory["repair_count"] = int(state.memory.working_memory.get("repair_count", 0)) + 1
             if state.loop.iteration == 0 and not state.loop.history:
                 return {
                     "action": "run_dsl",

@@ -4,3 +4,4 @@ from .query_tool import QueryTool, QUERY_TOOL_SCHEMA
 from .comparison_tool import ComparisonTool, COMPARISON_TOOL_SCHEMA
 from .statistics_tool import StatisticsTool, STATISTICS_TOOL_SCHEMA
 from .fast_path_tool import FastPathTool, FAST_PATH_TOOL_SCHEMA
+from .composition_tool import CompositionTool

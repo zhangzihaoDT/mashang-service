@@ -2,11 +2,12 @@ import json
 import datetime
 import re
 import copy
+import pandas as pd
 
 from agent.planner import PlanningAgent
 from operators import run_registered_operator
 from operators.time_windows import extract_listed_dates
-from tools import ComparisonTool, FastPathTool, QueryTool, StatisticsTool
+from tools import ComparisonTool, CompositionTool, FastPathTool, QueryTool, StatisticsTool
 
 
 def _infer_block_type(plan: dict) -> str:
@@ -23,6 +24,8 @@ def _infer_block_type(plan: dict) -> str:
 
 
 def _infer_row_count(result: object) -> int | None:
+    if isinstance(result, pd.DataFrame):
+        return len(result)
     if not isinstance(result, dict):
         return None
     for key in ["daily_rows", "weekly_rows", "weekend_rows"]:
@@ -66,6 +69,7 @@ def _execute_single_plan(
     query_tool: QueryTool,
     comparison_tool: ComparisonTool,
     statistics_tool: StatisticsTool,
+    composition_tool: CompositionTool | None = None,
     memory_context: dict | None = None,
 ) -> dict:
     dataset = plan.get("dataset")
@@ -76,6 +80,7 @@ def _execute_single_plan(
     comparison = plan.get("comparison", {}) or {}
     statistics = plan.get("statistics", {}) or {}
     fast_path = plan.get("fast_path", {}) or {}
+    post_process = plan.get("post_process", []) or []
 
     time_field = time.get("field")
     time_start = time.get("start")
@@ -113,6 +118,21 @@ def _execute_single_plan(
         }
         print(f"[Route] 使用固定算子: {execution_meta['route']}")
         tool_result = operator_result
+    if tool_result is None and composition_tool is not None:
+        intent = plan.get("analysis_intent", {}) or {}
+        if intent.get("type") == "share_breakdown":
+            execution_meta = {"engine": "composition", "route": f"composition.{intent.get('denominator_scope', 'share')}"}
+            print(f"\n[Thinking] 执行构成分析: {execution_meta['route']}")
+            try:
+                composition_result = composition_tool.execute(plan)
+                if isinstance(composition_result, str):
+                    tool_result = composition_result
+                elif isinstance(composition_result, pd.DataFrame):
+                    tool_result = composition_result
+                else:
+                    tool_result = str(composition_result)
+            except Exception as e:
+                tool_result = {"type": "composition_error", "error": "composition_execution_failed", "message": str(e)}
     if comparison_type in {"yoy", "wow", "dod"}:
         if comparison_type == "wow" and stats_type == "weekly_decline_ratio":
             execution_meta = {"engine": "comparison", "route": "comparison.weekly_wow_series"}
@@ -865,6 +885,8 @@ def _execute_single_plan(
             if time_field and time_start and time_end
             else filters_without_time,
         }
+        if post_process:
+            query_plan["post_process"] = list(post_process)
         tool_result = query_tool.execute_analysis(query_plan)
 
     if isinstance(tool_result, str) and ("找不到数据集" in tool_result or "聚合计算失败" in tool_result):
@@ -903,6 +925,7 @@ def run_dsl_step(
     query_tool: QueryTool,
     comparison_tool: ComparisonTool,
     statistics_tool: StatisticsTool,
+    composition_tool: CompositionTool | None = None,
     memory_context: dict | None = None,
 ) -> dict:
     print("\n[Thinking] PlanningAgent 正在构建执行规划并路由...")
@@ -1060,6 +1083,7 @@ def run_dsl_step(
                     query_tool=query_tool,
                     comparison_tool=comparison_tool,
                     statistics_tool=statistics_tool,
+                    composition_tool=composition_tool,
                     memory_context=memory_context,
                 )
                 result_blocks.append(execution["block"])
@@ -1081,6 +1105,7 @@ def run_dsl_step(
         query_tool=query_tool,
         comparison_tool=comparison_tool,
         statistics_tool=statistics_tool,
+        composition_tool=composition_tool,
         memory_context=memory_context,
     )
     return {

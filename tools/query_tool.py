@@ -424,6 +424,10 @@ class QueryTool:
                 if rename_map:
                     result_df = result_df.rename(columns=rename_map)
 
+        post_process = plan.get("post_process", [])
+        if isinstance(post_process, list) and post_process and isinstance(result_df, pd.DataFrame) and not result_df.empty:
+            result_df = self._apply_post_process(result_df, post_process)
+
         sort_opts = plan.get("sort", [])
         if sort_opts and not result_df.empty:
             if isinstance(sort_opts, dict):
@@ -445,6 +449,28 @@ class QueryTool:
             result_df = result_df.head(int(limit))
 
         return result_df
+
+    @staticmethod
+    def _apply_post_process(df: pd.DataFrame, steps: list[dict]) -> pd.DataFrame:
+        for step in steps:
+            if not isinstance(step, dict):
+                continue
+            ptype = step.get("type")
+            if ptype == "share":
+                value_col = step.get("value_col")
+                partition_by = step.get("partition_by", [])
+                alias = step.get("alias", "占比")
+                if not isinstance(value_col, str) or not value_col:
+                    continue
+                if value_col not in df.columns:
+                    continue
+                if not isinstance(partition_by, list) or not partition_by:
+                    continue
+                valid_partitions = [c for c in partition_by if c in df.columns]
+                if not valid_partitions:
+                    continue
+                df[alias] = df[value_col] / df.groupby(valid_partitions, observed=True)[value_col].transform("sum")
+        return df
 
     def execute_analysis(self, plan: dict) -> str:
         result_df = self.execute_analysis_df(plan)

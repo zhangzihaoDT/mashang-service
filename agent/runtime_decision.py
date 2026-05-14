@@ -3,6 +3,151 @@ import re
 from agent.state import AgentState
 
 
+def extract_required_slots(question: str) -> dict:
+    q = (question or "").replace(" ", "")
+    required: dict[str, str] = {}
+
+    if any(k in q for k in ["按周", "每周", "周度", "逐周", "周别"]):
+        required["time_grain"] = "week"
+    elif any(k in q for k in ["按月", "每月", "月度", "逐月", "月别"]):
+        required["time_grain"] = "month"
+    elif any(k in q for k in ["按日", "每日", "日度", "逐日", "日别", "按天"]):
+        required["time_grain"] = "day"
+
+    if any(k in q for k in ["分车型", "按车型", "车型", "分车系", "按车系", "车系"]):
+        required["breakdown_dimension"] = "model"
+    elif any(k in q for k in ["分门店", "按门店"]):
+        required["breakdown_dimension"] = "store"
+    elif any(k in q for k in ["分大区", "按大区"]):
+        required["breakdown_dimension"] = "region"
+    elif any(k in q for k in ["分城市", "按城市"]):
+        required["breakdown_dimension"] = "city"
+    elif any(k in q for k in ["性别", "男女"]):
+        required["breakdown_dimension"] = "gender"
+
+    if any(k in q for k in ["锁单"]):
+        required["metric"] = "lock_order_count"
+    elif any(k in q for k in ["交付"]):
+        required["metric"] = "delivery_count"
+
+    if any(k in q for k in ["占比", "比例", "份额"]):
+        required["post_metric"] = "share"
+
+    return required
+
+
+def _check_result_columns(result_text: str) -> list[str]:
+    if not isinstance(result_text, str) or not result_text:
+        return []
+    lines = result_text.strip().split("\n")
+    if not lines:
+        return []
+    return [c.strip() for c in lines[0].split() if c.strip()]
+
+
+def _result_sample_values(result_text: str) -> dict[str, list[str]]:
+    if not isinstance(result_text, str) or not result_text:
+        return {}
+    lines = result_text.strip().split("\n")
+    if len(lines) < 2:
+        return {}
+    cols = _check_result_columns(result_text)
+    if not cols:
+        return {}
+    samples: dict[str, list[str]] = {c: [] for c in cols}
+    for line in lines[1:]:
+        parts = line.split()
+        for i, c in enumerate(cols):
+            if i < len(parts):
+                samples[c].append(parts[i])
+    return samples
+
+
+def result_satisfies_goal(state: AgentState) -> bool:
+    question = getattr(state, "question", "") or ""
+    required = extract_required_slots(question)
+    if not required:
+        return True
+
+    blocks = getattr(getattr(state, "results", None), "structured_blocks", None)
+    if not isinstance(blocks, list) or not blocks:
+        return False
+
+    for b in blocks:
+        result_obj = getattr(b, "result", None)
+        if result_obj is None:
+            continue
+
+        if isinstance(result_obj, str):
+            cols = _check_result_columns(result_obj)
+            result_str = result_obj
+        elif isinstance(result_obj, dict):
+            cols = list(result_obj.keys())
+            result_str = None
+        elif hasattr(result_obj, "columns"):
+            cols = list(result_obj.columns)
+            result_str = str(result_obj)
+        else:
+            continue
+
+        if not cols:
+            continue
+
+        cols_lower = [c.lower() for c in cols]
+
+        time_grain = required.get("time_grain")
+        if time_grain:
+            keywords = {"week": ["week", "w"], "month": ["month"], "day": ["day", "date"]}
+            col_match = any(any(k in c for k in keywords.get(time_grain, [])) for c in cols_lower)
+            if not col_match:
+                if result_str:
+                    samples = _result_sample_values(result_str)
+                    value_match = False
+                    for col_vals in samples.values():
+                        combined = " ".join(col_vals)
+                        if time_grain == "week" and re.search(r"第\s*\d+\s*周", combined):
+                            value_match = True
+                            break
+                        if time_grain == "month" and re.search(r"\d+\s*月|第\s*\d+\s*月", combined):
+                            value_match = True
+                            break
+                    if not value_match:
+                        continue
+                else:
+                    continue
+
+        if required.get("post_metric") == "share":
+            if not any("占比" in c or "share" in c.lower() or "ratio" in c.lower() or "pct" in c.lower() for c in cols):
+                continue
+
+        if required.get("breakdown_dimension") == "model":
+            if not any(c in cols for c in ["sub_model_name", "model_name", "config_name", "product_name"]):
+                if not any("车型" in c or "model" in c.lower() or "product" in c.lower() or "config" in c.lower() for c in cols):
+                    continue
+
+        return True
+
+    return False
+
+
+def _generate_repair_query(state: AgentState) -> str | None:
+    question = getattr(state, "question", "") or ""
+    required = extract_required_slots(question)
+    if not required:
+        return None
+
+    repair_parts = [question.rstrip("。；;")]
+    if required.get("post_metric") == "share":
+        repair_parts.append("需要包含每周期占比")
+    if required.get("time_grain"):
+        cn = {"week": "周", "month": "月", "day": "日"}
+        repair_parts.append(f"按{cn.get(required['time_grain'], required['time_grain'])}分组")
+    if required.get("breakdown_dimension"):
+        repair_parts.append("需要包含拆解维度列")
+
+    return "，".join(repair_parts) + "。"
+
+
 ANALYSIS_EVIDENCE_CONTRACT = {
     "trend": {
         "required_fact_types": ["trend_summary"],
@@ -203,9 +348,40 @@ def evaluate_state_readiness(state: AgentState) -> dict:
         }
 
     has_any_result = bool(getattr(getattr(state, "memory", None), "facts", None) or getattr(getattr(state, "results", None), "structured_blocks", None) or [])
+    if not has_any_result:
+        return {
+            "ready": False,
+            "reason": "no_result",
+            "missing_info": ["result"],
+            "recommended_next_action": "run_dsl",
+        }
+    repair_count = int(getattr(getattr(state, "memory", None), "working_memory", {}).get("repair_count", 0))
+    if repair_count >= 2:
+        return {
+            "ready": True,
+            "reason": "repair_limit_reached",
+            "missing_info": [],
+            "recommended_next_action": "finish",
+        }
+    if result_satisfies_goal(state):
+        return {
+            "ready": True,
+            "reason": "default_has_result_and_satisfies_goal",
+            "missing_info": [],
+            "recommended_next_action": "finish",
+        }
+    repair_query = _generate_repair_query(state)
+    if repair_query:
+        return {
+            "ready": False,
+            "reason": "result_does_not_satisfy_goal",
+            "missing_info": ["result_quality"],
+            "recommended_next_action": "run_dsl",
+            "recommended_query": repair_query,
+        }
     return {
-        "ready": bool(has_any_result),
-        "reason": "default_has_result" if has_any_result else "no_result",
-        "missing_info": [] if has_any_result else ["result"],
-        "recommended_next_action": "finish" if has_any_result else "run_dsl",
+        "ready": True,
+        "reason": "default_has_result",
+        "missing_info": [],
+        "recommended_next_action": "finish",
     }
