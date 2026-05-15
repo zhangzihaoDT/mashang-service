@@ -7,7 +7,7 @@ import pandas as pd
 from agent.planner import PlanningAgent
 from operators import run_registered_operator
 from operators.time_windows import extract_listed_dates
-from tools import ComparisonTool, CompositionTool, FastPathTool, QueryTool, StatisticsTool
+from tools import ComparisonTool, CompositionTool, FastPathTool, MultiTableMetricTool, QueryTool, StatisticsTool
 
 
 def _infer_block_type(plan: dict) -> str:
@@ -84,6 +84,7 @@ _EVIDENCE_HINTS: dict[str, dict] = {
     "wow": {"fact_types": ["comparison_result"], "has_comparison": True, "comparison_type": "wow", "result_type": "comparison"},
     "dod": {"fact_types": ["comparison_result"], "has_comparison": True, "comparison_type": "dod", "result_type": "comparison"},
     "numeric_ratio": {"fact_types": ["metric_value"], "result_type": "fast_path"},
+    "data_update": {"fact_types": ["metric_value"], "result_type": "fast_path"},
 }
 
 
@@ -128,6 +129,7 @@ def _execute_single_plan(
     comparison_tool: ComparisonTool,
     statistics_tool: StatisticsTool,
     composition_tool: CompositionTool | None = None,
+    multi_table_tool: MultiTableMetricTool | None = None,
     memory_context: dict | None = None,
 ) -> dict:
     dataset = plan.get("dataset")
@@ -191,6 +193,16 @@ def _execute_single_plan(
                     tool_result = str(composition_result)
             except Exception as e:
                 tool_result = {"type": "composition_error", "error": "composition_execution_failed", "message": str(e)}
+    if tool_result is None and multi_table_tool is not None:
+        intent = plan.get("analysis_intent", {}) or {}
+        if intent.get("type") == "attribute_penetration":
+            execution_meta = {"engine": "multi_table", "route": "multi_table.attribute_penetration"}
+            print(f"\n[Thinking] 执行多表属性渗透率分析: {execution_meta['route']}")
+            try:
+                mt_result = multi_table_tool.execute(plan)
+                tool_result = mt_result if isinstance(mt_result, str) else mt_result
+            except Exception as e:
+                tool_result = {"type": "attribute_penetration_error", "error": "multi_table_execution_failed", "message": str(e)}
     if comparison_type in {"yoy", "wow", "dod"}:
         if comparison_type == "wow" and stats_type == "weekly_decline_ratio":
             execution_meta = {"engine": "comparison", "route": "comparison.weekly_wow_series"}
@@ -992,6 +1004,7 @@ def run_dsl_step(
     comparison_tool: ComparisonTool,
     statistics_tool: StatisticsTool,
     composition_tool: CompositionTool | None = None,
+    multi_table_tool: MultiTableMetricTool | None = None,
     memory_context: dict | None = None,
 ) -> dict:
     print("\n[Thinking] PlanningAgent 正在构建执行规划并路由...")
@@ -1150,6 +1163,7 @@ def run_dsl_step(
                     comparison_tool=comparison_tool,
                     statistics_tool=statistics_tool,
                     composition_tool=composition_tool,
+                    multi_table_tool=multi_table_tool,
                     memory_context=memory_context,
                 )
                 result_blocks.append(execution["block"])
@@ -1172,6 +1186,7 @@ def run_dsl_step(
         comparison_tool=comparison_tool,
         statistics_tool=statistics_tool,
         composition_tool=composition_tool,
+        multi_table_tool=multi_table_tool,
         memory_context=memory_context,
     )
     return {

@@ -27,6 +27,7 @@ Tool Router（agent/tool_router.py，确定性路由与执行）
   - Fast Path：纯计算 / 闲聊 / ISO 周数等轻量直算
   - Operators：强口径固定算子（避免指标口径漂移）
   - Composition：占比/构成/份额高频 BI 专用工具（周/月/日分组占比）
+  - MultiTableMetric：跨表配置渗透率/分布分析（order_data ⋈ config_attribute）
   - Query / Comparison / Statistics：通用 DSL 执行与统计后处理
   ↓
 Structured Result Blocks（结构化执行结果）
@@ -84,6 +85,30 @@ input（用户提问）
   "denominator_scope": "within_each_week",
   "time_grain": "week",
   "breakdown_dimension": "product_name"
+}
+```
+
+**v0.4.4 新增 `attribute_penetration` / `attribute_distribution` 类型**，用于跨表配置属性分析：
+
+```json
+{
+  "type": "attribute_penetration",
+  "attribute_pattern": "激光雷达",        // config_attribute.Attribute 模糊匹配
+  "value_contains": "Thor",              // value 模糊过滤（可选）
+  "positive_value": "是|标准|高阶|Thor",  // value 正则匹配（可选）
+  "dimension_field": "product_name",     // 分组维度
+  "dimension_mapping": {                 // 维度值映射（如 5座/6座）
+    "五座": "product_name LIKE '%五座%'",
+    "六座": "product_name LIKE '%六座%'"
+  }
+}
+```
+
+```json
+{
+  "type": "attribute_distribution",
+  "attribute_pattern": "轮毂|轮辋",       // config_attribute.Attribute 模糊匹配
+  "top_k": 10                            // 取 Top-K 值，其余归为"其他"
 }
 ```
 
@@ -148,6 +173,8 @@ runtime_decision →  负责是否允许 finish
 | 排序分析                | 锁单 TOP10 城市             | QueryTool + ORDER BY                  | `ranking_result`                                                |
 | 分布分析                | 锁单用户年龄分布 / 分位水平 | Statistics                            | `distribution_summary`                                          |
 | 诊断分析                | 为什么最近一周下滑          | Statistics.contribution_summary       | `trend_summary` + `contribution_summary`                        |
+| 配置渗透率分析          | CM2 增程中 Thor 选装率     | MultiTableMetricTool.attribute_penetration  | `dimension_breakdown` + `share_summary`                    |
+| 配置分布分析            | LS8 不同轮毂的选装比例     | MultiTableMetricTool.attribute_distribution | `dimension_breakdown` + `share_summary`                    |
 
 ## Query Log（规划与执行日志）
 
@@ -181,6 +208,28 @@ runtime_decision →  负责是否允许 finish
   - 引入 Evidence-driven Runtime：structured_blocks → facts → evidence contract → runtime decision
   - 新增 `statistics.contribution_summary` 用于诊断类问题的贡献拆解（描述性证据）
   - Facts 升级为 Normalized Facts（values / conclusion / source）
+- 2026-05-15（v0.4.5 — 数据集更新 Fast Path）
+  - 新增 `FastPathTool.data_update`：支持 CLI/飞书触发数据集增量更新
+    - `scope="order"` 时调用 `order_data_to_parquet.py`，完成后自动触发 `skills_order_observation_daily.py`
+    - `scope="config"` 时调用 `order_config_to_parquet.py`
+    - `scope="lock"` 时调用 `lock_attribution_data_to_parquet.py`
+    - 更新后自动读取 `lock_time` 最大日期作为"更新至"时间戳
+  - `FastPathTool` 升级：`answer` 字段直出（绕过 LLM 总结）
+  - `Planner._parse_fast_path_query`：规则路径前置，匹配"更新订单数据"等自然语言
+  - `_normalize_plan` fast_path 白名单加入 `data_update`
+- 2026-05-15（v0.4.4 — MultiTable / Lookup Metric 能力补齐）
+  - 新增 `MultiTableMetricTool`（tools/multitable_metric_tool.py）
+    - `attribute_penetration`：order_data ⋈ config_attribute，计算配置/属性渗透率（地暖/激光雷达/线控等）
+    - `attribute_distribution`：多值属性分布占比（轮毂 share、颜色分布），支持 Top-K
+    - 支持 `value_contains` 模糊匹配 variant（如 Thor/Orin 区分）
+    - 支持 `series_group_logic`（CM0/CM1/CM2/DM0/DM1）与 `product_type_logic`（增程/纯电）业务规则推导
+  - 新增 `ConfigCrossAnalysisTemplates`（tools/config_cross_analysis_templates.py）
+    - 17 个配置渗透率模板 + 3 个分布模板，关键词匹配自动填充 `analysis_intent`
+    - 通用 fallback：查询含"选装率"但无模板匹配时，自动提取文本作为 attribute_pattern
+    - 时间窗口：优先解析用户显式日期（X年X月X日至今）→ 系列上市日（time_periods.end）→ 默认
+  - Agent routing：`analysis_intent.type == "attribute_penetration"` / `"attribute_distribution"` → MultiTableMetricTool
+  - Planner 规则路径：`_is_penetration_query` + `_build_penetration_plan`，LLM 前稳定命中
+  - 独立回测脚本：scripts/ls8_floor_heating_rate.py
 - 2026-05-14（v0.4.2 — Fact Production Layer 稳定化）
   - 工具层与路由
     - 新增 `analysis_intent` + `post_process` DSL 字段，用于表达占比/构成类分析意图
@@ -239,6 +288,12 @@ runtime_decision →  负责是否允许 finish
   - `topn_share`：Top-N 占比
   - `cumulative_share`：累计占比（帕累托）
   - 路由条件：`plan.analysis_intent.type == "share_breakdown"`
+- MultiTable / Lookup Metric（[tools/multitable_metric_tool.py](tools/multitable_metric_tool.py)）
+  - `attribute_penetration`：主表右连选配表，计算配置/属性渗透率（二值 是/否），支持 variant 模糊匹配
+  - `attribute_distribution`：多值属性分布占比（如轮毂类型 share、颜色分布）
+  - 路由条件：`plan.analysis_intent.type == "attribute_penetration"` 或 `"attribute_distribution"`
+  - 模板库：[tools/config_cross_analysis_templates.py](tools/config_cross_analysis_templates.py)，覆盖 17 个配置项模板（地暖/轮毂/激光雷达/线控/礼包等）
+  - 支持业务规则推导：series_group_logic（CM0/CM1/CM2/DM0/DM1）、product_type_logic（增程/纯电）
 
 ## 环境变量
 
@@ -297,9 +352,17 @@ python3 feishu_bot.py
 │   ├── state.py            # 运行时状态（question/loop/planning/results/memory/final）
 │   ├── memory_extractor.py # 对话记忆抽取与更新
 │   └── llm_config.py       # DeepSeek 模型名配置
-├── tools/                 # 确定性执行工具（Query/Comparison/Statistics/FastPath/Composition）
+├── tools/                 # 确定性执行工具（Query/Comparison/Statistics/FastPath/Composition/MultiTableMetric）
+│   ├── query_tool.py
+│   ├── comparison_tool.py
+│   ├── statistics_tool.py
+│   ├── composition_tool.py
+│   ├── fast_path_tool.py
+│   ├── multitable_metric_tool.py    # 跨表属性渗透率/分布分析
+│   └── config_cross_analysis_templates.py  # 配置分析模板库（17 个模板）
 ├── operators/             # 强口径固定算子
 ├── schema/                # schema 与数据路径配置
+├── scripts/               # 固定自动化脚本（定时调度用）
 └── 设计方案/               # 方案与设计文档（可选参考）
 ```
 

@@ -1,4 +1,12 @@
 import datetime
+import subprocess
+import sys
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+UPDATER_DIR = REPO_ROOT / "dataset" / "updater"
+UPDATER_SCRIPT = UPDATER_DIR / "update_all_datasets.py"
+SYNC_SCRIPT = REPO_ROOT / "scripts" / "skills_order_observation_daily.py"
 
 
 class FastPathTool:
@@ -60,6 +68,9 @@ class FastPathTool:
                 "answer": f"今天是 {today.isoformat()}，ISO 周数为 {int(iso.year)}-W{int(iso.week):02d}。",
                 "question": str(user_query or ""),
             }
+        if kind == "data_update":
+            scope = (config.get("scope") or "all").strip().lower()
+            return self._run_data_update(scope, user_query)
         if kind != "numeric_ratio":
             return {"type": "fast_path", "error": "unsupported_type", "message": f"不支持的 fast_path 类型: {kind}"}
         try:
@@ -88,19 +99,145 @@ class FastPathTool:
             "question": str(user_query or ""),
         }
 
+    def _run_data_update(self, scope: str, user_query: str) -> dict:
+        steps: list[dict] = []
+        success = True
+
+        order_max_date = None
+        config_updated = False
+
+        if scope == "order" or scope == "all":
+            steps.append({"step": "order_data", "status": "running"})
+            try:
+                r = subprocess.run(
+                    [sys.executable, str(UPDATER_DIR / "order_data_to_parquet.py"),
+                     "--timeout", "600"],
+                    cwd=str(REPO_ROOT), text=True, timeout=900,
+                )
+                if r.returncode != 0:
+                    steps[-1]["status"] = "failed"
+                else:
+                    steps[-1]["status"] = "done"
+                    try:
+                        import pandas as pd
+                        odf = pd.read_parquet(str(REPO_ROOT / "dataset" / "order_data.parquet"))
+                        for col in ["lock_time", "delivery_date", "order_create_date"]:
+                            if col in odf.columns:
+                                mx = pd.to_datetime(odf[col].dropna(), errors="coerce").max()
+                                if pd.notna(mx):
+                                    order_max_date = mx.strftime("%Y-%m-%d")
+                                    break
+                    except Exception:
+                        pass
+            except subprocess.TimeoutExpired:
+                steps[-1]["status"] = "timeout"
+                success = False
+            except Exception as e:
+                steps[-1]["status"] = "failed"
+                steps[-1]["error"] = str(e)
+                success = False
+
+            if steps[-1]["status"] == "done":
+                steps.append({"step": "sync_observation", "status": "running"})
+                try:
+                    r = subprocess.run(
+                        [sys.executable, str(SYNC_SCRIPT)],
+                        cwd=str(REPO_ROOT), text=True, timeout=120,
+                    )
+                    steps[-1]["status"] = "done" if r.returncode == 0 else "failed"
+                except Exception as e:
+                    steps[-1]["status"] = "failed"
+                    steps[-1]["error"] = str(e)
+
+            if success:
+                steps.append({"step": "sync_observation", "status": "running"})
+                try:
+                    r = subprocess.run(
+                        [sys.executable, str(SYNC_SCRIPT), "--mtd", "--dry-run"],
+                        cwd=str(REPO_ROOT), capture_output=True, text=True, timeout=120,
+                    )
+                    steps[-1]["status"] = "done" if r.returncode == 0 else "failed"
+                    if r.returncode != 0:
+                        steps[-1]["error"] = r.stderr[-200:] if r.stderr else "exit code != 0"
+                except Exception as e:
+                    steps[-1]["status"] = "failed"
+                    steps[-1]["error"] = str(e)
+
+        if scope == "config" or scope == "all":
+            steps.append({"step": "config_attribute", "status": "running"})
+            try:
+                r = subprocess.run(
+                    [sys.executable, str(UPDATER_DIR / "order_config_to_parquet.py"),
+                     "--force", "--timeout", "600"],
+                    cwd=str(REPO_ROOT), text=True, timeout=900,
+                )
+                if r.returncode == 0:
+                    steps[-1]["status"] = "done"
+                    config_updated = True
+                else:
+                    steps[-1]["status"] = "failed"
+            except Exception as e:
+                steps[-1]["status"] = "failed"
+                steps[-1]["error"] = str(e)
+
+        if scope == "lock" or scope == "all":
+            steps.append({"step": "lock_attribution", "status": "running"})
+            try:
+                r = subprocess.run(
+                    [sys.executable, str(UPDATER_DIR / "lock_attribution_data_to_parquet.py"),
+                     "--timeout", "600"],
+                    cwd=str(REPO_ROOT), text=True, timeout=900,
+                )
+                steps[-1]["status"] = "done" if r.returncode == 0 else "failed"
+            except Exception as e:
+                steps[-1]["status"] = "failed"
+                steps[-1]["error"] = str(e)
+
+        done_steps = [s for s in steps if s["status"] == "done"]
+        failed_steps = [s for s in steps if s["status"] != "done"]
+
+        parts = []
+        if order_max_date:
+            parts.append(f"订单数据已更新至 {order_max_date}")
+        elif any(s["step"] == "order_data" and s["status"] == "done" for s in steps):
+            parts.append("订单数据已更新")
+        if config_updated:
+            parts.append("选配数据已更新")
+        if any(s["step"] == "lock_attribution" and s["status"] == "done" for s in steps):
+            parts.append("锁单归因数据已更新")
+
+        if not parts:
+            parts.append("无数据更新")
+
+        summary = "；".join(parts)
+        if failed_steps:
+            summary += "。" + "；".join(f"{s['step']}失败({s['status']})" for s in failed_steps)
+        else:
+            summary += "。"
+        return {
+            "type": "fast_path",
+            "kind": "data_update",
+            "scope": scope,
+            "steps": steps,
+            "success": success,
+            "answer": summary,
+            "question": str(user_query or ""),
+        }
+
 
 FAST_PATH_TOOL_SCHEMA = {
     "type": "function",
     "function": {
         "name": "run_fast_path",
-        "description": "执行轻量 Fast Path 计算（如数字环比提升，或获取当前日期 ISO 周数）。",
+        "description": "执行轻量 Fast Path 计算（如数字环比提升、数据更新、获取当前日期 ISO 周数）。",
         "parameters": {
             "type": "object",
             "properties": {
                 "config": {
                     "type": "object",
                     "properties": {
-                        "type": {"type": "string", "enum": ["numeric_ratio", "current_iso_week", "small_talk_contextual"]},
+                        "type": {"type": "string", "enum": ["numeric_ratio", "current_iso_week", "small_talk_contextual", "data_update"]},
+                        "scope": {"type": "string", "description": "更新范围：all / order / config / lock"},
                         "current": {"type": "number"},
                         "base": {"type": "number"},
                     },

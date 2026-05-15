@@ -7,6 +7,7 @@ from agent.llm_config import DEEPSEEK_PLANNER_MODEL
 from agent.runtime_decision import evaluate_state_readiness
 from agent.state import AgentState
 from operators.time_windows import resolve_time_window, parse_until_end_date
+from tools.config_cross_analysis_templates import TEMPLATE_CATALOG_MD, build_plan as template_build_plan, match as match_template
 
 LOOP_RUNTIME_SYSTEM_PROMPT = """
 你是一个数据分析 Agent Loop 调度器。
@@ -143,10 +144,20 @@ PLANNING_TOOL_SCHEMA = {
                                     "base": {"type": "number"},
                                 },
                             },
-                            "analysis_intent": {
+                                "analysis_intent": {
                                 "type": "object",
                                 "properties": {
-                                    "type": {"type": "string", "enum": ["share_breakdown"]},
+                                    "type": {"type": "string", "enum": ["share_breakdown", "attribute_penetration", "attribute_distribution"]},
+                                    "attribute_table": {"type": "string"},
+                                    "attribute_field": {"type": "string"},
+                                    "attribute_pattern": {"type": "string"},
+                                    "value_field": {"type": "string"},
+                                    "positive_value": {"type": "string"},
+                                    "dimension_field": {"type": "string"},
+                                    "dimension_mapping": {"type": "object"},
+                                    "join_key_left": {"type": "string"},
+                                    "join_key_right": {"type": "string"},
+                                    "top_k": {"type": "integer"},
                                     "numerator_metric": {"type": "string"},
                                     "denominator_scope": {"type": "string"},
                                     "time_grain": {"type": "string"},
@@ -296,6 +307,27 @@ class PlanningAgent:
         if "转化" in q:
             return False
         return True
+
+    @staticmethod
+    def _is_penetration_query(user_query: str) -> bool:
+        q = (user_query or "").replace(" ", "")
+        if not q:
+            return False
+        if "选装率" in q or "渗透率" in q or "配置率" in q:
+            return True
+        if "选装比例" in q or any(k in q for k in ["不同.*轮毂", "不同.*配置"]):
+            return True
+        return match_template(q) is not None
+
+    def _build_penetration_plan(self, user_query: str) -> dict | None:
+        if not self._is_penetration_query(user_query):
+            return None
+        from tools.config_cross_analysis_templates import is_distribution_query
+        plan = template_build_plan(user_query, self.business_definition_obj)
+        if plan:
+            plan["question"] = user_query
+            return self._normalize_plan(plan)
+        return None
 
     def _resolve_retained_intention_time_window(self, user_query: str, today: datetime.date) -> tuple[str, str]:
         until_end = parse_until_end_date(user_query)
@@ -883,7 +915,21 @@ class PlanningAgent:
         has_today = any(k in q for k in ["今天", "今日", "当前日期"])
         if iso_week_hint and has_today:
             return {"type": "current_iso_week"}
-        if any(k in q for k in ["锁单", "交付", "开票", "门店", "线索", "试驾", "订单", "在营"]):
+        is_update = any(k in q for k in ["更新数据", "刷新数据", "同步数据", "数据更新", "刷新数据集", "更新订单", "更新选配", "全部更新", "刷新全部", "更新归属"])
+        if not is_update and (q.startswith("更新") or q.startswith("刷新")):
+            is_update = True
+        if is_update:
+            scope = "all"
+            if "订单" in q or "order" in q.lower():
+                scope = "order"
+            elif "选配" in q or "config" in q.lower():
+                scope = "config"
+            elif "归属" in q:
+                scope = "lock"
+            return {"type": "data_update", "scope": scope}
+        if any(k in q for k in ["锁单", "交付", "开票", "门店", "线索", "试驾", "在营"]):
+            return None
+        if any(k in q for k in ["订单"]):
             return None
         has_compare_intent = any(k in q for k in ["环比", "同比", "提升", "增长", "下降", "减少", "涨幅", "降幅", "相比", "较", "比"])
         has_ask = any(k in q for k in ["多少", "几", "百分比", "%", "百分点"])
@@ -2250,7 +2296,7 @@ class PlanningAgent:
             plan["fast_path"] = {}
         elif isinstance(fast_path, dict):
             fp_type = fast_path.get("type")
-            if fp_type not in {"numeric_ratio", "current_iso_week", "small_talk_contextual"}:
+            if fp_type not in {"numeric_ratio", "current_iso_week", "small_talk_contextual", "data_update"}:
                 plan["fast_path"] = {}
             elif fp_type == "numeric_ratio":
                 try:
@@ -2264,7 +2310,7 @@ class PlanningAgent:
             plan["analysis_intent"] = {}
         else:
             atype = analysis_intent.get("type")
-            if atype not in {"share_breakdown"}:
+            if atype not in {"share_breakdown", "attribute_penetration", "attribute_distribution"}:
                 plan["analysis_intent"] = {}
 
         post_process = plan.get("post_process")
@@ -2496,6 +2542,11 @@ class PlanningAgent:
             self.last_planning_error = ""
             return self._finalize_plans(retained_plans, user_query)
 
+        penetration_plan = self._build_penetration_plan(user_query)
+        if isinstance(penetration_plan, dict) and penetration_plan:
+            self.last_planning_error = ""
+            return self._finalize_plans([penetration_plan], user_query)
+
         current_date = datetime.date.today().isoformat()
         memory_context = memory_context if isinstance(memory_context, dict) else {}
         memory_facts = memory_context.get("facts") if isinstance(memory_context.get("facts"), dict) else {}
@@ -2540,6 +2591,9 @@ class PlanningAgent:
                     "- 时序统计类按类型输出 statistics：weekly_decline_ratio / daily_threshold_count / daily_mean / daily_mean_median / trend_summary / daily_percentile_rank / weekend_percentile_rank / weekday_percentile_rank，并补齐各自必需字段。\n"
                     "- 若用户问“近 N 日/周/月 的某指标趋势/走势/波动”，优先使用 trend_summary，并设置 window_days 与 value_metric。\n"
                     "- 若用户问“近 N 个周的周日/周一..周日 处于什么水平”，使用 weekday_percentile_rank，并设置 window_weeks=N、weekdays=[对应周内日]、reference_date=昨天/今天。\n"
+                    "- 配置渗透率/选装率分析（如“地暖选装率”、“轮毂选装率”）：设置 analysis_intent.type=attribute_penetration，并在 analysis_intent 中补齐 attribute_pattern（选配项匹配模式）、dimension_field（分组维度，默认 product_name）。\n"
+                    "- 配置分布/比例分析（如“不同轮毂的选装比例”、“外饰颜色分布”）：设置 analysis_intent.type=attribute_distribution，并在 analysis_intent 中补齐 attribute_pattern 和 top_k。\n"
+                    f"{TEMPLATE_CATALOG_MD}\n"
                 ),
             },
             {"role": "user", "content": user_query},

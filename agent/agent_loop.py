@@ -13,7 +13,7 @@ from agent.planner import PlanningAgent, plan_runtime_action
 from agent.schema import DATA_PATH_FILE, SCHEMA_DIR
 from agent.state import AgentState, LoopState, ResultBlock
 from agent.tool_router import run_dsl_step
-from tools import CompositionTool, ComparisonTool, QueryTool, StatisticsTool
+from tools import CompositionTool, ComparisonTool, MultiTableMetricTool, QueryTool, StatisticsTool
 
 FINAL_ANSWER_SYSTEM_PROMPT = (
     "你是一个智能数据分析助手。请基于给定的规划 DSL 与执行结果，直接回答用户问题，语言简洁，给出关键数值与同比/环比方向与幅度。"
@@ -252,6 +252,20 @@ def _generate_final_answer(client: OpenAI, user_query: str, result_blocks: list[
     return final_response.choices[0].message.content or ""
 
 
+def _try_extract_fast_path_answer(blocks: list[str]) -> str | None:
+    for b in blocks:
+        text = _extract_result_text(b)
+        if not text:
+            continue
+        try:
+            obj = json.loads(text)
+        except Exception:
+            continue
+        if isinstance(obj, dict) and obj.get("type") == "fast_path" and obj.get("kind") == "data_update":
+            return str(obj.get("answer") or "")
+    return None
+
+
 def _extract_result_text(result_block: str) -> str:
     marker = "执行结果:\n"
     text = str(result_block or "")
@@ -371,6 +385,7 @@ def run_main_agent(user_query: str) -> str:
         comparison_tool = ComparisonTool(query_tool=query_tool)
         composition_tool = CompositionTool(query_tool=query_tool)
         statistics_tool = StatisticsTool()
+        multi_table_tool = MultiTableMetricTool(query_tool=query_tool)
         state = AgentState(question=user_query, normalized_question=_normalize_question_text(user_query), loop=LoopState(max_steps=5))
         query_rounds_max = int(state.loop.max_steps or 5)
         goal_time_info = planning_agent.infer_goal_time_window(user_query, datetime.date.today())
@@ -393,6 +408,7 @@ def run_main_agent(user_query: str) -> str:
                     comparison_tool=comparison_tool,
                     statistics_tool=statistics_tool,
                     composition_tool=composition_tool,
+                    multi_table_tool=multi_table_tool,
                     memory_context={
                         "facts": state.memory.facts,
                         "working_memory": state.memory.working_memory,
@@ -503,15 +519,22 @@ def run_main_agent(user_query: str) -> str:
             elif action.get("action") == "finish":
                 combined_results = "\n\n---\n\n".join([_extract_result_text(b) for b in state.results.blocks if b]) if state.results.blocks else ""
                 last_block = f"执行结果:\n{combined_results}" if combined_results else ""
-                finish_grounded_answer = _generate_finish_summary(
-                    client=client,
-                    user_query=user_query,
-                    action=action,
-                    last_result_block=last_block,
-                )
-                state.add_step(action, _trim_text(str(action.get("analysis") or "完成")))
-                state.loop.done = True
-                print("[Loop] execution=finish::answer_summarization")
+                fast_answer = _try_extract_fast_path_answer(state.results.blocks)
+                if fast_answer:
+                    finish_grounded_answer = fast_answer
+                    state.add_step(action, _trim_text(str(action.get("analysis") or "完成")))
+                    state.loop.done = True
+                    print("[Loop] execution=finish::fast_path_direct_answer")
+                else:
+                    finish_grounded_answer = _generate_finish_summary(
+                        client=client,
+                        user_query=user_query,
+                        action=action,
+                        last_result_block=last_block,
+                    )
+                    state.add_step(action, _trim_text(str(action.get("analysis") or "完成")))
+                    state.loop.done = True
+                    print("[Loop] execution=finish::answer_summarization")
             else:
                 state.add_step(action, "未知 action，终止。")
                 state.loop.done = True
