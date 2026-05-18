@@ -71,6 +71,9 @@ class FastPathTool:
         if kind == "data_update":
             scope = (config.get("scope") or "all").strip().lower()
             return self._run_data_update(scope, user_query)
+        if kind == "data_sync":
+            scope = (config.get("scope") or "all").strip().lower()
+            return self._run_data_sync(scope, user_query)
         if kind != "numeric_ratio":
             return {"type": "fast_path", "error": "unsupported_type", "message": f"不支持的 fast_path 类型: {kind}"}
         try:
@@ -137,32 +140,6 @@ class FastPathTool:
                 steps[-1]["error"] = str(e)
                 success = False
 
-            if steps[-1]["status"] == "done":
-                steps.append({"step": "sync_observation", "status": "running"})
-                try:
-                    r = subprocess.run(
-                        [sys.executable, str(SYNC_SCRIPT)],
-                        cwd=str(REPO_ROOT), text=True, timeout=120,
-                    )
-                    steps[-1]["status"] = "done" if r.returncode == 0 else "failed"
-                except Exception as e:
-                    steps[-1]["status"] = "failed"
-                    steps[-1]["error"] = str(e)
-
-            if success:
-                steps.append({"step": "sync_observation", "status": "running"})
-                try:
-                    r = subprocess.run(
-                        [sys.executable, str(SYNC_SCRIPT), "--mtd", "--dry-run"],
-                        cwd=str(REPO_ROOT), capture_output=True, text=True, timeout=120,
-                    )
-                    steps[-1]["status"] = "done" if r.returncode == 0 else "failed"
-                    if r.returncode != 0:
-                        steps[-1]["error"] = r.stderr[-200:] if r.stderr else "exit code != 0"
-                except Exception as e:
-                    steps[-1]["status"] = "failed"
-                    steps[-1]["error"] = str(e)
-
         if scope == "config" or scope == "all":
             steps.append({"step": "config_attribute", "status": "running"})
             try:
@@ -220,6 +197,83 @@ class FastPathTool:
             "scope": scope,
             "steps": steps,
             "success": success,
+            "_order_max_date": order_max_date,
+            "_config_updated": config_updated,
+            "answer": summary,
+            "question": str(user_query or ""),
+        }
+
+    def _run_data_sync(self, scope: str, user_query: str) -> dict:
+        result = self._run_data_update(scope, user_query)
+        steps: list[dict] = result["steps"]
+        success: bool = result["success"]
+        order_max_date = result.get("_order_max_date")
+        config_updated = result.get("_config_updated", False)
+
+        order_done = any(
+            s["step"] == "order_data" and s["status"] == "done" for s in steps
+        )
+        if order_done:
+            steps.append({"step": "sync_observation", "status": "running"})
+            try:
+                r = subprocess.run(
+                    [sys.executable, str(SYNC_SCRIPT)],
+                    cwd=str(REPO_ROOT), text=True, timeout=120,
+                )
+                steps[-1]["status"] = "done" if r.returncode == 0 else "failed"
+            except Exception as e:
+                steps[-1]["status"] = "failed"
+                steps[-1]["error"] = str(e)
+
+        if success:
+            steps.append({"step": "sync_observation_mtd", "status": "running"})
+            try:
+                r = subprocess.run(
+                    [sys.executable, str(SYNC_SCRIPT), "--mtd", "--dry-run"],
+                    cwd=str(REPO_ROOT), capture_output=True, text=True, timeout=120,
+                )
+                steps[-1]["status"] = "done" if r.returncode == 0 else "failed"
+                if r.returncode != 0:
+                    steps[-1]["error"] = r.stderr[-200:] if r.stderr else "exit code != 0"
+            except Exception as e:
+                steps[-1]["status"] = "failed"
+                steps[-1]["error"] = str(e)
+
+        done_steps = [s for s in steps if s["status"] == "done"]
+        failed_steps = [s for s in steps if s["status"] != "done"]
+
+        parts = []
+        if order_max_date:
+            parts.append(f"订单数据已更新至 {order_max_date}")
+        elif any(s["step"] == "order_data" and s["status"] == "done" for s in steps):
+            parts.append("订单数据已更新")
+        if config_updated:
+            parts.append("选配数据已更新")
+        if any(s["step"] == "lock_attribution" and s["status"] == "done" for s in steps):
+            parts.append("锁单归因数据已更新")
+        if any(s["step"] == "sync_observation" and s["status"] == "done" for s in steps):
+            parts.append("同步观察已执行")
+        if any(s["step"] == "sync_observation_mtd" and s["status"] == "done" for s in steps):
+            parts.append("MTD月累计观察已执行")
+
+        if not parts:
+            parts.append("无数据更新")
+
+        summary = "；".join(parts)
+        if failed_steps:
+            summary += "。" + "；".join(f"{s['step']}失败({s['status']})" for s in failed_steps)
+        else:
+            summary += "。"
+        return {
+            "type": "fast_path",
+            "kind": "data_sync",
+            "scope": scope,
+            "steps": steps,
+            "success": success and all(
+                s["status"] == "done"
+                for s in steps
+                if s["step"].startswith("sync_observation")
+            ),
             "answer": summary,
             "question": str(user_query or ""),
         }
@@ -236,7 +290,7 @@ FAST_PATH_TOOL_SCHEMA = {
                 "config": {
                     "type": "object",
                     "properties": {
-                        "type": {"type": "string", "enum": ["numeric_ratio", "current_iso_week", "small_talk_contextual", "data_update"]},
+                        "type": {"type": "string", "enum": ["numeric_ratio", "current_iso_week", "small_talk_contextual", "data_update", "data_sync"]},
                         "scope": {"type": "string", "description": "更新范围：all / order / config / lock"},
                         "current": {"type": "number"},
                         "base": {"type": "number"},

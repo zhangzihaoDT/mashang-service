@@ -915,10 +915,13 @@ class PlanningAgent:
         has_today = any(k in q for k in ["今天", "今日", "当前日期"])
         if iso_week_hint and has_today:
             return {"type": "current_iso_week"}
-        is_update = any(k in q for k in ["更新数据", "刷新数据", "同步数据", "数据更新", "刷新数据集", "更新订单", "更新选配", "全部更新", "刷新全部", "更新归属"])
-        if not is_update and (q.startswith("更新") or q.startswith("刷新")):
+        is_sync = "数据更新并同步" in q
+        if not is_sync and "同步数据" in q:
+            is_sync = True
+        is_update = any(k in q for k in ["更新数据", "刷新数据", "数据更新", "刷新数据集", "更新订单", "更新选配", "全部更新", "刷新全部", "更新归属"])
+        if not is_update and not is_sync and (q.startswith("更新") or q.startswith("刷新")):
             is_update = True
-        if is_update:
+        if is_sync or is_update:
             scope = "all"
             if "订单" in q or "order" in q.lower():
                 scope = "order"
@@ -926,6 +929,8 @@ class PlanningAgent:
                 scope = "config"
             elif "归属" in q:
                 scope = "lock"
+            if is_sync:
+                return {"type": "data_sync", "scope": scope}
             return {"type": "data_update", "scope": scope}
         if any(k in q for k in ["锁单", "交付", "开票", "门店", "线索", "试驾", "在营"]):
             return None
@@ -2296,7 +2301,7 @@ class PlanningAgent:
             plan["fast_path"] = {}
         elif isinstance(fast_path, dict):
             fp_type = fast_path.get("type")
-            if fp_type not in {"numeric_ratio", "current_iso_week", "small_talk_contextual", "data_update"}:
+            if fp_type not in {"numeric_ratio", "current_iso_week", "small_talk_contextual", "data_update", "data_sync"}:
                 plan["fast_path"] = {}
             elif fp_type == "numeric_ratio":
                 try:

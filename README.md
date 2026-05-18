@@ -202,21 +202,16 @@ runtime_decision →  负责是否允许 finish
 
 ## 更新日志
 
-- 2026-05-12
-  - 拆分“时间窗口 / 统计函数 / 维度（分组）”职责：时间窗口解析收敛到 `operators/time_windows.py`，统计计算收敛到 `tools/statistics_tool.py`，维度分组由 `agent/planner.py` 统一产出（统计类计划强制按时间字段分组）。
-- 2026-05-13（v0.4）
-  - 引入 Evidence-driven Runtime：structured_blocks → facts → evidence contract → runtime decision
-  - 新增 `statistics.contribution_summary` 用于诊断类问题的贡献拆解（描述性证据）
-  - Facts 升级为 Normalized Facts（values / conclusion / source）
 - 2026-05-15（v0.4.5 — 数据集更新 Fast Path）
   - 新增 `FastPathTool.data_update`：支持 CLI/飞书触发数据集增量更新
-    - `scope="order"` 时调用 `order_data_to_parquet.py`，完成后自动触发 `skills_order_observation_daily.py`
+    - `scope="order"` 时调用 `order_data_to_parquet.py`
     - `scope="config"` 时调用 `order_config_to_parquet.py`
     - `scope="lock"` 时调用 `lock_attribution_data_to_parquet.py`
     - 更新后自动读取 `lock_time` 最大日期作为"更新至"时间戳
+  - 新增 `FastPathTool.data_sync`：明确触发"数据更新并同步"时连续调用 `skills_order_observation_daily.py`
   - `FastPathTool` 升级：`answer` 字段直出（绕过 LLM 总结）
   - `Planner._parse_fast_path_query`：规则路径前置，匹配"更新订单数据"等自然语言
-  - `_normalize_plan` fast_path 白名单加入 `data_update`
+  - `_normalize_plan` fast_path 白名单加入 `data_update` / `data_sync`
 - 2026-05-15（v0.4.4 — MultiTable / Lookup Metric 能力补齐）
   - 新增 `MultiTableMetricTool`（tools/multitable_metric_tool.py）
     - `attribute_penetration`：order_data ⋈ config_attribute，计算配置/属性渗透率（地暖/激光雷达/线控等）
@@ -249,6 +244,12 @@ runtime_decision →  负责是否允许 finish
     - **`_comparison_df_to_dict`**：comparison DataFrame 转为 dict + evidence_hints（保留 rows 结构）
     - **`[Eval]` debug line**：runtime_decision 每次决策输出 `question | intent | required | available | missing | action | finish_reason` 一行
   - **10 问题回测全过**：`metric / trend / compare / composition / share / time_grouped_share / ranking / distribution / diagnosis`
+- 2026-05-13（v0.4）
+  - 引入 Evidence-driven Runtime：structured_blocks → facts → evidence contract → runtime decision
+  - 新增 `statistics.contribution_summary` 用于诊断类问题的贡献拆解（描述性证据）
+  - Facts 升级为 Normalized Facts（values / conclusion / source）
+- 2026-05-12
+  - 拆分"时间窗口 / 统计函数 / 维度（分组）"职责：时间窗口解析收敛到 `operators/time_windows.py`，统计计算收敛到 `tools/statistics_tool.py`，维度分组由 `agent/planner.py` 统一产出（统计类计划强制按时间字段分组）。
 
 ## 数据与 Schema
 

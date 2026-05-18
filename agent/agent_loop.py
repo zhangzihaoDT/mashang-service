@@ -261,7 +261,7 @@ def _try_extract_fast_path_answer(blocks: list[str]) -> str | None:
             obj = json.loads(text)
         except Exception:
             continue
-        if isinstance(obj, dict) and obj.get("type") == "fast_path" and obj.get("kind") == "data_update":
+        if isinstance(obj, dict) and obj.get("type") == "fast_path" and obj.get("kind") in ("data_update", "data_sync"):
             return str(obj.get("answer") or "")
     return None
 

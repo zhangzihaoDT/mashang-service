@@ -85,6 +85,7 @@ _EVIDENCE_HINTS: dict[str, dict] = {
     "dod": {"fact_types": ["comparison_result"], "has_comparison": True, "comparison_type": "dod", "result_type": "comparison"},
     "numeric_ratio": {"fact_types": ["metric_value"], "result_type": "fast_path"},
     "data_update": {"fact_types": ["metric_value"], "result_type": "fast_path"},
+    "data_sync": {"fact_types": ["metric_value"], "result_type": "fast_path"},
 }
 
 
