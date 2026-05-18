@@ -31,8 +31,14 @@ class ComparisonTool:
         current_end_ts = pd.Timestamp(current_end)
 
         if comparison_type == "yoy":
-            compare_start_ts = current_start_ts - pd.DateOffset(years=1)
-            compare_end_ts = current_end_ts - pd.DateOffset(years=1)
+            target_year = comparison.get("target_year")
+            if target_year:
+                years_offset = int(target_year) - current_start_ts.year
+                compare_start_ts = current_start_ts + pd.DateOffset(years=years_offset)
+                compare_end_ts = current_end_ts + pd.DateOffset(years=years_offset)
+            else:
+                compare_start_ts = current_start_ts - pd.DateOffset(years=1)
+                compare_end_ts = current_end_ts - pd.DateOffset(years=1)
         elif comparison_type == "wow":
             compare_start_ts = current_start_ts - pd.Timedelta(days=7)
             compare_end_ts = current_end_ts - pd.Timedelta(days=7)

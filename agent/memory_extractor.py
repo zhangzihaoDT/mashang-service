@@ -122,7 +122,7 @@ def _detect_dimension_field(rows: list[dict]) -> str | None:
 _DATA_EXCLUDE = {
     "type", "metric_alias", "metric", "window_days", "total_days", "window_weeks", "total_weeks",
     "top_k", "comparison_method", "date_start", "date_end",
-    "series", "city_field", "age_field", "identity_field",
+    "city_field", "age_field", "identity_field",
     "mapping_unknown_count", "mapping_unknown_ratio",
     "first_date", "last_date", "time_field",
     "reference_date", "reference_value",
@@ -364,6 +364,23 @@ def _build_column_based_facts(block, result, plan: dict, time_range: dict | None
         facts.append(_make_fact(block_id, "dimension_breakdown", content, {
             "dimension_fields": [dim_col], "metric_fields": [metric_col], "row_count": n,
         }, source, "descriptive_breakdown"))
+
+    # ── share_summary (deterministic fallback, computed from dimension values) ──
+    if has_dim and has_metric and not has_share and _should("share_summary") and rows:
+        dim_col = row_dim_cols[0] if row_dim_cols else dim_cols[0]
+        metric_col = row_metric_cols[0] if row_metric_cols else metric_cols[0]
+        numeric_values = [r.get(metric_col) for r in rows if isinstance(r.get(metric_col), (int, float))]
+        if numeric_values:
+            total = sum(numeric_values)
+            top_row = rows[0]
+            top_label = str(top_row.get(dim_col, ""))
+            top_val = top_row.get(metric_col, 0)
+            top_share = top_val / total if total > 0 else 0
+            content = f"按{dim_col}拆解{metric}占比，共{n}个分组"
+            if top_label and total > 0:
+                content += f"，最高={top_label}({top_share:.1%})"
+            meta = {"dimension": dim_col, "metric": metric, "row_count": n, "total": total}
+            facts.append(_make_fact(block_id, "share_summary", content, meta, source, "descriptive_share"))
 
     # ── ranking_result ───────────────────────────────────────────────
     has_topk = bool(result.get("top_k")) if isinstance(result, dict) else False

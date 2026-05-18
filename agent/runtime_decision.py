@@ -399,6 +399,28 @@ def evaluate_state_readiness(state: AgentState) -> dict:
         print(f"[RuntimeDecision] required_fact_types={required}")
         print(f"[RuntimeDecision] available_fact_types={available}")
         print(f"[RuntimeDecision] missing_fact_types={missing}")
+
+        working = getattr(getattr(state, "memory", None), "working_memory", None)
+        if isinstance(working, dict) and iteration >= 2 and missing:
+            last_missing = working.get("_last_missing_facts")
+            if isinstance(last_missing, list) and set(last_missing) == set(missing):
+                working["_stall_count"] = (working.get("_stall_count") or 0) + 1
+            else:
+                working["_stall_count"] = 0
+            working["_last_missing_facts"] = missing
+            if (working.get("_stall_count") or 0) >= 2:
+                print(f"[RuntimeDecision] stall detected: {missing} persisted {working['_stall_count']+1}x → force-finish")
+                _debug_decision_line(question, intent, required, available, missing, "finish", "stall_detected")
+                return {
+                    "ready": True,
+                    "reason": "stall_detected",
+                    "missing_info": missing,
+                    "recommended_next_action": "finish",
+                }
+        elif isinstance(working, dict):
+            working["_last_missing_facts"] = missing
+            working["_stall_count"] = 0
+
         if not missing:
             finish_reason = str(contract.get("finish_reason") or "ready")
             _debug_decision_line(question, intent, required, available, missing, "finish", finish_reason)

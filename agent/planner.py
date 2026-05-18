@@ -6,7 +6,20 @@ from openai import OpenAI
 from agent.llm_config import DEEPSEEK_PLANNER_MODEL
 from agent.runtime_decision import evaluate_state_readiness
 from agent.state import AgentState
-from operators.time_windows import resolve_time_window, parse_until_end_date
+from operators.time_windows import (
+    parse_time_window,
+    parse_time_window_with_business,
+    parse_comparison_type,
+    infer_time_window_type,
+    infer_goal_time_window_rule,
+    infer_goal_time_window as _ts_infer_goal_time_window,
+    remove_cumulative_time_dim,
+    is_cumulative_query,
+    contains_relative_to_today_hint,
+    cumulative_adjust_time,
+    parse_until_end_date,
+    extract_compare_year,
+)
 from tools.config_cross_analysis_templates import TEMPLATE_CATALOG_MD, build_plan as template_build_plan, match as match_template
 
 LOOP_RUNTIME_SYSTEM_PROMPT = """
@@ -425,24 +438,11 @@ class PlanningAgent:
         return False
 
     def _parse_time_window_with_business(self, user_query: str, today: datetime.date) -> tuple[str, str] | None:
-        if isinstance(self.business_definition_obj, dict):
-            window = resolve_time_window(user_query=user_query, today=today, business_definition=self.business_definition_obj)
-            if window:
-                return window
-        return PlanningAgent._parse_time_window(user_query, today)
+        return parse_time_window_with_business(user_query, today, self.business_definition_obj)
 
     @staticmethod
     def _parse_comparison_type(user_query: str) -> str:
-        q = user_query or ""
-        if "日环比" in q or "天环比" in q:
-            return "dod"
-        if ("昨天" in q or "昨日" in q or "今天" in q or "今日" in q) and ("环比" in q) and ("周环比" not in q):
-            return "dod"
-        if "同比" in q or "年同比" in q:
-            return "yoy"
-        if "环比" in q or "周环比" in q:
-            return "wow"
-        return "none"
+        return parse_comparison_type(user_query)
 
     @staticmethod
     def _classify_intent(user_query: str) -> str:
@@ -491,354 +491,14 @@ class PlanningAgent:
 
     @staticmethod
     def _parse_time_window(user_query: str, today: datetime.date) -> tuple[str, str] | None:
-        q = user_query or ""
-        if "昨天" in q or "昨日" in q:
-            start = today - datetime.timedelta(days=1)
-            end = today
-            return (start.isoformat(), end.isoformat())
-
-        window = resolve_time_window(user_query=user_query, today=today, business_definition={})
-        if window:
-            return window
-
-        def _normalize_year(y: str) -> int | None:
-            if not y:
-                return None
-            y = str(y).strip()
-            if not y.isdigit():
-                return None
-            if len(y) == 2:
-                return 2000 + int(y)
-            if len(y) == 4:
-                return int(y)
-            return None
-
-        def _safe_date(y: int, m: int, d: int) -> datetime.date | None:
-            try:
-                return datetime.date(int(y), int(m), int(d))
-            except Exception:
-                return None
-
-        def _month_window(year: int, month: int) -> tuple[str, str] | None:
-            if month < 1 or month > 12:
-                return None
-            start = _safe_date(year, month, 1)
-            if not start:
-                return None
-            if month == 12:
-                end = _safe_date(year + 1, 1, 1)
-            else:
-                end = _safe_date(year, month + 1, 1)
-            if not end:
-                return None
-            return (start.isoformat(), end.isoformat())
-
-        def _year_window(year: int) -> tuple[str, str] | None:
-            start = _safe_date(year, 1, 1)
-            end = _safe_date(year + 1, 1, 1)
-            if not start or not end:
-                return None
-            return (start.isoformat(), end.isoformat())
-
-        def _parse_month_token(token: str) -> int | None:
-            if not token:
-                return None
-            raw = str(token).strip()
-            if not raw:
-                return None
-            if raw.isdigit():
-                try:
-                    v = int(raw)
-                    return v if 1 <= v <= 12 else None
-                except Exception:
-                    return None
-            mapping = {
-                "正": 1,
-                "一": 1,
-                "二": 2,
-                "两": 2,
-                "三": 3,
-                "四": 4,
-                "五": 5,
-                "六": 6,
-                "七": 7,
-                "八": 8,
-                "九": 9,
-                "十": 10,
-                "十一": 11,
-                "十二": 12,
-            }
-            if raw in mapping:
-                return mapping[raw]
-            return None
-
-        if "本月" in q:
-            start = _safe_date(today.year, today.month, 1)
-            if start:
-                return (start.isoformat(), today.isoformat())
-        if "本周" in q:
-            monday = today - datetime.timedelta(days=today.weekday())
-            if monday:
-                return (monday.isoformat(), today.isoformat())
-        if "上月" in q:
-            year = today.year
-            month = today.month - 1
-            if month <= 0:
-                year -= 1
-                month = 12
-            window = _month_window(year, month)
-            if window:
-                return window
-
-        m = re.search(
-            r"(?:(?P<y>\d{2,4})\s*年\s*)?(?P<m>\d{1,2}|正|十一|十二|[一二两三四五六七八九十])\s*月\s*"
-            r"(?:(?:到|至|[-~—–－])\s*)?(?:至今|到今|现在|目前|今天|今日|截至今日|截至今天|截至昨日|昨日)",
-            q,
-        )
-        if m:
-            year = _normalize_year(m.group("y")) or today.year
-            month = _parse_month_token(m.group("m")) or today.month
-            start = _safe_date(year, month, 1)
-            if start:
-                return (start.isoformat(), today.isoformat())
-
-        if "前年" in q:
-            window = _year_window(today.year - 2)
-            if window:
-                return window
-        if "去年" in q:
-            window = _year_window(today.year - 1)
-            if window:
-                return window
-        if "今年" in q:
-            window = _year_window(today.year)
-            if window:
-                return window
-
-        m = re.search(
-            r"(?P<y>\d{2,4})\s*年\s*(?P<m>\d{1,2})\s*月\s*(?P<d>\d{1,2})\s*[日号]?\s*(?:到|至|[-~—–－])\s*(?P<iso>\d{4}-\d{2}-\d{2})",
-            q,
-        )
-        if m:
-            y1 = _normalize_year(m.group("y")) or today.year
-            m1 = int(m.group("m"))
-            d1 = int(m.group("d"))
-            start_date = _safe_date(y1, m1, d1)
-            end_date = datetime.date.fromisoformat(m.group("iso"))
-            if start_date and end_date:
-                if "留存" in q or "预售期" in q:
-                    end_open = end_date + datetime.timedelta(days=1)
-                    return (start_date.isoformat(), end_open.isoformat())
-                end_open = end_date + datetime.timedelta(days=1)
-                return (start_date.isoformat(), end_open.isoformat())
-
-        m = re.search(
-            r"(?P<y>\d{2,4})\s*年\s*(?P<m>\d{1,2})\s*月\s*(?P<d>\d{1,2})\s*[日号]?\s*(?:到|至|[-~—–－])\s*"
-            r"(?!\d{4}-\d{2}-\d{2})"
-            r"(?:(?P<y2>\d{2,4})\s*年\s*)?(?:(?P<m2>\d{1,2})\s*月\s*)?(?P<d2>\d{1,2})\s*[日号]?",
-            q,
-        )
-        if m:
-            y1 = _normalize_year(m.group("y")) or today.year
-            m1 = int(m.group("m"))
-            d1 = int(m.group("d"))
-            y2 = _normalize_year(m.group("y2")) or y1
-            m2 = int(m.group("m2") or m1)
-            d2 = int(m.group("d2"))
-            start_date = _safe_date(y1, m1, d1)
-            end_date = _safe_date(y2, m2, d2)
-            if start_date and end_date:
-                if "留存" in q or "预售期" in q:
-                    end_open = end_date + datetime.timedelta(days=1)
-                    return (start_date.isoformat(), end_open.isoformat())
-                end_open = end_date + datetime.timedelta(days=1)
-                return (start_date.isoformat(), end_open.isoformat())
-
-        m = re.search(
-            r"(?P<y>\d{2,4})\s*年\s*(?P<m>\d{1,2})\s*月\s*(?:整月|全月|整个月)",
-            q,
-        )
-        if m:
-            year = _normalize_year(m.group("y")) or today.year
-            month = int(m.group("m"))
-            window = _month_window(year, month)
-            if window:
-                return window
-
-        m = re.search(r"(?P<y>\d{2,4})\s*年\s*(?P<m>\d{1,2})\s*月(?!\s*\d)", q)
-        if m:
-            year = _normalize_year(m.group("y")) or today.year
-            month = int(m.group("m"))
-            window = _month_window(year, month)
-            if window:
-                return window
-
-        m = re.search(r"(?:(?P<y>\d{2,4})\s*年\s*)?(?P<m>正|十一|十二|[一二两三四五六七八九十])\s*月(?!\s*\d)", q)
-        if m:
-            year = _normalize_year(m.group("y")) or today.year
-            month = _parse_month_token(m.group("m"))
-            if month:
-                window = _month_window(year, month)
-                if window:
-                    return window
-
-        m = re.search(r"(?P<y>\d{2,4})\s*年\s*(?P<m>\d{1,2})\s*月\s*(?P<d>\d{1,2})\s*[日号]?", q)
-        if m:
-            year = _normalize_year(m.group("y")) or today.year
-            month = int(m.group("m"))
-            day = int(m.group("d"))
-            start_date = _safe_date(year, month, day)
-            if start_date:
-                end_open = start_date + datetime.timedelta(days=1)
-                return (start_date.isoformat(), end_open.isoformat())
-
-        m = re.search(r"(?P<y>\d{2,4})年(?!\s*\d|\s*月)", q)
-        if m:
-            year = _normalize_year(m.group("y")) or today.year
-            window = _year_window(year)
-            if window:
-                return window
-
-        m = re.search(r"(\d{4}-\d{2}-\d{2})\s*(?:到|至|[-~—–－])\s*(\d{4}-\d{2}-\d{2})", q)
-        if m:
-            start_date = datetime.date.fromisoformat(m.group(1))
-            end_date = datetime.date.fromisoformat(m.group(2))
-            if "留存" in q or "预售期" in q:
-                end_open = end_date + datetime.timedelta(days=1)
-                return (start_date.isoformat(), end_open.isoformat())
-            end_open = end_date + datetime.timedelta(days=1)
-            return (start_date.isoformat(), end_open.isoformat())
-
-        m = re.search(
-            r"(?P<y>\d{4})-(?P<m1>\d{1,2})-(?P<d1>\d{1,2})\s*(?:到|至|[-~—–－])\s*(?P<m2>\d{1,2})-(?P<d2>\d{1,2})",
-            q,
-        )
-        if m:
-            year = int(m.group("y"))
-            start_date = _safe_date(year, int(m.group("m1")), int(m.group("d1")))
-            end_date = _safe_date(year, int(m.group("m2")), int(m.group("d2")))
-            if start_date and end_date:
-                if "留存" in q or "预售期" in q:
-                    end_open = end_date + datetime.timedelta(days=1)
-                    return (start_date.isoformat(), end_open.isoformat())
-                end_open = end_date + datetime.timedelta(days=1)
-                return (start_date.isoformat(), end_open.isoformat())
-
-        m = re.search(r"(\d{4}-\d{2}-\d{2})", q)
-        if m:
-            start = datetime.date.fromisoformat(m.group(1))
-            end = start + datetime.timedelta(days=1)
-            return (start.isoformat(), end.isoformat())
-
-        return None
+        return parse_time_window(user_query, today)
 
     @staticmethod
     def infer_goal_time_window_rule(user_query: str, today: datetime.date) -> dict:
-        q = user_query or ""
-        has_retention_hint = ("留存" in q) or ("预售期" in q)
-
-        until_end = parse_until_end_date(q)
-        if until_end:
-            end_open = until_end + datetime.timedelta(days=1)
-            start = until_end - datetime.timedelta(days=30)
-            return {"window": (start.isoformat(), end_open.isoformat()), "confidence": "medium", "source": "until_date"}
-
-        m = re.search(r"(\d{4}-\d{2}-\d{2})\s*(?:到|至|[-~—–－])\s*(\d{4}-\d{2}-\d{2})", q)
-        if m:
-            start_date = datetime.date.fromisoformat(m.group(1))
-            end_date = datetime.date.fromisoformat(m.group(2))
-            if has_retention_hint:
-                end_open = end_date + datetime.timedelta(days=1)
-                return {"window": (start_date.isoformat(), end_open.isoformat()), "confidence": "high", "source": "iso_range"}
-            end_open = end_date + datetime.timedelta(days=1)
-            return {"window": (start_date.isoformat(), end_open.isoformat()), "confidence": "high", "source": "iso_range"}
-
-        m = re.search(
-            r"(?P<y>\d{2,4})\s*年\s*(?P<m>\d{1,2})\s*月\s*(?P<d>\d{1,2})\s*[日号]?\s*(?:到|至|[-~—–－])\s*(?P<iso>\d{4}-\d{2}-\d{2})",
-            q,
-        )
-        if m:
-            y1 = m.group("y")
-            start_date = datetime.date(int(y1) if len(str(y1)) == 4 else 2000 + int(y1), int(m.group("m")), int(m.group("d")))
-            end_date = datetime.date.fromisoformat(m.group("iso"))
-            if has_retention_hint:
-                end_open = end_date + datetime.timedelta(days=1)
-                return {"window": (start_date.isoformat(), end_open.isoformat()), "confidence": "high", "source": "mixed_cn_iso"}
-            end_open = end_date + datetime.timedelta(days=1)
-            return {"window": (start_date.isoformat(), end_open.isoformat()), "confidence": "high", "source": "mixed_cn_iso"}
-
-        window = PlanningAgent._parse_time_window(q, today)
-        if not window:
-            return {"window": None, "confidence": "low", "source": "none"}
-
-        iso_dates = []
-        for raw in re.findall(r"\d{4}-\d{2}-\d{2}", q):
-            try:
-                iso_dates.append(datetime.date.fromisoformat(raw))
-            except Exception:
-                pass
-        cn_dates = []
-        for m_cn in re.finditer(r"(?P<y>\d{2,4})\s*年\s*(?P<m>\d{1,2})\s*月\s*(?P<d>\d{1,2})\s*[日号]?", q):
-            yv = m_cn.group("y")
-            y = int(yv) if len(str(yv)) == 4 else 2000 + int(yv)
-            try:
-                cn_dates.append(datetime.date(y, int(m_cn.group("m")), int(m_cn.group("d"))))
-            except Exception:
-                pass
-
-        confidence = "low"
-        source = "fallback"
-        if any(k in q for k in ["昨天", "昨日", "今天", "今日", "本周", "上周", "本月", "上月", "今年", "去年", "前年", "至今", "截至", "目前", "现在"]):
-            confidence = "medium"
-            source = "relative"
-        elif ("到" in q or "至" in q or "-" in q or "~" in q or "—" in q or "–" in q or "－" in q) and (len(cn_dates) >= 2):
-            confidence = "high"
-            source = "cn_range"
-        elif len(iso_dates) == 1 and len(cn_dates) >= 1 and ("到" in q or "至" in q):
-            try:
-                parsed_end = datetime.date.fromisoformat(window[1])
-                max_iso = max(iso_dates)
-                if parsed_end <= max_iso:
-                    start_date = min(cn_dates)
-                    end_date = max_iso
-                    if has_retention_hint:
-                        return {"window": (start_date.isoformat(), end_date.isoformat()), "confidence": "medium", "source": "mixed_fallback"}
-                    end_open = end_date + datetime.timedelta(days=1)
-                    return {"window": (start_date.isoformat(), end_open.isoformat()), "confidence": "medium", "source": "mixed_fallback"}
-            except Exception:
-                pass
-        elif len(iso_dates) == 1 or len(cn_dates) == 1:
-            confidence = "medium"
-            source = "single_date"
-
-        return {"window": window, "confidence": confidence, "source": source}
+        return infer_goal_time_window_rule(user_query, today)
 
     def infer_goal_time_window(self, user_query: str, today: datetime.date) -> dict:
-        q = user_query or ""
-        has_retention_hint = ("留存" in q) or ("预售期" in q)
-        until_end = parse_until_end_date(q)
-        if has_retention_hint and until_end and isinstance(self.business_definition_obj, dict):
-            series_tokens = PlanningAgent._infer_series_tokens(q)
-            periods = self.business_definition_obj.get("time_periods")
-            if series_tokens and isinstance(periods, dict):
-                token = series_tokens[0]
-                meta = periods.get(token)
-                if isinstance(meta, dict):
-                    s = meta.get("start")
-                    if isinstance(s, str) and s.strip():
-                        try:
-                            start_day = datetime.date.fromisoformat(s.strip())
-                            end_open = until_end + datetime.timedelta(days=1)
-                            if end_open > start_day:
-                                return {"window": (start_day.isoformat(), end_open.isoformat()), "confidence": "high", "source": "until_date_series_start"}
-                        except Exception:
-                            pass
-        window = None
-        if isinstance(self.business_definition_obj, dict):
-            window = resolve_time_window(user_query=user_query, today=today, business_definition=self.business_definition_obj)
-        if window:
-            return {"window": window, "confidence": "high", "source": "operators.time_windows.resolve_time_window"}
-        return PlanningAgent.infer_goal_time_window_rule(user_query, today)
+        return _ts_infer_goal_time_window(user_query, today, self.business_definition_obj)
 
     @staticmethod
     def _metric_defaults(user_query: str) -> dict | None:
@@ -1307,6 +967,8 @@ class PlanningAgent:
         if non_null_field:
             filters = PlanningAgent._append_filter(filters, {"field": non_null_field, "op": "!=", "value": None})
 
+        is_cumulative = PlanningAgent._is_cumulative_query(user_query)
+        dimensions = [breakdown_dim] if is_cumulative else [time_field, breakdown_dim]
         plan = {
             "dataset": metric_defaults["dataset"],
             "metric": {
@@ -1316,25 +978,26 @@ class PlanningAgent:
                 "business_name": metric_obj.get("business_name") or metric_alias,
             },
             "time": {"field": time_field, "start": start, "end": end},
-            "dimensions": [time_field, breakdown_dim],
+            "dimensions": dimensions,
             "filters": filters,
             "comparison": {"type": "none"},
-            "analysis_intent": {
+        }
+        if not is_cumulative:
+            plan["analysis_intent"] = {
                 "type": "share_breakdown",
                 "numerator_metric": metric_alias,
                 "denominator_scope": f"within_each_{time_grain}",
                 "time_grain": time_grain,
                 "breakdown_dimension": breakdown_dim,
-            },
-            "post_process": [
+            }
+            plan["post_process"] = [
                 {
                     "type": "window_share",
                     "partition_by": [time_field],
                     "value_field": metric_alias,
                     "alias": f"每{time_grain_cn}占比",
                 }
-            ],
-        }
+            ]
         return self._fill_defaults(self._normalize_plan(plan), user_query)
 
     @staticmethod
@@ -2971,6 +2634,14 @@ class PlanningAgent:
 
         return self._normalize_plan(plan)
 
+    @staticmethod
+    def _is_cumulative_query(user_query: str) -> bool:
+        return is_cumulative_query(user_query)
+
+    @staticmethod
+    def _remove_cumulative_time_dim(plan: dict, user_query: str) -> dict:
+        return remove_cumulative_time_dim(plan, user_query)
+
     def create_plan(self, user_query: str, memory_context: dict | None = None) -> dict:
         plans = self.create_plans(user_query, memory_context=memory_context)
         if plans:
@@ -2988,46 +2659,32 @@ class PlanningAgent:
                     )
                 if "留存小订" in metric_text:
                     return first
-                return self._validate_and_rewrite_time(first, user_query)
+                first = self._validate_and_rewrite_time(first, user_query)
+                first = self._remove_cumulative_time_dim(first, user_query)
+                if isinstance(first.get("comparison"), dict) and first["comparison"].get("type") in ("yoy", "wow"):
+                    time_info = first.get("time")
+                    if isinstance(time_info, dict):
+                        start_str = time_info.get("start")
+                        if isinstance(start_str, str):
+                            try:
+                                current_year = int(start_str[:4])
+                            except (ValueError, IndexError):
+                                current_year = None
+                            if current_year:
+                                target = extract_compare_year(user_query, current_year)
+                                if target is not None:
+                                    first["comparison"]["target_year"] = target
+                return first
             return first
         return {}
 
     @staticmethod
     def _contains_relative_to_today_hint(user_query: str) -> bool:
-        q = user_query or ""
-        return any(k in q for k in ["至今", "截至", "目前", "现在", "今日", "今天", "本月"])
+        return contains_relative_to_today_hint(user_query)
 
     @staticmethod
     def _infer_time_window_type(user_query: str) -> str | None:
-        q = (user_query or "").strip()
-        if not q:
-            return None
-        if "昨天" in q or "昨日" in q:
-            return "yesterday"
-        if "本周" in q:
-            return "this_week"
-        if "本月" in q:
-            return "this_month_to_today"
-        if "上月" in q:
-            return "last_month"
-        if any(k in q for k in ["至今", "截至", "目前", "现在", "今日", "今天"]) and ("月" in q):
-            return "month_to_today"
-        if re.search(
-            r"\d{2,4}\s*年\s*\d{1,2}\s*月\s*\d{1,2}\s*[日号]?\s*(?:到|至|[-~—–－])\s*(?:\d{2,4}\s*年\s*)?(?:\d{1,2}\s*月\s*)?\d{1,2}\s*[日号]?",
-            q,
-        ):
-            return "date_range"
-        if re.search(r"\d{4}-\d{2}-\d{2}\s*(?:到|至|[-~—–－])\s*\d{4}-\d{2}-\d{2}", q):
-            return "date_range"
-        if re.search(r"\d{2,4}\s*年\s*\d{1,2}\s*月(?!\s*\d)", q) or re.search(r"(?:(?:\d{2,4}\s*年\s*)?)(?:正|十一|十二|[一二两三四五六七八九十])\s*月(?!\s*\d)", q):
-            return "month"
-        if re.search(r"\d{2,4}\s*年\s*\d{1,2}\s*月\s*\d{1,2}\s*[日号]?", q):
-            return "date"
-        if re.search(r"\d{2,4}\s*年(?!\s*\d|\s*月)", q):
-            return "year"
-        if re.search(r"\d{4}-\d{2}-\d{2}", q):
-            return "date"
-        return None
+        return infer_time_window_type(user_query)
 
     @staticmethod
     def _safe_parse_iso_date(value: object) -> datetime.date | None:

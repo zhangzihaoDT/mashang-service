@@ -202,6 +202,23 @@ runtime_decision →  负责是否允许 finish
 
 ## 更新日志
 
+- 2026-05-18（v0.5 — 时间语义层重构）
+  - **时间逻辑统一**：所有时间理解逻辑从 `planner.py`（~430 行）、`comparison_tool.py`、`tool_router.py` 收敛到 `operators/time_windows.py`，移除 `operators/time_semantics.py`
+    - 新增 `parse_time_window`（增强解析器）、`infer_time_window_type`（分类器）、`parse_comparison_type`、`is_cumulative_query`（累计检测）、`extract_compare_year`（同比目标年提取）、`infer_goal_time_window`（置信度推断）、`remove_cumulative_time_dim`（累计时删时间维度+截 end 为 today）、`cumulative_adjust_time`、`parse_time_semantics`（统一 facade）
+  - **"累计"语义**（YTD）：检测 `累计/累积` + 当前年份时，`time.end` 截断为 `today+1d`；`dimensions` 中移除时间字段（单独或与其他维度共存均处理）
+  - **"同比YYYY年"**：`comparison.target_year` 从 query 提取，`comparison_tool.py` 据此计算偏移（不再硬编码 -1 年）
+  - **日期范围保护**：`dates_are_range` 检测 `~`/`到`/`至` 等范围连接符，`multi_date_split` 不再拆分
+  - 修复的问题：
+    1. `~5月17日累计车系占比` → 全范围累计（原为拆成两单日）
+    2. `2026累计同比2025` → YTD vs YTD（原为全年 vs 全年）
+    3. `2026累计同比2024` → 正确偏移 -2 年（原为 -1 年）
+     4. `2024 1/1~5/17累计锁单数` → 正确 13,637（原为按时间戳分组错误）
+- 2026-05-18（v0.4.6 — Runtime Decision / Fact Extraction 稳定化）
+  - **Agent Loop 空转修复**：`memory_extractor` 三处缺陷导致 query block 始终抽不出 facts → loop 空跑 5 步
+    - `_DATA_EXCLUDE` 误过滤 `"series"` 维度列 → `dim_cols=[]` → 无 dimension_breakdown
+    - `tool_router.py` 默认路径调用 `execute_analysis()` 返回 string 而非 DataFrame → `cols=[]`
+    - `share_summary` 缺少 raw count → 占比的确定性 fallback 计算
+  - **Loop 熔断**：`runtime_decision.py` 新增 stall 检测，同一 `missing_facts` 连续 3 次 → force-finish
 - 2026-05-15（v0.4.5 — 数据集更新 Fast Path）
   - 新增 `FastPathTool.data_update`：支持 CLI/飞书触发数据集增量更新
     - `scope="order"` 时调用 `order_data_to_parquet.py`
@@ -226,8 +243,6 @@ runtime_decision →  负责是否允许 finish
   - Planner 规则路径：`_is_penetration_query` + `_build_penetration_plan`，LLM 前稳定命中
   - 独立回测脚本：scripts/ls8_floor_heating_rate.py
 - 2026-05-14（v0.4.2 — Fact Production Layer 稳定化）
-  - 工具层与路由
-    - 新增 `analysis_intent` + `post_process` DSL 字段，用于表达占比/构成类分析意图
     - 新增 `CompositionTool`（tools/composition_tool.py）：专用占比分析工具（周/月/日分组占比、Top-N、帕累托累计占比）
     - 路由：`plan.analysis_intent.type == "share_breakdown"` → CompositionTool
     - `QueryTool._apply_post_process`：通用 DataFrame 后处理（share 计算）
@@ -380,3 +395,5 @@ python3 feishu_bot.py
 按月分门店看交付数占比
 各门店锁单量Top-5占比
 ```
+
+

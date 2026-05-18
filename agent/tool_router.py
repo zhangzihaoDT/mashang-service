@@ -236,7 +236,7 @@ def _execute_single_plan(
                     "dimensions": dimensions,
                     "filters": filters_without_time,
                     "time": {"field": time_field, "start": time_start, "end": time_end},
-                    "comparison": {"type": comparison_type},
+                    "comparison": comparison,
                 }
             )
             if isinstance(comparison_result, str):
@@ -960,6 +960,9 @@ def _execute_single_plan(
         if post_process:
             query_plan["post_process"] = list(post_process)
         tool_result = query_tool.execute_analysis(query_plan)
+        tool_df = query_tool.execute_analysis_df(query_plan)
+        if not isinstance(tool_df, str):
+            tool_result = tool_df
 
     if isinstance(tool_result, str) and ("找不到数据集" in tool_result or "聚合计算失败" in tool_result):
         print("  ⚠️  执行异常，尝试回退到关键词匹配...")
@@ -1065,6 +1068,21 @@ def run_dsl_step(
         working_memory["last_plan_fingerprint"] = plan_fingerprint
         working_memory["last_action_query"] = action_query
 
+    if isinstance(plan.get("comparison"), dict) and plan["comparison"].get("type") in ("yoy", "wow") and not plan["comparison"].get("target_year"):
+        time_info = plan.get("time")
+        if isinstance(time_info, dict):
+            start_str = time_info.get("start")
+            if isinstance(start_str, str):
+                try:
+                    current_year = int(start_str[:4])
+                except (ValueError, IndexError):
+                    current_year = None
+                if current_year:
+                    from operators.time_windows import extract_compare_year
+                    target = extract_compare_year(action_query, current_year)
+                    if target is not None:
+                        plan["comparison"]["target_year"] = target
+
     goal_time_window = None
     goal_time_window_confidence = None
     if isinstance(memory_context, dict):
@@ -1142,7 +1160,8 @@ def run_dsl_step(
         dims = plan.get("dimensions")
         has_time_dim = isinstance(dims, list) and isinstance(time_field, str) and time_field in dims
         has_other_dim = isinstance(dims, list) and any(isinstance(d, str) and d and d != time_field for d in dims)
-        if len(dates) >= 2 and len(dates) <= 10 and has_time_dim and has_other_dim:
+        dates_are_range = bool(re.search(r"[日月号年\d][~到至\-\u2014\u2013\uFF0D][\d年月]", (action_query or "").replace(" ", "")))
+        if len(dates) >= 2 and len(dates) <= 10 and has_time_dim and has_other_dim and not dates_are_range:
             result_blocks: list[str] = []
             structured_blocks: list[dict] = []
             for day in dates:
