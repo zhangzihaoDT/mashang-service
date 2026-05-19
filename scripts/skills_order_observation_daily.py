@@ -23,6 +23,10 @@ from dotenv import load_dotenv
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT))
+
+from operators.mature_lock_prediction import run_mature_lock_prediction_operator
+from operators.assign_conversion import _parse_cn_date
 load_dotenv(REPO_ROOT / ".env")
 
 # 配置常量
@@ -405,7 +409,29 @@ def analyze_daily_invoice_orders(df, start_date, end_date):
         "models": model_invoice_stats
     }
 
-def send_feishu_notification(lock_stats, invoice_stats):
+def get_predicted_lock(assign_date_str: str) -> tuple[float | None, float | None, str | None]:
+    """
+    获取指定日期的预测锁单数。
+    returns (pred30, actual_locks_on_date, warning)
+    """
+    csv_path = REPO_ROOT / "dataset" / "assign_data.csv"
+    if not csv_path.exists():
+        return None, None, None
+    try:
+        df = pd.read_csv(str(csv_path))
+        end_dt = pd.Timestamp(assign_date_str) + pd.Timedelta(days=1)
+        result = run_mature_lock_prediction_operator(df, assign_date_str, end_dt.strftime("%Y-%m-%d"))
+        rows = result.get("daily_rows", [])
+        if not rows:
+            return None, None, None
+        r = rows[0]
+        pred = r.get("预测30日锁单数")
+        return pred, None, None
+    except Exception as e:
+        return None, None, str(e)
+
+
+def send_feishu_notification(lock_stats, invoice_stats, pred_lock=None):
     """发送飞书通知"""
     if not WEBHOOK_URL:
         print("❌ 错误: 未设置 FS_WEBHOOK_URL 环境变量，跳过发送消息")
@@ -453,7 +479,23 @@ def send_feishu_notification(lock_stats, invoice_stats):
         invoice_model_details.append(f"- {model}: {info['count']} ({info['user_car_count']}) 台｜平均开票价格：{price_str}")
     invoice_model_text = "\n".join(invoice_model_details)
 
-    # 构建卡片内容
+    # 构建预测锁单与达成率
+    pred_line = ""
+    warn_line = ""
+    if pred_lock is not None and pred_lock > 0:
+        actual = lock_stats['total']
+        rate = actual / pred_lock
+        pred_line = f"预测锁单数：{pred_lock:.0f}"
+        if rate < 0.8:
+            warn_line = (
+                f"\n\n⚠️ **达成率预警**\n"
+                f"达成率：{rate:.1%} < 80%\n"
+                f"实际锁单({actual}) 低于预测({pred_lock:.0f})，"
+                f"建议排查转化链路是否存在异常。"
+            )
+        else:
+            warn_line = f"\n达成率：{rate:.1%}（正常）"
+
     card_content = {
         "msg_type": "interactive",
         "card": {
@@ -462,14 +504,14 @@ def send_feishu_notification(lock_stats, invoice_stats):
                     "tag": "plain_text",
                     "content": f"📊 {title_prefix}业务数据观察 ({date_str})"
                 },
-                "template": "blue"
+                "template": "blue" if not warn_line else "red"
             },
             "elements": [
                 {
                     "tag": "div",
                     "text": {
                         "tag": "lark_md",
-                        "content": f"**{lock_label}：** {lock_stats['total']}\n{lock_model_text}"
+                        "content": f"**{lock_label}：** {lock_stats['total']}\n{pred_line}{warn_line}\n{lock_model_text}"
                     }
                 },
                 {
@@ -542,6 +584,13 @@ def main():
     lock_stats = analyze_daily_lock_orders(df, start_date, end_date)
     invoice_stats = analyze_daily_invoice_orders(df, start_date, end_date)
     
+    # 3. 获取预测锁单数
+    pred_lock = None
+    if start_date == end_date:
+        pred_lock, _, pred_err = get_predicted_lock(str(start_date))
+        if pred_err:
+            print(f"⚠️ 预测锁单计算失败: {pred_err}")
+
     if lock_stats and invoice_stats:
         # 打印结果到控制台
         print("\n" + "="*30)
@@ -549,8 +598,13 @@ def main():
             print(f"📅 日期: {start_date}")
         else:
             print(f"📅 日期范围: {start_date} ~ {end_date}")
-            
+
         print(f" 总锁单数: {lock_stats['total']}")
+        if pred_lock is not None and pred_lock > 0:
+            rate = lock_stats['total'] / pred_lock
+            warn = " ⚠️ 低于80%" if rate < 0.8 else ""
+            print(f" 预测锁单数: {pred_lock:.0f}")
+            print(f" 达成率: {rate:.1%}{warn}")
         print("   车型分布:")
         for model, stats in lock_stats['models'].items():
             count = stats["count"]
@@ -581,7 +635,7 @@ def main():
         if dry_run:
             print("🧪 dry-run: 已跳过飞书通知发送")
             return
-        send_feishu_notification(lock_stats, invoice_stats)
+        send_feishu_notification(lock_stats, invoice_stats, pred_lock)
 
 if __name__ == "__main__":
     main()

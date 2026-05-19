@@ -6,6 +6,7 @@ from operators.retained_intention import run_retained_intention_operator, run_re
 from operators.store_avg_lock import run_store_avg_lock_operator
 from operators.assign_conversion import run_assign_conversion_operator
 from operators.weighted_lead_conversion import run_weighted_lead_conversion_operator
+from operators.mature_lock_prediction import run_mature_lock_prediction_operator
 from pathlib import Path
 import json
 from operators.series_group_logic import apply_series_group_logic
@@ -102,6 +103,14 @@ def _is_city_tier_plan(plan: dict, user_query: str) -> bool:
         return False
     return any(k in text for k in ["锁单", "订单", "交付", "开票", "小订", "意向金"])
 
+def _is_mature_lock_prediction_plan(plan: dict, user_query: str) -> bool:
+    text = " ".join([
+        str(user_query or ""),
+        str((plan or {}).get("question") or ""),
+    ])
+    return "预测锁单" in text
+
+
 def _is_assign_conversion_plan(plan: dict, user_query: str) -> bool:
     metric = (plan or {}).get("metric", {}) or {}
     text = " ".join(
@@ -185,6 +194,18 @@ def run_registered_operator(plan: dict, user_query: str, query_tool) -> dict | N
         if not start or not end:
             return {"type": "weighted_lead_conversion", "error": "missing_time_window", "message": "加权锁单率需要明确 start/end"}
         return run_weighted_lead_conversion_operator(df=df, start=str(start), end=str(end))
+
+    if _is_mature_lock_prediction_plan(plan, user_query):
+        query_tool._load_datasets()
+        df = query_tool.datasets.get("assign_data")
+        if df is None:
+            return {"type": "mature_lock_prediction", "error": "dataset_not_found", "message": "缺少 assign_data 数据集"}
+        time = (plan or {}).get("time", {}) or {}
+        start = time.get("start")
+        end = time.get("end")
+        if not start or not end:
+            return {"type": "mature_lock_prediction", "error": "missing_time_window", "message": "预测锁单数需要明确 start/end"}
+        return run_mature_lock_prediction_operator(df=df, start=str(start), end=str(end))
 
     if _is_assign_conversion_plan(plan, user_query):
         query_tool._load_datasets()

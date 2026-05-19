@@ -34,5 +34,9 @@
   {
     "title": "下发线索加权锁单率",
     "summary": "0.4 × (门店当日锁单率 × 门店线索占比) + 0.4 × 下发线索7日锁单率 + 0.2 × 下发线索30日锁单率，基于 assign_data 按窗口聚合计算每日及整体加权锁单率。"
+  },
+  {
+    "title": "预测锁单数 / 下发线索成熟度预测锁单数 (Lead Maturity Forecast Locks)",
+    "summary": "基于成熟度曲线（Maturity Curve）修正右删失数据，对未完全成熟的下发线索 cohort（age < 30d）预测其最终30日锁单数。三段式：age>=30d 用原始值；7d≤age<30d 用 lock_7 ÷ r7 推算；age<7d 用 0.5×avg + 0.5×当日锁单推测。r7/r0 来自历史完全成熟 cohort。"
   }
 ]
