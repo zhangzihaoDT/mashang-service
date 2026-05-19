@@ -377,10 +377,12 @@ def run_main_agent(user_query: str) -> str:
 
         schema_context = query_tool._schema_context()
 
+        from operators.registry import get_operator_catalog_md
         planning_agent = PlanningAgent(
             client=client,
             schema_md=schema_context.get("schema_md", ""),
             business_definition=schema_context.get("business_definition", ""),
+            operator_catalog=get_operator_catalog_md(),
         )
         comparison_tool = ComparisonTool(query_tool=query_tool)
         composition_tool = CompositionTool(query_tool=query_tool)

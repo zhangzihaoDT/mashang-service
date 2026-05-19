@@ -253,10 +253,11 @@ class PlanningAgent:
         "owner_gender": ["按性别", "分性别", "性别", "男女", "男女比例", "男女占比", "性别占比", "车主", "车主性别", "owner_gender"],
     }
 
-    def __init__(self, client: OpenAI, schema_md: str, business_definition: str):
+    def __init__(self, client: OpenAI, schema_md: str, business_definition: str, operator_catalog: str = ""):
         self.client = client
         self.schema_md = schema_md or ""
         self.business_definition = business_definition or ""
+        self.operator_catalog = operator_catalog or ""
         self.last_planning_error: str = ""
         self.business_definition_obj: dict = {}
         try:
@@ -531,6 +532,17 @@ class PlanningAgent:
                 "time_field": "delivery_date",
                 "non_null_field": "delivery_date",
             }
+        if "平均开票价格" in q or ("平均" in q and "开票" in q and ("价格" in q or "金额" in q)):
+            return {
+                "dataset": "order_data",
+                "metric": {"field": "invoice_amount", "agg": "mean", "alias": "平均开票价格", "business_name": "平均开票价格"},
+                "time_field": "invoice_upload_time",
+                "non_null_field": "invoice_upload_time",
+                "extra_filters": [
+                    {"field": "order_type", "op": "==", "value": "用户车"},
+                    {"field": "invoice_amount", "op": ">", "value": 0},
+                ],
+            }
         if "开票金额" in q or ("开票" in q and "金额" in q):
             return {
                 "dataset": "order_data",
@@ -575,7 +587,7 @@ class PlanningAgent:
         has_today = any(k in q for k in ["今天", "今日", "当前日期"])
         if iso_week_hint and has_today:
             return {"type": "current_iso_week"}
-        is_sync = "数据更新并同步" in q
+        is_sync = "数据更新并同步" in q or "更新数据并同步" in q
         if not is_sync and "同步数据" in q:
             is_sync = True
         is_update = any(k in q for k in ["更新数据", "刷新数据", "数据更新", "刷新数据集", "更新订单", "更新选配", "全部更新", "刷新全部", "更新归属"])
@@ -2044,6 +2056,10 @@ class PlanningAgent:
         if non_null_field:
             plan["filters"].append({"field": non_null_field, "op": "!=", "value": None})
 
+        extra_filters = metric_defaults.get("extra_filters")
+        if isinstance(extra_filters, list):
+            plan["filters"].extend(extra_filters)
+
         return self._normalize_plan(plan)
 
     @staticmethod
@@ -2236,31 +2252,30 @@ class PlanningAgent:
                     f"{self.schema_md}\n\n"
                     "业务定义:\n"
                     f"{self.business_definition}\n\n"
+                    "算子目录:\n"
+                    f"{self.operator_catalog}\n\n"
                     f"{memory_text}"
                     "约束:\n"
-                    "- 默认返回 1 个 plan；仅当用户明确包含多个子问题时才拆成多个 plan，并保持原顺序。\n"
-                    "- 每个 plan 必须填写 question 字段用于回显。\n"
-                    "- time.start/time.end 必须是 YYYY-MM-DD，且 end 为开区间。\n"
-                    "- 遇到歧义必须返回 clarification.need=true，禁止自行猜测。\n"
-                    "- 澄清规则与指标口径以 Schema 文档为准。\n"
-                    "- 锁单量口径：order_number count 且 lock_time 非空，时间筛选基于 lock_time。\n"
+                    "- 默认返回 1 个 plan；多子问题才拆多个，保持原顺序。\n"
+                    "- 每个 plan 必须填写 question 字段。\n"
+                    "- time.start/end 必须是 YYYY-MM-DD，end 为开区间。\n"
+                    "- 遇到歧义（如销量口径、城市口径）必须 clarification.need=true。\n"
+                    "- 口径定义以 Schema 文档为准，约束仅列 Schema 未覆盖的行为规则。\n"
                     "- 路由优先级：Fast Path > Operators > Comparison/Statistics/Query。\n"
-                    "- 纯数字比较问题（如“405环比382提升多少”）输出 fast_path={type:numeric_ratio,current,base}。\n"
-                    "- 日期周序问题（如“今天是第几周/ISO周数”）输出 fast_path={type:current_iso_week}。\n"
-                    "- 闲聊/致谢/鼓励问题（如 welldone、谢谢、辛苦了）输出 fast_path={type:small_talk_contextual}。\n"
-                    "- 在营门店数问题优先走固定算子，plan.statistics 置空或不设置；时间字段优先 order_create_date。\n"
+                    "- 纯数字比较输出 fast_path={type:numeric_ratio,current,base}。\n"
+                    "- 日期周序输出 fast_path={type:current_iso_week}。\n"
+                    "- 闲聊致谢输出 fast_path={type:small_talk_contextual}。\n"
                     "- 用户出现‘试驾车’时 filters 必须含 order_type == 试驾车；出现‘用户车’时必须含 order_type == 用户车。\n"
                     "- 用户出现系列词（L6/L7/LS6/LS7/LS8/LS9）时，filters 应补充 series 约束。\n"
-                    "- 若用户出现 CM0/CM1/CM2/DM0/DM1 这类二级车型分组，需使用 business_definition.series_group_logic（product_name 逻辑）生成 filters，禁止把这些 token 直接写到 series 字段。\n"
-                    "- 注意：LS6/L6 是 series 车系，不要按 model_series_mapping 展开成 CM0/CM1/CM2 或 DM0/DM1；只有当用户明确问 CM0/CM1/CM2/DM0/DM1 时才使用 series_group_logic。\n"
-                    "- 用户问性别/男女比例时，默认使用 owner_gender 作为分组维度；只有明确提到订单用户/订单性别时才使用 order_gender。\n"
-                    "- 城市线级划分（如一线/新一线/二线/三线及以下/线级分布占比）优先走固定算子；默认使用 license_city，除非用户明确指定门店城市(store_city)。\n"
-                    "- 同比/年同比用 comparison.type=yoy；周环比用 comparison.type=wow；日环比（如“昨天日环比”）用 comparison.type=dod。\n"
-                    "- 时序统计类按类型输出 statistics：weekly_decline_ratio / daily_threshold_count / daily_mean / daily_mean_median / trend_summary / daily_percentile_rank / weekend_percentile_rank / weekday_percentile_rank，并补齐各自必需字段。\n"
-                    "- 若用户问“近 N 日/周/月 的某指标趋势/走势/波动”，优先使用 trend_summary，并设置 window_days 与 value_metric。\n"
-                    "- 若用户问“近 N 个周的周日/周一..周日 处于什么水平”，使用 weekday_percentile_rank，并设置 window_weeks=N、weekdays=[对应周内日]、reference_date=昨天/今天。\n"
-                    "- 配置渗透率/选装率分析（如“地暖选装率”、“轮毂选装率”）：设置 analysis_intent.type=attribute_penetration，并在 analysis_intent 中补齐 attribute_pattern（选配项匹配模式）、dimension_field（分组维度，默认 product_name）。\n"
-                    "- 配置分布/比例分析（如“不同轮毂的选装比例”、“外饰颜色分布”）：设置 analysis_intent.type=attribute_distribution，并在 analysis_intent 中补齐 attribute_pattern 和 top_k。\n"
+                    "- 若用户出现 CM0/CM1/CM2/DM0/DM1 等二级车型分组，使用 business_definition.series_group_logic（product_name 逻辑）生成 filters，禁止直接写到 series 字段。\n"
+                    "- LS6/L6 是 series 车系，不要按 model_series_mapping 展开成 CM0/CM1/CM2/DM0/DM1；仅当用户明确问二级分组时才使用 series_group_logic。\n"
+                    "- 用户问性别/男女比例时，默认 owner_gender；明确提到订单用户/订单性别时用 order_gender。\n"
+                    "- 同比/年同比用 comparison.type=yoy；周环比=wow；日环比=dod。\n"
+                    "- 时序统计输出 statistics：weekly_decline_ratio/daily_threshold_count/daily_mean/daily_mean_median/trend_summary/daily_percentile_rank/weekend_percentile_rank/weekday_percentile_rank，并补齐必需字段。\n"
+                    "- 近 N 日/周/月 的趋势/走势/波动，优先 trend_summary，设 window_days 与 value_metric。\n"
+                    "- 近 N 周的周日/周一..周日 水平，用 weekday_percentile_rank，设 window_weeks、weekdays、reference_date。\n"
+                    "- 配置渗透率/选装率：analysis_intent.type=attribute_penetration，补齐 attribute_pattern、dimension_field。\n"
+                    "- 配置分布/比例：analysis_intent.type=attribute_distribution，补齐 attribute_pattern、top_k。\n"
                     f"{TEMPLATE_CATALOG_MD}\n"
                 ),
             },

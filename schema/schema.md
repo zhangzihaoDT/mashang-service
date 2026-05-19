@@ -2,87 +2,99 @@
 
 本文档定义了数据集的业务逻辑、指标计算规则及可用维度，用于指导 Planning Agent 生成准确的分析计划。
 
-## 0. 澄清规则 (Clarifications)
+## 1. 可用指标 (Metrics)
 
-在生成规划 DSL 前，如果用户问题存在口径歧义，必须先澄清，确认后再生成 plans。
+用于计算总和、平均值、计数等数值指标。指标分为两层：
 
-### 0.1 口语“销量”澄清
+| 层级 | 说明 | 示例 |
+| :--- | :--- | :--- |
+| **原始指标** | field + agg 直接构成，不含业务过滤条件 | sum(invoice_amount), count(order_number) |
+| **业务 DSL 指标** | 原始指标 + 业务口径规则（强制过滤条件、派生逻辑、算子运算） | 锁单量 = count(order_number) WHERE lock_time IS NOT NULL |
 
-用户如果问“销量/卖了多少/成交量”但未明确口径，必须先澄清后再规划：
+### 1.1 原始指标 (Raw Metrics)
 
-- 澄清选项仅限：**锁单量**（lock_time） / **交付数**（delivery_date） / **开票数**（invoice_upload_time）
-- 不允许默认选择其中一个口径
-- 澄清后再生成对应 metric 与时间字段，并补齐对应“时间字段非空”过滤条件
+由数据集的原始字段和聚合函数直接构成，LLM 可在此基础上附加用户查询中的过滤条件。
 
-### 0.2 城市口径澄清
-
-用户如果在问题里提到“南京/南京市”等城市，但未明确是按门店口径还是上牌口径，必须先澄清后再规划：
-
-- 门店城市：`store_city`
-- 上牌城市：`license_city`
-
-澄清后再生成对应 filters。若数据中存在“南京/南京市”这类值别名差异，filters 建议使用 `in` 操作符携带多值以保证命中。
-
-**负样本（不要误判为城市）**
-
-- 句首动词/意图词不是城市：如“查询/统计/汇总/查看/分析/对比”，不要因为后面跟着“去年/本月/昨天”等时间词就把它当作城市。
-  - 例如：“查询去年的下发线索数,试驾数,锁单数”中的“查询”不是城市，不应触发城市口径澄清。
-  - 例如：“统计今年锁单量”中的“统计”不是城市，不应触发城市口径澄清。
-
-## 1. 时间维度 (Time Dimensions)
-
-用于按时间段（日、周、月、年）进行趋势分析和筛选。
-
-- `order_create_date`: 订单创建日期
-- `store_create_date`: 门店创建日期
-- `lock_time`: 锁单时间
-- `invoice_upload_time`: 发票上传时间
-- `delivery_date`: 交付日期
-- `intention_payment_time`: 意向金支付时间
-- `intention_refund_time`: 意向金退款时间
-- `deposit_payment_time`: 大定支付时间
-- `deposit_refund_time`: 大定退款时间
-- `apply_refund_time`: 申请退款时间
-- `approve_refund_time`: 审批退款时间
-- `actual_refund_time`: 实际退款时间
-- `first_touch_time`: 首次接触时间
-- `first_test_drive_time`: 首次试驾时间
-- `first_assign_time`: 首次下发时间
-- `final_payment_time`: 尾款支付时间
-- `Assign Time 年/月/日`: 外部线索下发日期 (仅限 assign_data)
-
-## 2. 可用指标 (Metrics)
-
-用于计算总和、平均值、计数等数值指标。
-
-### 核心业务指标
-
-- **锁单量**: `order_number` 计数 (必须添加过滤条件: `lock_time` 非空)。注意：时间筛选应基于 `lock_time`。
-- **交付数**: `order_number` 计数 (必须添加过滤条件: `delivery_date` 非空)。注意：时间筛选应基于 `delivery_date`。
-- **开票数**: `order_number` 计数 (必须添加过滤条件: `invoice_upload_time` 非空)。注意：时间筛选应基于 `invoice_upload_time`，而不是 `order_create_date`。
-- **小订数**: `order_number` 计数 (必须添加过滤条件: `intention_payment_time` 非空)。注意：时间筛选应基于 `intention_payment_time`。
-- **大定数**: `order_number` 计数 (必须添加过滤条件: `deposit_payment_time` 非空)。注意：时间筛选应基于 `deposit_payment_time`。
-- **留存小订单数**: 统计在指定时间窗口内支付小订，且在时间窗口结束时未发生退款的独立订单数量。
-  - 该指标由算子层统一计算：`operators/retained_intention.py`，优先走固定算子而不是通用 DSL 聚合。
-  - 时间筛选应基于 `intention_payment_time`。
-  - 注意：如果过滤条件是 `series` 等于某个车型（如 CM2, LS8），该字段在算子内部将优先使用 `series_group_logic` 进行精确匹配（如果有的话）。
-- **开票金额**: `invoice_amount` (求和/平均)
 - **订单计数**: `order_number` 计数
-- **在营门店数**: 以目标日 `d` 统计，口径为“最近 30 天内有活动且在 `d` 当天已开店的门店数”。
-  - 该指标由算子层统一计算：`operators/active_store.py`，优先走固定算子而不是通用 DSL 聚合。
-  - 活动日字段优先取 `order_create_date`。
+- **开票金额**: `invoice_amount` 求和
+- **购车人年龄**: `buyer_age` (平均/中位数/分布)
+- **车主年龄**: `owner_age` (平均/中位数/分布)
+
+### 1.2 业务 DSL 指标 (Business DSL Metrics)
+
+在原始指标基础上附加了固定的业务口径规则。LLM 必须严格按以下 DSL 映射生成计划。
+
+#### 1.2.1 计数类 — `order_number` count + 时间字段非空
+
+| 指标名 | 聚合 | 强制过滤条件 | 时间字段 | 说明 |
+| :--- | :--- | :--- | :--- | :--- |
+| **锁单量** | count(order_number) | `lock_time` IS NOT NULL | `lock_time` | |
+| **交付数** | count(order_number) | `delivery_date` IS NOT NULL | `delivery_date` | |
+| **开票数** | count(order_number) | `invoice_upload_time` IS NOT NULL | `invoice_upload_time` | 不要用 order_create_date |
+| **小订数** | count(order_number) | `intention_payment_time` IS NOT NULL | `intention_payment_time` | |
+| **大定数** | count(order_number) | `deposit_payment_time` IS NOT NULL | `deposit_payment_time` | |
+
+#### 1.2.2 均值类 — mean + 业务过滤
+
+| 指标名 | 聚合 | 强制过滤条件 | 时间字段 |
+| :--- | :--- | :--- | :--- |
+| **平均开票价格** | mean(invoice_amount) | `order_type == '用户车'`, `invoice_amount > 0` | `invoice_upload_time` |
+
+#### 1.2.3 算子类 — 由固定算子计算（不走通用 DSL 聚合）
+
+当用户查询匹配以下算子时，LLM 应生成带对应 `statistics.type` / `analysis_intent` / 算子的 plan，然后将 `statistics` 置为空或不设置，让路由层自动匹配算子（路由优先级确保算子优先于通用 DSL 聚合）。
+
+- **留存小订单数**: 统计在指定时间窗口内支付小订，且在时间窗口结束时未发生退款的独立订单数量。
+  - 算子：`operators/retained_intention.py`
+  - 时间字段：`intention_payment_time`
+  - 如果过滤条件包含 `series` 等于某车型（如 CM2, LS8），算子内部优先使用 `series_group_logic` 精确匹配。
+- **留存小订转化率**: 在留存小订基础上，进一步计算从小订到锁单/交付的转化漏斗。
+  - 算子：`operators/retained_intention.py`（`run_retained_intention_conversion_operator`）
+  - 时间字段：`intention_payment_time`（小订窗口）、`lock_time`（锁单窗口）
+  - 需要同时指定小订时间窗口和锁单时间窗口。
+- **在营门店数**: 以目标日 `d` 统计"最近 30 天内有活动且在 `d` 当天已开店的门店数"。
+  - 算子：`operators/active_store.py`
+  - 活动日字段：`order_create_date`
   - 仅保留 `store_name` 与活动日非空记录。
   - 每个门店开店日取 `store_create_date` 的最小值。
   - 活跃门店集合为活动日落在 `[d-29, d]` 的门店。
   - 在营判定为 `open_date <= d`，最终结果为门店 `store_name` 去重计数。
   - 不要把 `store_create_date` 直接当作统计时间字段做简单 count。
-- **下发线索至锁单时间间隔(天)**: `first_assign_lock_time` (平均/中位数)。二级指标，定义为 `(lock_time - first_assign_time)` 换算为天（负值视为无效），用于衡量从首次下发线索到锁单的转化时长，时间筛选通常基于 `lock_time`。
-  - 在 `scripts/index_summary.py` 的 `订单分析` 模块中：按车系输出 `{locks, avg, mid}`，其中 `avg`=均值(天，保留 1 位小数)，`mid`=中位数(天，保留 1 位小数)。
+- **年龄代际分布**: 根据身份证号或年龄字段推算出生年份，按 00后/95后/90后/…/60前 分组统计人数及占比。
+  - 算子：`operators/age_cohort.py`
+  - 默认年龄字段：`owner_age`；用户明确提到"购车人年龄/订单用户年龄"时使用 `buyer_age`。
+  - 支持车系过滤。
+- **城市线级分布**: 将城市按内置 mapping 归为 一线/新一线/二线/三线及以下 四档，统计各档人数及占比。
+  - 算子：`operators/city_tier.py`
+  - 默认城市字段：`license_city`；用户明确提到"门店城市"时使用 `store_city`。
+  - 支持车系过滤。
+- **省份 TopK 占比**: 将城市映射到省份，按用户指定的 TopK 统计省份集中度及占比。
+  - 算子：`operators/province_topk.py`
+  - 默认城市字段：`license_city`；用户明确提到"门店城市"时使用 `store_city`。
+  - TopK 从用户查询中解析（如"前5"、"Top 3"）。
+  - 支持车系过滤。
+- **店均锁单数**: 日锁单数 / 在营门店数，计算窗口内每日店均锁单量及整体均值。
+  - 算子：`operators/store_avg_lock.py`
+  - 在营门店定义：当天及往前29天存在订单活动且已开业的门店。
+  - 时间字段：`lock_time`
+- **下发线索转化率**: 基于 assign_data 计算下发线索在各渠道、各窗口（当日/7日/30日）的试驾率与锁单率。
+  - 算子：`operators/assign_conversion.py`
+  - 数据集：`assign_data`
+  - 输出包含门店线索占比、当日试驾率、当日/7日/30日锁单率及分渠道（门店/直播/平台/APP小程序/快慢闪）锁单率共13项比率。
+- **下发线索加权锁单率**: 0.4 × (门店当日锁单率 × 门店线索占比) + 0.4 × 下发线索7日锁单率 + 0.2 × 下发线索30日锁单率。
+  - 算子：`operators/weighted_lead_conversion.py`
+  - 数据集：`assign_data`
 
-- **购车人年龄**: `buyer_age` (平均/分布)
-- **车主年龄**: `owner_age` (平均/分布)
+#### 1.2.4 派生类 — 基于已有字段计算的二级指标
 
-### 外部线索指标 (仅限 assign_data)
+- **下发线索至锁单时间间隔(天)**: `first_assign_lock_time` (平均/中位数)
+  - 定义：`(lock_time - first_assign_time)` 换算为天，负值视为无效。
+  - 用途：衡量从首次下发线索到锁单的转化时长。
+  - 时间筛选通常基于 `lock_time`。
+
+### 1.3 外部线索指标 (仅限 assign_data, 预聚合字段)
+
+这些字段已由 Tableau 数据源预计算，LLM 直接按字段名查询即可。
 
 - `下发线索数`: 下发线索总数
 - `下发线索当日试驾数`: 下发当日完成试驾的数量
@@ -94,7 +106,7 @@
 - `下发线索数 (门店)`: 门店渠道收到的线索总数
 - `下发线索当日锁单数 (门店)`: 门店渠道线索当天即锁单的数量
 
-## 3. 可用维度 (Dimensions)
+## 2. 可用维度 (Dimensions)
 
 用于分组、筛选和拆解分析。
 

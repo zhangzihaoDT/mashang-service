@@ -10,6 +10,22 @@ from pathlib import Path
 import json
 from operators.series_group_logic import apply_series_group_logic
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+OPERATOR_CATALOG_FILE = REPO_ROOT / "operators" / "index_summary.json"
+
+
+def get_operator_catalog_md() -> str:
+    try:
+        catalog = json.loads(OPERATOR_CATALOG_FILE.read_text(encoding="utf-8"))
+    except Exception:
+        return ""
+    lines = ["### 可用算子 (Operator Catalog)\n"]
+    for i, entry in enumerate(catalog, 1):
+        title = entry.get("title", "")
+        summary = entry.get("summary", "")
+        lines.append(f"{i}. **{title}**: {summary}")
+    return "\n".join(lines) + "\n"
+
 
 def _is_active_store_plan(plan: dict, user_query: str) -> bool:
     metric = (plan or {}).get("metric", {}) or {}
