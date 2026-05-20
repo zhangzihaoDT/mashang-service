@@ -482,11 +482,13 @@ def send_feishu_notification(lock_stats, invoice_stats, pred_lock=None):
     # 构建预测锁单与达成率
     pred_line = ""
     warn_line = ""
+    is_warning = False
     if pred_lock is not None and pred_lock > 0:
         actual = lock_stats['total']
         rate = actual / pred_lock
         pred_line = f"预测锁单数：{pred_lock:.0f}"
         if rate < 0.8:
+            is_warning = True
             warn_line = (
                 f"\n\n⚠️ **达成率预警**\n"
                 f"达成率：{rate:.1%} < 80%\n"
@@ -504,14 +506,14 @@ def send_feishu_notification(lock_stats, invoice_stats, pred_lock=None):
                     "tag": "plain_text",
                     "content": f"📊 {title_prefix}业务数据观察 ({date_str})"
                 },
-                "template": "blue" if not warn_line else "red"
+                "template": "red" if is_warning else "blue"
             },
             "elements": [
                 {
                     "tag": "div",
                     "text": {
                         "tag": "lark_md",
-                        "content": f"**{lock_label}：** {lock_stats['total']}\n{pred_line}{warn_line}\n{lock_model_text}"
+                        "content": f"**{lock_label}：** {lock_stats['total']}\n{lock_model_text}\n{pred_line}{warn_line}"
                     }
                 },
                 {
@@ -600,11 +602,6 @@ def main():
             print(f"📅 日期范围: {start_date} ~ {end_date}")
 
         print(f" 总锁单数: {lock_stats['total']}")
-        if pred_lock is not None and pred_lock > 0:
-            rate = lock_stats['total'] / pred_lock
-            warn = " ⚠️ 低于80%" if rate < 0.8 else ""
-            print(f" 预测锁单数: {pred_lock:.0f}")
-            print(f" 达成率: {rate:.1%}{warn}")
         print("   车型分布:")
         for model, stats in lock_stats['models'].items():
             count = stats["count"]
@@ -622,6 +619,11 @@ def main():
                     detail_parts.append(f"六座：{d['六座']}")
             detail_str = "｜" + "，".join(detail_parts) if detail_parts else ""
             print(f"   - {model}: {count}{detail_str}")
+        if pred_lock is not None and pred_lock > 0:
+            rate = lock_stats['total'] / pred_lock
+            warn = " ⚠️ 低于80%" if rate < 0.8 else ""
+            print(f" 预测锁单数: {pred_lock:.0f}")
+            print(f" 达成率: {rate:.1%}{warn}")
             
         print("-" * 30)
         
