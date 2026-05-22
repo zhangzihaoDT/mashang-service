@@ -6,6 +6,7 @@ from openai import OpenAI
 from agent.llm_config import DEEPSEEK_PLANNER_MODEL
 from agent.runtime_decision import evaluate_state_readiness
 from agent.state import AgentState
+from schema import MetricRegistry
 from operators.time_windows import (
     parse_time_window,
     parse_time_window_with_business,
@@ -160,7 +161,12 @@ PLANNING_TOOL_SCHEMA = {
                                 "analysis_intent": {
                                 "type": "object",
                                 "properties": {
-                                    "type": {"type": "string", "enum": ["share_breakdown", "attribute_penetration", "attribute_distribution"]},
+                                    "type": {"type": "string", "enum": [
+                                        "share_breakdown", "attribute_penetration", "attribute_distribution",
+                                        "active_store", "retained_intention", "retained_intention_conversion",
+                                        "age_cohort", "city_tier", "province_topk", "store_avg_lock",
+                                        "assign_conversion", "weighted_lead_conversion", "mature_lock_prediction"
+                                    ]},
                                     "attribute_table": {"type": "string"},
                                     "attribute_field": {"type": "string"},
                                     "attribute_pattern": {"type": "string"},
@@ -253,11 +259,12 @@ class PlanningAgent:
         "owner_gender": ["按性别", "分性别", "性别", "男女", "男女比例", "男女占比", "性别占比", "车主", "车主性别", "owner_gender"],
     }
 
-    def __init__(self, client: OpenAI, schema_md: str, business_definition: str, operator_catalog: str = ""):
+    def __init__(self, client: OpenAI, schema_md: str, business_definition: str, operator_catalog: str = "", metric_registry: MetricRegistry | None = None):
         self.client = client
         self.schema_md = schema_md or ""
         self.business_definition = business_definition or ""
         self.operator_catalog = operator_catalog or ""
+        self.metric_registry = metric_registry or MetricRegistry()
         self.last_planning_error: str = ""
         self.business_definition_obj: dict = {}
         try:
@@ -508,77 +515,44 @@ class PlanningAgent:
     def infer_goal_time_window(self, user_query: str, today: datetime.date) -> dict:
         return _ts_infer_goal_time_window(user_query, today, self.business_definition_obj)
 
-    @staticmethod
-    def _metric_defaults(user_query: str) -> dict | None:
+    def _metric_defaults(self, user_query: str) -> dict | None:
         q = user_query or ""
-        if "在营门店" in q:
-            return {
-                "dataset": "order_data",
-                "metric": {"field": "store_name", "agg": "count", "alias": "在营门店数", "business_name": "在营门店数"},
-                "time_field": "order_create_date",
-                "non_null_field": "order_create_date",
-            }
-        if "下发线索" in q:
-            return {
-                "dataset": "assign_data",
-                "metric": {"field": "下发线索数", "agg": "sum", "alias": "下发线索数", "business_name": "下发线索数"},
-                "time_field": "Assign Time 年/月/日",
-                "non_null_field": "Assign Time 年/月/日",
-            }
-        if "锁单" in q:
-            return {
-                "dataset": "order_data",
-                "metric": {"field": "order_number", "agg": "count", "alias": "锁单数", "business_name": "锁单量"},
-                "time_field": "lock_time",
-                "non_null_field": "lock_time",
-            }
-        if "交付" in q:
-            return {
-                "dataset": "order_data",
-                "metric": {"field": "order_number", "agg": "count", "alias": "交付数", "business_name": "交付数"},
-                "time_field": "delivery_date",
-                "non_null_field": "delivery_date",
-            }
-        if "平均开票价格" in q or ("平均" in q and "开票" in q and ("价格" in q or "金额" in q)):
-            return {
-                "dataset": "order_data",
-                "metric": {"field": "invoice_amount", "agg": "mean", "alias": "平均开票价格", "business_name": "平均开票价格"},
-                "time_field": "invoice_upload_time",
-                "non_null_field": "invoice_upload_time",
-                "extra_filters": [
-                    {"field": "order_type", "op": "==", "value": "用户车"},
-                    {"field": "invoice_amount", "op": ">", "value": 0},
-                ],
-            }
-        if "开票金额" in q or ("开票" in q and "金额" in q):
-            return {
-                "dataset": "order_data",
-                "metric": {"field": "invoice_amount", "agg": "sum", "alias": "开票金额", "business_name": "开票金额"},
-                "time_field": "invoice_upload_time",
-                "non_null_field": "invoice_upload_time",
-            }
-        if "开票" in q:
-            return {
-                "dataset": "order_data",
-                "metric": {"field": "order_number", "agg": "count", "alias": "开票数", "business_name": "开票数"},
-                "time_field": "invoice_upload_time",
-                "non_null_field": "invoice_upload_time",
-            }
-        if "小订" in q or "意向金" in q:
-            return {
-                "dataset": "order_data",
-                "metric": {"field": "order_number", "agg": "count", "alias": "小订数", "business_name": "小订数"},
-                "time_field": "intention_payment_time",
-                "non_null_field": "intention_payment_time",
-            }
-        if "大定" in q or "定金" in q:
-            return {
-                "dataset": "order_data",
-                "metric": {"field": "order_number", "agg": "count", "alias": "大定数", "business_name": "大定数"},
-                "time_field": "deposit_payment_time",
-                "non_null_field": "deposit_payment_time",
-            }
-        return None
+        raw_matches = self.metric_registry.match_by_query(q)
+        if not raw_matches:
+            return None
+        scored = []
+        for name, cfg in raw_matches:
+            score = 0
+            all_tokens = [name] + cfg.get("aliases", [])
+            for t in all_tokens:
+                if t and t in q:
+                    score += len(t)
+            if cfg.get("type") == "operator":
+                score += 200
+            scored.append((score, name, cfg))
+        scored.sort(key=lambda x: -x[0])
+        name, cfg = scored[0][1], scored[0][2]
+        dataset = cfg.get("dataset", "order_data")
+        time_field = cfg.get("time_field", "lock_time")
+        metric = {
+            "field": cfg.get("field", "order_number"),
+            "agg": cfg.get("agg", "count"),
+            "alias": name,
+            "business_name": name,
+        }
+        result: dict = {
+            "dataset": dataset,
+            "metric": metric,
+            "time_field": time_field,
+        }
+        non_null_candidates = [f.get("value") for f in cfg.get("extra_filters", []) if f.get("op") == "!=" and f.get("value") is None]
+        if cfg.get("field") in ("store_name",) or any(f.get("field") == time_field for f in cfg.get("extra_filters", []) if f.get("op") == "!="):
+            result["non_null_field"] = time_field
+        if cfg.get("extra_filters"):
+            result["extra_filters"] = list(cfg.get("extra_filters"))
+        if cfg.get("type") == "operator":
+            result["operator_intent"] = cfg.get("operator")
+        return result
 
     @staticmethod
     def _parse_fast_path_query(user_query: str) -> dict | None:
@@ -1997,7 +1971,13 @@ class PlanningAgent:
             plan["analysis_intent"] = {}
         else:
             atype = analysis_intent.get("type")
-            if atype not in {"share_breakdown", "attribute_penetration", "attribute_distribution"}:
+            valid_intents = {
+                "share_breakdown", "attribute_penetration", "attribute_distribution",
+                "active_store", "retained_intention", "retained_intention_conversion",
+                "age_cohort", "city_tier", "province_topk", "store_avg_lock",
+                "assign_conversion", "weighted_lead_conversion", "mature_lock_prediction",
+            }
+            if atype not in valid_intents:
                 plan["analysis_intent"] = {}
 
         post_process = plan.get("post_process")
@@ -2261,6 +2241,8 @@ class PlanningAgent:
                     f"{self.business_definition}\n\n"
                     "算子目录:\n"
                     f"{self.operator_catalog}\n\n"
+                    "指标注册表:\n"
+                    f"{self.metric_registry.to_metric_defaults_md()}\n\n"
                     f"{memory_text}"
                     "约束:\n"
                     "- 默认返回 1 个 plan；多子问题才拆多个，保持原顺序。\n"
@@ -2268,7 +2250,9 @@ class PlanningAgent:
                     "- time.start/end 必须是 YYYY-MM-DD，end 为开区间。\n"
                     "- 遇到歧义（如销量口径、城市口径）必须 clarification.need=true。\n"
                     "- 口径定义以 Schema 文档为准，约束仅列 Schema 未覆盖的行为规则。\n"
-                    "- 路由优先级：Fast Path > Operators > Comparison/Statistics/Query。\n"
+                    "- 路由为 Intent-Driven：Fast Path > Operator Intents > Analysis Intents > Comparison/Statistics/Query。\n"
+                    "- 算子类指标（即下文 算子目录 中列出的）必须设置 analysis_intent.type 为对应算子 intent。\n"
+                    "- 意图驱动路由的 operator intents: active_store, retained_intention, retained_intention_conversion, age_cohort, city_tier, province_topk, store_avg_lock, assign_conversion, weighted_lead_conversion, mature_lock_prediction。\n"
                     "- 纯数字比较输出 fast_path={type:numeric_ratio,current,base}。\n"
                     "- 日期周序输出 fast_path={type:current_iso_week}。\n"
                     "- 闲聊致谢输出 fast_path={type:small_talk_contextual}。\n"
@@ -2562,6 +2546,12 @@ class PlanningAgent:
                         plan["dimensions"] = [time_field]
                 else:
                     plan["dimensions"] = [time_field]
+        if metric_defaults and metric_defaults.get("operator_intent"):
+            op_intent = metric_defaults["operator_intent"]
+            existing_intent = (plan.get("analysis_intent", {}) or {}).get("type")
+            if not existing_intent:
+                plan.setdefault("analysis_intent", {})["type"] = op_intent
+
         if metric_defaults and (metric_defaults.get("metric") or {}).get("alias") == "在营门店数":
             if isinstance(time, dict):
                 time["field"] = "order_create_date"

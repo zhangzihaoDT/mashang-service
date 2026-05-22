@@ -1,6 +1,11 @@
 import re
 
 from agent.state import AgentState
+from schema import MetricRegistry
+
+_metric_registry = MetricRegistry()
+
+_SERIES_TOKENS = ("LS9", "LS8", "LS7", "LS6", "L7", "L6")
 
 
 def extract_required_slots(question: str) -> dict:
@@ -149,18 +154,21 @@ def _generate_repair_query(state: AgentState) -> str | None:
 
 
 # ── Evidence Contract 定稿表 ──────────────────────────────────────────
-# intent              required_fact_types                                 说明
+# intent                    required_fact_types
 # ─────────────────────────────────────────────────────────────────────
-# metric              metric_value                                        单指标、总量、当前值
-# trend               trend_summary                                       时间序列趋势、上升下降、波动
-# compare             comparison_result                                   同比、环比、目标 vs 基准
-# composition         dimension_breakdown                                 按维度拆解，但不一定有占比
-# share               dimension_breakdown + share_summary                 按维度拆解并计算占比
-# time_grouped_share  time_grouped_metric + dimension_breakdown +         按时间粒度 + 维度 + 占比
-#                     share_summary
-# ranking             ranking_result                                      TOPN、排名、最高、最低
-# distribution        distribution_summary                                年龄分布、价格分布、分位区间
-# diagnosis           trend_summary + contribution_summary                先确认趋势，再拆解原因
+# metric                    metric_value
+# trend                     trend_summary
+# compare                   comparison_result
+# composition               dimension_breakdown
+# share                     dimension_breakdown + share_summary
+# time_grouped_share        time_grouped_metric + dimension_breakdown + share_summary
+# ranking                   ranking_result
+# distribution              distribution_summary
+# diagnosis                 trend_summary + contribution_summary
+# metric_ratio              metric_value + dimension_breakdown
+# metric_ratio_trend        time_grouped_metric + trend_summary
+# dimension_share           dimension_breakdown + share_summary
+# dimension_share_trend     time_grouped_metric + share_summary + trend_summary
 ANALYSIS_EVIDENCE_CONTRACT = {
     "metric": {
         "required_fact_types": ["metric_value"],
@@ -211,6 +219,31 @@ ANALYSIS_EVIDENCE_CONTRACT = {
         "finish_reason": "trend_and_contribution_found",
         "repair_query_template": "{question}；请先给出趋势摘要，再按关键维度拆解贡献。",
     },
+    "metric_ratio": {
+        "required_fact_types": ["metric_value", "dimension_breakdown"],
+        "finish_reason": "metric_ratio_found",
+        "repair_query_template": "{question}；请返回派生比例指标的计算结果，包含分子、分母及比值。",
+    },
+    "metric_ratio_trend": {
+        "required_fact_types": ["time_grouped_metric", "trend_summary"],
+        "finish_reason": "metric_ratio_trend_found",
+        "repair_query_template": "{question}；请按时间粒度返回派生比例指标的趋势，包含每日的分子、分母及比值。",
+    },
+    "dimension_share": {
+        "required_fact_types": ["dimension_breakdown", "share_summary"],
+        "finish_reason": "dimension_share_found",
+        "repair_query_template": "{question}；请按维度分组返回占比。",
+    },
+    "dimension_share_trend": {
+        "required_fact_types": ["time_grouped_metric", "share_summary", "trend_summary"],
+        "finish_reason": "dimension_share_trend_found",
+        "repair_query_template": "{question}；请按时间粒度返回该维度成员的每日占比及趋势。",
+    },
+    "time_grouped_share_breakdown": {
+        "required_fact_types": ["time_grouped_metric", "dimension_breakdown", "share_summary"],
+        "finish_reason": "time_grouped_share_breakdown_found",
+        "repair_query_template": "{question}；请按时间粒度返回每个拆分维度的占比。",
+    },
 }
 
 
@@ -241,6 +274,15 @@ def has_block_type(state: AgentState, block_type: str) -> bool:
     return False
 
 
+def _infer_series_tokens(q: str) -> list[str]:
+    q_upper = q.upper()
+    tokens = []
+    for s in _SERIES_TOKENS:
+        if s in q_upper:
+            tokens.append(s)
+    return list(dict.fromkeys(tokens))
+
+
 def infer_intent_from_question(question: str) -> str:
     q = (question or "").strip()
     if not q:
@@ -248,55 +290,85 @@ def infer_intent_from_question(question: str) -> str:
 
     q_ns = q.replace(" ", "")
 
+    # ── 优先：诊断 ──
+    if any(k in q_ns for k in ["为什么", "原因", "怎么回事", "为何", "导致", "怎么导致", "如何导致"]):
+        return "diagnosis"
+
+    # ── Tier 1: MetricRegistry 匹配（指标比值 / 转化率 / 渗透率）──
+    has_ratio_keyword = any(k in q_ns for k in ["占比", "比例", "率", "份额"])
+    if has_ratio_keyword:
+        pair = _metric_registry.match_metric_relation(q)
+        if pair:
+            has_trend = any(k in q_ns for k in ["趋势", "走势", "波动", "近", "日", "周", "月"])
+            return "metric_ratio_trend" if has_trend else "metric_ratio"
+
+    # ── Tier 2: 单一维度成员占比（如 "LS6 锁单占比" — series 成员 vs 总体）──
+    #    保护: 必须含 "占比/份额"（不含 "率/转化率/渗透率"），且 Tier 1 已排除 metric_relation
+    has_rate_excl = any(k in q_ns for k in ["率"])
+    if has_ratio_keyword and not has_rate_excl:
+        series_tokens = _infer_series_tokens(q)
+        has_metric_keyword = any(k in q_ns for k in ["锁单", "交付", "开票", "小订", "大定", "订单", "下发线索", "在营门店", "留存"])
+        if series_tokens and has_metric_keyword:
+            has_trend = any(k in q_ns for k in ["趋势", "走势", "波动", "近", "日", "周", "月"])
+            return "dimension_share_trend" if has_trend else "dimension_share"
+
+    # ── Tier 3: 多成员构成占比 —— share_breakdown / time_grouped_share_breakdown ──
+    #    "各渠道占比" → share_breakdown
+    #    "每周分车系占比" → time_grouped_share_breakdown
+    has_each = any(k in q_ns for k in ["各", "每"])
     has_time_group = any(k in q_ns for k in [
         "按周", "每周", "周度", "逐周", "周别",
         "按月", "每月", "月度", "逐月", "月别",
         "按日", "每日", "日度", "逐日", "日别", "按天",
     ])
-
     has_breakdown = any(k in q_ns for k in [
         "分车型", "按车型", "车型",
         "分车系", "按车系", "车系",
         "分门店", "按门店",
         "分大区", "按大区",
         "分城市", "按城市",
-        "分渠道", "按渠道",
+        "分渠道", "按渠道", "渠道",
         "分省份", "按省份",
         "性别", "男女",
     ])
+    has_share = any(k in q_ns for k in ["占比", "比例", "份额", "构成", "结构"])
 
-    has_share = any(k in q_ns for k in [
-        "占比", "比例", "份额", "构成", "结构",
-    ])
-
-    if any(k in q_ns for k in ["为什么", "原因", "怎么回事", "为何", "导致", "怎么导致", "如何导致"]):
-        return "diagnosis"
-
+    if has_time_group and has_breakdown and has_share and has_each:
+        return "time_grouped_share_breakdown"
     if has_time_group and has_breakdown and has_share:
         return "time_grouped_share"
-
+    if has_time_group and has_breakdown:
+        return "composition"
+    if has_breakdown and has_share and has_each:
+        return "share_breakdown"
+    if has_breakdown and has_share:
+        return "share"
+    if has_breakdown:
+        return "composition"
     if has_share:
         return "share"
 
+    # ── Tier 4: 对比 ──
     if any(k in q_ns for k in ["同比", "年同比", "环比", "周环比", "日环比", "对比", "相比", "vs", "VS"]):
         return "compare"
 
+    # ── Tier 5: 排名 ──
     if any(k in q_ns for k in ["TOP", "Top", "top", "排名", "排行", "最高", "最低", "前十", "前10"]):
         return "ranking"
 
+    # ── Tier 6: 分布 ──
     if any(k in q_ns for k in ["分布", "分位", "中位数", "均值", "平均值", "标准差"]):
         return "distribution"
 
-    if has_breakdown:
-        return "composition"
-
+    # ── Tier 7: 趋势 ──
     if any(k in q_ns for k in ["趋势", "走势", "变化趋势", "波动"]):
         return "trend"
 
     if re.search(r"近\s*\d+\s*(日|天|周|月|年)", q_ns):
         return "trend"
 
-    if any(k in q_ns for k in ["多少", "是多少", "总数", "合计", "数量"]):
+    # ── Tier 8: 简单指标查询 ──
+    if any(k in q_ns for k in ["多少", "是多少", "总数", "合计", "数量", "总量", "总共有"]):
         return "metric"
 
     return "unknown"

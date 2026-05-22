@@ -202,6 +202,50 @@ runtime_decision →  负责是否允许 finish
 
 ## 更新日志
 
+- 2026-05-22（v0.7 — Short-term Memory / Clarification Runtime）
+  - **Clarification Runtime**：算子产出多候选指标时中断执行，返回 `clarification_required` → `run_dsl_step` 拦截 → Agent Loop 输出澄清问题 + 选项列表；用户选择后继续执行
+    - `tool_router.py _route_by_intent` 检测 `len(preferred) >= 2` → 返回 `{"status":"clarification_required", ...}`
+    - `_execute_single_plan` 提前 return → `run_dsl_step` 转为 `status=clarification`
+    - Agent Loop 输出 `{qtext}\n请选择其一回复：{opts}` 并保存 `pending`
+    - `_merge_pending_context` 用户回复匹配 option label/id → 自动重构 query（如 `"门店线索当日锁单率"` → `"近 10 日门店 线索当日锁单率趋势"`）
+  - **Short-term Memory**（`short_term_memory`，独立于 `pending`）
+    - `operator_cache`：算子的 `daily_rows` + 13 个率列走 cache，同 session 内第二、三轮不再重复执行算子
+    - Cache key：`{operator}|{dataset}|{time_range}|{filter_sig}` 签名，换时间窗/过滤条件自动重建
+    - TTL：`expires_after_turns=5`，超 5 轮自动清除；`_meta.created_at` + `turn_count` 追踪
+    - `_save_short_term(key, value)` / `_load_short_term(key)` 独立 API
+  - **补充保护**
+    - `exact_match`：query 去噪（移除"近10日"/"趋势"）后按列名子串匹配，避免已选指标重复触发 ambiguity
+    - `原始问题=` 正则修复：从 enriched context 中提取真实原始问题，消除上下文指数增长
+    - `"率"` 排除 dimension_share（`锁单率/试驾率/转化率` 不走维度份额）
+
+- 2026-05-22（v0.6 — Semantic Metrics Layer / Intent-driven Router）
+  - **Semantic Metrics Layer**（`schema/__init__.py` + `schema/metrics.json`）
+    - 新建 `MetricRegistry` 类，统一管理 27 个指标定义（dataset/field/agg/aliases/group/type）
+    - 指标类型：base（原始）、business（含业务过滤条件）、operator（算子类）
+    - 派生指标注册：`metric_relations` 支持 ratio/composite/derived 三种关联类型
+    - 别名体系：alias → canonical 双向解析，支持用户自然语言模糊匹配
+    - Playground：`_metric_defaults()` 从硬编码 150+ 行 keyword 链替换为 MetricRegistry 智能打分
+    - 新增 `match_metric_relation(query)` 隐式 ratio 检测（numerator/denominator 双指标匹配）
+  - **Intent-driven Router**（取代 keyword-driven router）
+    - `tool_router.py` 新增 `_route_by_intent()` 按 plan.analysis_intent.type 分派
+    - 算子类 intent（active_store/retained_intention/age_cohort 等 10 个）→ `run_registered_operator`
+    - 派生指标类 intent（derived_ratio / derived_ratio_trend）→ 自动构建双指标查询 + ratio post_process + 可选 trend_summary
+    - 分析类 intent（share_breakdown / attribute_penetration / attribute_distribution）→ CompositionTool / MultiTableMetricTool
+    - `PLANNING_TOOL_SCHEMA` 扩展 `analysis_intent.type` enum 覆盖全部 10 个算子 + 2 个派生指标 intent
+  - **Operator Registry 独立**（`operators/registry.json`）
+    - 算子元数据从 `schema/schema.md` 和 keyword 匹配函数中抽离，归入独立 JSON 注册表
+    - 10 个算子的 intent 映射、query_hints、参数签名统一归档
+    - `operators/registry.py` 删除 10 个 `_is_*_plan()` keyword 函数，改为 `resolve_intent_from_plan()` 评分匹配
+    - 算子匹配优先级：analysis_intent.type > metric_names > query_hints scoring
+  - **RuntimeDecision → MetricRegistry**
+    - `infer_intent_from_question()` 将 share 判断前置为派生指标优先：Query 含"占比/率"时先查 `MetricRegistry.match_metric_relation()`
+    - 新增 `derived_ratio` / `derived_ratio_trend` 两条 Evidence Contract entry
+    - `post_process` 新增 `ratio` 类型：自动完成分子÷分母计算
+  - 修复的问题：
+    1. `近10日门店下发线索数占比趋势` → derived_ratio_trend + 双指标查询 + 占比趋势（原为 share → 只查单指标绝对值）
+    2. `留存小订转化率` → retained_intention_conversion（原被 retained_intention 优先拦截）
+    3. 算子 intent 冲突通过 scoring 正确排序（"预测锁单数"不再误匹配"锁单量"）
+
 - 2026-05-18（v0.5 — 时间语义层重构）
   - **时间逻辑统一**：所有时间理解逻辑从 `planner.py`（~430 行）、`comparison_tool.py`、`tool_router.py` 收敛到 `operators/time_windows.py`，移除 `operators/time_semantics.py`
     - 新增 `parse_time_window`（增强解析器）、`infer_time_window_type`（分类器）、`parse_comparison_type`、`is_cumulative_query`（累计检测）、`extract_compare_year`（同比目标年提取）、`infer_goal_time_window`（置信度推断）、`remove_cumulative_time_dim`（累计时删时间维度+截 end 为 today）、`cumulative_adjust_time`、`parse_time_semantics`（统一 facade）

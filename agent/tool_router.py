@@ -5,12 +5,36 @@ import copy
 import pandas as pd
 
 from agent.planner import PlanningAgent
-from operators import run_registered_operator
+from operators import run_registered_operator, resolve_intent_from_plan
 from operators.time_windows import extract_listed_dates
+from schema import MetricRegistry
 from tools import ComparisonTool, CompositionTool, FastPathTool, MultiTableMetricTool, QueryTool, StatisticsTool
+
+_metric_registry = MetricRegistry()
+
+
+_INTENT_EVIDENCE_HINTS: dict[str, dict] = {
+    "metric_ratio": {"fact_types": ["metric_value", "dimension_breakdown"], "result_type": "metric_ratio"},
+    "metric_ratio_trend": {"fact_types": ["time_grouped_metric", "trend_summary"], "grain": "day", "result_type": "metric_ratio_trend"},
+    "dimension_share": {"fact_types": ["dimension_breakdown", "share_summary"], "result_type": "dimension_share"},
+    "dimension_share_trend": {"fact_types": ["time_grouped_metric", "share_summary", "trend_summary"], "grain": "day", "result_type": "dimension_share_trend"},
+    "active_store": {"fact_types": ["time_grouped_metric", "metric_value"], "grain": "day", "has_series": True, "result_type": "operator"},
+    "retained_intention": {"fact_types": ["metric_value"], "result_type": "operator"},
+    "retained_intention_conversion": {"fact_types": ["metric_value"], "result_type": "operator"},
+    "age_cohort": {"fact_types": ["share_summary", "dimension_breakdown"], "dimension": "age_cohort", "result_type": "operator"},
+    "city_tier": {"fact_types": ["share_summary", "dimension_breakdown"], "dimension": "city_tier", "result_type": "operator"},
+    "province_topk": {"fact_types": ["share_summary", "dimension_breakdown", "ranking_result"], "dimension": "province", "result_type": "operator"},
+    "store_avg_lock": {"fact_types": ["metric_value", "time_grouped_metric"], "grain": "day", "has_series": True, "result_type": "operator"},
+    "assign_conversion": {"fact_types": ["metric_value", "dimension_breakdown"], "result_type": "operator"},
+    "weighted_lead_conversion": {"fact_types": ["metric_value"], "result_type": "operator"},
+    "mature_lock_prediction": {"fact_types": ["metric_value"], "result_type": "operator"},
+}
 
 
 def _infer_block_type(plan: dict) -> str:
+    intent = (plan.get("analysis_intent", {}) or {}).get("type")
+    if intent:
+        return intent
     statistics = plan.get("statistics")
     if isinstance(statistics, dict) and statistics.get("type"):
         return str(statistics.get("type"))
@@ -43,7 +67,7 @@ def _extract_statistics_summary(result: object) -> dict | None:
         return None
     stype = result.get("type")
     if stype == "trend_summary":
-        out = {"type": "trend_summary"}
+        out: dict = {"type": "trend_summary"}
         for key in ["direction", "latest", "mean", "total_change", "slope", "window_days"]:
             if key in result:
                 out[key] = result.get(key)
@@ -63,34 +87,8 @@ def _infer_status_and_error(result: object) -> tuple[str, object]:
     return "success", None
 
 
-_EVIDENCE_HINTS: dict[str, dict] = {
-    "trend_summary": {"fact_types": ["trend_summary", "time_grouped_metric"], "grain": "day", "has_series": True, "result_type": "statistics"},
-    "contribution_summary": {"fact_types": ["contribution_summary", "dimension_breakdown", "share_summary"], "result_type": "statistics"},
-    "category_share": {"fact_types": ["share_summary", "dimension_breakdown", "ranking_result"], "result_type": "statistics"},
-    "province_topk_share": {"fact_types": ["share_summary", "dimension_breakdown", "ranking_result"], "dimension": "province", "result_type": "operator"},
-    "city_tier_distribution": {"fact_types": ["share_summary", "dimension_breakdown"], "dimension": "city_tier", "result_type": "operator"},
-    "age_cohort_distribution": {"fact_types": ["share_summary", "dimension_breakdown"], "dimension": "age_cohort", "result_type": "operator"},
-    "retained_intention": {"fact_types": ["metric_value"], "result_type": "operator"},
-    "retained_intention_conversion": {"fact_types": ["metric_value"], "result_type": "operator"},
-    "active_store": {"fact_types": ["time_grouped_metric", "metric_value"], "grain": "day", "has_series": True, "result_type": "operator"},
-    "daily_mean": {"fact_types": ["metric_value", "time_grouped_metric"], "grain": "day", "has_series": True, "result_type": "statistics"},
-    "daily_mean_median": {"fact_types": ["metric_value", "time_grouped_metric"], "grain": "day", "has_series": True, "result_type": "statistics"},
-    "weekly_decline_ratio": {"fact_types": ["metric_value", "time_grouped_metric"], "grain": "week", "has_series": True, "result_type": "statistics"},
-    "daily_threshold_count": {"fact_types": ["metric_value", "time_grouped_metric"], "grain": "day", "has_series": True, "result_type": "statistics"},
-    "daily_percentile_rank": {"fact_types": ["metric_value", "distribution_summary", "time_grouped_metric"], "grain": "day", "has_series": True, "result_type": "statistics"},
-    "weekend_percentile_rank": {"fact_types": ["metric_value", "distribution_summary", "time_grouped_metric"], "grain": "weekend", "has_series": True, "result_type": "statistics"},
-    "weekday_percentile_rank": {"fact_types": ["metric_value", "distribution_summary", "time_grouped_metric"], "grain": "day", "has_series": True, "result_type": "statistics"},
-    "yoy": {"fact_types": ["comparison_result"], "has_comparison": True, "comparison_type": "yoy", "result_type": "comparison"},
-    "wow": {"fact_types": ["comparison_result"], "has_comparison": True, "comparison_type": "wow", "result_type": "comparison"},
-    "dod": {"fact_types": ["comparison_result"], "has_comparison": True, "comparison_type": "dod", "result_type": "comparison"},
-    "numeric_ratio": {"fact_types": ["metric_value"], "result_type": "fast_path"},
-    "data_update": {"fact_types": ["metric_value"], "result_type": "fast_path"},
-    "data_sync": {"fact_types": ["metric_value"], "result_type": "fast_path"},
-}
-
-
-def _infer_evidence_hints(block_type: str, result: dict | None, plan: dict | None) -> dict | None:
-    hints = _EVIDENCE_HINTS.get(block_type)
+def _infer_evidence_hints(intent: str, result: dict | None, plan: dict | None) -> dict | None:
+    hints = _INTENT_EVIDENCE_HINTS.get(intent)
     if hints is None:
         return None
     hints = dict(hints)
@@ -121,6 +119,270 @@ def _comparison_df_to_dict(df: "pd.DataFrame", comparison_type: str, metric_alia
         "evidence_hints": {"fact_types": ["comparison_result"], "has_comparison": True, "comparison_type": comparison_type, "result_type": "comparison"},
         **row,
     }
+
+
+def _route_by_intent(
+    plan: dict,
+    user_query: str,
+    query_tool: QueryTool,
+    statistics_tool: StatisticsTool,
+    composition_tool: CompositionTool | None = None,
+    multi_table_tool: MultiTableMetricTool | None = None,
+    memory_context: dict | None = None,
+) -> tuple[object | None, dict]:
+    intent = (plan.get("analysis_intent", {}) or {}).get("type", "")
+    if not intent:
+        operator_intent = resolve_intent_from_plan(plan)
+        if operator_intent:
+            plan.setdefault("analysis_intent", {})["type"] = operator_intent
+            intent = operator_intent
+
+    if not intent:
+        from agent.runtime_decision import infer_intent_from_question
+        runtime_intent = infer_intent_from_question(user_query or "")
+        if runtime_intent and runtime_intent not in ("unknown", "metric", "trend", "compare", "ranking", "distribution", "diagnosis"):
+            plan.setdefault("analysis_intent", {})["type"] = runtime_intent
+            intent = runtime_intent
+            print(f"[Route] runtime intent fallback: {intent}")
+        q = user_query or ""
+        rate_keywords = {"锁单率", "试驾率", "转化率"}
+        if not intent and any(k in q for k in rate_keywords):
+            from operators.registry import _load_registry as _load_op_reg
+            op_reg = _load_op_reg().get("intent_map", {})
+            for op_name, op_cfg in op_reg.items():
+                hints = op_cfg.get("query_hints", [])
+                matched_hints = sum(1 for h in hints if h in q)
+                if matched_hints >= 1 and op_cfg.get("dataset") == "assign_data":
+                    plan.setdefault("analysis_intent", {})["type"] = op_name
+                    intent = op_name
+                    print(f"[Route] operator fallback from rate query: {intent}")
+                    break
+
+    if not intent:
+        return None, {"engine": "none", "route": "no_intent"}
+
+    # ── metric_ratio / metric_ratio_trend: 指标比值 ──
+    if intent in ("metric_ratio", "metric_ratio_trend"):
+        relation = _metric_registry.match_metric_relation(user_query)
+        if relation is None:
+            return None, {"engine": "none", "route": "metric_ratio.no_relation"}
+        rname, rcfg = relation
+        num_name = rcfg.get("numerator", "")
+        den_name = rcfg.get("denominator", "")
+        num_metric = _metric_registry.get(num_name)
+        den_metric = _metric_registry.get(den_name)
+        if not num_metric or not den_metric:
+            return None, {"engine": "none", "route": "metric_ratio.incomplete_definition"}
+        time_field = num_metric.get("time_field") or den_metric.get("time_field") or "lock_time"
+        dataset = num_metric.get("dataset") or den_metric.get("dataset") or "assign_data"
+        time = plan.get("time", {}) or {}
+        time_start = time.get("start")
+        time_end = time.get("end")
+        query_plan = {
+            "dataset": dataset,
+            "metrics": [
+                {"field": num_metric.get("field"), "agg": num_metric.get("agg", "sum"), "alias": rname},
+                {"field": den_metric.get("field"), "agg": den_metric.get("agg", "sum"), "alias": f"{den_name}_denominator"},
+            ],
+            "dimensions": [time_field],
+            "filters": [
+                *([{"field": time_field, "op": "!=", "value": None}] if time_field else []),
+                *([{"field": time_field, "op": ">=", "value": time_start}] if time_start else []),
+                *([{"field": time_field, "op": "<", "value": time_end}] if time_end else []),
+            ],
+            "post_process": [
+                {"type": "ratio", "numerator": rname, "denominator": f"{den_name}_denominator", "alias": rname}
+            ],
+        }
+        meta = {"engine": "metric_ratio", "route": f"metric_ratio.{rname}"}
+        print(f"\n[Thinking] 执行指标比值: {rname} ({num_name} / {den_name})")
+        try:
+            raw_df = query_tool.execute_analysis_df(query_plan)
+            if isinstance(raw_df, str):
+                return raw_df, meta
+            if intent == "metric_ratio_trend":
+                trend_request = {
+                    "type": "trend_summary",
+                    "time_field": time_field,
+                    "window_days": 10,
+                    "metric_alias": rname,
+                }
+                result = statistics_tool.perform_statistics(trend_request, raw_df)
+                return result, {"engine": "metric_ratio_trend", "route": f"metric_ratio_trend.{rname}"}
+            return raw_df, meta
+        except Exception as e:
+            return {"type": "metric_ratio_error", "error": "metric_ratio_execution_failed", "message": str(e)}, meta
+
+    # ── dimension_share / dimension_share_trend: 维度成员占比 ──
+    if intent in ("dimension_share", "dimension_share_trend"):
+        metric_field = (plan.get("metric") or {}).get("field", "order_number")
+        metric_agg = (plan.get("metric") or {}).get("agg", "count")
+        metric_alias = (plan.get("metric") or {}).get("alias") or metric_field
+        time_field = (plan.get("time") or {}).get("field") or "lock_time"
+        time_start = (plan.get("time") or {}).get("start")
+        time_end = (plan.get("time") or {}).get("end")
+        dataset = plan.get("dataset", "order_data")
+        plan_filters = plan.get("filters") or []
+        dim_filter = next((f for f in plan_filters if f.get("op") in ("==", "in") and f.get("field") in ("series", "series_group_logic", "product_name")), None)
+        base_filters = [{"field": time_field, "op": "!=", "value": None}]
+        if time_start:
+            base_filters.append({"field": time_field, "op": ">=", "value": time_start})
+        if time_end:
+            base_filters.append({"field": time_field, "op": "<", "value": time_end})
+        dim_filters = list(base_filters)
+        if dim_filter:
+            dim_filters.append(dim_filter)
+        share_meta = {"engine": "dimension_share", "route": f"dimension_share.{metric_field}"}
+        dim_label = dim_filter.get("value") if dim_filter else "?"
+        print(f"\n[Thinking] 执行维度成员占比: {metric_field}, member={dim_label} / total over {time_field}")
+        try:
+            total_plan = {
+                "dataset": dataset,
+                "metrics": [{"field": metric_field, "agg": metric_agg, "alias": f"{metric_alias}_total"}],
+                "dimensions": [time_field] if intent == "dimension_share_trend" else [],
+                "filters": base_filters,
+            }
+            total_df = query_tool.execute_analysis_df(total_plan)
+            if isinstance(total_df, str):
+                return total_df, share_meta
+            dim_plan = {
+                "dataset": dataset,
+                "metrics": [{"field": metric_field, "agg": metric_agg, "alias": metric_alias}],
+                "dimensions": [time_field] if intent == "dimension_share_trend" else [],
+                "filters": dim_filters,
+            }
+            dim_df = query_tool.execute_analysis_df(dim_plan)
+            if isinstance(dim_df, str):
+                return dim_df, share_meta
+            share_col = "share"
+            if intent == "dimension_share_trend" and time_field in total_df.columns and time_field in dim_df.columns:
+                for df in (total_df, dim_df):
+                    dt = pd.to_datetime(df[time_field].astype(str), errors="coerce")
+                    df["_date"] = dt.dt.normalize() if dt.notna().any() else df[time_field]
+                daily_total = total_df.groupby("_date", as_index=False).agg({f"{metric_alias}_total": "sum"}).sort_values("_date")
+                daily_dim = dim_df.groupby("_date", as_index=False).agg({metric_alias: "sum"}).sort_values("_date")
+                merged = daily_dim.merge(daily_total, on="_date", how="left")
+                merged[metric_alias] = merged[metric_alias].fillna(0)
+                merged[f"{metric_alias}_total"] = merged[f"{metric_alias}_total"].fillna(0)
+                merged[share_col] = merged[metric_alias] / merged[f"{metric_alias}_total"].replace(0, float("nan"))
+                trend_request = {
+                    "type": "trend_summary",
+                    "time_field": "_date",
+                    "window_days": 10,
+                    "metric_alias": share_col,
+                }
+                result = statistics_tool.perform_statistics(trend_request, merged)
+                return result, {"engine": "dimension_share_trend", "route": f"dimension_share_trend.{metric_field}"}
+            else:
+                total_val = total_df.iloc[0].get(f"{metric_alias}_total", 1) if not total_df.empty else 1
+                if not dim_df.empty:
+                    dim_df[share_col] = dim_df[metric_alias] / total_val if total_val else 0
+                return dim_df, share_meta
+        except Exception as e:
+            return {"type": "dimension_share_error", "error": "dimension_share_execution_failed", "message": str(e)}, share_meta
+
+    # ── Operator intents (registered in operators/registry.json) ──
+    if intent in _INTENT_EVIDENCE_HINTS:
+        meta = {"engine": "operator", "route": f"operators.{intent}"}
+        plan_time = (plan.get("time") or {})
+        time_sig = f"{plan_time.get('start','')}_{plan_time.get('end','')}"
+        filter_sig = "_".join(sorted(f"{f.get('field')}{f.get('op')}{f.get('value')}" for f in (plan.get("filters") or []) if isinstance(f, dict)))
+        cache_key = f"{intent}|{plan.get('dataset','')}|{time_sig}|{filter_sig}"
+        stm = (memory_context or {}).get("short_term_memory", {})
+        cached = stm.get(cache_key) if isinstance(stm, dict) else None
+        if cached and isinstance(cached, dict) and cached.get("type") == intent:
+            operator_result = cached
+        else:
+            operator_result = run_registered_operator(plan=plan, user_query=user_query, query_tool=query_tool)
+        if operator_result is None:
+            return None, meta
+        stats_type = (plan.get("statistics") or {}).get("type") if isinstance(plan.get("statistics"), dict) else None
+        daily_rows = operator_result.get("daily_rows") if isinstance(operator_result, dict) else None
+        if stats_type and daily_rows:
+            meta = {"engine": "operator_with_statistics", "route": f"operators.{intent}.{stats_type}"}
+            raw_df = pd.DataFrame(daily_rows)
+            metric_alias = operator_result.get("metric_alias")
+            if not metric_alias or metric_alias not in raw_df.columns:
+                rate_cols = [c for c in raw_df.columns if c not in ("date",) and c != "date"]
+                q = user_query or ""
+                q_nospace = q.replace(" ", "")
+                q_core = q_nospace
+                for noise in ["近10日", "近7日", "近30日", "近10天", "近7天", "趋势", "走势", "波动"]:
+                    q_core = q_core.replace(noise, "")
+                def _col_core(c: str) -> str:
+                    return c.replace(" ", "").replace("下发", "").replace("下发线索", "").replace("（", "").replace("(", "").replace("）", "").replace(")", "")
+                exact_match = [c for c in rate_cols if q_core and (q_core in _col_core(c) or _col_core(c) in q_core)]
+                if exact_match:
+                    metric_alias = exact_match[0]
+                else:
+                    q_keywords = [k for k in ("转化率", "试驾率", "锁单率", "占比", "渗透率") if k in q]
+                    if "转化率" in q:
+                        q_keywords.extend(["试驾率", "锁单率"])
+                    fallback = ["转化率", "试驾率", "锁单率", "占比"]
+                    preferred = [c for c in rate_cols if any(k in c for k in (q_keywords or fallback))]
+                    if len(preferred) >= 2:
+                        import re as _re
+                        clean_q = _re.sub(r"[；;].*$", "", q.strip())[:30]
+                        def _shorten_label(c: str) -> str:
+                            for prefix in ["下发线索数（", "下发线索数 (", "下发线索数（", "下发线索"]:
+                                c = c.replace(prefix, "")
+                            c = c.replace("）", ")").replace("（", "(").replace(")", "").replace("(", "").strip()
+                            c = c.replace("门店", "门店 ").replace("直播", "直播 ").replace("平台", "平台 ").strip()
+                            c = " ".join(c.split())
+                            return c if c else "当日试驾率"
+                        options_list = [
+                            {"id": c, "label": _shorten_label(c), "definition": c}
+                            for c in preferred[:8]
+                        ]
+                        clarification_result = {
+                            "status": "clarification_required",
+                            "clarification_type": "ambiguous_metric",
+                            "question": f"你说的“{clean_q}”具体指哪个指标？",
+                            "options": options_list,
+                            "original_query": clean_q,
+                            "_operator_result": operator_result,
+                        }
+                        return clarification_result, meta
+                    metric_alias = (preferred or rate_cols)[0] if (preferred or rate_cols) else "value"
+            if metric_alias in raw_df.columns and raw_df[metric_alias].dtype.kind == "O":
+                cleaned = raw_df[metric_alias].astype(str).str.replace("%", "", regex=False).str.strip()
+                raw_df[metric_alias] = pd.to_numeric(cleaned, errors="coerce")
+            tool_result = statistics_tool.perform_statistics(
+                {
+                    "type": stats_type,
+                    "time_field": "date",
+                    "metric_alias": metric_alias,
+                    "date_start": operator_result.get("date_start"),
+                    "date_end": operator_result.get("date_end"),
+                    "window_days": operator_result.get("window_days", 10),
+                },
+                raw_df,
+            )
+            return tool_result, meta
+        return operator_result, meta
+
+    # ── share_breakdown / attribute_penetration / attribute_distribution ──
+    if intent == "share_breakdown" and composition_tool is not None:
+        meta = {"engine": "composition", "route": f"composition.{intent}"}
+        try:
+            composition_result = composition_tool.execute(plan)
+            if isinstance(composition_result, str):
+                return composition_result, meta
+            if isinstance(composition_result, pd.DataFrame):
+                return composition_result, meta
+            return str(composition_result), meta
+        except Exception as e:
+            return {"type": "composition_error", "error": "composition_execution_failed", "message": str(e)}, meta
+
+    if intent in ("attribute_penetration", "attribute_distribution") and multi_table_tool is not None:
+        meta = {"engine": "multi_table", "route": f"multi_table.{intent}"}
+        try:
+            mt_result = multi_table_tool.execute(plan)
+            return mt_result if isinstance(mt_result, str) else mt_result, meta
+        except Exception as e:
+            return {"type": f"{intent}_error", "error": "multi_table_execution_failed", "message": str(e)}, meta
+
+    return None, {"engine": "none", "route": f"unhandled_intent.{intent}"}
 
 
 def _execute_single_plan(
@@ -164,6 +426,7 @@ def _execute_single_plan(
     execution_meta = {"engine": "dsl", "route": "query_tool"}
     tool_result = None
     comparison_df = None
+
     if isinstance(fast_path, dict) and fast_path.get("type"):
         execution_meta = {"engine": "fast_path", "route": f"fast_path.{str(fast_path.get('type'))}"}
         tool_result = FastPathTool().run(
@@ -171,60 +434,30 @@ def _execute_single_plan(
             user_query=user_query,
             memory_context=memory_context,
         )
-    operator_result = run_registered_operator(plan=plan, user_query=user_query, query_tool=query_tool)
-    if operator_result is not None and tool_result is None:
-        stats_type = (plan.get("statistics") or {}).get("type") if isinstance(plan.get("statistics"), dict) else None
-        daily_rows = operator_result.get("daily_rows") if isinstance(operator_result, dict) else None
-        if stats_type and daily_rows:
-            execution_meta = {
-                "engine": "operator_with_statistics",
-                "route": f"operators.{str(operator_result.get('type') or 'unknown')}.{stats_type}",
-            }
-            print(f"[Route] 算子产出行级数据，接 statistics.{stats_type}: {execution_meta['route']}")
-            raw_df = pd.DataFrame(daily_rows)
-            tool_result = statistics_tool.perform_statistics(
-                {
-                    "type": stats_type,
-                    "time_field": "date",
-                    "metric_alias": operator_result.get("metric_alias", "value"),
-                    "date_start": operator_result.get("date_start"),
-                    "date_end": operator_result.get("date_end"),
-                    "window_days": operator_result.get("window_days", 10),
+
+    if tool_result is None:
+        route_result, meta = _route_by_intent(
+            plan, user_query, query_tool, statistics_tool,
+            composition_tool=composition_tool, multi_table_tool=multi_table_tool,
+            memory_context=memory_context,
+        )
+        if isinstance(route_result, dict) and route_result.get("status") == "clarification_required":
+            return {
+                "status": "clarification_required",
+                "clarification": {
+                    "need": True,
+                    "question": route_result.get("question", ""),
+                    "options": [o.get("label", o.get("id", "")) for o in (route_result.get("options") or [])],
+                    "_options_detail": route_result.get("options", []),
+                    "_operator_result": route_result.get("_operator_result"),
                 },
-                raw_df,
-            )
-        else:
-            execution_meta = {
-                "engine": "operator",
-                "route": f"operators.{str(operator_result.get('type') or 'unknown')}",
+                "original_query": route_result.get("original_query", user_query),
+                "plan": plan,
             }
-            print(f"[Route] 使用固定算子: {execution_meta['route']}")
-            tool_result = operator_result
-    if tool_result is None and composition_tool is not None:
-        intent = plan.get("analysis_intent", {}) or {}
-        if intent.get("type") == "share_breakdown":
-            execution_meta = {"engine": "composition", "route": f"composition.{intent.get('denominator_scope', 'share')}"}
-            print(f"\n[Thinking] 执行构成分析: {execution_meta['route']}")
-            try:
-                composition_result = composition_tool.execute(plan)
-                if isinstance(composition_result, str):
-                    tool_result = composition_result
-                elif isinstance(composition_result, pd.DataFrame):
-                    tool_result = composition_result
-                else:
-                    tool_result = str(composition_result)
-            except Exception as e:
-                tool_result = {"type": "composition_error", "error": "composition_execution_failed", "message": str(e)}
-    if tool_result is None and multi_table_tool is not None:
-        intent = plan.get("analysis_intent", {}) or {}
-        if intent.get("type") == "attribute_penetration":
-            execution_meta = {"engine": "multi_table", "route": "multi_table.attribute_penetration"}
-            print(f"\n[Thinking] 执行多表属性渗透率分析: {execution_meta['route']}")
-            try:
-                mt_result = multi_table_tool.execute(plan)
-                tool_result = mt_result if isinstance(mt_result, str) else mt_result
-            except Exception as e:
-                tool_result = {"type": "attribute_penetration_error", "error": "multi_table_execution_failed", "message": str(e)}
+        if route_result is not None:
+            tool_result = route_result
+            execution_meta = meta
+
     if comparison_type in {"yoy", "wow", "dod"}:
         if comparison_type == "wow" and stats_type == "weekly_decline_ratio":
             execution_meta = {"engine": "comparison", "route": "comparison.weekly_wow_series"}
@@ -1001,7 +1234,8 @@ def _execute_single_plan(
     if row_count is not None:
         enriched_meta["row_count"] = int(row_count)
     block_type = _infer_block_type(plan)
-    evidence_hints = _infer_evidence_hints(block_type, tool_result if isinstance(tool_result, dict) else None, plan)
+    operator_intent = (plan.get("analysis_intent", {}) or {}).get("type") or resolve_intent_from_plan(plan)
+    evidence_hints = _infer_evidence_hints(operator_intent, tool_result if isinstance(tool_result, dict) else None, plan)
     if evidence_hints:
         enriched_meta["evidence_hints"] = evidence_hints
         if isinstance(tool_result, dict):
@@ -1230,6 +1464,21 @@ def run_dsl_step(
         multi_table_tool=multi_table_tool,
         memory_context=memory_context,
     )
+    if isinstance(execution, dict) and execution.get("status") == "clarification_required":
+        clar = execution.get("clarification", {})
+        plan_time = (plan.get("time") or {})
+        time_sig = f"{plan_time.get('start','')}_{plan_time.get('end','')}"
+        filter_sig = "_".join(sorted(f"{f.get('field')}{f.get('op')}{f.get('value')}" for f in (plan.get("filters") or []) if isinstance(f, dict)))
+        op_intent = resolve_intent_from_plan(plan) or (plan.get("analysis_intent") or {}).get("type", "")
+        cache_key = f"{op_intent}|{plan.get('dataset','')}|{time_sig}|{filter_sig}" if op_intent else ""
+        return {
+            "status": "clarification",
+            "clarification": clar,
+            "original_question": execution.get("original_query", action_query),
+            "plan": plan,
+            "_operator_result": clar.get("_operator_result"),
+            "_cache_key": cache_key,
+        }
     return {
         "status": "ok",
         "result_blocks": [execution["block"]],

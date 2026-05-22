@@ -470,6 +470,13 @@ class QueryTool:
                 if not valid_partitions:
                     continue
                 df[alias] = df[value_col] / df.groupby(valid_partitions, observed=True)[value_col].transform("sum")
+            elif ptype == "ratio":
+                numerator = step.get("numerator", "")
+                denominator = step.get("denominator", "")
+                alias = step.get("alias", "")
+                if numerator in df.columns and denominator in df.columns and denominator in df.columns:
+                    if df[denominator].dtype.kind in "iuf":
+                        df[alias] = df[numerator] / df[denominator].replace(0, float("nan"))
         return df
 
     def execute_analysis(self, plan: dict) -> str:

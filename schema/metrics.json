@@ -1,0 +1,334 @@
+{
+  "metrics": {
+    "锁单量": {
+      "dataset": "order_data",
+      "field": "order_number",
+      "agg": "count",
+      "time_field": "lock_time",
+      "aliases": ["锁单数", "锁单", "订单锁单", "锁单量"],
+      "group": "订单分析",
+      "type": "business",
+      "extra_filters": [{"field": "lock_time", "op": "!=", "value": null}]
+    },
+    "交付数": {
+      "dataset": "order_data",
+      "field": "order_number",
+      "agg": "count",
+      "time_field": "delivery_date",
+      "aliases": ["交付", "交付量", "交付数量"],
+      "group": "订单分析",
+      "type": "business",
+      "extra_filters": [{"field": "delivery_date", "op": "!=", "value": null}]
+    },
+    "开票数": {
+      "dataset": "order_data",
+      "field": "order_number",
+      "agg": "count",
+      "time_field": "invoice_upload_time",
+      "aliases": ["开票", "开票量", "开票数量"],
+      "group": "订单分析",
+      "type": "business",
+      "extra_filters": [{"field": "invoice_upload_time", "op": "!=", "value": null}]
+    },
+    "小订数": {
+      "dataset": "order_data",
+      "field": "order_number",
+      "agg": "count",
+      "time_field": "intention_payment_time",
+      "aliases": ["小订", "意向金订单", "小订量", "意向金"],
+      "group": "订单分析",
+      "type": "business",
+      "extra_filters": [{"field": "intention_payment_time", "op": "!=", "value": null}]
+    },
+    "大定数": {
+      "dataset": "order_data",
+      "field": "order_number",
+      "agg": "count",
+      "time_field": "deposit_payment_time",
+      "aliases": ["大定", "定金订单", "大定量", "定金"],
+      "group": "订单分析",
+      "type": "business",
+      "extra_filters": [{"field": "deposit_payment_time", "op": "!=", "value": null}]
+    },
+    "平均开票价格": {
+      "dataset": "order_data",
+      "field": "invoice_amount",
+      "agg": "mean",
+      "time_field": "invoice_upload_time",
+      "aliases": ["平均开票金额", "开票均价", "均价"],
+      "group": "订单分析",
+      "type": "business",
+      "extra_filters": [
+        {"field": "order_type", "op": "==", "value": "用户车"},
+        {"field": "invoice_amount", "op": ">", "value": 0}
+      ]
+    },
+    "开票金额": {
+      "dataset": "order_data",
+      "field": "invoice_amount",
+      "agg": "sum",
+      "time_field": "invoice_upload_time",
+      "aliases": ["开票总额", "总开票金额"],
+      "group": "订单分析",
+      "type": "business"
+    },
+    "在营门店数": {
+      "dataset": "order_data",
+      "field": "store_name",
+      "agg": "count",
+      "time_field": "order_create_date",
+      "aliases": ["在营门店", "活跃门店数", "营业门店数"],
+      "group": "门店分析",
+      "type": "operator",
+      "operator": "active_store"
+    },
+    "留存小订数": {
+      "dataset": "order_data",
+      "field": "order_number",
+      "agg": "count",
+      "time_field": "intention_payment_time",
+      "aliases": ["留存小订", "留存意向金订单"],
+      "group": "留存分析",
+      "type": "operator",
+      "operator": "retained_intention"
+    },
+    "留存小订转化率": {
+      "dataset": "order_data",
+      "field": "order_number",
+      "agg": "count",
+      "time_field": "intention_payment_time",
+      "aliases": ["留存小订转化", "留存转化率"],
+      "group": "留存分析",
+      "type": "operator",
+      "operator": "retained_intention_conversion"
+    },
+    "下发线索数": {
+      "dataset": "assign_data",
+      "field": "下发线索数",
+      "agg": "sum",
+      "time_field": "Assign Time 年/月/日",
+      "aliases": ["总线索数", "线索总数", "线索量"],
+      "group": "线索分析",
+      "type": "base"
+    },
+    "下发线索数（门店）": {
+      "dataset": "assign_data",
+      "field": "下发线索数 (门店)",
+      "agg": "sum",
+      "time_field": "Assign Time 年/月/日",
+      "aliases": ["门店线索", "门店线索数"],
+      "group": "线索分析",
+      "type": "base"
+    },
+    "下发线索当日试驾数": {
+      "dataset": "assign_data",
+      "field": "下发线索当日试驾数",
+      "agg": "sum",
+      "time_field": "Assign Time 年/月/日",
+      "aliases": ["当日试驾", "当日试驾数"],
+      "group": "线索分析",
+      "type": "base"
+    },
+    "下发线索7日锁单数": {
+      "dataset": "assign_data",
+      "field": "下发线索 7 日锁单数",
+      "agg": "sum",
+      "time_field": "Assign Time 年/月/日",
+      "aliases": ["7日锁单", "七日锁单数"],
+      "group": "线索分析",
+      "type": "base"
+    },
+    "下发线索30日锁单数": {
+      "dataset": "assign_data",
+      "field": "下发线索 30 日锁单数",
+      "agg": "sum",
+      "time_field": "Assign Time 年/月/日",
+      "aliases": ["30日锁单", "三十日锁单数"],
+      "group": "线索分析",
+      "type": "base"
+    },
+    "下发线索当日锁单数（门店）": {
+      "dataset": "assign_data",
+      "field": "下发线索当日锁单数 (门店)",
+      "agg": "sum",
+      "time_field": "Assign Time 年/月/日",
+      "aliases": ["门店当日锁单数"],
+      "group": "线索分析",
+      "type": "base"
+    },
+    "下发门店数": {
+      "dataset": "assign_data",
+      "field": "下发门店数",
+      "agg": "sum",
+      "time_field": "Assign Time 年/月/日",
+      "aliases": ["门店下发数"],
+      "group": "线索分析",
+      "type": "base"
+    },
+    "订单计数": {
+      "dataset": "order_data",
+      "field": "order_number",
+      "agg": "count",
+      "time_field": "order_create_date",
+      "aliases": ["订单数量", "总订单数", "订单数"],
+      "group": "订单分析",
+      "type": "raw"
+    },
+    "购车人年龄": {
+      "dataset": "order_data",
+      "field": "buyer_age",
+      "agg": "mean",
+      "time_field": "lock_time",
+      "aliases": ["订单年龄", "订单用户年龄"],
+      "group": "用户画像",
+      "type": "raw"
+    },
+    "车主年龄": {
+      "dataset": "order_data",
+      "field": "owner_age",
+      "agg": "mean",
+      "time_field": "lock_time",
+      "aliases": ["车主年龄"],
+      "group": "用户画像",
+      "type": "raw"
+    },
+    "下发线索转化率": {
+      "dataset": "assign_data",
+      "field": "下发线索数",
+      "agg": "sum",
+      "time_field": "Assign Time 年/月/日",
+      "aliases": ["线索转化率", "线索转换率"],
+      "group": "线索分析",
+      "type": "operator",
+      "operator": "assign_conversion"
+    },
+    "下发线索加权锁单率": {
+      "dataset": "assign_data",
+      "field": "下发线索数",
+      "agg": "sum",
+      "time_field": "Assign Time 年/月/日",
+      "aliases": ["加权锁单率", "线索加权锁单率"],
+      "group": "线索分析",
+      "type": "operator",
+      "operator": "weighted_lead_conversion"
+    },
+    "预测锁单数": {
+      "dataset": "assign_data",
+      "field": "下发线索数",
+      "agg": "sum",
+      "time_field": "Assign Time 年/月/日",
+      "aliases": ["成熟度预测锁单数", "Lead Maturity Forecast Locks", "预测锁单"],
+      "group": "线索分析",
+      "type": "operator",
+      "operator": "mature_lock_prediction"
+    },
+    "店均锁单数": {
+      "dataset": "order_data",
+      "field": "order_number",
+      "agg": "count",
+      "time_field": "lock_time",
+      "aliases": ["平均店锁单", "店均锁单"],
+      "group": "门店分析",
+      "type": "operator",
+      "operator": "store_avg_lock"
+    },
+    "年龄代际分布": {
+      "dataset": "order_data",
+      "field": "owner_age",
+      "agg": "count",
+      "time_field": "lock_time",
+      "aliases": ["年龄分布", "代际分布", "年龄段分布"],
+      "group": "用户画像",
+      "type": "operator",
+      "operator": "age_cohort"
+    },
+    "城市线级分布": {
+      "dataset": "order_data",
+      "field": "license_city",
+      "agg": "count",
+      "time_field": "lock_time",
+      "aliases": ["城市分布", "城市等级分布", "线级分布"],
+      "group": "地域分析",
+      "type": "operator",
+      "operator": "city_tier"
+    },
+    "省份TopK占比": {
+      "dataset": "order_data",
+      "field": "license_city",
+      "agg": "count",
+      "time_field": "lock_time",
+      "aliases": ["省份集中度", "省份Top", "省份占比"],
+      "group": "地域分析",
+      "type": "operator",
+      "operator": "province_topk"
+    }
+  },
+  "derived_metrics": {
+    "下发线索至锁单时间间隔（天）": {
+      "field": "first_assign_lock_time",
+      "dataset": "order_data",
+      "agg": "mean",
+      "time_field": "lock_time",
+      "description": "(lock_time - first_assign_time) 换算为天，负值视为无效",
+      "aliases": ["线索转锁单天数", "下发至锁单天数"]
+    }
+  },
+  "metric_groups": {
+    "订单分析": {
+      "description": "核心订单业务指标",
+      "metrics": ["锁单量", "交付数", "开票数", "小订数", "大定数", "平均开票价格", "开票金额", "订单计数"]
+    },
+    "线索分析": {
+      "description": "线索相关指标",
+      "metrics": ["下发线索数", "下发线索数（门店）", "下发线索当日试驾数", "下发线索7日锁单数", "下发线索30日锁单数", "下发线索当日锁单数（门店）", "下发门店数", "下发线索转化率", "下发线索加权锁单率", "预测锁单数"]
+    },
+    "门店分析": {
+      "description": "门店相关指标",
+      "metrics": ["在营门店数", "店均锁单数"]
+    },
+    "留存分析": {
+      "description": "留存与转化指标",
+      "metrics": ["留存小订数", "留存小订转化率"]
+    },
+    "用户画像": {
+      "description": "用户特征指标",
+      "metrics": ["购车人年龄", "车主年龄", "年龄代际分布"]
+    },
+    "地域分析": {
+      "description": "地域分布指标",
+      "metrics": ["城市线级分布", "省份TopK占比"]
+    }
+  },
+  "metric_relations": {
+    "门店下发线索数占比": {
+      "type": "ratio",
+      "numerator": "下发线索数（门店）",
+      "denominator": "下发线索数",
+      "aliases": ["门店线索占比", "门店下发线索占比", "门店线索比例"]
+    },
+    "下发线索当日试驾率": {
+      "type": "ratio",
+      "numerator": "下发线索当日试驾数",
+      "denominator": "下发线索数",
+      "aliases": ["当日试驾率", "试驾率"]
+    },
+    "下发线索7日锁单率": {
+      "type": "ratio",
+      "numerator": "下发线索7日锁单数",
+      "denominator": "下发线索数",
+      "aliases": ["七日锁单率", "7日锁单率"]
+    },
+    "下发线索30日锁单率": {
+      "type": "ratio",
+      "numerator": "下发线索30日锁单数",
+      "denominator": "下发线索数",
+      "aliases": ["三十日锁单率", "30日锁单率"]
+    },
+    "门店当日锁单率": {
+      "type": "ratio",
+      "numerator": "下发线索当日锁单数（门店）",
+      "denominator": "下发线索数（门店）",
+      "aliases": ["门店锁单率", "门店线索当日锁单率"]
+    }
+  }
+}

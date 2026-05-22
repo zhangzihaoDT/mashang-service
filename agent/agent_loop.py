@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import sys
 import datetime
 import time
@@ -82,6 +83,34 @@ def _clear_pending(memory: dict) -> None:
     _save_memory(memory)
 
 
+_STM_TTL_TURNS = 5
+
+def _save_short_term(key: str, value: object) -> None:
+    memory = _load_memory()
+    if "short_term_memory" not in memory:
+        memory["short_term_memory"] = {}
+    memory["short_term_memory"][key] = value
+    memory["short_term_memory"]["_meta"] = {
+        "created_at": datetime.datetime.now().isoformat(timespec="seconds"),
+        "turn_count": 0,
+    }
+    _save_memory(memory)
+
+
+def _load_short_term(key: str) -> object | None:
+    memory = _load_memory()
+    stm = memory.get("short_term_memory", {})
+    meta = stm.get("_meta", {})
+    turn_count = meta.get("turn_count", 0)
+    if turn_count > _STM_TTL_TURNS:
+        memory.pop("short_term_memory", None)
+        _save_memory(memory)
+        return None
+    stm["_meta"] = {**meta, "turn_count": turn_count + 1}
+    _save_memory(memory)
+    return stm.get(key)
+
+
 def _merge_pending_context(user_query: str, memory: dict) -> str | None:
     pending = memory.get("pending")
     if not isinstance(pending, dict):
@@ -97,25 +126,50 @@ def _merge_pending_context(user_query: str, memory: dict) -> str | None:
         clarification = pending.get("clarification")
         if not isinstance(original_question, str) or not isinstance(clarification, dict):
             return None
+        base_original = original_question.strip()
+        if "澄清上下文:" in base_original:
+            m = re.search(r"原始问题=([^ ]+\s*[^ 澄清问题]*)", base_original)
+            if not m:
+                m = re.search(r"原始问题=(.+?)\s+澄清", base_original)
+            if m:
+                base_original = m.group(1).strip()
+        base_original = base_original.replace("\n", " ").replace("？", "").replace("?", "").strip().rstrip("。；;")
+        options_detail = clarification.get("_options_detail")
+        if isinstance(options_detail, list) and options_detail:
+            chosen = None
+            chosen_col = None
+            reply_norm = reply.replace(" ", "")
+            for opt in options_detail:
+                opt_label = str(opt.get("label", "")).replace(" ", "")
+                opt_id = str(opt.get("id", "")).replace(" ", "")
+                if reply_norm == opt_label or reply_norm == opt_id:
+                    chosen = opt.get("label", opt.get("id", ""))
+                    chosen_col = opt.get("id")
+                    break
+                if opt_label in reply_norm or opt_id in reply_norm:
+                    chosen = opt.get("label", opt.get("id", ""))
+                    chosen_col = opt.get("id")
+                    break
+                if reply_norm in opt_label or reply_norm in opt_id:
+                    chosen = opt.get("label", opt.get("id", ""))
+                    chosen_col = opt.get("id")
+                    break
+            if chosen:
+                clean = base_original
+                short = str(chosen).replace("下发", "").strip()
+                for pat in ["下发线索转化率", "下发线索转化", "线索转化率", "转化率"]:
+                    if pat in clean:
+                        clean = clean.replace(pat, short)
+                        break
+                return clean
         question = (
             str(clarification.get("question") or "")
-            .replace("\n", " ")
-            .replace("？", "")
-            .replace("?", "")
-            .strip()
+            .replace("\n", " ").replace("？", "").replace("?", "").strip()
         )
         options = clarification.get("options")
         options_text = ""
         if isinstance(options, list) and options:
             options_text = " / ".join(str(o) for o in options)
-        base_original = (
-            original_question.strip()
-            .replace("\n", " ")
-            .replace("？", "")
-            .replace("?", "")
-            .strip()
-            .rstrip("。；;")
-        )
         base_reply = reply.replace("\n", " ").strip().rstrip("？?。；;")
         payload = (
             "澄清上下文: "
@@ -378,11 +432,13 @@ def run_main_agent(user_query: str) -> str:
         schema_context = query_tool._schema_context()
 
         from operators.registry import get_operator_catalog_md
+        from schema import MetricRegistry
         planning_agent = PlanningAgent(
             client=client,
             schema_md=schema_context.get("schema_md", ""),
             business_definition=schema_context.get("business_definition", ""),
             operator_catalog=get_operator_catalog_md(),
+            metric_registry=MetricRegistry(),
         )
         comparison_tool = ComparisonTool(query_tool=query_tool)
         composition_tool = CompositionTool(query_tool=query_tool)
@@ -403,6 +459,7 @@ def run_main_agent(user_query: str) -> str:
             if action.get("action") == "run_dsl":
                 dsl_rounds += 1
                 action_query = str(action.get("query") or state.question).strip() or state.question
+                stm = memory.get("short_term_memory", {}) if isinstance(memory, dict) else {}
                 step_result = run_dsl_step(
                     action_query=action_query,
                     planning_agent=planning_agent,
@@ -417,6 +474,7 @@ def run_main_agent(user_query: str) -> str:
                         "execution_log": memory.get("execution_log") if isinstance(memory, dict) else [],
                         "goal_time_window": goal_time_window,
                         "goal_time_window_confidence": goal_time_window_confidence,
+                        "short_term_memory": stm,
                     },
                 )
                 status = step_result.get("status")
@@ -432,16 +490,23 @@ def run_main_agent(user_query: str) -> str:
                 if status == "clarification":
                     clarification = step_result.get("clarification") or {}
                     query_log_clarification = clarification if isinstance(clarification, dict) else {}
-                    _save_memory(
-                        {
-                            "pending": {
-                                "type": "clarification",
-                                "clarification": clarification,
-                                "original_question": step_result.get("original_question") or action_query,
-                                "created_at": datetime.datetime.now().isoformat(timespec="seconds"),
-                            }
-                        }
-                    )
+                    _operator_result = step_result.get("_operator_result")
+                    _cache_key = step_result.get("_cache_key", "")
+                    pending_entry = {
+                        "type": "clarification",
+                        "clarification": clarification,
+                        "original_question": step_result.get("original_question") or action_query,
+                        "created_at": datetime.datetime.now().isoformat(timespec="seconds"),
+                    }
+                    existing = _load_memory()
+                    existing["pending"] = pending_entry
+                    if _operator_result and isinstance(_operator_result, dict) and _cache_key:
+                        existing.setdefault("short_term_memory", {})[_cache_key] = _operator_result
+                        _save_short_term("_meta", {
+                            "created_at": datetime.datetime.now().isoformat(timespec="seconds"),
+                            "turn_count": 0,
+                        })
+                    _save_memory(existing)
                     opts = clarification.get("options") or []
                     opts_text = " / ".join([str(o) for o in opts]) if isinstance(opts, list) else ""
                     qtext = clarification.get("question") or "需要你补充信息后才能继续。"
