@@ -418,6 +418,13 @@ class PlanningAgent:
             "filters": [],
             "comparison": {"type": "none"},
         }
+        if "趋势" in (user_query or "").replace(" ", ""):
+            plan["dimensions"] = ["intention_payment_time"]
+            plan["statistics"] = {
+                "type": "trend_summary",
+                "window_days": 10,
+                "value_metric": {"alias": "留存小订数"},
+            }
         return self._normalize_plan(plan)
 
     @staticmethod

@@ -1,27 +1,60 @@
 import pandas as pd
 
-def run_retained_intention_operator(df: pd.DataFrame, series: str, start: str, end: str) -> dict:
+
+def _compute_retained_counts(
+    df_model: pd.DataFrame,
+    series: str,
+    presale_start: pd.Timestamp,
+    presale_end_excl: pd.Timestamp,
+    as_of_dates: list[pd.Timestamp],
+) -> dict:
+    m_presale = (
+        df_model['intention_payment_time'].notna()
+        & (df_model['intention_payment_time'] >= presale_start)
+        & (df_model['intention_payment_time'] < presale_end_excl)
+    )
+    presale_orders = df_model.loc[m_presale, [
+        'order_number', 'intention_refund_time', 'deposit_payment_time',
+        'deposit_refund_time', 'lock_time',
+    ]].copy()
+    presale_orders['order_number'] = presale_orders['order_number'].astype('string')
+    presale_orders = presale_orders.dropna(subset=['order_number']).drop_duplicates(subset=['order_number'])
+
+    exit_cols = [c for c in ['intention_refund_time', 'deposit_payment_time',
+                              'deposit_refund_time', 'lock_time'] if c in presale_orders.columns]
+    exit_time = presale_orders[exit_cols].min(axis=1, skipna=True)
+
+    counts = []
+    for d in as_of_dates:
+        as_of_excl = d + pd.Timedelta(days=1)
+        cnt = int((exit_time.isna() | (exit_time >= as_of_excl)).sum())
+        counts.append(cnt)
+    return {"exit_time": exit_time, "presale_total": len(presale_orders), "daily_counts": counts}
+
+
+def run_retained_intention_operator(df: pd.DataFrame, series: str, start: str, end: str,
+                                    plan: dict | None = None,
+                                    business_definition: dict | None = None) -> dict:
     if df is None or df.empty:
         return {"error": "dataset_empty", "message": "数据集为空"}
 
-    start_day = pd.to_datetime(start)
-    end_day = pd.to_datetime(end)
-    
-    # 由于 planner 解析自然语言时，如果是“2025-08-15到2025-09-10”，
-    # end_day 会被处理成开区间 2025-09-11 00:00:00，
-    # 而如果 end_day 是 00:00:00 的开区间，实际上代表的业务截止日是它减去 1 天。
-    if end_day.hour == 0 and end_day.minute == 0 and end_day.second == 0:
-        actual_end_day = end_day - pd.Timedelta(days=1)
-    else:
-        actual_end_day = end_day
+    # --- resolve presale period from business_definition ---
+    presale_start = None
+    presale_end_excl = None
+    if isinstance(business_definition, dict) and series:
+        tp = (business_definition.get("time_periods") or {}).get(series)
+        if isinstance(tp, dict):
+            s = tp.get("start")
+            e = tp.get("end")
+            if isinstance(s, str) and isinstance(e, str):
+                presale_start = pd.to_datetime(s)
+                presale_end_excl = pd.to_datetime(e) + pd.Timedelta(days=1)
 
-    n_days = int((actual_end_day.normalize() - start_day.normalize()).days + 1)
-    n_days = max(1, n_days)
-    
-    presale_end_excl = actual_end_day + pd.Timedelta(days=1)
-    window_end_excl = start_day + pd.Timedelta(days=n_days)
-    window_end_excl = min(window_end_excl, presale_end_excl)
+    if presale_start is None or presale_end_excl is None:
+        return {"type": "retained_intention", "error": "missing_presale_period",
+                "message": f"business_definition 中缺少 {series} 的 time_periods 预售期"}
 
+    # --- filter series ---
     df_model = df
     if series:
         if "series_group_logic" in df.columns:
@@ -29,22 +62,44 @@ def run_retained_intention_operator(df: pd.DataFrame, series: str, start: str, e
         elif "series" in df.columns:
             df_model = df[df['series'] == series]
 
-    mask_time = (df_model['intention_payment_time'].notna()) & \
-                (df_model['intention_payment_time'] >= start_day) & \
-                (df_model['intention_payment_time'] < window_end_excl)
+    # --- resolve as-of window from start/end (system convention: end is exclusive) ---
+    start_day = pd.to_datetime(start)
+    end_day = pd.to_datetime(end)
+    if end_day.hour == 0 and end_day.minute == 0 and end_day.second == 0:
+        actual_end_day = end_day - pd.Timedelta(days=1)
+    else:
+        actual_end_day = end_day
 
-    mask_retained = df_model['intention_refund_time'].isna() | \
-                    (df_model['intention_refund_time'] > window_end_excl)
+    n_days = int((actual_end_day.normalize() - start_day.normalize()).days + 1)
+    n_days = max(1, n_days)
+    as_of_dates = [start_day.normalize() + pd.Timedelta(days=i) for i in range(n_days)]
 
-    retained_orders = df_model.loc[mask_time & mask_retained, 'order_number'].dropna().drop_duplicates()
-    retained_count = int(retained_orders.nunique())
+    result = _compute_retained_counts(df_model, series, presale_start, presale_end_excl, as_of_dates)
+    daily_counts = result["daily_counts"]
 
+    stats = (plan or {}).get("statistics", {}) or {}
+    if stats.get("type") == "trend_summary":
+        daily_rows = [
+            {"date": d.strftime("%Y-%m-%d"), "留存小订数": c}
+            for d, c in zip(as_of_dates, daily_counts)
+        ]
+        return {
+            "type": "retained_intention",
+            "series": series,
+            "daily_rows": daily_rows,
+            "metric_alias": "留存小订数",
+            "window_days": n_days,
+            "date_start": start_day.strftime("%Y-%m-%d"),
+            "date_end": (actual_end_day + pd.Timedelta(days=1)).strftime("%Y-%m-%d"),
+        }
+
+    retained_count = daily_counts[0] if daily_counts else 0
     return {
         "type": "retained_intention",
         "series": series,
         "start": start_day.strftime("%Y-%m-%d"),
         "end": actual_end_day.strftime("%Y-%m-%d"),
-        "retained_count": retained_count
+        "retained_count": retained_count,
     }
 
 
@@ -105,7 +160,12 @@ def run_retained_intention_conversion_operator(
         presale_end_excl_ts = lock_end_ts
 
     m_presale_pay = pay.notna() & (pay >= presale_start_ts) & (pay < presale_end_excl_ts)
-    m_retained = refund.isna() | (refund >= presale_end_excl_ts)
+
+    exit_cols = [c for c in ['intention_refund_time', 'deposit_payment_time',
+                              'deposit_refund_time', 'lock_time'] if c in df_model.columns]
+    exit_time = df_model[exit_cols].min(axis=1, skipna=True)
+    m_retained = exit_time.isna() | (exit_time >= presale_end_excl_ts)
+
     retained_orders = df_model.loc[m_presale_pay & m_retained, "order_number"].dropna().astype("string").drop_duplicates()
 
     m_lock = lock.notna() & (lock >= lock_start_ts) & (lock < lock_end_ts)

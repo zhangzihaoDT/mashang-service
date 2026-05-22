@@ -173,12 +173,33 @@ def _execute_single_plan(
         )
     operator_result = run_registered_operator(plan=plan, user_query=user_query, query_tool=query_tool)
     if operator_result is not None and tool_result is None:
-        execution_meta = {
-            "engine": "operator",
-            "route": f"operators.{str(operator_result.get('type') or 'unknown')}",
-        }
-        print(f"[Route] 使用固定算子: {execution_meta['route']}")
-        tool_result = operator_result
+        stats_type = (plan.get("statistics") or {}).get("type") if isinstance(plan.get("statistics"), dict) else None
+        daily_rows = operator_result.get("daily_rows") if isinstance(operator_result, dict) else None
+        if stats_type and daily_rows:
+            execution_meta = {
+                "engine": "operator_with_statistics",
+                "route": f"operators.{str(operator_result.get('type') or 'unknown')}.{stats_type}",
+            }
+            print(f"[Route] 算子产出行级数据，接 statistics.{stats_type}: {execution_meta['route']}")
+            raw_df = pd.DataFrame(daily_rows)
+            tool_result = statistics_tool.perform_statistics(
+                {
+                    "type": stats_type,
+                    "time_field": "date",
+                    "metric_alias": operator_result.get("metric_alias", "value"),
+                    "date_start": operator_result.get("date_start"),
+                    "date_end": operator_result.get("date_end"),
+                    "window_days": operator_result.get("window_days", 10),
+                },
+                raw_df,
+            )
+        else:
+            execution_meta = {
+                "engine": "operator",
+                "route": f"operators.{str(operator_result.get('type') or 'unknown')}",
+            }
+            print(f"[Route] 使用固定算子: {execution_meta['route']}")
+            tool_result = operator_result
     if tool_result is None and composition_tool is not None:
         intent = plan.get("analysis_intent", {}) or {}
         if intent.get("type") == "share_breakdown":

@@ -365,16 +365,23 @@ def run_registered_operator(plan: dict, user_query: str, query_tool) -> dict | N
             if f.get("field") in ("series", "series_group_logic") and f.get("op") == "==":
                 series = f.get("value")
                 break
-        
+
+        bdef: dict = {}
         if "series_group_logic" not in df.columns:
             try:
                 bdef_path = Path(__file__).resolve().parents[1] / "schema" / "business_definition.json"
                 bdef = json.loads(bdef_path.read_text(encoding="utf-8")) if bdef_path.exists() else {}
                 df = apply_series_group_logic(df.copy(), bdef)
             except Exception:
-                pass
-                
-        return run_retained_intention_operator(df=df, series=series, start=start, end=end)
+                bdef = {}
+        else:
+            try:
+                bdef_path = Path(__file__).resolve().parents[1] / "schema" / "business_definition.json"
+                bdef = json.loads(bdef_path.read_text(encoding="utf-8")) if bdef_path.exists() else {}
+            except Exception:
+                bdef = {}
+
+        return run_retained_intention_operator(df=df, series=series, start=start, end=end, plan=plan, business_definition=bdef)
 
     if not _is_active_store_plan(plan, user_query):
         return None

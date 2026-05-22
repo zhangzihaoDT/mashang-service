@@ -5,7 +5,7 @@
   },
   {
     "title": "留存小订（计数）",
-    "summary": "在给定时间窗口内，统计 intention_payment_time 非空且未退订的去重 order_number 数量。支持车系过滤。"
+    "summary": "对指定 series，按 business_definition.time_periods 的 start~end（预售期）筛选意向金订单（intention_payment_time 落在预售期内，order_number 去重）；按查询日期的当日结束时刻判定留存：exit_time（intention_refund_time / deposit_payment_time / deposit_refund_time / lock_time 中的最小值）为空或 >= 当日+1天即为留存。支持单日查询和逐日趋势。"
   },
   {
     "title": "留存小订（转化率）",
