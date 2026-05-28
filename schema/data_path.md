@@ -3,10 +3,8 @@
 订单分析：/Users/zihao\_/Documents/github/mashang-service/dataset/order_data.parquet
 锁单归因：/Users/zihao\_/Documents/github/mashang-service/dataset/lock_attribution_data.parquet
 选配信息：/Users/zihao\_/Documents/github/mashang-service/dataset/config_attribute.parquet
+微信群聊：/Users/zihao\_/Documents/github/mashang-service/dataset/wechat/*.parquet
 正反向对比：/Users/zihao\*/Documents/coding/dataset/original/业务数据记录\_竞争PK（正反向排名）.csv
-
----
-
 智己大区分布：/Users/zihao\_/Documents/coding/dataset/original/store_region_business_definition_data.csv
 
 ---
