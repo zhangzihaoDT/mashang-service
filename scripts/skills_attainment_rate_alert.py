@@ -104,10 +104,17 @@ def _assign_last_n_days(end_day: date, days: int) -> pd.DataFrame:
         idx = pd.date_range(start_day, end_day, freq="D").strftime("%Y-%m-%d")
         return pd.DataFrame({"date": idx})
 
+    channel_cols = [
+        "下发线索数 (门店)",
+        "下发线索数（直播）",
+        "下发线索数（平台)",
+        "下发线索数（APP小程序)",
+        "下发线索数（快慢闪)",
+    ]
     need_cols = [
         "date",
         "下发线索数",
-        "下发线索数 (门店)",
+        *channel_cols,
         "门店线索占比",
         "下发 (门店)线索当日锁单率",
     ]
@@ -119,7 +126,8 @@ def _assign_last_n_days(end_day: date, days: int) -> pd.DataFrame:
     idx = pd.date_range(start_day, end_day, freq="D").strftime("%Y-%m-%d")
     df = pd.DataFrame({"date": idx}).merge(df, on="date", how="left")
     df["下发线索数"] = pd.to_numeric(df["下发线索数"], errors="coerce").fillna(0).astype(int)
-    df["下发线索数 (门店)"] = pd.to_numeric(df["下发线索数 (门店)"], errors="coerce").fillna(0).astype(int)
+    for c in channel_cols:
+        df[c] = pd.to_numeric(df[c], errors="coerce").fillna(0).astype(int)
     return df
 
 
@@ -146,8 +154,33 @@ def main() -> None:
     print()
 
     assign_df = _assign_last_n_days(end_day=end_day, days=days)
-    print(f"2) 近 {days} 日的下发线索数")
-    print(assign_df.loc[:, ["date", "下发线索数"]].to_string(index=False))
+
+    channel_cols = [
+        "下发线索数 (门店)",
+        "下发线索数（快慢闪)",
+        "下发线索数（APP小程序)",
+        "下发线索数（平台)",
+        "下发线索数（直播）",
+    ]
+    channel_alias = {
+        "下发线索数 (门店)": "门店",
+        "下发线索数（快慢闪)": "快慢闪",
+        "下发线索数（APP小程序)": "APP小程序",
+        "下发线索数（平台)": "平台",
+        "下发线索数（直播）": "直播",
+    }
+    channel_df = assign_df[["date"]].copy()
+    for c in channel_cols:
+        channel_df[channel_alias[c]] = assign_df[c]
+    channel_df["其他"] = assign_df["下发线索数"] - assign_df[channel_cols].sum(axis=1)
+    channel_df["合计"] = assign_df["下发线索数"]
+
+    print(f"2) 近 {days} 日的下发线索数（按渠道）")
+    print(channel_df.to_string(index=False))
+    print()
+    channel_totals = channel_df.drop(columns=["date", "合计"]).sum().sort_values(ascending=False)
+    print(f"  近 {days} 日累计（按渠道）")
+    print(channel_totals.to_string())
     print()
 
     print(f"3) 近 {days} 日的下发线索（门店）的占比")

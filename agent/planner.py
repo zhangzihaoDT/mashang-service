@@ -1417,11 +1417,28 @@ class PlanningAgent:
                 end = today
         time_field = metric_defaults["time_field"]
         value_metric = metric_defaults["metric"]
+        q = (user_query or "").replace(" ", "")
+        breakdown_dim = None
+        if self._contains_any_token(q, self._DIMENSION_SYNONYMS.get("product_name") or []):
+            breakdown_dim = "product_name"
+        elif self._contains_any_token(q, self._DIMENSION_SYNONYMS.get("series") or []):
+            breakdown_dim = "product_name" if PlanningAgent._infer_series_tokens(user_query) else "series"
+        elif self._contains_any_token(q, self._DIMENSION_SYNONYMS.get("store_name") or []):
+            breakdown_dim = "store_name"
+        elif self._contains_any_token(q, self._DIMENSION_SYNONYMS.get("store_city") or []):
+            breakdown_dim = "store_city"
+        elif self._contains_any_token(q, self._DIMENSION_SYNONYMS.get("license_city") or []):
+            breakdown_dim = "license_city"
+        elif self._contains_any_token(q, self._DIMENSION_SYNONYMS.get("parent_region_name") or []):
+            breakdown_dim = "parent_region_name"
+        dims = [time_field]
+        if breakdown_dim:
+            dims.append(breakdown_dim)
         plan = {
             "dataset": metric_defaults["dataset"],
             "metric": value_metric,
             "time": {"field": time_field, "start": start.isoformat(), "end": end.isoformat()},
-            "dimensions": [time_field],
+            "dimensions": dims,
             "filters": [{"field": time_field, "op": "!=", "value": None}],
             "comparison": {"type": "none"},
             "statistics": {
@@ -2545,7 +2562,11 @@ class PlanningAgent:
                     else:
                         plan["dimensions"] = [time_field]
                 else:
-                    plan["dimensions"] = [time_field]
+                    existing_dims = plan.get("dimensions")
+                    if isinstance(existing_dims, list) and len(existing_dims) > 1:
+                        pass
+                    else:
+                        plan["dimensions"] = [time_field]
         if metric_defaults and metric_defaults.get("operator_intent"):
             op_intent = metric_defaults["operator_intent"]
             existing_intent = (plan.get("analysis_intent", {}) or {}).get("type")
@@ -2571,20 +2592,20 @@ class PlanningAgent:
         dims = plan.get("dimensions")
         if not isinstance(dims, list):
             dims = []
+        q = (user_query or "").replace(" ", "")
+        dataset = str(plan.get("dataset") or "")
+        time_field = (plan.get("time", {}) or {}).get("field")
+        gender_dimension = self._resolve_gender_dimension(q)
+        want_date = any(k in q for k in ["按日期", "按天", "按日", "每天", "逐日", "分日期", "日维度", "日别"])
+        if not want_date:
+            want_date = len(re.findall(r"\d{4}-\d{2}-\d{2}", q)) >= 2 or len(re.findall(r"\d{1,2}月\d{1,2}[日号]?", q)) >= 2
+        want_series = self._contains_any_token(q, self._DIMENSION_SYNONYMS.get("series") or [])
+        want_product = self._contains_any_token(q, self._DIMENSION_SYNONYMS.get("product_name") or [])
+        want_region = self._contains_any_token(q, self._DIMENSION_SYNONYMS.get("parent_region_name") or [])
+        want_store = self._contains_any_token(q, self._DIMENSION_SYNONYMS.get("store_name") or [])
+        want_store_city = self._contains_any_token(q, self._DIMENSION_SYNONYMS.get("store_city") or [])
+        want_license_city = self._contains_any_token(q, self._DIMENSION_SYNONYMS.get("license_city") or [])
         if not dims:
-            q = (user_query or "").replace(" ", "")
-            dataset = str(plan.get("dataset") or "")
-            time_field = (plan.get("time", {}) or {}).get("field")
-            gender_dimension = self._resolve_gender_dimension(q)
-            want_date = any(k in q for k in ["按日期", "按天", "按日", "每天", "逐日", "分日期", "日维度", "日别"])
-            if not want_date:
-                want_date = len(re.findall(r"\d{4}-\d{2}-\d{2}", q)) >= 2 or len(re.findall(r"\d{1,2}月\d{1,2}[日号]?", q)) >= 2
-            want_series = self._contains_any_token(q, self._DIMENSION_SYNONYMS.get("series") or [])
-            want_product = self._contains_any_token(q, self._DIMENSION_SYNONYMS.get("product_name") or [])
-            want_region = self._contains_any_token(q, self._DIMENSION_SYNONYMS.get("parent_region_name") or [])
-            want_store = self._contains_any_token(q, self._DIMENSION_SYNONYMS.get("store_name") or [])
-            want_store_city = self._contains_any_token(q, self._DIMENSION_SYNONYMS.get("store_city") or [])
-            want_license_city = self._contains_any_token(q, self._DIMENSION_SYNONYMS.get("license_city") or [])
             if dataset == "order_data":
                 if want_date and isinstance(time_field, str) and time_field:
                     inferred_dims = [time_field]
@@ -2623,9 +2644,36 @@ class PlanningAgent:
                     plan["dimensions"] = ["store_name"]
                 elif want_region:
                     plan["dimensions"] = ["parent_region_name"]
+        else:
+            has_only_time = len(dims) == 1 and bool(time_field) and dims[0] == time_field
+            if has_only_time and dataset == "order_data":
+                if gender_dimension and gender_dimension not in dims:
+                    dims.append(gender_dimension)
+                elif want_product and "product_name" not in dims:
+                    dims.append("product_name")
+                elif want_series and "series" not in dims and "product_name" not in dims:
+                    if PlanningAgent._infer_series_tokens(user_query):
+                        dims.append("product_name")
+                    elif "series" not in dims:
+                        dims.append("series")
+                elif want_store_city and "store_city" not in dims:
+                    dims.append("store_city")
+                elif want_license_city and "license_city" not in dims:
+                    dims.append("license_city")
+                elif want_store and "store_name" not in dims:
+                    dims.append("store_name")
+                elif want_region and "parent_region_name" not in dims:
+                    dims.append("parent_region_name")
+                if len(dims) > 1:
+                    plan["dimensions"] = dims
         filters = self._apply_semantic_filters(filters, user_query)
         filters = self._apply_business_semantic_filters(filters, user_query)
         plan["filters"] = filters
+        has_series_in_dims = isinstance(plan.get("dimensions"), list) and "series" in plan["dimensions"]
+        if has_series_in_dims and (want_product or want_series):
+            has_series_filter = PlanningAgent._has_field_filter(filters, {"series"}) or PlanningAgent._has_field_filter(filters, {"product_name"})
+            if has_series_filter:
+                plan["dimensions"] = ["product_name" if d == "series" else d for d in plan["dimensions"]]
 
 
         comparison = plan.get("comparison")

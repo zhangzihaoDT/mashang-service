@@ -403,7 +403,10 @@ class QueryTool:
                         for dim in valid_dims:
                             try:
                                 col = df[dim]
-                                if pd.api.types.is_datetime64_any_dtype(col) or pd.api.types.is_numeric_dtype(col):
+                                if pd.api.types.is_datetime64_any_dtype(col):
+                                    df[dim] = col.dt.normalize()
+                                    continue
+                                if pd.api.types.is_numeric_dtype(col):
                                     continue
                                 df[dim] = col.fillna("未知")
                             except Exception:

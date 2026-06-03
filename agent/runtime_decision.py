@@ -21,13 +21,15 @@ def extract_required_slots(question: str) -> dict:
 
     if any(k in q for k in ["分车型", "按车型", "车型", "分车系", "按车系", "车系"]):
         required["breakdown_dimension"] = "model"
+    elif any(k in q for k in ["分产品", "分产品名称", "按产品", "按产品名称", "产品名称", "product_name", "productname"]):
+        required["breakdown_dimension"] = "product"
     elif any(k in q for k in ["分门店", "按门店"]):
         required["breakdown_dimension"] = "store"
     elif any(k in q for k in ["分大区", "按大区"]):
         required["breakdown_dimension"] = "region"
-    elif any(k in q for k in ["分城市", "按城市"]):
+    elif any(k in q for k in ["分城市", "按城市", "分门店城市", "按门店城市", "分上牌城市", "按上牌城市"]):
         required["breakdown_dimension"] = "city"
-    elif any(k in q for k in ["性别", "男女"]):
+    elif any(k in q for k in ["性别", "男女", "分性别", "按性别"]):
         required["breakdown_dimension"] = "gender"
 
     if any(k in q for k in ["锁单"]):
@@ -128,6 +130,11 @@ def result_satisfies_goal(state: AgentState) -> bool:
         if required.get("breakdown_dimension") == "model":
             if not any(c in cols for c in ["sub_model_name", "model_name", "config_name", "product_name"]):
                 if not any("车型" in c or "model" in c.lower() or "product" in c.lower() or "config" in c.lower() for c in cols):
+                    continue
+
+        if required.get("breakdown_dimension") == "product":
+            if not any("product_name" in c for c in cols):
+                if not any("产品" in c for c in cols):
                     continue
 
         return True
@@ -330,6 +337,12 @@ def infer_intent_from_question(question: str) -> str:
         "分渠道", "按渠道", "渠道",
         "分省份", "按省份",
         "性别", "男女",
+        # product_name
+        "分产品", "分产品名称", "按产品", "按产品名称",
+        "产品名称", "产品名", "productname", "product_name",
+        # store_city / license_city / gender
+        "分门店城市", "按门店城市", "分上牌城市", "按上牌城市",
+        "分性别", "按性别",
     ])
     has_share = any(k in q_ns for k in ["占比", "比例", "份额", "构成", "结构"])
 

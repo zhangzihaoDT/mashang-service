@@ -142,6 +142,7 @@ METRIC_COL_KEYWORDS = [
 
 DIMENSION_COL_KEYWORDS = [
     "dimension", "category", "model", "series", "config", "brand",
+    "product", "product_name",
     "city", "province", "region", "store", "channel", "gender",
     "age_group", "tier", "cohort", "segment", "group", "label",
     "车型", "车系", "配置", "品牌", "城市", "省份", "大区",

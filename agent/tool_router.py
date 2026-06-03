@@ -382,6 +382,40 @@ def _route_by_intent(
         except Exception as e:
             return {"type": f"{intent}_error", "error": "multi_table_execution_failed", "message": str(e)}, meta
 
+    # ── composition: 按维度拆解查询 ──
+    if intent == "composition":
+        meta = {"engine": "query", "route": "composition.query"}
+        try:
+            dims = list(plan.get("dimensions") or [])
+            time_field = (plan.get("time") or {}).get("field")
+            q = (user_query or "").replace(" ", "")
+            has_time_group = any(k in q for k in [
+                "按周", "每周", "周度", "逐周", "周别",
+                "按月", "每月", "月度", "逐月", "月别",
+                "按日", "每日", "日度", "逐日", "日别", "按天",
+            ])
+            if time_field and not has_time_group and time_field in dims:
+                dims.remove(time_field)
+            dataset = plan.get("dataset", "order_data")
+            metric = plan.get("metric", {})
+            plan_filters = list(plan.get("filters") or [])
+            time_start = (plan.get("time") or {}).get("start")
+            time_end = (plan.get("time") or {}).get("end")
+            query_plan = {
+                "dataset": dataset,
+                "metrics": [{"field": metric.get("field"), "agg": metric.get("agg"), "alias": metric.get("alias") or "value"}],
+                "dimensions": dims,
+                "filters": [
+                    *[f for f in plan_filters if f.get("field") != time_field],
+                    *([{"field": time_field, "op": ">=", "value": time_start}] if time_field and time_start else []),
+                    *([{"field": time_field, "op": "<", "value": time_end}] if time_field and time_end else []),
+                ],
+            }
+            result = query_tool.execute_analysis_df(query_plan)
+            return result, meta
+        except Exception as e:
+            return {"type": "composition_error", "error": "composition_execution_failed", "message": str(e)}, meta
+
     return None, {"engine": "none", "route": f"unhandled_intent.{intent}"}
 
 
@@ -876,9 +910,11 @@ def _execute_single_plan(
         print("\n[Thinking] 执行贡献拆解汇总...")
         value_metric = statistics.get("value_metric", {}) if isinstance(statistics, dict) else {}
         metric_alias = value_metric.get("alias") or metric.get("alias") or "value"
-        dimension_field = statistics.get("dimension_field") if isinstance(statistics, dict) else None
-        if not dimension_field and isinstance(dimensions, list) and len(dimensions) >= 2:
+        dimension_field = None
+        if isinstance(dimensions, list) and len(dimensions) >= 2:
             dimension_field = dimensions[1]
+        if not dimension_field:
+            dimension_field = statistics.get("dimension_field") if isinstance(statistics, dict) else None
         if comparison_df is not None:
             tool_result = {
                 "type": "contribution_summary",

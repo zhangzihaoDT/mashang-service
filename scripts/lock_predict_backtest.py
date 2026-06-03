@@ -15,7 +15,7 @@ from operators.mature_lock_prediction import run_mature_lock_prediction_operator
 from operators.assign_conversion import _parse_cn_date
 
 ASSIGN_CSV = REPO_ROOT / "dataset" / "assign_data.csv"
-OUTPUT_HTML = REPO_ROOT / "scripts" / "backtest_predicted_lock.html"
+OUTPUT_HTML = REPO_ROOT / "scripts" / "lock_predict_backtest.html"
 
 PRED_AGE = 7
 
