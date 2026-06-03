@@ -18,6 +18,7 @@ Lock Release Curve (锁单释放曲线独立研究)
   step_7    星期效应 (day_of_week)
   step_8    边际衰减 (marginal_decay)
   step_9    HTML 报告 (Plotly.js)
+  step_10    Lead→Lock 传导时滞分布 (mean/P50/P80/P90)
 设计决策: 60d窗口 / 按规模加权 / 归一化30d / 手动LM
 """
 
@@ -290,6 +291,47 @@ for target_pct in [50, 80, 90]:
     day_reached = np.searchsorted(avg_curve, target)
     print(f"    Day to reach {target_pct}% of 30d total: day {day_reached}")
 
+# ── 10. Lead→Lock Transmission Lag Distribution ──
+print("\n[10/10] Lead→Lock transmission lag distribution ...")
+
+lags = rc_raw["day_after"].values
+
+mean_lag = float(np.mean(lags))
+p50 = float(np.median(lags))
+p80 = float(np.percentile(lags, 80))
+p90 = float(np.percentile(lags, 90))
+p95 = float(np.percentile(lags, 95))
+
+print(f"  Total orders: {len(lags):,}")
+print(f"\n  {'Metric':>10s}  {'Value':>8s}")
+print(f"  {'Mean':>10s}  {mean_lag:7.2f}d")
+print(f"  {'P50':>10s}  {p50:7.2f}d")
+print(f"  {'P80':>10s}  {p80:7.2f}d")
+print(f"  {'P90':>10s}  {p90:7.2f}d")
+print(f"  {'P95':>10s}  {p95:7.2f}d")
+
+# Full histogram [0, MAX_DAY]
+hist, _ = np.histogram(lags, bins=range(MAX_DAY + 2), density=False)
+hist_pct = (hist / len(lags) * 100).tolist()
+
+# Year-over-year breakdown
+rc_raw["assign_year"] = rc_raw["assign_date"].dt.year
+year_lag_stats: dict[int, dict] = {}
+for year, grp in sorted(rc_raw.groupby("assign_year")):
+    vals = grp["day_after"].values
+    year_lag_stats[int(year)] = {
+        "orders": len(vals),
+        "mean": round(float(np.mean(vals)), 2),
+        "p50": round(float(np.median(vals)), 2),
+        "p80": round(float(np.percentile(vals, 80)), 2),
+        "p90": round(float(np.percentile(vals, 90)), 2),
+    }
+
+print(f"\n  Year-over-year:")
+print(f"  {'Year':>6s}  {'Orders':>8s}  {'Mean':>6s}  {'P50':>6s}  {'P80':>6s}  {'P90':>6s}")
+for y, ys in year_lag_stats.items():
+    print(f"  {y:6d}  {ys['orders']:8,d}  {ys['mean']:5.1f}d  {ys['p50']:5.1f}d  {ys['p80']:5.1f}d  {ys['p90']:5.1f}d")
+
 # ── 9. HTML Report ──
 print(f"\nGenerating HTML report ...")
 
@@ -368,6 +410,11 @@ series_json = json.dumps({
         "x0": round(x0_fit, 2) if x0_fit is not None else None,
         "curve": [round(float(v), 2) for v in y_fit] if y_fit is not None else None,
     },
+    "lag_hist_x": list(range(MAX_DAY + 1)),
+    "lag_hist_y": hist_pct,
+    "lag_stats": {"mean": mean_lag, "p50": p50, "p80": p80, "p90": p90, "p95": p95},
+    "lag_year_stats": {str(k): v for k, v in year_lag_stats.items()},
+    "lag_total_orders": int(len(lags)),
     "metadata": {
         "total_orders": int(total_weight),
         "total_cohorts": len(cohort_curves),
@@ -463,6 +510,16 @@ tr:hover td {{ background: #f0f2ff; }}
   </tbody>
   </table>
   </div>
+</div>
+
+<div class="chart-box">
+  <h2>Lead→Lock 传导时滞分布 (assign→lock 天数分布)</h2>
+  <div id="chart-lag-dist"></div>
+</div>
+
+<div class="chart-box">
+  <h2>逐年 Lead→Lock 传导时滞对比</h2>
+  <div id="chart-lag-year"></div>
 </div>
 
 </div>
@@ -575,6 +632,61 @@ Plotly.newPlot('chart-dow', dowTraces, {{
   hovermode: 'x unified',
   yaxis: {{title: '累计释放 %', range: [0, 120], fixedrange: true}},
   xaxis: {{title: '分配后天数', dtick: 5, fixedrange: true}},
+}}, {{displayModeBar: false}});
+
+// ── Chart 7A: Lag Distribution Histogram ──
+var lagStats = S.lag_stats;
+Plotly.newPlot('chart-lag-dist', [
+  {{x: S.lag_hist_x, y: S.lag_hist_y, type: 'bar', name: '占比 %',
+    marker: {{color: 'rgba(148,103,189,0.5)'}}}},
+], {{
+  height: 350, margin: {{t: 20, r: 20, b: 60, l: 80}},
+  hovermode: 'x unified',
+  yaxis: {{title: '占全部锁单 %', fixedrange: true}},
+  xaxis: {{title: '分配→锁单天数 (day_after)', dtick: 5, fixedrange: true}},
+  shapes: [
+    {{type: 'line', x0: lagStats.mean, y0: 0, x1: lagStats.mean, y1: 1, yref: 'paper',
+      line: {{color: '#d62728', width: 2, dash: 'dash'}}}},
+    {{type: 'line', x0: lagStats.p50, y0: 0, x1: lagStats.p50, y1: 1, yref: 'paper',
+      line: {{color: '#1f77b4', width: 2, dash: 'dot'}}}},
+    {{type: 'line', x0: lagStats.p80, y0: 0, x1: lagStats.p80, y1: 1, yref: 'paper',
+      line: {{color: '#ff7f0e', width: 2, dash: 'dot'}}}},
+    {{type: 'line', x0: lagStats.p90, y0: 0, x1: lagStats.p90, y1: 1, yref: 'paper',
+      line: {{color: '#2ca02c', width: 2, dash: 'dot'}}}},
+  ],
+  annotations: [
+    {{x: lagStats.mean, y: 0.95, xref: 'x', yref: 'paper', text: 'Mean=' + lagStats.mean.toFixed(1) + 'd',
+      showarrow: false, font: {{size: 10, color: '#d62728'}}}},
+    {{x: lagStats.p50, y: 0.88, xref: 'x', yref: 'paper', text: 'P50=' + lagStats.p50.toFixed(1) + 'd',
+      showarrow: false, font: {{size: 10, color: '#1f77b4'}}}},
+    {{x: lagStats.p80, y: 0.81, xref: 'x', yref: 'paper', text: 'P80=' + lagStats.p80.toFixed(1) + 'd',
+      showarrow: false, font: {{size: 10, color: '#ff7f0e'}}}},
+    {{x: lagStats.p90, y: 0.74, xref: 'x', yref: 'paper', text: 'P90=' + lagStats.p90.toFixed(1) + 'd',
+      showarrow: false, font: {{size: 10, color: '#2ca02c'}}}},
+  ],
+}}, {{displayModeBar: false}});
+
+// ── Chart 7B: Year-over-Year Lag Stats ──
+var yearLabels = Object.keys(S.lag_year_stats).sort();
+var yearMeans = yearLabels.map(function(y) {{ return S.lag_year_stats[y].mean; }});
+var yearP50s = yearLabels.map(function(y) {{ return S.lag_year_stats[y].p50; }});
+var yearP80s = yearLabels.map(function(y) {{ return S.lag_year_stats[y].p80; }});
+var yearP90s = yearLabels.map(function(y) {{ return S.lag_year_stats[y].p90; }});
+Plotly.newPlot('chart-lag-year', [
+  {{x: yearLabels, y: yearP90s, type: 'scatter', mode: 'lines+markers', name: 'P90',
+    line: {{color: '#2ca02c', width: 2}}, marker: {{size: 6}}}},
+  {{x: yearLabels, y: yearP80s, type: 'scatter', mode: 'lines+markers', name: 'P80',
+    line: {{color: '#ff7f0e', width: 2}}, marker: {{size: 6}}}},
+  {{x: yearLabels, y: yearMeans, type: 'scatter', mode: 'lines+markers', name: 'Mean',
+    line: {{color: '#d62728', width: 2}}, marker: {{size: 6}}}},
+  {{x: yearLabels, y: yearP50s, type: 'scatter', mode: 'lines+markers', name: 'P50 (中位数)',
+    line: {{color: '#1f77b4', width: 2, dash: 'dash'}}, marker: {{size: 6}}}},
+], {{
+  height: 350, margin: {{t: 20, r: 20, b: 60, l: 60}},
+  legend: {{orientation: 'h', y: 1.05, x: 0}},
+  hovermode: 'x unified',
+  yaxis: {{title: '传导时滞 (天)', fixedrange: true}},
+  xaxis: {{title: '分配年份', fixedrange: true}},
 }}, {{displayModeBar: false}});
 
 </script>
