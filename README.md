@@ -88,6 +88,45 @@ input（用户提问）
 }
 ```
 
+**v0.8 新增 `dimension_mapping`（维度值映射）**，用于 `share_breakdown` 将原始维度值聚合到业务分类（如 product_name → 五座/六座）：
+
+```json
+{
+  "type": "share_breakdown",
+  "breakdown_dimension": "product_name",
+  "denominator_scope": "overall",
+  "dimension_mapping": {
+    "五座": "product_name LIKE '%五座%'",
+    "六座": "product_name LIKE '%六座%'"
+  }
+}
+```
+
+**v0.8 新增 `monthly_mean` 统计类型**，按年月聚合后计算月均值：
+
+```json
+{
+  "statistics": {
+    "type": "monthly_mean",
+    "time_field": "lock_time",
+    "value_metric": {"field": "order_number", "agg": "count", "alias": "锁单量"}
+  }
+}
+```
+
+**v0.8 新增 `daily_percentile_rank` 支持 `reference_value`**，直接对指定数值计算分位：
+
+```json
+{
+  "statistics": {
+    "type": "daily_percentile_rank",
+    "reference_value": 116,
+    "window_days": 60,
+    ...
+  }
+}
+```
+
 **v0.4.4 新增 `attribute_penetration` / `attribute_distribution` 类型**，用于跨表配置属性分析：
 
 ```json
@@ -165,12 +204,16 @@ runtime_decision →  负责是否允许 finish
 | 能力类型                | 典型问题                    | 执行工具                              | Evidence Contract（所需证据类型）                               |
 | ----------------------- | --------------------------- | ------------------------------------- | --------------------------------------------------------------- |
 | 总量查询                | 昨天锁单数是多少            | QueryTool                             | `metric_value`                                                  |
+| 月均查询                | 2026年月均锁单数            | Statistics.monthly_mean               | `metric_value` + `time_grouped_metric`                          |
+| 月度明细                | 2026年每个月锁单数          | Statistics.monthly_mean               | `metric_value` + `time_grouped_metric`                          |
 | 趋势分析                | 近30日锁单趋势如何          | Statistics.trend_summary              | `trend_summary`                                                 |
 | 对比分析                | 本周 vs 上周变化            | Comparison.wow                        | `comparison_result`                                             |
 | 占比分析（share）       | 分车型锁单占比              | Composition.share_by_dimension        | `dimension_breakdown` + `share_summary`                         |
+| 占比分析（累计+维度映射）| LS8五六座比例              | Composition.share_by_dimension + dim_mapping | `dimension_breakdown` + `share_summary`                   |
 | 构成分析（composition） | 按城市/门店/渠道拆解结果    | QueryTool + GROUP BY                  | `dimension_breakdown`                                           |
 | 构成分析（含时间+占比） | 每周分车型锁单占比          | Composition.weekly_share_by_dimension | `time_grouped_metric` + `dimension_breakdown` + `share_summary` |
 | 排序分析                | 锁单 TOP10 城市             | QueryTool + ORDER BY                  | `ranking_result`                                                |
+| 分布分析 / 百分位       | 116在近2个月中的水平       | Statistics.daily_percentile_rank      | `distribution_summary`                                          |
 | 分布分析                | 锁单用户年龄分布 / 分位水平 | Statistics                            | `distribution_summary`                                          |
 | 诊断分析                | 为什么最近一周下滑          | Statistics.contribution_summary       | `trend_summary` + `contribution_summary`                        |
 | 配置渗透率分析          | CM2 增程中 Thor 选装率     | MultiTableMetricTool.attribute_penetration  | `dimension_breakdown` + `share_summary`                    |
@@ -201,6 +244,26 @@ runtime_decision →  负责是否允许 finish
 ```
 
 ## 更新日志
+
+- 2026-06-04（v0.8 — Monthly Mean / Dimension Mapping / Reference Percentile）
+  - **Monthly Mean**（`statistics.monthly_mean`）
+    - 新增 `_monthly_mean` 方法，按月聚合后计算月均值；支持 `2026年月均锁单数`、`每个月锁单数` 等自然语言模式
+    - `planner.py` 新增 `_is_monthly_mean_query` / `_build_monthly_mean_plan`，识别 `月均/每个月/每月/逐月` 并路由到 monthly_mean
+  - **Dimension Mapping（CompositionTool）**
+    - `composition_tool.py _partitioned_share` 新增 `dimension_mapping` 支持，复用 `_infer_dimension` 将 product_name 等维度值映射到业务分类（如 五座/六座）
+    - 新增 `denominator_scope: "overall"` 支持全局累计占比（累计查询时自动移除 time_field 维度不再按日分区）
+    - `planner.py` 检测 `五六座` 关键词时自动注入 `seat_count_logic` 映射到 `analysis_intent`
+    - `_is_share_breakdown_query` 扩展 `has_seat_pattern` 分支，使 `五六座比例` 绕开 `has_dim + has_time_grain` 约束
+  - **Percentile Rank 参考值**
+    - `daily_percentile_rank` 新增 `reference_value` 参数，支持直接对指定数值计算分位（如 `116的锁单数在近2个月中的水平`）
+    - `planner.py` 提取 `(\d+)的锁单` 模式并传入 `reference_value`
+    - `runtime_decision.py` 将 `水平` 归类为 `distribution` 而非 `trend`，`daily_percentile_rank` 检查移至 `trend_summary` 之前避免循环 prompt 拦截
+  - **时间窗口修复**
+    - `time_windows.py:358` 修复年正则负向前瞻 `(?!\s*月)` → `(?!\s*月\s*(?:\d|整|全))`，允许 `2026年月均` 匹配年份
+    - 所有 `近N` 正则增加 `(?:个)?`，支持 `近2个月` / `近3周` 等含"个"的常用表达
+    - `_parse_recent_days` 扩展支持周（×7）和月（×30）转换
+  - **DeepSeek API 兼容**
+    - 删除 3 处 `tool_choice={"type":"function",...}` 强制调用，改为默认 `"auto"`，适配 DeepSeek thinking mode
 
 - 2026-05-22（v0.7 — Short-term Memory / Clarification Runtime）
   - **Clarification Runtime**：算子产出多候选指标时中断执行，返回 `clarification_required` → `run_dsl_step` 拦截 → Agent Loop 输出澄清问题 + 选项列表；用户选择后继续执行
@@ -332,11 +395,12 @@ runtime_decision →  负责是否允许 finish
 - Statistics（[tools/statistics_tool.py](tools/statistics_tool.py)）
   - `weekly_decline_ratio`：周序列环比 + 下降周数占比
   - `daily_threshold_count`：近 N 日阈值计数（支持 `> >= < <= == !=`）
+  - `monthly_mean`：按月聚合月均（支持 `2026年月均锁单数`、`每个月锁单数`）
   - `daily_mean`：近 N 日（或指定窗）按日聚合后的日均
   - `daily_mean_median`：近 N 日（或指定窗）按日聚合后的日均 + 中位数
   - `trend_summary`：近 N 日趋势摘要（方向、斜率、波动、连续涨跌、峰谷值等）
   - `contribution_summary`：贡献拆解摘要（baseline vs target，描述性证据）
-  - `daily_percentile_rank`：参考日在近 N 日分布中的分位
+  - `daily_percentile_rank`：参考日/指定值在近 N 日分布中的分位（支持 `116的锁单数在近2个月中的水平`）
   - `weekend_percentile_rank`：参考周末在近 N 个周末分布中的分位
   - `weekday_percentile_rank`：参考“某个星期几”在近 N 次该 weekday 分布中的分位
 - Operators（[operators/registry.py](operators/registry.py)）
@@ -347,6 +411,8 @@ runtime_decision →  负责是否允许 finish
   - `monthly_share_by_dimension`：按月分拆占比
   - `topn_share`：Top-N 占比
   - `cumulative_share`：累计占比（帕累托）
+  - `dimension_mapping`：支持 business_definition 中的维度映射（如 `seat_count_logic` 将 product_name 映射为 五座/六座）
+  - `denominator_scope`：支持 `within_each_<grain>`（时间窗口内占比）和 `overall`（全局累计占比）
   - 路由条件：`plan.analysis_intent.type == "share_breakdown"`
 - MultiTable / Lookup Metric（[tools/multitable_metric_tool.py](tools/multitable_metric_tool.py)）
   - `attribute_penetration`：主表右连选配表，计算配置/属性渗透率（二值 是/否），支持 variant 模糊匹配
@@ -431,8 +497,13 @@ python3 feishu_bot.py
 ```text
 下发线索数 (门店) 的平均值是多少？
 2025年8月1日~10日锁单数日均值是多少？
+2026年月均锁单数是多少？
+2026年每个月锁单数分别是多少？
 近30日有多少天锁单数大于120？
 昨天的锁单数在近30日的锁单数中处于什么分位？
+116的锁单数在近2个月中的水平？
+LS8上市至今的五六座比例
+LS8上市至今累计锁单数的五六座比例
 查询近10周周四/周五门店锁单率环比变化，有多少周是下降的？
 输出LS8上市以来，每周分车型的锁单数占比分别是多少？
 本周智己LS8 66 Ultra 奢享大六座的锁单总数

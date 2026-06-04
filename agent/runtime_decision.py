@@ -370,14 +370,14 @@ def infer_intent_from_question(question: str) -> str:
         return "ranking"
 
     # ── Tier 6: 分布 ──
-    if any(k in q_ns for k in ["分布", "分位", "中位数", "均值", "平均值", "标准差"]):
+    if any(k in q_ns for k in ["分布", "分位", "中位数", "均值", "平均值", "标准差", "水平"]):
         return "distribution"
 
     # ── Tier 7: 趋势 ──
     if any(k in q_ns for k in ["趋势", "走势", "变化趋势", "波动"]):
         return "trend"
 
-    if re.search(r"近\s*\d+\s*(日|天|周|月|年)", q_ns):
+    if re.search(r"近\s*\d+\s*(?:个)?\s*(日|天|周|月|年)", q_ns):
         return "trend"
 
     # ── Tier 8: 简单指标查询 ──

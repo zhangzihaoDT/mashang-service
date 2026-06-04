@@ -99,19 +99,20 @@ PLANNING_TOOL_SCHEMA = {
                                 "type": "object",
                                 "properties": {
                                     "type": {
-                                        "type": "string",
-                                        "enum": [
-                                            "weekly_decline_ratio",
-                                            "daily_threshold_count",
-                                            "daily_mean",
-                                            "daily_mean_median",
-                                            "trend_summary",
-                                            "contribution_summary",
-                                            "category_share",
-                                            "daily_percentile_rank",
-                                            "weekend_percentile_rank",
-                                            "weekday_percentile_rank",
-                                        ],
+                                    "type": "string",
+                                    "enum": [
+                                        "weekly_decline_ratio",
+                                        "daily_threshold_count",
+                                        "monthly_mean",
+                                        "daily_mean",
+                                        "daily_mean_median",
+                                        "trend_summary",
+                                        "contribution_summary",
+                                        "category_share",
+                                        "daily_percentile_rank",
+                                        "weekend_percentile_rank",
+                                        "weekday_percentile_rank",
+                                    ],
                                     },
                                     "time_field": {"type": "string"},
                                     "window_weeks": {"type": "integer"},
@@ -480,6 +481,7 @@ class PlanningAgent:
             "阈值",
             "下降",
             "日均",
+            "月均",
             "均值",
             "平均值",
             "平均",
@@ -495,7 +497,7 @@ class PlanningAgent:
         ]
         has_stat_keyword = any(k in q for k in stat_keywords)
         has_explicit_window = PlanningAgent._parse_time_window(q, datetime.date.today()) is not None
-        has_time_window = has_explicit_window or bool(re.search(r"近\s*\d+\s*(日|天|周|月|年)", q)) or any(
+        has_time_window = has_explicit_window or bool(re.search(r"近\s*\d+\s*(?:个)?\s*(日|天|周|月|年)", q)) or any(
             k in q for k in ["昨天", "昨日", "本周", "上周", "本月", "上月", "今年", "去年", "上市至今", "上市以来", "预售至今", "预售以来"]
         )
         if has_stat_keyword and has_time_window:
@@ -913,7 +915,8 @@ class PlanningAgent:
         )
         has_time_grain = any(k in q for k in ["按周", "每周", "周度", "逐周", "按日", "每日", "逐日", "日度", "按天", "每天",
                                                 "按月", "每月", "月度", "逐月", "按季", "每季度", "季度"])
-        return has_dim and has_time_grain
+        has_seat_pattern = any(k in q for k in ["五座", "六座", "五六座"])
+        return (has_dim and has_time_grain) or (has_seat_pattern)
 
     @staticmethod
     def _infer_time_grain(user_query: str) -> str:
@@ -922,7 +925,7 @@ class PlanningAgent:
             return "week"
         if any(k in q for k in ["按日", "每日", "逐日", "日度", "按天", "每天", "日别"]):
             return "day"
-        if any(k in q for k in ["按月", "每月", "月度", "逐月", "月别"]):
+        if any(k in q for k in ["按月", "每月", "月度", "逐月", "月别", "每个月", "各月"]):
             return "month"
         return "week"
 
@@ -962,6 +965,13 @@ class PlanningAgent:
 
         is_cumulative = PlanningAgent._is_cumulative_query(user_query)
         dimensions = [breakdown_dim] if is_cumulative else [time_field, breakdown_dim]
+
+        dim_mapping = None
+        if any(k in user_query for k in ["五座", "六座", "五六座", "五座和六座", "五座与六座"]):
+            dim_mapping = self.business_definition_obj.get("seat_count_logic", {}) if isinstance(self.business_definition_obj, dict) else None
+            if dim_mapping:
+                breakdown_dim = "product_name"
+
         plan = {
             "dataset": metric_defaults["dataset"],
             "metric": {
@@ -975,14 +985,17 @@ class PlanningAgent:
             "filters": filters,
             "comparison": {"type": "none"},
         }
+        plan["analysis_intent"] = {
+            "type": "share_breakdown",
+            "numerator_metric": metric_alias,
+            "denominator_scope": "overall",
+            "breakdown_dimension": breakdown_dim,
+        }
+        if dim_mapping:
+            plan["analysis_intent"]["dimension_mapping"] = dim_mapping
         if not is_cumulative:
-            plan["analysis_intent"] = {
-                "type": "share_breakdown",
-                "numerator_metric": metric_alias,
-                "denominator_scope": f"within_each_{time_grain}",
-                "time_grain": time_grain,
-                "breakdown_dimension": breakdown_dim,
-            }
+            plan["analysis_intent"]["denominator_scope"] = f"within_each_{time_grain}"
+            plan["analysis_intent"]["time_grain"] = time_grain
             plan["post_process"] = [
                 {
                     "type": "window_share",
@@ -1022,12 +1035,19 @@ class PlanningAgent:
     @staticmethod
     def _parse_recent_days(user_query: str) -> int | None:
         q = user_query or ""
-        m = re.search(r"近\s*(\d{1,3})\s*(?:日|天)", q)
+        m = re.search(r"近\s*(\d{1,3})\s*(?:个)?\s*(日|天|周|月)", q)
         if not m:
             return None
         try:
             v = int(m.group(1))
-            return v if v > 0 else None
+            if v <= 0:
+                return None
+            unit = m.group(2)
+            if unit == "周":
+                return v * 7
+            if unit == "月":
+                return v * 30
+            return v
         except Exception:
             return None
 
@@ -1114,12 +1134,23 @@ class PlanningAgent:
         return has_day_count and has_recent_day and has_threshold
 
     @staticmethod
+    def _is_monthly_mean_query(user_query: str) -> bool:
+        q = user_query or ""
+        if not q:
+            return False
+        if "月均" not in q and not any(k in q for k in ["每个月", "每月", "逐月", "月度", "月别", "各月"]):
+            return False
+        has_explicit_window = PlanningAgent._extract_explicit_time_window(q, datetime.date.today()) is not None
+        has_year = bool(re.search(r"\d{2,4}\s*年", q))
+        return has_explicit_window or has_year
+
+    @staticmethod
     def _is_daily_mean_query(user_query: str) -> bool:
         q = user_query or ""
         if not q:
             return False
-        has_mean = any(k in q for k in ["日均", "均值", "平均值", "平均"])
-        has_recent_day = bool(re.search(r"近\s*(?:\d+|[一二两三四五六七八九十])\s*(日|天|周|月|年)", q))
+        has_mean = any(k in q for k in ["日均", "月均", "均值", "平均值", "平均"])
+        has_recent_day = bool(re.search(r"近\s*(?:\d+|[一二两三四五六七八九十])\s*(?:个)?\s*(日|天|周|月|年)", q))
         has_relative_day = any(k in q for k in ["昨天", "昨日", "今天", "今日", "本周", "上周", "本月", "上月", "上市至今", "上市以来", "预售至今", "预售以来", "至今", "截至", "目前", "现在"])
         has_explicit_window = PlanningAgent._extract_explicit_time_window(q, datetime.date.today()) is not None
         return has_mean and (has_recent_day or has_relative_day or has_explicit_window)
@@ -1133,7 +1164,7 @@ class PlanningAgent:
         has_median = any(k in q for k in ["中位数", "中值"])
         if not (has_mean and has_median):
             return False
-        has_recent = bool(re.search(r"近\s*(?:\d+|[一二两三四五六七八九十])\s*(日|天|周|月|年)", q))
+        has_recent = bool(re.search(r"近\s*(?:\d+|[一二两三四五六七八九十])\s*(?:个)?\s*(日|天|周|月|年)", q))
         has_relative = any(k in q for k in ["昨天", "昨日", "今天", "今日", "本周", "上周", "本月", "上月", "上市至今", "上市以来", "预售至今", "预售以来", "至今", "截至", "目前", "现在"])
         has_explicit = PlanningAgent._extract_explicit_time_window(q, datetime.date.today()) is not None
         return has_recent or has_relative or has_explicit
@@ -1144,7 +1175,7 @@ class PlanningAgent:
         if not q:
             return False
         has_trend = any(k in q for k in ["趋势", "走势", "变化趋势", "波动趋势", "波动情况"])
-        has_recent = bool(re.search(r"近\s*(?:\d+|[一二两三四五六七八九十])\s*(日|天|周|月|年)", q))
+        has_recent = bool(re.search(r"近\s*(?:\d+|[一二两三四五六七八九十])\s*(?:个)?\s*(日|天|周|月|年)", q))
         has_relative = any(k in q for k in ["昨天", "昨日", "今天", "今日", "本周", "上周", "本月", "上月", "今年", "去年", "至今", "截至"])
         has_explicit = PlanningAgent._extract_explicit_time_window(q, datetime.date.today()) is not None
         return has_trend and (has_recent or has_relative or has_explicit)
@@ -1155,7 +1186,7 @@ class PlanningAgent:
         if not q:
             return False
         has_contrib = any(k in q for k in ["贡献", "拆解", "贡献项", "主要贡献", "贡献度", "贡献来源"])
-        has_recent = bool(re.search(r"近\s*(?:\d+|[一二两三四五六七八九十])\s*(日|天)", q))
+        has_recent = bool(re.search(r"近\s*(?:\d+|[一二两三四五六七八九十])\s*(?:个)?\s*(日|天|周|月|年)", q))
         return has_contrib and has_recent
 
     @staticmethod
@@ -1164,10 +1195,11 @@ class PlanningAgent:
         if not q:
             return False
         has_percentile = any(k in q for k in ["分位", "百分位", "分位值", "百分位值"])
-        has_level = any(k in q for k in ["处于什么水平", "什么水平", "处于什么位置", "高低水平"])
+        has_level = any(k in q for k in ["处于什么水平", "什么水平", "处于什么位置", "高低水平", "的水平", "中的水平", "水平"])
         has_ref = any(k in q for k in ["昨天", "昨日", "今天", "今日"])
-        has_recent_day = bool(re.search(r"近\s*\d+\s*(日|天)", q))
-        return (has_percentile or has_level) and has_ref and has_recent_day
+        has_ref_value = bool(re.search(r"(\d+)\s*的\s*锁单", q))
+        has_recent = bool(re.search(r"近\s*\d+\s*(?:个)?\s*(日|天|周|月|年)", q))
+        return (has_percentile or has_level) and (has_ref or has_ref_value) and has_recent
 
     @staticmethod
     def _is_weekend_percentile_rank_query(user_query: str) -> bool:
@@ -1308,6 +1340,43 @@ class PlanningAgent:
                 "window_days": days,
                 "op": op,
                 "threshold": threshold,
+                "value_metric": value_metric,
+            },
+        }
+        return self._fill_defaults(self._normalize_plan(plan), user_query)
+
+    def _build_monthly_mean_plan(self, user_query: str) -> dict | None:
+        metric_defaults = self._metric_defaults(user_query)
+        if not metric_defaults:
+            return None
+        today = datetime.date.today()
+        explicit_window = self._extract_explicit_time_window(user_query, today)
+        if explicit_window:
+            start_s, end_s = explicit_window
+            start = datetime.date.fromisoformat(start_s)
+            end = datetime.date.fromisoformat(end_s)
+        else:
+            year_match = re.search(r"(\d{2,4})\s*年", user_query)
+            if year_match:
+                y = int(year_match.group(1))
+                if y < 100:
+                    y += 2000
+                start = datetime.date(y, 1, 1)
+                end = datetime.date(y + 1, 1, 1)
+            else:
+                return None
+        time_field = metric_defaults["time_field"]
+        value_metric = metric_defaults["metric"]
+        plan = {
+            "dataset": metric_defaults["dataset"],
+            "metric": value_metric,
+            "time": {"field": time_field, "start": start.isoformat(), "end": end.isoformat()},
+            "dimensions": [time_field],
+            "filters": [{"field": time_field, "op": "!=", "value": None}],
+            "comparison": {"type": "none"},
+            "statistics": {
+                "type": "monthly_mean",
+                "time_field": time_field,
                 "value_metric": value_metric,
             },
         }
@@ -1499,6 +1568,10 @@ class PlanningAgent:
         time_field = metric_defaults["time_field"]
         value_metric = metric_defaults["metric"]
         reference_date = (today - datetime.timedelta(days=1)).isoformat() if any(k in user_query for k in ["昨天", "昨日"]) else today.isoformat()
+        reference_value = None
+        ref_match = re.search(r"(\d+)\s*的\s*锁单", user_query)
+        if ref_match:
+            reference_value = float(ref_match.group(1))
         plan = {
             "dataset": metric_defaults["dataset"],
             "metric": value_metric,
@@ -1511,6 +1584,7 @@ class PlanningAgent:
                 "time_field": time_field,
                 "window_days": days,
                 "reference_date": reference_date,
+                "reference_value": reference_value,
                 "value_metric": value_metric,
             },
         }
@@ -1629,6 +1703,19 @@ class PlanningAgent:
             try:
                 float(threshold)
             except Exception:
+                return False
+            return True
+
+        if stype == "monthly_mean":
+            time_field = statistics.get("time_field") or (plan.get("time", {}) or {}).get("field")
+            value_metric = statistics.get("value_metric")
+            if not isinstance(time_field, str) or not time_field:
+                return False
+            if time_field not in dims:
+                return False
+            if not isinstance(value_metric, dict):
+                return False
+            if not value_metric.get("field") or not value_metric.get("agg"):
                 return False
             return True
 
@@ -1887,6 +1974,7 @@ class PlanningAgent:
             if stype not in {
                 "weekly_decline_ratio",
                 "daily_threshold_count",
+                "monthly_mean",
                 "daily_mean",
                 "daily_mean_median",
                 "trend_summary",
@@ -1922,6 +2010,8 @@ class PlanningAgent:
                 wdays = statistics.get("window_days")
                 if isinstance(wdays, str) and wdays.isdigit():
                     statistics["window_days"] = int(wdays)
+            elif stype == "monthly_mean":
+                pass
             elif stype == "daily_mean":
                 wdays = statistics.get("window_days")
                 if isinstance(wdays, str) and wdays.isdigit():
@@ -2140,6 +2230,14 @@ class PlanningAgent:
                         contrib_plan["question"] = q
                         finalized.append(contrib_plan)
                         continue
+            if self._is_daily_percentile_rank_query(semantic_q):
+                stat = normalized.get("statistics")
+                if not isinstance(stat, dict) or stat.get("type") != "daily_percentile_rank":
+                    percentile_plan = self._build_daily_percentile_rank_plan(semantic_q)
+                    if isinstance(percentile_plan, dict) and percentile_plan:
+                        percentile_plan["question"] = q
+                        finalized.append(percentile_plan)
+                        continue
             if self._is_trend_summary_query(semantic_q) and not has_compare:
                 stat = normalized.get("statistics")
                 if not isinstance(stat, dict) or stat.get("type") != "trend_summary":
@@ -2156,6 +2254,14 @@ class PlanningAgent:
                         summary_plan["question"] = q
                         finalized.append(summary_plan)
                         continue
+            if self._is_monthly_mean_query(semantic_q) and not has_compare:
+                stat = normalized.get("statistics")
+                if not isinstance(stat, dict) or stat.get("type") != "monthly_mean":
+                    monthly_plan = self._build_monthly_mean_plan(semantic_q)
+                    if isinstance(monthly_plan, dict) and monthly_plan:
+                        monthly_plan["question"] = q
+                        finalized.append(monthly_plan)
+                        continue
             if self._is_daily_mean_query(semantic_q):
                 stat = normalized.get("statistics")
                 if has_compare and any(k in semantic_q for k in ["昨天", "昨日"]):
@@ -2168,14 +2274,6 @@ class PlanningAgent:
                     if isinstance(daily_plan, dict) and daily_plan:
                         daily_plan["question"] = q
                         finalized.append(daily_plan)
-                        continue
-            if self._is_daily_percentile_rank_query(semantic_q):
-                stat = normalized.get("statistics")
-                if not isinstance(stat, dict) or stat.get("type") != "daily_percentile_rank":
-                    percentile_plan = self._build_daily_percentile_rank_plan(semantic_q)
-                    if isinstance(percentile_plan, dict) and percentile_plan:
-                        percentile_plan["question"] = q
-                        finalized.append(percentile_plan)
                         continue
             normalized["question"] = q
             finalized.append(normalized)
@@ -2279,7 +2377,7 @@ class PlanningAgent:
                     "- LS6/L6 是 series 车系，不要按 model_series_mapping 展开成 CM0/CM1/CM2/DM0/DM1；仅当用户明确问二级分组时才使用 series_group_logic。\n"
                     "- 用户问性别/男女比例时，默认 owner_gender；明确提到订单用户/订单性别时用 order_gender。\n"
                     "- 同比/年同比用 comparison.type=yoy；周环比=wow；日环比=dod。\n"
-                    "- 时序统计输出 statistics：weekly_decline_ratio/daily_threshold_count/daily_mean/daily_mean_median/trend_summary/daily_percentile_rank/weekend_percentile_rank/weekday_percentile_rank，并补齐必需字段。\n"
+                    "- 时序统计输出 statistics：weekly_decline_ratio/daily_threshold_count/monthly_mean/daily_mean/daily_mean_median/trend_summary/daily_percentile_rank/weekend_percentile_rank/weekday_percentile_rank，并补齐必需字段。\n"
                     "- 近 N 日/周/月 的趋势/走势/波动，优先 trend_summary，设 window_days 与 value_metric。\n"
                     "- 近 N 周的周日/周一..周日 水平，用 weekday_percentile_rank，设 window_weeks、weekdays、reference_date。\n"
                     "- 配置渗透率/选装率：analysis_intent.type=attribute_penetration，补齐 attribute_pattern、dimension_field。\n"
@@ -2295,7 +2393,6 @@ class PlanningAgent:
                 model=DEEPSEEK_PLANNER_MODEL,
                 messages=messages,
                 tools=[PLANNING_TOOL_SCHEMA],
-                tool_choice={"type": "function", "function": {"name": "create_planning_dsl"}},
                 temperature=0,
             )
 
@@ -2370,7 +2467,6 @@ class PlanningAgent:
                         model=DEEPSEEK_PLANNER_MODEL,
                         messages=retry_messages,
                         tools=[PLANNING_TOOL_SCHEMA],
-                        tool_choice={"type": "function", "function": {"name": "create_planning_dsl"}},
                         temperature=0,
                     )
                     retry_msg = retry.choices[0].message
@@ -2545,6 +2641,7 @@ class PlanningAgent:
         if isinstance(statistics, dict) and statistics.get("type") in {
             "weekly_decline_ratio",
             "daily_threshold_count",
+            "monthly_mean",
             "daily_mean",
             "daily_mean_median",
             "trend_summary",
@@ -2798,7 +2895,6 @@ class PlanningAgent:
                 model=DEEPSEEK_PLANNER_MODEL,
                 messages=messages,
                 tools=[TIME_REWRITE_TOOL_SCHEMA],
-                tool_choice={"type": "function", "function": {"name": "rewrite_time_window"}},
             )
             message = response.choices[0].message
             tool_calls = message.tool_calls or []

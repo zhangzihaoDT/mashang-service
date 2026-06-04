@@ -638,6 +638,7 @@ def _build_stat_metric_value_facts(block, result: dict, plan: dict, time_range: 
     block_type = source["block_type"]
 
     value_key_map = {
+        "monthly_mean": "monthly_mean",
         "daily_mean": "daily_mean",
         "daily_mean_median": "daily_mean",
         "weekly_decline_ratio": "decline_ratio",
@@ -652,6 +653,10 @@ def _build_stat_metric_value_facts(block, result: dict, plan: dict, time_range: 
         return []
 
     meta: dict = {value_key: primary_value}
+    if block_type == "monthly_mean":
+        meta["total"] = result.get("total")
+        meta["month_count"] = result.get("month_count")
+        meta["monthly_rows"] = result.get("monthly_rows")
     if block_type == "daily_mean_median":
         meta["median"] = result.get("daily_median")
     if block_type == "daily_threshold_count":
@@ -666,7 +671,7 @@ def _build_stat_metric_value_facts(block, result: dict, plan: dict, time_range: 
         meta["decline_weeks"] = result.get("decline_weeks")
         meta["total_weeks"] = result.get("total_weeks")
 
-    value_labels = {"daily_mean": "日均", "daily_mean_median": "日均", "matched_ratio": "达标率", "decline_ratio": "下降比例", "percentile_rank": "百分位"}
+    value_labels = {"monthly_mean": "月均", "daily_mean": "日均", "daily_mean_median": "日均", "matched_ratio": "达标率", "decline_ratio": "下降比例", "percentile_rank": "百分位"}
     label = value_labels.get(value_key or "", "") or value_key or ""
     content = f"{metric}{label}值为{primary_value}"
     if block_type == "daily_mean_median" and meta.get("median") is not None:
@@ -689,6 +694,11 @@ def _build_time_series_facts(block, result: dict, plan: dict, time_range: dict |
     if isinstance(daily_rows, list):
         row_count = len(daily_rows)
         grain = "day"
+    if row_count == 0 and result.get("monthly_rows"):
+        monthly_rows = result.get("monthly_rows")
+        if isinstance(monthly_rows, list):
+            row_count = len(monthly_rows)
+            grain = "month"
     if row_count == 0 and block_type == "weekly_decline_ratio":
         weekly_rows = result.get("weekly_rows")
         if isinstance(weekly_rows, list):
@@ -829,6 +839,7 @@ _FALLBACK_HINTS: dict[str, dict] = {
     "weekend_percentile_rank": {"fact_types": ["metric_value", "distribution_summary", "time_grouped_metric"]},
     "weekday_percentile_rank": {"fact_types": ["metric_value", "distribution_summary", "time_grouped_metric"]},
     "daily_mean": {"fact_types": ["metric_value", "time_grouped_metric"]},
+    "monthly_mean": {"fact_types": ["metric_value", "time_grouped_metric"]},
     "daily_mean_median": {"fact_types": ["metric_value", "time_grouped_metric"]},
     "weekly_decline_ratio": {"fact_types": ["metric_value", "time_grouped_metric"]},
     "daily_threshold_count": {"fact_types": ["metric_value", "time_grouped_metric"]},
@@ -851,6 +862,7 @@ _BLOCK_HANDLERS = {
     "city_tier_distribution": _build_share_breakdown_facts,
     "age_cohort_distribution": _build_share_breakdown_facts,
     "daily_mean": _build_stat_metric_value_facts,
+    "monthly_mean": _build_stat_metric_value_facts,
     "daily_mean_median": _build_stat_metric_value_facts,
     "daily_threshold_count": _build_stat_metric_value_facts,
     "daily_percentile_rank": _build_stat_metric_value_facts,
@@ -861,6 +873,7 @@ _BLOCK_HANDLERS = {
 }
 
 _BLOCK_TIME_SERIES_HANDLERS = {
+    "monthly_mean": _build_time_series_facts,
     "daily_mean": _build_time_series_facts,
     "daily_mean_median": _build_time_series_facts,
     "daily_threshold_count": _build_time_series_facts,

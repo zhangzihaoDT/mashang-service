@@ -4,6 +4,7 @@ import datetime
 import pandas as pd
 
 from .query_tool import QueryTool
+from .multitable_metric_tool import _infer_dimension
 
 
 class CompositionTool:
@@ -68,11 +69,14 @@ class CompositionTool:
         time_end = time.get("end")
         breakdown_dim = analysis_intent.get("breakdown_dimension")
         metric_alias = metric.get("alias") or "value"
+        denom_scope = analysis_intent.get("denominator_scope", "")
 
         if not dataset or not time_field:
             return "CompositionTool: 缺少 dataset 或 time.field"
 
         effective_dims = list(dict.fromkeys([d for d in [time_field, breakdown_dim] if d]))
+        if denom_scope == "overall":
+            effective_dims = [d for d in effective_dims if d != time_field]
         if not effective_dims:
             return "CompositionTool: 没有有效的维度列"
 
@@ -105,8 +109,27 @@ class CompositionTool:
                 groupby_cols.append(breakdown_dim)
             df = df.groupby(groupby_cols, observed=True).agg(agg_after).reset_index()
 
+        dim_mapping = analysis_intent.get("dimension_mapping")
+        if dim_mapping and breakdown_dim and breakdown_dim in df.columns:
+            df[breakdown_dim] = df[breakdown_dim].astype(str).apply(
+                lambda x: _infer_dimension(x, dim_mapping)
+            )
+            agg_cols = {metric_alias: "sum"}
+            groupby_cols = [c for c in [time_field, breakdown_dim] if c and c in df.columns]
+            if denom_scope == "overall":
+                groupby_cols = [c for c in groupby_cols if c != time_field]
+            if groupby_cols:
+                df = df.groupby(groupby_cols, observed=True).agg(agg_cols).reset_index()
+
         share_alias = "占比"
-        partition_cols = [c for c in [time_field] if c and c in df.columns]
+        denom_scope = analysis_intent.get("denominator_scope", "")
+        if denom_scope == "overall":
+            partition_cols = []
+        else:
+            partition_cols = [c for c in [time_field] if c and c in df.columns]
         if partition_cols and metric_alias in df.columns:
             df[share_alias] = df[metric_alias] / df.groupby(partition_cols, observed=True)[metric_alias].transform("sum")
+        elif not partition_cols and metric_alias in df.columns:
+            total = df[metric_alias].sum()
+            df[share_alias] = df[metric_alias] / total if total else 0.0
         return df

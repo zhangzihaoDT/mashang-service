@@ -8,6 +8,8 @@ class StatisticsTool:
             return self._weekly_decline_ratio(request, input_df)
         if stat_type == "daily_threshold_count":
             return self._daily_threshold_count(request, input_df)
+        if stat_type == "monthly_mean":
+            return self._monthly_mean(request, input_df)
         if stat_type == "daily_mean":
             return self._daily_mean(request, input_df)
         if stat_type == "daily_mean_median":
@@ -354,6 +356,64 @@ class StatisticsTool:
             "total_days": total_days,
             "matched_ratio": matched_ratio,
             "daily_rows": daily_rows,
+        }
+
+    @staticmethod
+    def _monthly_mean(request: dict, input_df: pd.DataFrame) -> dict | str:
+        if input_df is None or input_df.empty:
+            return "统计分析无可用数据。"
+
+        time_field = request.get("time_field")
+        metric_alias = request.get("metric_alias")
+        if not isinstance(time_field, str) or not time_field:
+            return "统计分析缺少必要参数: time_field"
+        if not isinstance(metric_alias, str) or not metric_alias:
+            return "统计分析缺少必要参数: metric_alias"
+        if time_field not in input_df.columns:
+            return f"统计分析缺少时间列: {time_field}"
+        if metric_alias not in input_df.columns:
+            return f"统计分析缺少指标列: {metric_alias}"
+
+        df = input_df.copy()
+        raw_time = df[time_field].astype(str).str.strip()
+        parsed_cn = pd.to_datetime(raw_time, errors="coerce", format="%Y年%m月%d日")
+        if float(parsed_cn.notna().mean()) >= 0.8:
+            df[time_field] = parsed_cn
+        else:
+            df[time_field] = pd.to_datetime(raw_time, errors="coerce")
+        df = df[df[time_field].notna()]
+        if df.empty:
+            return "统计分析时间列无法解析为日期。"
+
+        df["month"] = df[time_field].dt.to_period("M").astype(str)
+        monthly = (
+            df.groupby("month", as_index=False)
+            .agg({metric_alias: "sum"})
+            .sort_values("month")
+            .reset_index(drop=True)
+        )
+        if monthly.empty:
+            return "统计分析在窗口内无可用月数据。"
+
+        monthly["value"] = monthly[metric_alias].astype(float)
+        month_count = len(monthly)
+        monthly_mean = float(monthly["value"].mean()) if month_count else 0.0
+        total = float(monthly["value"].sum()) if month_count else 0.0
+
+        monthly_rows: list[dict] = []
+        for _, row in monthly.iterrows():
+            monthly_rows.append({
+                "month": str(row["month"]),
+                "value": float(row["value"]),
+            })
+
+        return {
+            "type": "monthly_mean",
+            "metric_alias": metric_alias,
+            "monthly_mean": monthly_mean,
+            "total": total,
+            "month_count": month_count,
+            "monthly_rows": monthly_rows,
         }
 
     @staticmethod
@@ -876,14 +936,22 @@ class StatisticsTool:
         date_index = pd.date_range(start=start, end=end - pd.Timedelta(days=1), freq="D")
         series = grouped.set_index("date")["value"].reindex(date_index, fill_value=0.0)
         total_days = int(len(series))
-        ref_raw = request.get("reference_date")
-        reference_date = pd.to_datetime(ref_raw, errors="coerce") if isinstance(ref_raw, str) else pd.NaT
-        if pd.isna(reference_date):
-            reference_date = date_index.max()
-        reference_date = pd.Timestamp(reference_date).normalize()
-        if reference_date not in set(pd.Timestamp(d).normalize() for d in date_index):
-            reference_date = date_index.max()
-        reference_value = float(series.get(reference_date, 0.0))
+        reference_date: pd.Timestamp | None = None
+        ref_value_raw = request.get("reference_value")
+        if ref_value_raw is not None:
+            try:
+                reference_value = float(ref_value_raw)
+            except Exception:
+                reference_value = None
+        if ref_value_raw is None or reference_value is None:
+            ref_raw = request.get("reference_date")
+            reference_date = pd.to_datetime(ref_raw, errors="coerce") if isinstance(ref_raw, str) else pd.NaT
+            if pd.isna(reference_date):
+                reference_date = date_index.max()
+            reference_date = pd.Timestamp(reference_date).normalize()
+            if reference_date not in set(pd.Timestamp(d).normalize() for d in date_index):
+                reference_date = date_index.max()
+            reference_value = float(series.get(reference_date, 0.0))
 
         less_count = int((series < reference_value).sum())
         le_count = int((series <= reference_value).sum())
@@ -902,7 +970,7 @@ class StatisticsTool:
             "type": "daily_percentile_rank",
             "window_days": int(window_days),
             "metric_alias": metric_alias,
-            "reference_date": reference_date.strftime("%Y-%m-%d"),
+            "reference_date": reference_date.strftime("%Y-%m-%d") if reference_date is not None else None,
             "reference_value": reference_value,
             "less_count": less_count,
             "le_count": le_count,
@@ -1136,6 +1204,7 @@ STATISTICS_TOOL_SCHEMA = {
                     "enum": [
                         "weekly_decline_ratio",
                         "daily_threshold_count",
+                        "monthly_mean",
                         "daily_mean",
                         "daily_mean_median",
                         "trend_summary",

@@ -843,6 +843,60 @@ def _execute_single_plan(
                         tool_result = statistics_tool.perform_statistics(stat_request, raw_df)
                     except Exception as e:
                         tool_result = {"type": "daily_mean_median", "error": "statistics_execution_failed", "message": str(e)}
+    elif stats_type == "monthly_mean" and tool_result is None:
+        execution_meta = {"engine": "statistics", "route": "statistics.monthly_mean"}
+        print("\n[Thinking] 执行月均分析...")
+        value_metric = statistics.get("value_metric", {}) if isinstance(statistics, dict) else {}
+        metric_alias = value_metric.get("alias") or metric.get("alias") or "value"
+        if comparison_df is not None:
+            tool_result = {
+                "type": "monthly_mean",
+                "error": "unsupported_pipeline_input",
+                "message": "monthly_mean 暂不支持 comparison 联动，请使用单窗口查询。",
+            }
+        else:
+            query_time_start = time_start
+            query_time_end = time_end
+            query_plan = {
+                "dataset": dataset,
+                "metrics": [
+                    {
+                        "field": value_metric.get("field") or metric.get("field"),
+                        "agg": value_metric.get("agg") or metric.get("agg") or "count",
+                        "alias": metric_alias,
+                    }
+                ],
+                "dimensions": dimensions,
+                "filters": [
+                    *filters_without_time,
+                    {"field": time_field, "op": ">=", "value": query_time_start},
+                    {"field": time_field, "op": "<", "value": query_time_end},
+                ]
+                if time_field and query_time_start and query_time_end
+                else filters_without_time,
+            }
+            raw_df = query_tool.execute_analysis_df(query_plan)
+            if isinstance(raw_df, str):
+                tool_result = raw_df
+            else:
+                missing_cols = [c for c in [statistics.get("time_field") or time_field, metric_alias] if c not in raw_df.columns]
+                if missing_cols:
+                    print(f"  ⚠️  monthly_mean 输入列缺失，返回结构化错误: {missing_cols}")
+                    tool_result = {
+                        "type": "monthly_mean",
+                        "error": "invalid_statistics_input_schema",
+                        "missing_columns": missing_cols,
+                    }
+                else:
+                    stat_request = {
+                        "type": "monthly_mean",
+                        "time_field": statistics.get("time_field") or time_field,
+                        "metric_alias": metric_alias,
+                    }
+                    try:
+                        tool_result = statistics_tool.perform_statistics(stat_request, raw_df)
+                    except Exception as e:
+                        tool_result = {"type": "monthly_mean", "error": "statistics_execution_failed", "message": str(e)}
     elif stats_type == "trend_summary" and tool_result is None:
         execution_meta = {"engine": "statistics", "route": "statistics.trend_summary"}
         print("\n[Thinking] 执行趋势分析汇总...")
@@ -1091,6 +1145,7 @@ def _execute_single_plan(
                         "date_start": query_time_start,
                         "date_end": query_time_end,
                         "reference_date": statistics.get("reference_date"),
+                        "reference_value": statistics.get("reference_value"),
                         "metric_alias": metric_alias,
                     }
                     try:

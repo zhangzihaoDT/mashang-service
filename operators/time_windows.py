@@ -203,7 +203,7 @@ def resolve_recent_window(user_query: str, today: datetime.date) -> tuple[str, s
     q = (user_query or "").replace(" ", "")
     if not q:
         return None
-    m = re.search(r"近(?P<n>\d+|[一二两三四五六七八九十])(?P<u>日|天|周|月|年)", q)
+    m = re.search(r"近(?P<n>\d+|[一二两三四五六七八九十])(?:\s*个)?\s*(?P<u>日|天|周|月|年)", q)
     if not m:
         return None
     n = _parse_int_token(m.group("n"))
@@ -355,7 +355,7 @@ def parse_time_window(user_query: str, today: datetime.date) -> tuple[str, str] 
         if start_date:
             return (start_date.isoformat(), (start_date + datetime.timedelta(days=1)).isoformat())
 
-    m = re.search(r"(?P<y>\d{2,4})年(?!\s*\d|\s*月)", q)
+    m = re.search(r"(?P<y>\d{2,4})年(?!\s*\d|\s*月\s*(?:\d|整|全))", q)
     if m:
         w = _year_window(_normalize_year(m.group("y")) or today.year)
         if w:
@@ -422,7 +422,7 @@ def infer_time_window_type(user_query: str) -> str | None:
         return "month"
     if re.search(r"\d{2,4}\s*年\s*\d{1,2}\s*月\s*\d{1,2}\s*[日号]?", q):
         return "date"
-    if re.search(r"\d{2,4}\s*年(?!\s*\d|\s*月)", q):
+    if re.search(r"\d{2,4}\s*年(?!\s*\d|\s*月\s*(?:\d|整|全))", q):
         return "year"
     if re.search(r"\d{4}-\d{2}-\d{2}", q):
         return "date"
