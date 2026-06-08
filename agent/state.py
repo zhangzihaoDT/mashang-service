@@ -1,3 +1,4 @@
+import json
 from dataclasses import dataclass, field
 
 
@@ -80,6 +81,20 @@ class AgentState:
 
     @staticmethod
     def _fact_key(fact: dict) -> tuple:
+        def _hashable(v: object) -> object:
+            if v is None or isinstance(v, (str, int, float, bool)):
+                return v
+            if isinstance(v, (dict, list, tuple, set)):
+                try:
+                    return json.dumps(v, ensure_ascii=False, sort_keys=True, default=str)
+                except Exception:
+                    return str(v)
+            try:
+                hash(v)
+                return v
+            except Exception:
+                return str(v)
+
         fact_type = fact.get("fact_type")
         metric = fact.get("metric")
         dataset = fact.get("dataset")
@@ -90,7 +105,16 @@ class AgentState:
         grain = time_range.get("grain")
         source = fact.get("source") if isinstance(fact.get("source"), dict) else {}
         block_id = source.get("block_id") or fact.get("source_block_id")
-        return (fact_type, metric, dataset, dimension, start, end, grain, block_id)
+        return (
+            _hashable(fact_type),
+            _hashable(metric),
+            _hashable(dataset),
+            _hashable(dimension),
+            _hashable(start),
+            _hashable(end),
+            _hashable(grain),
+            _hashable(block_id),
+        )
 
     def merge_facts(self, new_facts: object) -> None:
         if not isinstance(self.memory.facts, list):

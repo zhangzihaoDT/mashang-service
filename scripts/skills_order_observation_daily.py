@@ -35,6 +35,27 @@ BUSINESS_DEF_FILE = REPO_ROOT / "schema" / "business_definition.json"
 # 适配新数据集的 series 值：CM2->LS6, DM1->L6
 TARGET_MODELS = ["LS6", "L6", "LS8", "LS9"]
 WEBHOOK_URL = os.getenv("FS_WEBHOOK_URL")
+BITABLE_APP_TOKEN = os.getenv("BITABLE_APP_TOKEN")
+BITABLE_TABLE_ID = os.getenv("BITABLE_TABLE_ID")
+BITABLE_APP_ID = os.getenv("BITABLE_APP_ID") or os.getenv("FEISHU_APP_ID")
+BITABLE_APP_SECRET = os.getenv("BITABLE_APP_SECRET") or os.getenv("FEISHU_APP_SECRET")
+
+BITABLE_FIELD_DATE = os.getenv("BITABLE_FIELD_DATE") or "日期"
+BITABLE_FIELD_START_DATE = os.getenv("BITABLE_FIELD_START_DATE") or "开始日期"
+BITABLE_FIELD_END_DATE = os.getenv("BITABLE_FIELD_END_DATE") or "结束日期"
+BITABLE_FIELD_LOCK_TOTAL = os.getenv("BITABLE_FIELD_LOCK_TOTAL") or "锁单数"
+BITABLE_FIELD_INVOICE_TOTAL = os.getenv("BITABLE_FIELD_INVOICE_TOTAL") or "开票数"
+BITABLE_FIELD_INVOICE_USER_TOTAL = os.getenv("BITABLE_FIELD_INVOICE_USER_TOTAL") or "开票用户车数"
+BITABLE_FIELD_PRED_LOCK = os.getenv("BITABLE_FIELD_PRED_LOCK") or "预测锁单数"
+BITABLE_FIELD_ATTAINMENT_RATE = os.getenv("BITABLE_FIELD_ATTAINMENT_RATE") or "达成率"
+BITABLE_FIELD_IS_WARNING = os.getenv("BITABLE_FIELD_IS_WARNING") or "是否预警"
+BITABLE_FIELD_LOCK_DETAIL = os.getenv("BITABLE_FIELD_LOCK_DETAIL") or "锁单明细"
+BITABLE_FIELD_INVOICE_DETAIL = os.getenv("BITABLE_FIELD_INVOICE_DETAIL") or "开票明细"
+BITABLE_FIELD_GENERATED_AT = os.getenv("BITABLE_FIELD_GENERATED_AT") or "生成时间"
+
+_TENANT_TOKEN_CACHE = {"token": None, "expire_at": 0.0}
+_LAST_BITABLE_ERROR = ""
+_BITABLE_FIELDS_CACHE = {"loaded_at": 0.0, "types": {}}
 
 def parse_arguments():
     """解析命令行参数"""
@@ -431,6 +452,247 @@ def get_predicted_lock(assign_date_str: str) -> tuple[float | None, float | None
         return None, None, str(e)
 
 
+def _get_tenant_access_token() -> str | None:
+    if not BITABLE_APP_ID or not BITABLE_APP_SECRET:
+        return None
+    now = time.time()
+    token = _TENANT_TOKEN_CACHE.get("token")
+    expire_at = float(_TENANT_TOKEN_CACHE.get("expire_at") or 0.0)
+    if token and now + 60 < expire_at:
+        return str(token)
+    try:
+        resp = requests.post(
+            "https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal",
+            json={"app_id": BITABLE_APP_ID, "app_secret": BITABLE_APP_SECRET},
+            timeout=20,
+        )
+        resp.raise_for_status()
+        payload = resp.json() if resp.content else {}
+        if int(payload.get("code", -1)) != 0:
+            return None
+        t = payload.get("tenant_access_token")
+        if not t:
+            return None
+        expires_in = float(payload.get("expire") or payload.get("expires_in") or 0)
+        _TENANT_TOKEN_CACHE["token"] = t
+        _TENANT_TOKEN_CACHE["expire_at"] = now + max(expires_in, 0.0)
+        return str(t)
+    except Exception:
+        return None
+
+
+def _bitable_request(method: str, url: str, token: str, payload: dict | None = None) -> dict:
+    global _LAST_BITABLE_ERROR
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json; charset=utf-8"}
+    try:
+        r = requests.request(method, url, headers=headers, json=payload, timeout=30)
+        r.raise_for_status()
+        data = r.json() if r.content else {}
+        if isinstance(data, dict) and int(data.get("code", 0) or 0) != 0:
+            _LAST_BITABLE_ERROR = f"code={data.get('code')} msg={data.get('msg')}"
+        else:
+            _LAST_BITABLE_ERROR = ""
+        return data
+    except requests.HTTPError as e:
+        resp = getattr(e, "response", None)
+        body = ""
+        try:
+            body = (resp.text or "")[:800] if resp is not None else ""
+        except Exception:
+            body = ""
+        _LAST_BITABLE_ERROR = body or str(e)
+        raise
+
+
+def _bitable_find_record_id(app_token: str, table_id: str, token: str, date_key: str) -> str | None:
+    url = f"https://open.feishu.cn/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/records/search"
+    payload = {
+        "page_size": 10,
+        "filter": {
+            "conjunction": "and",
+            "conditions": [
+                {
+                    "field_name": BITABLE_FIELD_DATE,
+                    "operator": "is",
+                    "value": [date_key],
+                }
+            ],
+        },
+        "field_names": [BITABLE_FIELD_DATE],
+    }
+    data = _bitable_request("POST", url, token, payload)
+    records = ((data.get("data") or {}).get("items")) or []
+    if not records:
+        return None
+    rid = records[0].get("record_id")
+    return str(rid) if rid else None
+
+
+def _bitable_get_field_types(app_token: str, table_id: str, token: str) -> dict:
+    now = time.time()
+    cached = _BITABLE_FIELDS_CACHE.get("types")
+    loaded_at = float(_BITABLE_FIELDS_CACHE.get("loaded_at") or 0.0)
+    if isinstance(cached, dict) and cached and (now - loaded_at) < 600:
+        return cached
+
+    headers = {"Authorization": f"Bearer {token}"}
+    url = f"https://open.feishu.cn/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/fields"
+    page_token = None
+    out: dict = {}
+    for _ in range(10):
+        params = {}
+        if page_token:
+            params["page_token"] = page_token
+        r = requests.get(url, headers=headers, params=params, timeout=20)
+        r.raise_for_status()
+        payload = r.json() if r.content else {}
+        if int(payload.get("code", -1)) != 0:
+            break
+        data = payload.get("data") or {}
+        items = data.get("items") or []
+        for it in items:
+            name = it.get("field_name")
+            ftype = it.get("type")
+            if name:
+                out[str(name)] = ftype
+        if not data.get("has_more"):
+            break
+        page_token = data.get("page_token")
+        if not page_token:
+            break
+
+    if out:
+        _BITABLE_FIELDS_CACHE["types"] = out
+        _BITABLE_FIELDS_CACHE["loaded_at"] = now
+    return out
+
+
+def _to_bitable_datetime_ms(value) -> int | None:
+    if value is None:
+        return None
+    if isinstance(value, (int, float)):
+        v = float(value)
+        if v <= 0:
+            return None
+        if v < 10_000_000_000:
+            return int(v * 1000)
+        return int(v)
+    if isinstance(value, datetime):
+        return int(value.timestamp() * 1000)
+    try:
+        import datetime as _dt
+        if isinstance(value, _dt.date) and not isinstance(value, datetime):
+            dt = datetime(value.year, value.month, value.day, 0, 0, 0)
+            return int(dt.timestamp() * 1000)
+    except Exception:
+        pass
+    if isinstance(value, str):
+        s = value.strip()
+        if "~" in s:
+            s = s.split("~", 1)[0].strip()
+        for fmt in ("%Y-%m-%d %H:%M:%S", "%Y/%m/%d %H:%M:%S", "%Y-%m-%d", "%Y/%m/%d"):
+            try:
+                dt = datetime.strptime(s, fmt)
+                return int(dt.timestamp() * 1000)
+            except Exception:
+                continue
+    return None
+
+
+def _bitable_normalize_fields_for_write(fields: dict, field_types: dict) -> dict:
+    if not isinstance(fields, dict) or not fields:
+        return fields
+    if not isinstance(field_types, dict) or not field_types:
+        return fields
+    out = dict(fields)
+    for k, v in list(out.items()):
+        ftype = field_types.get(k)
+        if int(ftype or 0) == 5:
+            out[k] = _to_bitable_datetime_ms(v)
+    return out
+
+
+def upsert_bitable_observation(lock_stats, invoice_stats, pred_lock: float | None) -> bool:
+    global _LAST_BITABLE_ERROR
+    if not BITABLE_APP_TOKEN or not BITABLE_TABLE_ID:
+        return False
+    token = _get_tenant_access_token()
+    if not token:
+        _LAST_BITABLE_ERROR = "tenant_access_token 获取失败（请检查 BITABLE_APP_ID/BITABLE_APP_SECRET 或 FEISHU_APP_ID/FEISHU_APP_SECRET）"
+        return False
+
+    start_date = lock_stats["start_date"]
+    end_date = lock_stats["end_date"]
+    date_key = str(start_date) if start_date == end_date else f"{start_date}~{end_date}"
+
+    lock_model_details = []
+    for model, stats in (lock_stats.get("models") or {}).items():
+        count = stats.get("count", 0)
+        detail_parts = []
+        d = stats.get("details") or {}
+        for cap, cap_count in d.items():
+            cap_label = str(cap).replace("kwh", "kw")
+            detail_parts.append(f"{cap_label}：{cap_count}")
+        sd = stats.get("seat_details") or {}
+        if "五座" in sd:
+            detail_parts.append(f"五座：{sd['五座']}")
+        if "六座" in sd:
+            detail_parts.append(f"六座：{sd['六座']}")
+        detail_str = "｜" + "，".join(detail_parts) if detail_parts else ""
+        lock_model_details.append(f"- {model}: {count} 单{detail_str}")
+    lock_model_text = "\n".join(lock_model_details)
+
+    invoice_model_details = []
+    for model, info in (invoice_stats.get("models") or {}).items():
+        avg_price = float(info.get("avg_price") or 0)
+        price_str = f"{avg_price/10000:.1f}w" if avg_price > 0 else "N/A"
+        invoice_model_details.append(
+            f"- {model}: {info.get('count', 0)} ({info.get('user_car_count', 0)}) 台｜平均开票价格：{price_str}"
+        )
+    invoice_model_text = "\n".join(invoice_model_details)
+
+    attainment_rate = None
+    is_warning = False
+    if pred_lock is not None and pred_lock > 0:
+        attainment_rate = float(lock_stats.get("total", 0)) / float(pred_lock)
+        is_warning = attainment_rate < 0.8
+
+    fields = {
+        BITABLE_FIELD_DATE: date_key,
+        BITABLE_FIELD_START_DATE: str(start_date),
+        BITABLE_FIELD_END_DATE: str(end_date),
+        BITABLE_FIELD_LOCK_TOTAL: int(lock_stats.get("total", 0)),
+        BITABLE_FIELD_INVOICE_TOTAL: int(invoice_stats.get("total", 0)),
+        BITABLE_FIELD_INVOICE_USER_TOTAL: int(invoice_stats.get("total_user_car", 0)),
+        BITABLE_FIELD_PRED_LOCK: (None if pred_lock is None else float(pred_lock)),
+        BITABLE_FIELD_ATTAINMENT_RATE: attainment_rate,
+        BITABLE_FIELD_IS_WARNING: bool(is_warning),
+        BITABLE_FIELD_LOCK_DETAIL: lock_model_text,
+        BITABLE_FIELD_INVOICE_DETAIL: invoice_model_text,
+        BITABLE_FIELD_GENERATED_AT: datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    }
+    field_types = _bitable_get_field_types(BITABLE_APP_TOKEN, BITABLE_TABLE_ID, token)
+    if int(field_types.get(BITABLE_FIELD_DATE, 0) or 0) == 5 and "~" in str(fields.get(BITABLE_FIELD_DATE) or ""):
+        fields[BITABLE_FIELD_DATE] = str(start_date)
+    fields = _bitable_normalize_fields_for_write(fields, field_types)
+
+    try:
+        rid = _bitable_find_record_id(BITABLE_APP_TOKEN, BITABLE_TABLE_ID, token, date_key)
+        if rid:
+            url = f"https://open.feishu.cn/open-apis/bitable/v1/apps/{BITABLE_APP_TOKEN}/tables/{BITABLE_TABLE_ID}/records/batch_update"
+            payload = {"records": [{"record_id": rid, "fields": fields}]}
+            data = _bitable_request("POST", url, token, payload)
+            return int(data.get("code", -1)) == 0
+        url = f"https://open.feishu.cn/open-apis/bitable/v1/apps/{BITABLE_APP_TOKEN}/tables/{BITABLE_TABLE_ID}/records/batch_create"
+        payload = {"records": [{"fields": fields}]}
+        data = _bitable_request("POST", url, token, payload)
+        return int(data.get("code", -1)) == 0
+    except Exception as e:
+        if not _LAST_BITABLE_ERROR:
+            _LAST_BITABLE_ERROR = str(e)
+        return False
+
+
 def send_feishu_notification(lock_stats, invoice_stats, pred_lock=None):
     """发送飞书通知"""
     if not WEBHOOK_URL:
@@ -637,6 +899,12 @@ def main():
         if dry_run:
             print("🧪 dry-run: 已跳过飞书通知发送")
             return
+        bitable_ok = upsert_bitable_observation(lock_stats, invoice_stats, pred_lock)
+        if bitable_ok:
+            print("✅ 已写入多维表格记录")
+        elif BITABLE_APP_TOKEN and BITABLE_TABLE_ID:
+            msg = str(_LAST_BITABLE_ERROR or "").strip()
+            print("⚠️ 多维表格写入失败或未授权，已跳过" + (f"（{msg[:200]}）" if msg else ""))
         send_feishu_notification(lock_stats, invoice_stats, pred_lock)
 
 if __name__ == "__main__":

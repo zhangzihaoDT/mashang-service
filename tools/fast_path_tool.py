@@ -210,6 +210,12 @@ class FastPathTool:
         order_max_date = result.get("_order_max_date")
         config_updated = result.get("_config_updated", False)
 
+        q = str(user_query or "")
+        push_requested = (
+            any(k in q for k in ["推送", "发送", "通知"])
+            and not any(k in q for k in ["不推送", "不发送", "不通知", "dry-run", "dry run"])
+        )
+
         order_done = any(
             s["step"] == "order_data" and s["status"] == "done" for s in steps
         )
@@ -228,8 +234,11 @@ class FastPathTool:
         if success:
             steps.append({"step": "sync_observation_mtd", "status": "running"})
             try:
+                mtd_args = [sys.executable, str(SYNC_SCRIPT), "--mtd"]
+                if not push_requested:
+                    mtd_args.append("--dry-run")
                 r = subprocess.run(
-                    [sys.executable, str(SYNC_SCRIPT), "--mtd", "--dry-run"],
+                    mtd_args,
                     cwd=str(REPO_ROOT), capture_output=True, text=True, timeout=120,
                 )
                 steps[-1]["status"] = "done" if r.returncode == 0 else "failed"

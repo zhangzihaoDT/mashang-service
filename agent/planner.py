@@ -570,12 +570,15 @@ class PlanningAgent:
         has_today = any(k in q for k in ["今天", "今日", "当前日期"])
         if iso_week_hint and has_today:
             return {"type": "current_iso_week"}
+        has_push_intent = any(k in q for k in ["推送", "发送", "通知", "上报"])
         is_sync = "数据更新并同步" in q or "更新数据并同步" in q
         if not is_sync and "同步数据" in q:
             is_sync = True
         is_update = any(k in q for k in ["更新数据", "刷新数据", "数据更新", "刷新数据集", "更新订单", "更新选配", "全部更新", "刷新全部", "更新归属"])
         if not is_update and not is_sync and (q.startswith("更新") or q.startswith("刷新")):
             is_update = True
+        if not is_sync and has_push_intent and is_update:
+            is_sync = True
         if is_sync or is_update:
             scope = "all"
             if "订单" in q or "order" in q.lower():
