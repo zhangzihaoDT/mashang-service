@@ -99,6 +99,16 @@
         "required": ["df", "start", "end"],
         "optional": []
       }
+    },
+    "atp": {
+      "name": "开票均价分析",
+      "intent": "atp",
+      "dataset": "order_data",
+      "description": "基于 invoice_amount 统计在窗口内已锁单的用户车的平均开票价格、总金额及按车型分组明细",
+      "parameters": {
+        "required": ["df", "start", "end"],
+        "optional": []
+      }
     }
   },
   "intent_map": {
@@ -161,6 +171,12 @@
       "metric_names": ["预测锁单数"],
       "dataset": "assign_data",
       "query_hints": ["预测锁单"]
+    },
+    "atp": {
+      "operator": "atp",
+      "metric_names": ["开票均价", "ATP", "平均开票价格", "平均售价"],
+      "dataset": "order_data",
+      "query_hints": ["开票均价", "ATP", "平均开票", "平均售价", "invoice_amount"]
     }
   }
 }

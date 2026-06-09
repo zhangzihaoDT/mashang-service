@@ -12,11 +12,12 @@ from operators.store_avg_lock import run_store_avg_lock_operator
 from operators.assign_conversion import run_assign_conversion_operator
 from operators.weighted_lead_conversion import run_weighted_lead_conversion_operator
 from operators.mature_lock_prediction import run_mature_lock_prediction_operator
+from operators.atp_analysis import run_atp_operator
 from operators.series_group_logic import apply_series_group_logic
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 _REGISTRY_FILE = REPO_ROOT / "operators" / "registry.json"
-_CATALOG_FILE = REPO_ROOT / "operators" / "index_summary.json"
+_CATALOG_FILE = REPO_ROOT / "operators" / "operator_catalog.json"
 
 
 def _load_registry() -> dict:
@@ -163,6 +164,9 @@ def _resolve_operator_params(intent: str, plan: dict, user_query: str, query_too
 
     if intent == "mature_lock_prediction":
         return run_mature_lock_prediction_operator(df=df, start=str(start), end=str(end))
+
+    if intent == "atp":
+        return run_atp_operator(df=df, start=str(start), end=str(end))
 
     return None
 

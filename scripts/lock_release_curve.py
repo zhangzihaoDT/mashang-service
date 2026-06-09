@@ -6,7 +6,7 @@ Lock Release Curve (锁单释放曲线独立研究)
 从 order_data 中提取每批线索(按分配日 cohort)的逐日锁单释放模式，
 分析释放曲线的形态、稳定性、趋势变化，并尝试曲线拟合。
 
-输出: lock_release_curve.html (交互式报告)
+输出: reports/lock_release_curve.html (交互式报告)
 
 计算逻辑详见: lock_release_analysis.md
 结构速览:
@@ -34,7 +34,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
 ORDER_PARQUET = REPO_ROOT / "dataset" / "order_data.parquet"
-OUTPUT_HTML = REPO_ROOT / "scripts" / "lock_release_curve.html"
+OUTPUT_HTML = REPO_ROOT / "scripts" / "reports" / "lock_release_curve.html"
 MAX_DAY = 60  # 分析窗口：分配后 60 天
 
 print("=" * 60)

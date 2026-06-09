@@ -28,6 +28,7 @@ _INTENT_EVIDENCE_HINTS: dict[str, dict] = {
     "assign_conversion": {"fact_types": ["metric_value", "dimension_breakdown"], "result_type": "operator"},
     "weighted_lead_conversion": {"fact_types": ["metric_value"], "result_type": "operator"},
     "mature_lock_prediction": {"fact_types": ["metric_value"], "result_type": "operator"},
+    "atp": {"fact_types": ["metric_value", "dimension_breakdown"], "result_type": "operator"},
 }
 
 
