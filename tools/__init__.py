@@ -6,3 +6,4 @@ from .statistics_tool import StatisticsTool, STATISTICS_TOOL_SCHEMA
 from .fast_path_tool import FastPathTool, FAST_PATH_TOOL_SCHEMA
 from .composition_tool import CompositionTool
 from .multitable_metric_tool import MultiTableMetricTool
+from .report_generator import ReportGenerator, REPORT_GENERATOR_SCHEMA

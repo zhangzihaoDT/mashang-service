@@ -570,6 +570,14 @@ class PlanningAgent:
         has_today = any(k in q for k in ["今天", "今日", "当前日期"])
         if iso_week_hint and has_today:
             return {"type": "current_iso_week"}
+        q_nospace = q.replace(" ", "")
+        has_report_intent = any(k in q_nospace for k in [
+            "输出报告", "输出html", "输出HTML", "导出报告", "生成报告",
+            "产出一份报告", "报告导出", "整理为报告", "整理报告",
+            "报告生成", "制作报告", "报告输出",
+        ])
+        if has_report_intent:
+            return {"type": "generate_report"}
         has_push_intent = any(k in q for k in ["推送", "发送", "通知", "上报"])
         is_sync = "数据更新并同步" in q or "更新数据并同步" in q
         if not is_sync and "同步数据" in q:
@@ -2067,7 +2075,7 @@ class PlanningAgent:
             plan["fast_path"] = {}
         elif isinstance(fast_path, dict):
             fp_type = fast_path.get("type")
-            if fp_type not in {"numeric_ratio", "current_iso_week", "small_talk_contextual", "data_update", "data_sync"}:
+            if fp_type not in {"numeric_ratio", "current_iso_week", "small_talk_contextual", "data_update", "data_sync", "generate_report"}:
                 plan["fast_path"] = {}
             elif fp_type == "numeric_ratio":
                 try:
@@ -2290,25 +2298,35 @@ class PlanningAgent:
             parts = [merged, *rest]
         fp = self._parse_fast_path_query(user_query)
         if isinstance(fp, dict) and fp.get("type"):
-            self.last_planning_error = ""
-            return [
-                self._normalize_plan(
-                    {
-                        "question": user_query,
-                        "dataset": "order_data",
-                        "metric": {"field": "order_number", "agg": "count", "alias": "count", "business_name": "订单计数"},
-                        "time": {
-                            "field": "order_create_time",
-                            "start": datetime.date.today().isoformat(),
-                            "end": (datetime.date.today() + datetime.timedelta(days=1)).isoformat(),
-                        },
-                        "dimensions": [],
-                        "filters": [],
-                        "comparison": {"type": "none"},
-                        "fast_path": fp,
+            fp_type = fp.get("type")
+            if fp_type == "generate_report":
+                q_combined = (user_query or "").replace(" ", "")
+                has_analysis_intent = any(k in q_combined for k in [
+                    "锁单", "交付", "开票", "门店", "线索", "试驾", "在营", "订单",
+                    "占比", "趋势", "排名", "对比", "同比", "环比", "分布",
+                ])
+                if has_analysis_intent:
+                    fp = None
+            if isinstance(fp, dict) and fp.get("type"):
+                self.last_planning_error = ""
+                base = {
+                    "question": user_query,
+                    "dataset": "order_data",
+                    "metric": {"field": "order_number", "agg": "count", "alias": "count", "business_name": "订单计数"},
+                    "dimensions": [],
+                    "filters": [],
+                    "comparison": {"type": "none"},
+                    "fast_path": fp,
+                }
+                if fp_type == "generate_report":
+                    base["time"] = {}
+                else:
+                    base["time"] = {
+                        "field": "order_create_time",
+                        "start": datetime.date.today().isoformat(),
+                        "end": (datetime.date.today() + datetime.timedelta(days=1)).isoformat(),
                     }
-                )
-            ]
+                return [self._normalize_plan(base)]
         for part in parts:
             if self._should_sales_clarify(part):
                 return [{"question": part, "clarification": self._sales_clarification(part)}]
@@ -2782,7 +2800,20 @@ class PlanningAgent:
 
         fast_path = self._parse_fast_path_query(user_query)
         if fast_path:
-            plan["fast_path"] = fast_path
+            fp_type = fast_path.get("type")
+            if fp_type == "generate_report":
+                q_combined = (user_query or "").replace(" ", "")
+                if any(k in q_combined for k in [
+                    "锁单", "交付", "开票", "门店", "线索", "试驾", "在营", "订单",
+                    "占比", "趋势", "排名", "对比", "同比", "环比", "分布",
+                ]) and not any(k in q_combined for k in [
+                    "整理为报告", "整理报告", "报告生成", "制作报告", "报告输出",
+                ]):
+                    fast_path = None
+            if fast_path:
+                plan["fast_path"] = fast_path
+            elif "fast_path" in plan:
+                del plan["fast_path"]
         elif "fast_path" not in plan:
             plan["fast_path"] = {}
 
@@ -2791,6 +2822,18 @@ class PlanningAgent:
             if not time.get("start") or not time.get("end"):
                 time["start"] = time.get("start") or default_start
                 time["end"] = time.get("end") or default_end
+
+        q_ns = (user_query or "").replace(" ", "")
+        if "增程" in q_ns and "纯电" in q_ns:
+            dims = plan.get("dimensions")
+            if isinstance(dims, list):
+                plan["dimensions"] = ["product_type" if d == "product_name" else d for d in dims]
+            ai = plan.get("analysis_intent")
+            if isinstance(ai, dict) and ai.get("breakdown_dimension") == "product_name":
+                ai["breakdown_dimension"] = "product_type"
+            derived = plan.setdefault("derived_dimensions", [])
+            if not any(isinstance(dd, dict) and dd.get("name") == "product_type" for dd in derived):
+                derived.append({"name": "product_type", "source_field": "product_name", "type": "product_type"})
 
         return self._normalize_plan(plan)
 

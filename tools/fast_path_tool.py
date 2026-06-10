@@ -3,6 +3,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from .report_generator import ReportGenerator
+
 REPO_ROOT = Path(__file__).resolve().parents[1]
 UPDATER_DIR = REPO_ROOT / "dataset" / "updater"
 UPDATER_SCRIPT = UPDATER_DIR / "update_all_datasets.py"
@@ -74,6 +76,54 @@ class FastPathTool:
         if kind == "data_sync":
             scope = (config.get("scope") or "all").strip().lower()
             return self._run_data_sync(scope, user_query)
+        if kind == "generate_report":
+            rg = ReportGenerator()
+            logs_dir = Path(__file__).resolve().parents[1] / "logs"
+            saved_path = logs_dir / "last_result.parquet"
+            ctx = memory_context if isinstance(memory_context, dict) else {}
+            raw_facts = ctx.get("facts")
+            facts = list(raw_facts) if isinstance(raw_facts, list) else []
+
+            if saved_path.exists():
+                try:
+                    import pandas as pd
+                    df = pd.read_parquet(saved_path)
+                    title = "完整数据报告"
+                    caption = f"共 {len(df)} 行 | 来源: last_result.parquet"
+                    out_path = rg.generate_from_dataframe(df, title=title, caption=caption, save=True)
+                    return {
+                        "type": "fast_path",
+                        "kind": "generate_report",
+                        "report_path": out_path,
+                        "answer": f"报告已生成: {out_path}",
+                        "question": str(user_query or ""),
+                    }
+                except Exception as e:
+                    return {
+                        "type": "fast_path",
+                        "kind": "generate_report",
+                        "report_path": "",
+                        "answer": f"读取保存的数据失败: {e}",
+                        "question": str(user_query or ""),
+                    }
+
+            if facts:
+                out_path = rg.generate_from_facts(facts, title="数据分析报告", save=True)
+                return {
+                    "type": "fast_path",
+                    "kind": "generate_report",
+                    "report_path": out_path,
+                    "answer": f"报告已生成(基于内存事实): {out_path}",
+                    "question": str(user_query or ""),
+                }
+
+            return {
+                "type": "fast_path",
+                "kind": "generate_report",
+                "report_path": "",
+                "answer": "暂无可输出的数据，请先执行分析查询。",
+                "question": str(user_query or ""),
+            }
         if kind != "numeric_ratio":
             return {"type": "fast_path", "error": "unsupported_type", "message": f"不支持的 fast_path 类型: {kind}"}
         try:

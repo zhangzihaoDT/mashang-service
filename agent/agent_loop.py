@@ -4,6 +4,7 @@ import re
 import sys
 import datetime
 import time
+from pathlib import Path
 
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -475,6 +476,7 @@ def run_main_agent(user_query: str) -> str:
                         "goal_time_window": goal_time_window,
                         "goal_time_window_confidence": goal_time_window_confidence,
                         "short_term_memory": stm,
+                        "structured_blocks": state.results.structured_blocks,
                     },
                 )
                 status = step_result.get("status")
@@ -605,6 +607,19 @@ def run_main_agent(user_query: str) -> str:
             else:
                 state.add_step(action, "未知 action，终止。")
                 state.loop.done = True
+
+        # Save the last DataFrame result for cross-session report generation
+        try:
+            import pandas as pd
+            for blk in (state.results.structured_blocks or []):
+                r = getattr(blk, "result", None)
+                if isinstance(r, pd.DataFrame) and not r.empty:
+                    save_dir = Path(__file__).resolve().parents[1] / "logs"
+                    save_dir.mkdir(parents=True, exist_ok=True)
+                    r.to_parquet(save_dir / "last_result.parquet", index=False)
+                    break
+        except Exception:
+            pass
 
         if not state.results.blocks:
             fallback = "未产出可用查询结果。"

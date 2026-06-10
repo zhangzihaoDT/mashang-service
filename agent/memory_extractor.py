@@ -341,34 +341,36 @@ def _build_column_based_facts(block, result, plan: dict, time_range: dict | None
         return facts
 
     n = len(rows)
+    dim_col = (row_dim_cols[0] if row_dim_cols else dim_cols[0]) if has_dim else None
+    if has_time and has_dim and dim_col:
+        n_effective = len(set(r.get(dim_col) for r in rows if r.get(dim_col) is not None))
+    else:
+        n_effective = n
 
     # ── share_summary ────────────────────────────────────────────────
     if has_dim and has_share and _should("share_summary"):
-        dim_col = row_dim_cols[0] if row_dim_cols else dim_cols[0]
         share_col = share_cols[0]
         top_row = rows[0]
         top_label = str(top_row.get(dim_col, ""))
         top_share = top_row.get(share_col)
-        content = f"按{dim_col}拆解{metric}占比，共{n}个分组"
+        content = f"按{dim_col}拆解{metric}占比，共{n_effective}个分组"
         if top_label and top_share is not None:
             content += f"，最高={top_label}({top_share:.1%})"
-        meta = {"dimension": dim_col, "metric": metric, "row_count": n}
+        meta = {"dimension": dim_col, "metric": metric, "row_count": n_effective}
         if isinstance(result, dict) and result.get("total") is not None:
             meta["total"] = result["total"]
         facts.append(_make_fact(block_id, "share_summary", content, meta, source, "descriptive_share"))
 
     # ── dimension_breakdown ──────────────────────────────────────────
     if has_dim and has_metric and _should("dimension_breakdown"):
-        dim_col = row_dim_cols[0] if row_dim_cols else dim_cols[0]
         metric_col = row_metric_cols[0] if row_metric_cols else metric_cols[0]
-        content = f"结果按{dim_col}拆解{metric}，共{n}个分组"
+        content = f"结果按{dim_col}拆解{metric}，共{n_effective}个分组"
         facts.append(_make_fact(block_id, "dimension_breakdown", content, {
-            "dimension_fields": [dim_col], "metric_fields": [metric_col], "row_count": n,
+            "dimension_fields": [dim_col], "metric_fields": [metric_col], "row_count": n_effective,
         }, source, "descriptive_breakdown"))
 
     # ── share_summary (deterministic fallback, computed from dimension values) ──
     if has_dim and has_metric and not has_share and _should("share_summary") and rows:
-        dim_col = row_dim_cols[0] if row_dim_cols else dim_cols[0]
         metric_col = row_metric_cols[0] if row_metric_cols else metric_cols[0]
         numeric_values = [r.get(metric_col) for r in rows if isinstance(r.get(metric_col), (int, float))]
         if numeric_values:
@@ -377,26 +379,25 @@ def _build_column_based_facts(block, result, plan: dict, time_range: dict | None
             top_label = str(top_row.get(dim_col, ""))
             top_val = top_row.get(metric_col, 0)
             top_share = top_val / total if total > 0 else 0
-            content = f"按{dim_col}拆解{metric}占比，共{n}个分组"
+            content = f"按{dim_col}拆解{metric}占比，共{n_effective}个分组"
             if top_label and total > 0:
                 content += f"，最高={top_label}({top_share:.1%})"
-            meta = {"dimension": dim_col, "metric": metric, "row_count": n, "total": total}
+            meta = {"dimension": dim_col, "metric": metric, "row_count": n_effective, "total": total}
             facts.append(_make_fact(block_id, "share_summary", content, meta, source, "descriptive_share"))
 
     # ── ranking_result ───────────────────────────────────────────────
     has_topk = bool(result.get("top_k")) if isinstance(result, dict) else False
-    if has_dim and has_metric and (has_rank or has_topk or n >= 3) and _should("ranking_result"):
-        dim_col = row_dim_cols[0] if row_dim_cols else dim_cols[0]
+    if has_dim and has_metric and (has_rank or has_topk or n_effective >= 3) and _should("ranking_result"):
         metric_col = row_metric_cols[0] if row_metric_cols else metric_cols[0]
         top_k = result.get("top_k") if isinstance(result, dict) else None
-        top_n = top_k or n
+        top_n = top_k or n_effective
         first_label = str(rows[0].get(dim_col, ""))
         first_val = rows[0].get(metric_col)
         content = f"按{metric_col}排名，TOP{top_n}"
         if first_label and first_val is not None:
             content += f"：第1名={first_label}({first_val})"
         facts.append(_make_fact(block_id, "ranking_result", content, {
-            "rank_field": dim_col, "top_k": top_n, "row_count": n,
+            "rank_field": dim_col, "top_k": top_n, "row_count": n_effective,
         }, source, "descriptive_ranking"))
 
     # ── time_grouped_metric ──────────────────────────────────────────
@@ -411,12 +412,13 @@ def _build_column_based_facts(block, result, plan: dict, time_range: dict | None
         hints_grain = declared_hints.get("grain") if isinstance(declared_hints, dict) else None
         if hints_grain:
             grain = hints_grain
-        content = f"按{grain}统计{metric}，共{n}个周期"
+        n_periods = len(set(r.get(time_col) for r in rows if r.get(time_col) is not None)) if has_time else n
+        content = f"按{grain}统计{metric}，共{n_periods}个周期"
         tr = dict(time_range) if time_range else None
         if tr:
             tr["grain"] = grain
         facts.append(_make_fact(block_id, "time_grouped_metric", content, {
-            "metric": metric, "grain": grain, "period_count": n, "time_range": tr,
+            "metric": metric, "grain": grain, "period_count": n_periods, "time_range": tr,
         }, source, "descriptive_time_series"))
 
     # ── metric_value ──────────────────────────────────────────────────
@@ -856,6 +858,7 @@ _FALLBACK_HINTS: dict[str, dict] = {
 
 _BLOCK_HANDLERS = {
     "trend_summary": _build_trend_summary_facts,
+    "dimension_share_trend": _build_trend_summary_facts,
     "contribution_summary": _build_contribution_summary_facts,
     "category_share": _build_share_breakdown_facts,
     "province_topk_share": _build_share_breakdown_facts,

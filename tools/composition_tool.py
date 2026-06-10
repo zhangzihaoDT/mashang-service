@@ -86,6 +86,9 @@ class CompositionTool:
             "dimensions": effective_dims,
             "filters": list(filters),
         }
+        original_derived = plan.get("derived_dimensions")
+        if original_derived:
+            query_plan["derived_dimensions"] = list(original_derived)
         if time_field and time_start and time_end:
             query_plan["filters"].append({"field": time_field, "op": ">=", "value": time_start})
             query_plan["filters"].append({"field": time_field, "op": "<", "value": time_end})

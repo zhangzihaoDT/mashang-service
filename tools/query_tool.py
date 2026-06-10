@@ -360,6 +360,23 @@ class QueryTool:
             elif op == "not matches":
                 df = df[~df[field].astype(str).str.contains(str(value), na=False, regex=True)]
 
+        derived_dimensions = plan.get("derived_dimensions", [])
+        if isinstance(derived_dimensions, list):
+            for dd in derived_dimensions:
+                name = dd.get("name")
+                source = dd.get("source_field")
+                dtype = dd.get("type")
+                if name and source and source in df.columns:
+                    if dtype == "product_type":
+                        ptype_logic = self._business_definition.get("product_type_logic", {})
+                        reev_rule = ptype_logic.get("增程", "")
+                        like_tokens = re.findall(r"'%([^']+)%'", reev_rule)
+                        if like_tokens:
+                            pattern = "|".join(re.escape(t) for t in like_tokens)
+                            is_reev = df[source].astype(str).str.contains(pattern, na=False, regex=True)
+                            df[name] = "纯电"
+                            df.loc[is_reev, name] = "增程"
+
         metrics = plan.get("metrics", [])
 
         result_df = df
