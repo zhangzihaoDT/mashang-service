@@ -837,6 +837,7 @@ def _build_contribution_summary_facts(block, result: dict, plan: dict, time_rang
 # Fallback evidence_hints for block_types when not embedded in result dict
 _FALLBACK_HINTS: dict[str, dict] = {
     "trend_summary": {"fact_types": ["trend_summary", "time_grouped_metric"]},
+    "composition": {"fact_types": ["dimension_breakdown", "share_summary", "ranking_result"]},
     "daily_percentile_rank": {"fact_types": ["metric_value", "distribution_summary", "time_grouped_metric"]},
     "weekend_percentile_rank": {"fact_types": ["metric_value", "distribution_summary", "time_grouped_metric"]},
     "weekday_percentile_rank": {"fact_types": ["metric_value", "distribution_summary", "time_grouped_metric"]},
@@ -850,6 +851,8 @@ _FALLBACK_HINTS: dict[str, dict] = {
     "city_tier_distribution": {"fact_types": ["share_summary", "dimension_breakdown"]},
     "age_cohort_distribution": {"fact_types": ["share_summary", "dimension_breakdown"]},
     "contribution_summary": {"fact_types": ["contribution_summary"]},
+    "dimension_share_trend": {"fact_types": ["trend_summary", "time_grouped_metric", "share_summary", "dimension_breakdown"]},
+    "share_breakdown": {"fact_types": ["share_summary", "dimension_breakdown", "ranking_result"]},
     "yoy": {"fact_types": ["comparison_result"], "comparison_type": "yoy"},
     "wow": {"fact_types": ["comparison_result"], "comparison_type": "wow"},
     "dod": {"fact_types": ["comparison_result"], "comparison_type": "dod"},

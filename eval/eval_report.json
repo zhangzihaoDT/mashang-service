@@ -1,0 +1,131 @@
+{
+  "total": 5,
+  "passed": 4,
+  "failed": 1,
+  "pass_rate": 0.8,
+  "hard_pass": 1,
+  "soft_pass": 3,
+  "soft_fail": 0,
+  "hard_failed": 1,
+  "timeout_count": 0,
+  "results": [
+    {
+      "case_id": "ded8be1e677b",
+      "question": "近 10 日,LS6分车型锁单数和占比,输出 html 报告",
+      "passed": true,
+      "status": "soft_pass",
+      "checks": {
+        "no_forbidden_exit_reason": true,
+        "intent_match": true,
+        "contract_match": true,
+        "min_structured_blocks": false,
+        "fact_types_any": true
+      },
+      "actual": {
+        "exit_reason": "dimension_share_trend_found",
+        "eval_intent": "dimension_share_trend",
+        "contract_matched": true,
+        "fact_types": [
+          "trend_summary",
+          "share_summary",
+          "dimension_breakdown",
+          "time_grouped_metric"
+        ],
+        "structured_block_count": 2
+      },
+      "error": null,
+      "warning": "structured_block_count_below_expected_but_has_evidence"
+    },
+    {
+      "case_id": "6afdb1bb3979",
+      "question": "门店线索当日锁单率",
+      "passed": false,
+      "status": "failed",
+      "checks": {
+        "no_forbidden_exit_reason": true,
+        "intent_match": false,
+        "contract_match": false,
+        "min_structured_blocks": false,
+        "fact_types_any": false
+      },
+      "actual": {
+        "exit_reason": "default_has_result_and_satisfies_goal",
+        "eval_intent": "assign_conversion",
+        "contract_matched": false,
+        "fact_types": [
+          "dimension_breakdown",
+          "metric_value"
+        ],
+        "structured_block_count": 1
+      },
+      "error": null
+    },
+    {
+      "case_id": "a36b29ac4d05",
+      "question": "将查询结果整理为报告",
+      "passed": true,
+      "status": "soft_pass",
+      "checks": {
+        "no_forbidden_exit_reason": true,
+        "intent_match": true,
+        "contract_match": true,
+        "min_structured_blocks": true,
+        "fact_types_any": true
+      },
+      "actual": {
+        "exit_reason": "uncertain_finish",
+        "eval_intent": "unknown",
+        "contract_matched": false,
+        "fact_types": [],
+        "structured_block_count": 1
+      },
+      "error": null,
+      "warning": "passed_but_contract_not_matched"
+    },
+    {
+      "case_id": "d589289e56ae",
+      "question": "近 10 日 LS8 分车型锁单数",
+      "passed": true,
+      "status": "hard_pass",
+      "checks": {
+        "no_forbidden_exit_reason": true,
+        "intent_match": true,
+        "contract_match": true,
+        "min_structured_blocks": true,
+        "fact_types_any": true
+      },
+      "actual": {
+        "exit_reason": "stall_detected",
+        "eval_intent": "composition",
+        "contract_matched": true,
+        "fact_types": [],
+        "structured_block_count": 3
+      },
+      "error": null
+    },
+    {
+      "case_id": "dd235bc6b5fe",
+      "question": "近 10 日LS8 留存小订数趋势?",
+      "passed": true,
+      "status": "soft_pass",
+      "checks": {
+        "no_forbidden_exit_reason": true,
+        "intent_match": true,
+        "contract_match": true,
+        "min_structured_blocks": true,
+        "fact_types_any": true
+      },
+      "actual": {
+        "exit_reason": "uncertain_finish",
+        "eval_intent": "retained_intention",
+        "contract_matched": false,
+        "fact_types": [
+          "metric_value"
+        ],
+        "structured_block_count": 1
+      },
+      "error": null,
+      "warning": "passed_but_contract_not_matched"
+    }
+  ]
+}

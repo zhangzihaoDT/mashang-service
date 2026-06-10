@@ -632,6 +632,10 @@ class PlanningAgent:
         r'(LS\d[\w\u4e00-\u9fff\+]*(?:\s+[\w\u4e00-\u9fff+]+)*?(?:Max\+?|Pro|Ultra|标准|长续|奢享|科技|大五座|大六座|豪华|性能|续航|光年)(?:\s+[\w\u4e00-\u9fff+]+)*)'
     )
 
+    _RE_FALLBACK_SEPARATOR = re.compile(
+        r'[的之]|(?:锁单|交付|订单|销量|试驾|数量|金额|趋势|对比|分析|统计|数据|近\d+[日年月周]|[\d,，]+)'
+    )
+
     @staticmethod
     def _infer_product_name_token(user_query: str) -> str | None:
         q = (user_query or "").strip()
@@ -643,6 +647,40 @@ class PlanningAgent:
         m = PlanningAgent._RE_PRODUCT_NAME_NO_PREFIX.search(q)
         if m:
             return m.group(1).strip()
+
+        return PlanningAgent._infer_product_name_fallback(q)
+
+    @staticmethod
+    def _infer_product_name_fallback(user_query: str) -> str | None:
+        series_tokens = PlanningAgent._infer_series_tokens(user_query)
+        if not series_tokens:
+            return None
+
+        q = user_query or ""
+        for st in series_tokens:
+            idx = q.upper().find(st)
+            if idx < 0:
+                continue
+            after = q[idx + len(st):].strip()
+            after = re.sub(r'^[\s,，、\-_]+', '', after)
+            if not after:
+                continue
+
+            sep_match = PlanningAgent._RE_FALLBACK_SEPARATOR.search(after)
+            if sep_match:
+                candidate = after[:sep_match.start()].strip()
+            else:
+                candidate = after.strip()
+
+            if not candidate or len(candidate) < 2:
+                continue
+
+            chinese_count = sum(1 for c in candidate if '\u4e00' <= c <= '\u9fff')
+            if chinese_count < 2 or chinese_count < len(candidate):
+                continue
+
+            return candidate
+
         return None
 
     @staticmethod

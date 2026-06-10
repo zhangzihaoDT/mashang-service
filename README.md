@@ -14,43 +14,58 @@
   ↓
 入口层（main.py / feishu_bot.py）
   ↓
-Agent Loop（agent/agent_loop.py）
-  - 读取 State（question / loop / planning / results / memory / final）
-  - 决定下一步 action：run_dsl 或 finish（Evidence-driven Runtime Decision）
-  - 最多循环 5 步，避免重复查询
-  ↓
-PlanningAgent（agent/planner.py）
-  - 将自然语言问题转成 plan / clarification
-  - 产出 dataset / metric / time / filters / dimensions / comparison / statistics / fast_path
-  ↓
-Tool Router（agent/tool_router.py，确定性路由与执行）
-  - Fast Path：纯计算 / 闲聊 / ISO 周数等轻量直算
-  - Operators：强口径固定算子（避免指标口径漂移）
-  - Composition：占比/构成/份额高频 BI 专用工具（周/月/日分组占比）
-  - MultiTableMetric：跨表配置渗透率/分布分析（order_data ⋈ config_attribute）
-  - Query / Comparison / Statistics：通用 DSL 执行与统计后处理
-  ↓
-Structured Result Blocks（结构化执行结果）
-  - legacy blocks：LLM-readable 文本块（用于总结）
-  - structured_blocks：machine-readable 结构化块（用于可追溯与规则判断）
-  - 回写到 Agent State.results，供下一轮 loop 继续决策
-  ↓
-Fact Extraction（agent/memory_extractor.py）
-  - 从 structured_blocks 抽取/生成 Normalized Facts（每条 fact 带 source.block_id）
-  - 信息不足写入 missing_info（而不是编造）
-  ↓
-Evidence Contract（agent/runtime_decision.py）
-  - 不同分析意图需要的证据集合（required_fact_types）
-  - 例如 diagnosis 必须满足 trend_summary + contribution_summary
-  ↓
-Runtime Decision（agent/runtime_decision.py）
-  - 基于 Evidence Contract + Facts 决定继续 run_dsl 或 finish
-  - result_satisfies_goal：检查结果列是否满足用户问题所需（时间粒度、拆解维度、占比列等）
-  - 不满足时自动生成 repair query 并重试（最多 2 次 repair 后强制 finish）
-  ↓
+┌─ Agent Loop（agent/agent_loop.py）──────────────────────────────────┐
+│  读取 State（question / loop / planning / results / memory / final） │
+│  最多循环 5 步，避免重复查询                                         │
+│                                                                     │
+│  每轮循环：                                                         │
+│  ┌─ Runtime Decision（runtime_decision.py）─────────────────────┐   │
+│  │  evaluate_state_readiness() → 规则优先，决定 finish / run_dsl │   │
+│  │  ├─ Evidence Contract：按 intent 检查 required_fact_types    │   │
+│  │  ├─ Stall 熔断：同 missing_facts 连续 3 次 → force-finish   │   │
+│  │  ├─ Repair 检测：result_satisfies_goal 不满足时生成 repair   │   │
+│  │  │  query 重试（最多 2 次 repair 后强制 finish）            │   │
+│  │  └─ LLM Fallback：contract 无匹配时由 LLM 决策下一步         │   │
+│  └──────────────────────────────────────────────────────────────┘   │
+│       │ finish → 跳转 Answer Summarization                          │
+│       │ run_dsl → 继续                                              │
+│       ▼                                                             │
+│  ┌─ run_dsl_step（tool_router.py）──────────────────────────────┐   │
+│  │  ① PlanningAgent（planner.py）                               │   │
+│  │    - NL → plan / clarification                               │   │
+│  │    - 产出 dataset/metric/time/filters/dimensions/...         │   │
+│  │  ② Plan 指纹去重                                             │   │
+│  │    - 检测重复 plan，fallback 到规则规划                       │   │
+│  │  ③ Goal Time Window 钳位                                     │   │
+│  │    - 将计划时间窗对齐到预推断的目标时间窗（high/medium 置信度）│   │
+│  │  ④ Clarification 拦截                                        │   │
+│  │    - planner 产出 clarification_required → 回问用户          │   │
+│  │  ⑤ Tool Router 确定性执行                                    │   │
+│  │    - Fast Path：纯计算/闲聊/ISO 周数等轻量直算               │   │
+│  │    - Operators：强口径固定算子                               │   │
+│  │    - Composition：占比/构成/份额（周/月/日分组占比）          │   │
+│  │    - MultiTableMetric：跨表配置渗透率/分布分析               │   │
+│  │    - Query / Comparison / Statistics：通用 DSL 执行与后处理  │   │
+│  │  ⑥ Short-term Memory 缓存                                    │   │
+│  │    - 算子结果写缓存（TTL=5 轮），同轮次避免重复执行           │   │
+│  └──────────────────────────────────────────────────────────────┘   │
+│       ↓                                                             │
+│  Structured Result Blocks（结构化执行结果）                          │
+│    - legacy blocks：LLM-readable 文本块（用于总结）                 │
+│    - structured_blocks：machine-readable 块（用于可追溯与规则判断）│
+│    - 回写到 Agent State.results                                    │
+│       ↓                                                             │
+│  Fact Extraction（agent/memory_extractor.py）                       │
+│    - 从 structured_blocks 抽取/生成 Normalized Facts               │
+│    - 信息不足写入 missing_info（而不是编造）                        │
+│       ↓                                                             │
+│  ── 回到本轮循环开头 → Runtime Decision 再次评估 ──               │
+└─────────────────────────────────────────────────────────────────────┘
+       │ finish
+       ▼
 Answer / Summarization
-  - 信息不足：回到 Agent Loop 继续 run_dsl
   - 信息充分：生成 grounded summary / 最终自然语言答案
+  - 信息不足（repair/stall 超限）：返回已有结果并说明
   ↓
 Agent 返回
   - 命令行打印答案
@@ -66,11 +81,9 @@ Agent 返回
 
 ```text
 input（用户提问）
-  -> Agent Loop 判断要不要查
-  -> PlanningAgent 生成 DSL
-  -> Tool Router 执行工具
-  -> 得到结构化结果
-  -> Agent 总结
+  -> Agent Loop 判断要不要查（Runtime Decision 规则优先）
+  -> 要查：PlanningAgent 生成 DSL → 工具执行 → 提取 Facts → 回 Loop 继续判断
+  -> 够了：Agent 总结
   -> output（Agent 返回）
 ```
 
@@ -109,7 +122,11 @@ input（用户提问）
   "statistics": {
     "type": "monthly_mean",
     "time_field": "lock_time",
-    "value_metric": {"field": "order_number", "agg": "count", "alias": "锁单量"}
+    "value_metric": {
+      "field": "order_number",
+      "agg": "count",
+      "alias": "锁单量"
+    }
   }
 }
 ```
@@ -132,11 +149,12 @@ input（用户提问）
 ```json
 {
   "type": "attribute_penetration",
-  "attribute_pattern": "激光雷达",        // config_attribute.Attribute 模糊匹配
-  "value_contains": "Thor",              // value 模糊过滤（可选）
-  "positive_value": "是|标准|高阶|Thor",  // value 正则匹配（可选）
-  "dimension_field": "product_name",     // 分组维度
-  "dimension_mapping": {                 // 维度值映射（如 5座/6座）
+  "attribute_pattern": "激光雷达", // config_attribute.Attribute 模糊匹配
+  "value_contains": "Thor", // value 模糊过滤（可选）
+  "positive_value": "是|标准|高阶|Thor", // value 正则匹配（可选）
+  "dimension_field": "product_name", // 分组维度
+  "dimension_mapping": {
+    // 维度值映射（如 5座/6座）
     "五座": "product_name LIKE '%五座%'",
     "六座": "product_name LIKE '%六座%'"
   }
@@ -146,8 +164,8 @@ input（用户提问）
 ```json
 {
   "type": "attribute_distribution",
-  "attribute_pattern": "轮毂|轮辋",       // config_attribute.Attribute 模糊匹配
-  "top_k": 10                            // 取 Top-K 值，其余归为"其他"
+  "attribute_pattern": "轮毂|轮辋", // config_attribute.Attribute 模糊匹配
+  "top_k": 10 // 取 Top-K 值，其余归为"其他"
 }
 ```
 
@@ -201,23 +219,23 @@ runtime_decision →  负责是否允许 finish
 
 ## BI 能力矩阵
 
-| 能力类型                | 典型问题                    | 执行工具                              | Evidence Contract（所需证据类型）                               |
-| ----------------------- | --------------------------- | ------------------------------------- | --------------------------------------------------------------- |
-| 总量查询                | 昨天锁单数是多少            | QueryTool                             | `metric_value`                                                  |
-| 月均查询                | 2026年月均锁单数            | Statistics.monthly_mean               | `metric_value` + `time_grouped_metric`                          |
-| 月度明细                | 2026年每个月锁单数          | Statistics.monthly_mean               | `metric_value` + `time_grouped_metric`                          |
-| 趋势分析                | 近30日锁单趋势如何          | Statistics.trend_summary              | `trend_summary`                                                 |
-| 对比分析                | 本周 vs 上周变化            | Comparison.wow                        | `comparison_result`                                             |
-| 占比分析（share）       | 分车型锁单占比              | Composition.share_by_dimension        | `dimension_breakdown` + `share_summary`                         |
-| 占比分析（累计+维度映射）| LS8五六座比例              | Composition.share_by_dimension + dim_mapping | `dimension_breakdown` + `share_summary`                   |
-| 构成分析（composition） | 按城市/门店/渠道拆解结果    | QueryTool + GROUP BY                  | `dimension_breakdown`                                           |
-| 构成分析（含时间+占比） | 每周分车型锁单占比          | Composition.weekly_share_by_dimension | `time_grouped_metric` + `dimension_breakdown` + `share_summary` |
-| 排序分析                | 锁单 TOP10 城市             | QueryTool + ORDER BY                  | `ranking_result`                                                |
-| 分布分析 / 百分位       | 116在近2个月中的水平       | Statistics.daily_percentile_rank      | `distribution_summary`                                          |
-| 分布分析                | 锁单用户年龄分布 / 分位水平 | Statistics                            | `distribution_summary`                                          |
-| 诊断分析                | 为什么最近一周下滑          | Statistics.contribution_summary       | `trend_summary` + `contribution_summary`                        |
-| 配置渗透率分析          | CM2 增程中 Thor 选装率     | MultiTableMetricTool.attribute_penetration  | `dimension_breakdown` + `share_summary`                    |
-| 配置分布分析            | LS8 不同轮毂的选装比例     | MultiTableMetricTool.attribute_distribution | `dimension_breakdown` + `share_summary`                    |
+| 能力类型                  | 典型问题                    | 执行工具                                     | Evidence Contract（所需证据类型）                               |
+| ------------------------- | --------------------------- | -------------------------------------------- | --------------------------------------------------------------- |
+| 总量查询                  | 昨天锁单数是多少            | QueryTool                                    | `metric_value`                                                  |
+| 月均查询                  | 2026年月均锁单数            | Statistics.monthly_mean                      | `metric_value` + `time_grouped_metric`                          |
+| 月度明细                  | 2026年每个月锁单数          | Statistics.monthly_mean                      | `metric_value` + `time_grouped_metric`                          |
+| 趋势分析                  | 近30日锁单趋势如何          | Statistics.trend_summary                     | `trend_summary`                                                 |
+| 对比分析                  | 本周 vs 上周变化            | Comparison.wow                               | `comparison_result`                                             |
+| 占比分析（share）         | 分车型锁单占比              | Composition.share_by_dimension               | `dimension_breakdown` + `share_summary`                         |
+| 占比分析（累计+维度映射） | LS8五六座比例               | Composition.share_by_dimension + dim_mapping | `dimension_breakdown` + `share_summary`                         |
+| 构成分析（composition）   | 按城市/门店/渠道拆解结果    | QueryTool + GROUP BY                         | `dimension_breakdown`                                           |
+| 构成分析（含时间+占比）   | 每周分车型锁单占比          | Composition.weekly_share_by_dimension        | `time_grouped_metric` + `dimension_breakdown` + `share_summary` |
+| 排序分析                  | 锁单 TOP10 城市             | QueryTool + ORDER BY                         | `ranking_result`                                                |
+| 分布分析 / 百分位         | 116在近2个月中的水平        | Statistics.daily_percentile_rank             | `distribution_summary`                                          |
+| 分布分析                  | 锁单用户年龄分布 / 分位水平 | Statistics                                   | `distribution_summary`                                          |
+| 诊断分析                  | 为什么最近一周下滑          | Statistics.contribution_summary              | `trend_summary` + `contribution_summary`                        |
+| 配置渗透率分析            | CM2 增程中 Thor 选装率      | MultiTableMetricTool.attribute_penetration   | `dimension_breakdown` + `share_summary`                         |
+| 配置分布分析              | LS8 不同轮毂的选装比例      | MultiTableMetricTool.attribute_distribution  | `dimension_breakdown` + `share_summary`                         |
 
 ## Query Log（规划与执行日志）
 
@@ -319,7 +337,7 @@ runtime_decision →  负责是否允许 finish
     1. `~5月17日累计车系占比` → 全范围累计（原为拆成两单日）
     2. `2026累计同比2025` → YTD vs YTD（原为全年 vs 全年）
     3. `2026累计同比2024` → 正确偏移 -2 年（原为 -1 年）
-     4. `2024 1/1~5/17累计锁单数` → 正确 13,637（原为按时间戳分组错误）
+    4. `2024 1/1~5/17累计锁单数` → 正确 13,637（原为按时间戳分组错误）
 - 2026-05-18（v0.4.6 — Runtime Decision / Fact Extraction 稳定化）
   - **Agent Loop 空转修复**：`memory_extractor` 三处缺陷导致 query block 始终抽不出 facts → loop 空跑 5 步
     - `_DATA_EXCLUDE` 误过滤 `"series"` 维度列 → `dim_cols=[]` → 无 dimension_breakdown
@@ -350,12 +368,12 @@ runtime_decision →  负责是否允许 finish
   - Planner 规则路径：`_is_penetration_query` + `_build_penetration_plan`，LLM 前稳定命中
   - 独立回测脚本：scripts/ls8_floor_heating_rate.py
 - 2026-05-14（v0.4.2 — Fact Production Layer 稳定化）
-    - 新增 `CompositionTool`（tools/composition_tool.py）：专用占比分析工具（周/月/日分组占比、Top-N、帕累托累计占比）
-    - 路由：`plan.analysis_intent.type == "share_breakdown"` → CompositionTool
-    - `QueryTool._apply_post_process`：通用 DataFrame 后处理（share 计算）
-    - `runtime_decision.result_satisfies_goal`：基于用户问题提取 required slots，检查结果列是否满足需求；不满足时自动生成 repair query 重试（最多 2 次）
-    - 语义过滤增强：自动识别用户查询中的具体产品名并添加 product_name 过滤条件
-    - 时间窗口增强：`_parse_time_window` 新增"本周"支持（ISO 周 Mon–today）
+  - 新增 `CompositionTool`（tools/composition_tool.py）：专用占比分析工具（周/月/日分组占比、Top-N、帕累托累计占比）
+  - 路由：`plan.analysis_intent.type == "share_breakdown"` → CompositionTool
+  - `QueryTool._apply_post_process`：通用 DataFrame 后处理（share 计算）
+  - `runtime_decision.result_satisfies_goal`：基于用户问题提取 required slots，检查结果列是否满足需求；不满足时自动生成 repair query 重试（最多 2 次）
+  - 语义过滤增强：自动识别用户查询中的具体产品名并添加 product_name 过滤条件
+  - 时间窗口增强：`_parse_time_window` 新增"本周"支持（ISO 周 Mon–today）
   - 确定性 Fact 抽取
     - **所有 builder 改为 summary 格式**：每个 block × 每种 fact_type 最多 1 条，含 `content` + `metadata`，旧 `values`/`rows`/`time_series` 数组全部移除
     - **新增 `_make_fact`**：统一 fact 构造入口
@@ -463,6 +481,48 @@ python3 feishu_bot.py
 
 该入口使用飞书官方 SDK 的 WebSocket 长连接事件订阅模式：程序启动后会过滤启动前的历史消息，并对 message_id 做简单去重。
 
+## Runtime Eval Workflow
+
+Runtime Eval 的目标是对 Agent 的“运行时行为（Runtime）”做回归检查：是否按预期产生日志、是否命中正确 intent、是否匹配 Evidence Contract、是否产出足够的 structured blocks 与 fact_types。它不关注回答里的具体数值是否正确（见下文第 6 点）。
+
+1. `logs/query_log.jsonl` 的作用
+   - `query_log.jsonl` 是 append-only 的运行日志，每次调用一次 Agent（[agent_loop.py](agent/agent_loop.py) 的 `run_main_agent`）都会追加一行 JSON。
+   - 其中包含 Runtime Eval 依赖的字段（示例）：`exit_reason`、`eval_intent`、`contract_matched`、`fact_types`、`structured_blocks_summary`、`final_answer` 等。
+   - 该日志既用于“从真实运行记录中抽取/构造 eval case”，也用于“eval runner 执行 case 后读取最新一条日志作为 actual 行为”。
+
+2. 生成 `eval/runtime_cases.jsonl`
+   - 基于已有的 `logs/query_log.jsonl`，用脚本 [generate_eval_cases.py](scripts/generate_eval_cases.py) 抽样生成 runtime eval cases：
+
+```bash
+python scripts/generate_eval_cases.py
+python scripts/generate_eval_cases.py --strategy recent --limit 20
+python scripts/generate_eval_cases.py --strategy stratified --limit 50
+python scripts/generate_eval_cases.py --include-failures --limit 20
+```
+
+3. 运行 `eval/run_runtime_eval.py`
+   - 运行 [run_runtime_eval.py](eval/run_runtime_eval.py) 会逐条读取 `eval/runtime_cases.jsonl`，对每个 case 调用 `run_main_agent(question)`，然后从 `logs/query_log.jsonl` 读取新增的最后一条记录作为 actual：
+
+```bash
+python eval/run_runtime_eval.py
+python eval/run_runtime_eval.py --limit 10 --verbose
+python eval/run_runtime_eval.py --cases eval/runtime_cases.jsonl --report eval/eval_report.json
+```
+
+4. 查看 `eval/eval_report.json`
+   - runner 会输出 `eval/eval_report.json`（包含 `total/passed/failed/pass_rate/results`）。
+   - `results[]` 每条包含：`passed`、`checks`（每个检查项 true/false）、`actual`（从 query_log 中读取到的 actual 运行时字段）、以及可选的 `error`。
+
+5. 当前 eval 检查项说明
+   - `no_forbidden_exit_reason`：`actual.exit_reason` 不在 `expected.exit_reason_not_in` 里（通常用于禁止 `error/exception` 这类退出原因）。
+   - `intent_match`：若 `expected.intent` 非空，则要求 `actual.eval_intent == expected.intent`；否则跳过该项（视为通过）。
+   - `contract_match`：若 `expected.contract_matched` 存在（非 `None`），则要求 `actual.contract_matched` 与其一致；否则跳过。
+   - `min_structured_blocks`：若 `expected.min_structured_blocks > 0`，则要求 `actual.structured_block_count >= expected.min_structured_blocks`；否则跳过。
+   - `fact_types_any`：若 `expected.fact_types_any` 非空，则要求 `actual.fact_types` 与其有交集（至少命中一种 fact_type）；否则跳过。
+
+6. 第一版 eval 的边界
+   - 当前 Runtime Eval 不校验回答里的具体数值/明细是否正确；它只校验 Runtime 行为与证据产出是否符合预期（例如是否出现不允许的退出原因、intent/contract 是否一致、是否产出了足够的结构化证据）。
+
 ## 目录结构
 
 ```text
@@ -510,5 +570,3 @@ LS8上市至今累计锁单数的五六座比例
 按月分门店看交付数占比
 各门店锁单量Top-5占比
 ```
-
-

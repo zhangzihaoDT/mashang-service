@@ -17,7 +17,7 @@ _INTENT_EVIDENCE_HINTS: dict[str, dict] = {
     "metric_ratio": {"fact_types": ["metric_value", "dimension_breakdown"], "result_type": "metric_ratio"},
     "metric_ratio_trend": {"fact_types": ["time_grouped_metric", "trend_summary"], "grain": "day", "result_type": "metric_ratio_trend"},
     "dimension_share": {"fact_types": ["dimension_breakdown", "share_summary"], "result_type": "dimension_share"},
-    "dimension_share_trend": {"fact_types": ["time_grouped_metric", "share_summary", "trend_summary"], "grain": "day", "result_type": "dimension_share_trend"},
+    "dimension_share_trend": {"fact_types": ["time_grouped_metric", "share_summary", "trend_summary", "dimension_breakdown"], "grain": "day", "result_type": "dimension_share_trend"},
     "active_store": {"fact_types": ["time_grouped_metric", "metric_value"], "grain": "day", "has_series": True, "result_type": "operator"},
     "retained_intention": {"fact_types": ["metric_value"], "result_type": "operator"},
     "retained_intention_conversion": {"fact_types": ["metric_value"], "result_type": "operator"},
@@ -273,6 +273,19 @@ def _route_by_intent(
                     "metric_alias": share_col,
                 }
                 result = statistics_tool.perform_statistics(trend_request, merged)
+
+                if isinstance(result, dict):
+                    evidence_df = merged.copy()
+                    if isinstance(dim_filter, dict):
+                        dim_field = dim_filter.get("field") or "dimension"
+                        dim_value = dim_filter.get("value") or "unknown"
+                        if dim_field not in evidence_df.columns:
+                            evidence_df[dim_field] = dim_value
+                    if "_date" in evidence_df.columns:
+                        evidence_df["_date"] = evidence_df["_date"].astype(str)
+                    result["rows"] = evidence_df.to_dict(orient="records")
+                    result["columns"] = list(evidence_df.columns)
+
                 return result, {"engine": "dimension_share_trend", "route": f"dimension_share_trend.{metric_field}"}
             else:
                 total_val = total_df.iloc[0].get(f"{metric_alias}_total", 1) if not total_df.empty else 1

@@ -70,11 +70,11 @@ def _result_sample_values(result_text: str) -> dict[str, list[str]]:
     return samples
 
 
-def result_satisfies_goal(state: AgentState) -> bool:
+def result_satisfies_goal(state: AgentState) -> bool | None:
     question = getattr(state, "question", "") or ""
     required = extract_required_slots(question)
     if not required:
-        return True
+        return None
 
     blocks = getattr(getattr(state, "results", None), "structured_blocks", None)
     if not isinstance(blocks, list) or not blocks:
@@ -168,6 +168,7 @@ def _generate_repair_query(state: AgentState) -> str | None:
 # compare                   comparison_result
 # composition               dimension_breakdown
 # share                     dimension_breakdown + share_summary
+# share_breakdown           dimension_breakdown + share_summary
 # time_grouped_share        time_grouped_metric + dimension_breakdown + share_summary
 # ranking                   ranking_result
 # distribution              distribution_summary
@@ -201,6 +202,11 @@ ANALYSIS_EVIDENCE_CONTRACT = {
         "required_fact_types": ["dimension_breakdown", "share_summary"],
         "finish_reason": "share_summary_found",
         "repair_query_template": "{question}；请补充分组明细和占比字段。",
+    },
+    "share_breakdown": {
+        "required_fact_types": ["dimension_breakdown", "share_summary"],
+        "finish_reason": "share_breakdown_found",
+        "repair_query_template": "{question}；请按拆解维度返回明细及每行占比。",
     },
     "time_grouped_share": {
         "required_fact_types": [
@@ -404,13 +410,18 @@ def _rewrite_to_trend_query(question: str) -> str:
 
 
 def latest_intent(state: AgentState) -> str:
-    planning = getattr(state, "planning", None)
-    if planning is not None:
-        records = getattr(planning, "records", None)
-        if isinstance(records, list) and records:
-            last = records[-1]
-            if isinstance(last, dict) and isinstance(last.get("analysis_intent"), str) and last.get("analysis_intent"):
-                return str(last.get("analysis_intent"))
+    results = getattr(state, "results", None)
+    if results is not None:
+        blocks = getattr(results, "structured_blocks", None)
+        if isinstance(blocks, list):
+            for i in range(len(blocks) - 1, -1, -1):
+                plan = getattr(blocks[i], "plan", None)
+                if isinstance(plan, dict):
+                    ai = plan.get("analysis_intent")
+                    if isinstance(ai, dict):
+                        atype = ai.get("type")
+                        if isinstance(atype, str) and atype:
+                            return atype
     return infer_intent_from_question(getattr(state, "question", ""))
 
 
@@ -494,7 +505,7 @@ def evaluate_state_readiness(state: AgentState) -> dict:
                 working["_stall_count"] = 0
             working["_last_missing_facts"] = missing
             if (working.get("_stall_count") or 0) >= 2:
-                print(f"[RuntimeDecision] stall detected: {missing} persisted {working['_stall_count']+1}x → force-finish")
+                print(f"[RuntimeDecision] stall detected: {missing} persisted {working['_stall_count']}x → force-finish")
                 _debug_decision_line(question, intent, required, available, missing, "finish", "stall_detected")
                 return {
                     "ready": True,
@@ -505,6 +516,18 @@ def evaluate_state_readiness(state: AgentState) -> dict:
         elif isinstance(working, dict):
             working["_last_missing_facts"] = missing
             working["_stall_count"] = 0
+
+        if isinstance(working, dict) and missing:
+            working["_contract_repair_count"] = (working.get("_contract_repair_count") or 0) + 1
+            if working["_contract_repair_count"] >= 3:
+                print(f"[RuntimeDecision] contract repair limit ({working['_contract_repair_count']}) → force-finish")
+                _debug_decision_line(question, intent, required, available, missing, "finish", "contract_repair_limit")
+                return {
+                    "ready": True,
+                    "reason": "contract_repair_limit",
+                    "missing_info": missing,
+                    "recommended_next_action": "finish",
+                }
 
         if not missing:
             finish_reason = str(contract.get("finish_reason") or "ready")
@@ -543,13 +566,29 @@ def evaluate_state_readiness(state: AgentState) -> dict:
             "missing_info": [],
             "recommended_next_action": "finish",
         }
-    if result_satisfies_goal(state):
+    goal_result = result_satisfies_goal(state)
+    if goal_result is True:
         _debug_decision_line(question, intent, [], [], [], "finish", "goal_satisfied")
         return {
             "ready": True,
             "reason": "default_has_result_and_satisfies_goal",
             "missing_info": [],
             "recommended_next_action": "finish",
+        }
+    if goal_result is None:
+        _debug_decision_line(question, intent, [], [], [], "finish" if iteration >= 1 else "run_dsl", "uncertain")
+        if iteration >= 1:
+            return {
+                "ready": True,
+                "reason": "uncertain_finish",
+                "missing_info": [],
+                "recommended_next_action": "finish",
+            }
+        return {
+            "ready": False,
+            "reason": "uncertain_retry",
+            "missing_info": ["result_quality"],
+            "recommended_next_action": "run_dsl",
         }
     repair_query = _generate_repair_query(state)
     if repair_query:
@@ -561,10 +600,17 @@ def evaluate_state_readiness(state: AgentState) -> dict:
             "recommended_next_action": "run_dsl",
             "recommended_query": repair_query,
         }
-    _debug_decision_line(question, intent, [], [], [], "finish", "default_has_result")
+    _debug_decision_line(question, intent, [], [], [], "finish" if iteration >= 1 else "run_dsl", "uncertain_no_repair")
+    if iteration >= 1:
+        return {
+            "ready": True,
+            "reason": "uncertain_finish",
+            "missing_info": [],
+            "recommended_next_action": "finish",
+        }
     return {
-        "ready": True,
-        "reason": "default_has_result",
-        "missing_info": [],
-        "recommended_next_action": "finish",
+        "ready": False,
+        "reason": "uncertain_retry",
+        "missing_info": ["result_quality"],
+        "recommended_next_action": "run_dsl",
     }

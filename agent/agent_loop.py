@@ -2,6 +2,7 @@ import json
 import os
 import re
 import sys
+import uuid
 import datetime
 import time
 from pathlib import Path
@@ -12,8 +13,9 @@ from openai import OpenAI
 from agent.llm_config import DEEPSEEK_CHAT_MODEL
 from agent.memory_extractor import apply_memory_update, extract_memory_update
 from agent.planner import PlanningAgent, plan_runtime_action
+from agent.runtime_decision import latest_intent, ANALYSIS_EVIDENCE_CONTRACT
 from agent.schema import DATA_PATH_FILE, SCHEMA_DIR
-from agent.state import AgentState, LoopState, ResultBlock
+from agent.state import AgentState, LoopState, ResultBlock, _to_json_safe
 from agent.tool_router import run_dsl_step
 from tools import CompositionTool, ComparisonTool, MultiTableMetricTool, QueryTool, StatisticsTool
 
@@ -59,13 +61,15 @@ def _load_memory() -> dict:
         return {}
 
 
-def _save_memory(obj: dict) -> None:
+def _save_memory(obj: dict) -> bool:
     path = _memory_file()
     try:
         with open(path, "w", encoding="utf-8") as f:
             json.dump(obj, f, ensure_ascii=False, indent=2)
-    except Exception:
-        pass
+        return True
+    except Exception as e:
+        print(f"[Warning] _save_memory 写入失败: {e}")
+        return False
 
 
 def _clear_memory() -> None:
@@ -128,7 +132,10 @@ def _merge_pending_context(user_query: str, memory: dict) -> str | None:
         if not isinstance(original_question, str) or not isinstance(clarification, dict):
             return None
         base_original = original_question.strip()
-        if "澄清上下文:" in base_original:
+        raw_question = pending.get("original_raw_question")
+        if isinstance(raw_question, str) and raw_question.strip():
+            base_original = raw_question.strip()
+        elif "澄清上下文:" in base_original:
             m = re.search(r"原始问题=([^ ]+\s*[^ 澄清问题]*)", base_original)
             if not m:
                 m = re.search(r"原始问题=(.+?)\s+澄清", base_original)
@@ -195,6 +202,36 @@ def _looks_like_new_question(user_query: str) -> bool:
     return any(k in q for k in keywords)
 
 
+_NEW_QUESTION_KEYWORDS = frozenset(["锁单", "交付", "开票", "小订", "意向金", "金额", "试驾", "同比", "环比", "昨天", "去年", "今年", "按", "分"])
+
+
+def classify_pending_reply(user_query: str, pending: dict) -> str:
+    if not isinstance(pending, dict):
+        return "new_question"
+    reply = (user_query or "").strip()
+    if not reply:
+        return "new_question"
+    if pending.get("type") != "clarification":
+        return "new_question"
+    clarification = pending.get("clarification")
+    if not isinstance(clarification, dict):
+        return "new_question"
+
+    if _matches_pending_option(user_query, {"pending": pending}):
+        return "clarification_answer"
+
+    if len(reply) >= 12:
+        return "new_question"
+    if any(k in reply for k in _NEW_QUESTION_KEYWORDS):
+        return "new_question"
+
+    return "ambiguous"
+
+
+_CN_DIGITS = ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十"]
+_SELECTION_PREFIXES = ("选", "我选", "选择", "就", "按", "用", "看")
+
+
 def _matches_pending_option(user_query: str, memory: dict) -> bool:
     pending = memory.get("pending")
     if not isinstance(pending, dict):
@@ -204,45 +241,59 @@ def _matches_pending_option(user_query: str, memory: dict) -> bool:
         return False
     normalized_reply = reply.replace(" ", "")
     ptype = pending.get("type")
-    if ptype == "clarification":
-        clarification = pending.get("clarification")
-        if not isinstance(clarification, dict):
-            return False
-        options = clarification.get("options")
-        if isinstance(options, list):
-            normalized_options = {str(o).replace(" ", "") for o in options}
-            if normalized_reply in normalized_options:
-                return True
-            for opt in normalized_options:
-                if opt and opt in normalized_reply:
-                    return True
-            tokens = set()
-            for o in options:
-                s = str(o).strip()
-                if not s:
-                    continue
-                for sep in ["（", "(", " "]:
-                    if sep in s:
-                        s = s.split(sep, 1)[0].strip()
-                if s:
-                    tokens.add(s)
-            for t in tokens:
-                if t and t in reply:
-                    return True
-            relaxed_tokens = set()
-            for t in tokens:
-                base = str(t).replace("数量", "").replace("数目", "").replace("数量", "").strip()
-                for suffix in ["量", "数"]:
-                    if base.endswith(suffix) and len(base) > 1:
-                        base = base[: -len(suffix)]
-                if base:
-                    relaxed_tokens.add(base)
-            for t in relaxed_tokens:
-                if t and t in reply:
-                    return True
-        if normalized_reply in {"1", "2", "3", "4"}:
-            return True
+    if ptype != "clarification":
         return False
+    clarification = pending.get("clarification")
+    if not isinstance(clarification, dict):
+        return False
+
+    # Build (label, id) entries from options / _options_detail
+    entries: list[tuple[str, str]] = []
+    detail = clarification.get("_options_detail")
+    if isinstance(detail, list):
+        for d in detail:
+            label = str(d.get("label", "")).strip()
+            oid = str(d.get("id", "")).strip()
+            if label:
+                entries.append((label, oid))
+    else:
+        raw_opts = clarification.get("options")
+        if isinstance(raw_opts, list):
+            for o in raw_opts:
+                label = str(o).strip()
+                if label:
+                    entries.append((label, ""))
+    if not entries:
+        return False
+
+    def _exact_or_prefixed(text: str, target: str) -> bool:
+        t = text.replace(" ", "")
+        c = target.replace(" ", "")
+        if t == c:
+            return True
+        for prefix in _SELECTION_PREFIXES:
+            if t == (prefix + c).replace(" ", ""):
+                return True
+        return False
+
+    for idx, (label, oid) in enumerate(entries):
+        # (1) Exact match or selection-verb match
+        if _exact_or_prefixed(reply, label):
+            return True
+        if oid and _exact_or_prefixed(reply, oid):
+            return True
+
+        # (2) Number reference
+        num = idx + 1
+        patterns = {str(num), f"选{num}", f"第{num}个", f"第{num}", f"{num}个"}
+        if idx < len(_CN_DIGITS):
+            cn = _CN_DIGITS[idx]
+            patterns.update([cn, f"选{cn}", f"第{cn}个", f"第{cn}", f"{cn}个"])
+        if normalized_reply in {p.replace(" ", "") for p in patterns}:
+            return True
+        if reply in patterns:
+            return True
+
     return False
 
 
@@ -287,10 +338,11 @@ def _append_query_log(entry: dict) -> None:
         return
     path = _query_log_path()
     try:
+        safe_entry = _to_json_safe(entry)
         with open(path, "a", encoding="utf-8") as f:
-            f.write(json.dumps(entry, ensure_ascii=False) + "\n")
-    except Exception:
-        return
+            f.write(json.dumps(safe_entry, ensure_ascii=False) + "\n")
+    except Exception as e:
+        print(f"[Warning] _append_query_log 写入失败: {e}")
 
 
 def _generate_final_answer(client: OpenAI, user_query: str, result_blocks: list[str]) -> str:
@@ -398,25 +450,37 @@ def run_main_agent(user_query: str) -> str:
     final_execution_success = False
     final_answer_text = ""
     final_error_text = ""
+    exit_reason = ""
+    query_id = uuid.uuid4().hex[:12]
 
     print(f"\n{'='*60}")
     print(f"用户提问: '{user_query}'")
 
     memory = _load_memory()
+    pending = memory.get("pending")
+    classification = classify_pending_reply(user_query, pending) if pending else "new_question"
     merged = None
-    if memory.get("pending") and (
-        _matches_pending_option(user_query, memory)
-        or _looks_like_clarification_answer(user_query)
-        or not _looks_like_new_question(user_query)
-    ):
+    restored_state = None
+
+    if classification == "clarification_answer":
         merged = _merge_pending_context(user_query, memory)
+        snapshot = memory.get("pending", {}).get("state_snapshot")
+        if isinstance(snapshot, dict):
+            restored_state = AgentState.from_snapshot(snapshot)
+
     if merged:
         _clear_pending(memory)
         user_query = merged
+        if restored_state is not None:
+            restored_state.question = user_query
+            restored_state.normalized_question = _normalize_question_text(user_query)
+            restored_state.loop.done = False
         print(f"\n{'='*60}")
         print("已合并上一轮澄清上下文，继续规划...")
-    elif memory.get("pending") and _looks_like_new_question(user_query):
+    elif classification in ("new_question", "ambiguous"):
         _clear_pending(memory)
+        if classification == "ambiguous":
+            print("[Warning] 输入无法明确判断是否为上一轮的回答，已按新问题处理")
 
     try:
         api_key = _load_api_key()
@@ -445,7 +509,10 @@ def run_main_agent(user_query: str) -> str:
         composition_tool = CompositionTool(query_tool=query_tool)
         statistics_tool = StatisticsTool()
         multi_table_tool = MultiTableMetricTool(query_tool=query_tool)
-        state = AgentState(question=user_query, normalized_question=_normalize_question_text(user_query), loop=LoopState(max_steps=5))
+        if restored_state is not None:
+            state = restored_state
+        else:
+            state = AgentState(question=user_query, normalized_question=_normalize_question_text(user_query), loop=LoopState(max_steps=5))
         query_rounds_max = int(state.loop.max_steps or 5)
         goal_time_info = planning_agent.infer_goal_time_window(user_query, datetime.date.today())
         goal_time_window = goal_time_info.get("window") if isinstance(goal_time_info, dict) else None
@@ -494,21 +561,28 @@ def run_main_agent(user_query: str) -> str:
                     query_log_clarification = clarification if isinstance(clarification, dict) else {}
                     _operator_result = step_result.get("_operator_result")
                     _cache_key = step_result.get("_cache_key", "")
+                    _original = step_result.get("original_question") or action_query
                     pending_entry = {
                         "type": "clarification",
                         "clarification": clarification,
-                        "original_question": step_result.get("original_question") or action_query,
+                        "original_question": _original,
+                        "original_raw_question": _original,
                         "created_at": datetime.datetime.now().isoformat(timespec="seconds"),
+                        "state_snapshot": state.to_snapshot(),
                     }
                     existing = _load_memory()
                     existing["pending"] = pending_entry
                     if _operator_result and isinstance(_operator_result, dict) and _cache_key:
-                        existing.setdefault("short_term_memory", {})[_cache_key] = _operator_result
-                        _save_short_term("_meta", {
+                        stm = existing.setdefault("short_term_memory", {})
+                        stm[_cache_key] = _operator_result
+                        stm["_meta"] = {
                             "created_at": datetime.datetime.now().isoformat(timespec="seconds"),
                             "turn_count": 0,
-                        })
-                    _save_memory(existing)
+                        }
+                    save_ok = _save_memory(existing)
+                    if not save_ok:
+                        print("[Warning] 保存 pending + state_snapshot 失败，澄清状态可能无法恢复")
+                    exit_reason = "clarification"
                     opts = clarification.get("options") or []
                     opts_text = " / ".join([str(o) for o in opts]) if isinstance(opts, list) else ""
                     qtext = clarification.get("question") or "需要你补充信息后才能继续。"
@@ -520,8 +594,10 @@ def run_main_agent(user_query: str) -> str:
                     return final_answer_text
                 if status == "error":
                     err_text = str(step_result.get("message") or "执行失败")
+                    _clear_pending(memory)
                     state.add_step(action, _trim_text(err_text))
                     state.loop.done = True
+                    exit_reason = "error"
                     break
 
                 step_blocks = step_result.get("result_blocks") or []
@@ -608,6 +684,18 @@ def run_main_agent(user_query: str) -> str:
                 state.add_step(action, "未知 action，终止。")
                 state.loop.done = True
 
+        # Capture exit_reason from runtime decision result
+        if not exit_reason:
+            if state.loop.iteration >= state.loop.max_steps and not state.loop.done:
+                exit_reason = "max_steps_reached"
+            elif state.loop.history:
+                last_entry = state.loop.history[-1]
+                last_action = last_entry.get("action", {}) if isinstance(last_entry, dict) else {}
+                if isinstance(last_action, dict):
+                    exit_reason = last_action.get("reason", "") or last_action.get("action", "unknown")
+            if not exit_reason:
+                exit_reason = "unknown"
+
         # Save the last DataFrame result for cross-session report generation
         try:
             import pandas as pd
@@ -644,6 +732,8 @@ def run_main_agent(user_query: str) -> str:
         return final_text
     except Exception as e:
         final_error_text = f"系统处理出错: {str(e)}"
+        if not exit_reason:
+            exit_reason = "exception"
         raise
     finally:
         latency_ms = int(max(0.0, (time.time() - started_at) * 1000.0))
@@ -683,6 +773,7 @@ def run_main_agent(user_query: str) -> str:
             "generated_plan": {"steps": query_log_steps},
             "clarification": query_log_clarification or {},
             "execution_success": bool(final_execution_success),
+            "exit_reason": exit_reason,
             "used_dataset": used_dataset or "",
             "used_metrics": used_metrics,
             "used_dimensions": used_dimensions,
@@ -691,6 +782,67 @@ def run_main_agent(user_query: str) -> str:
             "result_summary": result_summary,
             "user_feedback": None,
         }
+        # ── eval logging fields ──
+        try:
+            entry["query_id"] = query_id
+            entry["final_answer"] = final_answer_text or final_error_text
+            if isinstance(state, AgentState):
+                entry["eval_intent"] = latest_intent(state)
+                entry["contract_matched"] = entry["eval_intent"] in ANALYSIS_EVIDENCE_CONTRACT
+                facts_list = getattr(getattr(state, "memory", None), "facts", None)
+                if isinstance(facts_list, list):
+                    entry["facts"] = facts_list
+                    seen_ft: list[str] = []
+                    for f in facts_list:
+                        ft = f.get("fact_type") if isinstance(f, dict) else None
+                        if isinstance(ft, str) and ft and ft not in seen_ft:
+                            seen_ft.append(ft)
+                    entry["fact_types"] = seen_ft
+                else:
+                    entry["facts"] = []
+                    entry["fact_types"] = []
+                wm = getattr(getattr(state, "memory", None), "working_memory", None)
+                if isinstance(wm, dict):
+                    mf = wm.get("_last_missing_facts")
+                    entry["missing_facts"] = list(mf) if isinstance(mf, list) else []
+                else:
+                    entry["missing_facts"] = []
+                hist = getattr(getattr(state, "loop", None), "history", None)
+                entry["loop_history"] = hist if isinstance(hist, list) else []
+                sb_list = getattr(getattr(state, "results", None), "structured_blocks", None)
+                sb_summary: list[dict] = []
+                if isinstance(sb_list, list):
+                    for blk in sb_list:
+                        s = {"block_type": getattr(blk, "block_type", ""),
+                             "execution_status": getattr(blk, "status", "")}
+                        r = getattr(blk, "result", None)
+                        if r is not None:
+                            s["has_result"] = True
+                            if hasattr(r, "columns"):
+                                s["result_type"] = "dataframe"
+                                try:
+                                    s["columns"] = list(r.columns)
+                                    s["row_count"] = len(r)
+                                except Exception:
+                                    pass
+                            elif isinstance(r, dict):
+                                s["result_type"] = "dict"
+                                s["columns"] = list(r.keys())
+                            elif isinstance(r, str):
+                                s["result_type"] = "str"
+                            else:
+                                s["result_type"] = type(r).__name__
+                        else:
+                            s["has_result"] = False
+                        p = getattr(blk, "plan", None)
+                        if isinstance(p, dict):
+                            ai = p.get("analysis_intent")
+                            if isinstance(ai, dict):
+                                s["plan_intent"] = ai.get("type", "")
+                        sb_summary.append(s)
+                entry["structured_blocks_summary"] = sb_summary
+        except Exception:
+            pass
         _append_query_log(entry)
 
 
