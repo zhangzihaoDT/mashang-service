@@ -6,7 +6,7 @@ mashang_workspace — 路径工具模块
 
 路径规则:
   PROJECT_ROOT   = mashang-service 根目录 (含 dataset/ .env 等)
-  WORKSPACE_ROOT = mashang_workspace 目录 (含 docs/ scripts/ eval/ 等)
+   WORKSPACE_ROOT = mashang_workspace 目录 (含 runtime_scripts/ research_scripts/ eval/ 等)
   DATASET_DIR    = PROJECT_ROOT / "dataset"
   OUTPUTS_DIR    = WORKSPACE_ROOT / "outputs"
   DOCS_DIR       = WORKSPACE_ROOT / "docs"
@@ -24,7 +24,11 @@ PROJECT_ROOT = _PROJECT_ROOT
 DATASET_DIR = _PROJECT_ROOT / "dataset"
 OUTPUTS_DIR = _WORKSPACE_ROOT / "outputs"
 DOCS_DIR = _WORKSPACE_ROOT / "docs"
-SCRIPTS_DIR = _WORKSPACE_ROOT / "scripts"
+RUNTIME_SCRIPTS_DIR = _WORKSPACE_ROOT / "runtime_scripts"
+RESEARCH_SCRIPTS_DIR = _WORKSPACE_ROOT / "research_scripts"
+UTILITY_SCRIPTS_DIR = _WORKSPACE_ROOT / "utility_scripts"
+LEGACY_SCRIPTS_DIR = _WORKSPACE_ROOT / "legacy_scripts"
+REPORTS_DIR = OUTPUTS_DIR / "reports"
 EVAL_DIR = _WORKSPACE_ROOT / "eval"
 TESTS_DIR = _WORKSPACE_ROOT / "tests"
 UTILS_DIR = _WORKSPACE_ROOT / "utils"

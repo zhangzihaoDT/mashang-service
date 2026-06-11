@@ -6,18 +6,28 @@ import subprocess, sys, json
 from pathlib import Path
 
 _WS_DIR = Path(__file__).resolve().parents[2]
-SCRIPTS_DIR = _WS_DIR / "scripts"
+RUNTIME_DIR = _WS_DIR / "runtime_scripts"
+RESEARCH_DIR = _WS_DIR / "research_scripts"
+
+
+def _resolve_script(script_name: str) -> Path:
+    # Map script names to their tier directories
+    tier_map = {
+        "atp_price_report.py": RUNTIME_DIR,
+        "lock_predict_backtest_cli.py": RESEARCH_DIR,
+    }
+    return tier_map.get(script_name, RUNTIME_DIR) / script_name
 
 
 def _run_help(script_name: str) -> subprocess.CompletedProcess:
     return subprocess.run(
-        [sys.executable, str(SCRIPTS_DIR / script_name), "--help"],
+        [sys.executable, str(_resolve_script(script_name)), "--help"],
         capture_output=True, text=True, timeout=30,
     )
 
 
 def _run_json(script_name: str, extra_args: list[str] = None) -> subprocess.CompletedProcess:
-    args = [sys.executable, str(SCRIPTS_DIR / script_name), "--format", "json"]
+    args = [sys.executable, str(_resolve_script(script_name)), "--format", "json"]
     if extra_args:
         args.extend(extra_args)
     return subprocess.run(args, capture_output=True, text=True, timeout=120)

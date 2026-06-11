@@ -8,7 +8,7 @@ from pathlib import Path
 _WS_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(_WS_DIR))
 
-from utils.paths import PROJECT_ROOT, WORKSPACE_ROOT, DATASET_DIR, OUTPUTS_DIR, DOCS_DIR, SCRIPTS_DIR, EVAL_DIR, TESTS_DIR, UTILS_DIR
+from utils.paths import PROJECT_ROOT, WORKSPACE_ROOT, DATASET_DIR, OUTPUTS_DIR, DOCS_DIR, EVAL_DIR, TESTS_DIR, UTILS_DIR, RUNTIME_SCRIPTS_DIR, RESEARCH_SCRIPTS_DIR, UTILITY_SCRIPTS_DIR, LEGACY_SCRIPTS_DIR, REPORTS_DIR
 
 
 def test_root_docs_not_exists():
@@ -41,9 +41,50 @@ def test_workspace_docs_exists():
     assert DOCS_DIR.exists(), f"workspace docs 不存在: {DOCS_DIR}"
 
 
-def test_workspace_scripts_exists():
-    """mashang_workspace/scripts/ 应存在。"""
-    assert SCRIPTS_DIR.exists(), f"workspace scripts 不存在: {SCRIPTS_DIR}"
+def test_workspace_scripts_not_exists():
+    """mashang_workspace/scripts/ 已删除。"""
+    assert not (WORKSPACE_ROOT / "scripts").exists(), "workspace scripts/ 应该已经删除"
+
+
+def test_runtime_scripts_is_real_dir():
+    """runtime_scripts/ 是真实目录，不是 symlink。"""
+    assert RUNTIME_SCRIPTS_DIR.exists(), f"runtime_scripts 不存在: {RUNTIME_SCRIPTS_DIR}"
+    assert not RUNTIME_SCRIPTS_DIR.is_symlink(), "runtime_scripts 不应是 symlink"
+
+
+def test_runtime_scripts_has_6_scripts():
+    """runtime_scripts/ 下应有 6 个 runtime 脚本。"""
+    files = [f.name for f in RUNTIME_SCRIPTS_DIR.iterdir() if f.suffix == ".py"]
+    expected = {"daily_lock_count.py", "lock_by_model.py", "lock_city_distribution.py",
+                "assign_conversion_analysis.py", "attribute_penetration_report.py",
+                "atp_price_report.py"}
+    assert expected.issubset(set(files)), f"runtime_scripts 缺少脚本: {expected - set(files)}"
+
+
+def test_research_scripts_exists():
+    """research_scripts/ 存在且有脚本。"""
+    assert RESEARCH_SCRIPTS_DIR.exists(), f"research_scripts 不存在: {RESEARCH_SCRIPTS_DIR}"
+    files = [f.name for f in RESEARCH_SCRIPTS_DIR.iterdir() if f.suffix == ".py"]
+    assert len(files) >= 5, f"research_scripts 脚本不足: {files}"
+
+
+def test_utility_scripts_exists():
+    """utility_scripts/ 存在且含 skills_order_observation_daily.py。"""
+    assert UTILITY_SCRIPTS_DIR.exists(), f"utility_scripts 不存在: {UTILITY_SCRIPTS_DIR}"
+    assert (UTILITY_SCRIPTS_DIR / "skills_order_observation_daily.py").exists(), \
+        "utility_scripts 缺少 skills_order_observation_daily.py"
+
+
+def test_legacy_scripts_exists():
+    """legacy_scripts/ 存在且含 skills_atp_price.py。"""
+    assert LEGACY_SCRIPTS_DIR.exists(), f"legacy_scripts 不存在: {LEGACY_SCRIPTS_DIR}"
+    assert (LEGACY_SCRIPTS_DIR / "skills_atp_price.py").exists(), \
+        "legacy_scripts 缺少 skills_atp_price.py"
+
+
+def test_reports_dir_exists():
+    """outputs/reports/ 存在。"""
+    assert REPORTS_DIR.exists(), f"reports 目录不存在: {REPORTS_DIR}"
 
 
 def test_workspace_eval_exists():
@@ -91,8 +132,13 @@ def test_path_resolution():
     assert not (PROJECT_ROOT / "docs").exists()
     assert DOCS_DIR.exists()
     assert not (PROJECT_ROOT / "scripts").exists()
-    assert SCRIPTS_DIR.exists()
+    assert not (WORKSPACE_ROOT / "scripts").exists()
     assert not (PROJECT_ROOT / "eval").exists()
     assert EVAL_DIR.exists()
     assert not (PROJECT_ROOT / "tests").exists()
     assert TESTS_DIR.exists()
+    assert RUNTIME_SCRIPTS_DIR.exists()
+    assert RESEARCH_SCRIPTS_DIR.exists()
+    assert UTILITY_SCRIPTS_DIR.exists()
+    assert LEGACY_SCRIPTS_DIR.exists()
+    assert REPORTS_DIR.exists()

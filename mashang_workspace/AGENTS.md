@@ -24,7 +24,11 @@ mashang-service/                   # 总项目根目录
 │   ├── AGENTS.md                  # 本文件
 │   ├── README.md
 │   ├── docs/
-│   ├── scripts/
+│   ├── runtime_scripts/           # Core — Runtime V2 可调度
+│   ├── research_scripts/          # Research — 预测/回测/释放曲线
+│   ├── utility_scripts/           # Utility — DataOps/SyncOps 工具
+│   ├── legacy_scripts/            # Legacy — 历史保留
+│   ├── (scripts/ — 已删除)        # 原始混合池已删除
 │   ├── eval/
 │   ├── tests/
 │   ├── utils/
@@ -35,8 +39,8 @@ mashang-service/                   # 总项目根目录
 
 1. **不要修改 dataset/ 下的原始数据**
 2. **不要移动 .env 或 .venv/**
-3. **优先使用已有 scripts/ 脚本**
-4. **临时分析写入 outputs/，稳定后再沉淀到 scripts/**
+3. **优先使用已有 runtime_scripts/ / research_scripts/ / utility_scripts/ 脚本**
+4. **临时分析写入 outputs/，稳定后再沉淀到 runtime_scripts/**
 5. **所有分析结果说明数据来源、时间窗口、口径**
 6. **高频能力回流到 mashang_runtime/**
 7. **每次改动后运行 `make eval` 或 `make ci`**
@@ -53,6 +57,8 @@ make parser-demo      # Context Parser
 make followup-demo    # Follow-up Runner
 make numeric-eval     # Numeric Eval
 make reference-eval   # Reference Eval
+make dataset-validate # 校验 dataset 完整性
+make daily-observation-dry-run  # 每日观察预检
 ```
 
 ## CI 门禁
@@ -84,16 +90,28 @@ python mashang_workspace/eval/run_eval.py --suite parser  # 单套件
 
 ## 核心脚本速查
 
-| 命令 | 说明 |
-|------|------|
-| `python scripts/daily_lock_count.py` | 每日锁单 |
-| `python scripts/lock_by_model.py --limit 5` | 车型拆分 |
-| `python scripts/lock_city_distribution.py` | 城市分布 |
-| `python scripts/release_curve_analysis.py` | 释放曲线 |
-| `python scripts/cohort_forecast.py` | 预测锁单 |
-| `python scripts/voc_theme_analysis.py` | VOC 分析 |
-| `python scripts/data_dictionary.py` | 数据字典 |
-| `python eval/parse_context_cli.py "..."` | 自然语言解析 |
-| `python eval/run_followup_eval.py` | 追问 Runner |
-| `python eval/run_numeric_eval.py` | 数值校验 |
-| `pytest tests -q` | 全量测试 |
+| 命令 | 说明 | 层级 |
+|------|------|------|
+| `python runtime_scripts/daily_lock_count.py` | 每日锁单 | runtime |
+| `python runtime_scripts/lock_by_model.py --limit 5` | 车型拆分 | runtime |
+| `python runtime_scripts/lock_city_distribution.py` | 城市分布 | runtime |
+| `python research_scripts/release_curve_analysis.py` | 释放曲线 | research |
+| `python research_scripts/cohort_forecast.py` | 预测锁单 | research |
+| `python utility_scripts/voc_theme_analysis.py` | VOC 分析 | utility |
+| `python utility_scripts/data_dictionary.py` | 数据字典 | utility |
+| `python utility_scripts/skills_order_observation_daily.py` | 每日数据观察(DataOps) | utility |
+| `python eval/parse_context_cli.py "..."` | 自然语言解析 | eval |
+| `python eval/run_followup_eval.py` | 追问 Runner | eval |
+| `python eval/run_numeric_eval.py` | 数值校验 | eval |
+| `pytest tests -q` | 全量测试 | test |
+
+## 自然语言指令
+
+| 用户说 | 含义 | 对应操作 |
+|--------|------|----------|
+| "数据更新并同步" | DataOps 指令，非日期分析问题 | `make daily-data-pipeline`（注意：写操作） |
+| "预检数据" | 安全预检 | `make daily-data-pipeline-dry-run` |
+
+注意：
+- "数据更新并同步" 不是带日期条件的分析问题，不表示"只更新今天的数据"
+- Runtime V2 不响应这个指令

@@ -18,7 +18,7 @@ import sys, argparse, json, subprocess, re
 from datetime import datetime
 from pathlib import Path
 
-import sys; from pathlib import Path; sys.path.insert(0, str(Path(__file__).resolve().parents[1])); from utils.paths import WORKSPACE_ROOT
+import sys; from pathlib import Path; sys.path.insert(0, str(Path(__file__).resolve().parents[1])); from utils.paths import WORKSPACE_ROOT, PROJECT_ROOT
 
 DEFAULT_FOLLOWUP_CASES = str(WORKSPACE_ROOT / "eval" / "cases" / "followup_cases.json")
 DEFAULT_NUMERIC_CASES = str(WORKSPACE_ROOT / "eval" / "cases" / "numeric_cases.json")
@@ -26,18 +26,18 @@ DEFAULT_REFERENCE_CASES = str(WORKSPACE_ROOT / "eval" / "cases" / "result_refere
 
 # Core tier: 稳定日常脚本，自动调度
 CORE_CONTRACT_SCRIPTS = [
-    "mashang_workspace/scripts/daily_lock_count.py --date 2026-06-10 --format json",
-    "mashang_workspace/scripts/lock_by_model.py --date 2026-06-10 --format json",
-    "mashang_workspace/scripts/lock_city_distribution.py --date 2026-06-10 --format json",
-    "mashang_workspace/scripts/assign_conversion_analysis.py --start-date 2026-06-01 --end-date 2026-06-10 --format json",
-    "mashang_workspace/scripts/attribute_penetration_report.py --series LS6 --attribute 激光雷达 --limit 5 --format json",
-    "mashang_workspace/scripts/atp_price_report.py --month 2026-05 --format json",
+    "mashang_workspace/runtime_scripts/daily_lock_count.py --date 2026-06-10 --format json",
+    "mashang_workspace/runtime_scripts/lock_by_model.py --date 2026-06-10 --format json",
+    "mashang_workspace/runtime_scripts/lock_city_distribution.py --date 2026-06-10 --format json",
+    "mashang_workspace/runtime_scripts/assign_conversion_analysis.py --start-date 2026-06-01 --end-date 2026-06-10 --format json",
+    "mashang_workspace/runtime_scripts/attribute_penetration_report.py --series LS6 --attribute 激光雷达 --limit 5 --format json",
+    "mashang_workspace/runtime_scripts/atp_price_report.py --month 2026-05 --format json",
 ]
 
 # Research tier: 需要用户明确要求才调用的脚本
 RESEARCH_CONTRACT_SCRIPTS = [
-    "mashang_workspace/scripts/cohort_forecast.py --start-date 2026-06-01 --end-date 2026-06-10 --format json",
-    "mashang_workspace/scripts/lock_predict_backtest_cli.py --format json",
+    "mashang_workspace/research_scripts/cohort_forecast.py --start-date 2026-06-01 --end-date 2026-06-10 --format json",
+    "mashang_workspace/research_scripts/lock_predict_backtest_cli.py --format json",
 ]
 
 CONTRACT_REQUIRED_FIELDS = ["status", "script", "scope", "result", "followup_context", "warnings", "errors"]
@@ -279,6 +279,25 @@ def _resolve_suites(name: str) -> list[str]:
     return [s.strip() for s in name.split(",") if s.strip() in SUITE_REGISTRY]
 
 
+def resolve_output_path(output: str | None) -> Path | None:
+    """解析 --output 路径，避免双前缀问题。
+
+    规则:
+      None / ""                                    → None
+      /abs/path/file.json                          → /abs/path/file.json
+      mashang_workspace/outputs/a.json              → PROJECT_ROOT / "mashang_workspace/outputs/a.json"
+      outputs/a.json                                → WORKSPACE_ROOT / "outputs/a.json"
+    """
+    if not output:
+        return None
+    p = Path(output)
+    if p.is_absolute():
+        return p
+    if str(p).startswith("mashang_workspace/"):
+        return PROJECT_ROOT / str(p)
+    return WORKSPACE_ROOT / str(p)
+
+
 def main():
     args = parse_args()
 
@@ -337,12 +356,7 @@ def main():
         "warnings": warnings,
     }
 
-    if hasattr(args, "output") and args.output:
-        out_path = Path(args.output)
-        if not out_path.is_absolute():
-            out_path = WORKSPACE_ROOT / args.output
-    else:
-        out_path = None
+    out_path = resolve_output_path(args.output if hasattr(args, "output") else None)
 
     if args.format == "json":
         body = json.dumps(output, ensure_ascii=False, indent=2)

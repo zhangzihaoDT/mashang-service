@@ -81,7 +81,7 @@ def test_make_atp_demo_works():
     """atp_price_report.py 通过 shared operators 可运行。"""
     import subprocess
     r = subprocess.run(
-        [sys.executable, str(_WS_DIR / "scripts" / "atp_price_report.py"),
+        [sys.executable, str(_WS_DIR / "runtime_scripts" / "atp_price_report.py"),
          "--month", "2026-05", "--format", "json"],
         capture_output=True, text=True, timeout=60,
     )

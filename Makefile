@@ -1,20 +1,21 @@
-.PHONY: eval full-eval core-eval research-eval capability-audit test ci data-dict lock-demo parser-demo followup-demo numeric-eval reference-eval atp-demo backtest-demo clean-outputs
+PYTHON ?= .venv/bin/python
+.PHONY: eval full-eval core-eval research-eval capability-audit test ci data-dict lock-demo parser-demo followup-demo numeric-eval reference-eval atp-demo backtest-demo clean-outputs dataset-update dataset-validate daily-observation-dry-run daily-observation-sync daily-data-pipeline-dry-run daily-data-pipeline
 
 ## 默认 Eval（core + parser + followup + reference，不含 research）
 eval:
-	python mashang_workspace/eval/run_eval.py --suite default
+	$(PYTHON) mashang_workspace/eval/run_eval.py --suite default
 
 ## 完整 Eval（含 research）
 full-eval:
-	python mashang_workspace/eval/run_eval.py --suite all
+	$(PYTHON) mashang_workspace/eval/run_eval.py --suite all
 
 ## Core Eval（仅 core 脚本）
 core-eval:
-	python mashang_workspace/eval/run_eval.py --suite core
+	$(PYTHON) mashang_workspace/eval/run_eval.py --suite core
 
 ## Research Eval（仅 research 脚本）
 research-eval:
-	python mashang_workspace/eval/run_eval.py --suite research
+	$(PYTHON) mashang_workspace/eval/run_eval.py --suite research
 
 ## 完整测试
 test:
@@ -22,7 +23,7 @@ test:
 
 ## CI 门禁（CI-safe suites + 测试）
 ci:
-	python mashang_workspace/eval/run_eval.py --suite ci --format json --output mashang_workspace/outputs/tables/unified_eval_result.json
+	$(PYTHON) mashang_workspace/eval/run_eval.py --suite ci --format json --output outputs/tables/unified_eval_result.json
 	pytest mashang_workspace/tests/test_root_cleanup.py \
 		mashang_workspace/tests/test_result_contract.py \
 		mashang_workspace/tests/eval/test_context_parser.py \
@@ -34,66 +35,100 @@ ci:
 
 ## 数据字典
 data-dict:
-	python mashang_workspace/scripts/data_dictionary.py --input dataset --output mashang_workspace/outputs/tables/data_dictionary.csv
+	$(PYTHON) mashang_workspace/utility_scripts/data_dictionary.py --input dataset --output mashang_workspace/outputs/tables/data_dictionary.csv
 
 ## 锁单分析 Demo
 lock-demo:
-	python mashang_workspace/scripts/lock_by_model.py --date 2026-06-10 --format json
+	$(PYTHON) mashang_workspace/runtime_scripts/lock_by_model.py --date 2026-06-10 --format json
 
 ## Context Parser Demo
 parser-demo:
-	python mashang_workspace/eval/parse_context_cli.py "昨天锁单数分车型"
+	$(PYTHON) mashang_workspace/eval/parse_context_cli.py "昨天锁单数分车型"
 
 ## Follow-up Runner Demo
 followup-demo:
-	python mashang_workspace/eval/run_followup_eval.py \
+	$(PYTHON) mashang_workspace/eval/run_followup_eval.py \
 		--cases mashang_workspace/eval/cases/followup_cases.json \
 		--parse-text --as-of-date 2026-06-11
 
 ## Numeric Eval
 numeric-eval:
-	python mashang_workspace/eval/run_numeric_eval.py
+	$(PYTHON) mashang_workspace/eval/run_numeric_eval.py
 
 ## Reference Eval
 reference-eval:
-	python mashang_workspace/eval/run_reference_eval.py
+	$(PYTHON) mashang_workspace/eval/run_reference_eval.py
 
 ## ATP 月报 Demo
 atp-demo:
-	python mashang_workspace/scripts/atp_price_report.py --month 2026-05 --format json
+	$(PYTHON) mashang_workspace/runtime_scripts/atp_price_report.py --month 2026-05 --format json
 
 ## 锁单预测回测 Demo
 backtest-demo:
-	python mashang_workspace/scripts/lock_predict_backtest_cli.py --format json
+	$(PYTHON) mashang_workspace/research_scripts/lock_predict_backtest_cli.py --format json
 
 ## Capability Audit
 capability-audit:
-	python mashang_workspace/eval/run_capability_audit.py --format json --output mashang_workspace/outputs/tables/capability_audit_result.json
+	$(PYTHON) mashang_workspace/eval/run_capability_audit.py --format json --output mashang_workspace/outputs/tables/capability_audit_result.json
 
 ## Runtime V2 Readiness Audit
 runtime-v2-audit:
-	python mashang_workspace/eval/run_runtime_v2_audit.py --format json --output mashang_workspace/outputs/tables/runtime_v2_audit_result.json
+	$(PYTHON) mashang_workspace/eval/run_runtime_v2_audit.py --format json --output mashang_workspace/outputs/tables/runtime_v2_audit_result.json
 
 ## Shared Audit
 shared-audit:
-	python -c "from mashang_workspace.utils.paths import BUSINESS_DEFINITION_PATH, ensure_shared_on_path; ensure_shared_on_path(); import operators; print('shared ok:', BUSINESS_DEFINITION_PATH)"
+	$(PYTHON) -c "from mashang_workspace.utils.paths import BUSINESS_DEFINITION_PATH, ensure_shared_on_path; ensure_shared_on_path(); import operators; print('shared ok:', BUSINESS_DEFINITION_PATH)"
 
 ## Runtime V2 Demo
 runtime-v2-demo:
-	python mashang_runtime_v2/app/runtime_service.py "昨天锁单数分车型"
+	$(PYTHON) mashang_runtime_v2/app/runtime_service.py "昨天锁单数分车型"
 
 runtime-v2-city-demo:
-	python mashang_runtime_v2/app/runtime_service.py "昨天 LS8 锁单城市分布"
+	$(PYTHON) mashang_runtime_v2/app/runtime_service.py "昨天 LS8 锁单城市分布"
 
 runtime-v2-followup-demo:
-	python mashang_runtime_v2/app/runtime_service.py "昨天锁单数分车型" --session demo --reset-session
-	python mashang_runtime_v2/app/runtime_service.py "LS8 的城市分布" --session demo
+	$(PYTHON) mashang_runtime_v2/app/runtime_service.py "昨天锁单数分车型" --session demo --reset-session
+	$(PYTHON) mashang_runtime_v2/app/runtime_service.py "LS8 的城市分布" --session demo
 
 runtime-v2-eval:
-	python mashang_runtime_v2/eval/run_runtime_v2_eval.py
+	$(PYTHON) mashang_runtime_v2/eval/run_runtime_v2_eval.py
 
 runtime-v2-clean-sessions:
-	python mashang_runtime_v2/app/runtime_service.py --cleanup-sessions
+	$(PYTHON) mashang_runtime_v2/app/runtime_service.py --cleanup-sessions
+
+## ─── Daily Data Pipeline ──────────────────────────────────────────
+
+## 数据集更新（从 Tableau/数据源刷新 dataset/*.parquet/.csv）
+## 注意：写操作，会修改本地 dataset 文件
+dataset-update:
+	$(PYTHON) dataset/updater/update_all_datasets.py
+
+## 数据集完整性校验（只读）
+dataset-validate:
+	$(PYTHON) mashang_workspace/utility_scripts/dataset_validate.py
+
+## 每日观察预检 dry-run（仅本地计算，不写外部系统）
+daily-observation-dry-run:
+	$(PYTHON) mashang_workspace/utility_scripts/skills_order_observation_daily.py --dry-run
+
+## 每日观察同步（计算并写入飞书多维表格/机器人）
+## 注意：写操作，会同步外部系统
+daily-observation-sync:
+	$(PYTHON) mashang_workspace/utility_scripts/skills_order_observation_daily.py
+
+## 每日数据管道 dry-run（安全预检，不含写操作）
+daily-data-pipeline-dry-run: dataset-validate daily-observation-dry-run
+
+## 每日数据管道完整执行（包含写操作）
+## 注意：会刷新 dataset 并同步外部系统
+daily-data-pipeline: dataset-update dataset-validate daily-observation-sync
+
+## [废弃] 请使用 daily-observation-dry-run 替代
+daily-sync-dry-run:
+	@echo "[DEPRECATED] Use 'make daily-observation-dry-run' instead."
+	$(MAKE) daily-observation-dry-run
+
+## ─── ──────────────────────────────────────────────────────────────
 
 ## 清理输出文件
 clean-outputs:
@@ -101,12 +136,15 @@ clean-outputs:
 
 ## 帮助
 help:
+	@echo "=== Eval / Test ==="
 	@echo "make eval            默认 Eval（core + parser + followup + reference）"
 	@echo "make full-eval       完整 Eval（含 research）"
 	@echo "make core-eval       Core 脚本 Eval"
 	@echo "make research-eval   Research 脚本 Eval"
 	@echo "make test            完整测试"
 	@echo "make ci              CI 门禁"
+	@echo ""
+	@echo "=== Analysis Demos ==="
 	@echo "make data-dict       数据字典"
 	@echo "make lock-demo       锁单 Demo"
 	@echo "make parser-demo     Context Parser Demo"
@@ -115,12 +153,27 @@ help:
 	@echo "make reference-eval  Reference Eval"
 	@echo "make atp-demo        ATP 月报 Demo"
 	@echo "make backtest-demo   锁单预测回测 Demo"
+	@echo ""
+	@echo "=== Audit ==="
 	@echo "make capability-audit  Capability Audit"
 	@echo "make shared-audit     Shared Layer Audit"
 	@echo "make runtime-v2-audit  Runtime V2 Readiness Audit"
+	@echo ""
+	@echo "=== Runtime V2 ==="
 	@echo "make runtime-v2-demo  Runtime V2 Demo (锁单车型)"
 	@echo "make runtime-v2-city-demo  Runtime V2 Demo (城市分布)"
 	@echo "make runtime-v2-followup-demo  Runtime V2 多轮追问 Demo"
 	@echo "make runtime-v2-eval  Runtime V2 Eval"
 	@echo "make runtime-v2-clean-sessions  Runtime V2 清理过期 Session"
+	@echo ""
+	@echo "=== Daily Data Pipeline ==="
+	@echo "make dataset-update           刷新 dataset（写操作）"
+	@echo "make dataset-validate         校验 dataset（只读）"
+	@echo "make daily-observation-dry-run  每日观察预检（只读）"
+	@echo "make daily-observation-sync    每日观察同步（写操作）"
+	@echo "make daily-data-pipeline-dry-run  管道 dry-run（安全预检）"
+	@echo "make daily-data-pipeline      完整管道（含写操作）"
+	@echo "make daily-sync-dry-run       [DEPRECATED]"
+	@echo ""
+	@echo "=== Utility ==="
 	@echo "make clean-outputs     清理输出文件"

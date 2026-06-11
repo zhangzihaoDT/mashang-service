@@ -30,7 +30,7 @@ mashang-service 是一个**汽车业务数据分析项目**，包含两个子分
 6. **`mashang_workspace` 是日常唯一主工作区**
 7. **OpenCode 应优先读取 `mashang_workspace/AGENTS.md`**
 8. **不要在根目录创建新的 `docs/scripts/eval/tests/utils`**
-9. **新分析能力优先沉淀到 `mashang_workspace/scripts + docs + eval`**
+9. **新分析能力优先沉淀到 `mashang_workspace/runtime_scripts/ + research_scripts/ + docs/ + eval/`**
 10. **每次完成改动后运行 `make eval` 或 `make ci`**
 11. **只有稳定、高频、口径明确的能力才回流 `mashang_runtime`**
 
@@ -303,21 +303,23 @@ mashang-service/
 | 查询类型 | CLI 方式 |
 |----------|----------|
 | CLI 问答 | `python main.py "昨天锁单数"` |
-| 锁单总览 | `python mashang_workspace/scripts/daily_lock_count.py` |
-| 车型拆分 | `python mashang_workspace/scripts/lock_by_model.py --limit 5` |
-| 城市分布 | `python mashang_workspace/scripts/lock_city_distribution.py` |
-| 释放曲线 | `python mashang_workspace/scripts/release_curve_analysis.py` |
-| 预测锁单 | `python mashang_workspace/scripts/cohort_forecast.py` |
-| VOC 分析 | `python mashang_workspace/scripts/voc_theme_analysis.py` |
-| ATP 月报 | `python mashang_workspace/scripts/atp_price_report.py 2026-05` |
-| 回测 | `python mashang_workspace/scripts/lock_predict_backtest_cli.py` |
-| 线索转化 | `python mashang_workspace/scripts/assign_conversion_analysis.py` |
-| 配置渗透率 | `python mashang_workspace/scripts/attribute_penetration_report.py` |
-| 数据字典 | `python mashang_workspace/scripts/data_dictionary.py` |
-| 每日观察 | `python mashang_workspace/scripts/skills_order_observation_daily.py` |
-| 达成率预警 | `python mashang_workspace/scripts/skills_attainment_rate_alert.py --days 10` |
-| 同比分析 | `python mashang_workspace/scripts/quick_lock_ratio.py` |
-| 生成 Eval | `python mashang_workspace/scripts/generate_eval_cases.py` |
+| 锁单总览 | `python mashang_workspace/runtime_scripts/daily_lock_count.py` | runtime |
+| 车型拆分 | `python mashang_workspace/runtime_scripts/lock_by_model.py --limit 5` | runtime |
+| 城市分布 | `python mashang_workspace/runtime_scripts/lock_city_distribution.py` | runtime |
+| 线索转化 | `python mashang_workspace/runtime_scripts/assign_conversion_analysis.py` | runtime |
+| 配置渗透率 | `python mashang_workspace/runtime_scripts/attribute_penetration_report.py` | runtime |
+| ATP 月报 | `python mashang_workspace/runtime_scripts/atp_price_report.py 2026-05` | runtime |
+| 释放曲线 | `python mashang_workspace/research_scripts/release_curve_analysis.py` | research |
+| 预测锁单 | `python mashang_workspace/research_scripts/cohort_forecast.py` | research |
+| 回测 | `python mashang_workspace/research_scripts/lock_predict_backtest_cli.py` | research |
+| 同比分析 | `python mashang_workspace/research_scripts/quick_lock_ratio.py` | research |
+| VOC 分析 | `python mashang_workspace/utility_scripts/voc_theme_analysis.py` | utility |
+| 数据字典 | `python mashang_workspace/utility_scripts/data_dictionary.py` | utility |
+| 每日观察 | `python mashang_workspace/utility_scripts/skills_order_observation_daily.py` | utility |
+| 达成率预警 | `python mashang_workspace/utility_scripts/skills_attainment_rate_alert.py --days 10` | utility |
+| 生成 Eval | `python mashang_workspace/utility_scripts/generate_eval_cases.py` | utility |
+| 数据更新并同步 | `make daily-data-pipeline` (写操作) | DataOps |
+| 预检数据 | `make daily-data-pipeline-dry-run` | DataOps |
 | 运行 Runtime Eval | `python eval/run_runtime_eval.py` |
 | 运行 Follow-up Eval | `python mashang_workspace/eval/run_followup_eval.py` |
 | 运行 Numeric Eval | `python mashang_workspace/eval/run_numeric_eval.py` |

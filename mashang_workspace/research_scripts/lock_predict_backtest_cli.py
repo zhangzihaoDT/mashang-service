@@ -5,10 +5,10 @@ Cohort 锁单预测回测 — 包装 lock_predict_backtest.py，统一 CLI + Res
 通过 subprocess 调用原脚本，从 stdout 解析 MAE/RMSE/MAPE 等指标。
 
 用法:
-    python mashang_workspace/scripts/lock_predict_backtest_cli.py
-    python mashang_workspace/scripts/lock_predict_backtest_cli.py --start-date 2026-05-01 --end-date 2026-05-31
-    python mashang_workspace/scripts/lock_predict_backtest_cli.py --format json
-    python mashang_workspace/scripts/lock_predict_backtest_cli.py --help
+    python mashang_workspace/research_scripts/lock_predict_backtest_cli.py
+    python mashang_workspace/research_scripts/lock_predict_backtest_cli.py --start-date 2026-05-01 --end-date 2026-05-31
+    python mashang_workspace/research_scripts/lock_predict_backtest_cli.py --format json
+    python mashang_workspace/research_scripts/lock_predict_backtest_cli.py --help
 """
 
 import sys, argparse, json, subprocess, re
@@ -82,7 +82,7 @@ def main():
         if metrics["mae"] is None:
             # partial success: can't extract metrics
             contract = build_partial_contract(
-                script="mashang_workspace/scripts/lock_predict_backtest_cli.py", command=cmd,
+                script="mashang_workspace/research_scripts/lock_predict_backtest_cli.py", command=cmd,
                 scope={"data_source": "dataset/assign_data.csv",
                        "time_window": {},
                        "metric_definition": "cohort forecast backtest based on lead-lock release logic"},
@@ -102,7 +102,7 @@ def main():
                 "metrics": {"mae": m["mae"], "rmse": m["rmse"], "mape": m["mape"], "case_count": m["n"]},
             }
             contract = build_partial_contract(
-                script="mashang_workspace/scripts/lock_predict_backtest_cli.py", command=cmd,
+                script="mashang_workspace/research_scripts/lock_predict_backtest_cli.py", command=cmd,
                 scope=scope, result=result,
                 warnings=["预测阶段 age<7d 使用加权平均，可能存在偏差"],
                 followup_context={"metric": "cohort_forecast_backtest", "available_dimensions": ["cohort_date"]},
@@ -113,7 +113,7 @@ def main():
 
     except subprocess.TimeoutExpired:
         contract = build_partial_contract(
-            script="mashang_workspace/scripts/lock_predict_backtest_cli.py", command=cmd,
+            script="mashang_workspace/research_scripts/lock_predict_backtest_cli.py", command=cmd,
             scope={"data_source": "dataset/assign_data.csv"},
             result={"summary": "原脚本执行超时"},
             warnings=["原脚本执行超时 (300s)，请直接运行 lock_predict_backtest.py"],
@@ -121,7 +121,7 @@ def main():
         )
     except Exception as e:
         contract = build_partial_contract(
-            script="mashang_workspace/scripts/lock_predict_backtest_cli.py", command=cmd,
+            script="mashang_workspace/research_scripts/lock_predict_backtest_cli.py", command=cmd,
             scope={"data_source": "dataset/assign_data.csv"},
             result={"summary": "执行异常"},
             warnings=[f"异常: {e}"],

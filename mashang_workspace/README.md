@@ -12,7 +12,10 @@ mashang_workspace/
 ├── AGENTS.md              # Workspace Agent 指南
 ├── README.md              # 本文件
 ├── docs/                  # 业务文档（术语/指标/车型/时间/分析范式/追问/合同）
-├── scripts/               # 独立分析脚本（~16 个）
+├── runtime_scripts/       # Core — Runtime V2 可调度（6 个稳定分析脚本）
+├── research_scripts/      # Research — 预测/回测/释放曲线（6 个）
+├── utility_scripts/       # Utility — DataOps/SyncOps/工具（5 个）
+├── legacy_scripts/        # Legacy — Frozen reference（仅历史保留，不活跃开发）
 ├── eval/                  # Eval 测试框架
 │   ├── run_followup_eval.py    # 多轮追问 Runner
 │   ├── run_numeric_eval.py     # 数值校验 Runner
@@ -25,7 +28,7 @@ mashang_workspace/
 ├── utils/                 # 工具模块
 │   └── paths.py           # 路径工具
 └── outputs/               # 输出文件
-    ├── reports/           # HTML/MD 报告
+    ├── reports/           # HTML/MD 报告（从 scripts/reports/ 迁移）
     ├── charts/            # PNG/SVG 图表
     └── tables/            # CSV/JSON 结果表
 ```
@@ -33,25 +36,27 @@ mashang_workspace/
 ## 常用命令
 
 ```bash
-# 数据字典
-python mashang_workspace/scripts/data_dictionary.py --input dataset
+# 数据字典（utility）
+python mashang_workspace/utility_scripts/data_dictionary.py --input dataset
 
-# 锁单分析
-python mashang_workspace/scripts/daily_lock_count.py --date 2026-06-10
-python mashang_workspace/scripts/lock_by_model.py --date 2026-06-10 --limit 5
-python mashang_workspace/scripts/lock_city_distribution.py --date 2026-06-10 --series LS8
+# 锁单分析（runtime）
+python mashang_workspace/runtime_scripts/daily_lock_count.py --date 2026-06-10
+python mashang_workspace/runtime_scripts/lock_by_model.py --date 2026-06-10 --limit 5
+python mashang_workspace/runtime_scripts/lock_city_distribution.py --date 2026-06-10 --series LS8
 
-# 释放曲线 / 预测 / VOC
-python mashang_workspace/scripts/release_curve_analysis.py
-python mashang_workspace/scripts/cohort_forecast.py
-python mashang_workspace/scripts/voc_theme_analysis.py
+# 释放曲线 / 预测（research）
+python mashang_workspace/research_scripts/release_curve_analysis.py
+python mashang_workspace/research_scripts/cohort_forecast.py
 
-# 线索转化 / 配置渗透率
-python mashang_workspace/scripts/assign_conversion_analysis.py
-python mashang_workspace/scripts/attribute_penetration_report.py
+# VOC 分析（utility）
+python mashang_workspace/utility_scripts/voc_theme_analysis.py
 
-# ATP 月报
-python mashang_workspace/scripts/atp_price_report.py 2026-05
+# 线索转化 / 配置渗透率（runtime）
+python mashang_workspace/runtime_scripts/assign_conversion_analysis.py
+python mashang_workspace/runtime_scripts/attribute_penetration_report.py
+
+# ATP 月报（runtime）
+python mashang_workspace/runtime_scripts/atp_price_report.py 2026-05
 
 # Context Parser
 python mashang_workspace/eval/parse_context_cli.py "昨天锁单数分车型"

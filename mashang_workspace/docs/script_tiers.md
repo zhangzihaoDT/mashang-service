@@ -1,17 +1,29 @@
 # Script Tiers — 脚本分层治理
 
-## 四层分类
+## 四层分类 + 物理目录
 
-| Tier | 说明 | 自动调度 | Core Eval | Research Eval | 示例 |
-|------|------|:--------:|:---------:|:-------------:|------|
-| **core** | 稳定日常脚本，can be auto-invoked by followup_runner / OpenCode | ✅ | ✅ | ❌ | lock_by_model, daily_lock_count |
-| **research** | 研发脚本，仅用户明确要求时调用（预测/回测/释放曲线） | ❌ | ❌ | ✅ | cohort_forecast, backtest, release_curve |
-| **utility** | 基础设施脚本，非分析能力 | ❌ | ❌ | ❌ | data_dictionary, generate_eval_cases |
-| **legacy** | 原始保留脚本，不主动开发 | ❌ | ❌ | ❌ | skills_atp_price, lock_predict_backtest |
+| Tier | 目录 | 说明 | 自动调度 | Core Eval | Research Eval | 示例 |
+|------|------|------|:--------:|:---------:|:-------------:|------|
+| **core** | `runtime_scripts/` | 稳定日常脚本，can be auto-invoked by followup_runner / OpenCode / Runtime V2 | ✅ | ✅ | ❌ | lock_by_model, daily_lock_count |
+| **research** | `research_scripts/` | 研发脚本，仅用户明确要求时调用（预测/回测/释放曲线） | ❌ | ❌ | ✅ | cohort_forecast, backtest, release_curve |
+| **utility** | `utility_scripts/` | 基础设施脚本（DataOps/SyncOps/数据字典/VOC），非分析能力 | ❌ | ❌ | ❌ | data_dictionary, skills_order_observation_daily |
+| **legacy** | `legacy_scripts/` | Frozen reference — 仅保留历史参考，不可被 Runtime V2 调度 | ❌ | ❌ | ❌ | skills_atp_price |
+
+## 四层物理目录位置
+
+```
+mashang_workspace/
+├── runtime_scripts/       # Core — Runtime V2 可调度
+├── research_scripts/      # Research — 仅手动执行
+├── utility_scripts/       # Utility — DataOps/SyncOps 工具
+├── legacy_scripts/        # Legacy — 历史保留
+├── outputs/reports/       # 报告输出
+└── (mashang_workspace/scripts/ 已删除)
+```
 
 ## 脚本 Tier 归属
 
-### Core Scripts (6 个)
+### Core Scripts (6 个) — `runtime_scripts/`
 
 | 脚本 | 说明 | CLI | Result Contract | Make target |
 |------|------|:---:|:---------------:|-------------|
@@ -22,38 +34,39 @@
 | `attribute_penetration_report.py` | 配置渗透率 | `--series --attribute --limit --format` | ✅ | — |
 | `atp_price_report.py` | ATP 月报 | `--month --format` | ✅ | `make atp-demo` |
 
-### Research Scripts (3 个)
+### Research Scripts (6 个) — `research_scripts/`
 
 | 脚本 | 说明 | CLI | Result Contract | Make target |
 |------|------|:---:|:---------------:|-------------|
 | `cohort_forecast.py` | 预测锁单 | `--start-date --end-date --format` | ✅ (partial) | — |
 | `lock_predict_backtest_cli.py` | 回测验证 | `--start-date --end-date --format` | ✅ (partial) | `make backtest-demo` |
-| `release_curve_analysis.py` | 释放曲线 | `--output --format` | ❌ (wrapper) | — |
+| `lock_predict_backtest.py` | 回测原脚本 | — | ❌ | — |
+| `lock_release_curve.py` | 释放曲线核心 | — | ❌ | — |
+| `release_curve_analysis.py` | 释放曲线报告 | `--output --format` | ❌ (wrapper) | — |
+| `quick_lock_ratio.py` | 同比分析 | — | ❌ | — |
 
-### Utility Scripts (4 个)
+### Utility Scripts (5 个) — `utility_scripts/`
+
+| 脚本 | 说明 | 定位 |
+|------|------|------|
+| `data_dictionary.py` | 数据字典 | 数据工具 |
+| `voc_theme_analysis.py` | VOC 骨架 | 分析工具 |
+| `generate_eval_cases.py` | Eval 用例生成 | 测试工具 |
+| `skills_order_observation_daily.py` | 每日数据观察与同步 | **DataOps/SyncOps** |
+| `skills_attainment_rate_alert.py` | 达成率预警 | 监控工具 |
+
+### Legacy Scripts (1 个) — `legacy_scripts/`
 
 | 脚本 | 说明 |
 |------|------|
-| `data_dictionary.py` | 数据字典 |
-| `voc_theme_analysis.py` | VOC 骨架 |
-| `generate_eval_cases.py` | Eval 用例生成 |
-| `skills_attainment_rate_alert.py` | 达成率预警 |
-
-### Legacy Scripts (4 个)
-
-| 脚本 | 说明 |
-|------|------|
-| `skills_atp_price.py` | ATP 原脚本 |
-| `lock_predict_backtest.py` | 回测原脚本 |
-| `skills_order_observation_daily.py` | 原每日观察 |
-| `quick_lock_ratio.py` | 同比分析（大型脚本） |
+| `skills_atp_price.py` | ATP 原脚本（已由 runtime_scripts/atp_price_report.py 替代） |
 
 ## Eval 分层
 
 | Suite | 覆盖 | 数据依赖 |
 |-------|------|:--------:|
 | `core` | 6 个 core scripts 的 contract + numeric | ✅ |
-| `research` | 3 个 research scripts 的 contract + numeric | ✅ |
+| `research` | 6 个 research scripts 的 contract + numeric | ✅ |
 | `all` | core + research + parser + followup + reference + smoke | ✅ |
 | `ci` | parser + followup + reference (不依赖真实数据) | ❌ |
 
@@ -67,10 +80,26 @@
 | `make research-eval` | research suites only |
 | `make ci` | CI-safe suites |
 
+## 外部数据供给层
+
+数据刷新由 `dataset/updater/` 负责，不属于 workspace 分析脚本：
+
+| 脚本 | 职责 | 写操作 |
+|------|------|--------|
+| `dataset/updater/update_all_datasets.py` | 从 Tableau/数据源刷新 dataset | ✅ 刷新本地文件 |
+| `dataset/updater/order_data_to_parquet.py` | 刷新 order_data.parquet | ✅ |
+| `dataset/updater/order_config_to_parquet.py` | 刷新 config_attribute.parquet | ✅ |
+| `dataset/updater/lock_attribution_data_to_parquet.py` | 刷新 assign/test_drive/lock_attribution | ✅ |
+
+详见 `docs/daily_data_pipeline.md`。
+
 ## 使用规则
 
-1. **OpenCode / followup_runner** 只能自动调用 **core** tier 脚本
-2. 用户明确提到"预测""回测""释放曲线"等关键词时，可调用 **research** tier
-3. **utility / legacy** 脚本不应被自动化工具直接调用（data_dictionary 例外）
-4. 新脚本默认进入 **research**，稳定迭代后升为 **core**
-5. 核心口径变更必须先批准再升级
+1. **OpenCode / followup_runner / Runtime V2** 只能自动调用 **runtime_scripts/** （core tier）脚本
+2. 用户明确提到"预测""回测""释放曲线"等关键词时，可调用 **research_scripts/**
+3. **utility_scripts/** 和 **legacy_scripts/** 不应被自动化工具直接调用（data_dictionary 例外）
+4. **skills_order_observation_daily.py** 是 DataOps/SyncOps 脚本，涉及外部写操作，必须通过 dry-run/execute 安全开关
+5. **dataset/updater/** 是数据供给基础设施，不属于 workspace 分析能力
+6. **Runtime V2 不调度 dataset/updater 和 utility_scripts**
+7. 新脚本默认进入 **research_scripts/**，稳定迭代后升为 **runtime_scripts/**
+8. 核心口径变更必须先批准再升级

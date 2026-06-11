@@ -8,12 +8,23 @@ import sys
 from pathlib import Path
 
 _WS_DIR = Path(__file__).resolve().parents[2]
-SCRIPTS_DIR = _WS_DIR / "scripts"
+RUNTIME_DIR = _WS_DIR / "runtime_scripts"
+RESEARCH_DIR = _WS_DIR / "research_scripts"
+UTILITY_DIR = _WS_DIR / "utility_scripts"
+
+
+def _find_script(script_name: str) -> Path | None:
+    """在 runtime/research/utility 目录中查找脚本。"""
+    for d in (RUNTIME_DIR, RESEARCH_DIR, UTILITY_DIR):
+        p = d / script_name
+        if p.exists():
+            return p
+    return None
 
 
 def _run_help(script_name: str) -> bool:
-    """运行 python scripts/<name>.py --help，返回是否成功。"""
-    script_path = SCRIPTS_DIR / script_name
+    """运行 python <tier>/<name>.py --help，返回是否成功。"""
+    script_path = _find_script(script_name)
     if not script_path.exists():
         print(f"[FAIL] 脚本不存在: {script_path}")
         return False

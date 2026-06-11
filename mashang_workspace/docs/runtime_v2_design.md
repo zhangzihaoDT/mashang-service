@@ -14,6 +14,7 @@
 7. **Runtime V2 的核心是 capability dispatch**，而不是复杂推理链
 8. **Runtime V2 支持多轮上下文**，但优先复用 workspace 的 context_parser / followup_runner / result_reference
 9. **Runtime V2 的每个能力必须能被 eval 验证** — capability audit + numeric eval + contract gate
+11. **Runtime V2 不调度 utility_scripts 和 legacy_scripts** — utility 是 DataOps/SyncOps 工具，legacy 是 frozen reference
 10. **Runtime V2 从 workspace 晋级能力中生长**，而不是从旧 Runtime 迁移而来
 
 ## 建议目录结构

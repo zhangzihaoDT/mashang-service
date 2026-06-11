@@ -7,7 +7,7 @@
 - Eval Runner: `eval/run_runtime_eval.py`
 - 用例文件: `eval/runtime_cases.jsonl` (自动生成)
 - 报告输出: `eval/eval_report.json`
-- 用例生成: `scripts/generate_eval_cases.py`
+- 用例生成: `utility_scripts/generate_eval_cases.py`
 
 ### 运行方式
 
@@ -131,12 +131,12 @@ context_parser 支持从文本解析结果引用:
 - `warnings / errors`
 
 已支持 Contract 的脚本 (6个):
-- `scripts/daily_lock_count.py` ✅
-- `scripts/lock_by_model.py` ✅
-- `scripts/lock_city_distribution.py` ✅
-- `scripts/cohort_forecast.py` ✅ (partial_success)
-- `scripts/assign_conversion_analysis.py` ✅
-- `scripts/attribute_penetration_report.py` ✅
+- `runtime_scripts/daily_lock_count.py` ✅
+- `runtime_scripts/lock_by_model.py` ✅
+- `runtime_scripts/lock_city_distribution.py` ✅
+- `research_scripts/cohort_forecast.py` ✅ (partial_success)
+- `runtime_scripts/assign_conversion_analysis.py` ✅
+- `runtime_scripts/attribute_penetration_report.py` ✅
 
 ### Numeric Eval
 
@@ -203,3 +203,24 @@ python mashang_workspace/eval/run_capability_audit.py
 ```
 
 覆盖 9 项检查: script_exists, tier_valid, status_valid, runtime_has_contract/numeric/gate, research/legacy_not_auto, promotion_fields.
+
+## Phase 13 Step 2.3: Remove Legacy Workspace Scripts Pool
+
+- `mashang_workspace/scripts/` 已删除
+- 脚本已物理分层到 `runtime_scripts/` / `research_scripts/` / `utility_scripts/` / `legacy_scripts/`
+- `paths.py` 中 `SCRIPTS_DIR` 已移除
+- `skills_order_observation_daily.py` 位于 `utility_scripts/`，DataOps/SyncOps，需要 `--dry-run` 安全模式
+- Runtime V2 只调度 `runtime_scripts/`
+- 所有代码路径不再引用 `mashang_workspace/scripts/`
+- `run_eval.py` output path 双前缀问题已修复（resolve_output_path）
+- `outputs/tables/` 中引用旧 `scripts/` 路径的缓存已清理
+- `legacy_scripts/README.md` 明确其 frozen reference 定位
+- `daily-sync-dry-run` 已废弃，改用 `daily-observation-dry-run`
+- `Makefile` 新增 dataset-update / dataset-validate / daily-observation-dry-run / daily-observation-sync / daily-data-pipeline / daily-data-pipeline-dry-run
+- `utility_scripts/dataset_validate.py` 新增轻量校验脚本
+- `docs/daily_data_pipeline.md` 新增完整 daily data pipeline 文档
+- Makefile 所有 `python` 命令统一为 `$(PYTHON)`（`PYTHON ?= .venv/bin/python`）
+- `PYTHON` 变量可通过 `PYTHON=python3 make target` 覆盖
+- 自然语言入口统一为"数据更新并同步"，非"今天的数据更新并同步"
+- `daily-sync-dry-run` 已废弃为别名，指向 `daily-observation-dry-run`
+- `make test` 新增 11 个 Makefile PYTHON / wording 检查

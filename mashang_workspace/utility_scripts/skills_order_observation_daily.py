@@ -28,13 +28,17 @@ _WS_ROOT = Path(__file__).resolve().parents[1]
 if str(_WS_ROOT) not in sys.path:
     sys.path.insert(0, str(_WS_ROOT))
 
+# Ensure shared/operators is on sys.path
+from utils.paths import ensure_shared_on_path
+ensure_shared_on_path()
+
 from operators.mature_lock_prediction import run_mature_lock_prediction_operator
 from operators.assign_conversion import _parse_cn_date
 load_dotenv(REPO_ROOT / ".env")
 
 # 配置常量
 PARQUET_FILE = str(REPO_ROOT / "dataset" / "order_data.parquet")
-BUSINESS_DEF_FILE = REPO_ROOT / "schema" / "business_definition.json"
+BUSINESS_DEF_FILE = REPO_ROOT / "shared" / "schema" / "business_definition.json"
 # 适配新数据集的 series 值：CM2->LS6, DM1->L6
 TARGET_MODELS = ["LS6", "L6", "LS8", "LS9"]
 WEBHOOK_URL = os.getenv("FS_WEBHOOK_URL")

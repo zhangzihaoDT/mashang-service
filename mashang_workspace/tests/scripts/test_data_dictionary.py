@@ -13,7 +13,7 @@ PROJECT_ROOT = REPO_ROOT.parent
 
 def test_data_dict_help():
     """--help 正常输出。"""
-    script = REPO_ROOT / "scripts" / "data_dictionary.py"
+    script = REPO_ROOT / "utility_scripts" / "data_dictionary.py"
     result = subprocess.run(
         [sys.executable, str(script), "--help"],
         capture_output=True, text=True, timeout=30,
@@ -23,7 +23,7 @@ def test_data_dict_help():
 
 def test_data_dict_terminal_output():
     """默认参数输出 terminal 格式不崩溃。"""
-    script = REPO_ROOT / "scripts" / "data_dictionary.py"
+    script = REPO_ROOT / "utility_scripts" / "data_dictionary.py"
     result = subprocess.run(
         [sys.executable, str(script), "--input", "dataset", "--format", "terminal"],
         capture_output=True, text=True, timeout=120,
@@ -35,7 +35,7 @@ def test_data_dict_terminal_output():
 def test_data_dict_csv_output():
     """--format csv 能正常生成 CSV 文件。"""
     with tempfile.TemporaryDirectory() as tmpdir:
-        script = REPO_ROOT / "scripts" / "data_dictionary.py"
+        script = REPO_ROOT / "utility_scripts" / "data_dictionary.py"
         result = subprocess.run(
             [sys.executable, str(script), "--input", "dataset", "--format", "csv", "--output", tmpdir],
             capture_output=True, text=True, timeout=120,
@@ -50,7 +50,7 @@ def test_data_dict_csv_output():
 def test_data_dict_json_output():
     """--format json 能正常生成 JSON 文件。"""
     with tempfile.TemporaryDirectory() as tmpdir:
-        script = REPO_ROOT / "scripts" / "data_dictionary.py"
+        script = REPO_ROOT / "utility_scripts" / "data_dictionary.py"
         result = subprocess.run(
             [sys.executable, str(script), "--input", "dataset", "--format", "json", "--output", tmpdir],
             capture_output=True, text=True, timeout=120,
