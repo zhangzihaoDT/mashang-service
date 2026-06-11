@@ -1,0 +1,46 @@
+[
+  {
+    "title": "在营门店",
+    "summary": "对窗口内每一天，统计门店在当天及往前29天（共30天窗口）存在订单活动、且开店日 <= 当天的不重复门店数。"
+  },
+  {
+    "title": "留存小订（计数）",
+    "summary": "对指定 series，按 business_definition.time_periods 的 start~end（预售期）筛选意向金订单（intention_payment_time 落在预售期内，order_number 去重）；按查询日期的当日结束时刻判定留存：exit_time（intention_refund_time / deposit_payment_time / deposit_refund_time / lock_time 中的最小值）为空或 >= 当日+1天即为留存。支持单日查询和逐日趋势。"
+  },
+  {
+    "title": "留存小订（转化率）",
+    "summary": "在留存小订基础上，进一步计算从小订到锁单/交付的转化漏斗。支持车系过滤。"
+  },
+  {
+    "title": "年龄代际分布",
+    "summary": "根据身份证号或年龄字段推算出生年份，按 00后/95后/90后/…/60前 分组统计人数及占比。支持车系过滤。"
+  },
+  {
+    "title": "城市线级分布",
+    "summary": "将城市按内置 mapping 归为 一线/新一线/二线/三线及以下 四档，统计各档人数及占比。支持车系过滤。"
+  },
+  {
+    "title": "省份 TopK 占比",
+    "summary": "将城市映射到省份，按用户指定的 TopK（从 query 中解析）统计省份集中度及占比。支持车系过滤。"
+  },
+  {
+    "title": "店均锁单数",
+    "summary": "日锁单数 / 在营门店数，计算窗口内每日店均锁单量及整体均值。在营门店定义：当天及往前29天存在订单活动且已开业的门店。"
+  },
+  {
+    "title": "下发线索转化率",
+    "summary": "基于 assign_data 计算下发线索在各渠道、各窗口（当日/7日/30日）的试驾率与锁单率，含门店线索占比、当日试驾率、当日/7日/30日锁单率及分渠道（门店/直播/平台/APP小程序/快慢闪）锁单率共13项比率。"
+  },
+  {
+    "title": "下发线索加权锁单率",
+    "summary": "0.4 × (门店当日锁单率 × 门店线索占比) + 0.4 × 下发线索7日锁单率 + 0.2 × 下发线索30日锁单率，基于 assign_data 按窗口聚合计算每日及整体加权锁单率。"
+  },
+  {
+    "title": "预测锁单数 / 下发线索成熟度预测锁单数 (Lead Maturity Forecast Locks)",
+    "summary": "基于成熟度曲线（Maturity Curve）修正右删失数据，对未完全成熟的下发线索 cohort（age < 30d）预测其最终30日锁单数。三段式：age>=30d 用原始值；7d≤age<30d 用 lock_7 ÷ r7 推算；age<7d 用 0.5×avg + 0.5×当日锁单推测。r7/r0 来自历史完全成熟 cohort。"
+  },
+  {
+    "title": "开票均价 (ATP – Average Transaction Price)",
+    "summary": "对指定时间窗口内 lock_time 非空、order_type='用户车' 的订单，按 invoice_amount 计算全局平均开票价格及总金额，并按 series_derived / series_group_logic / product_type / product_name 分组建明细（含订单数和均价）。要求数据集包含 invoice_amount、invoice_upload_time、lock_time、order_number、product_name 列。"
+  }
+]

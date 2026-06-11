@@ -1,0 +1,1 @@
+../scripts/lock_by_model.py

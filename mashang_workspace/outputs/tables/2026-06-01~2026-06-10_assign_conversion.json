@@ -1,0 +1,36 @@
+{
+  "status": "success",
+  "script": "scripts/assign_conversion_analysis.py",
+  "command": "python scripts/assign_conversion_analysis.py --start-date 2026-06-01 --end-date 2026-06-10 --format json --output outputs/tables/",
+  "generated_at": "2026-06-11T13:41:02",
+  "scope": {
+    "data_source": "/Users/zihao_/Documents/github/mashang-service/dataset/assign_data.csv",
+    "time_window": {
+      "type": "range",
+      "start_date": "2026-06-01",
+      "end_date": "2026-06-09"
+    },
+    "filters": {},
+    "metric_definition": "下发线索 → 试驾/7日锁单/30日锁单"
+  },
+  "result": {
+    "summary": "2026-06-01~2026-06-10 下发线索转化率",
+    "metrics": {
+      "total_leads": 114158,
+      "store_ratio_pct": 20.2,
+      "drive_rate_pct": 7.6,
+      "lock7_rate_pct": 1.0,
+      "lock30_rate_pct": 1.0
+    }
+  },
+  "artifacts": {},
+  "followup_context": {
+    "metric": "assign_conversion",
+    "available_dimensions": [
+      "渠道",
+      "门店"
+    ]
+  },
+  "warnings": [],
+  "errors": []
+}

@@ -1,0 +1,84 @@
+[
+  {
+    "case_id": "numeric_lock_by_model_001",
+    "tier": "core",
+    "description": "lock_by_model.py 基本结构和非负校验",
+    "command": "python mashang_workspace/scripts/lock_by_model.py --date 2026-06-10 --format json",
+    "expected": {
+      "status": "success",
+      "metrics": {"total_lock_count": {"operator": ">=", "value": 0}},
+      "required_fields": ["scope", "result", "followup_context", "followup_context.top_entities"]
+    }
+  },
+  {
+    "case_id": "numeric_lock_city_distribution_002",
+    "tier": "core",
+    "description": "lock_city_distribution.py 获取城市分布，至少返回 1 个城市",
+    "command": "python mashang_workspace/scripts/lock_city_distribution.py --date 2026-06-10 --format json",
+    "expected": {
+      "status": "success",
+      "metrics": {"total_lock_count": {"operator": ">=", "value": 0}},
+      "required_fields": ["result.dimensions"]
+    }
+  },
+  {
+    "case_id": "numeric_daily_lock_count_003",
+    "tier": "core",
+    "description": "daily_lock_count.py 基本校验",
+    "command": "python mashang_workspace/scripts/daily_lock_count.py --date 2026-06-10 --format json",
+    "expected": {
+      "status": "success",
+      "metrics": {"total_lock_count": {"operator": ">=", "value": 0}},
+      "required_fields": ["scope", "result", "followup_context"]
+    }
+  },
+  {
+    "case_id": "numeric_assign_conversion_004",
+    "tier": "core",
+    "description": "assign_conversion_analysis.py 基本校验",
+    "command": "python mashang_workspace/scripts/assign_conversion_analysis.py --start-date 2026-06-01 --end-date 2026-06-10 --format json",
+    "expected": {
+      "status": "success",
+      "metrics": {"total_leads": {"operator": ">=", "value": 0}},
+      "required_fields": ["scope", "result"]
+    }
+  },
+  {
+    "case_id": "numeric_attribute_penetration_005",
+    "tier": "core",
+    "description": "attribute_penetration_report.py 基本校验",
+    "command": "python mashang_workspace/scripts/attribute_penetration_report.py --series LS6 --attribute 激光雷达 --limit 5 --format json",
+    "expected": {
+      "status": "success",
+      "metrics": {"total_orders": {"operator": ">=", "value": 0}},
+      "required_fields": ["result.dimensions", "scope"]
+    }
+  },
+  {
+    "case_id": "numeric_atp_price_006",
+    "tier": "core",
+    "description": "atp_price_report.py ATP 月报基本校验",
+    "command": "python mashang_workspace/scripts/atp_price_report.py --month 2026-05 --format json",
+    "expected": {
+      "status": ["success", "partial_success"],
+      "required_fields": ["scope", "result", "followup_context"],
+      "metrics": {
+        "avg_atp": {"operator": ">=", "value": 0},
+        "vehicle_count": {"operator": ">=", "value": 0}
+      }
+    }
+  },
+  {
+    "case_id": "numeric_lock_predict_backtest_007",
+    "tier": "research",
+    "description": "lock_predict_backtest_cli.py 回测基本校验",
+    "command": "python mashang_workspace/scripts/lock_predict_backtest_cli.py --format json",
+    "expected": {
+      "status": ["success", "partial_success"],
+      "required_fields": ["scope", "result", "followup_context"],
+      "metrics": {
+        "case_count": {"operator": ">=", "value": 0}
+      }
+    }
+  }
+]

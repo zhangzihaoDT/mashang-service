@@ -1,0 +1,9 @@
+{
+  "enabled_capabilities": ["lock_by_model", "lock_city_distribution"],
+  "default_output_dir": "mashang_workspace/outputs/tables",
+  "script_timeout_seconds": 60,
+  "runtime_scripts": {
+    "lock_by_model": "mashang_workspace/runtime_scripts/lock_by_model.py",
+    "lock_city_distribution": "mashang_workspace/runtime_scripts/lock_city_distribution.py"
+  }
+}

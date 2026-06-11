@@ -1,0 +1,340 @@
+[
+  {
+    "capability_id": "daily_lock_count",
+    "name": "每日锁单数统计",
+    "tier": "runtime",
+    "status": "active",
+    "script": "mashang_workspace/scripts/daily_lock_count.py",
+    "auto_schedulable": true,
+    "result_contract": true,
+    "numeric_eval_case": "numeric_daily_lock_count_003",
+    "contract_gate": true,
+    "followup_supported": true,
+    "docs": [
+      "mashang_workspace/docs/metric_definitions.md",
+      "mashang_workspace/docs/analysis_playbook.md",
+      "mashang_workspace/docs/script_tiers.md"
+    ],
+    "promotion": {
+      "current_stage": "runtime_script",
+      "eligible_for_runtime_productization": false,
+      "eligible_for_runtime_script": false,
+      "blocked_reasons": [],
+      "eligible_for_runtime_v2": true,
+      "runtime_v2_candidate": true,
+      "candidate_stage": "v2_candidate"
+    },
+    "notes": "每日锁单基础统计，CLI 完整，Result Contract 完整，followup 支持。"
+  },
+  {
+    "capability_id": "lock_by_model",
+    "name": "锁单车型结构分析",
+    "tier": "runtime",
+    "status": "active",
+    "script": "mashang_workspace/scripts/lock_by_model.py",
+    "auto_schedulable": true,
+    "result_contract": true,
+    "numeric_eval_case": "numeric_lock_by_model_001",
+    "contract_gate": true,
+    "followup_supported": true,
+    "docs": [
+      "mashang_workspace/docs/metric_definitions.md",
+      "mashang_workspace/docs/analysis_playbook.md",
+      "mashang_workspace/docs/script_tiers.md"
+    ],
+    "promotion": {
+      "current_stage": "runtime_script",
+      "eligible_for_runtime_productization": true,
+      "eligible_for_runtime_script": false,
+      "blocked_reasons": [],
+      "eligible_for_runtime_v2": true,
+      "runtime_v2_candidate": true,
+      "candidate_stage": "v2_candidate"
+    },
+    "notes": "按车型/车系拆分锁单，支持系列分组和 TopN，result contract 含 dimensions/top_entities。"
+  },
+  {
+    "capability_id": "lock_city_distribution",
+    "name": "锁单城市分布分析",
+    "tier": "runtime",
+    "status": "active",
+    "script": "mashang_workspace/scripts/lock_city_distribution.py",
+    "auto_schedulable": true,
+    "result_contract": true,
+    "numeric_eval_case": "numeric_lock_city_distribution_002",
+    "contract_gate": true,
+    "followup_supported": true,
+    "docs": [
+      "mashang_workspace/docs/metric_definitions.md",
+      "mashang_workspace/docs/analysis_playbook.md",
+      "mashang_workspace/docs/script_tiers.md"
+    ],
+    "promotion": {
+      "current_stage": "runtime_script",
+      "eligible_for_runtime_productization": true,
+      "eligible_for_runtime_script": false,
+      "blocked_reasons": [],
+      "eligible_for_runtime_v2": true,
+      "runtime_v2_candidate": true,
+      "candidate_stage": "v2_candidate"
+    },
+    "notes": "按城市/大区拆分锁单分布，支持 TopN 和 region 分组，result contract 含 dimensions。"
+  },
+  {
+    "capability_id": "assign_conversion_analysis",
+    "name": "下发线索转化率分析",
+    "tier": "runtime",
+    "status": "active",
+    "script": "mashang_workspace/scripts/assign_conversion_analysis.py",
+    "auto_schedulable": true,
+    "result_contract": true,
+    "numeric_eval_case": "numeric_assign_conversion_004",
+    "contract_gate": true,
+    "followup_supported": true,
+    "docs": [
+      "mashang_workspace/docs/metric_definitions.md",
+      "mashang_workspace/docs/analysis_playbook.md",
+      "mashang_workspace/docs/script_tiers.md"
+    ],
+    "promotion": {
+      "current_stage": "runtime_script",
+      "eligible_for_runtime_productization": false,
+      "eligible_for_runtime_script": false,
+      "blocked_reasons": [
+        "依赖 assign_data.csv 预聚合字段，口径需与 Tableau 源数据对齐"
+      ],
+      "eligible_for_runtime_v2": true,
+      "runtime_v2_candidate": true,
+      "candidate_stage": "v2_candidate"
+    },
+    "notes": "计算线索渠道、试驾率、锁单率，result contract 含渠道指标。"
+  },
+  {
+    "capability_id": "attribute_penetration_report",
+    "name": "配置渗透率分析",
+    "tier": "runtime",
+    "status": "active",
+    "script": "mashang_workspace/scripts/attribute_penetration_report.py",
+    "auto_schedulable": true,
+    "result_contract": true,
+    "numeric_eval_case": "numeric_attribute_penetration_005",
+    "contract_gate": true,
+    "followup_supported": true,
+    "docs": [
+      "mashang_workspace/docs/metric_definitions.md",
+      "mashang_workspace/docs/analysis_playbook.md",
+      "mashang_workspace/docs/script_tiers.md"
+    ],
+    "promotion": {
+      "current_stage": "runtime_script",
+      "eligible_for_runtime_productization": true,
+      "eligible_for_runtime_script": false,
+      "blocked_reasons": [],
+      "eligible_for_runtime_v2": true,
+      "runtime_v2_candidate": true,
+      "candidate_stage": "v2_candidate"
+    },
+    "notes": "基于 order_data ⋈ config_attribute 计算选装率，支持任意属性名。"
+  },
+  {
+    "capability_id": "atp_price_report",
+    "name": "ATP 价格月报",
+    "tier": "runtime",
+    "status": "active",
+    "script": "mashang_workspace/scripts/atp_price_report.py",
+    "auto_schedulable": true,
+    "result_contract": true,
+    "numeric_eval_case": "numeric_atp_price_006",
+    "contract_gate": true,
+    "followup_supported": false,
+    "docs": [
+      "mashang_workspace/docs/metric_definitions.md",
+      "mashang_workspace/docs/analysis_playbook.md",
+      "mashang_workspace/docs/script_tiers.md"
+    ],
+    "promotion": {
+      "current_stage": "runtime_script",
+      "eligible_for_runtime_productization": true,
+      "eligible_for_runtime_script": false,
+      "blocked_reasons": [],
+      "eligible_for_runtime_v2": true,
+      "runtime_v2_candidate": true,
+      "candidate_stage": "v2_candidate"
+    },
+    "notes": "按月统计 ATP，复用 operators.atp_analysis，result contract 含 12 个 segment。"
+  },
+  {
+    "capability_id": "cohort_forecast",
+    "name": "Cohort 锁单预测",
+    "tier": "research",
+    "status": "active",
+    "script": "mashang_workspace/scripts/cohort_forecast.py",
+    "auto_schedulable": false,
+    "result_contract": true,
+    "numeric_eval_case": null,
+    "contract_gate": true,
+    "followup_supported": false,
+    "docs": [
+      "mashang_workspace/docs/metric_definitions.md",
+      "mashang_workspace/docs/script_tiers.md"
+    ],
+    "promotion": {
+      "current_stage": "research_script",
+      "eligible_for_runtime_productization": false,
+      "eligible_for_runtime_script": true,
+      "blocked_reasons": [
+        "依赖 runtime operators 运行",
+        "预测口径需业务确认",
+        "research script; requires manual interpretation"
+      ],
+      "eligible_for_runtime_v2": false,
+      "runtime_v2_candidate": false,
+      "candidate_stage": "not_eligible"
+    },
+    "notes": "三段式成熟度预测锁单，返回 partial_success contract。"
+  },
+  {
+    "capability_id": "lock_predict_backtest",
+    "name": "锁单预测回测",
+    "tier": "research",
+    "status": "active",
+    "script": "mashang_workspace/scripts/lock_predict_backtest_cli.py",
+    "auto_schedulable": false,
+    "result_contract": true,
+    "numeric_eval_case": "numeric_lock_predict_backtest_007",
+    "contract_gate": true,
+    "followup_supported": false,
+    "docs": [
+      "mashang_workspace/docs/metric_definitions.md",
+      "mashang_workspace/docs/script_tiers.md"
+    ],
+    "promotion": {
+      "current_stage": "research_script",
+      "eligible_for_runtime_productization": false,
+      "eligible_for_runtime_script": true,
+      "blocked_reasons": [
+        "运行时间较长（1-3 分钟）",
+        "回测口径需业务确认",
+        "research script; requires manual interpretation"
+      ],
+      "eligible_for_runtime_v2": false,
+      "runtime_v2_candidate": false,
+      "candidate_stage": "not_eligible"
+    },
+    "notes": "对预测锁单进行回测验证，输出 MAE/RMSE/MAPE。"
+  },
+  {
+    "capability_id": "release_curve_analysis",
+    "name": "锁单释放曲线分析",
+    "tier": "research",
+    "status": "active",
+    "script": "mashang_workspace/scripts/release_curve_analysis.py",
+    "auto_schedulable": false,
+    "result_contract": false,
+    "numeric_eval_case": null,
+    "contract_gate": false,
+    "followup_supported": false,
+    "docs": [
+      "mashang_workspace/docs/script_tiers.md",
+      "mashang_workspace/scripts/lock_release_analysis.md"
+    ],
+    "promotion": {
+      "current_stage": "research_script",
+      "eligible_for_runtime_productization": false,
+      "eligible_for_runtime_script": false,
+      "blocked_reasons": [
+        "目前为 HTML 报告输出，无 Result Contract",
+        "运行时间较长（2-3 分钟）",
+        "research script; requires manual interpretation"
+      ],
+      "eligible_for_runtime_v2": false,
+      "runtime_v2_candidate": false,
+      "candidate_stage": "not_eligible"
+    },
+    "notes": "基于 lock_release_curve.py（704 行），交互式 Plotly 报告。"
+  },
+  {
+    "capability_id": "data_dictionary",
+    "name": "数据字典生成",
+    "tier": "utility",
+    "status": "active",
+    "script": "mashang_workspace/scripts/data_dictionary.py",
+    "auto_schedulable": false,
+    "result_contract": false,
+    "numeric_eval_case": null,
+    "contract_gate": false,
+    "followup_supported": false,
+    "docs": [
+      "mashang_workspace/docs/data_dictionary.md",
+      "mashang_workspace/docs/script_tiers.md"
+    ],
+    "promotion": {
+      "current_stage": "utility_script",
+      "eligible_for_runtime_productization": false,
+      "eligible_for_runtime_script": false,
+      "blocked_reasons": [
+        "工具类能力，不纳入业务分析晋级流程",
+        "utility script; not business runtime capability"
+      ],
+      "eligible_for_runtime_v2": false,
+      "runtime_v2_candidate": false,
+      "candidate_stage": "not_eligible"
+    },
+    "notes": "扫描 dataset/ 目录输出字段清单，终端/csv/json 格式。"
+  },
+  {
+    "capability_id": "skills_atp_price",
+    "name": "ATP 价格月报（原脚本）",
+    "tier": "legacy",
+    "status": "deprecated",
+    "script": "mashang_workspace/scripts/skills_atp_price.py",
+    "auto_schedulable": false,
+    "result_contract": false,
+    "numeric_eval_case": null,
+    "contract_gate": false,
+    "followup_supported": false,
+    "docs": [],
+    "promotion": {
+      "current_stage": "legacy_script",
+      "eligible_for_runtime_productization": false,
+      "eligible_for_runtime_script": true,
+      "blocked_reasons": [
+        "已被 atp_price_report.py 替代",
+        "保留原脚本用于口径验证",
+        "legacy script; must be wrapped before promotion"
+      ],
+      "eligible_for_runtime_v2": false,
+      "runtime_v2_candidate": false,
+      "candidate_stage": "not_eligible"
+    },
+    "notes": "原 ATP 脚本，180 行。已被 wrapper atp_price_report.py 替代。"
+  },
+  {
+    "capability_id": "voc_theme_analysis",
+    "name": "VOC 主题分析",
+    "tier": "utility",
+    "status": "experimental",
+    "script": "mashang_workspace/scripts/voc_theme_analysis.py",
+    "auto_schedulable": false,
+    "result_contract": false,
+    "numeric_eval_case": null,
+    "contract_gate": false,
+    "followup_supported": false,
+    "docs": [
+      "mashang_workspace/docs/analysis_playbook.md"
+    ],
+    "promotion": {
+      "current_stage": "utility_script",
+      "eligible_for_runtime_productization": false,
+      "eligible_for_runtime_script": true,
+      "blocked_reasons": [
+        "当前为骨架（词频统计），NLP/JTBD 分类未集成",
+        "utility script; not business runtime capability"
+      ],
+      "eligible_for_runtime_v2": false,
+      "runtime_v2_candidate": false,
+      "candidate_stage": "not_eligible"
+    },
+    "notes": "依赖 dataset/wechat/*.parquet，当前为基础词频统计。"
+  }
+]

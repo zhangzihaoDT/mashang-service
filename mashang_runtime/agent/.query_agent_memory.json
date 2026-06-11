@@ -1,0 +1,56 @@
+{
+  "pending": {
+    "type": "clarification",
+    "clarification": {
+      "need": true,
+      "question": "你好！我是智能数据分析助手。\n\n你可以向我提出与数据分析相关的问题，例如：\n- 「上个月的销售额是多少？」\n- 「哪个门店的订单量最高？」\n- 「本周相比上周的增长率是多少？」\n- 「各城市门店的线索转化率排名」\n\n请描述你需要分析的具体问题，我会帮你拆解成可执行的分析计划！",
+      "options": [
+        "查看上个月的销售额",
+        "查询本周订单量Top10门店",
+        "对比本周和上周的增长率",
+        "分析各城市线索转化率"
+      ]
+    },
+    "original_question": "--help",
+    "original_raw_question": "--help",
+    "created_at": "2026-06-11T15:20:20",
+    "state_snapshot": {
+      "question": "--help",
+      "normalized_question": "--help",
+      "loop": {
+        "iteration": 0,
+        "max_steps": 5,
+        "done": false,
+        "history": []
+      },
+      "planning": {
+        "plans": [],
+        "clarifications": []
+      },
+      "results": {
+        "blocks": [],
+        "structured_blocks": [],
+        "entries": []
+      },
+      "memory": {
+        "facts": [],
+        "working_memory": {
+          "current_hypothesis": null,
+          "focus_dimension": null,
+          "analysis_stage": "init",
+          "repeated_plan_count": 0,
+          "last_plan_fingerprint": "{\"comparison\": null, \"dataset\": null, \"dimensions\": null, \"filters\": null, \"metric\": null, \"statistics\": null, \"time\": null}",
+          "last_action_query": "--help"
+        },
+        "missing_info": {}
+      },
+      "final": {
+        "answer": "",
+        "grounded_answer": "",
+        "status": "",
+        "execution_success": false,
+        "error": ""
+      }
+    }
+  }
+}

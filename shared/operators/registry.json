@@ -1,0 +1,182 @@
+{
+  "operators": {
+    "active_store": {
+      "name": "在营门店",
+      "intent": "active_store",
+      "dataset": "order_data",
+      "description": "统计每天在营门店数（30天滚动窗口内存在订单活动且已开业的门店去重计数）",
+      "parameters": {
+        "required": ["df", "start", "end"],
+        "optional": []
+      }
+    },
+    "retained_intention": {
+      "name": "留存小订",
+      "intent": "retained_intention",
+      "dataset": "order_data",
+      "description": "统计在指定时间窗口内支付小订，且在窗口结束时未退款的独立订单数",
+      "parameters": {
+        "required": ["df", "series", "start", "end", "business_definition"],
+        "optional": []
+      }
+    },
+    "retained_intention_conversion": {
+      "name": "留存小订转化率",
+      "intent": "retained_intention_conversion",
+      "dataset": "order_data",
+      "description": "在留存小订基础上，进一步计算从小订到锁单/交付的转化漏斗",
+      "parameters": {
+        "required": ["df", "series", "lock_start", "lock_end", "business_definition"],
+        "optional": []
+      }
+    },
+    "age_cohort": {
+      "name": "年龄代际分布",
+      "intent": "age_cohort",
+      "dataset": "order_data",
+      "description": "根据身份证号或年龄字段推算出生年份，按代际分组统计人数及占比",
+      "parameters": {
+        "required": ["df", "user_query", "start", "end", "series", "age_field", "identity_field", "time_field"],
+        "optional": []
+      }
+    },
+    "city_tier": {
+      "name": "城市线级分布",
+      "intent": "city_tier",
+      "dataset": "order_data",
+      "description": "将城市按内置 mapping 归为四档，统计各档人数及占比",
+      "parameters": {
+        "required": ["df", "start", "end", "series", "city_field", "time_field"],
+        "optional": []
+      }
+    },
+    "province_topk": {
+      "name": "省份TopK占比",
+      "intent": "province_topk",
+      "dataset": "order_data",
+      "description": "将城市映射到省份，按 TopK 统计省份集中度及占比",
+      "parameters": {
+        "required": ["df", "user_query", "start", "end", "series", "city_field", "time_field"],
+        "optional": []
+      }
+    },
+    "store_avg_lock": {
+      "name": "店均锁单数",
+      "intent": "store_avg_lock",
+      "dataset": "order_data",
+      "description": "日锁单数 / 在营门店数，计算每日店均锁单量及整体均值",
+      "parameters": {
+        "required": ["df", "start", "end"],
+        "optional": []
+      }
+    },
+    "assign_conversion": {
+      "name": "下发线索转化率",
+      "intent": "assign_conversion",
+      "dataset": "assign_data",
+      "description": "基于 assign_data 计算下发线索在各渠道、各窗口的试驾率与锁单率",
+      "parameters": {
+        "required": ["df", "start", "end"],
+        "optional": []
+      }
+    },
+    "weighted_lead_conversion": {
+      "name": "下发线索加权锁单率",
+      "intent": "weighted_lead_conversion",
+      "dataset": "assign_data",
+      "description": "加权锁单率 = 0.4×(门店锁单率×门店占比)+0.4×7日锁单率+0.2×30日锁单率",
+      "parameters": {
+        "required": ["df", "start", "end"],
+        "optional": []
+      }
+    },
+    "mature_lock_prediction": {
+      "name": "预测锁单数",
+      "intent": "mature_lock_prediction",
+      "dataset": "assign_data",
+      "description": "基于成熟度曲线修正右删失数据，预测未完全成熟线索的最终30日锁单数",
+      "parameters": {
+        "required": ["df", "start", "end"],
+        "optional": []
+      }
+    },
+    "atp": {
+      "name": "开票均价分析",
+      "intent": "atp",
+      "dataset": "order_data",
+      "description": "基于 invoice_amount 统计在窗口内已锁单的用户车的平均开票价格、总金额及按车型分组明细",
+      "parameters": {
+        "required": ["df", "start", "end"],
+        "optional": []
+      }
+    }
+  },
+  "intent_map": {
+    "active_store": {
+      "operator": "active_store",
+      "metric_names": ["在营门店数", "在营门店"],
+      "dataset": "order_data",
+      "query_hints": ["在营门店"]
+    },
+    "retained_intention": {
+      "operator": "retained_intention",
+      "metric_names": ["留存小订数", "留存小订"],
+      "dataset": "order_data",
+      "query_hints": ["留存小订"]
+    },
+    "retained_intention_conversion": {
+      "operator": "retained_intention_conversion",
+      "metric_names": ["留存小订转化率"],
+      "dataset": "order_data",
+      "query_hints": ["留存小订", "转化"]
+    },
+    "age_cohort": {
+      "operator": "age_cohort",
+      "metric_names": ["年龄代际分布"],
+      "dataset": "order_data",
+      "query_hints": ["年龄", "代际", "00后", "95后", "90后", "85后", "80后", "75后", "70后", "65后", "60前"]
+    },
+    "city_tier": {
+      "operator": "city_tier",
+      "metric_names": ["城市线级分布"],
+      "dataset": "order_data",
+      "query_hints": ["城市", "线级", "城市等级", "一线", "新一线", "二线", "三线"]
+    },
+    "province_topk": {
+      "operator": "province_topk",
+      "metric_names": ["省份TopK占比"],
+      "dataset": "order_data",
+      "query_hints": ["省", "省份", "province", "Top", "前"]
+    },
+    "store_avg_lock": {
+      "operator": "store_avg_lock",
+      "metric_names": ["店均锁单数"],
+      "dataset": "order_data",
+      "query_hints": ["店均锁单"]
+    },
+    "assign_conversion": {
+      "operator": "assign_conversion",
+      "metric_names": ["下发线索转化率"],
+      "dataset": "assign_data",
+      "query_hints": ["下发线索", "转化率", "锁单率"]
+    },
+    "weighted_lead_conversion": {
+      "operator": "weighted_lead_conversion",
+      "metric_names": ["下发线索加权锁单率"],
+      "dataset": "assign_data",
+      "query_hints": ["加权锁单率"]
+    },
+    "mature_lock_prediction": {
+      "operator": "mature_lock_prediction",
+      "metric_names": ["预测锁单数"],
+      "dataset": "assign_data",
+      "query_hints": ["预测锁单"]
+    },
+    "atp": {
+      "operator": "atp",
+      "metric_names": ["开票均价", "ATP", "平均开票价格", "平均售价"],
+      "dataset": "order_data",
+      "query_hints": ["开票均价", "ATP", "平均开票", "平均售价", "invoice_amount"]
+    }
+  }
+}

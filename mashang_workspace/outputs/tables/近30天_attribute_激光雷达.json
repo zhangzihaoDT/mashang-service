@@ -1,0 +1,104 @@
+{
+  "status": "success",
+  "script": "scripts/attribute_penetration_report.py",
+  "command": "python scripts/attribute_penetration_report.py --series LS6 --attribute 激光雷达 --limit 5 --format json --output outputs/tables/",
+  "generated_at": "2026-06-11T13:41:02",
+  "scope": {
+    "data_source": "/Users/zihao_/Documents/github/mashang-service/dataset/order_data.parquet ⋈ /Users/zihao_/Documents/github/mashang-service/dataset/config_attribute.parquet",
+    "time_window": {
+      "type": "range",
+      "start_date": "2026-05-12",
+      "end_date": "2026-06-10"
+    },
+    "filters": {
+      "series": "LS6",
+      "model": null,
+      "attribute": "激光雷达"
+    },
+    "metric_definition": "激光雷达 渗透率 = 含该配置的订单数 / 总订单数"
+  },
+  "result": {
+    "summary": "激光雷达 渗透率: 99.8% (3179/3184)",
+    "metrics": {
+      "total_orders": 3184,
+      "penetrated_orders": 3179,
+      "penetration_rate_pct": 99.8
+    },
+    "dimensions": [
+      {
+        "name": "value",
+        "items": [
+          {
+            "value": "标准+Orin",
+            "metrics": {
+              "count": 2640,
+              "share": 0.8291
+            }
+          },
+          {
+            "value": "高阶+Thor",
+            "metrics": {
+              "count": 508,
+              "share": 0.1595
+            }
+          },
+          {
+            "value": "标准",
+            "metrics": {
+              "count": 27,
+              "share": 0.0085
+            }
+          },
+          {
+            "value": "是",
+            "metrics": {
+              "count": 4,
+              "share": 0.0013
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "artifacts": {},
+  "followup_context": {
+    "metric": "attribute_penetration",
+    "attribute": "激光雷达",
+    "available_dimensions": [
+      "series",
+      "product_name"
+    ],
+    "top_entities": [
+      {
+        "field": "value",
+        "value": "标准+Orin",
+        "metrics": {
+          "count": 2640
+        }
+      },
+      {
+        "field": "value",
+        "value": "高阶+Thor",
+        "metrics": {
+          "count": 508
+        }
+      },
+      {
+        "field": "value",
+        "value": "标准",
+        "metrics": {
+          "count": 27
+        }
+      },
+      {
+        "field": "value",
+        "value": "是",
+        "metrics": {
+          "count": 4
+        }
+      }
+    ]
+  },
+  "warnings": [],
+  "errors": []
+}

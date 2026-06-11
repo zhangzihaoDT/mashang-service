@@ -1,0 +1,169 @@
+[
+  {
+    "case_id": "followup_lock_model_city_001",
+    "description": "锁单分车型 → 追问城市分布（继承时间 + series + 数量代指消解）",
+    "turns": [
+      {
+        "user": "昨天锁单数分车型",
+        "expected_context": {
+          "metric": "lock_count",
+          "time_window": "yesterday",
+          "group_by": "series"
+        }
+      },
+      {
+        "user": "昨天 LS8 的 75 个锁单城市分布",
+        "expected_context": {
+          "metric": "lock_count",
+          "time_window": "yesterday",
+          "series": "LS8",
+          "group_by": "city",
+          "filter_ref": "75"
+        }
+      }
+    ]
+  },
+  {
+    "case_id": "followup_ls6_energy_001",
+    "description": "LS6 增程/纯电占比 → 追问改时间窗口（时间替换，其它继承）",
+    "turns": [
+      {
+        "user": "近 15 日 LS6 增程和纯电占比",
+        "expected_context": {
+          "metric": "lock_count_share",
+          "time_window": "last_15_days",
+          "series": "LS6",
+          "group_by": "energy_type"
+        }
+      },
+      {
+        "user": "那最近 7 天呢？",
+        "expected_context": {
+          "metric": "lock_count_share",
+          "time_window": "last_7_days",
+          "series": "LS6",
+          "group_by": "energy_type"
+        }
+      }
+    ]
+  },
+  {
+    "case_id": "followup_ls8_battery_001",
+    "description": "LS8 分车型 → 追问加过滤条件（条件追加，时间/车型继承）",
+    "turns": [
+      {
+        "user": "LS8 上市以来分车型结构",
+        "expected_context": {
+          "metric": "lock_count_share",
+          "time_window": "since_launch",
+          "series": "LS8",
+          "group_by": "model"
+        }
+      },
+      {
+        "user": "只看大电池组",
+        "expected_context": {
+          "metric": "lock_count_share",
+          "time_window": "since_launch",
+          "series": "LS8",
+          "group_by": "model",
+          "filter": "large_battery"
+        }
+      }
+    ]
+  },
+  {
+    "case_id": "followup_city_then_model_001",
+    "description": "分城市 → 追问改分车型（维度切换，时间/车系继承）",
+    "turns": [
+      {
+        "user": "近 7 天 LS6 锁单城市分布",
+        "expected_context": {
+          "metric": "lock_count",
+          "time_window": "last_7_days",
+          "series": "LS6",
+          "group_by": "city"
+        }
+      },
+      {
+        "user": "分车型看看",
+        "expected_context": {
+          "metric": "lock_count",
+          "time_window": "last_7_days",
+          "series": "LS6",
+          "group_by": "model"
+        }
+      }
+    ]
+  },
+  {
+    "case_id": "followup_forecast_then_release_001",
+    "description": "预测锁单 → 问释放曲线（分析类型切换，时间继承）",
+    "turns": [
+      {
+        "user": "最近 30 天 cohort 预测锁单",
+        "expected_context": {
+          "metric": "lock_forecast",
+          "time_window": "last_30_days",
+          "analysis_type": "cohort_forecast"
+        }
+      },
+      {
+        "user": "释放曲线如何？",
+        "expected_context": {
+          "metric": "release_curve",
+          "time_window": "last_30_days",
+          "analysis_type": "release_curve"
+        }
+      }
+    ]
+  },
+  {
+    "case_id": "followup_multiple_city_refine_001",
+    "description": "多城市 → 追问只查某个城市（过滤追加）",
+    "turns": [
+      {
+        "user": "本月锁单城市分布 Top 10",
+        "expected_context": {
+          "metric": "lock_count",
+          "time_window": "this_month",
+          "group_by": "city",
+          "limit": 10
+        }
+      },
+      {
+        "user": "只看上海的数据",
+        "expected_context": {
+          "metric": "lock_count",
+          "time_window": "this_month",
+          "city": "上海"
+        }
+      }
+    ]
+  },
+  {
+    "case_id": "followup_energy_to_model_001",
+    "description": "增程占比 → 追问只看五座（引擎不变，条件追加）",
+    "turns": [
+      {
+        "user": "近 15 日 LS6 增程占比趋势",
+        "expected_context": {
+          "metric": "reev_share_trend",
+          "time_window": "last_15_days",
+          "series": "LS6",
+          "analysis_type": "share_trend"
+        }
+      },
+      {
+        "user": "只看五座",
+        "expected_context": {
+          "metric": "reev_share_trend",
+          "time_window": "last_15_days",
+          "series": "LS6",
+          "analysis_type": "share_trend",
+          "filter": "seat_5"
+        }
+      }
+    ]
+  }
+]

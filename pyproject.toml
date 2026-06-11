@@ -1,0 +1,18 @@
+[project]
+name = "mashang-service"
+version = "0.8.0"
+description = "Mashang AI-native automotive data analysis workspace and Agentic BI runtime"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+
+[tool.pytest.ini_options]
+testpaths = [
+    "mashang_workspace/tests",
+]
+pythonpath = ["."]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

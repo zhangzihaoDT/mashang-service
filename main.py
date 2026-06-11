@@ -1,13 +1,29 @@
-import os
+#!/usr/bin/env python
+"""
+Compatibility entrypoint for legacy Mashang Runtime.
+
+The real legacy runtime entrypoint lives at:
+    mashang_runtime/main.py
+
+New development should use:
+    mashang_workspace/
+    mashang_runtime_v2/
+"""
+
+from __future__ import annotations
+
+import runpy
 import sys
+from pathlib import Path
 
-from agent.agent_loop import run_main_agent
 
+PROJECT_ROOT = Path(__file__).resolve().parent
+RUNTIME_ROOT = PROJECT_ROOT / "mashang_runtime"
+
+# Ensure both root and runtime are on sys.path for legacy imports
+for p in [str(PROJECT_ROOT), str(RUNTIME_ROOT)]:
+    if p not in sys.path:
+        sys.path.insert(0, p)
 
 if __name__ == "__main__":
-    query = " ".join(sys.argv[1:]).strip()
-    if not query:
-        query = "下发线索数 (门店) 的平均值是多少？"
-    os.environ["ENABLE_QUERY_LOG"] = "1"
-    answer = run_main_agent(query)
-    print(answer)
+    runpy.run_path(str(RUNTIME_ROOT / "main.py"), run_name="__main__")

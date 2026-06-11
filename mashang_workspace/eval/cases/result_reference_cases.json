@@ -1,0 +1,86 @@
+[
+  {
+    "case_id": "reference_unique_value_001",
+    "description": "唯一数值匹配 (top_entities 中只有一个 75)",
+    "previous_result_context": {
+      "top_entities": [
+        {"field": "series", "value": "LS8", "metrics": {"lock_count": 75}}
+      ]
+    },
+    "turns": [
+      {"user": "这 75 个锁单城市分布",
+       "expected": {"result_reference_status": "resolved", "series": "LS8"}}
+    ]
+  },
+  {
+    "case_id": "reference_prev_ctx_disambiguate_002",
+    "description": "多候选 + previous_context.series 消歧",
+    "previous_result_context": {
+      "top_entities": [
+        {"field": "series", "value": "LS6", "metrics": {"lock_count": 75}},
+        {"field": "series", "value": "LS8", "metrics": {"lock_count": 75}}
+      ]
+    },
+    "previous_context": {"series": "LS8"},
+    "turns": [
+      {"user": "这 75 个锁单城市分布",
+       "expected": {"result_reference_status": "resolved", "series": "LS8"}}
+    ]
+  },
+  {
+    "case_id": "reference_explicit_series_003",
+    "description": "多候选 + 文本显式消歧（提到 LS6）",
+    "previous_result_context": {
+      "top_entities": [
+        {"field": "series", "value": "LS6", "metrics": {"lock_count": 75}},
+        {"field": "series", "value": "LS8", "metrics": {"lock_count": 75}}
+      ]
+    },
+    "turns": [
+      {"user": "这 75 个 LS6 锁单城市分布",
+       "expected": {"result_reference_status": "resolved", "series": "LS6"}}
+    ]
+  },
+  {
+    "case_id": "reference_ambiguous_004",
+    "description": "多候选无法消歧 → ambiguous",
+    "previous_result_context": {
+      "top_entities": [
+        {"field": "series", "value": "LS6", "metrics": {"lock_count": 75}},
+        {"field": "series", "value": "LS8", "metrics": {"lock_count": 75}}
+      ]
+    },
+    "turns": [
+      {"user": "这 75 个锁单城市分布",
+       "expected": {"result_reference_status": "ambiguous"}}
+    ]
+  },
+  {
+    "case_id": "reference_rank_first_005",
+    "description": "排名第一引用",
+    "previous_result_context": {
+      "top_entities": [
+        {"field": "series", "value": "LS8", "metrics": {"lock_count": 75}},
+        {"field": "series", "value": "LS6", "metrics": {"lock_count": 62}}
+      ]
+    },
+    "turns": [
+      {"user": "排名第一的车型城市分布",
+       "expected": {"result_reference_status": "resolved", "series": "LS8"}}
+    ]
+  },
+  {
+    "case_id": "reference_entity_reference_006",
+    "description": "刚才那个车型引用",
+    "previous_result_context": {
+      "top_entities": [
+        {"field": "series", "value": "LS8", "metrics": {"lock_count": 75}},
+        {"field": "series", "value": "LS6", "metrics": {"lock_count": 62}}
+      ]
+    },
+    "turns": [
+      {"user": "刚才那个车型的城市分布",
+       "expected": {"result_reference_status": "resolved", "series": "LS8"}}
+    ]
+  }
+]

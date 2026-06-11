@@ -1,0 +1,51 @@
+[
+  {
+    "case_id": "runtime_v2_lock_by_model_001",
+    "user_text": "昨天锁单数分车型",
+    "expected_capability": "lock_by_model",
+    "must_contain": ["车系"]
+  },
+  {
+    "case_id": "runtime_v2_lock_city_distribution_001",
+    "user_text": "昨天 LS8 锁单城市分布",
+    "expected_capability": "lock_city_distribution",
+    "must_contain": ["城市"]
+  },
+  {
+    "case_id": "runtime_v2_city_without_series_001",
+    "user_text": "昨天城市分布",
+    "expected_capability": "lock_city_distribution",
+    "allow_warning": true,
+    "must_contain": ["城市"]
+  },
+  {
+    "case_id": "runtime_v2_followup_lock_model_to_city_001",
+    "turns": [
+      {
+        "user_text": "昨天锁单数分车型",
+        "expected_capability": "lock_by_model",
+        "must_contain": ["锁单"]
+      },
+      {
+        "user_text": "LS8 的城市分布",
+        "expected_capability": "lock_city_distribution",
+        "must_contain": ["城市"]
+      }
+    ]
+  },
+  {
+    "case_id": "runtime_v2_unknown_followup_001",
+    "turns": [
+      {
+        "user_text": "昨天锁单数分车型",
+        "expected_capability": "lock_by_model",
+        "must_contain": ["锁单"]
+      },
+      {
+        "user_text": "这个里面哪个最好看",
+        "expected_error": "no_capability_matched",
+        "must_contain": ["仅支持"]
+      }
+    ]
+  }
+]

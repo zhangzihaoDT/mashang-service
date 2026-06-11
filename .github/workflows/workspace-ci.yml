@@ -1,0 +1,54 @@
+name: Workspace CI
+
+on:
+  push:
+    branches: ["main", "0.7", "master"]
+  pull_request:
+    branches: ["main", "0.7", "master"]
+
+jobs:
+  workspace-ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install pytest
+
+      - name: Ensure output directory
+        run: mkdir -p mashang_workspace/outputs/tables
+
+      - name: Run unified eval (CI-safe suites)
+        run: |
+          python mashang_workspace/eval/run_eval.py \
+            --suite ci \
+            --format json \
+            --output mashang_workspace/outputs/tables/unified_eval_result.json
+
+      - name: Run pytest (data-independent tests only)
+        run: |
+          pytest mashang_workspace/tests/test_root_cleanup.py \
+                 mashang_workspace/tests/test_result_contract.py \
+                 mashang_workspace/tests/eval/test_context_parser.py \
+                 mashang_workspace/tests/eval/test_followup_runner.py \
+                 mashang_workspace/tests/eval/test_numeric_eval.py \
+                 mashang_workspace/tests/eval/test_result_reference.py \
+                 mashang_workspace/tests/eval/test_unified_eval.py \
+                 -q
+
+      - name: Upload eval artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unified-eval-result
+          path: mashang_workspace/outputs/tables/unified_eval_result.json

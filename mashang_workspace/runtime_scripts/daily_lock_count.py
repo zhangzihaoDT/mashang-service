@@ -1,0 +1,1 @@
+../scripts/daily_lock_count.py

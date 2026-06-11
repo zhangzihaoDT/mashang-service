@@ -1,572 +1,765 @@
-# Mashang Agentic BI（DeepSeek Tool Calling）
+# mashang-service
 
-这是一个基于 DeepSeek API（OpenAI 兼容接口）的 **Agentic BI 查询 Agent**：将自然语言问题规划为结构化 DSL，然后在本地数据集上确定性执行，并汇总成可读回答。
+`mashang-service` 是一个面向汽车业务数据分析的 AI-native Analytics Workspace + Runtime System。
 
-本仓库有两个对外入口：
+它不是单一的自然语言问数 Agent，而是一套从共享业务语义、分析能力孵化、能力治理，到 Runtime 产品化的完整工程体系。
 
-- [main.py](main.py)：命令行单次问答（适合调试/本地跑）。
-- [feishu_bot.py](feishu_bot.py)：飞书机器人（WebSocket 长连接收消息，调用同一套 Agent 能力回复）。
-
-## 输入到输出链路
+当前项目主线是：
 
 ```text
-用户问题
+shared
   ↓
-入口层（main.py / feishu_bot.py）
+mashang_workspace
   ↓
-┌─ Agent Loop（agent/agent_loop.py）──────────────────────────────────┐
-│  读取 State（question / loop / planning / results / memory / final） │
-│  最多循环 5 步，避免重复查询                                         │
-│                                                                     │
-│  每轮循环：                                                         │
-│  ┌─ Runtime Decision（runtime_decision.py）─────────────────────┐   │
-│  │  evaluate_state_readiness() → 规则优先，决定 finish / run_dsl │   │
-│  │  ├─ Evidence Contract：按 intent 检查 required_fact_types    │   │
-│  │  ├─ Stall 熔断：同 missing_facts 连续 3 次 → force-finish   │   │
-│  │  ├─ Repair 检测：result_satisfies_goal 不满足时生成 repair   │   │
-│  │  │  query 重试（最多 2 次 repair 后强制 finish）            │   │
-│  │  └─ LLM Fallback：contract 无匹配时由 LLM 决策下一步         │   │
-│  └──────────────────────────────────────────────────────────────┘   │
-│       │ finish → 跳转 Answer Summarization                          │
-│       │ run_dsl → 继续                                              │
-│       ▼                                                             │
-│  ┌─ run_dsl_step（tool_router.py）──────────────────────────────┐   │
-│  │  ① PlanningAgent（planner.py）                               │   │
-│  │    - NL → plan / clarification                               │   │
-│  │    - 产出 dataset/metric/time/filters/dimensions/...         │   │
-│  │  ② Plan 指纹去重                                             │   │
-│  │    - 检测重复 plan，fallback 到规则规划                       │   │
-│  │  ③ Goal Time Window 钳位                                     │   │
-│  │    - 将计划时间窗对齐到预推断的目标时间窗（high/medium 置信度）│   │
-│  │  ④ Clarification 拦截                                        │   │
-│  │    - planner 产出 clarification_required → 回问用户          │   │
-│  │  ⑤ Tool Router 确定性执行                                    │   │
-│  │    - Fast Path：纯计算/闲聊/ISO 周数等轻量直算               │   │
-│  │    - Operators：强口径固定算子                               │   │
-│  │    - Composition：占比/构成/份额（周/月/日分组占比）          │   │
-│  │    - MultiTableMetric：跨表配置渗透率/分布分析               │   │
-│  │    - Query / Comparison / Statistics：通用 DSL 执行与后处理  │   │
-│  │  ⑥ Short-term Memory 缓存                                    │   │
-│  │    - 算子结果写缓存（TTL=5 轮），同轮次避免重复执行           │   │
-│  └──────────────────────────────────────────────────────────────┘   │
-│       ↓                                                             │
-│  Structured Result Blocks（结构化执行结果）                          │
-│    - legacy blocks：LLM-readable 文本块（用于总结）                 │
-│    - structured_blocks：machine-readable 块（用于可追溯与规则判断）│
-│    - 回写到 Agent State.results                                    │
-│       ↓                                                             │
-│  Fact Extraction（agent/memory_extractor.py）                       │
-│    - 从 structured_blocks 抽取/生成 Normalized Facts               │
-│    - 信息不足写入 missing_info（而不是编造）                        │
-│       ↓                                                             │
-│  ── 回到本轮循环开头 → Runtime Decision 再次评估 ──               │
-└─────────────────────────────────────────────────────────────────────┘
-       │ finish
-       ▼
-Answer / Summarization
-  - 信息充分：生成 grounded summary / 最终自然语言答案
-  - 信息不足（repair/stall 超限）：返回已有结果并说明
+mashang_runtime_v2
   ↓
-Agent 返回
-  - 命令行打印答案
-  - 或由飞书 Bot 回传消息
-
-旁路（强烈建议落盘）：
-  Query Log（规划与执行日志，append-only）
-    ↓
-  Question Pattern → DSL Prior（planner examples），用于提升规划稳定性（而不是长文本聊天记忆）
+mashang_runtime（产品能力沉淀）
 ```
 
-可以把这条链路简化理解为：
+也就是说：
 
-```text
-input（用户提问）
-  -> Agent Loop 判断要不要查（Runtime Decision 规则优先）
-  -> 要查：PlanningAgent 生成 DSL → 工具执行 → 提取 Facts → 回 Loop 继续判断
-  -> 够了：Agent 总结
-  -> output（Agent 返回）
-```
+- `shared/` 提供共享业务算子与业务定义；
+- `mashang_workspace/` 是日常工作的主阵地，负责分析、脚本开发、文档沉淀、Result Contract、Eval 与 Capability Registry；
+- `mashang_runtime_v2/` 用于验证和产品化新的 Runtime 架构；
+- `mashang_runtime/` 承载已经稳定、高频、口径清晰的产品能力。
 
-### DSL 扩展字段
+---
 
-- **`analysis_intent`**：分析意图元信息，用于工具路由与结果校验。
+# 快速开始
 
-```json
-{
-  "type": "share_breakdown",
-  "numerator_metric": "锁单数",
-  "denominator_scope": "within_each_week",
-  "time_grain": "week",
-  "breakdown_dimension": "product_name"
-}
-```
+## 环境准备
 
-**v0.8 新增 `dimension_mapping`（维度值映射）**，用于 `share_breakdown` 将原始维度值聚合到业务分类（如 product_name → 五座/六座）：
+推荐使用 Python 3.10+。
 
-```json
-{
-  "type": "share_breakdown",
-  "breakdown_dimension": "product_name",
-  "denominator_scope": "overall",
-  "dimension_mapping": {
-    "五座": "product_name LIKE '%五座%'",
-    "六座": "product_name LIKE '%六座%'"
-  }
-}
-```
+项目依赖通过 `pyproject.toml` 管理。
 
-**v0.8 新增 `monthly_mean` 统计类型**，按年月聚合后计算月均值：
-
-```json
-{
-  "statistics": {
-    "type": "monthly_mean",
-    "time_field": "lock_time",
-    "value_metric": {
-      "field": "order_number",
-      "agg": "count",
-      "alias": "锁单量"
-    }
-  }
-}
-```
-
-**v0.8 新增 `daily_percentile_rank` 支持 `reference_value`**，直接对指定数值计算分位：
-
-```json
-{
-  "statistics": {
-    "type": "daily_percentile_rank",
-    "reference_value": 116,
-    "window_days": 60,
-    ...
-  }
-}
-```
-
-**v0.4.4 新增 `attribute_penetration` / `attribute_distribution` 类型**，用于跨表配置属性分析：
-
-```json
-{
-  "type": "attribute_penetration",
-  "attribute_pattern": "激光雷达", // config_attribute.Attribute 模糊匹配
-  "value_contains": "Thor", // value 模糊过滤（可选）
-  "positive_value": "是|标准|高阶|Thor", // value 正则匹配（可选）
-  "dimension_field": "product_name", // 分组维度
-  "dimension_mapping": {
-    // 维度值映射（如 5座/6座）
-    "五座": "product_name LIKE '%五座%'",
-    "六座": "product_name LIKE '%六座%'"
-  }
-}
-```
-
-```json
-{
-  "type": "attribute_distribution",
-  "attribute_pattern": "轮毂|轮辋", // config_attribute.Attribute 模糊匹配
-  "top_k": 10 // 取 Top-K 值，其余归为"其他"
-}
-```
-
-- **`post_process`**：通用后处理步骤序列，目前支持 `share`（分组占比）与 `window_share`（时间窗口占比）。
-
-```json
-{
-  "post_process": [
-    {
-      "type": "share",
-      "value_col": "锁单数",
-      "partition_by": ["lock_time"],
-      "alias": "占比"
-    }
-  ]
-}
-```
-
-关键约定：
-
-- 时间窗口统一按左闭右开 `[start, end)` 执行过滤（`>= start` 且 `< end`）。
-- 数据执行尽量保持确定性：LLM 做规划与总结，代码做查询与计算。
-- Agent 的真实输出不是"直接查一次就回答"，而是"循环判断是否已拿到足够事实，再决定继续查还是结束回答"。
-
-## v0.4：Evidence-driven Agentic BI Runtime
-
-本版本开始，主循环从“LLM 判断是否结束”升级为“Evidence-driven Runtime”：
-
-- State-first：所有中间态都落入 AgentState
-- Structured Result Blocks：每次工具执行生成可追溯的 structured_blocks（同时保留 legacy 文本 blocks）
-- Fact Extraction：从 structured_blocks 抽取/生成 Normalized Facts，并强制携带 source.block_id
-- Evidence Contract：用 required_fact_types 固化“什么证据足够回答”
-- Runtime Decision：先走规则判定是否 finish；不足时再继续 run_dsl
-- Grounded Summary：总结层只基于证据输出，并避免将贡献拆解直接表述为因果原因
-
-## 核心设计原则
-
-```
-intent          →  负责判断问题类型
-fact_type       →  负责判断证据是否足够
-tool            →  负责生成证据
-runtime_decision →  负责是否允许 finish
-```
-
-四层各司其职，不跨层越权：
-
-- **intent**（`infer_intent_from_question`）只做 NL 分类，输出 `metric / trend / compare / share / time_grouped_share / composition / ranking / distribution / diagnosis` 之一，不关心具体数据。
-- **fact_type**（`SUPPORTED_FACT_TYPES`）定义证据语言，作为 contract 匹配的最小原子单位，不关心 LLM 或工具的实现细节。
-- **tool**（QueryTool / Statistics / Composition / Comparison）只负责生成结构化结果，不关心当前缺什么证据、是否应该 finish。
-- **runtime_decision**（`evaluate_state_readiness`）对照 contract 检查已有 fact_type，只回答"证据够不够"，不关心数据内容。
-
-## BI 能力矩阵
-
-| 能力类型                  | 典型问题                    | 执行工具                                     | Evidence Contract（所需证据类型）                               |
-| ------------------------- | --------------------------- | -------------------------------------------- | --------------------------------------------------------------- |
-| 总量查询                  | 昨天锁单数是多少            | QueryTool                                    | `metric_value`                                                  |
-| 月均查询                  | 2026年月均锁单数            | Statistics.monthly_mean                      | `metric_value` + `time_grouped_metric`                          |
-| 月度明细                  | 2026年每个月锁单数          | Statistics.monthly_mean                      | `metric_value` + `time_grouped_metric`                          |
-| 趋势分析                  | 近30日锁单趋势如何          | Statistics.trend_summary                     | `trend_summary`                                                 |
-| 对比分析                  | 本周 vs 上周变化            | Comparison.wow                               | `comparison_result`                                             |
-| 占比分析（share）         | 分车型锁单占比              | Composition.share_by_dimension               | `dimension_breakdown` + `share_summary`                         |
-| 占比分析（累计+维度映射） | LS8五六座比例               | Composition.share_by_dimension + dim_mapping | `dimension_breakdown` + `share_summary`                         |
-| 构成分析（composition）   | 按城市/门店/渠道拆解结果    | QueryTool + GROUP BY                         | `dimension_breakdown`                                           |
-| 构成分析（含时间+占比）   | 每周分车型锁单占比          | Composition.weekly_share_by_dimension        | `time_grouped_metric` + `dimension_breakdown` + `share_summary` |
-| 排序分析                  | 锁单 TOP10 城市             | QueryTool + ORDER BY                         | `ranking_result`                                                |
-| 分布分析 / 百分位         | 116在近2个月中的水平        | Statistics.daily_percentile_rank             | `distribution_summary`                                          |
-| 分布分析                  | 锁单用户年龄分布 / 分位水平 | Statistics                                   | `distribution_summary`                                          |
-| 诊断分析                  | 为什么最近一周下滑          | Statistics.contribution_summary              | `trend_summary` + `contribution_summary`                        |
-| 配置渗透率分析            | CM2 增程中 Thor 选装率      | MultiTableMetricTool.attribute_penetration   | `dimension_breakdown` + `share_summary`                         |
-| 配置分布分析              | LS8 不同轮毂的选装比例      | MultiTableMetricTool.attribute_distribution  | `dimension_breakdown` + `share_summary`                         |
-
-## Query Log（规划与执行日志）
-
-最优先记录的不是“用户偏好”，而是“问题模式（Question Pattern）”：例如“最近 7 天 + 某车型 + 区域趋势”、或“当前值 vs 近 30 日日均”。这些模式最终会沉淀为 DSL Prior（planner examples），用于提升 PlanningAgent 的稳定性与可控性。
-
-推荐日志结构（建议按 JSONL / SQLite / ClickHouse 这类 append-only 存储）：
-
-```json
-{
-  "timestamp": "...",
-  "question": "...",
-  "normalized_question": "...",
-  "generated_plan": {},
-  "clarification": {},
-  "execution_success": true,
-  "used_dataset": "...",
-  "used_metrics": [],
-  "used_dimensions": [],
-  "latency_ms": 1200,
-  "token_usage": {},
-  "result_summary": "...",
-  "user_feedback": null
-}
-```
-
-## 更新日志
-
-- 2026-06-04（v0.8 — Monthly Mean / Dimension Mapping / Reference Percentile）
-  - **Monthly Mean**（`statistics.monthly_mean`）
-    - 新增 `_monthly_mean` 方法，按月聚合后计算月均值；支持 `2026年月均锁单数`、`每个月锁单数` 等自然语言模式
-    - `planner.py` 新增 `_is_monthly_mean_query` / `_build_monthly_mean_plan`，识别 `月均/每个月/每月/逐月` 并路由到 monthly_mean
-  - **Dimension Mapping（CompositionTool）**
-    - `composition_tool.py _partitioned_share` 新增 `dimension_mapping` 支持，复用 `_infer_dimension` 将 product_name 等维度值映射到业务分类（如 五座/六座）
-    - 新增 `denominator_scope: "overall"` 支持全局累计占比（累计查询时自动移除 time_field 维度不再按日分区）
-    - `planner.py` 检测 `五六座` 关键词时自动注入 `seat_count_logic` 映射到 `analysis_intent`
-    - `_is_share_breakdown_query` 扩展 `has_seat_pattern` 分支，使 `五六座比例` 绕开 `has_dim + has_time_grain` 约束
-  - **Percentile Rank 参考值**
-    - `daily_percentile_rank` 新增 `reference_value` 参数，支持直接对指定数值计算分位（如 `116的锁单数在近2个月中的水平`）
-    - `planner.py` 提取 `(\d+)的锁单` 模式并传入 `reference_value`
-    - `runtime_decision.py` 将 `水平` 归类为 `distribution` 而非 `trend`，`daily_percentile_rank` 检查移至 `trend_summary` 之前避免循环 prompt 拦截
-  - **时间窗口修复**
-    - `time_windows.py:358` 修复年正则负向前瞻 `(?!\s*月)` → `(?!\s*月\s*(?:\d|整|全))`，允许 `2026年月均` 匹配年份
-    - 所有 `近N` 正则增加 `(?:个)?`，支持 `近2个月` / `近3周` 等含"个"的常用表达
-    - `_parse_recent_days` 扩展支持周（×7）和月（×30）转换
-  - **DeepSeek API 兼容**
-    - 删除 3 处 `tool_choice={"type":"function",...}` 强制调用，改为默认 `"auto"`，适配 DeepSeek thinking mode
-
-- 2026-05-22（v0.7 — Short-term Memory / Clarification Runtime）
-  - **Clarification Runtime**：算子产出多候选指标时中断执行，返回 `clarification_required` → `run_dsl_step` 拦截 → Agent Loop 输出澄清问题 + 选项列表；用户选择后继续执行
-    - `tool_router.py _route_by_intent` 检测 `len(preferred) >= 2` → 返回 `{"status":"clarification_required", ...}`
-    - `_execute_single_plan` 提前 return → `run_dsl_step` 转为 `status=clarification`
-    - Agent Loop 输出 `{qtext}\n请选择其一回复：{opts}` 并保存 `pending`
-    - `_merge_pending_context` 用户回复匹配 option label/id → 自动重构 query（如 `"门店线索当日锁单率"` → `"近 10 日门店 线索当日锁单率趋势"`）
-  - **Short-term Memory**（`short_term_memory`，独立于 `pending`）
-    - `operator_cache`：算子的 `daily_rows` + 13 个率列走 cache，同 session 内第二、三轮不再重复执行算子
-    - Cache key：`{operator}|{dataset}|{time_range}|{filter_sig}` 签名，换时间窗/过滤条件自动重建
-    - TTL：`expires_after_turns=5`，超 5 轮自动清除；`_meta.created_at` + `turn_count` 追踪
-    - `_save_short_term(key, value)` / `_load_short_term(key)` 独立 API
-  - **补充保护**
-    - `exact_match`：query 去噪（移除"近10日"/"趋势"）后按列名子串匹配，避免已选指标重复触发 ambiguity
-    - `原始问题=` 正则修复：从 enriched context 中提取真实原始问题，消除上下文指数增长
-    - `"率"` 排除 dimension_share（`锁单率/试驾率/转化率` 不走维度份额）
-
-- 2026-05-22（v0.6 — Semantic Metrics Layer / Intent-driven Router）
-  - **Semantic Metrics Layer**（`schema/__init__.py` + `schema/metrics.json`）
-    - 新建 `MetricRegistry` 类，统一管理 27 个指标定义（dataset/field/agg/aliases/group/type）
-    - 指标类型：base（原始）、business（含业务过滤条件）、operator（算子类）
-    - 派生指标注册：`metric_relations` 支持 ratio/composite/derived 三种关联类型
-    - 别名体系：alias → canonical 双向解析，支持用户自然语言模糊匹配
-    - Playground：`_metric_defaults()` 从硬编码 150+ 行 keyword 链替换为 MetricRegistry 智能打分
-    - 新增 `match_metric_relation(query)` 隐式 ratio 检测（numerator/denominator 双指标匹配）
-  - **Intent-driven Router**（取代 keyword-driven router）
-    - `tool_router.py` 新增 `_route_by_intent()` 按 plan.analysis_intent.type 分派
-    - 算子类 intent（active_store/retained_intention/age_cohort 等 10 个）→ `run_registered_operator`
-    - 派生指标类 intent（derived_ratio / derived_ratio_trend）→ 自动构建双指标查询 + ratio post_process + 可选 trend_summary
-    - 分析类 intent（share_breakdown / attribute_penetration / attribute_distribution）→ CompositionTool / MultiTableMetricTool
-    - `PLANNING_TOOL_SCHEMA` 扩展 `analysis_intent.type` enum 覆盖全部 10 个算子 + 2 个派生指标 intent
-  - **Operator Registry 独立**（`operators/registry.json`）
-    - 算子元数据从 `schema/schema.md` 和 keyword 匹配函数中抽离，归入独立 JSON 注册表
-    - 10 个算子的 intent 映射、query_hints、参数签名统一归档
-    - `operators/registry.py` 删除 10 个 `_is_*_plan()` keyword 函数，改为 `resolve_intent_from_plan()` 评分匹配
-    - 算子匹配优先级：analysis_intent.type > metric_names > query_hints scoring
-  - **RuntimeDecision → MetricRegistry**
-    - `infer_intent_from_question()` 将 share 判断前置为派生指标优先：Query 含"占比/率"时先查 `MetricRegistry.match_metric_relation()`
-    - 新增 `derived_ratio` / `derived_ratio_trend` 两条 Evidence Contract entry
-    - `post_process` 新增 `ratio` 类型：自动完成分子÷分母计算
-  - 修复的问题：
-    1. `近10日门店下发线索数占比趋势` → derived_ratio_trend + 双指标查询 + 占比趋势（原为 share → 只查单指标绝对值）
-    2. `留存小订转化率` → retained_intention_conversion（原被 retained_intention 优先拦截）
-    3. 算子 intent 冲突通过 scoring 正确排序（"预测锁单数"不再误匹配"锁单量"）
-
-- 2026-05-18（v0.5 — 时间语义层重构）
-  - **时间逻辑统一**：所有时间理解逻辑从 `planner.py`（~430 行）、`comparison_tool.py`、`tool_router.py` 收敛到 `operators/time_windows.py`，移除 `operators/time_semantics.py`
-    - 新增 `parse_time_window`（增强解析器）、`infer_time_window_type`（分类器）、`parse_comparison_type`、`is_cumulative_query`（累计检测）、`extract_compare_year`（同比目标年提取）、`infer_goal_time_window`（置信度推断）、`remove_cumulative_time_dim`（累计时删时间维度+截 end 为 today）、`cumulative_adjust_time`、`parse_time_semantics`（统一 facade）
-  - **"累计"语义**（YTD）：检测 `累计/累积` + 当前年份时，`time.end` 截断为 `today+1d`；`dimensions` 中移除时间字段（单独或与其他维度共存均处理）
-  - **"同比YYYY年"**：`comparison.target_year` 从 query 提取，`comparison_tool.py` 据此计算偏移（不再硬编码 -1 年）
-  - **日期范围保护**：`dates_are_range` 检测 `~`/`到`/`至` 等范围连接符，`multi_date_split` 不再拆分
-  - 修复的问题：
-    1. `~5月17日累计车系占比` → 全范围累计（原为拆成两单日）
-    2. `2026累计同比2025` → YTD vs YTD（原为全年 vs 全年）
-    3. `2026累计同比2024` → 正确偏移 -2 年（原为 -1 年）
-    4. `2024 1/1~5/17累计锁单数` → 正确 13,637（原为按时间戳分组错误）
-- 2026-05-18（v0.4.6 — Runtime Decision / Fact Extraction 稳定化）
-  - **Agent Loop 空转修复**：`memory_extractor` 三处缺陷导致 query block 始终抽不出 facts → loop 空跑 5 步
-    - `_DATA_EXCLUDE` 误过滤 `"series"` 维度列 → `dim_cols=[]` → 无 dimension_breakdown
-    - `tool_router.py` 默认路径调用 `execute_analysis()` 返回 string 而非 DataFrame → `cols=[]`
-    - `share_summary` 缺少 raw count → 占比的确定性 fallback 计算
-  - **Loop 熔断**：`runtime_decision.py` 新增 stall 检测，同一 `missing_facts` 连续 3 次 → force-finish
-- 2026-05-15（v0.4.5 — 数据集更新 Fast Path）
-  - 新增 `FastPathTool.data_update`：支持 CLI/飞书触发数据集增量更新
-    - `scope="order"` 时调用 `order_data_to_parquet.py`
-    - `scope="config"` 时调用 `order_config_to_parquet.py`
-    - `scope="lock"` 时调用 `lock_attribution_data_to_parquet.py`
-    - 更新后自动读取 `lock_time` 最大日期作为"更新至"时间戳
-  - 新增 `FastPathTool.data_sync`：明确触发"数据更新并同步"时连续调用 `skills_order_observation_daily.py`
-  - `FastPathTool` 升级：`answer` 字段直出（绕过 LLM 总结）
-  - `Planner._parse_fast_path_query`：规则路径前置，匹配"更新订单数据"等自然语言
-  - `_normalize_plan` fast_path 白名单加入 `data_update` / `data_sync`
-- 2026-05-15（v0.4.4 — MultiTable / Lookup Metric 能力补齐）
-  - 新增 `MultiTableMetricTool`（tools/multitable_metric_tool.py）
-    - `attribute_penetration`：order_data ⋈ config_attribute，计算配置/属性渗透率（地暖/激光雷达/线控等）
-    - `attribute_distribution`：多值属性分布占比（轮毂 share、颜色分布），支持 Top-K
-    - 支持 `value_contains` 模糊匹配 variant（如 Thor/Orin 区分）
-    - 支持 `series_group_logic`（CM0/CM1/CM2/DM0/DM1）与 `product_type_logic`（增程/纯电）业务规则推导
-  - 新增 `ConfigCrossAnalysisTemplates`（tools/config_cross_analysis_templates.py）
-    - 17 个配置渗透率模板 + 3 个分布模板，关键词匹配自动填充 `analysis_intent`
-    - 通用 fallback：查询含"选装率"但无模板匹配时，自动提取文本作为 attribute_pattern
-    - 时间窗口：优先解析用户显式日期（X年X月X日至今）→ 系列上市日（time_periods.end）→ 默认
-  - Agent routing：`analysis_intent.type == "attribute_penetration"` / `"attribute_distribution"` → MultiTableMetricTool
-  - Planner 规则路径：`_is_penetration_query` + `_build_penetration_plan`，LLM 前稳定命中
-  - 独立回测脚本：scripts/ls8_floor_heating_rate.py
-- 2026-05-14（v0.4.2 — Fact Production Layer 稳定化）
-  - 新增 `CompositionTool`（tools/composition_tool.py）：专用占比分析工具（周/月/日分组占比、Top-N、帕累托累计占比）
-  - 路由：`plan.analysis_intent.type == "share_breakdown"` → CompositionTool
-  - `QueryTool._apply_post_process`：通用 DataFrame 后处理（share 计算）
-  - `runtime_decision.result_satisfies_goal`：基于用户问题提取 required slots，检查结果列是否满足需求；不满足时自动生成 repair query 重试（最多 2 次）
-  - 语义过滤增强：自动识别用户查询中的具体产品名并添加 product_name 过滤条件
-  - 时间窗口增强：`_parse_time_window` 新增"本周"支持（ISO 周 Mon–today）
-  - 确定性 Fact 抽取
-    - **所有 builder 改为 summary 格式**：每个 block × 每种 fact_type 最多 1 条，含 `content` + `metadata`，旧 `values`/`rows`/`time_series` 数组全部移除
-    - **新增 `_make_fact`**：统一 fact 构造入口
-    - **column-based detection**（`memory_extractor.py`）：7 个 `_detect_*_columns` 函数用 keyword substring 匹配（中英文），替代硬编码列名集合
-    - **`_FALLBACK_HINTS`**：为每个 block_type 声明预期 fact_type 集合
-    - **gap-filling**：block_type handlers 产出不足时，自动用 column-based 补齐缺失的 fact_type（如 `trend_summary` → `trend_summary` + `time_grouped_metric`）
-    - **`evidence_hints`**：工具层注入到 `structured.result`（tool_router.py `_infer_evidence_hints`），fact 抽取从猜测升级为声明
-    - **`_comparison_df_to_dict`**：comparison DataFrame 转为 dict + evidence_hints（保留 rows 结构）
-    - **`[Eval]` debug line**：runtime_decision 每次决策输出 `question | intent | required | available | missing | action | finish_reason` 一行
-  - **10 问题回测全过**：`metric / trend / compare / composition / share / time_grouped_share / ranking / distribution / diagnosis`
-- 2026-05-13（v0.4）
-  - 引入 Evidence-driven Runtime：structured_blocks → facts → evidence contract → runtime decision
-  - 新增 `statistics.contribution_summary` 用于诊断类问题的贡献拆解（描述性证据）
-  - Facts 升级为 Normalized Facts（values / conclusion / source）
-- 2026-05-12
-  - 拆分"时间窗口 / 统计函数 / 维度（分组）"职责：时间窗口解析收敛到 `operators/time_windows.py`，统计计算收敛到 `tools/statistics_tool.py`，维度分组由 `agent/planner.py` 统一产出（统计类计划强制按时间字段分组）。
-
-## 数据与 Schema
-
-本项目默认在本地加载 CSV/Parquet 数据集：
-
-- 数据路径配置： [schema/data_path.md](schema/data_path.md)
-  - 支持绝对路径与通配符（例如 `assign*data.csv`）
-  - 该文件当前包含本机路径示例，换机器需要自行修改
-- Schema 与业务定义：
-  - [schema/schema.md](schema/schema.md)
-  - [schema/business_definition.json](schema/business_definition.json)
-
-## 支持的能力（路由一览）
-
-- Fast Path（[tools/fast_path_tool.py](tools/fast_path_tool.py)）
-  - `numeric_ratio`：纯数字环比/同比直算
-  - `current_iso_week`：当前日期 ISO 周
-  - `small_talk_contextual`：致谢/闲聊（结合最近 memory）
-- Comparison（[tools/comparison_tool.py](tools/comparison_tool.py)）
-  - `yoy` / `wow` / `dod`
-- Statistics（[tools/statistics_tool.py](tools/statistics_tool.py)）
-  - `weekly_decline_ratio`：周序列环比 + 下降周数占比
-  - `daily_threshold_count`：近 N 日阈值计数（支持 `> >= < <= == !=`）
-  - `monthly_mean`：按月聚合月均（支持 `2026年月均锁单数`、`每个月锁单数`）
-  - `daily_mean`：近 N 日（或指定窗）按日聚合后的日均
-  - `daily_mean_median`：近 N 日（或指定窗）按日聚合后的日均 + 中位数
-  - `trend_summary`：近 N 日趋势摘要（方向、斜率、波动、连续涨跌、峰谷值等）
-  - `contribution_summary`：贡献拆解摘要（baseline vs target，描述性证据）
-  - `daily_percentile_rank`：参考日/指定值在近 N 日分布中的分位（支持 `116的锁单数在近2个月中的水平`）
-  - `weekend_percentile_rank`：参考周末在近 N 个周末分布中的分位
-  - `weekday_percentile_rank`：参考“某个星期几”在近 N 次该 weekday 分布中的分位
-- Operators（[operators/registry.py](operators/registry.py)）
-  - 用于承接强业务口径的固定算子（例如在营门店等）
-- Composition（[tools/composition_tool.py](tools/composition_tool.py)）
-  - `share_by_dimension`：简单分组占比
-  - `weekly_share_by_dimension`：按周分拆占比（ISO 周合并，自动重聚合）
-  - `monthly_share_by_dimension`：按月分拆占比
-  - `topn_share`：Top-N 占比
-  - `cumulative_share`：累计占比（帕累托）
-  - `dimension_mapping`：支持 business_definition 中的维度映射（如 `seat_count_logic` 将 product_name 映射为 五座/六座）
-  - `denominator_scope`：支持 `within_each_<grain>`（时间窗口内占比）和 `overall`（全局累计占比）
-  - 路由条件：`plan.analysis_intent.type == "share_breakdown"`
-- MultiTable / Lookup Metric（[tools/multitable_metric_tool.py](tools/multitable_metric_tool.py)）
-  - `attribute_penetration`：主表右连选配表，计算配置/属性渗透率（二值 是/否），支持 variant 模糊匹配
-  - `attribute_distribution`：多值属性分布占比（如轮毂类型 share、颜色分布）
-  - 路由条件：`plan.analysis_intent.type == "attribute_penetration"` 或 `"attribute_distribution"`
-  - 模板库：[tools/config_cross_analysis_templates.py](tools/config_cross_analysis_templates.py)，覆盖 17 个配置项模板（地暖/轮毂/激光雷达/线控/礼包等）
-  - 支持业务规则推导：series_group_logic（CM0/CM1/CM2/DM0/DM1）、product_type_logic（增程/纯电）
-
-## 环境变量
-
-在项目根目录创建 `.env`（不要提交到仓库）：
-
-```env
-# DeepSeek（必填）
-DEEPSEEK_API_KEY=sk-xxx
-
-# 飞书 Bot（仅运行飞书入口需要）
-FEISHU_APP_ID=cli_xxx
-FEISHU_APP_SECRET=xxx
-
-# 可选：E2B Code Interpreter（当前未接入主流程；仅 tools/code_interpreter.py 使用）
-E2B_API_KEY=xxx
-```
-
-模型配置位于 [agent/llm_config.py](agent/llm_config.py)。
-
-## 安装与运行
+创建虚拟环境：
 
 ```bash
-python3 -m venv venv
-source venv/bin/activate
+python -m venv .venv
+source .venv/bin/activate
+```
+
+安装依赖：
+
+```bash
+pip install -e .
+```
+
+或：
+
+```bash
 pip install -r requirements.txt
 ```
 
-### 入口 1：命令行（main.py）
+（如果项目中存在 requirements 文件）
 
-```bash
-python3 main.py "下发线索数 (门店) 的平均值是多少？"
-```
+---
 
-不传入问题时会使用内置示例问题。
+## 数据准备
 
-### 入口 2：飞书机器人（feishu_bot.py）
-
-```bash
-python3 feishu_bot.py
-```
-
-该入口使用飞书官方 SDK 的 WebSocket 长连接事件订阅模式：程序启动后会过滤启动前的历史消息，并对 message_id 做简单去重。
-
-## Runtime Eval Workflow
-
-Runtime Eval 的目标是对 Agent 的“运行时行为（Runtime）”做回归检查：是否按预期产生日志、是否命中正确 intent、是否匹配 Evidence Contract、是否产出足够的 structured blocks 与 fact_types。它不关注回答里的具体数值是否正确（见下文第 6 点）。
-
-1. `logs/query_log.jsonl` 的作用
-   - `query_log.jsonl` 是 append-only 的运行日志，每次调用一次 Agent（[agent_loop.py](agent/agent_loop.py) 的 `run_main_agent`）都会追加一行 JSON。
-   - 其中包含 Runtime Eval 依赖的字段（示例）：`exit_reason`、`eval_intent`、`contract_matched`、`fact_types`、`structured_blocks_summary`、`final_answer` 等。
-   - 该日志既用于“从真实运行记录中抽取/构造 eval case”，也用于“eval runner 执行 case 后读取最新一条日志作为 actual 行为”。
-
-2. 生成 `eval/runtime_cases.jsonl`
-   - 基于已有的 `logs/query_log.jsonl`，用脚本 [generate_eval_cases.py](scripts/generate_eval_cases.py) 抽样生成 runtime eval cases：
-
-```bash
-python scripts/generate_eval_cases.py
-python scripts/generate_eval_cases.py --strategy recent --limit 20
-python scripts/generate_eval_cases.py --strategy stratified --limit 50
-python scripts/generate_eval_cases.py --include-failures --limit 20
-```
-
-3. 运行 `eval/run_runtime_eval.py`
-   - 运行 [run_runtime_eval.py](eval/run_runtime_eval.py) 会逐条读取 `eval/runtime_cases.jsonl`，对每个 case 调用 `run_main_agent(question)`，然后从 `logs/query_log.jsonl` 读取新增的最后一条记录作为 actual：
-
-```bash
-python eval/run_runtime_eval.py
-python eval/run_runtime_eval.py --limit 10 --verbose
-python eval/run_runtime_eval.py --cases eval/runtime_cases.jsonl --report eval/eval_report.json
-```
-
-4. 查看 `eval/eval_report.json`
-   - runner 会输出 `eval/eval_report.json`（包含 `total/passed/failed/pass_rate/results`）。
-   - `results[]` 每条包含：`passed`、`checks`（每个检查项 true/false）、`actual`（从 query_log 中读取到的 actual 运行时字段）、以及可选的 `error`。
-
-5. 当前 eval 检查项说明
-   - `no_forbidden_exit_reason`：`actual.exit_reason` 不在 `expected.exit_reason_not_in` 里（通常用于禁止 `error/exception` 这类退出原因）。
-   - `intent_match`：若 `expected.intent` 非空，则要求 `actual.eval_intent == expected.intent`；否则跳过该项（视为通过）。
-   - `contract_match`：若 `expected.contract_matched` 存在（非 `None`），则要求 `actual.contract_matched` 与其一致；否则跳过。
-   - `min_structured_blocks`：若 `expected.min_structured_blocks > 0`，则要求 `actual.structured_block_count >= expected.min_structured_blocks`；否则跳过。
-   - `fact_types_any`：若 `expected.fact_types_any` 非空，则要求 `actual.fact_types` 与其有交集（至少命中一种 fact_type）；否则跳过。
-
-6. 第一版 eval 的边界
-   - 当前 Runtime Eval 不校验回答里的具体数值/明细是否正确；它只校验 Runtime 行为与证据产出是否符合预期（例如是否出现不允许的退出原因、intent/contract 是否一致、是否产出了足够的结构化证据）。
-
-## 目录结构
+项目默认从根目录读取数据：
 
 ```text
-.
-├── main.py                # 入口：命令行单次问答（代理到 agent.agent_loop.run_main_agent）
-├── feishu_bot.py          # 入口：飞书机器人
-├── agent/                 # Agent 主循环、规划与状态
-│   ├── agent_loop.py       # run_main_agent：主循环入口
-│   ├── planner.py          # PlanningAgent：NL → plan（规划 DSL）
-│   ├── schema.py           # schema/data_path 等加载约定
-│   ├── tool_router.py      # 路由与编排（fast_path/operator/composition/comparison/statistics/query）
-│   ├── runtime_decision.py # Evidence Contract + Runtime Decision（should_continue）
-│   ├── state.py            # 运行时状态（question/loop/planning/results/memory/final）
-│   ├── memory_extractor.py # 对话记忆抽取与更新
-│   └── llm_config.py       # DeepSeek 模型名配置
-├── tools/                 # 确定性执行工具（Query/Comparison/Statistics/FastPath/Composition/MultiTableMetric）
-│   ├── query_tool.py
-│   ├── comparison_tool.py
-│   ├── statistics_tool.py
-│   ├── composition_tool.py
-│   ├── fast_path_tool.py
-│   ├── multitable_metric_tool.py    # 跨表属性渗透率/分布分析
-│   └── config_cross_analysis_templates.py  # 配置分析模板库（17 个模板）
-├── operators/             # 强口径固定算子
-├── schema/                # schema 与数据路径配置
-├── scripts/               # 固定自动化脚本（定时调度用）
-└── 设计方案/               # 方案与设计文档（可选参考）
+dataset/
 ```
 
-## 示例问题
+请确保：
 
 ```text
-下发线索数 (门店) 的平均值是多少？
-2025年8月1日~10日锁单数日均值是多少？
-2026年月均锁单数是多少？
-2026年每个月锁单数分别是多少？
-近30日有多少天锁单数大于120？
-昨天的锁单数在近30日的锁单数中处于什么分位？
-116的锁单数在近2个月中的水平？
-LS8上市至今的五六座比例
-LS8上市至今累计锁单数的五六座比例
-查询近10周周四/周五门店锁单率环比变化，有多少周是下降的？
-输出LS8上市以来，每周分车型的锁单数占比分别是多少？
-本周智己LS8 66 Ultra 奢享大六座的锁单总数
-按月分门店看交付数占比
-各门店锁单量Top-5占比
+mashang-service/
+├── dataset/
+├── .env
+└── .venv/
+```
+
+不要随意移动：
+
+```text
+dataset/
+.env
+.venv/
+```
+
+否则部分脚本和 Runtime 路径解析可能失效。
+
+---
+
+## 验证环境
+
+执行：
+
+```bash
+make test
+```
+
+或：
+
+```bash
+make ci
+```
+
+如果能够正常运行，则说明项目环境基本可用。
+
+---
+
+## 最推荐的使用方式
+
+### 日常工作：使用 Workspace
+
+绝大多数情况下，应直接在：
+
+```text
+mashang_workspace/
+```
+
+中开展工作。
+
+推荐让 OpenCode 在 Workspace 中完成：
+
+- 业务分析；
+- 数据探索；
+- 编写分析脚本；
+- 补充业务文档；
+- 沉淀 Result Contract；
+- 编写 Eval Case；
+- 注册 Capability；
+- 验证能力质量。
+
+Workspace 是能力孵化与治理中心，也是项目的主要开发入口。
+
+---
+
+### 查看锁单分析能力
+
+运行 Demo：
+
+```bash
+make lock-demo
+```
+
+示例问题：
+
+```text
+昨天锁单数分车型
+昨天 LS8 锁单城市分布
+```
+
+---
+
+### 查看 ATP 分析能力
+
+```bash
+make atp-demo
+```
+
+---
+
+### 查看数据字典
+
+```bash
+make data-dict
+```
+
+---
+
+### 运行 Runtime V2 Demo
+
+```bash
+make runtime-v2-demo
+```
+
+或：
+
+```bash
+make runtime-v2-city-demo
+```
+
+用于验证 Runtime V2 的能力调度链路。
+
+---
+
+## 开发者工作流
+
+推荐遵循以下工作模式：
+
+```text
+业务问题
+  ↓
+mashang_workspace
+  ↓
+分析脚本
+  ↓
+Result Contract
+  ↓
+Eval
+  ↓
+Capability Registry
+  ↓
+稳定能力
+  ↓
+mashang_runtime
+```
+
+其中：
+
+- Workspace 用于探索和沉淀能力；
+- Runtime 用于承载已经成熟的产品能力；
+- 不建议直接在 Runtime 中开发新业务逻辑。
+
+---
+
+## 常用检查命令
+
+```bash
+make eval
+```
+
+运行核心评测。
+
+```bash
+make full-eval
+```
+
+运行全量评测。
+
+```bash
+make capability-audit
+```
+
+检查 Capability Registry。
+
+```bash
+make runtime-v2-audit
+```
+
+检查 Runtime V2 就绪状态。
+
+```bash
+make ci
+```
+
+运行 CI 安全检查。
+
+---
+
+## 项目目录导航
+
+如果你是：
+
+### 业务分析开发者
+
+重点关注：
+
+```text
+mashang_workspace/runtime_scripts/
+mashang_workspace/research_scripts/
+mashang_workspace/docs/
+mashang_workspace/eval/
+```
+
+---
+
+### Runtime 开发者
+
+重点关注：
+
+```text
+mashang_runtime_v2/
+mashang_runtime/
+```
+
+---
+
+### 业务规则维护者
+
+重点关注：
+
+```text
+shared/schema/business_definition.json
+shared/operators/
+```
+
+---
+
+### 产品能力维护者
+
+重点关注：
+
+```text
+mashang_runtime/
+```
+
+这里存放已经沉淀完成的产品能力。
+
+---
+
+## 典型开发流程
+
+新增一个分析能力：
+
+### Step 1
+
+在：
+
+```text
+mashang_workspace/research_scripts/
+```
+
+完成业务验证。
+
+### Step 2
+
+封装为：
+
+```text
+mashang_workspace/runtime_scripts/
+```
+
+标准 Runtime Script。
+
+### Step 3
+
+输出标准 Result Contract。
+
+### Step 4
+
+补充 Eval Case。
+
+### Step 5
+
+注册到：
+
+```text
+mashang_workspace/registry/capability_registry.json
+```
+
+### Step 6
+
+通过 Audit 与 Eval。
+
+### Step 7
+
+经过实际使用验证。
+
+### Step 8
+
+对于稳定、高频、口径清晰的能力：
+
+```text
+mashang_workspace
+  ↓
+mashang_runtime
+```
+
+完成产品化沉淀。
+
+---
+
+## 项目定位
+
+`mashang-service` 的目标是构建一个面向汽车业务分析的 AI-native 数据服务系统。
+
+它支持：
+
+- 用自然语言描述业务问题；
+- 将问题解析为可执行分析上下文；
+- 调度标准化 Runtime Scripts；
+- 输出结构化 Result Contract；
+- 支持多轮追问；
+- 通过 Eval / Contract / Registry 管理能力质量；
+- 将成熟能力逐步产品化。
+
+核心思想是：
+
+```text
+不是把所有逻辑写进一个复杂 Agent，
+
+而是在 Workspace 中持续沉淀业务能力，
+通过文档、脚本、Result Contract 和 Eval 管理质量，
+
+最终把成熟能力回流到 Runtime，
+形成稳定可复用的产品能力。
+```
+
+---
+
+# 1. Architecture Overview
+
+当前项目采用四层架构：
+
+```text
+mashang-service/
+├── shared/                 # 共享业务语义层
+│   ├── operators/
+│   └── schema/
+│
+├── mashang_workspace/      # 能力孵化与治理层（主工作区）
+│   ├── runtime_scripts/
+│   ├── research_scripts/
+│   ├── utility_scripts/
+│   ├── legacy_scripts/
+│   ├── registry/
+│   ├── eval/
+│   ├── tests/
+│   ├── docs/
+│   └── utils/
+│
+├── mashang_runtime_v2/     # 新 Runtime 架构实验与产品化
+│
+├── mashang_runtime/        # 产品能力层
+│
+├── dataset/
+├── main.py
+├── feishu_bot.py
+├── Makefile
+├── pyproject.toml
+└── README.md
+```
+
+---
+
+# 2. Four-layer Design
+
+## 2.1 Shared Layer
+
+目录：
+
+```text
+shared/
+├── operators/
+└── schema/
+```
+
+共享业务语义层，包含：
+
+- 共享业务算子；
+- 指标定义；
+- 业务规则；
+- 车型与配置定义；
+- 时间窗口定义；
+- `business_definition.json`。
+
+Canonical Path：
+
+```text
+shared/schema/business_definition.json
+```
+
+被以下模块共同消费：
+
+```text
+mashang_workspace
+mashang_runtime
+mashang_runtime_v2
+```
+
+原则：
+
+```text
+shared 只存放稳定业务原语。
+新能力先进入 workspace，再决定是否沉淀到 shared。
+```
+
+---
+
+## 2.2 Workspace Layer
+
+目录：
+
+```text
+mashang_workspace/
+```
+
+这是项目最重要的工作区。
+
+推荐日常所有分析工作都从这里开始。
+
+负责：
+
+- 能力孵化；
+- 数据探索；
+- Runtime Script 管理；
+- Result Contract；
+- Eval；
+- Capability Registry；
+- 文档沉淀；
+- 能力治理。
+
+OpenCode 的主要工作区域也应当是 Workspace。
+
+---
+
+## 2.3 Runtime V2 Layer
+
+目录：
+
+```text
+mashang_runtime_v2/
+```
+
+用于验证新的 Runtime 架构。
+
+原则：
+
+```text
+Runtime V2 不重新发明分析能力；
+Runtime V2 优先消费 Workspace 中已经治理完成的能力；
+Runtime V2 统一消费 Result Contract。
+```
+
+最小运行链路：
+
+```text
+user text
+  ↓
+context_parser
+  ↓
+capability_dispatcher
+  ↓
+workspace_script_adapter
+  ↓
+runtime_scripts
+  ↓
+Result Contract
+  ↓
+response_renderer
+```
+
+---
+
+## 2.4 Runtime Layer
+
+目录：
+
+```text
+mashang_runtime/
+```
+
+产品能力层。
+
+这里不承担探索工作，而承担：
+
+- 稳定能力沉淀；
+- 高频能力复用；
+- 产品接口输出；
+- 飞书机器人能力；
+- API 能力。
+
+原则：
+
+```text
+Workspace 负责成长能力；
+Runtime 负责承载成熟能力。
+```
+
+---
+
+# 3. Capability Lifecycle
+
+推荐生命周期：
+
+```text
+research_scripts
+  ↓
+runtime_scripts
+  ↓
+Result Contract
+  ↓
+Eval
+  ↓
+Capability Registry
+  ↓
+业务验证
+  ↓
+mashang_runtime
+```
+
+对应：
+
+```text
+研究探索
+  ↓
+标准封装
+  ↓
+输出协议
+  ↓
+质量验证
+  ↓
+能力治理
+  ↓
+实际使用
+  ↓
+产品沉淀
+```
+
+---
+
+# 4. Script Tiers
+
+| Tier     | Directory           | Role         | Auto Schedulable | Default Eval |
+| -------- | ------------------- | ------------ | ---------------- | ------------ |
+| runtime  | `runtime_scripts/`  | 稳定分析能力 | yes              | yes          |
+| research | `research_scripts/` | 研究能力     | no               | no           |
+| utility  | `utility_scripts/`  | 工具脚本     | no               | no           |
+| legacy   | `legacy_scripts/`   | 历史脚本     | no               | no           |
+
+原则：
+
+```text
+普通业务问题默认只调度 runtime_scripts。
+research_scripts 必须显式调用。
+```
+
+---
+
+# 5. Capability Registry
+
+注册表：
+
+```text
+mashang_workspace/registry/capability_registry.json
+```
+
+当前核心能力：
+
+```text
+daily_lock_count
+lock_by_model
+lock_city_distribution
+assign_conversion_analysis
+attribute_penetration_report
+atp_price_report
+```
+
+Registry 的核心作用是：
+
+```text
+记录能力状态，
+帮助判断哪些能力已经具备产品化条件。
+```
+
+---
+
+# 6. Result Contract
+
+标准输出结构：
+
+```json
+{
+  "status": "success",
+  "metric": "...",
+  "scope": {},
+  "summary": {},
+  "dimensions": [],
+  "followup_context": {}
+}
+```
+
+文档：
+
+```text
+mashang_workspace/docs/result_contract.md
+```
+
+---
+
+# 7. Evaluation System
+
+常用命令：
+
+```bash
+make eval
+```
+
+```bash
+make full-eval
+```
+
+```bash
+make ci
+```
+
+```bash
+make test
+```
+
+Eval 的目标不是测试代码本身，而是验证：
+
+- 业务口径；
+- 数值正确性；
+- Result Contract；
+- Follow-up 能力；
+- 产品化准备度。
+
+---
+
+# 8. Current Runtime V2 Status
+
+当前支持能力：
+
+```text
+lock_by_model
+lock_city_distribution
+```
+
+示例问题：
+
+```text
+昨天锁单数分车型
+昨天 LS8 锁单城市分布
+```
+
+---
+
+# 9. Project Roadmap
+
+已完成：
+
+```text
+Phase 11：Promotion Gate & Capability Registry
+Phase 12：Legacy Runtime Freeze & Runtime V2 Foundation
+Phase 12.5：Legacy Runtime Packaging
+Phase 12.6：Archive Cleanup
+Phase 12.7：Shared Operators & Schema Extraction
+Phase 12.8：Rename mashang_shared to shared
+```
+
+进行中：
+
+```text
+Phase 13：Runtime V2 Minimal Implementation
+Phase 14：Runtime V2 Multi-turn & Response Quality
+Phase 15：Feishu / API Product Output
+```
+
+长期目标：
+
+```text
+Workspace 持续成长能力
+        ↓
+Eval 与 Registry 治理
+        ↓
+Runtime 产品化沉淀
+```
+
+---
+
+# 10. One-sentence Summary
+
+```text
+shared              # shared business semantics
+mashang_workspace   # capability incubation and governance
+mashang_runtime_v2  # runtime architecture evolution
+mashang_runtime     # productized capabilities
+```
+
+核心原则：
+
+```text
+平时主要在 Workspace 中工作，
+让 OpenCode 分析、写脚本、补文档、沉淀 Eval 和 Result Contract；
+
+当能力经过验证、使用频繁且业务口径稳定后，
+再回流到 Runtime，成为真正的产品能力。
 ```
