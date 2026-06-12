@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-_BUSINESS_DEF_FILE = REPO_ROOT / "schema" / "business_definition.json"
+_BUSINESS_DEF_FILE = REPO_ROOT / "shared" / "schema" / "business_definition.json"
 
 
 def _load_business_definition() -> dict:

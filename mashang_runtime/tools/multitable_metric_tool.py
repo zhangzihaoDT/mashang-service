@@ -7,7 +7,7 @@ from .config_cross_analysis_templates import match as match_template
 from operators.series_group_logic import apply_series_group_logic
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-BUSINESS_DEF = REPO_ROOT / "schema" / "business_definition.json"
+BUSINESS_DEF = REPO_ROOT / "shared" / "schema" / "business_definition.json"
 ORDER_DATA = REPO_ROOT / "dataset" / "order_data.parquet"
 CONFIG_ATTR = REPO_ROOT / "dataset" / "config_attribute.parquet"
 

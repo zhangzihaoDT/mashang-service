@@ -172,7 +172,7 @@ def _resolve_operator_params(intent: str, plan: dict, user_query: str, query_too
 
 
 def _load_business_definition(df, plan) -> dict:
-    bdef_path = REPO_ROOT / "schema" / "business_definition.json"
+    bdef_path = REPO_ROOT / "shared" / "schema" / "business_definition.json"
     bdef = {}
     try:
         bdef = json.loads(bdef_path.read_text(encoding="utf-8")) if bdef_path.exists() else {}
