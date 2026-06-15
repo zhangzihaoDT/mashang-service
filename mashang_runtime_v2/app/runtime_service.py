@@ -39,7 +39,7 @@ def run_pipeline(user_text: str, session_id: str = "", debug: bool = False) -> d
             previous_context = session["last_context"]
             previous_result_context = session.get("last_result_context")
             session_info["previous_session_loaded"] = True
-            session_info["session_path"] = str(_WS_ROOT / "outputs" / "runtime_v2_sessions" / f"{sanitize(session_id)}.json")
+            session_info["session_path"] = str(_V2_ROOT / "data" / "sessions" / f"{sanitize(session_id)}.json")
             session_info["turn_count"] = session.get("turn_count", 0)
 
     # 2. Context

@@ -25,6 +25,8 @@ mashang_workspace/
 ├── tests/                 # Smoke test（pytest）
 │   ├── scripts/           # 脚本级测试
 │   └── eval/              # Eval Runner + Parser 测试
+├── schema/                # 业务定义 & 数据词典（business_definition.json 等）
+├── registry/              # 能力注册表（capability_registry.json）
 ├── utils/                 # 工具模块
 │   └── paths.py           # 路径工具
 └── outputs/               # 输出文件

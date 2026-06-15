@@ -1,0 +1,96 @@
+{
+  "time_periods": {
+    "CM0": {
+      "start": "2023-08-25",
+      "end": "2023-10-12",
+      "finish": "2023-11-12"
+    },
+    "DM0": {
+      "start": "2024-04-08",
+      "end": "2024-05-13",
+      "finish": "2024-06-15"
+    },
+    "CM1": {
+      "start": "2024-08-30",
+      "end": "2024-09-26",
+      "finish": "2024-10-08"
+    },
+    "CM2": {
+      "start": "2025-08-15",
+      "end": "2025-09-10",
+      "finish": "2025-10-16"
+    },
+    "DM1": {
+      "start": "2025-04-18",
+      "end": "2025-05-13",
+      "finish": "2025-06-15"
+    },
+    "LS9": {
+      "start": "2025-11-04",
+      "end": "2025-11-12",
+      "finish": "2025-12-04"
+    },
+    "LS8": {
+      "start": "2026-03-26",
+      "end": "2026-04-16",
+      "finish": "2026-05-16"
+    }
+  },
+  "battery_capacity_logic": {
+    "52kwh": "product_name LIKE '%52%'",
+    "66kwh": "product_name LIKE '%66%'",
+    "76kwh": "product_name LIKE '%LS6%' AND product_name NOT LIKE '%52%' AND product_name NOT LIKE '%66%' AND product_name NOT LIKE '%Ultra%' AND product_name NOT LIKE '%Pro Max%'",
+    "103kwh": "product_name LIKE '%LS6%' AND product_name LIKE '%Ultra%' OR product_name LIKE '%LS6%' AND product_name LIKE '%Pro Max%'"
+  },
+  "product_type_logic": {
+    "增程": "product_name LIKE '%52%' OR product_name LIKE '%66%'",
+    "纯电": "product_name NOT LIKE '%52%' AND product_name NOT LIKE '%66%'"
+  },
+  "seat_count_logic": {
+    "五座": "product_name LIKE '%五座%'",
+    "六座": "product_name LIKE '%六座%'"
+  },
+  "series_group_logic": {
+    "CM2": "product_name LIKE '%新一代%' AND product_name LIKE '%LS6%'",
+    "CM1": "product_name LIKE '%全新%' AND product_name LIKE '%LS6%'",
+    "CM0": "product_name LIKE '%LS6%' AND product_name NOT LIKE '%全新%' AND product_name NOT LIKE '%新一代%'",
+    "DM1": "product_name LIKE '%全新%' AND product_name LIKE '%L6%'",
+    "DM0": "product_name LIKE '%L6%' AND product_name NOT LIKE '%全新%'",
+    "LS8": "product_name LIKE '%LS8%'",
+    "LS9": "product_name LIKE '%LS9%'",
+    "LS7": "product_name LIKE '%LS7%'",
+    "L7": "product_name LIKE '%L7%'",
+    "其他": "ELSE"
+  },
+  "model_series_mapping": {
+    "LS6": ["CM0", "CM1", "CM2"],
+    "L6": ["DM0", "DM1"]
+  },
+  "age_limit": [18, 80],
+  "business_knowledge": {
+    "main_selling_models_seats_6": {
+      "updated_at": "2026-03",
+      "updated_source": "TIP&MIX 数据截至 2026 年 3 月",
+      "models": [
+        "极氪9X",
+        "岚图泰山",
+        "理想L9",
+        "领克900",
+        "腾势N8L",
+        "蔚来ES8",
+        "问界M8 EV",
+        "问界M8 REEV",
+        "问界M9 EV",
+        "问界M9 REEV",
+        "银河M9",
+        "智己LS9",
+        "X9 EV",
+        "X9 REEV",
+        "零跑D19",
+        "ID.ERA 9X",
+        "大唐EV",
+        "乐道L90"
+      ]
+    }
+  }
+}

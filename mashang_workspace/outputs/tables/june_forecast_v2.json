@@ -1,0 +1,432 @@
+{
+  "framework": "Metrics Map + 统计分布 + 情景假设 = 销量预测",
+  "dataset": "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/schema/index_summary_daily_matrix.csv",
+  "as_of_date": "2026-06-14",
+  "samples": {
+    "recent_days": 30,
+    "history_days": 365
+  },
+  "metrics_map": {
+    "target_metric": "订单分析.锁单数",
+    "traffic_metric": "下发线索转化率.下发线索数",
+    "conversion_metric": "下发线索转化率.下发线索当30日锁单率",
+    "identity": "lock_orders = leads × lock_rate"
+  },
+  "recent_performance": {
+    "daily_leads_mean": 14009.63,
+    "daily_lock_rate_mean": 0.015366,
+    "daily_lock_orders_mean": 224.5,
+    "lead_daily_delta": 0.0,
+    "rate_daily_delta": 0.0
+  },
+  "distribution": {
+    "leads": {
+      "mean": 14500.778082,
+      "std": 4300.990817,
+      "mode": 13642.0,
+      "p10": 9789.4,
+      "p30": 12242.4,
+      "p50": 13963.0,
+      "p70": 16258.0,
+      "p90": 19918.8,
+      "zscore_recent_mean": -0.114193
+    },
+    "lock_rate": {
+      "mean": 0.01884,
+      "std": 0.006576,
+      "mode": 0.013982,
+      "p10": 0.012737,
+      "p30": 0.014361,
+      "p50": 0.017416,
+      "p70": 0.020569,
+      "p90": 0.02902,
+      "zscore_recent_mean": -0.528212
+    },
+    "lock_orders": {
+      "mean": 282.309589,
+      "std": 403.294787,
+      "mode": 128.0,
+      "p10": 97.0,
+      "p30": 130.0,
+      "p50": 185.0,
+      "p70": 291.6,
+      "p90": 500.2,
+      "zscore_recent_mean": -0.143343
+    }
+  },
+  "scenario_forecast": {
+    "forecast_days": 28,
+    "regime_quantile_based": {
+      "p10": {
+        "daily_leads": 9442.69,
+        "daily_lock_rate": 0.013547,
+        "daily_lock_orders": 127.96,
+        "period_lock_orders": 3582.94
+      },
+      "p50": {
+        "daily_leads": 12366.86,
+        "daily_lock_rate": 0.01571,
+        "daily_lock_orders": 194.43,
+        "period_lock_orders": 5444.05
+      },
+      "p90": {
+        "daily_leads": 14680.11,
+        "daily_lock_rate": 0.025121,
+        "daily_lock_orders": 369.21,
+        "period_lock_orders": 10337.76
+      }
+    },
+    "regime_quantile_bias_corrected": {
+      "p10": {
+        "daily_lock_orders_bias_corrected": 137.44,
+        "period_lock_orders_bias_corrected": 3848.37
+      },
+      "p50": {
+        "daily_lock_orders_bias_corrected": 208.83,
+        "period_lock_orders_bias_corrected": 5847.36
+      },
+      "p90": {
+        "daily_lock_orders_bias_corrected": 396.56,
+        "period_lock_orders_bias_corrected": 11103.61
+      }
+    },
+    "regime_bootstrap": {
+      "p10": {
+        "daily_leads": 11414.66,
+        "daily_lock_rate": 0.016601,
+        "daily_lock_orders": 197.15,
+        "period_lock_orders": 5520.07
+      },
+      "p50": {
+        "daily_leads": 12071.55,
+        "daily_lock_rate": 0.017729,
+        "daily_lock_orders": 219.43,
+        "period_lock_orders": 6143.99
+      },
+      "p90": {
+        "daily_leads": 12659.63,
+        "daily_lock_rate": 0.018933,
+        "daily_lock_orders": 242.46,
+        "period_lock_orders": 6788.86
+      },
+      "mode": {
+        "daily_leads": 12147.11,
+        "daily_lock_rate": 0.017901,
+        "daily_lock_orders": 217.93,
+        "period_lock_orders": 6102.08
+      }
+    },
+    "regime_bootstrap_bias_corrected": {
+      "p10": {
+        "daily_leads": 11414.66,
+        "daily_lock_rate": 0.016601,
+        "daily_lock_orders_bias_corrected": 211.76,
+        "period_lock_orders_bias_corrected": 5929.01
+      },
+      "p50": {
+        "daily_leads": 12071.55,
+        "daily_lock_rate": 0.017729,
+        "daily_lock_orders_bias_corrected": 235.69,
+        "period_lock_orders_bias_corrected": 6599.15
+      },
+      "p90": {
+        "daily_leads": 12659.63,
+        "daily_lock_rate": 0.018933,
+        "daily_lock_orders_bias_corrected": 260.42,
+        "period_lock_orders_bias_corrected": 7291.8
+      },
+      "mode": {
+        "daily_leads": 12147.11,
+        "daily_lock_rate": 0.017901,
+        "daily_lock_orders_bias_corrected": 234.07,
+        "period_lock_orders_bias_corrected": 6554.14
+      }
+    },
+    "bayesian_calibration": {
+      "enabled": 1,
+      "method": "regime_quantile",
+      "future_days": 28,
+      "future_regime_days": {
+        "activity_high_eff": 0,
+        "activity_low_eff": 0,
+        "weekday": 20,
+        "weekend": 8
+      },
+      "regime_inputs": {
+        "activity_high_eff": {
+          "leads": {
+            "n": 65,
+            "mode": 18638.0,
+            "p10": 13524.6,
+            "p50": 18638.0,
+            "p90": 24849.000000000004
+          },
+          "lock_rate": {
+            "n": 65,
+            "mode": 0.0197031949354408,
+            "p10": 0.0111877278868584,
+            "p50": 0.0193780142196589,
+            "p90": 0.031616643860417286
+          }
+        },
+        "activity_low_eff": {
+          "leads": {
+            "n": 82,
+            "mode": 17354.0,
+            "p10": 13975.1,
+            "p50": 17357.0,
+            "p90": 20045.9
+          },
+          "lock_rate": {
+            "n": 82,
+            "mode": 0.019347278216041153,
+            "p10": 0.01036236643368303,
+            "p50": 0.019876265394701498,
+            "p90": 0.03462092176137038
+          }
+        },
+        "weekday": {
+          "leads": {
+            "n": 155,
+            "mode": 11317.0,
+            "p10": 9251.2,
+            "p50": 11898.0,
+            "p90": 14293.6
+          },
+          "lock_rate": {
+            "n": 155,
+            "mode": 0.014234923629144101,
+            "p10": 0.01346651166879988,
+            "p50": 0.0155840631006386,
+            "p90": 0.02468741662406422
+          }
+        },
+        "weekend": {
+          "leads": {
+            "n": 63,
+            "mode": 13539.0,
+            "p10": 9921.4,
+            "p50": 13539.0,
+            "p90": 15646.4
+          },
+          "lock_rate": {
+            "n": 63,
+            "mode": 0.0153295644815543,
+            "p10": 0.01374944208807616,
+            "p50": 0.0160246877743647,
+            "p90": 0.0262066732161731
+          }
+        }
+      },
+      "regime_daily_lock_orders_reference": {
+        "activity_high_eff": {
+          "p10": 151.31,
+          "p50": 361.17,
+          "p90": 785.64,
+          "mode": 367.23
+        },
+        "activity_low_eff": {
+          "p10": 144.82,
+          "p50": 344.99,
+          "p90": 694.01,
+          "mode": 335.75
+        },
+        "weekday": {
+          "p10": 124.58,
+          "p50": 185.42,
+          "p90": 352.87,
+          "mode": 161.1
+        },
+        "weekend": {
+          "p10": 136.41,
+          "p50": 216.96,
+          "p90": 410.04,
+          "mode": 207.55
+        }
+      }
+    },
+    "bias_correction": {
+      "regime_quantile_based": {
+        "enabled": 1,
+        "samples": 365,
+        "bias": -582.6347397260274,
+        "mean_true": 7864.65205479452,
+        "bias_rate": -0.07408271029241992,
+        "factor": 1.07408271029242
+      }
+    },
+    "month_forecast": {
+      "target_month": "2026-06",
+      "month_start": "2026-06-01",
+      "month_end": "2026-06-30",
+      "as_of_date": "2026-06-14",
+      "actual_end_date": "2026-06-14",
+      "actual_days": 14,
+      "expected_days": 14,
+      "missing_days": 0,
+      "actual_lock_orders_sum": 3031.0,
+      "remaining_days": 16,
+      "remaining_start_date": "2026-06-15",
+      "month_end_date": "2026-06-30",
+      "bayesian_calibration": {
+        "enabled": 1,
+        "method": "regime_quantile",
+        "future_days": 16,
+        "future_regime_days": {
+          "activity_high_eff": 0,
+          "activity_low_eff": 0,
+          "weekday": 12,
+          "weekend": 4
+        },
+        "regime_inputs": {
+          "activity_high_eff": {
+            "leads": {
+              "n": 65,
+              "mode": 18638.0,
+              "p10": 13524.6,
+              "p50": 18638.0,
+              "p90": 24849.000000000004
+            },
+            "lock_rate": {
+              "n": 65,
+              "mode": 0.0197031949354408,
+              "p10": 0.0111877278868584,
+              "p50": 0.0193780142196589,
+              "p90": 0.031616643860417286
+            }
+          },
+          "activity_low_eff": {
+            "leads": {
+              "n": 82,
+              "mode": 17354.0,
+              "p10": 13975.1,
+              "p50": 17357.0,
+              "p90": 20045.9
+            },
+            "lock_rate": {
+              "n": 82,
+              "mode": 0.019347278216041153,
+              "p10": 0.01036236643368303,
+              "p50": 0.019876265394701498,
+              "p90": 0.03462092176137038
+            }
+          },
+          "weekday": {
+            "leads": {
+              "n": 155,
+              "mode": 11317.0,
+              "p10": 9251.2,
+              "p50": 11898.0,
+              "p90": 14293.6
+            },
+            "lock_rate": {
+              "n": 155,
+              "mode": 0.014234923629144101,
+              "p10": 0.01346651166879988,
+              "p50": 0.0155840631006386,
+              "p90": 0.02468741662406422
+            }
+          },
+          "weekend": {
+            "leads": {
+              "n": 63,
+              "mode": 13539.0,
+              "p10": 9921.4,
+              "p50": 13539.0,
+              "p90": 15646.4
+            },
+            "lock_rate": {
+              "n": 63,
+              "mode": 0.0153295644815543,
+              "p10": 0.01374944208807616,
+              "p50": 0.0160246877743647,
+              "p90": 0.0262066732161731
+            }
+          }
+        },
+        "regime_daily_lock_orders_reference": {
+          "activity_high_eff": {
+            "p10": 151.31,
+            "p50": 361.17,
+            "p90": 785.64,
+            "mode": 367.23
+          },
+          "activity_low_eff": {
+            "p10": 144.82,
+            "p50": 344.99,
+            "p90": 694.01,
+            "mode": 335.75
+          },
+          "weekday": {
+            "p10": 124.58,
+            "p50": 185.42,
+            "p90": 352.87,
+            "mode": 161.1
+          },
+          "weekend": {
+            "p10": 136.41,
+            "p50": 216.96,
+            "p90": 410.04,
+            "mode": 207.55
+          }
+        }
+      },
+      "bias_correction": {
+        "regime_quantile_based": {
+          "enabled": 1,
+          "samples": 365,
+          "bias": -588.4091780821916,
+          "mean_true": 4504.586301369863,
+          "bias_rate": -0.1306244655371025,
+          "factor": 1.1306244655371025
+        }
+      },
+      "month_totals": {
+        "actual_lock_orders_to_date": 3031.0,
+        "remaining_lock_orders_mode": 3558.34,
+        "remaining_lock_orders_p10": 3021.88,
+        "remaining_lock_orders_p50": 3482.49,
+        "remaining_lock_orders_p90": 3975.96,
+        "remaining_lock_orders_bias_corrected_mode": 4023.15,
+        "remaining_lock_orders_bias_corrected_p10": 3416.61,
+        "remaining_lock_orders_bias_corrected_p50": 3937.39,
+        "remaining_lock_orders_bias_corrected_p90": 4495.32,
+        "month_lock_orders_mode": 6589.34,
+        "month_lock_orders_p10": 6052.88,
+        "month_lock_orders_p50": 6513.49,
+        "month_lock_orders_p90": 7006.96,
+        "month_lock_orders_bias_corrected_mode": 7054.15,
+        "month_lock_orders_bias_corrected_p10": 6447.61,
+        "month_lock_orders_bias_corrected_p50": 6968.39,
+        "month_lock_orders_bias_corrected_p90": 7526.32,
+        "regime_daily_lock_orders_reference": {
+          "activity_high_eff": {
+            "p10": 151.31,
+            "p50": 361.17,
+            "p90": 785.64,
+            "mode": 367.23
+          },
+          "activity_low_eff": {
+            "p10": 144.82,
+            "p50": 344.99,
+            "p90": 694.01,
+            "mode": 335.75
+          },
+          "weekday": {
+            "p10": 124.58,
+            "p50": 185.42,
+            "p90": 352.87,
+            "mode": 161.1
+          },
+          "weekend": {
+            "p10": 136.41,
+            "p50": 216.96,
+            "p90": 410.04,
+            "mode": 207.55
+          }
+        }
+      }
+    }
+  },
+  "decision_summary": "截至 6/14 已锁单 3031；预计 6 月整月（bias 校正后）最可能值约 7054.15，P50 约 6968.39，区间 [6447.61, 7526.32]。"
+}

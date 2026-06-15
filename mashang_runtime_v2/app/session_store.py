@@ -3,7 +3,7 @@
 Runtime V2 — Session Store
 
 基于本地文件的 session 存储，用于多轮上下文传递。
-session 文件路径：mashang_workspace/outputs/runtime_v2_sessions/<session_id>.json
+session 文件路径：mashang_runtime_v2/data/sessions/<session_id>.json
 """
 
 import json, re, time
@@ -12,7 +12,7 @@ from pathlib import Path
 
 _V2_ROOT = Path(__file__).resolve().parents[1]
 _WS_ROOT = _V2_ROOT.parent / "mashang_workspace"
-SESSIONS_DIR = _WS_ROOT / "outputs" / "runtime_v2_sessions"
+SESSIONS_DIR = _V2_ROOT / "data" / "sessions"
 
 SAFE_ID_RE = re.compile(r"^[a-zA-Z0-9_-]+$")
 
