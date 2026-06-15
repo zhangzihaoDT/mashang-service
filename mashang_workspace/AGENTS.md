@@ -115,3 +115,43 @@ python mashang_workspace/eval/run_eval.py --suite parser  # 单套件
 注意：
 - "数据更新并同步" 不是带日期条件的分析问题，不表示"只更新今天的数据"
 - Runtime V2 不响应这个指令
+
+## Visual Identity Usage
+
+This project inherits the global Raccoon Research visual identity.
+
+Apply it only to user-facing outputs, including:
+
+- HTML reports
+- dashboard mockups
+- article assets
+- README screenshots
+- Agent UI pages
+
+Do not apply it to:
+
+- raw data files
+- logs
+- tests
+- CLI debug output
+- internal JSON artifacts
+- analytical chart interiors
+
+In this project, the visual system should behave as a data product style, not as a decorative mascot style.
+
+Use the raccoon avatar or brand wordmark only in report headers, footers, cover pages, empty states, and final signatures.
+
+Charts, tables, and metric cards should remain clean, readable, and data-first.
+
+Default output path for branded reports:
+
+```text
+outputs/reports/
+```
+
+Default template path:
+
+```text
+templates/report_base.html
+templates/report_style.css
+```

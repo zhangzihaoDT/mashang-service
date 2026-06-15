@@ -1,0 +1,23 @@
+{
+  "name": "Raccoon Research",
+  "colors": {
+    "blue": "#174A7C",
+    "deep_blue": "#06213D",
+    "cyan": "#7ECDEB",
+    "light_blue": "#DDEFF8",
+    "cream": "#FFF9EF",
+    "raccoon_gold": "#D79A36",
+    "brown": "#7A4A24",
+    "text": "#1F2D3D",
+    "muted": "#6B7C8F",
+    "card": "#FFFFFF"
+  },
+  "style_keywords": [
+    "marker hand-drawn texture",
+    "clean blue-white palette",
+    "warm research assistant",
+    "rational but not cold",
+    "friendly but not childish"
+  ],
+  "brand_sentence": "用数据、AI 和一点点常识，研究复杂世界。"
+}

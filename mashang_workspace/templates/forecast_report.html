@@ -1,0 +1,121 @@
+{% extends "report_base.html" %}
+
+{% block content %}
+{% set fc = contract.result.get("forecast", {}) %}
+{% set evidence = contract.result.tables or [] %}
+
+{% if fc %}
+<section class="forecast-band">
+  <div class="container">
+    <div class="forecast-bar">
+      <span class="forecast-label">P10 {{ "{:,}".format(fc.p10) }}</span>
+      <div class="forecast-track">
+        <div class="forecast-fill"></div>
+        <div class="forecast-marker p50" style="left: {{ ((fc.p50 - fc.p10) / (fc.p90 - fc.p10) * 100) | round(1) }}%">P50 {{ "{:,}".format(fc.p50) }}</div>
+        <div class="forecast-marker mode" style="left: {{ ((fc.mode - fc.p10) / (fc.p90 - fc.p10) * 100) | round(1) }}%">Mode {{ "{:,}".format(fc.mode) }}</div>
+      </div>
+      <span class="forecast-label">P90 {{ "{:,}".format(fc.p90) }}</span>
+    </div>
+    <p class="forecast-note">预测区间 P10–P90 · 基于时序 Bootstrap（8,000 次/天）</p>
+  </div>
+</section>
+
+<section class="metric-grid">
+  <div class="metric-card">
+    <div class="metric-label">P50 预测</div>
+    <div class="metric-value">{{ "{:,}".format(fc.p50) }}</div>
+    <div class="metric-note">中位数场景</div>
+  </div>
+  <div class="metric-card highlight">
+    <div class="metric-label">最可能预测</div>
+    <div class="metric-value">{{ "{:,}".format(fc.mode) }}</div>
+    <div class="metric-note">Mode 场景 · 推荐参考值</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-label">预测区间</div>
+    <div class="metric-value">{{ "{:,}".format(fc.range_low) }} – {{ "{:,}".format(fc.range_high) }}</div>
+    <div class="metric-note">P10 – P90 · 80% 置信区间</div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>整月预测场景</h2>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>场景</th>
+          <th>上半月实际</th>
+          <th>下半月预测</th>
+          <th>整月合计</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in fc.scenarios %}
+        <tr class="{% if s.highlight %}row-highlight{% endif %}">
+          <td><strong>{{ s.name }}</strong></td>
+          <td>{{ "{:,}".format(s.actual) }}</td>
+          <td>{{ "{:,}".format(s.forecast) }}</td>
+          <td><strong>{{ "{:,}".format(s.total) }}</strong></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="scenario-note">上半月合计 {{ "{:,}".format(fc.h1_actual) }} 锁单（15天）· 下半月剩余 15 天（11 工作日 + 4 周末）</p>
+</section>
+
+<section class="insight-grid">
+  {% for ins in fc.insights %}
+  <div class="insight-card">
+    <div class="insight-num">{{ loop.index }}</div>
+    <div class="insight-content">
+      <h3>{{ ins.title }}</h3>
+      <p>{{ ins.body }}</p>
+    </div>
+  </div>
+  {% endfor %}
+</section>
+{% endif %}
+
+{% for table in evidence %}
+<section class="card">
+  <h2>{{ table.title }}</h2>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          {% for col in table.columns %}
+          <th>{{ col }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in table.rows %}
+        <tr>
+          {% for col in table.columns %}
+          <td>{{ row.get(col, '') }}</td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endfor %}
+
+<section class="method-card">
+  <div class="container">
+    <h2>方法论 & 模型参数</h2>
+    <p class="method-summary">{{ contract.scope.metric_definition }}</p>
+    {% if fc.methodology %}
+    <table class="method-table">
+      {% for m in fc.methodology %}
+      <tr><td class="method-param">{{ m.param }}</td><td>{{ m.value }}</td></tr>
+      {% endfor %}
+    </table>
+    {% endif %}
+    <p class="method-footnote">报告生成时间: {{ contract.generated_at[:10] }} · 脚本: {{ contract.script }}</p>
+  </div>
+</section>
+{% endblock %}

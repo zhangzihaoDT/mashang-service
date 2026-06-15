@@ -1,0 +1,70 @@
+{% extends "report_base.html" %}
+
+{% block content %}
+{% set kpi_list = kpis or [] %}
+{% if kpi_list %}
+<section class="kpi-grid">
+  {% for kpi in kpi_list %}
+  <div class="kpi-card">
+    <div class="label">{{ kpi.label }}</div>
+    <div class="value">{{ kpi.value }}</div>
+    {% if kpi.change %}
+    <div class="change {{ kpi.direction | default('neutral') }}">{{ kpi.change }}</div>
+    {% endif %}
+  </div>
+  {% endfor %}
+</section>
+{% endif %}
+
+{% if summary %}
+<section class="card">
+  <p>{{ summary }}</p>
+</section>
+{% endif %}
+
+{% for table in (tables or []) %}
+<section class="card">
+  {% if table.title %}<h2>{{ table.title }}</h2>{% endif %}
+  <div class="table-wrap"><table class="data-table">
+    <thead>
+      <tr>
+        {% for col in table.columns %}
+        <th>{{ col }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in table.rows %}
+      <tr>
+        {% for col in table.columns %}
+        <td>{{ row.get(col, '') }}</td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table></div>
+</section>
+{% endfor %}
+
+{% if data_scope %}
+<section class="card">
+  <h2>数据信息</h2>
+  <table class="data-table scope-table">
+    <tbody>
+      {% if data_scope.data_source %}
+      <tr><td class="scope-label"><strong>数据源</strong></td><td>{{ data_scope.data_source }}</td></tr>
+      {% endif %}
+      {% if data_scope.time_window %}
+      <tr><td class="scope-label"><strong>时间</strong></td><td>{{ data_scope.time_window }}</td></tr>
+      {% endif %}
+      {% if data_scope.filters %}
+      <tr><td class="scope-label"><strong>筛选条件</strong></td><td>{{ data_scope.filters }}</td></tr>
+      {% endif %}
+      {% if data_scope.metric_definition %}
+      <tr><td class="scope-label"><strong>口径</strong></td><td>{{ data_scope.metric_definition }}</td></tr>
+      {% endif %}
+    </tbody>
+  </table>
+</section>
+{% endif %}
+{% endblock %}

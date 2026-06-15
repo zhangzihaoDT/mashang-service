@@ -50,14 +50,14 @@ file_path,file_name,file_type,row_count,column_name,dtype,non_null_count,null_co
 /Users/zihao_/Documents/github/mashang-service/dataset/config_attribute_data_2026.csv,config_attribute_data_2026.csv,csv,1000,Attribute,str,1000,0,"5C 超快充电池:否,ISC尾灯:是,内饰:大地象灰 浅,副驾屏幕及零重力座椅:是,外饰:戈雅黑,方向盘:半幅方向盘,智能冷暖双用冰箱:否,激光雷达:标准+Orin,轮毂:20英寸极速轻量化轮, 5C 超快充电池:否,ISC尾灯:是,内饰:大地象灰 浅,副驾屏幕及零重力座椅:是,外饰:戈雅黑,方向盘:半幅方向盘,智能冷暖双用冰箱:否,激光雷达:标准+Orin,轮毂:21英寸都市出行闪耀, 5C 超快充电池:否,ISC尾灯:是,内饰:大地象灰 浅,副驾屏幕及零重力座椅:是,外饰:戈雅黑,方向盘:半幅方向盘,智能冷暖双用冰箱:是,激光雷达:标准+Orin,轮毂:20英寸极速轻量化轮, 5C 超快充电池:否,ISC尾灯:是,内饰:大地象灰 浅,副驾屏幕及零重力座椅:是,外饰:戈雅黑,方向盘:半幅方向盘,智能冷暖双用冰箱:是,激光雷达:标准+Orin,轮毂:21英寸都市出行闪耀, 5C 超快充电池:否,ISC尾灯:是,内饰:大地象灰 浅,副驾屏幕及零重力座椅:是,外饰:戈雅黑,方向盘:全幅方向盘,智能冷暖双用冰箱:否,激光雷达:标准+Orin,轮毂:20英寸极速轻量化轮"
 /Users/zihao_/Documents/github/mashang-service/dataset/config_attribute_data_2026.csv,config_attribute_data_2026.csv,csv,1000,is_staff,str,1000,0,"N, Y"
 /Users/zihao_/Documents/github/mashang-service/dataset/config_attribute_data_2026.csv,config_attribute_data_2026.csv,csv,1000,Order Number,str,1000,0,"SO017104605074312, SO030154870562490, SO062987697664952, SO065321206279726, SO106290017084977"
-/Users/zihao_/Documents/github/mashang-service/dataset/config_attribute_data_2026.csv,config_attribute_data_2026.csv,csv,1000,Wheel,str,1000,0,"20英寸极速轻量化轮辋, 21英寸都市出行闪耀套装, 20英寸十辐运动轮辋, 20英寸星刃十辐运动轮辋, 21英寸星耀超多辐豪华轮辋"
-/Users/zihao_/Documents/github/mashang-service/dataset/lock_attribution_data.parquet,lock_attribution_data.parquet,parquet,0,lc_small_channel_name,str,0,0,
-/Users/zihao_/Documents/github/mashang-service/dataset/lock_attribution_data.parquet,lock_attribution_data.parquet,parquet,0,lc_main_code,string,0,0,
-/Users/zihao_/Documents/github/mashang-service/dataset/lock_attribution_data.parquet,lock_attribution_data.parquet,parquet,0,lc_user_phone_md5,string,0,0,
+/Users/zihao_/Documents/github/mashang-service/dataset/config_attribute_data_2026.csv,config_attribute_data_2026.csv,csv,1000,Wheel,str,1000,0,"20英寸极速轻量化轮辋, 21英寸都市出行闪耀套装, 20英寸十辐运动轮辋, 20英寸星刃十辐运动轮辋"
 /Users/zihao_/Documents/github/mashang-service/dataset/lock_attribution_data.parquet,lock_attribution_data.parquet,parquet,0,lc_create_time,datetime64[us],0,0,
 /Users/zihao_/Documents/github/mashang-service/dataset/lock_attribution_data.parquet,lock_attribution_data.parquet,parquet,0,来源辅助标记,Int64,0,0,
 /Users/zihao_/Documents/github/mashang-service/dataset/lock_attribution_data.parquet,lock_attribution_data.parquet,parquet,0,lc_order_lock_time_min,datetime64[us],0,0,
 /Users/zihao_/Documents/github/mashang-service/dataset/lock_attribution_data.parquet,lock_attribution_data.parquet,parquet,0,种子用户_md5锁单,Int64,0,0,
+/Users/zihao_/Documents/github/mashang-service/dataset/lock_attribution_data.parquet,lock_attribution_data.parquet,parquet,0,lc_small_channel_name,str,0,0,
+/Users/zihao_/Documents/github/mashang-service/dataset/lock_attribution_data.parquet,lock_attribution_data.parquet,parquet,0,lc_user_phone_md5,string,0,0,
+/Users/zihao_/Documents/github/mashang-service/dataset/lock_attribution_data.parquet,lock_attribution_data.parquet,parquet,0,lc_main_code,string,0,0,
 /Users/zihao_/Documents/github/mashang-service/dataset/order_data.parquet,order_data.parquet,parquet,0,order_number,string,0,0,
 /Users/zihao_/Documents/github/mashang-service/dataset/order_data.parquet,order_data.parquet,parquet,0,invoice_amount,float64,0,0,
 /Users/zihao_/Documents/github/mashang-service/dataset/order_data.parquet,order_data.parquet,parquet,0,main_lead_id,str,0,0,
@@ -93,31 +93,31 @@ file_path,file_name,file_type,row_count,column_name,dtype,non_null_count,null_co
 /Users/zihao_/Documents/github/mashang-service/dataset/order_data.parquet,order_data.parquet,parquet,0,deposit_refund_time,datetime64[us],0,0,
 /Users/zihao_/Documents/github/mashang-service/dataset/order_data.parquet,order_data.parquet,parquet,0,deposit_payment_time,datetime64[us],0,0,
 /Users/zihao_/Documents/github/mashang-service/dataset/order_data.parquet,order_data.parquet,parquet,0,lock_time,datetime64[us],0,0,
-/Users/zihao_/Documents/github/mashang-service/dataset/order_data_2026.csv,order_data_2026.csv,csv,1000,Buyer Identity No,str,673,327,"37072219680922682X, 411322198202123411, 210522199407143210, 422326198903090016, 320682199910067486"
-/Users/zihao_/Documents/github/mashang-service/dataset/order_data_2026.csv,order_data_2026.csv,csv,1000,buyer_age,float64,731,269,"58.0, 44.0, 32.0, 37.0, 27.0"
+/Users/zihao_/Documents/github/mashang-service/dataset/order_data_2026.csv,order_data_2026.csv,csv,1000,Buyer Identity No,str,667,333,"37072219680922682X, 411322198202123411, 210522199407143210, 422326198903090016, 320682199910067486"
+/Users/zihao_/Documents/github/mashang-service/dataset/order_data_2026.csv,order_data_2026.csv,csv,1000,buyer_age,float64,708,292,"58.0, 44.0, 32.0, 37.0, 27.0"
 /Users/zihao_/Documents/github/mashang-service/dataset/order_data_2026.csv,order_data_2026.csv,csv,1000,DATE([first_assign_time]),str,978,22,"2026/1/13, 2026/1/30, 2026/3/2, 2026/3/15, 2026/3/16"
-/Users/zihao_/Documents/github/mashang-service/dataset/order_data_2026.csv,order_data_2026.csv,csv,1000,DATE([Invoice Upload Time]),str,2,998,"2026/6/3, 2026/6/9"
+/Users/zihao_/Documents/github/mashang-service/dataset/order_data_2026.csv,order_data_2026.csv,csv,1000,DATE([Invoice Upload Time]),str,4,996,"2026/6/11, 2026/6/12, 2026/6/9"
 /Users/zihao_/Documents/github/mashang-service/dataset/order_data_2026.csv,order_data_2026.csv,csv,1000,DATE([store_create_date]),str,1000,0,"2024/10/1, 2025/7/15, 2023/6/29, 2022/6/29, 2023/12/20"
-/Users/zihao_/Documents/github/mashang-service/dataset/order_data_2026.csv,order_data_2026.csv,csv,1000,Deposit Payment Time,str,89,911,"2026/6/4 13:51:36, 2026/3/31 17:58:33, 2026/5/8 11:14:42, 2026/6/2 18:35:08, 2026/3/7 12:12:34"
-/Users/zihao_/Documents/github/mashang-service/dataset/order_data_2026.csv,order_data_2026.csv,csv,1000,Final Payment Way,str,68,932,"全款, 按揭"
+/Users/zihao_/Documents/github/mashang-service/dataset/order_data_2026.csv,order_data_2026.csv,csv,1000,Deposit Payment Time,str,93,907,"2026/3/31 17:58:33, 2026/5/8 11:14:42, 2026/6/2 18:35:08, 2026/3/7 12:12:34, 2026/4/16 21:02:49"
+/Users/zihao_/Documents/github/mashang-service/dataset/order_data_2026.csv,order_data_2026.csv,csv,1000,Final Payment Way,str,65,935,"全款, 按揭"
 /Users/zihao_/Documents/github/mashang-service/dataset/order_data_2026.csv,order_data_2026.csv,csv,1000,Finance Product,str,13,987,"首2年免息, 0首付, 常规分期"
-/Users/zihao_/Documents/github/mashang-service/dataset/order_data_2026.csv,order_data_2026.csv,csv,1000,Intention Payment Time,str,100,900,"2026/3/26 13:58:04, 2026/3/26 20:39:05, 2026/3/26 23:57:55, 2026/3/26 20:25:23, 2026/3/26 21:09:02"
+/Users/zihao_/Documents/github/mashang-service/dataset/order_data_2026.csv,order_data_2026.csv,csv,1000,Intention Payment Time,str,98,902,"2026/3/26 13:58:04, 2026/6/12 15:34:10, 2026/3/26 20:39:05, 2026/3/26 23:57:55, 2026/3/26 20:25:23"
 /Users/zihao_/Documents/github/mashang-service/dataset/order_data_2026.csv,order_data_2026.csv,csv,1000,Invoice Amount,float64,987,13,"236900.0, 209700.0, 201900.0, 248700.0, 999999.0"
-/Users/zihao_/Documents/github/mashang-service/dataset/order_data_2026.csv,order_data_2026.csv,csv,1000,License City,str,987,13,"合肥市, 苏州市, 上海市, 济南市, 银川市"
-/Users/zihao_/Documents/github/mashang-service/dataset/order_data_2026.csv,order_data_2026.csv,csv,1000,Lock Time,str,89,911,"2026/6/4 13:55:29, 2026/3/31 17:58:53, 2026/5/8 11:14:53, 2026/6/2 18:37:52, 2026/3/8 12:13:00"
+/Users/zihao_/Documents/github/mashang-service/dataset/order_data_2026.csv,order_data_2026.csv,csv,1000,License City,str,986,14,"合肥市, 苏州市, 上海市, 济南市, 银川市"
+/Users/zihao_/Documents/github/mashang-service/dataset/order_data_2026.csv,order_data_2026.csv,csv,1000,Lock Time,str,92,908,"2026/3/31 17:58:53, 2026/5/8 11:14:53, 2026/6/2 18:37:52, 2026/3/8 12:13:00, 2026/4/16 21:17:18"
 /Users/zihao_/Documents/github/mashang-service/dataset/order_data_2026.csv,order_data_2026.csv,csv,1000,Main Lead Id,str,978,22,"M202601131135371080, M202601300845120195, M202603021733281983, M202603152104104041, M202603161702579042"
 /Users/zihao_/Documents/github/mashang-service/dataset/order_data_2026.csv,order_data_2026.csv,csv,1000,Order Number,str,1000,0,"SO850879114106664, SO714539519276251, SO380445080186192, SO008282102318949, SO119668669020888"
 /Users/zihao_/Documents/github/mashang-service/dataset/order_data_2026.csv,order_data_2026.csv,csv,1000,order_gender,str,987,13,"男, 默认未知, 女"
-/Users/zihao_/Documents/github/mashang-service/dataset/order_data_2026.csv,order_data_2026.csv,csv,1000,order_type,str,374,626,"用户车, 仅批售, 大客户, 员工, 试驾车"
-/Users/zihao_/Documents/github/mashang-service/dataset/order_data_2026.csv,order_data_2026.csv,csv,1000,Owner Identity No,str,312,688,"34290120000722531X, 340421197906225817, 511621200010256897, 37072219680922682X, 64222220010313261X"
-/Users/zihao_/Documents/github/mashang-service/dataset/order_data_2026.csv,order_data_2026.csv,csv,1000,owner_age,float64,293,707,"26.0, 47.0, 41.0, 58.0, 25.0"
-/Users/zihao_/Documents/github/mashang-service/dataset/order_data_2026.csv,order_data_2026.csv,csv,1000,owner_gender,str,326,674,"男, 女, 默认未知"
+/Users/zihao_/Documents/github/mashang-service/dataset/order_data_2026.csv,order_data_2026.csv,csv,1000,order_type,str,378,622,"用户车, 仅批售, 员工, 试驾车, 集团员工"
+/Users/zihao_/Documents/github/mashang-service/dataset/order_data_2026.csv,order_data_2026.csv,csv,1000,Owner Identity No,str,318,682,"34290120000722531X, 340421197906225817, 511621200010256897, 37072219680922682X, 64222220010313261X"
+/Users/zihao_/Documents/github/mashang-service/dataset/order_data_2026.csv,order_data_2026.csv,csv,1000,owner_age,float64,292,708,"26.0, 47.0, 41.0, 58.0, 25.0"
+/Users/zihao_/Documents/github/mashang-service/dataset/order_data_2026.csv,order_data_2026.csv,csv,1000,owner_gender,str,332,668,"男, 女, 默认未知"
 /Users/zihao_/Documents/github/mashang-service/dataset/order_data_2026.csv,order_data_2026.csv,csv,1000,Parent Region Name,str,1000,0,"一区-苏皖, 上海区, 一区-鲁豫, 三区-西北, 三区-京津东北"
 /Users/zihao_/Documents/github/mashang-service/dataset/order_data_2026.csv,order_data_2026.csv,csv,1000,Product Name,str,1000,0,"全新智己L6 Pro Max, 新一代智己LS6 52 Max, L7 Max 超长续航版, 新一代智己LS6 Max, 全新LS6 长续航灵蜥智驾版"
 /Users/zihao_/Documents/github/mashang-service/dataset/order_data_2026.csv,order_data_2026.csv,csv,1000,Series,str,1000,0,"L6, LS6, L7, LS8, LS7"
 /Users/zihao_/Documents/github/mashang-service/dataset/order_data_2026.csv,order_data_2026.csv,csv,1000,Store City,str,1000,0,"合肥市, 苏州市, 上海市, 济南市, 银川市"
 /Users/zihao_/Documents/github/mashang-service/dataset/order_data_2026.csv,order_data_2026.csv,csv,1000,Store Name,str,1000,0,"合肥融创茂, 苏州昆山, 上海东安路展厅, 苏州吴中, 上海青浦"
-/Users/zihao_/Documents/github/mashang-service/dataset/order_data_2026.csv,order_data_2026.csv,csv,1000,Vin,str,24,976,"LSJE36098SS050309, LSJWR4090TS017135, LSJWR4095TS017633, LSJWR4094TS017137, LSJWR4094SS138670"
+/Users/zihao_/Documents/github/mashang-service/dataset/order_data_2026.csv,order_data_2026.csv,csv,1000,Vin,str,29,971,"LSJE36098SS050309, LSJWR4090TS017135, LSJWR4095TS017633, LSJWR4094TS017137, LSJWR4094SS138670"
 /Users/zihao_/Documents/github/mashang-service/dataset/order_data_2026.csv,order_data_2026.csv,csv,1000,Actual Refund Time 年/月/日,float64,0,1000,
 /Users/zihao_/Documents/github/mashang-service/dataset/order_data_2026.csv,order_data_2026.csv,csv,1000,Apply Refund Time 年/月/日,float64,0,1000,
 /Users/zihao_/Documents/github/mashang-service/dataset/order_data_2026.csv,order_data_2026.csv,csv,1000,Approve Refund Time 年/月/日,float64,0,1000,
@@ -130,9 +130,9 @@ file_path,file_name,file_type,row_count,column_name,dtype,non_null_count,null_co
 /Users/zihao_/Documents/github/mashang-service/dataset/order_data_2026.csv,order_data_2026.csv,csv,1000,Order Create Time 年/月/日,str,1000,0,"2026年1月13日, 2026年1月30日, 2026年2月12日, 2026年2月26日, 2026年3月2日"
 /Users/zihao_/Documents/github/mashang-service/dataset/test_drive_data.csv,test_drive_data.csv,csv,1000,create_date 年/月/日,str,1000,0,"2023年1月1日, 2023年1月2日, 2023年1月3日, 2023年1月4日, 2023年1月5日"
 /Users/zihao_/Documents/github/mashang-service/dataset/test_drive_data.csv,test_drive_data.csv,csv,1000,每天最大试驾数,int64,1000,0,"8, 5, 6, 4, 10"
-/Users/zihao_/Documents/github/mashang-service/dataset/test_drive_data.csv,test_drive_data.csv,csv,1000,每天的试驾波动率（Z-score）,float64,995,5,"5.021814274, 3.404326695, 4.291552779, 2.984188388, 4.915149398"
-/Users/zihao_/Documents/github/mashang-service/dataset/test_drive_data.csv,test_drive_data.csv,csv,1000,每天试驾数平均值,float64,1000,0,"1.355932203, 1.392156863, 1.108695652, 1.142857143, 1.511111111"
-/Users/zihao_/Documents/github/mashang-service/dataset/test_drive_data.csv,test_drive_data.csv,csv,1000,每天试驾数标准差,float64,1000,0,"1.323041322, 1.059781702, 1.139751647, 0.957427108, 1.727086646"
+/Users/zihao_/Documents/github/mashang-service/dataset/test_drive_data.csv,test_drive_data.csv,csv,1000,每天的试驾波动率（Z-score）,float64,995,5,"5.021814274, 3.404326695, 4.291552779, 2.995969023, 4.915149398"
+/Users/zihao_/Documents/github/mashang-service/dataset/test_drive_data.csv,test_drive_data.csv,csv,1000,每天试驾数平均值,float64,1000,0,"1.355932203, 1.392156863, 1.108695652, 1.12, 1.511111111"
+/Users/zihao_/Documents/github/mashang-service/dataset/test_drive_data.csv,test_drive_data.csv,csv,1000,每天试驾数标准差,float64,1000,0,"1.323041322, 1.059781702, 1.139751647, 0.961291648, 1.727086646"
 /Users/zihao_/Documents/github/mashang-service/dataset/test_drive_data.csv,test_drive_data.csv,csv,1000,L6有效试驾数,str,1000,0,"0, 1, 3, 2, 4"
 /Users/zihao_/Documents/github/mashang-service/dataset/test_drive_data.csv,test_drive_data.csv,csv,1000,LS6有效试驾数,str,1000,0,"0, 1, 3, 2, 5"
 /Users/zihao_/Documents/github/mashang-service/dataset/test_drive_data.csv,test_drive_data.csv,csv,1000,LS9有效试驾数,int64,1000,0,"0, 1, 2"
