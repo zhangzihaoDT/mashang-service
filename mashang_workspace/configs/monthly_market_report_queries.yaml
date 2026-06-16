@@ -1,0 +1,430 @@
+# =============================================================================
+# Monthly Market Report — Query Specification
+# 24 fixed queries for monthly passenger vehicle market report generation.
+#
+# Dataset: passenger_insurance (乘用车上险数据)
+# Loader:  shared.loaders.passenger_insurance_loader
+# Schema:  shared.schema.passenger_insurance_schema
+# =============================================================================
+
+report_name: "月度汽车市场标准查询"
+version: "0.1"
+scope: single_table_monthly_market_report
+description: "24 个固定月报查询问题，基于 passenger_insurance 现有 6 张预聚合单表，覆盖整体市场、新能源、中高端、价格带、品牌排名、城市市场结构等维度"
+default_dataset: "passenger_insurance"
+
+time_params:
+  report_month:         # YYYY-MM, e.g. "2026-05"
+  month_start:          # first day of report month, e.g. "2026-05-01"
+  month_end:            # last day of report month, e.g. "2026-05-31"
+  ytd_start:            # first day of current year, e.g. "2026-01-01"
+  ytd_end:              # same as month_end
+  last_year_month_start:  # first day of same month last year
+  last_year_month_end:    # last day of same month last year
+  last_year_ytd_start:    # first day of last year
+  last_year_ytd_end:      # last day of same month last year
+  rolling_12m_start:      # first day of rolling 12 months
+  rolling_12m_end:        # same as month_end
+
+queries:
+  # ===========================================================================
+  # Group 1: 整体市场 (Overall Market)
+  # ===========================================================================
+  - id: total_passenger_vehicle_sales
+    group: overall_market
+    section: "整体市场概览"
+    title: "整体乘用车市场销量表现"
+    question: "整体乘用车市场当月销量、同比、环比；年累计销量、同比变化。"
+    dataset: passenger_insurance
+    table: market_energy_monthly
+    grain: [date_month]
+    metrics: [sales]
+    dimensions: [date_month]
+    filters: {}
+    output_type: kpi_card
+    required: true
+    business_logic: "SUM(sales) across all fuel_type_group; YoY compare previous year same month; MoM compare previous month"
+
+  - id: nev_sales_penetration
+    group: overall_market
+    section: "整体市场概览"
+    title: "新能源车市场销量表现"
+    question: "新能源车市场当月销量、同比、环比、渗透率；年累计销量、同比、累计渗透率。"
+    dataset: passenger_insurance
+    table: market_energy_monthly
+    grain: [date_month, fuel_type_group]
+    metrics: [sales]
+    dimensions: [date_month, fuel_type_group]
+    filters:
+      fuel_type_group: [新能源]
+    output_type: kpi_card
+    required: true
+    business_logic: "Sales where fuel_type_group='新能源'; penetration = NEV_sales / total_sales"
+
+  - id: nev_energy_type_performance
+    group: overall_market
+    section: "整体市场概览"
+    title: "新能源分能源形式表现"
+    question: "BEV、PHEV、REEV 的销量、同比、份额、渗透率。"
+    dataset: passenger_insurance
+    table: market_energy_monthly
+    grain: [date_month, fuel_type]
+    metrics: [sales]
+    dimensions: [date_month, fuel_type]
+    filters:
+      fuel_type_group: [新能源]
+    output_type: structure_table
+    required: true
+    business_logic: "Group by fuel_type within NEV; share = fuel_type_sales / NEV_total_sales"
+
+  - id: nev_segment_performance
+    group: overall_market
+    section: "整体市场概览"
+    title: "新能源分细分市场表现"
+    question: "各细分市场销量、市占率及结构变化。"
+    dataset: passenger_insurance
+    table: product_segment_monthly
+    grain: [date_month, saic_segment, fuel_type_group]
+    metrics: [sales]
+    dimensions: [date_month, saic_segment, fuel_type_group]
+    filters:
+      fuel_type_group: [新能源]
+    output_type: structure_table
+    required: true
+    business_logic: "Group by saic_segment within NEV; market share per segment"
+
+  - id: nev_city_tier_performance
+    group: overall_market
+    section: "整体市场概览"
+    title: "新能源分线级城市表现"
+    question: "各线级城市新能源渗透率、销量份额、纯电/混动渗透率。"
+    dataset: passenger_insurance
+    table: geo_monthly
+    grain: [date_month, city_tier_group, fuel_type_group]
+    metrics: [sales]
+    dimensions: [date_month, city_tier_group, fuel_type_group]
+    filters: {}
+    output_type: structure_table
+    required: true
+    business_logic: "Group by city_tier_group; NEV penetration = NEV_sales / total_sales per tier"
+
+  - id: nev_region_performance
+    group: overall_market
+    section: "整体市场概览"
+    title: "新能源分区域市场表现"
+    question: "各区域新能源销量份额、渗透率、纯电/混动渗透率。"
+    dataset: passenger_insurance
+    table: geo_monthly
+    grain: [date_month, region_group, fuel_type_group]
+    metrics: [sales]
+    dimensions: [date_month, region_group, fuel_type_group]
+    filters: {}
+    output_type: structure_table
+    required: true
+    business_logic: "Group by region_group; NEV share and penetration per region"
+
+  # ===========================================================================
+  # Group 2: 中高端市场 (Premium Market)
+  # ===========================================================================
+  - id: premium_passenger_vehicle_sales
+    group: premium_market
+    section: "中高端市场"
+    title: "中高端乘用车市场销量表现"
+    question: "中高端乘用车当月销量、同比；年累计销量、同比。"
+    dataset: passenger_insurance
+    table: brand_monthly
+    grain: [date_month]
+    metrics: [sales]
+    dimensions: [date_month]
+    filters:
+      brand_luxury_group: [豪华, 新豪华]
+    output_type: kpi_card
+    required: true
+    business_logic: "Sales where brand_luxury_group in ('豪华','新豪华'); YoY compare"
+
+  - id: premium_nev_sales_penetration
+    group: premium_market
+    section: "中高端市场"
+    title: "中高端新能源车市场表现"
+    question: "中高端新能源车当月销量、同比、渗透率；年累计销量、同比、累计渗透率。"
+    dataset: passenger_insurance
+    table: brand_monthly
+    grain: [date_month]
+    metrics: [sales]
+    dimensions: [date_month]
+    filters:
+      brand_luxury_group: [豪华, 新豪华]
+    output_type: kpi_card
+    required: true
+    business_logic: "NEV brands within premium; penetration = premium_NEV_sales / premium_total_sales"
+    post_process: "NEV brand filter within premium_group"
+
+  - id: premium_nev_energy_type_performance
+    group: premium_market
+    section: "中高端市场"
+    title: "中高端新能源分能源形式表现"
+    question: "中高端新能源 BEV、PHEV、REEV 的销量、同比、份额。"
+    dataset: passenger_insurance
+    table: market_energy_monthly
+    grain: [date_month, fuel_type]
+    metrics: [sales]
+    dimensions: [date_month, fuel_type]
+    filters:
+      fuel_type_group: [新能源]
+    output_type: structure_table
+    required: true
+    business_logic: "Premium brand filter applied; group by fuel_type within premium NEV"
+    post_process: "Filter to premium brands only"
+
+  - id: premium_nev_segment_performance
+    group: premium_market
+    section: "中高端市场"
+    title: "中高端新能源分细分市场表现"
+    question: "中高端新能源各细分市场销量、市占率及结构变化。"
+    dataset: passenger_insurance
+    table: product_segment_monthly
+    grain: [date_month, saic_segment, fuel_type_group]
+    metrics: [sales]
+    dimensions: [date_month, saic_segment, fuel_type_group]
+    filters:
+      fuel_type_group: [新能源]
+    output_type: structure_table
+    required: true
+    business_logic: "Premium brands only; group by saic_segment"
+    post_process: "Filter to premium brands only"
+
+  # ===========================================================================
+  # Group 3: 成交价分析 (Transaction Price)
+  # ===========================================================================
+  - id: tp_price_band_structure
+    group: transaction_price
+    section: "成交价结构"
+    title: "市场成交价分价位段结构"
+    question: "整体乘用车、新能源车、燃油车在各价位段的销量占比变化。"
+    dataset: passenger_insurance
+    table: price_segment_monthly
+    grain: [date_month, tp_bucket_5w, fuel_type_group]
+    metrics: [sales]
+    dimensions: [date_month, tp_bucket_5w, fuel_type_group]
+    filters: {}
+    output_type: structure_table
+    required: true
+    business_logic: "Group by tp_bucket_5w and fuel_type_group; share per price band"
+
+  - id: overall_tp_trend
+    group: transaction_price
+    section: "成交价结构"
+    title: "整体乘用车市场成交价走势"
+    question: "整体、燃油、新能源的月度成交价及同比变化。"
+    dataset: passenger_insurance
+    table: market_energy_monthly
+    grain: [date_month, fuel_type_group]
+    metrics: [sales, weighted_tp]
+    dimensions: [date_month, fuel_type_group]
+    filters: {}
+    output_type: trend_table
+    required: true
+    business_logic: "weighted_tp by fuel_type_group; YoY change"
+
+  - id: nev_energy_type_tp_trend
+    group: transaction_price
+    section: "成交价结构"
+    title: "新能源车分能源形式成交价走势"
+    question: "BEV、PHEV、REEV 月度成交价变化。"
+    dataset: passenger_insurance
+    table: market_energy_monthly
+    grain: [date_month, fuel_type]
+    metrics: [sales, weighted_tp]
+    dimensions: [date_month, fuel_type]
+    filters:
+      fuel_type_group: [新能源]
+    output_type: trend_table
+    required: true
+    business_logic: "weighted_tp by fuel_type within NEV group"
+
+  - id: nev_body_type_tp_trend
+    group: transaction_price
+    section: "成交价结构"
+    title: "新能源车分车身形式成交价走势"
+    question: "不同车身形式的月度成交价变化。"
+    dataset: passenger_insurance
+    table: product_segment_monthly
+    grain: [date_month, body_type, fuel_type_group]
+    metrics: [sales, weighted_tp]
+    dimensions: [date_month, body_type, fuel_type_group]
+    filters:
+      fuel_type_group: [新能源]
+    output_type: trend_table
+    required: true
+    business_logic: "weighted_tp by body_type within NEV"
+
+  - id: price_band_brand_competition
+    group: transaction_price
+    section: "成交价结构"
+    title: "各价位段市场容量与领先新能源品牌"
+    question: "各价位段销量规模、领先品牌及份额。"
+    dataset: passenger_insurance
+    table: price_segment_monthly
+    grain: [date_month, tp_bucket_5w, fuel_type_group]
+    metrics: [sales]
+    dimensions: [date_month, tp_bucket_5w, fuel_type_group]
+    filters: {}
+    output_type: structure_table
+    required: true
+    business_logic: "Market size per price band; top brands per band"
+    post_process: "Cross-reference brand_monthly for brand-level breakdown"
+
+  # ===========================================================================
+  # Group 4: 车型排名 (Model Rankings)
+  # ===========================================================================
+  - id: bev_model_ranking_by_price_band
+    group: model_rankings
+    section: "车型排名"
+    title: "纯电车型分价位段销量排名"
+    question: "不同成交价格重心下的纯电车型销量排名。"
+    dataset: passenger_insurance
+    table: model_monthly
+    grain: [date_month, brand, model]
+    metrics: [sales]
+    dimensions: [date_month, brand, model, fuel_type, weighted_tp]
+    filters:
+      fuel_type: [纯电动]
+    output_type: ranking_table
+    required: true
+    business_logic: "BEV models ranked by sales within TP bands"
+
+  - id: hybrid_model_ranking_by_price_band
+    group: model_rankings
+    section: "车型排名"
+    title: "混动车型分价位段销量排名"
+    question: "不同成交价格重心下的混动车型销量排名。"
+    dataset: passenger_insurance
+    table: model_monthly
+    grain: [date_month, brand, model]
+    metrics: [sales]
+    dimensions: [date_month, brand, model, fuel_type, weighted_tp]
+    filters:
+      fuel_type_group: [新能源]
+    output_type: ranking_table
+    required: true
+    business_logic: "Hybrid (PHEV+REEV) models ranked by sales within TP bands"
+    post_process: "Exclude BEV fuel_type"
+
+  - id: premium_bev_model_ranking_by_body_type
+    group: model_rankings
+    section: "车型排名"
+    title: "20万元以上纯电车型分车身形式销量排名"
+    question: "20万元以上纯电车型分车身形式销量排名。"
+    dataset: passenger_insurance
+    table: model_monthly
+    grain: [date_month, brand, model, body_type]
+    metrics: [sales]
+    dimensions: [date_month, brand, model, body_type, fuel_type, weighted_tp]
+    filters:
+      fuel_type: [纯电动]
+    output_type: ranking_table
+    required: true
+    business_logic: "BEV models with weighted_tp >= 20万; ranked by body_type"
+
+  - id: premium_hybrid_model_ranking_by_body_type
+    group: model_rankings
+    section: "车型排名"
+    title: "20万元以上混动车型分车身形式销量排名"
+    question: "20万元以上混动车型分车身形式销量排名。"
+    dataset: passenger_insurance
+    table: model_monthly
+    grain: [date_month, brand, model, body_type]
+    metrics: [sales]
+    dimensions: [date_month, brand, model, body_type, fuel_type, weighted_tp]
+    filters:
+      fuel_type_group: [新能源]
+    output_type: ranking_table
+    required: true
+    business_logic: "Hybrid models with weighted_tp >= 20万; ranked by body_type"
+    post_process: "Exclude BEV fuel_type"
+
+  # ===========================================================================
+  # Group 5: 品牌竞争 (Brand Competition)
+  # ===========================================================================
+  - id: key_nev_brand_performance
+    group: brand_competition
+    section: "品牌竞争"
+    title: "重点新能源品牌表现"
+    question: "重点新能源品牌当月销量、年累计销量、累计同比变化。"
+    dataset: passenger_insurance
+    table: brand_monthly
+    grain: [date_month, brand]
+    metrics: [sales]
+    dimensions: [date_month, brand]
+    filters: {}
+    output_type: ranking_table
+    required: true
+    business_logic: "Top NEV brands by monthly and YTD sales; YoY change"
+    post_process: "Filter to NEV brands"
+
+  # ===========================================================================
+  # Group 6: 城市市场结构 (City Market Structure)
+  # ===========================================================================
+  - id: tier1_city_competition
+    group: city_competition
+    section: "城市市场结构"
+    title: "一线城市新能源市场结构"
+    question: "各线级城市新能源销量、销量份额、新能源渗透率、纯电/混动渗透率。"
+    dataset: passenger_insurance
+    table: geo_monthly
+    grain: [date_month, city, city_tier_group, fuel_type_group]
+    metrics: [sales]
+    dimensions: [date_month, city, city_tier_group, fuel_type_group]
+    filters:
+      city_tier_group: [一线城市]
+    output_type: structure_table
+    required: true
+    business_logic: "NEV sales volume, market share, NEV penetration, BEV/hybrid penetration by city tier"
+
+  - id: new_tier1_city_competition
+    group: city_competition
+    section: "城市市场结构"
+    title: "新一线城市新能源市场结构"
+    question: "各线级城市新能源销量、销量份额、新能源渗透率、纯电/混动渗透率。"
+    dataset: passenger_insurance
+    table: geo_monthly
+    grain: [date_month, city, city_tier_group, fuel_type_group]
+    metrics: [sales]
+    dimensions: [date_month, city, city_tier_group, fuel_type_group]
+    filters:
+      city_tier_group: [新一线城市]
+    output_type: structure_table
+    required: true
+    business_logic: "NEV sales volume, market share, NEV penetration, BEV/hybrid penetration by city tier"
+
+  - id: tier2_city_competition
+    group: city_competition
+    section: "城市市场结构"
+    title: "二线城市新能源市场结构"
+    question: "各线级城市新能源销量、销量份额、新能源渗透率、纯电/混动渗透率。"
+    dataset: passenger_insurance
+    table: geo_monthly
+    grain: [date_month, city, city_tier_group, fuel_type_group]
+    metrics: [sales]
+    dimensions: [date_month, city, city_tier_group, fuel_type_group]
+    filters:
+      city_tier_group: [二线城市]
+    output_type: structure_table
+    required: true
+    business_logic: "NEV sales volume, market share, NEV penetration, BEV/hybrid penetration by city tier"
+
+  - id: tier3_lower_city_competition
+    group: city_competition
+    section: "城市市场结构"
+    title: "三线及以下城市新能源市场结构"
+    question: "各线级城市新能源销量、销量份额、新能源渗透率、纯电/混动渗透率。"
+    dataset: passenger_insurance
+    table: geo_monthly
+    grain: [date_month, city, city_tier_group, fuel_type_group]
+    metrics: [sales]
+    dimensions: [date_month, city, city_tier_group, fuel_type_group]
+    filters:
+      city_tier_group: [三线城市, 四线城市, 五线城市]
+    output_type: structure_table
+    required: true
+    business_logic: "NEV sales volume, market share, NEV penetration, BEV/hybrid penetration by city tier"
