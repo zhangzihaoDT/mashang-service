@@ -336,6 +336,45 @@
     </div>
   </div>
 
+  <!-- Section: MCP Capabilities -->
+  <div class="section-title" style="margin-top: 48px;">
+    <h2>MCP Capabilities / Service Connectors</h2>
+    <span class="count">1 个</span>
+  </div>
+
+  <!-- Card: Playwright MCP -->
+  <div class="skill-card file-based">
+    <div class="skill-card-header">
+      <div class="skill-name">Playwright MCP</div>
+      <span class="skill-badge badge-file">MCP Connector</span>
+    </div>
+    <div class="skill-desc">
+      Service 级 <strong>browser ingestion</strong> 能力。通过本地 Chrome 访问飞书、内部网页、需要登录态的网站，并将下载的原始文件落入 <code>dataset/incoming/</code>。
+    </div>
+    <div class="skill-meta">
+      <span class="skill-tag gold">Browser Ingestion</span>
+      <span class="skill-tag gold">飞书下载</span>
+      <span class="skill-tag gold">网页抓取</span>
+      <span class="skill-tag gold">登录态</span>
+    </div>
+    <div style="font-size:13px;line-height:1.8;color:var(--zh-text);margin-bottom:12px;">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <tr><td style="padding:4px 12px 4px 0;color:var(--zh-muted);white-space:nowrap;vertical-align:top;">层级</td><td style="padding:4px 0;">service</td></tr>
+        <tr><td style="padding:4px 12px 4px 0;color:var(--zh-muted);white-space:nowrap;vertical-align:top;">配置位置</td><td style="padding:4px 0;"><code>opencode.jsonc</code></td></tr>
+        <tr><td style="padding:4px 12px 4px 0;color:var(--zh-muted);white-space:nowrap;vertical-align:top;">Profile</td><td style="padding:4px 0;"><code>.local/playwright-mcp/feishu/</code></td></tr>
+        <tr><td style="padding:4px 12px 4px 0;color:var(--zh-muted);white-space:nowrap;vertical-align:top;">数据落点</td><td style="padding:4px 0;"><code>dataset/incoming/feishu/</code></td></tr>
+      </table>
+    </div>
+    <div style="font-size:12px;color:var(--zh-muted);padding:12px;background:var(--zh-cream);border-radius:8px;border:1px solid rgba(215,154,54,0.12);">
+      <strong style="color:var(--zh-raccoon-gold);font-weight:600;">安全规则</strong><br>
+      <code>.local/</code> 不提交 · cookies / profile / 登录态不提交 · <code>dataset/incoming/feishu/</code> 不提交 · workspace 只消费 incoming，不作为下载入口
+    </div>
+    <div class="skill-path">
+      <span class="label">来源</span>
+      <code>opencode.jsonc → mcp.playwright</code>
+    </div>
+  </div>
+
   <!-- Footer -->
   <div class="footer">
     <div class="brand">
