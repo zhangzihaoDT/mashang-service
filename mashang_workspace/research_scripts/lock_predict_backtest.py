@@ -326,7 +326,8 @@ def main():
             print(f"  {DEEP}{BOLD}Cohort 锁单预测回测 · 三段式成熟度模型{RST:^20}")
             print(f"  {_ruler('━', 64)}")
 
-        print("Loading data ...")
+        if args.format == "terminal":
+            print("Loading data ...")
         rd = run_prediction(df, bt_start, cutoff)
         n_bt, mae_bt, rmse_bt, mape_bt, rd_bt = compute_metrics(rd, bt_start, bt_end)
 
@@ -338,20 +339,21 @@ def main():
             print(f"    {_b('样本量')}:  {_blue(str(n_bt))}  {_muted('回测天数')}")
             print(f"    {_b('avg_30d_rate')}: {avg:.4f}  {_b('r7')}: {r7:.4f}  {_b('r0')}: {r0:.4f}")
             print(f"\n  {GOLD}■{RST} {DEEP}{BOLD}按月明细{RST}")
-        print(f"CohortForecast vs CohortActual_30d (三段式, age={PRED_AGE} 预测)")
-        print(f"  周期 {bt_start.date()} ~ {bt_end.date()} | days={n_bt}  MAE={mae_bt:.1f}  RMSE={rmse_bt:.1f}  MAPE={mape_bt:.1f}%")
-        rd_bt["month"] = rd_bt["date"].dt.to_period("M").astype(str)
-        for m, grp in sorted(rd_bt.groupby("month")):
-            nm = len(grp)
-            me = float(grp["cohort_error"].abs().mean())
-            rms = float(np.sqrt((grp["cohort_error"] ** 2).mean()))
-            ap = grp["cohort_ape"].dropna()
-            mp = float(ap.mean()) if not ap.empty else 0.0
-            print(f"    {m}: n={nm:3d}  MAE={me:>7.1f}  RMSE={rms:>7.1f}  MAPE={mp:>5.1f}%")
+            print(f"CohortForecast vs CohortActual_30d (三段式, age={PRED_AGE} 预测)")
+            print(f"  周期 {bt_start.date()} ~ {bt_end.date()} | days={n_bt}  MAE={mae_bt:.1f}  RMSE={rmse_bt:.1f}  MAPE={mape_bt:.1f}%")
+            rd_bt["month"] = rd_bt["date"].dt.to_period("M").astype(str)
+            for m, grp in sorted(rd_bt.groupby("month")):
+                nm = len(grp)
+                me = float(grp["cohort_error"].abs().mean())
+                rms = float(np.sqrt((grp["cohort_error"] ** 2).mean()))
+                ap = grp["cohort_ape"].dropna()
+                mp = float(ap.mean()) if not ap.empty else 0.0
+                print(f"    {m}: n={nm:3d}  MAE={me:>7.1f}  RMSE={rms:>7.1f}  MAPE={mp:>5.1f}%")
 
-        print("\nLoading order_data ...")
+            print("\nLoading order_data ...")
         html_path = generate_html(rd, bt_start, bt_end, cutoff, n_bt, mae_bt, rmse_bt, mape_bt, r0, r7, avg)
-        print(f"Report saved: {html_path}")
+        if args.format == "terminal":
+            print(f"Report saved: {html_path}")
 
         scope = {
             "data_source": str(ASSIGN_CSV),

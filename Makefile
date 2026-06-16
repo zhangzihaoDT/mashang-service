@@ -19,7 +19,7 @@ research-eval:
 
 ## 完整测试
 test:
-	pytest mashang_workspace/tests -q
+	$(PYTHON) -m pytest mashang_workspace/tests -q
 
 ## CI 门禁（CI-safe suites + 测试）
 ci:
@@ -127,6 +127,10 @@ daily-data-pipeline: dataset-update dataset-validate daily-observation-sync
 daily-sync-dry-run:
 	@echo "[DEPRECATED] Use 'make daily-observation-dry-run' instead."
 	$(MAKE) daily-observation-dry-run
+
+## 构建乘用车上险数据集（Passenger Insurance Dataset）
+build-passenger-insurance-dataset:
+	$(PYTHON) scripts/build_passenger_insurance_dataset.py
 
 ## ─── ──────────────────────────────────────────────────────────────
 

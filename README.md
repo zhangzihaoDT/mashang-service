@@ -763,3 +763,111 @@ mashang_runtime     # productized capabilities
 当能力经过验证、使用频繁且业务口径稳定后，
 再回流到 Runtime，成为真正的产品能力。
 ```
+
+---
+
+# 11. Project Structure Boundaries / 项目结构边界
+
+## service 层
+
+根目录配置属于 service 层，包括：
+
+```text
+opencode.jsonc       # OpenCode 配置（MCP server、agent 定义）
+Makefile             # 项目级命令（eval / build / pipeline）
+pyproject.toml       # Python 项目配置
+.github/             # CI 工作流
+```
+
+Playwright MCP 是 service 级 **browser ingestion** 能力，配置在 `opencode.jsonc` 中。
+Playwright 的浏览器 profile 和登录态存储在 `.local/playwright-mcp/`，不提交 Git。
+
+---
+
+## dataset/incoming/
+
+`dataset/incoming/` 是 service 级**外部原始数据入口**。
+
+用于存放通过浏览器、飞书内部系统、API 下载等方式获取的原始文件。飞书下载入口统一为：
+
+```text
+dataset/incoming/feishu/
+```
+
+该目录**不提交 Git**，由 `.gitignore` 覆盖。
+
+---
+
+## .local/
+
+`.local/` 存放本地浏览器 profile、登录态 Cookie、临时环境数据。
+
+```text
+.local/playwright-mcp/feishu/     # Chrome profile + session cookies
+```
+
+该目录**永不提交 Git**，仅用于本地开发时的登录态持久化。
+
+---
+
+## mashang_workspace
+
+`mashang_workspace/` 是当前 Agent 工作区，负责：
+
+- 分析探索（`research_scripts/`）
+- 稳定分析脚本（`runtime_scripts/`）
+- 工具脚本（`utility_scripts/`）
+- 数据管道（DataOps）
+- 测试（`tests/`）
+- 评测（`eval/`）
+- 文档沉淀（`docs/`）
+- 输出产物（`outputs/`）
+
+workspace **消费** `dataset/incoming/` 中的文件，但**不作为 Playwright 下载入口**。
+所有通过 Playwright / 浏览器下载的文件，统一写入 `dataset/incoming/`。
+
+---
+
+## shared
+
+`shared/` 是当前共享算子、Schema、Loader 的**唯一可信来源**。
+
+```text
+shared/
+├── operators/     # 14 个 canonical 业务算子
+├── schema/        # metric registry, business definitions
+└── loaders/       # dataset loaders (passenger_insurance 等)
+```
+
+`shared/` 中的 operators 是 canonical 版本。
+`mashang_runtime/operators/` 保留 legacy 副本，已不再作为活跃来源。
+
+---
+
+## mashang_runtime
+
+`mashang_runtime/` 是 **legacy frozen runtime**。
+
+- 不再作为当前 workspace 的 canonical source
+- 不建议新增依赖
+- operators 和 schema 的 canonical 版本已迁移到 `shared/`
+- 未来考虑重命名为 `mashang_runtime.legacy/`
+
+当前 workspace **没有**任何 import 指向 `mashang_runtime/`。
+
+---
+
+## outputs
+
+输出产物分为三层：
+
+| 路径 | 内容 | Git 策略 |
+|------|------|----------|
+| `outputs/assets/brand/` | 品牌资产（logo、签名） | ✅ 提交 |
+| `outputs/reports/` | 正式渲染报告（HTML/PDF/DOCX） | 🟡 按需 |
+| `outputs/submission/` | 正式申报材料 | 🟡 按需 |
+| `mashang_workspace/outputs/reports/` | 分析报告 | 🟡 按需 |
+| `mashang_workspace/outputs/tables/` | 结构化数据 | 🟡 考虑 gitignore |
+| `mashang_workspace/outputs/charts/` | 可视化图表 | 🟡 考虑 gitignore |
+
+原则：可复现产物（CSV/JSON/图表）建议不提交；展示资产（品牌 logo / 正式报告）按需提交。

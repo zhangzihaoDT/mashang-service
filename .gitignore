@@ -21,8 +21,18 @@ coverage.xml
 /.query_agent_memory.json
 /agent/.query_agent_memory.json
 
+.local/
+
+node_modules/
+
 /logs/
 
 /test/
 
 /HTML/工信部新车/images/
+
+# Workspace scratch — temporary exploratory scripts
+mashang_workspace/scratch/
+
+# Service-level browser ingestion download directory
+dataset/incoming/feishu/

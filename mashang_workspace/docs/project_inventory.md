@@ -60,6 +60,9 @@ mashang-service/
 | `dataset/LS8A3流出T+30_0525.csv` | CSV | LS8 A3 流出 (30d) |
 | `dataset/云图人群资产结构.csv` | CSV | 云图人群资产 |
 | `dataset/wechat/销售全员群.parquet` | Parquet | 微信群消息 |
+| `dataset/passenger_insurance/` | 目录 | 乘用车上险数据资产（6 张 Parquet + registry + quality） |
+| `dataset/passenger_insurance/registry/passenger_insurance_tables.json` | JSON | 上险数据注册表 |
+| `dataset/passenger_insurance/raw_csv/` | 目录 | 6 张 Tableau 导出 CSV（UTF-16 LE, tab-delimited, pivot） |
 | `logs/last_result.parquet` | Parquet | 上次查询结果缓存 |
 | `logs/query_log.jsonl` | JSONL | 查询日志 |
 | `agent/.query_agent_memory.json` | JSON | Agent 对话记忆 |
@@ -134,7 +137,53 @@ mashang-service/
 | `scripts/reports/quick_lock_ratio.html` | 锁单累计同比报告 |
 | `scripts/reports/竞争洞察A3人群流转.html` | A3 人群流转报告 |
 
-## 9. 迁移建议摘要
+## 9. 基础设施与服务能力
+
+### 9.1 Playwright MCP
+
+- Playwright MCP 已配置在 service 层 `opencode.jsonc`。
+- Playwright MCP 的定位是 **service 级 browser ingestion 能力**。
+- 浏览器 profile / 登录态保存在 `.local/playwright-mcp/feishu/`（不提交 Git）。
+
+### 9.2 飞书下载入口
+
+飞书等浏览器下载得到的原始文件统一存放在：
+
+```text
+dataset/incoming/feishu/
+```
+
+此目录已被 `.gitignore` 覆盖，不提交 Git。
+
+`.local/playwright-mcp/feishu/` 只保存浏览器 profile 和登录态 Cookie，
+**不保存业务文件**。业务文件请下载到 `dataset/incoming/feishu/`。
+
+**mashang_workspace 不作为 Playwright 下载入口**，
+workspace 只消费 `dataset/incoming/feishu/` 中的文件。
+
+### 9.3 mashang_shared
+
+`shared/` 是当前共享算子与 Schema 的 **canonical 位置**。
+
+- `shared/operators/` — canonical 业务算子（14 个）
+- `shared/schema/` — metric registry、business definitions
+- `shared/loaders/` — dataset loaders（passenger_insurance 等）
+
+`mashang_runtime/operators/` 和 `mashang_runtime/schema/` 保留 legacy 副本，
+但 **不再作为 canonical 来源**。
+
+### 9.4 mashang_runtime
+
+`mashang_runtime/` 标记为 **legacy frozen**。
+
+- 当前 workspace **没有**任何 import 指向 `mashang_runtime/`
+- 不建议新增依赖
+- operators / schema 的 canonical 版本已迁移至 `shared/`
+- 未来考虑重命名为 `mashang_runtime.legacy/`
+
+---
+
+## 10. 迁移建议摘要
 
 | 源路径 | 目标路径 | 操作 |
 |--------|----------|------|
