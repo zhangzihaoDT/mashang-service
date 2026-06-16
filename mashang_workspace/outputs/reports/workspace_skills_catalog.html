@@ -13,7 +13,7 @@
     .skill-name { font-size: 20px; font-weight: 700; color: var(--zh-deep-blue); letter-spacing: .3px; }
     .skill-badge { font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; margin-top: 4px; }
     .badge-ws { background: var(--zh-light-blue); color: var(--zh-blue); }
-    .badge-repo { background: rgba(215,154,54,.12); color: var(--zh-brown); }
+
     .skill-desc { font-size: 14px; line-height: 1.7; color: var(--zh-text); margin-bottom: 12px; }
     .skill-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
     .skill-tag { font-size: 12px; color: var(--zh-muted); background: var(--zh-cream); padding: 3px 10px; border-radius: 8px; border: 1px solid rgba(107,124,143,.12); }
@@ -65,11 +65,6 @@
         <div class="change neutral">branded-html-report + runtime-eval-diagnosis</div>
       </div>
       <div class="kpi-card">
-        <div class="label">Repo-Level Skills</div>
-        <div class="value">1</div>
-        <div class="change neutral">official-document-render</div>
-      </div>
-      <div class="kpi-card">
         <div class="label">Skills 输出目录</div>
         <div class="value" style="font-size:18px;line-height:1.4">mashang_workspace/outputs/reports/</div>
         <div class="change neutral">品牌化 HTML 数据报告</div>
@@ -109,13 +104,6 @@
               <td>Diagnose mashang runtime eval reports, i</td>
               <td><code>eval/eval_report.json</code></td>
               <td><code>—</code></td>
-            </tr>
-            <tr class="row-highlight">
-              <td><strong>official-document-render</strong></td>
-              <td><span class="badge gold">repo</span></td>
-              <td>通用正式材料 Word/PDF/HTML 渲染能力，不计入 workspace </td>
-              <td><code>scripts/render_official_document.py</code></td>
-              <td><code>outputs/submission/</code></td>
             </tr>
           </tbody>
         </table>
@@ -226,14 +214,6 @@
       <div class="arch-card">
         <div class="arch-grid">
           <div class="arch-item">
-            <h3>repo root skills</h3>
-            <ul>
-              <li>通用生产能力</li>
-              <li>official-document-render — Markdown → Word/PDF/HTML 正式材料</li>
-              <li>位于 <code>.opencode/skills/official_document_render/</code></li>
-            </ul>
-          </div>
-          <div class="arch-item">
             <h3>workspace skills</h3>
             <ul>
               <li>业务场景能力</li>
@@ -251,21 +231,9 @@
               <li><code>outputs/reports/</code> — 报告输出</li>
             </ul>
           </div>
-          <div class="arch-item">
-            <h3>repo root tools</h3>
-            <ul>
-              <li><code>scripts/render_official_document.py</code></li>
-              <li><code>scripts/smoke_test_official_document_render.py</code></li>
-              <li><code>skills/official_document_render/</code></li>
-            </ul>
-          </div>
         </div>
       </div>
     </section>
-
-    <div class="note-card">
-      <strong>说明：</strong>repo root 的 <code>official-document-render</code> 是通用正式材料渲染能力（Word/PDF/HTML），不归入 workspace skills。本页面仅盘点 <code>mashang_workspace</code> 下的 workspace 级 skills。
-    </div>
 
   </main>
 

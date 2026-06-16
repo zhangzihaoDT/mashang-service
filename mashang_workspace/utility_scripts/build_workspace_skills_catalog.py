@@ -164,14 +164,6 @@ def build_json(skills: list[dict]) -> dict:
         "workspace": "mashang_workspace",
         "generated_at": TODAY,
         "skills": skills,
-        "repo_level_skills_note": [
-            {
-                "name": "official-document-render",
-                "directory": "../.opencode/skills/official_document_render/",
-                "level": "repo",
-                "description": "通用正式材料 Word/PDF/HTML 渲染能力，不计入 workspace skills。用于项目申报书、比赛材料、政府/机构申报附件等正式材料排版。",
-            }
-        ],
     }
 
 
@@ -183,7 +175,7 @@ def write_json(data: dict, path: Path):
 
 def write_markdown(data: dict, skills: list[dict], path: Path):
     ws_count = len(skills)
-    repo_count = len(data["repo_level_skills_note"])
+    output_dirs = ", ".join(set(s["outputs"][0] for s in skills if s["outputs"]))
 
     lines = [
         "# Mashang Workspace Skills Catalog",
@@ -201,8 +193,7 @@ def write_markdown(data: dict, skills: list[dict], path: Path):
         "| 指标 | 数值 |",
         "|------|------|",
         f"| Workspace Skills | {ws_count} |",
-        f"| Repo-Level Skills | {repo_count} |",
-        "| Skills 输出目录 | outputs/reports/ |",
+        f"| Skills 输出目录 | {output_dirs} |",
         f"| 最近更新 | {TODAY} |",
         "",
         "## Skills Overview",
@@ -215,9 +206,6 @@ def write_markdown(data: dict, skills: list[dict], path: Path):
         ep = s["entrypoints"][0] if s["entrypoints"] else "—"
         out = s["outputs"][0] if s["outputs"] else "—"
         lines.append(f"| {s['name']} | workspace | {s['positioning'][:40] if s['positioning'] else s['description'][:40]} | `{ep}` | {out} |")
-
-    rn = data["repo_level_skills_note"][0]
-    lines.append(f"| {rn['name']} | repo | {rn['description'][:40]} | `scripts/render_official_document.py` | outputs/submission/ |")
 
     lines += [
         "",
@@ -242,35 +230,18 @@ def write_markdown(data: dict, skills: list[dict], path: Path):
         ]
 
     lines += [
-        "## Agent Harness 分层说明",
+        "## 文件结构说明",
         "",
-        "### repo root skills",
-        "- 通用生产能力",
-        "- official-document-render — Markdown → Word/PDF/HTML 正式材料",
-        "- 位于 `.opencode/skills/official_document_render/`",
-        "",
-        "### workspace skills",
-        "- 业务场景能力",
     ]
     for s in skills:
-        lines.append(f"- {s['name']} — {s['positioning'][:40] if s['positioning'] else s['description'][:40]}")
+        lines += [
+            f"- `{s['directory']}` — {s['name']} skill",
+        ]
     lines += [
-        f"- 位于 `mashang_workspace/.opencode/skills/`",
-        "",
-        "### workspace tools",
-        "- utility_scripts/ — 渲染入口脚本",
-        "- templates/ — Jinja2 报告模板",
-        "- assets/brand/ — 品牌资产",
-        "- outputs/reports/ — 报告输出",
-        "",
-        "### repo root tools",
-        "- scripts/render_official_document.py",
-        "- scripts/smoke_test_official_document_render.py",
-        "- skills/official_document_render/",
-        "",
-        "---",
-        "",
-        "> 说明：repo root 的 official-document-render 是通用正式材料渲染能力（Word/PDF/HTML），不归入 workspace skills。本文件仅盘点 mashang_workspace 下的 workspace 级 skills。",
+        "- `utility_scripts/build_workspace_skills_catalog.py` — 本页生成脚本",
+        "- `utility_scripts/render_html_report.py` — 品牌化报告渲染脚本",
+        "- `templates/` — Jinja2 报告模板 + CSS",
+        "- `assets/brand/` — Raccoon Research 品牌资产",
         "",
     ]
 
@@ -290,9 +261,6 @@ def _ep_display(ep: str) -> str:
 
 def write_html(data: dict, skills: list[dict], path: Path):
     ws_count = len(skills)
-    repo_count = len(data["repo_level_skills_note"])
-    rn = data["repo_level_skills_note"][0]
-
     skill_names_joined = " + ".join(s["name"] for s in skills)
     output_dirs = ", ".join(set(s["outputs"][0] for s in skills if s["outputs"]))
 
@@ -308,15 +276,6 @@ def write_html(data: dict, skills: list[dict], path: Path):
               <td>{s['positioning'][:40] if s['positioning'] else s['description'][:40]}</td>
               <td><code>{ep}</code></td>
               <td><code>{out}</code></td>
-            </tr>""")
-
-    overview_rows.append(f"""
-            <tr class="row-highlight">
-              <td><strong>{rn['name']}</strong></td>
-              <td><span class="badge gold">repo</span></td>
-              <td>{rn['description'][:40]}</td>
-              <td><code>scripts/render_official_document.py</code></td>
-              <td><code>outputs/submission/</code></td>
             </tr>""")
 
     # Build skill cards
@@ -388,7 +347,7 @@ def write_html(data: dict, skills: list[dict], path: Path):
     .skill-name {{ font-size: 20px; font-weight: 700; color: var(--zh-deep-blue); letter-spacing: .3px; }}
     .skill-badge {{ font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; margin-top: 4px; }}
     .badge-ws {{ background: var(--zh-light-blue); color: var(--zh-blue); }}
-    .badge-repo {{ background: rgba(215,154,54,.12); color: var(--zh-brown); }}
+
     .skill-desc {{ font-size: 14px; line-height: 1.7; color: var(--zh-text); margin-bottom: 12px; }}
     .skill-meta {{ display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }}
     .skill-tag {{ font-size: 12px; color: var(--zh-muted); background: var(--zh-cream); padding: 3px 10px; border-radius: 8px; border: 1px solid rgba(107,124,143,.12); }}
@@ -440,11 +399,6 @@ def write_html(data: dict, skills: list[dict], path: Path):
         <div class="change neutral">{skill_names_joined}</div>
       </div>
       <div class="kpi-card">
-        <div class="label">Repo-Level Skills</div>
-        <div class="value">{repo_count}</div>
-        <div class="change neutral">official-document-render</div>
-      </div>
-      <div class="kpi-card">
         <div class="label">Skills 输出目录</div>
         <div class="value" style="font-size:18px;line-height:1.4">{output_dirs}</div>
         <div class="change neutral">品牌化 HTML 数据报告</div>
@@ -488,14 +442,6 @@ def write_html(data: dict, skills: list[dict], path: Path):
       <div class="arch-card">
         <div class="arch-grid">
           <div class="arch-item">
-            <h3>repo root skills</h3>
-            <ul>
-              <li>通用生产能力</li>
-              <li>official-document-render — Markdown → Word/PDF/HTML 正式材料</li>
-              <li>位于 <code>.opencode/skills/official_document_render/</code></li>
-            </ul>
-          </div>
-          <div class="arch-item">
             <h3>workspace skills</h3>
             <ul>
               <li>业务场景能力</li>
@@ -512,21 +458,9 @@ def write_html(data: dict, skills: list[dict], path: Path):
               <li><code>outputs/reports/</code> — 报告输出</li>
             </ul>
           </div>
-          <div class="arch-item">
-            <h3>repo root tools</h3>
-            <ul>
-              <li><code>scripts/render_official_document.py</code></li>
-              <li><code>scripts/smoke_test_official_document_render.py</code></li>
-              <li><code>skills/official_document_render/</code></li>
-            </ul>
-          </div>
         </div>
       </div>
     </section>
-
-    <div class="note-card">
-      <strong>说明：</strong>repo root 的 <code>official-document-render</code> 是通用正式材料渲染能力（Word/PDF/HTML），不归入 workspace skills。本页面仅盘点 <code>mashang_workspace</code> 下的 workspace 级 skills。
-    </div>
 
   </main>
 

@@ -60,13 +60,5 @@
       ],
       "level": "workspace"
     }
-  ],
-  "repo_level_skills_note": [
-    {
-      "name": "official-document-render",
-      "directory": "../.opencode/skills/official_document_render/",
-      "level": "repo",
-      "description": "通用正式材料 Word/PDF/HTML 渲染能力，不计入 workspace skills。用于项目申报书、比赛材料、政府/机构申报附件等正式材料排版。"
-    }
   ]
 }
