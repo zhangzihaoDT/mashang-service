@@ -173,3 +173,12 @@ pytest tests/test_passenger_insurance_dataset_build.py -q
 # workspace 侧 smoke test
 python mashang_workspace/research_scripts/passenger_insurance/check_passenger_insurance_asset.py
 ```
+
+---
+
+## 相关文档
+
+- **service 数据集说明**: `docs/passenger_insurance_dataset.md` — 数据构建流程、6 张 Parquet 的 grain/metrics 定义
+- **shared schema**: `shared/schema/passenger_insurance_schema.py` — grain / dimensions / metrics 的 Python 定义
+- **shared loader**: `shared/loaders/passenger_insurance_loader.py` — pandas / DuckDB 统一读取入口
+- **project cleanup audit**: `docs/project_cleanup_audit.md` — 项目结构边界与清理计划

@@ -199,3 +199,12 @@ pytest tests/test_passenger_insurance_dataset_build.py -q
 - 不存在宽表合并逻辑
 - Parquet 文件存在性及可读性
 - Raw CSV 缺失时的错误处理
+
+---
+
+## 相关文档
+
+- **workspace 使用指南**: `mashang_workspace/docs/passenger_insurance_usage.md` — 6 张表的适用场景、字段速查、workspace 消费规范
+- **数据集构建**: `scripts/build_passenger_insurance_dataset.py` — service 级构建脚本
+- **schema 定义**: `shared/schema/passenger_insurance_schema.py` — grain / dimensions / metrics
+- **loader**: `shared/loaders/passenger_insurance_loader.py` — pandas / DuckDB 读取入口
