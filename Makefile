@@ -1,5 +1,5 @@
 PYTHON ?= .venv/bin/python
-.PHONY: eval full-eval core-eval research-eval capability-audit test ci data-dict lock-demo parser-demo followup-demo numeric-eval reference-eval atp-demo backtest-demo clean-outputs dataset-update dataset-validate daily-observation-dry-run daily-observation-sync daily-data-pipeline-dry-run daily-data-pipeline render-official-doc render-official-doc-smoke
+.PHONY: eval full-eval core-eval research-eval capability-audit test ci data-dict lock-demo parser-demo followup-demo numeric-eval reference-eval atp-demo backtest-demo clean-outputs dataset-update dataset-validate daily-observation-dry-run daily-observation-sync daily-data-pipeline-dry-run daily-data-pipeline render-official-doc render-official-doc-smoke build-workspace-skills-catalog
 
 ## 默认 Eval（core + parser + followup + reference，不含 research）
 eval:
@@ -143,6 +143,10 @@ render-official-doc:
 render-official-doc-smoke:
 	$(PYTHON) scripts/smoke_test_official_document_render.py
 
+# Workflowe Skills Catalog
+build-workspace-skills-catalog:
+	$(PYTHON) mashang_workspace/utility_scripts/build_workspace_skills_catalog.py
+
 clean-outputs:
 	find mashang_workspace/outputs -type f ! -name "README.md" -delete
 
@@ -190,6 +194,10 @@ help:
 	@echo "=== Render ==="
 	@echo "make render-official-doc       正式材料排版渲染（Markdown→PDF/HTML/DOCX）"
 	@echo "make render-official-doc-smoke 正式材料排版渲染 Smoke Test"
+	@echo ""
+	@echo ""
+	@echo "=== Catalog ==="
+	@echo "make build-workspace-skills-catalog  生成 workspace skills catalog（JSON/MD/HTML）"
 	@echo ""
 	@echo "=== Utility ==="
 	@echo "make clean-outputs     清理输出文件"

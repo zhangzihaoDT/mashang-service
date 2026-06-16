@@ -1,0 +1,72 @@
+{
+  "workspace": "mashang_workspace",
+  "generated_at": "2026-06-16",
+  "skills": [
+    {
+      "name": "branded-html-report",
+      "directory": ".opencode/skills/branded_html_report/",
+      "description": "生成 mashang_workspace 专属的品牌化 HTML 数据报告，适用于汽车市场洞察、销量预测、锁单释放曲线、模型回测和经营分析报告。使用 Raccoon Research 视觉风格。",
+      "positioning": "将汽车经营分析、预测模型、回测评估、市场洞察等结果，渲染为具有 Raccoon Research / mashang 风格的 HTML 数据报告。",
+      "scenarios": [
+        "销量预测报告",
+        "锁单释放曲线报告",
+        "模型回测报告",
+        "汽车市场洞察报告",
+        "经营复盘报告",
+        "用户反馈 / VOC 分析报告",
+        "车型结构、城市分布、渠道分析报告"
+      ],
+      "not_for": [
+        "政府正式申报书",
+        "通知/公文风材料",
+        "Word / PDF 正式材料",
+        "简历",
+        "PPT",
+        "纯命令行日志"
+      ],
+      "entrypoints": [
+        "python runtime_scripts/daily_lock_count.py --format json \\",
+        "python utility_scripts/render_html_report.py \\",
+        "python utility_scripts/render_html_report.py \\"
+      ],
+      "outputs": [
+        "mashang_workspace/outputs/reports/"
+      ],
+      "constraints": [
+        "不生成 Word/PDF 正式材料",
+        "不生成政府公文风",
+        "不引入 repo root 的 `official_document_render` 逻辑",
+        "不删除已有 outputs/reports 下的任何报告",
+        "不改写现有模板或品牌资产"
+      ],
+      "level": "workspace"
+    },
+    {
+      "name": "runtime-eval-diagnosis",
+      "directory": ".opencode/skills/runtime-eval-diagnosis/",
+      "description": "Diagnose mashang runtime eval reports, including hard_pass, soft_pass, failed, contract mismatch, fact_types, and exit_reason.",
+      "positioning": "",
+      "scenarios": [],
+      "not_for": [],
+      "entrypoints": [
+        "OpenCode Agent 自动匹配 — SKILL.md 位于 .opencode/skills/runtime-eval-diagnosis/"
+      ],
+      "outputs": [],
+      "constraints": [
+        "Diagnose before changing code.",
+        "Do not modify core runtime logic first.",
+        "Preserve compatibility of the existing passed field.",
+        "Prefer smallest possible fix."
+      ],
+      "level": "workspace"
+    }
+  ],
+  "repo_level_skills_note": [
+    {
+      "name": "official-document-render",
+      "directory": "../.opencode/skills/official_document_render/",
+      "level": "repo",
+      "description": "通用正式材料 Word/PDF/HTML 渲染能力，不计入 workspace skills。用于项目申报书、比赛材料、政府/机构申报附件等正式材料排版。"
+    }
+  ]
+}
