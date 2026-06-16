@@ -101,6 +101,7 @@ python mashang_workspace/eval/run_eval.py --suite parser  # 单套件
 | `python utility_scripts/voc_theme_analysis.py` | VOC 分析 | utility |
 | `python utility_scripts/data_dictionary.py` | 数据字典 | utility |
 | `python utility_scripts/skills_order_observation_daily.py` | 每日数据观察(DataOps) | utility |
+| `python utility_scripts/build_workspace_capability_inventory.py` | 能力总览 | utility |
 | `python eval/parse_context_cli.py "..."` | 自然语言解析 | eval |
 | `python eval/run_followup_eval.py` | 追问 Runner | eval |
 | `python eval/run_numeric_eval.py` | 数值校验 | eval |

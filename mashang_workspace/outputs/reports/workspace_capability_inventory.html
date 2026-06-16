@@ -1,0 +1,708 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mashang Workspace Capability Inventory</title>
+  <link rel="stylesheet" href="../../templates/report_style.css" />
+  <style>
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 32px; }
+    .kpi-card { background: var(--zh-card); border-radius: 12px; padding: 20px 20px; box-shadow: 0 1px 4px rgba(6,33,61,.06); border: 1px solid rgba(23,74,124,.06); }
+    .kpi-card .label { font-size: 11px; font-weight: 600; color: var(--zh-muted); text-transform: uppercase; letter-spacing: .4px; margin-bottom: 6px; }
+    .kpi-card .value { font-size: 28px; font-weight: 800; color: var(--zh-deep-blue); }
+    .kpi-card .change { font-size: 11px; color: var(--zh-muted); margin-top: 4px; }
+
+    .cap-map { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 32px; }
+    .cap-item { background: var(--zh-card); border-radius: 12px; padding: 16px 18px; display: flex; align-items: flex-start; gap: 12px; box-shadow: 0 1px 4px rgba(6,33,61,.06); border: 1px solid rgba(23,74,124,.06); }
+    .cap-icon { width: 28px; height: 28px; border-radius: 8px; background: var(--zh-blue); color: white; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+    .cap-label { font-size: 14px; font-weight: 700; color: var(--zh-deep-blue); }
+    .cap-sub { font-size: 11px; color: var(--zh-muted); }
+    .cap-count { font-size: 11px; color: var(--zh-blue); font-weight: 600; margin-top: 2px; }
+
+    .group-subtitle { font-size: 13px; font-weight: 400; color: var(--zh-muted); margin-left: 8px; }
+    .group-desc { font-size: 13px; color: var(--zh-muted); line-height: 1.6; margin-bottom: 16px; }
+
+    .inv-grid { display: grid; gap: 16px; }
+    .inv-card { background: var(--zh-card); border-radius: 12px; padding: 20px 22px; box-shadow: 0 1px 4px rgba(6,33,61,.06); border: 1px solid rgba(23,74,124,.06); }
+    .inv-card:hover { box-shadow: 0 4px 24px rgba(6,33,61,.10); border-color: rgba(23,74,124,.15); }
+    .inv-card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+    .inv-card-name { font-size: 15px; font-weight: 700; color: var(--zh-deep-blue); word-break: break-all; }
+    .inv-card-desc { font-size: 13px; line-height: 1.6; color: var(--zh-text); margin-bottom: 10px; }
+    .inv-card-fields { display: flex; flex-direction: column; gap: 5px; }
+    .inv-field { font-size: 12px; color: var(--zh-text); line-height: 1.5; }
+    .inv-field code { background: var(--zh-cream); padding: 1px 5px; border-radius: 3px; font-size: 11px; word-break: break-all; }
+    .inv-field-label { font-size: 10px; font-weight: 600; color: var(--zh-muted); text-transform: uppercase; letter-spacing: .3px; margin-right: 6px; display: inline-block; min-width: 60px; }
+
+    .skill-badge { font-size: 10px; font-weight: 600; padding: 2px 10px; border-radius: 12px; white-space: nowrap; }
+    .badge-green { background: rgba(72,187,120,.12); color: #2F855A; }
+    .badge-blue { background: var(--zh-light-blue); color: var(--zh-blue); }
+    .badge-gold { background: rgba(215,154,54,.08); color: var(--zh-brown); }
+    .badge-gray { background: rgba(107,124,143,.08); color: var(--zh-muted); }
+    .badge-tag { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 8px; background: rgba(126,205,235,.12); color: #2A6B8A; white-space: nowrap; }
+
+    .wf-step { font-size: 13px; color: var(--zh-text); line-height: 1.8; padding: 6px 0; border-bottom: 1px solid rgba(23,74,124,.04); }
+    .wf-step:last-child { border-bottom: none; }
+
+    .empty-section { font-size: 13px; color: var(--zh-muted); font-style: italic; padding: 12px 0; }
+
+    .note-list { font-size: 12px; color: var(--zh-muted); line-height: 1.7; }
+    .note-list li { margin-bottom: 4px; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="container">
+      <div class="brand">
+        <img class="brand-avatar" src="../../assets/brand/raccoon_avatar_light.png" alt="" />
+        <span class="brand-name">Raccoon Research</span>
+      </div>
+      <span class="header-meta">workspace_capability_inventory | 2026-06-16</span>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <section class="hero">
+      <h1>Mashang Workspace Capability Inventory</h1>
+      <p>Agent Harness 能力总览 · skills / scripts / data assets / outputs / evaluation</p>
+    </section>
+
+    <section class="kpi-grid">
+
+      <div class="kpi-card">
+        <div class="label">Workspace Skills</div>
+        <div class="value">3</div>
+        <div class="change neutral">mashang_workspace</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="label">Callable Scripts</div>
+        <div class="value">27</div>
+        <div class="change neutral">4 categories</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="label">Data Assets</div>
+        <div class="value">6</div>
+        <div class="change neutral">read-only</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="label">Generated Outputs</div>
+        <div class="value">35</div>
+        <div class="change neutral">reports / data / charts</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="label">Quality Assets</div>
+        <div class="value">6</div>
+        <div class="change neutral">eval / tests</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Capability Map</h2>
+      <div class="cap-map">
+
+        <div class="cap-item">
+          <div class="cap-icon">1</div>
+          <div>
+            <div class="cap-label">Skills</div>
+            <div class="cap-sub">Agent 会什么</div>
+            <div class="cap-count">3 项资产</div>
+          </div>
+        </div>
+
+        <div class="cap-item">
+          <div class="cap-icon">2</div>
+          <div>
+            <div class="cap-label">Scripts</div>
+            <div class="cap-sub">Agent 能调用什么</div>
+            <div class="cap-count">27 项资产</div>
+          </div>
+        </div>
+
+        <div class="cap-item">
+          <div class="cap-icon">3</div>
+          <div>
+            <div class="cap-label">Data</div>
+            <div class="cap-sub">Agent 能查什么</div>
+            <div class="cap-count">6 项资产</div>
+          </div>
+        </div>
+
+        <div class="cap-item">
+          <div class="cap-icon">4</div>
+          <div>
+            <div class="cap-label">Outputs</div>
+            <div class="cap-sub">Agent 已沉淀什么</div>
+            <div class="cap-count">35 项资产</div>
+          </div>
+        </div>
+
+        <div class="cap-item">
+          <div class="cap-icon">5</div>
+          <div>
+            <div class="cap-label">Evaluation</div>
+            <div class="cap-sub">Agent 如何自检</div>
+            <div class="cap-count">6 项资产</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <section class="card">
+      <h2>Skills <span class="group-subtitle">Agent 会什么</span></h2>
+      <p class="group-desc">Agent 可以通过 skill 匹配识别任务类型、选择执行方式、调用对应脚本和模板。每个 skill 包含 SKILL.md 指令文件，指导 Agent 如何响应特定场景。</p>
+      <div class="inv-grid">
+
+          <div class="inv-card">
+            <div class="inv-card-header">
+              <div class="inv-card-name">branded-html-report</div>
+              <span class="skill-badge badge-green">active</span>
+            </div>
+            <div class="inv-card-desc">将汽车经营分析、预测模型、回测评估、市场洞察等结果，渲染为具有 Raccoon Research / mashang 风格的 HTML 数据报告。</div>
+            <div class="inv-card-fields">
+              <div class="inv-field"><span class="inv-field-label">Path</span><code>.opencode/skills/branded_html_report/</code></div><div class="inv-field"><span class="inv-field-label">Entry</span><code>.opencode/skills/branded_html_report/SKILL.md</code></div><div class="inv-field"><span class="inv-field-label">Scripts</span><code>runtime_scripts/daily_lock_count.py</code>, <code>utility_scripts/render_html_report.py</code></div>
+            </div>
+          </div>
+
+          <div class="inv-card">
+            <div class="inv-card-header">
+              <div class="inv-card-name">monthly-market-report</div>
+              <span class="skill-badge badge-green">active</span>
+            </div>
+            <div class="inv-card-desc">monthly-market-report v0.1 是基于 `passenger_insurance` 现有 6 张预聚合单表的月度汽车市场固定主查询能力。</div>
+            <div class="inv-card-fields">
+              <div class="inv-field"><span class="inv-field-label">Path</span><code>.opencode/skills/monthly-market-report/</code></div><div class="inv-field"><span class="inv-field-label">Entry</span><code>.opencode/skills/monthly-market-report/SKILL.md</code></div><div class="inv-field"><span class="inv-field-label">Scripts</span><code>research_scripts/market_report/run_monthly_market_report.py</code></div>
+            </div>
+          </div>
+
+          <div class="inv-card">
+            <div class="inv-card-header">
+              <div class="inv-card-name">runtime-eval-diagnosis</div>
+              <span class="skill-badge badge-green">active</span>
+            </div>
+            <div class="inv-card-desc">Diagnose mashang runtime eval reports, including hard_pass, soft_pass, failed,</div>
+            <div class="inv-card-fields">
+              <div class="inv-field"><span class="inv-field-label">Path</span><code>.opencode/skills/runtime-eval-diagnosis/</code></div><div class="inv-field"><span class="inv-field-label">Entry</span><code>.opencode/skills/runtime-eval-diagnosis/SKILL.md</code></div>
+            </div>
+          </div>
+      </div>
+    </section>
+    <section class="card">
+      <h2>Scripts <span class="group-subtitle">Agent 能调用什么</span></h2>
+      <p class="group-desc">Agent 可直接调用的 Python 脚本，按功能分为 runtime（稳定运行入口）、research（研究分析）、utility（工具/渲染/验证）和 legacy（历史保留）四类。</p>
+      <div class="inv-grid">
+
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Name</th><th>Description</th><th>Status</th></tr></thead>
+              <tbody>
+            <tr>
+              <td><strong>assign_conversion_analysis.py</strong></td>
+              <td>未声明</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
+              <td><strong>atp_price_report.py</strong></td>
+              <td>未声明</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
+              <td><strong>attribute_penetration_report.py</strong></td>
+              <td>未声明</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
+              <td><strong>daily_lock_count.py</strong></td>
+              <td>未声明</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
+              <td><strong>lock_by_model.py</strong></td>
+              <td>未声明</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
+              <td><strong>lock_city_distribution.py</strong></td>
+              <td>未声明</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
+              <td><strong>cohort_forecast.py</strong></td>
+              <td>未声明</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
+              <td><strong>lock_predict_backtest.py</strong></td>
+              <td>未声明</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
+              <td><strong>lock_release_curve.py</strong></td>
+              <td>未声明</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
+              <td><strong>ls8_battery_weekly_share_report.py</strong></td>
+              <td>未声明</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
+              <td><strong>ls8_weekly_model_share.py</strong></td>
+              <td>未声明</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
+              <td><strong>market_report/run_monthly_market_report.py</strong></td>
+              <td>未声明</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
+              <td><strong>passenger_insurance/check_passenger_insurance_asset.py</strong></td>
+              <td>未声明</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
+              <td><strong>quick_lock_ratio.py</strong></td>
+              <td>未声明</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
+              <td><strong>release_curve_analysis.py</strong></td>
+              <td>未声明</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
+              <td><strong>structured_business_forecast.py</strong></td>
+              <td>脚本作用：
+1) 基于日度矩阵（index_summary_daily_matrix）做结构化业务预测，核心恒等式为 l</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
+              <td><strong>build_daily_matrix.py</strong></td>
+              <td>未声明</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
+              <td><strong>build_workspace_capability_inventory.py</strong></td>
+              <td>未声明</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
+              <td><strong>build_workspace_skills_catalog.py</strong></td>
+              <td>未声明</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
+              <td><strong>data_dictionary.py</strong></td>
+              <td>未声明</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
+              <td><strong>dataset_validate.py</strong></td>
+              <td>未声明</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
+              <td><strong>generate_eval_cases.py</strong></td>
+              <td>未声明</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
+              <td><strong>render_html_report.py</strong></td>
+              <td>未声明</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
+              <td><strong>skills_attainment_rate_alert.py</strong></td>
+              <td>未声明</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
+              <td><strong>skills_order_observation_daily.py</strong></td>
+              <td>未声明</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
+              <td><strong>voc_theme_analysis.py</strong></td>
+              <td>未声明</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
+              <td><strong>skills_atp_price.py</strong></td>
+              <td>未声明</td>
+              <td><span class="badge-tag">legacy</span></td>
+            </tr></tbody>
+            </table>
+          </div>
+      </div>
+    </section>
+    <section class="card">
+      <h2>Data Assets <span class="group-subtitle">Agent 能查什么</span></h2>
+      <p class="group-desc">Agent 可查询的数据来源，包括 dataset/ 下的原始数据文件、shared loader 接入的 service 级数据资产、以及 config 目录下的配置规范。</p>
+      <div class="inv-grid">
+
+          <div class="inv-card">
+            <div class="inv-card-header">
+              <div class="inv-card-name">passenger_insurance</div>
+              <span class="skill-badge badge-green">active</span>
+            </div>
+            <div class="inv-card-desc">乘用车上险数据（6 张 Parquet 表），workspace 通过 shared loaders 消费。</div>
+            <div class="inv-card-fields">
+              <div class="inv-field"><span class="inv-field-label">Path</span><code>dataset/passenger_insurance/</code></div><div class="inv-field"><span class="inv-field-label">Scripts</span><code>research_scripts/market_report/run_monthly_market_report.py</code></div><div class="inv-field"><span class="inv-field-label">Grain</span>date_month × fuel_type / brand / model / geo / price_segment / product_segment</div>
+            </div>
+          </div>
+
+          <div class="inv-card">
+            <div class="inv-card-header">
+              <div class="inv-card-name">order_data</div>
+              <span class="skill-badge badge-green">active</span>
+            </div>
+            <div class="inv-card-desc">订单主表，含锁单/交付/开票/退订时间戳。</div>
+            <div class="inv-card-fields">
+              <div class="inv-field"><span class="inv-field-label">Path</span><code>dataset/order_data.parquet</code></div><div class="inv-field"><span class="inv-field-label">Scripts</span><code>runtime_scripts/daily_lock_count.py</code>, <code>runtime_scripts/lock_by_model.py</code>, <code>runtime_scripts/lock_city_distribution.py</code></div><div class="inv-field"><span class="inv-field-label">Grain</span>单笔订单</div>
+            </div>
+          </div>
+
+          <div class="inv-card">
+            <div class="inv-card-header">
+              <div class="inv-card-name">assign_data</div>
+              <span class="skill-badge badge-green">active</span>
+            </div>
+            <div class="inv-card-desc">下发线索表，含渠道拆解和转化分析。</div>
+            <div class="inv-card-fields">
+              <div class="inv-field"><span class="inv-field-label">Path</span><code>dataset/assign_data.csv</code></div><div class="inv-field"><span class="inv-field-label">Scripts</span><code>runtime_scripts/assign_conversion_analysis.py</code>, <code>research_scripts/lock_predict_backtest.py</code></div><div class="inv-field"><span class="inv-field-label">Grain</span>单条线索</div>
+            </div>
+          </div>
+
+          <div class="inv-card">
+            <div class="inv-card-header">
+              <div class="inv-card-name">config_attribute</div>
+              <span class="skill-badge badge-green">active</span>
+            </div>
+            <div class="inv-card-desc">选配属性表，用于配置渗透率分析。</div>
+            <div class="inv-card-fields">
+              <div class="inv-field"><span class="inv-field-label">Path</span><code>dataset/config_attribute.parquet</code></div><div class="inv-field"><span class="inv-field-label">Scripts</span><code>runtime_scripts/attribute_penetration_report.py</code></div><div class="inv-field"><span class="inv-field-label">Grain</span>单车 × 选配项</div>
+            </div>
+          </div>
+
+          <div class="inv-card">
+            <div class="inv-card-header">
+              <div class="inv-card-name">monthly_market_report_queries</div>
+              <span class="skill-badge badge-green">active</span>
+            </div>
+            <div class="inv-card-desc">24 个固定月报查询的 YAML 规范。</div>
+            <div class="inv-card-fields">
+              <div class="inv-field"><span class="inv-field-label">Path</span><code>mashang_workspace/configs/monthly_market_report_queries.yaml</code></div><div class="inv-field"><span class="inv-field-label">Scripts</span><code>research_scripts/market_report/run_monthly_market_report.py</code></div><div class="inv-field"><span class="inv-field-label">Grain</span>24 个查询问题 × 时间参数</div>
+            </div>
+          </div>
+
+          <div class="inv-card">
+            <div class="inv-card-header">
+              <div class="inv-card-name">wechat_sync</div>
+              <span class="skill-badge badge-green">active</span>
+            </div>
+            <div class="inv-card-desc">微信群消息，VOC 情感/主题挖掘。</div>
+            <div class="inv-card-fields">
+              <div class="inv-field"><span class="inv-field-label">Path</span><code>dataset/wechat/销售全员群.parquet</code></div><div class="inv-field"><span class="inv-field-label">Scripts</span><code>utility_scripts/voc_theme_analysis.py</code></div><div class="inv-field"><span class="inv-field-label">Grain</span>单条消息</div>
+            </div>
+          </div>
+      </div>
+    </section>
+    <section class="card">
+      <h2>Outputs / Reports <span class="group-subtitle">Agent 已沉淀什么</span></h2>
+      <p class="group-desc">Agent 执行后沉淀的输出成果，包括 reports/ 下的品牌化 HTML 报告、Markdown 分析和 JSON 数据契约，以及 monthly_market_report/ 下的月报数据底稿。</p>
+      <div class="inv-grid">
+
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Name</th><th>Description</th><th>Status</th></tr></thead>
+              <tbody>
+            <tr>
+              <td><strong>agent_execution_trace.md</strong></td>
+              <td>markdown report · 5.4 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
+              <td><strong>atp_2026-04.html</strong></td>
+              <td>html report · 7.7 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
+              <td><strong>atp_2026-05.html</strong></td>
+              <td>html report · 7.7 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
+              <td><strong>daily_msg_report.html</strong></td>
+              <td>html report · 25.8 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
+              <td><strong>followup_trace_ls8_city.md</strong></td>
+              <td>markdown report · 9.4 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
+              <td><strong>june_2026_forecast.html</strong></td>
+              <td>html report · 5.9 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
+              <td><strong>lock_predict_backtest.html</strong></td>
+              <td>html report · 34.4 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
+              <td><strong>lock_release_curve.html</strong></td>
+              <td>html report · 74.0 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
+              <td><strong>ls8_battery_weekly_share.html</strong></td>
+              <td>html report · 2950.1 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
+              <td><strong>ls8_city_distribution_2026-06-14.html</strong></td>
+              <td>html report · 11.8 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
+              <td><strong>ls8_city_distribution_report.html</strong></td>
+              <td>html report · 9.4 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
+              <td><strong>passenger_insurance_workspace_smoke.md</strong></td>
+              <td>markdown report · 1.1 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
+              <td><strong>pk_weekly_compare_ls8_ls9.html</strong></td>
+              <td>html report · 66.1 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
+              <td><strong>quick_lock_ratio.html</strong></td>
+              <td>html report · 638.5 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
+              <td><strong>w24_weekend_analysis.html</strong></td>
+              <td>html report · 19.3 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
+              <td><strong>w24_weekend_analysis.md</strong></td>
+              <td>markdown report · 4.1 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
+              <td><strong>workspace_capability_inventory.html</strong></td>
+              <td>html report · 32.8 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
+              <td><strong>workspace_capability_inventory.json</strong></td>
+              <td>json contract · 35.2 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
+              <td><strong>workspace_capability_inventory.md</strong></td>
+              <td>markdown report · 7.0 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
+              <td><strong>workspace_skills_catalog.html</strong></td>
+              <td>html report · 16.2 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
+              <td><strong>workspace_skills_catalog.json</strong></td>
+              <td>json contract · 4.0 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
+              <td><strong>workspace_skills_catalog.md</strong></td>
+              <td>markdown report · 3.6 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
+              <td><strong>竞争洞察A3人群流转.html</strong></td>
+              <td>html report · 4934.7 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
+              <td><strong>2026-02/query_results.json</strong></td>
+              <td>月报 · 2026-02 · 21.1 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
+              <td><strong>2026-02/report_draft.md</strong></td>
+              <td>月报 · 2026-02 · 8.7 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
+              <td><strong>2026-02/run_metadata.json</strong></td>
+              <td>月报 · 2026-02 · 0.6 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
+              <td><strong>2026-03/query_results.json</strong></td>
+              <td>月报 · 2026-03 · 497.1 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
+              <td><strong>2026-03/report_draft.md</strong></td>
+              <td>月报 · 2026-03 · 15.8 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
+              <td><strong>2026-03/run_metadata.json</strong></td>
+              <td>月报 · 2026-03 · 0.6 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
+              <td><strong>2026-05/query_results.json</strong></td>
+              <td>月报 · 2026-05 · 21.1 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
+              <td><strong>2026-05/report_draft.md</strong></td>
+              <td>月报 · 2026-05 · 8.7 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
+              <td><strong>2026-05/run_metadata.json</strong></td>
+              <td>月报 · 2026-05 · 0.6 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
+              <td><strong>2026-12/query_results.json</strong></td>
+              <td>月报 · 2026-12 · 21.1 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
+              <td><strong>2026-12/report_draft.md</strong></td>
+              <td>月报 · 2026-12 · 8.7 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
+              <td><strong>2026-12/run_metadata.json</strong></td>
+              <td>月报 · 2026-12 · 0.6 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr></tbody>
+            </table>
+          </div>
+      </div>
+    </section>
+    <section class="card">
+      <h2>Evaluation / Quality <span class="group-subtitle">Agent 是否可靠</span></h2>
+      <p class="group-desc">Agent 能力的质量保障体系，包括统一 Eval 框架、上下文解析评测、多轮追问评测、数值校验、pytest 测试套件和回归测试记录。</p>
+      <div class="inv-grid">
+
+          <div class="inv-card">
+            <div class="inv-card-header">
+              <div class="inv-card-name">eval_suites</div>
+              <span class="skill-badge badge-green">active</span>
+            </div>
+            <div class="inv-card-desc">统一 Eval 框架，6 suites。</div>
+            <div class="inv-card-fields">
+              <div class="inv-field"><span class="inv-field-label">Path</span><code>mashang_workspace/eval/run_eval.py</code></div><div class="inv-field"><span class="inv-field-label">Files</span>12</div>
+            </div>
+          </div>
+
+          <div class="inv-card">
+            <div class="inv-card-header">
+              <div class="inv-card-name">context_parser</div>
+              <span class="skill-badge badge-green">active</span>
+            </div>
+            <div class="inv-card-desc">自然语言 → 结构化 context。</div>
+            <div class="inv-card-fields">
+              <div class="inv-field"><span class="inv-field-label">Path</span><code>mashang_workspace/eval/context_parser.py</code></div><div class="inv-field"><span class="inv-field-label">Files</span>1</div>
+            </div>
+          </div>
+
+          <div class="inv-card">
+            <div class="inv-card-header">
+              <div class="inv-card-name">followup_runner</div>
+              <span class="skill-badge badge-green">active</span>
+            </div>
+            <div class="inv-card-desc">多轮追问评测。</div>
+            <div class="inv-card-fields">
+              <div class="inv-field"><span class="inv-field-label">Path</span><code>mashang_workspace/eval/run_followup_eval.py</code></div><div class="inv-field"><span class="inv-field-label">Files</span>1</div>
+            </div>
+          </div>
+
+          <div class="inv-card">
+            <div class="inv-card-header">
+              <div class="inv-card-name">pytest_tests</div>
+              <span class="skill-badge badge-green">active</span>
+            </div>
+            <div class="inv-card-desc">19 个测试文件的 pytest 套件。</div>
+            <div class="inv-card-fields">
+              <div class="inv-field"><span class="inv-field-label">Path</span><code>mashang_workspace/tests</code></div><div class="inv-field"><span class="inv-field-label">Files</span>19</div>
+            </div>
+          </div>
+
+          <div class="inv-card">
+            <div class="inv-card-header">
+              <div class="inv-card-name">cached_eval_report</div>
+              <span class="skill-badge badge-blue">generated</span>
+            </div>
+            <div class="inv-card-desc">缓存的 Eval 报告（5 suites, N/A）</div>
+            <div class="inv-card-fields">
+              <div class="inv-field"><span class="inv-field-label">Path</span><code>mashang_workspace/eval/eval_report.json</code></div><div class="inv-field"><span class="inv-field-label">Files</span>5</div>
+            </div>
+          </div>
+
+          <div class="inv-card">
+            <div class="inv-card-header">
+              <div class="inv-card-name">regression_notes</div>
+              <span class="skill-badge badge-blue">generated</span>
+            </div>
+            <div class="inv-card-desc">Regression 测试文档。</div>
+            <div class="inv-card-fields">
+              <div class="inv-field"><span class="inv-field-label">Path</span><code>mashang_workspace/eval/regression_notes.md</code></div><div class="inv-field"><span class="inv-field-label">Files</span>0</div>
+            </div>
+          </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Recommended Workflow</h2>
+      <div class="wf-steps">
+          <div class="wf-step">1. 用户提出业务问题</div>
+          <div class="wf-step">2. Agent 根据 Skill 判断任务类型</div>
+          <div class="wf-step">3. Skill 调度对应 scripts</div>
+          <div class="wf-step">4. scripts 消费 data assets</div>
+          <div class="wf-step">5. outputs 沉淀报告 / JSON / Markdown / HTML</div>
+          <div class="wf-step">6. tests / eval 验证能力稳定性</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Notes</h2>
+      <ul class="note-list">
+        <li>JSON 为唯一事实源（Single Source of Truth），Markdown 与 HTML 从 JSON 渲染。</li>
+        <li>outputs/ 下的文件仅展示文件名、类型、大小和生成时间，不读取文件内容。</li>
+        <li>dataset/ 下的数据资产仅展示逻辑路径和元信息，不读取原始数据文件。</li>
+        <li>本 inventory 由脚本自动生成，对应脚本路径：mashang_workspace/utility_scripts/build_workspace_capability_inventory.py</li>
+      </ul>
+    </section>
+
+  </main>
+
+  <footer>
+    <img class="brand-sig" src="../../assets/brand/zihao_signature_transparent.png" alt="Raccoon Research" />
+    <div class="brand-sentence">用数据、AI 和一点点常识，研究复杂世界。</div>
+    <div style="font-size:11px;color:var(--zh-muted);margin-top:8px">mashang_workspace/outputs/reports/workspace_capability_inventory.html</div>
+  </footer>
+
+</body>
+</html>
