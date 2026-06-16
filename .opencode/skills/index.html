@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skills · mashang-service</title>
+<style>
+  :root {
+    --zh-blue: #174A7C;
+    --zh-deep-blue: #06213D;
+    --zh-cyan: #7ECDEB;
+    --zh-light-blue: #DDEFF8;
+    --zh-cream: #FFF9EF;
+    --zh-raccoon-gold: #D79A36;
+    --zh-brown: #7A4A24;
+    --zh-text: #1F2D3D;
+    --zh-muted: #6B7C8F;
+    --zh-card: #FFFFFF;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--zh-cream);
+    font-family: -apple-system, "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    color: var(--zh-text);
+    min-height: 100vh;
+    padding: 48px 24px;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(222, 239, 248, 0.4) 0%, transparent 60%),
+      radial-gradient(circle at 80% 70%, rgba(215, 154, 54, 0.06) 0%, transparent 50%);
+  }
+
+  .container {
+    max-width: 880px;
+    margin: 0 auto;
+  }
+
+  /* ===== Header ===== */
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 48px;
+    padding-bottom: 32px;
+    border-bottom: 2px dashed rgba(23, 74, 124, 0.12);
+  }
+
+  .raccoon-icon {
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(6, 33, 61, 0.08);
+  }
+
+  .raccoon-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .header-text h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--zh-deep-blue);
+    letter-spacing: 1px;
+  }
+
+  .header-text p {
+    font-size: 14px;
+    color: var(--zh-muted);
+    margin-top: 4px;
+    letter-spacing: 0.3px;
+  }
+
+  .header-text .brand-sentence {
+    font-size: 13px;
+    color: var(--zh-raccoon-gold);
+    margin-top: 6px;
+    font-style: italic;
+  }
+
+  /* ===== Section Title ===== */
+  .section-title {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .section-title h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--zh-blue);
+    letter-spacing: 0.5px;
+  }
+
+  .section-title .count {
+    font-size: 13px;
+    color: var(--zh-muted);
+    background: var(--zh-light-blue);
+    padding: 2px 10px;
+    border-radius: 12px;
+  }
+
+  /* ===== Skill Card ===== */
+  .skill-card {
+    background: var(--zh-card);
+    border-radius: 16px;
+    padding: 28px 32px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 12px rgba(6, 33, 61, 0.06);
+    border: 1px solid rgba(23, 74, 124, 0.06);
+    transition: box-shadow 0.2s, border-color 0.2s;
+    position: relative;
+  }
+
+  .skill-card:hover {
+    box-shadow: 0 4px 24px rgba(6, 33, 61, 0.10);
+    border-color: rgba(23, 74, 124, 0.15);
+  }
+
+  .skill-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    border-radius: 16px 0 0 16px;
+  }
+
+  .skill-card.builtin::before {
+    background: linear-gradient(to bottom, var(--zh-cyan), var(--zh-blue));
+  }
+
+  .skill-card.file-based::before {
+    background: linear-gradient(to bottom, var(--zh-raccoon-gold), var(--zh-brown));
+  }
+
+  .skill-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 12px;
+  }
+
+  .skill-name {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--zh-deep-blue);
+    letter-spacing: 0.3px;
+  }
+
+  .skill-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 12px;
+    border-radius: 20px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
+
+  .badge-builtin {
+    background: var(--zh-light-blue);
+    color: var(--zh-blue);
+  }
+
+  .badge-file {
+    background: rgba(215, 154, 54, 0.12);
+    color: var(--zh-brown);
+  }
+
+  .skill-desc {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--zh-text);
+    margin-bottom: 16px;
+  }
+
+  .skill-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .skill-tag {
+    font-size: 12px;
+    color: var(--zh-muted);
+    background: var(--zh-cream);
+    padding: 4px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(107, 124, 143, 0.12);
+  }
+
+  .skill-tag.cyan {
+    color: var(--zh-blue);
+    background: var(--zh-light-blue);
+    border-color: rgba(126, 205, 235, 0.25);
+  }
+
+  .skill-tag.gold {
+    color: var(--zh-brown);
+    background: rgba(215, 154, 54, 0.08);
+    border-color: rgba(215, 154, 54, 0.2);
+  }
+
+  .skill-path {
+    font-size: 12px;
+    color: var(--zh-muted);
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(107, 124, 143, 0.08);
+    font-family: "SF Mono", "Fira Code", monospace;
+    word-break: break-all;
+  }
+
+  .skill-path code {
+    background: var(--zh-cream);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+
+  .skill-path .label {
+    color: var(--zh-muted);
+    margin-right: 8px;
+  }
+
+  /* ===== Footer ===== */
+  .footer {
+    margin-top: 56px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(107, 124, 143, 0.10);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .footer .brand {
+    font-size: 13px;
+    color: var(--zh-muted);
+  }
+
+  .footer .brand mark {
+    background: none;
+    color: var(--zh-raccoon-gold);
+    font-weight: 600;
+  }
+
+  .footer .brand-sentence {
+    font-size: 12px;
+    color: var(--zh-muted);
+    opacity: 0.7;
+    font-style: italic;
+  }
+
+  /* ===== Responsive ===== */
+  @media (max-width: 600px) {
+    body { padding: 24px 16px; }
+    .header { flex-direction: column; text-align: center; }
+    .header-text h1 { font-size: 22px; }
+    .skill-card { padding: 20px; }
+    .skill-card-header { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="raccoon-icon">
+      <img src="raccoon_avatar.png" alt="Raccoon Avatar">
+    </div>
+    <div class="header-text">
+      <h1>Skills · mashang-service</h1>
+      <p>OpenCode 技能清单 · .opencode/skills/</p>
+      <div class="brand-sentence">用数据、AI 和一点点常识，研究复杂世界。</div>
+    </div>
+  </div>
+
+  <!-- Section -->
+  <div class="section-title">
+    <h2>已注册技能</h2>
+    <span class="count">2 个</span>
+  </div>
+
+  <!-- Card: customize-opencode -->
+  <div class="skill-card builtin">
+    <div class="skill-card-header">
+      <div class="skill-name">customize-opencode</div>
+      <span class="skill-badge badge-builtin">built-in</span>
+    </div>
+    <div class="skill-desc">
+      编辑 OpenCode 自身配置的专用技能。管理 <code>opencode.json</code>、<code>.opencode/</code>、<code>~/.config/opencode/</code> 下的 Agent 配置、Subagent、Skill、Plugin、MCP Server 以及权限规则。不适用于用户项目代码。
+    </div>
+    <div class="skill-meta">
+      <span class="skill-tag cyan">配置管理</span>
+      <span class="skill-tag cyan">Agent 编排</span>
+      <span class="skill-tag cyan">权限规则</span>
+      <span class="skill-tag cyan">MCP 集成</span>
+    </div>
+    <div class="skill-path">
+      <span class="label">来源</span>
+      <code>built-in · 内置于 OpenCode</code>
+    </div>
+  </div>
+
+  <!-- Card: official-document-render -->
+  <div class="skill-card file-based">
+    <div class="skill-card-header">
+      <div class="skill-name">official-document-render</div>
+      <span class="skill-badge badge-file">SKILL.md</span>
+    </div>
+    <div class="skill-desc">
+      将 Markdown 文档转换为正式通知、项目申报书、比赛材料、政府/机构申报附件风格的 <strong>Word</strong>、<strong>PDF</strong> 和 <strong>HTML</strong> 文件。采用 A4 排版：宋体正文、黑体标题、首行缩进、页码居中。克制、正式、不添加红头。
+    </div>
+    <div class="skill-meta">
+      <span class="skill-tag gold">文档渲染</span>
+      <span class="skill-tag gold">Word 导出</span>
+      <span class="skill-tag gold">PDF 生成</span>
+      <span class="skill-tag gold">正式排版</span>
+      <span class="skill-tag gold">申报材料</span>
+    </div>
+    <div class="skill-path">
+      <span class="label">路径</span>
+      <code>.opencode/skills/official_document_render/SKILL.md</code>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="brand">
+      <mark>zihao</mark> · mashang-service
+    </div>
+    <div class="brand-sentence">用数据、AI 和一点点常识，研究复杂世界。</div>
+  </div>
+
+</div>
+</body>
+</html>
