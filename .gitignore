@@ -36,3 +36,6 @@ mashang_workspace/scratch/
 
 # Service-level browser ingestion download directory
 dataset/incoming/feishu/
+
+# Monthly market report runtime outputs (regenerated on every run)
+mashang_workspace/outputs/monthly_market_report/
