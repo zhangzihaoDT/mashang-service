@@ -9,6 +9,7 @@ dependencies = []
 [tool.pytest.ini_options]
 testpaths = [
     "mashang_workspace/tests",
+    "tests",
 ]
 pythonpath = ["."]
 addopts = "-q"

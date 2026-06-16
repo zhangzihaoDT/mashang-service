@@ -15,6 +15,7 @@ mashang-service/                   # 总项目根目录
 ├── .env                           # 共享环境变量
 ├── .venv/                         # 共享虚拟环境
 ├── dataset/                       # 共享原始数据
+│   └── passenger_insurance/       #   └── 乘用车上险数据（6 张 Parquet + registry + quality）
 ├── requirements.txt               # 共享依赖
 │
 ├── mashang_runtime/             # Legacy runtime (frozen, packaged)
@@ -104,6 +105,56 @@ python mashang_workspace/eval/run_eval.py --suite parser  # 单套件
 | `python eval/run_followup_eval.py` | 追问 Runner | eval |
 | `python eval/run_numeric_eval.py` | 数值校验 | eval |
 | `pytest tests -q` | 全量测试 | test |
+
+## Passenger Insurance Data Asset / 乘用车上险数据资产
+
+### 资产定位
+
+passenger_insurance 是 **service 级共享数据资产**，不属于 workspace 私有数据。
+数据资产本体位于 `../dataset/passenger_insurance/`（项目根目录）。
+
+### 使用规则
+
+- workspace **不直接读取 raw_csv**
+- workspace **不复制 parquet** 到 workspace 内
+- workspace **不维护字段映射**
+- workspace 仅通过 shared loader 读取：
+
+```python
+from shared.loaders.passenger_insurance_loader import (
+    load_passenger_insurance_table,
+    load_passenger_insurance_registry,
+    list_passenger_insurance_tables,
+)
+```
+
+### 6 张可用表
+
+| Parquet | Grain | 用途 |
+|---------|-------|------|
+| `market_energy_monthly` | date_month, fuel_type_group, fuel_type | 市场总量、能源结构、新能源渗透率 |
+| `brand_monthly` | date_month, brand | 品牌排名、品牌份额、品牌价格重心 |
+| `model_monthly` | date_month, brand, model, sub_model, sub_model_id | 车型排名、车型趋势、品牌内部车型结构 |
+| `geo_monthly` | date_month, province, city, city_tier_group, fuel_type_group | 省市市场、城市线级、区域结构 |
+| `price_segment_monthly` | date_month, tp_bucket_5w, tp_bucket_10w, fuel_type_group, body_type, vehicle_level_group | 价格带市场、20-30 万、价格结构 |
+| `product_segment_monthly` | date_month, saic_segment, body_type, vehicle_level, vehicle_level_group, fuel_type_group, drive_type_group | 细分市场、车身结构、级别结构、驱动结构、尺寸重心 |
+
+### workspace 的职责
+
+**负责**：
+- 分析探索
+- 图表输出
+- 报告生成
+- 验证后为 runtimeV2 提供查询原型
+
+**不负责**：
+- 读取 Tableau raw_csv
+- 构建 Parquet
+- 修改 registry
+- 维护另一份 loader
+- 生成一张大宽表
+
+详见 `docs/passenger_insurance_usage.md`。
 
 ## 自然语言指令
 
