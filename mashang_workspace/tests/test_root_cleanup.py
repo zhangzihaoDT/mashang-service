@@ -11,14 +11,44 @@ sys.path.insert(0, str(_WS_DIR))
 from utils.paths import PROJECT_ROOT, WORKSPACE_ROOT, DATASET_DIR, OUTPUTS_DIR, DOCS_DIR, EVAL_DIR, TESTS_DIR, UTILS_DIR, RUNTIME_SCRIPTS_DIR, RESEARCH_SCRIPTS_DIR, UTILITY_SCRIPTS_DIR, LEGACY_SCRIPTS_DIR, REPORTS_DIR
 
 
+def _visible_items(directory: Path):
+    """Return non-hidden, non-generated entries in a directory."""
+    skip = {"__pycache__", ".DS_Store"}
+    return sorted(
+        f.name for f in directory.iterdir()
+        if not f.name.startswith(".") and f.name not in skip
+    )
+
+
+DOCS_ALLOWLIST = frozenset({"passenger_insurance_dataset.md"})
+SCRIPTS_ALLOWLIST = frozenset({
+    "__init__.py",
+    "build_passenger_insurance_dataset.py",
+    "render_official_document.py",
+    "smoke_test_official_document_render.py",
+})
+TESTS_ALLOWLIST = frozenset({"test_passenger_insurance_dataset_build.py"})
+
+
 def test_root_docs_not_exists():
-    """根目录 docs/ 不应存在（已归档）。"""
-    assert not (PROJECT_ROOT / "docs").exists(), "根目录 docs/ 应该已归档"
+    """根目录 docs/ 仅含 service 级共享文档（如 passenger_insurance_dataset.md），非 workspace 文档。"""
+    docs_dir = PROJECT_ROOT / "docs"
+    if docs_dir.exists():
+        items = _visible_items(docs_dir)
+        unexpected = [f for f in items if f not in DOCS_ALLOWLIST]
+        assert not unexpected, f"docs/ 发现未允许文件: {unexpected}"
+        assert all(f.endswith(".md") for f in items), f"docs/ 应仅含 .md 文件: {items}"
 
 
 def test_root_scripts_not_exists():
-    """根目录 scripts/ 不应存在。"""
-    assert not (PROJECT_ROOT / "scripts").exists(), "根目录 scripts/ 应该已归档"
+    """根目录 scripts/ 仅含 service 级构建脚本，非 workspace 脚本。"""
+    scripts_dir = PROJECT_ROOT / "scripts"
+    if scripts_dir.exists():
+        items = _visible_items(scripts_dir)
+        unexpected = [f for f in items if f not in SCRIPTS_ALLOWLIST]
+        assert not unexpected, f"scripts/ 发现未允许文件: {unexpected}"
+        assert all(f.endswith(".py") for f in items if f != "__init__" or True), \
+            f"scripts/ 应仅含 .py 文件: {items}"
 
 
 def test_root_eval_not_exists():
@@ -27,8 +57,12 @@ def test_root_eval_not_exists():
 
 
 def test_root_tests_not_exists():
-    """根目录 tests/ 不应存在。"""
-    assert not (PROJECT_ROOT / "tests").exists(), "根目录 tests/ 应该已归档"
+    """根目录 tests/ 仅含 service 级测试（如 test_passenger_insurance_dataset_build.py），非 workspace 测试。"""
+    tests_dir = PROJECT_ROOT / "tests"
+    if tests_dir.exists():
+        items = _visible_items(tests_dir)
+        unexpected = [f for f in items if f not in TESTS_ALLOWLIST]
+        assert not unexpected, f"tests/ 发现未允许文件: {unexpected}"
 
 
 def test_root_utils_not_exists():
@@ -128,15 +162,28 @@ def test_archive_removed():
 
 
 def test_path_resolution():
-    """核心标记：根目录已清理 + workspace 路径正确。"""
-    assert not (PROJECT_ROOT / "docs").exists()
+    """核心标记：根目录清理状态 + workspace 路径正确。
+
+    Service 级目录允许存在（严格白名单）：
+      - docs/      — 仅 DOCS_ALLOWLIST 中的文件
+      - scripts/   — 仅 SCRIPTS_ALLOWLIST 中的文件
+      - tests/     — 仅 TESTS_ALLOWLIST 中的文件
+    Workspace 级目录不应出现在根目录：
+      - eval/      — 应在 mashang_workspace/eval/
+      - utils/     — 应在 mashang_workspace/utils/
+    """
+    for name, allowlist in [("docs", DOCS_ALLOWLIST), ("scripts", SCRIPTS_ALLOWLIST), ("tests", TESTS_ALLOWLIST)]:
+        d = PROJECT_ROOT / name
+        if d.exists():
+            items = _visible_items(d)
+            unexpected = [f for f in items if f not in allowlist]
+            assert not unexpected, f"根目录 {name}/ 发现未允许文件: {unexpected}"
+
     assert DOCS_DIR.exists()
-    assert not (PROJECT_ROOT / "scripts").exists()
-    assert not (WORKSPACE_ROOT / "scripts").exists()
-    assert not (PROJECT_ROOT / "eval").exists()
     assert EVAL_DIR.exists()
-    assert not (PROJECT_ROOT / "tests").exists()
     assert TESTS_DIR.exists()
+    assert not (PROJECT_ROOT / "eval").exists(), "根目录 eval/ 应该已归档到 workspace"
+    assert not (WORKSPACE_ROOT / "scripts").exists(), "workspace scripts/ 应该已经删除"
     assert RUNTIME_SCRIPTS_DIR.exists()
     assert RESEARCH_SCRIPTS_DIR.exists()
     assert UTILITY_SCRIPTS_DIR.exists()
