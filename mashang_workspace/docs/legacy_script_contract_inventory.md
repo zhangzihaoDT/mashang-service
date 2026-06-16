@@ -9,7 +9,7 @@
 | `skills_atp_price.py` | ✅ | month, --output | Terminal + HTML | ❌ | order_data.parquet | 复用函数 |
 | `atp_price_report.py` | ✅ | month, --output | Terminal(基础) | ❌ | 同 | 重写为完整 Contract |
 | `lock_predict_backtest.py` | ✅ | 无参数 | Terminal + HTML | ❌ | assign_data.csv | subprocess 截取 |
-| `lock_predict_backtest_cli.py` | ✅ | --start-date/end-date | Terminal(基础) | ❌ | 同 | 重写为完整 Contract |
+| `lock_predict_backtest.py` | ✅ | --format | Terminal + JSON | ❌ | assign_data.csv | 已合并 <sup>†</sup> |
 
 ## 详情
 
@@ -45,15 +45,15 @@
 - **输出**: Terminal 摘要 + HTML 报告 (Plotly)
 - **Contract 状态**: ❌ 不支持
 
-### lock_predict_backtest_cli.py — 锁单预测回测 (当前 wrapper)
+### lock_predict_backtest.py — 锁单预测回测 (已合并)
 
-- **位置**: `mashang_workspace/scripts/lock_predict_backtest_cli.py`
-- **行数**: 66
-- **方式**: 委派调用 `lock_predict_backtest.main()`
-- **CLI**: `--start-date`, `--end-date`, `--format terminal/html`
-- **Contract 状态**: ❌ 不支持
+- **位置**: `mashang_workspace/research_scripts/lock_predict_backtest.py`
+- **行数**: 405
+- **方式**: 原生 Result Contract 支持，含 --format json/terminal
+- **CLI**: `--format`, `--output`
+- **Contract 状态**: ✅ 完整 Contract
 
-**升级方案**: 通过 subprocess 调用原脚本，从 stdout 正则提取 MAE/RMSE/MAPE/n_bt，构建 Result Contract。terminal 模式保持 legacy 输出。
+**注意**: `lock_predict_backtest_cli.py` 已合并至此文件，不再单独存在。
 
 ## 运行风险
 

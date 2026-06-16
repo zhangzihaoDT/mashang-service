@@ -1,0 +1,194 @@
+/* ============================================================
+   official_print.css — 正式材料排版样式
+   参考：正式通知/申报材料风格
+   版式：A4 / 宋体正文 / 黑体标题 / 白底黑字 / 克制正式
+   ============================================================ */
+
+@page {
+  size: A4;
+  margin: 25mm;
+  @bottom-center {
+    content: "—  " counter(page) "  —";
+    font-family: "Songti SC", "SimSun", STSong, "Noto Serif CJK SC", serif;
+    font-size: 10pt;
+    color: #333;
+  }
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Songti SC", "SimSun", STSong, "Noto Serif CJK SC", serif;
+  font-size: 12pt;
+  line-height: 1.8;
+  color: #1a1a1a;
+  background: #fff;
+  text-align: justify;
+  orphans: 2;
+  widows: 2;
+}
+
+/* ===== Title ===== */
+.doc-title {
+  font-family: "Heiti SC", "SimHei", "Microsoft YaHei", sans-serif;
+  font-size: 20pt;
+  font-weight: 700;
+  text-align: center;
+  margin: 48px 0 12px;
+  line-height: 1.4;
+}
+
+.info-block {
+  text-align: center;
+  margin: 0 0 44px;
+  font-size: 11pt;
+  color: #333;
+}
+.info-block p {
+  margin: 4px 0;
+  text-indent: 0;
+}
+
+/* ===== Section Headings ===== */
+h2.section {
+  font-family: "Heiti SC", "SimHei", "Microsoft YaHei", sans-serif;
+  font-size: 15pt;
+  font-weight: 700;
+  margin: 30px 0 14px;
+  padding-bottom: 4px;
+  line-height: 1.5;
+  page-break-after: avoid;
+}
+
+h3 {
+  font-family: "Heiti SC", "SimHei", "Microsoft YaHei", sans-serif;
+  font-size: 13pt;
+  font-weight: 600;
+  margin: 20px 0 10px;
+  line-height: 1.5;
+  page-break-after: avoid;
+}
+
+/* ===== Paragraphs ===== */
+p {
+  text-indent: 2em;
+  margin: 6px 0;
+}
+
+/* ===== Lists ===== */
+ul, ol {
+  margin: 6px 0 6px 2em;
+  padding-left: 0.5em;
+}
+
+li {
+  margin: 3px 0;
+}
+
+li p {
+  text-indent: 0;
+  margin: 0;
+}
+
+/* ===== Code ===== */
+pre {
+  font-family: "Menlo", "Courier New", monospace;
+  font-size: 9pt;
+  background: #f5f5f5;
+  padding: 10px 14px;
+  margin: 8px 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+code {
+  font-family: "Menlo", "Courier New", monospace;
+  font-size: 10pt;
+  background: #f5f5f5;
+  padding: 1px 4px;
+  border-radius: 2px;
+}
+
+/* ===== Tables ===== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+  font-size: 11pt;
+}
+
+th {
+  background: #f0f0f0;
+  font-family: "Heiti SC", "SimHei", sans-serif;
+  font-weight: 600;
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  text-align: left;
+}
+
+td {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+}
+
+tr:hover td {
+  background: #fafafa;
+}
+
+/* ===== Figures ===== */
+.figure {
+  text-align: center;
+  margin: 16px 0;
+}
+
+.figure img {
+  max-width: 90%;
+  height: auto;
+  border: 1px solid #ddd;
+}
+
+.fig-caption {
+  font-size: 10pt;
+  color: #555;
+  margin-top: 4px;
+}
+
+/* ===== Page Breaks ===== */
+.page-break {
+  page-break-before: always;
+}
+
+h2.section {
+  page-break-before: auto;
+}
+
+/* ===== Print ===== */
+@media print {
+  body {
+    font-size: 12pt;
+  }
+  a {
+    color: #1a1a1a;
+    text-decoration: none;
+  }
+}
+
+/* ===== Misc ===== */
+strong {
+  font-weight: 700;
+}
+
+blockquote {
+  margin: 10px 2em;
+  padding: 6px 14px;
+  border-left: 3px solid #ccc;
+  color: #555;
+  font-style: normal;
+}

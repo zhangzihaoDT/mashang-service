@@ -43,7 +43,7 @@ def test_research_scripts_has_scripts():
     files = {f.name for f in RESEARCH_SCRIPTS_DIR.iterdir() if f.suffix == ".py"}
     expected = {
         "cohort_forecast.py", "release_curve_analysis.py",
-        "lock_predict_backtest.py", "lock_predict_backtest_cli.py",
+        "lock_predict_backtest.py",
         "lock_release_curve.py", "quick_lock_ratio.py",
     }
     missing = expected - files

@@ -1,0 +1,339 @@
+{
+  "status": "success",
+  "script": "scripts/lock_city_distribution.py",
+  "command": "python runtime_scripts/lock_city_distribution.py --date 2026-06-14 --series LS8 --limit 20 --format json --output outputs/tables/",
+  "generated_at": "2026-06-15T14:16:07",
+  "scope": {
+    "data_source": "/Users/zihao_/Documents/github/mashang-service/dataset/order_data.parquet",
+    "time_window": {
+      "type": "date",
+      "date": "2026-06-14",
+      "start_date": "2026-06-14",
+      "end_date": "2026-06-14"
+    },
+    "filters": {
+      "series": "LS8",
+      "model": null,
+      "city": null
+    },
+    "metric_definition": "lock_count = COUNTD(order_number), grouped by license_city"
+  },
+  "result": {
+    "summary": "2026-06-14 锁单数 (按城市): 87",
+    "metrics": {
+      "total_lock_count": 87
+    },
+    "dimensions": [
+      {
+        "name": "license_city",
+        "items": [
+          {
+            "value": "成都市",
+            "metrics": {
+              "lock_count": 7,
+              "share": 0.0805
+            }
+          },
+          {
+            "value": "重庆市",
+            "metrics": {
+              "lock_count": 6,
+              "share": 0.069
+            }
+          },
+          {
+            "value": "北京市",
+            "metrics": {
+              "lock_count": 4,
+              "share": 0.046
+            }
+          },
+          {
+            "value": "宁波市",
+            "metrics": {
+              "lock_count": 3,
+              "share": 0.0345
+            }
+          },
+          {
+            "value": "苏州市",
+            "metrics": {
+              "lock_count": 3,
+              "share": 0.0345
+            }
+          },
+          {
+            "value": "上海市",
+            "metrics": {
+              "lock_count": 3,
+              "share": 0.0345
+            }
+          },
+          {
+            "value": "贵阳市",
+            "metrics": {
+              "lock_count": 3,
+              "share": 0.0345
+            }
+          },
+          {
+            "value": "太原市",
+            "metrics": {
+              "lock_count": 3,
+              "share": 0.0345
+            }
+          },
+          {
+            "value": "杭州市",
+            "metrics": {
+              "lock_count": 2,
+              "share": 0.023
+            }
+          },
+          {
+            "value": "福州市",
+            "metrics": {
+              "lock_count": 2,
+              "share": 0.023
+            }
+          },
+          {
+            "value": "绍兴市",
+            "metrics": {
+              "lock_count": 2,
+              "share": 0.023
+            }
+          },
+          {
+            "value": "广州市",
+            "metrics": {
+              "lock_count": 2,
+              "share": 0.023
+            }
+          },
+          {
+            "value": "宿迁市",
+            "metrics": {
+              "lock_count": 2,
+              "share": 0.023
+            }
+          },
+          {
+            "value": "宜昌市",
+            "metrics": {
+              "lock_count": 2,
+              "share": 0.023
+            }
+          },
+          {
+            "value": "济宁市",
+            "metrics": {
+              "lock_count": 2,
+              "share": 0.023
+            }
+          },
+          {
+            "value": "南京市",
+            "metrics": {
+              "lock_count": 2,
+              "share": 0.023
+            }
+          },
+          {
+            "value": "周口市",
+            "metrics": {
+              "lock_count": 2,
+              "share": 0.023
+            }
+          },
+          {
+            "value": "厦门市",
+            "metrics": {
+              "lock_count": 2,
+              "share": 0.023
+            }
+          },
+          {
+            "value": "兰州市",
+            "metrics": {
+              "lock_count": 2,
+              "share": 0.023
+            }
+          },
+          {
+            "value": "滨州市",
+            "metrics": {
+              "lock_count": 1,
+              "share": 0.0115
+            }
+          }
+        ]
+      }
+    ],
+    "tables": [
+      {
+        "name": "lock_by_city",
+        "columns": [
+          "license_city",
+          "lock_count",
+          "share"
+        ],
+        "rows": [
+          {
+            "license_city": "成都市",
+            "lock_count": 7,
+            "share": 0.0805
+          },
+          {
+            "license_city": "重庆市",
+            "lock_count": 6,
+            "share": 0.069
+          },
+          {
+            "license_city": "北京市",
+            "lock_count": 4,
+            "share": 0.046
+          },
+          {
+            "license_city": "宁波市",
+            "lock_count": 3,
+            "share": 0.0345
+          },
+          {
+            "license_city": "苏州市",
+            "lock_count": 3,
+            "share": 0.0345
+          },
+          {
+            "license_city": "上海市",
+            "lock_count": 3,
+            "share": 0.0345
+          },
+          {
+            "license_city": "贵阳市",
+            "lock_count": 3,
+            "share": 0.0345
+          },
+          {
+            "license_city": "太原市",
+            "lock_count": 3,
+            "share": 0.0345
+          },
+          {
+            "license_city": "杭州市",
+            "lock_count": 2,
+            "share": 0.023
+          },
+          {
+            "license_city": "福州市",
+            "lock_count": 2,
+            "share": 0.023
+          },
+          {
+            "license_city": "绍兴市",
+            "lock_count": 2,
+            "share": 0.023
+          },
+          {
+            "license_city": "广州市",
+            "lock_count": 2,
+            "share": 0.023
+          },
+          {
+            "license_city": "宿迁市",
+            "lock_count": 2,
+            "share": 0.023
+          },
+          {
+            "license_city": "宜昌市",
+            "lock_count": 2,
+            "share": 0.023
+          },
+          {
+            "license_city": "济宁市",
+            "lock_count": 2,
+            "share": 0.023
+          },
+          {
+            "license_city": "南京市",
+            "lock_count": 2,
+            "share": 0.023
+          },
+          {
+            "license_city": "周口市",
+            "lock_count": 2,
+            "share": 0.023
+          },
+          {
+            "license_city": "厦门市",
+            "lock_count": 2,
+            "share": 0.023
+          },
+          {
+            "license_city": "兰州市",
+            "lock_count": 2,
+            "share": 0.023
+          },
+          {
+            "license_city": "滨州市",
+            "lock_count": 1,
+            "share": 0.0115
+          }
+        ]
+      }
+    ]
+  },
+  "artifacts": {},
+  "followup_context": {
+    "metric": "lock_count",
+    "group_by": "license_city",
+    "available_dimensions": [
+      "series",
+      "product_name",
+      "license_city",
+      "store_city",
+      "parent_region_name"
+    ],
+    "top_entities": [
+      {
+        "field": "license_city",
+        "value": "成都市",
+        "metrics": {
+          "lock_count": 7
+        }
+      },
+      {
+        "field": "license_city",
+        "value": "重庆市",
+        "metrics": {
+          "lock_count": 6
+        }
+      },
+      {
+        "field": "license_city",
+        "value": "北京市",
+        "metrics": {
+          "lock_count": 4
+        }
+      },
+      {
+        "field": "license_city",
+        "value": "宁波市",
+        "metrics": {
+          "lock_count": 3
+        }
+      },
+      {
+        "field": "license_city",
+        "value": "苏州市",
+        "metrics": {
+          "lock_count": 3
+        }
+      }
+    ],
+    "date": "2026-06-14",
+    "series": "LS8"
+  },
+  "warnings": [],
+  "errors": []
+}

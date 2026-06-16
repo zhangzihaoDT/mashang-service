@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LS8 锁单城市分布经营分析报告 — 2026-06-14</title>
+  <link rel="stylesheet" href="../../templates/report_style.css" />
+  <style>
+    .hero { padding: 32px 0 24px; }
+    .hero h1 { font-size: 28px; }
+    .section-tag { font-size: 12px; color: var(--zh-muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+    .insight-callout { background: var(--zh-light-blue); border-left: 4px solid var(--zh-blue); padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+    .insight-callout p { margin: 0; font-size: 14px; }
+    .city-top3 { display: flex; gap: 16px; margin-bottom: 24px; }
+    .city-pod { flex: 1; background: var(--zh-card); border-radius: 12px; padding: 20px; box-shadow: 0 1px 4px rgba(6,33,61,0.06); text-align: center; }
+    .city-pod .rank { font-size: 12px; font-weight: 600; color: var(--zh-muted); margin-bottom: 4px; }
+    .city-pod .city-name { font-size: 16px; font-weight: 600; color: var(--zh-deep-blue); }
+    .city-pod .city-count { font-size: 32px; font-weight: 700; color: var(--zh-blue); margin: 8px 0; }
+    .city-pod .city-share { font-size: 13px; color: var(--zh-muted); }
+    .city-pod.gold { border: 1.5px solid var(--zh-raccoon-gold); }
+    .city-pod.gold .city-count { color: var(--zh-raccoon-gold); }
+    .city-pod.blue { border: 1.5px solid var(--zh-cyan); }
+    .city-pod.blue .city-count { color: var(--zh-blue); }
+    .chart-bar { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
+    .chart-bar-label { width: 80px; font-size: 13px; text-align: right; color: var(--zh-text); white-space: nowrap; }
+    .chart-bar-track { flex: 1; height: 20px; background: var(--zh-light-blue); border-radius: 4px; overflow: hidden; }
+    .chart-bar-fill { height: 100%; background: linear-gradient(to right, var(--zh-cyan), var(--zh-blue)); border-radius: 4px; transition: width 0.3s; }
+    .chart-bar-value { width: 50px; font-size: 13px; color: var(--zh-muted); }
+    .dual-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .observation-list { list-style: none; padding: 0; }
+    .observation-list li { padding: 8px 0; border-bottom: 1px solid var(--zh-light-blue); font-size: 14px; }
+    .observation-list li:last-child { border-bottom: none; }
+    .observation-list .num { display: inline-block; width: 24px; height: 24px; line-height: 24px; text-align: center; background: var(--zh-light-blue); color: var(--zh-blue); border-radius: 50%; font-size: 12px; font-weight: 600; margin-right: 10px; }
+    @media (max-width: 768px) { .city-top3, .dual-col { grid-template-columns: 1fr; flex-direction: column; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="brand">
+        <img class="brand-avatar" src="../../assets/brand/raccoon_avatar_light.png" alt="" />
+        <span class="brand-name">mashang</span>
+      </div>
+      <span class="header-meta">LS8 城市分布 | 2026-06-14</span>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <div class="section-tag">Business Intelligence Report</div>
+      <h1>LS8 锁单城市分布 · 经营分析报告</h1>
+      <p>数据日期：2026-06-14（周日）</p>
+    </section>
+
+    <section class="kpi-grid">
+      <div class="kpi-card">
+        <div class="label">LS8 总锁单数</div>
+        <div class="value">87</div>
+        <div class="change neutral">2026-06-14 周日</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">覆盖城市数</div>
+        <div class="value">47+</div>
+        <div class="change neutral">全国广泛分布</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">TOP1 城市</div>
+        <div class="value">成都</div>
+        <div class="change neutral">7 单 · 占 8.0%</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">TOP3 集中度</div>
+        <div class="value">19.5%</div>
+        <div class="change neutral">成都/重庆/北京</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>TOP3 城市概览</h2>
+      <div class="city-top3">
+        <div class="city-pod gold">
+          <div class="rank">#1</div>
+          <div class="city-name">成都市</div>
+          <div class="city-count">7</div>
+          <div class="city-share">占比 8.0%</div>
+        </div>
+        <div class="city-pod blue">
+          <div class="rank">#2</div>
+          <div class="city-name">重庆市</div>
+          <div class="city-count">6</div>
+          <div class="city-share">占比 6.9%</div>
+        </div>
+        <div class="city-pod">
+          <div class="rank">#3</div>
+          <div class="city-name">北京市</div>
+          <div class="city-count">4</div>
+          <div class="city-share">占比 4.6%</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>城市分布明细</h2>
+      <div class="table-wrap"><table class="data-table">
+        <thead>
+          <tr><th>排名</th><th>城市</th><th>锁单数</th><th>占比</th><th>累计占比</th></tr>
+        </thead>
+        <tbody>
+          <tr class="row-highlight"><td>1</td><td>成都市</td><td>7</td><td>8.0%</td><td>8.0%</td></tr>
+          <tr class="row-highlight"><td>2</td><td>重庆市</td><td>6</td><td>6.9%</td><td>14.9%</td></tr>
+          <tr class="row-highlight"><td>3</td><td>北京市</td><td>4</td><td>4.6%</td><td>19.5%</td></tr>
+          <tr><td>4</td><td>宁波市</td><td>3</td><td>3.4%</td><td>23.0%</td></tr>
+          <tr><td>5</td><td>苏州市</td><td>3</td><td>3.4%</td><td>26.4%</td></tr>
+          <tr><td>6</td><td>上海市</td><td>3</td><td>3.4%</td><td>29.9%</td></tr>
+          <tr><td>7</td><td>贵阳市</td><td>3</td><td>3.4%</td><td>33.3%</td></tr>
+          <tr><td>8</td><td>太原市</td><td>3</td><td>3.4%</td><td>36.8%</td></tr>
+          <tr><td>9</td><td>杭州市</td><td>2</td><td>2.3%</td><td>39.1%</td></tr>
+          <tr><td>10</td><td>福州市</td><td>2</td><td>2.3%</td><td>41.4%</td></tr>
+          <tr><td>11</td><td>绍兴市</td><td>2</td><td>2.3%</td><td>43.7%</td></tr>
+          <tr><td>12</td><td>广州市</td><td>2</td><td>2.3%</td><td>46.0%</td></tr>
+          <tr><td>13</td><td>宿迁市</td><td>2</td><td>2.3%</td><td>48.3%</td></tr>
+          <tr><td>14</td><td>宜昌市</td><td>2</td><td>2.3%</td><td>50.6%</td></tr>
+          <tr><td>15</td><td>济宁市</td><td>2</td><td>2.3%</td><td>52.9%</td></tr>
+          <tr><td>16</td><td>南京市</td><td>2</td><td>2.3%</td><td>55.2%</td></tr>
+          <tr><td>17</td><td>周口市</td><td>2</td><td>2.3%</td><td>57.5%</td></tr>
+          <tr><td>18</td><td>厦门市</td><td>2</td><td>2.3%</td><td>59.8%</td></tr>
+          <tr><td>19</td><td>兰州市</td><td>2</td><td>2.3%</td><td>62.1%</td></tr>
+          <tr><td colspan="2">其他城市（28+ 城市各 1 单）</td><td>28+</td><td>37.9%</td><td>100%</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <div class="dual-col">
+      <section class="card">
+        <h2>集中度分析</h2>
+        <div class="chart-bar">
+          <span class="chart-bar-label">TOP1 成都</span>
+          <div class="chart-bar-track"><div class="chart-bar-fill" style="width:8%"></div></div>
+          <span class="chart-bar-value">8.0%</span>
+        </div>
+        <div class="chart-bar">
+          <span class="chart-bar-label">TOP3</span>
+          <div class="chart-bar-track"><div class="chart-bar-fill" style="width:19.5%"></div></div>
+          <span class="chart-bar-value">19.5%</span>
+        </div>
+        <div class="chart-bar">
+          <span class="chart-bar-label">TOP10</span>
+          <div class="chart-bar-track"><div class="chart-bar-fill" style="width:41.4%"></div></div>
+          <span class="chart-bar-value">41.4%</span>
+        </div>
+        <div class="chart-bar">
+          <span class="chart-bar-label">TOP20</span>
+          <div class="chart-bar-track"><div class="chart-bar-fill" style="width:62.1%"></div></div>
+          <span class="chart-bar-value">62.1%</span>
+        </div>
+        <div class="insight-callout" style="margin-top:16px">
+          <p><strong>特征：</strong>LS8 城市分布较为分散，TOP3 集中度仅 19.5%，说明 LS8 在全国多个城市均有需求，不存在单一城市过度依赖。但头部城市（成都、重庆）可加大运营力度。</p>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>经营观察</h2>
+        <ol class="observation-list">
+          <li><span class="num">1</span><strong>西南双核驱动</strong> — 成都（7 单）+ 重庆（6 单）合计占 14.9%，西南市场对 LS8 接受度高，建议维持资源倾斜。</li>
+          <li><span class="num">2</span><strong>一线城市表现平稳</strong> — 北京（4 单）、上海（3 单）、广州（2 单）合计 9 单，一线城市总量占比约 10%，仍有提升空间。</li>
+          <li><span class="num">3</span><strong>多点开花格局</strong> — 47+ 城市产生锁单，单城市均产约 1.85 单，说明 LS8 的全国覆盖广度较好，但深度不足。</li>
+          <li><span class="num">4</span><strong>中腰部城市潜力</strong> — 宁波、苏州、贵阳、太原分别贡献 3 单，这些城市有潜力通过区域运营升级为第二梯队。</li>
+          <li><span class="num">5</span><strong>周日数据特征</strong> — 6 月 14 日为周日，锁单量受假期因素影响，建议结合工作日数据综合判断趋势。</li>
+        </ol>
+      </section>
+    </div>
+
+    <section class="card">
+      <h2>BI 建议</h2>
+      <div class="insight-grid" style="grid-template-columns:1fr;gap:12px">
+        <div class="insight-card">
+          <div class="insight-num">1</div>
+          <div class="insight-content">
+            <h3>成都 · 重庆 深化运营</h3>
+            <p>西南双城贡献近 15% 锁单，建议加大试驾体验活动投放，针对已锁单客户挖掘转介绍机会。</p>
+          </div>
+        </div>
+        <div class="insight-card">
+          <div class="insight-num">2</div>
+          <div class="insight-content">
+            <h3>一线城市渗透提升</h3>
+            <p>北上广合计仅 9 单，在一线城市的新能源渗透率大背景下，LS8 存在明显增长空间，建议排查门店覆盖与营销力度。</p>
+          </div>
+        </div>
+        <div class="insight-card">
+          <div class="insight-num">3</div>
+          <div class="insight-content">
+            <h3>中腰部城市精准运营</h3>
+            <p>宁波、苏州、贵阳、太原（各 3 单），以及杭州、福州、绍兴等（各 2 单），可制定针对性区域策略，推动向 TOP 梯队跃迁。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>数据信息</h2>
+      <table class="data-table scope-table">
+        <tbody>
+          <tr><td class="scope-label"><strong>数据源</strong></td><td>dataset/order_data.parquet</td></tr>
+          <tr><td class="scope-label"><strong>时间</strong></td><td>2026-06-14（周日）</td></tr>
+          <tr><td class="scope-label"><strong>筛选条件</strong></td><td>series = LS8</td></tr>
+          <tr><td class="scope-label"><strong>口径</strong></td><td>lock_count = COUNTD(order_number)，按 license_city 分组</td></tr>
+          <tr><td class="scope-label"><strong>生成脚本</strong></td><td>runtime_scripts/lock_city_distribution.py</td></tr>
+          <tr><td class="scope-label"><strong>生成时间</strong></td><td>2026-06-15T14:15:02</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+  </main>
+
+  <footer>
+    <img class="brand-sig" src="../../assets/brand/zihao_signature_transparent.png" alt="Raccoon Research" />
+    <div class="brand-sentence">用数据、AI 和一点点常识，研究复杂世界。</div>
+  </footer>
+</body>
+</html>

@@ -71,8 +71,8 @@
   {
     "case_id": "numeric_lock_predict_backtest_007",
     "tier": "research",
-    "description": "lock_predict_backtest_cli.py 回测基本校验",
-    "command": "python mashang_workspace/research_scripts/lock_predict_backtest_cli.py --format json",
+    "description": "lock_predict_backtest.py 回测基本校验",
+    "command": "python mashang_workspace/research_scripts/lock_predict_backtest.py --format json",
     "expected": {
       "status": ["success", "partial_success"],
       "required_fields": ["scope", "result", "followup_context"],

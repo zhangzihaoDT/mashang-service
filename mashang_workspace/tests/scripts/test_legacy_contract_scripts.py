@@ -1,5 +1,5 @@
 """
-Tests for legacy contract scripts: atp_price_report.py, lock_predict_backtest_cli.py
+Tests for legacy contract scripts: atp_price_report.py, lock_predict_backtest.py
 """
 
 import subprocess, sys, json
@@ -14,7 +14,7 @@ def _resolve_script(script_name: str) -> Path:
     # Map script names to their tier directories
     tier_map = {
         "atp_price_report.py": RUNTIME_DIR,
-        "lock_predict_backtest_cli.py": RESEARCH_DIR,
+        "lock_predict_backtest.py": RESEARCH_DIR,
     }
     return tier_map.get(script_name, RUNTIME_DIR) / script_name
 
@@ -39,8 +39,8 @@ def test_atp_report_help():
     assert "ATP" in r.stdout
 
 
-def test_backtest_cli_help():
-    r = _run_help("lock_predict_backtest_cli.py")
+def test_backtest_help():
+    r = _run_help("lock_predict_backtest.py")
     assert r.returncode == 0
     assert "回测" in r.stdout or "Cohort" in r.stdout
 
@@ -64,15 +64,15 @@ def test_atp_report_contract_fields():
     assert "vehicle_count" in data.get("result", {}).get("metrics", {})
 
 
-def test_backtest_cli_json():
-    r = _run_json("lock_predict_backtest_cli.py")
+def test_backtest_json():
+    r = _run_json("lock_predict_backtest.py")
     assert r.returncode == 0
     data = json.loads(r.stdout)
     assert data["status"] in ("success", "partial_success")
 
 
-def test_backtest_cli_contract_fields():
-    r = _run_json("lock_predict_backtest_cli.py")
+def test_backtest_contract_fields():
+    r = _run_json("lock_predict_backtest.py")
     data = json.loads(r.stdout)
     for field in ("status", "script", "scope", "result", "followup_context", "warnings", "errors"):
         assert field in data, f"missing required field: {field}"
@@ -84,7 +84,7 @@ def test_contract_gate_includes_new():
     runner_path = _WS_DIR / "eval" / "run_eval.py"
     src = runner_path.read_text()
     assert "atp_price_report.py" in src
-    assert "lock_predict_backtest_cli.py" in src
+    assert "lock_predict_backtest.py" in src
 
 
 def test_numeric_cases_includes_new():
@@ -94,3 +94,4 @@ def test_numeric_cases_includes_new():
     ids = [c["case_id"] for c in cases]
     assert "numeric_atp_price_006" in ids
     assert "numeric_lock_predict_backtest_007" in ids
+

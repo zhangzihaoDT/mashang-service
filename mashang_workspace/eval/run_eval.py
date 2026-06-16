@@ -37,7 +37,7 @@ CORE_CONTRACT_SCRIPTS = [
 # Research tier: 需要用户明确要求才调用的脚本
 RESEARCH_CONTRACT_SCRIPTS = [
     "mashang_workspace/research_scripts/cohort_forecast.py --start-date 2026-06-01 --end-date 2026-06-10 --format json",
-    "mashang_workspace/research_scripts/lock_predict_backtest_cli.py --format json",
+    "mashang_workspace/research_scripts/lock_predict_backtest.py --format json",
 ]
 
 CONTRACT_REQUIRED_FIELDS = ["status", "script", "scope", "result", "followup_context", "warnings", "errors"]

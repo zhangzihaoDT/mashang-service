@@ -198,7 +198,7 @@
     "name": "锁单预测回测",
     "tier": "research",
     "status": "active",
-    "script": "mashang_workspace/research_scripts/lock_predict_backtest_cli.py",
+    "script": "mashang_workspace/research_scripts/lock_predict_backtest.py",
     "auto_schedulable": false,
     "result_contract": true,
     "numeric_eval_case": "numeric_lock_predict_backtest_007",

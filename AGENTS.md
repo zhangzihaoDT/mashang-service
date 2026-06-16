@@ -311,7 +311,7 @@ mashang-service/
 | ATP 月报 | `python mashang_workspace/runtime_scripts/atp_price_report.py 2026-05` | runtime |
 | 释放曲线 | `python mashang_workspace/research_scripts/release_curve_analysis.py` | research |
 | 预测锁单 | `python mashang_workspace/research_scripts/cohort_forecast.py` | research |
-| 回测 | `python mashang_workspace/research_scripts/lock_predict_backtest_cli.py` | research |
+| 回测 | `python mashang_workspace/research_scripts/lock_predict_backtest.py` | research |
 | 同比分析 | `python mashang_workspace/research_scripts/quick_lock_ratio.py` | research |
 | VOC 分析 | `python mashang_workspace/utility_scripts/voc_theme_analysis.py` | utility |
 | 数据字典 | `python mashang_workspace/utility_scripts/data_dictionary.py` | utility |

@@ -39,7 +39,7 @@ mashang_workspace/
 | 脚本 | 说明 | CLI | Result Contract | Make target |
 |------|------|:---:|:---------------:|-------------|
 | `cohort_forecast.py` | 预测锁单 | `--start-date --end-date --format` | ✅ (partial) | — |
-| `lock_predict_backtest_cli.py` | 回测验证 | `--start-date --end-date --format` | ✅ (partial) | `make backtest-demo` |
+| `lock_predict_backtest.py` | 回测验证 | `--format` | ✅ | `make backtest-demo` |
 | `lock_predict_backtest.py` | 回测原脚本 | — | ❌ | — |
 | `lock_release_curve.py` | 释放曲线核心 | — | ❌ | — |
 | `release_curve_analysis.py` | 释放曲线报告 | `--output --format` | ❌ (wrapper) | — |

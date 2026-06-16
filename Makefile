@@ -1,5 +1,5 @@
 PYTHON ?= .venv/bin/python
-.PHONY: eval full-eval core-eval research-eval capability-audit test ci data-dict lock-demo parser-demo followup-demo numeric-eval reference-eval atp-demo backtest-demo clean-outputs dataset-update dataset-validate daily-observation-dry-run daily-observation-sync daily-data-pipeline-dry-run daily-data-pipeline
+.PHONY: eval full-eval core-eval research-eval capability-audit test ci data-dict lock-demo parser-demo followup-demo numeric-eval reference-eval atp-demo backtest-demo clean-outputs dataset-update dataset-validate daily-observation-dry-run daily-observation-sync daily-data-pipeline-dry-run daily-data-pipeline render-official-doc render-official-doc-smoke
 
 ## 默认 Eval（core + parser + followup + reference，不含 research）
 eval:
@@ -65,7 +65,7 @@ atp-demo:
 
 ## 锁单预测回测 Demo
 backtest-demo:
-	$(PYTHON) mashang_workspace/research_scripts/lock_predict_backtest_cli.py --format json
+	$(PYTHON) mashang_workspace/research_scripts/lock_predict_backtest.py --format json
 
 ## Capability Audit
 capability-audit:
@@ -131,6 +131,18 @@ daily-sync-dry-run:
 ## ─── ──────────────────────────────────────────────────────────────
 
 ## 清理输出文件
+# # 正式材料排版渲染（Markdown → HTML/PDF/DOCX）
+# 用法: make render-official-doc INPUT=path/to/doc.md BASENAME=输出文件名
+render-official-doc:
+	$(PYTHON) scripts/render_official_document.py \
+		--input "$(INPUT)" \
+		--basename "$(BASENAME)" \
+		--formats html,pdf,docx
+
+# 正式材料排版渲染 Smoke Test
+render-official-doc-smoke:
+	$(PYTHON) scripts/smoke_test_official_document_render.py
+
 clean-outputs:
 	find mashang_workspace/outputs -type f ! -name "README.md" -delete
 
@@ -174,6 +186,10 @@ help:
 	@echo "make daily-data-pipeline-dry-run  管道 dry-run（安全预检）"
 	@echo "make daily-data-pipeline      完整管道（含写操作）"
 	@echo "make daily-sync-dry-run       [DEPRECATED]"
+	@echo ""
+	@echo "=== Render ==="
+	@echo "make render-official-doc       正式材料排版渲染（Markdown→PDF/HTML/DOCX）"
+	@echo "make render-official-doc-smoke 正式材料排版渲染 Smoke Test"
 	@echo ""
 	@echo "=== Utility ==="
 	@echo "make clean-outputs     清理输出文件"

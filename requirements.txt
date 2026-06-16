@@ -21,3 +21,4 @@ pandas
 pyarrow
 plotly
 statsmodels
+jinja2

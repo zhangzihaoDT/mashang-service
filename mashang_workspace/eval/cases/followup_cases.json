@@ -165,5 +165,48 @@
         }
       }
     ]
+  },
+  {
+    "case_id": "followup_ls8_four_round_001",
+    "description": "4 轮连续追问：分车型→LS8城市分布→异常城市识别→日报结论生成",
+    "turns": [
+      {
+        "user": "昨天锁单数分车型",
+        "expected_context": {
+          "metric": "lock_count",
+          "time_window": "yesterday",
+          "group_by": "model"
+        }
+      },
+      {
+        "user": "那 LS8 的城市分布呢？",
+        "expected_context": {
+          "metric": "lock_count",
+          "time_window": "yesterday",
+          "series": "LS8",
+          "group_by": "city"
+        }
+      },
+      {
+        "user": "哪些城市相比近 7 日均值下降明显？",
+        "expected_context": {
+          "metric": "lock_count",
+          "time_window": "yesterday",
+          "series": "LS8",
+          "group_by": "city",
+          "analysis_type": "compare"
+        }
+      },
+      {
+        "user": "生成一段可以放进日报的结论",
+        "expected_context": {
+          "metric": "lock_count",
+          "time_window": "yesterday",
+          "series": "LS8",
+          "group_by": "city",
+          "analysis_type": "summary"
+        }
+      }
+    ]
   }
 ]
