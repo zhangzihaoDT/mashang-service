@@ -98,7 +98,7 @@ python mashang_workspace/eval/run_eval.py --suite parser  # 单套件
 | `python runtime_scripts/lock_city_distribution.py` | 城市分布 | runtime |
 | `python research_scripts/release_curve_analysis.py` | 释放曲线 | research |
 | `python research_scripts/cohort_forecast.py` | 预测锁单 | research |
-| `python research_scripts/auto_launch_monitor.py --start YYYY-MM-DD --end YYYY-MM-DD` | 新车事件监测（上市/预售/发布会/亮相/交付等产品投放事件） | research |
+| `python research_scripts/auto_launch_monitor.py --start YYYY-MM-DD --end YYYY-MM-DD [--brands ...] [--event-types ...] [--source-types ...]` | 新车事件监测：支持按品牌、事件类型、来源类型、关键词过滤，输出可追溯的新车投放事件报告 | research |
 | `python utility_scripts/voc_theme_analysis.py` | VOC 分析 | utility |
 | `python utility_scripts/data_dictionary.py` | 数据字典 | utility |
 | `python utility_scripts/skills_order_observation_daily.py` | 每日数据观察(DataOps) | utility |

@@ -313,7 +313,7 @@ mashang-service/
 | 预测锁单 | `python mashang_workspace/research_scripts/cohort_forecast.py` | research |
 | 回测 | `python mashang_workspace/research_scripts/lock_predict_backtest.py` | research |
 | 同比分析 | `python mashang_workspace/research_scripts/quick_lock_ratio.py` | research |
-| 新车事件监测 | `python mashang_workspace/research_scripts/auto_launch_monitor.py --start 2026-06-05 --end 2026-06-07` | research |
+| 新车事件监测 | `python mashang_workspace/research_scripts/auto_launch_monitor.py --start 2026-06-05 --end 2026-06-07 --brands "智己,理想"` | research |
 | VOC 分析 | `python mashang_workspace/utility_scripts/voc_theme_analysis.py` | utility |
 | 数据字典 | `python mashang_workspace/utility_scripts/data_dictionary.py` | utility |
 | 每日观察 | `python mashang_workspace/utility_scripts/skills_order_observation_daily.py` | utility |
