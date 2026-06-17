@@ -1,5 +1,5 @@
 """
-Smoke test: auto_launch_monitor.py v0.4
+Smoke test: auto_launch_monitor.py v0.4.1
 
 验证:
 1. load_watch_targets 读取、校验、aliases 拆分
@@ -10,7 +10,11 @@ Smoke test: auto_launch_monitor.py v0.4
 6. target 聚合逻辑
 7. Markdown 包含命中概览 / 未命中 / filters 摘要
 8. v0.3 兼容：不传 --targets-file 时原有逻辑不变
-9. 原有 14 个测试保持
+9. 13 个原有测试保持
+10. Firecrawl 失败不抛出异常
+11. retry 后成功不记失败
+12. diagnostics 出现在 markdown 中
+13. chejiahao.autohome.com.cn 分类为 social_media
 """
 
 import json
@@ -422,3 +426,115 @@ def test_help_contains_required_args():
     result = _run(["--help"])
     for arg in ("--start", "--end", "--targets-file", "--brands", "--event-types", "--source-types"):
         assert arg in result.stdout or arg in result.stderr
+
+
+# ─── v0.4.1: Firecrawl failure tolerance ──────────────────────────
+
+def test_scrape_url_with_retry_failure_does_not_raise():
+    """模拟 scrape 失败，不抛出异常到主流程。"""
+    code = rf"""
+import sys
+sys.path.insert(0, r"{_SCRIPT_DIR}")
+from auto_launch_monitor import scrape_url_with_retry
+
+class MockApp:
+    def scrape_url(self, url, **kw):
+        raise RuntimeError("mock tunnel failed")
+
+result = scrape_url_with_retry(MockApp(), "https://example.com/fail", max_retries=1)
+assert result["success"] is False
+assert "error" in result
+print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+def test_scrape_url_retry_succeeds_on_second_try():
+    """模拟第一次失败、第二次成功，最终记成功。"""
+    code = rf"""
+import sys
+sys.path.insert(0, r"{_SCRIPT_DIR}")
+from auto_launch_monitor import scrape_url_with_retry
+
+class _Resp:
+    markdown = "hello"
+    metadata = type("M", (), {{"title": "ok", "ogTitle": ""}})()
+
+class MockApp:
+    def __init__(self):
+        self.call_count = 0
+    def scrape_url(self, url, **kw):
+        self.call_count += 1
+        if self.call_count == 1:
+            raise RuntimeError("first fail")
+        return _Resp()
+
+result = scrape_url_with_retry(MockApp(), "https://example.com/retry", max_retries=2)
+assert result["success"] is True
+assert result["markdown"] == "hello"
+print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+def test_diagnostics_in_markdown():
+    """markdown 输出应包含监测质量诊断和计数器。"""
+    code = rf"""
+import sys
+sys.path.insert(0, r"{_SCRIPT_DIR}")
+from auto_launch_monitor import format_markdown, build_event_summary, MonitorFilters, CrawlDiagnostics
+
+events = []
+summary = build_event_summary(events, "新车发布会")
+filters = MonitorFilters()
+diag = CrawlDiagnostics(generated_query_count=17, dedup_url_count=701,
+                         planned_crawl_count=50, crawled_page_count=45, failed_crawl_count=5,
+                         failed_urls=[{{"url":"https://a.com","error":"timeout"}}])
+
+md = format_markdown(events, summary, "2026-06-05", "2026-06-07", "新车发布会",
+                      filters, diagnostics=diag)
+assert "监测质量诊断" in md
+assert "generated_query_count" in md
+assert "failed_crawl_count" in md
+assert "5" in md
+assert "需复核抓取覆盖度" in md
+print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+def test_chejiahao_classified_as_social_media():
+    """chejiahao.autohome.com.cn 应分类为 social_media。"""
+    code = rf"""
+import sys
+sys.path.insert(0, r"{_SCRIPT_DIR}")
+from auto_launch_monitor import classify_domain, map_source_type
+
+raw = classify_domain("https://chejiahao.autohome.com.cn/info/123")
+assert raw == "social", f"got {{raw}}"
+st = map_source_type(raw)
+assert st == "social_media", f"got {{st}}"
+print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+def test_autohome_main_station_is_mainstream():
+    """autohome.com.cn 主站应保持 mainstream_media。"""
+    code = rf"""
+import sys
+sys.path.insert(0, r"{_SCRIPT_DIR}")
+from auto_launch_monitor import classify_domain, map_source_type
+
+raw = classify_domain("https://www.autohome.com.cn/news/202606/123.html")
+assert raw == "mainstream", f"got {{raw}}"
+st = map_source_type(raw)
+assert st == "mainstream_media", f"got {{st}}"
+print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"

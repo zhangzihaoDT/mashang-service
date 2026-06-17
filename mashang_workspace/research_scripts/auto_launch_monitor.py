@@ -86,6 +86,7 @@ SOURCE_TYPE_MAP = {
     "official": "official",
     "mainstream": "mainstream_media",
     "industry_media": "industry_media",
+    "social": "social_media",
     "social_media": "social_media",
     "forum": "forum",
     "low": "social_media",
@@ -115,6 +116,10 @@ LOW_QUALITY_DOMAINS = [
     "k.sina.com.cn", "sohu.com/a", "weibo.com",
 ]
 
+SOCIAL_MEDIA_DOMAINS = [
+    "chejiahao.autohome.com.cn",
+]
+
 
 @dataclass
 class MonitorFilters:
@@ -132,6 +137,16 @@ class MonitorFilters:
             "keywords": self.keywords,
             "exclude_keywords": self.exclude_keywords,
         }
+
+
+@dataclass
+class CrawlDiagnostics:
+    generated_query_count: int = 0
+    dedup_url_count: int = 0
+    planned_crawl_count: int = 0
+    crawled_page_count: int = 0
+    failed_crawl_count: int = 0
+    failed_urls: list[dict[str, str]] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -358,6 +373,9 @@ def dedup_urls(results):
 
 def classify_domain(url):
     domain = urlparse(url).netloc.lower()
+    for sd in SOCIAL_MEDIA_DOMAINS:
+        if sd in domain:
+            return "social"
     for od in OFFICIAL_DOMAINS:
         if od in domain:
             return "official"
@@ -525,9 +543,8 @@ def extract_brand_model(text):
     return "", ""
 
 
-def scrape_urls(firecrawl_app, urls):
-    results = []
-    for url in urls:
+def scrape_url_with_retry(firecrawl_app, url, max_retries=2):
+    for attempt in range(1 + max_retries):
         try:
             resp = firecrawl_app.scrape_url(url, formats=["markdown"])
             title = ""
@@ -536,9 +553,33 @@ def scrape_urls(firecrawl_app, urls):
                 title = getattr(meta, "title", None) or getattr(meta, "ogTitle", "") or ""
             md = getattr(resp, "markdown", None) or ""
             if md:
-                results.append({"url": url, "title": title or url, "markdown": md})
+                return {"url": url, "title": title or url, "markdown": md, "success": True}
+            return {"url": url, "success": False, "error": "empty_markdown", "retries": attempt}
         except Exception as e:
-            print(f"[WARN] Firecrawl scrape failed: {url} - {e}", file=sys.stderr)
+            if attempt < max_retries:
+                __import__("time").sleep(1.0 * (attempt + 1))
+            last_error = e
+    return {"url": url, "success": False,
+            "error": str(last_error)[:200] if last_error else "unknown",
+            "retries": max_retries}
+
+
+def scrape_urls(firecrawl_app, urls, diagnostics: CrawlDiagnostics | None = None):
+    results = []
+    for url in urls:
+        r = scrape_url_with_retry(firecrawl_app, url)
+        if r["success"]:
+            results.append(r)
+            if diagnostics:
+                diagnostics.crawled_page_count += 1
+        else:
+            if diagnostics:
+                diagnostics.failed_crawl_count += 1
+                diagnostics.failed_urls.append({
+                    "url": url,
+                    "error": r.get("error", "unknown"),
+                })
+            print(f"[WARN] Firecrawl scrape failed: {url} - {r.get('error', '')}", file=sys.stderr)
     return results
 
 
@@ -751,6 +792,7 @@ def main():
     firecrawl_app = FirecrawlApp()
 
     queries = build_search_queries(start_str, end_str, args.market, filters, args.max_results, targets=targets)
+    diagnostics = CrawlDiagnostics(generated_query_count=len(queries))
 
     all_results = []
     for query, tag in queries:
@@ -761,6 +803,7 @@ def main():
         all_results.extend(results)
 
     deduped = dedup_urls(all_results)
+    diagnostics.dedup_url_count = len(deduped)
 
     def _priority(url):
         rt = classify_domain(url)
@@ -772,9 +815,10 @@ def main():
     candidates = deduped[:args.max_results]
 
     scrape_targets_list = [r["url"] for r in candidates if r.get("url")]
+    diagnostics.planned_crawl_count = len(scrape_targets_list)
     print(f"[INFO] 候选 URL 去重后: {len(deduped)}，将抓取: {len(scrape_targets_list)}", file=sys.stderr)
 
-    scraped_pages = scrape_urls(firecrawl_app, scrape_targets_list)
+    scraped_pages = scrape_urls(firecrawl_app, scrape_targets_list, diagnostics=diagnostics)
 
     raw_events = []
     for page in scraped_pages:
@@ -813,6 +857,14 @@ def main():
             "watchlist": watchlist_info,
             "target_summary": target_overview_hits,
             "missed_targets": target_overview_misses,
+            "diagnostics": {
+                "generated_query_count": diagnostics.generated_query_count,
+                "dedup_url_count": diagnostics.dedup_url_count,
+                "planned_crawl_count": diagnostics.planned_crawl_count,
+                "crawled_page_count": diagnostics.crawled_page_count,
+                "failed_crawl_count": diagnostics.failed_crawl_count,
+                "failed_urls": diagnostics.failed_urls[:10],
+            },
             "summary": summary,
             "events": events,
         }
@@ -844,9 +896,11 @@ def main():
         out_path = out_dir / f"{base_name}.md"
         with open(out_path, "w", encoding="utf-8") as f:
             f.write(format_markdown(events, summary, start_str, end_str, args.topic, filters,
-                                    watchlist_info, target_overview_hits, target_overview_misses))
+                                    watchlist_info, target_overview_hits, target_overview_misses,
+                                    diagnostics=diagnostics))
         print(format_markdown(events, summary, start_str, end_str, args.topic, filters,
-                              watchlist_info, target_overview_hits, target_overview_misses))
+                              watchlist_info, target_overview_hits, target_overview_misses,
+                              diagnostics=diagnostics))
 
     print(f"\n[Summary] 共找到 {len(events)} 个事件", file=sys.stderr)
     print(f"[Output] {out_path}", file=sys.stderr)
@@ -857,7 +911,8 @@ def main():
 def format_markdown(events, summary, start_str, end_str, topic,
                     filters: Optional[MonitorFilters] = None,
                     watchlist_info=None, target_overview_hits=None,
-                    target_overview_misses=None):
+                    target_overview_misses=None,
+                    diagnostics: Optional[CrawlDiagnostics] = None):
     lines = []
     lines.append("# 汽车新车事件监测报告")
     lines.append("")
@@ -924,6 +979,7 @@ def format_markdown(events, summary, start_str, end_str, topic,
         lines.append("> 未找到符合条件的事件。")
         lines.append("")
         if not target_overview_hits and not target_overview_misses:
+            lines.extend(_build_diagnostics_section(diagnostics))
             return "\n".join(lines)
 
     lines.append("## 事件统计")
@@ -993,7 +1049,39 @@ def format_markdown(events, summary, start_str, end_str, topic,
     lines.append("- 优先来源: 品牌官网、汽车之家、懂车帝、易车、太平洋汽车、盖世汽车、新出行、网通社等")
     lines.append("")
 
+    if diagnostics:
+        lines.extend(_build_diagnostics_section(diagnostics))
+
     return "\n".join(lines)
+
+
+def _build_diagnostics_section(diagnostics: CrawlDiagnostics) -> list[str]:
+    lines = []
+    lines.append("## 监测质量诊断")
+    lines.append("")
+    lines.append("| 指标 | 数值 |")
+    lines.append("|------|-----:|")
+    lines.append(f"| generated_query_count | {diagnostics.generated_query_count} |")
+    lines.append(f"| dedup_url_count | {diagnostics.dedup_url_count} |")
+    lines.append(f"| planned_crawl_count | {diagnostics.planned_crawl_count} |")
+    lines.append(f"| crawled_page_count | {diagnostics.crawled_page_count} |")
+    lines.append(f"| failed_crawl_count | {diagnostics.failed_crawl_count} |")
+    lines.append("")
+
+    if diagnostics.failed_crawl_count > 0:
+        lines.append("### 抓取失败 URL 样例")
+        lines.append("")
+        lines.append("| url | error |")
+        lines.append("|-----|-------|")
+        for fu in diagnostics.failed_urls[:10]:
+            err = fu.get("error", "")[:60]
+            lines.append(f"| {fu['url']} | {err} |")
+        lines.append("")
+        lines.append("> 注意：未命中表示在当前时间范围、目标车型池、信源类型、事件类型和成功抓取页面范围内未发现明确事件；"
+                     "如果 failed_crawl_count 较高，需复核抓取覆盖度。")
+        lines.append("")
+
+    return lines
 
 
 if __name__ == "__main__":
