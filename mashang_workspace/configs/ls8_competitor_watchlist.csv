@@ -1,0 +1,11 @@
+watchlist_name,target_id,brand,brand_aliases,model,model_aliases,display_name,group,priority,active,notes
+LS8 竞争关注品牌-车型列表,leapmotor_d19,零跑,零跑|Leapmotor|LEAPMOTOR,D19,零跑D19|Leapmotor D19|LEAPMOTOR D19,零跑 D19,新势力SUV,high,true,
+LS8 竞争关注品牌-车型列表,voyah_taishan_x8_phev,岚图,岚图|VOYAH,泰山 X8 PHEV,岚图泰山|岚图泰山X8|岚图X8 PHEV|泰山X8 PHEV|VOYAH Taishan,岚图 泰山 X8 PHEV,央国企新能源SUV,high,true,
+LS8 竞争关注品牌-车型列表,xpeng_gx,小鹏,小鹏|小鵬|XPENG|Xpeng,GX,小鹏GX|小鵬GX|XPENG GX|Xpeng GX,小鹏 GX,新势力SUV,high,true,
+LS8 竞争关注品牌-车型列表,li_i6,理想,理想|Li Auto|Lixiang,i6,理想i6|理想 i6|Li Auto i6,理想 i6,新势力SUV,high,true,
+LS8 竞争关注品牌-车型列表,onvo_l80,乐道,乐道|乐道汽车|ONVO|蔚来乐道|NIO ONVO,L80,乐道L80|乐道 L80|ONVO L80|蔚来乐道L80|乐道汽车L80,乐道 L80,蔚来系SUV,high,true,
+LS8 竞争关注品牌-车型列表,vw_id_era_9x,大众,大众|Volkswagen|VW|ID. ERA|ID ERA,ID. ERA 9X,ID. ERA 9X|ID ERA 9X|ERA 9X|大众ID. ERA|大众 ID. ERA 9X,大众 ID. ERA 9X,合资新能源SUV,medium,true,
+LS8 竞争关注品牌-车型列表,aito_m7,问界,问界|AITO|鸿蒙智行,M7,问界M7|问界 M7|AITO M7|鸿蒙智行M7,问界 M7,华为系SUV,high,true,
+LS8 竞争关注品牌-车型列表,avatr_06,阿维塔,阿维塔|AVATR,06,阿维塔06|阿维塔 06|AVATR 06,阿维塔 06,华为系SUV,high,true,
+LS8 竞争关注品牌-车型列表,lynk_900,领克,领克|Lynk & Co|LYNK & CO,900,领克900|领克 900|Lynk & Co 900|LYNK & CO 900,领克 900,吉利系SUV,medium,true,
+LS8 竞争关注品牌-车型列表,zeekr_8x,极氪,极氪|ZEEKR|Zeekr,8X,极氪8X|极氪 8X|ZEEKR 8X|Zeekr 8X,极氪 8X,吉利系SUV,medium,true,
