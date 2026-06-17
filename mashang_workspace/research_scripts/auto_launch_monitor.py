@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-汽车新车事件监测器 — Auto Launch Monitor (v0.3)
+汽车新车事件监测器 — Auto Launch Monitor (v0.4)
 
 Market Intelligence / New Vehicle Event Monitor
 
@@ -12,7 +12,7 @@ Market Intelligence / New Vehicle Event Monitor
 
 体系位置:
   市场情报 Market Intelligence
-  ├── 新车事件监测 auto_launch_monitor.py     <- 当前 v0.3
+  ├── 新车事件监测 auto_launch_monitor.py     <- 当前 v0.4
   ├── 价格/权益监测 price_incentive_monitor.py
   ├── 销量/订单异动监测 sales_signal_monitor.py
   ├── 舆情热点监测 public_opinion_monitor.py
@@ -22,22 +22,29 @@ Market Intelligence / New Vehicle Event Monitor
 阶段定义:
   v0.1 新车事件查询链路跑通
   v0.2 新车事件质量规则增强
-  v0.3 可配置情报源 + 品牌/关键词过滤 (当前)
+  v0.3 可配置情报源 + 品牌/关键词过滤
+  v0.4 关注车型池监测 (当前)
 
-v0.3 新增功能:
-  - --brands: 按品牌过滤 (逗号分隔)
-  - --event-types: 按事件类型过滤 (逗号分隔)
-  - --source-types: 按来源类型过滤 (逗号分隔)
-  - --keywords: 正向关键词 (逗号分隔)
-  - --exclude-keywords: 排除关键词 (逗号分隔)
+v0.4 新增功能:
+  - --targets-file: 读取关注车型列表 CSV，按 target_id 做搜索扩展、结果过滤、车型归一化
+  - 关注车型命中概览：展示每个目标车型的命中数、最高可信度、最新事件
+  - 未命中关注车型列表：展示没有事件的车型
+  - WatchTarget 数据结构 + match_event_to_target 匹配逻辑
+  - 聚合 key 升级为 target_id + date + event_type
 
 用法:
     python mashang_workspace/research_scripts/auto_launch_monitor.py \\
         --start 2026-06-05 --end 2026-06-07 \\
+        --targets-file mashang_workspace/configs/ls8_competitor_watchlist.csv \\
+        --source-types official,mainstream_media,industry_media \\
+        --format markdown --output mashang_workspace/outputs/reports/
+
+    # 未传 --targets-file 时保持 v0.3 行为不变
+    python mashang_workspace/research_scripts/auto_launch_monitor.py \\
+        --start 2026-06-05 --end 2026-06-07 \\
         --brands "智己,理想,小米" \\
         --event-types "发布会,上市,预售" \\
-        --source-types "official,mainstream_media,industry_media" \\
-        --format markdown --output mashang_workspace/outputs/reports/
+        --source-types "official,mainstream_media,industry_media"
 
 环境变量:
     TAVILY_API_KEY      (必填) Tavily 搜索 API Key
@@ -127,11 +134,127 @@ class MonitorFilters:
         }
 
 
+@dataclass(frozen=True)
+class WatchTarget:
+    watchlist_name: str
+    target_id: str
+    brand: str
+    brand_aliases: list[str]
+    model: str
+    model_aliases: list[str]
+    display_name: str
+    group: str
+    priority: str
+    active: bool
+    notes: str = ""
+
+
+# ─── CSV arg parsing ──────────────────────────────────────────────
+
 def parse_csv_arg(value: Optional[str]) -> list[str]:
     if not value or not value.strip():
         return []
     return [s.strip() for s in value.split(",") if s.strip()]
 
+
+# ─── WatchTarget loading ─────────────────────────────────────────
+
+def load_watch_targets(targets_file: str | Path) -> list[WatchTarget]:
+    path = Path(targets_file)
+    if not path.exists():
+        print(f"[ERROR] 关注车型文件不存在: {path}", file=sys.stderr)
+        sys.exit(1)
+
+    with open(path, newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        rows = list(reader)
+
+    if not rows:
+        print(f"[ERROR] 关注车型文件为空: {path}", file=sys.stderr)
+        sys.exit(1)
+
+    required = {"watchlist_name", "target_id", "brand", "model", "display_name", "group", "priority", "active"}
+    for r in rows:
+        missing = required - set(r.keys())
+        if missing:
+            print(f"[ERROR] 关注车型文件缺少字段: {missing}", file=sys.stderr)
+            sys.exit(1)
+
+    targets = []
+    seen_ids = set()
+    for r in rows:
+        if r.get("active", "").strip().lower() != "true":
+            continue
+        tid = r["target_id"].strip()
+        if tid in seen_ids:
+            print(f"[ERROR] 重复 target_id: {tid}", file=sys.stderr)
+            sys.exit(1)
+        seen_ids.add(tid)
+
+        brand = r["brand"].strip()
+        model = r["model"].strip()
+        brand_aliases = [a.strip() for a in r.get("brand_aliases", "").split("|") if a.strip()]
+        model_aliases = [a.strip() for a in r.get("model_aliases", "").split("|") if a.strip()]
+
+        if brand not in brand_aliases:
+            brand_aliases.insert(0, brand)
+        if model not in model_aliases:
+            model_aliases.insert(0, model)
+
+        targets.append(WatchTarget(
+            watchlist_name=r.get("watchlist_name", "").strip(),
+            target_id=tid,
+            brand=brand,
+            brand_aliases=brand_aliases,
+            model=model,
+            model_aliases=model_aliases,
+            display_name=r.get("display_name", f"{brand} {model}").strip(),
+            group=r.get("group", "").strip(),
+            priority=r.get("priority", "medium").strip(),
+            active=True,
+            notes=r.get("notes", "").strip(),
+        ))
+
+    if not targets:
+        print(f"[ERROR] 没有 active=true 的关注车型", file=sys.stderr)
+        sys.exit(1)
+
+    return targets
+
+
+# ─── Target matching ─────────────────────────────────────────────
+
+def match_event_to_target(event, targets: list[WatchTarget]) -> Optional[WatchTarget]:
+    text_pool = " ".join([
+        event.get("brand", ""),
+        event.get("model", ""),
+        event.get("title", ""),
+        event.get("source_title", ""),
+        event.get("evidence", ""),
+    ])
+
+    for t in targets:
+        brand_hit = any(alias in text_pool for alias in t.brand_aliases)
+        if not brand_hit:
+            continue
+        model_hit = any(alias in text_pool for alias in t.model_aliases)
+        if model_hit:
+            return t
+
+    for t in targets:
+        brand_hit = any(alias in text_pool for alias in t.brand_aliases)
+        if brand_hit:
+            model_strong = any(
+                alias in event.get("model", "") or alias in event.get("source_title", "")
+                for alias in t.model_aliases
+            )
+            if model_strong:
+                return t
+
+    return None
+
+
+# ─── CLI ─────────────────────────────────────────────────────────
 
 def parse_args():
     parser = argparse.ArgumentParser(description="汽车新车事件监测")
@@ -145,14 +268,11 @@ def parse_args():
     parser.add_argument("--output", default=str(REPO_ROOT / "mashang_workspace" / "outputs" / "reports"),
                         help="输出目录 (default outputs/reports/)")
     parser.add_argument("--brands", type=str, default=None, help="品牌过滤，逗号分隔")
-    parser.add_argument("--event-types", type=str, default=None,
-                        help="事件类型过滤，逗号分隔 (默认: 发布会,上市,预售,首发亮相,开启交付)")
-    parser.add_argument("--source-types", type=str, default=None,
-                        help="来源类型过滤，逗号分隔 (默认: official,mainstream_media,industry_media)")
-    parser.add_argument("--keywords", type=str, default=None,
-                        help="搜索关键词，逗号分隔 (默认: 上市,预售,发布会,首发,亮相,开启交付)")
-    parser.add_argument("--exclude-keywords", type=str, default=None,
-                        help="排除关键词，逗号分隔 (默认: 谍照,假想图,申报图,路试,曝光,或将,预计,有望,疑似,网传,价格猜测)")
+    parser.add_argument("--event-types", type=str, default=None, help="事件类型过滤")
+    parser.add_argument("--source-types", type=str, default=None, help="来源类型过滤")
+    parser.add_argument("--keywords", type=str, default=None, help="搜索关键词")
+    parser.add_argument("--exclude-keywords", type=str, default=None, help="排除关键词")
+    parser.add_argument("--targets-file", type=str, default=None, help="关注车型 CSV 文件路径")
     return parser.parse_args()
 
 
@@ -174,10 +294,27 @@ def check_env():
         sys.exit(1)
 
 
-def build_search_queries(start, end, market, filters: MonitorFilters, max_results):
-    date_range = f"{start} 到 {end}"
-    queries = []
+# ─── Search query construction ───────────────────────────────────
 
+def build_search_queries(start, end, market, filters: MonitorFilters, max_results, targets=None):
+    date_range = f"{start} 到 {end}"
+
+    if targets:
+        queries = []
+        for t in targets:
+            if t.priority == "high":
+                q = f"{date_range} {market} {t.display_name} {' '.join(filters.keywords[:2])}"
+                queries.append((q, t.target_id))
+                for alias in t.model_aliases[:1]:
+                    q = f"{date_range} {market} {alias} {filters.keywords[0]}"
+                    if q not in [x[0] for x in queries]:
+                        queries.append((q, t.target_id))
+            else:
+                q = f"{date_range} {market} {t.display_name} {filters.keywords[0]}"
+                queries.append((q, t.target_id))
+        return queries
+
+    queries = []
     if filters.brands:
         for brand in filters.brands:
             for kw in filters.keywords:
@@ -196,6 +333,8 @@ def build_search_queries(start, end, market, filters: MonitorFilters, max_result
 
     return queries
 
+
+# ─── Search / scrape ─────────────────────────────────────────────
 
 def tavily_search(client, query, max_results):
     try:
@@ -244,6 +383,8 @@ def has_exclude_keywords(text, exclude_keywords):
             return True
     return False
 
+
+# ─── Event extraction ────────────────────────────────────────────
 
 def extract_events_from_markdown(markdown_text, url, source_title,
                                   start_date=None, end_date=None,
@@ -405,28 +546,44 @@ def normalize_date(d):
     return d.isoformat() if isinstance(d, date) else d
 
 
+# ─── Filtering ───────────────────────────────────────────────────
+
+def match_events_to_targets(events, targets: list[WatchTarget]):
+    matched = []
+    for e in events:
+        t = match_event_to_target(e, targets)
+        if t:
+            e["target_id"] = t.target_id
+            e["target_display_name"] = t.display_name
+            e["target_group"] = t.group
+            e["target_priority"] = t.priority
+            matched.append(e)
+    return matched
+
+
 def apply_event_filters(events, filters: MonitorFilters):
     filtered = []
-
     for e in events:
         if filters.event_types and e.get("event_type") not in filters.event_types:
             continue
-
         if filters.brands and e.get("brand") not in filters.brands:
             continue
-
         if filters.source_types and e.get("source_type") not in filters.source_types:
             continue
-
         filtered.append(e)
-
     return filtered
 
+
+# ─── Aggregation ─────────────────────────────────────────────────
 
 def aggregate_events(events):
     buckets = {}
     for e in events:
-        key = (e["date"], e["brand"], e["model"], e["event_type"])
+        if e.get("target_id"):
+            key = (e["target_id"], e["date"], e["event_type"])
+        else:
+            key = (e["date"], e["brand"], e["model"], e["event_type"])
+
         if key not in buckets:
             buckets[key] = {
                 "date": e["date"],
@@ -440,6 +597,10 @@ def aggregate_events(events):
                 "evidence": e["evidence"],
                 "confidences": [],
                 "_has_excluded": False,
+                "target_id": e.get("target_id"),
+                "target_display_name": e.get("target_display_name"),
+                "target_group": e.get("target_group"),
+                "target_priority": e.get("target_priority"),
             }
         b = buckets[key]
         if e["source_url"] not in b["source_urls"]:
@@ -470,7 +631,7 @@ def aggregate_events(events):
         if b["_has_excluded"] and not has_official and len(unique_urls) < 2:
             confidence = "低"
 
-        if not b["brand"] and not b["model"]:
+        if not b["brand"] and not b["model"] and not b.get("target_id"):
             continue
 
         event_status = b["event_status"]
@@ -478,7 +639,7 @@ def aggregate_events(events):
             if not has_official and len(unique_urls) < 2:
                 event_status = "待确认"
 
-        aggregated.append({
+        row = {
             "date": b["date"],
             "brand": b["brand"],
             "model": b["model"],
@@ -490,7 +651,15 @@ def aggregate_events(events):
             "source_type": "|".join(sorted(b["source_types_raw"])),
             "confidence": confidence,
             "evidence": b["evidence"],
-        })
+        }
+        if b.get("target_id"):
+            row.update({
+                "target_id": b["target_id"],
+                "target_display_name": b["target_display_name"],
+                "target_group": b["target_group"],
+                "target_priority": b["target_priority"],
+            })
+        aggregated.append(row)
 
     aggregated.sort(key=lambda e: e["date"])
     return aggregated
@@ -523,6 +692,44 @@ def build_event_summary(events, topic):
     return summary
 
 
+# ─── Target hit/miss overview ───────────────────────────────────
+
+def build_target_overview(targets: list[WatchTarget], events):
+    hit_rows = []
+    miss_rows = []
+    hit_target_ids = set(e.get("target_id") for e in events if e.get("target_id"))
+
+    for t in targets:
+        matched_events = [e for e in events if e.get("target_id") == t.target_id]
+        hit_count = len(matched_events)
+        if hit_count > 0:
+            best_conf = max(e.get("confidence", "低") for e in matched_events)
+            latest = max(matched_events, key=lambda e: e.get("date", ""))
+            latest_str = f"{latest['date']} {latest['event_type']}"
+            hit_rows.append({
+                "target_id": t.target_id,
+                "display_name": t.display_name,
+                "group": t.group,
+                "priority": t.priority,
+                "hit_count": hit_count,
+                "best_confidence": best_conf,
+                "latest_event": latest_str,
+            })
+        else:
+            miss_rows.append({
+                "target_id": t.target_id,
+                "display_name": t.display_name,
+                "group": t.group,
+                "priority": t.priority,
+            })
+
+    hit_rows.sort(key=lambda r: (-r["hit_count"], r["target_id"]))
+    miss_rows.sort(key=lambda r: r["target_id"])
+    return hit_rows, miss_rows
+
+
+# ─── main ────────────────────────────────────────────────────────
+
 def main():
     args = parse_args()
     check_env()
@@ -533,6 +740,9 @@ def main():
     out_dir.mkdir(parents=True, exist_ok=True)
 
     filters = build_filters(args)
+    targets = None
+    if args.targets_file:
+        targets = load_watch_targets(args.targets_file)
 
     from tavily import TavilyClient
     from firecrawl import FirecrawlApp
@@ -540,14 +750,14 @@ def main():
     tavily_client = TavilyClient()
     firecrawl_app = FirecrawlApp()
 
-    queries = build_search_queries(start_str, end_str, args.market, filters, args.max_results)
+    queries = build_search_queries(start_str, end_str, args.market, filters, args.max_results, targets=targets)
 
     all_results = []
-    for query, topic in queries:
+    for query, tag in queries:
         print(f"[INFO] 搜索: {query}", file=sys.stderr)
         results = tavily_search(tavily_client, query, args.max_results)
         for r in results:
-            r["query_topic"] = topic
+            r["query_tag"] = tag
         all_results.extend(results)
 
     deduped = dedup_urls(all_results)
@@ -559,13 +769,12 @@ def main():
         return 1
 
     deduped.sort(key=lambda x: (_priority(x.get("url", "")), -x.get("score", 0)))
-
     candidates = deduped[:args.max_results]
 
-    scrape_targets = [r["url"] for r in candidates if r.get("url")]
-    print(f"[INFO] 候选 URL 去重后: {len(deduped)}，将抓取: {len(scrape_targets)}", file=sys.stderr)
+    scrape_targets_list = [r["url"] for r in candidates if r.get("url")]
+    print(f"[INFO] 候选 URL 去重后: {len(deduped)}，将抓取: {len(scrape_targets_list)}", file=sys.stderr)
 
-    scraped_pages = scrape_urls(firecrawl_app, scrape_targets)
+    scraped_pages = scrape_urls(firecrawl_app, scrape_targets_list)
 
     raw_events = []
     for page in scraped_pages:
@@ -578,13 +787,35 @@ def main():
         raw_events.extend(events)
 
     raw_events = apply_event_filters(raw_events, filters)
+
+    if targets:
+        raw_events = match_events_to_targets(raw_events, targets)
+
     events = aggregate_events(raw_events)
     summary = build_event_summary(events, args.topic)
+
+    watchlist_info = None
+    target_overview_hits = []
+    target_overview_misses = []
+    if targets:
+        watchlist_info = {
+            "targets_file": args.targets_file,
+            "watchlist_name": targets[0].watchlist_name if targets else "",
+            "active_target_count": len(targets),
+        }
+        target_overview_hits, target_overview_misses = build_target_overview(targets, events)
 
     base_name = f"auto_launch_monitor_{start_str}_{end_str}"
 
     if args.format == "json":
-        output = {"filters": filters.to_dict(), "summary": summary, "events": events}
+        output = {
+            "filters": filters.to_dict(),
+            "watchlist": watchlist_info,
+            "target_summary": target_overview_hits,
+            "missed_targets": target_overview_misses,
+            "summary": summary,
+            "events": events,
+        }
         out_path = out_dir / f"{base_name}.json"
         with open(out_path, "w", encoding="utf-8") as f:
             json.dump(output, f, ensure_ascii=False, indent=2)
@@ -598,27 +829,35 @@ def main():
             row.pop("source_urls", None)
             flat.append(row)
         if flat:
-            fieldnames = ["date", "brand", "model", "event_type", "event_status",
-                          "source_title", "source_url", "source_type", "confidence", "evidence"]
+            fieldnames = ["target_id", "target_display_name", "target_group", "target_priority",
+                          "date", "brand", "model", "event_type", "event_status",
+                          "confidence", "source_type", "source_url", "evidence"]
             with open(out_path, "w", newline="", encoding="utf-8") as f:
-                writer = csv.DictWriter(f, fieldnames=fieldnames)
+                writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
                 writer.writeheader()
                 writer.writerows(flat)
         else:
-            out_path.write_text("date,brand,model,event_type,event_status,source_title,source_url,source_type,confidence,evidence\n")
+            out_path.write_text("target_id,target_display_name,date,brand,model,event_type,event_status,confidence,source_url,evidence\n")
         print(f"[Output] CSV: {out_path}")
 
     else:
         out_path = out_dir / f"{base_name}.md"
         with open(out_path, "w", encoding="utf-8") as f:
-            f.write(format_markdown(events, summary, start_str, end_str, args.topic, filters))
-        print(format_markdown(events, summary, start_str, end_str, args.topic, filters))
+            f.write(format_markdown(events, summary, start_str, end_str, args.topic, filters,
+                                    watchlist_info, target_overview_hits, target_overview_misses))
+        print(format_markdown(events, summary, start_str, end_str, args.topic, filters,
+                              watchlist_info, target_overview_hits, target_overview_misses))
 
     print(f"\n[Summary] 共找到 {len(events)} 个事件", file=sys.stderr)
     print(f"[Output] {out_path}", file=sys.stderr)
 
 
-def format_markdown(events, summary, start_str, end_str, topic, filters: Optional[MonitorFilters] = None):
+# ─── Markdown output ─────────────────────────────────────────────
+
+def format_markdown(events, summary, start_str, end_str, topic,
+                    filters: Optional[MonitorFilters] = None,
+                    watchlist_info=None, target_overview_hits=None,
+                    target_overview_misses=None):
     lines = []
     lines.append("# 汽车新车事件监测报告")
     lines.append("")
@@ -628,9 +867,18 @@ def format_markdown(events, summary, start_str, end_str, topic, filters: Optiona
     lines.append(f"**事件总数**: {summary['total_events']}")
     lines.append("")
 
-    if filters:
-        lines.append("## 过滤条件")
-        lines.append("")
+    lines.append("## 过滤条件")
+    lines.append("")
+    if watchlist_info:
+        lines.append(f"| 维度 | 值 |")
+        lines.append(f"|------|-----|")
+        lines.append(f"| 关注文件 | `{watchlist_info['targets_file']}` |")
+        lines.append(f"| 关注列表 | `{watchlist_info['watchlist_name']}` |")
+        lines.append(f"| 目标数量 | {watchlist_info['active_target_count']} 个 |")
+        lines.append(f"| 事件类型 | {', '.join(filters.event_types) if filters else '-'} |")
+        lines.append(f"| 来源类型 | {', '.join(filters.source_types) if filters else '-'} |")
+        lines.append(f"| 排除关键词 | {', '.join(filters.exclude_keywords) if filters else '-'} |")
+    elif filters:
         lines.append(f"| 维度 | 值 |")
         lines.append(f"|------|-----|")
         lines.append(f"| 品牌 | {', '.join(filters.brands) if filters.brands else '不限'} |")
@@ -638,17 +886,45 @@ def format_markdown(events, summary, start_str, end_str, topic, filters: Optiona
         lines.append(f"| 来源类型 | {', '.join(filters.source_types)} |")
         lines.append(f"| 正向关键词 | {', '.join(filters.keywords)} |")
         lines.append(f"| 排除关键词 | {', '.join(filters.exclude_keywords)} |")
-        lines.append("")
+    lines.append("")
 
     topic_note = summary.get("topic_note")
     if topic_note:
         lines.append(f"> {topic_note}")
         lines.append("")
 
+    if target_overview_hits is not None:
+        lines.append("## 关注车型命中概览")
+        lines.append("")
+        lines.append("| target_id | 车型 | 分组 | 优先级 | 命中数 | 最高可信度 | 最新事件 |")
+        lines.append("|-----------|------|------|--------|--------|-----------|----------|")
+        seen_ids = set()
+        if target_overview_hits:
+            for r in target_overview_hits:
+                seen_ids.add(r["target_id"])
+                lines.append(f"| {r['target_id']} | {r['display_name']} | {r['group']} | "
+                             f"{r['priority']} | {r['hit_count']} | {r['best_confidence']} | {r['latest_event']} |")
+        for r in (target_overview_misses or []):
+            if r["target_id"] not in seen_ids:
+                lines.append(f"| {r['target_id']} | {r['display_name']} | {r['group']} | "
+                             f"{r['priority']} | 0 | - | 未发现明确新车事件 |")
+        lines.append("")
+
+    if target_overview_misses:
+        lines.append("## 未命中关注车型")
+        lines.append("")
+        lines.append("| target_id | 车型 | 分组 | 优先级 | 说明 |")
+        lines.append("|-----------|------|------|--------|------|")
+        for r in target_overview_misses:
+            lines.append(f"| {r['target_id']} | {r['display_name']} | {r['group']} | "
+                         f"{r['priority']} | 本次时间范围内未发现符合过滤条件的明确新车事件 |")
+        lines.append("")
+
     if not events:
         lines.append("> 未找到符合条件的事件。")
         lines.append("")
-        return "\n".join(lines)
+        if not target_overview_hits and not target_overview_misses:
+            return "\n".join(lines)
 
     lines.append("## 事件统计")
     lines.append("")
@@ -671,15 +947,26 @@ def format_markdown(events, summary, start_str, end_str, topic, filters: Optiona
 
     lines.append("## 事件列表")
     lines.append("")
-    lines.append("| 日期 | 品牌 | 车型 | 事件类型 | 状态 | 可信度 | 来源 | 证据 |")
-    lines.append("|------|------|------|----------|------|--------|------|------|")
-
-    for e in events:
-        source_link = f"[{e['source_title'][:30]}]({e['source_url']})" if e['source_url'] else e['source_title'][:30]
-        brand = e.get("brand", "") or "-"
-        model = e.get("model", "") or "-"
-        evidence = e.get("evidence", "")[:60]
-        lines.append(f"| {e['date']} | {brand} | {model} | {e['event_type']} | {e['event_status']} | {e['confidence']} | {source_link} | {evidence} |")
+    if any(e.get("target_id") for e in events):
+        lines.append("| target_id | 关注车型 | 日期 | 品牌 | 车型 | 事件类型 | 状态 | 可信度 | 来源 | 证据 |")
+        lines.append("|-----------|---------|------|------|------|----------|------|--------|------|------|")
+        for e in events:
+            tid = e.get("target_id", "-")
+            tdn = e.get("target_display_name", "-")
+            source_link = f"[{e['source_title'][:30]}]({e['source_url']})" if e['source_url'] else e['source_title'][:30]
+            brand = e.get("brand", "") or "-"
+            model = e.get("model", "") or "-"
+            evidence = e.get("evidence", "")[:50]
+            lines.append(f"| {tid} | {tdn} | {e['date']} | {brand} | {model} | {e['event_type']} | {e['event_status']} | {e['confidence']} | {source_link} | {evidence} |")
+    else:
+        lines.append("| 日期 | 品牌 | 车型 | 事件类型 | 状态 | 可信度 | 来源 | 证据 |")
+        lines.append("|------|------|------|----------|------|--------|------|------|")
+        for e in events:
+            source_link = f"[{e['source_title'][:30]}]({e['source_url']})" if e['source_url'] else e['source_title'][:30]
+            brand = e.get("brand", "") or "-"
+            model = e.get("model", "") or "-"
+            evidence = e.get("evidence", "")[:60]
+            lines.append(f"| {e['date']} | {brand} | {model} | {e['event_type']} | {e['event_status']} | {e['confidence']} | {source_link} | {evidence} |")
 
     lines.append("")
     lines.append("## 可信度规则")

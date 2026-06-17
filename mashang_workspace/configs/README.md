@@ -10,7 +10,7 @@ Workspace 业务监测配置目录。存放各类可复用的分析配置和关�
 
 **用途**: 维护 LS8 竞品与相邻市场关注车型池，供新车事件监测脚本等下游消费。
 
-**当前服务对象**: `auto_launch_monitor.py` 后续 v0.4 `--targets-file` 参数。
+**当前服务对象**: `auto_launch_monitor.py` v0.4 `--targets-file` 参数。
 
 ### 字段说明
 

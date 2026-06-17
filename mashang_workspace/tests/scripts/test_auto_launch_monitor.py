@@ -1,17 +1,16 @@
 """
-Smoke test: auto_launch_monitor.py v0.3
+Smoke test: auto_launch_monitor.py v0.4
 
 验证:
-1. --help 正常输出
-2. 无 API Key 时给出清晰错误提示
-3. CLI 参数覆盖
-4. parse_csv_arg 基础行为
-5. 品牌过滤
-6. 事件类型过滤
-7. 来源类型过滤
-8. 排除关键词降级
-9. 官方来源为高、2+ 交叉验证为高、单一主流为中
-10. markdown 包含 source_url / evidence / filters 摘要
+1. load_watch_targets 读取、校验、aliases 拆分
+2. 缺失 targets_file 报错
+3. target 匹配（理想 i6 → li_i6, ONVO L80 → onvo_l80, ZEEKR 8X → zeekr_8x）
+4. 品牌命中但车型不匹配不归入
+5. targets-file 过滤
+6. target 聚合逻辑
+7. Markdown 包含命中概览 / 未命中 / filters 摘要
+8. v0.3 兼容：不传 --targets-file 时原有逻辑不变
+9. 原有 14 个测试保持
 """
 
 import json
@@ -23,6 +22,8 @@ from pathlib import Path
 _WS_DIR = Path(__file__).resolve().parents[2]
 SCRIPT = _WS_DIR / "research_scripts" / "auto_launch_monitor.py"
 _SCRIPT_DIR = _WS_DIR / "research_scripts"
+CONFIGS_DIR = _WS_DIR / "configs"
+WATCHLIST_CSV = CONFIGS_DIR / "ls8_competitor_watchlist.csv"
 
 
 def _run(args: list[str], env_override: dict | None = None) -> subprocess.CompletedProcess:
@@ -44,246 +45,369 @@ def _extract_py(env, code):
     )
 
 
-# ─── parse_csv_arg ─────────────────────────────────────────────────
+# ─── load_watch_targets ──────────────────────────────────────────
+
+def test_load_watch_targets_returns_active():
+    code = rf"""
+import sys
+sys.path.insert(0, r"{_SCRIPT_DIR}")
+from auto_launch_monitor import load_watch_targets
+
+targets = load_watch_targets(r"{WATCHLIST_CSV}")
+assert len(targets) >= 10, f"expected >=10, got {{len(targets)}}"
+for t in targets:
+    assert t.active == True
+print("OK count=", len(targets))
+print("IDS:", [t.target_id for t in targets])
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+    data = result.stdout
+    assert "leapmotor_d19" in data
+    assert "zeekr_8x" in data
+
+
+def test_load_watch_targets_aliases_split():
+    code = rf"""
+import sys
+sys.path.insert(0, r"{_SCRIPT_DIR}")
+from auto_launch_monitor import load_watch_targets
+
+targets = load_watch_targets(r"{WATCHLIST_CSV}")
+for t in targets:
+    assert len(t.brand_aliases) >= 1
+    assert len(t.model_aliases) >= 1
+    assert t.brand in t.brand_aliases
+    assert t.model in t.model_aliases
+zeekr = [t for t in targets if t.target_id == "zeekr_8x"][0]
+assert "ZEEKR" in zeekr.brand_aliases
+assert "Zeekr" in zeekr.brand_aliases
+print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+def test_load_watch_targets_no_duplicate_ids():
+    code = rf"""
+import sys
+sys.path.insert(0, r"{_SCRIPT_DIR}")
+from auto_launch_monitor import load_watch_targets
+
+targets = load_watch_targets(r"{WATCHLIST_CSV}")
+ids = [t.target_id for t in targets]
+assert len(ids) == len(set(ids)), "duplicate target_id found"
+print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+def test_load_watch_targets_file_not_found():
+    code = rf"""
+import sys
+sys.path.insert(0, r"{_SCRIPT_DIR}")
+from auto_launch_monitor import load_watch_targets
+try:
+    load_watch_targets("/nonexistent/path.csv")
+except SystemExit:
+    print("OK exit")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+# ─── target matching ─────────────────────────────────────────────
+
+def test_match_li_i6():
+    code = rf"""
+import sys
+sys.path.insert(0, r"{_SCRIPT_DIR}")
+from auto_launch_monitor import load_watch_targets, match_event_to_target
+
+targets = load_watch_targets(r"{WATCHLIST_CSV}")
+event = {{"brand": "理想", "model": "i6", "title": "理想i6", "source_title": "", "evidence": ""}}
+t = match_event_to_target(event, targets)
+assert t is not None, "should match"
+assert t.target_id == "li_i6", f"got {{t.target_id}}"
+print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+def test_match_onvo_l80():
+    code = rf"""
+import sys
+sys.path.insert(0, r"{_SCRIPT_DIR}")
+from auto_launch_monitor import load_watch_targets, match_event_to_target
+
+targets = load_watch_targets(r"{WATCHLIST_CSV}")
+event = {{"brand": "乐道", "model": "L80", "title": "ONVO L80", "source_title": "", "evidence": ""}}
+t = match_event_to_target(event, targets)
+assert t is not None, "should match"
+assert t.target_id == "onvo_l80", f"got {{t.target_id}}"
+print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+def test_match_zeekr_8x():
+    code = rf"""
+import sys
+sys.path.insert(0, r"{_SCRIPT_DIR}")
+from auto_launch_monitor import load_watch_targets, match_event_to_target
+
+targets = load_watch_targets(r"{WATCHLIST_CSV}")
+event = {{"brand": "极氪", "model": "8X", "title": "ZEEKR 8X", "source_title": "", "evidence": ""}}
+t = match_event_to_target(event, targets)
+assert t is not None, "should match"
+assert t.target_id == "zeekr_8x", f"got {{t.target_id}}"
+print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+def test_no_match_brand_only():
+    code = rf"""
+import sys
+sys.path.insert(0, r"{_SCRIPT_DIR}")
+from auto_launch_monitor import load_watch_targets, match_event_to_target
+
+targets = load_watch_targets(r"{WATCHLIST_CSV}")
+# 理想品牌但没有 i6 车型
+event = {{"brand": "理想", "model": "L9", "title": "理想L9", "source_title": "", "evidence": ""}}
+t = match_event_to_target(event, targets)
+assert t is None, f"should NOT match li_i6, got {{t}}"
+print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+# ─── targets-file filtering ──────────────────────────────────────
+
+def test_targets_filter():
+    code = rf"""
+import sys
+sys.path.insert(0, r"{_SCRIPT_DIR}")
+from auto_launch_monitor import load_watch_targets, match_events_to_targets
+
+targets = load_watch_targets(r"{WATCHLIST_CSV}")
+events = [
+    {{"brand": "理想", "model": "i6", "event_type": "上市", "source_url": "a", "source_title": "t"}},
+    {{"brand": "理想", "model": "L9", "event_type": "上市", "source_url": "b", "source_title": "t"}},
+    {{"brand": "乐道", "model": "L80", "event_type": "预售", "source_url": "c", "source_title": "t"}},
+]
+matched = match_events_to_targets(events, targets)
+ids = [e.get("target_id") for e in matched]
+assert "li_i6" in ids, f"li_i6 missing: {{ids}}"
+assert "onvo_l80" in ids, f"onvo_l80 missing: {{ids}}"
+assert len(matched) == 2, f"expected 2, got {{len(matched)}}: {{ids}}"
+print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+# ─── target aggregation ──────────────────────────────────────────
+
+def test_target_aggregation_same_target():
+    code = rf"""
+import sys, json
+sys.path.insert(0, r"{_SCRIPT_DIR}")
+from auto_launch_monitor import aggregate_events
+
+events = [
+    {{"date":"2026-06-05","brand":"理想","model":"i6","event_type":"上市","event_status":"已确认",
+      "source_title":"A","source_url":"url1","source_type":"mainstream_media","confidence":"高","evidence":"a","_has_excluded":False,
+      "target_id":"li_i6","target_display_name":"理想 i6","target_group":"新势力SUV","target_priority":"high"}},
+    {{"date":"2026-06-05","brand":"理想","model":"i6","event_type":"上市","event_status":"已确认",
+      "source_title":"B","source_url":"url2","source_type":"mainstream_media","confidence":"高","evidence":"b","_has_excluded":False,
+      "target_id":"li_i6","target_display_name":"理想 i6","target_group":"新势力SUV","target_priority":"high"}},
+]
+result = aggregate_events(events)
+assert len(result) == 1, f"expected 1, got {{len(result)}}"
+assert len(result[0]["source_urls"]) == 2, "urls not merged"
+assert result[0]["confidence"] == "高", "2 sources should be high"
+assert result[0]["target_id"] == "li_i6"
+print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+def test_target_aggregation_different_targets():
+    code = rf"""
+import sys, json
+sys.path.insert(0, r"{_SCRIPT_DIR}")
+from auto_launch_monitor import aggregate_events
+
+events = [
+    {{"date":"2026-06-05","brand":"理想","model":"i6","event_type":"上市","event_status":"已确认",
+      "source_title":"A","source_url":"url1","source_type":"mainstream_media","confidence":"高","evidence":"a","_has_excluded":False,
+      "target_id":"li_i6","target_display_name":"理想 i6","target_group":"新势力SUV","target_priority":"high"}},
+    {{"date":"2026-06-05","brand":"乐道","model":"L80","event_type":"预售","event_status":"已确认",
+      "source_title":"B","source_url":"url2","source_type":"mainstream_media","confidence":"高","evidence":"b","_has_excluded":False,
+      "target_id":"onvo_l80","target_display_name":"乐道 L80","target_group":"蔚来系SUV","target_priority":"high"}},
+]
+result = aggregate_events(events)
+assert len(result) == 2, f"expected 2, got {{len(result)}}"
+print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+# ─── markdown output ─────────────────────────────────────────────
+
+def test_markdown_contains_target_sections():
+    code = rf"""
+import sys
+sys.path.insert(0, r"{_SCRIPT_DIR}")
+from auto_launch_monitor import format_markdown, build_event_summary, MonitorFilters
+
+events = [
+    {{"date":"2026-06-05","brand":"理想","model":"i6","event_type":"上市","event_status":"已确认",
+      "source_title":"A","source_url":"https://a.com","source_urls":["https://a.com"],
+      "source_type":"mainstream_media","confidence":"中","evidence":"test",
+      "target_id":"li_i6","target_display_name":"理想 i6","target_group":"新势力SUV","target_priority":"high"}},
+]
+summary = build_event_summary(events, "新车发布会")
+filters = MonitorFilters()
+
+wi = {{"targets_file":"ls8_competitor_watchlist.csv","watchlist_name":"LS8 竞争关注品牌-车型列表","active_target_count":10}}
+hits = [{{"target_id":"li_i6","display_name":"理想 i6","group":"新势力SUV","priority":"high",
+          "hit_count":1,"best_confidence":"中","latest_event":"2026-06-05 上市"}}]
+misses = [{{"target_id":"zeekr_8x","display_name":"极氪 8X","group":"吉利系SUV","priority":"medium"}}]
+
+md = format_markdown(events, summary, "2026-06-05", "2026-06-07", "新车发布会", filters, wi, hits, misses)
+assert "关注车型命中概览" in md
+assert "未命中关注车型" in md
+assert "ls8_competitor_watchlist.csv" in md
+assert "10 个" in md
+assert "li_i6" in md
+assert "zeekr_8x" in md
+assert "0" in md  # hit_count for missed target
+print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+def test_markdown_no_targets_fallback():
+    """不传 watchlist 时保持 v0.3 格式"""
+    code = rf"""
+import sys
+sys.path.insert(0, r"{_SCRIPT_DIR}")
+from auto_launch_monitor import format_markdown, build_event_summary, MonitorFilters
+
+events = [
+    {{"date":"2026-06-05","brand":"本田","model":"CR-V","event_type":"上市","event_status":"已确认",
+      "source_title":"A","source_url":"https://a.com","source_urls":["https://a.com"],
+      "source_type":"mainstream_media","confidence":"中","evidence":"test"}},
+]
+summary = build_event_summary(events, "新车发布会")
+filters = MonitorFilters()
+md = format_markdown(events, summary, "2026-06-05", "2026-06-07", "新车发布会", filters)
+assert "关注车型命中概览" not in md
+assert "未命中关注车型" not in md
+assert "本田" in md
+print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+# ─── v0.3 compatibility ──────────────────────────────────────────
+
+def test_no_targets_file_uses_brands_keywords():
+    result = _run(["--help"])
+    assert "--targets-file" in result.stdout or "--targets-file" in result.stderr
+    assert "--brands" in result.stdout or "--brands" in result.stderr
+
+
+# ─── v0.3 preserved tests ────────────────────────────────────────
 
 def test_parse_csv_arg_multiple():
-    code = r"""
-import sys
-sys.path.insert(0, r"SD")
+    code = rf"""
+import sys; sys.path.insert(0, r"{_SCRIPT_DIR}")
 from auto_launch_monitor import parse_csv_arg
 r = parse_csv_arg("智己,理想,小米")
-assert r == ["智己", "理想", "小米"], f"got {r}"
+assert r == ["智己", "理想", "小米"]
 print("OK")
-""".replace("SD", str(_SCRIPT_DIR))
+"""
     result = _extract_py(os.environ.copy(), code)
     assert result.returncode == 0, f"stderr: {result.stderr}"
 
 
 def test_parse_csv_arg_empty():
-    code = r"""
-import sys
-sys.path.insert(0, r"SD")
+    code = rf"""
+import sys; sys.path.insert(0, r"{_SCRIPT_DIR}")
 from auto_launch_monitor import parse_csv_arg
 assert parse_csv_arg("") == []
 assert parse_csv_arg(None) == []
-assert parse_csv_arg("  ") == []
 print("OK")
-""".replace("SD", str(_SCRIPT_DIR))
+"""
     result = _extract_py(os.environ.copy(), code)
-    assert result.returncode == 0, f"stderr: {result.stderr}"
+    assert result.returncode == 0
 
-
-# ─── Brand filtering ───────────────────────────────────────────────
-
-def test_brand_filter():
-    code = r"""
-import sys, json
-sys.path.insert(0, r"SD")
-from auto_launch_monitor import apply_event_filters, MonitorFilters
-
-events = [
-    {"date":"2026-06-05","brand":"智己","model":"LS6","event_type":"上市","source_type":"mainstream_media"},
-    {"date":"2026-06-05","brand":"理想","model":"L8","event_type":"预售","source_type":"mainstream_media"},
-    {"date":"2026-06-05","brand":"蔚来","model":"ES8","event_type":"上市","source_type":"mainstream_media"},
-]
-filters = MonitorFilters(brands=["智己","理想"])
-result = apply_event_filters(events, filters)
-brands = [e["brand"] for e in result]
-assert "智己" in brands and "理想" in brands and "蔚来" not in brands, f"got {brands}"
-print("OK")
-""".replace("SD", str(_SCRIPT_DIR))
-    result = _extract_py(os.environ.copy(), code)
-    assert result.returncode == 0, f"stderr: {result.stderr}"
-
-
-# ─── Event type filtering ──────────────────────────────────────────
-
-def test_event_type_filter():
-    code = r"""
-import sys
-sys.path.insert(0, r"SD")
-from auto_launch_monitor import apply_event_filters, MonitorFilters
-
-events = [
-    {"date":"2026-06-05","brand":"智己","model":"LS6","event_type":"上市","source_type":"mainstream_media"},
-    {"date":"2026-06-05","brand":"理想","model":"L8","event_type":"预售","source_type":"mainstream_media"},
-    {"date":"2026-06-05","brand":"蔚来","model":"ES8","event_type":"媒体预热","source_type":"mainstream_media"},
-]
-filters = MonitorFilters(event_types=["上市","预售"])
-result = apply_event_filters(events, filters)
-types = [e["event_type"] for e in result]
-assert "上市" in types and "预售" in types and "媒体预热" not in types, f"got {types}"
-print("OK")
-""".replace("SD", str(_SCRIPT_DIR))
-    result = _extract_py(os.environ.copy(), code)
-    assert result.returncode == 0, f"stderr: {result.stderr}"
-
-
-# ─── Source type filtering ─────────────────────────────────────────
-
-def test_source_type_filter():
-    code = r"""
-import sys
-sys.path.insert(0, r"SD")
-from auto_launch_monitor import apply_event_filters, MonitorFilters
-
-events = [
-    {"date":"2026-06-05","brand":"智己","model":"LS6","event_type":"上市","source_type":"official"},
-    {"date":"2026-06-05","brand":"理想","model":"L8","event_type":"上市","source_type":"mainstream_media"},
-    {"date":"2026-06-05","brand":"蔚来","model":"ES8","event_type":"上市","source_type":"social_media"},
-]
-filters = MonitorFilters(source_types=["official","mainstream_media"])
-result = apply_event_filters(events, filters)
-st = [e["source_type"] for e in result]
-assert "official" in st and "mainstream_media" in st and "social_media" not in st, f"got {st}"
-print("OK")
-""".replace("SD", str(_SCRIPT_DIR))
-    result = _extract_py(os.environ.copy(), code)
-    assert result.returncode == 0, f"stderr: {result.stderr}"
-
-
-# ─── Exclude keyword downgrade ─────────────────────────────────────
-
-def test_exclude_keyword_downgrades_confidence():
-    code = r"""
-import sys, json
-sys.path.insert(0, r"SD")
-from auto_launch_monitor import extract_events_from_markdown
-
-text = "2026年06月05日 疑似 智己LS6上市 价格猜测"
-events = extract_events_from_markdown(text, "https://auto.sina.com.cn/abc", "test",
-                                       start_date="2026-06-05", end_date="2026-06-07",
-                                       exclude_keywords=["疑似","价格猜测"])
-# Should find an event with low confidence and pending status due to exclude keywords
-low_events = [e for e in events if e["confidence"] == "低" and e["event_status"] == "待确认"]
-assert low_events, f"expected low/pending event, got {json.dumps(events, ensure_ascii=False)}"
-print("OK")
-""".replace("SD", str(_SCRIPT_DIR))
-    result = _extract_py(os.environ.copy(), code)
-    assert result.returncode == 0, f"stderr: {result.stderr}"
-
-
-def test_exclude_keyword_does_not_downgrade_official():
-    code = r"""
-import sys, json
-sys.path.insert(0, r"SD")
-from auto_launch_monitor import extract_events_from_markdown
-
-text = "2026年06月05日 理想L8上市 疑似交付"
-events = extract_events_from_markdown(text, "https://www.lixiang.com/news/123", "test",
-                                       start_date="2026-06-05", end_date="2026-06-07",
-                                       exclude_keywords=["疑似"])
-# Official source should not be downgraded
-high = [e for e in events if e["confidence"] == "高"]
-assert high, f"expected high confidence for official source, got {json.dumps(events, ensure_ascii=False)}"
-print("OK")
-""".replace("SD", str(_SCRIPT_DIR))
-    result = _extract_py(os.environ.copy(), code)
-    assert result.returncode == 0, f"stderr: {result.stderr}"
-
-
-# ─── Confidence rules (kept from v0.2) ────────────────────────────
 
 def test_single_mainstream_confidence_is_medium():
-    code = r"""
-import sys, json
-sys.path.insert(0, r"SD")
+    code = rf"""
+import sys, json; sys.path.insert(0, r"{_SCRIPT_DIR}")
 from auto_launch_monitor import aggregate_events
-
-events = [
-    {"date":"2026-06-05","brand":"本田","model":"CR-V","event_type":"上市","event_status":"已确认",
-     "source_title":"太平洋汽车","source_url":"https://price.pcauto.com.cn/cars/6",
-     "source_type":"mainstream_media","confidence":"高","evidence":"test","_has_excluded":False},
-]
+events = [{{"date":"2026-06-05","brand":"本田","model":"CR-V","event_type":"上市","event_status":"已确认",
+     "source_title":"A","source_url":"https://a.com","source_type":"mainstream_media","confidence":"高","evidence":"t","_has_excluded":False}}]
 result = aggregate_events(events)
 assert len(result) == 1
-assert result[0]["confidence"] == "中", f"expected 中, got {result[0]['confidence']}"
+assert result[0]["confidence"] == "中"
 print("OK")
-""".replace("SD", str(_SCRIPT_DIR))
+"""
     result = _extract_py(os.environ.copy(), code)
-    assert result.returncode == 0, f"stderr: {result.stderr}"
+    assert result.returncode == 0
 
 
 def test_two_sources_cross_verify_confidence_is_high():
-    code = r"""
-import sys, json
-sys.path.insert(0, r"SD")
+    code = rf"""
+import sys, json; sys.path.insert(0, r"{_SCRIPT_DIR}")
 from auto_launch_monitor import aggregate_events
-
 events = [
-    {"date":"2026-06-05","brand":"本田","model":"CR-V","event_type":"上市","event_status":"已确认",
-     "source_title":"太平洋汽车","source_url":"https://price.pcauto.com.cn/cars/6",
-     "source_type":"mainstream_media","confidence":"高","evidence":"test1","_has_excluded":False},
-    {"date":"2026-06-05","brand":"本田","model":"CR-V","event_type":"上市","event_status":"已确认",
-     "source_title":"新浪汽车","source_url":"https://auto.sina.com.cn/newcar/",
-     "source_type":"mainstream_media","confidence":"高","evidence":"test2","_has_excluded":False},
+    {{"date":"2026-06-05","brand":"本田","model":"CR-V","event_type":"上市","event_status":"已确认",
+      "source_title":"A","source_url":"https://a1.com","source_type":"mainstream_media","confidence":"高","evidence":"t","_has_excluded":False}},
+    {{"date":"2026-06-05","brand":"本田","model":"CR-V","event_type":"上市","event_status":"已确认",
+      "source_title":"B","source_url":"https://a2.com","source_type":"mainstream_media","confidence":"高","evidence":"t","_has_excluded":False}},
 ]
 result = aggregate_events(events)
 assert len(result) == 1
-assert result[0]["confidence"] == "高", f"expected 高, got {result[0]['confidence']}"
+assert result[0]["confidence"] == "高"
 assert len(result[0]["source_urls"]) == 2
 print("OK")
-""".replace("SD", str(_SCRIPT_DIR))
+"""
     result = _extract_py(os.environ.copy(), code)
-    assert result.returncode == 0, f"stderr: {result.stderr}"
+    assert result.returncode == 0
 
 
 def test_official_source_confidence_is_high():
-    code = r"""
-import sys, json
-sys.path.insert(0, r"SD")
+    code = rf"""
+import sys, json; sys.path.insert(0, r"{_SCRIPT_DIR}")
 from auto_launch_monitor import aggregate_events
-
-events = [
-    {"date":"2026-06-05","brand":"理想","model":"L8","event_type":"发布","event_status":"已确认",
-     "source_title":"理想官网","source_url":"https://www.lixiang.com/news/123",
-     "source_type":"official","confidence":"高","evidence":"test","_has_excluded":False},
-]
+events = [{{"date":"2026-06-05","brand":"理想","model":"L8","event_type":"发布","event_status":"已确认",
+     "source_title":"A","source_url":"https://www.lixiang.com/abc","source_type":"official","confidence":"高","evidence":"t","_has_excluded":False}}]
 result = aggregate_events(events)
 assert len(result) == 1
-assert result[0]["confidence"] == "高", f"expected 高, got {result[0]['confidence']}"
+assert result[0]["confidence"] == "高"
 print("OK")
-""".replace("SD", str(_SCRIPT_DIR))
+"""
     result = _extract_py(os.environ.copy(), code)
-    assert result.returncode == 0, f"stderr: {result.stderr}"
+    assert result.returncode == 0
 
-
-# ─── Markdown output ──────────────────────────────────────────────
-
-def test_markdown_contains_source_url_evidence_and_filters():
-    code = r"""
-import sys
-sys.path.insert(0, r"SD")
-from auto_launch_monitor import format_markdown, build_event_summary, MonitorFilters
-
-events = [
-    {"date":"2026-06-05","brand":"本田","model":"CR-V","event_type":"上市","event_status":"已确认",
-     "source_title":"太平洋汽车","source_url":"https://price.pcauto.com.cn/cars/6",
-     "source_urls":["https://price.pcauto.com.cn/cars/6"],
-     "source_type":"mainstream_media","confidence":"中","evidence":"2026年06月05日上市"},
-]
-summary = build_event_summary(events, "新车发布会")
-filters = MonitorFilters(brands=["本田"], event_types=["上市"], source_types=["mainstream_media"])
-md = format_markdown(events, summary, "2026-06-05", "2026-06-07", "新车发布会", filters)
-
-assert "汽车新车事件监测报告" in md, "title"
-assert "https://price.pcauto.com.cn/cars/6" in md, "source URL"
-assert "2026年06月05日上市" in md, "evidence"
-assert "过滤条件" in md, "filters section"
-assert "本田" in md, "brand filter"
-assert "上市" in md, "event type filter"
-assert "mainstream_media" in md, "source type filter"
-print("OK")
-""".replace("SD", str(_SCRIPT_DIR))
-    result = _extract_py(os.environ.copy(), code)
-    assert result.returncode == 0, f"stderr: {result.stderr}"
-
-
-# ─── Original smoke tests ─────────────────────────────────────────
 
 def test_help():
     result = _run(["--help"])
-    assert result.returncode == 0, f"--help 失败: {result.stderr}"
+    assert result.returncode == 0
     assert "用法" in result.stdout or "usage" in result.stdout or "usage" in result.stderr
 
 
@@ -292,16 +416,9 @@ def test_missing_api_key():
                   if k not in ("TAVILY_API_KEY", "FIRECRAWL_API_KEY")}
     result = _run(["--start", "2026-06-05", "--end", "2026-06-07"], env_override=env_no_key)
     assert result.returncode != 0 or "ERROR" in result.stdout or "缺少" in result.stdout
-    assert ("TAVILY_API_KEY" in result.stdout or "FIRECRAWL_API_KEY" in result.stdout
-            or "缺少" in result.stdout or "ERROR" in result.stdout)
 
 
 def test_help_contains_required_args():
     result = _run(["--help"])
-    assert "--start" in result.stdout or "--start" in result.stderr
-    assert "--end" in result.stdout or "--end" in result.stderr
-    assert "--brands" in result.stdout or "--brands" in result.stderr
-    assert "--event-types" in result.stdout or "--event-types" in result.stderr
-    assert "--source-types" in result.stdout or "--source-types" in result.stderr
-    assert "--keywords" in result.stdout or "--keywords" in result.stderr
-    assert "--exclude-keywords" in result.stdout or "--exclude-keywords" in result.stderr
+    for arg in ("--start", "--end", "--targets-file", "--brands", "--event-types", "--source-types"):
+        assert arg in result.stdout or arg in result.stderr

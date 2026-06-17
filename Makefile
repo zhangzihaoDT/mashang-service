@@ -67,13 +67,14 @@ atp-demo:
 backtest-demo:
 	$(PYTHON) mashang_workspace/research_scripts/lock_predict_backtest.py --format json
 
-## 新车事件监测（Tavily + Firecrawl，支持品牌/事件类型/来源类型/关键词过滤）
+## 新车事件监测（Tavily + Firecrawl，支持品牌/事件类型/来源类型/关键词/关注车型列表过滤）
 auto-launch-monitor:
 	@if [ -f .env ]; then set -a; . .env 2>/dev/null; set +a; fi; \
 	$(PYTHON) mashang_workspace/research_scripts/auto_launch_monitor.py \
 		--start $(or $(START),$(shell date -v-7d +%Y-%m-%d)) \
 		--end $(or $(END),$(shell date +%Y-%m-%d)) \
 		--max-results $(or $(MAX_RESULTS),8) \
+		$(if $(TARGETS_FILE),--targets-file "$(TARGETS_FILE)") \
 		$(if $(BRANDS),--brands "$(BRANDS)") \
 		$(if $(EVENT_TYPES),--event-types "$(EVENT_TYPES)") \
 		$(if $(SOURCE_TYPES),--source-types "$(SOURCE_TYPES)") \
@@ -192,7 +193,7 @@ help:
 	@echo "make reference-eval  Reference Eval"
 	@echo "make atp-demo        ATP 月报 Demo"
 	@echo "make backtest-demo   锁单预测回测 Demo"
-	@echo "make auto-launch-monitor  新车事件监测（START= END= MAX_RESULTS=8 BRANDS= EVENT_TYPES= SOURCE_TYPES= KEYWORDS= EXCLUDE_KEYWORDS= 可选）"
+	@echo "make auto-launch-monitor  新车事件监测（START= END= MAX_RESULTS=8 TARGETS_FILE= BRANDS= EVENT_TYPES= SOURCE_TYPES= KEYWORDS= EXCLUDE_KEYWORDS= 可选）"
 	@echo ""
 	@echo "=== Audit ==="
 	@echo "make capability-audit  Capability Audit"
