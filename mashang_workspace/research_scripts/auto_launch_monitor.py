@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-汽车新车事件监测器 — Auto Launch Monitor (v0.4)
+汽车新车事件监测器 — Auto Launch Monitor (v0.4.5)
 
 Market Intelligence / New Vehicle Event Monitor
 
@@ -11,40 +11,37 @@ Market Intelligence / New Vehicle Event Monitor
 未覆盖: 价格变化、权益变化、销量异动、舆情热点、政策信息、渠道动作等
 
 体系位置:
-  市场情报 Market Intelligence
-  ├── 新车事件监测 auto_launch_monitor.py     <- 当前 v0.4
-  ├── 价格/权益监测 price_incentive_monitor.py
-  ├── 销量/订单异动监测 sales_signal_monitor.py
-  ├── 舆情热点监测 public_opinion_monitor.py
-  ├── 政策/法规监测 policy_monitor.py
-  └── 竞品动作周报 competitor_weekly_digest.py
+   市场情报 Market Intelligence
+   ├── 新车事件监测 auto_launch_monitor.py     <- 当前 v0.4.5
+   ├── 价格/权益监测 price_incentive_monitor.py
+   ├── 销量/订单异动监测 sales_signal_monitor.py
+   ├── 舆情热点监测 public_opinion_monitor.py
+   ├── 政策/法规监测 policy_monitor.py
+   └── 竞品动作周报 competitor_weekly_digest.py
 
 阶段定义:
-  v0.1 新车事件查询链路跑通
-  v0.2 新车事件质量规则增强
-  v0.3 可配置情报源 + 品牌/关键词过滤
-  v0.4 关注车型池监测 (当前)
+   v0.1 新车事件查询链路跑通
+   v0.2 新车事件质量规则增强
+   v0.3 可配置情报源 + 品牌/关键词过滤
+   v0.4 关注车型池监测
+   v0.4.1 Firecrawl 抓取容错 + 质量诊断
+   v0.4.2 结果污染修复 + 匹配强化
+   v0.4.3 规则层 final guard 收口
+   v0.4.4 降级传导 + snippet 污染 + 可信度收紧
+   v0.4.5 真实 E2E 中 brand conflict / polluted snippet 未触发修复 (当前)
 
-v0.4 新增功能:
-  - --targets-file: 读取关注车型列表 CSV，按 target_id 做搜索扩展、结果过滤、车型归一化
-  - 关注车型命中概览：展示每个目标车型的命中数、最高可信度、最新事件
-  - 未命中关注车型列表：展示没有事件的车型
-  - WatchTarget 数据结构 + match_event_to_target 匹配逻辑
-  - 聚合 key 升级为 target_id + date + event_type
+v0.4.5 修复:
+   - brand conflict 规则改为 evidence 专属校验（source_title 不再作为豁免证据）
+   - model conflict 增加 OTHER_MODEL_PATTERN_MARKERS 辅助判断
+   - polluted snippet 检测扩展（覆盖 dy_recommends / post2020 / model_ 等真实污染）
+   - polluted snippet 无 target strong alias 时直接过滤
+   - 新增 normalize_text_value / get_event_text_blob 字段标准化
 
 用法:
     python mashang_workspace/research_scripts/auto_launch_monitor.py \\
         --start 2026-06-05 --end 2026-06-07 \\
         --targets-file mashang_workspace/configs/ls8_competitor_watchlist.csv \\
-        --source-types official,mainstream_media,industry_media \\
-        --format markdown --output mashang_workspace/outputs/reports/
-
-    # 未传 --targets-file 时保持 v0.3 行为不变
-    python mashang_workspace/research_scripts/auto_launch_monitor.py \\
-        --start 2026-06-05 --end 2026-06-07 \\
-        --brands "智己,理想,小米" \\
-        --event-types "发布会,上市,预售" \\
-        --source-types "official,mainstream_media,industry_media"
+        --source-types official,mainstream_media,industry_media
 
 环境变量:
     TAVILY_API_KEY      (必填) Tavily 搜索 API Key
@@ -54,7 +51,7 @@ v0.4 新增功能:
     - 官方来源（品牌官网）= 高
     - 2 个及以上主流汽车媒体交叉验证同一事件 = 高
     - 单一主流汽车媒体 = 中
-    - 自媒体、论坛、二次转载、无明确日期 = 低
+    - 自媒体、论坛、聚合页、二次转载、无明确日期 = 低
 """
 
 import argparse
@@ -63,6 +60,7 @@ import json
 import os
 import re
 import sys
+import time
 from collections import Counter
 from dataclasses import dataclass, field
 from datetime import date, datetime
@@ -81,6 +79,25 @@ DEFAULT_KEYWORDS = ["新车上市", "新车预售", "新车发布会", "新车�
 DEFAULT_EXCLUDE_KEYWORDS = [
     "谍照", "假想图", "申报图", "路试", "曝光", "或将", "预计", "有望", "疑似", "网传", "价格猜测",
 ]
+IRRELEVANT_KEYWORDS = {"哈兰德", "世界杯", "中国女排", "欧冠", "英超"}
+
+CONFIRMED_EVENT_VERBS = {"正式上市", "上市", "开启预售", "开启交付", "正式发布", "发布", "首发亮相", "官图发布"}
+
+POLLUTED_SNIPPET_MARKERS = {
+    "相关资讯", "推荐阅读", "查看更多评论", "推荐视频",
+    "询底价", "点击查看", "车型报价", "对比评测",
+    "车型新闻", "全部新车资讯", "导购", "试驾", "测评",
+    "自驾游", "用车",
+    "dy_recommends", "post2020",
+    "spss=dy_author", "[![",
+    "model_",
+    "db.m.auto.sohu.com/model_",
+}
+
+OTHER_MODEL_PATTERN_MARKERS = {
+    "EX90", "ES90", "宋U", "贝塔T1", "海豹08", "S07", "乐道L60",
+    "插混中型SUV", "系新爆款",
+}
 
 SOURCE_TYPE_MAP = {
     "official": "official",
@@ -88,10 +105,14 @@ SOURCE_TYPE_MAP = {
     "industry_media": "industry_media",
     "social": "social_media",
     "social_media": "social_media",
+    "aggregator": "aggregator",
+    "ugc_media": "ugc_media",
     "forum": "forum",
     "low": "social_media",
     "normal": "unknown",
 }
+
+LOW_QUALITY_SOURCE_TYPES = {"aggregator", "social_media", "ugc_media", "forum", "unknown"}
 
 OFFICIAL_DOMAINS = [
     "lixiang.com", "xiaopeng.com", "saicmotor.com",
@@ -113,11 +134,19 @@ INDUSTRY_DOMAINS = [
 
 LOW_QUALITY_DOMAINS = [
     "zhihu.com", "baijiahao.baidu.com", "toutiao.com",
-    "k.sina.com.cn", "sohu.com/a", "weibo.com",
+    "k.sina.com.cn", "weibo.com",
 ]
 
 SOCIAL_MEDIA_DOMAINS = [
     "chejiahao.autohome.com.cn",
+]
+
+AGGREGATOR_DOMAINS = [
+    "tags.sina.com.cn",
+]
+
+UGC_DOMAINS = [
+    "163.com/dy",
 ]
 
 
@@ -143,10 +172,28 @@ class MonitorFilters:
 class CrawlDiagnostics:
     generated_query_count: int = 0
     dedup_url_count: int = 0
+    pre_crawl_skipped_count: int = 0
+    pre_crawl_skipped_urls: list[dict[str, str]] = field(default_factory=list)
     planned_crawl_count: int = 0
     crawled_page_count: int = 0
     failed_crawl_count: int = 0
     failed_urls: list[dict[str, str]] = field(default_factory=list)
+    raw_extracted_event_count: int = 0
+    source_filtered_count: int = 0
+    target_matched_event_count: int = 0
+    conflict_filtered_count: int = 0
+    final_event_count: int = 0
+    conflict_filtered_events: list[dict[str, str]] = field(default_factory=list)
+    final_guard_filtered_count: int = 0
+    final_guard_filtered_events: list[dict] = field(default_factory=list)
+    out_of_range_event_count: int = 0
+    brand_model_conflict_count: int = 0
+    evidence_irrelevant_count: int = 0
+    date_basis_downgraded_count: int = 0
+    polluted_snippet_count: int = 0
+    confidence_downgraded_count: int = 0
+    status_downgraded_count: int = 0
+    degrade_samples: list[dict] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -237,36 +284,346 @@ def load_watch_targets(targets_file: str | Path) -> list[WatchTarget]:
     return targets
 
 
-# ─── Target matching ─────────────────────────────────────────────
+# ─── Target matching helpers ─────────────────────────────────────
 
-def match_event_to_target(event, targets: list[WatchTarget]) -> Optional[WatchTarget]:
+_SHORT_MODEL_ALIASES = {"i6", "M7", "GX", "06", "900", "8X", "L80", "D19", "S600"}
+
+
+def is_strong_model_alias(alias: str) -> bool:
+    if alias in _SHORT_MODEL_ALIASES:
+        return False
+    if len(alias) <= 2 and any(c.isdigit() for c in alias):
+        return False
+    return True
+
+
+def has_target_brand_signal(text: str, target: WatchTarget) -> bool:
+    return any(alias in text for alias in target.brand_aliases)
+
+
+def has_target_model_signal(text: str, target: WatchTarget) -> bool:
+    return any(alias in text for alias in target.model_aliases)
+
+
+def is_strong_model_match(text: str, target: WatchTarget) -> bool:
+    for alias in target.model_aliases:
+        if alias in text and is_strong_model_alias(alias):
+            return True
+    return False
+
+
+# ─── v0.4.5: Text normalization helpers ─────────────────────────
+
+def normalize_text_value(value: object) -> str:
+    if value is None:
+        return ""
+    s = str(value).strip()
+    if s in ("-",):
+        return ""
+    return s
+
+
+def get_event_text_blob(event: dict) -> str:
+    fields = [
+        event.get("brand") or "",
+        event.get("model") or "",
+        event.get("target_display_name") or "",
+        event.get("title") or "",
+        event.get("source_title") or "",
+        event.get("evidence") or "",
+        event.get("source_url") or "",
+    ]
+    return " ".join(f.strip() for f in fields if f.strip())
+
+
+# ─── Conflict detection ──────────────────────────────────────────
+
+def detect_target_conflict(event, target: WatchTarget, all_targets: list[WatchTarget]) -> tuple[bool, str]:
+    eb = event.get("brand", "")
+    if not eb:
+        return False, ""
+
+    if eb in target.brand_aliases:
+        return False, ""
+
     text_pool = " ".join([
-        event.get("brand", ""),
+        event.get("source_title", ""), event.get("evidence", ""),
         event.get("model", ""),
-        event.get("title", ""),
-        event.get("source_title", ""),
-        event.get("evidence", ""),
     ])
 
-    for t in targets:
-        brand_hit = any(alias in text_pool for alias in t.brand_aliases)
-        if not brand_hit:
+    for ot in all_targets:
+        if ot.target_id == target.target_id:
             continue
-        model_hit = any(alias in text_pool for alias in t.model_aliases)
-        if model_hit:
-            return t
+        if eb in ot.brand_aliases:
+            ot_model_hit = any(ma in text_pool for ma in ot.model_aliases)
+            if ot_model_hit:
+                return True, f"brand '{eb}' matches {ot.target_id}"
 
-    for t in targets:
-        brand_hit = any(alias in text_pool for alias in t.brand_aliases)
-        if brand_hit:
-            model_strong = any(
-                alias in event.get("model", "") or alias in event.get("source_title", "")
-                for alias in t.model_aliases
-            )
-            if model_strong:
-                return t
+    return False, ""
 
-    return None
+
+# ─── v0.4.5: Brand/model conflict hard filter (evidence-based) ────
+
+def is_brand_model_conflict(event: dict, target: WatchTarget, all_targets: list[WatchTarget]) -> tuple[bool, str]:
+    eb = normalize_text_value(event.get("brand"))
+    em = normalize_text_value(event.get("model"))
+    if not eb and not em:
+        return False, ""
+
+    evidence_text = event.get("evidence") or ""
+    source_title = event.get("source_title") or ""
+    full_text_blob = get_event_text_blob(event)
+
+    def evidence_has_target_strong_signal() -> bool:
+        for alias in target.model_aliases:
+            if alias in evidence_text and is_strong_model_alias(alias):
+                return True
+        hbs = has_target_brand_signal(evidence_text, target)
+        hms = has_target_model_signal(evidence_text, target)
+        if hbs and hms:
+            return True
+        if hbs:
+            for alias in target.model_aliases:
+                if alias in evidence_text:
+                    return True
+        return False
+
+    evidence_ok = evidence_has_target_strong_signal()
+
+    if eb and eb not in target.brand_aliases:
+        if not evidence_ok:
+            return True, f"brand '{eb}' conflicts with target '{target.target_id}'"
+
+    if em and em not in target.model_aliases:
+        if not evidence_ok:
+            for marker in OTHER_MODEL_PATTERN_MARKERS:
+                if marker in em or marker in evidence_text:
+                    return True, f"model '{em}' matches other model marker '{marker}'"
+            if not evidence_ok:
+                return True, f"model '{em}' conflicts with target '{target.target_id}'"
+
+    return False, ""
+
+
+# ─── v0.4.3: Evidence relevance guard ──────────────────────────────
+
+def has_final_target_evidence(event: dict, target: WatchTarget) -> bool:
+    text_pool = " ".join(filter(None, [
+        event.get("evidence") or "",
+        event.get("source_title") or "",
+    ]))
+
+    for alias in target.model_aliases:
+        if alias in text_pool and is_strong_model_alias(alias):
+            return True
+
+    has_brand = has_target_brand_signal(text_pool, target)
+    has_model = has_target_model_signal(text_pool, target)
+    if has_brand and has_model:
+        return True
+
+    if has_brand:
+        for alias in target.model_aliases:
+            if alias in text_pool:
+                return True
+
+    return False
+
+
+# ─── v0.4.5: Polluted snippet detection (extended) ────────────────
+
+def is_polluted_snippet(event: dict) -> tuple[bool, str]:
+    text_pool = " ".join(filter(None, [
+        event.get("evidence") or "",
+        event.get("source_title") or "",
+        event.get("title") or "",
+        event.get("source_url") or "",
+    ]))
+    for marker in POLLUTED_SNIPPET_MARKERS:
+        if marker in text_pool:
+            return True, marker
+    return False, ""
+
+
+# ─── v0.4.4: Post-aggregation confidence normalization ─────────────
+
+def post_aggregate_normalize(events: list[dict], diagnostics: CrawlDiagnostics | None = None) -> list[dict]:
+    for e in events:
+        date_basis = e.get("date_basis", "")
+        evidence = e.get("evidence", "")
+        source_type = e.get("source_type", "")
+        unique_urls = e.get("source_urls", [])
+        has_official = "official" in source_type
+
+        polluted, p_marker = is_polluted_snippet(e)
+
+        downgrade_reason = None
+
+        if polluted:
+            if has_official and len(unique_urls) >= 2:
+                new_conf = "中"
+            else:
+                new_conf = "低"
+            if e.get("confidence") != new_conf:
+                old_conf = e.get("confidence", "")
+                e["confidence"] = new_conf
+                downgrade_reason = f"polluted_snippet:{p_marker}"
+                if diagnostics:
+                    diagnostics.confidence_downgraded_count += 1
+            if e.get("event_status") == "已确认":
+                e["event_status"] = "待确认"
+                if diagnostics:
+                    diagnostics.status_downgraded_count += 1
+
+        if date_basis == "source_publish_date" and not polluted:
+            new_conf = e.get("confidence", "")
+            if new_conf == "高":
+                e["confidence"] = "中"
+                new_conf = "中"
+                downgrade_reason = "date_basis_source_publish_date"
+                if diagnostics:
+                    diagnostics.confidence_downgraded_count += 1
+            evidence_text = " ".join(filter(None, [
+                e.get("evidence") or "",
+                e.get("source_title") or "",
+            ]))
+            has_verb = any(verb in evidence_text for verb in CONFIRMED_EVENT_VERBS)
+            if not has_verb and e.get("event_status") == "已确认":
+                e["event_status"] = "待确认"
+                if diagnostics:
+                    diagnostics.status_downgraded_count += 1
+
+        if downgrade_reason:
+            if diagnostics and len(diagnostics.degrade_samples) < 10:
+                diagnostics.degrade_samples.append({
+                    "target_id": e.get("target_id", ""),
+                    "reason": downgrade_reason,
+                    "before_status": e.get("event_status", ""),
+                    "after_status": e.get("event_status", ""),
+                    "before_confidence": e.get("confidence", ""),
+                    "after_confidence": e.get("confidence", ""),
+                    "evidence_snippet": (e.get("evidence") or "")[:60],
+                })
+
+    return events
+
+
+# ─── v0.4.3: Final event guard ─────────────────────────────────────
+
+def apply_final_event_guard(
+    events: list[dict],
+    targets: list[WatchTarget] | None,
+    *,
+    start_date: str,
+    end_date: str,
+    diagnostics: CrawlDiagnostics | None = None,
+) -> list[dict]:
+    guarded = []
+    for event in events:
+        target_id = event.get("target_id")
+        target = None
+        if target_id and targets:
+            for t in targets:
+                if t.target_id == target_id:
+                    target = t
+                    break
+
+        reason = None
+
+        ed = (event.get("event_date") or "").strip()
+        if ed:
+            if ed < start_date or ed > end_date:
+                reason = "event_date_out_of_range"
+                if diagnostics:
+                    diagnostics.out_of_range_event_count += 1
+
+        if not reason and target:
+            conflict, conflict_reason = is_brand_model_conflict(event, target, targets or [])
+            if conflict:
+                reason = f"brand_model_conflict: {conflict_reason}"
+                if diagnostics:
+                    diagnostics.brand_model_conflict_count += 1
+
+        if not reason and target:
+            if not has_final_target_evidence(event, target):
+                reason = "missing_target_evidence"
+                if diagnostics:
+                    diagnostics.evidence_irrelevant_count += 1
+
+        if not reason:
+            text_pool = " ".join(filter(None, [
+                event.get("evidence") or "",
+                event.get("source_title") or "",
+            ]))
+            if any(ik in text_pool for ik in IRRELEVANT_KEYWORDS):
+                reason = "irrelevant_keywords"
+                if diagnostics:
+                    diagnostics.evidence_irrelevant_count += 1
+
+        polluted, p_marker = is_polluted_snippet(event)
+        if polluted and diagnostics:
+            diagnostics.polluted_snippet_count += 1
+
+        if reason or polluted:
+            if reason:
+                record_reason = reason
+            elif target and polluted:
+                evidence_text = event.get("evidence") or ""
+                source_title = event.get("source_title") or ""
+                has_target_signal = False
+                for alias in target.model_aliases:
+                    if alias in evidence_text and is_strong_model_alias(alias):
+                        has_target_signal = True
+                        break
+                if not has_target_signal:
+                    if has_target_brand_signal(evidence_text, target):
+                        for alias in target.model_aliases:
+                            if alias in evidence_text:
+                                has_target_signal = True
+                                break
+                if not has_target_signal and not has_target_brand_signal(source_title, target):
+                    record_reason = f"polluted_snippet_without_target_signal:{p_marker}"
+                else:
+                    record_reason = None
+                    event["_polluted"] = True
+                    event["_polluted_marker"] = p_marker
+            else:
+                record_reason = None
+                event["_polluted"] = True
+                event["_polluted_marker"] = p_marker
+
+            if record_reason:
+                if diagnostics:
+                    diagnostics.final_guard_filtered_count += 1
+                    if len(diagnostics.final_guard_filtered_events) < 10:
+                        diagnostics.final_guard_filtered_events.append({
+                            "target_id": target_id or "",
+                            "brand": event.get("brand", ""),
+                            "model": event.get("model", ""),
+                            "event_date": event.get("event_date", ""),
+                            "source_publish_date": event.get("source_publish_date", ""),
+                            "reason": record_reason,
+                            "evidence_snippet": (event.get("evidence") or "")[:80],
+                        })
+                continue
+
+        db = event.get("date_basis") or ""
+        spd = event.get("source_publish_date") or ""
+        if db == "source_publish_date" and spd:
+            event["date_confidence"] = "low"
+            evidence = (event.get("evidence") or "")
+            has_confirmed_verb = any(verb in evidence for verb in CONFIRMED_EVENT_VERBS)
+            if not has_confirmed_verb:
+                if event.get("event_status") == "已确认":
+                    event["event_status"] = "待确认"
+                    if diagnostics:
+                        diagnostics.status_downgraded_count += 1
+            if diagnostics:
+                diagnostics.date_basis_downgraded_count += 1
+
+        guarded.append(event)
+
+    return guarded
 
 
 # ─── CLI ─────────────────────────────────────────────────────────
@@ -371,11 +728,24 @@ def dedup_urls(results):
     return deduped
 
 
+# ─── Domain classification ───────────────────────────────────────
+
 def classify_domain(url):
     domain = urlparse(url).netloc.lower()
+    path = urlparse(url).path.lower()
+
     for sd in SOCIAL_MEDIA_DOMAINS:
         if sd in domain:
             return "social"
+
+    for ad in AGGREGATOR_DOMAINS:
+        if ad in domain:
+            return "aggregator"
+
+    for ud in UGC_DOMAINS:
+        if ud in domain or (ud.split("/")[0] in domain and ud.split("/")[1] in path):
+            return "ugc_media"
+
     for od in OFFICIAL_DOMAINS:
         if od in domain:
             return "official"
@@ -402,11 +772,46 @@ def has_exclude_keywords(text, exclude_keywords):
     return False
 
 
+# ─── URL pre-filter ──────────────────────────────────────────────
+
+def should_skip_url_before_crawl(url: str, source_types: list[str]) -> tuple[bool, str]:
+    raw_type = classify_domain(url)
+    st = map_source_type(raw_type)
+
+    if st in LOW_QUALITY_SOURCE_TYPES and st not in source_types:
+        return True, f"source_type '{st}' not in allowed list"
+
+    return False, ""
+
+
 # ─── Event extraction ────────────────────────────────────────────
+
+def try_parse_event_date(text: str) -> tuple[str, str, str]:
+    patterns = [
+        (r"于\s*(\d{1,2})\s*月\s*(\d{1,2})\s*日", "high"),
+        (r"(\d{4})年(\d{1,2})月(\d{1,2})日", "high"),
+        (r"(\d{1,2})月(\d{1,2})日.*?(?:上市|发布|预售|亮相|交付)", "medium"),
+    ]
+    for pat, conf in patterns:
+        m = re.search(pat, text)
+        if m:
+            groups = m.groups()
+            if len(groups) == 2:
+                month, day = int(groups[0]), int(groups[1])
+                now = datetime.now()
+                year = now.year
+                if month < 1 or month > 12 or day < 1 or day > 31:
+                    continue
+                return f"{year:04d}-{month:02d}-{day:02d}", "event_date", conf
+            elif len(groups) == 3:
+                return f"{int(groups[0]):04d}-{int(groups[1]):02d}-{int(groups[2]):02d}", "event_date", conf
+    return "", "", ""
+
 
 def extract_events_from_markdown(markdown_text, url, source_title,
                                   start_date=None, end_date=None,
-                                  exclude_keywords=None):
+                                  exclude_keywords=None,
+                                  source_publish_date=None):
     events = []
     text = markdown_text
     exclude_keywords = exclude_keywords or []
@@ -443,16 +848,30 @@ def extract_events_from_markdown(markdown_text, url, source_title,
                     brand, model = extract_brand_model(context)
 
                     is_excluded = has_exclude_keywords(context, exclude_keywords)
+                    has_irrelevant = any(ik in context for ik in IRRELEVANT_KEYWORDS)
 
                     if is_excluded and source_type_raw not in ("official",):
+                        event_status = "待确认"
+                        confidence = "低"
+                    elif has_irrelevant:
                         event_status = "待确认"
                         confidence = "低"
                     else:
                         event_status = "待确认" if ev_type == "媒体预热" else "已确认"
                         confidence = "高"
 
+                    event_date, date_basis, date_confidence = try_parse_event_date(context)
+                    if not event_date:
+                        event_date = ev_date
+                        date_basis = "source_publish_date"
+                        date_confidence = "low"
+
                     events.append({
-                        "date": ev_date,
+                        "date": event_date,
+                        "event_date": event_date if date_basis == "event_date" else "",
+                        "source_publish_date": source_publish_date or ev_date,
+                        "date_basis": date_basis,
+                        "date_confidence": date_confidence,
                         "brand": brand,
                         "model": model,
                         "event_type": ev_type,
@@ -462,7 +881,7 @@ def extract_events_from_markdown(markdown_text, url, source_title,
                         "source_type": map_source_type(source_type_raw),
                         "confidence": confidence,
                         "evidence": evidence[:120],
-                        "_has_excluded": is_excluded,
+                        "_has_excluded": is_excluded or has_irrelevant,
                     })
                     break
 
@@ -490,16 +909,30 @@ def extract_events_from_markdown(markdown_text, url, source_title,
                     brand, model = extract_brand_model(context)
 
                     is_excluded = has_exclude_keywords(context, exclude_keywords)
+                    has_irrelevant = any(ik in context for ik in IRRELEVANT_KEYWORDS)
 
                     if is_excluded and source_type_raw not in ("official",):
+                        event_status = "待确认"
+                        confidence = "低"
+                    elif has_irrelevant:
                         event_status = "待确认"
                         confidence = "低"
                     else:
                         event_status = "待确认" if ev_type == "媒体预热" else "已确认"
                         confidence = "高"
 
+                    event_date, date_basis, date_confidence = try_parse_event_date(context)
+                    if not event_date:
+                        event_date = ev_date
+                        date_basis = "source_publish_date"
+                        date_confidence = "low"
+
                     events.append({
-                        "date": ev_date,
+                        "date": event_date,
+                        "event_date": event_date if date_basis == "event_date" else "",
+                        "source_publish_date": source_publish_date or ev_date,
+                        "date_basis": date_basis,
+                        "date_confidence": date_confidence,
                         "brand": brand,
                         "model": model,
                         "event_type": ev_type,
@@ -509,7 +942,7 @@ def extract_events_from_markdown(markdown_text, url, source_title,
                         "source_type": map_source_type(source_type_raw),
                         "confidence": confidence,
                         "evidence": evidence[:120],
-                        "_has_excluded": is_excluded,
+                        "_has_excluded": is_excluded or has_irrelevant,
                     })
                     break
 
@@ -557,7 +990,7 @@ def scrape_url_with_retry(firecrawl_app, url, max_retries=2):
             return {"url": url, "success": False, "error": "empty_markdown", "retries": attempt}
         except Exception as e:
             if attempt < max_retries:
-                __import__("time").sleep(1.0 * (attempt + 1))
+                time.sleep(1.0 * (attempt + 1))
             last_error = e
     return {"url": url, "success": False,
             "error": str(last_error)[:200] if last_error else "unknown",
@@ -587,7 +1020,37 @@ def normalize_date(d):
     return d.isoformat() if isinstance(d, date) else d
 
 
-# ─── Filtering ───────────────────────────────────────────────────
+# ─── Target matching ─────────────────────────────────────────────
+
+def match_event_to_target(event, targets: list[WatchTarget]) -> Optional[WatchTarget]:
+    text_pool = " ".join([
+        event.get("brand", ""),
+        event.get("model", ""),
+        event.get("source_title", ""),
+        event.get("evidence", ""),
+    ])
+
+    for t in targets:
+        brand_hit = has_target_brand_signal(text_pool, t)
+        if not brand_hit:
+            continue
+
+        model_hit = has_target_model_signal(text_pool, t)
+        if model_hit:
+            model_strong = is_strong_model_match(text_pool, t)
+            if model_strong:
+                return t
+            if any(alias in text_pool for alias in t.model_aliases):
+                return t
+
+    for t in targets:
+        brand_hit = has_target_brand_signal(text_pool, t)
+        if brand_hit:
+            if is_strong_model_match(text_pool, t):
+                return t
+
+    return None
+
 
 def match_events_to_targets(events, targets: list[WatchTarget]):
     matched = []
@@ -601,6 +1064,8 @@ def match_events_to_targets(events, targets: list[WatchTarget]):
             matched.append(e)
     return matched
 
+
+# ─── Filtering ───────────────────────────────────────────────────
 
 def apply_event_filters(events, filters: MonitorFilters):
     filtered = []
@@ -642,6 +1107,10 @@ def aggregate_events(events):
                 "target_display_name": e.get("target_display_name"),
                 "target_group": e.get("target_group"),
                 "target_priority": e.get("target_priority"),
+                "event_date": e.get("event_date", ""),
+                "source_publish_date": e.get("source_publish_date", ""),
+                "date_basis": e.get("date_basis", ""),
+                "date_confidence": e.get("date_confidence", ""),
             }
         b = buckets[key]
         if e["source_url"] not in b["source_urls"]:
@@ -692,6 +1161,10 @@ def aggregate_events(events):
             "source_type": "|".join(sorted(b["source_types_raw"])),
             "confidence": confidence,
             "evidence": b["evidence"],
+            "event_date": b.get("event_date", ""),
+            "source_publish_date": b.get("source_publish_date", ""),
+            "date_basis": b.get("date_basis", ""),
+            "date_confidence": b.get("date_confidence", ""),
         }
         if b.get("target_id"):
             row.update({
@@ -756,7 +1229,9 @@ def build_target_overview(targets: list[WatchTarget], events):
                 "best_confidence": best_conf,
                 "latest_event": latest_str,
             })
-        else:
+
+    for t in targets:
+        if t.target_id not in hit_target_ids:
             miss_rows.append({
                 "target_id": t.target_id,
                 "display_name": t.display_name,
@@ -812,11 +1287,25 @@ def main():
         return 1
 
     deduped.sort(key=lambda x: (_priority(x.get("url", "")), -x.get("score", 0)))
-    candidates = deduped[:args.max_results]
+
+    pre_skip = []
+    keep = []
+    for r in deduped:
+        url = r.get("url", "")
+        skip, reason = should_skip_url_before_crawl(url, filters.source_types)
+        if skip:
+            pre_skip.append({"url": url, "reason": reason})
+        else:
+            keep.append(r)
+
+    diagnostics.pre_crawl_skipped_count = len(pre_skip)
+    diagnostics.pre_crawl_skipped_urls = pre_skip[:10]
+
+    candidates = keep[:args.max_results]
 
     scrape_targets_list = [r["url"] for r in candidates if r.get("url")]
     diagnostics.planned_crawl_count = len(scrape_targets_list)
-    print(f"[INFO] 候选 URL 去重后: {len(deduped)}，将抓取: {len(scrape_targets_list)}", file=sys.stderr)
+    print(f"[INFO] 候选 URL 去重后: {len(deduped)}，预过滤跳过: {len(pre_skip)}，将抓取: {len(scrape_targets_list)}", file=sys.stderr)
 
     scraped_pages = scrape_urls(firecrawl_app, scrape_targets_list, diagnostics=diagnostics)
 
@@ -827,15 +1316,53 @@ def main():
             page["markdown"], page["url"], source_title,
             start_date=start_str, end_date=end_str,
             exclude_keywords=filters.exclude_keywords,
+            source_publish_date=None,
         )
         raw_events.extend(events)
 
+    diagnostics.raw_extracted_event_count = len(raw_events)
+
     raw_events = apply_event_filters(raw_events, filters)
+    diagnostics.source_filtered_count = diagnostics.raw_extracted_event_count - len(raw_events)
 
     if targets:
         raw_events = match_events_to_targets(raw_events, targets)
+        diagnostics.target_matched_event_count = len(raw_events)
+
+        conflict_filtered = []
+        for e in raw_events:
+            tid = e.get("target_id")
+            if not tid:
+                conflict_filtered.append(e)
+                continue
+            t = next((t for t in targets if t.target_id == tid), None)
+            if not t:
+                conflict_filtered.append(e)
+                continue
+            conflict, reason = detect_target_conflict(e, t, targets)
+            if conflict:
+                diagnostics.conflict_filtered_count += 1
+                diagnostics.conflict_filtered_events.append({
+                    "target_id": tid,
+                    "event_brand": e.get("brand", ""),
+                    "event_model": e.get("model", ""),
+                    "reason": reason,
+                })
+                continue
+            conflict_filtered.append(e)
+        raw_events = conflict_filtered
+
+    raw_events = apply_final_event_guard(
+        raw_events, targets,
+        start_date=start_str, end_date=end_str,
+        diagnostics=diagnostics,
+    )
 
     events = aggregate_events(raw_events)
+
+    events = post_aggregate_normalize(events, diagnostics=diagnostics)
+    diagnostics.final_event_count = len(events)
+
     summary = build_event_summary(events, args.topic)
 
     watchlist_info = None
@@ -860,9 +1387,23 @@ def main():
             "diagnostics": {
                 "generated_query_count": diagnostics.generated_query_count,
                 "dedup_url_count": diagnostics.dedup_url_count,
+                "pre_crawl_skipped_count": diagnostics.pre_crawl_skipped_count,
                 "planned_crawl_count": diagnostics.planned_crawl_count,
                 "crawled_page_count": diagnostics.crawled_page_count,
                 "failed_crawl_count": diagnostics.failed_crawl_count,
+                "raw_extracted_event_count": diagnostics.raw_extracted_event_count,
+                "source_filtered_count": diagnostics.source_filtered_count,
+                "target_matched_event_count": diagnostics.target_matched_event_count,
+                "conflict_filtered_count": diagnostics.conflict_filtered_count,
+                "final_guard_filtered_count": diagnostics.final_guard_filtered_count,
+                "out_of_range_event_count": diagnostics.out_of_range_event_count,
+                "brand_model_conflict_count": diagnostics.brand_model_conflict_count,
+                "evidence_irrelevant_count": diagnostics.evidence_irrelevant_count,
+                "date_basis_downgraded_count": diagnostics.date_basis_downgraded_count,
+                "polluted_snippet_count": diagnostics.polluted_snippet_count,
+                "confidence_downgraded_count": diagnostics.confidence_downgraded_count,
+                "status_downgraded_count": diagnostics.status_downgraded_count,
+                "final_event_count": diagnostics.final_event_count,
                 "failed_urls": diagnostics.failed_urls[:10],
             },
             "summary": summary,
@@ -882,7 +1423,8 @@ def main():
             flat.append(row)
         if flat:
             fieldnames = ["target_id", "target_display_name", "target_group", "target_priority",
-                          "date", "brand", "model", "event_type", "event_status",
+                          "date", "event_date", "source_publish_date", "date_basis", "date_confidence",
+                          "brand", "model", "event_type", "event_status",
                           "confidence", "source_type", "source_url", "evidence"]
             with open(out_path, "w", newline="", encoding="utf-8") as f:
                 writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
@@ -1004,25 +1546,27 @@ def format_markdown(events, summary, start_str, end_str, topic,
     lines.append("## 事件列表")
     lines.append("")
     if any(e.get("target_id") for e in events):
-        lines.append("| target_id | 关注车型 | 日期 | 品牌 | 车型 | 事件类型 | 状态 | 可信度 | 来源 | 证据 |")
-        lines.append("|-----------|---------|------|------|------|----------|------|--------|------|------|")
+        lines.append("| target_id | 关注车型 | 日期 | 日期依据 | 品牌 | 车型 | 事件类型 | 状态 | 可信度 | 来源 | 证据 |")
+        lines.append("|-----------|---------|------|---------|------|------|----------|------|--------|------|------|")
         for e in events:
             tid = e.get("target_id", "-")
             tdn = e.get("target_display_name", "-")
-            source_link = f"[{e['source_title'][:30]}]({e['source_url']})" if e['source_url'] else e['source_title'][:30]
+            source_link = f"[{e['source_title'][:25]}]({e['source_url']})" if e['source_url'] else e['source_title'][:25]
+            brand = e.get("brand", "") or "-"
+            model = e.get("model", "") or "-"
+            evidence = e.get("evidence", "")[:40]
+            db = e.get("date_basis", "-")
+            lines.append(f"| {tid} | {tdn} | {e['date']} | {db} | {brand} | {model} | {e['event_type']} | {e['event_status']} | {e['confidence']} | {source_link} | {evidence} |")
+    else:
+        lines.append("| 日期 | 日期依据 | 品牌 | 车型 | 事件类型 | 状态 | 可信度 | 来源 | 证据 |")
+        lines.append("|------|---------|------|------|----------|------|--------|------|------|")
+        for e in events:
+            source_link = f"[{e['source_title'][:25]}]({e['source_url']})" if e['source_url'] else e['source_title'][:25]
             brand = e.get("brand", "") or "-"
             model = e.get("model", "") or "-"
             evidence = e.get("evidence", "")[:50]
-            lines.append(f"| {tid} | {tdn} | {e['date']} | {brand} | {model} | {e['event_type']} | {e['event_status']} | {e['confidence']} | {source_link} | {evidence} |")
-    else:
-        lines.append("| 日期 | 品牌 | 车型 | 事件类型 | 状态 | 可信度 | 来源 | 证据 |")
-        lines.append("|------|------|------|----------|------|--------|------|------|")
-        for e in events:
-            source_link = f"[{e['source_title'][:30]}]({e['source_url']})" if e['source_url'] else e['source_title'][:30]
-            brand = e.get("brand", "") or "-"
-            model = e.get("model", "") or "-"
-            evidence = e.get("evidence", "")[:60]
-            lines.append(f"| {e['date']} | {brand} | {model} | {e['event_type']} | {e['event_status']} | {e['confidence']} | {source_link} | {evidence} |")
+            db = e.get("date_basis", "-")
+            lines.append(f"| {e['date']} | {db} | {brand} | {model} | {e['event_type']} | {e['event_status']} | {e['confidence']} | {source_link} | {evidence} |")
 
     lines.append("")
     lines.append("## 可信度规则")
@@ -1031,7 +1575,7 @@ def format_markdown(events, summary, start_str, end_str, topic,
     lines.append("|------|------|")
     lines.append("| **高** | 官方来源（品牌官网）/ 2 个及以上主流汽车媒体交叉验证 |")
     lines.append("| **中** | 单一主流汽车媒体报道 |")
-    lines.append("| **低** | 自媒体、论坛、二次转载、无明确日期 / 命中排除关键词且非官方单来源 |")
+    lines.append("| **低** | 自媒体、论坛、聚合页、二次转载、无明确日期 / 命中排除关键词且非官方单来源 |")
     lines.append("")
 
     lines.append("## 事件状态说明")
@@ -1063,10 +1607,33 @@ def _build_diagnostics_section(diagnostics: CrawlDiagnostics) -> list[str]:
     lines.append("|------|-----:|")
     lines.append(f"| generated_query_count | {diagnostics.generated_query_count} |")
     lines.append(f"| dedup_url_count | {diagnostics.dedup_url_count} |")
+    lines.append(f"| pre_crawl_skipped_count | {diagnostics.pre_crawl_skipped_count} |")
     lines.append(f"| planned_crawl_count | {diagnostics.planned_crawl_count} |")
     lines.append(f"| crawled_page_count | {diagnostics.crawled_page_count} |")
     lines.append(f"| failed_crawl_count | {diagnostics.failed_crawl_count} |")
+    lines.append(f"| raw_extracted_event_count | {diagnostics.raw_extracted_event_count} |")
+    lines.append(f"| source_filtered_count | {diagnostics.source_filtered_count} |")
+    lines.append(f"| target_matched_event_count | {diagnostics.target_matched_event_count} |")
+    lines.append(f"| conflict_filtered_count | {diagnostics.conflict_filtered_count} |")
+    lines.append(f"| final_guard_filtered_count | {diagnostics.final_guard_filtered_count} |")
+    lines.append(f"| out_of_range_event_count | {diagnostics.out_of_range_event_count} |")
+    lines.append(f"| brand_model_conflict_count | {diagnostics.brand_model_conflict_count} |")
+    lines.append(f"| evidence_irrelevant_count | {diagnostics.evidence_irrelevant_count} |")
+    lines.append(f"| date_basis_downgraded_count | {diagnostics.date_basis_downgraded_count} |")
+    lines.append(f"| polluted_snippet_count | {diagnostics.polluted_snippet_count} |")
+    lines.append(f"| confidence_downgraded_count | {diagnostics.confidence_downgraded_count} |")
+    lines.append(f"| status_downgraded_count | {diagnostics.status_downgraded_count} |")
+    lines.append(f"| final_event_count | {diagnostics.final_event_count} |")
     lines.append("")
+
+    if diagnostics.pre_crawl_skipped_count > 0:
+        lines.append("### 抓取前跳过 URL 样例")
+        lines.append("")
+        lines.append("| url | reason |")
+        lines.append("|-----|--------|")
+        for fu in diagnostics.pre_crawl_skipped_urls[:10]:
+            lines.append(f"| {fu.get('url', '')} | {fu.get('reason', '')} |")
+        lines.append("")
 
     if diagnostics.failed_crawl_count > 0:
         lines.append("### 抓取失败 URL 样例")
@@ -1079,6 +1646,35 @@ def _build_diagnostics_section(diagnostics: CrawlDiagnostics) -> list[str]:
         lines.append("")
         lines.append("> 注意：未命中表示在当前时间范围、目标车型池、信源类型、事件类型和成功抓取页面范围内未发现明确事件；"
                      "如果 failed_crawl_count 较高，需复核抓取覆盖度。")
+        lines.append("")
+
+    if diagnostics.conflict_filtered_count > 0:
+        lines.append("### 冲突过滤事件样例")
+        lines.append("")
+        lines.append("| target_id | event_brand | event_model | reason |")
+        lines.append("|-----------|-------------|-------------|--------|")
+        for ce in diagnostics.conflict_filtered_events[:10]:
+            lines.append(f"| {ce.get('target_id', '')} | {ce.get('event_brand', '')} | {ce.get('event_model', '')} | {ce.get('reason', '')} |")
+        lines.append("")
+
+    if diagnostics.final_guard_filtered_count > 0:
+        lines.append("### Final Guard 过滤样例")
+        lines.append("")
+        lines.append("| target_id | brand | model | event_date | reason | evidence |")
+        lines.append("|-----------|-------|-------|------------|--------|----------|")
+        for fe in diagnostics.final_guard_filtered_events[:10]:
+            ev_snippet = fe.get("evidence_snippet", "")[:50]
+            lines.append(f"| {fe.get('target_id', '')} | {fe.get('brand', '')} | {fe.get('model', '')} | {fe.get('event_date', '')} | {fe.get('reason', '')} | {ev_snippet} |")
+        lines.append("")
+
+    if diagnostics.degrade_samples:
+        lines.append("### Final Guard 降级样例")
+        lines.append("")
+        lines.append("| target_id | reason | before_status | after_status | before_confidence | after_confidence | evidence |")
+        lines.append("|-----------|--------|---------------|--------------|-------------------|------------------|----------|")
+        for ds in diagnostics.degrade_samples[:10]:
+            ev_snippet = ds.get("evidence_snippet", "")[:50]
+            lines.append(f"| {ds.get('target_id', '')} | {ds.get('reason', '')} | {ds.get('before_status', '')} | {ds.get('after_status', '')} | {ds.get('before_confidence', '')} | {ds.get('after_confidence', '')} | {ev_snippet} |")
         lines.append("")
 
     return lines
