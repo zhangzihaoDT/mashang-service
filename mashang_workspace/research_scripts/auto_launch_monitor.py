@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-汽车新车事件监测器 — Auto Launch Monitor (v0.4.5)
+汽车新车事件监测器 — Auto Launch Monitor (v0.5.4)
 
 Market Intelligence / New Vehicle Event Monitor
 
@@ -28,14 +28,45 @@ Market Intelligence / New Vehicle Event Monitor
    v0.4.2 结果污染修复 + 匹配强化
    v0.4.3 规则层 final guard 收口
    v0.4.4 降级传导 + snippet 污染 + 可信度收紧
-   v0.4.5 真实 E2E 中 brand conflict / polluted snippet 未触发修复 (当前)
+    v0.4.5 真实 E2E 中 brand conflict / polluted snippet 未触发修复
+    v0.5   DeepSeek LLM Judge（默认关闭，只裁判 uncertain candidates）
+v0.5.1 source_publish_date 误当作 event_date / 空 brand+model 已确认 / 历史上市误入修复
+v0.5.2 Makefile 产品入口默认启用 LLM Judge；Python 脚本默认关闭
+v0.5.3 Polluted Evidence Judge Guard — 污染证据治理、reject intent 后处理
+v0.5.4 LLM Judge Cache Versioning + Event Scope Classification (当前)
 
-v0.4.5 修复:
-   - brand conflict 规则改为 evidence 专属校验（source_title 不再作为豁免证据）
-   - model conflict 增加 OTHER_MODEL_PATTERN_MARKERS 辅助判断
-   - polluted snippet 检测扩展（覆盖 dy_recommends / post2020 / model_ 等真实污染）
-   - polluted snippet 无 target strong alias 时直接过滤
-   - 新增 normalize_text_value / get_event_text_blob 字段标准化
+v0.5 新增:
+    - DeepSeek LLM Judge：只对规则层不确定的候选事件做语义裁判
+    - 新增 --llm-judge / --llm-judge-mode / --llm-judge-max / --llm-judge-cache CLI 参数
+    - LLMJudgeConfig / LLMJudgeDecision dataclass
+    - should_send_to_llm_judge 候选选择逻辑
+    - build_llm_judge_prompt / call_deepseek_llm_judge / parse_llm_judge_response
+    - 缓存层 (outputs/cache/auto_launch_monitor_llm_judge_cache.json)
+    - apply_llm_judge_decision 决策应用（含可信度上限锁定）
+    - diagnostics 扩展（11 个新字段 + LLM Judge 样例区块）
+    - Mock 测试覆盖，不依赖真实 DeepSeek API
+
+v0.5.1 修复:
+    - Strict Event Date Guard: source_publish_date + 强事件类型无同日证据→降级/丢弃
+    - Core Entity Final Guard: 已确认事件无品牌/车型→丢弃（LLM Judge 可修正后保留）
+    - 历史回顾/非当期事件 guard: 此前上市/已上市/北京车展上市等→丢弃
+    - has_explicit_same_day_event_evidence / has_historical_event_phrase / is_missing_core_entity
+    - diagnostics 新增字段: source_publish_date_guard_count / historical_event_filtered_count / missing_core_entity_filtered_count
+    - LLM Judge diagnostics 始终显示（即使未启用 --llm-judge）
+
+v0.5.2 变更:
+    - Makefile 产品入口默认启用 LLM Judge（LLM_JUDGE ?= 1）
+    - Python 脚本入口保持默认关闭（action=store_true, default=False）
+    - Makefile 支持 LLM_JUDGE=0 显式关闭
+    - LLM_JUDGE_MAX 默认从 20 改为 10
+
+v0.5.3 变更:
+    - 新增 POLLUTED_EVIDENCE_PATTERNS + is_polluted_evidence_snippet() 污染证据识别函数
+    - LLM Judge prompt 对污染证据标记 evidence_polluted 强提示
+    - 新增 has_reject_intent() 后处理：LLM 说"不保留"但 action=downgrade 时转为 discard
+    - 新增 final guard：待确认+低可信+污染证据 → 移出主事件列表
+    - 污染证据 confidence cap：polluted evidence 最高可信度限制为"低"
+    - diagnostics 新增字段: polluted_evidence_llm_prompt_count / llm_reject_intent_discard_count / low_confidence_polluted_filtered_count
 
 用法:
     python mashang_workspace/research_scripts/auto_launch_monitor.py \\
@@ -93,6 +124,68 @@ POLLUTED_SNIPPET_MARKERS = {
     "model_",
     "db.m.auto.sohu.com/model_",
 }
+
+POLLUTED_EVIDENCE_PATTERNS = [
+    "db.m.auto.sohu.com/model_",
+    "/model_",
+    "相关资讯",
+    "### 相关资讯",
+    "- [**",
+    ") - [**",
+    "post2020_dy_recommends",
+    "f=post2020_dy_recommends",
+    "www.163.com/v/video",
+]
+
+LLM_JUDGE_PROMPT_VERSION = "v0.5.4"
+LLM_JUDGE_SCHEMA_VERSION = "v1"
+LLM_JUDGE_GUARD_VERSION = "polluted-evidence-v2"
+
+EVENT_SCOPE_NATIONAL = "national"
+EVENT_SCOPE_REGIONAL = "regional"
+EVENT_SCOPE_DEALER = "dealer"
+EVENT_SCOPE_AUTO_SHOW = "auto_show"
+EVENT_SCOPE_MEDIA = "media"
+EVENT_SCOPE_UNKNOWN = "unknown"
+
+SCOPE_CITY_NAMES = [
+    "重庆", "成都", "上海", "广州", "深圳", "北京",
+    "杭州", "南京", "苏州", "武汉", "西安", "长沙",
+    "郑州", "天津", "青岛", "宁波", "佛山",
+]
+
+REJECT_INTENT_PHRASES = [
+    "不保留",
+    "不应保留",
+    "不支持",
+    "证据不支持",
+    "缺乏正文支持",
+    "无关",
+    "与目标车型无关",
+    "非目标车型",
+    "主体不是",
+    "不是目标车型",
+    "仅 source_title 命中",
+    "仅标题命中",
+    "仅来源标题命中",
+    "evidence不支持",
+    "evidence 不支持",
+    "keep=false",
+    "keep = false",
+    "should reject",
+    "reject",
+]
+
+HISTORICAL_EVENT_PHRASES = [
+    "此前上市", "已经上市", "已上市", "上市后",
+    "上市以来", "自上市以来", "上市仅", "上市满",
+    "上市一个月", "上市仅一个月",
+    "北京车展正式上市", "上海车展正式上市",
+    "成都车展正式上市", "广州车展正式上市",
+    "曾于", "此前发布", "此前开启预售",
+    "回顾", "早在", "当年", "历史上",
+]
+STRONG_DATE_EVENT_TYPES = {"上市", "发布会", "预售", "开启交付", "首发亮相"}
 
 OTHER_MODEL_PATTERN_MARKERS = {
     "EX90", "ES90", "宋U", "贝塔T1", "海豹08", "S07", "乐道L60",
@@ -194,6 +287,77 @@ class CrawlDiagnostics:
     confidence_downgraded_count: int = 0
     status_downgraded_count: int = 0
     degrade_samples: list[dict] = field(default_factory=list)
+    llm_judge_enabled: bool = False
+    llm_judge_mode: str = ""
+    llm_judge_candidate_count: int = 0
+    llm_judge_called_count: int = 0
+    llm_judge_cache_hit_count: int = 0
+    llm_judge_cache_miss_count: int = 0
+    llm_judge_keep_count: int = 0
+    llm_judge_discard_count: int = 0
+    llm_judge_downgrade_count: int = 0
+    llm_judge_error_count: int = 0
+    llm_judge_samples: list[dict] = field(default_factory=list)
+    historical_downgraded_count: int = 0
+    source_pub_empty_brand_model_count: int = 0
+    source_publish_date_guard_count: int = 0
+    historical_event_filtered_count: int = 0
+    missing_core_entity_filtered_count: int = 0
+    polluted_evidence_llm_prompt_count: int = 0
+    llm_reject_intent_discard_count: int = 0
+    low_confidence_polluted_filtered_count: int = 0
+    llm_judge_cache_stale_count: int = 0
+    llm_judge_cache_bypass_count: int = 0
+    event_scope_classified_count: int = 0
+    national_event_count: int = 0
+    regional_event_count: int = 0
+    dealer_event_count: int = 0
+    auto_show_event_count: int = 0
+    media_event_count: int = 0
+    unknown_event_scope_count: int = 0
+    related_event_count: int = 0
+    non_national_event_filtered_count: int = 0
+    related_event_samples: list[dict] = field(default_factory=list)
+
+
+@dataclass
+class LLMJudgeConfig:
+    enabled: bool = False
+    mode: str = "uncertain"
+    max_candidates: int = 20
+    cache_enabled: bool = True
+    model: str = ""
+    api_key_env: str = "DEEPSEEK_API_KEY"
+    base_url_env: str = "DEEPSEEK_BASE_URL"
+    default_model: str = "deepseek-v4-flash"
+
+
+DEFAULT_LLM_MODEL = "deepseek-v4-flash"
+
+
+@dataclass
+class LLMJudgeDecision:
+    keep: bool = True
+    action: str = "keep"
+    target_match: bool = True
+    event_is_about_target: bool = True
+    event_subject_brand: str = ""
+    event_subject_model: str = ""
+    corrected_brand: str = ""
+    corrected_model: str = ""
+    event_type: str = ""
+    event_status: str = ""
+    confidence: str = "中"
+    event_date: str = ""
+    source_publish_date: str = ""
+    date_basis: str = ""
+    date_confidence: str = "medium"
+    source_context_type: str = "unknown"
+    polluted_snippet: bool = False
+    conflict: bool = False
+    conflict_reason: str = ""
+    evidence_quality: str = "medium"
+    reason: str = ""
 
 
 @dataclass(frozen=True)
@@ -508,6 +672,68 @@ def post_aggregate_normalize(events: list[dict], diagnostics: CrawlDiagnostics |
     return events
 
 
+# ─── v0.5.1: Explicit same-day event evidence ────────────────────
+
+def has_explicit_same_day_event_evidence(
+    evidence: str,
+    event_date: str | None,
+    event_type: str | None,
+) -> bool:
+    if not evidence or not event_date:
+        return False
+    try:
+        dt = datetime.strptime(event_date, "%Y-%m-%d")
+        y, m, d = dt.year, dt.month, dt.day
+    except (ValueError, TypeError):
+        return False
+    patterns = [
+        f"{m}月{d}日正式上市",
+        f"{m}月{d}日上市",
+        f"{m}月{d}日正式发布",
+        f"{m}月{d}日发布",
+        f"{m}月{d}日开启预售",
+        f"{m}月{d}日开启交付",
+        f"{m}月{d}日首发亮相",
+        f"{y}年{m}月{d}日正式上市",
+        f"{y}年{m}月{d}日上市",
+        f"{y}年{m}月{d}日正式发布",
+        f"{y}年{m}月{d}日开启预售",
+        f"{y}年{m}月{d}日开启交付",
+        f"{y}年{m}月{d}日首发亮相",
+        "今日正式上市", "昨日正式上市", "当天正式上市",
+        "今日上市", "昨日上市", "当天上市",
+        "今日开启预售", "昨日开启预售",
+        "今日开启交付", "昨日开启交付",
+    ]
+    for pat in patterns:
+        if pat in evidence:
+            return True
+    return False
+
+
+# ─── v0.5.1: Historical event phrase detection ──────────────────
+
+def has_historical_event_phrase(text: str) -> bool:
+    return any(phrase in text for phrase in HISTORICAL_EVENT_PHRASES)
+
+
+# ─── v0.5.1: Core entity check for confirmed events ─────────────
+
+def is_missing_core_entity_for_confirmed_event(
+    event: dict, target: WatchTarget | None = None,
+) -> tuple[bool, str]:
+    eb = normalize_text_value(event.get("brand"))
+    em = normalize_text_value(event.get("model"))
+    if not eb and not em:
+        return True, "missing_brand_and_model"
+    if not eb:
+        return True, "missing_brand"
+    if not em and target:
+        if not has_target_model_signal(event.get("evidence", ""), target):
+            return True, "missing_model_no_target_signal"
+    return False, ""
+
+
 # ─── v0.4.3: Final event guard ─────────────────────────────────────
 
 def apply_final_event_guard(
@@ -609,17 +835,159 @@ def apply_final_event_guard(
 
         db = event.get("date_basis") or ""
         spd = event.get("source_publish_date") or ""
+        ev_type = event.get("event_type", "")
+        ed_val = (event.get("event_date") or "").strip()
+        evidence = event.get("evidence") or ""
+        source_title = event.get("source_title") or ""
+        text_pool = " ".join(filter(None, [evidence, source_title]))
+
+        # ── v0.5.1: source_publish_date guard (downgrade first) ──
+        orig_status = event.get("event_status", "")
         if db == "source_publish_date" and spd:
             event["date_confidence"] = "low"
-            evidence = (event.get("evidence") or "")
-            has_confirmed_verb = any(verb in evidence for verb in CONFIRMED_EVENT_VERBS)
-            if not has_confirmed_verb:
-                if event.get("event_status") == "已确认":
-                    event["event_status"] = "待确认"
-                    if diagnostics:
-                        diagnostics.status_downgraded_count += 1
             if diagnostics:
                 diagnostics.date_basis_downgraded_count += 1
+            if ev_type in STRONG_DATE_EVENT_TYPES:
+                has_same_day = has_explicit_same_day_event_evidence(evidence, ed_val, ev_type)
+                if not has_same_day:
+                    if diagnostics:
+                        diagnostics.source_publish_date_guard_count += 1
+                    if event.get("event_status") == "已确认":
+                        event["event_status"] = "待确认"
+                        if diagnostics:
+                            diagnostics.status_downgraded_count += 1
+                    if event.get("confidence") == "高":
+                        event["confidence"] = "中"
+                        if diagnostics:
+                            diagnostics.confidence_downgraded_count += 1
+
+        # ── v0.5.1: discard-level checks ─────────────────────────
+        discard_reason = None
+
+        # Historical event phrase + no same-day evidence → discard
+        if has_historical_event_phrase(text_pool):
+            ed_for_check = ed_val or spd
+            if not has_explicit_same_day_event_evidence(evidence, ed_for_check, ev_type):
+                discard_reason = "historical_event_phrase"
+                if diagnostics:
+                    diagnostics.historical_event_filtered_count += 1
+
+        # Core entity missing for confirmed (or originally confirmed) event → discard
+        check_core = orig_status == "已确认" or event.get("event_status") == "已确认"
+        if not discard_reason and check_core:
+            missing_core, core_reason = is_missing_core_entity_for_confirmed_event(event, target)
+            if missing_core:
+                discard_reason = f"missing_core_entity_for_confirmed_event:{core_reason}"
+                if diagnostics:
+                    diagnostics.missing_core_entity_filtered_count += 1
+
+        # Triple problem: source_publish_date + no same-day + (missing core entity or date mismatch) → discard
+        ev_polluted, _ = is_polluted_evidence_snippet(evidence)
+        if ev_polluted:
+            event["confidence"] = "低"
+            event["event_status"] = "待确认"
+        if not discard_reason and event.get("event_status") == "待确认" and event.get("confidence") == "低":
+            if ev_polluted:
+                discard_reason = "low_confidence_polluted_evidence"
+                if diagnostics:
+                    diagnostics.low_confidence_polluted_filtered_count += 1
+
+        if not discard_reason and db == "source_publish_date" and ev_type in STRONG_DATE_EVENT_TYPES:
+            has_same_day = has_explicit_same_day_event_evidence(evidence, ed_val, ev_type)
+            if not has_same_day:
+                missing_core, _ = is_missing_core_entity_for_confirmed_event(event, target)
+                date_mismatch = False
+                if ed_val:
+                    m_date_match = re.search(r"(\d{1,2})月(\d{1,2})日", evidence)
+                    if m_date_match:
+                        try:
+                            ev_dt = datetime.strptime(ed_val, "%Y-%m-%d")
+                            if int(m_date_match.group(1)) != ev_dt.month or int(m_date_match.group(2)) != ev_dt.day:
+                                date_mismatch = True
+                        except (ValueError, TypeError):
+                            pass
+                if missing_core or date_mismatch:
+                    discard_reason = "source_publish_date_no_same_day_plus_missing_core_entity"
+                    if diagnostics:
+                        diagnostics.missing_core_entity_filtered_count += 1
+
+        if not discard_reason:
+            scope = classify_event_scope(evidence, source_title, event.get("source_url", ""), ev_type)
+            event["event_scope"] = scope
+            if diagnostics:
+                diagnostics.event_scope_classified_count += 1
+                if scope == EVENT_SCOPE_NATIONAL:
+                    diagnostics.national_event_count += 1
+                elif scope == EVENT_SCOPE_REGIONAL:
+                    diagnostics.regional_event_count += 1
+                elif scope == EVENT_SCOPE_DEALER:
+                    diagnostics.dealer_event_count += 1
+                elif scope == EVENT_SCOPE_AUTO_SHOW:
+                    diagnostics.auto_show_event_count += 1
+                elif scope == EVENT_SCOPE_MEDIA:
+                    diagnostics.media_event_count += 1
+                else:
+                    diagnostics.unknown_event_scope_count += 1
+            if scope in (EVENT_SCOPE_REGIONAL, EVENT_SCOPE_DEALER):
+                discard_reason = f"non_national_event_scope:{scope}"
+                if diagnostics:
+                    diagnostics.non_national_event_filtered_count += 1
+                    diagnostics.related_event_count += 1
+                    if len(diagnostics.related_event_samples) < 10:
+                        diagnostics.related_event_samples.append({
+                            "target_id": target_id or "",
+                            "brand": event.get("brand", ""),
+                            "model": event.get("model", ""),
+                            "event_date": event.get("event_date", ""),
+                            "scope": scope,
+                            "event_type": ev_type,
+                            "evidence_snippet": (evidence or "")[:60],
+                        })
+            elif scope == EVENT_SCOPE_AUTO_SHOW and ev_type == "上市":
+                discard_reason = f"non_national_event_scope:{scope}"
+                if diagnostics:
+                    diagnostics.non_national_event_filtered_count += 1
+                    diagnostics.related_event_count += 1
+                    if len(diagnostics.related_event_samples) < 10:
+                        diagnostics.related_event_samples.append({
+                            "target_id": target_id or "",
+                            "brand": event.get("brand", ""),
+                            "model": event.get("model", ""),
+                            "event_date": event.get("event_date", ""),
+                            "scope": scope,
+                            "event_type": ev_type,
+                            "evidence_snippet": (evidence or "")[:60],
+                        })
+            elif scope == EVENT_SCOPE_MEDIA and ev_type != "媒体预热":
+                discard_reason = f"non_national_event_scope:{scope}"
+                if diagnostics:
+                    diagnostics.non_national_event_filtered_count += 1
+                    diagnostics.related_event_count += 1
+                    if len(diagnostics.related_event_samples) < 10:
+                        diagnostics.related_event_samples.append({
+                            "target_id": target_id or "",
+                            "brand": event.get("brand", ""),
+                            "model": event.get("model", ""),
+                            "event_date": event.get("event_date", ""),
+                            "scope": scope,
+                            "event_type": ev_type,
+                            "evidence_snippet": (evidence or "")[:60],
+                        })
+
+        if discard_reason:
+            if diagnostics:
+                diagnostics.final_guard_filtered_count += 1
+                if len(diagnostics.final_guard_filtered_events) < 10:
+                    diagnostics.final_guard_filtered_events.append({
+                        "target_id": target_id or "",
+                        "brand": event.get("brand", ""),
+                        "model": event.get("model", ""),
+                        "event_date": event.get("event_date", ""),
+                        "source_publish_date": event.get("source_publish_date", ""),
+                        "reason": discard_reason,
+                        "evidence_snippet": (evidence or "")[:80],
+                    })
+            continue
 
         guarded.append(event)
 
@@ -645,6 +1013,17 @@ def parse_args():
     parser.add_argument("--keywords", type=str, default=None, help="搜索关键词")
     parser.add_argument("--exclude-keywords", type=str, default=None, help="排除关键词")
     parser.add_argument("--targets-file", type=str, default=None, help="关注车型 CSV 文件路径")
+    parser.add_argument("--llm-judge", action="store_true", default=False,
+                        help="启用 DeepSeek LLM Judge（默认关闭）")
+    parser.add_argument("--llm-judge-mode", type=str, default="uncertain",
+                        choices=["uncertain", "all_candidates"],
+                        help="LLM Judge 模式: uncertain (默认) 只裁判不确定事件, all_candidates 仅用于 debug")
+    parser.add_argument("--llm-judge-max", type=int, default=20,
+                        help="LLM Judge 最大裁判数，防止成本失控 (默认 20)")
+    parser.add_argument("--llm-judge-cache", action="store_true", default=False,
+                        help="启用 LLM Judge 缓存 (默认开启)")
+    parser.add_argument("--no-llm-judge-cache", action="store_true", default=False,
+                        help="禁用 LLM Judge 缓存")
     return parser.parse_args()
 
 
@@ -664,6 +1043,407 @@ def check_env():
         print(f"[ERROR] 缺少环境变量: {', '.join(missing)}")
         print(f"请确保 {', '.join(missing)} 已设置在 .env 或环境中。")
         sys.exit(1)
+
+
+# ─── v0.5.3: Polluted evidence snippet detector ──────────────────
+
+def is_polluted_evidence_snippet(text: str | None) -> tuple[bool, str | None]:
+    if not text:
+        return False, None
+    for pat in POLLUTED_EVIDENCE_PATTERNS:
+        if pat in text:
+            return True, pat
+    return False, None
+
+
+# ─── v0.5.3: Reject intent detector ─────────────────────────────
+
+def has_reject_intent(reason: str | None) -> bool:
+    if not reason:
+        return False
+    return any(phrase in reason for phrase in REJECT_INTENT_PHRASES)
+
+
+# ─── LLM Judge: should_send_to_llm_judge ──────────────────────────
+
+_CACHE_DIR = _WS_ROOT / "outputs" / "cache"
+LLM_JUDGE_CACHE_PATH = _CACHE_DIR / "auto_launch_monitor_llm_judge_cache.json"
+
+
+def should_send_to_llm_judge(event: dict, target: WatchTarget, *,
+                              mode: str = "uncertain",
+                              start_date: str = "", end_date: str = "") -> tuple[bool, str]:
+    if mode == "all_candidates":
+        return True, "all_candidates_mode"
+
+    ed = (event.get("event_date") or "").strip()
+    if ed:
+        if ed < start_date or ed > end_date:
+            return False, "event_date_out_of_range"
+    eb = normalize_text_value(event.get("brand"))
+    em = normalize_text_value(event.get("model"))
+    evidence = event.get("evidence") or ""
+    if eb and em:
+        if eb not in target.brand_aliases:
+            if em not in target.model_aliases:
+                if not any(alias in evidence for alias in target.model_aliases):
+                    return False, "brand_model_conflict"
+    text_pool = " ".join(filter(None, [evidence, event.get("source_title", "")]))
+    if any(ik in text_pool for ik in IRRELEVANT_KEYWORDS):
+        return False, "irrelevant_keywords"
+
+    polluted, _ = is_polluted_snippet(event)
+    if polluted:
+        return True, "polluted_snippet"
+
+    if not eb or not em:
+        return True, "missing_brand_or_model"
+    db = event.get("date_basis", "")
+    if db == "source_publish_date":
+        return True, "date_basis_source_publish_date"
+    if not any(alias in evidence for alias in target.model_aliases):
+        return True, "weak_evidence"
+    es = event.get("event_status", "")
+    if es == "待确认":
+        return True, "pending_status"
+    cf = event.get("confidence", "")
+    if cf == "低":
+        return True, "low_confidence"
+    src_url = event.get("source_url", "")
+    if "model_" in src_url:
+        return True, "model_page_url"
+    return False, "sufficient_confidence"
+
+
+# ─── LLM Judge: prompt builder ──────────────────────────────────
+
+def build_llm_judge_prompt(event: dict, target: WatchTarget, *,
+                            start_date: str, end_date: str) -> str:
+    evidence_text = event.get("evidence", "") or ""
+    source_title = event.get("source_title", "") or ""
+    is_polluted, pollute_reason = is_polluted_evidence_snippet(evidence_text)
+
+    extra_rule = ""
+    if is_polluted:
+        extra_rule = f"""
+evidence_polluted: true
+pollution_reason: {pollute_reason}
+
+⚠️ 污染证据规则（因为 evidence_polluted=true）：
+该 evidence 可能来自车型页相关资讯列表、聚合卡片、视频推荐或截断链接片段，不可默认视为 article_body。
+只有当 evidence 自身同时清楚包含：
+1. 目标品牌/车型
+2. 事件动作，如 上市/预售/发布/开启交付/亮相
+3. 明确日期或同日证据
+4. 主体不是其他车型
+才允许 keep。
+否则应输出 reject。
+不要仅凭 source_title 命中目标车型就 keep。"""
+    else:
+        extra_rule = """
+evidence_polluted: false"""
+
+    return f"""你是汽车市场情报系统中的 LLM Judge。
+你的任务不是搜索信息，而是判断一个候选事件是否应该进入最终报告。
+
+请只基于给定 evidence/source_title/source_url 判断，不要引入外部知识。
+
+查询时间范围：
+{start_date} 至 {end_date}
+
+目标车型：
+target_id: {target.target_id}
+brand: {target.brand}
+brand_aliases: {', '.join(target.brand_aliases)}
+model: {target.model}
+model_aliases: {', '.join(target.model_aliases)}
+display_name: {target.display_name}
+
+候选事件：
+brand: {event.get("brand", "")}
+model: {event.get("model", "")}
+event_type: {event.get("event_type", "")}
+event_status: {event.get("event_status", "")}
+confidence: {event.get("confidence", "")}
+date: {event.get("date", "")}
+event_date: {event.get("event_date", "")}
+source_publish_date: {event.get("source_publish_date", "")}
+date_basis: {event.get("date_basis", "")}
+source_title: {source_title}
+source_url: {event.get("source_url", "")}
+evidence: {evidence_text}{extra_rule}
+
+判断规则：
+1. 如果 evidence 主体不是目标车型，keep=false。
+2. 如果 evidence 是推荐阅读、相关资讯、车型页列表、推荐流，而不是正文事件，通常 keep=false 或 action=downgrade。
+3. 如果 evidence 只出现其他车型，例如乐道L60、沃尔沃EX90、比亚迪宋U，而目标是大众ID. ERA 9X或极氪8X，keep=false。
+4. 如果只有 source_title 命中目标，但 evidence 不支持，keep=false。
+5. 如果没有明确事件日期，date_basis 应为 source_publish_date，date_confidence=low。
+6. 如果证据不扎实，不要给"高"可信度。
+7. 不要编造外部事实。
+
+source_context_type 必须准确：
+- article_body: 正常正文
+- related_links: 相关资讯/推荐阅读列表
+- aggregator_card: 聚合卡片
+- video_recommendation: 视频推荐
+- search_snippet: 搜索结果摘要
+- unknown: 不确定
+
+如果 evidence 是 model_... - [**、相关资讯、/a/... - [** 等片段，应倾向：
+source_context_type = related_links 或 aggregator_card
+evidence_quality = low
+action = reject
+
+只返回 JSON：
+{{
+  "keep": true,
+  "action": "keep",
+  "target_match": true,
+  "event_is_about_target": true,
+  "event_subject_brand": "",
+  "event_subject_model": "",
+  "corrected_brand": "",
+  "corrected_model": "",
+  "event_type": "",
+  "event_status": "已确认",
+  "confidence": "中",
+  "event_date": "",
+  "source_publish_date": "",
+  "date_basis": "source_publish_date",
+  "date_confidence": "medium",
+  "source_context_type": "article_body",
+  "polluted_snippet": false,
+  "conflict": false,
+  "conflict_reason": "",
+  "evidence_quality": "medium",
+  "reason": ""
+}}"""
+
+
+# ─── LLM Judge: DeepSeek API call ────────────────────────────────
+
+def call_deepseek_llm_judge(prompt: str, config: LLMJudgeConfig) -> dict:
+    import requests
+    api_key = os.environ.get(config.api_key_env, "")
+    base_url = os.environ.get(config.base_url_env, "https://api.deepseek.com")
+    model = os.environ.get("DEEPSEEK_MODEL", config.model or config.default_model)
+    if not api_key:
+        return {"_error": f"{config.api_key_env} not configured"}
+    if not model:
+        return {"_error": "DEEPSEEK_MODEL not configured"}
+    try:
+        resp = requests.post(
+            f"{base_url.rstrip('/')}/chat/completions",
+            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+            json={
+                "model": model,
+                "messages": [{"role": "user", "content": prompt}],
+                "temperature": 0.0,
+                "max_tokens": 2000,
+            },
+            timeout=30,
+        )
+        if resp.status_code != 200:
+            return {"_error": f"API error {resp.status_code}: {resp.text[:200]}"}
+        data = resp.json()
+        content = data["choices"][0]["message"]["content"]
+        return {"_content": content}
+    except Exception as e:
+        return {"_error": str(e)[:500]}
+
+
+# ─── LLM Judge: response parser ─────────────────────────────────
+
+def parse_llm_judge_response(raw: str) -> tuple[LLMJudgeDecision | None, str]:
+    text = raw.strip()
+    if "```json" in text:
+        parts = text.split("```json")
+        if len(parts) >= 2:
+            text = parts[1].split("```")[0].strip()
+    elif "```" in text:
+        parts = text.split("```")
+        if len(parts) >= 2:
+            text = parts[1].strip()
+            if text.startswith("json"):
+                text = text[4:].strip()
+    try:
+        data = json.loads(text)
+    except json.JSONDecodeError as e:
+        return None, f"JSON decode error: {e}"
+    if not isinstance(data, dict):
+        return None, "response is not a dict"
+    try:
+        dec = LLMJudgeDecision(
+            keep=data.get("keep", True),
+            action=data.get("action", "keep") or "keep",
+            target_match=data.get("target_match", True),
+            event_is_about_target=data.get("event_is_about_target", True),
+            event_subject_brand=data.get("event_subject_brand", ""),
+            event_subject_model=data.get("event_subject_model", ""),
+            corrected_brand=data.get("corrected_brand", ""),
+            corrected_model=data.get("corrected_model", ""),
+            event_type=data.get("event_type", ""),
+            event_status=data.get("event_status", ""),
+            confidence=data.get("confidence", "中"),
+            event_date=data.get("event_date", ""),
+            source_publish_date=data.get("source_publish_date", ""),
+            date_basis=data.get("date_basis", ""),
+            date_confidence=data.get("date_confidence", "medium"),
+            source_context_type=data.get("source_context_type", "unknown"),
+            polluted_snippet=bool(data.get("polluted_snippet", False)),
+            conflict=bool(data.get("conflict", False)),
+            conflict_reason=data.get("conflict_reason", ""),
+            evidence_quality=data.get("evidence_quality", "medium") or "medium",
+            reason=data.get("reason", ""),
+        )
+        return dec, ""
+    except Exception as e:
+        return None, f"parse error: {e}"
+
+
+# ─── LLM Judge: cache ───────────────────────────────────────────
+
+def build_llm_judge_cache_key(event: dict, target: WatchTarget) -> str:
+    import hashlib
+    ev_text = (event.get("evidence", "") or "")[:100]
+    ev_hash = hashlib.md5(ev_text.encode("utf-8")).hexdigest()[:16]
+    is_polluted, _ = is_polluted_evidence_snippet(event.get("evidence", "") or "")
+    raw = "|".join([
+        LLM_JUDGE_PROMPT_VERSION,
+        LLM_JUDGE_SCHEMA_VERSION,
+        LLM_JUDGE_GUARD_VERSION,
+        target.target_id,
+        event.get("source_url", ""),
+        event.get("event_type", ""),
+        event.get("date", ""),
+        ev_hash,
+        (event.get("source_title", "") or "")[:50],
+        event.get("date_basis", ""),
+        event.get("brand", ""),
+        event.get("model", ""),
+        event.get("confidence", ""),
+        event.get("event_status", ""),
+        str(int(is_polluted)),
+    ])
+    return hashlib.md5(raw.encode("utf-8")).hexdigest()
+
+
+def load_llm_judge_cache(path: Path) -> dict:
+    if path.exists():
+        try:
+            with open(path, encoding="utf-8") as f:
+                return json.load(f)
+        except (json.JSONDecodeError, OSError):
+            return {}
+    return {}
+
+
+def save_llm_judge_cache(path: Path, cache: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(cache, f, ensure_ascii=False, indent=2)
+
+
+# ─── LLM Judge: apply decision ──────────────────────────────────
+
+def apply_llm_judge_decision(event: dict, decision: LLMJudgeDecision,
+                               diagnostics: CrawlDiagnostics | None = None) -> tuple[dict | None, str]:
+    if not decision.keep or decision.action == "discard":
+        return None, f"llm_discard:{decision.reason}"
+    event["llm_judged"] = True
+    event["llm_action"] = decision.action
+    event["llm_reason"] = decision.reason
+    event["llm_evidence_quality"] = decision.evidence_quality
+    event["llm_source_context_type"] = decision.source_context_type
+    if decision.corrected_brand:
+        event["brand"] = decision.corrected_brand
+    if decision.corrected_model:
+        event["model"] = decision.corrected_model
+    if decision.event_status:
+        event["event_status"] = decision.event_status
+    if decision.confidence:
+        event["confidence"] = decision.confidence
+    if decision.event_date:
+        event["event_date"] = decision.event_date
+        event["date_basis"] = "event_date"
+        event["date_confidence"] = decision.date_confidence or "medium"
+    if decision.date_basis:
+        event["date_basis"] = decision.date_basis
+    if decision.date_confidence:
+        event["date_confidence"] = decision.date_confidence
+    st = event.get("source_type", "")
+    urls = event.get("source_urls", [])
+    has_official = "official" in st
+    has_cross = len(urls) >= 2 if urls else False
+    if decision.confidence == "高" and not has_official and not has_cross:
+        event["confidence"] = "中"
+    if decision.confidence == "高" and not has_official and decision.evidence_quality in ("weak", "medium"):
+        event["confidence"] = "中"
+    if decision.confidence == "高" and not has_official and decision.source_context_type == "related_news":
+        event["confidence"] = "中"
+    evidence_text = event.get("evidence", "") or ""
+    ev_polluted, _ = is_polluted_evidence_snippet(evidence_text)
+    if ev_polluted:
+        event["confidence"] = "低"
+        event["event_status"] = "待确认"
+    return event, ""
+
+
+# ─── v0.5.4: Event scope classification ─────────────────────────
+
+def classify_event_scope(
+    evidence: str,
+    title: str = "",
+    source_url: str = "",
+    event_type: str = "",
+) -> str:
+    text = " ".join(filter(None, [evidence, title]))
+    # dealer patterns
+    dealer_pats = ["门店上市", "经销商上市", "到店", "到店实拍", "门店品鉴", "品鉴会", "交付中心", "体验中心"]
+    for dp in dealer_pats:
+        if dp in text:
+            return EVENT_SCOPE_DEALER
+    # media patterns
+    media_pats = ["媒体预热", "媒体试驾", "抢先体验", "静态体验", "实拍", "图解", "导购", "配置解析"]
+    for mp in media_pats:
+        if mp in text:
+            return EVENT_SCOPE_MEDIA
+    # auto_show patterns (non-上市 event types)
+    show_pats = ["车展亮相", "车展首发", "车展发布"]
+    for sp in show_pats:
+        if sp in text:
+            return EVENT_SCOPE_AUTO_SHOW
+    # regional patterns: city_name + 上市/city_name + 车展上市
+    for city in SCOPE_CITY_NAMES:
+        if city in text:
+            if f"{city}车展上市" in text and event_type == "上市":
+                return EVENT_SCOPE_REGIONAL
+            if f"{city}区域上市" in text or f"{city}区域正式上市" in text:
+                return EVENT_SCOPE_REGIONAL
+            if f"{city}上市" in text:
+                return EVENT_SCOPE_REGIONAL
+            if f"{city}车展" in text:
+                return EVENT_SCOPE_AUTO_SHOW
+    regional_generic = ["区域上市", "区域正式上市", "地方上市", "地方车展上市", "巡展上市"]
+    for rg in regional_generic:
+        if rg in text:
+            return EVENT_SCOPE_REGIONAL
+    # national patterns
+    national_pats = ["正式上市", "全国上市", "全球上市", "官方上市", "品牌发布会",
+                     "官方发布", "上市发布会", "全系上市", "新车上市"]
+    for np in national_pats:
+        if np in text:
+            return EVENT_SCOPE_NATIONAL
+    # auto_show by event_type
+    show_event_pats = ["重庆车展", "上海车展", "北京车展", "成都车展", "广州车展"]
+    for sep in show_event_pats:
+        if sep in text:
+            return EVENT_SCOPE_AUTO_SHOW
+    # media by event_type
+    if event_type == "媒体预热":
+        return EVENT_SCOPE_MEDIA
+    return EVENT_SCOPE_UNKNOWN
 
 
 # ─── Search query construction ───────────────────────────────────
@@ -849,11 +1629,15 @@ def extract_events_from_markdown(markdown_text, url, source_title,
 
                     is_excluded = has_exclude_keywords(context, exclude_keywords)
                     has_irrelevant = any(ik in context for ik in IRRELEVANT_KEYWORDS)
+                    has_brand_model = bool(brand) or bool(model)
 
                     if is_excluded and source_type_raw not in ("official",):
                         event_status = "待确认"
                         confidence = "低"
                     elif has_irrelevant:
+                        event_status = "待确认"
+                        confidence = "低"
+                    elif not has_brand_model and source_type_raw not in ("official",):
                         event_status = "待确认"
                         confidence = "低"
                     else:
@@ -910,11 +1694,15 @@ def extract_events_from_markdown(markdown_text, url, source_title,
 
                     is_excluded = has_exclude_keywords(context, exclude_keywords)
                     has_irrelevant = any(ik in context for ik in IRRELEVANT_KEYWORDS)
+                    has_brand_model = bool(brand) or bool(model)
 
                     if is_excluded and source_type_raw not in ("official",):
                         event_status = "待确认"
                         confidence = "低"
                     elif has_irrelevant:
+                        event_status = "待确认"
+                        confidence = "低"
+                    elif not has_brand_model and source_type_raw not in ("official",):
                         event_status = "待确认"
                         confidence = "低"
                     else:
@@ -1352,6 +2140,127 @@ def main():
             conflict_filtered.append(e)
         raw_events = conflict_filtered
 
+    llm_judge_config = LLMJudgeConfig(
+        enabled=args.llm_judge,
+        mode=args.llm_judge_mode,
+        max_candidates=args.llm_judge_max,
+        cache_enabled=not args.no_llm_judge_cache,
+    )
+    if llm_judge_config.enabled:
+        diagnostics.llm_judge_enabled = True
+        diagnostics.llm_judge_mode = llm_judge_config.mode
+        ak = os.environ.get(llm_judge_config.api_key_env, "")
+        if not ak:
+            print(f"[ERROR] LLM Judge enabled but {llm_judge_config.api_key_env} is not configured",
+                  file=sys.stderr)
+            sys.exit(1)
+        mdl = os.environ.get("DEEPSEEK_MODEL", "")
+        if not mdl:
+            mdl = llm_judge_config.default_model
+            print(f"[WARN] DEEPSEEK_MODEL not set, defaulting to '{mdl}'", file=sys.stderr)
+        llm_judge_config.model = mdl
+        llm_cache = {}
+        if llm_judge_config.cache_enabled:
+            llm_cache = load_llm_judge_cache(LLM_JUDGE_CACHE_PATH)
+        candidates_for_llm = []
+        for e in raw_events:
+            tid = e.get("target_id")
+            if not tid:
+                continue
+            t = next((t for t in targets if t.target_id == tid), None) if targets else None
+            if not t:
+                continue
+            send, reason = should_send_to_llm_judge(
+                e, t, mode=llm_judge_config.mode,
+                start_date=start_str, end_date=end_str,
+            )
+            if send:
+                candidates_for_llm.append((e, t, reason))
+        diagnostics.llm_judge_candidate_count = len(candidates_for_llm)
+        selected = candidates_for_llm[:llm_judge_config.max_candidates]
+        kept_events = []
+        for event, tgt, sel_reason in selected:
+            ck = build_llm_judge_cache_key(event, tgt)
+            cached = llm_cache.get(ck) if llm_judge_config.cache_enabled else None
+            cache_hit_valid = False
+            if cached is not None:
+                if isinstance(cached, dict) and cached.get("prompt_version"):
+                    cache_hit_valid = True
+                elif isinstance(cached, str):
+                    pass
+            if cached and cache_hit_valid:
+                diagnostics.llm_judge_cache_hit_count += 1
+                raw_text = cached.get("decision", cached) if isinstance(cached, dict) else cached
+                dec, parse_err = parse_llm_judge_response(raw_text)
+            elif cached and not cache_hit_valid and llm_judge_config.cache_enabled:
+                diagnostics.llm_judge_cache_stale_count += 1
+                diagnostics.llm_judge_cache_miss_count += 1
+                diagnostics.llm_judge_cache_miss_count += 1
+                diagnostics.llm_judge_called_count += 1
+                prompt = build_llm_judge_prompt(event, tgt, start_date=start_str, end_date=end_str)
+                ev_text = event.get("evidence", "") or ""
+                p_polluted, _ = is_polluted_evidence_snippet(ev_text)
+                if p_polluted:
+                    diagnostics.polluted_evidence_llm_prompt_count += 1
+                llm_resp = call_deepseek_llm_judge(prompt, llm_judge_config)
+                if "_error" in llm_resp:
+                    diagnostics.llm_judge_error_count += 1
+                    kept_events.append(event)
+                    continue
+                raw_text = llm_resp.get("_content", "")
+                if llm_judge_config.cache_enabled:
+                    llm_cache[ck] = {
+                        "prompt_version": LLM_JUDGE_PROMPT_VERSION,
+                        "schema_version": LLM_JUDGE_SCHEMA_VERSION,
+                        "guard_version": LLM_JUDGE_GUARD_VERSION,
+                        "created_at": datetime.now().isoformat(),
+                        "decision": raw_text,
+                    }
+                    save_llm_judge_cache(LLM_JUDGE_CACHE_PATH, llm_cache)
+                dec, parse_err = parse_llm_judge_response(raw_text)
+            if dec is None:
+                diagnostics.llm_judge_error_count += 1
+                kept_events.append(event)
+                continue
+            if dec.action == "downgrade" and has_reject_intent(dec.reason):
+                dec.action = "discard"
+                diagnostics.llm_reject_intent_discard_count += 1
+            result_event, apply_err = apply_llm_judge_decision(event, dec, diagnostics=diagnostics)
+            if result_event is None:
+                diagnostics.llm_judge_discard_count += 1
+            elif dec.action == "downgrade":
+                diagnostics.llm_judge_downgrade_count += 1
+                kept_events.append(result_event)
+            else:
+                diagnostics.llm_judge_keep_count += 1
+                kept_events.append(result_event)
+            if len(diagnostics.llm_judge_samples) < 10:
+                diagnostics.llm_judge_samples.append({
+                    "target_id": tgt.target_id,
+                    "action": dec.action,
+                    "evidence_quality": dec.evidence_quality,
+                    "source_context_type": dec.source_context_type,
+                    "reason": dec.reason,
+                    "evidence": (event.get("evidence") or "")[:60],
+                })
+        non_candidate_events = []
+        for e in raw_events:
+            tid = e.get("target_id")
+            if not tid:
+                non_candidate_events.append(e)
+                continue
+            t = next((t for t in targets if t.target_id == tid), None) if targets else None
+            if not t:
+                non_candidate_events.append(e)
+                continue
+            send, _ = should_send_to_llm_judge(
+                e, t, mode=llm_judge_config.mode,
+                start_date=start_str, end_date=end_str,
+            )
+            if not send:
+                non_candidate_events.append(e)
+        raw_events = kept_events + non_candidate_events
+
     raw_events = apply_final_event_guard(
         raw_events, targets,
         start_date=start_str, end_date=end_str,
@@ -1404,6 +2313,36 @@ def main():
                 "confidence_downgraded_count": diagnostics.confidence_downgraded_count,
                 "status_downgraded_count": diagnostics.status_downgraded_count,
                 "final_event_count": diagnostics.final_event_count,
+                "llm_judge_enabled": diagnostics.llm_judge_enabled,
+                "llm_judge_mode": diagnostics.llm_judge_mode,
+                "llm_judge_candidate_count": diagnostics.llm_judge_candidate_count,
+                "llm_judge_called_count": diagnostics.llm_judge_called_count,
+                "llm_judge_cache_hit_count": diagnostics.llm_judge_cache_hit_count,
+                "llm_judge_cache_miss_count": diagnostics.llm_judge_cache_miss_count,
+                "llm_judge_keep_count": diagnostics.llm_judge_keep_count,
+                "llm_judge_discard_count": diagnostics.llm_judge_discard_count,
+                "llm_judge_downgrade_count": diagnostics.llm_judge_downgrade_count,
+                "llm_judge_error_count": diagnostics.llm_judge_error_count,
+                "historical_downgraded_count": diagnostics.historical_downgraded_count,
+                "source_pub_empty_brand_model_count": diagnostics.source_pub_empty_brand_model_count,
+                "source_publish_date_guard_count": diagnostics.source_publish_date_guard_count,
+                "historical_event_filtered_count": diagnostics.historical_event_filtered_count,
+                "missing_core_entity_filtered_count": diagnostics.missing_core_entity_filtered_count,
+                "polluted_evidence_llm_prompt_count": diagnostics.polluted_evidence_llm_prompt_count,
+                "llm_reject_intent_discard_count": diagnostics.llm_reject_intent_discard_count,
+                "low_confidence_polluted_filtered_count": diagnostics.low_confidence_polluted_filtered_count,
+                "llm_judge_cache_version": LLM_JUDGE_PROMPT_VERSION,
+                "llm_judge_cache_stale_count": diagnostics.llm_judge_cache_stale_count,
+                "llm_judge_cache_bypass_count": diagnostics.llm_judge_cache_bypass_count,
+                "event_scope_classified_count": diagnostics.event_scope_classified_count,
+                "national_event_count": diagnostics.national_event_count,
+                "regional_event_count": diagnostics.regional_event_count,
+                "dealer_event_count": diagnostics.dealer_event_count,
+                "auto_show_event_count": diagnostics.auto_show_event_count,
+                "media_event_count": diagnostics.media_event_count,
+                "unknown_event_scope_count": diagnostics.unknown_event_scope_count,
+                "non_national_event_filtered_count": diagnostics.non_national_event_filtered_count,
+                "related_event_count": diagnostics.related_event_count,
                 "failed_urls": diagnostics.failed_urls[:10],
             },
             "summary": summary,
@@ -1425,7 +2364,9 @@ def main():
             fieldnames = ["target_id", "target_display_name", "target_group", "target_priority",
                           "date", "event_date", "source_publish_date", "date_basis", "date_confidence",
                           "brand", "model", "event_type", "event_status",
-                          "confidence", "source_type", "source_url", "evidence"]
+                          "confidence", "source_type", "source_url", "evidence",
+                          "llm_judged", "llm_action", "llm_reason", "llm_evidence_quality",
+                          "llm_source_context_type"]
             with open(out_path, "w", newline="", encoding="utf-8") as f:
                 writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
                 writer.writeheader()
@@ -1624,6 +2565,36 @@ def _build_diagnostics_section(diagnostics: CrawlDiagnostics) -> list[str]:
     lines.append(f"| confidence_downgraded_count | {diagnostics.confidence_downgraded_count} |")
     lines.append(f"| status_downgraded_count | {diagnostics.status_downgraded_count} |")
     lines.append(f"| final_event_count | {diagnostics.final_event_count} |")
+    lines.append(f"| llm_judge_enabled | {diagnostics.llm_judge_enabled} |")
+    lines.append(f"| llm_judge_mode | {diagnostics.llm_judge_mode} |")
+    lines.append(f"| llm_judge_candidate_count | {diagnostics.llm_judge_candidate_count} |")
+    lines.append(f"| llm_judge_called_count | {diagnostics.llm_judge_called_count} |")
+    lines.append(f"| llm_judge_cache_hit_count | {diagnostics.llm_judge_cache_hit_count} |")
+    lines.append(f"| llm_judge_cache_miss_count | {diagnostics.llm_judge_cache_miss_count} |")
+    lines.append(f"| llm_judge_keep_count | {diagnostics.llm_judge_keep_count} |")
+    lines.append(f"| llm_judge_discard_count | {diagnostics.llm_judge_discard_count} |")
+    lines.append(f"| llm_judge_downgrade_count | {diagnostics.llm_judge_downgrade_count} |")
+    lines.append(f"| llm_judge_error_count | {diagnostics.llm_judge_error_count} |")
+    lines.append(f"| source_publish_date_guard_count | {diagnostics.source_publish_date_guard_count} |")
+    lines.append(f"| historical_event_filtered_count | {diagnostics.historical_event_filtered_count} |")
+    lines.append(f"| missing_core_entity_filtered_count | {diagnostics.missing_core_entity_filtered_count} |")
+    lines.append(f"| polluted_evidence_llm_prompt_count | {diagnostics.polluted_evidence_llm_prompt_count} |")
+    lines.append(f"| llm_reject_intent_discard_count | {diagnostics.llm_reject_intent_discard_count} |")
+    lines.append(f"| low_confidence_polluted_filtered_count | {diagnostics.low_confidence_polluted_filtered_count} |")
+    lines.append(f"| llm_judge_cache_version | {LLM_JUDGE_PROMPT_VERSION} |")
+    lines.append(f"| llm_judge_cache_stale_count | {diagnostics.llm_judge_cache_stale_count} |")
+    lines.append(f"| llm_judge_cache_bypass_count | {diagnostics.llm_judge_cache_bypass_count} |")
+    lines.append(f"| event_scope_classified_count | {diagnostics.event_scope_classified_count} |")
+    lines.append(f"| national_event_count | {diagnostics.national_event_count} |")
+    lines.append(f"| regional_event_count | {diagnostics.regional_event_count} |")
+    lines.append(f"| dealer_event_count | {diagnostics.dealer_event_count} |")
+    lines.append(f"| auto_show_event_count | {diagnostics.auto_show_event_count} |")
+    lines.append(f"| media_event_count | {diagnostics.media_event_count} |")
+    lines.append(f"| unknown_event_scope_count | {diagnostics.unknown_event_scope_count} |")
+    lines.append(f"| non_national_event_filtered_count | {diagnostics.non_national_event_filtered_count} |")
+    lines.append(f"| related_event_count | {diagnostics.related_event_count} |")
+    lines.append(f"| historical_downgraded_count | {diagnostics.historical_downgraded_count} |")
+    lines.append(f"| source_pub_empty_brand_model_count | {diagnostics.source_pub_empty_brand_model_count} |")
     lines.append("")
 
     if diagnostics.pre_crawl_skipped_count > 0:
@@ -1675,6 +2646,26 @@ def _build_diagnostics_section(diagnostics: CrawlDiagnostics) -> list[str]:
         for ds in diagnostics.degrade_samples[:10]:
             ev_snippet = ds.get("evidence_snippet", "")[:50]
             lines.append(f"| {ds.get('target_id', '')} | {ds.get('reason', '')} | {ds.get('before_status', '')} | {ds.get('after_status', '')} | {ds.get('before_confidence', '')} | {ds.get('after_confidence', '')} | {ev_snippet} |")
+        lines.append("")
+
+    if diagnostics.related_event_samples:
+        lines.append("### 相关但非全国级事件")
+        lines.append("")
+        lines.append("| target_id | brand | model | event_date | event_type | scope | evidence |")
+        lines.append("|-----------|-------|-------|------------|------------|-------|----------|")
+        for s in diagnostics.related_event_samples[:10]:
+            ev = s.get("evidence_snippet", "")[:50]
+            lines.append(f"| {s.get('target_id', '')} | {s.get('brand', '')} | {s.get('model', '')} | {s.get('event_date', '')} | {s.get('event_type', '')} | {s.get('scope', '')} | {ev} |")
+        lines.append("")
+
+    if diagnostics.llm_judge_samples:
+        lines.append("### LLM Judge 样例")
+        lines.append("")
+        lines.append("| target_id | action | evidence_quality | source_context_type | reason | evidence |")
+        lines.append("|-----------|--------|-----------------|---------------------|--------|----------|")
+        for s in diagnostics.llm_judge_samples[:10]:
+            ev = s.get("evidence", "")[:50]
+            lines.append(f"| {s.get('target_id', '')} | {s.get('action', '')} | {s.get('evidence_quality', '')} | {s.get('source_context_type', '')} | {s.get('reason', '')} | {ev} |")
         lines.append("")
 
     return lines
