@@ -1,5 +1,7 @@
 # AGENTS.md — mashang_workspace Guide
 
+**注意：OpenCode 仍应从仓库根目录启动。** 本文件仅定义 `mashang_workspace/` 内的工作规则。
+
 等同于项目根目录 `AGENTS.md` 的 workspace 专用版本。
 所有 workspace 内的 AI Agent 请优先阅读此文档和根目录 AGENTS.md。
 
@@ -17,8 +19,12 @@ mashang-service/                   # 总项目根目录
 ├── dataset/                       # 共享原始数据
 │   └── passenger_insurance/       #   └── 乘用车上险数据（6 张 Parquet + registry + quality）
 ├── requirements.txt               # 共享依赖
+├── mashang_shared/               # shared operators / schema 层，谨慎修改
 │
 ├── mashang_runtime/             # Legacy runtime (frozen, packaged)
+│   └── README.md
+│
+├── mashang_runtimeV2/           # Runtime V2 / 产品化沉淀层，承接 workspace 验证稳定后的能力
 │   └── README.md
 │
 └── mashang_workspace/             # ← AI-native 分析工作区（当前所在目录）
@@ -43,7 +49,7 @@ mashang-service/                   # 总项目根目录
 3. **优先使用已有 runtime_scripts/ / research_scripts/ / utility_scripts/ 脚本**
 4. **临时分析写入 outputs/，稳定后再沉淀到 runtime_scripts/**
 5. **所有分析结果说明数据来源、时间窗口、口径**
-6. **高频能力回流到 mashang_runtime/**
+6. **高频能力产品化路径**：先在 workspace 内沉淀（`runtime_scripts/`）；经过明确 V2 任务后迁移至 `mashang_runtimeV2/`。旧 `mashang_runtime/` 不作为回流目标。
 7. **每次改动后运行 `make eval` 或 `make ci`**
 
 ## 常用 Make 命令

@@ -1,19 +1,37 @@
 # AGENTS.md — mashang Service Guide
 
+## 启动位置与宿主层
+
+**OpenCode 应从仓库根目录启动。** 根目录是所有 Agent 命令、Makefile、MCP 配置的统一执行入口。
+
+mashang-service 根目录是 **Agent Harness / service 宿主层**，承载以下能力：
+
+- `Makefile` / `pyproject.toml` — 构建与调度
+- `.opencode/`、`opencode.json`、MCP 配置 — OpenCode / MCP 能力
+- `.env` / `.venv/` — 本地环境
+- `dataset/` — 共享数据入口
+- `mashang_shared/` — 共享 operator/schema
+- 根 `AGENTS.md` / `README.md` — 项目级文档
+
+Agent 工作边界：**启动在根目录，工作在 `mashang_workspace/`**。
+
 ## 项目定位
 
-mashang-service 是一个**汽车业务数据分析项目**，包含两个子分支：
+mashang-service 是一个**汽车业务数据分析项目**，包含以下分支 / 模块：
 
 | 分支 | 目录 | 定位 |
 |------|------|------|
-| **Runtime** | `mashang_runtime/` | 产品化 Agentic BI Runtime（Agent Loop/Tools/Operators/Schema） |
+| **Runtime** | `mashang_runtime/` | Legacy / frozen 旧 Runtime 层；当前不作为日常活跃开发目录 |
+| **Runtime V2** | `mashang_runtimeV2/` | Runtime V2 / 产品化沉淀层；承接从 `mashang_workspace/` 验证稳定后的能力 |
 | **Workspace** | `mashang_workspace/` | AI-native 数据分析工作区（Scripts/Docs/Eval/Tests） |
+| **Shared** | `mashang_shared/` | 共享 operator/schema 层（非默认工作区） |
 
 **共享底座**：
 - `dataset/` — 原始数据
 - `.env` — 环境变量
 - `.venv/` — Python 虚拟环境
 - `requirements.txt` — 依赖
+- `mashang_shared/` — 共享 operator/schema
 
 **核心数据集**：
 - `dataset/order_data.parquet` — 订单主表（含锁单、交付、开票、退订等时间戳）
@@ -23,7 +41,7 @@ mashang-service 是一个**汽车业务数据分析项目**，包含两个子分
 ## 工作原则
 
 1. **新分析能力**：优先进入 `mashang_workspace/`
-2. **高频稳定能力**：沉淀到 `mashang_runtime/`
+2. **Runtime 分层**：`mashang_runtime/` 是 legacy / frozen 旧 Runtime 层，不作为日常活跃开发目录。`mashang_runtimeV2/` 是产品化沉淀层，承接从 `mashang_workspace/` 验证稳定后的能力。
 3. **不要移动 `dataset/` `.env` `.venv/`**
 4. **不要在 runtime 中做临时分析**
 5. **不要在 workspace 中引入破坏 runtime 的改动**
@@ -32,7 +50,9 @@ mashang-service 是一个**汽车业务数据分析项目**，包含两个子分
 8. **不要在根目录创建新的 `docs/scripts/eval/tests/utils`**
 9. **新分析能力优先沉淀到 `mashang_workspace/runtime_scripts/ + research_scripts/ + docs/ + eval/`**
 10. **每次完成改动后运行 `make eval` 或 `make ci`**
-11. **只有稳定、高频、口径明确的能力才回流 `mashang_runtime`**
+11. **能力产品化路径**：workspace 中验证稳定的能力，经过明确 V2 / packaging / productization 任务后，迁移到 `mashang_runtimeV2/`。不要绕过 workspace 直接在 runtimeV2 中开发探索性能力。
+12. **`mashang_shared/` 边界**：共享 operator/schema 层，不应随意修改。如修改需说明影响范围，并同步相关测试。
+13. **MCP 边界**：MCP 能力由根目录统一提供（`.opencode/` / opencode.json），workspace 只消费能力。不得将本地 profile、cookies、API key、incoming 原始数据等提交进仓库。
 
 其余原则详见 `mashang_workspace/AGENTS.md`。
 
@@ -44,7 +64,7 @@ mashang-service 是一个**汽车业务数据分析项目**，包含两个子分
 4. **不要编造数据**：在数据无法支撑结论时，明确说明"无数据/数据不足"。
 5. **所有分析结果必须说明来源**：包括数据源、过滤条件、时间窗口、指标口径。
 6. **临时代码放 scratch/ 或 outputs/**，稳定脚本再沉淀到 `scripts/`。
-7. **高频能力再回流到 mashang_runtime**：高频分析路径可以考虑沉淀为 operator 或 tool。
+7. **高频能力先在 workspace 内沉淀**：高频分析路径先沉淀到 `mashang_workspace/runtime_scripts/`；经过明确 V2 任务后再迁移至 `mashang_runtimeV2/`。旧 `mashang_runtime/` 不作为回流目标。
 8. **回答数据问题前，先看 `docs/data_dictionary.md` 和 `docs/metric_definitions.md`**，确认字段名和口径。
 9. **对标准分析问题，优先调用 `scripts/` 下已有脚本**，不要重复造轮子。
 10. **如果脚本缺少参数，先小范围补充 CLI 参数，不要重写脚本**。
@@ -274,8 +294,9 @@ mashang-service/
 ├── .venv/                 ← 共享虚拟环境
 ├── dataset/               ← 共享原始数据
 ├── requirements.txt       ← 共享依赖
+├── mashang_shared/        ← 共享 operator/schema（非默认工作区）
 │
-├── mashang_runtime/       ← 产品化 Agentic BI Runtime
+├── mashang_runtime/       ← Legacy / frozen 旧 Runtime（非活跃开发，仅历史兼容）
 │   ├── agent/             ← Agent Loop / Planner / Router / Decisions
 │   ├── tools/             ← 确定性执行工具
 │   ├── operators/         ← 固定业务算子
@@ -283,6 +304,9 @@ mashang-service/
 │   ├── main.py            ← CLI 入口
 │   ├── feishu_bot.py      ← 飞书入口
 │   └── README.md          ← Runtime 说明
+│
+├── mashang_runtimeV2/     ← Runtime V2 / 产品化沉淀层（从 workspace 验证稳定后迁移至此）
+│   └── README.md          ← Runtime V2 说明
 │
 └── mashang_workspace/     ← AI-native 分析工作区
     ├── AGENTS.md          ← Workspace Agent 指南
