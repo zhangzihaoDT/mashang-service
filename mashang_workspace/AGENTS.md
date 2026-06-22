@@ -122,6 +122,8 @@ python mashang_workspace/eval/run_eval.py --suite parser  # 单套件
 | `make miit-latest-publicity` | 监控最新公示批次 | make |
 | `make miit-latest-official` | 监控最新正式公告批次 | make |
 | `make miit-extract-text BATCH=N` | 附件文本抽取 | make |
+| `make miit-latest-publicity-refresh` | 重新获取最新公示（允许缓存） | make |
+| `make miit-latest-official-refresh` | 重新获取最新正式公告（允许缓存） | make |
 
 ## MIIT New Car Monitor / 工信部新车公告批次监控
 
@@ -140,6 +142,7 @@ mashang_workspace/research_scripts/miit_new_car/
 ├── parse_products.py     # 附件解析 → CSV/JSON/Markdown
 ├── diff_watchlist.py     # Watchlist 匹配 + 与上一批增量 diff
 ├── monitor.py            # 串联完整流水线
+├── http_utils.py         # HTTP 请求工具（重试/backoff/NetworkError）
 └── README.md             # 完整文档
 ```
 
@@ -150,8 +153,10 @@ make miit-discover-latest-batch              # 打印最新批次
 make miit-discover-batches PAGES=3           # 多页发现
 make miit-fetch-batch BATCH=408              # 抓取指定批次
 make miit-new-car-monitor                    # 监控最新批次
-make miit-latest-publicity                   # 监控最新公示
-make miit-latest-official                    # 监控最新正式公告
+make miit-latest-publicity                   # 监控最新公示（幂等，复用 evidence）
+make miit-latest-official                    # 监控最新正式公告（幂等）
+make miit-latest-publicity-refresh           # 重新获取最新公示（允许缓存）
+make miit-latest-official-refresh            # 重新获取最新正式公告
 make miit-extract-text BATCH=N               # 附件文本抽取
 ```
 

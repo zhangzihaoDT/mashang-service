@@ -225,7 +225,7 @@ def parse_batch(
         w = csv.DictWriter(f, fieldnames=TARGET_FIELDS)
         w.writeheader()
         w.writerows(products)
-    print(f"  CSV: {csv_path} ({len(products)} 行)")
+    print(f"  CSV: {csv_path} ({len(products)} 条可结构化记录)")
 
     # JSON
     json_path = out_dir / f"{prefix}.json"

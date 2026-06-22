@@ -28,6 +28,41 @@ mashang_workspace/research_scripts/miit_new_car/
 └── README.md             # 本文件
 ```
 
+## V0.2.2 Polish
+
+| 能力 | 说明 |
+|------|------|
+| **幂等 source 标记** | 复用 evidence 时 `discovery_source` 和 `detail_source` 标记为 `skipped_existing`，不再显示 `unknown` |
+| **避免二次 discover** | monitor latest 模式从 discovery 结果拿到 `detail_url` 后直接传给 fetch，不再重复请求 jpage |
+| **network_retry_count** | Summary 新增 `network_retry_count`，跟踪本次运行发生的网络重试次数 |
+| **"可结构化记录"** | 用户可见文案从"产品数"改为"可结构化记录数"，避免误解（`parsed` 不等于完整公告总量） |
+| **"道路机动车辆公告"** | discover 输出文案从"公告"改为"道路机动车辆公告" |
+
+已知限制：
+
+- 当前 `parsed` 结果代表"当前解析器可结构化提取的记录"，**不等于该批次完整公告产品总量**。正式公告 DOC 附件的完整产品表格结构化属于后续版本能力。
+
+## V0.2.1 稳定性增强
+
+| 能力 | 说明 |
+|------|------|
+| **HTTP 重试** | 所有对外请求自动重试 3 次，指数 backoff |
+| **Discovery cache fallback** | jpage API 超时时，使用本地 `discovery/discovered_batches.json` |
+| **Detail page cache fallback** | 详情页请求超时时，使用本地 `raw/batch_N/detail.html` |
+| **证据幂等** | 已处理批次（evidence 存在）默认复用本地 evidence，不重新请求 |
+| **--refresh** | 重新处理，允许缓存降级 |
+| **--force-refresh** | 强制远端请求，缓存不可用则失败 |
+| **网络错误分类** | 网络不可达返回 `network_unavailable`，不再错误地输出"未发现任何批次" |
+| **Summary 标记** | 最终摘要含 `discovery_source` / `detail_source` / `evidence_source` / `network_warnings_count` |
+
+幂等行为：
+
+```bash
+make miit-latest-publicity              # 第1次：正常处理
+make miit-latest-publicity              # 第2次：evidence 存在 → 复用，exit 0
+make miit-latest-publicity-refresh      # 重新获取（允许缓存）
+```
+
 ## V0.2 新增能力
 
 | 能力 | CLI | Makefile |
@@ -174,13 +209,13 @@ python -m pytest mashang_workspace/tests/test_miit_new_car.py -v
 make test
 ```
 
-## 已知限制 (V0.2)
+## 已知限制 (V0.2.2)
 
 1. **附件 404**：`miit.gov.cn` 域的部分附件 URL 在当前环境返回 404（可能是地区限制）。已作为 warning 处理，不中断主流程
 2. **DOC 解析**：`.doc` 格式依赖系统工具 `textutil`（macOS）或 `antiword`，不可用时记录为 `unsupported`，不失败。`.docx` 已支持标准 zipfile 解析
-3. **结构化字段**：能源类型、电池类型、续航、电机功率等深度参数仍暂未解析（包含在 DOC 中）
+3. **结构化字段**：能源类型、电池类型、续航、电机功率等深度参数仍暂未解析（包含在 DOC 中）。当前 `parsed` 结果代表"当前解析器可结构化提取的记录"，**不等于该批次完整公告产品总量**
 4. **分页上限**：jpage API 返回 `totalpage=3`（约 45 条），不是全量历史
-5. **网站稳定性**：工信部 EIDC 网站可能间歇性不可达，所有网络请求有 timeout 和重试
+5. **网站稳定性**：工信部 EIDC 网站可能间歇性不可达，所有网络请求有 timeout、重试和缓存降级
 6. **附件 URL 时效**：部分公示附件链接可能有时效性，正式公告 URL 更稳定
 7. **auto_launch_monitor 联动**：当前只输出 evidence 文件，未自动触发 auto_launch_monitor 主流程
 

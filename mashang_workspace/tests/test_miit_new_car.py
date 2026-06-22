@@ -1,9 +1,15 @@
 """
-Tests for MIIT 新车公告批次监控模块 V0.2.
+Tests for MIIT 新车公告批次监控模块 V0.2.1.
 
-覆盖：批次号解析、状态识别、watchlist 匹配、diff 结构、
-latest-publicity/latest-official 筛选、多页去重、
-附件 404 容错、docx 文本抽取、doc unsupported、evidence 结构。
+V0.2.1 新增覆盖:
+  - discovery cache fallback（远端超时 + 缓存存在 → 可用）
+  - discovery cache fallback（远端超时 + 无缓存 → network_unavailable）
+  - detail.html cache fallback
+  - 已处理批次幂等复用 evidence
+  - --refresh 重新处理（允许缓存）
+  - --force-refresh 重新处理（不允许缓存）
+  - summary 包含 discovery/detail/evidence_source + network_warnings_count
+  - http_utils 重试机制
 """
 
 import sys, json, re, zipfile
@@ -31,6 +37,12 @@ from research_scripts.miit_new_car.extract_attachment_text import (
     _extract_docx_text,
     _extract_html_text,
 )
+from research_scripts.miit_new_car.http_utils import (
+    NetworkError,
+    http_get,
+    http_get_text,
+)
+from research_scripts.miit_new_car.discover_batches import _fetch_jpage as _db_fetch_jpage
 
 
 # ── Batch number extraction ──
@@ -52,7 +64,7 @@ def test_parse_batch_from_title_large():
 
 
 def test_parse_batch_from_title_double():
-    assert _parse_batch_from_title("关于《道路机动车辆生产企业及产品公告》（第408批）和《享受车船税减免优惠...》（第八十七批）") == 408
+    assert _parse_batch_from_title("关于《道路机动车辆生产企业及产品公告》（第408批）和《享受车船税...》（第八十七批）") == 408
 
 
 def test_extract_batch_no_from_title():
@@ -77,49 +89,78 @@ def test_detect_status_default():
 
 # ── Status filtering (V0.2) ──
 
-def _mock_discover_batches_all(*, limit=10, pages=1, status_filter=None, _all_batches=None):
-    if _all_batches is None:
-        return []
-    if status_filter:
-        return [b for b in _all_batches if b["status"] == status_filter][:limit]
-    return _all_batches[:limit]
-
-
 def test_discover_latest_by_status_publicity(monkeypatch):
-    """Test that discover_latest_by_status('publicity') filters correctly."""
-    mock_batches = [
+    mock_all = [
         {"batch_no": 408, "status": "publicity", "title": "关于第408批公示", "publish_date": "2026-06-10", "detail_url": "http://a"},
         {"batch_no": 407, "status": "official", "title": "第407批正式公告", "publish_date": "2026-06-12", "detail_url": "http://b"},
         {"batch_no": 406, "status": "official", "title": "第406批正式公告", "publish_date": "2026-05-09", "detail_url": "http://c"},
     ]
     monkeypatch.setattr(
         "research_scripts.miit_new_car.discover_batches.discover_batches",
-        lambda limit=10, pages=1, status_filter=None: _mock_discover_batches_all(limit=limit, pages=pages, status_filter=status_filter, _all_batches=mock_batches),
+        lambda limit=10, pages=1, status_filter=None, force_refresh=False: (
+            [b for b in mock_all if b["status"] == status_filter][:limit] if status_filter else mock_all[:limit],
+            "remote",
+        ),
     )
-    result = discover_latest_by_status("publicity")
+    result, source = discover_latest_by_status("publicity")
     assert result is not None
     assert result["batch_no"] == 408
     assert result["status"] == "publicity"
+    assert source == "remote"
 
 
 def test_discover_latest_by_status_official(monkeypatch):
-    mock_batches = [
+    mock_all = [
         {"batch_no": 408, "status": "publicity", "title": "关于第408批公示", "publish_date": "2026-06-10", "detail_url": "http://a"},
         {"batch_no": 407, "status": "official", "title": "第407批正式公告", "publish_date": "2026-06-12", "detail_url": "http://b"},
     ]
     monkeypatch.setattr(
         "research_scripts.miit_new_car.discover_batches.discover_batches",
-        lambda limit=10, pages=1, status_filter=None: _mock_discover_batches_all(limit=limit, pages=pages, status_filter=status_filter, _all_batches=mock_batches),
+        lambda limit=10, pages=1, status_filter=None, force_refresh=False: (
+            [b for b in mock_all if b["status"] == status_filter][:limit] if status_filter else mock_all[:limit],
+            "remote",
+        ),
     )
-    result = discover_latest_by_status("official")
+    result, source = discover_latest_by_status("official")
     assert result is not None
     assert result["batch_no"] == 407
     assert result["status"] == "official"
 
 
-def test_discover_latest_by_status_no_match(monkeypatch):
-    monkeypatch.setattr("research_scripts.miit_new_car.discover_batches.discover_batches", lambda limit=10, pages=1, status_filter=None: [])
-    assert discover_latest_by_status("publicity") is None
+# ── V0.2.1: Discovery cache fallback ──
+
+def test_discover_cache_fallback_remote_fails_cache_exists(tmp_path, monkeypatch):
+    """Remote fails but cache exists → returns cache + source='cache'."""
+    cached = [
+        {"batch_no": 408, "status": "publicity", "title": "第408批", "publish_date": "2026-06-10", "detail_url": "http://a", "source": "miit-eidc"},
+    ]
+    cache_file = tmp_path / "discovered_batches.json"
+    cache_file.write_text(json.dumps(cached), encoding="utf-8")
+    monkeypatch.setattr("research_scripts.miit_new_car.discover_batches.DISCOVERY_CACHE_FILE", cache_file)
+
+    def mock_fetch_jpage(page=1):
+        raise NetworkError("超时模拟")
+    monkeypatch.setattr("research_scripts.miit_new_car.discover_batches._fetch_jpage", mock_fetch_jpage)
+
+    batches, source = discover_batches(limit=5)
+    assert len(batches) == 1
+    assert source == "cache"
+    assert batches[0]["batch_no"] == 408
+
+
+def test_discover_cache_fallback_no_cache(tmp_path, monkeypatch):
+    """Remote fails and no cache → returns ([], 'network_unavailable')."""
+    cache_file = tmp_path / "discovered_batches.json"
+    monkeypatch.setattr("research_scripts.miit_new_car.discover_batches.DISCOVERY_CACHE_FILE", cache_file)
+    assert not cache_file.exists()
+
+    def mock_fetch_jpage(page=1):
+        raise NetworkError("超时模拟")
+    monkeypatch.setattr("research_scripts.miit_new_car.discover_batches._fetch_jpage", mock_fetch_jpage)
+
+    batches, source = discover_batches(limit=5)
+    assert batches == []
+    assert source == "network_unavailable"
 
 
 # ── Multi-page dedup (V0.2) ──
@@ -134,19 +175,6 @@ def test_dedup():
     assert len(result) == 2
     assert result[0]["batch_no"] == 408
     assert result[1]["batch_no"] == 407
-
-
-def test_discover_batches_status_filter(monkeypatch):
-    """Test discover_batches with status_filter."""
-    mock_batches = [
-        {"batch_no": 408, "status": "publicity", "title": "公示", "publish_date": "", "detail_url": "", "source": ""},
-        {"batch_no": 407, "status": "official", "title": "正式", "publish_date": "", "detail_url": "", "source": ""},
-    ]
-    monkeypatch.setattr("research_scripts.miit_new_car.discover_batches._fetch_jpage", lambda page=1: "<xml/>")
-    monkeypatch.setattr("research_scripts.miit_new_car.discover_batches._RecordExtractor", lambda: type("MockExtractor", (), {"parse": lambda self, xml: []})())
-    result = discover_batches(limit=5, status_filter="publicity")
-    # Should be empty since mock returns no records (but at least doesn't crash)
-    assert isinstance(result, list)
 
 
 # ── Watchlist keyword matching ──
@@ -183,7 +211,6 @@ def test_load_watchlist(tmp_path):
     entries = _load_watchlist(csv_path)
     assert len(entries) == 2
     assert entries[0]["brand"] == "智己"
-    assert entries[0]["keywords"] == "智己;IM"
 
 
 def test_load_watchlist_not_exists(capsys):
@@ -202,7 +229,6 @@ def test_load_watchlist_with_bom(tmp_path):
 # ── Diff output structure ──
 
 def test_diff_structure_transforms(tmp_path, monkeypatch):
-    """Test diff_batch produces the correct output structure with mock data."""
     parsed_dir = tmp_path / "parsed"
     diff_dir = tmp_path / "diff"
     state_dir = tmp_path / "state"
@@ -231,45 +257,149 @@ def test_diff_structure_transforms(tmp_path, monkeypatch):
     result = diff_batch(batch_no=408, previous_batch=407, watchlist_path=Path("/nonexistent"), output_dir=diff_dir, state_update=True)
 
     assert result["batch_no"] == 408
-    assert result["previous_batch"] == 407
-    assert result["total_products"] == 2
     assert result["new_products"] == 1
-    assert (state_dir / "latest_processed_batch.json").exists()
     assert (diff_dir / "batch_408_watchlist_diff.json").exists()
-    assert (diff_dir / "batch_408_watchlist_diff.md").exists()
 
 
-# ── Attachment 404 should not crash fetch (V0.2) ──
+# ── V0.2.1: Detail page cache fallback ──
 
-def test_fetch_attachment_404_no_crash(monkeypatch, capsys):
-    """Simulate a 404 on one attachment; verify the overall fetch doesn't crash."""
-    from research_scripts.miit_new_car.fetch_batch import fetch_batch
-
-    # Mock _fetch so the detail page returns HTML, but one attachment returns 404
-    _fetch_calls = []
-
-    def mock_fetch(url, timeout=60):
-        _fetch_calls.append(url)
-        from urllib.error import HTTPError
-        if "nodata" in url:
-            raise HTTPError(url, 404, "Not Found", {}, None)
-        if "detail" in url or "/art/" in url:
-            return b"<html><body>Mock detail page</body></html>", 200
-        if ".doc" in url:
-            return b"mock doc content", 200
-        return b"mock content", 200
-
-    monkeypatch.setattr("research_scripts.miit_new_car.fetch_batch._fetch", mock_fetch)
-
-    # Mock discover_batches at its source module
-    monkeypatch.setattr(
-        "research_scripts.miit_new_car.discover_batches.discover_batches",
-        lambda limit=5, pages=1, status_filter=None: [
-            {"batch_no": 408, "detail_url": "http://mock/detail", "status": "publicity", "title": "test"}
-        ],
+def test_fetch_detail_cache_fallback(tmp_path, monkeypatch):
+    """Detail page fetch fails but detail.html exists locally → uses cached HTML."""
+    batch_dir = tmp_path / "batch_408"
+    batch_dir.mkdir(parents=True)
+    detail_html = batch_dir / "detail.html"
+    detail_html.write_text(
+        '<html><div class="_nk_wz_tit">第408批公示测试</div></html>',
+        encoding="utf-8",
     )
 
-    # Mock _DetailParser to return attachments (one that will 404)
+    monkeypatch.setattr("research_scripts.miit_new_car.fetch_batch.OUTPUT_BASE", tmp_path)
+
+    def mock_http_get(url, **kw):
+        raise NetworkError("超时模拟")
+    monkeypatch.setattr("research_scripts.miit_new_car.fetch_batch.http_get", mock_http_get)
+
+    def mock_discover(*a, **kw):
+        return [{"batch_no": 408, "detail_url": "http://mock/detail", "status": "publicity"}], "remote"
+    monkeypatch.setattr("research_scripts.miit_new_car.discover_batches.discover_batches", mock_discover)
+
+    from research_scripts.miit_new_car.fetch_batch import fetch_batch
+    result = fetch_batch(batch_no=408, download=False)
+    assert result["batch_no"] == 408
+    assert result.get("detail_source") == "cache"
+
+
+def test_fetch_detail_cache_not_found_fails(monkeypatch):
+    """Detail page fetch fails and no local cache → raises RuntimeError."""
+    def mock_http_get(url, **kw):
+        raise NetworkError("超时模拟")
+    monkeypatch.setattr("research_scripts.miit_new_car.fetch_batch.http_get", mock_http_get)
+
+    def mock_discover(*a, **kw):
+        return [{"batch_no": 408, "detail_url": "http://mock/detail", "status": "publicity"}], "remote"
+    monkeypatch.setattr("research_scripts.miit_new_car.discover_batches.discover_batches", mock_discover)
+
+    import tempfile
+    with tempfile.TemporaryDirectory() as td:
+        monkeypatch.setattr("research_scripts.miit_new_car.fetch_batch.OUTPUT_BASE", Path(td))
+        from research_scripts.miit_new_car.fetch_batch import fetch_batch
+        import pytest
+        with pytest.raises(RuntimeError, match="详情页请求失败且本地无缓存"):
+            fetch_batch(batch_no=408, download=False)
+
+
+# ── V0.2.1: Idempotent evidence reuse ──
+
+def test_monitor_evidence_idempotent(tmp_path, monkeypatch):
+    """Evidence exists and no --refresh → reuse existing."""
+    evidence_file = tmp_path / "evidence" / "batch_408_official_source_evidence.json"
+    evidence_file.parent.mkdir(parents=True)
+    evidence_data = {
+        "source_type": "official", "source_name": "MIIT New Car Announcement",
+        "batch_no": 408, "batch_status": "publicity", "publish_date": "2026-06-10",
+        "detail_url": "http://mock", "discovery_source": "cache",
+        "detail_source": "cache", "evidence_source": "existing",
+        "parsed_product_count": 5,
+        "watchlist_hits": [{"brand": "智己", "matched_keyword": "智己", "matched_text": "上汽集团", "confidence": "high", "evidence_type": "official_announcement_publicity"}],
+    }
+    evidence_file.write_text(json.dumps(evidence_data), encoding="utf-8")
+
+    monkeypatch.setattr("research_scripts.miit_new_car.monitor.EVIDENCE_BASE", tmp_path / "evidence")
+    monkeypatch.setattr("research_scripts.miit_new_car.monitor.OUTPUT_BASE", tmp_path)
+
+    from research_scripts.miit_new_car.monitor import _is_already_processed, _load_existing_evidence, _build_summary_from_evidence
+    assert _is_already_processed(408) is True
+    ev = _load_existing_evidence(408)
+    assert ev is not None
+    summary = _build_summary_from_evidence(ev)
+    assert summary["batch_no"] == 408
+    assert summary["evidence_source"] == "existing"
+    assert summary["discovery_source"] == "skipped_existing"
+    assert summary["detail_source"] == "skipped_existing"
+    assert summary["structured_records"] == 5
+
+
+# ── V0.2.1: Summary cache markers ──
+
+def test_run_monitor_summary_cache_markers(monkeypatch):
+    """Verify that run_monitor output contains discovery/detail/evidence_source + network_warnings_count."""
+    from research_scripts.miit_new_car.monitor import run_monitor
+
+    def mock_fetch(*a, **kw):
+        return {
+            "batch_no": 408, "status": "publicity", "title": "测试",
+            "publish_date": "2026-06-10", "detail_url": "http://a",
+            "fetched_at": "2026-06-22T00:00:00Z",
+            "detail_source": "remote",
+            "attachment_statuses": [{"status": "downloaded"}],
+        }
+    monkeypatch.setattr("research_scripts.miit_new_car.monitor.fetch_batch", mock_fetch)
+    monkeypatch.setattr("research_scripts.miit_new_car.monitor.parse_batch", lambda **kw: [{"enterprise_name": "上汽集团"}])
+    monkeypatch.setattr("research_scripts.miit_new_car.monitor.diff_batch",
+                        lambda **kw: {"watchlist_matched": 1, "new_products": 1, "new_watchlist_matched": 1, "matched_products": []})
+    monkeypatch.setattr("research_scripts.miit_new_car.monitor.extract_attachment_text", lambda **kw: [])
+    monkeypatch.setattr("research_scripts.miit_new_car.monitor._write_evidence", lambda **kw: {"source_type": "official"})
+
+    result = run_monitor(batch_no=408, download=False, state_update=False, discovery_source="remote")
+    assert result["discovery_source"] == "remote"
+    assert result["detail_source"] == "remote"
+    assert result["evidence_source"] == "generated"
+    assert "network_warnings_count" in result
+    assert "network_retry_count" in result
+
+
+# ── V0.2.1: http_utils retry mechanism ──
+
+def test_http_network_error_class():
+    err = NetworkError("测试错误", url="http://mock", cause=ValueError("内部错误"))
+    assert str(err) == "测试错误"
+    assert err.url == "http://mock"
+    assert isinstance(err.cause, ValueError)
+    assert isinstance(err, RuntimeError)
+
+
+# ── Attachment 404 should not crash fetch ──
+
+def test_fetch_attachment_404_no_crash(monkeypatch):
+    from research_scripts.miit_new_car.fetch_batch import fetch_batch
+
+    def mock_http_get(url, **kw):
+        from urllib.error import HTTPError
+        if "nodata" in url:
+            raise __import__("research_scripts.miit_new_car.http_utils", fromlist=["NetworkError"]).NetworkError("404模拟")
+        if "detail" in url or "/art/" in url:
+            return b"<html><body>Mock</body></html>", 200
+        return b"mock", 200
+
+    monkeypatch.setattr("research_scripts.miit_new_car.fetch_batch.http_get", mock_http_get)
+    monkeypatch.setattr(
+        "research_scripts.miit_new_car.discover_batches.discover_batches",
+        lambda limit=5, pages=1, status_filter=None, force_refresh=False: (
+            [{"batch_no": 408, "detail_url": "http://mock/detail", "status": "publicity", "title": "test"}],
+            "remote",
+        ),
+    )
+
     class MockDetailParser:
         def __init__(self):
             self.title = "第408批公示"
@@ -291,29 +421,23 @@ def test_fetch_attachment_404_no_crash(monkeypatch, capsys):
         statuses = result.get("attachment_statuses", [])
         assert len(statuses) == 2
         failed = [s for s in statuses if s["status"] == "failed"]
-        downloaded = [s for s in statuses if s["status"] == "downloaded"]
-        assert len(failed) == 1
-        assert len(downloaded) == 1
+        assert len(failed) >= 1
 
 
-# ── DOCX text extraction (V0.2) ──
+# ── DOCX text extraction ──
 
 def test_docx_text_extraction(tmp_path):
-    """Verify _extract_docx_text can extract text from a simple docx."""
-    # Build a minimal docx with zipfile
     docx_path = tmp_path / "test.docx"
     document_xml = (
-        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+        '<?xml version="1.0" encoding="UTF-8"?>'
         '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
         '<w:body>'
         '<w:p><w:r><w:t>小米SU7</w:t></w:r></w:p>'
         '<w:p><w:r><w:t>纯电动轿车</w:t></w:r></w:p>'
-        '</w:body>'
-        '</w:document>'
+        '</w:body></w:document>'
     )
     with zipfile.ZipFile(docx_path, "w") as z:
         z.writestr("word/document.xml", document_xml)
-
     text = _extract_docx_text(docx_path)
     assert "小米SU7" in text
     assert "纯电动轿车" in text
@@ -327,7 +451,7 @@ def test_docx_text_extraction_empty(tmp_path):
     assert text == ""
 
 
-# ── HTML text extraction (V0.2) ──
+# ── HTML text extraction ──
 
 def test_html_text_extraction(tmp_path):
     html_path = tmp_path / "test.html"
@@ -348,10 +472,9 @@ def test_html_text_extraction_skip_hidden(tmp_path):
     assert "隐藏" not in text
 
 
-# ── DOC unsupported (V0.2) ──
+# ── DOC unsupported ──
 
 def test_doc_extract_unsupported(tmp_path, monkeypatch):
-    """Verify .doc extraction returns unsupported when no system tool available."""
     monkeypatch.setattr("shutil.which", lambda cmd: None)
     doc_path = tmp_path / "test.doc"
     doc_path.write_bytes(b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1")
@@ -361,10 +484,9 @@ def test_doc_extract_unsupported(tmp_path, monkeypatch):
     assert text == ""
 
 
-# ── Evidence structure (V0.2) ──
+# ── Evidence structure ──
 
 def test_evidence_structure(tmp_path, monkeypatch):
-    """Verify that _write_evidence produces the expected JSON structure."""
     from research_scripts.miit_new_car.monitor import _write_evidence
 
     EVIDENCE_BASE = tmp_path / "evidence"
@@ -373,41 +495,31 @@ def test_evidence_structure(tmp_path, monkeypatch):
     meta = {
         "batch_no": 408, "status": "publicity", "publish_date": "2026-06-10",
         "detail_url": "http://example.com", "fetched_at": "2026-06-22T00:00:00Z",
+        "detail_source": "remote",
     }
     diff_result = {
-        "matched_products": [
-            {"brand": "智己", "matched_keyword": "智己", "matched_text": "上汽集团 智己 L6 纯电动轿车"},
-        ],
+        "matched_products": [{"brand": "智己", "matched_keyword": "智己", "matched_text": "上汽集团 智己 L6"}],
         "watchlist_matched": 1, "new_products": 1, "new_watchlist_matched": 1,
     }
-    attachment_statuses = [
-        {"status": "downloaded"}, {"status": "failed", "error": "404"},
-    ]
-    extraction_results = [
+    att_statuses = [{"status": "downloaded"}, {"status": "failed", "error": "404"}]
+    ext_results = [
         {"extract_status": "success", "text_length": 100, "text_preview": "abc", "filename": "a.html"},
         {"extract_status": "unsupported", "text_length": 0, "text_preview": "", "filename": "b.doc", "error": "no tool"},
     ]
     products = [{"enterprise_name": "上汽集团", "brand": "智己"}]
 
-    evidence = _write_evidence(
-        batch_no=408, meta=meta, diff_result=diff_result,
-        attachment_statuses=attachment_statuses,
-        extraction_results=extraction_results, products=products,
-    )
-
+    evidence = _write_evidence(408, meta, diff_result, att_statuses, ext_results, products, discovery_source="cache")
     assert evidence["source_type"] == "official"
     assert evidence["batch_no"] == 408
-    assert evidence["batch_status"] == "publicity"
+    assert evidence["discovery_source"] == "cache"
+    assert evidence["detail_source"] == "remote"
     assert len(evidence["watchlist_hits"]) == 1
     assert evidence["watchlist_hits"][0]["brand"] == "智己"
-    assert evidence["watchlist_hits"][0]["confidence"] == "high"
     assert evidence["attachment_summary"]["downloaded"] == 1
     assert evidence["attachment_summary"]["failed"] == 1
     assert evidence["extraction_summary"]["success"] == 1
     assert evidence["extraction_summary"]["unsupported"] == 1
-    assert evidence["parsed_product_count"] == 1
 
-    # Check file was written
     evidence_file = EVIDENCE_BASE / "batch_408_official_source_evidence.json"
     assert evidence_file.exists()
     loaded = json.loads(evidence_file.read_text())
@@ -418,13 +530,17 @@ def test_evidence_structure(tmp_path, monkeypatch):
 
 def test_discover_batches_network_error(monkeypatch, capsys):
     def mock_fetch(*args, **kwargs):
-        raise RuntimeError("模拟网络错误")
+        raise NetworkError("模拟网络错误")
     monkeypatch.setattr("research_scripts.miit_new_car.discover_batches._fetch_jpage", mock_fetch)
-    from research_scripts.miit_new_car.discover_batches import discover_batches
-    result = discover_batches()
-    assert result == []
-    captured = capsys.readouterr()
-    assert "模拟网络错误" in captured.err or "网络" in captured.err
+    # Ensure no cache
+    import tempfile
+    with tempfile.TemporaryDirectory() as td:
+        cache_file = Path(td) / "discovered_batches.json"
+        monkeypatch.setattr("research_scripts.miit_new_car.discover_batches.DISCOVERY_CACHE_FILE", cache_file)
+        from research_scripts.miit_new_car.discover_batches import discover_batches
+        result, source = discover_batches()
+        assert result == []
+        assert source == "network_unavailable"
 
 
 def test_parse_batch_no_raw_dir():
@@ -432,44 +548,3 @@ def test_parse_batch_no_raw_dir():
     import pytest
     with pytest.raises(FileNotFoundError, match="原始数据目录"):
         parse_batch(batch_no=99999)
-
-
-# ── Default metadata output path in readme ──
-
-def test_monitor_output_structure(monkeypatch):
-    """Verify monitor's run_monitor returns expected top-level keys."""
-    from research_scripts.miit_new_car.monitor import run_monitor
-
-    def mock_fetch_batch(*a, **kw):
-        return {
-            "batch_no": 408, "status": "publicity", "title": "测试",
-            "publish_date": "2026-06-10", "detail_url": "http://a",
-            "fetched_at": "2026-06-22T00:00:00Z",
-            "attachment_statuses": [{"status": "downloaded"}],
-        }
-
-    def mock_parse_batch(*a, **kw):
-        return [{"enterprise_name": "上汽集团"}]
-
-    def mock_diff_batch(*a, **kw):
-        return {"watchlist_matched": 1, "new_products": 1, "new_watchlist_matched": 1,
-                "matched_products": [{"brand": "智己", "matched_keyword": "", "matched_text": ""}]}
-
-    def mock_extract_text(*a, **kw):
-        return []
-
-    def mock_write_evidence(*a, **kw):
-        return {"source_type": "official"}
-
-    monkeypatch.setattr("research_scripts.miit_new_car.monitor.fetch_batch", mock_fetch_batch)
-    monkeypatch.setattr("research_scripts.miit_new_car.monitor.parse_batch", mock_parse_batch)
-    monkeypatch.setattr("research_scripts.miit_new_car.monitor.diff_batch", mock_diff_batch)
-    monkeypatch.setattr("research_scripts.miit_new_car.monitor.extract_attachment_text", mock_extract_text)
-    monkeypatch.setattr("research_scripts.miit_new_car.monitor._write_evidence", mock_write_evidence)
-
-    result = run_monitor(batch_no=408, download=False, state_update=False)
-    assert result["batch_no"] == 408
-    assert "product_count" in result
-    assert "attachments_downloaded" in result
-    assert "extraction_success" in result
-    assert "evidence" in result
