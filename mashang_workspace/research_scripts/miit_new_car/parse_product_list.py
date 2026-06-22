@@ -30,14 +30,36 @@ PRODUCT_LIST_BASE = WORKSPACE_ROOT / "outputs" / "miit_new_car" / "product_list"
 PRODUCT_LIST_FIELDS = [
     "batch_no", "batch_status", "publish_date",
     "enterprise_name", "brand", "product_name", "product_model",
-    "product_category", "announcement_type",
-    "source_attachment", "source_attachment_title",
+    "product_model_granularity", "product_category", "announcement_type",
+    "source_attachment", "source_attachment_title", "source_attachment_type",
     "source_text_path", "source_text_snippet",
     "parse_method", "parse_confidence", "ingested_at",
 ]
 
 RE_TAX_KEYWORDS = re.compile(r"(购置税|车船税|减免|免税|税收)", re.IGNORECASE)
 RE_TABLE_ROW = re.compile(r"^\s*\d+\s+", re.MULTILINE)
+RE_ROAD_ANNOUNCEMENT = re.compile(r"道路机动车辆生产企业及产品")
+RE_VEHICLE_VESSEL_TAX = re.compile(r"(享受车船税减免优惠|车船税)")
+RE_PURCHASE_TAX = re.compile(r"(减免车辆购置税|车辆购置税)")
+RE_MODEL_SPLIT = re.compile(r"[、,，]+")
+RE_ENTERPRISE_SUFFIX = re.compile(r"(有限公司|股份有限公司|集团有限公司|汽车有限公司|制造有限公司|科技有限公司|责任公司|工业有限公司)$")
+RE_BRAND_SUFFIX = re.compile(r"牌$")
+RE_PRODUCT_NAME_KEYWORDS = re.compile(r"(轿车|乘用车|客车|货车|专用车|垃圾车|清洗车|牵引车|半挂|底盘|旅居车|商务车|检测车|工程车|消防车|救护车|冷藏车|邮政车|扫路车|洒水车|吸污车|吸粪车|清障车)")
+
+
+def classify_attachment_type(text: str, filename: str = "") -> str:
+    """分类附件类型。"""
+    combined = f"{text[:500]} {filename}"
+    if RE_ROAD_ANNOUNCEMENT.search(combined):
+        return "road_product_announcement"
+    if RE_VEHICLE_VESSEL_TAX.search(combined):
+        return "vehicle_vessel_tax_catalog"
+    if RE_PURCHASE_TAX.search(combined):
+        return "purchase_tax_catalog"
+    # Try the old tax keywords as fallback
+    if RE_TAX_KEYWORDS.search(combined):
+        return "tax_catalog_other"
+    return "unknown"
 
 
 class _HtmlTableParser(HTMLParser):
@@ -106,6 +128,104 @@ def _guess_brand(enterprise: str, product_name: str) -> str:
         if b in enterprise or b in product_name:
             return b
     return ""
+
+
+def _parse_road_product_announcement_text(text: str) -> list[dict]:
+    """状态机解析道路机动车辆生产企业及产品公告文本。
+
+    附件 1 的 DOC 文本格式（textutil 输出）使用 \x07 (bell) 作为列分隔符。
+    列结构：序号, 企业名称, 目录序号, 商标, 产品名称, 产品型号
+    实际布局：header 行后紧跟数据行，每行包含重复组：
+      [enterprise_name, catalog_no, brand, product_name, product_model, ...]
+    """
+    records = []
+    lines = text.replace("\r\n", "\n").split("\n")
+    seen_keys: set[str] = set()
+
+    SEP = "\x07"
+
+    for i, line in enumerate(lines):
+        raw = line.strip()
+        if not raw:
+            continue
+
+        # Skip text paragraphs (not table rows)
+        if "同意" in raw[:4] or "注：" in raw[:4] or "PAGE" in raw or len(raw) < 20:
+            continue
+
+        if SEP in raw:
+            parts = raw.split(SEP)
+            parts = [p.strip() for p in parts]
+
+            if len(parts) < 7:
+                continue
+
+            # Skip short header rows (only column names, no data)
+            first = parts[0]
+            if first in ("序号", "企业名称", "商标", "产品名称", "产品型号") and len(parts) <= 6:
+                continue
+
+            # Skip section marker lines (第二部分, 第三部分, etc.)
+            if re.match(r"^[第第][一二三四五六七八九十\d]+[部部分分]", first):
+                continue
+            if re.match(r"^[（(][一二三四五六七八九十\d]+[)）]", first):
+                continue
+            if any(kw in raw[:20] for kw in ("PAGE", "MERGETORMAT", "MERGEFORMAT")):
+                continue
+
+            # Pattern: parts[0-5] are header/filler, parts[6+] are repeating data groups
+            # Group layout: [enterprise, catalog_no, brand, product_name, product_model, ...]
+            head_len = 6
+            data_parts = parts[head_len:]
+
+            j = 0
+            while j + 4 < len(data_parts):
+                enterprise = data_parts[j]
+                catalog_no = data_parts[j + 1] if j + 1 < len(data_parts) else ""
+                brand_raw = data_parts[j + 2] if j + 2 < len(data_parts) else ""
+                product_name_raw = data_parts[j + 3] if j + 3 < len(data_parts) else ""
+                model_raw = data_parts[j + 4] if j + 4 < len(data_parts) else ""
+
+                j += 5
+
+                if not enterprise and not model_raw:
+                    continue
+                if len(enterprise) < 4 and not model_raw:
+                    continue
+                # Only accept enterprise names that end with recognized suffixes
+                if not enterprise.endswith(("公司", "厂", "集团", "有限")):
+                    if not model_raw:
+                        continue
+
+                # brand normalization
+                brand = brand_raw.strip()
+                if brand.endswith("牌"):
+                    brand = brand[:-1]
+
+                product_name = product_name_raw.strip()
+                if not product_name:
+                    product_name = enterprise
+
+                # Split multiple models
+                model_raw_clean = model_raw.replace("、、", "、").strip()
+                models = re.split(r"[、，,]+", model_raw_clean)
+                models = [m.strip() for m in models if m.strip() and len(m.strip()) >= 3]
+
+                if models:
+                    for model in models:
+                        key = f"{enterprise}|{model}|{product_name}"
+                        if key not in seen_keys:
+                            seen_keys.add(key)
+                            records.append({
+                                "enterprise_name": enterprise,
+                                "brand": brand if brand else _guess_brand(enterprise, ""),
+                                "product_name": product_name,
+                                "product_model": model,
+                                "product_model_granularity": "prefix",
+                                "product_category": "",
+                            })
+
+    return records
 
 
 def _parse_text_table(text: str) -> list[dict]:
@@ -197,6 +317,7 @@ def parse_product_list(
     seen_keys: set[str] = set()
     enterprises_set: set[str] = set()
     models_set: set[str] = set()
+    excluded_attachments: list[dict] = []
 
     # Parse attachments
     if att_dir.exists():
@@ -204,13 +325,34 @@ def parse_product_list(
             if not fpath.is_file():
                 continue
 
-            ann_type = _detect_announcement_type("", fpath.name, "")
-            if ann_type == "tax_exemption":
-                continue
-
             text_snippet = ""
             text_path_candidate = None
             records = []
+            parse_method = "skipped"
+            source_attachment_type = "unknown"
+
+            # Read text content for classification
+            file_text = ""
+            if fpath.suffix in (".html", ".htm"):
+                file_text = fpath.read_text("utf-8", errors="replace")[:1000]
+            elif fpath.suffix == ".txt":
+                file_text = fpath.read_text("utf-8", errors="replace")[:1000]
+            elif fpath.suffix in (".doc", ".docx"):
+                txt_candidate = text_dir / f"{fpath.stem}.txt"
+                if txt_candidate.exists():
+                    file_text = txt_candidate.read_text("utf-8", errors="replace")[:1000]
+
+            # Classify attachment type
+            source_attachment_type = classify_attachment_type(file_text, fpath.name)
+
+            # Only process road_product_announcement
+            if source_attachment_type != "road_product_announcement":
+                excluded_attachments.append({
+                    "filename": fpath.name,
+                    "attachment_type": source_attachment_type,
+                    "reason": "not_road_product_announcement",
+                })
+                continue
 
             if fpath.suffix in (".html", ".htm"):
                 html = fpath.read_text("utf-8", errors="replace")
@@ -228,27 +370,31 @@ def parse_product_list(
             elif fpath.suffix == ".txt":
                 text = fpath.read_text("utf-8", errors="replace")
                 text_snippet = text[:200]
-                records = _parse_text_table(text)
-                parse_method = "text_parse"
+                # Try tab-separated road announcement format first
+                records = _parse_road_product_announcement_text(text)
+                if not records:
+                    records = _parse_text_table(text)
+                parse_method = "road_doc_state_machine" if records else "text_parse"
 
             elif fpath.suffix == ".docx":
                 text = _read_docx_text(fpath)
                 text_snippet = text[:200]
-                records = _parse_text_table(text)
-                parse_method = "docx_text_parse"
+                records = _parse_road_product_announcement_text(text)
+                if not records:
+                    records = _parse_text_table(text)
+                parse_method = "road_doc_state_machine" if records else "docx_text_parse"
 
             elif fpath.suffix == ".doc":
                 text_path_candidate = text_dir / f"{fpath.stem}.txt"
                 if text_path_candidate.exists():
                     text = text_path_candidate.read_text("utf-8", errors="replace")
                     text_snippet = text[:200]
-                    records = _parse_text_table(text)
-                    parse_method = "doc_text_parse"
+                    records = _parse_road_product_announcement_text(text)
+                    if not records:
+                        records = _parse_text_table(text)
+                    parse_method = "road_doc_state_machine" if records else "doc_text_parse"
                 else:
                     parse_method = "no_text"
-
-            else:
-                parse_method = "skipped"
 
             if records:
                 for rec in records:
@@ -265,22 +411,23 @@ def parse_product_list(
                         "batch_no": batch_no,
                         "batch_status": meta.get("status", ""),
                         "publish_date": meta.get("publish_date", ""),
-                        "enterprise_name": rec["enterprise_name"],
-                        "brand": rec["brand"],
-                        "product_name": rec["product_name"],
-                        "product_model": rec["product_model"],
-                        "product_category": rec["product_category"],
-                        "announcement_type": _detect_announcement_type("", fpath.name, text_snippet),
+                        "enterprise_name": rec.get("enterprise_name", ""),
+                        "brand": rec.get("brand", ""),
+                        "product_name": rec.get("product_name", ""),
+                        "product_model": rec.get("product_model", ""),
+                        "product_model_granularity": rec.get("product_model_granularity", ""),
+                        "product_category": rec.get("product_category", ""),
+                        "announcement_type": "road_product_announcement",
                         "source_attachment": fpath.name,
                         "source_attachment_title": "",
+                        "source_attachment_type": source_attachment_type,
                         "source_text_path": str(text_path_candidate) if text_path_candidate else "",
                         "source_text_snippet": text_snippet[:300],
                         "parse_method": parse_method,
-                        "parse_confidence": "high" if parse_method in ("html_table",) else "medium",
+                        "parse_confidence": "high" if parse_method in ("html_table", "road_doc_state_machine") else "medium",
                         "ingested_at": ingested_at,
                     })
             else:
-                # Record as unsourced row
                 key = f"{batch_no}||{fpath.name}|"
                 if key not in seen_keys:
                     seen_keys.add(key)
@@ -292,10 +439,12 @@ def parse_product_list(
                         "brand": "",
                         "product_name": "",
                         "product_model": "",
+                        "product_model_granularity": "",
                         "product_category": "",
-                        "announcement_type": _detect_announcement_type("", fpath.name, text_snippet),
+                        "announcement_type": "road_product_announcement",
                         "source_attachment": fpath.name,
                         "source_attachment_title": "",
+                        "source_attachment_type": source_attachment_type,
                         "source_text_path": str(text_path_candidate) if text_path_candidate else "",
                         "source_text_snippet": text_snippet[:300],
                         "parse_method": parse_method,
@@ -332,7 +481,14 @@ def parse_product_list(
         quality_reason = None
 
     output_payload = {
-        "summary": {"record_count": rc, "enterprise_count": ec, "product_model_count": mc, "quality": quality, "quality_reason": quality_reason},
+        "summary": {
+            "record_count": rc,
+            "enterprise_count": ec,
+            "product_model_count": mc,
+            "quality": quality,
+            "quality_reason": quality_reason,
+            "excluded_attachments": excluded_attachments,
+        },
         "records": products,
     }
     json_path = out_dir / f"{prefix}.json"
@@ -359,7 +515,10 @@ def parse_product_list(
             f.write(f"| {p['enterprise_name'][:20]} | {p['brand']} | {p['product_name'][:20]} | {p['product_model'][:20]} | {src} |\n")
     print(f"  Markdown: {md_path}")
 
+    excluded_count = len(excluded_attachments)
     print(f"  质量: {quality}{' (' + quality_reason + ')' if quality_reason else ''} ({ec} enterprises / {mc} models)")
+    if excluded_count:
+        print(f"  已排除附件: {excluded_count} ({', '.join(e['filename'][:30] for e in excluded_attachments)})")
 
     return products
 

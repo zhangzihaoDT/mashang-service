@@ -763,7 +763,7 @@ def test_product_list_from_html(tmp_path, monkeypatch):
     att_dir = raw_dir / "attachments"
     att_dir.mkdir()
     # _parse_html_rows uses fixed positions: [0]=enterprise, [1]=product_model, [2]=product_name
-    html = """<html><body><table>
+    html = """<html><body><h1>道路机动车辆生产企业及产品（第888批）</h1><table>
     <tr><th>企业名称</th><th>产品型号</th><th>产品名称</th><th>产品类别</th></tr>
     <tr><td>智己汽车科技有限公司</td><td>ABC7000BEV</td><td>纯电动多用途乘用车</td><td>新能源乘用车</td></tr>
     <tr><td>小米汽车科技有限公司</td><td>XMA7000BEV</td><td>纯电动轿车</td><td>新能源乘用车</td></tr>
@@ -815,7 +815,7 @@ def test_product_list_dedup(tmp_path, monkeypatch):
 
     att_dir = raw_dir / "attachments"
     att_dir.mkdir()
-    html = """<html><body><table>
+    html = """<html><body><h1>道路机动车辆生产企业及产品（第777批）</h1><table>
     <tr><th>企业名称</th><th>产品名称</th><th>产品型号</th></tr>
     <tr><td>智己</td><td>纯电动轿车</td><td>L6</td></tr>
     <tr><td>智己</td><td>纯电动轿车</td><td>L6</td></tr>
@@ -840,9 +840,9 @@ def test_product_list_tax_exclusion(tmp_path, monkeypatch):
 
     att_dir = raw_dir / "attachments"
     att_dir.mkdir()
-    (att_dir / "normal.html").write_text("<html><body><table><tr><td>A</td><td>B</td></tr></table></body></html>", encoding="utf-8")
-    (att_dir / "减免车辆购置税.html").write_text("税收目录内容", encoding="utf-8")
-    (att_dir / "车船税优惠.html").write_text("车船税内容", encoding="utf-8")
+    (att_dir / "normal.html").write_text("<html><body><h1>道路机动车辆生产企业及产品（第666批）</h1><table><tr><td>A</td><td>B</td></tr></table></body></html>", encoding="utf-8")
+    (att_dir / "减免车辆购置税.html").write_text("减免车辆购置税\n税收目录内容", encoding="utf-8")
+    (att_dir / "车船税优惠.html").write_text("车船税\n车船税内容", encoding="utf-8")
 
     monkeypatch.setattr("research_scripts.miit_new_car.parse_product_list.RAW_BASE", tmp_path / "raw")
     monkeypatch.setattr("research_scripts.miit_new_car.parse_product_list.EXTRACTED_BASE", tmp_path / "extracted")
@@ -869,7 +869,7 @@ def test_product_list_low_confidence(tmp_path, monkeypatch):
 
     att_dir = raw_dir / "attachments"
     att_dir.mkdir()
-    (att_dir / "no_table.txt").write_text("无法解析的纯文本内容，没有表格结构", encoding="utf-8")
+    (att_dir / "no_table.txt").write_text("道路机动车辆生产企业及产品（第555批）\n无法解析的纯文本内容，没有表格结构", encoding="utf-8")
 
     monkeypatch.setattr("research_scripts.miit_new_car.parse_product_list.RAW_BASE", tmp_path / "raw")
     monkeypatch.setattr("research_scripts.miit_new_car.parse_product_list.EXTRACTED_BASE", tmp_path / "extracted")
@@ -1152,3 +1152,104 @@ def test_evidence_has_schema_version(tmp_path, monkeypatch):
                                 diagnostics=diagnostics, product_list=product_list, discovery_source="remote")
     assert evidence.get("schema_version") == "miit_official_evidence.v0.3"
     assert evidence.get("generator_version") == "miit_new_car_monitor.v0.3.2"
+
+
+# ═══════════════════════════════════════════════════════════════════
+# V0.3.3: Attachment type classification
+# ═══════════════════════════════════════════════════════════════════
+
+def test_classify_attachment_type_road():
+    from research_scripts.miit_new_car.parse_product_list import classify_attachment_type
+    assert classify_attachment_type("道路机动车辆生产企业及产品（第407批）", "") == "road_product_announcement"
+    assert classify_attachment_type("附件1 道路机动车辆生产企业及产品", "") == "road_product_announcement"
+
+
+def test_classify_attachment_type_vessel_tax():
+    from research_scripts.miit_new_car.parse_product_list import classify_attachment_type
+    assert classify_attachment_type("享受车船税减免优惠的节约能源 使用新能源汽车车型目录", "") == "vehicle_vessel_tax_catalog"
+    assert classify_attachment_type("车船税优惠", "") == "vehicle_vessel_tax_catalog"
+
+
+def test_classify_attachment_type_purchase_tax():
+    from research_scripts.miit_new_car.parse_product_list import classify_attachment_type
+    assert classify_attachment_type("减免车辆购置税的新能源汽车车型目录", "") == "purchase_tax_catalog"
+    assert classify_attachment_type("车辆购置税", "") == "purchase_tax_catalog"
+
+
+def test_classify_attachment_type_unknown():
+    from research_scripts.miit_new_car.parse_product_list import classify_attachment_type
+    assert classify_attachment_type("普通文档", "") == "unknown"
+
+
+# ═══════════════════════════════════════════════════════════════════
+# V0.3.3: Road product announcement state machine parser
+# ═══════════════════════════════════════════════════════════════════
+
+SEP07 = "\x07"
+
+
+def test_road_state_machine_basic():
+    """State machine parses 0x07-separated road announcement rows."""
+    from research_scripts.miit_new_car.parse_product_list import _parse_road_product_announcement_text
+
+    text = (
+        f"序号{SEP07}商标{SEP07}产品名称{SEP07}产品型号{SEP07}{SEP07}{SEP07}上海汽车集团股份有限公司{SEP07}122{SEP07}智己牌{SEP07}纯电动轿车{SEP07}CSA7005\n"
+        f"{SEP07}{SEP07}{SEP07}{SEP07}{SEP07}{SEP07}北京现代汽车有限公司{SEP07}11{SEP07}北京现代牌{SEP07}纯电动轿车{SEP07}BH7002\n"
+    )
+    records = _parse_road_product_announcement_text(text)
+    saic = [r for r in records if "上海汽车" in r["enterprise_name"]]
+    assert len(saic) >= 1
+    assert saic[0]["enterprise_name"] == "上海汽车集团股份有限公司"
+    assert "CSA7005" in saic[0]["product_model"]
+    assert saic[0]["brand"] == "智己"
+
+    bj = [r for r in records if "北京现代" in r["enterprise_name"]]
+    assert len(bj) >= 1
+    assert bj[0]["product_model"] == "BH7002"
+
+
+def test_road_state_machine_multiple_models():
+    """Multiple models separated by 、 are split into separate records."""
+    from research_scripts.miit_new_car.parse_product_list import _parse_road_product_announcement_text
+
+    text = (
+        f"序号{SEP07}商标{SEP07}产品名称{SEP07}产品型号{SEP07}{SEP07}{SEP07}岚图汽车{SEP07}18{SEP07}岚图牌{SEP07}纯电动多用途乘用车{SEP07}EQ6501、EQ6522、EQ6521\n"
+    )
+    records = _parse_road_product_announcement_text(text)
+    models = [r["product_model"] for r in records if r["product_model"]]
+    assert len(models) >= 3
+    assert "EQ6501" in models
+    assert "EQ6522" in models
+    assert "EQ6521" in models
+
+
+def test_road_state_machine_enterprise_and_model_count():
+    """Multi-enterprise, multi-model sample → enterprise_count > 0, model_count > 0."""
+    from research_scripts.miit_new_car.parse_product_list import _parse_road_product_announcement_text
+
+    text = (
+        f"序号{SEP07}商标{SEP07}产品名称{SEP07}产品型号{SEP07}{SEP07}{SEP07}"
+        f"北京现代汽车有限公司{SEP07}11{SEP07}北京现代牌{SEP07}纯电动轿车{SEP07}BH7002、BH7001、BH7000、BH7003"
+        f"{SEP07}{SEP07}{SEP07}{SEP07}{SEP07}{SEP07}上海汽车集团股份有限公司{SEP07}122{SEP07}智己牌{SEP07}纯电动运动型乘用车{SEP07}CSA6492"
+        f"{SEP07}{SEP07}{SEP07}{SEP07}{SEP07}{SEP07}肇庆小鹏新能源投资有限公司{SEP07}91{SEP07}小鹏牌{SEP07}纯电动多用途乘用车{SEP07}NHQ6490、NHQ6510\n"
+    )
+    records = _parse_road_product_announcement_text(text)
+    enterprises = set(r["enterprise_name"] for r in records if r["enterprise_name"])
+    models = set(r["product_model"] for r in records if r["product_model"])
+    assert len(enterprises) >= 3
+    assert len(models) >= 6
+    assert "BH7002" in models
+    assert "NHQ6490" in models
+
+
+def test_road_state_machine_handles_product_name_wrap():
+    """Product names are parsed correctly with trailing-char heuristic."""
+    from research_scripts.miit_new_car.parse_product_list import _parse_road_product_announcement_text
+
+    text = (
+        f"序号{SEP07}商标{SEP07}产品名称{SEP07}产品型号{SEP07}{SEP07}{SEP07}金华青年{SEP07}01{SEP07}青年牌{SEP07}纯电动低地板城市客{SEP07}XMQ6106\n"
+    )
+    records = _parse_road_product_announcement_text(text)
+    rec = [r for r in records if "金华" in r["enterprise_name"]]
+    assert len(rec) >= 1
+    assert "XMQ6106" in rec[0]["product_model"]
