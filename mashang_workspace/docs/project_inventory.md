@@ -82,7 +82,7 @@ mashang-service/
 | `test/pk_weekly_ls8_ls9.py` | LS8 vs LS9 周度对比 | 可迁移至 `scripts/` |
 | `test/竞争洞察A3人群流转.py` | A3 人群流转分析 | 可迁移至 `scripts/` |
 | `test/ls8_floor_heating_rate.py` | LS8 地暖选装率 | 可迁移至 `scripts/` |
-| `research_scripts/miit_new_car/` | MIIT 新车公告批次监控（official source ingestion / automotive intelligence） | `research_scripts/` |
+| `research_scripts/miit_new_car/` | MIIT 新车公告批次监控 V0.2 — official source ingestion / automotive intelligence（latest-publicity/latest-official 分流、多页发现、DOCX 文本抽取、附件状态管理、evidence 证据输出） | `research_scripts/` |
 | `test/ls6_price_elasticity_loglog.py` | LS6 价格弹性 | `test/` 保留 |
 | `test/ls9_trailer_hitch_rate.py` | LS9 拖车钩率 | `test/` 保留 |
 | `test/tmp_query_ls8_yesterday_lock_idcards.py` | 临时查询 | `test/` 保留 |

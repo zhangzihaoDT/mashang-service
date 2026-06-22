@@ -116,8 +116,12 @@ python mashang_workspace/eval/run_eval.py --suite parser  # 单套件
 | `python eval/run_numeric_eval.py` | 数值校验 | eval |
 | `pytest tests -q` | 全量测试 | test |
 | `make miit-discover-latest-batch` | 发现最新公告批次 | make |
+| `make miit-discover-batches PAGES=3` | 多页发现公告批次 | make |
 | `make miit-fetch-batch BATCH=408` | 抓取指定批次 | make |
-| `make miit-new-car-monitor` | 自动监控最新未处理批次 | make |
+| `make miit-new-car-monitor` | 监控最新批次 | make |
+| `make miit-latest-publicity` | 监控最新公示批次 | make |
+| `make miit-latest-official` | 监控最新正式公告批次 | make |
+| `make miit-extract-text BATCH=N` | 附件文本抽取 | make |
 
 ## MIIT New Car Monitor / 工信部新车公告批次监控
 
@@ -143,8 +147,12 @@ mashang_workspace/research_scripts/miit_new_car/
 
 ```bash
 make miit-discover-latest-batch              # 打印最新批次
+make miit-discover-batches PAGES=3           # 多页发现
 make miit-fetch-batch BATCH=408              # 抓取指定批次
-make miit-new-car-monitor                    # 自动监控最新未处理批次
+make miit-new-car-monitor                    # 监控最新批次
+make miit-latest-publicity                   # 监控最新公示
+make miit-latest-official                    # 监控最新正式公告
+make miit-extract-text BATCH=N               # 附件文本抽取
 ```
 
 ### 输出目录
@@ -152,8 +160,11 @@ make miit-new-car-monitor                    # 自动监控最新未处理批次
 ```
 mashang_workspace/outputs/miit_new_car/
 ├── raw/                 # 原始 HTML 和附件（不提交 git）
+├── discovery/           # 多页发现结果 JSON/MD
 ├── parsed/              # 结构化产品解析 CSV/JSON/MD
+├── extracted/           # 附件文本抽取 JSON/MD
 ├── diff/                # Watchlist 增量 diff JSON/MD
+├── evidence/            # Official Source Evidence JSON
 └── state/               # 最新处理批次记录
 ```
 

@@ -11,14 +11,17 @@
 import sys, re, json, argparse
 from pathlib import Path
 from urllib.request import Request, urlopen
-from urllib.error import URLError
+from urllib.error import URLError, HTTPError
 from html.parser import HTMLParser
 from datetime import datetime, timezone
 from typing import Optional
 
 MODULE_DIR = Path(__file__).resolve().parent
 WORKSPACE_ROOT = MODULE_DIR.parents[1]
-sys.path.insert(0, str(WORKSPACE_ROOT))
+if str(WORKSPACE_ROOT) not in sys.path:
+    sys.path.insert(0, str(WORKSPACE_ROOT))
+if str(MODULE_DIR) not in sys.path:
+    sys.path.insert(0, str(MODULE_DIR))
 
 USER_AGENT = (
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
@@ -31,13 +34,10 @@ RE_BATCH = re.compile(r"[第](\d+)[批]")
 RE_PUBLICITY = re.compile(r"(拟发布|公示)")
 
 
-def _fetch(url: str, timeout: int = REQUEST_TIMEOUT) -> bytes:
+def _fetch(url: str, timeout: int = REQUEST_TIMEOUT) -> tuple[bytes, int]:
     req = Request(url, headers={"User-Agent": USER_AGENT})
-    try:
-        with urlopen(req, timeout=timeout) as resp:
-            return resp.read()
-    except URLError as e:
-        raise RuntimeError(f"请求失败 {url}: {e}")
+    with urlopen(req, timeout=timeout) as resp:
+        return resp.read(), resp.status
 
 
 def _extract_batch_no(title: str, url: str) -> int:
@@ -51,8 +51,6 @@ def _extract_batch_no(title: str, url: str) -> int:
 
 
 class _DetailParser(HTMLParser):
-    """解析详情页，提取标题、发布日期、正文、附件链接。"""
-
     def __init__(self):
         super().__init__()
         self.title: str = ""
@@ -61,19 +59,13 @@ class _DetailParser(HTMLParser):
         self.attachments: list[dict] = []
         self._in_title = False
         self._in_zoom = False
-        self._zoom_depth = 0
-        self._in_publish_info = False
-        self._tag_stack = []
 
     def handle_starttag(self, tag, attrs):
         a = dict(attrs)
-        self._tag_stack.append(tag)
-
         if tag == "div" and a.get("class") == "_nk_wz_tit":
             self._in_title = True
         if tag == "div" and a.get("id") == "zoom":
             self._in_zoom = True
-            self._zoom_depth = 1
         if self._in_zoom:
             if tag == "a" and "href" in a:
                 href = a["href"]
@@ -87,16 +79,10 @@ class _DetailParser(HTMLParser):
     def handle_endtag(self, tag):
         if tag == "div" and self._in_title:
             self._in_title = False
-        if self._in_zoom:
-            pass
-        if self._tag_stack:
-            self._tag_stack.pop()
 
     def handle_data(self, data):
         if self._in_title:
             self.title += data.strip()
-        if self._in_zoom:
-            self.content_html += data
 
 
 def fetch_batch(
@@ -105,11 +91,9 @@ def fetch_batch(
     download: bool = True,
     timeout: int = REQUEST_TIMEOUT,
 ) -> dict:
-    """抓取批次详情，返回 metadata dict。"""
     if not detail_url and batch_no is None:
         raise ValueError("必须提供 batch_no 或 detail_url")
 
-    # If only batch_no given, we need to discover the URL first
     if not detail_url:
         from discover_batches import discover_batches
         batches = discover_batches(limit=5)
@@ -118,7 +102,7 @@ def fetch_batch(
             raise ValueError(f"未找到第 {batch_no} 批的详情页 URL")
         detail_url = target[0]["detail_url"]
 
-    raw_bytes = _fetch(detail_url, timeout=timeout)
+    raw_bytes = _fetch(detail_url, timeout=timeout)[0]
     html = raw_bytes.decode("utf-8", errors="replace")
 
     parser = _DetailParser()
@@ -130,14 +114,11 @@ def fetch_batch(
     title = parser.title or f"第{batch_no}批公告详情"
     pub_date = parser.publish_date or ""
 
-    # Infer batch_no from title
     if batch_no is None:
         batch_no = _extract_batch_no(title, detail_url)
 
-    # Infer status
     status = "publicity" if RE_PUBLICITY.search(title) else "official"
 
-    # Clean attachment titles with parent anchor text
     attachments = []
     for a in parser.attachments:
         att_title = a["title"] or a["filename"]
@@ -158,7 +139,6 @@ def fetch_batch(
         "fetched_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
     }
 
-    # Save raw data
     batch_dir = OUTPUT_BASE / f"batch_{batch_no}"
     batch_dir.mkdir(parents=True, exist_ok=True)
 
@@ -167,31 +147,75 @@ def fetch_batch(
     with open(batch_dir / "metadata.json", "w", encoding="utf-8") as f:
         json.dump(result, f, ensure_ascii=False, indent=2)
 
-    with open(batch_dir / "links.json", "w", encoding="utf-8") as f:
-        json.dump(attachments, f, ensure_ascii=False, indent=2)
-
-    # Download attachments
     att_dir = batch_dir / "attachments"
     att_dir.mkdir(parents=True, exist_ok=True)
 
-    for att in attachments:
+    attachment_statuses = []
+    for idx, att in enumerate(attachments):
         url = att["url"]
         fname = att["filename"]
         if not fname or "." not in fname:
             ext = ".doc" if ".doc" in url else ".html"
-            fname = f"attachment_{attachments.index(att)}{ext}"
+            fname = f"attachment_{idx}{ext}"
         dest = att_dir / fname
+
+        entry = {
+            "title": att["title"],
+            "url": url,
+            "filename": fname,
+            "status": "skipped",
+            "http_status": None,
+            "local_path": str(dest) if download else None,
+            "error": None,
+            "retried": 0,
+        }
+
+        if not download:
+            if dest.exists():
+                entry["status"] = "skipped"
+                entry["local_path"] = str(dest)
+            attachment_statuses.append(entry)
+            continue
+
         if dest.exists():
+            entry["status"] = "skipped"
+            entry["local_path"] = str(dest)
+            attachment_statuses.append(entry)
             print(f"  跳过已存在: {dest.name}")
             continue
-        if not download:
-            continue
+
         try:
-            data = _fetch(url, timeout=timeout)
+            data, http_code = _fetch(url, timeout=timeout)
             dest.write_bytes(data)
+            entry["status"] = "downloaded"
+            entry["http_status"] = http_code
+            entry["local_path"] = str(dest)
             print(f"  下载: {dest.name} ({len(data)} bytes)")
+        except HTTPError as e:
+            entry["status"] = "failed"
+            entry["http_status"] = e.code
+            entry["error"] = str(e)
+            print(f"  [WARN] 附件下载失败 [{e.code}] {url}")
+        except URLError as e:
+            entry["status"] = "failed"
+            entry["error"] = str(e)
+            print(f"  [WARN] 附件网络错误 {url}: {e}")
         except Exception as e:
-            print(f"  [WARN] 附件下载失败 {url}: {e}")
+            entry["status"] = "failed"
+            entry["error"] = f"{type(e).__name__}: {e}"
+            print(f"  [WARN] 附件下载异常 {url}: {e}")
+        attachment_statuses.append(entry)
+
+    result["attachment_statuses"] = attachment_statuses
+
+    with open(batch_dir / "links.json", "w", encoding="utf-8") as f:
+        json.dump(attachments, f, ensure_ascii=False, indent=2)
+
+    with open(batch_dir / "attachment_status.json", "w", encoding="utf-8") as f:
+        json.dump(attachment_statuses, f, ensure_ascii=False, indent=2)
+
+    with open(batch_dir / "metadata.json", "w", encoding="utf-8") as f:
+        json.dump(result, f, ensure_ascii=False, indent=2)
 
     return result
 
@@ -207,9 +231,6 @@ def main():
     if not args.batch and not args.detail_url:
         p.error("请提供 --batch 或 --detail-url")
 
-    from discover_batches import discover_batches
-    discover_batches(limit=1)
-
     try:
         result = fetch_batch(
             batch_no=args.batch,
@@ -221,21 +242,20 @@ def main():
         sys.exit(1)
 
     if args.format == "json":
-        result_out = {k: v for k, v in result.items() if k != "content_html"}
+        result_out = {k: v for k, v in result.items() if k not in ("content_html",)}
         print(json.dumps(result_out, ensure_ascii=False, indent=2))
         return
+
+    statuses = result.get("attachment_statuses", [])
+    downloaded = sum(1 for s in statuses if s["status"] == "downloaded")
+    failed = sum(1 for s in statuses if s["status"] == "failed")
 
     print(f"\n[Summary] 第 {result['batch_no']} 批公告")
     status_label = "公示" if result["status"] == "publicity" else "正式发布"
     print(f"  状态: {status_label}")
     print(f"  标题: {result['title'][:100]}")
     print(f"  日期: {result['publish_date']}")
-    print(f"  URL: {result['detail_url']}")
-    print(f"  附件: {len(result['attachments'])} 个")
-    for att in result["attachments"]:
-        print(f"    - {att['title'] or att['filename']}")
-        print(f"      {att['url']}")
-    print(f"\n  Raw: {OUTPUT_BASE / f'batch_{result["batch_no"]}'}")
+    print(f"  附件: {len(statuses)} 个 (下载 {downloaded}, 失败 {failed})")
 
 
 if __name__ == "__main__":

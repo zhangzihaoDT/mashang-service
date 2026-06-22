@@ -120,10 +120,24 @@ def diff_batch(
             ";".join(w["keywords"] for w in watchlist),
         )
 
+        matched_text = f"{p.get('enterprise_name', '')} {p.get('brand', '')} {p.get('product_model', '')} {p.get('vehicle_name', '')}"
+        matched_keyword = ""
+        if wl_match:
+            from discover_batches import RE_BATCH
+            for w in watchlist:
+                for kw in w["keywords"].split(";"):
+                    if kw.strip() and kw.strip() in matched_text:
+                        matched_keyword = kw.strip()
+                        break
+                if matched_keyword:
+                    break
+
         entry = {
             **p,
             "is_new": is_new,
             "watchlist_match": wl_match,
+            "matched_keyword": matched_keyword,
+            "matched_text": matched_text,
         }
 
         if wl_match:

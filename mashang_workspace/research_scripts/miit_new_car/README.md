@@ -28,13 +28,32 @@ mashang_workspace/research_scripts/miit_new_car/
 └── README.md             # 本文件
 ```
 
+## V0.2 新增能力
+
+| 能力 | CLI | Makefile |
+|------|-----|----------|
+| 最新公示批次 | `monitor.py --latest-publicity` | `make miit-latest-publicity` |
+| 最新正式公告 | `monitor.py --latest-official` | `make miit-latest-official` |
+| 多页发现 | `discover_batches.py --pages 3` | `make miit-discover-batches PAGES=3` |
+| 附件文本抽取 | `extract_attachment_text.py --batch 408` | `make miit-extract-text BATCH=408` |
+| Official Evidence | monitor 自动输出 | `outputs/miit_new_car/evidence/` |
+
 ## 使用方式
 
 ### 发现最新批次
 
 ```bash
+# 默认最新 10 条（混合公示+正式）
 python mashang_workspace/research_scripts/miit_new_car/discover_batches.py
-python mashang_workspace/research_scripts/miit_new_car/discover_batches.py --limit 3 --format json
+
+# 只看公示批次
+python mashang_workspace/research_scripts/miit_new_car/discover_batches.py --publicity
+
+# 只看正式公告
+python mashang_workspace/research_scripts/miit_new_car/discover_batches.py --official
+
+# 多页回溯
+python mashang_workspace/research_scripts/miit_new_car/discover_batches.py --pages 3 --limit 20
 ```
 
 ### 抓取指定批次
@@ -50,6 +69,12 @@ python mashang_workspace/research_scripts/miit_new_car/fetch_batch.py --batch 40
 python mashang_workspace/research_scripts/miit_new_car/parse_products.py --batch 408
 ```
 
+### 附件文本抽取
+
+```bash
+python mashang_workspace/research_scripts/miit_new_car/extract_attachment_text.py --batch 408
+```
+
 ### Watchlist 增量 Diff
 
 ```bash
@@ -60,8 +85,14 @@ python mashang_workspace/research_scripts/miit_new_car/diff_watchlist.py --batch
 ### 全流程监控
 
 ```bash
-# 自动发现并处理最新未处理批次
+# 自动发现并处理最新批次（batch_no 最大）
 python mashang_workspace/research_scripts/miit_new_car/monitor.py --latest
+
+# 自动发现并处理最新公示批次
+python mashang_workspace/research_scripts/miit_new_car/monitor.py --latest-publicity
+
+# 自动发现并处理最新正式公告批次
+python mashang_workspace/research_scripts/miit_new_car/monitor.py --latest-official
 
 # 处理指定批次
 python mashang_workspace/research_scripts/miit_new_car/monitor.py --batch 408
@@ -74,9 +105,13 @@ python mashang_workspace/research_scripts/miit_new_car/monitor.py --batch 408 \
 ### Makefile 命令
 
 ```bash
-make miit-discover-latest-batch     # 打印最新批次
-make miit-fetch-batch BATCH=408     # 抓取指定批次
-make miit-new-car-monitor           # 自动处理最新批次
+make miit-discover-latest-batch        # 打印最新批次
+make miit-discover-batches PAGES=3     # 多页发现
+make miit-fetch-batch BATCH=408        # 抓取指定批次
+make miit-new-car-monitor              # 监控最新批次
+make miit-latest-publicity             # 监控最新公示
+make miit-latest-official              # 监控最新正式公告
+make miit-extract-text BATCH=408       # 抽取附件文本
 ```
 
 ## 输出文件说明
@@ -84,17 +119,26 @@ make miit-new-car-monitor           # 自动处理最新批次
 ```
 mashang_workspace/outputs/miit_new_car/
 ├── raw/batch_{N}/                   # 原始数据（不提交 git）
-│   ├── metadata.json                # 批次元信息
+│   ├── metadata.json                # 批次元信息（V0.2: 含 attachment_statuses）
 │   ├── detail.html                  # 详情页 HTML
 │   ├── links.json                   # 附件链接
+│   ├── attachment_status.json       # V0.2: 每个附件下载状态
 │   └── attachments/                 # 下载的附件
-├── parsed/                          # 结构化解析结果（可提交）
-│   ├── batch_{N}_products.csv       # 产品清单 CSV
-│   ├── batch_{N}_products.json      # 产品清单 JSON
-│   └── batch_{N}_products.md        # 产品清单 Markdown
-├── diff/                            # 增量对比结果（可提交）
+├── discovery/                       # V0.2: 多页发现结果
+│   ├── discovered_batches.json
+│   └── discovered_batches.md
+├── parsed/                          # 结构化解析结果
+│   ├── batch_{N}_products.csv
+│   ├── batch_{N}_products.json
+│   └── batch_{N}_products.md
+├── extracted/                       # V0.2: 附件文本抽取
+│   ├── batch_{N}_attachment_text.json
+│   └── batch_{N}_attachment_text.md
+├── diff/                            # 增量对比结果
 │   ├── batch_{N}_watchlist_diff.json
 │   └── batch_{N}_watchlist_diff.md
+├── evidence/                        # V0.2: Official Source Evidence
+│   └── batch_{N}_official_source_evidence.json
 └── state/
     └── latest_processed_batch.json  # 最新处理批次记录
 ```
@@ -130,13 +174,15 @@ python -m pytest mashang_workspace/tests/test_miit_new_car.py -v
 make test
 ```
 
-## 已知限制
+## 已知限制 (V0.2)
 
-1. **附件格式**：新产品公示清单为 HTML 表格格式，解析依赖表格结构，不同批次的 HTML 结构可能有差异
-2. **DOC 格式**：正式发布的附件为 `.doc` 格式，当前仅保留原始文件，未做 DOC→结构化解析
-3. **结构化字段**：能源类型、电池类型、续航、电机功率等深度参数暂未解析（这些字段在 DOC 格式中）
-4. **分页**：列表页仅解析第 1 页（15 条），历史批次需翻页
-5. **网站反爬**：工信部网站有一定频率限制，本模块内置了 timeout 和重试机制
+1. **附件 404**：`miit.gov.cn` 域的部分附件 URL 在当前环境返回 404（可能是地区限制）。已作为 warning 处理，不中断主流程
+2. **DOC 解析**：`.doc` 格式依赖系统工具 `textutil`（macOS）或 `antiword`，不可用时记录为 `unsupported`，不失败。`.docx` 已支持标准 zipfile 解析
+3. **结构化字段**：能源类型、电池类型、续航、电机功率等深度参数仍暂未解析（包含在 DOC 中）
+4. **分页上限**：jpage API 返回 `totalpage=3`（约 45 条），不是全量历史
+5. **网站稳定性**：工信部 EIDC 网站可能间歇性不可达，所有网络请求有 timeout 和重试
+6. **附件 URL 时效**：部分公示附件链接可能有时效性，正式公告 URL 更稳定
+7. **auto_launch_monitor 联动**：当前只输出 evidence 文件，未自动触发 auto_launch_monitor 主流程
 
 ## 后续可扩展方向
 

@@ -11,7 +11,7 @@ HUOSHAN_TIMEOUT ?= 30
 HUOSHAN_RECENCY ?= month
 HUOSHAN_SEARCH_MODE ?= auto
 HUOSHAN_DEBUG_RESPONSE ?= 0
-.PHONY: eval full-eval core-eval research-eval capability-audit test ci data-dict lock-demo parser-demo followup-demo numeric-eval reference-eval atp-demo backtest-demo clean-outputs dataset-update dataset-validate daily-observation-dry-run daily-observation-sync daily-data-pipeline-dry-run daily-data-pipeline render-official-doc render-official-doc-smoke build-workspace-skills-catalog build-workspace-capability-inventory miit-discover-latest-batch miit-fetch-batch miit-new-car-monitor
+.PHONY: eval full-eval core-eval research-eval capability-audit test ci data-dict lock-demo parser-demo followup-demo numeric-eval reference-eval atp-demo backtest-demo clean-outputs dataset-update dataset-validate daily-observation-dry-run daily-observation-sync daily-data-pipeline-dry-run daily-data-pipeline render-official-doc render-official-doc-smoke build-workspace-skills-catalog build-workspace-capability-inventory miit-discover-latest-batch miit-discover-batches miit-fetch-batch miit-new-car-monitor miit-latest-publicity miit-latest-official miit-extract-text
 
 ## 默认 Eval（core + parser + followup + reference，不含 research）
 eval:
@@ -107,15 +107,34 @@ auto-launch-monitor:
 		--format markdown \
 		--output mashang_workspace/outputs/reports/
 
-## MIIT 新车公告批次监控
+## MIIT 新车公告批次监控 (V0.2)
+## 发现最新公告
 miit-discover-latest-batch:
 	$(PYTHON) mashang_workspace/research_scripts/miit_new_car/discover_batches.py --limit 5
 
+## 发现多页公告
+miit-discover-batches:
+	$(PYTHON) mashang_workspace/research_scripts/miit_new_car/discover_batches.py --pages $(or $(PAGES),1)
+
+## 抓取指定批次
 miit-fetch-batch:
 	$(PYTHON) mashang_workspace/research_scripts/miit_new_car/monitor.py --batch $(BATCH)
 
+## 监控最新批次
 miit-new-car-monitor:
 	$(PYTHON) mashang_workspace/research_scripts/miit_new_car/monitor.py --latest
+
+## 监控最新公示批次
+miit-latest-publicity:
+	$(PYTHON) mashang_workspace/research_scripts/miit_new_car/monitor.py --latest-publicity
+
+## 监控最新正式公告批次
+miit-latest-official:
+	$(PYTHON) mashang_workspace/research_scripts/miit_new_car/monitor.py --latest-official
+
+## 抽取指定批次附件文本
+miit-extract-text:
+	$(PYTHON) mashang_workspace/research_scripts/miit_new_car/extract_attachment_text.py --batch $(BATCH)
 
 ## Capability Audit
 capability-audit:
@@ -231,8 +250,12 @@ help:
 	@echo ""
 	@echo "=== MIIT 新车公告 ==="
 	@echo "make miit-discover-latest-batch  发现最新公告批次"
+	@echo "make miit-discover-batches PAGES=N  多页发现公告批次"
 	@echo "make miit-fetch-batch BATCH=N    抓取指定批次"
-	@echo "make miit-new-car-monitor        自动监控最新批次"
+	@echo "make miit-new-car-monitor        监控最新批次"
+	@echo "make miit-latest-publicity       监控最新公示批次"
+	@echo "make miit-latest-official        监控最新正式公告批次"
+	@echo "make miit-extract-text BATCH=N   抽取指定批次附件文本"
 	@echo ""
 	@echo "=== Audit ==="
 	@echo "make capability-audit  Capability Audit"
