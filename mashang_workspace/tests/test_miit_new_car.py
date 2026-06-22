@@ -985,3 +985,170 @@ def test_run_monitor_summary_v03_fields(monkeypatch):
     assert "structured_records" in result
     # Ensure no old "product_count" key remains
     assert "product_count" not in result
+    # V0.3.2 fields
+    assert "attachments_skipped" in result
+    assert "product_list_quality" in result
+    assert "product_list_enterprise_count" in result
+    assert "product_list_model_count" in result
+
+
+# ═══════════════════════════════════════════════════════════════════
+# V0.3.2: Evidence schema/version guard
+# ═══════════════════════════════════════════════════════════════════
+
+def test_evidence_schema_validation_valid(tmp_path, monkeypatch):
+    """Schema-valid evidence → reuse allowed."""
+    from research_scripts.miit_new_car.monitor import _validate_evidence_schema
+
+    evidence = {
+        "schema_version": "miit_official_evidence.v0.3",
+        "evidence_layers": {
+            "official_batch_evidence": {"available": True},
+            "official_attachment_evidence": {"available": True},
+            "official_product_list_evidence": {"available": False},
+        },
+    }
+    valid, reason = _validate_evidence_schema(evidence)
+    assert valid is True
+    assert reason == ""
+
+
+def test_evidence_schema_validation_missing_version():
+    from research_scripts.miit_new_car.monitor import _validate_evidence_schema
+
+    evidence = {"batch_no": 408, "status": "official"}
+    valid, reason = _validate_evidence_schema(evidence)
+    assert valid is False
+    assert "schema_version" in reason
+
+
+def test_evidence_schema_validation_wrong_version():
+    from research_scripts.miit_new_car.monitor import _validate_evidence_schema
+
+    evidence = {
+        "schema_version": "miit_official_evidence.v0.2",
+        "evidence_layers": {"official_batch_evidence": {"available": True}},
+    }
+    valid, reason = _validate_evidence_schema(evidence)
+    assert valid is False
+    assert "v0.3" in reason
+
+
+def test_evidence_schema_validation_missing_layers():
+    from research_scripts.miit_new_car.monitor import _validate_evidence_schema
+
+    evidence = {
+        "schema_version": "miit_official_evidence.v0.3",
+        "evidence_layers": {"official_batch_evidence": {"available": True}},
+    }
+    valid, reason = _validate_evidence_schema(evidence)
+    assert valid is False
+    assert "缺少" in reason
+
+
+# ═══════════════════════════════════════════════════════════════════
+# V0.3.2: Product list quality gate
+# ═══════════════════════════════════════════════════════════════════
+
+def test_product_list_quality_usable(tmp_path, monkeypatch):
+    """product_list with enterprises and models → quality=usable."""
+    from research_scripts.miit_new_car.monitor import _compute_product_list_quality
+
+    pl = [
+        {"enterprise_name": "智己", "product_model": "L6"},
+        {"enterprise_name": "小米", "product_model": "SU7"},
+    ]
+    q = _compute_product_list_quality(pl)
+    assert q["quality"] == "usable"
+    assert q["enterprise_count"] == 2
+    assert q["product_model_count"] == 2
+
+
+def test_product_list_quality_enterprise_empty():
+    from research_scripts.miit_new_car.monitor import _compute_product_list_quality
+
+    pl = [
+        {"enterprise_name": "", "product_model": "L6"},
+        {"enterprise_name": "", "product_model": "SU7"},
+    ]
+    q = _compute_product_list_quality(pl)
+    assert q["quality"] == "unusable"
+    assert q["quality_reason"] == "enterprise_name_empty"
+    assert q["enterprise_count"] == 0
+
+
+def test_product_list_quality_model_empty():
+    from research_scripts.miit_new_car.monitor import _compute_product_list_quality
+
+    pl = [
+        {"enterprise_name": "智己", "product_model": ""},
+        {"enterprise_name": "小米", "product_model": ""},
+    ]
+    q = _compute_product_list_quality(pl)
+    assert q["quality"] == "low_quality"
+    assert q["quality_reason"] == "product_model_empty"
+
+
+def test_product_list_quality_empty_list():
+    from research_scripts.miit_new_car.monitor import _compute_product_list_quality
+
+    q = _compute_product_list_quality([])
+    assert q["quality"] == "empty"
+    assert q["record_count"] == 0
+
+
+# ═══════════════════════════════════════════════════════════════════
+# V0.3.2: Evidence uses quality gate
+# ═══════════════════════════════════════════════════════════════════
+
+def test_evidence_layers_quality_gate(tmp_path, monkeypatch):
+    """Low-quality product_list → official_product_list_evidence.available=False."""
+    from research_scripts.miit_new_car.monitor import _write_evidence
+
+    EVIDENCE_BASE = tmp_path / "evidence"
+    monkeypatch.setattr("research_scripts.miit_new_car.monitor.EVIDENCE_BASE", EVIDENCE_BASE)
+
+    meta = {"batch_no": 407, "status": "official", "publish_date": "2026-06-12",
+            "detail_url": "http://x", "fetched_at": "", "detail_source": "remote"}
+    diff_result = {"matched_products": [], "watchlist_matched": 0, "new_products": 0, "new_watchlist_matched": 0}
+    att_statuses = [{"status": "downloaded"}]
+    ext_results = [{"extract_status": "success", "text_length": 100, "text_preview": "abc", "filename": "a.doc"}]
+    products = [{"enterprise_name": "上汽集团"}]
+    diagnostics = [{"download_status": "downloaded"}]
+    # Low-quality product_list: enterprise empty
+    product_list = [{"enterprise_name": "", "product_model": "L6"}]
+
+    evidence = _write_evidence(407, meta, diff_result, att_statuses, ext_results, products,
+                                diagnostics=diagnostics, product_list=product_list, discovery_source="remote")
+    layers = evidence.get("evidence_layers", {})
+    pl_layer = layers.get("official_product_list_evidence", {})
+    assert pl_layer["available"] is False
+    assert pl_layer["quality"] == "unusable"
+    assert pl_layer["quality_reason"] == "enterprise_name_empty"
+    assert pl_layer["record_count"] == 1
+
+
+# ═══════════════════════════════════════════════════════════════════
+# V0.3.2: Evidence schema version written
+# ═══════════════════════════════════════════════════════════════════
+
+def test_evidence_has_schema_version(tmp_path, monkeypatch):
+    """Evidence JSON contains schema_version and generator_version."""
+    from research_scripts.miit_new_car.monitor import _write_evidence
+
+    EVIDENCE_BASE = tmp_path / "evidence"
+    monkeypatch.setattr("research_scripts.miit_new_car.monitor.EVIDENCE_BASE", EVIDENCE_BASE)
+
+    meta = {"batch_no": 407, "status": "official", "publish_date": "2026-06-12",
+            "detail_url": "http://x", "fetched_at": "", "detail_source": "remote"}
+    diff_result = {"matched_products": [], "watchlist_matched": 0, "new_products": 0, "new_watchlist_matched": 0}
+    att_statuses = [{"status": "downloaded"}]
+    ext_results = [{"extract_status": "success", "text_length": 100, "text_preview": "abc", "filename": "a.doc"}]
+    products = []
+    diagnostics = []
+    product_list = [{"enterprise_name": "智己", "product_model": "L6"}]
+
+    evidence = _write_evidence(407, meta, diff_result, att_statuses, ext_results, products,
+                                diagnostics=diagnostics, product_list=product_list, discovery_source="remote")
+    assert evidence.get("schema_version") == "miit_official_evidence.v0.3"
+    assert evidence.get("generator_version") == "miit_new_car_monitor.v0.3.2"

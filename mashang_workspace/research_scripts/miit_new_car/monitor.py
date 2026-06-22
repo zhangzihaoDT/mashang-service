@@ -37,6 +37,14 @@ OUTPUT_BASE = WORKSPACE_ROOT / "outputs" / "miit_new_car"
 STATE_FILE = OUTPUT_BASE / "state" / "latest_processed_batch.json"
 DEFAULT_WATCHLIST = WORKSPACE_ROOT / "configs" / "miit_new_car_watchlist.csv"
 EVIDENCE_BASE = OUTPUT_BASE / "evidence"
+EVIDENCE_SCHEMA_VERSION = "miit_official_evidence.v0.3"
+GENERATOR_VERSION = "miit_new_car_monitor.v0.3.2"
+
+REQUIRED_EVIDENCE_LAYERS = [
+    "official_batch_evidence",
+    "official_attachment_evidence",
+    "official_product_list_evidence",
+]
 
 
 def _evidence_path(batch_no: int) -> Path:
@@ -50,8 +58,39 @@ def _is_already_processed(batch_no: int) -> bool:
 def _load_existing_evidence(batch_no: int) -> dict | None:
     path = _evidence_path(batch_no)
     if path.exists():
-        return json.loads(path.read_text(encoding="utf-8"))
+        try:
+            return json.loads(path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, Exception):
+            return None
     return None
+
+
+def _validate_evidence_schema(evidence: dict) -> tuple[bool, str]:
+    """校验 evidence schema 是否匹配当前版本。
+    返回 (valid, reason)。
+    """
+    if evidence.get("schema_version") != EVIDENCE_SCHEMA_VERSION:
+        return False, f"schema_version 不匹配 (期望 {EVIDENCE_SCHEMA_VERSION}, 实际 {evidence.get('schema_version', '无')})"
+    layers = evidence.get("evidence_layers")
+    if not layers or not isinstance(layers, dict):
+        return False, "evidence_layers 缺失"
+    for key in REQUIRED_EVIDENCE_LAYERS:
+        if key not in layers:
+            return False, f"evidence_layers 缺少 {key}"
+    return True, ""
+
+
+def _compute_product_list_quality(product_list: list[dict]) -> dict:
+    enterprises = len(set(p.get("enterprise_name", "") for p in product_list if p.get("enterprise_name")))
+    models = len(set(p.get("product_model", "") for p in product_list if p.get("product_model")))
+    rc = len(product_list)
+    if rc == 0:
+        return {"record_count": 0, "enterprise_count": 0, "product_model_count": 0, "quality": "empty", "quality_reason": "no_records"}
+    if enterprises == 0:
+        return {"record_count": rc, "enterprise_count": 0, "product_model_count": models, "quality": "unusable", "quality_reason": "enterprise_name_empty"}
+    if models == 0:
+        return {"record_count": rc, "enterprise_count": enterprises, "product_model_count": 0, "quality": "low_quality", "quality_reason": "product_model_empty"}
+    return {"record_count": rc, "enterprise_count": enterprises, "product_model_count": models, "quality": "usable", "quality_reason": None}
 
 
 def _build_evidence_layers(
@@ -60,6 +99,7 @@ def _build_evidence_layers(
 ) -> dict:
     diag_downloaded = sum(1 for d in diagnostics if d.get("download_status") == "downloaded")
     diag_failed = sum(1 for d in diagnostics if d.get("download_status") == "failed")
+    pl_quality = _compute_product_list_quality(product_list)
 
     return {
         "official_batch_evidence": {
@@ -75,8 +115,8 @@ def _build_evidence_layers(
             "diagnostics_path": str(OUTPUT_BASE / "diagnostics" / f"batch_{batch_no}_attachment_diagnostics.json"),
         },
         "official_product_list_evidence": {
-            "available": len(product_list) > 0,
-            "record_count": len(product_list),
+            "available": pl_quality["quality"] == "usable",
+            **pl_quality,
             "product_list_path": str(OUTPUT_BASE / "product_list" / f"batch_{batch_no}_product_list.json"),
         },
     }
@@ -104,7 +144,25 @@ def _write_evidence(
             "evidence_type": "official_announcement_publicity" if meta.get("status") == "publicity" else "official_announcement_official",
         })
 
+    # Compute product_list quality
+    pl_enterprises = len(set(p.get("enterprise_name", "") for p in product_list if p.get("enterprise_name")))
+    pl_models = len(set(p.get("product_model", "") for p in product_list if p.get("product_model")))
+    if len(product_list) == 0:
+        pl_quality = "empty"
+        pl_quality_reason = "no_records"
+    elif pl_enterprises == 0:
+        pl_quality = "unusable"
+        pl_quality_reason = "enterprise_name_empty"
+    elif pl_models == 0:
+        pl_quality = "low_quality"
+        pl_quality_reason = "product_model_empty"
+    else:
+        pl_quality = "usable"
+        pl_quality_reason = None
+
     evidence = {
+        "schema_version": EVIDENCE_SCHEMA_VERSION,
+        "generator_version": GENERATOR_VERSION,
         "source_type": "official",
         "source_name": "MIIT New Car Announcement",
         "batch_no": batch_no,
@@ -126,6 +184,7 @@ def _write_evidence(
         "attachment_summary": {
             "total": len(attachment_statuses),
             "downloaded": sum(1 for s in attachment_statuses if s.get("status") == "downloaded"),
+            "skipped": sum(1 for s in attachment_statuses if s.get("status") == "skipped"),
             "failed": sum(1 for s in attachment_statuses if s.get("status") == "failed"),
         },
         "extraction_summary": {
@@ -199,11 +258,12 @@ def run_monitor(
     status_label = "公示" if meta.get("status") == "publicity" else "正式发布"
     att_statuses = meta.get("attachment_statuses", [])
     att_downloaded = sum(1 for s in att_statuses if s["status"] == "downloaded")
+    att_skipped = sum(1 for s in att_statuses if s["status"] == "skipped")
     att_failed = sum(1 for s in att_statuses if s["status"] == "failed")
     detail_source = meta.get("detail_source", "remote")
     detail_tag = f" [{detail_source.upper()}]" if detail_source != "remote" else ""
     print(f"  ✓ 第 {meta['batch_no']} 批 [{status_label}]{detail_tag} {meta.get('publish_date', '')}")
-    print(f"  附件: 下载 {att_downloaded}, 失败 {att_failed}")
+    print(f"  附件: 下载 {att_downloaded}, 跳过已存在 {att_skipped}, 失败 {att_failed}")
 
     # 1b. Attachment Diagnostics
     print(f"\n[1b] 附件诊断...")
@@ -215,8 +275,9 @@ def run_monitor(
     diag_total = len(diagnostics)
     diag_failed_ct = sum(1 for d in diagnostics if d.get("download_status") == "failed")
     diag_ok = sum(1 for d in diagnostics if d.get("download_status") == "downloaded")
+    diag_recovered = sum(1 for d in diagnostics if d.get("strategy_used") not in (None, "original_url"))
     if diagnostics:
-        print(f"  附件诊断: {diag_total} total / {diag_failed_ct} failed / {diag_ok} recovered")
+        print(f"  附件诊断: {diag_total} total / {diag_failed_ct} failed / {diag_ok} ok / {diag_recovered} recovered")
 
     # 2. Text Extraction
     print(f"\n[2/4] 附件文本抽取...")
@@ -231,7 +292,7 @@ def run_monitor(
     if not extraction_results:
         print(f"  文本抽取: 无附件")
     else:
-        print(f"  文本抽取: {ext_success} 成功 / {ext_unsupported} 不支持 / {ext_failed} 失败")
+        print(f"  文本抽取: {ext_success} 成功 / {ext_unsupported} 不支持 / {ext_failed} 失败（见 extracted/ 获取抽取器信息）")
 
     # 3. Parse structured records
     print(f"\n[3/4] 解析结构化记录...")
@@ -246,12 +307,14 @@ def run_monitor(
     print(f"\n[3b] 解析产品清单主表...")
     try:
         product_list = parse_product_list(batch_no=batch_no)
-        print(f"  ✓ 产品清单: {len(product_list)} 条记录")
+        pl_enterprises = len(set(p.get("enterprise_name", "") for p in product_list if p.get("enterprise_name")))
+        pl_models = len(set(p.get("product_model", "") for p in product_list if p.get("product_model")))
+        print(f"  ✓ 产品清单: {len(product_list)} records / {pl_enterprises} enterprises / {pl_models} models")
     except Exception as e:
         print(f"  [WARN] 产品清单解析异常: {e}")
         product_list = []
 
-    # 4. Diff (based on product_list if available, else structured_records)
+    # 4. Diff
     print(f"\n[3c] Watchlist Diff...")
     try:
         diff = diff_batch(
@@ -282,6 +345,7 @@ def run_monitor(
     )
 
     layers = evidence.get("evidence_layers", {})
+    pl_quality_info = layers.get("official_product_list_evidence", {})
     result = {
         "batch_no": batch_no,
         "status": meta.get("status", ""),
@@ -290,10 +354,14 @@ def run_monitor(
         "title": meta.get("title", ""),
         "structured_records": len(products),
         "product_list_count": len(product_list),
+        "product_list_quality": pl_quality_info.get("quality", "unknown"),
+        "product_list_enterprise_count": pl_quality_info.get("enterprise_count", 0),
+        "product_list_model_count": pl_quality_info.get("product_model_count", 0),
         "watchlist_matched": diff.get("watchlist_matched", 0),
         "new_products": diff.get("new_products", 0),
         "new_watchlist_matched": diff.get("new_watchlist_matched", 0),
         "attachments_downloaded": att_downloaded,
+        "attachments_skipped": att_skipped,
         "attachments_failed": att_failed,
         "diagnostics_total": diag_total,
         "diagnostics_failed": diag_failed_ct,
@@ -395,27 +463,31 @@ def main():
         if _is_already_processed(latest_batch_no) and not args.refresh and not args.force_refresh:
             evidence = _load_existing_evidence(latest_batch_no)
             if evidence:
-                print(f"  第 {latest_batch_no} 批已处理过，复用本地 evidence。")
-                summary = _build_summary_from_evidence(evidence)
-                layers = summary.get("evidence_layers", {})
-                print(f"\n{'='*60}")
-                print(f"  MIIT New Car Monitor Summary")
-                print(f"{'='*60}")
-                print(f"  batch_no: {summary['batch_no']}")
-                print(f"  status: {summary['status']}")
-                print(f"  discovery_source: {summary['discovery_source']}")
-                print(f"  detail_source: {summary['detail_source']}")
-                print(f"  evidence_source: {summary['evidence_source']}")
-                print(f"  network_retry_count: {summary['network_retry_count']}")
-                print(f"  network_warnings_count: {summary['network_warnings_count']}")
-                print(f"  evidence_layers:")
-                print(f"    batch: {layers.get('official_batch_evidence', {}).get('available', False)}")
-                print(f"    attachment: {layers.get('official_attachment_evidence', {}).get('available', False)}")
-                print(f"    product_list: {layers.get('official_product_list_evidence', {}).get('available', False)}")
-                print(f"  evidence: {summary['files']['evidence_json']}")
-                if args.format == "json":
-                    print(json.dumps(summary, ensure_ascii=False, indent=2))
-                sys.exit(0)
+                valid, reason = _validate_evidence_schema(evidence)
+                if valid:
+                    print(f"  第 {latest_batch_no} 批已处理过，复用本地 evidence。")
+                    summary = _build_summary_from_evidence(evidence)
+                    layers = summary.get("evidence_layers", {})
+                    print(f"\n{'='*60}")
+                    print(f"  MIIT New Car Monitor Summary")
+                    print(f"{'='*60}")
+                    print(f"  batch_no: {summary['batch_no']}")
+                    print(f"  status: {summary['status']}")
+                    print(f"  discovery_source: {summary['discovery_source']}")
+                    print(f"  detail_source: {summary['detail_source']}")
+                    print(f"  evidence_source: {summary['evidence_source']}")
+                    print(f"  network_retry_count: {summary['network_retry_count']}")
+                    print(f"  network_warnings_count: {summary['network_warnings_count']}")
+                    print(f"  evidence_layers:")
+                    print(f"    batch: {layers.get('official_batch_evidence', {}).get('available', False)}")
+                    print(f"    attachment: {layers.get('official_attachment_evidence', {}).get('available', False)}")
+                    print(f"    product_list: {layers.get('official_product_list_evidence', {}).get('available', False)}")
+                    print(f"  evidence: {summary['files']['evidence_json']}")
+                    if args.format == "json":
+                        print(json.dumps(summary, ensure_ascii=False, indent=2))
+                    sys.exit(0)
+                else:
+                    print(f"  第 {latest_batch_no} 批已有 evidence，但 schema 已过期 ({reason})，自动重新生成。")
 
         batch_numbers = [latest_batch_no]
 
@@ -455,12 +527,20 @@ def main():
             print(f"  evidence_source: {r.get('evidence_source', 'unknown')}")
             print(f"  network_retry_count: {r.get('network_retry_count', 0)}")
             print(f"  network_warnings_count: {r.get('network_warnings_count', 0)}")
+            print(f"")
+            print(f"  附件: {r.get('attachments_downloaded', 0)} downloaded / {r.get('attachments_skipped', 0)} skipped / {r.get('attachments_failed', 0)} failed")
             print(f"  附件诊断: {r.get('diagnostics_total', 0)} total / {r.get('diagnostics_failed', 0)} failed")
-            print(f"  文本抽取: {r.get('extraction_success', 0)} 成功 / {r.get('extraction_unsupported', 0)} 不支持")
-            print(f"  可结构化记录: {r['structured_records']}, 产品清单: {r.get('product_list_count', 0)}")
+            print(f"  文本抽取: {r.get('extraction_success', 0)} success / {r.get('extraction_unsupported', 0)} unsupported")
+            print(f"  可结构化记录: {r['structured_records']}")
+            pl_q = r.get('product_list_quality', 'unknown')
+            pl_ec = r.get('product_list_enterprise_count', 0)
+            pl_mc = r.get('product_list_model_count', 0)
+            print(f"  产品清单: {r.get('product_list_count', 0)} records / {pl_ec} enterprises / {pl_mc} models / quality={pl_q}")
             print(f"  Watchlist: {r['watchlist_matched']}, 新增: {r['new_products']}")
+            print(f"")
             print(f"  evidence_layers:")
             print(f"    batch: {layers.get('batch', False)}, attachment: {layers.get('attachment', False)}, product_list: {layers.get('product_list', False)}")
+            print(f"")
             print(f"  evidence: {r['files']['evidence_json']}")
 
 

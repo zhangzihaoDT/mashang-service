@@ -195,6 +195,8 @@ def parse_product_list(
 
     products: list[dict] = []
     seen_keys: set[str] = set()
+    enterprises_set: set[str] = set()
+    models_set: set[str] = set()
 
     # Parse attachments
     if att_dir.exists():
@@ -254,6 +256,10 @@ def parse_product_list(
                     if key in seen_keys:
                         continue
                     seen_keys.add(key)
+                    if rec["enterprise_name"]:
+                        enterprises_set.add(rec["enterprise_name"])
+                    if rec["product_model"]:
+                        models_set.add(rec["product_model"])
 
                     products.append({
                         "batch_no": batch_no,
@@ -308,9 +314,30 @@ def parse_product_list(
         w.writerows(products)
     print(f"  CSV: {csv_path} ({len(products)} 行)")
 
+    # Compute quality
+    rc = len(products)
+    ec = len(enterprises_set)
+    mc = len(models_set)
+    if rc == 0:
+        quality = "empty"
+        quality_reason = "no_records"
+    elif ec == 0:
+        quality = "unusable"
+        quality_reason = "enterprise_name_empty"
+    elif mc == 0:
+        quality = "low_quality"
+        quality_reason = "product_model_empty"
+    else:
+        quality = "usable"
+        quality_reason = None
+
+    output_payload = {
+        "summary": {"record_count": rc, "enterprise_count": ec, "product_model_count": mc, "quality": quality, "quality_reason": quality_reason},
+        "records": products,
+    }
     json_path = out_dir / f"{prefix}.json"
     with open(json_path, "w", encoding="utf-8") as f:
-        json.dump(products, f, ensure_ascii=False, indent=2)
+        json.dump(output_payload, f, ensure_ascii=False, indent=2)
     print(f"  JSON: {json_path}")
 
     md_path = out_dir / f"{prefix}.md"
@@ -318,13 +345,21 @@ def parse_product_list(
         f.write(f"# 第 {batch_no} 批产品清单\n\n")
         f.write(f"- 状态: {meta.get('status', '')}\n")
         f.write(f"- 发布日期: {meta.get('publish_date', '')}\n")
-        f.write(f"- 记录数: {len(products)}\n\n")
+        f.write(f"- 记录数: {rc}\n")
+        f.write(f"- 企业数: {ec}\n")
+        f.write(f"- 型号数: {mc}\n")
+        f.write(f"- 质量: {quality}")
+        if quality_reason:
+            f.write(f" ({quality_reason})")
+        f.write("\n\n")
         f.write(f"| 企业名称 | 品牌 | 产品名称 | 产品型号 | 来源 |\n")
         f.write(f"|---------|------|---------|--------|------|\n")
         for p in products:
             src = p.get("source_attachment", "")[:15]
             f.write(f"| {p['enterprise_name'][:20]} | {p['brand']} | {p['product_name'][:20]} | {p['product_model'][:20]} | {src} |\n")
     print(f"  Markdown: {md_path}")
+
+    print(f"  质量: {quality}{' (' + quality_reason + ')' if quality_reason else ''} ({ec} enterprises / {mc} models)")
 
     return products
 
@@ -393,13 +428,16 @@ def main():
         sys.exit(1)
 
     if args.format == "json":
-        print(json.dumps(products, ensure_ascii=False, indent=2))
+        output_payload = {
+            "summary": {
+                "record_count": len(products),
+                "enterprise_count": len(set(p["enterprise_name"] for p in products if p["enterprise_name"])),
+                "product_model_count": len(set(p["product_model"] for p in products if p["product_model"])),
+            },
+            "records": products,
+        }
+        print(json.dumps(output_payload, ensure_ascii=False, indent=2))
         return
-
-    print(f"\n[Summary] 第 {args.batch} 批产品清单")
-    print(f"  记录数: {len(products)}")
-    enterprises = set(p["enterprise_name"] for p in products if p["enterprise_name"])
-    print(f"  企业数: {len(enterprises)}")
 
 
 if __name__ == "__main__":
