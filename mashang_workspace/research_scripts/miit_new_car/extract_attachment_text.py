@@ -2,8 +2,12 @@
 """
 对已下载的 MIIT 批次附件进行文本抽取。
 
-支持格式: .html / .htm / .txt / .docx
-.doc 依赖系统工具 antiword 或 textutil，不可用时记录为 unsupported。
+V0.3:
+  - 策略化抽取（html_strip / docx_zip / textutil / antiword / catdoc / libreoffice）
+  - 成功文本落盘到 extracted/text/batch_N/*.txt
+  - 支持 detect extractor 环境
+
+支持格式: .html / .htm / .txt / .docx / .doc
 
 用法:
   python mashang_workspace/research_scripts/miit_new_car/extract_attachment_text.py --batch 408
@@ -18,16 +22,22 @@ from typing import Optional
 
 MODULE_DIR = Path(__file__).resolve().parent
 WORKSPACE_ROOT = MODULE_DIR.parents[1]
-sys.path.insert(0, str(WORKSPACE_ROOT))
+if str(WORKSPACE_ROOT) not in sys.path:
+    sys.path.insert(0, str(WORKSPACE_ROOT))
+if str(MODULE_DIR) not in sys.path:
+    sys.path.insert(0, str(MODULE_DIR))
+
+from research_scripts.miit_new_car.check_text_extractors import check_extractors
 
 RAW_BASE = WORKSPACE_ROOT / "outputs" / "miit_new_car" / "raw"
 EXTRACTED_BASE = WORKSPACE_ROOT / "outputs" / "miit_new_car" / "extracted"
+TEXT_DIR = EXTRACTED_BASE / "text"
 
 
 def _extract_html_text(filepath: Path) -> str:
     html = filepath.read_text("utf-8", errors="replace")
 
-    class _TextExtractor(HTMLParser):
+    class _Parser(HTMLParser):
         def __init__(self):
             super().__init__()
             self.parts: list[str] = []
@@ -35,9 +45,7 @@ def _extract_html_text(filepath: Path) -> str:
 
         def handle_starttag(self, tag, attrs):
             a = dict(attrs)
-            style = a.get("style", "")
-            cls = a.get("class", "")
-            if "display:none" in style or "hidden" in cls:
+            if "display:none" in a.get("style", "") or "hidden" in a.get("class", ""):
                 self._skip = True
 
         def handle_endtag(self, tag):
@@ -47,16 +55,16 @@ def _extract_html_text(filepath: Path) -> str:
 
         def handle_data(self, data):
             if not self._skip:
-                stripped = data.strip()
-                if stripped:
-                    self.parts.append(stripped)
+                s = data.strip()
+                if s:
+                    self.parts.append(s)
 
-    parser = _TextExtractor()
+    p = _Parser()
     try:
-        parser.feed(html)
+        p.feed(html)
     except Exception:
         pass
-    text = " ".join(parser.parts)
+    text = " ".join(p.parts)
     text = re.sub(r"\s{3,}", "\n\n", text)
     return text.strip()
 
@@ -106,33 +114,66 @@ def _extract_docx_text(filepath: Path) -> str:
     return "".join(texts).strip()
 
 
-def _extract_doc_text(filepath: Path) -> tuple[str, str]:
-    """尝试用系统工具提取 .doc 文本。返回 (status, text)。"""
-    # Try textutil (macOS built-in)
-    if shutil.which("textutil"):
-        try:
-            result = subprocess.run(
-                ["textutil", "-stdout", "-convert", "txt", str(filepath)],
-                capture_output=True, text=True, timeout=30,
-            )
-            if result.returncode == 0:
-                return "success", result.stdout.strip()
-        except Exception:
-            pass
+def _extract_doc_text(filepath: Path) -> tuple[str, str, str]:
+    """返回 (status, method, text)。尝试所有可用 .doc 抽取器。"""
+    extractor_info = check_extractors()
+    preferred = extractor_info.get("preferred_doc_extractor")
+    extractors = extractor_info["extractors"]
 
-    # Try antiword
-    if shutil.which("antiword"):
-        try:
-            result = subprocess.run(
-                ["antiword", str(filepath)],
-                capture_output=True, text=True, timeout=30,
-            )
-            if result.returncode == 0:
-                return "success", result.stdout.strip()
-        except Exception:
-            pass
+    # Ordered by preference: textutil > antiword > catdoc > libreoffice
+    order = ["textutil", "antiword", "catdoc", "libreoffice"]
+    if preferred and preferred in order:
+        order.remove(preferred)
+        order.insert(0, preferred)
 
-    return "unsupported", ""
+    for name in order:
+        info = extractors.get(name)
+        if not info or not info["available"]:
+            continue
+        tool_path = info["path"]
+        if not tool_path:
+            continue
+
+        try:
+            if name == "textutil":
+                result = subprocess.run(
+                    [tool_path, "-stdout", "-convert", "txt", str(filepath)],
+                    capture_output=True, text=True, timeout=30,
+                )
+                if result.returncode == 0 and result.stdout.strip():
+                    return "success", "textutil", result.stdout.strip()
+            elif name == "antiword":
+                result = subprocess.run(
+                    [tool_path, str(filepath)],
+                    capture_output=True, text=True, timeout=30,
+                )
+                if result.returncode == 0 and result.stdout.strip():
+                    return "success", "antiword", result.stdout.strip()
+            elif name == "catdoc":
+                result = subprocess.run(
+                    [tool_path, str(filepath)],
+                    capture_output=True, text=True, timeout=30,
+                )
+                if result.returncode == 0 and result.stdout.strip():
+                    return "success", "catdoc", result.stdout.strip()
+            elif name == "libreoffice":
+                outdir = filepath.parent / "_lo_extract"
+                outdir.mkdir(exist_ok=True)
+                result = subprocess.run(
+                    [tool_path, "--headless", "--convert-to", "txt", "--outdir", str(outdir), str(filepath)],
+                    capture_output=True, text=True, timeout=60,
+                )
+                if result.returncode == 0:
+                    txt_file = outdir / f"{filepath.stem}.txt"
+                    if txt_file.exists():
+                        text = txt_file.read_text("utf-8", errors="replace").strip()
+                        txt_file.unlink(missing_ok=True)
+                        if text:
+                            return "success", "libreoffice", text
+        except Exception:
+            continue
+
+    return "unsupported", "", ""
 
 
 def extract_attachment_text(
@@ -147,6 +188,9 @@ def extract_attachment_text(
     if not att_dir.exists():
         return []
 
+    batch_text_dir = TEXT_DIR / f"batch_{batch_no}"
+    batch_text_dir.mkdir(parents=True, exist_ok=True)
+
     results = []
     for fpath in sorted(att_dir.iterdir()):
         if not fpath.is_file():
@@ -157,7 +201,9 @@ def extract_attachment_text(
             "filename": fpath.name,
             "local_path": str(fpath),
             "extract_status": "unknown",
+            "extract_method": "",
             "text_length": 0,
+            "text_path": "",
             "text_preview": "",
             "error": None,
         }
@@ -166,35 +212,48 @@ def extract_attachment_text(
             if fpath.suffix in (".html", ".htm"):
                 text = _extract_html_text(fpath)
                 entry["extract_status"] = "success"
-                entry["text_length"] = len(text)
-                entry["text_preview"] = text[:500]
+                entry["extract_method"] = "html_strip"
             elif fpath.suffix == ".txt":
                 text = fpath.read_text("utf-8", errors="replace").strip()
                 entry["extract_status"] = "success"
-                entry["text_length"] = len(text)
-                entry["text_preview"] = text[:500]
+                entry["extract_method"] = "txt_direct"
             elif fpath.suffix == ".docx":
                 text = _extract_docx_text(fpath)
+                entry["extract_method"] = "docx_zip"
                 if text:
                     entry["extract_status"] = "success"
                 else:
                     entry["extract_status"] = "failed"
                     entry["error"] = "docx 文本抽取返回空"
-                entry["text_length"] = len(text)
-                entry["text_preview"] = text[:500]
             elif fpath.suffix == ".doc":
-                status, text = _extract_doc_text(fpath)
+                status, method, text = _extract_doc_text(fpath)
                 entry["extract_status"] = status
-                entry["text_length"] = len(text)
-                entry["text_preview"] = text[:500] if text else ""
+                entry["extract_method"] = method or "unsupported"
                 if status == "unsupported":
-                    entry["error"] = "当前环境无 textutil/antiword，无法解析 .doc"
+                    entry["error"] = f"当前环境无可用的 .doc 抽取器"
+                elif status == "failed":
+                    entry["error"] = "doc 抽取失败"
             else:
                 entry["extract_status"] = "unsupported"
+                entry["extract_method"] = "unsupported"
                 entry["error"] = f"不支持的文件格式: {fpath.suffix}"
+                text = ""
         except Exception as e:
             entry["extract_status"] = "failed"
+            entry["extract_method"] = "error"
             entry["error"] = f"{type(e).__name__}: {e}"
+            text = ""
+
+        entry["text_length"] = len(text)
+        entry["text_preview"] = text[:500]
+
+        # Write full text to file
+        if text:
+            txt_dest = batch_text_dir / f"{fpath.stem}.txt"
+            txt_dest.write_text(text, encoding="utf-8")
+            entry["text_path"] = str(txt_dest)
+        else:
+            entry["text_path"] = ""
 
         results.append(entry)
 
@@ -208,21 +267,25 @@ def extract_attachment_text(
     md_path = out_dir / f"batch_{batch_no}_attachment_text.md"
     with open(md_path, "w", encoding="utf-8") as f:
         f.write(f"# 第 {batch_no} 批附件文本抽取\n\n")
-        f.write(f"| 文件 | 状态 | 文本长度 |\n|------|------|---------|\n")
+        f.write(f"| 文件 | 状态 | 方法 | 文本长度 |\n|------|------|------|---------|\n")
         for r in results:
-            f.write(f"| {r['filename']} | {r['extract_status']} | {r['text_length']} |\n")
-        f.write(f"\n## 预览\n\n")
+            f.write(f"| {r['filename']} | {r['extract_status']} | {r['extract_method']} | {r['text_length']} |\n")
+        f.write(f"\n## 文本路径\n\n")
         for r in results:
-            if r["text_preview"]:
-                f.write(f"### {r['filename']}\n\n")
-                f.write(f"```\n{r['text_preview']}\n```\n\n")
+            if r["text_path"]:
+                f.write(f"- {r['filename']}: {r['text_path']}\n")
 
     success = sum(1 for r in results if r["extract_status"] == "success")
     unsupported = sum(1 for r in results if r["extract_status"] == "unsupported")
     failed = sum(1 for r in results if r["extract_status"] == "failed")
+
+    extractor_info = check_extractors()
+    preferred = extractor_info.get("preferred_doc_extractor") or "无"
+
     print(f"  JSON: {json_path}")
     print(f"  Markdown: {md_path}")
-    print(f"  文本抽取: {success} 成功, {unsupported} 不支持, {failed} 失败")
+    print(f"  文本抽取: {success} 成功 / {unsupported} 不支持 / {failed} 失败")
+    print(f"  extractors: {preferred}")
 
     return results
 
@@ -250,7 +313,7 @@ def main():
     print(f"\n[Summary] 第 {args.batch} 批附件文本抽取")
     print(f"  附件数: {len(results)}")
     for r in results:
-        print(f"  {r['filename']}: {r['extract_status']} ({r['text_length']} chars)")
+        print(f"  {r['filename']}: {r['extract_status']} ({r['extract_method']}, {r['text_length']} chars)")
 
 
 if __name__ == "__main__":

@@ -28,6 +28,39 @@ mashang_workspace/research_scripts/miit_new_car/
 └── README.md             # 本文件
 ```
 
+## V0.3 Attachment & Product Parser
+
+| 能力 | 说明 |
+|------|------|
+| **附件下载诊断** | `diagnose_attachment_urls.py` — 对每个附件 URL 做完整诊断（domain/http_status/content_type/failure_type/strategy） |
+| **文本抽取器检测** | `check_text_extractors.py` — 检测 textutil / antiword / catdoc / libreoffice 可用性 |
+| **策略化文本抽取** | `extract_attachment_text.py` 增强 — 策略：html_strip → txt_direct → docx_zip → textutil → antiword → catdoc → libreoffice；完整文本落盘到 `extracted/text/batch_N/*.txt` |
+| **产品清单主表** | `parse_product_list.py` — 从 HTML 表格、DOC/DOCX 文本中解析企业/品牌/产品名称/型号，按 `batch_no+enterprise+model+name` 去重，排除税收目录 |
+| **evidence_layers** | evidence 区分 `official_batch_evidence` / `official_attachment_evidence` / `official_product_list_evidence` |
+| **输出分层** | `parsed/` 保留原有结构；新增 `product_list/` 和 `diagnostics/` |
+
+新增命令：
+
+```bash
+make miit-check-text-extractors              # 检查文本抽取工具
+make miit-diagnose-attachments BATCH=407     # 诊断附件下载
+make miit-parse-product-list BATCH=407       # 解析产品清单主表
+```
+
+monitor 升级流程：
+
+```
+discover → fetch + attachment diagnostics → extract text
+→ parse structured records → parse product list
+→ watchlist diff → evidence layers
+```
+
+已知限制：
+
+- `product_list/` 中的"产品清单"仅包含通过 HTML 表格或文本行匹配解析出的记录，不等于该批次完整公告产品总量
+- 税收目录（购置税/车船税）附件会被排除
+- 深度参数（续航、电池、电机、尺寸）结构化属于后续 V0.4
+
 ## V0.2.2 Polish
 
 | 能力 | 说明 |

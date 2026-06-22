@@ -2,6 +2,8 @@
 """
 抓取指定批次的公告详情页和附件。
 
+V0.2.1: 详情页请求超时时，如果本地 detail.html 存在，则使用缓存继续。
+
 用法:
   python mashang_workspace/research_scripts/miit_new_car/fetch_batch.py --batch 408
   python mashang_workspace/research_scripts/miit_new_car/fetch_batch.py --detail-url https://...
@@ -10,8 +12,7 @@
 
 import sys, re, json, argparse
 from pathlib import Path
-from urllib.request import Request, urlopen
-from urllib.error import URLError, HTTPError
+from urllib.error import HTTPError
 from html.parser import HTMLParser
 from datetime import datetime, timezone
 from typing import Optional
@@ -23,21 +24,13 @@ if str(WORKSPACE_ROOT) not in sys.path:
 if str(MODULE_DIR) not in sys.path:
     sys.path.insert(0, str(MODULE_DIR))
 
-USER_AGENT = (
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-)
+from research_scripts.miit_new_car.http_utils import NetworkError, http_get, http_get_text, DEFAULT_TIMEOUT
+
 REQUEST_TIMEOUT = 60
 OUTPUT_BASE = WORKSPACE_ROOT / "outputs" / "miit_new_car" / "raw"
 
 RE_BATCH = re.compile(r"[第](\d+)[批]")
 RE_PUBLICITY = re.compile(r"(拟发布|公示)")
-
-
-def _fetch(url: str, timeout: int = REQUEST_TIMEOUT) -> tuple[bytes, int]:
-    req = Request(url, headers={"User-Agent": USER_AGENT})
-    with urlopen(req, timeout=timeout) as resp:
-        return resp.read(), resp.status
 
 
 def _extract_batch_no(title: str, url: str) -> int:
@@ -85,6 +78,15 @@ class _DetailParser(HTMLParser):
             self.title += data.strip()
 
 
+def _parse_html(html: str) -> _DetailParser:
+    parser = _DetailParser()
+    try:
+        parser.feed(html)
+    except Exception:
+        pass
+    return parser
+
+
 def fetch_batch(
     batch_no: Optional[int] = None,
     detail_url: Optional[str] = None,
@@ -96,21 +98,32 @@ def fetch_batch(
 
     if not detail_url:
         from discover_batches import discover_batches
-        batches = discover_batches(limit=5)
+        batches, _source = discover_batches(limit=5)
         target = [b for b in batches if b["batch_no"] == batch_no]
         if not target:
             raise ValueError(f"未找到第 {batch_no} 批的详情页 URL")
         detail_url = target[0]["detail_url"]
 
-    raw_bytes = _fetch(detail_url, timeout=timeout)[0]
-    html = raw_bytes.decode("utf-8", errors="replace")
+    batch_dir = OUTPUT_BASE / f"batch_{batch_no}"
+    batch_dir.mkdir(parents=True, exist_ok=True)
+    detail_html_path = batch_dir / "detail.html"
 
-    parser = _DetailParser()
+    # Try remote detail page
+    html = None
+    detail_source = "remote"
     try:
-        parser.feed(html)
-    except Exception:
-        pass
+        raw_bytes = http_get(detail_url, timeout=timeout)[0]
+        html = raw_bytes.decode("utf-8", errors="replace")
+    except NetworkError as e:
+        # Fallback to local cache
+        if detail_html_path.exists():
+            print(f"  [WARN] 详情页请求失败，使用本地 cached detail.html: {e}", file=sys.stderr)
+            html = detail_html_path.read_text(encoding="utf-8")
+            detail_source = "cache"
+        else:
+            raise RuntimeError(f"详情页请求失败且本地无缓存: {e}") from e
 
+    parser = _parse_html(html)
     title = parser.title or f"第{batch_no}批公告详情"
     pub_date = parser.publish_date or ""
 
@@ -135,15 +148,16 @@ def fetch_batch(
         "publish_date": pub_date,
         "detail_url": detail_url,
         "source": "miit-eidc",
+        "detail_source": detail_source,
         "attachments": attachments,
         "fetched_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
     }
 
-    batch_dir = OUTPUT_BASE / f"batch_{batch_no}"
-    batch_dir.mkdir(parents=True, exist_ok=True)
+    # Save detail HTML (only if fetched fresh)
+    if detail_source == "remote":
+        detail_html_path.write_text(html, encoding="utf-8")
 
-    (batch_dir / "detail.html").write_text(html, encoding="utf-8")
-
+    # Save metadata
     with open(batch_dir / "metadata.json", "w", encoding="utf-8") as f:
         json.dump(result, f, ensure_ascii=False, indent=2)
 
@@ -185,7 +199,7 @@ def fetch_batch(
             continue
 
         try:
-            data, http_code = _fetch(url, timeout=timeout)
+            data, http_code = http_get(url, timeout=timeout)
             dest.write_bytes(data)
             entry["status"] = "downloaded"
             entry["http_status"] = http_code
@@ -196,7 +210,7 @@ def fetch_batch(
             entry["http_status"] = e.code
             entry["error"] = str(e)
             print(f"  [WARN] 附件下载失败 [{e.code}] {url}")
-        except URLError as e:
+        except NetworkError as e:
             entry["status"] = "failed"
             entry["error"] = str(e)
             print(f"  [WARN] 附件网络错误 {url}: {e}")
@@ -249,10 +263,13 @@ def main():
     statuses = result.get("attachment_statuses", [])
     downloaded = sum(1 for s in statuses if s["status"] == "downloaded")
     failed = sum(1 for s in statuses if s["status"] == "failed")
+    detail_src = result.get("detail_source", "remote")
+    cache_tag = " [CACHE]" if detail_src == "cache" else ""
 
-    print(f"\n[Summary] 第 {result['batch_no']} 批公告")
+    print(f"\n[Summary] 第 {result['batch_no']} 批公告{cache_tag}")
     status_label = "公示" if result["status"] == "publicity" else "正式发布"
     print(f"  状态: {status_label}")
+    print(f"  详情来源: {detail_src}")
     print(f"  标题: {result['title'][:100]}")
     print(f"  日期: {result['publish_date']}")
     print(f"  附件: {len(statuses)} 个 (下载 {downloaded}, 失败 {failed})")

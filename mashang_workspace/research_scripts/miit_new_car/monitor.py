@@ -1,23 +1,17 @@
 #!/usr/bin/env python
 """
-MIIT 新车公告批次监控 — 串联完整流程。
+MIIT 新车公告批次监控 — 串联完整流程 V0.3。
 
-V0.2.1:
-  - 网络重试与 backoff（通过 http_utils）
-  - discovery cache fallback
-  - detail page cache fallback
-  - 已处理批次幂等复用 evidence
-  - --refresh / --force-refresh
-  - summary 包含 cache 标记
+流程:
+  discover → fetch + attachment diagnostics → extract text
+  → parse structured records → parse product list
+  → watchlist diff → evidence layers
 
 用法:
   python mashang_workspace/research_scripts/miit_new_car/monitor.py --latest
   python mashang_workspace/research_scripts/miit_new_car/monitor.py --latest-publicity
   python mashang_workspace/research_scripts/miit_new_car/monitor.py --latest-official
   python mashang_workspace/research_scripts/miit_new_car/monitor.py --batch 408
-  python mashang_workspace/research_scripts/miit_new_car/monitor.py --batch 408 --refresh
-  python mashang_workspace/research_scripts/miit_new_car/monitor.py --batch 408 --force-refresh
-  python mashang_workspace/research_scripts/miit_new_car/monitor.py --all
 """
 
 import sys, json, argparse
@@ -35,6 +29,8 @@ from fetch_batch import fetch_batch
 from parse_products import parse_batch
 from diff_watchlist import diff_batch
 from extract_attachment_text import extract_attachment_text
+from parse_product_list import parse_product_list
+from diagnose_attachment_urls import diagnose_attachments
 from research_scripts.miit_new_car.http_utils import NetworkError, get_and_reset_retry_count
 
 OUTPUT_BASE = WORKSPACE_ROOT / "outputs" / "miit_new_car"
@@ -58,6 +54,34 @@ def _load_existing_evidence(batch_no: int) -> dict | None:
     return None
 
 
+def _build_evidence_layers(
+    batch_no: int, meta: dict, diagnostics: list[dict],
+    product_list: list[dict], diff_result: dict,
+) -> dict:
+    diag_downloaded = sum(1 for d in diagnostics if d.get("download_status") == "downloaded")
+    diag_failed = sum(1 for d in diagnostics if d.get("download_status") == "failed")
+
+    return {
+        "official_batch_evidence": {
+            "available": True,
+            "batch_no": batch_no,
+            "batch_status": meta.get("status", ""),
+            "detail_url": meta.get("detail_url", ""),
+        },
+        "official_attachment_evidence": {
+            "available": len(diagnostics) > 0,
+            "downloaded_count": diag_downloaded,
+            "failed_count": diag_failed,
+            "diagnostics_path": str(OUTPUT_BASE / "diagnostics" / f"batch_{batch_no}_attachment_diagnostics.json"),
+        },
+        "official_product_list_evidence": {
+            "available": len(product_list) > 0,
+            "record_count": len(product_list),
+            "product_list_path": str(OUTPUT_BASE / "product_list" / f"batch_{batch_no}_product_list.json"),
+        },
+    }
+
+
 def _write_evidence(
     batch_no: int,
     meta: dict,
@@ -65,6 +89,8 @@ def _write_evidence(
     attachment_statuses: list[dict],
     extraction_results: list[dict],
     products: list[dict],
+    diagnostics: list[dict],
+    product_list: list[dict],
     discovery_source: str = "remote",
     network_retry_count: int = 0,
 ) -> dict:
@@ -88,11 +114,14 @@ def _write_evidence(
         "discovery_source": discovery_source,
         "detail_source": meta.get("detail_source", "remote"),
         "evidence_source": "generated",
+        "evidence_layers": _build_evidence_layers(batch_no, meta, diagnostics, product_list, diff_result),
         "artifacts": {
             "metadata": str(OUTPUT_BASE / "raw" / f"batch_{batch_no}" / "metadata.json"),
             "products_json": str(OUTPUT_BASE / "parsed" / f"batch_{batch_no}_products.json"),
+            "product_list_json": str(OUTPUT_BASE / "product_list" / f"batch_{batch_no}_product_list.json"),
             "watchlist_diff": str(OUTPUT_BASE / "diff" / f"batch_{batch_no}_watchlist_diff.json"),
             "attachment_text": str(OUTPUT_BASE / "extracted" / f"batch_{batch_no}_attachment_text.json"),
+            "diagnostics": str(OUTPUT_BASE / "diagnostics" / f"batch_{batch_no}_attachment_diagnostics.json"),
         },
         "attachment_summary": {
             "total": len(attachment_statuses),
@@ -106,6 +135,7 @@ def _write_evidence(
             "failed": sum(1 for r in extraction_results if r["extract_status"] == "failed"),
         },
         "parsed_product_count": len(products),
+        "product_list_count": len(product_list),
         "watchlist_hits": watchlist_hits,
         "network_retry_count": network_retry_count,
         "generated_at": meta.get("fetched_at", ""),
@@ -120,19 +150,21 @@ def _write_evidence(
 
 
 def _build_summary_from_evidence(evidence: dict) -> dict:
-    """从已有的 evidence 构建 summary，标记 skipped_existing。"""
     ew = evidence
+    layers = ew.get("evidence_layers", {})
     return {
         "batch_no": ew.get("batch_no", 0),
         "status": ew.get("batch_status", ""),
         "publish_date": ew.get("publish_date", ""),
         "structured_records": ew.get("parsed_product_count", 0),
+        "product_list_count": ew.get("product_list_count", 0),
         "watchlist_matched": len(ew.get("watchlist_hits", [])),
         "discovery_source": "skipped_existing",
         "detail_source": "skipped_existing",
         "evidence_source": "existing",
         "network_retry_count": 0,
         "network_warnings_count": 0,
+        "evidence_layers": layers,
         "files": {"evidence_json": str(_evidence_path(ew.get("batch_no", 0)))},
         "evidence": ew,
     }
@@ -173,16 +205,36 @@ def run_monitor(
     print(f"  ✓ 第 {meta['batch_no']} 批 [{status_label}]{detail_tag} {meta.get('publish_date', '')}")
     print(f"  附件: 下载 {att_downloaded}, 失败 {att_failed}")
 
+    # 1b. Attachment Diagnostics
+    print(f"\n[1b] 附件诊断...")
+    try:
+        diagnostics = diagnose_attachments(batch_no=batch_no)
+    except Exception as e:
+        print(f"  [WARN] 附件诊断异常: {e}")
+        diagnostics = []
+    diag_total = len(diagnostics)
+    diag_failed_ct = sum(1 for d in diagnostics if d.get("download_status") == "failed")
+    diag_ok = sum(1 for d in diagnostics if d.get("download_status") == "downloaded")
+    if diagnostics:
+        print(f"  附件诊断: {diag_total} total / {diag_failed_ct} failed / {diag_ok} recovered")
+
     # 2. Text Extraction
-    print(f"\n[1b] 附件文本抽取...")
+    print(f"\n[2/4] 附件文本抽取...")
     try:
         extraction_results = extract_attachment_text(batch_no=batch_no)
     except Exception as e:
         print(f"  [WARN] 文本抽取异常: {e}")
         extraction_results = []
+    ext_success = sum(1 for r in extraction_results if r.get("extract_status") == "success")
+    ext_unsupported = sum(1 for r in extraction_results if r.get("extract_status") == "unsupported")
+    ext_failed = sum(1 for r in extraction_results if r.get("extract_status") == "failed")
+    if not extraction_results:
+        print(f"  文本抽取: 无附件")
+    else:
+        print(f"  文本抽取: {ext_success} 成功 / {ext_unsupported} 不支持 / {ext_failed} 失败")
 
-    # 3. Parse
-    print(f"\n[2/4] 解析产品信息...")
+    # 3. Parse structured records
+    print(f"\n[3/4] 解析结构化记录...")
     try:
         products = parse_batch(batch_no=batch_no)
         print(f"  ✓ 解析完成: {len(products)} 条可结构化记录")
@@ -190,8 +242,17 @@ def run_monitor(
         print(f"  [WARN] 解析异常: {e}")
         products = []
 
-    # 4. Diff
-    print(f"\n[3/4] Watchlist Diff...")
+    # 3b. Parse product list
+    print(f"\n[3b] 解析产品清单主表...")
+    try:
+        product_list = parse_product_list(batch_no=batch_no)
+        print(f"  ✓ 产品清单: {len(product_list)} 条记录")
+    except Exception as e:
+        print(f"  [WARN] 产品清单解析异常: {e}")
+        product_list = []
+
+    # 4. Diff (based on product_list if available, else structured_records)
+    print(f"\n[3c] Watchlist Diff...")
     try:
         diff = diff_batch(
             batch_no=batch_no,
@@ -199,9 +260,9 @@ def run_monitor(
             state_update=state_update,
         )
         print(f"  ✓ Watchlist 命中: {diff['watchlist_matched']} 个")
-        print(f"  新增产品: {diff['new_products']} 个 (关联: {diff['new_watchlist_matched']})")
+        print(f"  新增: {diff['new_products']} 个 (关联: {diff['new_watchlist_matched']})")
     except FileNotFoundError as e:
-        print(f"  [WARN] Diff 跳过 (parse 未生成): {e}")
+        print(f"  [WARN] Diff 跳过: {e}")
         diff = {"watchlist_matched": 0, "new_products": 0, "new_watchlist_matched": 0, "matched_products": []}
 
     # 5. Evidence
@@ -214,10 +275,13 @@ def run_monitor(
         attachment_statuses=att_statuses,
         extraction_results=extraction_results,
         products=products,
+        diagnostics=diagnostics,
+        product_list=product_list,
         discovery_source=discovery_source,
         network_retry_count=retry_count,
     )
 
+    layers = evidence.get("evidence_layers", {})
     result = {
         "batch_no": batch_no,
         "status": meta.get("status", ""),
@@ -225,23 +289,31 @@ def run_monitor(
         "publish_date": meta.get("publish_date", ""),
         "title": meta.get("title", ""),
         "structured_records": len(products),
+        "product_list_count": len(product_list),
         "watchlist_matched": diff.get("watchlist_matched", 0),
         "new_products": diff.get("new_products", 0),
         "new_watchlist_matched": diff.get("new_watchlist_matched", 0),
         "attachments_downloaded": att_downloaded,
         "attachments_failed": att_failed,
-        "extraction_success": sum(1 for r in extraction_results if r.get("extract_status") == "success"),
-        "extraction_unsupported": sum(1 for r in extraction_results if r.get("extract_status") == "unsupported"),
+        "diagnostics_total": diag_total,
+        "diagnostics_failed": diag_failed_ct,
+        "extraction_success": ext_success,
+        "extraction_unsupported": ext_unsupported,
         "discovery_source": discovery_source,
         "detail_source": detail_source,
         "evidence_source": "generated",
         "network_retry_count": retry_count,
         "network_warnings_count": network_warnings_count,
+        "evidence_layers": {
+            "batch": layers.get("official_batch_evidence", {}).get("available", False),
+            "attachment": layers.get("official_attachment_evidence", {}).get("available", False),
+            "product_list": layers.get("official_product_list_evidence", {}).get("available", False),
+        },
         "files": {
             "metadata": str(OUTPUT_BASE / "raw" / f"batch_{batch_no}" / "metadata.json"),
             "parsed_csv": str(OUTPUT_BASE / "parsed" / f"batch_{batch_no}_products.csv"),
             "parsed_json": str(OUTPUT_BASE / "parsed" / f"batch_{batch_no}_products.json"),
-            "parsed_md": str(OUTPUT_BASE / "parsed" / f"batch_{batch_no}_products.md"),
+            "product_list_json": str(OUTPUT_BASE / "product_list" / f"batch_{batch_no}_product_list.json"),
             "diff_json": str(OUTPUT_BASE / "diff" / f"batch_{batch_no}_watchlist_diff.json"),
             "diff_md": str(OUTPUT_BASE / "diff" / f"batch_{batch_no}_watchlist_diff.md"),
             "evidence_json": str(OUTPUT_BASE / "evidence" / f"batch_{batch_no}_official_source_evidence.json"),
@@ -255,7 +327,7 @@ def run_monitor(
 
 
 def main():
-    p = argparse.ArgumentParser(description="MIIT 新车公告批次监控 V0.2.1")
+    p = argparse.ArgumentParser(description="MIIT 新车公告批次监控 V0.3")
     p.add_argument("--latest", action="store_true", help="自动发现最新批次（按 batch_no 最大）")
     p.add_argument("--latest-publicity", action="store_true", help="自动发现最新公示批次")
     p.add_argument("--latest-official", action="store_true", help="自动发现最新正式公告批次")
@@ -272,19 +344,15 @@ def main():
     flags = [args.latest, args.latest_publicity, args.latest_official, bool(args.batch), args.all]
     if sum(flags) != 1:
         p.error("请提供 --latest / --latest-publicity / --latest-official / --batch N / --all 之一")
-
     if args.force_refresh and args.refresh:
         p.error("--refresh 和 --force-refresh 不能同时使用")
 
     watchlist_path = Path(args.watchlist) if args.watchlist else None
-    network_warnings_count = 0
-
-    # Determine batch number(s) and collect detail_urls from discovery
     batch_detail_map: dict[int, str | None] = {}
 
     if args.batch:
         batch_numbers = [args.batch]
-        batch_detail_map[args.batch] = None  # resolve inside fetch
+        batch_detail_map[args.batch] = None
         discovery_source = "direct"
     elif args.all:
         batches, discovery_source = discover_batches(limit=20, force_refresh=args.force_refresh)
@@ -299,7 +367,6 @@ def main():
             batch_detail_map[b["batch_no"]] = b.get("detail_url")
         print(f"待处理批次: {batch_numbers}")
     else:
-        # --latest / --latest-publicity / --latest-official
         print("正在获取最新公告批次...", flush=True)
         if args.latest_publicity:
             latest, discovery_source = discover_latest_by_status("publicity")
@@ -315,7 +382,6 @@ def main():
         if discovery_source == "network_unavailable":
             print("[ERROR] network_unavailable: 无法连接工信部 EIDC 网站，且本地无 discovery cache", file=sys.stderr)
             sys.exit(1)
-
         if not latest:
             print("[ERROR] 未发现任何批次", file=sys.stderr)
             sys.exit(1)
@@ -324,16 +390,14 @@ def main():
         latest_status = latest["status"]
         cache_tag = " [CACHE]" if discovery_source == "cache" else ""
         print(f"  最新批次: 第 {latest_batch_no} 批 ({latest_status}) [{label}]{cache_tag}")
-
-        # Store detail_url from discovery so fetch doesn't re-discover
         batch_detail_map[latest_batch_no] = latest.get("detail_url")
 
-        # Idempotent check: if evidence already exists and not refresh, reuse
         if _is_already_processed(latest_batch_no) and not args.refresh and not args.force_refresh:
             evidence = _load_existing_evidence(latest_batch_no)
             if evidence:
                 print(f"  第 {latest_batch_no} 批已处理过，复用本地 evidence。")
                 summary = _build_summary_from_evidence(evidence)
+                layers = summary.get("evidence_layers", {})
                 print(f"\n{'='*60}")
                 print(f"  MIIT New Car Monitor Summary")
                 print(f"{'='*60}")
@@ -344,12 +408,17 @@ def main():
                 print(f"  evidence_source: {summary['evidence_source']}")
                 print(f"  network_retry_count: {summary['network_retry_count']}")
                 print(f"  network_warnings_count: {summary['network_warnings_count']}")
+                print(f"  evidence_layers:")
+                print(f"    batch: {layers.get('official_batch_evidence', {}).get('available', False)}")
+                print(f"    attachment: {layers.get('official_attachment_evidence', {}).get('available', False)}")
+                print(f"    product_list: {layers.get('official_product_list_evidence', {}).get('available', False)}")
                 print(f"  evidence: {summary['files']['evidence_json']}")
                 if args.format == "json":
                     print(json.dumps(summary, ensure_ascii=False, indent=2))
                 sys.exit(0)
 
-    # Process each batch
+        batch_numbers = [latest_batch_no]
+
     results = []
     for bn in batch_numbers:
         try:
@@ -378,6 +447,7 @@ def main():
         if "error" in r:
             print(f"  ✗ 第 {r['batch_no']} 批: {r['error']}")
         else:
+            layers = r.get("evidence_layers", {})
             print(f"  batch_no: {r['batch_no']}")
             print(f"  status: {r['status']}")
             print(f"  discovery_source: {r.get('discovery_source', 'unknown')}")
@@ -385,9 +455,12 @@ def main():
             print(f"  evidence_source: {r.get('evidence_source', 'unknown')}")
             print(f"  network_retry_count: {r.get('network_retry_count', 0)}")
             print(f"  network_warnings_count: {r.get('network_warnings_count', 0)}")
-            print(f"  可结构化记录: {r['structured_records']}, Watchlist: {r['watchlist_matched']}, 新增: {r['new_products']}")
-            print(f"  附件: {r.get('attachments_downloaded', '?')} 下载 / {r.get('attachments_failed', '?')} 失败")
-            print(f"  文本抽取: {r.get('extraction_success', '?')} 成功 / {r.get('extraction_unsupported', '?')} 不支持")
+            print(f"  附件诊断: {r.get('diagnostics_total', 0)} total / {r.get('diagnostics_failed', 0)} failed")
+            print(f"  文本抽取: {r.get('extraction_success', 0)} 成功 / {r.get('extraction_unsupported', 0)} 不支持")
+            print(f"  可结构化记录: {r['structured_records']}, 产品清单: {r.get('product_list_count', 0)}")
+            print(f"  Watchlist: {r['watchlist_matched']}, 新增: {r['new_products']}")
+            print(f"  evidence_layers:")
+            print(f"    batch: {layers.get('batch', False)}, attachment: {layers.get('attachment', False)}, product_list: {layers.get('product_list', False)}")
             print(f"  evidence: {r['files']['evidence_json']}")
 
 
