@@ -13,7 +13,7 @@ mashang_workspace/
 ├── README.md              # 本文件
 ├── docs/                  # 业务文档（术语/指标/车型/时间/分析范式/追问/合同）
 ├── runtime_scripts/       # Core — Runtime V2 可调度（6 个稳定分析脚本）
-├── research_scripts/      # Research — 预测/回测/释放曲线（6 个）
+├── research_scripts/      # Research — 预测/回测/释放曲线/MIIT 新车公告（7 个）
 ├── utility_scripts/       # Utility — DataOps/SyncOps/工具（5 个）
 ├── legacy_scripts/        # Legacy — Frozen reference（仅历史保留，不活跃开发）
 ├── eval/                  # Eval 测试框架
@@ -52,6 +52,10 @@ python mashang_workspace/runtime_scripts/lock_city_distribution.py --date 2026-0
 # 释放曲线 / 预测（research）
 python mashang_workspace/research_scripts/release_curve_analysis.py
 python mashang_workspace/research_scripts/cohort_forecast.py
+
+# MIIT 新车公告监控（research / official source ingestion）
+python mashang_workspace/research_scripts/miit_new_car/discover_batches.py
+python mashang_workspace/research_scripts/miit_new_car/monitor.py --latest
 
 # VOC 分析（utility）
 python mashang_workspace/utility_scripts/voc_theme_analysis.py

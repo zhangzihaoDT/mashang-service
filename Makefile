@@ -1,5 +1,17 @@
 PYTHON ?= .venv/bin/python
-.PHONY: eval full-eval core-eval research-eval capability-audit test ci data-dict lock-demo parser-demo followup-demo numeric-eval reference-eval atp-demo backtest-demo clean-outputs dataset-update dataset-validate daily-observation-dry-run daily-observation-sync daily-data-pipeline-dry-run daily-data-pipeline render-official-doc render-official-doc-smoke build-workspace-skills-catalog build-workspace-capability-inventory
+LLM_JUDGE ?= 1
+LLM_JUDGE_MODE ?= uncertain
+LLM_JUDGE_MAX ?= 10
+LLM_JUDGE_CACHE ?= 1
+SEARCH_PROVIDER ?= huoshan
+HUOSHAN_SITE_FILTER ?= 1
+HUOSHAN_SITES ?=
+HUOSHAN_SITE_MAX ?= 5
+HUOSHAN_TIMEOUT ?= 30
+HUOSHAN_RECENCY ?= month
+HUOSHAN_SEARCH_MODE ?= auto
+HUOSHAN_DEBUG_RESPONSE ?= 0
+.PHONY: eval full-eval core-eval research-eval capability-audit test ci data-dict lock-demo parser-demo followup-demo numeric-eval reference-eval atp-demo backtest-demo clean-outputs dataset-update dataset-validate daily-observation-dry-run daily-observation-sync daily-data-pipeline-dry-run daily-data-pipeline render-official-doc render-official-doc-smoke build-workspace-skills-catalog build-workspace-capability-inventory miit-discover-latest-batch miit-fetch-batch miit-new-car-monitor
 
 ## 默认 Eval（core + parser + followup + reference，不含 research）
 eval:
@@ -67,7 +79,7 @@ atp-demo:
 backtest-demo:
 	$(PYTHON) mashang_workspace/research_scripts/lock_predict_backtest.py --format json
 
-## 新车事件监测（Tavily + Firecrawl，支持品牌/事件类型/来源类型/关键词/关注车型列表过滤）
+## 新车事件监测（Tavily + Firecrawl，支持品牌/事件类型/来源类型/关键词/关注车型列表/LLM Judge 过滤）
 auto-launch-monitor:
 	@if [ -f .env ]; then set -a; . .env 2>/dev/null; set +a; fi; \
 	$(PYTHON) mashang_workspace/research_scripts/auto_launch_monitor.py \
@@ -80,8 +92,30 @@ auto-launch-monitor:
 		$(if $(SOURCE_TYPES),--source-types "$(SOURCE_TYPES)") \
 		$(if $(KEYWORDS),--keywords "$(KEYWORDS)") \
 		$(if $(EXCLUDE_KEYWORDS),--exclude-keywords "$(EXCLUDE_KEYWORDS)") \
+		$(if $(filter 0,$(LLM_JUDGE)),,--llm-judge) \
+		$(if $(LLM_JUDGE_MODE),--llm-judge-mode "$(LLM_JUDGE_MODE)") \
+		$(if $(LLM_JUDGE_MAX),--llm-judge-max "$(LLM_JUDGE_MAX)") \
+		$(if $(filter 0,$(LLM_JUDGE_CACHE)),--no-llm-judge-cache,--llm-judge-cache) \
+		--search-provider $(SEARCH_PROVIDER) \
+		$(if $(filter 0,$(HUOSHAN_SITE_FILTER)),--no-huoshan-site-filter,--huoshan-site-filter) \
+		$(if $(HUOSHAN_SITES),--huoshan-sites "$(HUOSHAN_SITES)") \
+		--huoshan-site-max $(HUOSHAN_SITE_MAX) \
+		--huoshan-timeout $(HUOSHAN_TIMEOUT) \
+		--huoshan-recency $(HUOSHAN_RECENCY) \
+		--huoshan-search-mode $(HUOSHAN_SEARCH_MODE) \
+		$(if $(filter 0,$(HUOSHAN_DEBUG_RESPONSE)),,--huoshan-debug-response) \
 		--format markdown \
 		--output mashang_workspace/outputs/reports/
+
+## MIIT 新车公告批次监控
+miit-discover-latest-batch:
+	$(PYTHON) mashang_workspace/research_scripts/miit_new_car/discover_batches.py --limit 5
+
+miit-fetch-batch:
+	$(PYTHON) mashang_workspace/research_scripts/miit_new_car/monitor.py --batch $(BATCH)
+
+miit-new-car-monitor:
+	$(PYTHON) mashang_workspace/research_scripts/miit_new_car/monitor.py --latest
 
 ## Capability Audit
 capability-audit:
@@ -193,7 +227,12 @@ help:
 	@echo "make reference-eval  Reference Eval"
 	@echo "make atp-demo        ATP 月报 Demo"
 	@echo "make backtest-demo   锁单预测回测 Demo"
-	@echo "make auto-launch-monitor  新车事件监测（START= END= MAX_RESULTS=8 TARGETS_FILE= BRANDS= EVENT_TYPES= SOURCE_TYPES= KEYWORDS= EXCLUDE_KEYWORDS= 可选）"
+	@echo "make auto-launch-monitor  新车事件监测（START= END= MAX_RESULTS=8 TARGETS_FILE= ... SEARCH_PROVIDER=huoshan 默认）"
+	@echo ""
+	@echo "=== MIIT 新车公告 ==="
+	@echo "make miit-discover-latest-batch  发现最新公告批次"
+	@echo "make miit-fetch-batch BATCH=N    抓取指定批次"
+	@echo "make miit-new-car-monitor        自动监控最新批次"
 	@echo ""
 	@echo "=== Audit ==="
 	@echo "make capability-audit  Capability Audit"

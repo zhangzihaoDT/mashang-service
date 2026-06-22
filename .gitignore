@@ -39,3 +39,6 @@ dataset/incoming/feishu/
 
 # Monthly market report runtime outputs (regenerated on every run)
 mashang_workspace/outputs/monthly_market_report/
+
+# MIIT 新车公告原始下载数据（可重新抓取，不提交）
+mashang_workspace/outputs/miit_new_car/raw/
