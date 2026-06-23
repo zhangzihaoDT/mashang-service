@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-ATP 价格月报 — 包装 skills_atp_price.py，统一 CLI + Result Contract
+ATP 价格月报 — 替代 skills_atp_price.py，统一 CLI + Result Contract
 
 用法:
     python mashang_workspace/runtime_scripts/atp_price_report.py --month 2026-05

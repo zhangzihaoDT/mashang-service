@@ -2,7 +2,7 @@
 
 Workspace 能力总览：skills / scripts / data assets / outputs / evaluation
 
-生成时间：2026-06-16 08:05:24
+生成时间：2026-06-23 02:56:59
 Workspace：mashang_workspace
 
 ---
@@ -12,9 +12,9 @@ Workspace：mashang_workspace
 | 能力类型 | 数量 |
 |---------|------|
 | Skills（Agent 会什么） | 3 |
-| Scripts（Agent 能调用什么） | 27 |
+| Scripts（Agent 能调用什么） | 39 |
 | Data Assets（Agent 能查什么） | 6 |
-| Outputs / Reports（Agent 已沉淀什么） | 35 |
+| Outputs / Reports（Agent 已沉淀什么） | 42 |
 | Evaluation / Quality（Agent 是否可靠） | 6 |
 
 ---
@@ -25,8 +25,8 @@ Agent 可以通过 skill 匹配识别任务类型、选择执行方式、调用�
 
 | # | 名称 | 描述 | 状态 |
 |---|------|------|------|
-| 1 | branded-html-report | 将汽车经营分析、预测模型、回测评估、市场洞察等结果，渲染为具有 Raccoon Research / mashang 风格的 HTML 数据报告。 | active |
-| 2 | monthly-market-report | monthly-market-report v0.1 是基于 `passenger_insurance` 现有 6 张预聚合单表的月度汽车市场固... | active |
+| 1 | branded-html-report | 生成 mashang_workspace 专属的品牌化 HTML 数据报告，适用于汽车市场洞察、销量预测、锁单释放曲线、模型回测和经营分析报告。... | active |
+| 2 | monthly-market-report | workspace 层的月度汽车市场报告生成 Skill。基于 passenger_insurance 现有 6 张预聚合单表，按月运行 24 ... | active |
 | 3 | runtime-eval-diagnosis | Diagnose mashang runtime eval reports, including hard_pass, soft_pass, f... | active |
 
 ---
@@ -43,28 +43,40 @@ Agent 可直接调用的 Python 脚本，按功能分为 runtime（稳定运行�
 | 4 | daily_lock_count.py |  | active |
 | 5 | lock_by_model.py |  | active |
 | 6 | lock_city_distribution.py |  | active |
-| 7 | cohort_forecast.py |  | active |
-| 8 | lock_predict_backtest.py |  | active |
-| 9 | lock_release_curve.py |  | active |
-| 10 | ls8_battery_weekly_share_report.py |  | active |
-| 11 | ls8_weekly_model_share.py |  | active |
-| 12 | market_report/run_monthly_market_report.py |  | active |
-| 13 | passenger_insurance/check_passenger_insurance_asset.py |  | active |
-| 14 | quick_lock_ratio.py |  | active |
-| 15 | release_curve_analysis.py |  | active |
-| 16 | structured_business_forecast.py | 脚本作用：
+| 7 | skills_atp_price.py |  | active |
+| 8 | user_profile.py |  | active |
+| 9 | auto_launch_monitor.py |  | active |
+| 10 | cohort_forecast.py |  | active |
+| 11 | lock_predict_backtest.py |  | active |
+| 12 | lock_release_curve.py |  | active |
+| 13 | ls8_battery_weekly_share_report.py |  | active |
+| 14 | ls8_weekly_model_share.py |  | active |
+| 15 | market_report/run_monthly_market_report.py |  | active |
+| 16 | miit_new_car/check_text_extractors.py |  | active |
+| 17 | miit_new_car/diagnose_attachment_urls.py |  | active |
+| 18 | miit_new_car/diff_watchlist.py |  | active |
+| 19 | miit_new_car/discover_batches.py |  | active |
+| 20 | miit_new_car/extract_attachment_text.py |  | active |
+| 21 | miit_new_car/fetch_batch.py |  | active |
+| 22 | miit_new_car/http_utils.py |  | active |
+| 23 | miit_new_car/monitor.py |  | active |
+| 24 | miit_new_car/parse_product_list.py |  | active |
+| 25 | miit_new_car/parse_products.py |  | active |
+| 26 | passenger_insurance/check_passenger_insurance_asset.py |  | active |
+| 27 | quick_lock_ratio.py |  | active |
+| 28 | release_curve_analysis.py |  | active |
+| 29 | structured_business_forecast.py | 脚本作用：
 1) 基于日度矩阵（index_summary_daily_matrix）做结构化业务预测，核心恒等式为 lock_orders =... | active |
-| 17 | build_daily_matrix.py |  | active |
-| 18 | build_workspace_capability_inventory.py |  | active |
-| 19 | build_workspace_skills_catalog.py |  | active |
-| 20 | data_dictionary.py |  | active |
-| 21 | dataset_validate.py |  | active |
-| 22 | generate_eval_cases.py |  | active |
-| 23 | render_html_report.py |  | active |
-| 24 | skills_attainment_rate_alert.py |  | active |
-| 25 | skills_order_observation_daily.py |  | active |
-| 26 | voc_theme_analysis.py |  | active |
-| 27 | skills_atp_price.py |  | legacy |
+| 30 | build_daily_matrix.py |  | active |
+| 31 | build_workspace_capability_inventory.py |  | active |
+| 32 | build_workspace_skills_catalog.py |  | active |
+| 33 | data_dictionary.py |  | active |
+| 34 | dataset_validate.py |  | active |
+| 35 | generate_eval_cases.py |  | active |
+| 36 | render_html_report.py |  | active |
+| 37 | skills_attainment_rate_alert.py |  | active |
+| 38 | skills_order_observation_daily.py |  | active |
+| 39 | voc_theme_analysis.py |  | active |
 
 ---
 
@@ -89,41 +101,48 @@ Agent 执行后沉淀的输出成果，包括 reports/ 下的品牌化 HTML 报�
 
 | # | 名称 | 描述 | 状态 |
 |---|------|------|------|
-| 1 | agent_execution_trace.md | markdown report · 5.4 KB | generated |
-| 2 | atp_2026-04.html | html report · 7.7 KB | generated |
-| 3 | atp_2026-05.html | html report · 7.7 KB | generated |
-| 4 | daily_msg_report.html | html report · 25.8 KB | generated |
-| 5 | followup_trace_ls8_city.md | markdown report · 9.4 KB | generated |
-| 6 | june_2026_forecast.html | html report · 5.9 KB | generated |
-| 7 | lock_predict_backtest.html | html report · 34.4 KB | generated |
-| 8 | lock_release_curve.html | html report · 74.0 KB | generated |
-| 9 | ls8_battery_weekly_share.html | html report · 2950.1 KB | generated |
-| 10 | ls8_city_distribution_2026-06-14.html | html report · 11.8 KB | generated |
-| 11 | ls8_city_distribution_report.html | html report · 9.4 KB | generated |
-| 12 | passenger_insurance_workspace_smoke.md | markdown report · 1.1 KB | generated |
-| 13 | pk_weekly_compare_ls8_ls9.html | html report · 66.1 KB | generated |
-| 14 | quick_lock_ratio.html | html report · 638.5 KB | generated |
-| 15 | w24_weekend_analysis.html | html report · 19.3 KB | generated |
-| 16 | w24_weekend_analysis.md | markdown report · 4.1 KB | generated |
-| 17 | workspace_capability_inventory.html | html report · 32.8 KB | generated |
-| 18 | workspace_capability_inventory.json | json contract · 35.2 KB | generated |
-| 19 | workspace_capability_inventory.md | markdown report · 7.0 KB | generated |
-| 20 | workspace_skills_catalog.html | html report · 16.2 KB | generated |
-| 21 | workspace_skills_catalog.json | json contract · 4.0 KB | generated |
-| 22 | workspace_skills_catalog.md | markdown report · 3.6 KB | generated |
-| 23 | 竞争洞察A3人群流转.html | html report · 4934.7 KB | generated |
-| 24 | 2026-02/query_results.json | 月报 · 2026-02 · 21.1 KB | generated |
-| 25 | 2026-02/report_draft.md | 月报 · 2026-02 · 8.7 KB | generated |
-| 26 | 2026-02/run_metadata.json | 月报 · 2026-02 · 0.6 KB | generated |
-| 27 | 2026-03/query_results.json | 月报 · 2026-03 · 497.1 KB | generated |
-| 28 | 2026-03/report_draft.md | 月报 · 2026-03 · 15.8 KB | generated |
-| 29 | 2026-03/run_metadata.json | 月报 · 2026-03 · 0.6 KB | generated |
-| 30 | 2026-05/query_results.json | 月报 · 2026-05 · 21.1 KB | generated |
-| 31 | 2026-05/report_draft.md | 月报 · 2026-05 · 8.7 KB | generated |
-| 32 | 2026-05/run_metadata.json | 月报 · 2026-05 · 0.6 KB | generated |
-| 33 | 2026-12/query_results.json | 月报 · 2026-12 · 21.1 KB | generated |
-| 34 | 2026-12/report_draft.md | 月报 · 2026-12 · 8.7 KB | generated |
-| 35 | 2026-12/run_metadata.json | 月报 · 2026-12 · 0.6 KB | generated |
+| 1 | .DS_Store | other · 10.0 KB | generated |
+| 2 | agent_execution_trace.md | markdown report · 5.4 KB | generated |
+| 3 | atp_2026-04.html | html report · 7.7 KB | generated |
+| 4 | atp_2026-05.html | html report · 7.7 KB | generated |
+| 5 | auto_launch_monitor_2026-06-01_2026-06-17.md | markdown report · 8.7 KB | generated |
+| 6 | auto_launch_monitor_2026-06-05_2026-06-07.json | json contract · 2.4 KB | generated |
+| 7 | auto_launch_monitor_2026-06-05_2026-06-07.md | markdown report · 4.2 KB | generated |
+| 8 | auto_launch_monitor_2026-06-17_2026-06-17.md | markdown report · 6.7 KB | generated |
+| 9 | daily_msg_report.html | html report · 25.8 KB | generated |
+| 10 | followup_trace_ls8_city.md | markdown report · 9.4 KB | generated |
+| 11 | june_2026_forecast.html | html report · 5.9 KB | generated |
+| 12 | lock_predict_backtest.html | html report · 34.4 KB | generated |
+| 13 | lock_release_curve.html | html report · 74.0 KB | generated |
+| 14 | ls8_battery_weekly_share.html | html report · 2950.1 KB | generated |
+| 15 | ls8_city_distribution_2026-06-14.html | html report · 11.8 KB | generated |
+| 16 | ls8_city_distribution_report.html | html report · 9.4 KB | generated |
+| 17 | ls8_user_profile_20260401_20260621.html | html report · 8.3 KB | generated |
+| 18 | ls8_user_profile_20260401_20260621.md | markdown report · 1.7 KB | generated |
+| 19 | passenger_insurance_workspace_smoke.md | markdown report · 1.1 KB | generated |
+| 20 | pk_weekly_compare_ls8_ls9.html | html report · 66.1 KB | generated |
+| 21 | quick_lock_ratio.html | html report · 638.5 KB | generated |
+| 22 | w24_weekend_analysis.html | html report · 19.3 KB | generated |
+| 23 | w24_weekend_analysis.md | markdown report · 4.1 KB | generated |
+| 24 | workspace_capability_inventory.html | html report · 37.8 KB | generated |
+| 25 | workspace_capability_inventory.json | json contract · 49.4 KB | generated |
+| 26 | workspace_capability_inventory.md | markdown report · 9.2 KB | generated |
+| 27 | workspace_skills_catalog.html | html report · 14.1 KB | generated |
+| 28 | workspace_skills_catalog.json | json contract · 3.9 KB | generated |
+| 29 | workspace_skills_catalog.md | markdown report · 3.5 KB | generated |
+| 30 | 竞争洞察A3人群流转.html | html report · 4934.7 KB | generated |
+| 31 | 2026-02/query_results.json | 月报 · 2026-02 · 21.1 KB | generated |
+| 32 | 2026-02/report_draft.md | 月报 · 2026-02 · 8.7 KB | generated |
+| 33 | 2026-02/run_metadata.json | 月报 · 2026-02 · 0.6 KB | generated |
+| 34 | 2026-03/query_results.json | 月报 · 2026-03 · 497.1 KB | generated |
+| 35 | 2026-03/report_draft.md | 月报 · 2026-03 · 15.8 KB | generated |
+| 36 | 2026-03/run_metadata.json | 月报 · 2026-03 · 0.6 KB | generated |
+| 37 | 2026-05/query_results.json | 月报 · 2026-05 · 501.5 KB | generated |
+| 38 | 2026-05/report_draft.md | 月报 · 2026-05 · 15.9 KB | generated |
+| 39 | 2026-05/run_metadata.json | 月报 · 2026-05 · 0.6 KB | generated |
+| 40 | 2026-12/query_results.json | 月报 · 2026-12 · 21.1 KB | generated |
+| 41 | 2026-12/report_draft.md | 月报 · 2026-12 · 8.7 KB | generated |
+| 42 | 2026-12/run_metadata.json | 月报 · 2026-12 · 0.6 KB | generated |
 
 ---
 
@@ -136,7 +155,7 @@ Agent 能力的质量保障体系，包括统一 Eval 框架、上下文解析�
 | 1 | eval_suites | 统一 Eval 框架，6 suites。 | active |
 | 2 | context_parser | 自然语言 → 结构化 context。 | active |
 | 3 | followup_runner | 多轮追问评测。 | active |
-| 4 | pytest_tests | 19 个测试文件的 pytest 套件。 | active |
+| 4 | pytest_tests | 21 个测试文件的 pytest 套件。 | active |
 | 5 | cached_eval_report | 缓存的 Eval 报告（5 suites, N/A） | generated |
 | 6 | regression_notes | Regression 测试文档。 | generated |
 

@@ -32,7 +32,6 @@ SCRIPT_DIRS = {
     "runtime_scripts": WS_ROOT / "runtime_scripts",
     "research_scripts": WS_ROOT / "research_scripts",
     "utility_scripts": WS_ROOT / "utility_scripts",
-    "legacy_scripts": WS_ROOT / "legacy_scripts",
 }
 
 EVAL_DIR = WS_ROOT / "eval"
@@ -159,9 +158,6 @@ def rel_path(p: Path) -> str:
 
 def status_from_path(p: Path) -> str:
     """Infer status from script location."""
-    parent_name = p.parent.name
-    if parent_name == "legacy_scripts":
-        return "legacy"
     return "active"
 
 

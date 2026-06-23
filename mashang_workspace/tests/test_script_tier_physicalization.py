@@ -12,7 +12,7 @@ sys.path.insert(0, str(_WS_DIR))
 
 from utils.paths import (
     WORKSPACE_ROOT, RUNTIME_SCRIPTS_DIR, RESEARCH_SCRIPTS_DIR,
-    UTILITY_SCRIPTS_DIR, LEGACY_SCRIPTS_DIR, REPORTS_DIR,
+    UTILITY_SCRIPTS_DIR, REPORTS_DIR,
 )
 from utils.paths import PROJECT_ROOT
 
@@ -26,13 +26,13 @@ def test_runtime_scripts_is_real_dir():
     assert not RUNTIME_SCRIPTS_DIR.is_symlink(), "runtime_scripts 不应是 symlink"
 
 
-def test_runtime_scripts_has_6_scripts():
-    """runtime_scripts 下存在 6 个 runtime scripts。"""
+def test_runtime_scripts_has_7_scripts():
+    """runtime_scripts 下存在 7 个 runtime scripts。"""
     files = {f.name for f in RUNTIME_SCRIPTS_DIR.iterdir() if f.suffix == ".py"}
     expected = {
         "daily_lock_count.py", "lock_by_model.py", "lock_city_distribution.py",
         "assign_conversion_analysis.py", "attribute_penetration_report.py",
-        "atp_price_report.py",
+        "atp_price_report.py", "skills_atp_price.py",
     }
     missing = expected - files
     assert not missing, f"runtime_scripts 缺少: {missing}"
@@ -58,16 +58,6 @@ def test_utility_scripts_has_scripts():
     assert "generate_eval_cases.py" in files
     assert "voc_theme_analysis.py" in files
     assert "skills_attainment_rate_alert.py" in files
-
-
-def test_legacy_scripts_has_skills_atp_price():
-    """legacy_scripts 下存在 skills_atp_price.py。"""
-    assert (LEGACY_SCRIPTS_DIR / "skills_atp_price.py").exists()
-
-
-def test_legacy_scripts_readme_exists():
-    """legacy_scripts/README.md 存在。"""
-    assert (LEGACY_SCRIPTS_DIR / "README.md").exists(), "legacy_scripts 缺少 README.md"
 
 
 def test_reports_migrated_to_outputs():

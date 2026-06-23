@@ -285,9 +285,9 @@
   {
     "capability_id": "skills_atp_price",
     "name": "ATP 价格月报（原脚本）",
-    "tier": "legacy",
-    "status": "deprecated",
-    "script": "mashang_workspace/legacy_scripts/skills_atp_price.py",
+    "tier": "runtime",
+    "status": "active_reference",
+    "script": "mashang_workspace/runtime_scripts/skills_atp_price.py",
     "auto_schedulable": false,
     "result_contract": false,
     "numeric_eval_case": null,

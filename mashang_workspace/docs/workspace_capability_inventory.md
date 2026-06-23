@@ -44,7 +44,7 @@ Workspace Capability Inventory（能力总览）是 mashang_workspace 的**完�
 | `runtime_scripts/` | runtime | 稳定运行入口 |
 | `research_scripts/` | research | 研究分析脚本 |
 | `utility_scripts/` | utility | 工具、渲染、目录生成脚本 |
-| `legacy_scripts/` | legacy | 历史保留脚本 |
+| ~~`legacy_scripts/`~~ | ~~legacy~~ | ~~已退休删除~~ |
 
 ### 3. Data Assets（Agent 能查什么）
 

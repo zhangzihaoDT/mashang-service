@@ -109,11 +109,9 @@ def test_utility_scripts_exists():
         "utility_scripts 缺少 skills_order_observation_daily.py"
 
 
-def test_legacy_scripts_exists():
-    """legacy_scripts/ 存在且含 skills_atp_price.py。"""
-    assert LEGACY_SCRIPTS_DIR.exists(), f"legacy_scripts 不存在: {LEGACY_SCRIPTS_DIR}"
-    assert (LEGACY_SCRIPTS_DIR / "skills_atp_price.py").exists(), \
-        "legacy_scripts 缺少 skills_atp_price.py"
+def test_legacy_scripts_retired():
+    """legacy_scripts/ 已退休删除。"""
+    assert not LEGACY_SCRIPTS_DIR.exists(), f"legacy_scripts 应已删除: {LEGACY_SCRIPTS_DIR}"
 
 
 def test_reports_dir_exists():
@@ -187,5 +185,5 @@ def test_path_resolution():
     assert RUNTIME_SCRIPTS_DIR.exists()
     assert RESEARCH_SCRIPTS_DIR.exists()
     assert UTILITY_SCRIPTS_DIR.exists()
-    assert LEGACY_SCRIPTS_DIR.exists()
+    assert not LEGACY_SCRIPTS_DIR.exists()
     assert REPORTS_DIR.exists()

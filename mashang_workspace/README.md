@@ -15,7 +15,7 @@ mashang_workspace/
 ├── runtime_scripts/       # Core — Runtime V2 可调度（6 个稳定分析脚本）
 ├── research_scripts/      # Research — 预测/回测/释放曲线/MIIT 新车公告（7 个）
 ├── utility_scripts/       # Utility — DataOps/SyncOps/工具（5 个）
-├── legacy_scripts/        # Legacy — Frozen reference（仅历史保留，不活跃开发）
+├── (legacy_scripts/ — 已退休)  # 历史参考脚本已迁移到 runtime_scripts/research_scripts/utility_scripts
 ├── eval/                  # Eval 测试框架
 │   ├── run_followup_eval.py    # 多轮追问 Runner
 │   ├── run_numeric_eval.py     # 数值校验 Runner

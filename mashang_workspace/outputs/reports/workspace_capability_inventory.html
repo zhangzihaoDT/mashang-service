@@ -57,7 +57,7 @@
         <img class="brand-avatar" src="../../assets/brand/raccoon_avatar_light.png" alt="" />
         <span class="brand-name">Raccoon Research</span>
       </div>
-      <span class="header-meta">workspace_capability_inventory | 2026-06-16</span>
+      <span class="header-meta">workspace_capability_inventory | 2026-06-23</span>
     </div>
   </header>
 
@@ -78,8 +78,8 @@
 
       <div class="kpi-card">
         <div class="label">Callable Scripts</div>
-        <div class="value">27</div>
-        <div class="change neutral">4 categories</div>
+        <div class="value">39</div>
+        <div class="change neutral">3 categories</div>
       </div>
 
       <div class="kpi-card">
@@ -90,7 +90,7 @@
 
       <div class="kpi-card">
         <div class="label">Generated Outputs</div>
-        <div class="value">35</div>
+        <div class="value">42</div>
         <div class="change neutral">reports / data / charts</div>
       </div>
 
@@ -119,7 +119,7 @@
           <div>
             <div class="cap-label">Scripts</div>
             <div class="cap-sub">Agent 能调用什么</div>
-            <div class="cap-count">27 项资产</div>
+            <div class="cap-count">39 项资产</div>
           </div>
         </div>
 
@@ -137,7 +137,7 @@
           <div>
             <div class="cap-label">Outputs</div>
             <div class="cap-sub">Agent 已沉淀什么</div>
-            <div class="cap-count">35 项资产</div>
+            <div class="cap-count">42 项资产</div>
           </div>
         </div>
 
@@ -163,9 +163,9 @@
               <div class="inv-card-name">branded-html-report</div>
               <span class="skill-badge badge-green">active</span>
             </div>
-            <div class="inv-card-desc">将汽车经营分析、预测模型、回测评估、市场洞察等结果，渲染为具有 Raccoon Research / mashang 风格的 HTML 数据报告。</div>
+            <div class="inv-card-desc">生成 mashang_workspace 专属的品牌化 HTML 数据报告，适用于汽车市场洞察、销量预测、锁单释放曲线、模型回测和经营分析报告。使用 Raccoon Research 视觉风格。</div>
             <div class="inv-card-fields">
-              <div class="inv-field"><span class="inv-field-label">Path</span><code>.opencode/skills/branded_html_report/</code></div><div class="inv-field"><span class="inv-field-label">Entry</span><code>.opencode/skills/branded_html_report/SKILL.md</code></div><div class="inv-field"><span class="inv-field-label">Scripts</span><code>runtime_scripts/daily_lock_count.py</code>, <code>utility_scripts/render_html_report.py</code></div>
+              <div class="inv-field"><span class="inv-field-label">Path</span><code>.opencode/skills/branded-html-report/</code></div>
             </div>
           </div>
 
@@ -174,9 +174,9 @@
               <div class="inv-card-name">monthly-market-report</div>
               <span class="skill-badge badge-green">active</span>
             </div>
-            <div class="inv-card-desc">monthly-market-report v0.1 是基于 `passenger_insurance` 现有 6 张预聚合单表的月度汽车市场固定主查询能力。</div>
+            <div class="inv-card-desc">workspace 层的月度汽车市场报告生成 Skill。基于 passenger_insurance 现有 6 张预聚合单表，按月运行 24 个固定月报查询问题，输出结构化数据底稿和报告草稿。</div>
             <div class="inv-card-fields">
-              <div class="inv-field"><span class="inv-field-label">Path</span><code>.opencode/skills/monthly-market-report/</code></div><div class="inv-field"><span class="inv-field-label">Entry</span><code>.opencode/skills/monthly-market-report/SKILL.md</code></div><div class="inv-field"><span class="inv-field-label">Scripts</span><code>research_scripts/market_report/run_monthly_market_report.py</code></div>
+              <div class="inv-field"><span class="inv-field-label">Path</span><code>.opencode/skills/monthly-market-report/</code></div>
             </div>
           </div>
 
@@ -185,9 +185,9 @@
               <div class="inv-card-name">runtime-eval-diagnosis</div>
               <span class="skill-badge badge-green">active</span>
             </div>
-            <div class="inv-card-desc">Diagnose mashang runtime eval reports, including hard_pass, soft_pass, failed,</div>
+            <div class="inv-card-desc">Diagnose mashang runtime eval reports, including hard_pass, soft_pass, failed, contract mismatch, fact_types, and exit_reason.</div>
             <div class="inv-card-fields">
-              <div class="inv-field"><span class="inv-field-label">Path</span><code>.opencode/skills/runtime-eval-diagnosis/</code></div><div class="inv-field"><span class="inv-field-label">Entry</span><code>.opencode/skills/runtime-eval-diagnosis/SKILL.md</code></div>
+              <div class="inv-field"><span class="inv-field-label">Path</span><code>.opencode/skills/runtime-eval-diagnosis/</code></div>
             </div>
           </div>
       </div>
@@ -232,6 +232,21 @@
               <td><span class="badge-tag">active</span></td>
             </tr>
             <tr>
+              <td><strong>skills_atp_price.py</strong></td>
+              <td>未声明</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
+              <td><strong>user_profile.py</strong></td>
+              <td>未声明</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
+              <td><strong>auto_launch_monitor.py</strong></td>
+              <td>未声明</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
               <td><strong>cohort_forecast.py</strong></td>
               <td>未声明</td>
               <td><span class="badge-tag">active</span></td>
@@ -258,6 +273,56 @@
             </tr>
             <tr>
               <td><strong>market_report/run_monthly_market_report.py</strong></td>
+              <td>未声明</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
+              <td><strong>miit_new_car/check_text_extractors.py</strong></td>
+              <td>未声明</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
+              <td><strong>miit_new_car/diagnose_attachment_urls.py</strong></td>
+              <td>未声明</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
+              <td><strong>miit_new_car/diff_watchlist.py</strong></td>
+              <td>未声明</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
+              <td><strong>miit_new_car/discover_batches.py</strong></td>
+              <td>未声明</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
+              <td><strong>miit_new_car/extract_attachment_text.py</strong></td>
+              <td>未声明</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
+              <td><strong>miit_new_car/fetch_batch.py</strong></td>
+              <td>未声明</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
+              <td><strong>miit_new_car/http_utils.py</strong></td>
+              <td>未声明</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
+              <td><strong>miit_new_car/monitor.py</strong></td>
+              <td>未声明</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
+              <td><strong>miit_new_car/parse_product_list.py</strong></td>
+              <td>未声明</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
+              <td><strong>miit_new_car/parse_products.py</strong></td>
               <td>未声明</td>
               <td><span class="badge-tag">active</span></td>
             </tr>
@@ -331,11 +396,6 @@
               <td><strong>voc_theme_analysis.py</strong></td>
               <td>未声明</td>
               <td><span class="badge-tag">active</span></td>
-            </tr>
-            <tr>
-              <td><strong>skills_atp_price.py</strong></td>
-              <td>未声明</td>
-              <td><span class="badge-tag">legacy</span></td>
             </tr></tbody>
             </table>
           </div>
@@ -423,6 +483,11 @@
               <thead><tr><th>Name</th><th>Description</th><th>Status</th></tr></thead>
               <tbody>
             <tr>
+              <td><strong>.DS_Store</strong></td>
+              <td>other · 10.0 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
               <td><strong>agent_execution_trace.md</strong></td>
               <td>markdown report · 5.4 KB</td>
               <td><span class="badge-tag">generated</span></td>
@@ -435,6 +500,26 @@
             <tr>
               <td><strong>atp_2026-05.html</strong></td>
               <td>html report · 7.7 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
+              <td><strong>auto_launch_monitor_2026-06-01_2026-06-17.md</strong></td>
+              <td>markdown report · 8.7 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
+              <td><strong>auto_launch_monitor_2026-06-05_2026-06-07.json</strong></td>
+              <td>json contract · 2.4 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
+              <td><strong>auto_launch_monitor_2026-06-05_2026-06-07.md</strong></td>
+              <td>markdown report · 4.2 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
+              <td><strong>auto_launch_monitor_2026-06-17_2026-06-17.md</strong></td>
+              <td>markdown report · 6.7 KB</td>
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>
@@ -478,6 +563,16 @@
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>
+              <td><strong>ls8_user_profile_20260401_20260621.html</strong></td>
+              <td>html report · 8.3 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
+              <td><strong>ls8_user_profile_20260401_20260621.md</strong></td>
+              <td>markdown report · 1.7 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
               <td><strong>passenger_insurance_workspace_smoke.md</strong></td>
               <td>markdown report · 1.1 KB</td>
               <td><span class="badge-tag">generated</span></td>
@@ -504,32 +599,32 @@
             </tr>
             <tr>
               <td><strong>workspace_capability_inventory.html</strong></td>
-              <td>html report · 32.8 KB</td>
+              <td>html report · 37.8 KB</td>
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>
               <td><strong>workspace_capability_inventory.json</strong></td>
-              <td>json contract · 35.2 KB</td>
+              <td>json contract · 49.4 KB</td>
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>
               <td><strong>workspace_capability_inventory.md</strong></td>
-              <td>markdown report · 7.0 KB</td>
+              <td>markdown report · 9.2 KB</td>
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>
               <td><strong>workspace_skills_catalog.html</strong></td>
-              <td>html report · 16.2 KB</td>
+              <td>html report · 14.1 KB</td>
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>
               <td><strong>workspace_skills_catalog.json</strong></td>
-              <td>json contract · 4.0 KB</td>
+              <td>json contract · 3.9 KB</td>
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>
               <td><strong>workspace_skills_catalog.md</strong></td>
-              <td>markdown report · 3.6 KB</td>
+              <td>markdown report · 3.5 KB</td>
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>
@@ -569,12 +664,12 @@
             </tr>
             <tr>
               <td><strong>2026-05/query_results.json</strong></td>
-              <td>月报 · 2026-05 · 21.1 KB</td>
+              <td>月报 · 2026-05 · 501.5 KB</td>
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>
               <td><strong>2026-05/report_draft.md</strong></td>
-              <td>月报 · 2026-05 · 8.7 KB</td>
+              <td>月报 · 2026-05 · 15.9 KB</td>
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>
@@ -644,9 +739,9 @@
               <div class="inv-card-name">pytest_tests</div>
               <span class="skill-badge badge-green">active</span>
             </div>
-            <div class="inv-card-desc">19 个测试文件的 pytest 套件。</div>
+            <div class="inv-card-desc">21 个测试文件的 pytest 套件。</div>
             <div class="inv-card-fields">
-              <div class="inv-field"><span class="inv-field-label">Path</span><code>mashang_workspace/tests</code></div><div class="inv-field"><span class="inv-field-label">Files</span>19</div>
+              <div class="inv-field"><span class="inv-field-label">Path</span><code>mashang_workspace/tests</code></div><div class="inv-field"><span class="inv-field-label">Files</span>21</div>
             </div>
           </div>
 

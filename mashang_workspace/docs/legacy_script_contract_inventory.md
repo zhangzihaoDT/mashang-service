@@ -15,12 +15,12 @@
 
 ### skills_atp_price.py — ATP 价格月报 (原脚本)
 
-- **位置**: `mashang_workspace/scripts/skills_atp_price.py`
+- **位置**: `mashang_workspace/runtime_scripts/skills_atp_price.py`
 - **行数**: 180
 - **核心逻辑**: 从 order_data.parquet 读取订单，apply_business_logic 添加 series_group，按 12 个系别分组计算 ATP
 - **关键函数**: `run_atp_operator(seg_df, start, end)` → {total_orders, avg_price}
 - **依赖**: `operators.atp_analysis`
-- **CLI**: `python scripts/skills_atp_price.py [YYYY-MM] [--output PATH]`
+- **CLI**: `python runtime_scripts/skills_atp_price.py [YYYY-MM] [--output PATH]`
 - **输出**: Terminal 表格 + HTML 报告
 - **Contract 状态**: ❌ 不支持
 

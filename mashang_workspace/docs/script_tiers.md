@@ -7,18 +7,17 @@
 | **core** | `runtime_scripts/` | 稳定日常脚本，can be auto-invoked by followup_runner / OpenCode / Runtime V2 | ✅ | ✅ | ❌ | lock_by_model, daily_lock_count |
 | **research** | `research_scripts/` | 研发脚本，仅用户明确要求时调用（预测/回测/释放曲线） | ❌ | ❌ | ✅ | cohort_forecast, backtest, release_curve |
 | **utility** | `utility_scripts/` | 基础设施脚本（DataOps/SyncOps/数据字典/VOC），非分析能力 | ❌ | ❌ | ❌ | data_dictionary, skills_order_observation_daily |
-| **legacy** | `legacy_scripts/` | Frozen reference — 仅保留历史参考，不可被 Runtime V2 调度 | ❌ | ❌ | ❌ | skills_atp_price |
 
-## 四层物理目录位置
+## 三层物理目录位置
 
 ```
 mashang_workspace/
 ├── runtime_scripts/       # Core — Runtime V2 可调度
 ├── research_scripts/      # Research — 仅手动执行
 ├── utility_scripts/       # Utility — DataOps/SyncOps 工具
-├── legacy_scripts/        # Legacy — 历史保留
 ├── outputs/reports/       # 报告输出
-└── (mashang_workspace/scripts/ 已删除)
+├── (scripts/ 已删除)
+└── (legacy_scripts/ 已退休)
 ```
 
 ## 脚本 Tier 归属
@@ -54,12 +53,6 @@ mashang_workspace/
 | `generate_eval_cases.py` | Eval 用例生成 | 测试工具 |
 | `skills_order_observation_daily.py` | 每日数据观察与同步 | **DataOps/SyncOps** |
 | `skills_attainment_rate_alert.py` | 达成率预警 | 监控工具 |
-
-### Legacy Scripts (1 个) — `legacy_scripts/`
-
-| 脚本 | 说明 |
-|------|------|
-| `skills_atp_price.py` | ATP 原脚本（已由 runtime_scripts/atp_price_report.py 替代） |
 
 ## Eval 分层
 
@@ -97,7 +90,7 @@ mashang_workspace/
 
 1. **OpenCode / followup_runner / Runtime V2** 只能自动调用 **runtime_scripts/** （core tier）脚本
 2. 用户明确提到"预测""回测""释放曲线"等关键词时，可调用 **research_scripts/**
-3. **utility_scripts/** 和 **legacy_scripts/** 不应被自动化工具直接调用（data_dictionary 例外）
+3. **legacy_scripts/** 已退休删除，历史脚本已迁移到 runtime_scripts/research_scripts/utility_scripts
 4. **skills_order_observation_daily.py** 是 DataOps/SyncOps 脚本，涉及外部写操作，必须通过 dry-run/execute 安全开关
 5. **dataset/updater/** 是数据供给基础设施，不属于 workspace 分析能力
 6. **Runtime V2 不调度 dataset/updater 和 utility_scripts**

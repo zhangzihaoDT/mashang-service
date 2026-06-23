@@ -34,8 +34,8 @@ mashang-service/                   # 总项目根目录
 │   ├── runtime_scripts/           # Core — Runtime V2 可调度
 │   ├── research_scripts/          # Research — 预测/回测/释放曲线
 │   ├── utility_scripts/           # Utility — DataOps/SyncOps 工具
-│   ├── legacy_scripts/            # Legacy — 历史保留
 │   ├── (scripts/ — 已删除)        # 原始混合池已删除
+│   ├── (legacy_scripts/ — 已退休)  # 历史参考脚本已迁移到 runtime_scripts/research_scripts/utility_scripts
 │   ├── eval/
 │   ├── tests/
 │   ├── utils/
@@ -51,6 +51,11 @@ mashang-service/                   # 总项目根目录
 5. **所有分析结果说明数据来源、时间窗口、口径**
 6. **高频能力产品化路径**：先在 workspace 内沉淀（`runtime_scripts/`）；经过明确 V2 任务后迁移至 `mashang_runtimeV2/`。旧 `mashang_runtime/` 不作为回流目标。
 7. **每次改动后运行 `make eval` 或 `make ci`**
+8. **脚本分层规则**：
+    - `runtime_scripts/`：可被 Agent 或 Makefile 调用的稳定运行脚本。
+    - `research_scripts/`：研究、探索、一次性分析脚本。
+    - `utility_scripts/`：workspace 管理、生成、检查类工具脚本。
+    - `legacy_scripts/`：已退休目录，不再作为有效脚本落点。发现历史脚本时应迁移到上述三类目录之一。
 
 ## 常用 Make 命令
 
