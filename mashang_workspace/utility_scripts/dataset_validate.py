@@ -29,12 +29,12 @@ DATASET_FILES = [
     },
     {
         "path": "dataset/config_attribute.parquet",
-        "key_fields": ["order_number"],
+        "key_fields": ["Order Number"],
         "required": True,
     },
     {
         "path": "dataset/assign_data.csv",
-        "key_fields": ["first_assign_time"],
+        "key_fields": ["Assign Time 年/月/日"],
         "required": True,
     },
     {
