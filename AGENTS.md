@@ -7,7 +7,7 @@
 mashang-service 根目录是 **Agent Harness / service 宿主层**，承载以下能力：
 
 - `Makefile` / `pyproject.toml` — 构建与调度
-- `.opencode/`、`opencode.json`、MCP 配置 — OpenCode / MCP 能力
+- `.opencode/`、`opencode.jsonc`、MCP 配置 — OpenCode / MCP 能力
 - `.env` / `.venv/` — 本地环境
 - `dataset/` — 共享数据入口
 - `mashang_shared/` — 共享 operator/schema
@@ -52,7 +52,7 @@ mashang-service 是一个**汽车业务数据分析项目**，包含以下分支
 10. **每次完成改动后运行 `make eval` 或 `make ci`**
 11. **能力产品化路径**：workspace 中验证稳定的能力，经过明确 V2 / packaging / productization 任务后，迁移到 `mashang_runtimeV2/`。不要绕过 workspace 直接在 runtimeV2 中开发探索性能力。
 12. **`mashang_shared/` 边界**：共享 operator/schema 层，不应随意修改。如修改需说明影响范围，并同步相关测试。
-13. **MCP 边界**：MCP 能力由根目录统一提供（`.opencode/` / opencode.json），workspace 只消费能力。不得将本地 profile、cookies、API key、incoming 原始数据等提交进仓库。
+13. **MCP 边界**：MCP 能力由根目录统一提供（`.opencode/` / `opencode.jsonc`），workspace 只消费能力。不得将本地 profile、cookies、API key、incoming 原始数据等提交进仓库。
 
 其余原则详见 `mashang_workspace/AGENTS.md`。
 

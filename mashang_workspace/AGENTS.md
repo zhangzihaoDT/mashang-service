@@ -57,6 +57,24 @@ mashang-service/                   # 总项目根目录
     - `utility_scripts/`：workspace 管理、生成、检查类工具脚本。
     - `legacy_scripts/`：已退休目录，不再作为有效脚本落点。发现历史脚本时应迁移到上述三类目录之一。
 
+## Service 层 MCP 能力
+
+MCP 由仓库根目录 `opencode.jsonc` 统一配置，属于 **service 层能力**，非 workspace 私有。
+
+当前已配置的 MCP：
+
+| MCP | 类型 | 定位 | 消费方式 |
+|-----|------|------|----------|
+| Playwright MCP | local (npx @playwright/mcp@latest) | service 级 browser ingestion | Agent 自动识别；浏览器 profile 在 `.local/playwright-mcp/feishu/` |
+
+工作规则：
+
+- workspace **不直接调用** Playwright MCP 浏览器 API（不写 Page.goto / page.click 等 Agent 底层操作）。
+- workspace **消费** MCP 采集后的数据文件（从 `dataset/incoming/feishu/` 或 `dataset/` 读取）。
+- workspace **不提交** `.local/`、browser profile、cookies、token。
+- 浏览器 profile / 登录态落在 `.local/playwright-mcp/feishu/`（已 `.gitignore`）。
+- 外部网页/飞书/浏览器采集结果进入 `dataset/incoming/feishu/`，再由 workspace 脚本消费。
+
 ## 常用 Make 命令
 
 ```bash

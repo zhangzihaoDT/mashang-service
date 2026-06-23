@@ -1,7 +1,7 @@
 {
   "inventory_name": "workspace_capability_inventory",
   "version": "0.1",
-  "generated_at": "2026-06-23 02:56:59",
+  "generated_at": "2026-06-23 03:02:32",
   "workspace": "mashang_workspace",
   "summary": {
     "skills": 3,
@@ -921,22 +921,22 @@
         {
           "name": "workspace_capability_inventory.html",
           "path": "mashang_workspace/outputs/reports/workspace_capability_inventory.html",
-          "description": "生成报告，37.8 KB，html report，关联能力：capability_catalog",
-          "short_description": "html report · 37.8 KB",
+          "description": "生成报告，37.3 KB，html report，关联能力：capability_catalog",
+          "short_description": "html report · 37.3 KB",
           "type": "html_report",
-          "modified_at": "2026-06-23 02:53",
-          "size_kb": 37.8,
+          "modified_at": "2026-06-23 02:56",
+          "size_kb": 37.3,
           "related_capability": "capability_catalog",
           "status": "generated"
         },
         {
           "name": "workspace_capability_inventory.json",
           "path": "mashang_workspace/outputs/reports/workspace_capability_inventory.json",
-          "description": "生成报告，49.4 KB，json contract，关联能力：capability_catalog",
-          "short_description": "json contract · 49.4 KB",
+          "description": "生成报告，48.7 KB，json contract，关联能力：capability_catalog",
+          "short_description": "json contract · 48.7 KB",
           "type": "json_contract",
-          "modified_at": "2026-06-23 02:53",
-          "size_kb": 49.4,
+          "modified_at": "2026-06-23 02:56",
+          "size_kb": 48.7,
           "related_capability": "capability_catalog",
           "status": "generated"
         },
@@ -946,7 +946,7 @@
           "description": "生成报告，9.2 KB，markdown report，关联能力：capability_catalog",
           "short_description": "markdown report · 9.2 KB",
           "type": "markdown_report",
-          "modified_at": "2026-06-23 02:53",
+          "modified_at": "2026-06-23 02:56",
           "size_kb": 9.2,
           "related_capability": "capability_catalog",
           "status": "generated"
@@ -957,7 +957,7 @@
           "description": "生成报告，14.1 KB，html report，关联能力：capability_catalog",
           "short_description": "html report · 14.1 KB",
           "type": "html_report",
-          "modified_at": "2026-06-23 02:53",
+          "modified_at": "2026-06-23 03:02",
           "size_kb": 14.1,
           "related_capability": "capability_catalog",
           "status": "generated"
@@ -968,7 +968,7 @@
           "description": "生成报告，3.9 KB，json contract，关联能力：capability_catalog",
           "short_description": "json contract · 3.9 KB",
           "type": "json_contract",
-          "modified_at": "2026-06-23 02:53",
+          "modified_at": "2026-06-23 03:02",
           "size_kb": 3.9,
           "related_capability": "capability_catalog",
           "status": "generated"
@@ -979,7 +979,7 @@
           "description": "生成报告，3.5 KB，markdown report，关联能力：capability_catalog",
           "short_description": "markdown report · 3.5 KB",
           "type": "markdown_report",
-          "modified_at": "2026-06-23 02:53",
+          "modified_at": "2026-06-23 03:02",
           "size_kb": 3.5,
           "related_capability": "capability_catalog",
           "status": "generated"

@@ -2,7 +2,7 @@
 
 Workspace 能力总览：skills / scripts / data assets / outputs / evaluation
 
-生成时间：2026-06-23 02:56:59
+生成时间：2026-06-23 03:02:32
 Workspace：mashang_workspace
 
 ---
@@ -124,8 +124,8 @@ Agent 执行后沉淀的输出成果，包括 reports/ 下的品牌化 HTML 报�
 | 21 | quick_lock_ratio.html | html report · 638.5 KB | generated |
 | 22 | w24_weekend_analysis.html | html report · 19.3 KB | generated |
 | 23 | w24_weekend_analysis.md | markdown report · 4.1 KB | generated |
-| 24 | workspace_capability_inventory.html | html report · 37.8 KB | generated |
-| 25 | workspace_capability_inventory.json | json contract · 49.4 KB | generated |
+| 24 | workspace_capability_inventory.html | html report · 37.3 KB | generated |
+| 25 | workspace_capability_inventory.json | json contract · 48.7 KB | generated |
 | 26 | workspace_capability_inventory.md | markdown report · 9.2 KB | generated |
 | 27 | workspace_skills_catalog.html | html report · 14.1 KB | generated |
 | 28 | workspace_skills_catalog.json | json contract · 3.9 KB | generated |
