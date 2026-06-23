@@ -20,6 +20,23 @@
 - 对重点品牌（watchlist 内的品牌），应回看 extracted text 原文确认。
 - **不要覆盖原始数据**，只输出清洗建议。
 
+## 信息边界约束
+
+字段清洗只用于修正 `enterprise_name` / `brand` / `product_name` / `product_model` 四个字段的对齐问题。**不得补充原文件不存在的字段**。
+
+### 允许的操作
+
+- 纠正字段错位（将企业名从 product_model 列移回 enterprise_name 列）
+- 还原被截断或丢失的品牌名（如从 extracted text 中确认品牌）
+- 标记无法确认的记录（标记 `low_confidence`）
+
+### 禁止的操作
+
+- 不得从 product_name（如"插电式增程混合动力运动型乘用车"）推断具体商品名（如"智己 L6"）
+- 不得补充续航、电池、电机、尺寸、价格、上市时间等字段
+- 不得凭空创建原 JSON 中没有的记录
+- 不得将 product_model 前缀（如 CSA6492）映射为上市商品系列名称
+
 ## 适用输入
 
 - `product_list/batch_{N}_product_list.json`（records 数组）
@@ -125,6 +142,7 @@ original_record, cleaned_enterprise_name, cleaned_brand, cleaned_product_name, c
 2. 对低置信度记录必须标记 need_raw_text_check=true
 3. 对 watchlist 内品牌（智己、比亚迪、小鹏、问界等），如果字段疑似异常，必须回看 extracted text
 4. 字段清洗是后续所有分析的前置步骤
+5. 不得补充原文件不存在的字段；不得从 product_name 推断商品名；不得将 product_model 映射为上市车型名称
 ```
 
 ## 字段对齐质量判断速查

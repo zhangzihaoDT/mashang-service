@@ -53,14 +53,40 @@
 4. **对未发现品牌，必须写"当前可用输入未发现"**，不得写"本批次无该品牌"。因为数据来源不完整，不可做否定判断。
 5. 输出表格的"来源"列应注明具体来源（如 "tax catalog text" / "extracted text fallback"），不可笼统写 "product_list"。
 
+## 信息边界约束
+
+所有提取结果受限于公告文件的信息边界。参见 README.md "信息边界 / Evidence Boundary" 章节。
+
+### 产品型号的边界声明
+
+`product_model`（如 CSA6492、BYD6510）是**公告申报型号前缀**，不是上市商品名。不允许：
+- 将 CSA6492 直接称为"智己 L6"（即使该型号在往批公告中与智己 L6 相关）
+- 将 BYD6510 直接称为"比亚迪海狮 08"
+- 从型号前缀推断配置级别（如 LFSHEV3 = 低配、LFSHEV4 = 高配）
+
+### 可提取的信息
+
+每条记录只能提取以下可确认的字段：
+
+| 字段 | 可提取内容 | 示例 |
+|------|-----------|------|
+| enterprise_name | 企业全称 | 上海汽车集团股份有限公司 |
+| brand | 品牌 | 智己 |
+| product_name | 公告产品名称（大类） | 插电式增程混合动力运动型乘用车 |
+| product_model | 公告型号（前缀） | CSA6492 |
+| evidence_level | 信息层级：事实 / 谨慎推断 / 待验证 / 禁止结论 | 事实 |
+| source_field | 该信息的原始来源字段 | product_model: "CSA6492" |
+| allowed_conclusion | 该字段可做出的最大解释 | "智己增程产品进入公告申报阶段" |
+| prohibited_conclusion | 该字段禁止输出的解释 | 商品名、价格、上市时间、续航、电池、电机、尺寸 |
+
 ## 输出表格
 
-| 企业 | 品牌 | 产品名称 | 产品型号 | 型号前缀 | 来源 | source_reliability | 字段问题 | 置信度 | 待验证事项 |
-|------|------|----------|----------|----------|------|--------------------|----------|--------|------------|
-| 上海汽车集团股份有限公司 | 智己 | 插电式增程混合动力运动型乘用车 | CSA6492 (含 LFSHEV3/LFSHEV4) | CSA6492 | product_list | product_list_verified | 无 | high | 增程版本的续航、电池、上市时间 |
-| 比亚迪汽车工业有限公司 | 比亚迪 | 插电式混合动力多用途乘用车 | BYD6510 | BYD6510 | product_list | product_list_verified | 无 | high | 是否为海狮 08 PHEV 版 |
-| — | 小鹏 | — | — | — | product_list | conflict_between_sources | field_shift | low | 需回看 extracted text 确认具体产品 |
-| 比亚迪汽车有限公司 | 比亚迪牌 | 比亚迪宋Pro HEV | BYD6476ST6HEV12 | BYD6476 | tax catalog text | tax_catalog_verified | 无 | medium | 来源为 tax catalog，非完整产品清单 |
+| 企业 | 品牌 | 产品名称 | 产品型号 | 型号前缀 | 来源 | source_reliability | 字段问题 | 置信度 | evidence_level | source_field | allowed_conclusion | prohibited_conclusion | 待验证事项 |
+|------|------|----------|----------|----------|------|--------------------|----------|--------|----------------|--------------|-------------------|----------------------|------------|
+| 上海汽车集团股份有限公司 | 智己 | 插电式增程混合动力运动型乘用车 | CSA6492 | CSA6492 | product_list | product_list_verified | 无 | high | 事实 | product_name:"插电式增程混合动力", product_model:"CSA6492" | 智己增程产品进入公告申报阶段 | 不得推断商品名、价格、上市时间、续航、电池、电机、尺寸 | 具体商品名、上市节奏、配置参数 |
+| 比亚迪汽车工业有限公司 | 比亚迪 | 插电式混合动力多用途乘用车 | BYD6510 | BYD6510 | product_list | product_list_verified | 无 | high | 事实 | product_name:"插电式混合动力", product_model:"BYD6510" | 比亚迪 PHEV 产品进入公告申报阶段 | 不得推断商品名、价格、上市时间、续航 | 具体车型名称、定价 |
+| — | 小鹏 | — | — | — | product_list | conflict_between_sources | field_shift | low | 待验证 | 字段偏移无法确认 | — | — | 需回看 extracted text 确认具体产品 |
+| 比亚迪汽车有限公司 | 比亚迪牌 | 比亚迪宋Pro HEV | BYD6476ST6HEV12 | BYD6476 | tax catalog text | tax_catalog_verified | 无 | medium | 谨慎推断 | tax catalog 文本:企业/品牌/型号字段 | 比亚迪宋Pro HEV 进入税收目录 | 不得推断续航、价格、配置变化 | 来源为 tax catalog，非完整产品清单 |
 
 ## 重点品牌优先级标记
 
@@ -111,7 +137,7 @@
 3. 使用 watchlist CSV 中的品牌+关键词补充检索
 
 ## 输出格式：
-Markdown 表格，包含：企业, 品牌, 产品名称, 产品型号, 型号前缀, 来源, source_reliability, 字段问题, 置信度, 待验证事项
+Markdown 表格，包含：企业, 品牌, 产品名称, 产品型号, 型号前缀, 来源, source_reliability, 字段问题, 置信度, evidence_level, source_field, allowed_conclusion, prohibited_conclusion, 待验证事项
 
 ## 优先级标记（在"待验证事项"列后附加一列"优先级"）：
 - S：高度相关、可能有战略信号
@@ -125,4 +151,6 @@ Markdown 表格，包含：企业, 品牌, 产品名称, 产品型号, 型号前
 3. 不推断上市价格、续航、电池、电机、尺寸、上市时间
 4. 如果记录字段偏移严重，标记 source_reliability=low_confidence
 5. 如果不同来源冲突，标记 conflict_between_sources
+6. product_model 只能标记为"公告型号"，不得映射为上市商品名
+7. evidence_level 按以下规则标记：直接从公告结构化字段提取→"事实"；需要回看 extracted text 确认→"谨慎推断"；字段偏移无法确认→"待验证"；属于超纲推断→"禁止结论"
 ```
