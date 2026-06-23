@@ -117,8 +117,9 @@ miit-discover-batches:
 	$(PYTHON) mashang_workspace/research_scripts/miit_new_car/discover_batches.py --pages $(or $(PAGES),1)
 
 ## 抓取指定批次
+## 支持 PAGES 参数搜索历史批次：make miit-fetch-batch BATCH=402 PAGES=10
 miit-fetch-batch:
-	$(PYTHON) mashang_workspace/research_scripts/miit_new_car/monitor.py --batch $(BATCH)
+	$(PYTHON) mashang_workspace/research_scripts/miit_new_car/monitor.py --batch $(BATCH) --pages $(or $(PAGES),3)
 
 ## 监控最新批次
 miit-new-car-monitor:

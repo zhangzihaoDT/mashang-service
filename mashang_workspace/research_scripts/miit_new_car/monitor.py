@@ -237,6 +237,7 @@ def run_monitor(
     state_update: bool = True,
     force_refresh: bool = False,
     discovery_source: str = "remote",
+    pages: int = 3,
 ) -> dict:
     wl_path = watchlist_path or DEFAULT_WATCHLIST
     network_warnings_count = 0
@@ -248,12 +249,12 @@ def run_monitor(
     # 1. Fetch
     print("[1/4] 抓取批次详情...")
     try:
-        meta = fetch_batch(batch_no=batch_no, detail_url=detail_url, download=download)
+        meta = fetch_batch(batch_no=batch_no, detail_url=detail_url, download=download, pages=pages)
     except NetworkError as e:
         network_warnings_count += 1
         if force_refresh:
             raise
-        meta = fetch_batch(batch_no=batch_no, detail_url=detail_url, download=download)
+        meta = fetch_batch(batch_no=batch_no, detail_url=detail_url, download=download, pages=pages)
 
     status_label = "公示" if meta.get("status") == "publicity" else "正式发布"
     att_statuses = meta.get("attachment_statuses", [])
@@ -406,6 +407,7 @@ def main():
     p.add_argument("--watchlist", type=str, help="watchlist CSV 路径")
     p.add_argument("--no-download", action="store_true", help="不下载附件")
     p.add_argument("--no-state-update", action="store_true", help="不更新 state 文件")
+    p.add_argument("--pages", type=int, default=3, help="搜索分页页数（默认 3，搜索历史批次时需增加）")
     p.add_argument("--format", choices=["terminal", "json"], default="terminal")
     args = p.parse_args()
 
@@ -502,6 +504,7 @@ def main():
                 state_update=not args.no_state_update,
                 force_refresh=args.force_refresh,
                 discovery_source=discovery_source,
+                pages=args.pages,
             )
             results.append(result)
         except Exception as e:

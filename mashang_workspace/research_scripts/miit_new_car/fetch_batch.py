@@ -92,16 +92,21 @@ def fetch_batch(
     detail_url: Optional[str] = None,
     download: bool = True,
     timeout: int = REQUEST_TIMEOUT,
+    pages: int = 3,
 ) -> dict:
     if not detail_url and batch_no is None:
         raise ValueError("必须提供 batch_no 或 detail_url")
 
     if not detail_url:
         from discover_batches import discover_batches
-        batches, _source = discover_batches(limit=5)
+        batches, _source = discover_batches(pages=pages, limit=9999)
         target = [b for b in batches if b["batch_no"] == batch_no]
         if not target:
-            raise ValueError(f"未找到第 {batch_no} 批的详情页 URL")
+            raise ValueError(
+                f"未找到第 {batch_no} 批的详情页 URL（已搜索 pages={pages}）。\n"
+                f"  建议：增加 --pages（如 --pages 20）扩大搜索范围。\n"
+                f"  或使用 --detail-url 手动指定详情页 URL。"
+            )
         detail_url = target[0]["detail_url"]
 
     batch_dir = OUTPUT_BASE / f"batch_{batch_no}"
@@ -239,6 +244,7 @@ def main():
     p.add_argument("--batch", type=int, help="批次号")
     p.add_argument("--detail-url", type=str, help="详情页 URL（与 --batch 二选一）")
     p.add_argument("--no-download", action="store_true", help="不下载附件")
+    p.add_argument("--pages", type=int, default=3, help="搜索分页页数（默认 3，搜索历史批次时需增加）")
     p.add_argument("--format", choices=["terminal", "json"], default="terminal")
     args = p.parse_args()
 
@@ -250,6 +256,7 @@ def main():
             batch_no=args.batch,
             detail_url=args.detail_url,
             download=not args.no_download,
+            pages=args.pages,
         )
     except (RuntimeError, ValueError) as e:
         print(f"[ERROR] {e}", file=sys.stderr)
