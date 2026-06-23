@@ -444,10 +444,11 @@ def test_help():
 
 
 def test_missing_api_key():
-    env_no_key = {k: v for k, v in os.environ.items()
-                  if k not in ("TAVILY_API_KEY", "FIRECRAWL_API_KEY")}
-    result = _run(["--start", "2026-06-05", "--end", "2026-06-07"], env_override=env_no_key)
-    assert result.returncode != 0 or "ERROR" in result.stdout or "缺少" in result.stdout
+    # Firecrawl/Tavily 已退休，不再检查这些 key。
+    # Huoshan API key 由具体调用处动态检查，不在此处做全局拦截。
+    result = _run(["--start", "2026-06-05", "--end", "2026-06-07", "--llm-judge-max", "1"], env_override={})
+    # 只要帮助/用法能正常输出即可，不一定要求 returncode != 0
+    assert result.returncode == 0 or "usage" in (result.stdout + result.stderr).lower()
 
 
 def test_help_contains_required_args():
@@ -3089,19 +3090,14 @@ print("OK")
 
 
 
-def test_provider_tavily_calls_tavily():
+def test_provider_tavily_retired():
+    """Tavily 已退休，provider='tavily' 不应再通过 CLI 选择；保留常量兼容但不应运行。"""
     code = rf"""
 import sys; sys.path.insert(0, r"{_SCRIPT_DIR}")
-from auto_launch_monitor import run_search_query, CrawlDiagnostics
-import unittest.mock as mock
-
-with mock.patch("auto_launch_monitor.tavily_search") as mock_tav:
-    mock_tav.return_value = []
-    diag = CrawlDiagnostics()
-    run_search_query("q", provider="tavily", max_results=10,
-                      tavily_client=mock.MagicMock(), diagnostics=diag)
-    assert mock_tav.called, "Tavily should be called"
-    print("OK")
+from auto_launch_monitor import SEARCH_PROVIDER_TAVILY
+# 常量应仍存在以兼容 import，但不作为活动 provider
+assert SEARCH_PROVIDER_TAVILY == "tavily"
+print("OK")
 """
     result = _extract_py(os.environ.copy(), code)
     assert result.returncode == 0, f"stderr: {result.stderr}"
@@ -3286,21 +3282,15 @@ diag = CrawlDiagnostics()
 diag.search_attempt_count = 3
 diag.search_success_count = 3
 diag.huoshan_dns_error_count = 3
-diag.baidu_fallback_to_tavily_count = 3
-diag.tavily_query_count = 3
-diag.tavily_result_count = 15
 if diag.search_attempt_count > 0:
     if diag.search_success_count < diag.search_attempt_count:
         diag.search_run_status = "partial_failed"
     elif diag.search_success_count == diag.search_attempt_count:
         diag.search_run_status = "ok"
-assert diag.search_run_status == "ok", "tavily fallback succeeded should be ok, got " + str(diag.search_run_status)
+assert diag.search_run_status == "ok", "search succeeded should be ok, got " + str(diag.search_run_status)
 diag2 = CrawlDiagnostics()
 diag2.search_attempt_count = 3
 diag2.search_success_count = 0
-diag2.baidu_dns_error_count = 3
-diag2.tavily_query_count = 3
-diag2.tavily_result_count = 0
 if diag2.search_attempt_count > 0:
     if diag2.search_success_count == 0:
         diag2.search_run_status = "failed"
@@ -3628,13 +3618,11 @@ import unittest.mock as mock
 
 with mock.patch("auto_launch_monitor.call_huoshan_fangzhou_search") as mock_hs:
     mock_hs.return_value = []
-    with mock.patch("auto_launch_monitor.tavily_search") as mock_tav:
-        diag = CrawlDiagnostics()
-        run_search_query("q", provider="huoshan", max_results=10,
-                          huoshan_api_key="k", diagnostics=diag)
-        assert mock_hs.called
-        assert not mock_tav.called
-        print("OK")
+    diag = CrawlDiagnostics()
+    run_search_query("q", provider="huoshan", max_results=10,
+                      huoshan_api_key="k", diagnostics=diag)
+    assert mock_hs.called
+    print("OK")
 """
     result = _extract_py(os.environ.copy(), code)
     assert result.returncode == 0, f"stderr: {result.stderr}"

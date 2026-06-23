@@ -79,8 +79,8 @@ v0.5.3 变更:
         --source-types official,mainstream_media,industry_media
 
 环境变量:
-    TAVILY_API_KEY      (必填) Tavily 搜索 API Key
-    FIRECRAWL_API_KEY   (必填) Firecrawl 网页抓取 API Key
+    TAVILY_API_KEY      [已退休] 当前使用 Huoshan 方舟搜索，不再需要 Tavily
+    FIRECRAWL_API_KEY   [已退休] 当前使用 Huoshan 方舟搜索，不再需要 Firecrawl
 
 可信度规则:
     - 官方来源（品牌官网）= 高
@@ -413,7 +413,7 @@ class SearchResult:
 
 
 SEARCH_PROVIDER_HUOSHAN = "huoshan"
-SEARCH_PROVIDER_TAVILY = "tavily"
+SEARCH_PROVIDER_TAVILY = "tavily"  # [已退休] 仅保留常量避免 import 断裂，不可选为活动 provider
 SEARCH_PROVIDER_BAIDU = "baidu"       # legacy unsupported
 SEARCH_PROVIDER_AUTO = "auto"          # legacy unsupported
 DEFAULT_SEARCH_PROVIDER = SEARCH_PROVIDER_HUOSHAN
@@ -1123,8 +1123,8 @@ def parse_args():
     parser.add_argument("--no-llm-judge-cache", action="store_true", default=False,
                         help="禁用 LLM Judge 缓存")
     parser.add_argument("--search-provider", type=str, default=DEFAULT_SEARCH_PROVIDER,
-                        choices=[SEARCH_PROVIDER_HUOSHAN, SEARCH_PROVIDER_TAVILY],
-                        help="搜索 provider (默认 huoshan)")
+                        choices=[SEARCH_PROVIDER_HUOSHAN],
+                        help="搜索 provider (当前仅 Huoshan 方舟搜索可用)")
     parser.add_argument("--huoshan-site-filter", action="store_true", default=True,
                         help="启用火山站点过滤（默认开启）")
     parser.add_argument("--no-huoshan-site-filter", action="store_true", default=False,
@@ -1156,11 +1156,9 @@ def build_filters(args) -> MonitorFilters:
 
 
 def check_env():
-    firecrawl_ok = "FIRECRAWL_API_KEY" in os.environ
-    if not firecrawl_ok:
-        print("[ERROR] 缺少环境变量: FIRECRAWL_API_KEY", file=sys.stderr)
-        print("请确保 FIRECRAWL_API_KEY 已设置在 .env 或环境中。", file=sys.stderr)
-        sys.exit(1)
+    # Firecrawl/Tavily 已退休，不再检查其 API Key
+    # 当前仅需 HUOSANFANGZHOU_API_KEY 或 ARK_API_KEY（由各自调用处检查）
+    pass
 
 
 def get_huoshan_api_key() -> str | None:
@@ -2465,8 +2463,12 @@ def main():
     if args.targets_file:
         targets = load_watch_targets(args.targets_file)
 
-    from firecrawl import FirecrawlApp
-    firecrawl_app = FirecrawlApp()
+    firecrawl_app = None
+    try:
+        from firecrawl import FirecrawlApp
+        firecrawl_app = FirecrawlApp()
+    except Exception:
+        print("[WARN] Firecrawl 不可用（可能缺少 API Key），网页抓取功能已降级", file=sys.stderr)
 
     search_provider = args.search_provider
     if search_provider in (SEARCH_PROVIDER_BAIDU, SEARCH_PROVIDER_AUTO):
@@ -2562,7 +2564,11 @@ def main():
     diagnostics.planned_crawl_count = len(scrape_targets_list)
     print(f"[INFO] 候选 URL 去重后: {len(deduped)}，预过滤跳过: {len(pre_skip)}，将抓取: {len(scrape_targets_list)}", file=sys.stderr)
 
-    scraped_pages = scrape_urls(firecrawl_app, scrape_targets_list, diagnostics=diagnostics)
+    scraped_pages = []
+    if firecrawl_app:
+        scraped_pages = scrape_urls(firecrawl_app, scrape_targets_list, diagnostics=diagnostics)
+    else:
+        print("  Firecrawl 未配置，跳过网页抓取", file=sys.stderr)
 
     raw_events = []
     for page in scraped_pages:
@@ -3053,7 +3059,7 @@ def format_markdown(events, summary, start_str, end_str, topic,
             lines.append("- 搜索引擎: 火山引擎 / 火山方舟联网搜索")
     else:
         lines.append("- 搜索引擎: 火山引擎 / 火山方舟联网搜索")
-    lines.append("- 网页抓取: Firecrawl")
+    lines.append("- 网页抓取: Firecrawl [已退休]")
     lines.append("- 优先来源: 品牌官网、汽车之家、懂车帝、易车、太平洋汽车、盖世汽车、新出行、网通社等")
     lines.append("")
 
