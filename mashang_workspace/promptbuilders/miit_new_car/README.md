@@ -51,8 +51,37 @@
 
 每个 `.prompt.md` 文件可独立复制到 OpenCode / ChatGPT / DeepSeek 的对话中。将 `{batch_N}` 替换为实际批次号，将 `{target_brands}` 替换为目标品牌列表，将对应输入文件的 JSON / 文本内容粘贴到 Prompt 中的指定位置。
 
+## 降级模式 / Degraded Mode
+
+当批次状态为 **publicity**（公示）而非 official（正式发布），或主附件返回 404、product_list 为空（quality=empty）时，Prompt Pack 自动进入降级模式。
+
+### 降级模式行为
+
+| 模块 | 正常模式 | 降级模式 |
+|------|----------|----------|
+| 00_asset_check | 预期所有资产完整 | 输出 asset_status=partial/empty，标记 blocking_reason |
+| 01_field_cleaning | 对 product_list records 做字段清洗 | 跳过（0 records），输出 skipped_empty_product_list |
+| 02_target_brand_extract | 基于 product_list + extracted text | 仅基于 tax catalog / extracted text fallback，source_reliability 受限 |
+| 03_product_signal_interpretation | 可输出完整车型判断，含 S/A/B/C | 仅输出"观察信号"，不允许 S 级判断，所有结论标记 low confidence |
+| 04_brief_output | 标准简报 | 含"输入资产降级说明"章节，明确告知结论适用范围限制 |
+
+### 降级模式使用限制
+
+- 降级模式下只能做**有限信号提取**，不能输出完整车型判断。
+- 所有结论必须注明输入来源限制（如"基于 tax catalog 数据，非完整产品清单"）。
+- 降级模式不阻断分析，但会显著降低结论置信度。
+- 建议在批次转为 **official** 后复跑完整流程。
+
+## 边界验证案例
+
+| 批次 | 状态 | 特点 | 验证意义 |
+|------|------|------|----------|
+| 第 407 批 | official | 主附件完整，product_list 1111 条/469 企/939 型号 | 正常路径验证 |
+| 第 408 批 | publicity | 3 个附件 404，product_list empty (quality=empty)，仅 tax catalog 可用 | 降级路径验证 |
+
 ## 版本
 
-- **Version**: v0.1
-- **Source**: `docs/miit_promptbuilder_draft.md` v0.2 draft
+- **Version**: v0.2
+- **Source**: `docs/miit_promptbuilder_draft.md` v0.2 draft + 第 408 批 publicity 边界验证
 - **Date**: 2026-06-23
+- **Key changes**: 新增 degraded mode 全流程支持，asset_status 四态判断，empty product_list 处理路径，tax catalog fallback 限制，降级模式 S 级判断禁止规则，简报新增输入资产降级说明章节

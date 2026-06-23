@@ -6,6 +6,8 @@
 
 **前提条件**：已完成 00_asset_check.prompt.md 和 01_field_cleaning.prompt.md。
 
+**降级模式处理**：如果 00 模块输出 `degraded_mode=true` 且 `allowed_analysis_scope` 为 `tax_catalog_fallback_only`，则本模块进入降级提取模式——跳过 product_list 检索，直接基于 extracted text / tax catalog 做有限提取。
+
 ## 角色设定
 
 你是一个汽车行业 MIIT 竞品情报分析师。你的职责是从产品清单和附件原文中，提取指定品牌的所有可识别产品记录。
@@ -14,18 +16,19 @@
 
 - `product_list/batch_{N}_product_list.json`（records 数组）
 - `extracted/text/batch_{N}/{attachment1}.txt`（附件 1 原文，用于字段偏移时的确认）
+- `extracted/text/batch_{N}/{tax_catalog_hash}.txt`（车船税/购置税目录原文，降级模式时主要数据源）
 - `extracted/batch_{N}_attachment_text.json`（附件抽取索引）
 - `evidence/batch_{N}_official_source_evidence.json`（用于确认批次元信息）
 - `configs/miit_new_car_watchlist.csv`
 
 ## 字段清洗参考
 
-执行本 Prompt 前，应先参考 01_field_cleaning 的输出结果。对于标记了 `field_shift` 或 `need_raw_text_check=true` 的记录，以 extracted text 为准进行人工判断。
+执行本 Prompt 前，应先参考 01_field_cleaning 的输出结果。如果 01 输出 `skipped_empty_product_list`，则本模块直接进入降级提取模式。
 
 ## 检索策略（fallback 优先级）
 
-1. **product_list JSON 全字段检索**：在 `enterprise_name`、`brand`、`product_name`、`product_model` 四个字段中搜索目标品牌关键词。
-2. **extracted text 全文检索**：对疑似字段偏移的记录，回看附件 1 原始文本确认。
+1. **product_list JSON 全字段检索**：在 `enterprise_name`、`brand`、`product_name`、`product_model` 四个字段中搜索目标品牌关键词。如果 product_list records=0，跳过此步。
+2. **extracted text 全文检索**：对疑似字段偏移的记录，回看附件 1 原始文本确认。如果主附件 404，则对 tax catalog 文本进行全文检索。
 3. **watchlist CSV 关键词匹配**：使用 watchlist 中定义的品牌关键词逐条匹配。
 4. **evidence 文件辅助确认**：确认批次号、附件数量、质量等元信息。
 5. **如果来源冲突**：以 product_list + extracted text 交叉验证为准，标记 `conflict_between_sources`。
@@ -36,8 +39,19 @@
 |----|------|
 | `product_list_verified` | 字段对齐好，直接来自 product_list，无需回看 extracted text |
 | `extracted_text_verified` | 通过回看 extracted text 确认字段正确 |
+| `tax_catalog_verified` | 来自车船税/购置税目录文本，非完整产品清单，字段可用但范围受限 |
 | `conflict_between_sources` | product_list 和 extracted text 冲突，需要人工判断 |
 | `low_confidence` | 无法确认，字段偏移严重或文本不可读 |
+
+## 降级模式限制
+
+当 `product_list` 为空（records=0）且进入降级提取模式时：
+
+1. **只能基于 extracted text / tax catalog 做有限提取**，不可假装 product_list 有记录。
+2. **source_reliability 应标记为 `extracted_text_verified`、`tax_catalog_verified` 或 `low_confidence`**，不可标记 `product_list_verified`。
+3. **不得将 tax catalog 记录等同于完整道路机动车产品清单**。tax catalog 仅包含可享受税收优惠的车型，不代表企业的全部申报产品。
+4. **对未发现品牌，必须写"当前可用输入未发现"**，不得写"本批次无该品牌"。因为数据来源不完整，不可做否定判断。
+5. 输出表格的"来源"列应注明具体来源（如 "tax catalog text" / "extracted text fallback"），不可笼统写 "product_list"。
 
 ## 输出表格
 
@@ -46,6 +60,7 @@
 | 上海汽车集团股份有限公司 | 智己 | 插电式增程混合动力运动型乘用车 | CSA6492 (含 LFSHEV3/LFSHEV4) | CSA6492 | product_list | product_list_verified | 无 | high | 增程版本的续航、电池、上市时间 |
 | 比亚迪汽车工业有限公司 | 比亚迪 | 插电式混合动力多用途乘用车 | BYD6510 | BYD6510 | product_list | product_list_verified | 无 | high | 是否为海狮 08 PHEV 版 |
 | — | 小鹏 | — | — | — | product_list | conflict_between_sources | field_shift | low | 需回看 extracted text 确认具体产品 |
+| 比亚迪汽车有限公司 | 比亚迪牌 | 比亚迪宋Pro HEV | BYD6476ST6HEV12 | BYD6476 | tax catalog text | tax_catalog_verified | 无 | medium | 来源为 tax catalog，非完整产品清单 |
 
 ## 重点品牌优先级标记
 
@@ -58,14 +73,17 @@
 | **B** | 常规新增或补申报 | 品牌在 watchlist 中但非 S/A 级别；已有车型的常规版本扩展 |
 | **C** | 低相关或暂不关注 | 品牌不在 watchlist 中；或为非乘用车（卡车/客车/专用车） |
 
+**降级模式优先级限制**：当 `allowed_analysis_scope` 为 `tax_catalog_fallback_only` 时，不允许标记 S 级优先级。所有记录最高为 A 级，且需标注 "来源受限"。
+
 ## 关键要求
 
 1. **大样本品牌只输出代表性记录**，并额外说明总命中数量。例如比亚迪命中 8 条，列出字段对齐好的 3 条，其余简述。
 2. **重点品牌要尽可能完整输出**。每个品牌至少列出企业名、产品名称、型号前缀。
 3. **不编造 product_list 中没有的字段**。不要输出续航、电池容量、电机功率、尺寸等当前不可获取的信息。
 4. **不直接推断上市价格、续航、上市时间**。如果需要推断，必须标注为 "estimate" 并说明推理依据。
-5. **对疑似重要信号标记 S/A/B/C 优先级**。
+5. **对疑似重要信号标记 S/A/B/C 优先级**（降级模式下最高 A 级）。
 6. **字段问题列说明**：如果该记录在 01 字段清洗中有问题（如 field_shift），在此列说明具体问题。
+7. **降级模式下必须注明数据来源限制**：在输出表格前添加一行说明，如"注意：以下数据来源为 tax catalog，非完整产品清单，不代表企业全部申报。"
 
 ## Prompt 模板
 

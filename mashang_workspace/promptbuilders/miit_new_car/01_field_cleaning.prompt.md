@@ -4,7 +4,9 @@
 
 对第 `{batch_N}` 批 `product_list` 中的记录做字段一致性检查，识别字段错位、品牌缺失、产品名异常、型号异常。
 
-**前提条件**：已完成 00_asset_check.prompt.md，确认 product_list 可用。
+**前提条件**：已完成 00_asset_check.prompt.md。
+
+**注意**：如果 00 模块输出 `asset_status=partial` 或 `empty`，且 `allowed_analysis_scope` 不包含 `full_product_list_analysis`，则本模块应直接跳过标准字段清洗流程，输出 `field_cleaning_status=skipped_empty_product_list`。
 
 ## 角色设定
 
@@ -48,21 +50,41 @@
 | `ok` | 字段正常，无需清洗 |
 | `uncertain` | 不确定 |
 
+## Empty product_list 处理路径
+
+**何时触发**：00_asset_check 产出 `asset_status=partial` 或 `empty`，且 `product_list` 的 records 数组长度为 0。
+
+**处理规则**：
+1. 不生成空泛清洗表。
+2. 输出 `field_cleaning_status=skipped_empty_product_list`。
+3. 明确说明没有可清洗记录。
+4. 建议回到 00_asset_check 确认降级模式，或等待 official 附件可用后复跑。
+
+**输出格式**：
+
+```
+field_cleaning_status: skipped_empty_product_list
+reason: product_list records=0, quality=empty（来自 00_asset_check）
+suggestion: 当前批次可能为 publicity 公示或主附件 404，建议确认 batch_status 后决定是否等待 official 附件。
+next_module: 跳过 01，直接进入 02_target_brand_extract（降级模式）
+```
+
 ## 输出字段
 
 | 字段 | 说明 |
 |------|------|
-| original_record | 原始记录关键字段（enterprise_name, brand, product_name, product_model） |
-| cleaned_enterprise_name | 清洗建议的企业名称 |
-| cleaned_brand | 清洗建议的品牌 |
-| cleaned_product_name | 清洗建议的产品名称 |
-| cleaned_product_model | 清洗建议的产品型号 |
-| issue_type | 问题类型 |
-| confidence | high / medium / low |
+| field_cleaning_status | `completed` / `skipped_empty_product_list` |
+| original_record | 原始记录关键字段（enterprise_name, brand, product_name, product_model）；skipped 时填 N/A |
+| cleaned_enterprise_name | 清洗建议的企业名称；skipped 时填 N/A |
+| cleaned_brand | 清洗建议的品牌；skipped 时填 N/A |
+| cleaned_product_name | 清洗建议的产品名称；skipped 时填 N/A |
+| cleaned_product_model | 清洗建议的产品型号；skipped 时填 N/A |
+| issue_type | 问题类型；skipped 时填 `no_records` |
+| confidence | high / medium / low；skipped 时填 N/A |
 | need_raw_text_check | 是否需要回看 extracted text（true / false） |
 | reason | 判断理由 |
 
-## 输出表格示例
+## 输出表格示例（正常模式）
 
 | original_record | cleaned_enterprise | cleaned_brand | cleaned_product | cleaned_model | issue_type | confidence | need_raw_text_check | reason |
 |-----------------|--------------------|---------------|----------------|---------------|------------|------------|---------------------|--------|
