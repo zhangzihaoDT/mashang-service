@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-汽车新车事件监测器 — Auto Launch Monitor (v0.5.4)
+汽车新车事件监测器 — Auto Launch Monitor (v0.5.8)
 
 Market Intelligence / New Vehicle Event Monitor
 
@@ -33,7 +33,11 @@ Market Intelligence / New Vehicle Event Monitor
 v0.5.1 source_publish_date 误当作 event_date / 空 brand+model 已确认 / 历史上市误入修复
 v0.5.2 Makefile 产品入口默认启用 LLM Judge；Python 脚本默认关闭
 v0.5.3 Polluted Evidence Judge Guard — 污染证据治理、reject intent 后处理
-v0.5.4 LLM Judge Cache Versioning + Event Scope Classification (当前)
+v0.5.4 LLM Judge Cache Versioning + Event Scope Classification
+v0.5.5 Baidu Qianfan Search Provider — 默认搜索源切换为百度千帆
+v0.5.6 Search Failure Semantics — 搜索失败不再误报"无事件"
+v0.5.7 Replace Baidu with Huoshan Fangzhou Search Provider
+v0.5.8 Correct Huoshan API endpoint + response schema (当前)
 
 v0.5 新增:
     - DeepSeek LLM Judge：只对规则层不确定的候选事件做语义裁判
@@ -96,7 +100,7 @@ from collections import Counter
 from dataclasses import dataclass, field
 from datetime import date, datetime
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 from urllib.parse import urlparse
 
 _WS_ROOT = Path(__file__).resolve().parents[1]
@@ -318,6 +322,41 @@ class CrawlDiagnostics:
     related_event_count: int = 0
     non_national_event_filtered_count: int = 0
     related_event_samples: list[dict] = field(default_factory=list)
+    search_provider: str = ""
+    huoshan_enabled: bool = False
+    huoshan_query_attempt_count: int = 0
+    huoshan_query_success_count: int = 0
+    huoshan_result_count: int = 0
+    huoshan_site_filter_enabled: bool = False
+    huoshan_site_filter_count: int = 0
+    huoshan_site_expanded_query_count: int = 0
+    huoshan_site_max: int = 0
+    huoshan_stream: bool = False
+    huoshan_disable_image_search: bool = True
+    huoshan_error_count: int = 0
+    huoshan_auth_error_count: int = 0
+    huoshan_quota_error_count: int = 0
+    huoshan_network_error_count: int = 0
+    huoshan_dns_error_count: int = 0
+    huoshan_http_error_count: int = 0
+    huoshan_parse_error_count: int = 0
+    huoshan_response_schema_type: str = ""
+    huoshan_response_raw_samples: list[dict] = field(default_factory=list)
+    huoshan_search_mode: str = ""
+    tavily_query_count: int = 0
+    tavily_result_count: int = 0
+    search_attempt_count: int = 0
+    search_success_count: int = 0
+    search_error_count: int = 0
+    search_failed_provider_count: int = 0
+    search_all_failed: bool = False
+    search_partial_failed: bool = False
+    search_run_status: str = ""
+    baidu_query_attempt_count: int = 0
+    baidu_query_success_count: int = 0
+    baidu_network_error_count: int = 0
+    baidu_dns_error_count: int = 0
+    baidu_http_error_count: int = 0
 
 
 @dataclass
@@ -358,6 +397,65 @@ class LLMJudgeDecision:
     conflict_reason: str = ""
     evidence_quality: str = "medium"
     reason: str = ""
+
+
+@dataclass
+class SearchResult:
+    title: str
+    url: str
+    content: str = ""
+    published_at: str = ""
+    source_provider: str = ""
+    website: str = ""
+    score: float | None = None
+    authority_score: float | None = None
+    raw: dict[str, Any] = field(default_factory=dict)
+
+
+SEARCH_PROVIDER_HUOSHAN = "huoshan"
+SEARCH_PROVIDER_TAVILY = "tavily"
+SEARCH_PROVIDER_BAIDU = "baidu"       # legacy unsupported
+SEARCH_PROVIDER_AUTO = "auto"          # legacy unsupported
+DEFAULT_SEARCH_PROVIDER = SEARCH_PROVIDER_HUOSHAN
+
+DEFAULT_AUTO_SITE_FILTERS = [
+    "www.autohome.com.cn",
+    "www.dongchedi.com",
+    "www.yiche.com",
+    "www.pcauto.com.cn",
+    "www.gasgoo.com",
+    "www.news18a.com",
+    "www.xchuxing.com",
+    "auto.sina.com.cn",
+    "auto.qq.com",
+    "auto.ifeng.com",
+    "auto.china.com.cn",
+    "www.sohu.com",
+    "www.163.com",
+    "www.ithome.com",
+]
+
+
+class BaiduQianfanSearchError(RuntimeError):
+    pass
+
+class BaiduQianfanAuthError(BaiduQianfanSearchError):
+    pass
+
+class BaiduQianfanQuotaError(BaiduQianfanSearchError):
+    pass
+
+class HuoshanSearchError(RuntimeError):
+    pass
+
+class HuoshanAuthError(HuoshanSearchError):
+    pass
+
+class HuoshanQuotaError(HuoshanSearchError):
+    pass
+
+class HuoshanNetworkError(HuoshanSearchError):
+    pass
 
 
 @dataclass(frozen=True)
@@ -1024,6 +1122,26 @@ def parse_args():
                         help="启用 LLM Judge 缓存 (默认开启)")
     parser.add_argument("--no-llm-judge-cache", action="store_true", default=False,
                         help="禁用 LLM Judge 缓存")
+    parser.add_argument("--search-provider", type=str, default=DEFAULT_SEARCH_PROVIDER,
+                        choices=[SEARCH_PROVIDER_HUOSHAN, SEARCH_PROVIDER_TAVILY],
+                        help="搜索 provider (默认 huoshan)")
+    parser.add_argument("--huoshan-site-filter", action="store_true", default=True,
+                        help="启用火山站点过滤（默认开启）")
+    parser.add_argument("--no-huoshan-site-filter", action="store_true", default=False,
+                        help="禁用火山站点过滤")
+    parser.add_argument("--huoshan-sites", type=str, default=None,
+                        help="火山站点过滤列表，逗号分隔")
+    parser.add_argument("--huoshan-site-max", type=int, default=5,
+                        help="Filter.Sites 最多站点数 (默认 5)")
+    parser.add_argument("--huoshan-timeout", type=int, default=30,
+                        help="火山方舟 API 超时秒数 (默认 30)")
+    parser.add_argument("--huoshan-recency", type=str, default="month",
+                        help="搜索时间范围 (默认 month)")
+    parser.add_argument("--huoshan-search-mode", type=str, default="auto",
+                        choices=["raw_api", "mcp_tool", "responses_api", "auto"],
+                        help="火山 API 模式 (默认 auto)")
+    parser.add_argument("--huoshan-debug-response", action="store_true", default=False,
+                        help="保存最多 3 条脱敏 raw response 到 diagnostics")
     return parser.parse_args()
 
 
@@ -1038,11 +1156,207 @@ def build_filters(args) -> MonitorFilters:
 
 
 def check_env():
-    missing = [k for k in ("TAVILY_API_KEY", "FIRECRAWL_API_KEY") if k not in os.environ]
-    if missing:
-        print(f"[ERROR] 缺少环境变量: {', '.join(missing)}")
-        print(f"请确保 {', '.join(missing)} 已设置在 .env 或环境中。")
+    firecrawl_ok = "FIRECRAWL_API_KEY" in os.environ
+    if not firecrawl_ok:
+        print("[ERROR] 缺少环境变量: FIRECRAWL_API_KEY", file=sys.stderr)
+        print("请确保 FIRECRAWL_API_KEY 已设置在 .env 或环境中。", file=sys.stderr)
         sys.exit(1)
+
+
+def get_huoshan_api_key() -> str | None:
+    key = os.environ.get("HUOSANFANGZHOU_API_KEY")
+    if key:
+        return key
+    key = os.environ.get("HUOSHANFANGZHOU_API_KEY")
+    if key:
+        return key
+    key = os.environ.get("VOLCENGINE_API_KEY")
+    if key:
+        return key
+    return None
+
+
+def _is_dns_error(err_text: str) -> bool:
+    dns_markers = ["nodename nor servname provided", "Failed to resolve", "NameResolutionError",
+                    "Name or service not known", "getaddrinfo failed"]
+    for m in dns_markers:
+        if m in err_text:
+            return True
+    return False
+
+
+def _is_network_error(err_text: str) -> bool:
+    net_markers = ["connection timeout", "ConnectionError", "Max retries exceeded",
+                    "Connection refused", "Connection reset", "timeout"]
+    for m in net_markers:
+        if m.lower() in err_text.lower():
+            return True
+    return False
+
+
+HUOSHAN_SEARCH_MODE_RAW = "raw_api"
+HUOSHAN_SEARCH_MODE_MCP = "mcp_tool"
+HUOSHAN_SEARCH_MODE_RESPONSES = "responses_api"
+HUOSHAN_SEARCH_MODE_AUTO = "auto"
+
+
+def detect_huoshan_schema(data: dict[str, Any]) -> str:
+    """Detect which response schema the Huoshan API returned."""
+    if "WebResults" in data:
+        return "web_search_api"
+    if "Result" in data and isinstance(data.get("Result"), dict):
+        sub = data["Result"]
+        if "WebResults" in sub or "ResultCount" in sub:
+            return "web_search_api_wrapped"  # ResponseMetadata+Result wrapper
+        if "results" in sub:
+            return "result_wrapper_results"
+    if "results" in data and isinstance(data.get("results"), list):
+        return "results_list"
+    if "references" in data:
+        return "references_list"
+    if "data" in data and isinstance(data.get("data"), dict):
+        sub = data["data"]
+        if "results" in sub:
+            return "data_results"
+        if "web_search" in sub:
+            return "data_web_search"
+        if "items" in sub:
+            return "data_items"
+    if "choices" in data or "output" in data:
+        return "answer_or_tool_response"
+    if "ResultCount" in data or "WebResults" in data:
+        return "web_search_api"
+    return "unknown"
+
+
+def parse_huoshan_search_response(data: dict[str, Any], diagnostics: CrawlDiagnostics | None = None) -> list[SearchResult]:
+    schema = detect_huoshan_schema(data)
+    if diagnostics:
+        diagnostics.huoshan_response_schema_type = schema
+    raw_items = None
+    if schema == "web_search_api":
+        raw_items = data.get("WebResults")
+    elif schema == "web_search_api_wrapped":
+        result_wrapper = data.get("Result", {})
+        raw_items = result_wrapper.get("WebResults")
+        if raw_items is None:
+            if "data" in result_wrapper and isinstance(result_wrapper.get("data"), dict):
+                raw_items = result_wrapper["data"].get("WebResults")
+    elif schema == "result_wrapper_results":
+        raw_items = data.get("Result", {}).get("results")
+    elif schema == "results_list":
+        raw_items = data.get("results")
+    elif schema == "references_list":
+        raw_items = data.get("references")
+    elif schema in ("data_results", "data_web_search", "data_items"):
+        sub = data.get("data", {})
+        if schema == "data_results":
+            raw_items = sub.get("results")
+        elif schema == "data_web_search":
+            raw_items = sub.get("web_search")
+        else:
+            raw_items = sub.get("items")
+    if raw_items is None or not isinstance(raw_items, list):
+        if diagnostics:
+            diagnostics.huoshan_parse_error_count += 1
+        return []
+    results: list[SearchResult] = []
+    for item in raw_items:
+        if not isinstance(item, dict):
+            continue
+        url = item.get("Url") or item.get("url") or item.get("link") or item.get("source_url") or ""
+        if not url:
+            continue
+        title = item.get("Title") or item.get("title") or item.get("name") or ""
+        content = item.get("Content") or item.get("content") or item.get("Snippet") or item.get("snippet") or item.get("Summary") or item.get("summary") or item.get("text") or ""
+        pub = item.get("PublishTime") or item.get("published_at") or item.get("publish_time") or item.get("date") or ""
+        if pub and "T" in pub:
+            pub = pub.split("T")[0]
+        website = item.get("SiteName") or item.get("website") or item.get("site") or item.get("source") or ""
+        score = None
+        try:
+            score = float(item.get("RankScore") or item.get("score") or item.get("rerank_score") or 0) or None
+        except (ValueError, TypeError):
+            pass
+        results.append(SearchResult(
+            title=str(title)[:500], url=url, content=str(content)[:2000],
+            published_at=str(pub), website=str(website),
+            source_provider="huoshan", score=score, raw=item,
+        ))
+    return results
+
+
+def call_huoshan_fangzhou_search(
+    query: str,
+    *,
+    api_key: str,
+    max_results: int = 10,
+    site_filters: list[str] | None = None,
+    time_range: str = "",
+    timeout: int = 30,
+    debug_response: bool = False,
+    diagnostics: CrawlDiagnostics | None = None,
+) -> list[SearchResult]:
+    import requests
+    url = "https://open.feedcoopapi.com/search_api/web_search"
+    payload: dict[str, Any] = {
+        "Query": query,
+        "SearchType": "web",
+        "Count": min(max_results, 50),
+        "Filter": {},
+    }
+    if site_filters:
+        payload["Filter"]["Sites"] = "|".join(site_filters[:20])
+    if time_range and time_range != "none":
+        tr_map = {"week": "OneWeek", "month": "OneMonth", "semiyear": "OneYear", "year": "OneYear"}
+        for k, v in tr_map.items():
+            if k in time_range:
+                payload["TimeRange"] = v
+                break
+        if payload.get("TimeRange") is None and payload.get("TimeRange") not in ("OneDay", "OneWeek", "OneMonth", "OneYear"):
+            payload.pop("TimeRange", None)
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {api_key}",
+    }
+    try:
+        resp = requests.post(url, headers=headers, json=payload, timeout=timeout)
+    except requests.Timeout:
+        raise HuoshanNetworkError(f"Huoshan search timeout after {timeout}s")
+    except Exception as e:
+        err_text = str(e)[:300]
+        if _is_dns_error(err_text):
+            raise HuoshanNetworkError(err_text)
+        if _is_network_error(err_text):
+            raise HuoshanNetworkError(err_text)
+        raise HuoshanSearchError(str(e)[:300])
+    if resp.status_code in (401, 403):
+        raise HuoshanAuthError(f"Huoshan auth error: {resp.status_code}")
+    if resp.status_code == 429 or "quota" in resp.text.lower() or "rate limit" in resp.text.lower() or "insufficient" in resp.text.lower():
+        raise HuoshanQuotaError(f"Huoshan quota error: {resp.status_code}")
+    if resp.status_code != 200:
+        raise HuoshanSearchError(f"Huoshan search error {resp.status_code}: {resp.text[:200]}")
+    try:
+        data = resp.json()
+    except Exception as e:
+        if diagnostics:
+            diagnostics.huoshan_parse_error_count += 1
+        return []
+    if debug_response and diagnostics:
+        try:
+            diag = diagnostics
+            diag.huoshan_response_raw_samples = diag.huoshan_response_raw_samples or []
+            if len(diag.huoshan_response_raw_samples) < 3:
+                sample = {
+                    "top_level_keys": list(data.keys()),
+                    "schema_type": detect_huoshan_schema(data),
+                    "result_count": data.get("ResultCount", data.get("result_count", "N/A")),
+                }
+                diag.huoshan_response_raw_samples.append(sample)
+        except Exception:
+            pass
+    results = parse_huoshan_search_response(data, diagnostics=diagnostics)
+    return results[:max_results]
 
 
 # ─── v0.5.3: Polluted evidence snippet detector ──────────────────
@@ -1491,17 +1805,120 @@ def build_search_queries(start, end, market, filters: MonitorFilters, max_result
 def tavily_search(client, query, max_results):
     try:
         response = client.search(query=query, search_depth="advanced", max_results=max_results)
-        return response.get("results", [])
+        raw = response.get("results", [])
+        results: list[SearchResult] = []
+        for r in raw:
+            results.append(SearchResult(
+                title=r.get("title", ""),
+                url=r.get("url", ""),
+                content=r.get("content", ""),
+                published_at=r.get("published_date", "") or r.get("publishedDate", "") or "",
+                source_provider="tavily",
+                website=r.get("domain", "") or "",
+                score=r.get("score", None),
+                raw=r,
+            ))
+        return results
     except Exception as e:
         print(f"[WARN] Tavily search error: {e}", file=sys.stderr)
         return []
 
 
-def dedup_urls(results):
+def _track_huoshan_error(diagnostics: CrawlDiagnostics | None, exc: Exception) -> None:
+    if diagnostics is None:
+        return
+    diagnostics.huoshan_error_count += 1
+    err_text = str(exc)
+    if _is_dns_error(err_text):
+        diagnostics.huoshan_dns_error_count += 1
+    elif _is_network_error(err_text):
+        diagnostics.huoshan_network_error_count += 1
+    else:
+        diagnostics.huoshan_http_error_count += 1
+
+
+def run_search_query(
+    query: str,
+    *,
+    provider: str,
+    max_results: int,
+    huoshan_api_key: str | None = None,
+    huoshan_site_filters: list[str] | None = None,
+    huoshan_time_range: str = "",
+    huoshan_timeout: int = 30,
+    huoshan_debug_response: bool = False,
+    tavily_client=None,
+    diagnostics: CrawlDiagnostics | None = None,
+) -> list[SearchResult]:
+    if diagnostics:
+        diagnostics.search_attempt_count += 1
+
+    if provider == SEARCH_PROVIDER_HUOSHAN:
+        if not huoshan_api_key:
+            if diagnostics: diagnostics.search_error_count += 1
+            print("[ERROR] HUOSANFANGZHOU_API_KEY not found for Huoshan provider", file=sys.stderr)
+            return []
+        if diagnostics: diagnostics.huoshan_query_attempt_count += 1
+        try:
+            results = call_huoshan_fangzhou_search(
+                query, api_key=huoshan_api_key, max_results=max_results,
+                site_filters=huoshan_site_filters, time_range=huoshan_time_range,
+                timeout=huoshan_timeout, debug_response=huoshan_debug_response,
+                diagnostics=diagnostics,
+            )
+            if diagnostics:
+                diagnostics.huoshan_query_success_count += 1
+                diagnostics.huoshan_result_count += len(results)
+                diagnostics.search_success_count += 1
+            return results
+        except HuoshanAuthError as e:
+            if diagnostics: diagnostics.huoshan_auth_error_count += 1
+            _track_huoshan_error(diagnostics, e)
+            print(f"[ERROR] Huoshan auth: {e}", file=sys.stderr)
+            return []
+        except HuoshanQuotaError as e:
+            if diagnostics: diagnostics.huoshan_quota_error_count += 1
+            _track_huoshan_error(diagnostics, e)
+            print(f"[ERROR] Huoshan quota: {e}", file=sys.stderr)
+            return []
+        except HuoshanNetworkError as e:
+            _track_huoshan_error(diagnostics, e)
+            print(f"[ERROR] Huoshan network: {e}", file=sys.stderr)
+            return []
+        except HuoshanSearchError as e:
+            _track_huoshan_error(diagnostics, e)
+            print(f"[ERROR] Huoshan search: {e}", file=sys.stderr)
+            return []
+
+    elif provider == SEARCH_PROVIDER_TAVILY:
+        if not tavily_client:
+            if diagnostics: diagnostics.search_error_count += 1
+            print("[ERROR] Tavily client not available", file=sys.stderr)
+            return []
+        results = tavily_search(tavily_client, query, max_results)
+        if diagnostics:
+            diagnostics.tavily_query_count += 1
+            diagnostics.tavily_result_count += len(results)
+            if len(results) > 0:
+                diagnostics.search_success_count += 1
+            else:
+                diagnostics.search_error_count += 1
+        return results
+
+    elif provider in (SEARCH_PROVIDER_BAIDU, SEARCH_PROVIDER_AUTO):
+        msg = f"Provider '{provider}' was removed in v0.5.7; use --search-provider huoshan"
+        print(f"[ERROR] {msg}", file=sys.stderr)
+        if diagnostics: diagnostics.search_error_count += 1
+        return []
+
+    return []
+
+
+def dedup_urls(results: list[SearchResult]) -> list[SearchResult]:
     seen = set()
     deduped = []
     for r in results:
-        url = r.get("url", "")
+        url = r.url if isinstance(r, SearchResult) else (r.get("url", "") if isinstance(r, dict) else "")
         if url and url not in seen:
             seen.add(url)
             deduped.append(r)
@@ -2048,22 +2465,72 @@ def main():
     if args.targets_file:
         targets = load_watch_targets(args.targets_file)
 
-    from tavily import TavilyClient
     from firecrawl import FirecrawlApp
-
-    tavily_client = TavilyClient()
     firecrawl_app = FirecrawlApp()
 
-    queries = build_search_queries(start_str, end_str, args.market, filters, args.max_results, targets=targets)
-    diagnostics = CrawlDiagnostics(generated_query_count=len(queries))
+    search_provider = args.search_provider
+    if search_provider in (SEARCH_PROVIDER_BAIDU, SEARCH_PROVIDER_AUTO):
+        print(f"[ERROR] Provider '{search_provider}' was removed in v0.5.7; use --search-provider huoshan", file=sys.stderr)
+        sys.exit(1)
 
-    all_results = []
-    for query, tag in queries:
-        print(f"[INFO] 搜索: {query}", file=sys.stderr)
-        results = tavily_search(tavily_client, query, args.max_results)
+    huoshan_api_key = get_huoshan_api_key()
+    huoshan_site_filter_enabled = args.huoshan_site_filter
+    if args.no_huoshan_site_filter:
+        huoshan_site_filter_enabled = False
+    huoshan_sites = None
+    if args.huoshan_sites:
+        huoshan_sites = [s.strip() for s in args.huoshan_sites.split(",") if s.strip()]
+    elif huoshan_site_filter_enabled:
+        huoshan_sites = DEFAULT_AUTO_SITE_FILTERS
+    huoshan_site_max = args.huoshan_site_max
+    huoshan_search_mode = args.huoshan_search_mode
+    huoshan_debug_response = args.huoshan_debug_response
+
+    tavily_client = None
+    if search_provider == SEARCH_PROVIDER_TAVILY:
+        from tavily import TavilyClient
+        tavily_client = TavilyClient()
+
+    diagnostics = CrawlDiagnostics(generated_query_count=0)
+    diagnostics.search_provider = search_provider
+    diagnostics.huoshan_enabled = search_provider == SEARCH_PROVIDER_HUOSHAN
+    diagnostics.huoshan_site_filter_enabled = huoshan_site_filter_enabled
+    diagnostics.huoshan_site_max = huoshan_site_max
+    diagnostics.huoshan_search_mode = huoshan_search_mode
+    diagnostics.huoshan_site_max = huoshan_site_max
+
+    all_queries = build_search_queries(start_str, end_str, args.market, filters, args.max_results, targets=targets)
+    diagnostics.generated_query_count = len(all_queries)
+
+    all_results: list[SearchResult] = []
+    for query, tag in all_queries:
+        print(f"[INFO] 搜索 {search_provider}: {query}", file=sys.stderr)
+        results = run_search_query(
+            query,
+            provider=search_provider,
+            max_results=args.max_results,
+            huoshan_api_key=huoshan_api_key,
+            huoshan_site_filters=huoshan_sites,
+            huoshan_time_range=args.huoshan_recency,
+            huoshan_timeout=args.huoshan_timeout,
+            huoshan_debug_response=huoshan_debug_response,
+            tavily_client=tavily_client,
+            diagnostics=diagnostics,
+        )
         for r in results:
-            r["query_tag"] = tag
+            r.raw["query_tag"] = tag
         all_results.extend(results)
+
+    if diagnostics.search_attempt_count > 0:
+        if diagnostics.search_success_count == 0:
+            diagnostics.search_run_status = "failed"
+            diagnostics.search_all_failed = True
+            diagnostics.search_failed_provider_count = 1
+        elif diagnostics.search_success_count < diagnostics.search_attempt_count:
+            diagnostics.search_run_status = "partial_failed"
+            diagnostics.search_partial_failed = True
+        else:
+            diagnostics.search_run_status = "ok"
 
     deduped = dedup_urls(all_results)
     diagnostics.dedup_url_count = len(deduped)
@@ -2074,12 +2541,12 @@ def main():
             return 0
         return 1
 
-    deduped.sort(key=lambda x: (_priority(x.get("url", "")), -x.get("score", 0)))
+    deduped.sort(key=lambda x: (_priority(x.url), -(x.score or 0)))
 
     pre_skip = []
     keep = []
     for r in deduped:
-        url = r.get("url", "")
+        url = r.url
         skip, reason = should_skip_url_before_crawl(url, filters.source_types)
         if skip:
             pre_skip.append({"url": url, "reason": reason})
@@ -2091,7 +2558,7 @@ def main():
 
     candidates = keep[:args.max_results]
 
-    scrape_targets_list = [r["url"] for r in candidates if r.get("url")]
+    scrape_targets_list = [r.url for r in candidates if r.url]
     diagnostics.planned_crawl_count = len(scrape_targets_list)
     print(f"[INFO] 候选 URL 去重后: {len(deduped)}，预过滤跳过: {len(pre_skip)}，将抓取: {len(scrape_targets_list)}", file=sys.stderr)
 
@@ -2343,6 +2810,34 @@ def main():
                 "unknown_event_scope_count": diagnostics.unknown_event_scope_count,
                 "non_national_event_filtered_count": diagnostics.non_national_event_filtered_count,
                 "related_event_count": diagnostics.related_event_count,
+                "search_provider": diagnostics.search_provider,
+                "huoshan_enabled": diagnostics.huoshan_enabled,
+                "huoshan_query_attempt_count": diagnostics.huoshan_query_attempt_count,
+                "huoshan_query_success_count": diagnostics.huoshan_query_success_count,
+                "huoshan_result_count": diagnostics.huoshan_result_count,
+                "huoshan_site_filter_enabled": diagnostics.huoshan_site_filter_enabled,
+                "huoshan_site_expanded_query_count": diagnostics.huoshan_site_expanded_query_count,
+                "huoshan_site_max": diagnostics.huoshan_site_max,
+                "huoshan_stream": diagnostics.huoshan_stream,
+                "huoshan_disable_image_search": diagnostics.huoshan_disable_image_search,
+                "huoshan_error_count": diagnostics.huoshan_error_count,
+                "huoshan_auth_error_count": diagnostics.huoshan_auth_error_count,
+                "huoshan_quota_error_count": diagnostics.huoshan_quota_error_count,
+                "huoshan_network_error_count": diagnostics.huoshan_network_error_count,
+                "huoshan_dns_error_count": diagnostics.huoshan_dns_error_count,
+                "huoshan_http_error_count": diagnostics.huoshan_http_error_count,
+                "huoshan_parse_error_count": diagnostics.huoshan_parse_error_count,
+                "huoshan_response_schema_type": diagnostics.huoshan_response_schema_type,
+                "huoshan_search_mode": diagnostics.huoshan_search_mode,
+                "tavily_query_count": diagnostics.tavily_query_count,
+                "tavily_result_count": diagnostics.tavily_result_count,
+                "search_attempt_count": diagnostics.search_attempt_count,
+                "search_success_count": diagnostics.search_success_count,
+                "search_error_count": diagnostics.search_error_count,
+                "search_failed_provider_count": diagnostics.search_failed_provider_count,
+                "search_all_failed": diagnostics.search_all_failed,
+                "search_partial_failed": diagnostics.search_partial_failed,
+                "search_run_status": diagnostics.search_run_status,
                 "failed_urls": diagnostics.failed_urls[:10],
             },
             "summary": summary,
@@ -2426,6 +2921,20 @@ def format_markdown(events, summary, start_str, end_str, topic,
         lines.append(f"| 排除关键词 | {', '.join(filters.exclude_keywords)} |")
     lines.append("")
 
+    if diagnostics and diagnostics.search_run_status == "failed":
+        lines.append("> ⚠️ **搜索服务失败**：本次未成功获取候选 URL，因此报告不应解读为「无新车事件」。")
+        if diagnostics.huoshan_dns_error_count > 0:
+            lines.append("> 火山方舟搜索 endpoint DNS 解析失败，当前报告未完成。")
+        if diagnostics.huoshan_auth_error_count > 0:
+            lines.append("> 火山方舟搜索鉴权失败，请检查 HUOSANFANGZHOU_API_KEY。")
+        if diagnostics.huoshan_network_error_count > 0 and diagnostics.huoshan_dns_error_count == 0:
+            lines.append("> 火山方舟搜索网络连接失败，请检查网络。")
+        lines.append("> 请检查搜索 provider 或使用 `SEARCH_PROVIDER=tavily` 重试。")
+        lines.append("")
+    elif diagnostics and diagnostics.search_run_status == "partial_failed":
+        lines.append("> ⚠️ **部分搜索失败**：部分 query 未成功获取候选 URL，结果可能不完整。")
+        lines.append("")
+
     topic_note = summary.get("topic_note")
     if topic_note:
         lines.append(f"> {topic_note}")
@@ -2459,7 +2968,12 @@ def format_markdown(events, summary, start_str, end_str, topic,
         lines.append("")
 
     if not events:
-        lines.append("> 未找到符合条件的事件。")
+        if diagnostics and diagnostics.search_run_status == "failed":
+            lines.append("> 搜索失败，未完成监测。")
+        elif diagnostics and diagnostics.search_run_status == "partial_failed":
+            lines.append("> 部分搜索失败，结果可能不完整。")
+        else:
+            lines.append("> 未找到符合条件的事件。")
         lines.append("")
         if not target_overview_hits and not target_overview_misses:
             lines.extend(_build_diagnostics_section(diagnostics))
@@ -2529,7 +3043,16 @@ def format_markdown(events, summary, start_str, end_str, topic,
 
     lines.append("## 数据源")
     lines.append("")
-    lines.append("- 搜索引擎: Tavily (AI-powered web search)")
+    if diagnostics:
+        sp = diagnostics.search_provider
+        if sp == SEARCH_PROVIDER_HUOSHAN:
+            lines.append("- 搜索引擎: 火山引擎 / 火山方舟联网搜索")
+        elif sp == SEARCH_PROVIDER_TAVILY:
+            lines.append("- 搜索引擎: Tavily (AI-powered web search)")
+        else:
+            lines.append("- 搜索引擎: 火山引擎 / 火山方舟联网搜索")
+    else:
+        lines.append("- 搜索引擎: 火山引擎 / 火山方舟联网搜索")
     lines.append("- 网页抓取: Firecrawl")
     lines.append("- 优先来源: 品牌官网、汽车之家、懂车帝、易车、太平洋汽车、盖世汽车、新出行、网通社等")
     lines.append("")
@@ -2593,6 +3116,31 @@ def _build_diagnostics_section(diagnostics: CrawlDiagnostics) -> list[str]:
     lines.append(f"| unknown_event_scope_count | {diagnostics.unknown_event_scope_count} |")
     lines.append(f"| non_national_event_filtered_count | {diagnostics.non_national_event_filtered_count} |")
     lines.append(f"| related_event_count | {diagnostics.related_event_count} |")
+    lines.append(f"| search_provider | {diagnostics.search_provider} |")
+    lines.append(f"| huoshan_enabled | {diagnostics.huoshan_enabled} |")
+    lines.append(f"| huoshan_query_attempt_count | {diagnostics.huoshan_query_attempt_count} |")
+    lines.append(f"| huoshan_query_success_count | {diagnostics.huoshan_query_success_count} |")
+    lines.append(f"| huoshan_result_count | {diagnostics.huoshan_result_count} |")
+    lines.append(f"| huoshan_site_filter_enabled | {diagnostics.huoshan_site_filter_enabled} |")
+    lines.append(f"| huoshan_site_expanded_query_count | {diagnostics.huoshan_site_expanded_query_count} |")
+    lines.append(f"| huoshan_site_max | {diagnostics.huoshan_site_max} |")
+    lines.append(f"| huoshan_search_mode | {diagnostics.huoshan_search_mode} |")
+    lines.append(f"| huoshan_response_schema_type | {diagnostics.huoshan_response_schema_type} |")
+    lines.append(f"| huoshan_error_count | {diagnostics.huoshan_error_count} |")
+    lines.append(f"| huoshan_auth_error_count | {diagnostics.huoshan_auth_error_count} |")
+    lines.append(f"| huoshan_quota_error_count | {diagnostics.huoshan_quota_error_count} |")
+    lines.append(f"| huoshan_network_error_count | {diagnostics.huoshan_network_error_count} |")
+    lines.append(f"| huoshan_dns_error_count | {diagnostics.huoshan_dns_error_count} |")
+    lines.append(f"| huoshan_http_error_count | {diagnostics.huoshan_http_error_count} |")
+    lines.append(f"| huoshan_parse_error_count | {diagnostics.huoshan_parse_error_count} |")
+    lines.append(f"| tavily_query_count | {diagnostics.tavily_query_count} |")
+    lines.append(f"| tavily_result_count | {diagnostics.tavily_result_count} |")
+    lines.append(f"| search_attempt_count | {diagnostics.search_attempt_count} |")
+    lines.append(f"| search_success_count | {diagnostics.search_success_count} |")
+    lines.append(f"| search_error_count | {diagnostics.search_error_count} |")
+    lines.append(f"| search_run_status | {diagnostics.search_run_status} |")
+    lines.append(f"| search_all_failed | {diagnostics.search_all_failed} |")
+    lines.append(f"| search_partial_failed | {diagnostics.search_partial_failed} |")
     lines.append(f"| historical_downgraded_count | {diagnostics.historical_downgraded_count} |")
     lines.append(f"| source_pub_empty_brand_model_count | {diagnostics.source_pub_empty_brand_model_count} |")
     lines.append("")

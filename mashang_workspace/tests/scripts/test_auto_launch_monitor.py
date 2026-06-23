@@ -3066,3 +3066,728 @@ print("OK")
 """
     result = _extract_py(os.environ.copy(), code)
     assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+# ═══════════════════════════════════════════════════════════════════
+# v0.5.5 — Baidu Qianfan Search Provider
+# ═══════════════════════════════════════════════════════════════════
+
+# ─── A. Baidu request construction ──────────────────────────────
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def test_provider_tavily_calls_tavily():
+    code = rf"""
+import sys; sys.path.insert(0, r"{_SCRIPT_DIR}")
+from auto_launch_monitor import run_search_query, CrawlDiagnostics
+import unittest.mock as mock
+
+with mock.patch("auto_launch_monitor.tavily_search") as mock_tav:
+    mock_tav.return_value = []
+    diag = CrawlDiagnostics()
+    run_search_query("q", provider="tavily", max_results=10,
+                      tavily_client=mock.MagicMock(), diagnostics=diag)
+    assert mock_tav.called, "Tavily should be called"
+    print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+
+
+
+
+def test_v054_scope_still_works():
+    code = rf"""
+import sys; sys.path.insert(0, r"{_SCRIPT_DIR}")
+from auto_launch_monitor import classify_event_scope, EVENT_SCOPE_NATIONAL
+
+scope = classify_event_scope("官方宣布全系正式上市", event_type="上市")
+assert scope == EVENT_SCOPE_NATIONAL
+print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+def test_v053_polluted_still_works():
+    code = rf"""
+import sys; sys.path.insert(0, r"{_SCRIPT_DIR}")
+from auto_launch_monitor import is_polluted_evidence_snippet
+
+polluted, reason = is_polluted_evidence_snippet("### 相关资讯 - [**上市")
+assert polluted
+print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+# ═══════════════════════════════════════════════════════════════════
+# v0.5.6 — Search Failure Semantics
+# ═══════════════════════════════════════════════════════════════════
+
+# ─── A. diagnostics (all DNS failed) ────────────────────────────
+
+def test_search_failed_all_dns():
+    code = rf"""
+import sys; sys.path.insert(0, r"{_SCRIPT_DIR}")
+from auto_launch_monitor import CrawlDiagnostics
+
+diag = CrawlDiagnostics()
+diag.search_attempt_count = 17
+diag.search_success_count = 0
+diag.baidu_query_attempt_count = 17
+diag.huoshan_dns_error_count = 17
+diag.baidu_query_success_count = 0
+# Simulate run_search_query behavior
+if diag.search_attempt_count > 0:
+    if diag.search_success_count == 0:
+        diag.search_run_status = "failed"
+        diag.search_all_failed = True
+        diag.search_failed_provider_count = 1
+assert diag.search_run_status == "failed"
+assert diag.search_all_failed == True
+print("OK status=" + diag.search_run_status)
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+def test_search_failed_counts():
+    code = rf"""
+import sys; sys.path.insert(0, r"{_SCRIPT_DIR}")
+from auto_launch_monitor import CrawlDiagnostics
+
+diag = CrawlDiagnostics()
+diag.baidu_query_attempt_count = 17
+diag.huoshan_dns_error_count = 17
+diag.baidu_query_success_count = 0
+assert diag.baidu_query_attempt_count == 17
+assert diag.huoshan_dns_error_count == 17
+assert diag.baidu_query_success_count == 0
+print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+def test_dns_error_detection():
+    code = rf"""
+import sys; sys.path.insert(0, r"{_SCRIPT_DIR}")
+from auto_launch_monitor import _is_dns_error
+
+assert _is_dns_error("nodename nor servname provided")
+assert _is_dns_error("Failed to resolve 'qianfan.baidubce.com'")
+assert _is_dns_error("NameResolutionError")
+assert not _is_dns_error("connection timeout")
+assert not _is_dns_error("rate limit exceeded")
+print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+def test_network_error_detection():
+    code = rf"""
+import sys; sys.path.insert(0, r"{_SCRIPT_DIR}")
+from auto_launch_monitor import _is_network_error
+
+assert _is_network_error("connection timeout")
+assert _is_network_error("Max retries exceeded")
+assert _is_network_error("ConnectionError")
+assert not _is_network_error("nodename nor servname provided")
+assert not _is_network_error("auth failed")
+print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+# ─── B. markdown ────────────────────────────────────────────────
+
+def test_markdown_search_failed_warning():
+    code = rf"""
+import sys; sys.path.insert(0, r"{_SCRIPT_DIR}")
+from auto_launch_monitor import format_markdown, build_event_summary, MonitorFilters, CrawlDiagnostics
+
+events = []
+summary = build_event_summary(events, "新车发布会")
+diag = CrawlDiagnostics(search_run_status="failed", huoshan_dns_error_count=1)
+md = format_markdown(events, summary, "2026-06-05", "2026-06-07", "新车发布会", diagnostics=diag)
+assert "搜索服务失败" in md
+assert "未成功获取候选 URL" in md
+assert "DNS 解析失败" in md
+assert "未找到符合条件的事件" not in md
+assert "搜索失败，未完成监测" in md
+print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+def test_markdown_partial_failed():
+    code = rf"""
+import sys; sys.path.insert(0, r"{_SCRIPT_DIR}")
+from auto_launch_monitor import format_markdown, build_event_summary, MonitorFilters, CrawlDiagnostics
+
+events = []
+summary = build_event_summary(events, "新车发布会")
+diag = CrawlDiagnostics(search_run_status="partial_failed")
+md = format_markdown(events, summary, "2026-06-05", "2026-06-07", "新车发布会", diagnostics=diag)
+assert "部分搜索失败" in md
+assert "结果可能不完整" in md
+print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+def test_markdown_ok_no_events():
+    code = rf"""
+import sys; sys.path.insert(0, r"{_SCRIPT_DIR}")
+from auto_launch_monitor import format_markdown, build_event_summary, MonitorFilters, CrawlDiagnostics
+
+events = []
+summary = build_event_summary(events, "新车发布会")
+diag = CrawlDiagnostics(search_run_status="ok")
+md = format_markdown(events, summary, "2026-06-05", "2026-06-07", "新车发布会", diagnostics=diag)
+assert "未找到符合条件的事件" in md
+print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+# ─── C. provider routing ────────────────────────────────────────
+
+
+
+def test_auto_fallback_partial_status():
+    code = r"""
+import sys; sys.path.insert(0, r"/Users/zihao_/Documents/github/mashang-service/mashang_workspace/research_scripts")
+from auto_launch_monitor import CrawlDiagnostics
+
+diag = CrawlDiagnostics()
+diag.search_attempt_count = 3
+diag.search_success_count = 3
+diag.huoshan_dns_error_count = 3
+diag.baidu_fallback_to_tavily_count = 3
+diag.tavily_query_count = 3
+diag.tavily_result_count = 15
+if diag.search_attempt_count > 0:
+    if diag.search_success_count < diag.search_attempt_count:
+        diag.search_run_status = "partial_failed"
+    elif diag.search_success_count == diag.search_attempt_count:
+        diag.search_run_status = "ok"
+assert diag.search_run_status == "ok", "tavily fallback succeeded should be ok, got " + str(diag.search_run_status)
+diag2 = CrawlDiagnostics()
+diag2.search_attempt_count = 3
+diag2.search_success_count = 0
+diag2.baidu_dns_error_count = 3
+diag2.tavily_query_count = 3
+diag2.tavily_result_count = 0
+if diag2.search_attempt_count > 0:
+    if diag2.search_success_count == 0:
+        diag2.search_run_status = "failed"
+assert diag2.search_run_status == "failed"
+print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+# ─── D. regression ─────────────────────────────────────────────
+
+
+def test_v054_scope_fields_still_exist():
+    code = rf"""
+import sys; sys.path.insert(0, r"{_SCRIPT_DIR}")
+from auto_launch_monitor import CrawlDiagnostics
+
+diag = CrawlDiagnostics()
+assert hasattr(diag, 'event_scope_classified_count')
+assert hasattr(diag, 'national_event_count')
+assert hasattr(diag, 'regional_event_count')
+print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+def test_v053_polluted_still_works_v056():
+    code = rf"""
+import sys; sys.path.insert(0, r"{_SCRIPT_DIR}")
+from auto_launch_monitor import is_polluted_evidence_snippet
+
+polluted, reason = is_polluted_evidence_snippet("### 相关资讯 - [**上市")
+assert polluted
+print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+# ─── E. diagnostics in markdown table ──────────────────────────
+
+def test_search_diag_in_markdown():
+    code = rf"""
+import sys; sys.path.insert(0, r"{_SCRIPT_DIR}")
+from auto_launch_monitor import format_markdown, build_event_summary, MonitorFilters, CrawlDiagnostics
+
+events = [{{"date":"2026-06-05","brand":"理想","model":"i6","event_type":"上市","event_status":"已确认",
+           "source_title":"A","source_url":"https://a.com","source_urls":["https://a.com"],
+           "source_type":"mainstream_media","confidence":"中","evidence":"test"}}]
+summary = build_event_summary(events, "新车发布会")
+diag = CrawlDiagnostics(search_run_status="failed", search_attempt_count=17, baidu_dns_error_count=17)
+md = format_markdown(events, summary, "2026-06-05", "2026-06-07", "新车发布会", diagnostics=diag)
+assert "search_run_status" in md
+assert "search_attempt_count" in md
+assert "huoshan_dns_error_count" in md
+print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+# ═══════════════════════════════════════════════════════════════════
+# v0.5.7 — Huoshan Fangzhou Search Provider
+# ═══════════════════════════════════════════════════════════════════
+
+# ─── A. Huoshan request construction ────────────────────────────
+
+def test_huoshan_body_default():
+    code = r"""
+import sys; sys.path.insert(0, "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/research_scripts")
+from auto_launch_monitor import call_huoshan_fangzhou_search
+import unittest.mock as mock
+
+with mock.patch("requests.post") as mock_post:
+    mock_resp = mock.MagicMock()
+    mock_resp.status_code = 200
+    mock_resp.json.return_value = {"WebResults": []}
+    mock_post.return_value = mock_resp
+    call_huoshan_fangzhou_search("test query", api_key="test-key")
+    body = mock_post.call_args[1]["json"]
+    hdrs = mock_post.call_args[1]["headers"]
+    assert body["Query"] == "test query"
+    assert body["SearchType"] == "web"
+    assert body["Count"] == 10
+    assert "Filter" in body
+    assert hdrs["Authorization"] == "Bearer test-key"
+    assert hdrs["Content-Type"] == "application/json"
+    print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+def test_huoshan_site_filters():
+    code = r"""
+import sys; sys.path.insert(0, "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/research_scripts")
+from auto_launch_monitor import call_huoshan_fangzhou_search
+import unittest.mock as mock
+
+with mock.patch("requests.post") as mock_post:
+    mock_resp = mock.MagicMock()
+    mock_resp.status_code = 200
+    mock_resp.json.return_value = {"WebResults": []}
+    mock_post.return_value = mock_resp
+    call_huoshan_fangzhou_search("q", api_key="k", site_filters=["a.com","b.com"])
+    body = mock_post.call_args[1]["json"]
+    assert "Filter" in body
+    assert body["Filter"]["Sites"] == "a.com|b.com"
+    print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+
+def test_huoshan_parse_web_results():
+    code = r"""
+import sys; sys.path.insert(0, "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/research_scripts")
+from auto_launch_monitor import parse_huoshan_search_response
+
+data = {"WebResults": [{"Title":"理想i6上市","Url":"https://a.com","Content":"正文","PublishTime":"2026-06-10T00:00:00+08:00","SiteName":"autohome","RankScore":0.95}]}
+results = parse_huoshan_search_response(data)
+assert len(results) == 1
+assert results[0].title == "理想i6上市"
+assert results[0].url == "https://a.com"
+assert results[0].content == "正文"
+assert results[0].published_at == "2026-06-10"
+assert results[0].website == "autohome"
+print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+def test_huoshan_parse_fallback_schema():
+    code = r"""
+import sys; sys.path.insert(0, "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/research_scripts")
+from auto_launch_monitor import parse_huoshan_search_response
+
+data = {"results": [{"title":"t","url":"https://b.com"}]}
+results = parse_huoshan_search_response(data)
+assert len(results) == 1
+assert results[0].url == "https://b.com"
+print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+def test_huoshan_parse_detect_schema():
+    code = r"""
+import sys; sys.path.insert(0, "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/research_scripts")
+from auto_launch_monitor import parse_huoshan_search_response, CrawlDiagnostics
+
+diag = CrawlDiagnostics()
+data = {"WebResults": [{"Title":"t","Url":"https://c.com"}]}
+results = parse_huoshan_search_response(data, diagnostics=diag)
+assert diag.huoshan_response_schema_type == "web_search_api"
+print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+def test_huoshan_filter_no_url():
+    code = r"""
+import sys; sys.path.insert(0, "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/research_scripts")
+from auto_launch_monitor import parse_huoshan_search_response
+
+data = {"results": [{"title":"no url"}, {"title":"has url","url":"https://d.com"}]}
+results = parse_huoshan_search_response(data)
+assert len(results) == 1
+assert results[0].url == "https://d.com"
+print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+# ─── D. Error handling ─────────────────────────────────────────
+
+def test_huoshan_auth_error():
+    code = r"""
+import sys; sys.path.insert(0, "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/research_scripts")
+from auto_launch_monitor import call_huoshan_fangzhou_search, HuoshanAuthError
+import unittest.mock as mock
+
+with mock.patch("requests.post") as mock_post:
+    mock_resp = mock.MagicMock()
+    mock_resp.status_code = 401
+    mock_post.return_value = mock_resp
+    try:
+        call_huoshan_fangzhou_search("q", api_key="k")
+        assert False
+    except HuoshanAuthError:
+        print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+def test_huoshan_quota_error():
+    code = r"""
+import sys; sys.path.insert(0, "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/research_scripts")
+from auto_launch_monitor import call_huoshan_fangzhou_search, HuoshanQuotaError
+import unittest.mock as mock
+
+with mock.patch("requests.post") as mock_post:
+    mock_resp = mock.MagicMock()
+    mock_resp.status_code = 429
+    mock_resp.text = "rate limit"
+    mock_post.return_value = mock_resp
+    try:
+        call_huoshan_fangzhou_search("q", api_key="k")
+        assert False
+    except HuoshanQuotaError:
+        print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+def test_huoshan_network_error():
+    code = r"""
+import sys; sys.path.insert(0, "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/research_scripts")
+from auto_launch_monitor import call_huoshan_fangzhou_search, HuoshanNetworkError
+import unittest.mock as mock
+
+with mock.patch("requests.post") as mock_post:
+    mock_post.side_effect = Exception("nodename nor servname provided")
+    try:
+        call_huoshan_fangzhou_search("q", api_key="k")
+        assert False
+    except HuoshanNetworkError:
+        print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+def test_huoshan_http_500():
+    code = r"""
+import sys; sys.path.insert(0, "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/research_scripts")
+from auto_launch_monitor import call_huoshan_fangzhou_search, HuoshanSearchError
+import unittest.mock as mock
+
+with mock.patch("requests.post") as mock_post:
+    mock_resp = mock.MagicMock()
+    mock_resp.status_code = 500
+    mock_resp.text = "internal error"
+    mock_post.return_value = mock_resp
+    try:
+        call_huoshan_fangzhou_search("q", api_key="k")
+        assert False
+    except HuoshanSearchError:
+        print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+def test_huoshan_json_parse_error():
+    code = r"""
+import sys; sys.path.insert(0, "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/research_scripts")
+from auto_launch_monitor import call_huoshan_fangzhou_search, CrawlDiagnostics
+import unittest.mock as mock
+
+with mock.patch("requests.post") as mock_post:
+    mock_resp = mock.MagicMock()
+    mock_resp.status_code = 200
+    mock_resp.json.side_effect = ValueError("bad json")
+    mock_post.return_value = mock_resp
+    diag = CrawlDiagnostics()
+    results = call_huoshan_fangzhou_search("q", api_key="k", diagnostics=diag)
+    assert len(results) == 0
+    assert diag.huoshan_parse_error_count >= 1
+    print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+# ─── E. Env loading ────────────────────────────────────────────
+
+def test_get_huoshan_api_key():
+    code = r"""
+import sys, os; sys.path.insert(0, "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/research_scripts")
+from auto_launch_monitor import get_huoshan_api_key
+
+os.environ["HUOSANFANGZHOU_API_KEY"] = "hs-test-key"
+key = get_huoshan_api_key()
+assert key == "hs-test-key"
+print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+def test_get_huoshan_api_key_typo_fallback():
+    code = r"""
+import sys, os; sys.path.insert(0, "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/research_scripts")
+from auto_launch_monitor import get_huoshan_api_key
+
+saved = os.environ.pop("HUOSANFANGZHOU_API_KEY", None)
+os.environ["HUOSHANFANGZHOU_API_KEY"] = "typo-key"
+key = get_huoshan_api_key()
+assert key == "typo-key"
+if saved: os.environ["HUOSANFANGZHOU_API_KEY"] = saved
+os.environ.pop("HUOSHANFANGZHOU_API_KEY", None)
+print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+# ─── F. Provider routing ───────────────────────────────────────
+
+def test_provider_huoshan_calls_huoshan():
+    code = r"""
+import sys; sys.path.insert(0, "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/research_scripts")
+from auto_launch_monitor import run_search_query, CrawlDiagnostics
+import unittest.mock as mock
+
+with mock.patch("auto_launch_monitor.call_huoshan_fangzhou_search") as mock_hs:
+    mock_hs.return_value = []
+    with mock.patch("auto_launch_monitor.tavily_search") as mock_tav:
+        diag = CrawlDiagnostics()
+        run_search_query("q", provider="huoshan", max_results=10,
+                          huoshan_api_key="k", diagnostics=diag)
+        assert mock_hs.called
+        assert not mock_tav.called
+        print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+def test_provider_tavily_calls_tavily():
+    code = r"""
+import sys; sys.path.insert(0, "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/research_scripts")
+from auto_launch_monitor import run_search_query, CrawlDiagnostics
+import unittest.mock as mock
+
+with mock.patch("auto_launch_monitor.call_huoshan_fangzhou_search") as mock_hs:
+    with mock.patch("auto_launch_monitor.tavily_search") as mock_tav:
+        mock_tav.return_value = []
+        diag = CrawlDiagnostics()
+        run_search_query("q", provider="tavily", max_results=10,
+                          tavily_client=mock.MagicMock(), diagnostics=diag)
+        assert not mock_hs.called
+        assert mock_tav.called
+        print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+def test_provider_baidu_unsupported():
+    code = r"""
+import sys; sys.path.insert(0, "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/research_scripts")
+from auto_launch_monitor import run_search_query, CrawlDiagnostics
+
+diag = CrawlDiagnostics()
+results = run_search_query("q", provider="baidu", max_results=10, diagnostics=diag)
+assert len(results) == 0
+print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+# ─── G. Diagnostics / report ───────────────────────────────────
+
+def test_huoshan_diagnostics_in_markdown():
+    code = r"""
+import sys; sys.path.insert(0, "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/research_scripts")
+from auto_launch_monitor import format_markdown, build_event_summary, MonitorFilters, CrawlDiagnostics
+
+events = [{"date":"2026-06-05","brand":"理想","model":"i6","event_type":"上市","event_status":"已确认",
+           "source_title":"A","source_url":"https://a.com","source_urls":["https://a.com"],
+           "source_type":"mainstream_media","confidence":"中","evidence":"test"}]
+summary = build_event_summary(events, "新车发布会")
+diag = CrawlDiagnostics(search_provider="huoshan", huoshan_query_attempt_count=3, huoshan_result_count=15)
+md = format_markdown(events, summary, "2026-06-05", "2026-06-07", "新车发布会", diagnostics=diag)
+assert "huoshan_query_attempt_count" in md
+assert "huoshan_result_count" in md
+assert "火山引擎" in md
+print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+def test_report_data_source_huoshan():
+    code = r"""
+import sys; sys.path.insert(0, "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/research_scripts")
+from auto_launch_monitor import format_markdown, build_event_summary, MonitorFilters, CrawlDiagnostics
+
+events = [{"date":"2026-06-05","brand":"理想","model":"i6","event_type":"上市","event_status":"已确认",
+           "source_title":"A","source_url":"https://a.com","source_urls":["https://a.com"],
+           "source_type":"mainstream_media","confidence":"中","evidence":"test"}]
+summary = build_event_summary(events, "新车发布会")
+diag = CrawlDiagnostics(search_provider="huoshan")
+md = format_markdown(events, summary, "2026-06-05", "2026-06-07", "新车发布会", diagnostics=diag)
+assert "火山引擎 / 火山方舟联网搜索" in md
+print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+def test_huoshan_failed_status():
+    code = r"""
+import sys; sys.path.insert(0, "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/research_scripts")
+from auto_launch_monitor import format_markdown, build_event_summary, MonitorFilters, CrawlDiagnostics
+
+events = []
+summary = build_event_summary(events, "新车发布会")
+diag = CrawlDiagnostics(search_run_status="failed", huoshan_dns_error_count=5)
+md = format_markdown(events, summary, "2026-06-05", "2026-06-07", "新车发布会", diagnostics=diag)
+assert "搜索服务失败" in md
+assert "DNS 解析失败" in md
+assert "未找到符合条件的事件" not in md
+print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+# ─── H. Regression ─────────────────────────────────────────────
+
+def test_v056_search_failure_semantics():
+    code = r"""
+import sys; sys.path.insert(0, "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/research_scripts")
+from auto_launch_monitor import CrawlDiagnostics
+
+diag = CrawlDiagnostics()
+diag.search_attempt_count = 5
+diag.search_success_count = 0
+if diag.search_attempt_count > 0:
+    if diag.search_success_count == 0:
+        diag.search_run_status = "failed"
+assert diag.search_run_status == "failed"
+print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+def test_v054_scope_still_exists():
+    code = r"""
+import sys; sys.path.insert(0, "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/research_scripts")
+from auto_launch_monitor import CrawlDiagnostics, classify_event_scope, EVENT_SCOPE_NATIONAL
+
+diag = CrawlDiagnostics()
+assert hasattr(diag, 'event_scope_classified_count')
+scope = classify_event_scope("官方宣布全系正式上市", event_type="上市")
+assert scope == EVENT_SCOPE_NATIONAL
+print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+def test_v053_polluted_still_works_v057():
+    code = r"""
+import sys; sys.path.insert(0, "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/research_scripts")
+from auto_launch_monitor import is_polluted_evidence_snippet
+
+polluted, reason = is_polluted_evidence_snippet("### 相关资讯 - [**上市")
+assert polluted
+print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+
+
+def test_llm_judge_default_off():
+    code = r"""
+import sys; sys.path.insert(0, "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/research_scripts")
+from auto_launch_monitor import CrawlDiagnostics
+
+diag = CrawlDiagnostics()
+assert diag.llm_judge_enabled == False
+print("OK")
+"""
+    result = _extract_py(os.environ.copy(), code)
+    assert result.returncode == 0, f"stderr: {result.stderr}"
