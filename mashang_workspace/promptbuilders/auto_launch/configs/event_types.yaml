@@ -1,0 +1,63 @@
+# Auto Launch 事件类型定义
+# version: v0.1
+
+event_types:
+  - id: launch
+    name: 上市
+    description: 新车正式上市，公布全系售价和配置
+    search_keywords: [上市, 正式上市, 售价公布, 上市发布]
+    required_modules: [event_confirmation, pricing, product_positioning, competitive_analysis, media_feedback, impact_assessment]
+
+  - id: presale
+    name: 预售
+    description: 新车开启预售，公布预售价和预售权益
+    search_keywords: [预售, 开启预售, 预订, 盲订]
+    required_modules: [event_confirmation, pricing, competitive_analysis, media_feedback]
+
+  - id: launch_event
+    name: 发布会
+    description: 新车发布会，可能同时公布价格或仅亮相
+    search_keywords: [发布会, 亮相, 发布, 首发]
+    required_modules: [event_confirmation, product_positioning, media_feedback]
+
+  - id: debut
+    name: 首发亮相
+    description: 新车首次公开亮相（车展或品牌活动），通常不公布价格
+    search_keywords: [首发, 首秀, 车展, 亮相]
+    required_modules: [event_confirmation, product_positioning, competitive_analysis, media_feedback]
+
+  - id: config_release
+    name: 配置公布
+    description: 官方公布详细配置表
+    search_keywords: [配置, 配置表, 参数, 详细配置]
+    required_modules: [product_positioning, competitive_analysis, media_feedback]
+
+  - id: price_release
+    name: 价格公布
+    description: 官方公布售价（可能单独发布）
+    search_keywords: [售价, 价格, 定价, 价格公布]
+    required_modules: [event_confirmation, pricing, competitive_analysis, media_feedback]
+
+  - id: delivery_start
+    name: 开启交付
+    description: 新车开始交付给用户
+    search_keywords: [交付, 交付仪式, 首批, 提车, 开始交付]
+    required_modules: [event_confirmation, media_feedback, impact_assessment]
+
+  - id: facelift_launch
+    name: 改款上市
+    description: 现有车型的年度改款或中期改款上市
+    search_keywords: [改款, 新款, 2026款, 年度改款, 中期改款]
+    required_modules: [event_confirmation, pricing, product_positioning, competitive_analysis, media_feedback]
+
+  - id: benefit_adjustment
+    name: 限时权益调整
+    description: 限时购车权益、金融方案调整
+    search_keywords: [限时, 权益, 金融方案, 置换补贴, 保险补贴]
+    required_modules: [pricing, competitive_analysis]
+
+  - id: official_price_change
+    name: 官方调价
+    description: 官方宣布降价或涨价
+    search_keywords: [降价, 涨价, 调价, 价格调整, 官方降价]
+    required_modules: [pricing, competitive_analysis, media_feedback, impact_assessment]

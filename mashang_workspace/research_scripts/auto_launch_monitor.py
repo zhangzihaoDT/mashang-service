@@ -1,5 +1,15 @@
 #!/usr/bin/env python3
 """
+[DEPRECATED] auto_launch_monitor.py — 仅作为迁移参考保留。
+
+canonical 模块: mashang_workspace/promptbuilders/auto_launch/
+  - promptbuilder.py 生成搜索 Prompt，交给 AI 搜索能力执行
+  - 不直接爬取网页、不调用 LLM、不执行搜索
+
+auto_launch_monitor.py 是旧版搜索+执行+裁判一体脚本。
+后续新功能不要加到本文件。
+----------------------------------------------------------
+
 汽车新车事件监测器 — Auto Launch Monitor (v0.5.8)
 
 Market Intelligence / New Vehicle Event Monitor

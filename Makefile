@@ -79,7 +79,8 @@ atp-demo:
 backtest-demo:
 	$(PYTHON) mashang_workspace/research_scripts/lock_predict_backtest.py --format json
 
-## 新车事件监测（Tavily + Firecrawl，支持品牌/事件类型/来源类型/关键词/关注车型列表/LLM Judge 过滤）
+## [DEPRECATED] 新车事件监测 - 旧版搜索+执行+裁判一体脚本，迁移中。
+## canonical 入口: make build-auto-launch-prompt
 auto-launch-monitor:
 	@if [ -f .env ]; then set -a; . .env 2>/dev/null; set +a; fi; \
 	$(PYTHON) mashang_workspace/research_scripts/auto_launch_monitor.py \
@@ -156,6 +157,96 @@ miit-diagnose-attachments:
 ## 解析产品清单主表
 miit-parse-product-list:
 	$(PYTHON) mashang_workspace/research_scripts/miit_new_car/parse_product_list.py --batch $(BATCH)
+
+## 生成 Auto Launch 示例搜索 Prompt
+## 支持覆盖参数: TARGETS_FILE TARGET_PROFILE_FILE BATTLE_FIELDS_FILE TARGET_BRAND TARGET_MODEL TARGET_GROUP EVENT_TYPE EVENT_DATE WINDOW COMPETITOR_LIMIT INCLUDE_PRIORITY
+build-auto-launch-prompt:
+	$(PYTHON) mashang_workspace/promptbuilders/auto_launch/promptbuilder.py \
+		--brand $(or $(TARGET_BRAND),智己) \
+		--model $(or $(TARGET_MODEL),LS8) \
+		--event-type $(or $(EVENT_TYPE),上市) \
+		--event-date $(or $(EVENT_DATE),2026-06-25) \
+		--window $(or $(WINDOW),48h) \
+		$(if $(TARGETS_FILE),--targets-file "$(TARGETS_FILE)",--targets-file mashang_workspace/configs/ls8_competitor_watchlist.csv) \
+		$(if $(TARGET_PROFILE_FILE),--target-profile-file "$(TARGET_PROFILE_FILE)",--target-profile-file mashang_workspace/promptbuilders/auto_launch/configs/target_profiles.yaml) \
+		$(if $(BATTLE_FIELDS_FILE),--battle-fields-file "$(BATTLE_FIELDS_FILE)",--battle-fields-file mashang_workspace/promptbuilders/auto_launch/configs/battle_fields.yaml) \
+		$(if $(TARGET_GROUP),--target-group "$(TARGET_GROUP)") \
+		--competitor-limit $(or $(COMPETITOR_LIMIT),5) \
+		--include-priority $(or $(INCLUDE_PRIORITY),high) \
+		--output mashang_workspace/outputs/auto_launch/prompts/ls8_search_task.md
+
+## 生成 Golden Prompt Cases（3 个标准样例 + 校验）
+build-auto-launch-golden-prompts:
+	$(PYTHON) mashang_workspace/promptbuilders/auto_launch/examples/generate_golden_cases.py
+
+## 验证 AI 返回结果是否符合 evidence schema 和输出结构要求
+## 支持覆盖参数: CASE_NAME RAW_FILE PROMPT_FILE OUTPUT
+validate-auto-launch-ai-response:
+	$(PYTHON) mashang_workspace/promptbuilders/auto_launch/examples/validate_ai_response.py \
+		--strict \
+		--case-name $(or $(CASE_NAME),sample_response) \
+		--raw-file $(or $(RAW_FILE),mashang_workspace/promptbuilders/auto_launch/examples/fixtures/sample_response.synthetic.raw.md) \
+		--prompt-file $(or $(PROMPT_FILE),mashang_workspace/outputs/auto_launch/prompts/examples/byd_datang_ev_launch_7d_vs_ls8.md) \
+		--output $(or $(OUTPUT),mashang_workspace/outputs/auto_launch/ai_response_examples/sample_response.validation.json)
+
+## 验证 byd_datang_ev 真实 AI 返回结果
+## 使用前: 将 DeepSeek/ChatGPT 搜索结果保存为 outputs/auto_launch/ai_response_examples/byd_datang_ev_launch_7d_vs_ls8.raw.md
+validate-auto-launch-byd-datang-fixture:
+	@if [ ! -f mashang_workspace/outputs/auto_launch/ai_response_examples/byd_datang_ev_launch_7d_vs_ls8.raw.md ]; then \
+		echo ""; \
+		echo "  ⚠️  未找到真实 AI 返回结果。请先完成以下步骤："; \
+		echo ""; \
+		echo "  1. 打开以下 Prompt 文件，复制全部内容："; \
+		echo "     mashang_workspace/outputs/auto_launch/prompts/examples/byd_datang_ev_launch_7d_vs_ls8.md"; \
+		echo ""; \
+		echo "  2. 将内容粘贴到 DeepSeek / ChatGPT 的搜索对话中"; \
+		echo ""; \
+		echo "  3. 等待 AI 搜索完成后，将完整返回结果保存为："; \
+		echo "     mashang_workspace/outputs/auto_launch/ai_response_examples/byd_datang_ev_launch_7d_vs_ls8.raw.md"; \
+		echo ""; \
+		echo "  4. 重新运行: make validate-auto-launch-byd-datang-fixture"; \
+		echo ""; \
+		exit 1; \
+	fi
+	$(PYTHON) mashang_workspace/promptbuilders/auto_launch/examples/validate_ai_response.py \
+		--case-name byd_datang_ev_launch_7d_vs_ls8 \
+		--raw-file mashang_workspace/outputs/auto_launch/ai_response_examples/byd_datang_ev_launch_7d_vs_ls8.raw.md \
+		--prompt-file mashang_workspace/outputs/auto_launch/prompts/examples/byd_datang_ev_launch_7d_vs_ls8.md \
+		--output mashang_workspace/outputs/auto_launch/ai_response_examples/byd_datang_ev_launch_7d_vs_ls8.validation.json
+
+## 生成 byd_datang_ev 标准化证据 JSON
+## 前置条件: make validate-auto-launch-byd-datang-fixture 已通过
+build-auto-launch-byd-datang-report:
+	$(PYTHON) mashang_workspace/promptbuilders/auto_launch/examples/normalize_ai_response.py \
+		--case-name byd_datang_ev_launch_7d_vs_ls8 \
+		--raw-file mashang_workspace/outputs/auto_launch/ai_response_examples/byd_datang_ev_launch_7d_vs_ls8.raw.md \
+		--prompt-file mashang_workspace/outputs/auto_launch/prompts/examples/byd_datang_ev_launch_7d_vs_ls8.md \
+		--validation-file mashang_workspace/outputs/auto_launch/ai_response_examples/byd_datang_ev_launch_7d_vs_ls8.validation.json \
+		--normalized-output mashang_workspace/outputs/auto_launch/normalized/byd_datang_ev_launch_7d_vs_ls8.normalized_evidence.json \
+		--report-output mashang_workspace/outputs/auto_launch/reports/byd_datang_ev_launch_7d_vs_ls8/executive_brief.md
+
+## 打包为标准化报告目录（raw.md + 摘要 + 索引 + 质量）
+## 依赖: raw.md + validation.json + normalized_evidence.json
+package-auto-launch-byd-datang-report: build-auto-launch-byd-datang-report
+	$(PYTHON) mashang_workspace/promptbuilders/auto_launch/examples/package_ai_report.py \
+		--case-name byd_datang_ev_launch_7d_vs_ls8 \
+		--raw-file mashang_workspace/outputs/auto_launch/ai_response_examples/byd_datang_ev_launch_7d_vs_ls8.raw.md \
+		--validation-file mashang_workspace/outputs/auto_launch/ai_response_examples/byd_datang_ev_launch_7d_vs_ls8.validation.json \
+		--normalized-file mashang_workspace/outputs/auto_launch/normalized/byd_datang_ev_launch_7d_vs_ls8.normalized_evidence.json \
+		--output-dir mashang_workspace/outputs/auto_launch/reports/byd_datang_ev_launch_7d_vs_ls8
+
+## [EXPERIMENTAL] 生成一页摘要（不替代 raw.md）
+build-auto-launch-battle-brief:
+	$(PYTHON) mashang_workspace/promptbuilders/auto_launch/examples/build_battle_brief.py \
+		--normalized-file $(or $(NORMALIZED_FILE),mashang_workspace/outputs/auto_launch/normalized/byd_datang_ev_launch_7d_vs_ls8.normalized_evidence.json) \
+		--output $(or $(REPORT_OUTPUT),mashang_workspace/outputs/auto_launch/reports/byd_datang_ev_launch_7d_vs_ls8/executive_brief.md)
+
+## [EXPERIMENTAL] 验收 executive_brief.md 摘要质量
+validate-auto-launch-byd-datang-report:
+	$(PYTHON) mashang_workspace/promptbuilders/auto_launch/examples/validate_battle_brief.py \
+		--brief-file mashang_workspace/outputs/auto_launch/reports/byd_datang_ev_launch_7d_vs_ls8/executive_brief.md \
+		--normalized-file mashang_workspace/outputs/auto_launch/normalized/byd_datang_ev_launch_7d_vs_ls8.normalized_evidence.json \
+		--output mashang_workspace/outputs/auto_launch/reports/byd_datang_ev_launch_7d_vs_ls8/report.quality.json
 
 ## Capability Audit
 capability-audit:
@@ -267,7 +358,14 @@ help:
 	@echo "make reference-eval  Reference Eval"
 	@echo "make atp-demo        ATP 月报 Demo"
 	@echo "make backtest-demo   锁单预测回测 Demo"
-	@echo "make auto-launch-monitor  新车事件监测（START= END= MAX_RESULTS=8 TARGETS_FILE= ... SEARCH_PROVIDER=huoshan 默认）"
+	@echo "=== Auto Launch (新车上市情报) ==="
+	@echo "make build-auto-launch-prompt          生成搜索 Prompt（新主入口）"
+	@echo "make build-auto-launch-golden-prompts  生成 4 个 Golden Prompt 样例"
+	@echo "make validate-auto-launch-ai-response  [strict] synthetic AI 返回验证"
+	@echo "make validate-auto-launch-byd-datang-fixture  [tolerant] 真实 AI 返回验证"
+	@echo "make package-auto-launch-byd-datang-report  打包标准化报告目录 (raw+摘要+索引+质量)"
+	@echo "make build-auto-launch-battle-brief    [EXPERIMENTAL] 生成一页摘要"
+	@echo "make auto-launch-monitor               [DEPRECATED] 旧版新车事件监测"
 	@echo ""
 	@echo "=== MIIT 新车公告 ==="
 	@echo "make miit-discover-latest-batch  发现最新公告批次"

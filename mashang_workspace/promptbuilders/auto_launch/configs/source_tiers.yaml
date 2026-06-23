@@ -1,0 +1,99 @@
+# Auto Launch 信源分层配置
+# version: v0.1
+#
+# Tier 1: 官方一手信息 — 最高优先级，直接决定输出结论
+# Tier 2: 行业媒体 — 交叉验证和补充细节
+# Tier 3: 社交与用户 — 舆情参考，不作为事实结论依据
+
+tiers:
+  - tier: 1
+    name: 官方一手信息
+    weight: 1.0
+    description: 品牌官方渠道发布的一手信息
+    sources:
+      - name: 品牌官网
+        type: official
+        examples: [https://www.immotors.com, https://www.byd.com]
+        evidence_level: high
+      - name: 官方App/小程序
+        type: official
+        examples: [IM智己App, 比亚迪App]
+        evidence_level: high
+      - name: 官方微博
+        type: official
+        examples: ["@IM智己汽车", "@比亚迪汽车"]
+        evidence_level: high
+      - name: 官方微信公众号
+        type: official
+        evidence_level: high
+      - name: 官方新闻发布会/直播
+        type: official
+        evidence_level: high
+
+  - tier: 2
+    name: 行业媒体与垂媒
+    weight: 0.7
+    description: 第三方媒体、垂直网站和专业机构发布的信息
+    sources:
+      - name: 汽车之家
+        type: vertical_media
+        examples: [https://www.autohome.com.cn]
+        evidence_level: medium
+      - name: 懂车帝
+        type: vertical_media
+        examples: [https://www.dongchedi.com]
+        evidence_level: medium
+      - name: 易车
+        type: vertical_media
+        examples: [https://www.yiche.com]
+        evidence_level: medium
+      - name: 爱卡汽车
+        type: vertical_media
+        examples: [https://www.xcar.com.cn]
+        evidence_level: medium
+      - name: 新出行
+        type: vertical_media
+        examples: [https://www.xchuxing.com]
+        evidence_level: medium
+      - name: 盖世汽车
+        type: industry_media
+        evidence_level: medium
+      - name: 36氪
+        type: tech_media
+        evidence_level: medium
+      - name: 虎嗅
+        type: tech_media
+        evidence_level: medium
+      - name: 第一电动网
+        type: industry_media
+        evidence_level: medium
+      - name: 晚点Auto
+        type: industry_media
+        evidence_level: medium
+
+  - tier: 3
+    name: 社交平台与用户
+    weight: 0.4
+    description: 社交平台上的用户讨论、订单情报、论坛反馈
+    sources:
+      - name: 小红书
+        type: social
+        evidence_level: low
+      - name: 知乎
+        type: social
+        evidence_level: low
+      - name: 微博（非官方）
+        type: social
+        evidence_level: low
+      - name: 车主论坛/BBS
+        type: forum
+        evidence_level: low
+      - name: 汽车之家论坛
+        type: forum
+        evidence_level: low
+      - name: 懂车帝社群/车友圈
+        type: forum
+        evidence_level: low
+      - name: 抖音/快手
+        type: short_video
+        evidence_level: low

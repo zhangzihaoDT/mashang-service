@@ -51,9 +51,8 @@ mashang_workspace/outputs/miit_new_car/diff/
 mashang_workspace/outputs/miit_new_car/evidence/
 mashang_workspace/outputs/miit_new_car/state/
 
-# Runtime reports: auto launch monitor
-mashang_workspace/outputs/reports/auto_launch_monitor_*.md
-mashang_workspace/outputs/reports/auto_launch_monitor_*.json
+# Auto launch: all outputs are runtime-generated, not committed
+mashang_workspace/outputs/auto_launch/
 
 # Runtime reports: LS8 user profile snapshots
 mashang_workspace/outputs/reports/ls8_user_profile_*.md

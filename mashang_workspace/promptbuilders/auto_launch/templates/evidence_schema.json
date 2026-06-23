@@ -1,0 +1,157 @@
+{
+  "schema_version": "auto_launch_evidence.v0.1",
+  "description": "Auto Launch 搜索结果证据 schema — 用于结构化存储检索到的上市/预售/发布会情报",
+  "top_level_fields": {
+    "brand": { "type": "string", "description": "品牌名", "required": true },
+    "model": { "type": "string", "description": "车型名", "required": true },
+    "event_type": { "type": "string", "description": "事件类型", "required": true, "enum": ["launch", "presale", "launch_event", "debut", "config_release", "price_release", "delivery_start", "facelift_launch", "权益_adjustment", "official_price_change"] },
+    "event_date": { "type": "string", "description": "事件日期", "required": true, "format": "date" },
+    "search_time_window": { "type": "object", "description": "搜索时间窗口", "required": true, "properties": {
+      "start": { "type": "string", "format": "date" },
+      "end": { "type": "string", "format": "date" }
+    }},
+    "event_confirmation": { "$ref": "#/definitions/event_confirmation" },
+    "pricing_and_权益": { "$ref": "#/definitions/pricing_and_权益" },
+    "product_positioning": { "$ref": "#/definitions/product_positioning" },
+    "competitive_analysis": { "$ref": "#/definitions/competitive_analysis" },
+    "media_and_user_feedback": { "$ref": "#/definitions/media_and_user_feedback" },
+    "impact_assessment": { "$ref": "#/definitions/impact_assessment" },
+    "evidence_trail": { "$ref": "#/definitions/evidence_trail" }
+  },
+  "definitions": {
+    "event_confirmation": {
+      "type": "object",
+      "description": "模块1: 事件确认",
+      "properties": {
+        "event_name": { "type": "string", "description": "事件官方名称" },
+        "event_date_confirmed": { "type": "string", "description": "确认的事件日期" },
+        "location": { "type": "string", "description": "举办地点/城市" },
+        "official_announcement_url": { "type": "string", "description": "官方公告链接" },
+        "key_message": { "type": "string", "description": "官方核心宣传语/主题" },
+        "confirmation_confidence": { "type": "string", "enum": ["high", "medium", "low"] }
+      }
+    },
+    "pricing_and_权益": {
+      "type": "object",
+      "description": "模块2: 价格与权益",
+      "properties": {
+        "price": {
+          "type": "object",
+          "properties": {
+            "starting_price": { "type": "string", "description": "起售价" },
+            "top_price": { "type": "string", "description": "顶配售价" },
+            "price_range": { "type": "string", "description": "价格区间" },
+            "price_source": { "type": "string", "description": "价格信息来源" },
+            "price_confidence": { "type": "string", "enum": ["confirmed", "estimated", "rumor"] }
+          }
+        },
+        "presale_info": {
+          "type": "object",
+          "properties": {
+            "presale_start": { "type": "string" },
+            "presale_price": { "type": "string" },
+            "deposit": { "type": "string", "description": "定金金额" }
+          }
+        },
+        "权益": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "权益_type": { "type": "string", "description": "权益类型：置换/金融/保险/充电/终身" },
+              "权益_detail": { "type": "string" },
+              "权益_deadline": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "product_positioning": {
+      "type": "object",
+      "description": "模块3: 产品定位与核心卖点",
+      "properties": {
+        "vehicle_level": { "type": "string", "description": "车型级别" },
+        "body_type": { "type": "string", "description": "车身形式" },
+        "energy_type": { "type": "string" },
+        "range": { "type": "string", "description": "续航" },
+        "dimensions": { "type": "object", "properties": {
+          "length": { "type": "string" }, "width": { "type": "string" }, "height": { "type": "string" }, "wheelbase": { "type": "string" }
+        }},
+        "core_selling_points": { "type": "array", "items": { "type": "string" }, "description": "核心卖点列表" },
+        "target_audience": { "type": "string", "description": "目标用户画像" },
+        "positioning_statement": { "type": "string", "description": "官方定位话术" }
+      }
+    },
+    "competitive_analysis": {
+      "type": "object",
+      "description": "模块4: 竞品对标",
+      "properties": {
+        "competitors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "competitor_name": { "type": "string" },
+              "competitor_model": { "type": "string" },
+              "price_comparison": { "type": "string" },
+              "parameter_comparison": { "type": "string" },
+              "advantage": { "type": "string", "description": "该车型的优势" },
+              "disadvantage": { "type": "string", "description": "该车型的劣势" }
+            }
+          }
+        },
+        "market_segment": { "type": "string", "description": "所属细分市场" },
+        "segment_trend": { "type": "string", "description": "细分市场趋势" }
+      }
+    },
+    "media_and_user_feedback": {
+      "type": "object",
+      "description": "模块5: 媒体与用户反馈",
+      "properties": {
+        "media_coverage": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "media_name": { "type": "string" },
+              "article_title": { "type": "string" },
+              "article_url": { "type": "string" },
+              "sentiment": { "type": "string", "enum": ["positive", "neutral", "negative"] },
+              "key_quote": { "type": "string" }
+            }
+          }
+        },
+        "user_sentiment": { "type": "string", "description": "整体用户舆情倾向" },
+        "order_heat": { "type": "string", "description": "订单热度（如有官宣）" },
+        "forum_hot_topics": { "type": "array", "items": { "type": "string" }, "description": "论坛热议话题" }
+      }
+    },
+    "impact_assessment": {
+      "type": "object",
+      "description": "模块6: 对我方车型影响判断",
+      "properties": {
+        "target_overlap": { "type": "string", "description": "与我方车型的目标用户重叠度" },
+        "price_overlap": { "type": "string", "description": "价格带重叠度" },
+        "product_overlap": { "type": "string", "description": "产品形态重叠度" },
+        "threat_level": { "type": "string", "enum": ["high", "medium", "low", "none"] },
+        "recommended_action": { "type": "string", "description": "建议应对动作" }
+      }
+    },
+    "evidence_trail": {
+      "type": "object",
+      "description": "证据溯源",
+      "properties": {
+        "sources_used": { "type": "array", "items": { "type": "string" }, "description": "使用到的来源列表" },
+        "claims_by_tier": {
+          "type": "object",
+          "properties": {
+            "tier1_claims": { "type": "array", "items": { "type": "string" }, "description": "基于官方来源的结论" },
+            "tier2_claims": { "type": "array", "items": { "type": "string" }, "description": "基于行业媒体的结论" },
+            "tier3_claims": { "type": "array", "items": { "type": "string" }, "description": "基于社交平台的结论（仅供参考）" }
+          }
+        },
+        "unconfirmed_claims": { "type": "array", "items": { "type": "string" }, "description": "未找到可靠来源支持的传闻" }
+      }
+    }
+  }
+}
