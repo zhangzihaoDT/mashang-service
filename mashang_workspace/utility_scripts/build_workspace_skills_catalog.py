@@ -159,6 +159,64 @@ def scan_workspace_skills() -> list[dict]:
     return skills
 
 
+# ─── Promptbuilder scan ────────────────────────────────────────
+
+PROMPTBUILDER_CAPABILITIES = {
+    "auto_launch": {
+        "name": "auto_launch",
+        "type": "Promptbuilder / Intelligence Workflow",
+        "directory": "promptbuilders/auto_launch/",
+        "description": "生成竞品市场事件检索 Prompt；验证 AI raw response；归一化 evidence；Raw-first report packaging",
+        "entrypoints": [
+            "make build-auto-launch-prompt",
+            "make validate-auto-launch-ai-response",
+            "make validate-auto-launch-byd-datang-fixture",
+            "make package-auto-launch-byd-datang-report",
+        ],
+        "outputs": "outputs/auto_launch/",
+    },
+    "miit_new_car": {
+        "name": "miit_new_car",
+        "type": "Promptbuilder / MIIT Workflow",
+        "directory": "promptbuilders/miit_new_car/",
+        "description": "MIIT 公告信号解释 Prompt Pack；新车申报情报分析",
+        "entrypoints": [
+            "make miit-fetch-batch BATCH=N",
+            "make miit-extract-text BATCH=N",
+        ],
+        "outputs": "outputs/miit_new_car/promptbuilder_runs/",
+    },
+}
+
+
+def scan_promptbuilders() -> list[dict]:
+    """Scan promptbuilders/ directory for registered capabilities."""
+    promptbuilders_dir = WS_ROOT / "promptbuilders"
+    if not promptbuilders_dir.exists():
+        return []
+
+    found = []
+    for entry in sorted(promptbuilders_dir.iterdir()):
+        if entry.is_dir() and (entry / "README.md").exists():
+            name = entry.name
+            cap = PROMPTBUILDER_CAPABILITIES.get(name)
+            if cap:
+                found.append(cap)
+            else:
+                # Auto-detect from README
+                readme = (entry / "README.md").read_text(encoding="utf-8")
+                first_line = readme.strip().split("\n")[0].lstrip("#").strip()
+                found.append({
+                    "name": name,
+                    "type": "Promptbuilder",
+                    "directory": f"promptbuilders/{name}/",
+                    "description": first_line or f"Promptbuilder module at promptbuilders/{name}/",
+                    "entrypoints": [f"promptbuilders/{name}/"],
+                    "outputs": "",
+                })
+    return found
+
+
 def build_json(skills: list[dict]) -> dict:
     return {
         "workspace": "mashang_workspace",
@@ -174,8 +232,15 @@ def write_json(data: dict, path: Path):
 
 
 def write_markdown(data: dict, skills: list[dict], path: Path):
-    ws_count = len(skills)
-    output_dirs = ", ".join(set(s["outputs"][0] for s in skills if s["outputs"]))
+    ws_count = len([s for s in skills if s.get("type", "").startswith("workspace") or "type" not in s])
+    pb_count = len([s for s in skills if "Promptbuilder" in s.get("type", "")])
+    all_count = len(skills)
+    def _md_out(s):
+        o = s.get("outputs", "")
+        if isinstance(o, list):
+            return o[0] if o else ""
+        return str(o)
+    output_dirs = ", ".join(set(_md_out(s) for s in skills if _md_out(s)))
 
     lines = [
         "# Mashang Workspace Skills Catalog",
@@ -198,14 +263,16 @@ def write_markdown(data: dict, skills: list[dict], path: Path):
         "",
         "## Skills Overview",
         "",
-        "| Skill | 层级 | 能力定位 | 入口文件 | 默认输出 |",
+        "| Skill | 类型 | 能力定位 | 入口文件 | 默认输出 |",
         "|-------|------|---------|---------|---------|",
     ]
 
     for s in skills:
         ep = s["entrypoints"][0] if s["entrypoints"] else "—"
-        out = s["outputs"][0] if s["outputs"] else "—"
-        lines.append(f"| {s['name']} | workspace | {s['positioning'][:40] if s['positioning'] else s['description'][:40]} | `{ep}` | {out} |")
+        out = s.get("outputs", "") if s.get("outputs") else "—"
+        stype = s.get("type", "workspace")
+        positioning = s.get("positioning", s.get("description", ""))[:40]
+        lines.append(f"| {s['name']} | {stype} | {positioning} | `{ep}` | {out} |")
 
     lines += [
         "",
@@ -214,28 +281,46 @@ def write_markdown(data: dict, skills: list[dict], path: Path):
     ]
 
     for s in skills:
-        lines += [
-            f"### {s['name']}",
-            "",
-            "| 字段 | 内容 |",
-            "|------|------|",
-            f"| 目录 | `{s['directory']}` |",
-            "| 层级 | workspace |",
-            f"| 能力定位 | {s['positioning'] or s['description']} |",
-            f"| 适用场景 | {'、'.join(s['scenarios'][:6]) if s['scenarios'] else '—'} |",
-            f"| 不适用场景 | {'、'.join(s['not_for'][:4]) if s['not_for'] else '—'} |",
-            f"| 入口命令 | `{s['entrypoints'][0] if s['entrypoints'] else '—'}` |",
-            f"| 默认输出 | {s['outputs'][0] if s['outputs'] else '—'} |",
-            "",
-        ]
+        stype = s.get("type", "workspace")
+        positioning = s.get("positioning", s.get("description", ""))
+        ep_display = s["entrypoints"][0] if s["entrypoints"] else "—"
+        if "Promptbuilder" in stype:
+            # Promptbuilder format
+            lines += [
+                f"### {s['name']} ({stype})",
+                "",
+                "| 字段 | 内容 |",
+                "|------|------|",
+                f"| 目录 | `{s['directory']}` |",
+                f"| 类型 | {stype} |",
+                f"| 能力定位 | {positioning} |",
+                f"| 入口命令 | `{ep_display}` |",
+                "",
+            ]
+        else:
+            lines += [
+                f"### {s['name']}",
+                "",
+                "| 字段 | 内容 |",
+                "|------|------|",
+                f"| 目录 | `{s['directory']}` |",
+                "| 层级 | workspace |",
+                f"| 能力定位 | {positioning} |",
+                f"| 适用场景 | {'、'.join(s['scenarios'][:6]) if s['scenarios'] else '—'} |",
+                f"| 不适用场景 | {'、'.join(s['not_for'][:4]) if s['not_for'] else '—'} |",
+                f"| 入口命令 | `{ep_display}` |",
+                f"| 默认输出 | {s.get('outputs', '—') if s.get('outputs') else '—'} |",
+                "",
+            ]
 
     lines += [
         "## 文件结构说明",
         "",
     ]
     for s in skills:
+        stype = s.get("type", "workspace skill")
         lines += [
-            f"- `{s['directory']}` — {s['name']} skill",
+            f"- `{s['directory']}` — {s['name']} ({stype})",
         ]
     lines += [
         "- `utility_scripts/build_workspace_skills_catalog.py` — 本页生成脚本",
@@ -260,20 +345,31 @@ def _ep_display(ep: str) -> str:
 
 
 def write_html(data: dict, skills: list[dict], path: Path):
-    ws_count = len(skills)
+    ws_skills = [s for s in skills if "Promptbuilder" not in s.get("type", "")]
+    pb_skills = [s for s in skills if "Promptbuilder" in s.get("type", "")]
+    ws_count = len(ws_skills)
+    pb_count = len(pb_skills)
+    all_count = len(skills)
     skill_names_joined = " + ".join(s["name"] for s in skills)
-    output_dirs = ", ".join(set(s["outputs"][0] for s in skills if s["outputs"]))
+    def _html_out(s):
+        o = s.get("outputs", "")
+        if isinstance(o, list):
+            return o[0] if o else ""
+        return str(o)
+    output_dirs = ", ".join(set(_html_out(s) for s in skills if _html_out(s)))
 
     # Build overview table rows
     overview_rows = []
     for s in skills:
         ep = _ep_display(s["entrypoints"][0]) if s["entrypoints"] else "—"
-        out = s["outputs"][0] if s["outputs"] else "—"
+        out = s.get("outputs", "") if s.get("outputs") else "—"
+        stype = s.get("type", "workspace")
+        badge_class = "badge-pb" if "Promptbuilder" in stype else "badge-ws"
         overview_rows.append(f"""
             <tr>
               <td><strong>{s['name']}</strong></td>
-              <td><span class="badge blue">workspace</span></td>
-              <td>{s['positioning'][:40] if s['positioning'] else s['description'][:40]}</td>
+              <td><span class="badge {badge_class}">{stype}</span></td>
+              <td>{s.get('positioning', s.get('description', ''))[:40]}</td>
               <td><code>{ep}</code></td>
               <td><code>{out}</code></td>
             </tr>""")
@@ -281,32 +377,45 @@ def write_html(data: dict, skills: list[dict], path: Path):
     # Build skill cards
     skill_cards = []
     for s in skills:
+        stype = s.get("type", "workspace")
+        is_pb = "Promptbuilder" in stype
         tags = []
-        for word in ["HTML", "品牌", "Jinja2", "Eval", "诊断", "Runtime", "报告", "模板", "预测", "回测", "质量保障", "Raccoon Research"]:
-            if word in s["description"] or any(word in sc for sc in s["scenarios"]):
-                css = "gold" if word in ("预测", "回测", "质量保障") else "blue"
-                tags.append(f'            <span class="skill-tag {css}">{word}</span>')
+        if is_pb:
+            tags.append('            <span class="skill-tag gold">Promptbuilder</span>')
+            tags.append('            <span class="skill-tag blue">Workflow</span>')
+        else:
+            for word in ["HTML", "品牌", "Jinja2", "Eval", "诊断", "Runtime", "报告", "模板", "预测", "回测", "质量保障", "Raccoon Research"]:
+                desc = s.get("description", "")
+                scens = s.get("scenarios", [])
+                if word in desc or any(word in sc for sc in scens):
+                    css = "gold" if word in ("预测", "回测", "质量保障") else "blue"
+                    tags.append(f'            <span class="skill-tag {css}">{word}</span>')
 
-        scenarios_li = "\n".join(f"                  <li>{sc}</li>" for sc in s["scenarios"][:8])
-        not_for_li = "\n".join(f"                  <li>{nf}</li>" for nf in s["not_for"][:6])
+        scenarios_li = "\n".join(f"                  <li>{sc}</li>" for sc in s.get("scenarios", [])[:8]) if not is_pb else ""
+        not_for_li = "\n".join(f"                  <li>{nf}</li>" for nf in s.get("not_for", [])[:6]) if not is_pb else ""
 
+        # Entrypoints: promptbuilder entries use full list
         ep_display = _ep_display(s["entrypoints"][0]) if s["entrypoints"] else "—"
+        ep_lines = "\n".join(f'                  <code>{ep}</code><br/>' for ep in s["entrypoints"][:4]) if is_pb else f'                  <code>{ep_display}</code>'
+
+        badge_class = "badge-pb" if is_pb else "badge-ws"
+        positioning = s.get("positioning", s.get("description", ""))
 
         skill_cards.append(f"""
         <div class="skill-card">
           <div class="skill-card-header">
             <div class="skill-name">{s['name']}</div>
-            <span class="skill-badge badge-ws">workspace</span>
+            <span class="skill-badge {badge_class}">{stype}</span>
           </div>
-          <div class="skill-desc">{s['positioning'] or s['description']}</div>
+          <div class="skill-desc">{positioning}</div>
           <div class="skill-meta">
 {chr(10).join(tags)}
           </div>
           <div class="skill-section">
             <div class="skill-section-label">目录</div>
             <div class="skill-section-value"><code>{s['directory']}</code></div>
-          </div>
-          <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          </div>""" +
+          (f"""          <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
             <div class="skill-section">
               <div class="skill-section-label">适用场景</div>
               <div class="skill-section-value">
@@ -323,11 +432,11 @@ def write_html(data: dict, skills: list[dict], path: Path):
                 </ul>
               </div>
             </div>
-          </div>
-          <div class="skill-section" style="margin-top:10px">
+          </div>""" if not is_pb else "") +
+          f"""          <div class="skill-section" style="margin-top:10px">
             <div class="skill-section-label">入口命令</div>
             <div class="skill-section-value">
-              <code>{ep_display}</code>
+{ep_lines}
             </div>
           </div>
         </div>""")
@@ -347,6 +456,7 @@ def write_html(data: dict, skills: list[dict], path: Path):
     .skill-name {{ font-size: 20px; font-weight: 700; color: var(--zh-deep-blue); letter-spacing: .3px; }}
     .skill-badge {{ font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; margin-top: 4px; }}
     .badge-ws {{ background: var(--zh-light-blue); color: var(--zh-blue); }}
+    .badge-pb {{ background: rgba(215,154,54,.12); color: var(--zh-brown); }}
 
     .skill-desc {{ font-size: 14px; line-height: 1.7; color: var(--zh-text); margin-bottom: 12px; }}
     .skill-meta {{ display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }}
@@ -396,17 +506,17 @@ def write_html(data: dict, skills: list[dict], path: Path):
       <div class="kpi-card">
         <div class="label">Workspace Skills</div>
         <div class="value">{ws_count}</div>
-        <div class="change neutral">{skill_names_joined}</div>
+        <div class="change neutral">OpenCode Agent 自动匹配</div>
       </div>
       <div class="kpi-card">
-        <div class="label">Skills 输出目录</div>
-        <div class="value" style="font-size:18px;line-height:1.4">{output_dirs}</div>
-        <div class="change neutral">品牌化 HTML 数据报告</div>
+        <div class="label">Promptbuilder Workflows</div>
+        <div class="value">{pb_count}</div>
+        <div class="change neutral">Intelligence Workflow</div>
       </div>
       <div class="kpi-card">
-        <div class="label">最近更新</div>
-        <div class="value">{TODAY}</div>
-        <div class="change neutral">自动生成</div>
+        <div class="label">总能力数</div>
+        <div class="value">{all_count}</div>
+        <div class="change neutral">{TODAY}</div>
       </div>
     </section>
 
@@ -437,6 +547,15 @@ def write_html(data: dict, skills: list[dict], path: Path):
       </div>
     </section>
 
+    {f'''<section>
+      <h2 style="font-size:18px;font-weight:600;color:var(--zh-deep-blue);margin-bottom:16px">Promptbuilders / Intelligence Workflows</h2>
+      <p style="color:var(--zh-muted);font-size:13px;margin-bottom:16px">
+        Promptbuilder 是结构化 AI 提示词模块，用于执行特定情报分析任务。
+        它们不是 OpenCode SKILL.md，而是可独立复制到 DeepSeek/ChatGPT 的 Prompt Pack。
+      </p>
+      {''.join(skill_cards[i] for i, s in enumerate(skills) if "Promptbuilder" in s.get("type", ""))}
+    </section>''' if any("Promptbuilder" in s.get("type", "") for s in skills) else ''}
+
     <section class="arch-section">
       <h2 style="font-size:18px;font-weight:600;color:var(--zh-deep-blue);margin-bottom:16px">Agent Harness 分层说明</h2>
       <div class="arch-card">
@@ -445,8 +564,15 @@ def write_html(data: dict, skills: list[dict], path: Path):
             <h3>workspace skills</h3>
             <ul>
               <li>业务场景能力</li>
-{chr(10).join('              <li>' + s['name'] + ' — ' + (s['positioning'][:40] if s['positioning'] else s['description'][:40]) + '</li>' for s in skills)}
+{chr(10).join('              <li>' + s['name'] + ' — ' + (s.get('positioning', s.get('description', ''))[:40] if s.get('positioning', s.get('description', '')) else '') + '</li>' for s in ws_skills)}
               <li>位于 <code>mashang_workspace/.opencode/skills/</code></li>
+            </ul>
+          </div>
+          <div class="arch-item">
+            <h3>promptbuilder workflows</h3>
+            <ul>
+{chr(10).join('              <li>' + s['name'] + ' — ' + (s.get('description', '')[:50]) + '</li>' for s in pb_skills)}
+              <li>位于 <code>mashang_workspace/promptbuilders/</code></li>
             </ul>
           </div>
           <div class="arch-item">
@@ -487,20 +613,26 @@ def main():
     print()
 
     skills = scan_workspace_skills()
+    promptbuilders = scan_promptbuilders()
+    all_capabilities = skills + promptbuilders
+
     print(f"  Found {len(skills)} workspace skills:")
     for s in skills:
         print(f"    - {s['name']} ({s['directory']})")
+    print(f"  Found {len(promptbuilders)} promptbuilder capabilities:")
+    for p in promptbuilders:
+        print(f"    - {p['name']} ({p['type']})")
     print()
 
-    data = build_json(skills)
+    data_combined = build_json(all_capabilities)
 
     json_path = OUTPUT_DIR / "workspace_skills_catalog.json"
     md_path = OUTPUT_DIR / "workspace_skills_catalog.md"
     html_path = OUTPUT_DIR / "workspace_skills_catalog.html"
 
-    write_json(data, json_path)
-    write_markdown(data, skills, md_path)
-    write_html(data, skills, html_path)
+    write_json(data_combined, json_path)
+    write_markdown(data_combined, all_capabilities, md_path)
+    write_html(data_combined, all_capabilities, html_path)
 
     print()
     print("=" * 60)

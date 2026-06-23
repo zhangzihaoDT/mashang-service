@@ -13,6 +13,7 @@
     .skill-name { font-size: 20px; font-weight: 700; color: var(--zh-deep-blue); letter-spacing: .3px; }
     .skill-badge { font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; margin-top: 4px; }
     .badge-ws { background: var(--zh-light-blue); color: var(--zh-blue); }
+    .badge-pb { background: rgba(215,154,54,.12); color: var(--zh-brown); }
 
     .skill-desc { font-size: 14px; line-height: 1.7; color: var(--zh-text); margin-bottom: 12px; }
     .skill-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
@@ -62,17 +63,17 @@
       <div class="kpi-card">
         <div class="label">Workspace Skills</div>
         <div class="value">3</div>
-        <div class="change neutral">branded-html-report + monthly-market-report + runtime-eval-diagnosis</div>
+        <div class="change neutral">OpenCode Agent 自动匹配</div>
       </div>
       <div class="kpi-card">
-        <div class="label">Skills 输出目录</div>
-        <div class="value" style="font-size:18px;line-height:1.4">mashang_workspace/outputs/monthly_market_report/YYYY-MM/, mashang_workspace/outputs/reports/</div>
-        <div class="change neutral">品牌化 HTML 数据报告</div>
+        <div class="label">Promptbuilder Workflows</div>
+        <div class="value">2</div>
+        <div class="change neutral">Intelligence Workflow</div>
       </div>
       <div class="kpi-card">
-        <div class="label">最近更新</div>
-        <div class="value">2026-06-23</div>
-        <div class="change neutral">自动生成</div>
+        <div class="label">总能力数</div>
+        <div class="value">5</div>
+        <div class="change neutral">2026-06-23</div>
       </div>
     </section>
 
@@ -93,24 +94,38 @@
 
             <tr>
               <td><strong>branded-html-report</strong></td>
-              <td><span class="badge blue">workspace</span></td>
+              <td><span class="badge badge-ws">workspace</span></td>
               <td>将汽车经营分析、预测模型、回测评估、市场洞察等结果，渲染为具有 Raccoon </td>
               <td><code>python runtime_scripts/daily_lock_count.py</code></td>
-              <td><code>mashang_workspace/outputs/reports/</code></td>
+              <td><code>['mashang_workspace/outputs/reports/']</code></td>
             </tr>
             <tr>
               <td><strong>monthly-market-report</strong></td>
-              <td><span class="badge blue">workspace</span></td>
+              <td><span class="badge badge-ws">workspace</span></td>
               <td>monthly-market-report v0.1 是基于 `passenge</td>
               <td><code>OpenCode Agent 自动匹配 — SKILL.md 位于 .opencode/skills/monthly-market-report/</code></td>
-              <td><code>mashang_workspace/outputs/monthly_market_report/YYYY-MM/</code></td>
+              <td><code>['mashang_workspace/outputs/monthly_market_report/YYYY-MM/']</code></td>
             </tr>
             <tr>
               <td><strong>runtime-eval-diagnosis</strong></td>
-              <td><span class="badge blue">workspace</span></td>
-              <td>Diagnose mashang runtime eval reports, i</td>
+              <td><span class="badge badge-ws">workspace</span></td>
+              <td></td>
               <td><code>eval/eval_report.json</code></td>
               <td><code>—</code></td>
+            </tr>
+            <tr>
+              <td><strong>auto_launch</strong></td>
+              <td><span class="badge badge-pb">Promptbuilder / Intelligence Workflow</span></td>
+              <td>生成竞品市场事件检索 Prompt；验证 AI raw response；归一化</td>
+              <td><code>make build-auto-launch-prompt</code></td>
+              <td><code>outputs/auto_launch/</code></td>
+            </tr>
+            <tr>
+              <td><strong>miit_new_car</strong></td>
+              <td><span class="badge badge-pb">Promptbuilder / MIIT Workflow</span></td>
+              <td>MIIT 公告信号解释 Prompt Pack；新车申报情报分析</td>
+              <td><code>make miit-fetch-batch BATCH=N</code></td>
+              <td><code>outputs/miit_new_car/promptbuilder_runs/</code></td>
             </tr>
           </tbody>
         </table>
@@ -138,8 +153,7 @@
           <div class="skill-section">
             <div class="skill-section-label">目录</div>
             <div class="skill-section-value"><code>.opencode/skills/branded_html_report/</code></div>
-          </div>
-          <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          </div>          <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
             <div class="skill-section">
               <div class="skill-section-label">适用场景</div>
               <div class="skill-section-value">
@@ -167,11 +181,10 @@
                 </ul>
               </div>
             </div>
-          </div>
-          <div class="skill-section" style="margin-top:10px">
+          </div>          <div class="skill-section" style="margin-top:10px">
             <div class="skill-section-label">入口命令</div>
             <div class="skill-section-value">
-              <code>python runtime_scripts/daily_lock_count.py</code>
+                  <code>python runtime_scripts/daily_lock_count.py</code>
             </div>
           </div>
         </div>
@@ -187,8 +200,7 @@
           <div class="skill-section">
             <div class="skill-section-label">目录</div>
             <div class="skill-section-value"><code>.opencode/skills/monthly-market-report/</code></div>
-          </div>
-          <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          </div>          <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
             <div class="skill-section">
               <div class="skill-section-label">适用场景</div>
               <div class="skill-section-value">
@@ -210,11 +222,10 @@
                 </ul>
               </div>
             </div>
-          </div>
-          <div class="skill-section" style="margin-top:10px">
+          </div>          <div class="skill-section" style="margin-top:10px">
             <div class="skill-section-label">入口命令</div>
             <div class="skill-section-value">
-              <code>OpenCode Agent 自动匹配 — SKILL.md 位于 .opencode/skills/monthly-market-report/</code>
+                  <code>OpenCode Agent 自动匹配 — SKILL.md 位于 .opencode/skills/monthly-market-report/</code>
             </div>
           </div>
         </div>
@@ -223,15 +234,14 @@
             <div class="skill-name">runtime-eval-diagnosis</div>
             <span class="skill-badge badge-ws">workspace</span>
           </div>
-          <div class="skill-desc">Diagnose mashang runtime eval reports, including hard_pass, soft_pass, failed, contract mismatch, fact_types, and exit_reason.</div>
+          <div class="skill-desc"></div>
           <div class="skill-meta">
 
           </div>
           <div class="skill-section">
             <div class="skill-section-label">目录</div>
             <div class="skill-section-value"><code>.opencode/skills/runtime-eval-diagnosis/</code></div>
-          </div>
-          <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          </div>          <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
             <div class="skill-section">
               <div class="skill-section-label">适用场景</div>
               <div class="skill-section-value">
@@ -248,15 +258,111 @@
                 </ul>
               </div>
             </div>
-          </div>
-          <div class="skill-section" style="margin-top:10px">
+          </div>          <div class="skill-section" style="margin-top:10px">
             <div class="skill-section-label">入口命令</div>
             <div class="skill-section-value">
-              <code>eval/eval_report.json</code>
+                  <code>eval/eval_report.json</code>
+            </div>
+          </div>
+        </div>
+        <div class="skill-card">
+          <div class="skill-card-header">
+            <div class="skill-name">auto_launch</div>
+            <span class="skill-badge badge-pb">Promptbuilder / Intelligence Workflow</span>
+          </div>
+          <div class="skill-desc">生成竞品市场事件检索 Prompt；验证 AI raw response；归一化 evidence；Raw-first report packaging</div>
+          <div class="skill-meta">
+            <span class="skill-tag gold">Promptbuilder</span>
+            <span class="skill-tag blue">Workflow</span>
+          </div>
+          <div class="skill-section">
+            <div class="skill-section-label">目录</div>
+            <div class="skill-section-value"><code>promptbuilders/auto_launch/</code></div>
+          </div>          <div class="skill-section" style="margin-top:10px">
+            <div class="skill-section-label">入口命令</div>
+            <div class="skill-section-value">
+                  <code>make build-auto-launch-prompt</code><br/>
+                  <code>make validate-auto-launch-ai-response</code><br/>
+                  <code>make validate-auto-launch-byd-datang-fixture</code><br/>
+                  <code>make package-auto-launch-byd-datang-report</code><br/>
+            </div>
+          </div>
+        </div>
+        <div class="skill-card">
+          <div class="skill-card-header">
+            <div class="skill-name">miit_new_car</div>
+            <span class="skill-badge badge-pb">Promptbuilder / MIIT Workflow</span>
+          </div>
+          <div class="skill-desc">MIIT 公告信号解释 Prompt Pack；新车申报情报分析</div>
+          <div class="skill-meta">
+            <span class="skill-tag gold">Promptbuilder</span>
+            <span class="skill-tag blue">Workflow</span>
+          </div>
+          <div class="skill-section">
+            <div class="skill-section-label">目录</div>
+            <div class="skill-section-value"><code>promptbuilders/miit_new_car/</code></div>
+          </div>          <div class="skill-section" style="margin-top:10px">
+            <div class="skill-section-label">入口命令</div>
+            <div class="skill-section-value">
+                  <code>make miit-fetch-batch BATCH=N</code><br/>
+                  <code>make miit-extract-text BATCH=N</code><br/>
             </div>
           </div>
         </div>
       </div>
+    </section>
+
+    <section>
+      <h2 style="font-size:18px;font-weight:600;color:var(--zh-deep-blue);margin-bottom:16px">Promptbuilders / Intelligence Workflows</h2>
+      <p style="color:var(--zh-muted);font-size:13px;margin-bottom:16px">
+        Promptbuilder 是结构化 AI 提示词模块，用于执行特定情报分析任务。
+        它们不是 OpenCode SKILL.md，而是可独立复制到 DeepSeek/ChatGPT 的 Prompt Pack。
+      </p>
+      
+        <div class="skill-card">
+          <div class="skill-card-header">
+            <div class="skill-name">auto_launch</div>
+            <span class="skill-badge badge-pb">Promptbuilder / Intelligence Workflow</span>
+          </div>
+          <div class="skill-desc">生成竞品市场事件检索 Prompt；验证 AI raw response；归一化 evidence；Raw-first report packaging</div>
+          <div class="skill-meta">
+            <span class="skill-tag gold">Promptbuilder</span>
+            <span class="skill-tag blue">Workflow</span>
+          </div>
+          <div class="skill-section">
+            <div class="skill-section-label">目录</div>
+            <div class="skill-section-value"><code>promptbuilders/auto_launch/</code></div>
+          </div>          <div class="skill-section" style="margin-top:10px">
+            <div class="skill-section-label">入口命令</div>
+            <div class="skill-section-value">
+                  <code>make build-auto-launch-prompt</code><br/>
+                  <code>make validate-auto-launch-ai-response</code><br/>
+                  <code>make validate-auto-launch-byd-datang-fixture</code><br/>
+                  <code>make package-auto-launch-byd-datang-report</code><br/>
+            </div>
+          </div>
+        </div>
+        <div class="skill-card">
+          <div class="skill-card-header">
+            <div class="skill-name">miit_new_car</div>
+            <span class="skill-badge badge-pb">Promptbuilder / MIIT Workflow</span>
+          </div>
+          <div class="skill-desc">MIIT 公告信号解释 Prompt Pack；新车申报情报分析</div>
+          <div class="skill-meta">
+            <span class="skill-tag gold">Promptbuilder</span>
+            <span class="skill-tag blue">Workflow</span>
+          </div>
+          <div class="skill-section">
+            <div class="skill-section-label">目录</div>
+            <div class="skill-section-value"><code>promptbuilders/miit_new_car/</code></div>
+          </div>          <div class="skill-section" style="margin-top:10px">
+            <div class="skill-section-label">入口命令</div>
+            <div class="skill-section-value">
+                  <code>make miit-fetch-batch BATCH=N</code><br/>
+                  <code>make miit-extract-text BATCH=N</code><br/>
+            </div>
+          </div>
+        </div>
     </section>
 
     <section class="arch-section">
@@ -269,8 +375,16 @@
               <li>业务场景能力</li>
               <li>branded-html-report — 将汽车经营分析、预测模型、回测评估、市场洞察等结果，渲染为具有 Raccoon </li>
               <li>monthly-market-report — monthly-market-report v0.1 是基于 `passenge</li>
-              <li>runtime-eval-diagnosis — Diagnose mashang runtime eval reports, i</li>
+              <li>runtime-eval-diagnosis — </li>
               <li>位于 <code>mashang_workspace/.opencode/skills/</code></li>
+            </ul>
+          </div>
+          <div class="arch-item">
+            <h3>promptbuilder workflows</h3>
+            <ul>
+              <li>auto_launch — 生成竞品市场事件检索 Prompt；验证 AI raw response；归一化 evidence；</li>
+              <li>miit_new_car — MIIT 公告信号解释 Prompt Pack；新车申报情报分析</li>
+              <li>位于 <code>mashang_workspace/promptbuilders/</code></li>
             </ul>
           </div>
           <div class="arch-item">

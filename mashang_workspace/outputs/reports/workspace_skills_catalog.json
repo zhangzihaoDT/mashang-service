@@ -93,6 +93,30 @@
         "Prefer smallest possible fix."
       ],
       "level": "workspace"
+    },
+    {
+      "name": "auto_launch",
+      "type": "Promptbuilder / Intelligence Workflow",
+      "directory": "promptbuilders/auto_launch/",
+      "description": "生成竞品市场事件检索 Prompt；验证 AI raw response；归一化 evidence；Raw-first report packaging",
+      "entrypoints": [
+        "make build-auto-launch-prompt",
+        "make validate-auto-launch-ai-response",
+        "make validate-auto-launch-byd-datang-fixture",
+        "make package-auto-launch-byd-datang-report"
+      ],
+      "outputs": "outputs/auto_launch/"
+    },
+    {
+      "name": "miit_new_car",
+      "type": "Promptbuilder / MIIT Workflow",
+      "directory": "promptbuilders/miit_new_car/",
+      "description": "MIIT 公告信号解释 Prompt Pack；新车申报情报分析",
+      "entrypoints": [
+        "make miit-fetch-batch BATCH=N",
+        "make miit-extract-text BATCH=N"
+      ],
+      "outputs": "outputs/miit_new_car/promptbuilder_runs/"
     }
   ]
 }
