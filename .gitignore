@@ -40,14 +40,16 @@ dataset/incoming/feishu/
 # Monthly market report runtime outputs (regenerated on every run)
 mashang_workspace/outputs/monthly_market_report/
 
-# MIIT 新车公告原始下载数据（可重新抓取，不提交）
+# MIIT runtime outputs — regenerated on every batch fetch, not committed
 mashang_workspace/outputs/miit_new_car/raw/
-
-# MIIT scratch: diagnostics, discovery cache, extracted text, product list
 mashang_workspace/outputs/miit_new_car/diagnostics/
 mashang_workspace/outputs/miit_new_car/discovery/
 mashang_workspace/outputs/miit_new_car/extracted/
+mashang_workspace/outputs/miit_new_car/parsed/
 mashang_workspace/outputs/miit_new_car/product_list/
+mashang_workspace/outputs/miit_new_car/diff/
+mashang_workspace/outputs/miit_new_car/evidence/
+mashang_workspace/outputs/miit_new_car/state/
 
 # Runtime reports: auto launch monitor
 mashang_workspace/outputs/reports/auto_launch_monitor_*.md
