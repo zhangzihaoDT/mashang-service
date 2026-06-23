@@ -33,9 +33,32 @@
 ### 禁止的操作
 
 - 不得从 product_name（如"插电式增程混合动力运动型乘用车"）推断具体商品名（如"智己 L6"）
-- 不得补充续航、电池、电机、尺寸、价格、上市时间等字段
+- 不得补充原文件不存在的字段
 - 不得凭空创建原 JSON 中没有的记录
 - 不得将 product_model 前缀（如 CSA6492）映射为上市商品系列名称
+
+## 附件类型感知规则
+
+字段清洗前必须先识别数据来源的附件类型。不同附件的字段缺失不应一律视为异常。
+
+### 附件类型
+
+| 来源附件 | source_attachment_type | 预期包含的字段 | 可缺失的字段 |
+|----------|-----------------------|---------------|-------------|
+| 主公告(附件1) | `main_announcement` | enterprise_name, directory_no, brand, product_name, product_model | generic_model_name（不包含）、范围/续航/电池等深度参数（不包含） |
+| 车船税目录(附件2) | `vehicle_vessel_tax_catalog` | enterprise_name, brand, generic_model_name, product_model, 续航, 电池, 整备质量, 燃料消耗量, 排量 | product_name（产品大类名称不包含）、directory_no（不包含） |
+| 购置税目录(附件3) | `purchase_tax_catalog` | enterprise_name, generic_model_name, product_name, product_model, 续航, 电池, 整备质量 | brand/商标（不包含）、directory_no（不包含） |
+| 未知 | `unknown` | — | — |
+
+### 附件感知的字段清洗规则
+
+1. **先识别附件类型**。从 JSON 的 `source_attachment` 或 `source_attachment_type` 字段判断，或从文本头部（"附件1"/"附件2"/"附件3"）识别。
+2. **不同附件的字段缺失不同**：
+   - 购置税目录（附件3）没有 `brand` 字段 → 标记 `field_not_provided_by_source`，不是 `missing_brand`。
+   - 主公告（附件1）没有 `generic_model_name` → 正常，不是异常。
+   - 车船税目录（附件2）没有 `product_name`（产品大类） → 正常，不是异常。
+3. **新增 issue_type 值**：`field_not_provided_by_source` — 该字段在当前附件类型中不提供，不是数据质量问题。
+4. **跨附件合并**：如果希望获取某字段但当前附件不提供，应标记 `needs_cross_attachment_join`，建议使用 `05_cross_attachment_join.prompt.md` 跨附件合并。
 
 ## 适用输入
 

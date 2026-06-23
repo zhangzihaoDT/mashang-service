@@ -53,20 +53,29 @@
 4. **对未发现品牌，必须写"当前可用输入未发现"**，不得写"本批次无该品牌"。因为数据来源不完整，不可做否定判断。
 5. 输出表格的"来源"列应注明具体来源（如 "tax catalog text" / "extracted text fallback"），不可笼统写 "product_list"。
 
-## 信息边界约束
+## 分附件证据边界约束
 
-所有提取结果受限于公告文件的信息边界。参见 README.md "信息边界 / Evidence Boundary" 章节。
+所有提取结果受限于来源附件的信息边界。参见 README.md "分附件证据边界 / Source-aware Evidence Boundary" 章节。
+
+### 附件类型
+
+| source_attachment_type | 对应附件 | 可提取字段 |
+|------------------------|----------|-----------|
+| `main_announcement` | 附件1 主公告 | enterprise_name, directory_no, brand, product_name(大类), product_model |
+| `vehicle_vessel_tax_catalog` | 附件2 车船税目录 | enterprise_name, brand, generic_model_name, product_model, 续航(PHEV), 电池能量, 电池质量, 整备质量, 燃料消耗量, 排量 |
+| `purchase_tax_catalog` | 附件3 购置税目录 | enterprise_name, generic_model_name, product_name(大类), product_model, CLTC续航, 电池能量, 电池质量, 整备质量 |
+| `unknown` | 未知/多个附件 | 仅提取各附件共有的字段 |
 
 ### 产品型号的边界声明
 
-`product_model`（如 CSA6492、BYD6510）是**公告申报型号前缀**，不是上市商品名。不允许：
-- 将 CSA6492 直接称为"智己 L6"（即使该型号在往批公告中与智己 L6 相关）
+`product_model`（如 CSA6492、BYD6510）是**公告申报型号前缀**，也是跨附件合并的核心 join key。不允许：
+- 将 CSA6492 直接称为"智己 L6"（即使该型号在税收目录中有通用商品名）
 - 将 BYD6510 直接称为"比亚迪海狮 08"
 - 从型号前缀推断配置级别（如 LFSHEV3 = 低配、LFSHEV4 = 高配）
 
-### 可提取的信息
+### 可提取的信息（按来源）
 
-每条记录只能提取以下可确认的字段：
+#### 来源为附件 1（main_announcement）时
 
 | 字段 | 可提取内容 | 示例 |
 |------|-----------|------|
@@ -74,19 +83,41 @@
 | brand | 品牌 | 智己 |
 | product_name | 公告产品名称（大类） | 插电式增程混合动力运动型乘用车 |
 | product_model | 公告型号（前缀） | CSA6492 |
-| evidence_level | 信息层级：事实 / 谨慎推断 / 待验证 / 禁止结论 | 事实 |
-| source_field | 该信息的原始来源字段 | product_model: "CSA6492" |
-| allowed_conclusion | 该字段可做出的最大解释 | "智己增程产品进入公告申报阶段" |
-| prohibited_conclusion | 该字段禁止输出的解释 | 商品名、价格、上市时间、续航、电池、电机、尺寸 |
+| evidence_level | 信息层级 | 事实 |
+| source_field | 原始来源字段 | product_model: "CSA6492" |
+| allowed_conclusion | 公告身份和产品路线 | "智己增程产品进入公告申报阶段" |
+| prohibited_conclusion | 禁止输出 | 商品名、价格、上市时间、续航、电池、电机、尺寸、配置 |
+
+#### 来源为附件 2/3（tax catalog）时
+
+| 字段 | 可提取内容 | 示例 |
+|------|-----------|------|
+| generic_model_name | 通用商品名 | 智己L6、比亚迪海狮06 |
+| pure_ev_range / cltc_range | 续航里程 | 710km(CLTC) |
+| battery_energy_kwh | 电池能量 | 82.732kWh |
+| battery_weight_kg | 电池质量 | 571.3kg |
+| curb_weight_kg | 整备质量 | 2080kg |
+| energy_type | 能源类型 | BEV/PHEV/EREV |
+| allowed_conclusion | 可确认具体续航和电池参数 | "智己L6 纯电版 CLTC 续航 710km，电池 82.732kWh" |
+| prohibited_conclusion | 仍禁止输出 | 价格、上市时间、智驾版本、配置高低配 |
+
+### 跨附件合并说明
+
+`product_model`（公告型号前缀）是跨附件合并的核心 join key。例如：
+- 附件1：`enterprise_name=上海汽车集团, brand=智己, product_name=纯电动运动型乘用车, product_model=CSA6492`
+- 附件3：`enterprise_name=上海汽车集团, product_model=CSA6492, generic_model_name=智己L6, cltc_range=710km, battery=82.732kWh`
+- 合并后：通过 `product_model=CSA6492` join，获得完整信息。
+
+如果需要跨附件合并，建议使用 `05_cross_attachment_join.prompt.md`。
 
 ## 输出表格
 
-| 企业 | 品牌 | 产品名称 | 产品型号 | 型号前缀 | 来源 | source_reliability | 字段问题 | 置信度 | evidence_level | source_field | allowed_conclusion | prohibited_conclusion | 待验证事项 |
-|------|------|----------|----------|----------|------|--------------------|----------|--------|----------------|--------------|-------------------|----------------------|------------|
-| 上海汽车集团股份有限公司 | 智己 | 插电式增程混合动力运动型乘用车 | CSA6492 | CSA6492 | product_list | product_list_verified | 无 | high | 事实 | product_name:"插电式增程混合动力", product_model:"CSA6492" | 智己增程产品进入公告申报阶段 | 不得推断商品名、价格、上市时间、续航、电池、电机、尺寸 | 具体商品名、上市节奏、配置参数 |
-| 比亚迪汽车工业有限公司 | 比亚迪 | 插电式混合动力多用途乘用车 | BYD6510 | BYD6510 | product_list | product_list_verified | 无 | high | 事实 | product_name:"插电式混合动力", product_model:"BYD6510" | 比亚迪 PHEV 产品进入公告申报阶段 | 不得推断商品名、价格、上市时间、续航 | 具体车型名称、定价 |
-| — | 小鹏 | — | — | — | product_list | conflict_between_sources | field_shift | low | 待验证 | 字段偏移无法确认 | — | — | 需回看 extracted text 确认具体产品 |
-| 比亚迪汽车有限公司 | 比亚迪牌 | 比亚迪宋Pro HEV | BYD6476ST6HEV12 | BYD6476 | tax catalog text | tax_catalog_verified | 无 | medium | 谨慎推断 | tax catalog 文本:企业/品牌/型号字段 | 比亚迪宋Pro HEV 进入税收目录 | 不得推断续航、价格、配置变化 | 来源为 tax catalog，非完整产品清单 |
+| 企业 | 品牌 | 产品名称 | 产品型号 | 型号前缀 | source_attachment_type | source_reliability | 字段问题 | 置信度 | evidence_level | source_field | source_supported_fields | source_join_key | allowed_conclusion | prohibited_conclusion | 待验证事项 |
+|------|------|----------|----------|----------|------------------------|--------------------|----------|--------|----------------|--------------|------------------------|-----------------|-------------------|----------------------|------------|
+| 上海汽车集团股份有限公司 | 智己 | 插电式增程混合动力运动型乘用车 | CSA6492 | CSA6492 | main_announcement | product_list_verified | 无 | high | 事实 | product_model:"CSA6492" | enterprise_name, brand, product_name, product_model | product_model: CSA6492 | 智己增程产品进入公告申报阶段 | 不得推断商品名、价格、上市时间、续航、电池、电机、尺寸 | 具体商品名、上市节奏、配置参数 |
+| 比亚迪汽车工业有限公司 | 比亚迪 | 插电式混合动力多用途乘用车 | BYD6510 | BYD6510 | main_announcement | product_list_verified | 无 | high | 事实 | product_model:"BYD6510" | enterprise_name, brand, product_name, product_model | product_model: BYD6510 | 比亚迪 PHEV 产品进入公告申报阶段 | 不得推断商品名、价格、上市时间、续航 | 具体车型名称、定价 |
+| 比亚迪汽车有限公司 | 比亚迪牌 | 比亚迪宋Pro HEV | BYD6476ST6HEV12 | BYD6476 | vehicle_vessel_tax_catalog | tax_catalog_verified | 无 | medium | 事实 | tax catalog 文本 | enterprise_name, brand, generic_model_name, product_model, battery, range | product_model: BYD6476 | 比亚迪宋Pro HEV 进入税收目录，纯电续航 150km | 不得推断价格、上市时间、配置变化 | 来源为 tax catalog，非完整产品清单 |
+| 上海汽车集团股份有限公司 | — | 纯电动运动型乘用车 | CSA6492 | CSA6492 | purchase_tax_catalog | tax_catalog_verified | brand 不提供 | medium | 事实 | 购置税目录文本 | enterprise_name, product_name, generic_model_name, product_model, cltc_range, battery | product_model: CSA6492 | 智己L6 纯电版 CLTC 续航 710km | 不得推断价格、上市时间、智驾版本 | brand 需跨附件 join |
 
 ## 重点品牌优先级标记
 
@@ -137,7 +168,7 @@
 3. 使用 watchlist CSV 中的品牌+关键词补充检索
 
 ## 输出格式：
-Markdown 表格，包含：企业, 品牌, 产品名称, 产品型号, 型号前缀, 来源, source_reliability, 字段问题, 置信度, evidence_level, source_field, allowed_conclusion, prohibited_conclusion, 待验证事项
+Markdown 表格，包含：企业, 品牌, 产品名称, 产品型号, 型号前缀, source_attachment_type, source_reliability, 字段问题, 置信度, evidence_level, source_field, source_supported_fields, source_join_key, allowed_conclusion, prohibited_conclusion, 待验证事项
 
 ## 优先级标记（在"待验证事项"列后附加一列"优先级"）：
 - S：高度相关、可能有战略信号
