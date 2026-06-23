@@ -42,3 +42,17 @@ mashang_workspace/outputs/monthly_market_report/
 
 # MIIT 新车公告原始下载数据（可重新抓取，不提交）
 mashang_workspace/outputs/miit_new_car/raw/
+
+# MIIT scratch: diagnostics, discovery cache, extracted text, product list
+mashang_workspace/outputs/miit_new_car/diagnostics/
+mashang_workspace/outputs/miit_new_car/discovery/
+mashang_workspace/outputs/miit_new_car/extracted/
+mashang_workspace/outputs/miit_new_car/product_list/
+
+# Runtime reports: auto launch monitor
+mashang_workspace/outputs/reports/auto_launch_monitor_*.md
+mashang_workspace/outputs/reports/auto_launch_monitor_*.json
+
+# Runtime reports: LS8 user profile snapshots
+mashang_workspace/outputs/reports/ls8_user_profile_*.md
+mashang_workspace/outputs/reports/ls8_user_profile_*.html
