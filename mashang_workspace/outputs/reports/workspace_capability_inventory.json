@@ -1,14 +1,14 @@
 {
   "inventory_name": "workspace_capability_inventory",
   "version": "0.1",
-  "generated_at": "2026-06-23 03:02:32",
+  "generated_at": "2026-06-24 07:45:45",
   "workspace": "mashang_workspace",
   "summary": {
-    "skills": 3,
+    "skills": 5,
     "script_categories": 3,
-    "scripts": 39,
+    "scripts": 41,
     "data_assets": 6,
-    "outputs": 42,
+    "outputs": 36,
     "quality_assets": 6
   },
   "groups": [
@@ -44,6 +44,28 @@
           "name": "runtime-eval-diagnosis",
           "path": ".opencode/skills/runtime-eval-diagnosis/",
           "description": "Diagnose mashang runtime eval reports, including hard_pass, soft_pass, failed, contract mismatch, fact_types, and exit_reason.",
+          "short_description": "",
+          "group": "other",
+          "entrypoint": "",
+          "related_scripts": [],
+          "output_paths": [],
+          "status": "active"
+        },
+        {
+          "name": "auto_launch",
+          "path": ".opencode/skills/auto_launch/",
+          "description": "生成竞品市场事件检索 Prompt；验证 AI raw response；归一化 evidence；Raw-first report packaging",
+          "short_description": "",
+          "group": "other",
+          "entrypoint": "",
+          "related_scripts": [],
+          "output_paths": [],
+          "status": "active"
+        },
+        {
+          "name": "miit_new_car",
+          "path": ".opencode/skills/miit_new_car/",
+          "description": "MIIT 公告信号解释 Prompt Pack；新车申报情报分析",
           "short_description": "",
           "group": "other",
           "entrypoint": "",
@@ -180,6 +202,18 @@
           "likely_outputs": [
             "html_report",
             "structured_data"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "competition_a3_flow.py",
+          "path": "mashang_workspace/research_scripts/competition_a3_flow.py",
+          "category": "research_scripts",
+          "description": "竞争洞察 A3 人群流转分析",
+          "short_description": "竞争洞察 A3 人群流转分析",
+          "has_cli": false,
+          "likely_outputs": [
+            "unknown"
           ],
           "status": "active"
         },
@@ -371,6 +405,18 @@
           "category": "research_scripts",
           "description": "",
           "short_description": "",
+          "has_cli": true,
+          "likely_outputs": [
+            "unknown"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "pk_weekly_ls8_ls9.py",
+          "path": "mashang_workspace/research_scripts/pk_weekly_ls8_ls9.py",
+          "category": "research_scripts",
+          "description": "name: pk_weekly_compare_ls8_ls9\nuse: python research_scripts/pk_weekly_ls8_ls9.py -n 7\nupdated_at: \"2026-05-27\"\nsummary: 读取\"正反向对比\"CSV，对比 LS8/LS9 在（end day 所在周的周一）起算连续 N 周的 PK次数、PK正向排名、PK反向排名，并输出 N 个表格到 stdout。\ninputs:\n  - schema/data_path.md（读取\"正反向对比\"路径）\n  - schema/business_definition.json（读取 time_periods.<series>.end）\noutputs:\n  - stdout：Markdown 表格\n  - outputs/reports/pk_weekly_compare_ls8_ls9.html（默认）",
+          "short_description": "name: pk_weekly_compare_ls8_ls9\nuse: python research_scripts/pk_weekly_ls8_ls9.",
           "has_cli": true,
           "likely_outputs": [
             "unknown"
@@ -668,11 +714,11 @@
         {
           "name": ".DS_Store",
           "path": "mashang_workspace/outputs/reports/.DS_Store",
-          "description": "生成报告，10.0 KB，other，关联能力：general_report",
-          "short_description": "other · 10.0 KB",
+          "description": "生成报告，8.0 KB，other，关联能力：general_report",
+          "short_description": "other · 8.0 KB",
           "type": "other",
-          "modified_at": "2026-06-22 03:36",
-          "size_kb": 10.0,
+          "modified_at": "2026-06-24 07:37",
+          "size_kb": 8.0,
           "related_capability": "general_report",
           "status": "generated"
         },
@@ -707,50 +753,6 @@
           "modified_at": "2026-06-11 08:39",
           "size_kb": 7.7,
           "related_capability": "atp_price",
-          "status": "generated"
-        },
-        {
-          "name": "auto_launch_monitor_2026-06-01_2026-06-17.md",
-          "path": "mashang_workspace/outputs/reports/auto_launch_monitor_2026-06-01_2026-06-17.md",
-          "description": "生成报告，8.7 KB，markdown report，关联能力：general_report",
-          "short_description": "markdown report · 8.7 KB",
-          "type": "markdown_report",
-          "modified_at": "2026-06-18 09:10",
-          "size_kb": 8.7,
-          "related_capability": "general_report",
-          "status": "generated"
-        },
-        {
-          "name": "auto_launch_monitor_2026-06-05_2026-06-07.json",
-          "path": "mashang_workspace/outputs/reports/auto_launch_monitor_2026-06-05_2026-06-07.json",
-          "description": "生成报告，2.4 KB，json contract，关联能力：general_report",
-          "short_description": "json contract · 2.4 KB",
-          "type": "json_contract",
-          "modified_at": "2026-06-17 01:46",
-          "size_kb": 2.4,
-          "related_capability": "general_report",
-          "status": "generated"
-        },
-        {
-          "name": "auto_launch_monitor_2026-06-05_2026-06-07.md",
-          "path": "mashang_workspace/outputs/reports/auto_launch_monitor_2026-06-05_2026-06-07.md",
-          "description": "生成报告，4.2 KB，markdown report，关联能力：general_report",
-          "short_description": "markdown report · 4.2 KB",
-          "type": "markdown_report",
-          "modified_at": "2026-06-17 02:45",
-          "size_kb": 4.2,
-          "related_capability": "general_report",
-          "status": "generated"
-        },
-        {
-          "name": "auto_launch_monitor_2026-06-17_2026-06-17.md",
-          "path": "mashang_workspace/outputs/reports/auto_launch_monitor_2026-06-17_2026-06-17.md",
-          "description": "生成报告，6.7 KB，markdown report，关联能力：general_report",
-          "short_description": "markdown report · 6.7 KB",
-          "type": "markdown_report",
-          "modified_at": "2026-06-18 08:56",
-          "size_kb": 6.7,
-          "related_capability": "general_report",
           "status": "generated"
         },
         {
@@ -789,33 +791,33 @@
         {
           "name": "lock_predict_backtest.html",
           "path": "mashang_workspace/outputs/reports/lock_predict_backtest.html",
-          "description": "生成报告，34.4 KB，html report，关联能力：prediction",
-          "short_description": "html report · 34.4 KB",
+          "description": "生成报告，35.9 KB，html report，关联能力：prediction",
+          "short_description": "html report · 35.9 KB",
           "type": "html_report",
-          "modified_at": "2026-06-23 02:40",
-          "size_kb": 34.4,
+          "modified_at": "2026-06-24 07:28",
+          "size_kb": 35.9,
           "related_capability": "prediction",
           "status": "generated"
         },
         {
           "name": "lock_release_curve.html",
           "path": "mashang_workspace/outputs/reports/lock_release_curve.html",
-          "description": "生成报告，74.0 KB，html report，关联能力：release_curve",
-          "short_description": "html report · 74.0 KB",
+          "description": "生成报告，75.4 KB，html report，关联能力：release_curve",
+          "short_description": "html report · 75.4 KB",
           "type": "html_report",
-          "modified_at": "2026-06-15 06:59",
-          "size_kb": 74.0,
+          "modified_at": "2026-06-24 07:32",
+          "size_kb": 75.4,
           "related_capability": "release_curve",
           "status": "generated"
         },
         {
           "name": "ls8_battery_weekly_share.html",
           "path": "mashang_workspace/outputs/reports/ls8_battery_weekly_share.html",
-          "description": "生成报告，2950.1 KB，html report，关联能力：competitive_analysis",
-          "short_description": "html report · 2950.1 KB",
+          "description": "生成报告，2951.0 KB，html report，关联能力：competitive_analysis",
+          "short_description": "html report · 2951.0 KB",
           "type": "html_report",
-          "modified_at": "2026-06-16 07:29",
-          "size_kb": 2950.1,
+          "modified_at": "2026-06-24 07:28",
+          "size_kb": 2951.0,
           "related_capability": "competitive_analysis",
           "status": "generated"
         },
@@ -842,28 +844,6 @@
           "status": "generated"
         },
         {
-          "name": "ls8_user_profile_20260401_20260621.html",
-          "path": "mashang_workspace/outputs/reports/ls8_user_profile_20260401_20260621.html",
-          "description": "生成报告，8.3 KB，html report，关联能力：general_report",
-          "short_description": "html report · 8.3 KB",
-          "type": "html_report",
-          "modified_at": "2026-06-22 03:26",
-          "size_kb": 8.3,
-          "related_capability": "general_report",
-          "status": "generated"
-        },
-        {
-          "name": "ls8_user_profile_20260401_20260621.md",
-          "path": "mashang_workspace/outputs/reports/ls8_user_profile_20260401_20260621.md",
-          "description": "生成报告，1.7 KB，markdown report，关联能力：general_report",
-          "short_description": "markdown report · 1.7 KB",
-          "type": "markdown_report",
-          "modified_at": "2026-06-22 03:27",
-          "size_kb": 1.7,
-          "related_capability": "general_report",
-          "status": "generated"
-        },
-        {
           "name": "passenger_insurance_workspace_smoke.md",
           "path": "mashang_workspace/outputs/reports/passenger_insurance_workspace_smoke.md",
           "description": "生成报告，1.1 KB，markdown report，关联能力：data_quality",
@@ -877,11 +857,11 @@
         {
           "name": "pk_weekly_compare_ls8_ls9.html",
           "path": "mashang_workspace/outputs/reports/pk_weekly_compare_ls8_ls9.html",
-          "description": "生成报告，66.1 KB，html report，关联能力：competitive_analysis",
-          "short_description": "html report · 66.1 KB",
+          "description": "生成报告，18.3 KB，html report，关联能力：competitive_analysis",
+          "short_description": "html report · 18.3 KB",
           "type": "html_report",
-          "modified_at": "2026-06-11 08:39",
-          "size_kb": 66.1,
+          "modified_at": "2026-06-24 07:43",
+          "size_kb": 18.3,
           "related_capability": "competitive_analysis",
           "status": "generated"
         },
@@ -921,77 +901,77 @@
         {
           "name": "workspace_capability_inventory.html",
           "path": "mashang_workspace/outputs/reports/workspace_capability_inventory.html",
-          "description": "生成报告，37.3 KB，html report，关联能力：capability_catalog",
-          "short_description": "html report · 37.3 KB",
+          "description": "生成报告，37.9 KB，html report，关联能力：capability_catalog",
+          "short_description": "html report · 37.9 KB",
           "type": "html_report",
-          "modified_at": "2026-06-23 02:56",
-          "size_kb": 37.3,
+          "modified_at": "2026-06-24 07:40",
+          "size_kb": 37.9,
           "related_capability": "capability_catalog",
           "status": "generated"
         },
         {
           "name": "workspace_capability_inventory.json",
           "path": "mashang_workspace/outputs/reports/workspace_capability_inventory.json",
-          "description": "生成报告，48.7 KB，json contract，关联能力：capability_catalog",
-          "short_description": "json contract · 48.7 KB",
+          "description": "生成报告，47.8 KB，json contract，关联能力：capability_catalog",
+          "short_description": "json contract · 47.8 KB",
           "type": "json_contract",
-          "modified_at": "2026-06-23 02:56",
-          "size_kb": 48.7,
+          "modified_at": "2026-06-24 07:40",
+          "size_kb": 47.8,
           "related_capability": "capability_catalog",
           "status": "generated"
         },
         {
           "name": "workspace_capability_inventory.md",
           "path": "mashang_workspace/outputs/reports/workspace_capability_inventory.md",
-          "description": "生成报告，9.2 KB，markdown report，关联能力：capability_catalog",
-          "short_description": "markdown report · 9.2 KB",
+          "description": "生成报告，9.1 KB，markdown report，关联能力：capability_catalog",
+          "short_description": "markdown report · 9.1 KB",
           "type": "markdown_report",
-          "modified_at": "2026-06-23 02:56",
-          "size_kb": 9.2,
+          "modified_at": "2026-06-24 07:40",
+          "size_kb": 9.1,
           "related_capability": "capability_catalog",
           "status": "generated"
         },
         {
           "name": "workspace_skills_catalog.html",
           "path": "mashang_workspace/outputs/reports/workspace_skills_catalog.html",
-          "description": "生成报告，14.1 KB，html report，关联能力：capability_catalog",
-          "short_description": "html report · 14.1 KB",
+          "description": "生成报告，20.2 KB，html report，关联能力：capability_catalog",
+          "short_description": "html report · 20.2 KB",
           "type": "html_report",
-          "modified_at": "2026-06-23 03:02",
-          "size_kb": 14.1,
+          "modified_at": "2026-06-24 07:45",
+          "size_kb": 20.2,
           "related_capability": "capability_catalog",
           "status": "generated"
         },
         {
           "name": "workspace_skills_catalog.json",
           "path": "mashang_workspace/outputs/reports/workspace_skills_catalog.json",
-          "description": "生成报告，3.9 KB，json contract，关联能力：capability_catalog",
-          "short_description": "json contract · 3.9 KB",
+          "description": "生成报告，4.9 KB，json contract，关联能力：capability_catalog",
+          "short_description": "json contract · 4.9 KB",
           "type": "json_contract",
-          "modified_at": "2026-06-23 03:02",
-          "size_kb": 3.9,
+          "modified_at": "2026-06-24 07:45",
+          "size_kb": 4.9,
           "related_capability": "capability_catalog",
           "status": "generated"
         },
         {
           "name": "workspace_skills_catalog.md",
           "path": "mashang_workspace/outputs/reports/workspace_skills_catalog.md",
-          "description": "生成报告，3.5 KB，markdown report，关联能力：capability_catalog",
-          "short_description": "markdown report · 3.5 KB",
+          "description": "生成报告，4.7 KB，markdown report，关联能力：capability_catalog",
+          "short_description": "markdown report · 4.7 KB",
           "type": "markdown_report",
-          "modified_at": "2026-06-23 03:02",
-          "size_kb": 3.5,
+          "modified_at": "2026-06-24 07:45",
+          "size_kb": 4.7,
           "related_capability": "capability_catalog",
           "status": "generated"
         },
         {
           "name": "竞争洞察A3人群流转.html",
           "path": "mashang_workspace/outputs/reports/竞争洞察A3人群流转.html",
-          "description": "生成报告，4934.7 KB，html report，关联能力：general_report",
-          "short_description": "html report · 4934.7 KB",
+          "description": "生成报告，4958.7 KB，html report，关联能力：general_report",
+          "short_description": "html report · 4958.7 KB",
           "type": "html_report",
-          "modified_at": "2026-06-11 08:39",
-          "size_kb": 4934.7,
+          "modified_at": "2026-06-24 07:32",
+          "size_kb": 4958.7,
           "related_capability": "general_report",
           "status": "generated"
         },

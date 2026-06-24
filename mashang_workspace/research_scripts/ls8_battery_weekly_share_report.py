@@ -16,9 +16,13 @@ from datetime import datetime
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT))
+_WS_ROOT = REPO_ROOT / "mashang_workspace"
+if str(_WS_ROOT) not in sys.path:
+    sys.path.insert(0, str(_WS_ROOT))
 
 import pandas as pd
 import plotly.graph_objects as go
+from utils.plotly_theme import ZH, apply_zh_theme, GRID_COLOR, ZERO_LINE, AXIS_LINE, AXIS_TEXT, AXIS_TITLE
 
 HERE = REPO_ROOT / "mashang_workspace"
 ORDER_PARQUET = REPO_ROOT / "dataset" / "order_data.parquet"
@@ -27,9 +31,6 @@ AVATAR = HERE / "assets" / "brand" / "raccoon_avatar_light.png"
 SIGNATURE = HERE / "assets" / "brand" / "zihao_signature_transparent.png"
 
 SERIES = "LS8"
-COLOR_5_SEAT = "#174A7C"
-COLOR_6_SEAT = "#7ECDEB"
-COLOR_5_SEAT_66 = "#D79A36"
 COLOR_6_SEAT_66 = "#FFF3E0"
 COLOR_CARD = "#FFFFFF"
 COLOR_TEXT = "#1F2D3D"
@@ -68,22 +69,20 @@ def make_chart(weeks, segments, color_map, title_label):
             marker_color=color,
             text=[f"{v * 100:.1f}%" if v > 0.035 else "" for v in vals],
             textposition="inside",
-            textfont=dict(color="#fff" if color in ("#174A7C", "#7A4A24", "#D79A36") else COLOR_TEXT, size=11),
+            textfont=dict(color="#fff" if color in (ZH['own'], "#7A4A24", ZH['event']) else COLOR_TEXT, size=11),
             hovertemplate=f"<b>%{{x}}</b><br>{seg}: %{{y:.1f}}%<extra></extra>",
         ))
     fig.update_layout(
         barmode="stack",
         title=dict(text=title_label, font=dict(size=16, color=COLOR_DEEP_BLUE), x=0.5),
-        xaxis=dict(title="", tickangle=-45, tickfont=dict(size=11, color=COLOR_TEXT), gridcolor="#ebedf0",
-                   showline=True, linewidth=1, linecolor="#ebedf0"),
-        yaxis=dict(title="占 LS8 总锁单比重", ticksuffix="%", range=[0, 100],
-                   tickfont=dict(size=11, color=COLOR_TEXT), gridcolor="#ebedf0",
-                   showline=True, linewidth=1, linecolor="#ebedf0"),
+        xaxis=dict(title=dict(text="", font=dict(color=AXIS_TITLE)), tickangle=-45, tickfont=dict(size=11, color=AXIS_TEXT)),
+        yaxis=dict(title=dict(text="占 LS8 总锁单比重", font=dict(color=AXIS_TITLE)), ticksuffix="%", range=[0,100],
+                   tickfont=dict(size=11, color=AXIS_TEXT)),
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5,
                     font=dict(size=12, color=COLOR_TEXT)),
-        plot_bgcolor=COLOR_CARD, paper_bgcolor=COLOR_CARD,
         margin=dict(l=40, r=20, t=60, b=50), hovermode="x unified", height=400,
     )
+    apply_zh_theme(fig)
     return fig
 
 
@@ -140,8 +139,8 @@ def main():
             segments_52[s].append(c52 / wt)
             segments_66[s].append(c66 / wt)
 
-    color_map_52 = {"大五座": COLOR_5_SEAT, "大六座": COLOR_6_SEAT}
-    color_map_66 = {"大五座": COLOR_5_SEAT_66, "大六座": COLOR_6_SEAT_66}
+    color_map_52 = {"大五座": ZH['own'], "大六座": ZH['sky_muted']}
+    color_map_66 = {"大五座": ZH['event'], "大六座": COLOR_6_SEAT_66}
     chart_52 = make_chart(weeks_display, segments_52, color_map_52, "52 Max+（增程）占 LS8 比重").to_html(
         include_plotlyjs="cdn", full_html=False, div_id="chart-52")
     chart_66 = make_chart(weeks_display, segments_66, color_map_66, "66 Ultra（纯电）占 LS8 比重").to_html(
@@ -175,17 +174,21 @@ def main():
   <title>LS8 组内车型结构周度占比走势</title>
   <style>
     :root {{
-      --zh-blue: #174A7C; --zh-deep-blue: #06213D; --zh-cyan: #7ECDEB;
-      --zh-light-blue: #DDEFF8; --zh-cream: #FFF9EF; --zh-raccoon-gold: #D79A36;
-      --zh-brown: #7A4A24; --zh-text: #1F2D3D; --zh-muted: #6B7C8F; --zh-card: #FFFFFF;
+      --zh-blue: #174A7C; --zh-blue-700: #123B63; --zh-blue-500: #2D6FA3;
+      --zh-deep-blue: #06213D; --zh-cyan: #7ECDEB; --zh-cyan-100: #E8F8FD;
+      --zh-cream: #FFF9EF; --zh-raccoon-gold: #D79A36; --zh-gold-700: #A96F1F; --zh-gold-100: #FFF0D6;
+      --zh-brown: #7A4A24; --zh-text: #1F2D3D; --zh-muted: #6B7280; --zh-card: #FFFFFF;
+      --zh-border: #E5EAF0; --zh-bg: #FAFBFC; --zh-panel: #F6F8FA; --zh-row-alt: #FAFAFA;
+      --zh-grid: #EEF2F6; --zh-axis-line: #8A94A3; --zh-axis-text: #5F6B7A; --zh-axis-title: #374151;
+      --status-positive: #2A9D8F; --status-negative: #D95F59;
     }}
     * {{ margin: 0; padding: 0; box-sizing: border-box; }}
     body {{
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-      background: var(--zh-cream); color: var(--zh-text); line-height: 1.6;
+      background: var(--zh-bg); color: var(--zh-text); line-height: 1.6;
     }}
     .container {{ max-width: 1100px; margin: 0 auto; padding: 0 24px; }}
-    header {{ background: var(--zh-card); border-bottom: 1px solid var(--zh-light-blue); padding: 16px 0; }}
+    header {{ background: var(--zh-card); border-bottom: 1px solid var(--zh-border); padding: 16px 0; }}
     header .container {{ display: flex; align-items: center; justify-content: space-between; }}
     .brand {{ display: flex; align-items: center; gap: 10px; }}
     .brand-avatar {{ width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }}
@@ -216,15 +219,17 @@ def main():
     table.data-table th {{
       text-align: left; font-size: 12px; font-weight: 600; color: var(--zh-muted);
       text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 12px;
-      border-bottom: 2px solid var(--zh-light-blue);
+      border-bottom: 2px solid var(--zh-border);
     }}
     table.data-table td {{
-      padding: 10px 12px; border-bottom: 1px solid var(--zh-light-blue); font-size: 14px;
+      padding: 10px 12px; border-bottom: 1px solid var(--zh-border); font-size: 14px;
     }}
     table.data-table tr:last-child td {{ border-bottom: none; }}
+    table.data-table tbody tr:nth-child(even) {{ background: var(--zh-row-alt); }}
+    table.data-table tbody tr:hover {{ background: var(--zh-panel); }}
     .group-header td {{
-      background: var(--zh-light-blue); font-weight: 700; color: var(--zh-deep-blue);
-      border-bottom: 2px solid var(--zh-cyan);
+      background: var(--zh-table-section); font-weight: 700; color: var(--zh-deep-blue);
+      border-bottom: 2px solid var(--zh-border);
     }}
     .insight-card {{
       background: var(--zh-card); border-radius: 12px; padding: 20px 24px;
@@ -266,12 +271,12 @@ def main():
       <div class="kpi-card">
         <div class="label">52 Max+ 累计</div>
         <div class="value">{int(df_ls8[df_ls8['battery_group']=='52 Max+']['order_number'].nunique()):,}</div>
-        <div class="sub" style="color:#174A7C;">增程组别</div>
+        <div class="sub" style="color:var(--zh-blue);">增程组别</div>
       </div>
       <div class="kpi-card">
         <div class="label">66 Ultra 累计</div>
         <div class="value">{int(df_ls8[df_ls8['battery_group']=='66 Ultra']['order_number'].nunique()):,}</div>
-        <div class="sub" style="color:#D79A36;">纯电组别</div>
+        <div class="sub" style="color:var(--zh-raccoon-gold);">纯电组别</div>
       </div>
       <div class="kpi-card">
         <div class="label">52 大五座累计占比</div>

@@ -2,7 +2,7 @@
 
 Agent Harness 能力目录
 
-生成日期：2026-06-23
+生成日期：2026-06-24
 
 本页面展示 mashang_workspace 中可被 OpenCode Agent 调用的 workspace 级 skills。
 
@@ -13,8 +13,8 @@ Agent Harness 能力目录
 | 指标 | 数值 |
 |------|------|
 | Workspace Skills | 3 |
-| Skills 输出目录 | mashang_workspace/outputs/reports/, outputs/miit_new_car/promptbuilder_runs/, mashang_workspace/outputs/monthly_market_report/YYYY-MM/, outputs/auto_launch/ |
-| 最近更新 | 2026-06-23 |
+| Skills 输出目录 | outputs/miit_new_car/promptbuilder_runs/, mashang_workspace/outputs/monthly_market_report/YYYY-MM/, outputs/auto_launch/, mashang_workspace/outputs/reports/ |
+| 最近更新 | 2026-06-24 |
 
 ## Skills Overview
 

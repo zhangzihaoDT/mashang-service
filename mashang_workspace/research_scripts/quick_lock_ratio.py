@@ -32,13 +32,15 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 
-# --- Visualization Style Constants ---
-COLOR_MAIN = "#3498DB"      # Blue (用于 2025 - 基准/完整年)
-COLOR_CONTRAST = "#E67E22"  # Orange (用于 2026 - 当前/观察年)
-COLOR_DARK = "#373f4a"
-COLOR_GRID = "#ebedf0"
-COLOR_TEXT = "#7B848F"
-COLOR_BG = "#FFFFFF"
+REPO_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO_ROOT))
+_WS_ROOT = Path(__file__).resolve().parents[1]
+if str(_WS_ROOT) not in sys.path:
+    sys.path.insert(0, str(_WS_ROOT))
+
+from utils.plotly_theme import ZH, apply_zh_theme, GRID_COLOR, ZERO_LINE, AXIS_LINE, AXIS_TEXT, AXIS_TITLE
+
+COLOR_DARK = "#1F2933"
 
 DEFAULT_INPUT = Path(
     "/Users/zihao_/Documents/github/mashang-service/dataset/order_data.parquet"
@@ -440,7 +442,7 @@ def build_figure(df: pd.DataFrame) -> go.Figure:
         df["yoy_2025"].fillna(0)
     ), axis=-1)
     
-    text_2025 = create_end_label(df["yoy_2025"], COLOR_MAIN)
+    text_2025 = create_end_label(df["yoy_2025"], ZH['own'])
     
     fig.add_trace(go.Scatter(
         x=df["axis_date"],
@@ -449,9 +451,9 @@ def build_figure(df: pd.DataFrame) -> go.Figure:
         mode="lines+text",
         text=text_2025,
         textposition="middle right",
-        textfont=dict(color=COLOR_MAIN, size=12),
+        textfont=dict(color=ZH['own'], size=12),
         cliponaxis=False,
-        line=dict(color=COLOR_MAIN, width=2),
+        line=dict(color=ZH['own'], width=2),
         customdata=custom_data_2025,
         hovertemplate=(
             "<b>%{customdata[0]}</b><br>" +
@@ -470,7 +472,7 @@ def build_figure(df: pd.DataFrame) -> go.Figure:
         df["yoy_2026"].fillna(0)
     ), axis=-1)
     
-    text_2026 = create_end_label(df["yoy_2026"], COLOR_CONTRAST)
+    text_2026 = create_end_label(df["yoy_2026"], ZH['event'])
     
     fig.add_trace(go.Scatter(
         x=df["axis_date"],
@@ -479,9 +481,9 @@ def build_figure(df: pd.DataFrame) -> go.Figure:
         mode="lines+text",
         text=text_2026,
         textposition="middle right",
-        textfont=dict(color=COLOR_CONTRAST, size=13),
+        textfont=dict(color=ZH['event'], size=13),
         cliponaxis=False,
-        line=dict(color=COLOR_CONTRAST, width=3),
+        line=dict(color=ZH['event'], width=3),
         customdata=custom_data_2026,
         hovertemplate=(
             "<b>%{customdata[0]}</b><br>" +
@@ -495,44 +497,30 @@ def build_figure(df: pd.DataFrame) -> go.Figure:
     # --- Layout ---
     fig.update_layout(
         title="锁单累计同比趋势对比 (2025 vs 2026)",
-        plot_bgcolor=COLOR_BG,
-        paper_bgcolor=COLOR_BG,
         xaxis=dict(
             title="日期 (对齐到 2025 年)",
-            gridcolor=COLOR_GRID,
-            zerolinecolor=COLOR_GRID,
-            tickfont=dict(color=COLOR_TEXT),
-            title_font=dict(color=COLOR_TEXT),
-            showline=True,
-            linecolor=COLOR_GRID,
             dtick="M1",
             tickformat="%m-%d"
         ),
         yaxis=dict(
-            title="累计同比 (%)",
-            gridcolor=COLOR_GRID,
-            zerolinecolor=COLOR_GRID,
-            tickfont=dict(color=COLOR_TEXT),
-            title_font=dict(color=COLOR_TEXT),
-            showline=True,
-            linecolor=COLOR_GRID
+            title="累计同比 (%)"
         ),
         legend=dict(
-            bordercolor=COLOR_TEXT,
+            bordercolor=ZH['neutral'],
             borderwidth=1,
-            font=dict(color=COLOR_TEXT),
-            orientation="v",       # 垂直排列
+            font=dict(color=ZH['neutral']),
+            orientation="v",
             yanchor="top",
             y=1,
             xanchor="left",
-            x=1.02                 # 放置在图表右侧
+            x=1.02
         ),
         hovermode="x unified",
         margin=dict(l=60, r=80, t=80, b=60),
         height=600
     )
-    
-    fig.add_hline(y=0, line_dash="dash", line_color=COLOR_TEXT, opacity=0.5)
+    apply_zh_theme(fig)
+    fig.add_hline(y=0, line_dash="dash", line_color=ZH['neutral'], opacity=0.5)
     return fig
 
 def build_ls6_reev_figure(df: pd.DataFrame) -> go.Figure:
@@ -552,7 +540,7 @@ def build_ls6_reev_figure(df: pd.DataFrame) -> go.Figure:
         pd.Series(df["daily_reev"]).fillna(0),
         pd.Series(df["ratio_ma7"]).fillna(0)
     ), axis=-1)
-    text_end = create_end_label(pd.Series(df["ratio_ma7"]), COLOR_CONTRAST)
+    text_end = create_end_label(pd.Series(df["ratio_ma7"]), ZH['event'])
     fig.add_trace(go.Scatter(
         x=df["axis_date"],
         y=df["ratio_raw"],
@@ -578,9 +566,9 @@ def build_ls6_reev_figure(df: pd.DataFrame) -> go.Figure:
         mode="lines+text",
         text=text_end,
         textposition="middle right",
-        textfont=dict(color=COLOR_CONTRAST, size=12),
+        textfont=dict(color=ZH['event'], size=12),
         cliponaxis=False,
-        line=dict(color=COLOR_CONTRAST, width=3),
+        line=dict(color=ZH['event'], width=3),
         customdata=custom_data,
         hovertemplate=(
             "MA7 占比: %{y:.1f}%<br>" +
@@ -595,39 +583,25 @@ def build_ls6_reev_figure(df: pd.DataFrame) -> go.Figure:
         y=[avg_ratio, avg_ratio],
         name=f"整体均值 ({avg_ratio:.1f}%)",
         mode="lines",
-        line=dict(color=COLOR_MAIN, width=1.5, dash="dash"),
+        line=dict(color=ZH['own'], width=1.5, dash="dash"),
         opacity=0.6,
         hoverinfo="skip"
     ))
     fig.update_layout(
         title="LS6 车型日增程占比趋势 (MA7, 2025-09-10 至今)",
-        plot_bgcolor=COLOR_BG,
-        paper_bgcolor=COLOR_BG,
         xaxis=dict(
             title="日期",
-            gridcolor=COLOR_GRID,
-            zerolinecolor=COLOR_GRID,
-            tickfont=dict(color=COLOR_TEXT),
-            title_font=dict(color=COLOR_TEXT),
-            showline=True,
-            linecolor=COLOR_GRID,
             dtick="M1",
             tickformat="%Y-%m-%d"
         ),
         yaxis=dict(
             title="日增程占比 (MA7, %)",
-            gridcolor=COLOR_GRID,
-            zerolinecolor=COLOR_GRID,
-            tickfont=dict(color=COLOR_TEXT),
-            title_font=dict(color=COLOR_TEXT),
-            showline=True,
-            linecolor=COLOR_GRID,
             range=[0, 105]
         ),
         legend=dict(
-            bordercolor=COLOR_TEXT,
+            bordercolor=ZH['neutral'],
             borderwidth=1,
-            font=dict(color=COLOR_TEXT),
+            font=dict(color=ZH['neutral']),
             orientation="v",
             yanchor="top",
             y=1,
@@ -638,6 +612,7 @@ def build_ls6_reev_figure(df: pd.DataFrame) -> go.Figure:
         margin=dict(l=60, r=80, t=80, b=60),
         height=600
     )
+    apply_zh_theme(fig)
     return fig
 
 def build_reev_product_breakdown_figure(metrics_dict: dict) -> go.Figure:
@@ -649,8 +624,8 @@ def build_reev_product_breakdown_figure(metrics_dict: dict) -> go.Figure:
 
     # 颜色列表
     colors = [
-        "#636EFA", "#EF553B", "#00CC96", "#AB63FA", "#FFA15A", 
-        "#19D3F3", "#FF6692", "#B6E880", "#FF97FF", "#FECB52"
+        "#174A7C", "#D79A36", "#2A9D8F", "#8E6BBE", "#E76F51", 
+        "#5B8DEF", "#7ECDEB", "#D95F59", "#6B7280", "#06213D"
     ]
     
     # --- Helper: Create end label ---
@@ -685,13 +660,13 @@ def build_reev_product_breakdown_figure(metrics_dict: dict) -> go.Figure:
 
     for i, (product_name, df) in enumerate(metrics_dict.items()):
         # 颜色分配逻辑：
-        # Top 1 -> COLOR_CONTRAST (Orange, 对应 2026 重点色)
-        # Top 2 -> COLOR_MAIN (Blue, 对应 2025 基准色)
+        # Top 1 -> ZH['event'] (Orange, 对应 2026 重点色)
+        # Top 2 -> ZH['own'] (Blue, 对应 2025 基准色)
         # Others -> Cycle through colors list
         if product_name == top1_name:
-            color = COLOR_CONTRAST
+            color = ZH['event']
         elif product_name == top2_name:
-            color = COLOR_MAIN
+            color = ZH['own']
         else:
             color = colors[i % len(colors)]
         
@@ -763,44 +738,30 @@ def build_reev_product_breakdown_figure(metrics_dict: dict) -> go.Figure:
     # --- Layout ---
     fig.update_layout(
         title="增程车型各配置内部占比趋势 (分母=增程总销量, MA7, Top2 Highlighted)",
-        plot_bgcolor=COLOR_BG,
-        paper_bgcolor=COLOR_BG,
         xaxis=dict(
             title="日期 (对齐到 2025 年)",
-            gridcolor=COLOR_GRID,
-            zerolinecolor=COLOR_GRID,
-            tickfont=dict(color=COLOR_TEXT),
-            title_font=dict(color=COLOR_TEXT),
-            showline=True,
-            linecolor=COLOR_GRID,
             dtick="M1",
             tickformat="%m-%d"
         ),
         yaxis=dict(
             title="日销量占比 (MA7, %)",
-            gridcolor=COLOR_GRID,
-            zerolinecolor=COLOR_GRID,
-            tickfont=dict(color=COLOR_TEXT),
-            title_font=dict(color=COLOR_TEXT),
-            showline=True,
-            linecolor=COLOR_GRID,
-            range=[0, None]  # 自适应上限
+            range=[0, None]
         ),
         legend=dict(
-            bordercolor=COLOR_TEXT,
+            bordercolor=ZH['neutral'],
             borderwidth=1,
-            font=dict(color=COLOR_TEXT),
-            orientation="v",       # 垂直排列
+            font=dict(color=ZH['neutral']),
+            orientation="v",
             yanchor="top",
             y=1,
             xanchor="left",
-            x=1.02                 # 放置在图表右侧
+            x=1.02
         ),
         hovermode="x unified",
         margin=dict(l=60, r=80, t=80, b=60),
         height=600
     )
-    
+    apply_zh_theme(fig)
     return fig
 
 def main():

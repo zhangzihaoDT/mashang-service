@@ -449,10 +449,11 @@ html = f"""<!DOCTYPE html>
 <title>锁单释放曲线分析 — Release Curve Analysis</title>
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
 <style>
-:root {{ --blue: #174A7C; --deep: #06213D; --cyan: #7ECDEB; --light: #DDEFF8; --cream: #FFF9EF; --gold: #D79A36; --text: #1F2D3D; --muted: #6B7C8F; --card: #FFFFFF; }}
+:root {{ --blue: #174A7C; --blue-700: #123B63; --blue-500: #2D6FA3; --deep: #06213D; --cyan: #7ECDEB; --cyan-100: #E8F8FD; --cream: #FFF9EF; --gold: #D79A36; --gold-700: #A96F1F; --gold-100: #FFF0D6; --text: #1F2D3D; --muted: #6B7280; --border: #E5EAF0; --bg: #FAFBFC; --card: #FFFFFF; --panel: #F6F8FA; --row-alt: #FAFAFA; --table-section: #F7F8FA; --grid: #EEF2F6; --zero-line: #D8DEE6; --axis-line: #C7CDD4; --axis-text: #5F6B7A; --axis-title: #374151; --positive: #2A9D8F; --negative: #D95F59; --neutral: #6B7280; }}
 * {{ margin: 0; padding: 0; box-sizing: border-box; }}
-body {{ font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: var(--cream); color: var(--text); line-height: 1.6; }}
+body {{ font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }}
 .header {{ background: linear-gradient(135deg, var(--deep), var(--blue)); color: #fff; padding: 32px 24px 24px; text-align: center; }}
+.panel {{ background: var(--panel); border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 4px rgba(6,33,61,.06); }}
 .header h1 {{ font-size: 24px; font-weight: 700; }}
 .header p {{ font-size: 13px; opacity: .75; margin-top: 6px; }}
 .stats {{ display: flex; gap: 12px; padding: 20px 24px; flex-wrap: wrap; }}
@@ -461,11 +462,13 @@ body {{ font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif
 .stat-card .label {{ font-size: 11px; color: var(--muted); margin-top: 4px; font-weight: 500; }}
 .chart-section {{ padding: 0 24px 24px; }}
 .chart-box {{ background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 4px rgba(6,33,61,.06); }}
+.chart-box .sub-bg {{ background: var(--panel); border-radius: 8px; padding: 12px; }}
 .chart-box h2 {{ font-size: 16px; font-weight: 600; margin-bottom: 14px; color: var(--deep); padding-bottom: 8px; border-bottom: 2px solid var(--light); }}
 table {{ width: 100%; border-collapse: collapse; font-size: 13px; }}
 th {{ background: var(--deep); color: #fff; padding: 10px 12px; text-align: left; font-weight: 500; }}
-td {{ padding: 8px 12px; border-bottom: 1px solid var(--light); }}
-tr:hover td {{ background: var(--light); }}
+td {{ padding: 8px 12px; border-bottom: 1px solid var(--border); }}
+tbody tr:nth-child(even) td {{ background: var(--row-alt); }}
+tbody tr:hover td {{ background: var(--panel); }}
 .footer {{ text-align: center; padding: 24px; font-size: 12px; color: var(--muted); border-top: 1px solid var(--light); margin-top: 8px; }}
 </style>
 </head>
@@ -551,20 +554,30 @@ var S = {series_json};
 
 // ── Chart 1: Main Release Curve ──
 Plotly.newPlot('chart-main', [
-  {{x: S.day_axis, y: S.avg_curve, type: 'scatter', mode: 'lines+markers', name: '累计释放 %', line: {{color: '#174A7C', width: 2.5}}, marker: {{size: 3, color: '#174A7C'}}}},
+  {{x: S.day_axis, y: S.avg_curve, type: 'scatter', mode: 'lines+markers', name: '累计释放 %', line: {{color: C.blue, width: 2.5}}, marker: {{size: 3, color: C.blue}}}},
   {{x: S.day_axis, y: S.daily_marginal, type: 'bar', name: '每日边际 %', marker: {{color: 'rgba(23,74,124,0.2)'}}, yaxis: 'y2'}},
 ], {{
   height: 380, margin: {{t: 20, r: 20, b: 60, l: 60}},
   legend: {{orientation: 'h', y: 1.05, x: 0}},
   hovermode: 'x unified',
-  yaxis: {{title: '累计释放 %', range: [0, 120], fixedrange: true}},
-  yaxis2: {{title: '每日边际 %', overlaying: 'y', side: 'right', range: [0, 120], fixedrange: true}},
-  xaxis: {{title: '分配后天数', dtick: 5, fixedrange: true}},
+  yaxis: {{title: '累计释放 %', range: [0, 120], fixedrange: true,
+    showline: true, linecolor: '#C7CDD4', linewidth: 1, gridcolor: '#EEF2F6',
+    zeroline: true, zerolinecolor: '#6B7280', zerolinewidth: 2,
+    tickfont: {{color: '#5F6B7A'}}, title: {{font: {{color: '#374151'}}}}}},
+  yaxis2: {{title: '每日边际 %', overlaying: 'y', side: 'right', range: [0, 120], fixedrange: true,
+    showline: true, linecolor: '#C7CDD4', linewidth: 1, gridcolor: '#EEF2F6',
+    zeroline: true, zerolinecolor: '#6B7280', zerolinewidth: 2,
+    tickfont: {{color: '#5F6B7A'}}, title: {{font: {{color: '#374151'}}}}}},
+  xaxis: {{title: '分配后天数', dtick: 5, fixedrange: true,
+    showline: true, linecolor: '#C7CDD4', linewidth: 1, gridcolor: '#EEF2F6', zeroline: false,
+    tickfont: {{color: '#5F6B7A'}}, title: {{font: {{color: '#374151'}}}}}},
+  paper_bgcolor: '#FFFFFF', plot_bgcolor: '#FFFFFF',
 }}, {{displayModeBar: false}});
 
 // ── Chart 2: Year-over-Year ──
 var yearTraces = [];
-var yearColors = ['#174A7C', '#D79A36', '#7ECDEB', '#06213D'];
+var C = {{ blue: '#174A7C', gold: '#D79A36', steel: '#4F6F82', sage: '#7A8B76', mauve: '#7D6A8E', sky_muted: '#6A93B8', ash: '#9AA3AD', deep: '#06213D', muted: '#6B7280', positive: '#2A9D8F', negative: '#D95F59', light: '#DDEFF8' }};
+var yearColors = [C.blue, C.steel, C.sage, C.mauve];
 Object.keys(S.year_curves).forEach(function(y, i) {{
   yearTraces.push({{
     x: S.day_axis, y: S.year_curves[y], type: 'scatter', mode: 'lines',
@@ -581,9 +594,9 @@ Plotly.newPlot('chart-year', yearTraces, {{
 
 // ── Chart 3: Scatter ──
 Plotly.newPlot('chart-scatter', [
-  {{x: S.scatter.dates, y: S.scatter.d0, type: 'scatter', mode: 'markers', name: 'D0释放率', marker: {{color: '#D79A36', size: 4, opacity: 0.5}}}},
-  {{x: S.scatter.dates, y: S.scatter.d7, type: 'scatter', mode: 'markers', name: 'D7释放率', marker: {{color: '#174A7C', size: 4, opacity: 0.5}}}},
-  {{x: S.scatter.dates, y: S.scatter.d14, type: 'scatter', mode: 'markers', name: 'D14释放率', marker: {{color: '#7ECDEB', size: 4, opacity: 0.5}}}},
+  {{x: S.scatter.dates, y: S.scatter.d0, type: 'scatter', mode: 'markers', name: 'D0释放率', marker: {{color: C.steel, size: 4, opacity: 0.5}}}},
+  {{x: S.scatter.dates, y: S.scatter.d7, type: 'scatter', mode: 'markers', name: 'D7释放率', marker: {{color: C.blue, size: 4, opacity: 0.5}}}},
+  {{x: S.scatter.dates, y: S.scatter.d14, type: 'scatter', mode: 'markers', name: 'D14释放率', marker: {{color: C.sky_muted, size: 4, opacity: 0.5}}}},
 ], {{
   height: 350, margin: {{t: 20, r: 20, b: 60, l: 60}},
   legend: {{orientation: 'h', y: 1.05, x: 0}},
@@ -603,9 +616,9 @@ Plotly.newPlot('chart-percentile', [
   {{x: S.day_axis, y: S.percentiles.p25, type: 'scatter', mode: 'lines', name: 'P25',
     line: {{color: 'rgba(23,74,124,0.2)', width: 0}}, fill: 'tonexty', fillcolor: 'rgba(23,74,124,0.2)', showlegend: false}},
   {{x: S.day_axis, y: S.percentiles.p50, type: 'scatter', mode: 'lines', name: 'P50 (中位数)',
-    line: {{color: '#174A7C', width: 2.5, dash: 'dash'}}}},
+    line: {{color: C.blue, width: 2.5, dash: 'dash'}}}},
   {{x: S.day_axis, y: S.avg_curve, type: 'scatter', mode: 'lines', name: '加权平均',
-    line: {{color: '#D79A36', width: 2}}}},
+    line: {{color: C.gold, width: 2}}}},
 ], {{
   height: 350, margin: {{t: 20, r: 20, b: 60, l: 60}},
   legend: {{orientation: 'h', y: 1.05, x: 0}},
@@ -618,9 +631,9 @@ Plotly.newPlot('chart-percentile', [
 if (S.logistic_fit.curve) {{
   Plotly.newPlot('chart-logistic', [
     {{x: S.day_axis, y: S.avg_curve, type: 'scatter', mode: 'markers', name: '实际值',
-      marker: {{color: '#174A7C', size: 3, opacity: 0.6}}}},
+      marker: {{color: C.blue, size: 3, opacity: 0.6}}}},
     {{x: S.day_axis, y: S.logistic_fit.curve, type: 'scatter', mode: 'lines', name: 'Logistic拟合',
-      line: {{color: '#D79A36', width: 2}}}},
+      line: {{color: C.gold, width: 2}}}},
   ], {{
     height: 300, margin: {{t: 20, r: 20, b: 60, l: 60}},
     legend: {{orientation: 'h', y: 1.05, x: 0}},
@@ -630,15 +643,15 @@ if (S.logistic_fit.curve) {{
     annotations: [{{
       x: 25, y: 20, xref: 'x', yref: 'y',
       text: 'y = ' + S.logistic_fit.L.toFixed(1) + ' / (1 + exp(-' + S.logistic_fit.k.toFixed(4) + ' * (x - ' + S.logistic_fit.x0.toFixed(2) + ')))',
-      showarrow: false, font: {{size: 11, color: '#666'}}
+      showarrow: false, font: {{size: 11, color: C.muted}}
     }}],
   }}, {{displayModeBar: false}});
 }} else {{
-  document.getElementById('chart-logistic').innerHTML = '<p style="color:#999;padding:20px;">Logistic fit failed</p>';
+  document.getElementById('chart-logistic').innerHTML = '<p style="color:' + C.muted + ';padding:20px;">Logistic fit failed</p>';
 }}
 
 // ── Chart 6: DOW ──
-var dowColors = ['#174A7C','#D79A36','#7ECDEB','#6B7C8F','#DDEFF8','#06213D','#1F2D3D'];
+var dowColors = [C.blue, C.steel, C.sage, C.mauve, C.sky_muted, C.ash, C.gold];
 var dowTraces = [];
 S.dow_labels.forEach(function(label, i) {{
   dowTraces.push({{
@@ -666,23 +679,23 @@ Plotly.newPlot('chart-lag-dist', [
   xaxis: {{title: '分配→锁单天数 (day_after)', dtick: 5, fixedrange: true}},
   shapes: [
     {{type: 'line', x0: lagStats.mean, y0: 0, x1: lagStats.mean, y1: 1, yref: 'paper',
-      line: {{color: '#D79A36', width: 2, dash: 'dash'}}}},
+      line: {{color: C.gold, width: 2, dash: 'dash'}}}},
     {{type: 'line', x0: lagStats.p50, y0: 0, x1: lagStats.p50, y1: 1, yref: 'paper',
-      line: {{color: '#174A7C', width: 2, dash: 'dot'}}}},
+      line: {{color: C.blue, width: 2, dash: 'dot'}}}},
     {{type: 'line', x0: lagStats.p80, y0: 0, x1: lagStats.p80, y1: 1, yref: 'paper',
-      line: {{color: '#7ECDEB', width: 2, dash: 'dot'}}}},
+      line: {{color: C.cyan, width: 2, dash: 'dot'}}}},
     {{type: 'line', x0: lagStats.p90, y0: 0, x1: lagStats.p90, y1: 1, yref: 'paper',
-      line: {{color: '#06213D', width: 2, dash: 'dot'}}}},
+      line: {{color: C.deep, width: 2, dash: 'dot'}}}},
   ],
   annotations: [
     {{x: lagStats.mean, y: 0.95, xref: 'x', yref: 'paper', text: 'Mean=' + lagStats.mean.toFixed(1) + 'd',
-      showarrow: false, font: {{size: 10, color: '#D79A36'}}}},
+      showarrow: false, font: {{size: 10, color: C.gold}}}},
     {{x: lagStats.p50, y: 0.88, xref: 'x', yref: 'paper', text: 'P50=' + lagStats.p50.toFixed(1) + 'd',
-      showarrow: false, font: {{size: 10, color: '#174A7C'}}}},
+      showarrow: false, font: {{size: 10, color: C.blue}}}},
     {{x: lagStats.p80, y: 0.81, xref: 'x', yref: 'paper', text: 'P80=' + lagStats.p80.toFixed(1) + 'd',
-      showarrow: false, font: {{size: 10, color: '#7ECDEB'}}}},
+      showarrow: false, font: {{size: 10, color: C.cyan}}}},
     {{x: lagStats.p90, y: 0.74, xref: 'x', yref: 'paper', text: 'P90=' + lagStats.p90.toFixed(1) + 'd',
-      showarrow: false, font: {{size: 10, color: '#06213D'}}}},
+      showarrow: false, font: {{size: 10, color: C.deep}}}},
   ],
 }}, {{displayModeBar: false}});
 
@@ -694,13 +707,13 @@ var yearP80s = yearLabels.map(function(y) {{ return S.lag_year_stats[y].p80; }})
 var yearP90s = yearLabels.map(function(y) {{ return S.lag_year_stats[y].p90; }});
 Plotly.newPlot('chart-lag-year', [
   {{x: yearLabels, y: yearP90s, type: 'scatter', mode: 'lines+markers', name: 'P90',
-    line: {{color: '#06213D', width: 2}}, marker: {{size: 6}}}},
+    line: {{color: C.deep, width: 2}}, marker: {{size: 6}}}},
   {{x: yearLabels, y: yearP80s, type: 'scatter', mode: 'lines+markers', name: 'P80',
-    line: {{color: '#7ECDEB', width: 2}}, marker: {{size: 6}}}},
+    line: {{color: C.cyan, width: 2}}, marker: {{size: 6}}}},
   {{x: yearLabels, y: yearMeans, type: 'scatter', mode: 'lines+markers', name: 'Mean',
-    line: {{color: '#D79A36', width: 2}}, marker: {{size: 6}}}},
+    line: {{color: C.gold, width: 2}}, marker: {{size: 6}}}},
   {{x: yearLabels, y: yearP50s, type: 'scatter', mode: 'lines+markers', name: 'P50 (中位数)',
-    line: {{color: '#174A7C', width: 2, dash: 'dash'}}, marker: {{size: 6}}}},
+    line: {{color: C.blue, width: 2, dash: 'dash'}}, marker: {{size: 6}}}},
 ], {{
   height: 350, margin: {{t: 20, r: 20, b: 60, l: 60}},
   legend: {{orientation: 'h', y: 1.05, x: 0}},

@@ -36,8 +36,10 @@ OUTPUT_HTML = _WS_ROOT / "outputs" / "reports" / "lock_predict_backtest.html"
 PRED_AGE = 7
 
 BRAND = {
-    "pred": "#174A7C", "actual": "#D79A36", "daily": "#7ECDEB",
+    "pred": "#174A7C", "actual": "#D79A36", "daily": "#6A93B8",
     "ratio": "#D79A36", "accent": "#06213D", "bg": "#FFF9EF",
+    "positive": "#2A9D8F", "negative": "#D95F59", "muted": "#6B7280",
+    "border": "#D8E3EA", "light": "#DDEFF8", "cyan100": "#E8F8FD",
 }
 BLUE = "\033[38;2;23;74;124m"
 DEEP = "\033[38;2;6;33;61m"
@@ -205,9 +207,9 @@ def generate_html(rd, bt_start, bt_end, cutoff, n_bt, mae_bt, rmse_bt, mape_bt, 
 <title>Cohort 锁单预测 — 回测报告</title>
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
 <style>
-:root {{ --blue: #174A7C; --deep: #06213D; --cyan: #7ECDEB; --light: #DDEFF8; --cream: #FFF9EF; --gold: #D79A36; --text: #1F2D3D; --muted: #6B7C8F; --card: #FFFFFF; }}
+:root {{ --blue: #174A7C; --blue-700: #123B63; --blue-500: #2D6FA3; --deep: #06213D; --cyan: #7ECDEB; --cyan-100: #E8F8FD; --cream: #FFF9EF; --gold: #D79A36; --gold-700: #A96F1F; --gold-100: #FFF0D6; --text: #1F2D3D; --muted: #6B7280; --border: #E5EAF0; --bg: #FAFBFC; --card: #FFFFFF; --panel: #F6F8FA; --row-alt: #FAFAFA; --grid: #EEF2F6; --zero-line: #D8DEE6; --axis-line: #C7CDD4; --axis-text: #5F6B7A; --axis-title: #374151; --positive: #2A9D8F; --negative: #D95F59; }}
 * {{ margin: 0; padding: 0; box-sizing: border-box; }}
-body {{ font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: var(--cream); color: var(--text); line-height: 1.6; }}
+body {{ font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }}
 .header {{ background: linear-gradient(135deg, var(--deep), var(--blue)); color: #fff; padding: 32px 24px 24px; text-align: center; }}
 .header h1 {{ font-size: 24px; font-weight: 700; }}
 .header p {{ font-size: 13px; opacity: .75; margin-top: 6px; }}
@@ -220,9 +222,10 @@ body {{ font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif
 .chart-box h2 {{ font-size: 16px; font-weight: 600; margin-bottom: 14px; color: var(--deep); padding-bottom: 8px; border-bottom: 2px solid var(--light); }}
 table {{ width: 100%; border-collapse: collapse; font-size: 13px; }}
 th {{ background: var(--deep); color: #fff; padding: 10px 12px; text-align: left; font-weight: 500; }}
-td {{ padding: 8px 12px; border-bottom: 1px solid var(--light); }}
-tr:hover td {{ background: var(--light); }}
-.footer {{ text-align: center; padding: 24px; font-size: 12px; color: var(--muted); border-top: 1px solid var(--light); margin-top: 8px; }}
+td {{ padding: 8px 12px; border-bottom: 1px solid var(--border); }}
+tbody tr:nth-child(even) td {{ background: var(--row-alt); }}
+tbody tr:hover td {{ background: var(--panel); }}
+.footer {{ text-align: center; padding: 24px; font-size: 12px; color: var(--muted); border-top: 1px solid var(--border); margin-top: 8px; }}
 </style>
 </head>
 <body>
@@ -274,24 +277,42 @@ Plotly.newPlot('chart-cohort', [
 ], {{
   height: 350, margin: {{t: 20, r: 20, b: 50, l: 60}},
   legend: {{orientation: 'h', y: 1.05, x: 0}},
-  hovermode: 'x unified', yaxis: {{title: '30日锁单数', fixedrange: true}},
-  xaxis: {{title: 'Assign Date', fixedrange: true}},
+  hovermode: 'x unified',
+  yaxis: {{title: '30日锁单数', fixedrange: true, showline: true, linecolor: '#C7CDD4', linewidth: 1,
+    gridcolor: '#EEF2F6', zeroline: true, zerolinecolor: '#6B7280', zerolinewidth: 2,
+    tickfont: {{color: '#5F6B7A'}}, title: {{font: {{color: '#374151'}}}}}},
+  xaxis: {{title: 'Assign Date', fixedrange: true, showline: true, linecolor: '#C7CDD4', linewidth: 1,
+    gridcolor: '#EEF2F6', zeroline: false,
+    tickfont: {{color: '#5F6B7A'}}, title: {{font: {{color: '#374151'}}}}}},
+  paper_bgcolor: '#FFFFFF', plot_bgcolor: '#FFFFFF',
 }}, {{displayModeBar: false}});
-var diffColors = S.error.map(v => v >= 0 ? '#174A7C' : '#D79A36');
+var diffColors = S.error.map(v => v >= 0 ? '{BRAND["positive"]}' : '{BRAND["negative"]}');
 Plotly.newPlot('chart-diff', [
   {{x: S.dates, y: S.error, type: 'bar', name: 'cohort_error', marker: {{color: diffColors, opacity: 0.6}}}},
 ], {{
   height: 300, margin: {{t: 20, r: 20, b: 50, l: 60}},
-  hovermode: 'x unified', yaxis: {{title: '误差 (DailyLockCount - CohortForecast)', fixedrange: true}},
-  xaxis: {{title: 'Assign Date', fixedrange: true}},
+  hovermode: 'x unified',
+  yaxis: {{title: '误差 (DailyLockCount - CohortForecast)', fixedrange: true, showline: true, linecolor: '#C7CDD4', linewidth: 1,
+    gridcolor: '#EEF2F6', zeroline: true, zerolinecolor: '#6B7280', zerolinewidth: 2,
+    tickfont: {{color: '#5F6B7A'}}, title: {{font: {{color: '#374151'}}}}}},
+  xaxis: {{title: 'Assign Date', fixedrange: true, showline: true, linecolor: '#C7CDD4', linewidth: 1,
+    gridcolor: '#EEF2F6', zeroline: false,
+    tickfont: {{color: '#5F6B7A'}}, title: {{font: {{color: '#374151'}}}}}},
+  paper_bgcolor: '#FFFFFF', plot_bgcolor: '#FFFFFF',
 }}, {{displayModeBar: false}});
 Plotly.newPlot('chart-ratio', [
   {{x: S.dates, y: S.ratio, type: 'scatter', mode: 'markers', name: 'pred/actual', marker: {{color: '{BRAND["ratio"]}', size: 3, opacity: 0.4}}}},
 ], {{
   height: 250, margin: {{t: 20, r: 20, b: 50, l: 60}},
-  hovermode: 'x unified', yaxis: {{title: 'DailyLockCount / CohortForecast', fixedrange: true}},
-  xaxis: {{title: 'Assign Date', fixedrange: true}},
-  shapes: [{{type: 'line', x0: S.dates[0], y0: 1, x1: S.dates[S.dates.length-1], y1: 1, line: {{color: '#888', width: 1, dash: 'dash'}}}}],
+  hovermode: 'x unified',
+  yaxis: {{title: 'DailyLockCount / CohortForecast', fixedrange: true, showline: true, linecolor: '#C7CDD4', linewidth: 1,
+    gridcolor: '#EEF2F6', zeroline: true, zerolinecolor: '#6B7280', zerolinewidth: 2,
+    tickfont: {{color: '#5F6B7A'}}, title: {{font: {{color: '#374151'}}}}}},
+  xaxis: {{title: 'Assign Date', fixedrange: true, showline: true, linecolor: '#C7CDD4', linewidth: 1,
+    gridcolor: '#EEF2F6', zeroline: false,
+    tickfont: {{color: '#5F6B7A'}}, title: {{font: {{color: '#374151'}}}}}},
+  paper_bgcolor: '#FFFFFF', plot_bgcolor: '#FFFFFF',
+  shapes: [{{type: 'line', x0: S.dates[0], y0: 1, x1: S.dates[S.dates.length-1], y1: 1, line: {{color: '{BRAND["muted"]}', width: 1, dash: 'dash'}}}}],
 }}, {{displayModeBar: false}});
 </script>
 </body>
