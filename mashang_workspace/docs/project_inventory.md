@@ -79,8 +79,8 @@ mashang-service/
 | `scripts/skills_attainment_rate_alert.py` | 达成率预警 (~195 行) | `scripts/` |
 | `scripts/generate_eval_cases.py` | Eval case 生成 (~292 行) | `scripts/` |
 | `test/daily_msg_report.py` | 每日消息报告 | 可迁移至 `scripts/` |
-| `test/pk_weekly_ls8_ls9.py` | LS8 vs LS9 周度对比 | 可迁移至 `scripts/` |
-| `test/竞争洞察A3人群流转.py` | A3 人群流转分析 | 可迁移至 `scripts/` |
+| `research_scripts/pk_weekly_ls8_ls9.py` | LS8 vs LS9 周度对比 | `research_scripts/` |
+| `research_scripts/competition_a3_flow.py` | A3 人群流转分析 | `research_scripts/` |
 | `test/ls8_floor_heating_rate.py` | LS8 地暖选装率 | 可迁移至 `scripts/` |
 | `research_scripts/miit_new_car/` | MIIT 新车公告批次监控 V0.2.1 — official source ingestion（latest-publicity/official 分流、多页发现、DOCX 文本抽取、附件状态管理、evidence 证据输出、HTTP 重试与 backoff、discovery/detail cache fallback、已处理幂等复用、--refresh/--force-refresh） | `research_scripts/` |
 | `test/ls6_price_elasticity_loglog.py` | LS6 价格弹性 | `test/` 保留 |
@@ -194,8 +194,8 @@ workspace 只消费 `dataset/incoming/feishu/` 中的文件。
 | `schema/` | `mashang_runtime/schema/` | 先标注，后续迁移 |
 | `scripts/` | 保留 | 已有良好结构 |
 | `test/daily_msg_report.py` | `scripts/daily_msg_report.py` | 可迁移 |
-| `test/pk_weekly_ls8_ls9.py` | `scripts/pk_weekly_ls8_ls9.py` | 可迁移 |
-| `test/竞争洞察A3人群流转.py` | `scripts/competition_a3_flow.py` | 可迁移 |
+| `research_scripts/pk_weekly_ls8_ls9.py` | `research_scripts/pk_weekly_ls8_ls9.py` | 已完成迁移 |
+| `research_scripts/competition_a3_flow.py` | `research_scripts/competition_a3_flow.py` | 已完成迁移 |
 | `test/ls8_floor_heating_rate.py` | `scripts/ls8_floor_heating_rate.py` | 可迁移 |
 | `eval/` | 保留 | 已有良好结构 |
 | `设计方案/` | `docs/design/` | 建议迁移 |
