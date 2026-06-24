@@ -379,16 +379,21 @@ outflow_coeff = _TABLE_B_OUTFLOW / outflow_total
 detail_0622['校准后流入'] = (detail_0622['A3流入人数（指数）'] * inflow_coeff).round(0).astype(int)
 detail_0622['校准后流出'] = (detail_0622['A3流出人数（指数）'] * outflow_coeff).round(0).astype(int)
 detail_0622['估算净流入'] = detail_0622['校准后流入'] - detail_0622['校准后流出']
-detail_0622['承接率'] = detail_0622['A3流出人数（指数）'] / detail_0622['A3流入人数（指数）']
+detail_0622['流入流出比'] = detail_0622['A3流出人数（指数）'] / detail_0622['A3流入人数（指数）']
 
-detail_ranking = detail_0622.sort_values('估算净流入', ascending=True).head(10).reset_index(drop=True)
-detail_ranking.index = detail_ranking.index + 1
-detail_ranking.index.name = '排名'
+full_ranked = detail_0622.sort_values('估算净流入', ascending=True).reset_index(drop=True)
+full_ranked.index = full_ranked.index + 1
+full_ranked.index.name = '排名'
 
-display_main = detail_ranking[['车系', '校准后流入', '校准后流出', '估算净流入', '承接率']].copy()
+top10 = full_ranked.head(10)
+extra_models = ['岚图', '零跑']
+extra_rows = full_ranked[full_ranked['车系'].str.contains('|'.join(extra_models), na=False)]
+detail_ranking = pd.concat([top10, extra_rows]).drop_duplicates(subset='车系').sort_values('估算净流入', ascending=True)
+
+display_main = detail_ranking[['车系', '校准后流入', '校准后流出', '估算净流入', '流入流出比']].copy()
 for col in ['校准后流入', '校准后流出', '估算净流入']:
     display_main[col] = display_main[col].apply(lambda x: f'{x:,}')
-display_main['承接率'] = display_main['承接率'].apply(lambda x: f'{x:.1%}')
+display_main['流入流出比'] = display_main['流入流出比'].apply(lambda x: f'{x:.1%}')
 
 detail_0622_fig = go.Figure()
 detail_0622_fig.add_trace(
@@ -409,8 +414,8 @@ detail_0622_fig.add_trace(
     )
 )
 detail_0622_fig.update_layout(
-    title=dict(text='LS8 A3流出 T+15 TOP10（双边校准 · 按估算净流入升序，截止0622）', x=0.5, font=dict(size=16)),
-    width=1500, height=500,
+    title=dict(text='LS8 A3流出 T+15（双边校准 · 按估算净流入升序，含岚图泰山X8/零跑D19，截止0622）', x=0.5, font=dict(size=16)),
+    width=1500, height=600,
 )
 with open(_OUTPUT_HTML, 'a') as f:
     f.write(detail_0622_fig.to_html(full_html=False, include_plotlyjs=False))
@@ -421,20 +426,20 @@ note_fig.add_annotation(
     x=0.5, y=0.5,
     text=(
         '<b>指标说明：</b><br><br>'
-        '• <b>校准后流出</b>看<b>"量"</b>：本品 A3 流失主要去了哪些车型？<br>'
-        '• <b>估算净流入</b>看<b>"净影响"</b>：哪些车型真正造成净流失？<br>'
-        '• <b>承接率</b>看<b>"准"</b>：哪些车型特别精准地截流本品人群？<br><br>'
-        '承接率 = A3流出指数 / A3流入指数，代表该竞品流入人群中多大比例与本品流失有关。<br>'
-        '承接率高说明该车型"专门在吃本品的人"，截流浓度强，是精准防守对象。<br>'
-        '净流失规模大说明该车型"抢走的人多"，是规模上的主要流失去向。<br><br>'
-        '两个视角结合使用：<b>校准后流出看量，承接率看准</b>。'
+        '• <b>校准后流出</b>看<b>"规模"</b>：本品 A3 流失主要去了哪些车型？<br>'
+        '• <b>流失承接率</b>看<b>"分布"</b>：某车型承接了本品总流失的多少比例？<br>'
+        '• <b>估算净流入</b>看<b>"结果"</b>：哪些车型最终对本品是净增量还是净流失？<br>'
+        '• <b>流入流出比</b>看<b>"压力"</b>：本品和该竞品之间的攻防压力是否失衡？<br><br>'
+        '流入流出比 = A3流出指数 / A3流入指数，衡量本品流向该竞品的压力相对于回流能力。<br>'
+        '比值越高说明本品面对该竞品的防守压力越大，比值越低说明本品在该竞品人群中的吸引力更强。<br><br>'
+        '四个视角结合使用：<b>规模看校准后流出，分布看流失承接率，结果看估算净流入，压力看流入流出比</b>。'
     ),
     xref='paper', yref='paper',
     showarrow=False, align='left',
     font=dict(size=14),
 )
 note_fig.update_layout(
-    title=dict(text='指标解读：净流失规模 vs 承接率', x=0.5, font=dict(size=16)),
+    title=dict(text='指标体系：规模 / 分布 / 结果 / 压力', x=0.5, font=dict(size=16)),
     width=1300, height=400,
     xaxis=dict(visible=False),
     yaxis=dict(visible=False),
