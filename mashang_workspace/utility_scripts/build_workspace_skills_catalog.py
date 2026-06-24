@@ -455,18 +455,18 @@ def write_html(data: dict, skills: list[dict], path: Path):
     .skill-card-header {{ display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 12px; }}
     .skill-name {{ font-size: 20px; font-weight: 700; color: var(--zh-deep-blue); letter-spacing: .3px; }}
     .skill-badge {{ font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; margin-top: 4px; }}
-    .badge-ws {{ background: var(--zh-light-blue); color: var(--zh-blue); }}
-    .badge-pb {{ background: rgba(215,154,54,.12); color: var(--zh-brown); }}
+    .badge-ws {{ background: rgba(23,74,124,.08); color: var(--zh-blue); border: 1px solid rgba(23,74,124,.2); font-weight: 600; border-radius: 20px; padding: 2px 10px; font-size: 12px; }}
+    .badge-pb {{ background: var(--zh-gold-100); color: var(--zh-gold-700); border: 1px solid rgba(215,154,54,.35); font-weight: 700; border-radius: 20px; padding: 2px 10px; font-size: 12px; }}
 
     .skill-desc {{ font-size: 14px; line-height: 1.7; color: var(--zh-text); margin-bottom: 12px; }}
     .skill-meta {{ display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }}
-    .skill-tag {{ font-size: 12px; color: var(--zh-muted); background: var(--zh-cream); padding: 3px 10px; border-radius: 8px; border: 1px solid rgba(107,124,143,.12); }}
-    .skill-tag.blue {{ color: var(--zh-blue); background: var(--zh-light-blue); border-color: rgba(126,205,235,.25); }}
+    .skill-tag {{ font-size: 12px; color: var(--zh-muted); background: var(--zh-panel); padding: 3px 10px; border-radius: 8px; border: 1px solid var(--zh-border); }}
+    .skill-tag.blue {{ color: var(--zh-blue); background: var(--zh-panel); border-color: var(--zh-border); }}
     .skill-tag.gold {{ color: var(--zh-brown); background: rgba(215,154,54,.08); border-color: rgba(215,154,54,.2); }}
     .skill-section {{ margin-bottom: 6px; }}
     .skill-section-label {{ font-size: 12px; font-weight: 600; color: var(--zh-muted); text-transform: uppercase; letter-spacing: .4px; margin-bottom: 4px; }}
     .skill-section-value {{ font-size: 13px; color: var(--zh-text); line-height: 1.6; }}
-    .skill-section-value code {{ background: var(--zh-cream); padding: 1px 6px; border-radius: 4px; font-size: 12px; font-family: "SF Mono","Fira Code",monospace; }}
+    .skill-section-value code {{ background: var(--zh-panel); padding: 1px 6px; border-radius: 4px; font-size: 12px; font-family: "SF Mono","Fira Code",monospace; }}
     .skill-section-value ul {{ list-style: none; padding: 0; }}
     .skill-section-value ul li::before {{ content: "· "; color: var(--zh-muted); }}
     .skill-section-value ul li {{ font-size: 13px; color: var(--zh-text); line-height: 1.7; }}
@@ -479,7 +479,7 @@ def write_html(data: dict, skills: list[dict], path: Path):
     .arch-item ul {{ list-style: none; padding: 0; }}
     .arch-item ul li {{ font-size: 13px; color: var(--zh-muted); line-height: 1.8; padding-left: 12px; position: relative; }}
     .arch-item ul li::before {{ content: "—"; position: absolute; left: 0; color: var(--zh-cyan); }}
-    .note-card {{ background: var(--zh-light-blue); border-radius: 12px; padding: 16px 24px; margin-bottom: 32px; font-size: 13px; color: var(--zh-muted); line-height: 1.6; }}
+    .note-card {{ background: var(--zh-panel); border-radius: 12px; padding: 16px 24px; margin-bottom: 32px; font-size: 13px; color: var(--zh-muted); line-height: 1.6; }}
     .note-card strong {{ color: var(--zh-blue); }}
   </style>
 </head>

@@ -1,14 +1,61 @@
 :root {
+  /* ── Brand Core ── */
   --zh-blue: #174A7C;
+  --zh-blue-700: #123B63;
+  --zh-blue-500: #2D6FA3;
+  --zh-blue-100: #DDEFF8;
+
   --zh-deep-blue: #06213D;
-  --zh-cyan: #7ECDEB;
-  --zh-light-blue: #DDEFF8;
-  --zh-cream: #FFF9EF;
+
   --zh-raccoon-gold: #D79A36;
+  --zh-gold-700: #A96F1F;
+  --zh-gold-100: #FFF0D6;
+
+  --zh-cyan: #7ECDEB;
+  --zh-cyan-100: #E8F8FD;
+
+  --zh-cream: #FFF9EF;
   --zh-brown: #7A4A24;
+
   --zh-text: #1F2D3D;
-  --zh-muted: #6B7C8F;
+  --zh-muted: #6B7280;
+
+  --zh-border: #E5EAF0;
+  --zh-bg: #FAFBFC;
   --zh-card: #FFFFFF;
+  --zh-panel: #F6F8FA;
+  --zh-row-alt: #FAFAFA;
+  --zh-table-section: #F7F8FA;
+  --zh-row-hover: #F3F6F8;
+  --zh-grid: #EEF2F6;
+  --zh-zero-line: #6B7280;
+  --zh-axis-line: #C7CDD4;
+  --zh-axis-text: #5F6B7A;
+  --zh-axis-title: #374151;
+  /* --zh-ink / --zh-white: reserved, not used in current templates */
+
+  /* ── Chart Palette ── */
+  --chart-own: #174A7C;
+  --chart-event: #D79A36;
+  --chart-steel: #4F6F82;
+  --chart-sage: #7A8B76;
+  --chart-clay: #C06F45;
+  --chart-mauve: #7D6A8E;
+  --chart-sky-muted: #6A93B8;
+  --chart-ash: #9AA3AD;
+  /* backwards compat */
+  --chart-1: #174A7C;
+  --chart-2: #D79A36;
+  --chart-3: #4F6F82;
+  --chart-4: #7A8B76;
+  --chart-5: #7D6A8E;
+  --chart-6: #6A93B8;
+
+  /* ── Status Colors ── */
+  --status-positive: #2A9D8F;
+  --status-warning: #D79A36;
+  --status-negative: #D95F59;
+  --status-neutral: #6B7280;
 }
 
 * {
@@ -19,7 +66,7 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-  background: var(--zh-cream);
+  background: var(--zh-bg);
   color: var(--zh-text);
   line-height: 1.6;
   min-height: 100vh;
@@ -33,7 +80,7 @@ body {
 
 header {
   background: var(--zh-card);
-  border-bottom: 1px solid var(--zh-light-blue);
+  border-bottom: 1px solid var(--zh-border);
   padding: 16px 0;
 }
 header .container {
@@ -139,19 +186,35 @@ header .container {
   text-align: left;
   font-size: 12px;
   font-weight: 600;
-  color: var(--zh-muted);
+  color: var(--zh-deep-blue);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   padding: 8px 12px;
-  border-bottom: 2px solid var(--zh-light-blue);
+  background: var(--zh-panel);
+  border-bottom: 2px solid var(--zh-blue);
 }
 .data-table td {
   padding: 10px 12px;
-  border-bottom: 1px solid var(--zh-light-blue);
+  border-bottom: 1px solid var(--zh-border);
   font-size: 14px;
 }
 .data-table tr:last-child td {
   border-bottom: none;
+}
+.data-table tbody tr:nth-child(even),
+.report-table tbody tr:nth-child(even),
+table.content-table tbody tr:nth-child(even) {
+  background: var(--zh-row-alt);
+}
+.data-table tbody tr.section-row,
+.report-table tbody tr.section-row,
+table.content-table tbody tr.section-row {
+  background: var(--zh-table-section);
+}
+.data-table tbody tr:hover,
+.report-table tbody tr:hover,
+table.content-table tbody tr:hover {
+  background: var(--zh-row-hover);
 }
 
 .scope-table {
@@ -166,20 +229,243 @@ header .container {
   overflow-x: auto;
 }
 
+/* ── Summary Cards ── */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 32px;
+}
+.summary-card {
+  background: var(--zh-card);
+  border-radius: 10px;
+  padding: 16px 18px;
+  box-shadow: 0 1px 4px rgba(6,33,61,.06);
+}
+.summary-card .summary-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--zh-deep-blue);
+}
+.summary-card .summary-label {
+  font-size: 11px;
+  color: var(--zh-muted);
+  margin-top: 2px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: .3px;
+}
+.summary-card .summary-hint {
+  font-size: 12px;
+  color: var(--zh-axis-text);
+  margin-top: 4px;
+}
+.summary-card.positive .summary-value { color: var(--status-positive); }
+.summary-card.negative .summary-value { color: var(--status-negative); }
+.summary-card.warning .summary-value { color: var(--status-warning); }
+.summary-card.neutral .summary-value { color: var(--zh-muted); }
+
+/* ── Section / Page Shell ── */
+.report-page {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: var(--zh-bg);
+  color: var(--zh-text);
+  padding: 24px 32px;
+}
+.report-container {
+  max-width: 1360px;
+  margin: 0 auto;
+}
+.report-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--zh-blue);
+  border-left: 4px solid var(--zh-blue);
+  padding-left: 14px;
+  margin: 0 0 4px 0;
+}
+.report-subtitle {
+  font-size: 13px;
+  color: var(--zh-muted);
+  margin: 0 0 24px 16px;
+}
+.report-section {
+  margin-bottom: 32px;
+}
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--zh-deep-blue);
+  border-left: 4px solid var(--zh-blue);
+  padding-left: 12px;
+  margin-bottom: 8px;
+}
+.section-note {
+  font-size: 13px;
+  color: var(--zh-muted);
+  margin-bottom: 16px;
+  padding-left: 16px;
+}
+
+/* ── Report Table ── */
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.report-table thead th {
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--zh-deep-blue);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 8px 12px;
+  background: var(--zh-panel);
+  border-bottom: 2px solid var(--zh-blue);
+}
+.report-table td {
+  padding: 8px 12px;
+  font-size: 13px;
+  border-bottom: 1px solid var(--zh-border);
+}
+.report-table tbody tr:nth-child(even) { background: var(--zh-row-alt); }
+.report-table tbody tr:hover { background: var(--zh-row-hover); }
+.report-table .num {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+.report-table .rank {
+  text-align: center;
+  font-weight: 600;
+  color: var(--zh-axis-text);
+}
+.report-table .delta-positive { color: var(--status-positive); font-weight: 600; }
+.report-table .delta-negative { color: var(--status-negative); font-weight: 600; }
+.report-table .delta-neutral { color: var(--zh-muted); }
+
+/* ── Badge Family ── */
+.badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid transparent; }
+.badge-blue { background: rgba(23,74,124,.08); color: var(--zh-blue); border-color: rgba(23,74,124,.2); }
+.badge-gold { background: var(--zh-gold-100); color: var(--zh-gold-700); border-color: rgba(215,154,54,.35); font-weight: 700; }
+.badge-muted { background: rgba(107,114,128,.08); color: var(--zh-muted); border-color: var(--zh-border); }
+.badge-outline { background: transparent; color: var(--zh-muted); border-color: var(--zh-border); }
+.badge-six-seat { background: var(--zh-gold-100); color: var(--zh-gold-700); border: 1px solid rgba(215,154,54,.35); font-weight: 700; border-radius: 10px; padding: 1px 6px; font-size: 11px; line-height: 16px; margin-left: 6px; }
+.badge-key { background: var(--zh-gold-100); color: var(--zh-gold-700); border-color: rgba(215,154,54,.35); font-weight: 700; border-radius: 8px; padding: 0 6px; font-size: 10px; line-height: 16px; margin-left: 6px; }
+
+/* ── Barcell (Ranking Data Bar) ── */
+.barcell {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-height: 22px;
+  line-height: 22px;
+  padding-left: 8px;
+  border-radius: 5px;
+  background: #F8FAFC;
+  overflow: hidden;
+}
+.barcell .bar {
+  position: absolute;
+  left: 0;
+  top: 3px;
+  bottom: 3px;
+  background: rgba(23,74,124,.13);
+  border-left: 3px solid var(--chart-own);
+  border-radius: 4px;
+  pointer-events: none;
+}
+.barcell .bar.six {
+  background: rgba(215,154,54,.15);
+  border-left: 3px solid var(--chart-event);
+}
+.barcell .bar.positive {
+  background: rgba(42,157,143,.13);
+  border-left: 3px solid var(--status-positive);
+}
+.barcell .bar.negative {
+  background: rgba(217,95,89,.13);
+  border-left: 3px solid var(--status-negative);
+}
+.barcell .txt {
+  position: relative;
+  z-index: 1;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--zh-text);
+}
+
+/* ── Chart Box ── */
+.chart-box {
+  background: var(--zh-card);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 4px rgba(6,33,61,.06);
+}
+.chart-box .chart-wrap { width: 100%; }
+
+/* ── Method Section (footnote) ── */
+.method-section {
+  background: var(--zh-panel);
+  border-radius: 12px;
+  padding: 24px 28px;
+  margin-top: 32px;
+}
+.method-section .section-title { border-left-color: var(--zh-muted); }
+.method-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.method-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.method-icon {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+}
+.method-body { font-size: 13px; color: var(--zh-text); line-height: 1.6; }
+.method-body strong { color: var(--zh-deep-blue); }
+.method-footnote { font-size: 12px; color: var(--zh-muted); line-height: 1.6; }
+
+@media (max-width: 640px) {
+  .method-grid { grid-template-columns: 1fr; }
+  .summary-grid { grid-template-columns: 1fr 1fr; }
+}
+
 .badge {
   display: inline-block;
   padding: 2px 10px;
   border-radius: 20px;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
+  border: 1px solid transparent;
 }
 .badge.blue {
-  background: var(--zh-light-blue);
+  background: rgba(23,74,124,.08);
   color: var(--zh-blue);
+  border-color: rgba(23,74,124,.2);
 }
 .badge.gold {
-  background: #fff3e0;
-  color: var(--zh-raccoon-gold);
+  background: var(--zh-gold-100);
+  color: var(--zh-gold-700);
+  border-color: rgba(215,154,54,.35);
+  font-weight: 700;
+}
+.badge.gray {
+  background: rgba(107,114,128,.08);
+  color: var(--zh-muted);
+  border-color: var(--zh-border);
 }
 
 footer {
@@ -295,14 +581,14 @@ footer .brand-sentence {
 }
 .metric-card.highlight {
   border: 1.5px solid var(--zh-cyan);
-  background: linear-gradient(135deg, #fff, var(--zh-light-blue));
+  background: linear-gradient(135deg, var(--zh-card), var(--zh-light-blue));
 }
 .metric-card.highlight .metric-value {
   color: var(--zh-blue);
 }
 
 .row-highlight td {
-  background: var(--zh-light-blue);
+  background: var(--zh-table-section);
   font-weight: 600;
 }
 .row-highlight td:first-child {
@@ -327,10 +613,11 @@ footer .brand-sentence {
 .insight-num {
   font-size: 28px;
   font-weight: 700;
-  color: var(--zh-light-blue);
+  color: var(--zh-muted);
   line-height: 1;
   min-width: 32px;
   text-align: center;
+  opacity: .5;
 }
 .insight-content h3 {
   font-size: 15px;
@@ -353,7 +640,7 @@ footer .brand-sentence {
 }
 
 .method-card {
-  background: var(--zh-light-blue);
+  background: var(--zh-panel);
   border-radius: 12px;
   padding: 24px 0;
   margin-top: 8px;

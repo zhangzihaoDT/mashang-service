@@ -99,8 +99,8 @@ def _week_monday(d: pd.Timestamp) -> pd.Timestamp:
     return d - pd.Timedelta(days=int(d.weekday()))
 
 
-def _week_cols(num_weeks: int) -> list[str]:
-    return ["对比车系"] + [f"第{i}周" for i in range(1, num_weeks + 1)]
+def _week_cols(num_weeks: int, first_week: int = 1) -> list[str]:
+    return ["对比车系"] + [f"第{i}周" for i in range(first_week, first_week + num_weeks)]
 
 
 def _to_raw_str(x: pd.Series) -> pd.Series:
@@ -168,9 +168,9 @@ def _format_markdown_table(title: str, df: pd.DataFrame) -> str:
     return "\n".join(lines)
 
 
-def _build_week_ranges(w: SeriesWindow) -> dict[int, tuple[pd.Timestamp, pd.Timestamp]]:
+def _build_week_ranges(w: SeriesWindow, first_week: int = 1) -> dict[int, tuple[pd.Timestamp, pd.Timestamp]]:
     out: dict[int, tuple[pd.Timestamp, pd.Timestamp]] = {}
-    for i in range(1, w.num_weeks + 1):
+    for i in range(first_week, first_week + w.num_weeks):
         start = w.base_week_monday + pd.Timedelta(days=7 * (i - 1))
         end = start + pd.Timedelta(days=6)
         out[i] = (start, end)
@@ -186,7 +186,7 @@ def _render_html_table(
     cols = df.columns.tolist()
     df = df.loc[:, cols].copy()
 
-    parts: list[str] = ['<table class="t">', "<thead>", "<tr>"]
+    parts: list[str] = ['<table class="report-table">', "<thead>", "<tr>"]
     for c in cols:
         if c in week_sublabels and week_sublabels[c]:
             parts.append(
@@ -222,22 +222,15 @@ def _format_html_report(
         '<meta charset="utf-8" />',
         '<meta name="viewport" content="width=device-width, initial-scale=1" />',
         f"<title>{title}</title>",
+        '<link rel="stylesheet" href="../../templates/report_style.css">',
         "<style>",
-        "body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,'Noto Sans','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;margin:24px;color:#111;}",
-        "h1{margin:0 0 12px 0;font-size:20px;}",
-        "h2{margin:18px 0 8px 0;font-size:16px;}",
-        ".meta{margin:0 0 12px 0;padding:12px 14px;background:#fafafa;border:1px solid #eee;border-radius:8px;}",
+        "body{margin:24px;background:var(--zh-bg);color:var(--zh-text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;}",
+        "h1{margin:0 0 12px 0;font-size:20px;color:var(--zh-blue);border-left:4px solid var(--zh-blue);padding-left:12px;}",
+        "h2{margin:18px 0 8px 0;font-size:16px;color:var(--zh-deep-blue);}",
+        ".meta{margin:0 0 12px 0;padding:12px 14px;background:var(--zh-panel);border:1px solid var(--zh-border);border-radius:8px;}",
         ".meta ul{margin:0;padding-left:18px;}",
         "table{border-collapse:collapse;width:100%;margin:8px 0 18px 0;}",
-        "th,td{border:1px solid #e5e5e5;padding:8px 10px;font-size:13px;}",
-        "th{background:#f5f5f5;text-align:left;}",
-        "td{text-align:left;}",
-        "th .sub{display:block;font-size:11px;color:#666;margin-top:2px;font-weight:400;line-height:1.25;}",
-        ".barcell{position:relative;display:block;width:100%;min-height:18px;line-height:18px;}",
-        ".barcell .bar{position:absolute;left:0;top:0;bottom:0;background:#3b82f633;border-radius:3px;pointer-events:none;}",
-        ".barcell .bar.six{background:#f9731633;}",
-        ".barcell .txt{position:relative;z-index:1;font-variant-numeric:tabular-nums;pointer-events:none;}",
-        ".badge{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:10px;font-size:11px;line-height:16px;background:#f9731622;color:#9a3412;border:1px solid #f9731633;}",
+        "th .sub{display:block;font-size:11px;color:var(--zh-muted);margin-top:2px;font-weight:400;line-height:1.25;text-transform:none;letter-spacing:0;}",
         "</style>",
         "</head>",
         "<body>",
@@ -271,10 +264,10 @@ def _format_html_report(
     return "\n".join(parts)
 
 
-def _build_metric_pivot(sub: pd.DataFrame, value_col: str, num_weeks: int) -> pd.DataFrame:
+def _build_metric_pivot(sub: pd.DataFrame, value_col: str, num_weeks: int, first_week: int = 1) -> pd.DataFrame:
     s = sub.copy()
     s[value_col] = _to_raw_str(s[value_col])
-    cols = _week_cols(num_weeks)
+    cols = _week_cols(num_weeks, first_week=first_week)
     pivot = (
         s.pivot_table(
             index="车系",
@@ -283,11 +276,11 @@ def _build_metric_pivot(sub: pd.DataFrame, value_col: str, num_weeks: int) -> pd
             aggfunc="first",
             dropna=False,
         )
-        .rename(columns={i: f"第{i}周" for i in range(1, num_weeks + 1)})
+        .rename(columns={i: f"第{i}周" for i in range(first_week, first_week + num_weeks)})
         .reset_index()
         .rename(columns={"车系": "对比车系"})
     )
-    for i in range(1, num_weeks + 1):
+    for i in range(first_week, first_week + num_weeks):
         c = f"第{i}周"
         if c not in pivot.columns:
             pivot[c] = ""
@@ -296,10 +289,10 @@ def _build_metric_pivot(sub: pd.DataFrame, value_col: str, num_weeks: int) -> pd
     return pivot
 
 
-def _build_pk_num_pivot(sub: pd.DataFrame, num_weeks: int) -> pd.DataFrame:
+def _build_pk_num_pivot(sub: pd.DataFrame, num_weeks: int, first_week: int = 1) -> pd.DataFrame:
     s = sub.copy()
     s["PK次数_num"] = _to_number_series(s["PK次数"])
-    cols = _week_cols(num_weeks)
+    cols = _week_cols(num_weeks, first_week=first_week)
     pivot = (
         s.pivot_table(
             index="车系",
@@ -308,11 +301,11 @@ def _build_pk_num_pivot(sub: pd.DataFrame, num_weeks: int) -> pd.DataFrame:
             aggfunc="first",
             dropna=False,
         )
-        .rename(columns={i: f"第{i}周" for i in range(1, num_weeks + 1)})
+        .rename(columns={i: f"第{i}周" for i in range(first_week, first_week + num_weeks)})
         .reset_index()
         .rename(columns={"车系": "对比车系"})
     )
-    for i in range(1, num_weeks + 1):
+    for i in range(first_week, first_week + num_weeks):
         c = f"第{i}周"
         if c not in pivot.columns:
             pivot[c] = float("nan")
@@ -321,8 +314,8 @@ def _build_pk_num_pivot(sub: pd.DataFrame, num_weeks: int) -> pd.DataFrame:
     return pivot
 
 
-def _build_rank_pivot(sub: pd.DataFrame, value_col: str, num_weeks: int) -> pd.DataFrame:
-    return _build_metric_pivot(sub, value_col=value_col, num_weeks=num_weeks)
+def _build_rank_pivot(sub: pd.DataFrame, value_col: str, num_weeks: int, first_week: int = 1) -> pd.DataFrame:
+    return _build_metric_pivot(sub, value_col=value_col, num_weeks=num_weeks, first_week=first_week)
 
 
 def _attach_rank_bar_cells(rank_df: pd.DataFrame, pk_num_df: pd.DataFrame) -> pd.DataFrame:
@@ -383,7 +376,7 @@ def _attach_rank_bar_cells_with_six_seat(
         if col == "对比车系":
             v0 = row.get(col, "")
             s0 = "" if v0 is None or (isinstance(v0, float) and pd.isna(v0)) else str(v0)
-            badge = '<span class="badge">6座</span>' if is_six else ""
+            badge = '<span class="badge-six-seat">6座</span>' if is_six else ""
             return f"{html_lib.escape(s0)}{badge}"
 
         v = row.get(col, "")
@@ -449,6 +442,12 @@ def main(argv: list[str] | None = None) -> None:
         help="对比周数；设为 0 则自动以 LS8 数据最大周为准",
     )
     p.add_argument(
+        "--first-week",
+        type=int,
+        default=1,
+        help="起始周索引（从 1 开始）；例如 --first-week 9 -n 2 表示第9~10周",
+    )
+    p.add_argument(
         "--html-out",
         default=str(_ROOT / "outputs" / "reports" / "pk_weekly_compare_ls8_ls9.html"),
         help="HTML 报告输出路径；传空字符串可禁用",
@@ -510,22 +509,23 @@ def main(argv: list[str] | None = None) -> None:
     ranges_by_series: dict[str, dict[int, tuple[pd.Timestamp, pd.Timestamp]]] = {}
 
     for w in windows:
-        ranges_by_series[w.series] = _build_week_ranges(w)
+        ranges_by_series[w.series] = _build_week_ranges(w, first_week=args.first_week)
         sub = df[df["series"].astype(str).str.upper() == w.series.upper()].copy()
         if sub.empty:
             continue
 
         sub["wk_index"] = ((sub["week_start"] - w.base_week_monday).dt.days // 7) + 1
-        sub = sub[sub["wk_index"].between(1, w.num_weeks)].copy()
+        sub = sub[sub["wk_index"].between(args.first_week, args.first_week + w.num_weeks - 1)].copy()
 
+        fw = args.first_week
         week_sublabels = {
             f"第{i}周": f"{ranges_by_series[w.series][i][0].date()} ~ {ranges_by_series[w.series][i][1].date()}"
-            for i in range(1, w.num_weeks + 1)
+            for i in range(fw, fw + w.num_weeks)
         }
 
         pk_by_week = sub.groupby("wk_index", as_index=True)["PK次数_num"].sum().to_dict()
         pk_row: dict[str, str] = {"对比车系": w.series}
-        for i in range(1, w.num_weeks + 1):
+        for i in range(fw, fw + w.num_weeks):
             pk_row[f"第{i}周"] = str(int(round(float(pk_by_week.get(i, 0.0)))))
         pk_sum_tables.append(
             (
@@ -535,9 +535,9 @@ def main(argv: list[str] | None = None) -> None:
             )
         )
 
-        pk_num = _build_pk_num_pivot(sub, num_weeks=w.num_weeks)
+        pk_num = _build_pk_num_pivot(sub, num_weeks=w.num_weeks, first_week=fw)
 
-        pos_rank = _build_rank_pivot(sub, "PK正向排名", num_weeks=w.num_weeks)
+        pos_rank = _build_rank_pivot(sub, "PK正向排名", num_weeks=w.num_weeks, first_week=fw)
         pos_rank = _sort_by_last_week_pk(pos_rank, pk_num)
         pos_tables.append(
             (
@@ -547,7 +547,7 @@ def main(argv: list[str] | None = None) -> None:
             )
         )
 
-        neg_rank = _build_rank_pivot(sub, "PK反向排名", num_weeks=w.num_weeks)
+        neg_rank = _build_rank_pivot(sub, "PK反向排名", num_weeks=w.num_weeks, first_week=fw)
         neg_rank = _sort_by_last_week_pk(neg_rank, pk_num)
         neg_tables.append(
             (
@@ -558,18 +558,20 @@ def main(argv: list[str] | None = None) -> None:
         )
 
     series_names = "、".join(w.series for w in windows)
-    meta_title = f"{series_names} 上市后（end day 所在周起算）连续 {num_weeks} 周 PK 对比"
+    week_range_str = f"第{args.first_week}~{args.first_week + num_weeks - 1}周"
+    meta_title = f"{series_names} 上市后（end day 所在周起算）{week_range_str} PK 对比"
     meta_lines = [f"# {meta_title}", ""]
-    meta_lines.append(f"- 统一对比周数: {num_weeks} 周")
+    meta_lines.append(f"- 对比周数: {num_weeks} 周（{week_range_str}）")
     meta_lines.append(
         f"- 数据最大动态周: "
         + "; ".join(f"{s}={max_weeks_by_series.get(s, '?')}周" for s in (w.series for w in windows))
     )
     for w in windows:
         ranges = ranges_by_series[w.series]
+        fw = args.first_week
         week_descrs = "; ".join(
             f"第{i}周={ranges[i][0].date()}~{ranges[i][1].date()}"
-            for i in range(1, w.num_weeks + 1)
+            for i in range(fw, fw + w.num_weeks)
         )
         meta_lines.append(
             f"- {w.series}: end={w.end_date.date()} base_week_monday={w.base_week_monday.date()} ({week_descrs})"

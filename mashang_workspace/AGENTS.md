@@ -296,3 +296,17 @@ Default template path:
 templates/report_base.html
 templates/report_style.css
 ```
+
+### 报告视觉系统参考
+
+`docs/report_visual_system.md` 是 mashang-service 报告视觉体系的总文档，包含：
+
+- CSS 组件库（页面外壳、摘要卡片、表格、badge、barcell 数据条）
+- Plotly 图表主题（`utils/plotly_theme.py` + `apply_zh_theme` + `get_series_color`）
+- 颜色语义规则（按业务角色分配）
+- 约束规则
+
+在以下情况下**必须阅读**该文档：
+- 新建或修改 HTML 报告脚本
+- 新增 Plotly 图表
+- 调整报告视觉风格

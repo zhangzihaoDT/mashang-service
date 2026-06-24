@@ -30,15 +30,16 @@
     .inv-card-desc { font-size: 13px; line-height: 1.6; color: var(--zh-text); margin-bottom: 10px; }
     .inv-card-fields { display: flex; flex-direction: column; gap: 5px; }
     .inv-field { font-size: 12px; color: var(--zh-text); line-height: 1.5; }
-    .inv-field code { background: var(--zh-cream); padding: 1px 5px; border-radius: 3px; font-size: 11px; word-break: break-all; }
+    .inv-field code { background: var(--zh-panel); padding: 1px 5px; border-radius: 3px; font-size: 11px; word-break: break-all; }
     .inv-field-label { font-size: 10px; font-weight: 600; color: var(--zh-muted); text-transform: uppercase; letter-spacing: .3px; margin-right: 6px; display: inline-block; min-width: 60px; }
 
     .skill-badge { font-size: 10px; font-weight: 600; padding: 2px 10px; border-radius: 12px; white-space: nowrap; }
-    .badge-green { background: rgba(72,187,120,.12); color: #2F855A; }
-    .badge-blue { background: var(--zh-light-blue); color: var(--zh-blue); }
-    .badge-gold { background: rgba(215,154,54,.08); color: var(--zh-brown); }
-    .badge-gray { background: rgba(107,124,143,.08); color: var(--zh-muted); }
-    .badge-tag { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 8px; background: rgba(126,205,235,.12); color: #2A6B8A; white-space: nowrap; }
+    .skill-badge { font-size: 10px; font-weight: 600; padding: 2px 10px; border-radius: 12px; white-space: nowrap; border: 1px solid transparent; }
+    .badge-green { background: rgba(42,157,143,.12); color: #2A9D8F; border-color: rgba(42,157,143,.25); }
+    .badge-blue { background: rgba(23,74,124,.08); color: var(--zh-blue); border-color: rgba(23,74,124,.2); }
+    .badge-gold { background: var(--zh-gold-100); color: var(--zh-gold-700); border-color: rgba(215,154,54,.35); font-weight: 700; }
+    .badge-gray { background: rgba(107,114,128,.08); color: var(--zh-muted); border-color: var(--zh-border); }
+    .badge-tag { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 8px; background: var(--zh-cyan-100); color: var(--zh-blue-500); white-space: nowrap; border: 1px solid rgba(126,205,235,.25); }
 
     .wf-step { font-size: 13px; color: var(--zh-text); line-height: 1.8; padding: 6px 0; border-bottom: 1px solid rgba(23,74,124,.04); }
     .wf-step:last-child { border-bottom: none; }
@@ -57,7 +58,7 @@
         <img class="brand-avatar" src="../../assets/brand/raccoon_avatar_light.png" alt="" />
         <span class="brand-name">Raccoon Research</span>
       </div>
-      <span class="header-meta">workspace_capability_inventory | 2026-06-23</span>
+      <span class="header-meta">workspace_capability_inventory | 2026-06-24</span>
     </div>
   </header>
 
@@ -72,13 +73,13 @@
 
       <div class="kpi-card">
         <div class="label">Workspace Skills</div>
-        <div class="value">3</div>
+        <div class="value">5</div>
         <div class="change neutral">mashang_workspace</div>
       </div>
 
       <div class="kpi-card">
         <div class="label">Callable Scripts</div>
-        <div class="value">39</div>
+        <div class="value">41</div>
         <div class="change neutral">3 categories</div>
       </div>
 
@@ -90,7 +91,7 @@
 
       <div class="kpi-card">
         <div class="label">Generated Outputs</div>
-        <div class="value">42</div>
+        <div class="value">36</div>
         <div class="change neutral">reports / data / charts</div>
       </div>
 
@@ -110,7 +111,7 @@
           <div>
             <div class="cap-label">Skills</div>
             <div class="cap-sub">Agent 会什么</div>
-            <div class="cap-count">3 项资产</div>
+            <div class="cap-count">5 项资产</div>
           </div>
         </div>
 
@@ -119,7 +120,7 @@
           <div>
             <div class="cap-label">Scripts</div>
             <div class="cap-sub">Agent 能调用什么</div>
-            <div class="cap-count">39 项资产</div>
+            <div class="cap-count">41 项资产</div>
           </div>
         </div>
 
@@ -137,7 +138,7 @@
           <div>
             <div class="cap-label">Outputs</div>
             <div class="cap-sub">Agent 已沉淀什么</div>
-            <div class="cap-count">42 项资产</div>
+            <div class="cap-count">36 项资产</div>
           </div>
         </div>
 
@@ -188,6 +189,28 @@
             <div class="inv-card-desc">Diagnose mashang runtime eval reports, including hard_pass, soft_pass, failed, contract mismatch, fact_types, and exit_reason.</div>
             <div class="inv-card-fields">
               <div class="inv-field"><span class="inv-field-label">Path</span><code>.opencode/skills/runtime-eval-diagnosis/</code></div>
+            </div>
+          </div>
+
+          <div class="inv-card">
+            <div class="inv-card-header">
+              <div class="inv-card-name">auto_launch</div>
+              <span class="skill-badge badge-green">active</span>
+            </div>
+            <div class="inv-card-desc">生成竞品市场事件检索 Prompt；验证 AI raw response；归一化 evidence；Raw-first report packaging</div>
+            <div class="inv-card-fields">
+              <div class="inv-field"><span class="inv-field-label">Path</span><code>.opencode/skills/auto_launch/</code></div>
+            </div>
+          </div>
+
+          <div class="inv-card">
+            <div class="inv-card-header">
+              <div class="inv-card-name">miit_new_car</div>
+              <span class="skill-badge badge-green">active</span>
+            </div>
+            <div class="inv-card-desc">MIIT 公告信号解释 Prompt Pack；新车申报情报分析</div>
+            <div class="inv-card-fields">
+              <div class="inv-field"><span class="inv-field-label">Path</span><code>.opencode/skills/miit_new_car/</code></div>
             </div>
           </div>
       </div>
@@ -249,6 +272,11 @@
             <tr>
               <td><strong>cohort_forecast.py</strong></td>
               <td>未声明</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
+              <td><strong>competition_a3_flow.py</strong></td>
+              <td>竞争洞察 A3 人群流转分析</td>
               <td><span class="badge-tag">active</span></td>
             </tr>
             <tr>
@@ -329,6 +357,12 @@
             <tr>
               <td><strong>passenger_insurance/check_passenger_insurance_asset.py</strong></td>
               <td>未声明</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
+              <td><strong>pk_weekly_ls8_ls9.py</strong></td>
+              <td>name: pk_weekly_compare_ls8_ls9
+use: python research_scripts</td>
               <td><span class="badge-tag">active</span></td>
             </tr>
             <tr>
@@ -484,7 +518,7 @@
               <tbody>
             <tr>
               <td><strong>.DS_Store</strong></td>
-              <td>other · 10.0 KB</td>
+              <td>other · 8.0 KB</td>
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>
@@ -500,26 +534,6 @@
             <tr>
               <td><strong>atp_2026-05.html</strong></td>
               <td>html report · 7.7 KB</td>
-              <td><span class="badge-tag">generated</span></td>
-            </tr>
-            <tr>
-              <td><strong>auto_launch_monitor_2026-06-01_2026-06-17.md</strong></td>
-              <td>markdown report · 8.7 KB</td>
-              <td><span class="badge-tag">generated</span></td>
-            </tr>
-            <tr>
-              <td><strong>auto_launch_monitor_2026-06-05_2026-06-07.json</strong></td>
-              <td>json contract · 2.4 KB</td>
-              <td><span class="badge-tag">generated</span></td>
-            </tr>
-            <tr>
-              <td><strong>auto_launch_monitor_2026-06-05_2026-06-07.md</strong></td>
-              <td>markdown report · 4.2 KB</td>
-              <td><span class="badge-tag">generated</span></td>
-            </tr>
-            <tr>
-              <td><strong>auto_launch_monitor_2026-06-17_2026-06-17.md</strong></td>
-              <td>markdown report · 6.7 KB</td>
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>
@@ -539,17 +553,17 @@
             </tr>
             <tr>
               <td><strong>lock_predict_backtest.html</strong></td>
-              <td>html report · 34.4 KB</td>
+              <td>html report · 35.9 KB</td>
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>
               <td><strong>lock_release_curve.html</strong></td>
-              <td>html report · 74.0 KB</td>
+              <td>html report · 75.4 KB</td>
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>
               <td><strong>ls8_battery_weekly_share.html</strong></td>
-              <td>html report · 2950.1 KB</td>
+              <td>html report · 2951.0 KB</td>
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>
@@ -563,23 +577,13 @@
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>
-              <td><strong>ls8_user_profile_20260401_20260621.html</strong></td>
-              <td>html report · 8.3 KB</td>
-              <td><span class="badge-tag">generated</span></td>
-            </tr>
-            <tr>
-              <td><strong>ls8_user_profile_20260401_20260621.md</strong></td>
-              <td>markdown report · 1.7 KB</td>
-              <td><span class="badge-tag">generated</span></td>
-            </tr>
-            <tr>
               <td><strong>passenger_insurance_workspace_smoke.md</strong></td>
               <td>markdown report · 1.1 KB</td>
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>
               <td><strong>pk_weekly_compare_ls8_ls9.html</strong></td>
-              <td>html report · 66.1 KB</td>
+              <td>html report · 18.3 KB</td>
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>
@@ -599,37 +603,37 @@
             </tr>
             <tr>
               <td><strong>workspace_capability_inventory.html</strong></td>
-              <td>html report · 37.3 KB</td>
+              <td>html report · 37.9 KB</td>
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>
               <td><strong>workspace_capability_inventory.json</strong></td>
-              <td>json contract · 48.7 KB</td>
+              <td>json contract · 47.8 KB</td>
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>
               <td><strong>workspace_capability_inventory.md</strong></td>
-              <td>markdown report · 9.2 KB</td>
+              <td>markdown report · 9.1 KB</td>
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>
               <td><strong>workspace_skills_catalog.html</strong></td>
-              <td>html report · 14.1 KB</td>
+              <td>html report · 20.2 KB</td>
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>
               <td><strong>workspace_skills_catalog.json</strong></td>
-              <td>json contract · 3.9 KB</td>
+              <td>json contract · 4.9 KB</td>
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>
               <td><strong>workspace_skills_catalog.md</strong></td>
-              <td>markdown report · 3.5 KB</td>
+              <td>markdown report · 4.7 KB</td>
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>
               <td><strong>竞争洞察A3人群流转.html</strong></td>
-              <td>html report · 4934.7 KB</td>
+              <td>html report · 4958.7 KB</td>
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>

@@ -948,15 +948,16 @@ def write_html(data: dict, path: Path):
     .inv-card-desc {{ font-size: 13px; line-height: 1.6; color: var(--zh-text); margin-bottom: 10px; }}
     .inv-card-fields {{ display: flex; flex-direction: column; gap: 5px; }}
     .inv-field {{ font-size: 12px; color: var(--zh-text); line-height: 1.5; }}
-    .inv-field code {{ background: var(--zh-cream); padding: 1px 5px; border-radius: 3px; font-size: 11px; word-break: break-all; }}
+    .inv-field code {{ background: var(--zh-panel); padding: 1px 5px; border-radius: 3px; font-size: 11px; word-break: break-all; }}
     .inv-field-label {{ font-size: 10px; font-weight: 600; color: var(--zh-muted); text-transform: uppercase; letter-spacing: .3px; margin-right: 6px; display: inline-block; min-width: 60px; }}
 
     .skill-badge {{ font-size: 10px; font-weight: 600; padding: 2px 10px; border-radius: 12px; white-space: nowrap; }}
-    .badge-green {{ background: rgba(72,187,120,.12); color: #2F855A; }}
-    .badge-blue {{ background: var(--zh-light-blue); color: var(--zh-blue); }}
-    .badge-gold {{ background: rgba(215,154,54,.08); color: var(--zh-brown); }}
-    .badge-gray {{ background: rgba(107,124,143,.08); color: var(--zh-muted); }}
-    .badge-tag {{ font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 8px; background: rgba(126,205,235,.12); color: #2A6B8A; white-space: nowrap; }}
+    .skill-badge {{ font-size: 10px; font-weight: 600; padding: 2px 10px; border-radius: 12px; white-space: nowrap; border: 1px solid transparent; }}
+    .badge-green {{ background: rgba(42,157,143,.12); color: #2A9D8F; border-color: rgba(42,157,143,.25); }}
+    .badge-blue {{ background: rgba(23,74,124,.08); color: var(--zh-blue); border-color: rgba(23,74,124,.2); }}
+    .badge-gold {{ background: var(--zh-gold-100); color: var(--zh-gold-700); border-color: rgba(215,154,54,.35); font-weight: 700; }}
+    .badge-gray {{ background: rgba(107,114,128,.08); color: var(--zh-muted); border-color: var(--zh-border); }}
+    .badge-tag {{ font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 8px; background: var(--zh-cyan-100); color: var(--zh-blue-500); white-space: nowrap; border: 1px solid rgba(126,205,235,.25); }}
 
     .wf-step {{ font-size: 13px; color: var(--zh-text); line-height: 1.8; padding: 6px 0; border-bottom: 1px solid rgba(23,74,124,.04); }}
     .wf-step:last-child {{ border-bottom: none; }}
