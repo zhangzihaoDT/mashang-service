@@ -129,14 +129,14 @@ mashang-service/
 
 | 文件 | 说明 |
 |------|------|
-| `scripts/reports/atp_2026-04.html` | ATP 月报 2026-04 |
-| `scripts/reports/atp_2026-05.html` | ATP 月报 2026-05 |
-| `scripts/reports/daily_msg_report.html` | 每日消息报告 |
-| `scripts/reports/lock_predict_backtest.html` | 预测回测报告 |
-| `scripts/reports/lock_release_curve.html` | 释放曲线报告 |
-| `scripts/reports/pk_weekly_compare_ls8_ls9.html` | LS8 vs LS9 周度对比 |
-| `scripts/reports/quick_lock_ratio.html` | 锁单累计同比报告 |
-| `scripts/reports/竞争洞察A3人群流转.html` | A3 人群流转报告 |
+| `outputs/reports/atp_2026-04.html` | ATP 月报 2026-04 |
+| `outputs/reports/atp_2026-05.html` | ATP 月报 2026-05 |
+| `outputs/reports/daily_msg_report.html` | 每日消息报告 |
+| `outputs/reports/lock_predict_backtest.html` | 预测回测报告 |
+| `outputs/reports/lock_release_curve.html` | 释放曲线报告 |
+| `outputs/reports/pk_weekly_compare_ls8_ls9.html` | LS8 vs LS9 周度对比 |
+| `outputs/reports/quick_lock_ratio.html` | 锁单累计同比报告 |
+| `outputs/reports/竞争洞察A3人群流转.html` | A3 人群流转报告 |
 
 ## 9. 基础设施与服务能力
 

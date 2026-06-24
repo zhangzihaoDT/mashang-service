@@ -35,7 +35,7 @@ from operators.atp_analysis import run_atp_operator, apply_business_logic, _load
 def main():
     parser = argparse.ArgumentParser(description="ATP价格及锁单数月报")
     parser.add_argument("month", nargs="?", type=str, default=None, help="报告月份 YYYY-MM（默认前一个月）")
-    parser.add_argument("--output", "-o", type=str, default=None, help="HTML 报告输出路径（默认 scripts/reports/atp_YYYY-MM.html）")
+    parser.add_argument("--output", "-o", type=str, default=None, help="HTML 报告输出路径（默认 mashang_workspace/outputs/reports/atp_YYYY-MM.html）")
     args = parser.parse_args()
 
     if args.month:
@@ -132,7 +132,7 @@ def main():
     if args.output:
         out_path = Path(args.output)
     else:
-        out_path = REPO_ROOT / "scripts" / "reports" / f"atp_{month_label}.html"
+        out_path = _WS_ROOT / "outputs" / "reports" / f"atp_{month_label}.html"
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     bg_map = {"all": "#ffffff", "suv": "#f0f7ff", "sedan": "#fff8f0"}

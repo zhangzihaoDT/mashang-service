@@ -57,3 +57,9 @@ mashang_workspace/outputs/auto_launch/
 # Runtime reports: LS8 user profile snapshots
 mashang_workspace/outputs/reports/ls8_user_profile_*.md
 mashang_workspace/outputs/reports/ls8_user_profile_*.html
+
+# Local MCP runtime
+.playwright-mcp/
+
+# Local chart scratch outputs
+outputs/charts/
