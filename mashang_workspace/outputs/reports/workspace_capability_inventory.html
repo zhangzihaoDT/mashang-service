@@ -58,7 +58,7 @@
         <img class="brand-avatar" src="../../assets/brand/raccoon_avatar_light.png" alt="" />
         <span class="brand-name">Raccoon Research</span>
       </div>
-      <span class="header-meta">workspace_capability_inventory | 2026-06-24</span>
+      <span class="header-meta">workspace_capability_inventory | 2026-06-25</span>
     </div>
   </header>
 
@@ -73,13 +73,13 @@
 
       <div class="kpi-card">
         <div class="label">Workspace Skills</div>
-        <div class="value">5</div>
+        <div class="value">6</div>
         <div class="change neutral">mashang_workspace</div>
       </div>
 
       <div class="kpi-card">
         <div class="label">Callable Scripts</div>
-        <div class="value">41</div>
+        <div class="value">42</div>
         <div class="change neutral">3 categories</div>
       </div>
 
@@ -91,7 +91,7 @@
 
       <div class="kpi-card">
         <div class="label">Generated Outputs</div>
-        <div class="value">36</div>
+        <div class="value">37</div>
         <div class="change neutral">reports / data / charts</div>
       </div>
 
@@ -111,7 +111,7 @@
           <div>
             <div class="cap-label">Skills</div>
             <div class="cap-sub">Agent 会什么</div>
-            <div class="cap-count">5 项资产</div>
+            <div class="cap-count">6 项资产</div>
           </div>
         </div>
 
@@ -120,7 +120,7 @@
           <div>
             <div class="cap-label">Scripts</div>
             <div class="cap-sub">Agent 能调用什么</div>
-            <div class="cap-count">41 项资产</div>
+            <div class="cap-count">42 项资产</div>
           </div>
         </div>
 
@@ -138,7 +138,7 @@
           <div>
             <div class="cap-label">Outputs</div>
             <div class="cap-sub">Agent 已沉淀什么</div>
-            <div class="cap-count">36 项资产</div>
+            <div class="cap-count">37 项资产</div>
           </div>
         </div>
 
@@ -167,6 +167,17 @@
             <div class="inv-card-desc">生成 mashang_workspace 专属的品牌化 HTML 数据报告，适用于汽车市场洞察、销量预测、锁单释放曲线、模型回测和经营分析报告。使用 Raccoon Research 视觉风格。</div>
             <div class="inv-card-fields">
               <div class="inv-field"><span class="inv-field-label">Path</span><code>.opencode/skills/branded-html-report/</code></div>
+            </div>
+          </div>
+
+          <div class="inv-card">
+            <div class="inv-card-header">
+              <div class="inv-card-name">cpca-weekly-data-capture</div>
+              <span class="skill-badge badge-green">active</span>
+            </div>
+            <div class="inv-card-desc">第一时间捕捉乘联分会周度核心数据，并生成带置信度的三句话 fact_result JSON</div>
+            <div class="inv-card-fields">
+              <div class="inv-field"><span class="inv-field-label">Path</span><code>.opencode/skills/cpca-weekly-data-capture/</code></div>
             </div>
           </div>
 
@@ -276,7 +287,12 @@
             </tr>
             <tr>
               <td><strong>competition_a3_flow.py</strong></td>
-              <td>竞争洞察 A3 人群流转分析</td>
+              <td>竞争洞察 A3 人群流转分析 — 情报报告</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
+              <td><strong>cpca_weekly_early_signal.py</strong></td>
+              <td>乘联分会周度数据早源监控 — Period-Aware</td>
               <td><span class="badge-tag">active</span></td>
             </tr>
             <tr>
@@ -537,6 +553,11 @@ use: python research_scripts</td>
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>
+              <td><strong>cpca_weekly_early_signal.html</strong></td>
+              <td>html report · 21.3 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
               <td><strong>daily_msg_report.html</strong></td>
               <td>html report · 25.8 KB</td>
               <td><span class="badge-tag">generated</span></td>
@@ -583,12 +604,12 @@ use: python research_scripts</td>
             </tr>
             <tr>
               <td><strong>pk_weekly_compare_ls8_ls9.html</strong></td>
-              <td>html report · 18.3 KB</td>
+              <td>html report · 13.6 KB</td>
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>
               <td><strong>quick_lock_ratio.html</strong></td>
-              <td>html report · 638.5 KB</td>
+              <td>html report · 661.5 KB</td>
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>
@@ -603,37 +624,37 @@ use: python research_scripts</td>
             </tr>
             <tr>
               <td><strong>workspace_capability_inventory.html</strong></td>
-              <td>html report · 37.9 KB</td>
+              <td>html report · 38.9 KB</td>
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>
               <td><strong>workspace_capability_inventory.json</strong></td>
-              <td>json contract · 47.8 KB</td>
+              <td>json contract · 49.2 KB</td>
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>
               <td><strong>workspace_capability_inventory.md</strong></td>
-              <td>markdown report · 9.1 KB</td>
+              <td>markdown report · 9.4 KB</td>
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>
               <td><strong>workspace_skills_catalog.html</strong></td>
-              <td>html report · 20.2 KB</td>
+              <td>html report · 22.9 KB</td>
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>
               <td><strong>workspace_skills_catalog.json</strong></td>
-              <td>json contract · 4.9 KB</td>
+              <td>json contract · 6.4 KB</td>
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>
               <td><strong>workspace_skills_catalog.md</strong></td>
-              <td>markdown report · 4.7 KB</td>
+              <td>markdown report · 6.0 KB</td>
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>
               <td><strong>竞争洞察A3人群流转.html</strong></td>
-              <td>html report · 4958.7 KB</td>
+              <td>html report · 416.8 KB</td>
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>

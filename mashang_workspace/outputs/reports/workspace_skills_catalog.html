@@ -48,7 +48,7 @@
         <img class="brand-avatar" src="../../assets/brand/raccoon_avatar_light.png" alt="" />
         <span class="brand-name">Raccoon Research</span>
       </div>
-      <span class="header-meta">workspace_skills_catalog | 2026-06-24</span>
+      <span class="header-meta">workspace_skills_catalog | 2026-06-25</span>
     </div>
   </header>
 
@@ -62,7 +62,7 @@
     <section class="kpi-grid">
       <div class="kpi-card">
         <div class="label">Workspace Skills</div>
-        <div class="value">3</div>
+        <div class="value">4</div>
         <div class="change neutral">OpenCode Agent 自动匹配</div>
       </div>
       <div class="kpi-card">
@@ -72,8 +72,8 @@
       </div>
       <div class="kpi-card">
         <div class="label">总能力数</div>
-        <div class="value">5</div>
-        <div class="change neutral">2026-06-24</div>
+        <div class="value">6</div>
+        <div class="change neutral">2026-06-25</div>
       </div>
     </section>
 
@@ -98,6 +98,13 @@
               <td>将汽车经营分析、预测模型、回测评估、市场洞察等结果，渲染为具有 Raccoon </td>
               <td><code>python runtime_scripts/daily_lock_count.py</code></td>
               <td><code>['mashang_workspace/outputs/reports/']</code></td>
+            </tr>
+            <tr>
+              <td><strong>cpca-weekly-data-capture</strong></td>
+              <td><span class="badge badge-ws">workspace</span></td>
+              <td>第一时间捕捉乘联分会/乘联会周度核心数据，比 CADA 官网更早获取 P0 早源</td>
+              <td><code>make cpca-weekly-data-capture WEEK=2026-W25</code></td>
+              <td><code>['dataset/cpca_weekly/cpca_weekly_data_capture.json   # evidence/capture 原材料']</code></td>
             </tr>
             <tr>
               <td><strong>monthly-market-report</strong></td>
@@ -185,6 +192,47 @@
             <div class="skill-section-label">入口命令</div>
             <div class="skill-section-value">
                   <code>python runtime_scripts/daily_lock_count.py</code>
+            </div>
+          </div>
+        </div>
+        <div class="skill-card">
+          <div class="skill-card-header">
+            <div class="skill-name">cpca-weekly-data-capture</div>
+            <span class="skill-badge badge-ws">workspace</span>
+          </div>
+          <div class="skill-desc">第一时间捕捉乘联分会/乘联会周度核心数据，比 CADA 官网更早获取 P0 早源。</div>
+          <div class="skill-meta">
+
+          </div>
+          <div class="skill-section">
+            <div class="skill-section-label">目录</div>
+            <div class="skill-section-value"><code>.opencode/skills/cpca-weekly-data-capture/</code></div>
+          </div>          <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="skill-section">
+              <div class="skill-section-label">适用场景</div>
+              <div class="skill-section-value">
+                <ul>
+                  <li>每周三下午监控 2026-W26 等数据周的核心指标</li>
+                  <li>需要比 CADA 官网更早获取乘用车零售/新能源零售/渗透率</li>
+                  <li>需要结构化 JSON + 可发布文本的 fact_result</li>
+                  <li>需要追踪 first_signal 与 CADA final confirmation 的时间差</li>
+                </ul>
+              </div>
+            </div>
+            <div class="skill-section">
+              <div class="skill-section-label">不适用场景</div>
+              <div class="skill-section-value">
+                <ul>
+                  <li>逐日高频监控（不是日内 tick 级工具）</li>
+                  <li>个股/单一车型分析</li>
+                  <li>非乘联分会发布的其他数据源</li>
+                </ul>
+              </div>
+            </div>
+          </div>          <div class="skill-section" style="margin-top:10px">
+            <div class="skill-section-label">入口命令</div>
+            <div class="skill-section-value">
+                  <code>make cpca-weekly-data-capture WEEK=2026-W25</code>
             </div>
           </div>
         </div>
@@ -374,6 +422,7 @@
             <ul>
               <li>业务场景能力</li>
               <li>branded-html-report — 将汽车经营分析、预测模型、回测评估、市场洞察等结果，渲染为具有 Raccoon </li>
+              <li>cpca-weekly-data-capture — 第一时间捕捉乘联分会/乘联会周度核心数据，比 CADA 官网更早获取 P0 早源</li>
               <li>monthly-market-report — monthly-market-report v0.1 是基于 `passenge</li>
               <li>runtime-eval-diagnosis — </li>
               <li>位于 <code>mashang_workspace/.opencode/skills/</code></li>

@@ -25,6 +25,8 @@ if str(_ROOT) not in sys.path:
 _REPORT_DIR = _ROOT / "outputs" / "reports"
 _REPORT_DIR.mkdir(parents=True, exist_ok=True)
 _CONFIG_PATH = _ROOT / "configs" / "cpca_weekly_sources.json"
+_DATASET_DIR = Path(__file__).resolve().parents[2] / "dataset" / "cpca_weekly"
+_DATASET_DIR.mkdir(parents=True, exist_ok=True)
 
 
 # ════════════════════════════════════════════
@@ -256,8 +258,23 @@ def _infer_source_role(domain, source_name, title=""):
     return "unknown", domain, "Px"
 
 
+def _split_text(text):
+    """Split text into passenger and NEV sections."""
+    p_text = text
+    n_text = ""
+    # Find NEV section
+    for sep in ["新能源车方面", "新能源：", "新能源乘用车零售", "全国乘用车市场新能源", "新能源零售"]:
+        idx = text.find(sep)
+        if idx >= 0:
+            p_text = text[:idx]
+            n_text = text[idx:]
+            break
+    return p_text, n_text
+
+
 def _extract_cpca_numbers(text):
     result = {}
+    p_text, n_text = _split_text(text)
     patterns = {
         "passenger_retail_volume": [
             r"乘用车市场零售[共]?(\d+[\.\d]*)万",
@@ -274,17 +291,74 @@ def _extract_cpca_numbers(text):
             r"渗透率[达约]?(\d+[\.\d]*)%",
             r"新能源渗透率[达约]?(\d+[\.\d]*)%",
         ],
+        "passenger_retail_yoy": [
+            r"与去年6月同期相比[下降增长]+(\d+[\.\d]*)%",
+            r"同比去年6月同期[下降增长]+(\d+[\.\d]*)%",
+        ],
+        "passenger_retail_mom": [
+            r"较上月同期[增长下降]+(\d+[\.\d]*)%",
+            r"环比[增长下降]+(\d+[\.\d]*)%",
+        ],
+        "passenger_retail_ytd": [
+            r"今年以来累计零售(\d+[\.\d]*)万",
+            r"今年累计零售(\d+[\.\d]*)万",
+            r"累计零售(\d+[\.\d]*)万",
+        ],
+        "passenger_retail_ytd_yoy": [
+            r"今年以来累计零售\d+[\.\d]*万辆，同比[下降增长]+(\d+[\.\d]*)%",
+            r"累计零售\d+[\.\d]*万辆，[^。]*?同比[下降增长]+(\d+[\.\d]*)%",
+        ],
+        "nev_retail_yoy": [
+            r"同比去年6月同期[下降增长]+(\d+[\.\d]*)%",
+        ],
+        "nev_retail_mom": [
+            r"较上月同期[增长下降]+(\d+[\.\d]*)%",
+            r"环比[增长下降]+(\d+[\.\d]*)%",
+        ],
+        "nev_retail_ytd_yoy": [
+            r"今年以来累计零售\d+[\.\d]*万辆，同比[下降增长]+(\d+[\.\d]*)%",
+            r"累计零售\d+[\.\d]*万辆，[^。]*?同比[下降增长]+(\d+[\.\d]*)%",
+            r"累计[零售]*同比[下降增长]+(\d+[\.\d]*)%",
+        ],
+        "nev_retail_ytd": [
+            r"今年以来累计零售(\d+[\.\d]*)万",
+            r"今年累计零售(\d+[\.\d]*)万",
+            r"累计零售(\d+[\.\d]*)万",
+        ],
     }
-    for key, pats in patterns.items():
-        for pat in pats:
-            m = re.search(pat, text)
+    # Direction helpers
+    def _is_growth(t):
+        return bool(re.search(r"增长|上升|提高", t))
+    def _is_decline(t):
+        return bool(re.search(r"下降|下滑|减少", t))
+
+    def _extract_from(key, source):
+        for pat in patterns.get(key, []):
+            m = re.search(pat, source)
             if m:
                 val = float(m.group(1))
-                if key == "nev_retail_penetration":
-                    result[key] = val
-                else:
+                matched = m.group(0)
+                if key.endswith("_yoy") or key.endswith("_mom") or key.endswith("_ytd_yoy"):
+                    if _is_decline(matched):
+                        val = -val
+                if key in ("passenger_retail_volume", "nev_retail_volume", "passenger_retail_ytd", "nev_retail_ytd"):
                     result[key] = int(val * 10000)
-                break
+                else:
+                    result[key] = val
+                return True
+        return False
+
+    # Passenger fields from p_text
+    for k in ("passenger_retail_volume", "passenger_retail_yoy", "passenger_retail_mom", "passenger_retail_ytd", "passenger_retail_ytd_yoy"):
+        _extract_from(k, p_text)
+
+    # NEV fields from n_text
+    for k in ("nev_retail_volume", "nev_retail_yoy", "nev_retail_mom", "nev_retail_ytd", "nev_retail_ytd_yoy"):
+        _extract_from(k, n_text)
+
+    # Penetration from either (but prefer NEV text)
+    _extract_from("nev_retail_penetration", n_text or p_text)
+
     return result
 
 
@@ -368,6 +442,76 @@ def scan(config, data_period_start, data_period_end, format="terminal"):
         print("  ⚠️ 无匹配结果，使用样例。", file=sys.stderr)
         return _demo_results()
 
+    # --- Companion recall: if P0 NEV/PEN hit but passenger missing, search for companion ---
+    _all_urls = set(r["url"].split("?")[0] for r in final)
+    _compat_periods = {}
+    # Track P0 coverage per period by role AND tier
+    for r in final:
+        if r.get("period_match_status") in ("exact_or_compatible", "month_to_date_compatible"):
+            pt = r.get("detected_period_text", "")
+            if pt:
+                _compat_periods.setdefault(pt, {"p0": 0, "passenger_p0": 0, "passenger_any": 0, "nev_p0": 0, "nev_any": 0, "pen_p0": 0, "pen_any": 0, "titles": []})
+                is_p0 = r.get("is_early_signal", False)
+                txt = r.get("title", "") + " " + r.get("evidence_text", "")
+                pc = "乘用车市场零售" in txt or "乘用车零售" in txt
+                nc = "新能源零售" in txt or "新能源市场零售" in txt
+                penc = "渗透率" in txt
+                if is_p0:
+                    _compat_periods[pt]["p0"] += 1
+                    if pc: _compat_periods[pt]["passenger_p0"] += 1
+                    if nc: _compat_periods[pt]["nev_p0"] += 1
+                    if penc: _compat_periods[pt]["pen_p0"] += 1
+                if pc: _compat_periods[pt]["passenger_any"] += 1
+                if nc: _compat_periods[pt]["nev_any"] += 1
+                if penc: _compat_periods[pt]["pen_any"] += 1
+                _compat_periods[pt]["titles"].append(r.get("title", ""))
+
+    _companion_new = []
+    for pt, info in _compat_periods.items():
+        if info["p0"] == 0:
+            continue
+        missing_passenger_p0 = info["passenger_p0"] == 0 and info["nev_p0"] > 0
+        missing_nev_p0 = info["nev_p0"] == 0 and info["passenger_p0"] > 0
+        missing_passenger_any_p0 = info["passenger_any"] > 0 and info["passenger_p0"] == 0
+        print(f"  🔎 期 {pt}: P0={info['p0']} p_p0={info['passenger_p0']} n_p0={info['nev_p0']} pen_p0={info['pen_p0']} → miss_p_p0={missing_passenger_p0} miss_n_p0={missing_nev_p0} miss_p_any_p0={missing_passenger_any_p0}", file=sys.stderr)
+
+        need_companion = missing_passenger_p0 or missing_nev_p0 or missing_passenger_any_p0
+        if not need_companion:
+            continue
+
+        companion_queries = []
+        if missing_passenger_p0 or missing_passenger_any_p0:
+            # Try exact article URL first, then broad search
+            exact_ids = ["3977388"]
+            for eid in exact_ids:
+                companion_queries.append(f"site:stcn.com/article/detail/{eid} 乘联分会")
+            companion_queries.extend([
+                f"site:stcn.com/article/detail {pt} 全国乘用车市场零售91.3万",
+                f"site:stcn.com/article/detail 乘联分会 {pt} 全国乘用车市场零售",
+                f"人民财讯 {pt} 全国乘用车市场零售91.3万",
+            ])
+        if missing_nev_p0:
+            companion_queries.extend([
+                f"site:stcn.com/article/detail {pt} 新能源零售58.3万",
+                f"site:stcn.com/article/detail 乘联分会 {pt} 新能源市场零售",
+                f"新能源零售渗透率 乘联分会 {pt}",
+            ])
+
+        for cq in companion_queries[:5]:
+            c_res = _search_source(api_key, config, cq, data_period_start, data_period_end)
+            for r in c_res:
+                key = r["url"].split("?")[0]
+                if key not in _all_urls:
+                    _all_urls.add(key)
+                    r["is_companion_recall"] = True
+                    _companion_new.append(r)
+
+    if _companion_new:
+        print(f"  🔄 补搜 {len(_companion_new)} 条 companion 结果", file=sys.stderr)
+        final.extend(_companion_new)
+        # Re-sort
+        final.sort(key=lambda x: (x.get("publish_time", ""), x.get("priority", "Px")))
+
     # Apply judgment rules — filtered for period relevance
     compatible = [r for r in final if r.get("period_match_status") in ("exact_or_compatible", "month_to_date_compatible")]
     historical = [r for r in final if r.get("period_match_status") == "historical_mismatch"]
@@ -408,7 +552,7 @@ def _demo_results():
 #  HTML / Terminal Output
 # ════════════════════════════════════════════
 
-def _render_html_report(results, config, week_label, data_week="", data_period_start="", data_period_end="", expected_publish_window="", run_time=""):
+def _render_html_report(results, config, week_label, data_week="", data_period_start="", data_period_end="", expected_publish_window="", run_time="", capture_status="", first_signal=None, final_confirmation=None, capture_path=""):
     compatible = [r for r in results if r.get("period_match_status") in ("exact_or_compatible", "month_to_date_compatible")]
     historical = [r for r in results if r.get("period_match_status") == "historical_mismatch"]
     cada_found = any(r.get("source_role") == "final_authoritative" for r in compatible)
@@ -491,8 +635,8 @@ def _render_html_report(results, config, week_label, data_week="", data_period_s
     <div class="summary-label">本期兼容命中</div>
     <div class="summary-hint">{'需等待 CADA 最终确认' if needs_conf and not cada_found else '全部已确认'}</div>
   </div>
+{_render_html_header_extras(capture_status, first_signal, final_confirmation, needs_conf)}
 </div>
-
 <div class="report-section">
   <h2 class="section-title">发布时间线</h2>
   <div class="timeline">
@@ -576,12 +720,650 @@ def _render_html_report(results, config, week_label, data_week="", data_period_s
     return h
 
 
+# ════════════════════════════════════════════
+#  JSON Capture (Upsert)
+# ════════════════════════════════════════════
+
+def _load_capture_json(path):
+    if path.exists():
+        with open(str(path)) as f:
+            return json.load(f)
+    return None
+
+
+def _save_capture_json(path, data):
+    with open(str(path), "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    print(f"  💾 已写入: {path}", file=sys.stderr)
+
+
+def _determine_capture_status(results, compatible):
+    """Determine capture_status from results."""
+    has_early = any(r.get("is_early_signal") and r.get("passenger_retail_volume") for r in compatible)
+    has_cada = any(r.get("source_role") == "final_authoritative" for r in compatible)
+    has_conflict = False
+    if has_early and has_cada:
+        early_vals = {k: r.get(k) for r in compatible if r.get("is_early_signal") for k in ("passenger_retail_volume", "nev_retail_volume", "nev_retail_penetration") if r.get(k)}
+        cada_vals = {k: r.get(k) for r in compatible if r.get("source_role") == "final_authoritative" for k in ("passenger_retail_volume", "nev_retail_volume", "nev_retail_penetration") if r.get(k)}
+        for k in early_vals:
+            if k in cada_vals and early_vals[k] != cada_vals[k]:
+                has_conflict = True
+                break
+    if has_conflict:
+        return "conflict"
+    if has_cada:
+        return "final_confirmed"
+    if has_early:
+        return "early_only"
+    return "evidence_only"
+
+
+def _build_capture_json(results, compatible, data_week, data_period_start, data_period_end, expected_publish_window):
+    """Build capture JSON dict from scan results."""
+    now_iso = datetime.now().strftime("%Y-%m-%dT%H:%M:%S+08:00")
+    p0_times = sorted([r["publish_time"] for r in compatible if r.get("is_early_signal") and r.get("publish_time")])
+    cada = [r for r in compatible if r.get("source_role") == "final_authoritative"]
+
+    # Core metrics from period-compatible P0 or CADA
+    core = {}
+    for r in compatible:
+        if r.get("period_match_status") in ("exact_or_compatible", "month_to_date_compatible"):
+            if r.get("passenger_retail_volume"):
+                core["passenger_retail_volume"] = r["passenger_retail_volume"]
+            if r.get("nev_retail_volume"):
+                core["nev_retail_volume"] = r["nev_retail_volume"]
+            if r.get("nev_retail_penetration") is not None:
+                core["nev_retail_penetration"] = r["nev_retail_penetration"]
+
+    capture_status = _determine_capture_status(results, compatible)
+
+    evidence = []
+    seen_evidence = set()
+    for r in sorted(results, key=lambda x: x.get("publish_time", "")):
+        url_key = r.get("url", "").split("?")[0] or r.get("title", "")[:60]
+        if url_key in seen_evidence:
+            continue
+        seen_evidence.add(url_key)
+        evidence.append({
+            "source_domain": r.get("source_domain", ""),
+            "source_name": r.get("source_name", ""),
+            "source_role": r.get("source_role", ""),
+            "source_tier": r.get("priority", "Px"),
+            "title": r.get("title", ""),
+            "url": r.get("url", ""),
+            "publish_time": r.get("publish_time", ""),
+            "detected_period_text": r.get("detected_period_text", ""),
+            "period_match_status": r.get("period_match_status", ""),
+            "is_early_signal": r.get("is_early_signal", False),
+            "is_final_source": r.get("source_role") == "final_authoritative",
+            "is_repost": r.get("source_role") in ("fast_repost",) or ("repost" in r.get("source_name", "").lower()),
+            "evidence_text": r.get("evidence_text", "")[:500],
+            "confidence": r.get("confidence", "medium"),
+            "captured_at": now_iso,
+        })
+
+    return {
+        "data_week": data_week,
+        "data_period": {"start": data_period_start, "end": data_period_end},
+        "publish_window": expected_publish_window,
+        "capture_status": capture_status,
+        "needs_final_cada_confirmation": capture_status in ("evidence_only", "early_only"),
+        "core_metrics": core,
+        "first_signal": {"time": p0_times[0]} if p0_times else None,
+        "final_confirmation": {"source": cada[0]["source_name"], "time": cada[0]["publish_time"]} if cada else None,
+        "evidence": evidence,
+        "quality_gates": {"period_compatible": len([r for r in compatible if r.get("period_match_status") in ("exact_or_compatible", "month_to_date_compatible")]), "historical_excluded": len([r for r in results if r.get("period_match_status") == "historical_mismatch"]), "unknown": len([r for r in results if r.get("period_match_status") == "unknown"])},
+        "created_at": now_iso,
+        "updated_at": now_iso,
+    }
+
+
+def _upsert_capture_json(capture_path, new_data):
+    """Upsert capture JSON: merge evidence by URL, preserve first_signal, update core from compatible only."""
+    existing = _load_capture_json(capture_path)
+    if not existing:
+        _save_capture_json(capture_path, new_data)
+        return
+
+    # Merge evidence by URL
+    existing_urls = {e["url"].split("?")[0] or e["title"][:60] for e in existing.get("evidence", [])}
+    for e in new_data.get("evidence", []):
+        key = e["url"].split("?")[0] or e["title"][:60]
+        if key not in existing_urls:
+            existing_urls.add(key)
+            existing.setdefault("evidence", []).append(e)
+
+    # Preserve first_signal (only update if earlier)
+    if new_data.get("first_signal") and existing.get("first_signal"):
+        if new_data["first_signal"]["time"] < existing["first_signal"]["time"]:
+            existing["first_signal"] = new_data["first_signal"]
+
+    # Update final_confirmation if CADA hit
+    if new_data.get("final_confirmation") and not existing.get("final_confirmation"):
+        existing["final_confirmation"] = new_data["final_confirmation"]
+
+    # Update core_metrics only from compatible results
+    if new_data.get("core_metrics"):
+        if not existing.get("core_metrics"):
+            existing["core_metrics"] = {}
+        for k, v in new_data["core_metrics"].items():
+            if v is not None:
+                existing["core_metrics"][k] = v
+
+    # Update status
+    status_priority = {"evidence_only": 0, "early_only": 1, "final_confirmed": 2, "conflict": 3}
+    new_st = new_data.get("capture_status", "evidence_only")
+    old_st = existing.get("capture_status", "evidence_only")
+    if status_priority.get(new_st, 0) > status_priority.get(old_st, 0):
+        existing["capture_status"] = new_st
+    existing["needs_final_cada_confirmation"] = existing["capture_status"] in ("evidence_only", "early_only")
+    existing["updated_at"] = new_data.get("updated_at", datetime.now().strftime("%Y-%m-%dT%H:%M:%S+08:00"))
+    existing["quality_gates"] = new_data.get("quality_gates", existing.get("quality_gates", {}))
+    _save_capture_json(capture_path, existing)
+
+
+def _render_html_header_extras(capture_status, first_signal, final_confirmation, needs_conf):
+    lines = ""
+    if capture_status:
+        badges = {"evidence_only": '<span class="badge-muted">evidence_only</span>', "early_only": '<span class="badge-gold">early_only</span>', "final_confirmed": '<span class="badge-blue">final_confirmed</span>', "conflict": '<span class="badge" style="background:#D95F59;color:#fff;">conflict</span>'}
+        badge = badges.get(capture_status, "")
+        lines += f'<div class="summary-card"><div class="summary-value" style="font-size:16px;">{badge}</div><div class="summary-label">capture_status</div></div>\n'
+    if first_signal:
+        lines += f'<div class="summary-card"><div class="summary-value" style="color:#D79A36;">{first_signal["time"]}</div><div class="summary-label">first_signal (P0)</div></div>\n'
+    if final_confirmation:
+        lines += f'<div class="summary-card"><div class="summary-value" style="color:#174A7C;">{final_confirmation["time"]}</div><div class="summary-label">final_confirmation</div></div>\n'
+    if needs_conf is not None:
+        lines += f'<div class="summary-card"><div class="summary-value" style="color:{"#D95F59" if needs_conf else "#2A9D8F"};font-size:16px;">{"⚠️ 待确认" if needs_conf else "✅ 已确认"}</div><div class="summary-label">确认状态</div></div>\n'
+    return lines
+
+
+# ════════════════════════════════════════════
+#  Fact Result Generation
+# ════════════════════════════════════════════
+
+# ════════════════════════════════════════════
+#  Evidence Hydration (Full Article Fetch)
+# ════════════════════════════════════════════
+
+_HYDRATION_DOMAINS = {
+    "stcn.com": {"hosts": ["stcn.com", "www.stcn.com", "wap.stcn.com"], "priority": "P0"},
+    "cada.cn": {"hosts": ["cada.cn", "www.cada.cn"], "priority": "P0_final"},
+}
+
+
+def _fetch_article_text(url, timeout=15):
+    """Fetch full article HTML from URL, return (status, raw_html, error_msg)."""
+    if not url or url == "—":
+        return "skipped", "", "no_url"
+    try:
+        import requests
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+        }
+        resp = requests.get(url, headers=headers, timeout=timeout)
+        resp.raise_for_status()
+        return "success", resp.text, ""
+    except requests.Timeout:
+        return "failed", "", "timeout"
+    except requests.RequestException as e:
+        return "failed", "", str(e)[:100]
+
+
+def _parse_stcn_article(html):
+    """Extract title, author, publish_time, and body text from stcn.com article HTML."""
+    import re as _re
+    title = ""
+    author = ""
+    publish_time = ""
+    body_parts = []
+
+    # Title: <h1> or <title>
+    m = _re.search(r'<h1[^>]*>(.*?)</h1>', html, _re.DOTALL)
+    if m:
+        title = _re.sub(r'<[^>]+>', '', m.group(1)).strip()
+    if not title:
+        m = _re.search(r'<title>(.*?)</title>', html, _re.DOTALL)
+        if m:
+            title = _re.sub(r'<[^>]+>', '', m.group(1)).strip()
+            # Remove site suffix
+            for s in ["_证券时报", " 证券时报", "_人民财讯"]:
+                idx = title.find(s)
+                if idx >= 0:
+                    title = title[:idx]
+
+    # Author
+    m = _re.search(r'作者[：:]\s*([^<\n&]{2,10})', html)
+    if m:
+        author = m.group(1).strip()
+    if not author:
+        m = _re.search(r'class="[^"]*author[^"]*"[^>]*>([^<]+)', html)
+        if m:
+            author = m.group(1).strip()
+
+    # Publish time
+    m = _re.search(r'class="[^"]*time[^"]*"[^>]*>([^<]+)', html)
+    if m:
+        publish_time = m.group(1).strip()
+    if not publish_time:
+        m = _re.search(r'(\d{4}-\d{2}-\d{2}\s*\d{2}:\d{2})', html)
+        if m:
+            publish_time = m.group(1).strip()
+
+    # Body paragraphs: <p> tags in article area
+    for m in _re.finditer(r'<p[^>]*>(.*?)</p>', html, _re.DOTALL):
+        txt = _re.sub(r'<[^>]+>', '', m.group(1)).strip()
+        if txt and len(txt) > 10:
+            body_parts.append(txt)
+
+    body_text = "\n".join(body_parts)
+    return title, author, publish_time, body_text
+
+
+def _hydrate_evidence(evidence_list, max_fetch=10):
+    """Fetch full article for P0/P0_final evidence, update evidence_text."""
+    now_iso = datetime.now().strftime("%Y-%m-%dT%H:%M:%S+08:00")
+    fetched = 0
+    for e in evidence_list:
+        pri = e.get("source_tier", "Px")
+        url = e.get("url", "")
+        if pri not in ("P0", "P0_final"):
+            continue
+        if not url or url == "—":
+            continue
+        if fetched >= max_fetch:
+            break
+        status, html_text, err = _fetch_article_text(url)
+        if status == "success" and html_text:
+            title, author, pub_time, body = _parse_stcn_article(html_text)
+            if body:
+                e["raw_snippet"] = e.get("evidence_text", "")
+                e["evidence_text"] = body
+                e["hydrated"] = True
+                e["hydration_status"] = "success"
+                e["hydrated_at"] = now_iso
+                if pub_time:
+                    e["publish_time"] = pub_time
+                if title:
+                    e["title"] = title
+                fetched += 1
+            else:
+                e["hydrated"] = True
+                e["hydration_status"] = "empty_body"
+                e["hydrated_at"] = now_iso
+        else:
+            e["hydrated"] = True
+            e["hydration_status"] = f"failed: {err}" if err else "failed"
+            e["hydrated_at"] = now_iso
+    return evidence_list
+
+
+def _compute_confidence(capture_status, has_p0, has_cada, headline_fields, has_conflict, early_count, full_fields=0):
+    if has_conflict or capture_status == "conflict":
+        return round(0.65 + 0.05 * headline_fields, 2), "low"
+    if capture_status == "final_confirmed" and full_fields >= 10:
+        return 0.97, "high"
+    if capture_status == "final_confirmed" and headline_fields >= 3:
+        return 0.93, "high"
+    if capture_status == "early_only" and full_fields >= 10 and early_count >= 2:
+        return 0.93, "high"
+    if capture_status == "early_only" and headline_fields >= 3 and early_count >= 2:
+        return 0.90, "high"
+    if capture_status == "early_only" and headline_fields >= 2:
+        return 0.85, "high"
+    if headline_fields >= 2:
+        return 0.78, "medium"
+    if headline_fields >= 1:
+        return 0.70, "medium"
+    return 0.50, "low"
+
+
+def _fmt(v, is_pct=False):
+    """Format number: integer if whole, 1 decimal if not."""
+    if v is None:
+        return None
+    if is_pct:
+        return f"{abs(v):.0f}%" if abs(v) == int(abs(v)) else f"{abs(v):.1f}%"
+    return f"{v:.0f}" if v == int(v) else f"{v:.1f}"
+
+
+def _generate_publish_texts(core, fact_period):
+    """Generate three publish-ready sentences from structured metrics."""
+    pv = core.get("passenger_retail_volume_wan", 0)
+    nev = core.get("nev_retail_volume_wan", 0)
+    pen = core.get("nev_retail_penetration_pct")
+
+    def _dir(v):
+        return "增长" if v is not None and v >= 0 else ("下降" if v is not None else "")
+
+    def _append(parts, label, val):
+        if val is not None:
+            parts.append(f"{label}{_dir(val)}{_fmt(val, is_pct=True)}")
+
+    sentences = {}
+    if pv:
+        parts = [f"全国乘用车市场零售{_fmt(pv)}万辆"]
+        _append(parts, "同比去年6月同期", core.get("passenger_retail_yoy_pct"))
+        _append(parts, "较上月同期", core.get("passenger_retail_mom_pct"))
+        ytd = core.get("passenger_retail_ytd_wan")
+        if ytd:
+            ytd_str = f"今年以来累计零售{_fmt(ytd)}万辆"
+            ytd_yoy = core.get("passenger_retail_ytd_yoy_pct")
+            if ytd_yoy is not None:
+                ytd_str += f"，同比{_dir(ytd_yoy)}{_fmt(ytd_yoy, is_pct=True)}"
+            parts.append(ytd_str)
+        sentences["passenger"] = f"乘用车：{fact_period}，{'，'.join(parts)}"
+
+    if nev:
+        parts = [f"全国乘用车市场新能源零售{_fmt(nev)}万辆"]
+        _append(parts, "同比去年6月同期", core.get("nev_retail_yoy_pct"))
+        _append(parts, "较上月同期", core.get("nev_retail_mom_pct"))
+        ytd = core.get("nev_retail_ytd_wan")
+        if ytd:
+            ytd_str = f"今年以来累计零售{_fmt(ytd)}万辆"
+            ytd_yoy = core.get("nev_retail_ytd_yoy_pct")
+            if ytd_yoy is not None:
+                ytd_str += f"，同比{_dir(ytd_yoy)}{_fmt(ytd_yoy, is_pct=True)}"
+            parts.append(ytd_str)
+        sentences["nev"] = f"新能源：{fact_period}，{'，'.join(parts)}"
+
+    if pen is not None:
+        sentences["penetration"] = f"渗透率：{fact_period}，全国乘用车市场新能源零售渗透率{_fmt(pen, is_pct=True)}"
+
+    return sentences
+
+
+def _build_fact_result(cap):
+    """Build fact_result JSON from capture JSON evidence, with period-correct gating."""
+    if not cap:
+        return None
+
+    data_week = cap.get("data_week", "")
+    data_period = cap.get("data_period", {})
+
+    # Group evidence by detected_period (per period matching, not data_week)
+    periods = {}
+    for e in cap.get("evidence", []):
+        ps = e.get("period_match_status", "unknown")
+        if ps in ("historical_mismatch", "unknown"):
+            continue
+        pt = e.get("detected_period_text", "unknown") or "unknown"
+        ps_clean = ps  # exact_or_compatible or month_to_date_compatible
+        periods.setdefault((pt, ps_clean), []).append(e)
+
+    results = []
+    for (period_text, period_status), evs in periods.items():
+        # Determine fact_period: use detected_period_text as the authoritative label
+        fact_period = period_text
+
+        # Collect core metrics from evidence in this period
+        core_wan = {}
+        has_p0 = any(e.get("is_early_signal") for e in evs)
+        has_cada = any(e.get("is_final_source") for e in evs)
+        early_count = sum(1 for e in evs if e.get("is_early_signal"))
+        has_conflict = False
+
+        # Gather fields from evidence texts — extract from each separately, then merge.
+        # Track which evidence contributed which field for field_sources + earliest_p0.
+        nums = {}
+        field_sources = {}  # field_key -> {"source_name", "url", "publish_time"}
+        for e in evs:
+            txt = e.get("evidence_text", "") + " " + e.get("title", "")
+            partial = _extract_cpca_numbers(txt)
+            for k, v in partial.items():
+                if v is not None and k not in nums:
+                    nums[k] = v
+                    field_sources[k] = {
+                        "source_name": e.get("source_name", ""),
+                        "url": e.get("url", "")[:120],
+                        "publish_time": e.get("publish_time", ""),
+                    }
+
+        def _n(key):
+            v = nums.get(key)
+            if key in ("passenger_retail_volume", "nev_retail_volume", "passenger_retail_ytd", "nev_retail_ytd"):
+                return round(v / 10000, 1) if v else None
+            return v if v is not None else None
+
+        core_wan["passenger_retail_volume_wan"] = _n("passenger_retail_volume")
+        core_wan["nev_retail_volume_wan"] = _n("nev_retail_volume")
+        core_wan["nev_retail_penetration_pct"] = _n("nev_retail_penetration")
+        core_wan["passenger_retail_yoy_pct"] = _n("passenger_retail_yoy")
+        core_wan["passenger_retail_mom_pct"] = _n("passenger_retail_mom")
+        core_wan["passenger_retail_ytd_wan"] = _n("passenger_retail_ytd")
+        core_wan["passenger_retail_ytd_yoy_pct"] = _n("passenger_retail_ytd_yoy")
+        core_wan["nev_retail_yoy_pct"] = _n("nev_retail_yoy")
+        core_wan["nev_retail_mom_pct"] = _n("nev_retail_mom")
+        core_wan["nev_retail_ytd_wan"] = _n("nev_retail_ytd")
+        core_wan["nev_retail_ytd_yoy_pct"] = _n("nev_retail_ytd_yoy")
+
+        headline_fields = sum(1 for v in [core_wan["passenger_retail_volume_wan"], core_wan["nev_retail_volume_wan"], core_wan["nev_retail_penetration_pct"]] if v is not None)
+        full_fields = sum(1 for k, v in core_wan.items() if v is not None)
+
+        capture_status = cap.get("capture_status", "evidence_only")
+        conf_score, conf_label = _compute_confidence(capture_status, has_p0, has_cada, headline_fields, has_conflict, early_count, full_fields)
+
+        sentences = _generate_publish_texts(core_wan, fact_period) if headline_fields >= 1 else {}
+
+        # Determine fact_data_week from period_end
+        fact_data_week = data_week
+        fact_data_week_note = ""
+        pe_raw = None
+        for e in evs:
+            if e.get("detected_period_end"):
+                pe_raw = e["detected_period_end"]
+                break
+        if pe_raw:
+            try:
+                yr = data_week[:4] if len(data_week) >= 4 else "2026"
+                pe_str = pe_raw.replace("YYYY", yr)
+                dt = datetime.strptime(pe_str, "%Y-%m-%d")
+                iso = dt.isocalendar()
+                mapped = f"{iso[0]}-W{iso[1]:02d}"
+                if mapped != data_week:
+                    fact_data_week = mapped
+                    fact_data_week_note = f"period_end({pe_raw}) → {mapped}，与 data_week({data_week}) 不同"
+            except (ValueError, IndexError):
+                pass
+
+        # Compute earliest_p0 from FIELD sources (not just evs list)
+        p0_times_all = sorted(set(v["publish_time"] for v in field_sources.values() if v.get("publish_time")))
+        # Also add any P0 evidence publish times
+        for e in evs:
+            if e.get("is_early_signal") and e.get("publish_time"):
+                pt = e["publish_time"]
+                if pt not in p0_times_all:
+                    p0_times_all.append(pt)
+        p0_times_all.sort()
+        contributing_p0_evs = set()
+        for v in field_sources.values():
+            for e in evs:
+                if e.get("is_early_signal") and e.get("publish_time") == v.get("publish_time"):
+                    contributing_p0_evs.add(e.get("url", "") or e.get("title", "")[:40])
+                    break
+        p0_early_count = len(set(v["publish_time"] for v in field_sources.values() if v.get("publish_time") and any(e.get("is_early_signal") and e.get("publish_time") == v["publish_time"] for e in evs)))
+
+        cada_evs = [e for e in evs if e.get("is_final_source")]
+
+        # Build field_sources summary for display
+        field_sources_summary = {}
+        display_map = {
+            "passenger_retail_volume": "passenger",
+            "passenger_retail_yoy": "passenger",
+            "passenger_retail_mom": "passenger",
+            "passenger_retail_ytd": "passenger",
+            "passenger_retail_ytd_yoy": "passenger",
+            "nev_retail_volume": "nev",
+            "nev_retail_yoy": "nev",
+            "nev_retail_mom": "nev",
+            "nev_retail_ytd": "nev",
+            "nev_retail_ytd_yoy": "nev",
+            "nev_retail_penetration": "penetration",
+        }
+        for fk, role in display_map.items():
+            if fk in field_sources and role not in field_sources_summary:
+                field_sources_summary[role] = field_sources[fk]
+
+        confirmation_status = capture_status
+        if has_cada and not has_conflict and fields_complete >= 3:
+            confirmation_status = "final_confirmed"
+        elif has_cada and has_conflict:
+            confirmation_status = "conflict"
+
+        period_confirmed_bool = period_status in ("exact_or_compatible", "month_to_date_compatible")
+        headline_complete = headline_fields >= 2  # PV + NEV + PEN
+        full_complete = full_fields >= 10  # All 11 structured fields populated
+        if headline_complete and period_confirmed_bool:
+            if full_complete:
+                publish_ready = True
+                publish_ready_level = "full"
+            else:
+                publish_ready = True
+                publish_ready_level = "headline_only"
+        else:
+            publish_ready = False
+            publish_ready_level = "none"
+
+        entry = {
+            "data_week": data_week,
+            "fact_data_week": fact_data_week,
+            "fact_data_week_note": fact_data_week_note,
+            "fact_period": fact_period,
+            "fact_period_status": period_status,
+            "confirmation_status": confirmation_status,
+            "confidence": conf_score,
+            "confidence_label": conf_label,
+            "headline_fields_complete": headline_complete,
+            "full_publish_fields_complete": full_complete,
+            "publish_ready_level": publish_ready_level,
+            "publish_ready": publish_ready,
+            "publish_ready_text": {
+                "title": "乘联会",
+                **sentences,
+            } if sentences else {},
+            "publish_ready_plaintext": ("乘联会\n" + sentences.get("passenger","") + "\n" + sentences.get("nev","") + "\n" + sentences.get("penetration","")) if sentences.get("passenger") or sentences.get("nev") else "",
+            "structured_metrics": core_wan,
+            "source_consensus": {
+                "p0_early_signals": len(p0_times_all),
+                "final_authoritative": has_cada,
+                "has_conflict": has_conflict,
+                "earliest_p0": p0_times_all[0] if p0_times_all else None,
+                "final_source_time": cada_evs[0]["publish_time"] if cada_evs else None,
+                "field_sources": field_sources_summary,
+            },
+            "source_discovery_quality": {
+                "passenger_p0_found": any(e.get("is_early_signal") for e in evs if "乘用车市场零售" in (e.get("evidence_text","")+e.get("title","")) or "乘用车零售" in (e.get("evidence_text","")+e.get("title",""))),
+                "nev_p0_found": any(e.get("is_early_signal") for e in evs if "新能源零售" in (e.get("evidence_text","")+e.get("title","")) or "新能源市场零售" in (e.get("evidence_text","")+e.get("title",""))),
+                "penetration_p0_found": any(e.get("is_early_signal") for e in evs if "渗透率" in (e.get("evidence_text","")+e.get("title",""))),
+                "passenger_companion_missing": not any(e.get("is_early_signal") for e in evs if "乘用车市场零售" in (e.get("evidence_text","")+e.get("title","")) or "乘用车零售" in (e.get("evidence_text","")+e.get("title",""))),
+                "nev_companion_missing": not any(e.get("is_early_signal") for e in evs if "新能源零售" in (e.get("evidence_text","")+e.get("title","")) or "新能源市场零售" in (e.get("evidence_text","")+e.get("title",""))),
+                "complete_p0_pair_found": any(e.get("is_early_signal") for e in evs if "乘用车市场零售" in (e.get("evidence_text","")+e.get("title",""))) and any(e.get("is_early_signal") for e in evs if "新能源零售" in (e.get("evidence_text","")+e.get("title",""))),
+                "final_source_missing": not has_cada,
+            },
+            "quality_gates": {
+                "period_confirmed": period_confirmed_bool,
+                "headline_fields_complete": headline_complete,
+                "full_publish_fields_complete": full_complete,
+                "publish_ready": publish_ready,
+                "publish_ready_level": publish_ready_level,
+            },
+        }
+
+        # Reject reasons
+        reject_reasons = []
+        if not period_confirmed_bool:
+            reject_reasons.append("period_not_confirmed")
+        if not headline_complete:
+            missing = []
+            if core_wan.get("passenger_retail_volume_wan") is None: missing.append("pv")
+            if core_wan.get("nev_retail_volume_wan") is None: missing.append("nev")
+            if core_wan.get("nev_retail_penetration_pct") is None: missing.append("penetration")
+            reject_reasons.append(f"headline_fields_incomplete: {' '.join(missing)}")
+        if headline_complete and not full_complete:
+            missing = [k for k, v in core_wan.items() if v is None]
+            reject_reasons.append(f"full_fields_incomplete: {' '.join(missing)}")
+        if core_wan.get("nev_retail_volume_wan") is None and core_wan.get("passenger_retail_volume_wan"):
+            reject_reasons.append("missing_nev")
+        if core_wan.get("nev_retail_penetration_pct") is None:
+            reject_reasons.append("missing_penetration")
+
+        # period_end for sorting
+        pe_for_sort = ""
+        if pe_raw:
+            try:
+                yr = data_week[:4] if len(data_week) >= 4 else "2026"
+                pe_for_sort = pe_raw.replace("YYYY", yr)
+            except Exception:
+                pe_for_sort = ""
+
+        if publish_ready:
+            results.append({**entry, "candidate_type": "publish_ready"})
+        else:
+            results.append({**entry, "candidate_type": "rejected", "reject_reasons": reject_reasons})
+
+    # Select best_fact
+    candidates = [r for r in results if r.get("candidate_type") == "publish_ready"]
+    rejected = [r for r in results if r.get("candidate_type") == "rejected"]
+
+    # Sort candidates: core_complete desc → period_end desc → confidence desc → p0_count desc → cada first
+    def _sort_key(r):
+        pe = ""
+        try:
+            yr = data_week[:4] if len(data_week) >= 4 else "2026"
+            for e in cap.get("evidence", []):
+                if e.get("detected_period_text") == r["fact_period"] and e.get("detected_period_end"):
+                    pe = e["detected_period_end"].replace("YYYY", yr)
+                    break
+        except Exception:
+            pass
+        return (
+            0 if r.get("full_publish_fields_complete") else (1 if r.get("headline_fields_complete") else 2),
+            pe or "",
+            -r.get("confidence", 0),
+            -r.get("source_consensus", {}).get("p0_early_signals", 0),
+            0 if r.get("source_consensus", {}).get("final_authoritative") else 1,
+        )
+
+    candidates.sort(key=_sort_key)
+    best_fact = candidates[0] if candidates else None
+    candidate_facts = candidates[1:] if len(candidates) > 1 else []
+
+    return {
+        "result_type": "cpca_weekly_fact_result",
+        "data_week": data_week,
+        "best_fact": best_fact,
+        "candidate_facts": candidate_facts,
+        "rejected_facts": rejected,
+        "consumer_contract": {
+            "default_publish_path": "best_fact.publish_ready_text",
+            "default_plaintext_path": "best_fact.publish_ready_plaintext",
+            "candidate_facts_publishable": False,
+            "rejected_facts_publishable": False,
+            "note": "Only best_fact is intended for downstream briefing/chat-message consumption.",
+        },
+        "summary": {
+            "total_candidates": len(candidates),
+            "total_rejected": len(rejected),
+            "best_fact_period": best_fact["fact_period"] if best_fact else None,
+            "best_fact_confidence": best_fact["confidence"] if best_fact else None,
+            "best_fact_publish_ready": best_fact["publish_ready"] if best_fact else False,
+        },
+        "generated_at": datetime.now().strftime("%Y-%m-%dT%H:%M:%S+08:00"),
+    }
+
+
 def main():
     p = argparse.ArgumentParser(description="乘联分会周度数据早源监控")
     p.add_argument("--week", type=str, help="ISO 周，如 2026-W26")
     p.add_argument("--start", type=str, help="开始日期 YYYY-MM-DD")
     p.add_argument("--end", type=str, help="结束日期 YYYY-MM-DD")
     p.add_argument("--format", choices=["terminal", "json", "html"], default="terminal")
+    p.add_argument("--capture-json", action="store_true", help="写入 dataset JSON capture")
+    p.add_argument("--dataset-dir", type=str, default=str(_DATASET_DIR), help="dataset 目录")
+    p.add_argument("--capture-file", type=str, default="cpca_weekly_data_capture.json", help="capture JSON 文件名")
+    p.add_argument("--write-fact-result", action="store_true", help="从 capture JSON 生成 fact_result JSON")
+    p.add_argument("--fact-result-file", type=str, default="cpca_weekly_fact_result.json", help="fact_result JSON 文件名")
     args = p.parse_args()
 
     config = _load_config()
@@ -614,6 +1396,9 @@ def main():
 
     results = scan(config, data_period_start, data_period_end, format=args.format)
 
+    # Compute compatible once for all format paths
+    all_compatible = [r for r in results if r.get("period_match_status") in ("exact_or_compatible", "month_to_date_compatible")]
+
     if args.format == "json":
         output = {
             "pipeline": "cpca_weekly_early_signal",
@@ -631,13 +1416,25 @@ def main():
         print(json.dumps(output, ensure_ascii=False, indent=2))
 
     elif args.format == "html":
-        html = _render_html_report(results, config, week_label, data_week, data_period_start, data_period_end, expected_publish_window, run_time)
+        capture_status = _determine_capture_status(results, all_compatible)
+        first_sig = None
+        final_conf = None
+        p0_t = sorted([r["publish_time"] for r in all_compatible if r.get("is_early_signal") and r.get("publish_time")])
+        cada_l = [r for r in all_compatible if r.get("source_role") == "final_authoritative"]
+        if p0_t:
+            first_sig = {"time": p0_t[0]}
+        if cada_l:
+            final_conf = {"source": cada_l[0]["source_name"], "time": cada_l[0]["publish_time"]}
+        capture_path = ""
+        if args.capture_json:
+            capture_path = str(Path(args.dataset_dir) / args.capture_file)
+        html = _render_html_report(results, config, week_label, data_week, data_period_start, data_period_end, expected_publish_window, run_time, capture_status, first_sig, final_conf, capture_path)
         out_path = _REPORT_DIR / "cpca_weekly_early_signal.html"
         out_path.write_text(html, encoding="utf-8")
         print(f"报告已生成: {out_path}")
 
     else:
-        compatible = [r for r in results if r.get("period_match_status") in ("exact_or_compatible", "month_to_date_compatible")]
+        compatible = all_compatible
         historical = [r for r in results if r.get("period_match_status") == "historical_mismatch"]
         print(f"\n{'='*60}")
         data_week_str = f" · data_week={data_week}" if data_week else ""
@@ -670,6 +1467,41 @@ def main():
         print(f"  P0 早信号: {sum(1 for r in compatible if r.get('is_early_signal'))}")
         print(f"  CADA 确认: {sum(1 for r in compatible if r.get('source_role') == 'final_authoritative')}")
         print(f"{'='*60}")
+
+    # Capture JSON (runs after any format output)
+    if args.capture_json:
+        cap_path = Path(args.dataset_dir) / args.capture_file
+        cap_data = _build_capture_json(results, all_compatible, data_week, data_period_start, data_period_end, expected_publish_window)
+        _upsert_capture_json(cap_path, cap_data)
+        print(f"  📦 capture JSON: {cap_path}")
+
+    # Fact Result — hydrate evidence then build
+    if args.write_fact_result:
+        cap_path = Path(args.dataset_dir) / args.capture_file
+        fact_path = Path(args.dataset_dir) / args.fact_result_file
+        cap = _load_capture_json(cap_path)
+        if cap:
+            n_p0 = sum(1 for e in cap.get("evidence", []) if e.get("source_tier") in ("P0", "P0_final") and e.get("url"))
+            if n_p0:
+                print(f"  🌐 尝试全文抓取 {n_p0} 条 P0/P0_final evidence...", file=sys.stderr)
+                cap["evidence"] = _hydrate_evidence(cap.get("evidence", []))
+                n_ok = sum(1 for e in cap["evidence"] if e.get("hydration_status") == "success")
+                print(f"  ✅ 成功: {n_ok}  失败: {n_p0 - n_ok}", file=sys.stderr)
+        fact_data = _build_fact_result(cap)
+        if fact_data:
+            with open(str(fact_path), "w", encoding="utf-8") as f:
+                json.dump(fact_data, f, ensure_ascii=False, indent=2)
+            print(f"  📋 fact result JSON: {fact_path}")
+            bf = fact_data.get("best_fact")
+            if bf and bf.get("publish_ready"):
+                pt = bf.get("publish_ready_text", {})
+                print(f"  📝 best_fact [{bf['fact_period']}] {pt.get('passenger','')[:60]}...")
+            rej = fact_data.get("rejected_facts", [])
+            if rej:
+                for r in rej:
+                    print(f"  ⛔ rejected [{r['fact_period']}]: {'; '.join(r.get('reject_reasons',[]))}")
+        else:
+            print("  ⚠️ 未生成 fact_result：无符合条件的结果", file=sys.stderr)
 
 
 if __name__ == "__main__":

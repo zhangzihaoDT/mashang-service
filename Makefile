@@ -325,18 +325,21 @@ render-official-doc:
 		--formats html,pdf,docx
 
 # 正式材料排版渲染 Smoke Test
- render-official-doc-smoke:
- 	$(PYTHON) scripts/smoke_test_official_document_render.py
+render-official-doc-smoke:
+	$(PYTHON) scripts/smoke_test_official_document_render.py
 
 # === CPCA Weekly Early Signal ===
 cpca-weekly-early-signal:  ## 乘联分会周度数据早源监控（终端输出）WEEK=目标数据周
- 	$(PYTHON) mashang_workspace/research_scripts/cpca_weekly_early_signal.py --week $(or $(WEEK),2026-W26) --format terminal
+	$(PYTHON) mashang_workspace/research_scripts/cpca_weekly_early_signal.py --week $(or $(WEEK),2026-W26) --format terminal
 
 cpca-weekly-early-signal-html:  ## 乘联分会周度数据早源监控（HTML 报告）WEEK=目标数据周
- 	$(PYTHON) mashang_workspace/research_scripts/cpca_weekly_early_signal.py --week $(or $(WEEK),2026-W26) --format html
+	$(PYTHON) mashang_workspace/research_scripts/cpca_weekly_early_signal.py --week $(or $(WEEK),2026-W26) --format html
 
 cpca-weekly-early-signal-json:  ## 乘联分会周度数据早源监控（JSON 输出）WEEK=目标数据周
- 	$(PYTHON) mashang_workspace/research_scripts/cpca_weekly_early_signal.py --week $(or $(WEEK),2026-W26) --format json
+	$(PYTHON) mashang_workspace/research_scripts/cpca_weekly_early_signal.py --week $(or $(WEEK),2026-W26) --format json
+
+cpca-weekly-data-capture:  ## 捕捉乘联分会周度早源数据并生成 fact_result JSON（WEEK=目标数据周）
+	$(PYTHON) mashang_workspace/research_scripts/cpca_weekly_early_signal.py --week $(or $(WEEK),2026-W26) --format html --capture-json --write-fact-result
 
 # Workspace Skills Catalog
 build-workspace-skills-catalog:
