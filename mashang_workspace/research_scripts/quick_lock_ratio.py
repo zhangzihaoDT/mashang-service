@@ -418,6 +418,30 @@ def compute_reev_product_breakdown(df: pd.DataFrame) -> dict:
         
     return results
 
+def build_ma7_figure(df: pd.DataFrame) -> go.Figure:
+    """绘制 2025 vs 2026 锁单数 MA7 对比折线。"""
+    fig = go.Figure()
+    ma7_2025 = df['daily_2025'].rolling(7, min_periods=1).mean()
+    ma7_2026 = df['daily_2026'].rolling(7, min_periods=1).mean()
+    max_val = max(ma7_2025.max(), ma7_2026.max()) * 1.15
+
+    fig.add_trace(go.Scatter(x=df['axis_date'], y=ma7_2025, mode='lines',
+        name='2025 MA7', line=dict(color=ZH['own'], width=2)))
+    fig.add_trace(go.Scatter(x=df['axis_date'], y=ma7_2026, mode='lines',
+        name='2026 MA7', line=dict(color=ZH['event'], width=2)))
+
+    fig.update_layout(
+        title="锁单数 MA7 对比 (2025 vs 2026)",
+        width=1300, height=380, hovermode='x unified',
+        legend=dict(orientation='h', y=1.05, x=0),
+        margin=dict(t=50, b=40, r=40, l=60),
+        yaxis=dict(title='MA7 锁单数 (7日滚动平均)', range=[0, max_val]),
+        xaxis=dict(title='日期 (对齐到 2025 年)'),
+    )
+    apply_zh_theme(fig)
+    return fig
+
+
 def build_figure(df: pd.DataFrame) -> go.Figure:
     """绘制累计同比图表。"""
     fig = go.Figure()
@@ -781,11 +805,13 @@ def main():
     print("🔄 计算指标 1 (累计同比)...")
     try:
         metrics_df = compute_yoy_metrics(df)
+        fig_ma7 = build_ma7_figure(metrics_df)
         fig1 = build_figure(metrics_df)
     except Exception as e:
         print(f"❌ 计算累计同比失败: {e}")
         import traceback
         traceback.print_exc()
+        fig_ma7 = None
         fig1 = None
 
     print("🔄 计算指标 2 (LS6 增程占比)...")
@@ -813,8 +839,11 @@ def main():
     print(f"💾 保存报告: {out_path}")
     with open(out_path, 'w', encoding='utf-8') as f:
         f.write("<html><head><meta charset='utf-8'><title>锁单分析报告</title></head><body>")
+        if fig_ma7:
+            f.write(fig_ma7.to_html(full_html=False, include_plotlyjs='cdn'))
+            f.write("<br><hr style='border:none;border-top:1px solid #E5EAF0;margin:24px 0;'><br>")
         if fig1:
-            f.write(fig1.to_html(full_html=False, include_plotlyjs='cdn'))
+            f.write(fig1.to_html(full_html=False, include_plotlyjs=False))
         if fig2:
             f.write("<br><hr><br>")
             f.write(fig2.to_html(full_html=False, include_plotlyjs=False))

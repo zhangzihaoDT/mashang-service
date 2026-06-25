@@ -7,6 +7,8 @@
   - dataset/assign_data.csv
   - dataset/LS8A3流出T+7_0622.csv
   - dataset/LS8A3流出T+15_0622.csv
+  - dataset/TOP20懂车帝A3 流转_LS6.csv（LS6 懂车帝 A3 净流入，双边校准）
+  - dataset/order_data.parquet（LS6 锁单数 MA7）
 
 输出:
   - outputs/reports/竞争洞察A3人群流转.html
@@ -520,11 +522,304 @@ def _build_ranking_df(csv_path):
     display['流入流出比'] = display['流入流出比'].apply(lambda x: f'{x:.1%}')
     return display
 
+# === LS6 懂车帝 A3 净流入 vs 锁单数 MA7（双边校准 · 合并 0325~0622） ===
+_ls6_order = pd.read_parquet(str(_PROJECT_ROOT / 'dataset' / 'order_data.parquet'))
+_ls6_order['lock_time'] = pd.to_datetime(_ls6_order['lock_time'], errors='coerce')
+_ls6_order = _ls6_order[_ls6_order['series'] == 'LS6'].dropna(subset=['lock_time'])
+
+_ls6_a3 = _read_dataset('dataset/TOP20懂车帝A3 流转_LS6.csv')
+_ls6_a3['日期'] = _ls6_a3['日期'].astype(str)
+_ls6_a3 = _ls6_a3[_ls6_a3['竞争对手'] == '竞争度TOP20车系集合'].copy()
+_ls6_a3['dt'] = pd.to_datetime(_ls6_a3['日期'], format='%Y%m%d')
+_ls6_a3 = _ls6_a3.sort_values('dt').reset_index(drop=True)
+for col in ['净流入', '本品A3流出', '竞争对手5A流入']:
+    _ls6_a3[col] = _ls6_a3[col].astype(str).str.replace(',', '', regex=False).astype(int)
+
+# 分时段校准参数：[(start, end, inflow_bm, outflow_bm), ...]
+_LS6_CAL_PERIODS = [
+    ('20250628', '20250727', 496050, 497794),
+    ('20250728', '20250826', 1073893, 395982),
+    ('20250827', '20250925', 1396305, 1133347),
+    ('20250926', '20251025', 815685, 1545568),
+    ('20251026', '20251124', 373360, 1174019),
+    ('20251125', '20251224', 414056, 518496),
+    ('20251225', '20260123', 518967, 386116),
+    ('20260124', '20260222', 375833, 513899),
+    ('20260223', '20260324', 415301, 428046),
+    ('20260325', '20260423', 476630, 456528),
+    ('20260424', '20260523', 430983, 499173),
+    ('20260524', '20260622', 365238, 400618),
+]
+
+_ls6_cal_frames = []
+for start, end, inf_bm, outf_bm in _LS6_CAL_PERIODS:
+    period = _ls6_a3[(_ls6_a3['日期'] >= start) & (_ls6_a3['日期'] <= end)].copy()
+    inf_c = inf_bm / period['竞争对手5A流入'].sum()
+    outf_c = outf_bm / period['本品A3流出'].sum()
+    period['校准后流入'] = (period['竞争对手5A流入'] * inf_c).round(0).astype(int)
+    period['校准后流出'] = (period['本品A3流出'] * outf_c).round(0).astype(int)
+    period['校准后净流入'] = period['校准后流入'] - period['校准后流出']
+    _ls6_cal_frames.append(period)
+    print(f'  LS6 {start}~{end}: 流入系数={inf_c:.4f}, 流出系数={outf_c:.4f} | '
+          f'校准后流入={period["校准后流入"].sum():,} 流出={period["校准后流出"].sum():,}')
+
+_ls6_combined = pd.concat(_ls6_cal_frames, ignore_index=True).drop_duplicates(subset='dt').sort_values('dt')
+
+_lock = _ls6_order.groupby(_ls6_order['lock_time'].dt.date).size()
+_rng = pd.date_range(_ls6_combined['dt'].min().date(), _ls6_combined['dt'].max().date(), freq='D')
+_lock = _lock.reindex(_rng, fill_value=0)
+_lock_ma7 = _lock.rolling(7, min_periods=1).mean()
+
+_ls6_merged = pd.DataFrame({'dt': _ls6_combined['dt'], '净流入': _ls6_combined['校准后净流入']})
+_ls6_merged['锁单数MA7'] = _lock_ma7.values
+
+fig_ls6 = go.Figure()
+_bar_colors = [ZH['negative'] if v < 0 else 'rgba(42,157,143,.35)' for v in _ls6_merged['净流入']]
+fig_ls6.add_trace(go.Bar(x=_ls6_merged['dt'], y=_ls6_merged['净流入'], name='懂车帝A3净流入(校准后)',
+    marker_color=_bar_colors, yaxis='y', hovertemplate='%{x|%Y-%m-%d}<br>净流入: %{y:,}<extra></extra>'))
+fig_ls6.add_trace(go.Scatter(x=_ls6_merged['dt'], y=_ls6_merged['锁单数MA7'], mode='lines',
+    name='LS6 锁单数 MA7', line=dict(color=ZH['event'], width=2.5), yaxis='y2',
+    hovertemplate='%{x|%Y-%m-%d}<br>锁单数MA7: %{y:,.0f}<extra></extra>'))
+
+_y1, _y2 = _ls6_merged['净流入'], _ls6_merged['锁单数MA7']
+def _pd(s):
+    lo, hi = float(s.min()), float(s.max()); r = hi - lo
+    if r == 0: r = abs(lo) if lo != 0 else 1
+    return lo - 0.05*r, hi + 0.05*r
+_lo1, _hi1 = _pd(_y1); _lo2, _hi2 = _pd(_y2)
+_n1, _p1 = max(0, -_lo1), max(0, _hi1)
+_rt = _n1 / _p1 if _p1 else 1
+_n2, _p2 = max(0, -_lo2), max(0, _hi2)
+_lo2 = -max(_n2, _p2 * _rt)
+_hi2 = max(_p2, _n2 / _rt) if _rt else _p2
+
+fig_ls6.update_layout(title=dict(text='LS6 懂车帝A3净流入 vs 锁单数 MA7（双边校准 · 合并 0325~0622）', x=0.5, font=dict(size=15)),
+    width=1300, height=350, hovermode='x unified', hoverlabel=dict(bgcolor='white', font_size=13),
+    legend=dict(x=1.02, xanchor='left'), margin=dict(t=50, b=40, r=120),
+    yaxis=dict(title='校准后A3净流入', range=[_lo1, _hi1]),
+    yaxis2=dict(title='LS6 锁单数 MA7', overlaying='y', side='right', range=[_lo2, _hi2]))
+fig_ls6.update_xaxes(dtick='M1', tickformat='%Y-%m', hoverformat='%Y-%m-%d')
+apply_zh_theme(fig_ls6)
+
+_chart_ls6_html = fig_ls6.to_html(full_html=False, include_plotlyjs=False)
+html_section_ls6_flow = f'''
+<div class="report-section">
+  <h2>LS6 懂车帝A3净流入 vs 锁单数 MA7（双边校准 · 合并 0325~0622）</h2>
+  <p class="section-note">四个时段分别校准后合并：0628~0727 (496,050/497,794)、0728~0826 (1,073,893/395,982)、0827~0925 (1,396,305/1,133,347)、0926~1025 (815,685/1,545,568)、1026~1124 (373,360/1,174,019)、1125~1224 (414,056/518,496)、1225~0123 (518,967/386,116)、0124~0222 (375,833/513,899)、0223~0324 (415,301/428,046)、0325~0423 (476,630/456,528)、0424~0523 (430,983/499,173)、0524~0622 (365,238/400,618)。柱状图为校准后 A3 每日净流入，折线为 LS6 锁单数 7 日滚动平均。</p>
+  <div class="chart-box"><div class="chart-wrap">{_chart_ls6_html}</div></div>
+</div>
+'''
+
+# === LS8 懂车帝 A3 净流入 vs 锁单数 MA7（双边校准 · 合并） ===
+_ls8_order_actual = pd.read_parquet(str(_PROJECT_ROOT / 'dataset' / 'order_data.parquet'))
+_ls8_order_actual['lock_time'] = pd.to_datetime(_ls8_order_actual['lock_time'], errors='coerce')
+_ls8_order_actual = _ls8_order_actual[_ls8_order_actual['series'] == 'LS8'].dropna(subset=['lock_time'])
+
+_ls8_a3 = _read_dataset('dataset/TOP20懂车帝A3 流转_LS8.csv')
+_ls8_a3['日期'] = _ls8_a3['日期'].astype(str)
+_ls8_a3 = _ls8_a3[_ls8_a3['竞争对手'] == '竞争度TOP20车系集合'].copy()
+_ls8_a3['dt'] = pd.to_datetime(_ls8_a3['日期'], format='%Y%m%d')
+_ls8_a3 = _ls8_a3.sort_values('dt').reset_index(drop=True)
+for col in ['净流入', '本品A3流出', '竞争对手5A流入']:
+    _ls8_a3[col] = _ls8_a3[col].astype(str).str.replace(',', '', regex=False).astype(int)
+
+_LS8_CAL_PERIODS = [
+    ('20260124', '20260222', 141947, 114127),
+    ('20260223', '20260324', 183439, 137410),
+    ('20260325', '20260423', 1174436, 168728),
+    ('20260424', '20260523', 350242, 1239878),
+    ('20260524', '20260622', 287838, 375867),
+]
+
+_ls8_frames = []
+for start, end, inf_bm, outf_bm in _LS8_CAL_PERIODS:
+    period = _ls8_a3[(_ls8_a3['日期'] >= start) & (_ls8_a3['日期'] <= end)].copy()
+    inf_c = inf_bm / period['竞争对手5A流入'].sum()
+    outf_c = outf_bm / period['本品A3流出'].sum()
+    period['校准后流入'] = (period['竞争对手5A流入'] * inf_c).round(0).astype(int)
+    period['校准后流出'] = (period['本品A3流出'] * outf_c).round(0).astype(int)
+    period['校准后净流入'] = period['校准后流入'] - period['校准后流出']
+    _ls8_frames.append(period)
+    print(f'  LS8 {start}~{end}: 流入系数={inf_c:.4f}, 流出系数={outf_c:.4f} | '
+          f'校准后流入={period["校准后流入"].sum():,} 流出={period["校准后流出"].sum():,}')
+
+_ls8_c = pd.concat(_ls8_frames, ignore_index=True).drop_duplicates(subset='dt').sort_values('dt')
+
+_ls8_lock = _ls8_order_actual.groupby(_ls8_order_actual['lock_time'].dt.date).size()
+_ls8_lock = _ls8_lock.reindex(pd.date_range(_ls8_c['dt'].iloc[0], _ls8_c['dt'].iloc[-1], freq='D'), fill_value=0)
+_ls8_lock = _ls8_lock.reindex(pd.DatetimeIndex(_ls8_c['dt']), fill_value=0)
+_ls8_lock_ma7 = _ls8_lock.rolling(7, min_periods=1).mean()
+
+_ls8_m = pd.DataFrame({'dt': _ls8_c['dt'], '净流入': _ls8_c['校准后净流入']})
+_ls8_m['锁单数MA7'] = _ls8_lock_ma7.values
+
+fig_ls8 = go.Figure()
+_ls8_bc = [ZH['negative'] if v < 0 else 'rgba(42,157,143,.35)' for v in _ls8_m['净流入']]
+fig_ls8.add_trace(go.Bar(x=_ls8_m['dt'], y=_ls8_m['净流入'], name='懂车帝A3净流入(校准后)',
+    marker_color=_ls8_bc, yaxis='y', hovertemplate='%{x|%Y-%m-%d}<br>净流入: %{y:,}<extra></extra>'))
+fig_ls8.add_trace(go.Scatter(x=_ls8_m['dt'], y=_ls8_m['锁单数MA7'], mode='lines',
+    name='LS8 锁单数 MA7', line=dict(color=ZH['event'], width=2.5), yaxis='y2',
+    hovertemplate='%{x|%Y-%m-%d}<br>锁单数MA7: %{y:,.0f}<extra></extra>'))
+
+_y1, _y2 = _ls8_m['净流入'], _ls8_m['锁单数MA7']
+def _pd8(s):
+    lo, hi = float(s.min()), float(s.max()); r = hi - lo
+    if r == 0: r = abs(lo) if lo != 0 else 1
+    return lo - 0.05*r, hi + 0.05*r
+_lo1, _hi1 = _pd8(_y1); _lo2, _hi2 = _pd8(_y2)
+_n1, _p1 = max(0, -_lo1), max(0, _hi1)
+_rt = _n1 / _p1 if _p1 else 1
+_n2, _p2 = max(0, -_lo2), max(0, _hi2)
+_lo2 = -max(_n2, _p2 * _rt)
+_hi2 = max(_p2, _n2 / _rt) if _rt else _p2
+
+fig_ls8.update_layout(title=dict(text='LS8 懂车帝A3净流入 vs 锁单数 MA7（双边校准 · 合并）', x=0.5, font=dict(size=15)),
+    width=1300, height=350, hovermode='x unified', hoverlabel=dict(bgcolor='white', font_size=13),
+    legend=dict(x=1.02, xanchor='left'), margin=dict(t=50, b=40, r=120),
+    yaxis=dict(title='校准后A3净流入', range=[_lo1, _hi1]),
+    yaxis2=dict(title='LS8 锁单数 MA7', overlaying='y', side='right', range=[_lo2, _hi2]))
+fig_ls8.update_xaxes(dtick='M1', tickformat='%Y-%m', hoverformat='%Y-%m-%d')
+apply_zh_theme(fig_ls8)
+
+_chart_ls8_html = fig_ls8.to_html(full_html=False, include_plotlyjs=False)
+html_section_ls8_flow = f'''
+<div class="report-section">
+  <h2>LS8 懂车帝A3净流入 vs 锁单数 MA7（双边校准 · 合并）</h2>
+  <p class="section-note">四个时段分别校准后合并：0124~0222 (141,947/114,127)、0223~0324 (183,439/137,410)、0325~0423 (1,174,436/168,728)、0424~0523 (350,242/1,239,878)、0524~0622 (287,838/375,867)。柱状图为校准后 A3 每日净流入，折线为 LS8 锁单数 7 日滚动平均。</p>
+  <div class="chart-box"><div class="chart-wrap">{_chart_ls8_html}</div></div>
+</div>
+'''
+
+# === LS9 懂车帝 A3 净流入 vs 锁单数 MA7（双边校准 · 合并） ===
+_ls9_order = pd.read_parquet(str(_PROJECT_ROOT / 'dataset' / 'order_data.parquet'))
+_ls9_order['lock_time'] = pd.to_datetime(_ls9_order['lock_time'], errors='coerce')
+_ls9_order = _ls9_order[_ls9_order['series'] == 'LS9'].dropna(subset=['lock_time'])
+
+_ls9_a3 = _read_dataset('dataset/TOP20懂车帝A3 流转_LS9.csv')
+_ls9_a3['日期'] = _ls9_a3['日期'].astype(str)
+_ls9_a3 = _ls9_a3[_ls9_a3['竞争对手'] == '竞争度TOP20车系集合'].copy()
+_ls9_a3['dt'] = pd.to_datetime(_ls9_a3['日期'], format='%Y%m%d')
+_ls9_a3 = _ls9_a3.sort_values('dt').reset_index(drop=True)
+for col in ['净流入', '本品A3流出', '竞争对手5A流入']:
+    _ls9_a3[col] = _ls9_a3[col].astype(str).str.replace(',', '', regex=False).astype(int)
+
+_LS9_CAL_PERIODS = [
+    ('20250827', '20250925', 70234, 120935),
+    ('20250926', '20251025', 89638, 37454),
+    ('20251026', '20251124', 1088022, 73465),
+    ('20251125', '20251224', 506837, 923440),
+    ('20251225', '20260123', 430260, 526625),
+    ('20260124', '20260222', 394169, 461995),
+    ('20260223', '20260324', 416300, 420460),
+    ('20260325', '20260423', 496766, 439758),
+    ('20260424', '20260523', 341217, 497278),
+    ('20260524', '20260622', 269714, 290156),
+]
+
+_ls9_frames = []
+for start, end, inf_bm, outf_bm in _LS9_CAL_PERIODS:
+    period = _ls9_a3[(_ls9_a3['日期'] >= start) & (_ls9_a3['日期'] <= end)].copy()
+    inf_c = inf_bm / period['竞争对手5A流入'].sum()
+    outf_c = outf_bm / period['本品A3流出'].sum()
+    period['校准后流入'] = (period['竞争对手5A流入'] * inf_c).round(0).astype(int)
+    period['校准后流出'] = (period['本品A3流出'] * outf_c).round(0).astype(int)
+    period['校准后净流入'] = period['校准后流入'] - period['校准后流出']
+    _ls9_frames.append(period)
+    print(f'  LS9 {start}~{end}: 流入系数={inf_c:.4f}, 流出系数={outf_c:.4f} | '
+          f'校准后流入={period["校准后流入"].sum():,} 流出={period["校准后流出"].sum():,}')
+
+_ls9_c = pd.concat(_ls9_frames, ignore_index=True).drop_duplicates(subset='dt').sort_values('dt')
+
+_ls9_lock = _ls9_order.groupby(_ls9_order['lock_time'].dt.date).size()
+_ls9_lock = _ls9_lock.reindex(pd.date_range(_ls9_c['dt'].iloc[0], _ls9_c['dt'].iloc[-1], freq='D'), fill_value=0)
+_ls9_lock = _ls9_lock.reindex(pd.DatetimeIndex(_ls9_c['dt']), fill_value=0)
+_ls9_lock_ma7 = _ls9_lock.rolling(7, min_periods=1).mean()
+
+_ls9_m = pd.DataFrame({'dt': _ls9_c['dt'], '净流入': _ls9_c['校准后净流入']})
+_ls9_m['锁单数MA7'] = _ls9_lock_ma7.values
+
+fig_ls9 = go.Figure()
+_ls9_bc = [ZH['negative'] if v < 0 else 'rgba(42,157,143,.35)' for v in _ls9_m['净流入']]
+fig_ls9.add_trace(go.Bar(x=_ls9_m['dt'], y=_ls9_m['净流入'], name='懂车帝A3净流入(校准后)',
+    marker_color=_ls9_bc, yaxis='y', hovertemplate='%{x|%Y-%m-%d}<br>净流入: %{y:,}<extra></extra>'))
+fig_ls9.add_trace(go.Scatter(x=_ls9_m['dt'], y=_ls9_m['锁单数MA7'], mode='lines',
+    name='LS9 锁单数 MA7', line=dict(color=ZH['event'], width=2.5), yaxis='y2',
+    hovertemplate='%{x|%Y-%m-%d}<br>锁单数MA7: %{y:,.0f}<extra></extra>'))
+
+_y1, _y2 = _ls9_m['净流入'], _ls9_m['锁单数MA7']
+def _pd9(s):
+    lo, hi = float(s.min()), float(s.max()); r = hi - lo
+    if r == 0: r = abs(lo) if lo != 0 else 1
+    return lo - 0.05*r, hi + 0.05*r
+_lo1, _hi1 = _pd9(_y1); _lo2, _hi2 = _pd9(_y2)
+_n1, _p1 = max(0, -_lo1), max(0, _hi1)
+_rt = _n1 / _p1 if _p1 else 1
+_n2, _p2 = max(0, -_lo2), max(0, _hi2)
+_lo2 = -max(_n2, _p2 * _rt)
+_hi2 = max(_p2, _n2 / _rt) if _rt else _p2
+
+fig_ls9.update_layout(title=dict(text='LS9 懂车帝A3净流入 vs 锁单数 MA7（双边校准 · 合并）', x=0.5, font=dict(size=15)),
+    width=1300, height=350, hovermode='x unified', hoverlabel=dict(bgcolor='white', font_size=13),
+    legend=dict(x=1.02, xanchor='left'), margin=dict(t=50, b=40, r=120),
+    yaxis=dict(title='校准后A3净流入', range=[_lo1, _hi1]),
+    yaxis2=dict(title='LS9 锁单数 MA7', overlaying='y', side='right', range=[_lo2, _hi2]))
+fig_ls9.update_xaxes(dtick='M1', tickformat='%Y-%m', hoverformat='%Y-%m-%d')
+apply_zh_theme(fig_ls9)
+
+_chart_ls9_html = fig_ls9.to_html(full_html=False, include_plotlyjs=False)
+html_section_ls9_flow = f'''
+<div class="report-section">
+  <h2>LS9 懂车帝A3净流入 vs 锁单数 MA7（双边校准 · 合并）</h2>
+  <p class="section-note">10个时段分别校准后合并：0827~0925 (70,234/120,935)、0926~1025 (89,638/37,454)、1026~1124 (1,088,022/73,465)、1125~1224 (506,837/923,440)、1225~0123 (430,260/526,625)、0124~0222 (394,169/461,995)、0223~0324 (416,300/420,460)、0325~0423 (496,766/439,758)、0424~0523 (341,217/497,278)、0524~0622 (269,714/290,156)。柱状图为校准后 A3 每日净流入，折线为 LS9 锁单数 7 日滚动平均。</p>
+  <div class="chart-box"><div class="chart-wrap">{_chart_ls9_html}</div></div>
+</div>
+'''
+
 t7_df = _build_ranking_df(_PROJECT_ROOT / 'dataset' / 'LS8A3流出T+7_0622.csv')
 t15_df = _build_ranking_df(_PROJECT_ROOT / 'dataset' / 'LS8A3流出T+15_0622.csv')
 
 html_section_8 = _build_table_html('LS8 A3 承接车型排名 · T+7', t7_df, 'T+7 窗口（截止 2026-06-22）')
 html_section_9 = _build_table_html('LS8 A3 承接车型排名 · T+15', t15_df, 'T+15 窗口（截止 2026-06-22）')
+
+# === LS9 A3流出 双边校准 ===
+def _build_ranking_df_ls9(csv_path, inflow_benchmark, outflow_benchmark):
+    detail = pd.read_csv(str(csv_path), encoding='utf-8-sig')
+    for col in ['A3流入人数（指数）', 'A3流出人数（指数）']:
+        detail[col] = detail[col].astype(str).str.replace(',', '', regex=False).astype(int)
+    inflow_total = detail['A3流入人数（指数）'].sum()
+    outflow_total = detail['A3流出人数（指数）'].sum()
+    inflow_coeff = inflow_benchmark / inflow_total
+    outflow_coeff = outflow_benchmark / outflow_total
+    detail['校准后流入'] = (detail['A3流入人数（指数）'] * inflow_coeff).round(0).astype(int)
+    detail['校准后流出'] = (detail['A3流出人数（指数）'] * outflow_coeff).round(0).astype(int)
+    detail['估算净流入'] = detail['校准后流入'] - detail['校准后流出']
+    detail['流入流出比'] = detail['A3流出人数（指数）'] / detail['A3流入人数（指数）']
+    full = detail.sort_values('估算净流入', ascending=True).reset_index(drop=True)
+    full.index = full.index + 1
+    full.index.name = '排名'
+    top10 = full.head(10)
+    extra = full[full['车系'].str.contains('|'.join(_EXTRA_MODELS), na=False)]
+    ranking = pd.concat([top10, extra]).drop_duplicates(subset='车系').sort_values('估算净流入', ascending=True)
+    display = ranking[['车系', '校准后流入', '校准后流出', '估算净流入', '流入流出比']].copy()
+    for col in ['校准后流入', '校准后流出', '估算净流入']:
+        display[col] = display[col].apply(lambda x: f'{x:,}')
+    display['流入流出比'] = display['流入流出比'].apply(lambda x: f'{x:.1%}')
+    return display
+
+ls9_t7_df = _build_ranking_df_ls9(_PROJECT_ROOT / 'dataset' / 'LS9A3流出T+7_0118.csv', 154508, 236432)
+ls9_t15_df = _build_ranking_df_ls9(_PROJECT_ROOT / 'dataset' / 'LS9A3流出T+15_0118.csv', 281425, 323626)
+ls9_t15_0412_df = _build_ranking_df_ls9(_PROJECT_ROOT / 'dataset' / 'LS9A3流出T+15_0412.csv', 303375, 329363)
+html_section_ls9_t7 = _build_table_html('LS9 A3 承接车型排名 · T+7', ls9_t7_df, 'T+7 窗口（截止 2026-01-18）')
+html_section_ls9_t15 = _build_table_html('LS9 A3 承接车型排名 · T+15', ls9_t15_df, 'T+15 窗口（截止 2026-01-18）')
+html_section_ls9_t15_0412 = _build_table_html('LS9 A3 承接车型排名 · T+15', ls9_t15_0412_df, 'T+15 窗口（截止 2026-04-12）')
+
+# === LS6 A3流出 双边校准 ===
+ls6_t7_df = _build_ranking_df_ls9(_PROJECT_ROOT / 'dataset' / 'LS6A3流出T+7_1116.csv', 98955, 378471)
+ls6_t15_df = _build_ranking_df_ls9(_PROJECT_ROOT / 'dataset' / 'LS6A3流出T+15_1116.csv', 203508, 796390)
+ls6_t15_0412_df = _build_ranking_df_ls9(_PROJECT_ROOT / 'dataset' / 'LS6A3流出T+15_0412.csv', 297295, 345334)
+html_section_ls6_t7 = _build_table_html('LS6 A3 承接车型排名 · T+7', ls6_t7_df, 'T+7 窗口（截止 2025-11-16）')
+html_section_ls6_t15 = _build_table_html('LS6 A3 承接车型排名 · T+15', ls6_t15_df, 'T+15 窗口（截止 2025-11-16）')
+html_section_ls6_t15_0412 = _build_table_html('LS6 A3 承接车型排名 · T+15', ls6_t15_0412_df, 'T+15 窗口（截止 2026-04-12）')
 
 # ════════════════════════════════════════════
 #  Methodology + Footer
@@ -552,8 +847,17 @@ with open(_OUTPUT_HTML, 'w', encoding='utf-8') as f:
     f.write(html_section_5)
     f.write(html_section_6)
     f.write(html_section_7)
+    f.write(html_section_ls6_flow)
+    f.write(html_section_ls8_flow)
+    f.write(html_section_ls9_flow)
     f.write(html_section_8)
     f.write(html_section_9)
+    f.write(html_section_ls9_t7)
+    f.write(html_section_ls9_t15)
+    f.write(html_section_ls9_t15_0412)
+    f.write(html_section_ls6_t7)
+    f.write(html_section_ls6_t15)
+    f.write(html_section_ls6_t15_0412)
     f.write(html_method)
     f.write(html_footer)
 
