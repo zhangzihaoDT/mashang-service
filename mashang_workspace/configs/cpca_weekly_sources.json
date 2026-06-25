@@ -1,0 +1,127 @@
+{
+  "pipeline_id": "cpca_weekly_early_signal",
+  "pipeline_name": "乘联分会周度数据早源监控",
+  "version": "v0.1.0",
+  "description": "监控乘联分会/乘联会周度核心数据，比 CADA 官网更早捕捉快讯",
+
+  "monitor_keywords": [
+    "乘联分会 全国乘用车市场零售",
+    "乘联分会 新能源市场零售",
+    "乘联分会 新能源零售渗透率",
+    "乘联会 乘用车市场零售",
+    "乘联会 新能源 零售 渗透率",
+    "车市扫描 乘联分会",
+    "6月1-21日 全国乘用车市场零售",
+    "6月1-21日 全国乘用车市场新能源零售"
+  ],
+
+  "sources": [
+    {
+      "domain": "stcn.com",
+      "path_hint": "/article/detail/",
+      "source_name": "人民财讯 / 证券时报网",
+      "source_role": "early_signal",
+      "priority": "P0",
+      "trust_level": "high_for_core_numbers",
+      "limitations": "通常只有核心快讯，不包含完整图表和全文解释",
+      "author_weights": {
+        "李在山": 1.0,
+        "周映彤": 0.8
+      },
+      "author_hard_filter": false
+    },
+    {
+      "domain": "cada.cn",
+      "path_hint": null,
+      "source_name": "CADA 官网 / 中国汽车流通协会",
+      "source_role": "final_authoritative",
+      "priority": "P0_final",
+      "trust_level": "high",
+      "limitations": "发布时间较晚，但数据完整权威，用作最终校验"
+    }
+  ],
+
+  "auxiliary_sources": [
+    {
+      "domain": "sohu.com",
+      "path_hint": "/a/",
+      "source_name": "中国汽车流通协会搜狐号",
+      "source_role": "near_fulltext_sync",
+      "priority": "P1",
+      "trust_level": "medium_high"
+    },
+    {
+      "domain": "sina.com.cn",
+      "path_hint": null,
+      "source_name": "新浪财经 7x24",
+      "source_role": "fast_repost",
+      "priority": "P1",
+      "trust_level": "medium"
+    },
+    {
+      "domain": "eastmoney.com",
+      "path_hint": null,
+      "source_name": "东方财富",
+      "source_role": "fast_repost",
+      "priority": "P1",
+      "trust_level": "medium"
+    },
+    {
+      "domain": "cls.cn",
+      "path_hint": null,
+      "source_name": "财联社",
+      "source_role": "fast_repost",
+      "priority": "P1",
+      "trust_level": "medium"
+    },
+    {
+      "domain": "nbd.com.cn",
+      "path_hint": null,
+      "source_name": "每日经济新闻",
+      "source_role": "fast_repost",
+      "priority": "P1",
+      "trust_level": "medium"
+    },
+    {
+      "domain": "weibo.com",
+      "path_hint": null,
+      "source_name": "微博",
+      "source_role": "optional_social_signal",
+      "priority": "P2",
+      "trust_level": "low",
+      "note": "不作为主数据源，仅作 social signal 参考"
+    }
+  ],
+
+  "extraction_fields": {
+    "period_start": "string (date)",
+    "period_end": "string (date)",
+    "publish_time": "string (datetime ISO8601)",
+    "source_domain": "string",
+    "source_name": "string",
+    "source_role": "string",
+    "title": "string",
+    "url": "string",
+    "passenger_retail_volume": "integer or null",
+    "passenger_retail_yoy": "float or null",
+    "passenger_retail_mom": "float or null",
+    "passenger_retail_ytd": "integer or null",
+    "passenger_retail_ytd_yoy": "float or null",
+    "nev_retail_volume": "integer or null",
+    "nev_retail_yoy": "float or null",
+    "nev_retail_mom": "float or null",
+    "nev_retail_ytd": "integer or null",
+    "nev_retail_ytd_yoy": "float or null",
+    "nev_retail_penetration": "float or null",
+    "evidence_text": "string",
+    "confidence": "enum: high/medium/low",
+    "needs_final_cada_confirmation": "boolean"
+  },
+
+  "judgment_rules": {
+    "early_signal_confirmed": "stcn.com hit time < cada.cn publish time",
+    "needs_final_cada_confirmation": "仅财经快讯命中，CADA 官网未发布全文",
+    "cada_final_validation": "CADA 官网已发布，用其数据做最终校验",
+    "repost_dedup": "若来源标注为证券时报网/人民财讯且有转载标记，归类为 repost 而非 first_source"
+  }
+}

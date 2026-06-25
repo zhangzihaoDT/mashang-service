@@ -130,6 +130,9 @@ python mashang_workspace/eval/run_eval.py --suite parser  # 单套件
 | `python research_scripts/release_curve_analysis.py` | 释放曲线 | research |
 | `python research_scripts/cohort_forecast.py` | 预测锁单 | research |
 | `python research_scripts/auto_launch_monitor.py --start YYYY-MM-DD --end YYYY-MM-DD [--targets-file ...] [--brands ...] [--event-types ...] [--source-types ...]` | 新车事件监测：支持按品牌、事件类型、来源类型、关键词、关注车型列表过滤，输出可追溯的新车投放事件报告 | research |
+| `python research_scripts/cpca_weekly_early_signal.py --week 2026-W26` | 乘联分会周度数据早源监控（WEEK=数据归属周） | research |
+| `make cpca-weekly-early-signal WEEK=2026-W26` | 早源监控（终端输出）WEEK=要监控的数据周 | make |
+| `make cpca-weekly-early-signal-html WEEK=2026-W26` | 早源监控（HTML 报告）WEEK=要监控的数据周 | make |
 | `python utility_scripts/voc_theme_analysis.py` | VOC 分析 | utility |
 | `python utility_scripts/data_dictionary.py` | 数据字典 | utility |
 | `python utility_scripts/skills_order_observation_daily.py` | 每日数据观察(DataOps) | utility |
