@@ -152,11 +152,11 @@ if not schema_path.exists():
 with open(str(schema_path)) as f:
     biz = json.load(f)
 
-df = _read_dataset('dataset/品牌 A3 流转.csv')
+df = _read_dataset('dataset/a3_flow_analysis/品牌 A3 流转.csv')
 df['日期'] = pd.to_datetime(df['日期'], format='%Y%m%d')
 df = df.sort_values('日期')
 
-dd = _read_dataset('dataset/TOP10A3 流转_懂车帝.csv')
+dd = _read_dataset('dataset/a3_flow_analysis/TOP10A3 流转_懂车帝.csv')
 dd['日期'] = pd.to_datetime(dd['日期'], format='%Y%m%d')
 dd = dd.sort_values('日期')
 
@@ -180,7 +180,7 @@ for pid, prd in biz['time_periods'].items():
     period_parts.append(dd.loc[mask].copy().sort_values('日期'))
 period_df = pd.concat(period_parts, ignore_index=True).sort_values('日期')
 
-assign = _read_dataset('dataset/assign_data.csv')
+assign = _read_dataset('dataset/a3_flow_analysis/assign_data.csv')
 assign['日期'] = pd.to_datetime(assign['Assign Time 年/月/日'].str.replace('年', '-').str.replace('月', '-').str.replace('日', ''), format='%Y-%m-%d')
 assign = assign.sort_values('日期')
 assign = assign[(assign['日期'] >= period_df['日期'].min()) & (assign['日期'] <= period_df['日期'].max())].copy()
@@ -523,11 +523,11 @@ def _build_ranking_df(csv_path):
     return display
 
 # === LS6 懂车帝 A3 净流入 vs 锁单数 MA7（双边校准 · 合并 0325~0622） ===
-_ls6_order = pd.read_parquet(str(_PROJECT_ROOT / 'dataset' / 'order_data.parquet'))
+_ls6_order = pd.read_parquet(str(_PROJECT_ROOT / 'dataset' / 'a3_flow_analysis' / 'order_data.parquet'))
 _ls6_order['lock_time'] = pd.to_datetime(_ls6_order['lock_time'], errors='coerce')
 _ls6_order = _ls6_order[_ls6_order['series'] == 'LS6'].dropna(subset=['lock_time'])
 
-_ls6_a3 = _read_dataset('dataset/TOP20懂车帝A3 流转_LS6.csv')
+_ls6_a3 = _read_dataset('dataset/a3_flow_analysis/TOP20懂车帝A3 流转_LS6.csv')
 _ls6_a3['日期'] = _ls6_a3['日期'].astype(str)
 _ls6_a3 = _ls6_a3[_ls6_a3['竞争对手'] == '竞争度TOP20车系集合'].copy()
 _ls6_a3['dt'] = pd.to_datetime(_ls6_a3['日期'], format='%Y%m%d')
@@ -610,12 +610,53 @@ html_section_ls6_flow = f'''
 </div>
 '''
 
+# ── LS6 传导迟滞分析 ──
+_ls6_lag_best_p, _ls6_best_pearson, _ls6_best_s, _ls6_best_spearman = 0, 0, 0, 0
+_ls6_cross = []
+for lag in range(0, 31):
+    shifted = _ls6_merged['锁单数MA7'].shift(-lag)
+    valid = _ls6_merged['净流入'].notna() & shifted.notna()
+    if valid.sum() < 10:
+        continue
+    x = _ls6_merged.loc[valid, '净流入']
+    y = shifted.loc[valid]
+    r_p = x.corr(y)
+    r_s = x.rank().corr(y.rank())
+    _ls6_cross.append((lag, r_p, r_s))
+    if abs(r_p) > abs(_ls6_best_pearson):
+        _ls6_best_pearson = r_p; _ls6_lag_best_p = lag
+    if abs(r_s) > abs(_ls6_best_spearman):
+        _ls6_best_spearman = r_s; _ls6_best_s = lag
+print(f'  LS6 迟滞: Pearson={_ls6_lag_best_p}d r={_ls6_best_pearson:.4f}, Spearman={_ls6_best_s}d ρ={_ls6_best_spearman:.4f}')
+
+fig_ls6_lag = go.Figure()
+_lags = [x[0] for x in _ls6_cross]
+_ps = [x[1] for x in _ls6_cross]
+_ss = [x[2] for x in _ls6_cross]
+fig_ls6_lag.add_trace(go.Bar(x=_lags, y=_ps, name='Pearson',
+    marker_color=[ZH['negative'] if l == _ls6_lag_best_p else ZH['steel'] for l in _lags]))
+fig_ls6_lag.add_trace(go.Scatter(x=_lags, y=_ss, mode='lines+markers',
+    name='Spearman', line=dict(color=ZH['positive'], width=2)))
+fig_ls6_lag.update_layout(title=dict(text='LS6 传导迟滞分析 — 懂车帝A3净流入 vs 锁单数 MA7', x=0.5, font=dict(size=15)),
+    width=800, height=350, xaxis=dict(title=dict(text='迟滞日 (天)'), dtick=1),
+    yaxis=dict(title=dict(text='相关系数')), margin=dict(t=50, b=40, r=40), legend=dict(x=1.02, xanchor='left'))
+apply_zh_theme(fig_ls6_lag)
+_chart_ls6_lag_html = fig_ls6_lag.to_html(full_html=False, include_plotlyjs=False)
+
+html_section_ls6_lag = f'''
+<div class="report-section">
+  <h2>LS6 传导迟滞分析</h2>
+  <p class="section-note">Pearson 与 Spearman 交叉相关 vs 迟滞天数。最优迟滞：Pearson {_ls6_lag_best_p} 天 (r={_ls6_best_pearson:.3f})，Spearman {_ls6_best_s} 天 (ρ={_ls6_best_spearman:.3f})。</p>
+  <div class="chart-box"><div class="chart-wrap">{_chart_ls6_lag_html}</div></div>
+</div>
+'''
+
 # === LS8 懂车帝 A3 净流入 vs 锁单数 MA7（双边校准 · 合并） ===
-_ls8_order_actual = pd.read_parquet(str(_PROJECT_ROOT / 'dataset' / 'order_data.parquet'))
+_ls8_order_actual = pd.read_parquet(str(_PROJECT_ROOT / 'dataset' / 'a3_flow_analysis' / 'order_data.parquet'))
 _ls8_order_actual['lock_time'] = pd.to_datetime(_ls8_order_actual['lock_time'], errors='coerce')
 _ls8_order_actual = _ls8_order_actual[_ls8_order_actual['series'] == 'LS8'].dropna(subset=['lock_time'])
 
-_ls8_a3 = _read_dataset('dataset/TOP20懂车帝A3 流转_LS8.csv')
+_ls8_a3 = _read_dataset('dataset/a3_flow_analysis/TOP20懂车帝A3 流转_LS8.csv')
 _ls8_a3['日期'] = _ls8_a3['日期'].astype(str)
 _ls8_a3 = _ls8_a3[_ls8_a3['竞争对手'] == '竞争度TOP20车系集合'].copy()
 _ls8_a3['dt'] = pd.to_datetime(_ls8_a3['日期'], format='%Y%m%d')
@@ -691,11 +732,11 @@ html_section_ls8_flow = f'''
 '''
 
 # === LS9 懂车帝 A3 净流入 vs 锁单数 MA7（双边校准 · 合并） ===
-_ls9_order = pd.read_parquet(str(_PROJECT_ROOT / 'dataset' / 'order_data.parquet'))
+_ls9_order = pd.read_parquet(str(_PROJECT_ROOT / 'dataset' / 'a3_flow_analysis' / 'order_data.parquet'))
 _ls9_order['lock_time'] = pd.to_datetime(_ls9_order['lock_time'], errors='coerce')
 _ls9_order = _ls9_order[_ls9_order['series'] == 'LS9'].dropna(subset=['lock_time'])
 
-_ls9_a3 = _read_dataset('dataset/TOP20懂车帝A3 流转_LS9.csv')
+_ls9_a3 = _read_dataset('dataset/a3_flow_analysis/TOP20懂车帝A3 流转_LS9.csv')
 _ls9_a3['日期'] = _ls9_a3['日期'].astype(str)
 _ls9_a3 = _ls9_a3[_ls9_a3['竞争对手'] == '竞争度TOP20车系集合'].copy()
 _ls9_a3['dt'] = pd.to_datetime(_ls9_a3['日期'], format='%Y%m%d')
@@ -775,8 +816,8 @@ html_section_ls9_flow = f'''
 </div>
 '''
 
-t7_df = _build_ranking_df(_PROJECT_ROOT / 'dataset' / 'LS8A3流出T+7_0622.csv')
-t15_df = _build_ranking_df(_PROJECT_ROOT / 'dataset' / 'LS8A3流出T+15_0622.csv')
+t7_df = _build_ranking_df(_PROJECT_ROOT / 'dataset' / 'a3_flow_analysis' / 'LS8A3流出T+7_0622.csv')
+t15_df = _build_ranking_df(_PROJECT_ROOT / 'dataset' / 'a3_flow_analysis' / 'LS8A3流出T+15_0622.csv')
 
 html_section_8 = _build_table_html('LS8 A3 承接车型排名 · T+7', t7_df, 'T+7 窗口（截止 2026-06-22）')
 html_section_9 = _build_table_html('LS8 A3 承接车型排名 · T+15', t15_df, 'T+15 窗口（截止 2026-06-22）')
@@ -806,18 +847,24 @@ def _build_ranking_df_ls9(csv_path, inflow_benchmark, outflow_benchmark):
     display['流入流出比'] = display['流入流出比'].apply(lambda x: f'{x:.1%}')
     return display
 
-ls9_t7_df = _build_ranking_df_ls9(_PROJECT_ROOT / 'dataset' / 'LS9A3流出T+7_0118.csv', 154508, 236432)
-ls9_t15_df = _build_ranking_df_ls9(_PROJECT_ROOT / 'dataset' / 'LS9A3流出T+15_0118.csv', 281425, 323626)
-ls9_t15_0412_df = _build_ranking_df_ls9(_PROJECT_ROOT / 'dataset' / 'LS9A3流出T+15_0412.csv', 303375, 329363)
+ls9_t7_df = _build_ranking_df_ls9(_PROJECT_ROOT / 'dataset' / 'a3_flow_analysis' / 'LS9A3流出T+7_0118.csv', 154508, 236432)
+ls9_t7_0622_df = _build_ranking_df_ls9(_PROJECT_ROOT / 'dataset' / 'a3_flow_analysis' / 'LS9A3流出T+7_0622.csv', 64721, 125241)
+ls9_t15_df = _build_ranking_df_ls9(_PROJECT_ROOT / 'dataset' / 'a3_flow_analysis' / 'LS9A3流出T+15_0118.csv', 281425, 323626)
+ls9_t15_0412_df = _build_ranking_df_ls9(_PROJECT_ROOT / 'dataset' / 'a3_flow_analysis' / 'LS9A3流出T+15_0412.csv', 303375, 329363)
 html_section_ls9_t7 = _build_table_html('LS9 A3 承接车型排名 · T+7', ls9_t7_df, 'T+7 窗口（截止 2026-01-18）')
+html_section_ls9_t7_0622 = _build_table_html('LS9 A3 承接车型排名 · T+7', ls9_t7_0622_df, 'T+7 窗口（截止 2026-06-22）')
 html_section_ls9_t15 = _build_table_html('LS9 A3 承接车型排名 · T+15', ls9_t15_df, 'T+15 窗口（截止 2026-01-18）')
 html_section_ls9_t15_0412 = _build_table_html('LS9 A3 承接车型排名 · T+15', ls9_t15_0412_df, 'T+15 窗口（截止 2026-04-12）')
+ls9_t15_0622_df = _build_ranking_df_ls9(_PROJECT_ROOT / 'dataset' / 'a3_flow_analysis' / 'LS9A3流出T+15_0622.csv', 151354, 183862)
+html_section_ls9_t15_0622 = _build_table_html('LS9 A3 承接车型排名 · T+15', ls9_t15_0622_df, 'T+15 窗口（截止 2026-06-22）')
 
 # === LS6 A3流出 双边校准 ===
-ls6_t7_df = _build_ranking_df_ls9(_PROJECT_ROOT / 'dataset' / 'LS6A3流出T+7_1116.csv', 98955, 378471)
-ls6_t15_df = _build_ranking_df_ls9(_PROJECT_ROOT / 'dataset' / 'LS6A3流出T+15_1116.csv', 203508, 796390)
-ls6_t15_0412_df = _build_ranking_df_ls9(_PROJECT_ROOT / 'dataset' / 'LS6A3流出T+15_0412.csv', 297295, 345334)
+ls6_t7_df = _build_ranking_df_ls9(_PROJECT_ROOT / 'dataset' / 'a3_flow_analysis' / 'LS6A3流出T+7_1116.csv', 98955, 378471)
+ls6_t7_0524_df = _build_ranking_df_ls9(_PROJECT_ROOT / 'dataset' / 'a3_flow_analysis' / 'LS6A3流出T+7_0524.csv', 126878, 173315)
+ls6_t15_df = _build_ranking_df_ls9(_PROJECT_ROOT / 'dataset' / 'a3_flow_analysis' / 'LS6A3流出T+15_1116.csv', 203508, 796390)
+ls6_t15_0412_df = _build_ranking_df_ls9(_PROJECT_ROOT / 'dataset' / 'a3_flow_analysis' / 'LS6A3流出T+15_0412.csv', 297295, 345334)
 html_section_ls6_t7 = _build_table_html('LS6 A3 承接车型排名 · T+7', ls6_t7_df, 'T+7 窗口（截止 2025-11-16）')
+html_section_ls6_t7_0524 = _build_table_html('LS6 A3 承接车型排名 · T+7', ls6_t7_0524_df, 'T+7 窗口（截止 2026-05-24）')
 html_section_ls6_t15 = _build_table_html('LS6 A3 承接车型排名 · T+15', ls6_t15_df, 'T+15 窗口（截止 2025-11-16）')
 html_section_ls6_t15_0412 = _build_table_html('LS6 A3 承接车型排名 · T+15', ls6_t15_0412_df, 'T+15 窗口（截止 2026-04-12）')
 
@@ -848,14 +895,18 @@ with open(_OUTPUT_HTML, 'w', encoding='utf-8') as f:
     f.write(html_section_6)
     f.write(html_section_7)
     f.write(html_section_ls6_flow)
+    f.write(html_section_ls6_lag)
     f.write(html_section_ls8_flow)
     f.write(html_section_ls9_flow)
     f.write(html_section_8)
     f.write(html_section_9)
+    f.write(html_section_ls9_t15_0622)
     f.write(html_section_ls9_t7)
+    f.write(html_section_ls9_t7_0622)
     f.write(html_section_ls9_t15)
     f.write(html_section_ls9_t15_0412)
     f.write(html_section_ls6_t7)
+    f.write(html_section_ls6_t7_0524)
     f.write(html_section_ls6_t15)
     f.write(html_section_ls6_t15_0412)
     f.write(html_method)
