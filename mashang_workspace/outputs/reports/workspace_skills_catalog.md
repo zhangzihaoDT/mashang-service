@@ -13,7 +13,7 @@ Agent Harness 能力目录
 | 指标 | 数值 |
 |------|------|
 | Workspace Skills | 4 |
-| Skills 输出目录 | mashang_workspace/outputs/reports/, mashang_workspace/outputs/monthly_market_report/YYYY-MM/, outputs/auto_launch/, dataset/cpca_weekly/cpca_weekly_data_capture.json   # evidence/capture 原材料, outputs/miit_new_car/promptbuilder_runs/ |
+| Skills 输出目录 | mashang_workspace/outputs/reports/, dataset/cpca_weekly/cpca_weekly_data_capture.json   # evidence/capture 原材料, outputs/miit_new_car/promptbuilder_runs/, mashang_workspace/outputs/monthly_market_report/YYYY-MM/, outputs/auto_launch/ |
 | 最近更新 | 2026-06-25 |
 
 ## Skills Overview

@@ -1,7 +1,7 @@
 {
   "inventory_name": "workspace_capability_inventory",
   "version": "0.1",
-  "generated_at": "2026-06-25 08:35:09",
+  "generated_at": "2026-06-25 08:40:23",
   "workspace": "mashang_workspace",
   "summary": {
     "skills": 6,
@@ -938,7 +938,7 @@
           "description": "生成报告，38.9 KB，html report，关联能力：capability_catalog",
           "short_description": "html report · 38.9 KB",
           "type": "html_report",
-          "modified_at": "2026-06-25 08:30",
+          "modified_at": "2026-06-25 08:35",
           "size_kb": 38.9,
           "related_capability": "capability_catalog",
           "status": "generated"
@@ -949,7 +949,7 @@
           "description": "生成报告，49.2 KB，json contract，关联能力：capability_catalog",
           "short_description": "json contract · 49.2 KB",
           "type": "json_contract",
-          "modified_at": "2026-06-25 08:30",
+          "modified_at": "2026-06-25 08:35",
           "size_kb": 49.2,
           "related_capability": "capability_catalog",
           "status": "generated"
@@ -960,7 +960,7 @@
           "description": "生成报告，9.4 KB，markdown report，关联能力：capability_catalog",
           "short_description": "markdown report · 9.4 KB",
           "type": "markdown_report",
-          "modified_at": "2026-06-25 08:30",
+          "modified_at": "2026-06-25 08:35",
           "size_kb": 9.4,
           "related_capability": "capability_catalog",
           "status": "generated"
@@ -971,7 +971,7 @@
           "description": "生成报告，22.9 KB，html report，关联能力：capability_catalog",
           "short_description": "html report · 22.9 KB",
           "type": "html_report",
-          "modified_at": "2026-06-25 08:35",
+          "modified_at": "2026-06-25 08:40",
           "size_kb": 22.9,
           "related_capability": "capability_catalog",
           "status": "generated"
@@ -982,7 +982,7 @@
           "description": "生成报告，6.4 KB，json contract，关联能力：capability_catalog",
           "short_description": "json contract · 6.4 KB",
           "type": "json_contract",
-          "modified_at": "2026-06-25 08:35",
+          "modified_at": "2026-06-25 08:40",
           "size_kb": 6.4,
           "related_capability": "capability_catalog",
           "status": "generated"
@@ -993,7 +993,7 @@
           "description": "生成报告，6.0 KB，markdown report，关联能力：capability_catalog",
           "short_description": "markdown report · 6.0 KB",
           "type": "markdown_report",
-          "modified_at": "2026-06-25 08:35",
+          "modified_at": "2026-06-25 08:40",
           "size_kb": 6.0,
           "related_capability": "capability_catalog",
           "status": "generated"

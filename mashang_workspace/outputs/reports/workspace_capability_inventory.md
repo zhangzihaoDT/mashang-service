@@ -2,7 +2,7 @@
 
 Workspace 能力总览：skills / scripts / data assets / outputs / evaluation
 
-生成时间：2026-06-25 08:35:09
+生成时间：2026-06-25 08:40:23
 Workspace：mashang_workspace
 
 ---

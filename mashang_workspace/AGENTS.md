@@ -134,6 +134,7 @@ python mashang_workspace/eval/run_eval.py --suite parser  # 单套件
 | `make cpca-weekly-early-signal WEEK=2026-W26` | 早源监控（终端输出）WEEK=要监控的数据周 | make |
 | `make cpca-weekly-early-signal-html WEEK=2026-W26` | 早源监控（HTML 报告）WEEK=要监控的数据周 | make |
 | `make cpca-weekly-data-capture WEEK=2026-W26` | **[Skill] 乘联分会周度数据捕捉** → dataset/cpca_weekly/*.json（WEEK=数据归属周） | make |
+| — | Dataset Contract: `docs/datasets/cpca_weekly_data_capture.md` | doc |
 | `python utility_scripts/voc_theme_analysis.py` | VOC 分析 | utility |
 | `python utility_scripts/data_dictionary.py` | 数据字典 | utility |
 | `python utility_scripts/skills_order_observation_daily.py` | 每日数据观察(DataOps) | utility |
