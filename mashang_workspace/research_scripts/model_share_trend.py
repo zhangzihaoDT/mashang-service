@@ -61,6 +61,7 @@ def parse_args():
     p.add_argument("--output", type=str, help="输出目录 (默认 outputs/tables/)")
     p.add_argument("--format", type=str, default="terminal", choices=["terminal", "csv", "json", "report"])
     p.add_argument("--limit", type=int, default=0, help="限制展示车型数 (0=全部)")
+    p.add_argument("--order-type", type=str, default=None, help="订单类型过滤 (如 用户车, 员工车)")
     return p.parse_args()
 
 
@@ -83,6 +84,8 @@ def main():
 
     df_car = df[df["series"] == series].copy()
     df_car = df_car[(df_car["lock_time"] >= t_start) & (df_car["lock_time"] < t_end)]
+    if args.order_type:
+        df_car = df_car[df_car["order_type"] == args.order_type].copy()
 
     df_car["period_label"] = period_label(df_car["lock_time"], period)
     df_car.sort_values("lock_time", inplace=True)
@@ -127,10 +130,13 @@ def main():
 
     metric_def = f"lock_count = COUNTD(order_number WHERE lock_time IS NOT NULL) per {period} per product_name; share = lock_count / {period}_total"
 
+    filters = {"series": series}
+    if args.order_type:
+        filters["order_type"] = args.order_type
     scope = {
         "data_source": str(ORDER_PARQUET),
         "time_window": {"start_date": launch_date, "end_date": datetime.now().strftime("%Y-%m-%d"), "type": "since_launch"},
-        "filters": {"series": series},
+        "filters": filters,
         "metric_definition": metric_def,
     }
     result = {
