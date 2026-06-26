@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>乘联分会周度数据早源监控</title>
+<link rel="stylesheet" href="../../templates/report_style.css">
+<style>
+  .tl-item { display:flex; gap:12px; align-items:flex-start; padding:8px 12px; border-radius:8px; background:var(--zh-card); border-left:4px solid var(--zh-border); margin-bottom:6px; }
+  .tl-item.p0 { border-left-color:var(--chart-event); background:#FFF0D6; }
+  .tl-item.p0f { border-left-color:var(--zh-blue); background:#E8F8FD; }
+  .tl-item.hist { border-left-color:var(--zh-border); opacity:.55; }
+  .tl-time { font-size:14px; font-weight:700; color:var(--zh-deep-blue); white-space:nowrap; min-width:90px; }
+  .tl-body { font-size:13px; color:var(--zh-text); }
+  .tl-body .src { color:var(--zh-muted); font-size:12px; }
+  .badge-g { background:var(--zh-gold-100); color:var(--zh-gold-700); border:1px solid rgba(215,154,54,.35); font-weight:700; padding:0 6px; border-radius:8px; font-size:10px; }
+  .badge-b { background:rgba(23,74,124,.08); color:var(--zh-blue); border:1px solid rgba(23,74,124,.2); padding:0 6px; border-radius:8px; font-size:10px; }
+</style>
+</head>
+<body class="report-page">
+<div class="report-container">
+
+<h1 class="report-title">乘联分会周度数据早源监控</h1>
+<p class="report-subtitle">
+  data_week: 2026-W25 · data_period: 2026-06-15 至 2026-06-21
+  · 预计发布窗口: 2026-06-23 16:30-18:00 左右
+  · run_time: 2026-06-25 16:35
+</p>
+
+<div class="summary-grid">
+  <div class="summary-card">
+    <div class="summary-value" style="color:#D79A36;">5</div>
+    <div class="summary-label">本期 P0 早信号</div>
+    <div class="summary-hint">最早: 2025-06-18T16:16:00+08:00</div>
+  </div>
+  <div class="summary-card">
+    <div class="summary-value" style="color:#174A7C;">0</div>
+    <div class="summary-label">CADA 权威确认</div>
+    <div class="summary-hint">⚠️ 待确认</div>
+  </div>
+  <div class="summary-card">
+    <div class="summary-value" style="color:#D95F59;">6</div>
+    <div class="summary-label">历史误召回</div>
+    <div class="summary-hint">已排除出本期信号</div>
+  </div>
+  <div class="summary-card warning">
+    <div class="summary-value">6</div>
+    <div class="summary-label">本期兼容命中</div>
+    <div class="summary-hint">需等待 CADA 最终确认</div>
+  </div>
+<div class="summary-card"><div class="summary-value" style="font-size:16px;"><span class="badge-gold">early_only</span></div><div class="summary-label">capture_status</div></div>
+<div class="summary-card"><div class="summary-value" style="color:#D79A36;">2025-06-18T16:16:00+08:00</div><div class="summary-label">first_signal (P0)</div></div>
+<div class="summary-card"><div class="summary-value" style="color:#D95F59;font-size:16px;">⚠️ 待确认</div><div class="summary-label">确认状态</div></div>
+
+</div>
+<div class="report-section">
+  <h2 class="section-title">发布时间线</h2>
+  <div class="timeline">
+    <div class="tl-item p0">
+      <div class="tl-time">2025-06-18T16:16:00+08:00</div>
+      <div class="tl-body">
+        <div><span style='font-size:11px;color:#6B7280;'>[6月1-15日]</span> 乘联分会：6月1—15日全国乘用车市场零售70.6万辆，同比增长20% <span class="badge-g">P0 早信号</span></div>
+        <div class="src">人民财讯 / 证券时报网 · 证券时报 · exact_or_compatible</div>
+        <div style="font-size:12px;margin-top:2px;">乘用车零售: 706,000</div>
+        <div style='font-size:11px;color:#D95F59;margin-top:2px;'>⚠️ 需 CADA 确认</div>
+      </div>
+    </div>
+    <div class="tl-item hist">
+      <div class="tl-time">2026-04-09T16:08:00+08:00</div>
+      <div class="tl-body">
+        <div><span style='font-size:11px;color:#6B7280;'>[3月1-31日]</span> 乘联分会：3月全国乘用车市场零售164.8万辆，同比下降15.0% </div>
+        <div class="src">财富号 · 财富号 · historical_mismatch</div>
+        <div style="font-size:12px;margin-top:2px;">乘用车零售: 1,648,000</div>
+        
+      </div>
+    </div>
+    <div class="tl-item hist">
+      <div class="tl-time">2026-04-22T16:38:00+08:00</div>
+      <div class="tl-body">
+        <div><span style='font-size:11px;color:#6B7280;'>[4月1-19日]</span> 乘联分会：4月1-19日全国乘用车市场零售62.7万辆 同比下降26% </div>
+        <div class="src">每日经济新闻 · 每日经济新闻 · historical_mismatch</div>
+        <div style="font-size:12px;margin-top:2px;">乘用车零售: 627,000 | 渗透率: 61.7%</div>
+        
+      </div>
+    </div>
+    <div class="tl-item p1">
+      <div class="tl-time">2026-05-11T10:32:31+08:00</div>
+      <div class="tl-body">
+        <div>10:32:31【乘联分会：4月全国乘用车市场零售138.4万辆 同比下降21.5%】 </div>
+        <div class="src">财联社 · 财联社 · unknown</div>
+        <div style="font-size:12px;margin-top:2px;">乘用车零售: 1,384,000</div>
+        
+      </div>
+    </div>
+    <div class="tl-item hist">
+      <div class="tl-time">2026-05-28T10:34:00+08:00</div>
+      <div class="tl-body">
+        <div><span style='font-size:11px;color:#6B7280;'>[5月1-24日]</span> 5月27日，乘联分会发布数据，5月1-24日，全国乘用车市场零售98.9万辆，同_财富号_东方财富网 </div>
+        <div class="src">东方财富 · 财富号 · historical_mismatch</div>
+        <div style="font-size:12px;margin-top:2px;">乘用车零售: 989,000 | 渗透率: 62.5%</div>
+        
+      </div>
+    </div>
+    <div class="tl-item hist">
+      <div class="tl-time">2026-06-08T16:13:00+08:00</div>
+      <div class="tl-body">
+        <div><span style='font-size:11px;color:#6B7280;'>[5月1-31日]</span> 乘联分会：5月全国乘用车市场零售151万辆 同比下降22.1% </div>
+        <div class="src">人民财讯 / 证券时报网 · 证券时报 · historical_mismatch</div>
+        <div style="font-size:12px;margin-top:2px;">乘用车零售: 1,510,000</div>
+        
+      </div>
+    </div>
+    <div class="tl-item p1">
+      <div class="tl-time">2026-06-08T16:15:00+08:00</div>
+      <div class="tl-body">
+        <div>乘联分会：全国乘用车市场零售151.0万辆，同比下降22.1％ </div>
+        <div class="src">手机搜狐网 · 手机搜狐网 · unknown</div>
+        <div style="font-size:12px;margin-top:2px;">乘用车零售: 1,510,000</div>
+        
+      </div>
+    </div>
+    <div class="tl-item p1">
+      <div class="tl-time">2026-06-08T16:42:00+08:00</div>
+      <div class="tl-body">
+        <div>乘联分会：5 月全国乘用车市场零售 151 万辆同比下降 22.1%，高油价推动新能源渗透率创新高 </div>
+        <div class="src">新浪财经 · 新浪财经 · unknown</div>
+        <div style="font-size:12px;margin-top:2px;"></div>
+        
+      </div>
+    </div>
+    <div class="tl-item p1">
+      <div class="tl-time">2026-06-10T10:05:00+08:00</div>
+      <div class="tl-body">
+        <div>乘联分会:5月全国乘用车市场零售154.5万辆,同比下降20% </div>
+        <div class="src">手机新浪网 · 手机新浪网 · unknown</div>
+        <div style="font-size:12px;margin-top:2px;">乘用车零售: 1,545,000</div>
+        
+      </div>
+    </div>
+    <div class="tl-item hist">
+      <div class="tl-time">2026-06-17T16:43:00+08:00</div>
+      <div class="tl-body">
+        <div><span style='font-size:11px;color:#6B7280;'>[6月1-14日]</span> 乘联分会：6月1-14日全国乘用车市场零售53.4万辆，同比下降18% </div>
+        <div class="src">手机搜狐网 · 手机搜狐网 · historical_mismatch</div>
+        <div style="font-size:12px;margin-top:2px;">乘用车零售: 534,000</div>
+        
+      </div>
+    </div>
+    <div class="tl-item hist">
+      <div class="tl-time">2026-06-17T16:43:00+08:00</div>
+      <div class="tl-body">
+        <div><span style='font-size:11px;color:#6B7280;'>[6月1-14日]</span> 乘联分会：6月1-14日全国乘用车市场零售53.4万辆 同比下降18% </div>
+        <div class="src">新浪财经 · 新浪财经 · historical_mismatch</div>
+        <div style="font-size:12px;margin-top:2px;">乘用车零售: 534,000 | 新能源: 341,000 | 渗透率: 63.9%</div>
+        
+      </div>
+    </div>
+    <div class="tl-item p1">
+      <div class="tl-time">2026-06-18T19:22:00+08:00</div>
+      <div class="tl-body">
+        <div>【乘联分会：预计6月狭义乘用车零售市场规模约为165万辆 环比增长9.3%】乘联分会预计，6月车市将延续修复态势，尽管宏观消费疲软，高温淡季，5月末冲量透支等制约因素仍然存在，但以旧换新政策持续稳步发力，多款重磅新车集中上市，“端午“叠加”618“形成阶段性促销窗口，多重支撑下修复动能与5... </div>
+        <div class="src">手机搜狐网 · 手机搜狐网 · unknown</div>
+        <div style="font-size:12px;margin-top:2px;"></div>
+        
+      </div>
+    </div>
+    <div class="tl-item p0">
+      <div class="tl-time">2026-06-18T19:25:00+08:00</div>
+      <div class="tl-body">
+        <div>乘联分会：6月新能源零售量预计为105万辆左右 渗透率约63.6% <span class="badge-g">P0 早信号</span></div>
+        <div class="src">人民财讯 / 证券时报网 · 证券时报 · unknown</div>
+        <div style="font-size:12px;margin-top:2px;"> | 渗透率: 63.6%</div>
+        <div style='font-size:11px;color:#D95F59;margin-top:2px;'>⚠️ 需 CADA 确认</div>
+      </div>
+    </div>
+    <div class="tl-item p0">
+      <div class="tl-time">2026-06-24T16:46:00+08:00</div>
+      <div class="tl-body">
+        <div><span style='font-size:11px;color:#6B7280;'>[6月1-21日]</span> 乘联分会：6月1—21日全国乘用车市场零售91.3万辆 同比下降23% <span class="badge-g">P0 早信号</span></div>
+        <div class="src">人民财讯 / 证券时报网 · 证券时报 · month_to_date_compatible</div>
+        <div style="font-size:12px;margin-top:2px;">乘用车零售: 913,000</div>
+        <div style='font-size:11px;color:#D95F59;margin-top:2px;'>⚠️ 需 CADA 确认</div>
+      </div>
+    </div>
+    <div class="tl-item p0">
+      <div class="tl-time">2026-06-24T16:47:00+08:00</div>
+      <div class="tl-body">
+        <div><span style='font-size:11px;color:#6B7280;'>[6月1-21日]</span> 乘联分会：6月1—21日全国乘用车市场新能源零售58.3万辆 同比下降10% <span class="badge-g">P0 早信号</span></div>
+        <div class="src">人民财讯 / 证券时报网 · 证券时报 · month_to_date_compatible</div>
+        <div style="font-size:12px;margin-top:2px;"> | 新能源: 583,000 | 渗透率: 63.8%</div>
+        <div style='font-size:11px;color:#D95F59;margin-top:2px;'>⚠️ 需 CADA 确认</div>
+      </div>
+    </div>
+    <div class="tl-item p1">
+      <div class="tl-time">2026-06-24T17:07:00+08:00</div>
+      <div class="tl-body">
+        <div><span style='font-size:11px;color:#6B7280;'>[6月1-21日]</span> 乘联分会：6月1-21日全国乘用车市场零售91.3万辆 同比下降23% </div>
+        <div class="src">手机搜狐网 · 手机搜狐网 · month_to_date_compatible</div>
+        <div style="font-size:12px;margin-top:2px;">乘用车零售: 913,000 | 新能源: 583,000 | 渗透率: 63.8%</div>
+        
+      </div>
+    </div>
+    <div class="tl-item p0">
+      <div class="tl-time">2026-06-24T21:01:00+08:00</div>
+      <div class="tl-body">
+        <div><span style='font-size:11px;color:#6B7280;'>[6月1-21日]</span> 乘联分会：6月1—21日，全国乘用车市场新能源零售渗透率63.8% <span class="badge-g">P0 早信号</span></div>
+        <div class="src">人民财讯 / 证券时报网 · 证券时报 · month_to_date_compatible</div>
+        <div style="font-size:12px;margin-top:2px;">乘用车零售: 913,000 | 新能源: 583,000 | 渗透率: 63.8%</div>
+        <div style='font-size:11px;color:#D95F59;margin-top:2px;'>⚠️ 需 CADA 确认</div>
+      </div>
+    </div>
+    <div class="tl-item p0">
+      <div class="tl-time">2026-06-25T06:52:00+08:00</div>
+      <div class="tl-body">
+        <div><span style='font-size:11px;color:#6B7280;'>[6月1-21日]</span> 6月前三周全国乘用车市场新能源零售渗透率63.8% <span class="badge-g">P0 早信号</span></div>
+        <div class="src">人民财讯 / 证券时报网 · 证券时报 · month_to_date_compatible</div>
+        <div style="font-size:12px;margin-top:2px;">乘用车零售: 913,000 | 新能源: 583,000 | 渗透率: 63.8%</div>
+        <div style='font-size:11px;color:#D95F59;margin-top:2px;'>⚠️ 需 CADA 确认</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="report-section">
+  <h2 class="section-title">详细信息</h2>
+  <div class="table-wrap">
+    <table class="report-table">
+      <thead><tr>
+        <th>发布时间</th><th>源域名</th><th>源名称</th><th>源角色</th>
+        <th>检测周期</th><th>标题</th><th>乘用车零售</th><th>新能源零售</th><th>渗透率</th><th>置信度</th>
+      </tr></thead>
+      <tbody>
+<tr style="background:#FFF0D6;">
+<td>2025-06-18T16:16:00+08:00</td>
+<td>证券时报</td>
+<td>人民财讯 / 证券时报网</td>
+<td>early_signal</td>
+<td>6月1-15日 <span style="color:#2A9D8F;">✓</span></td>
+<td>乘联分会：6月1—15日全国乘用车市场零售70.6万辆，同比增长20%</td>
+<td>706000</td>
+<td>—</td>
+<td>—%</td>
+<td>high</td>
+</tr>
+<tr style="opacity:.5;">
+<td>2026-04-09T16:08:00+08:00</td>
+<td>财富号</td>
+<td>财富号</td>
+<td>unknown</td>
+<td>3月1-31日 <span style="color:#D95F59;">历史</span></td>
+<td>乘联分会：3月全国乘用车市场零售164.8万辆，同比下降15.0%</td>
+<td>1648000</td>
+<td>—</td>
+<td>—%</td>
+<td>high</td>
+</tr>
+<tr style="opacity:.5;">
+<td>2026-04-22T16:38:00+08:00</td>
+<td>每日经济新闻</td>
+<td>每日经济新闻</td>
+<td>fast_repost</td>
+<td>4月1-19日 <span style="color:#D95F59;">历史</span></td>
+<td>乘联分会：4月1-19日全国乘用车市场零售62.7万辆 同比下降26%</td>
+<td>627000</td>
+<td>—</td>
+<td>61.7%</td>
+<td>high</td>
+</tr>
+<tr>
+<td>2026-05-11T10:32:31+08:00</td>
+<td>财联社</td>
+<td>财联社</td>
+<td>fast_repost</td>
+<td>— <span style="color:#6B7280;">?</span></td>
+<td>10:32:31【乘联分会：4月全国乘用车市场零售138.4万辆 同比下降21.5%】</td>
+<td>1384000</td>
+<td>—</td>
+<td>—%</td>
+<td>high</td>
+</tr>
+<tr style="opacity:.5;">
+<td>2026-05-28T10:34:00+08:00</td>
+<td>财富号</td>
+<td>东方财富</td>
+<td>fast_repost</td>
+<td>5月1-24日 <span style="color:#D95F59;">历史</span></td>
+<td>5月27日，乘联分会发布数据，5月1-24日，全国乘用车市场零售98.9万辆，同_财富号_东方财富网</td>
+<td>989000</td>
+<td>—</td>
+<td>62.5%</td>
+<td>high</td>
+</tr>
+<tr style="opacity:.5;">
+<td>2026-06-08T16:13:00+08:00</td>
+<td>证券时报</td>
+<td>人民财讯 / 证券时报网</td>
+<td>early_signal</td>
+<td>5月1-31日 <span style="color:#D95F59;">历史</span></td>
+<td>乘联分会：5月全国乘用车市场零售151万辆 同比下降22.1%</td>
+<td>1510000</td>
+<td>—</td>
+<td>—%</td>
+<td>high</td>
+</tr>
+<tr>
+<td>2026-06-08T16:15:00+08:00</td>
+<td>手机搜狐网</td>
+<td>手机搜狐网</td>
+<td>unknown</td>
+<td>— <span style="color:#6B7280;">?</span></td>
+<td>乘联分会：全国乘用车市场零售151.0万辆，同比下降22.1％</td>
+<td>1510000</td>
+<td>—</td>
+<td>—%</td>
+<td>high</td>
+</tr>
+<tr>
+<td>2026-06-08T16:42:00+08:00</td>
+<td>新浪财经</td>
+<td>新浪财经</td>
+<td>unknown</td>
+<td>— <span style="color:#6B7280;">?</span></td>
+<td>乘联分会：5 月全国乘用车市场零售 151 万辆同比下降 22.1%，高油价推动新能源渗透率创新高</td>
+<td>—</td>
+<td>—</td>
+<td>—%</td>
+<td>medium</td>
+</tr>
+<tr>
+<td>2026-06-10T10:05:00+08:00</td>
+<td>手机新浪网</td>
+<td>手机新浪网</td>
+<td>unknown</td>
+<td>— <span style="color:#6B7280;">?</span></td>
+<td>乘联分会:5月全国乘用车市场零售154.5万辆,同比下降20%</td>
+<td>1545000</td>
+<td>—</td>
+<td>—%</td>
+<td>high</td>
+</tr>
+<tr style="opacity:.5;">
+<td>2026-06-17T16:43:00+08:00</td>
+<td>手机搜狐网</td>
+<td>手机搜狐网</td>
+<td>unknown</td>
+<td>6月1-14日 <span style="color:#D95F59;">历史</span></td>
+<td>乘联分会：6月1-14日全国乘用车市场零售53.4万辆，同比下降18%</td>
+<td>534000</td>
+<td>—</td>
+<td>—%</td>
+<td>high</td>
+</tr>
+<tr style="opacity:.5;">
+<td>2026-06-17T16:43:00+08:00</td>
+<td>新浪财经</td>
+<td>新浪财经</td>
+<td>unknown</td>
+<td>6月1-14日 <span style="color:#D95F59;">历史</span></td>
+<td>乘联分会：6月1-14日全国乘用车市场零售53.4万辆 同比下降18%</td>
+<td>534000</td>
+<td>341000</td>
+<td>63.9%</td>
+<td>high</td>
+</tr>
+<tr>
+<td>2026-06-18T19:22:00+08:00</td>
+<td>手机搜狐网</td>
+<td>手机搜狐网</td>
+<td>unknown</td>
+<td>— <span style="color:#6B7280;">?</span></td>
+<td>【乘联分会：预计6月狭义乘用车零售市场规模约为165万辆 环比增长9.3%】乘联分会预计，6月车市将延续修复态势，尽管宏观消费疲软，高温淡季，5月末冲量透支等制约因素仍然存在，但以旧换新政策持续稳步发力，多款重磅新车集中上市，“端午“叠加”618“形成阶段性促销窗口，多重支撑下修复动能与5...</td>
+<td>—</td>
+<td>—</td>
+<td>—%</td>
+<td>high</td>
+</tr>
+<tr style="background:#FFF0D6;">
+<td>2026-06-18T19:25:00+08:00</td>
+<td>证券时报</td>
+<td>人民财讯 / 证券时报网</td>
+<td>early_signal</td>
+<td>— <span style="color:#6B7280;">?</span></td>
+<td>乘联分会：6月新能源零售量预计为105万辆左右 渗透率约63.6%</td>
+<td>—</td>
+<td>—</td>
+<td>63.6%</td>
+<td>high</td>
+</tr>
+<tr style="background:#FFF0D6;">
+<td>2026-06-24T16:46:00+08:00</td>
+<td>证券时报</td>
+<td>人民财讯 / 证券时报网</td>
+<td>early_signal</td>
+<td>6月1-21日 <span style="color:#D79A36;">月累计</span></td>
+<td>乘联分会：6月1—21日全国乘用车市场零售91.3万辆 同比下降23%</td>
+<td>913000</td>
+<td>—</td>
+<td>—%</td>
+<td>high</td>
+</tr>
+<tr style="background:#FFF0D6;">
+<td>2026-06-24T16:47:00+08:00</td>
+<td>证券时报</td>
+<td>人民财讯 / 证券时报网</td>
+<td>early_signal</td>
+<td>6月1-21日 <span style="color:#D79A36;">月累计</span></td>
+<td>乘联分会：6月1—21日全国乘用车市场新能源零售58.3万辆 同比下降10%</td>
+<td>—</td>
+<td>583000</td>
+<td>63.8%</td>
+<td>high</td>
+</tr>
+<tr>
+<td>2026-06-24T17:07:00+08:00</td>
+<td>手机搜狐网</td>
+<td>手机搜狐网</td>
+<td>unknown</td>
+<td>6月1-21日 <span style="color:#D79A36;">月累计</span></td>
+<td>乘联分会：6月1-21日全国乘用车市场零售91.3万辆 同比下降23%</td>
+<td>913000</td>
+<td>583000</td>
+<td>63.8%</td>
+<td>high</td>
+</tr>
+<tr style="background:#FFF0D6;">
+<td>2026-06-24T21:01:00+08:00</td>
+<td>证券时报</td>
+<td>人民财讯 / 证券时报网</td>
+<td>early_signal</td>
+<td>6月1-21日 <span style="color:#D79A36;">月累计</span></td>
+<td>乘联分会：6月1—21日，全国乘用车市场新能源零售渗透率63.8%</td>
+<td>913000</td>
+<td>583000</td>
+<td>63.8%</td>
+<td>high</td>
+</tr>
+<tr style="background:#FFF0D6;">
+<td>2026-06-25T06:52:00+08:00</td>
+<td>证券时报</td>
+<td>人民财讯 / 证券时报网</td>
+<td>early_signal</td>
+<td>6月1-21日 <span style="color:#D79A36;">月累计</span></td>
+<td>6月前三周全国乘用车市场新能源零售渗透率63.8%</td>
+<td>913000</td>
+<td>583000</td>
+<td>63.8%</td>
+<td>high</td>
+</tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="report-section">
+  <h2 class="section-title">源配置</h2>
+  <table class="report-table"><thead><tr><th>优先级</th><th>源</th><th>角色</th><th>域名</th><th>说明</th></tr></thead><tbody>
+<tr><td><span class='badge-gold'>P0</span></td><td>人民财讯 / 证券时报网</td><td>early_signal</td><td>stcn.com</td><td>通常只有核心快讯，不包含完整图表和全文解释</td></tr>
+<tr><td><span class='badge-gold'>P0_final</span></td><td>CADA 官网 / 中国汽车流通协会</td><td>final_authoritative</td><td>cada.cn</td><td>发布时间较晚，但数据完整权威，用作最终校验</td></tr>
+<tr><td><span class='badge-muted'>P1</span></td><td>中国汽车流通协会搜狐号</td><td>near_fulltext_sync</td><td>sohu.com</td><td>中国汽车流通协会搜狐号</td></tr>
+<tr><td><span class='badge-muted'>P1</span></td><td>新浪财经 7x24</td><td>fast_repost</td><td>sina.com.cn</td><td>新浪财经 7x24</td></tr>
+<tr><td><span class='badge-muted'>P1</span></td><td>东方财富</td><td>fast_repost</td><td>eastmoney.com</td><td>东方财富</td></tr>
+<tr><td><span class='badge-muted'>P1</span></td><td>财联社</td><td>fast_repost</td><td>cls.cn</td><td>财联社</td></tr>
+<tr><td><span class='badge-muted'>P1</span></td><td>每日经济新闻</td><td>fast_repost</td><td>nbd.com.cn</td><td>每日经济新闻</td></tr>
+<tr><td><span class='badge-muted'>P2</span></td><td>微博</td><td>optional_social_signal</td><td>weibo.com</td><td>不作为主数据源，仅作 social signal 参考</td></tr>
+  </tbody></table>
+</div>
+
+<div class="method-section">
+  <h2 class="section-title">方法说明</h2>
+  <p class="method-footnote">
+    P0 早信号：stcn.com 人民财讯 · P0_final 权威：CADA 官网 · 搜索：火山方舟<br>
+    周期匹配：exact_or_compatible(✓) / month_to_date_compatible(月累计) / historical_mismatch(历史)<br>
+    historical_mismatch 不参与本期早信号判断。<br>
+    配置：<code>configs/cpca_weekly_sources.json</code>
+  </p>
+</div>
+
+</div></body></html>

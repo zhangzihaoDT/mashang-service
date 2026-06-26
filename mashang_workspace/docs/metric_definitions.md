@@ -8,7 +8,7 @@
 ### 锁单数 / 锁单量
 
 - **业务含义**：用户最终确认锁定的订单数量
-- **计算口径**：`count(order_number)` WHERE `lock_time IS NOT NULL`
+- **计算口径**：`COUNTD(order_number WHERE lock_time IS NOT NULL)`
 - **数据集**：`order_data.parquet`
 - **时间字段**：`lock_time`
 - **常用别名**：锁单量, 锁单, 订单锁单
