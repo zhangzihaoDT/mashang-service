@@ -26,6 +26,7 @@ from utils.plotly_theme import ZH, apply_zh_theme, GRID_COLOR, ZERO_LINE, AXIS_L
 
 HERE = REPO_ROOT / "mashang_workspace"
 ORDER_PARQUET = REPO_ROOT / "dataset" / "order_data.parquet"
+CONFIG_PARQUET = REPO_ROOT / "dataset" / "config_attribute.parquet"
 BUSINESS_DEF = REPO_ROOT / "shared" / "schema" / "business_definition.json"
 AVATAR = HERE / "assets" / "brand" / "raccoon_avatar_light.png"
 SIGNATURE = HERE / "assets" / "brand" / "zihao_signature_transparent.png"
@@ -86,6 +87,35 @@ def make_chart(weeks, segments, color_map, title_label):
     return fig
 
 
+def make_ratio_line_chart(weeks, pct_52, pct_66):
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=weeks, y=pct_52, mode='lines+markers',
+        name='52 Max+（增程）',
+        line=dict(color=ZH['own'], width=3),
+        marker=dict(size=8, color=ZH['own']),
+        hovertemplate='<b>%{x}</b><br>52 Max+: %{y:.1f}%<extra></extra>',
+    ))
+    fig.add_trace(go.Scatter(
+        x=weeks, y=pct_66, mode='lines+markers',
+        name='66 Ultra',
+        line=dict(color=ZH['event'], width=3),
+        marker=dict(size=8, color=ZH['event']),
+        hovertemplate='<b>%{x}</b><br>66 Ultra: %{y:.1f}%<extra></extra>',
+    ))
+    fig.update_layout(
+        title=dict(text='52 Max+ vs 66 Ultra 周度占比', font=dict(size=16, color=COLOR_DEEP_BLUE), x=0.5),
+        xaxis=dict(title=dict(text='', font=dict(color=AXIS_TITLE)), tickangle=-45, tickfont=dict(size=11, color=AXIS_TEXT)),
+        yaxis=dict(title=dict(text='占 LS8 总锁单比重', font=dict(color=AXIS_TITLE)), ticksuffix='%', range=[0, 100],
+                   tickfont=dict(size=11, color=AXIS_TEXT)),
+        legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='center', x=0.5,
+                    font=dict(size=12, color=COLOR_TEXT)),
+        margin=dict(l=40, r=20, t=60, b=50), hovermode='x unified', height=400,
+    )
+    apply_zh_theme(fig)
+    return fig
+
+
 def main():
     import argparse
     parser = argparse.ArgumentParser(description="LS8 组内车型结构周度占比报告")
@@ -102,6 +132,11 @@ def main():
 
     df_ls8 = df[df["series"] == SERIES].copy()
     df_ls8 = df_ls8[(df_ls8["lock_time"] >= t_start) & (df_ls8["lock_time"] < t_end)]
+
+    # Filter to non-staff orders only (用户车)
+    config = pd.read_parquet(str(CONFIG_PARQUET))
+    non_staff_orders = set(config[config["is_staff"] == 0]["Order Number"].unique())
+    df_ls8 = df_ls8[df_ls8["order_number"].isin(non_staff_orders)]
 
     iso = df_ls8["lock_time"].dt.isocalendar()
     df_ls8["week_year"] = iso["year"].astype(int)
@@ -141,9 +176,17 @@ def main():
 
     color_map_52 = {"大五座": ZH['own'], "大六座": ZH['sky_muted']}
     color_map_66 = {"大五座": ZH['event'], "大六座": COLOR_6_SEAT_66}
-    chart_52 = make_chart(weeks_display, segments_52, color_map_52, "52 Max+（增程）占 LS8 比重").to_html(
-        include_plotlyjs="cdn", full_html=False, div_id="chart-52")
-    chart_66 = make_chart(weeks_display, segments_66, color_map_66, "66 Ultra（纯电）占 LS8 比重").to_html(
+    pct_52_list = [segments_52['大五座'][i] + segments_52['大六座'][i] for i in range(len(all_weeks))]
+    pct_66_list = [segments_66['大五座'][i] + segments_66['大六座'][i] for i in range(len(all_weeks))]
+    pct_52_display = [round(v * 100, 1) for v in pct_52_list]
+    pct_66_display = [round(v * 100, 1) for v in pct_66_list]
+
+    chart_ratio = make_ratio_line_chart(weeks_display, pct_52_display, pct_66_display).to_html(
+        include_plotlyjs="cdn", full_html=False, div_id="chart-ratio")
+
+    chart_52 = make_chart(weeks_display, segments_52, color_map_52, "52 Max+ 占 LS8 比重").to_html(
+        include_plotlyjs=False, full_html=False, div_id="chart-52")
+    chart_66 = make_chart(weeks_display, segments_66, color_map_66, "66 Ultra 占 LS8 比重").to_html(
         include_plotlyjs=False, full_html=False, div_id="chart-66")
 
     model_keys_ordered = [
@@ -271,17 +314,23 @@ def main():
       <div class="kpi-card">
         <div class="label">52 Max+ 累计</div>
         <div class="value">{int(df_ls8[df_ls8['battery_group']=='52 Max+']['order_number'].nunique()):,}</div>
-        <div class="sub" style="color:var(--zh-blue);">增程组别</div>
+        <div class="sub" style="color:var(--zh-blue);">标准电池组别</div>
       </div>
       <div class="kpi-card">
         <div class="label">66 Ultra 累计</div>
         <div class="value">{int(df_ls8[df_ls8['battery_group']=='66 Ultra']['order_number'].nunique()):,}</div>
-        <div class="sub" style="color:var(--zh-raccoon-gold);">纯电组别</div>
+        <div class="sub" style="color:var(--zh-raccoon-gold);">大电池组别</div>
       </div>
       <div class="kpi-card">
         <div class="label">52 大五座累计占比</div>
         <div class="value" style="font-size:22px;">{int(df_ls8[(df_ls8['battery_group']=='52 Max+') & (df_ls8['seat_group']=='大五座')]['order_number'].nunique() / max(df_ls8[df_ls8['battery_group']=='52 Max+']['order_number'].nunique(), 1) * 100):.1f}%</div>
         <div class="sub">52 Max+ 组内</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="chart-wrap">
+        {chart_ratio}
       </div>
     </div>
 
@@ -322,14 +371,14 @@ def main():
       <h2>关键解读</h2>
       <div class="insight-card">
         <p>
-          <strong>52 Max+（增程）</strong>整体占 LS8 锁单比重约 <strong>58-72%</strong>，呈持续上升趋势。
+          <strong>52 Max+</strong>整体占 LS8 锁单比重约 <strong>58-72%</strong>，呈持续上升趋势。
           其中 <strong style="color:#174A7C;">大五座</strong> 占比从上市周 43.6% → 最新周 61.7%，为主要增量来源；
           大六座占比约 <strong>10-12%</strong>，相对稳定。
         </p>
       </div>
       <div class="insight-card">
         <p>
-          <strong>66 Ultra（纯电）</strong>整体占 LS8 锁单比重约 <strong>28-45%</strong>，呈下降趋势。
+          <strong>66 Ultra</strong>整体占 LS8 锁单比重约 <strong>28-45%</strong>，呈下降趋势。
           其中 <strong style="color:#D79A36;">大五座</strong> 占比从上市周 34.4% → 最新周 21.3%，持续收窄；
           大六座占比约 <strong>5-10%</strong>，波动中略有下降。
         </p>
@@ -339,13 +388,13 @@ def main():
     <div class="card">
       <h2>数据说明</h2>
       <table class="scope-table">
-        <tr><td>数据源</td><td>{ORDER_PARQUET}</td></tr>
+        <tr><td>数据源</td><td>{ORDER_PARQUET} + {CONFIG_PARQUET}</td></tr>
         <tr><td>车系</td><td>{SERIES}</td></tr>
         <tr><td>时间窗口</td><td>{launch_date} ~ {datetime.now().strftime('%Y-%m-%d')}</td></tr>
-        <tr><td>组别口径</td><td>52 Max+ = product_name 含 "52"；66 Ultra = product_name 含 "66"</td></tr>
+        <tr><td>组别口径</td><td>52 Max+ = product_name 含 "52"（标准电池）；66 Ultra = product_name 含 "66"（大电池）</td></tr>
         <tr><td>车型口径</td><td>大五座 = product_name 含 "五座"；大六座 = product_name 含 "六座"</td></tr>
         <tr><td>占比口径</td><td>各车型锁单 / 当周 LS8 总锁单</td></tr>
-        <tr><td>指标</td><td>lock_count = COUNTD(order_number)</td></tr>
+        <tr><td>指标</td><td>lock_count = COUNTD(order_number)，仅用户车（is_staff=0）</td></tr>
         <tr><td>生成时间</td><td>{now_str}</td></tr>
       </table>
     </div>
