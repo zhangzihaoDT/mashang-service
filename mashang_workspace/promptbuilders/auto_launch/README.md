@@ -213,13 +213,21 @@ promptbuilders/auto_launch/examples/     # committed samples
 ├── ai_outputs/                  ← 示例 AI 输出（仅用于结构测试）
 ├── normalized/                  ← 示例 normalized JSON
 ├── reports/                     ← 示例 markdown 报告
-├── golden_cases/                ← 旧 promptbuilder 生成的 golden Prompt 样例
-└── legacy_prompts/              ← 旧 workflow 遗留 Prompt 参考
+├── legacy_promptbuilder_cases/  ← 旧 promptbuilder 历史案例归档（非 regression 标准）
+├── legacy_prompts/              ← 旧 workflow 遗留 Prompt 参考
+└── legacy_ai_outputs/           ← 旧 workflow 遗留 AI 返回/报告参考
 ```
 
 ### 边界规则
 
 - `mashang_workspace/outputs/auto_launch/` **只用于新 intake workflow 的 runtime run directories**，默认不提交 git
-- 可提交的样例、contract、golden cases 应放在 `promptbuilders/auto_launch/examples/`
+- 可提交的样例、contract 应放在 `promptbuilders/auto_launch/examples/`
+- `legacy_*` 目录下的历史案例来自旧 auto_launch_monitor / 旧 promptbuilder 的运行产物，**仅用于参考，不代表当前工作流的质量标准，不构成 regression 基准**
 - 旧 auto_launch_monitor 和旧 promptbuilder 的遗留运行产物不得写入 `outputs/auto_launch/`
 - 旧产物已清理或迁移至 `promptbuilders/auto_launch/examples/legacy_*`
+
+### Future Golden Cases
+
+- 当前暂无 golden cases
+- 只有通过新 intake workflow、来源可追溯、业务判断被人工认可的案例，才可以晋升为 golden case
+- Golden cases 未来应单独建立 registry，而不是直接复用 legacy cases

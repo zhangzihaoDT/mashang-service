@@ -257,14 +257,22 @@ def test_old_output_dirs_removed():
             f"Old output dir should be removed: {bad_dir}"
 
 
-def test_golden_cases_migrated():
-    """Golden cases should exist in promptbuilders/auto_launch/examples/golden_cases/."""
+def test_golden_cases_renamed_to_legacy():
+    """Old golden_cases is renamed to legacy_promptbuilder_cases."""
     golden = AUTO_LAUNCH / "examples" / "golden_cases"
-    assert (golden / "byd_datang_ev_launch_7d_vs_ls8.md").exists()
-    assert (golden / "byd_datang_ev_launch_7d_vs_ls8.metadata.json").exists()
-    assert (golden / "ledao_l80_launch_48h_vs_ls8.md").exists()
-    assert (golden / "wenjie_m7_launch_72h_vs_ls8.md").exists()
-    assert (golden / "xiaomi_yu7_launch_72h_vs_competitors.md").exists()
+    legacy = AUTO_LAUNCH / "examples" / "legacy_promptbuilder_cases"
+    assert not golden.exists(), "golden_cases should no longer exist"
+    assert legacy.exists(), "legacy_promptbuilder_cases should exist"
+
+
+def test_legacy_cases_exist():
+    """Legacy promptbuilder cases are preserved under new name."""
+    legacy = AUTO_LAUNCH / "examples" / "legacy_promptbuilder_cases"
+    assert (legacy / "byd_datang_ev_launch_7d_vs_ls8.md").exists()
+    assert (legacy / "byd_datang_ev_launch_7d_vs_ls8.metadata.json").exists()
+    assert (legacy / "ledao_l80_launch_48h_vs_ls8.md").exists()
+    assert (legacy / "wenjie_m7_launch_72h_vs_ls8.md").exists()
+    assert (legacy / "xiaomi_yu7_launch_72h_vs_competitors.md").exists()
 
 
 def test_readme_mentions_examples_boundary():
@@ -272,6 +280,32 @@ def test_readme_mentions_examples_boundary():
     text = (AUTO_LAUNCH / "README.md").read_text("utf-8")
     assert "只用于新 intake workflow" in text
     assert "可提交的样例" in text
+
+
+def test_readme_does_not_call_legacy_golden():
+    """README directory listing should use legacy_promptbuilder_cases, not golden_cases."""
+    text = (AUTO_LAUNCH / "README.md").read_text("utf-8")
+    lines = text.split("\n")
+    # Find the directory listing section for examples/
+    in_examples = False
+    found_legacy = False
+    for line in lines:
+        if "committed samples" in line:
+            in_examples = True
+            continue
+        if in_examples and line.strip().startswith("├──") or line.strip().startswith("└──"):
+            if "legacy_promptbuilder_cases" in line:
+                found_legacy = True
+            if "golden_cases" in line:
+                assert False, f"directory listing should not reference golden_cases: {line}"
+    assert found_legacy, "directory listing should reference legacy_promptbuilder_cases"
+
+
+def test_readme_legacy_not_regression_standard():
+    """README clarifies legacy cases are not regression standard."""
+    text = (AUTO_LAUNCH / "README.md").read_text("utf-8")
+    assert "不构成 regression 基准" in text
+    assert "不代表当前工作流的质量标准" in text
 
 
 def test_runbook_mentions_examples_boundary():

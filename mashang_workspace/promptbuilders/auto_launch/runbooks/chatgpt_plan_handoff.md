@@ -110,5 +110,6 @@ mashang_workspace/outputs/auto_launch/
 ## Outputs 与 Examples 的边界
 
 - `mashang_workspace/outputs/auto_launch/` 只用于新 intake workflow 的 runtime run directories，默认不提交 git
-- 可提交的样例、contract、golden cases 应放在 `promptbuilders/auto_launch/examples/`
+- 可提交的样例、contract 应放在 `promptbuilders/auto_launch/examples/`
 - 旧 auto_launch_monitor 和旧 promptbuilder 的遗留产物不得写入 `outputs/auto_launch/`
+- `examples/legacy_*` 目录下的历史案例仅用于参考，不构成 regression 基准
