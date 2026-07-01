@@ -241,6 +241,12 @@ def _validate_daily_monitor(data: dict, result: dict) -> dict:
             if si is not None and not isinstance(si, list):
                 result["ok"] = False
                 result["errors"].append(f"discovery_signals[{idx}].source_items must be an array")
+            # window_match = context_window requires why_not_candidate
+            if s.get("window_match") == "context_window":
+                wnc = s.get("why_not_candidate")
+                if not wnc or not isinstance(wnc, str) or not wnc.strip():
+                    result["ok"] = False
+                    result["errors"].append(f"discovery_signals[{idx}]: window_match=context_window but why_not_candidate is empty")
 
     # search_audit must be array if present
     sa = data.get("search_audit")
@@ -269,6 +275,18 @@ def _validate_daily_monitor(data: dict, result: dict) -> dict:
                 if pf not in impact:
                     result["ok"] = False
                     result["errors"].append(f"event_candidates[{idx}].impact_vs_our_model missing: {pf}")
+        # window_match = context_window is invalid for event_candidates
+        if candidate.get("window_match") == "context_window":
+            result["ok"] = False
+            result["errors"].append(f"event_candidates[{idx}].window_match cannot be 'context_window'")
+        # source_publish_time=unknown + confidence=high is a warning (not hard fail)
+        if candidate.get("source_publish_time") == "unknown" and candidate.get("confidence") == "high":
+            result.setdefault("warnings", []).append(f"event_candidates[{idx}]: source_publish_time=unknown with confidence=high (advisory)")
+        # review_flags non-empty + confidence=high is invalid
+        rfs = candidate.get("review_flags")
+        if rfs and isinstance(rfs, list) and len(rfs) > 0 and candidate.get("confidence") == "high":
+            result["ok"] = False
+            result["errors"].append(f"event_candidates[{idx}]: review_flags non-empty with confidence=high")
 
     # Check needs_review items (lenient)
     for idx, item in enumerate(data.get("needs_review", [])):
@@ -301,6 +319,11 @@ def print_report(result: dict):
         print("  Errors:")
         for err in result["errors"]:
             print(f"    - {err}")
+    if result.get("warnings"):
+        print()
+        print("  Warnings:")
+        for w in result["warnings"]:
+            print(f"    - {w}")
 
 
 def main():

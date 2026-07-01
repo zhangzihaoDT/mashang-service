@@ -165,6 +165,6 @@ def test_report_manifest_created():
 
         manifest = json.loads(Path(intake_dir, "report_manifest.json").read_text("utf-8"))
         assert manifest["report_type"] == "daily_monitor_report"
-        assert manifest["event_candidates_count"] == 1
-        assert manifest["needs_review_count"] == 1
-        assert manifest["no_event_models_count"] == 2
+        assert manifest["event_candidates"] == 1
+        assert manifest["needs_review"] == 1
+        assert manifest["no_event_models"] == 2

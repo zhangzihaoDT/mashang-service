@@ -112,16 +112,26 @@ def render_md(input_dir, normalized, candidates, needs_review, no_event_models):
     lines.append(f"| needs_review_count | {nr} |\n")
     lines.append(f"| no_event_models_count | {ne} |\n")
     lines.append(f"| search_audit_count | {sa} |\n")
+    # Window policy
+    wp = md.get("window_policy", {})
+    cew = wp.get("confirmed_event_window", {})
+    dsw = wp.get("discovery_signal_window", {})
+    cw = wp.get("context_window", {})
+    if cew or dsw or cw:
+        lines.append(f"| confirmed_event_window | {cew.get('primary_start','?')} ~ {cew.get('end','?')} |\n")
+        lines.append(f"| discovery_signal_window | {dsw.get('default_start','?')} ~ {dsw.get('end','?')} |\n")
+        lines.append(f"| context_window | {cw.get('start','?')} ~ {cw.get('end','?')} |\n")
     lines.append("\n")
 
     # 2. Event candidates
     lines.append("## 2. 今日明确销售动作\n\n")
     if candidates:
-        lines.append("| 品牌 | 车型 | event_type | 事件名称 | 事件日期 | 可信度 | 价格压力 | 权益压力 | 配置压力 | 交付压力 |\n")
-        lines.append("|------|------|-----------|----------|----------|--------|----------|----------|----------|----------|\n")
+        lines.append("| 品牌 | 车型 | event_type | 事件名称 | 事件日期 | 可信度 | discovered | source_pub | window | review_flags | 价格压力 | 权益压力 | 配置压力 | 交付压力 |\n")
+        lines.append("|------|------|-----------|----------|----------|--------|------------|------------|--------|--------------|----------|----------|----------|----------|\n")
         for c in candidates:
             imp = c.get("impact_vs_our_model", {})
-            lines.append(f"| {c.get('event_brand','')} | {c.get('event_model','')} | {c.get('event_type','')} | {c.get('event_name','')} | {c.get('event_date','')} | {c.get('confidence','')} | {imp.get('price_pressure','')} | {imp.get('rights_pressure','')} | {imp.get('configuration_pressure','')} | {imp.get('delivery_pressure','')} |\n")
+            rfs = ",".join(c.get("review_flags", [])) if c.get("review_flags") else ""
+            lines.append(f"| {c.get('event_brand','unknown')} | {c.get('event_model','unknown')} | {c.get('event_type','unknown')} | {c.get('event_name','unknown')} | {c.get('event_date','unknown')} | {c.get('confidence','unknown')} | {c.get('discovered_date','unknown')} | {c.get('source_publish_time','unknown')} | {c.get('window_match','unknown')} | {rfs or '[]'} | {imp.get('price_pressure','unknown')} | {imp.get('rights_pressure','unknown')} | {imp.get('configuration_pressure','unknown')} | {imp.get('delivery_pressure','unknown')} |\n")
     else:
         lines.append("None\n")
     lines.append("\n")
@@ -129,10 +139,11 @@ def render_md(input_dir, normalized, candidates, needs_review, no_event_models):
     # 3. Discovery Signals
     lines.append("## 3. 销售弱信号 Discovery Signals\n\n")
     if ds > 0:
-        lines.append("| 品牌 | 车型 | signal_type | 线索名称 | possible_event_type | 可信度 | 未进入 candidate 原因 |\n")
-        lines.append("|------|------|------------|----------|---------------------|--------|---------------------|\n")
+        lines.append("| 品牌 | 车型 | signal_type | 线索名称 | possible_event_type | 可信度 | discovered | source_pub | window | review_flags | 未进入 candidate 原因 |\n")
+        lines.append("|------|------|------------|----------|---------------------|--------|------------|------------|--------|--------------|---------------------|\n")
         for s in md.get("discovery_signals", []):
-            lines.append(f"| {s.get('event_brand','')} | {s.get('event_model','')} | {s.get('signal_type','')} | {s.get('signal_name','')} | {s.get('possible_event_type','')} | {s.get('confidence','')} | {s.get('why_not_candidate','')} |\n")
+            rfs = ",".join(s.get("review_flags", [])) if s.get("review_flags") else ""
+            lines.append(f"| {s.get('event_brand','')} | {s.get('event_model','')} | {s.get('signal_type','')} | {s.get('signal_name','')} | {s.get('possible_event_type','')} | {s.get('confidence','')} | {s.get('discovered_date','')} | {s.get('source_publish_time','')} | {s.get('window_match','')} | {rfs} | {s.get('why_not_candidate','')} |\n")
     else:
         lines.append("None\n")
     lines.append("\n")
@@ -173,12 +184,13 @@ def render_md(input_dir, normalized, candidates, needs_review, no_event_models):
     # 7. Search Audit
     lines.append("## 7. 检索覆盖 Search Audit\n\n")
     if sa > 0:
-        lines.append("| 车型 | 官方确认层 | 媒体交叉验证层 | 销售弱信号层 | official | mainstream | industry | user_gen | unknown | coverage_note |\n")
-        lines.append("|------|-----------|---------------|--------------|----------|------------|----------|----------|---------|---------------|\n")
+        lines.append("| 车型 | 官方确认层 | 媒体交叉验证层 | 销售弱信号层 | confirmed_win | discovery_win | context_win | official | mainstream | industry | user_gen | unknown | coverage_note |\n")
+        lines.append("|------|-----------|---------------|--------------|---------------|---------------|-------------|----------|------------|----------|----------|---------|---------------|\n")
         for a in md.get("search_audit", []):
             sl = a.get("searched_layers", {})
             sc = a.get("source_coverage", {})
-            lines.append(f"| {a.get('event_model','')} | {sl.get('official_confirmation','?')} | {sl.get('media_cross_check','?')} | {sl.get('sales_weak_signals','?')} | {sc.get('official',0)} | {sc.get('mainstream_media',0)} | {sc.get('industry_media',0)} | {sc.get('user_generated',0)} | {sc.get('unknown',0)} | {a.get('coverage_note','')} |\n")
+            wc = a.get("window_coverage", {})
+            lines.append(f"| {a.get('event_model','')} | {sl.get('official_confirmation','?')} | {sl.get('media_cross_check','?')} | {sl.get('sales_weak_signals','?')} | {wc.get('confirmed_event_window', 'unknown')} | {wc.get('discovery_signal_window', 'unknown')} | {wc.get('context_window', 'unknown')} | {sc.get('official',0)} | {sc.get('mainstream_media',0)} | {sc.get('industry_media',0)} | {sc.get('user_generated',0)} | {sc.get('unknown',0)} | {a.get('coverage_note','')} |\n")
     else:
         lines.append("None\n")
     lines.append("\n")
@@ -196,6 +208,18 @@ def render_md(input_dir, normalized, candidates, needs_review, no_event_models):
         lines.append("本轮无确认事件，但有发现销售动作线索，建议人工判断是否继续追踪。\n")
     else:
         lines.append("本轮可作为 no-event daily monitor pilot 留档。\n")
+    lines.append("\n")
+
+    # Metadata
+    lines.append("## Report Metadata\n\n")
+    lines.append("| 字段 | 值 |\n|---|---|\n")
+    lines.append("| source_file | raw_ai_output.json |\n")
+    lines.append("| render_mode | deterministic_raw_render |\n")
+    lines.append(f"| raw_event_candidates_count | {ec} |\n")
+    lines.append(f"| raw_discovery_signals_count | {ds} |\n")
+    lines.append(f"| raw_needs_review_count | {nr} |\n")
+    lines.append(f"| raw_no_event_models_count | {ne} |\n")
+    lines.append(f"| raw_search_audit_count | {sa} |\n")
 
     return "".join(lines)
 
@@ -267,15 +291,25 @@ def render_html(input_dir, normalized, candidates, needs_review, no_event_models
     for k, v in [("task_name", md.get("task_name")), ("monitor_date", md.get("monitor_date")),
                  ("battle_field", md.get("battle_field")), ("our_model", md.get("our_model"))]:
         parts.append(f"<tr><th>{_esc(k)}</th><td>{_esc(v or 'unknown')}</td></tr>")
+    wp = md.get("window_policy", {})
+    for k, win in [("confirmed_event_window", wp.get("confirmed_event_window", {})),
+                    ("discovery_signal_window", wp.get("discovery_signal_window", {})),
+                    ("context_window", wp.get("context_window", {}))]:
+        start = win.get("primary_start") or win.get("default_start") or win.get("start", "")
+        end = win.get("end", "")
+        val = f"{_esc(start)} ~ {_esc(end)}" if start else ""
+        if val:
+            parts.append(f"<tr><th>{_esc(k)}</th><td>{val}</td></tr>")
     parts.append("</table>")
 
     # 2. Event candidates
     parts.append("<h2>2. 今日明确销售动作</h2>")
     if candidates:
-        parts.append("<table><tr><th>品牌</th><th>车型</th><th>event_type</th><th>事件名称</th><th>日期</th><th>可信度</th><th>价格</th><th>权益</th><th>配置</th><th>交付</th></tr>")
+        parts.append("<table><tr><th>品牌</th><th>车型</th><th>event_type</th><th>事件名称</th><th>日期</th><th>可信度</th><th>window</th><th>review</th><th>价格</th><th>权益</th><th>配置</th><th>交付</th></tr>")
         for c in candidates:
             imp = c.get("impact_vs_our_model", {})
-            parts.append(f"<tr><td>{_esc(c.get('event_brand',''))}</td><td>{_esc(c.get('event_model',''))}</td><td>{_esc(c.get('event_type',''))}</td><td>{_esc(c.get('event_name',''))}</td><td>{_esc(c.get('event_date',''))}</td><td>{_esc(c.get('confidence',''))}</td><td>{_esc(imp.get('price_pressure',''))}</td><td>{_esc(imp.get('rights_pressure',''))}</td><td>{_esc(imp.get('configuration_pressure',''))}</td><td>{_esc(imp.get('delivery_pressure',''))}</td></tr>")
+            rfs = ",".join(c.get("review_flags", []))
+            parts.append(f"<tr><td>{_esc(c.get('event_brand',''))}</td><td>{_esc(c.get('event_model',''))}</td><td>{_esc(c.get('event_type',''))}</td><td>{_esc(c.get('event_name',''))}</td><td>{_esc(c.get('event_date',''))}</td><td>{_esc(c.get('confidence',''))}</td><td>{_esc(c.get('window_match',''))}</td><td>{_esc(rfs)}</td><td>{_esc(imp.get('price_pressure',''))}</td><td>{_esc(imp.get('rights_pressure',''))}</td><td>{_esc(imp.get('configuration_pressure',''))}</td><td>{_esc(imp.get('delivery_pressure',''))}</td></tr>")
         parts.append("</table>")
     else:
         parts.append("<p class='none'>None</p>")
@@ -284,9 +318,10 @@ def render_html(input_dir, normalized, candidates, needs_review, no_event_models
     parts.append("<h2>3. 销售弱信号 Discovery Signals</h2>")
     ds_list = md.get("discovery_signals", [])
     if ds_list:
-        parts.append("<table><tr><th>品牌</th><th>车型</th><th>signal_type</th><th>线索名称</th><th>possible_event_type</th><th>可信度</th><th>未进入原因</th></tr>")
+        parts.append("<table><tr><th>品牌</th><th>车型</th><th>signal_type</th><th>线索名称</th><th>possible_type</th><th>可信度</th><th>window</th><th>review</th><th>未进入原因</th></tr>")
         for s in ds_list:
-            parts.append(f"<tr><td>{_esc(s.get('event_brand',''))}</td><td>{_esc(s.get('event_model',''))}</td><td>{_esc(s.get('signal_type',''))}</td><td>{_esc(s.get('signal_name',''))}</td><td>{_esc(s.get('possible_event_type',''))}</td><td>{_esc(s.get('confidence',''))}</td><td>{_esc(s.get('why_not_candidate',''))}</td></tr>")
+            rfs = ",".join(s.get("review_flags", []))
+            parts.append(f"<tr><td>{_esc(s.get('event_brand',''))}</td><td>{_esc(s.get('event_model',''))}</td><td>{_esc(s.get('signal_type',''))}</td><td>{_esc(s.get('signal_name',''))}</td><td>{_esc(s.get('possible_event_type',''))}</td><td>{_esc(s.get('confidence',''))}</td><td>{_esc(s.get('window_match',''))}</td><td>{_esc(rfs)}</td><td>{_esc(s.get('why_not_candidate',''))}</td></tr>")
         parts.append("</table>")
     else:
         parts.append("<p class='none'>None</p>")
@@ -328,11 +363,12 @@ def render_html(input_dir, normalized, candidates, needs_review, no_event_models
     parts.append("<h2>7. 检索覆盖 Search Audit</h2>")
     sa_list = md.get("search_audit", [])
     if sa_list:
-        parts.append("<table><tr><th>车型</th><th>官方确认</th><th>媒体验证</th><th>弱信号</th><th>official</th><th>mainstream</th><th>industry</th><th>user_gen</th><th>unknown</th><th>coverage_note</th></tr>")
+        parts.append("<table><tr><th>车型</th><th>官方确认</th><th>媒体验证</th><th>弱信号</th><th>conf_win</th><th>disc_win</th><th>ctx_win</th><th>official</th><th>mainstream</th><th>industry</th><th>user_gen</th><th>unknown</th><th>coverage_note</th></tr>")
         for a in sa_list:
             sl = a.get("searched_layers", {})
             sc = a.get("source_coverage", {})
-            parts.append(f"<tr><td>{_esc(a.get('event_model',''))}</td><td>{sl.get('official_confirmation','?')}</td><td>{sl.get('media_cross_check','?')}</td><td>{sl.get('sales_weak_signals','?')}</td><td>{sc.get('official',0)}</td><td>{sc.get('mainstream_media',0)}</td><td>{sc.get('industry_media',0)}</td><td>{sc.get('user_generated',0)}</td><td>{sc.get('unknown',0)}</td><td>{_esc(a.get('coverage_note',''))}</td></tr>")
+            wc = a.get("window_coverage", {})
+            parts.append(f"<tr><td>{_esc(a.get('event_model',''))}</td><td>{sl.get('official_confirmation','?')}</td><td>{sl.get('media_cross_check','?')}</td><td>{sl.get('sales_weak_signals','?')}</td><td>{wc.get('confirmed_event_window','?')}</td><td>{wc.get('discovery_signal_window','?')}</td><td>{wc.get('context_window','?')}</td><td>{sc.get('official',0)}</td><td>{sc.get('mainstream_media',0)}</td><td>{sc.get('industry_media',0)}</td><td>{sc.get('user_generated',0)}</td><td>{sc.get('unknown',0)}</td><td>{_esc(a.get('coverage_note',''))}</td></tr>")
         parts.append("</table>")
     else:
         parts.append("<p class='none'>None</p>")
@@ -369,23 +405,37 @@ def main():
         print(f"[auto_launch report] ERROR: input dir not found: {input_dir}", file=sys.stderr)
         sys.exit(1)
 
-    # Load data
-    normalized = _load_json(os.path.join(input_dir, "normalized_daily_monitor.json"))
-    candidates = _load_json(os.path.join(input_dir, "event_candidates.json")) or []
-    needs_review = _load_json(os.path.join(input_dir, "needs_review.json")) or []
-    no_event_models = _load_json(os.path.join(input_dir, "no_event_models.json")) or []
+    # Load primary data source: raw_ai_output.json (golden source)
+    raw = _load_json(os.path.join(input_dir, "raw_ai_output.json"))
+    # Fallback: normalized_daily_monitor.json
+    data = raw or _load_json(os.path.join(input_dir, "normalized_daily_monitor.json"))
 
-    if normalized is None:
-        print(f"[auto_launch report] ERROR: normalized_daily_monitor.json not found in {input_dir}", file=sys.stderr)
+    if data is None:
+        print(f"[auto_launch report] ERROR: neither raw_ai_output.json nor normalized_daily_monitor.json found in {input_dir}", file=sys.stderr)
         sys.exit(1)
+
+    # All data MUST come from raw/normalized top-level arrays only.
+    # Do NOT read from event_candidates.json / needs_review.json / etc. as they may be stale.
+    candidates = data.get("event_candidates", [])
+    needs_review = data.get("needs_review", [])
+    no_event_models = data.get("no_event_models", [])
+
+    # Consistency check
+    ec, ds, nr, ne, sa = (len(data.get("event_candidates", [])),
+                           len(data.get("discovery_signals", [])),
+                           len(data.get("needs_review", [])),
+                           len(data.get("no_event_models", [])),
+                           len(data.get("search_audit", [])))
+    expected = {"event_candidates": ec, "discovery_signals": ds,
+                "needs_review": nr, "no_event_models": ne, "search_audit": sa}
 
     # Resolve output paths
     output_md = args.output_md or os.path.join(input_dir, "daily_monitor_report.md")
     output_html = args.output_html or os.path.join(input_dir, "daily_monitor_report.html")
 
     # Render
-    md = render_md(input_dir, normalized, candidates, needs_review, no_event_models)
-    html = render_html(input_dir, normalized, candidates, needs_review, no_event_models)
+    md = render_md(input_dir, data, candidates, needs_review, no_event_models)
+    html = render_html(input_dir, data, candidates, needs_review, no_event_models)
 
     # Write
     with open(output_md, "w", encoding="utf-8") as f:
@@ -396,14 +446,14 @@ def main():
         f.write(html)
     print(f"[auto_launch report] HTML OK: {output_html}")
 
-    # Write report_manifest
+    # Write report_manifest with consistency-verified counts
     manifest = {
         "report_type": "daily_monitor_report",
         "input_dir": os.path.abspath(input_dir),
+        "source_file": "raw_ai_output.json" if raw else "normalized_daily_monitor.json",
         "outputs": {"markdown": os.path.abspath(output_md), "html": os.path.abspath(output_html)},
-        "event_candidates_count": len(candidates),
-        "needs_review_count": len(needs_review),
-        "no_event_models_count": len(no_event_models),
+        "render_mode": "deterministic_raw_render",
+        **expected,
         "generated_at": datetime.now(timezone.utc).isoformat(),
     }
     manifest_path = os.path.join(input_dir, "report_manifest.json")
