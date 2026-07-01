@@ -27,6 +27,8 @@ daily_sales_action_monitor.md  (ChatGPT Plan)
 event_candidates.json
   ↓
 auto_launch intake workflow (validate → normalize → render)
+  ├── Daily Monitor 分支 → normalized_daily_monitor.json, event_candidates.json, needs_review.json, no_event_models.json, intake_summary.md
+  └── Legacy brief 分支 → normalized.json, report.md, intake_manifest.json
   ↓
 needs_review / accepted_event / ignored_event
   ↓
@@ -57,11 +59,39 @@ needs_review / accepted_event / ignored_event
 ## 两阶段分析
 
 ```
-第一阶段: daily_sales_action_monitor  →  发现事件
-第二阶段: event_impact_vs_our_model   →  分析影响
+第一阶段: daily_sales_action_monitor  →  发现事件  → 按 auto_launch_daily_monitor.schema.json 验证
+第二阶段: event_impact_vs_our_model   →  分析影响  → 按 auto_launch_brief.schema.json 验证
 ```
 
 不要把深度影响分析塞回 Daily Monitor。
+
+## Intake 双分支
+
+intake 流程自动检测输入类型：
+
+- 如果 `task_name == "auto_launch_daily_sales_action_monitor"` → 走 Daily Monitor 分支
+- 否则 → 走旧 brief/event 分支
+
+### Daily Monitor 分支产出
+
+| 文件 | 说明 |
+|------|------|
+| `normalized_daily_monitor.json` | 标准化后的完整 Daily Monitor JSON |
+| `event_candidates.json` | 有明确销售动作证据的事件列表 |
+| `discovery_signals.json` | 有业务价值但尚未确认的销售动作线索 |
+| `search_audit.json` | 检索覆盖记录 |
+| `needs_review.json` | 证据不足、无法归类、来源冲突的项目 |
+| `no_event_models.json` | 搜索后未发现有效销售动作或信号的车型 |
+| `intake_summary.md` | 简短摘要 |
+| `intake_manifest.json` | 处理元数据 |
+
+### Legacy Brief/Event 分支产出
+
+| 文件 | 说明 |
+|------|------|
+| `normalized.json` | 归一化后的统一结构 JSON |
+| `report.md` | 人类可读简报 |
+| `intake_manifest.json` | 处理元数据 |
 
 ## 输出格式
 
@@ -112,6 +142,9 @@ promptbuilders/auto_launch/
 │   └── render_markdown_report.py
 ├── intake/                           # intake workflow
 │   └── process_ai_output.py
+├── reports/                          # 报告生成器
+│   ├── generate_daily_monitor_report.py
+│   └── README.md
 ├── indexers/                         # output index
 │   └── build_output_index.py
 ├── runbooks/                         # 操作指南
@@ -121,7 +154,8 @@ promptbuilders/auto_launch/
 │   └── pilot_comparison_notes.md
 ├── schemas/                          # JSON Schema
 │   ├── auto_launch_event.schema.json
-│   └── auto_launch_brief.schema.json
+│   ├── auto_launch_brief.schema.json
+│   └── auto_launch_daily_monitor.schema.json
 ├── search_adapters/                  # 可选搜索后端经验
 │   ├── README.md
 │   └── volc_search.md
@@ -140,6 +174,9 @@ promptbuilders/auto_launch/
 # 运行 intake
 make auto-launch-intake SAMPLE=path/to/raw_ai_output.json OUT_DIR=path/to/output/
 
+# 生成 Daily Monitor 日报 Report（intake 后执行）
+make auto-launch-daily-report OUT_DIR=mashang_workspace/outputs/auto_launch/daily_monitor
+
 # 验证
 make auto-launch-validate SAMPLE=path/to/output.json
 
@@ -149,6 +186,53 @@ make auto-launch-index OUT_ROOT=mashang_workspace/outputs/auto_launch
 # Volc-assisted 搜索（可选 deep dive 路径）
 # 见 runbooks/volc_search_assisted_pilot.md
 ```
+
+## Daily Monitor Report
+
+Daily Monitor 分为两层：
+1. `event_candidates`：已确认销售动作（严格事实门槛）
+2. `discovery_signals`：销售动作弱信号（提升情报发现丰富度，但不进入 confirmed event）
+
+工作流：
+
+```
+ChatGPT Plan raw output
+  ↓
+auto-launch-intake
+  ↓
+event_candidates / discovery_signals / search_audit
+  ↓
+daily_monitor_report
+  ↓
+人工判断是否进入 impact_vs_our_model
+```
+
+Daily Monitor intake 成功后，可运行：
+
+```bash
+make auto-launch-daily-report \
+  OUT_DIR=mashang_workspace/outputs/auto_launch/daily_monitor
+```
+
+生成：
+
+- `daily_monitor_report.md` — Markdown 日报
+- `daily_monitor_report.html` — 单文件 HTML 日报（含 summary cards 和表格）
+- `report_manifest.json` — 报告处理元数据
+
+Daily Monitor Report 是**日报汇总**，不替代 impact_vs_our_model。它只做当天销售动作发现结果的展示。
+
+### Report 结构
+
+1. Run Summary — task_name、monitor_date、各计数（含 discovery_signals / search_audit）
+2. 今日明确销售动作 — event_candidates 表格（含 impact 四维压力）
+3. 销售弱信号 — discovery_signals 列表
+4. 事件证据 — 按事件展示 source_items
+5. 待复核项目 — needs_review 列表
+6. 未发现动作车型 — no_event_models
+7. 检索覆盖 — search_audit 表格
+8. 结论 — 基于数据的 3-5 条简短自动结论
+9. Next Step — 是否建议进入 impact_vs_our_model
 
 ## 历史参考
 

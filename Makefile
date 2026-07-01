@@ -240,6 +240,13 @@ auto-launch-index:
 		--index-json $(OUT_ROOT)/index.json \
 		--index-md $(OUT_ROOT)/index.md
 
+## Generate Daily Monitor Report from intake outputs
+## OUT_DIR: Daily Monitor intake output directory (default: daily_monitor)
+OUT_DIR ?= mashang_workspace/outputs/auto_launch/daily_monitor
+auto-launch-daily-report:
+	$(PYTHON) mashang_workspace/promptbuilders/auto_launch/reports/generate_daily_monitor_report.py \
+		--input-dir $(OUT_DIR)
+
 ## Capability Audit
 capability-audit:
 	$(PYTHON) mashang_workspace/eval/run_capability_audit.py --format json --output mashang_workspace/outputs/tables/capability_audit_result.json
@@ -373,7 +380,8 @@ help:
 	@echo "make auto-launch-validate  SAMPLE=... 验证 AI 输出 JSON（Prompt workflow intake）"
 	@echo "make auto-launch-normalize SAMPLE=... 归一化 AI 输出 JSON"
 	@echo "make auto-launch-intake    SAMPLE=... OUT_DIR=... 完整 intake: validate→normalize→markdown (output-dir 模式)"
-	@echo "make auto-launch-index     OUT_ROOT=... 生成 output index（Promopt workflow output archive）"
+	@echo "make auto-launch-index     OUT_ROOT=... 生成 output index（Prompt workflow output archive）"
+	@echo "make auto-launch-daily-report OUT_DIR=... 生成 Daily Monitor 日报 report (MD + HTML)"
 	@echo "prompts/ + plan_templates/             核心资产（promptbuilders/auto_launch/）"
 	@echo ""
 	@echo "=== MIIT 新车公告 ==="

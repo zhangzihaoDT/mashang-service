@@ -17,6 +17,18 @@ import os
 
 # ── 最小校验规则 ────────────────────────────────────────────────
 
+DAILY_MONITOR_REQUIRED = [
+    "task_name",
+    "battle_field",
+    "our_model",
+    "monitor_date",
+    "time_window",
+    "input_assets",
+    "event_candidates",
+    "no_event_models",
+    "needs_review",
+]
+
 EVENT_REQUIRED = [
     "event_id",
     "battle_field",
@@ -50,7 +62,9 @@ SHARED_REQUIRED = [
 
 
 def detect_type(data: dict) -> str:
-    """Detect whether the JSON is event or brief type."""
+    """Detect whether the JSON is daily_monitor, event or brief type."""
+    if data.get("task_name") == "auto_launch_daily_sales_action_monitor":
+        return "daily_monitor"
     if "event_id" in data and "event" in data:
         return "event"
     if "brief_id" in data or "sections" in data:
@@ -107,10 +121,14 @@ def run_validation(data: dict) -> dict:
     doc_type = result["type"]
     if doc_type == "unknown":
         result["ok"] = False
-        result["errors"].append("cannot determine type (neither event nor brief)")
+        result["errors"].append("cannot determine type (neither daily_monitor, event, nor brief)")
         return result
 
-    # Determine which fields to check
+    # Daily Monitor validation
+    if doc_type == "daily_monitor":
+        return _validate_daily_monitor(data, result)
+
+    # Determine which fields to check for legacy types
     if doc_type == "event":
         required = EVENT_REQUIRED
     else:  # brief
@@ -161,12 +179,119 @@ def run_validation(data: dict) -> dict:
     return result
 
 
+def _validate_daily_monitor(data: dict, result: dict) -> dict:
+    """Validate Daily Sales Action Monitor format."""
+    # Check required top-level fields exist (allow empty arrays)
+    for key in DAILY_MONITOR_REQUIRED:
+        if key not in data:
+            result["ok"] = False
+            result["errors"].append(f"missing field: {key}")
+            result["checks"][key] = "missing"
+        else:
+            val = data[key]
+            if val is None:
+                result["ok"] = False
+                result["errors"].append(f"field is null: {key}")
+                result["checks"][key] = "null"
+            elif isinstance(val, str) and not val.strip():
+                result["ok"] = False
+                result["errors"].append(f"empty string: {key}")
+                result["checks"][key] = "empty"
+            elif isinstance(val, list):
+                result["checks"][key] = f"ok ({len(val)} items)"
+            elif isinstance(val, dict):
+                result["checks"][key] = f"ok ({len(val)} keys)"
+            else:
+                result["checks"][key] = "ok"
+
+    # task_name must be the expected value
+    if data.get("task_name") != "auto_launch_daily_sales_action_monitor":
+        result["ok"] = False
+        result["errors"].append(f"invalid task_name: {data.get('task_name')}")
+
+    # event_candidates must be array
+    if not isinstance(data.get("event_candidates"), list):
+        result["ok"] = False
+        result["errors"].append("event_candidates must be an array")
+
+    # no_event_models must be array
+    if not isinstance(data.get("no_event_models"), list):
+        result["ok"] = False
+        result["errors"].append("no_event_models must be an array")
+
+    # needs_review must be array
+    if not isinstance(data.get("needs_review"), list):
+        result["ok"] = False
+        result["errors"].append("needs_review must be an array")
+
+    # discovery_signals must be array if present
+    ds = data.get("discovery_signals")
+    if ds is not None and not isinstance(ds, list):
+        result["ok"] = False
+        result["errors"].append("discovery_signals must be an array")
+    elif ds:
+        for idx, s in enumerate(ds):
+            if not isinstance(s, dict):
+                continue
+            conf = s.get("confidence")
+            if conf == "high":
+                result["ok"] = False
+                result["errors"].append(f"discovery_signals[{idx}].confidence cannot be 'high'")
+            si = s.get("source_items")
+            if si is not None and not isinstance(si, list):
+                result["ok"] = False
+                result["errors"].append(f"discovery_signals[{idx}].source_items must be an array")
+
+    # search_audit must be array if present
+    sa = data.get("search_audit")
+    if sa is not None and not isinstance(sa, list):
+        result["ok"] = False
+        result["errors"].append("search_audit must be an array")
+
+    # Check event_candidates items (lenient)
+    for idx, candidate in enumerate(data.get("event_candidates", [])):
+        if not isinstance(candidate, dict):
+            continue
+        # event_type must be non-empty if present
+        et = candidate.get("event_type")
+        if et is not None and (not isinstance(et, str) or not et.strip()):
+            result["ok"] = False
+            result["errors"].append(f"event_candidates[{idx}].event_type is empty")
+        # source_items must be array if present
+        si = candidate.get("source_items")
+        if si is not None and not isinstance(si, list):
+            result["ok"] = False
+            result["errors"].append(f"event_candidates[{idx}].source_items must be an array")
+        # impact_vs_our_model must have pressure fields if present
+        impact = candidate.get("impact_vs_our_model")
+        if isinstance(impact, dict):
+            for pf in ["price_pressure", "rights_pressure", "configuration_pressure", "delivery_pressure"]:
+                if pf not in impact:
+                    result["ok"] = False
+                    result["errors"].append(f"event_candidates[{idx}].impact_vs_our_model missing: {pf}")
+
+    # Check needs_review items (lenient)
+    for idx, item in enumerate(data.get("needs_review", [])):
+        if not isinstance(item, dict):
+            continue
+        reason = item.get("reason")
+        if reason is not None and (not isinstance(reason, str) or not reason.strip()):
+            result["ok"] = False
+            result["errors"].append(f"needs_review[{idx}].reason is empty")
+
+    return result
+
+
 def print_report(result: dict):
     """Print human-readable validation report."""
     status = "OK" if result["ok"] else "FAIL"
     print(f"[auto_launch validate] {status}")
     print(f"  type: {result['type']}")
-    print(f"  schema: auto_launch_{result['type']}.schema.json" if result["type"] != "unknown" else "  schema: unknown")
+    schema_name = result["type"]
+    if schema_name in ("daily_monitor", "event", "brief"):
+        print(f"  schema: auto_launch_{schema_name}.schema.json")
+    else:
+        print("  schema: unknown")
     print()
     for key, msg in sorted(result["checks"].items()):
         status_char = "✅" if msg == "ok" or msg.startswith("ok ") else "❌"

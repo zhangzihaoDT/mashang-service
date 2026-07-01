@@ -36,21 +36,80 @@
         "delivery_pressure": "unknown"
       },
       "missing_evidence": [
-        "问界 M7 权益更新后的实际终端成交价变化",
-        "智己 LS8 当前权益与更新后 M7 权益的逐项对比"
+        "缺少权益对比数据"
       ]
     }
   ],
+  "discovery_signals": [
+    {
+      "event_model": "理想 i6",
+      "event_brand": "理想",
+      "signal_type": "dealer_offer",
+      "signal_name": "门店端出现限时权益海报",
+      "possible_event_type": "official_rights_update",
+      "confidence": "low",
+      "source_items": [
+        {
+          "source_name": "小红书",
+          "source_title": "理想 i6 门店权益更新",
+          "source_url": "https://example.com/xiaohongshu-li-i6",
+          "source_tier": "user_generated",
+          "publish_time": "2026-06-30"
+        }
+      ],
+      "why_not_candidate": "非官方来源，缺少品牌官方确认",
+      "missing_evidence": [
+        "缺少理想汽车官方权益公告"
+      ]
+    }
+  ],
+  "needs_review": [],
   "no_event_models": [
     "零跑 D19",
     "岚图 泰山 X8 PHEV",
     "小鹏 GX",
-    "理想 i6",
     "乐道 L80",
     "大众 ID. ERA 9X",
     "阿维塔 06",
     "领克 900",
     "极氪 8X"
   ],
-  "needs_review": []
+  "search_audit": [
+    {
+      "event_model": "问界 M7",
+      "event_brand": "问界",
+      "searched_layers": {
+        "official_confirmation": true,
+        "media_cross_check": true,
+        "sales_weak_signals": true
+      },
+      "source_coverage": {
+        "official": 1,
+        "mainstream_media": 2,
+        "industry_media": 1,
+        "user_generated": 0,
+        "unknown": 0
+      },
+      "queries_used": ["问界 M7 权益", "问界 M7 懂车帝", "问界 M7 门店"],
+      "coverage_note": "官方源和主流媒体有覆盖，弱信号未发现"
+    },
+    {
+      "event_model": "理想 i6",
+      "event_brand": "理想",
+      "searched_layers": {
+        "official_confirmation": true,
+        "media_cross_check": false,
+        "sales_weak_signals": true
+      },
+      "source_coverage": {
+        "official": 0,
+        "mainstream_media": 0,
+        "industry_media": 0,
+        "user_generated": 1,
+        "unknown": 0
+      },
+      "queries_used": ["理想 i6 权益", "理想 i6 门店"],
+      "coverage_note": "弱信号层有发现，但官方和媒体层未覆盖"
+    }
+  ]
 }
