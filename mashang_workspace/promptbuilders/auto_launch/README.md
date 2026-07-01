@@ -231,3 +231,28 @@ promptbuilders/auto_launch/examples/     # committed samples
 - 当前暂无 golden cases
 - 只有通过新 intake workflow、来源可追溯、业务判断被人工认可的案例，才可以晋升为 golden case
 - Golden cases 未来应单独建立 registry，而不是直接复用 legacy cases
+
+## Pilot Run Decision Gate
+
+在建立第一个 golden case 之前，所有输出均视为 pilot run。
+
+当前状态：
+- **暂无 golden cases**
+- `examples/legacy_promptbuilder_cases/` **不是质量基准**
+- 新的 golden case **必须来自真实 pilot run**
+- Pilot run 的产出先用 `runbooks/pilot_run_decision_gate.md` 评估
+- 再通过 `templates/pilot_quality_scorecard.md` 人工评审
+- 通过后才考虑晋升为 golden case
+
+完整流程：
+
+```
+pilot run → intake → 人工评审 (scorecard) → 通过 → 晋升 golden case
+                                            → 不通过 → 保留在 outputs/ 作为记录
+```
+
+关键规则：
+- Pilot run 的 validate / normalize / report 全部按现有 intake 流程自动完成
+- 质量评分和晋升判断完全由人工完成（scorecard）
+- 不创建 golden case registry，直到有第一个通过评审的案例
+- 不把 legacy_promptbuilder_cases 用作质量标准
