@@ -105,11 +105,16 @@
 
 ### 选配信息 (仅限 config_attribute.parquet)
 
+数据结构：长表（EAV），每行一个选配项。2026 年起改为 Tableau 规范化视图。通过 `Order Number` 关联 `order_data.parquet` 补充了订单类型和 VIN。
+
 - `Order Number`: 订单号（与 `order_data.parquet` 的 `order_number` 对应，但字段名不同）
-- `Attribute`: 选配项名称
-- `value`: 选配项取值（常见为"是/否"，也可能是具体配置值）
-- `is_staff`: 是否员工单标记（布尔）
-- `vin`: 车辆识别代码(VIN)
+- `Attribute`: 选配项名称（内饰、外饰、轮毂、动力电池等，共 63 种）
+- `value`: 选配项取值
+- `option_flag`: 选装标记（Y/N，Y=已选装）
+- `required`: 是否标配（Y/N，Y=标配，N=选装）
+- `price`: 选配价格（元，Int64）
+- `order_type`: 订单类型（关联自 order_data，如用户车/员工/试驾车等）
+- `vin`: 车辆识别代码（关联自 order_data）
 
 ---
 
@@ -184,14 +189,18 @@
 | 下发门店数                       | int64     | 下发门店数量                        |
 | 主要渠道统计覆盖率               | float64   | 主要渠道统计覆盖率                  |
 
-### config_attribute.parquet (Total Rows: 2196954)
+### config_attribute.parquet (Total Rows: 4452631 · Unique Orders: 274692 · Unique Attributes: 63)
 
-| Column Name  | Data Type | Description    |
-| :----------- | :-------- | :------------- |
-| Order Number | str       | 订单号         |
-| Attribute    | str       | 选配项名称     |
-| value        | str       | 选配项取值     |
-| is_staff     | boolean   | 是否员工单标记 |
+| Column Name  | Data Type | Description                                        |
+| :----------- | :-------- | :------------------------------------------------- |
+| Order Number | str       | 订单号（与 `order_data.order_number` 对应）          |
+| Attribute    | str       | 选配项名称（含内饰、外饰、轮毂、动力电池等）          |
+| value        | str       | 选配项取值                                          |
+| option_flag  | str       | 选装标记（Y/N，Y=已选装）                              |
+| required     | str       | 是否标配（Y/N，Y=标配，N=选装）                        |
+| price        | Int64     | 选配价格（元），空值表示无额外费用或不可单独计价       |
+| order_type   | str       | 订单类型（关联自 order_data，如用户车/员工/试驾车等）  |
+| vin          | str       | 车辆识别代码（关联自 order_data）                     |
 
 ## 3. 微信群聊消息 (wechat_sync)
 

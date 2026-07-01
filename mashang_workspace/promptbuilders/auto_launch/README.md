@@ -96,15 +96,16 @@ MIIT 输出 `potential_event_signal`，不直接并入 auto_launch 管线。
 ```
 ChatGPT Plan 执行（用户复制 plan_template 到 ChatGPT）
     │
-    ▼ 输出 Markdown / JSON（含来源链接）
-人工保存到 outputs/auto_launch/ai_response_examples/*.raw.md
+    ▼ 输出 JSON（含来源链接和可信度标记）
+人工保存到 outputs/auto_launch/{日期}_{车型}_{事件}/raw_ai_output.json
     │
     ▼
-validate_ai_response.py → validation.json
+intake（process_ai_output.py | make auto-launch-intake）
     │
-    ▼
-normalize_ai_response.py → normalized_evidence.json
-                         → executive_brief.md
+    ├── validated: 结构校验通过
+    ├── normalized.json: 统一结构 JSON
+    ├── report.md: 人类可读简报
+    └── intake_manifest.json: 处理元数据
     │
     ▼
 后续进入 mashang-service（入库、复盘、报告沉淀）
@@ -137,7 +138,17 @@ promptbuilders/auto_launch/
 │   ├── README.md
 │   └── volc_search.md
 ├── validators/                # 质量保证层参考
-│   └── README.md
+│   ├── validate_ai_response.py
+│   └── normalize_ai_response.py
+├── renderers/                 # 格式渲染层
+│   ├── README.md
+│   └── render_markdown_report.py
+├── intake/                    # AI output intake workflow
+│   ├── README.md
+│   └── process_ai_output.py
+├── runbooks/                  # 实际操作指南
+│   ├── README.md
+│   └── chatgpt_plan_handoff.md
 ├── templates/                 # 旧模板（保留兼容）
 │   ├── search_task_prompt.md
 │   └── evidence_schema.json
@@ -167,10 +178,32 @@ make validate-auto-launch-ai-response
 # 归一化 + 打包报告
 make build-auto-launch-byd-datang-report
 
+# ★★★ 日常使用 ★★★
+# validate → normalize → markdown (output-dir 模式)
+make auto-launch-intake SAMPLE=path/to/raw_ai_output.json OUT_DIR=path/to/output_dir/
+
+# 仅校验
+make auto-launch-validate SAMPLE=path/to/ai_output.json
+
+# 仅归一化
+make auto-launch-normalize SAMPLE=path/to/ai_output.json
+
 # 查询配置
 #   configs/event_types.yaml       事件类型定义
 #   configs/source_tiers.yaml      信源分层
 #   configs/battle_fields.yaml     战场分类
 #   configs/target_profiles.yaml   目标画像
 #   ../../configs/ls8_competitor_watchlist.csv  竞品池
+```
+
+## 产出物结构
+
+使用 `--output-dir` 模式后，每个事件产出 4 个文件：
+
+```
+output_dir/
+├── raw_ai_output.json       ← 原始 AI 输出（from ChatGPT Plan）
+├── normalized.json          ← 统一结构 JSON
+├── report.md                ← 人类可读简报
+└── intake_manifest.json     ← 处理元数据
 ```

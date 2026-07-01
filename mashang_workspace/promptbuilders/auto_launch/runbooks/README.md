@@ -1,0 +1,11 @@
+# Runbooks — 实际操作指南
+
+## 定位
+
+Runbooks 是 Auto Launch 的**实际操作指南**，指导用户如何把 ChatGPT Plan 的 AI 输出落地为本地文件。
+
+## 内容
+
+| Runbook | 说明 |
+|---------|------|
+| `chatgpt_plan_handoff.md` | 从 ChatGPT Plan 输出到本地 intake 的完整流程 |

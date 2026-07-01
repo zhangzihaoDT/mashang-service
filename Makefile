@@ -209,6 +209,7 @@ validate-auto-launch-byd-datang-report:
 
 ## AI Output Intake Workflow (validate → normalize → markdown)
 ## SAMPLE: AI output JSON path (default: event_48h_sample.json)
+## OUT_DIR: if set, uses --output-dir mode (auto-generates raw/normalized/report/manifest)
 SAMPLE ?= mashang_workspace/promptbuilders/auto_launch/examples/ai_outputs/event_48h_sample.json
 OUTPUT_PREFIX ?= mashang_workspace/promptbuilders/auto_launch/examples
 
@@ -222,10 +223,14 @@ auto-launch-normalize:
 		--output $(OUTPUT_PREFIX)/normalized/$(notdir $(SAMPLE:.json=.normalized.json))
 
 ## Full Intake: validate → normalize → markdown report
+## If OUT_DIR is set, uses --output-dir mode; otherwise uses --normalized-output/--report-output
 auto-launch-intake:
-	$(PYTHON) mashang_workspace/promptbuilders/auto_launch/intake/process_ai_output.py $(SAMPLE) \
-		--normalized-output $(OUTPUT_PREFIX)/normalized/$(notdir $(SAMPLE:.json=.normalized.json)) \
-		--report-output $(OUTPUT_PREFIX)/reports/$(notdir $(SAMPLE:.json=.md))
+	$(if $(OUT_DIR),\
+		$(PYTHON) mashang_workspace/promptbuilders/auto_launch/intake/process_ai_output.py $(SAMPLE) \
+			--output-dir $(OUT_DIR),\
+		$(PYTHON) mashang_workspace/promptbuilders/auto_launch/intake/process_ai_output.py $(SAMPLE) \
+			--normalized-output $(OUTPUT_PREFIX)/normalized/$(notdir $(SAMPLE:.json=.normalized.json)) \
+			--report-output $(OUTPUT_PREFIX)/reports/$(notdir $(SAMPLE:.json=.md)))
 
 ## Capability Audit
 capability-audit:
@@ -359,7 +364,7 @@ help:
 	@echo "make build-auto-launch-battle-brief    [EXPERIMENTAL] 生成一页摘要"
 	@echo "make auto-launch-validate  SAMPLE=... 验证 AI 输出 JSON（Prompt workflow intake）"
 	@echo "make auto-launch-normalize SAMPLE=... 归一化 AI 输出 JSON"
-	@echo "make auto-launch-intake    SAMPLE=... 完整 intake: validate→normalize→markdown"
+	@echo "make auto-launch-intake    SAMPLE=... OUT_DIR=... 完整 intake: validate→normalize→markdown (output-dir 模式)"
 	@echo "prompts/ + plan_templates/             核心资产（promptbuilders/auto_launch/）"
 	@echo ""
 	@echo "=== MIIT 新车公告 ==="
