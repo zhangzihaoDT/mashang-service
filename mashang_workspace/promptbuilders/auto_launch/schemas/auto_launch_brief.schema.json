@@ -1,0 +1,79 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "auto_launch_brief.schema.json",
+  "title": "Auto Launch Brief Schema",
+  "description": "竞品事件简报输出格式，对应 event_48h_brief / impact_vs_our_model 等 Prompt 的 Markdown 输出结构。",
+  "type": "object",
+  "required": ["title", "sections", "evidence_quality"],
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "简报标题，格式：{品牌} {车型} {事件类型} 简报"
+    },
+    "sections": {
+      "type": "array",
+      "description": "简报章节列表",
+      "items": {
+        "type": "object",
+        "required": ["heading", "content", "sources"],
+        "properties": {
+          "heading": {"type": "string", "description": "章节标题"},
+          "content": {
+            "type": "object",
+            "description": "结构化内容，每个 key 为信息项名称，value 为内容及来源",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "value": {"type": "string"},
+                "confidence": {"type": "string", "enum": ["confirmed_fact", "cross_validated", "single_source", "inference", "rumor", "no_info"]},
+                "source_urls": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "tier": {"type": "integer", "enum": [1, 2, 3]},
+                      "name": {"type": "string"},
+                      "url": {"type": "string", "format": "uri"}
+                    },
+                    "required": ["tier", "name", "url"]
+                  }
+                }
+              },
+              "required": ["value", "confidence"]
+            }
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "tier": {"type": "integer", "enum": [1, 2, 3]},
+                "name": {"type": "string"},
+                "url": {"type": "string", "format": "uri"}
+              },
+              "required": ["tier", "name", "url"]
+            }
+          }
+        }
+      }
+    },
+    "evidence_quality": {
+      "type": "object",
+      "required": ["tier1_count", "tier2_count", "tier3_count", "unconfirmed_count"],
+      "properties": {
+        "tier1_count": {"type": "integer", "minimum": 0},
+        "tier2_count": {"type": "integer", "minimum": 0},
+        "tier3_count": {"type": "integer", "minimum": 0},
+        "unconfirmed_count": {"type": "integer", "minimum": 0}
+      }
+    },
+    "diagnostics": {
+      "type": "object",
+      "properties": {
+        "case_name": {"type": "string"},
+        "prompt_template": {"type": "string"},
+        "generated_at": {"type": "string", "format": "date-time"}
+      }
+    }
+  }
+}

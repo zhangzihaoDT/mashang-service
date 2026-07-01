@@ -1,16 +1,4 @@
 PYTHON ?= .venv/bin/python
-LLM_JUDGE ?= 1
-LLM_JUDGE_MODE ?= uncertain
-LLM_JUDGE_MAX ?= 10
-LLM_JUDGE_CACHE ?= 1
-SEARCH_PROVIDER ?= huoshan
-HUOSHAN_SITE_FILTER ?= 1
-HUOSHAN_SITES ?=
-HUOSHAN_SITE_MAX ?= 5
-HUOSHAN_TIMEOUT ?= 30
-HUOSHAN_RECENCY ?= month
-HUOSHAN_SEARCH_MODE ?= auto
-HUOSHAN_DEBUG_RESPONSE ?= 0
 .PHONY: eval full-eval core-eval research-eval capability-audit test ci data-dict lock-demo parser-demo followup-demo numeric-eval reference-eval atp-demo backtest-demo clean-outputs dataset-update dataset-validate daily-observation-dry-run daily-observation-sync daily-data-pipeline-dry-run daily-data-pipeline render-official-doc render-official-doc-smoke build-workspace-skills-catalog build-workspace-capability-inventory miit-discover-latest-batch miit-discover-batches miit-fetch-batch miit-new-car-monitor miit-latest-publicity miit-latest-official miit-latest-publicity-refresh miit-latest-official-refresh miit-extract-text miit-check-text-extractors miit-diagnose-attachments miit-parse-product-list
 
 ## 默认 Eval（core + parser + followup + reference，不含 research）
@@ -78,35 +66,6 @@ atp-demo:
 ## 锁单预测回测 Demo
 backtest-demo:
 	$(PYTHON) mashang_workspace/research_scripts/lock_predict_backtest.py --format json
-
-## [DEPRECATED] 新车事件监测 - 旧版搜索+执行+裁判一体脚本，迁移中。
-## canonical 入口: make build-auto-launch-prompt
-auto-launch-monitor:
-	@if [ -f .env ]; then set -a; . .env 2>/dev/null; set +a; fi; \
-	$(PYTHON) mashang_workspace/research_scripts/auto_launch_monitor.py \
-		--start $(or $(START),$(shell date -v-7d +%Y-%m-%d)) \
-		--end $(or $(END),$(shell date +%Y-%m-%d)) \
-		--max-results $(or $(MAX_RESULTS),8) \
-		$(if $(TARGETS_FILE),--targets-file "$(TARGETS_FILE)") \
-		$(if $(BRANDS),--brands "$(BRANDS)") \
-		$(if $(EVENT_TYPES),--event-types "$(EVENT_TYPES)") \
-		$(if $(SOURCE_TYPES),--source-types "$(SOURCE_TYPES)") \
-		$(if $(KEYWORDS),--keywords "$(KEYWORDS)") \
-		$(if $(EXCLUDE_KEYWORDS),--exclude-keywords "$(EXCLUDE_KEYWORDS)") \
-		$(if $(filter 0,$(LLM_JUDGE)),,--llm-judge) \
-		$(if $(LLM_JUDGE_MODE),--llm-judge-mode "$(LLM_JUDGE_MODE)") \
-		$(if $(LLM_JUDGE_MAX),--llm-judge-max "$(LLM_JUDGE_MAX)") \
-		$(if $(filter 0,$(LLM_JUDGE_CACHE)),--no-llm-judge-cache,--llm-judge-cache) \
-		--search-provider $(SEARCH_PROVIDER) \
-		$(if $(filter 0,$(HUOSHAN_SITE_FILTER)),--no-huoshan-site-filter,--huoshan-site-filter) \
-		$(if $(HUOSHAN_SITES),--huoshan-sites "$(HUOSHAN_SITES)") \
-		--huoshan-site-max $(HUOSHAN_SITE_MAX) \
-		--huoshan-timeout $(HUOSHAN_TIMEOUT) \
-		--huoshan-recency $(HUOSHAN_RECENCY) \
-		--huoshan-search-mode $(HUOSHAN_SEARCH_MODE) \
-		$(if $(filter 0,$(HUOSHAN_DEBUG_RESPONSE)),,--huoshan-debug-response) \
-		--format markdown \
-		--output mashang_workspace/outputs/reports/
 
 ## MIIT 新车公告批次监控 (V0.2)
 ## 发现最新公告
@@ -371,14 +330,14 @@ help:
 	@echo "make reference-eval  Reference Eval"
 	@echo "make atp-demo        ATP 月报 Demo"
 	@echo "make backtest-demo   锁单预测回测 Demo"
-	@echo "=== Auto Launch (新车上市情报) ==="
-	@echo "make build-auto-launch-prompt          生成搜索 Prompt（新主入口）"
+	@echo "=== Auto Launch (竞品上市事件 Prompt 工作流) ==="
+	@echo "make build-auto-launch-prompt          生成搜索 Prompt"
 	@echo "make build-auto-launch-golden-prompts  生成 4 个 Golden Prompt 样例"
 	@echo "make validate-auto-launch-ai-response  [strict] synthetic AI 返回验证"
 	@echo "make validate-auto-launch-byd-datang-fixture  [tolerant] 真实 AI 返回验证"
 	@echo "make package-auto-launch-byd-datang-report  打包标准化报告目录 (raw+摘要+索引+质量)"
 	@echo "make build-auto-launch-battle-brief    [EXPERIMENTAL] 生成一页摘要"
-	@echo "make auto-launch-monitor               [DEPRECATED] 旧版新车事件监测"
+	@echo "prompts/ + plan_templates/             核心资产（promptbuilders/auto_launch/）"
 	@echo ""
 	@echo "=== MIIT 新车公告 ==="
 	@echo "make miit-discover-latest-batch  发现最新公告批次"

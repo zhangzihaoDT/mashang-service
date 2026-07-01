@@ -1,407 +1,176 @@
-# Auto Launch Promptbuilder
+# Auto Launch — 竞品上市事件 Prompt Workflow Asset
 
 ## 定位
 
-| 模块 | 目录 / 文件 | 职责 |
-|------|-------------|------|
-| **MIIT Promptbuilder** | `promptbuilders/miit_new_car/` | 公告、参数、目录、资质事实（申报阶段信号） |
-| **Auto Launch Promptbuilder** | `promptbuilders/auto_launch/` | 上市传播、价格权益、媒体舆论、竞品对标、用户反馈（市场阶段信号） |
+Auto Launch 是**竞品上市事件 Prompt workflow asset**，不是爬虫监控脚本。
 
-### 职责边界
+核心能力：
+- 提供标准化的 Prompt 模板（按场景：日报/48h 简报/72h 跟踪/影响评估/LLM Judge）
+- 提供车型配置、战场分类、事件类型、信源分层等资产
+- 提供 AI 返回结果的校验和归一化工具
+- 保留火山搜索 API 作为可选搜索后端经验
 
-| 维度 | MIIT 模块 | Auto Launch 模块 |
-|------|-----------|-----------------|
-| 信息源 | 工信部 EIDC 官网（结构化 DOC） | 公开网络：官网/垂媒/社交媒体/论坛 |
-| 数据获取方式 | Python 脚本直接抓取 + 解析 | 生成搜索 Prompt → 交给 AI 搜索能力执行 |
-| 可确认的信息 | 企业名、公告型号、产品大类、能源类型 | 商品名、价格、上市时间、配置、权益、舆论 |
-| 不可确认的信息 | 商品名、价格、上市时间、续航(主公告) | 资质真实性(需 MIIT 交叉验证) |
-| 核心输出 | 公告信号简报 + evidence JSON | 搜索 Prompt → AI raw.md → 标准化报告目录 |
+## 架构
 
-## 使用方式
-
-```bash
-# 生成搜索 Prompt（推荐）
-python mashang_workspace/promptbuilders/auto_launch/promptbuilder.py \
-  --brand 智己 \
-  --model LS6 \
-  --event-type 上市 \
-  --event-date 2026-06-25 \
-  --window 48h \
-  --competitors "小鹏G6,特斯拉Model Y,问界M5" \
-  --output outputs/auto_launch/prompts/ls6_launch_search_task.md
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  ChatGPT Plan                                                    │
+│  (plan_templates/)                                               │
+│  定时触发 / 日常雷达 / 简报生成 / 事件判断                        │
+└──────────────────────────┬──────────────────────────────────────┘
+                           │ 输出 Markdown / JSON
+                           ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  Promptbuilders                                                  │
+│  (prompts/ + configs/ + schemas/)                                │
+│  Prompt 模板 / 配置 / 输出结构 / 校验规则                         │
+└──────────────────────────┬──────────────────────────────────────┘
+                           │ 参考经验
+                           ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  Volc Search Adapter (optional)                                  │
+│  (search_adapters/volc_search.md)                                │
+│  仅保留已验证的火山搜索 API / 只返回候选信息 / 不承担事件判断     │
+└──────────────────────────┬──────────────────────────────────────┘
+                           │ AI raw.md
+                           ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  mashang-service                                                 │
+│  (validators/ + examples/)                                       │
+│  validate_ai_response → normalize_ai_response → 入库/复盘/报告   │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-## Target Profile / Battle Field Resolver
+### 组件职责
 
-watchlist 是**竞品池**，不含目标车型自身。为了稳定识别目标车型所在战场（target_group），增加了 Target Profile 机制。
-
-### 配置文件
-
-`configs/target_profiles.yaml` 存储目标车型画像：
-
-```yaml
-profiles:
-  - brand: 智己
-    model: LS8
-    display_name: 智己 LS8
-    group: 大六座新能源 SUV
-    segment: 中大型/大型 SUV
-    priority: high
-    notes: LS8 战场核心目标车型
-```
-
-### target_group 解析优先级
-
-| 优先级 | 来源 | CLI 参数 | 适用场景 |
-|--------|------|----------|----------|
-| 1 | 用户显式传入 | `--target-group` | 临时指定 |
-| 2 | target_profiles.yaml 匹配 | `--target-profile-file` | 常用 target 车型 |
-| 3 | watchlist 只有一个 dominant group | — | 竞品全部在同一战场 |
-| 4 | 无法解析 | — | 退化为 priority 排序 |
-
-### 三个核心概念的职责
-
-| 概念 | 位置 | 职责 | 建议 |
-|------|------|------|------|
-| **target_profiles.yaml** | `configs/target_profiles.yaml` | 目标车型画像，包含 brand/model/group | 不建议为了匹配 group 把目标车型硬塞进竞品表 |
-| **watchlist CSV** | `configs/ls8_competitor_watchlist.csv` | 竞品池，所有 active 竞品列表 | 只放竞品，不包含目标车型 |
-| **target_group** | 运行时解析 | 战场边界，决定哪些竞品优先关注 | 从 profile 自动推导，也可手动指定 |
-
-### 状态字段说明
-
-| 字段 | 说明 | 示例值 |
-|------|------|--------|
-| target_group | 解析后的竞争分组 | 大六座新能源 SUV |
-| target_group_source | target_group 来源 | manual / target_profile / dominant_watchlist_group / unknown |
-| group_field_available | watchlist CSV 是否存在 group 字段 | 是 / 否 |
-| target_group_resolved | target_group 是否成功解析 | 是 / 否 |
-| group_filter_applied | group 同组优先是否生效（需字段存在 + 解析成功） | 是 / 否 |
-| fallback_rule | 退化规则说明 | priority_only（target_group 未解析） |
-
-## Watchlist Schema Normalization
-
-Watchlist CSV 的字段结构已经标准化，区分"产品战场"和"品牌阵营"两个维度：
-
-### 字段职责
-
-| 字段 | 职责 | 用于 | 示例 |
-|------|------|------|------|
-| `battle_field_id` | **产品战场** — 用于竞品匹配（主字段） | 同战场竞品筛选 | `large_six_seat_suv` |
-| `ecosystem_group` | **品牌阵营** — 用于解释来源结构 | 展示、信息分类 | 新势力SUV |
-| `group`（legacy） | **旧分组字段** — 仅做 fallback | 向后兼容 | — |
-| `priority` | **战场内部排序** | 同战场内排序 | high / medium |
-| `active` | **是否进入候选池** | active 过滤 | true / false |
-
-### competitor_match_field 匹配优先级
-
-1. **battle_field_id**（主字段）— CSV 中存在且非空时使用
-2. **ecosystem_group**（第一 fallback）— 当 battle_field_id 未提供时使用
-3. **group**（第二 fallback）— 向后兼容 legacy CSV
-
-## Group Taxonomy Normalization
-
-Watchlist CSV 中的 `group` 字段和 target_profiles.yaml 中的 `group` 字段可能写法不一致（如"新势力SUV" vs "大六座新能源 SUV"）。Group Taxonomy 通过 `configs/battle_fields.yaml` 建立一个统一的**竞争战场分类体系**，用 canonical `group_id` 进行同组匹配，而不是依赖中文字符串硬匹配。
-
-### 分类体系结构
-
-```yaml
-battle_fields:
-  - id: large_six_seat_suv          # 稳定的机器字段，用于匹配
-    label: 大六座新能源 SUV          # 展示文本
-    aliases:                         # 兼容 CSV / target_profiles 中的不同写法
-      - 大六座新能源SUV
-      - 大六座 SUV
-```
-
-| 字段 | 用途 | 示例 |
+| 组件 | 位置 | 职责 |
 |------|------|------|
-| `id` | 稳定的 group_id，用于跨配置匹配 | `large_six_seat_suv` |
-| `label` | 展示文本 | 大六座新能源 SUV |
-| `aliases` | 兼容 CSV / target_profiles 中不同写法 | `大六座新能源SUV`, `大六座 SUV` |
+| ChatGPT Plan | `plan_templates/` | 用户复制到 ChatGPT Plan 的自然语言任务描述 |
+| Prompt 模板 | `prompts/` | 标准化的搜索/分析 Prompt，含变量占位、输出格式、校验规则 |
+| 配置 | `configs/` | 事件类型、信源分层、战场分类、目标画像的 YAML 定义 |
+| Schema | `schemas/` | JSON Schema 定义事件证据和简报的输出结构 |
+| Search Adapter | `search_adapters/` | 可选搜索后端经验文档（当前仅 Volc Search） |
+| Validator | `examples/validate_ai_response.py` | 校验 AI 返回结果的结构和来源标注 |
+| Normalizer | `examples/normalize_ai_response.py` | 将 AI raw.md 转换为标准化 evidence JSON |
+| Promptbuilder CLI | `promptbuilder.py` | 旧版 CLI，渲染 `templates/search_task_prompt.md` |
 
-### 归一化流程
+## 旧 auto_launch_monitor.py
 
-1. `load_battle_fields()` 加载 `battle_fields.yaml`
-2. `build_group_alias_map()` 构建 `别名 → group_id` 映射表
-3. Watchlist 加载后，每个条目的 `group` 通过 `normalize_group()` 转为 canonical `group_id`
-4. Target profile 的 `group` 同样归一化
-5. `derive_competitors()` 使用 canonical `group_id` 进行同组匹配
+`research_scripts/auto_launch_monitor.py` 已下线，不再保留运行入口。
 
-### 状态字段说明
+旧方案是一个 3264 行的单体搜索+提取+裁判脚本，包含火山方舟搜索、Firecrawl（已不可用）、正则提取、LLM Judge、聚合输出等逻辑。
 
-| 字段 | 说明 |
-|------|------|
-| `group_normalization_applied` | Group taxonomy 是否已加载并应用 |
-| `same_group_competitor_count` | 同组竞品数量 |
-| `supplemented_from_other_groups` | 从其他 group 补充的数量 |
-| `group_taxonomy_warning` | 如果同组竞品为 0，输出 warning |
+**已迁移的资产**：
 
-### 三个配置文件的关系
+| 资产 | 旧位置 | 新位置 |
+|------|--------|--------|
+| watchlist 配置 | inline + CSV | `configs/ls8_competitor_watchlist.csv`（路径不变） |
+| event types 定义 | inline | `configs/event_types.yaml` |
+| source tiers 定义 | inline | `configs/source_tiers.yaml` |
+| battle fields 分类 | inline | `configs/battle_fields.yaml` |
+| target profiles | inline | `configs/target_profiles.yaml` |
+| LLM Judge Prompt | inline | `prompts/llm_judge.md` |
+| 火山搜索 API 经验 | inline | `search_adapters/volc_search.md` |
+| validate/normalize | — | `examples/validate_ai_response.py` + `normalize_ai_response.py` |
 
-| 文件 | 职责 | 更新频率 |
-|------|------|----------|
-| `battle_fields.yaml` | 战场分类体系（规范） | 低频（定义新战场时） |
-| `target_profiles.yaml` | 目标车型画像 | 低频（有新的 target 车型时）|
-| `ls8_competitor_watchlist.csv` | 竞品池 | 高频（竞品变化时） |
+**已下线的内容**：
+- `research_scripts/auto_launch_monitor.py` → 替换为迁移说明
+- `tests/scripts/test_auto_launch_monitor.py` → 删除（3781 行，仅服务旧脚本）
+- Makefile `auto-launch-monitor` target → 删除
 
-## Watchlist Adapter
+## 与 MIIT 新车公告的关系
 
-支持从 CSV watchlist 自动推导竞品列表，无需手动输入 `--competitors`。
+MIIT 新车公告监控（`research_scripts/miit_new_car/`）与 Auto Launch 是**两个独立架构，不直接合并**。
 
-### 参数
+| 维度 | MIIT | Auto Launch |
+|------|------|-------------|
+| 信息源 | 工信部 EIDC 官网（结构化 DOC） | 公开网络：官网/垂媒/社交媒体 |
+| 方式 | Python 直接抓取 + 解析 | ChatGPT Plan + Prompt |
+| 输出 | 公告信号简报 + evidence JSON | 事件证据 JSON + 影响评估 |
+| 关系 | **官方前置信号源** | 消费 MIIT 信号做市场分析 |
 
-| 参数 | 说明 | 示例 |
-|------|------|------|
-| `--targets-file` | watchlist CSV 文件路径 | `mashang_workspace/configs/ls8_competitor_watchlist.csv` |
-| `--competitor-limit` | 推导竞品的最大数量（默认 5） | `5` |
-| `--include-priority` | 按优先级筛选：high / medium / all（默认 all） | `high` |
+MIIT 输出 `potential_event_signal`，不直接并入 auto_launch 管线。
 
-### 参数优先级
-
-1. **手动 `--competitors`** — 最高优先级，显式传入时不使用 watchlist
-2. **`--targets-file` + `--target-model`** — 从 watchlist 自动推导竞品
-3. **两者均无** — 保持当前行为，Prompt 中 competitors 标记为 `user_provided_required`
-
-### 三个核心字段
-
-| 字段 | 职责 | 示例 | 缺失时行为 |
-|------|------|------|-----------|
-| `group` | **战场边界** — 同一 group 的车型视为直接竞品 | 新势力SUV、华为系SUV | 退化为仅按 priority 排序，推导说明中注明 |
-| `priority` | **战场内部排序** — 同 group 内高优先级先入选 | high / medium | 默认为 medium |
-| `active` | **是否进入候选池** — 仅 active=true 参与推导 | true / false | 视为全部 active，推导说明中注明 |
-
-### 推导规则
-
-1. 默认只使用 **active=true** 的车型（如字段不存在则使用全部）
-2. 排除目标车型自身（根据 brand + model 匹配）
-3. 识别目标车型所在 **group**，记为 target_group
-4. **优先选择同 group 竞品**，同 group 内按 priority 排序：high → medium → low
-5. 如果同 group 竞品数量不足 `--competitor-limit`，再从**其他 group 的 high priority** 中补充
-6. 最终按 `--competitor-limit` 截断
-
-### 竞品来源标记
-
-生成的 Prompt 中 `competitor_source` 字段标记竞品来源：
-
-| 值 | 含义 |
-|----|------|
-| `manual` | 用户手动传入 `--competitors` |
-| `watchlist` | 从 watchlist 自动推导 |
-| `watchlist_empty` | watchlist 未推导出竞品（目标车型不在 watchlist 中） |
-| `user_provided_required` | 未指定竞品，需用户手动补充 |
-
-### 字段映射
-
-watchlist CSV 中的字段通过候选映射表自动匹配，不依赖固定列名：
-
-| 规范字段 | 候选列名 |
-|----------|---------|
-| brand | brand, brand_name, make |
-| model | model, model_name, model_code |
-| priority | priority, tier, level |
-| group | group, segment, battle_field, competitor_group, category |
-| display_name | display_name, name, competitor_name, full_name |
-| active | active, enabled, is_active |
-
-## Golden Prompt Cases
-
-`outputs/auto_launch/prompts/examples/` 下存放标准 Prompt 样例，用于验证 Promptbuilder 的稳定性。
-
-每个 case 包含两个文件：
-- `{case_name}.md` — 生成的搜索 Prompt
-- `{case_name}.metadata.json` — 输入参数、竞品来源、校验结果
-
-### 生成
-
-```bash
-make build-auto-launch-golden-prompts
-```
-
-### 当前 Cases
-
-| Case | case_type | Event 车型 | 本品车型 | 事件 | 窗口 | 竞品来源 |
-|------|-----------|-----------|---------|------|------|----------|
-| ledao_l80_launch_48h_vs_ls8 | impact_vs_our_model | 乐道 L80 | 智己 LS8 | 上市 | 48h | watchlist |
-| wenjie_m7_launch_72h_vs_ls8 | impact_vs_our_model | 问界 M7 | 智己 LS8 | 上市 | 72h | watchlist |
-| xiaomi_yu7_launch_72h_vs_competitors | **general_event_intelligence** | 小米 YU7 | （未指定） | 上市 | 72h | manual |
-| byd_datang_ev_launch_7d_vs_ls8 | impact_vs_our_model | **比亚迪 大唐EV** | **智己 LS8** | 上市 | 7d | watchlist |
-
-### 校验规则
-
-每个 Prompt 必须通过以下校验：
-1. 无未渲染占位符
-2. 包含目标品牌和车型
-3. 包含事件类型
-4. 包含时间窗口
-5. 包含至少 1 个竞品
-6. 包含 evidence schema 要求
-7. 包含全部 6 个检索模块
-
-### 用法示例
-
-```bash
-# 从 watchlist 自动推导竞品
-python mashang_workspace/promptbuilders/auto_launch/promptbuilder.py \
-  --brand 智己 \
-  --model LS8 \
-  --event-type 上市 \
-  --event-date 2026-06-25 \
-  --window 48h \
-  --targets-file mashang_workspace/configs/ls8_competitor_watchlist.csv \
-  --competitor-limit 5 \
-  --include-priority high
-
-# 手动指定竞品（优先级更高）
-python mashang_workspace/promptbuilders/auto_launch/promptbuilder.py \
-  --brand 智己 \
-  --model LS6 \
-  --event-type 上市 \
-  --event-date 2026-06-25 \
-  --window 48h \
-  --competitors "小鹏G6,特斯拉Model Y,问界M5"
-```
-
-## 输入参数
-
-| 参数 | 说明 | 示例 |
-|------|------|------|
-| `--brand` | 品牌（必填） | 智己 |
-| `--model` | 车型（必填） | LS6 |
-| `--event-type` | 事件类型（必填） | 上市 |
-| `--event-date` | 事件日期（与 --window 搭配） | 2026-06-25 |
-| `--window` | 时间窗口：48h / 72h / 7d / 14d | 48h |
-| `--start` | 自定义开始日期（优先级高于 event-date） | 2026-06-23 |
-| `--end` | 自定义结束日期 | 2026-06-27 |
-| `--competitors` | 竞品列表（逗号分隔） | 小鹏G6,Model Y |
-| `--output` | 输出路径 | outputs/auto_launch/prompts/task.md |
-
-## Migration from auto_launch_monitor
-
-`mashang_workspace/research_scripts/auto_launch_monitor.py` 是旧版搜索+执行+裁判一体脚本（v0.5.8），**已标记 DEPRECATED**。
-
-| 维度 | 旧 auto_launch_monitor | 新 promptbuilder |
-|------|----------------------|-----------------|
-| 定位 | 搜索+提取+裁判一体 | 搜索 Prompt 生成器 |
-| 搜索能力 | 内置 Huoshan 方舟搜索 API 调用 | ❌ 不直接搜索（生成 Prompt → 交给 AI 执行） |
-| LLM Judge | 内置 DeepSeek LLM 裁判 | ❌ 不调用 LLM |
-| 事件检测 | 规则引擎 + 评分卡 + 多级过滤 | ❌ 不执行事件检测（委托 AI 搜索能力） |
-| 事件类型 | 内置 8 种 + CLI 参数 | 从 configs/event_types.yaml 读取 |
-| 信源分层 | 内置域名列表 + CLI 参数 | 从 configs/source_tiers.yaml 读取 |
-| Watchlist | CSV 文件加载 + 别名匹配 + 冲突检测 | ❌ 不内置（CLI 传入 --competitors） |
-| 输出 | JSON/Markdown 报告 | 搜索 Prompt Markdown 文件 |
-
-### 已迁移的概念
-
-| 旧能力 | 新位置 | 说明 |
-|--------|--------|------|
-| event_types | `configs/event_types.yaml` | 10 种事件类型，含搜索关键词和必需模块 |
-| source_types (信源分层) | `configs/source_tiers.yaml` | 3 层信源（Tier 1 官方 / Tier 2 垂媒 / Tier 3 社交） |
-| 6 大检索模块 | `templates/search_task_prompt.md` | 事件确认/价格权益/产品定位/竞品对标/媒体反馈/影响判断 |
-| evidence schema | `templates/evidence_schema.json` | JSON 输出 schema，含证据溯源 |
-| 输出文件命名 | `promptbuilder.py` `--output` | 统一管理 |
-
-### 暂不迁移的旧能力
-
-| 旧能力 | 不迁移理由 |
-|--------|-----------|
-| 搜索 API 调用（Huoshan/火山引擎） | promptbuilder 职责是生成 Prompt，搜索由 AI 执行 |
-| LLM Judge（DeepSeek 裁判） | 同上 |
-| 事件提取规则引擎 | 委托 AI 搜索能力完成 |
-| 别名匹配 + 冲突检测 | 委托 AI 搜索能力完成 |
-| crawl diagnostics | 不再需要（无爬取） |
-| 低质量来源过滤（polluted snippet） | 委托 AI 搜索能力完成 |
-| 2 个 Config CSV（watchlist / targets） | 通过 `--competitors` CLI 参数传入 |
-
-## 核心问题
-
-Auto Launch Promptbuilder 支持两种用法场景：
-
-| 场景 | case_type | 说明 | CLI 参数要求 |
-|------|-----------|------|-------------|
-| **竞品事件对本品影响分析** | `impact_vs_our_model` | 判断某竞品的上市/预售/发布事件对我方本品的影响 | 必填 `--our-brand`/`--our-model` |
-| **单车型上市事件情报检索** | `general_event_intelligence` | 收集某车型上市事件的市场信息（无本产品对照） | 无需 `--our-brand`/`--our-model` |
-
-推荐主线是 **impact_vs_our_model**，这是 auto_launch Promptbuilder 的核心业务价值。
-
-核心问题：
-> **某竞品市场事件，对我方本品造成什么影响？**
-
-系统区分三个业务角色：
-
-| 角色 | CLI 参数 | 说明 |
-|------|----------|------|
-| **event_model** | `--event-brand` / `--event-model` | 本次发生上市/预售/发布等事件的车型 |
-| **our_model** | `--our-brand` / `--our-model` | 我方被影响车型（本品） |
-| **competitor_context** | `--competitors` / `--targets-file` | 同战场竞品背景 |
-
-这三个角色在 Prompt 的"业务角色"章节中明确列出，影响判断模块会直接写：
-> "判断 event_model 本次事件对 our_model 的潜在影响，并结合 competitor_context 判断战场压力。"
-
-### 历史参数兼容
-
-`--brand` / `--model` 已弃用，请改用 `--event-brand` / `--event-model`。旧参数仍可使用但会输出 deprecation warning。
-
-## 模块边界
-
-| 维度 | MIIT 模块 | Auto Launch 模块 |
-|------|-----------|-----------------|
-| 信息源 | 工信部 EIDC 官网（结构化 DOC） | 公开网络：官网/垂媒/社交媒体/论坛 |
-| 数据获取方式 | Python 脚本直接抓取 + 解析 | 生成搜索 Prompt → 交给 AI 搜索能力执行 |
-| 可确认的信息 | 企业名、公告型号、产品大类、能源类型、目录序号 | 商品名、价格、上市时间、配置、权益、舆论 |
-| 不可确认的信息 | 商品名、价格、上市时间、续航(主公告) | 资质真实性（需 MIIT 交叉验证） |
-| 核心输出 | 公告信号简报 + evidence JSON | 搜索任务 Prompt + 搜索结果摘要 |
-| 职责分界 | **公告事实**：参数、目录、资质 | **市场信号**：上市传播、价格权益、媒体舆论、竞品对标、用户反馈 |
-
-## Raw-first Workflow
-
-Auto Launch 采用 **Raw-first** 策略：AI 原始返回（raw.md）是主报告，其余文件均为辅助产物。
-
-### 报告产物优先级
-
-| 优先级 | 文件 | 定位 | 是否可读 |
-|--------|------|------|----------|
-| 1 | `report.raw.md` | **主报告** — AI 原始返回，原样保留 | ✅ 是，完整信息 |
-| 2 | `executive_brief.md` | 一页摘要 — 不替代 raw.md，标注"以 raw.md 为准" | ✅ 是 |
-| 3 | `report.index.json` | 机器索引 — event / price / threat / competitors 概要 | ❌ JSON |
-| 4 | `report.quality.json` | 质量检查 — validation / schema_gaps / evidence_risk | ❌ JSON |
-| 5 | `normalized_evidence.json` | 结构化证据 — 用于索引和质量检查 | ❌ JSON |
-
-### 完整链路
+## 短期 Workflow
 
 ```
-promptbuilder.py → 搜索 Prompt (Golden Prompt)
-        ↓ (粘贴到 DeepSeek/ChatGPT)
-    AI 返回 raw.md
-        ↓
+ChatGPT Plan 执行（用户复制 plan_template 到 ChatGPT）
+    │
+    ▼ 输出 Markdown / JSON（含来源链接）
+人工保存到 outputs/auto_launch/ai_response_examples/*.raw.md
+    │
+    ▼
 validate_ai_response.py → validation.json
+    │
+    ▼
 normalize_ai_response.py → normalized_evidence.json
-package_ai_report.py → report.raw.md + executive_brief.md + report.index.json + report.quality.json
+                         → executive_brief.md
+    │
+    ▼
+后续进入 mashang-service（入库、复盘、报告沉淀）
 ```
 
-### 说明
-
-- **battle_brief.md** 已标记为 `[EXPERIMENTAL]`，不再是主报告。完整业务判断请以 `report.raw.md` 为准。
-- **auto_launch_monitor.py** 仍未删除，v0.6 再处理 Legacy Cleanup。
-
-## 文件结构
+## 目录结构
 
 ```
 promptbuilders/auto_launch/
-├── README.md                        # 本文件
-├── promptbuilder.py                 # CLI 入口
-├── templates/
-│   ├── search_task_prompt.md        # 搜索任务 Prompt 模板
-│   └── evidence_schema.json         # 输出 JSON schema
-└── configs/
-    ├── event_types.yaml             # 事件类型定义
-    └── source_tiers.yaml            # 信源分层配置
+├── README.md                  # 本文件
+├── promptbuilder.py           # CLI Prompt 渲染入口（旧，保留兼容）
+├── prompts/                   # 标准 Prompt 模板
+│   ├── daily_radar.md         # 日报
+│   ├── event_48h_brief.md     # 48h 简报
+│   ├── event_72h_followup.md  # 72h 跟踪
+│   ├── impact_vs_our_model.md # 影响评估
+│   └── llm_judge.md           # LLM 裁判（从旧 monitor 迁移）
+├── plan_templates/            # ChatGPT Plan 任务描述
+│   ├── chatgpt_plan_daily_radar.md
+│   └── chatgpt_plan_event_48h.md
+├── configs/                   # 配置
+│   ├── event_types.yaml
+│   ├── source_tiers.yaml
+│   ├── battle_fields.yaml
+│   └── target_profiles.yaml
+├── schemas/                   # JSON Schema
+│   ├── auto_launch_event.schema.json
+│   └── auto_launch_brief.schema.json
+├── search_adapters/           # 可选搜索后端经验
+│   ├── README.md
+│   └── volc_search.md
+├── validators/                # 质量保证层参考
+│   └── README.md
+├── templates/                 # 旧模板（保留兼容）
+│   ├── search_task_prompt.md
+│   └── evidence_schema.json
+└── examples/                  # 实现脚本 + 示例
+    ├── validate_ai_response.py
+    ├── normalize_ai_response.py
+    ├── package_ai_report.py
+    ├── build_battle_brief.py
+    ├── validate_battle_brief.py
+    ├── generate_golden_cases.py
+    ├── README.md
+    └── fixtures/
 ```
 
-## 六大检索模块
+## 快速参考
 
-1. **事件确认** — 车型、时间、地点、官方渠道
-2. **价格与权益** — 售价、定金、限时权益、金融方案
-3. **产品定位与核心卖点** — 尺寸、续航、智驾、动力、差异化卖点
-4. **竞品对标** — 价格、配置、参数交叉对比
-5. **媒体与用户反馈** — 媒体评价、用户舆情、订单热度
-6. **对我方车型影响判断** — 重叠度、威胁评估、应对建议
+```bash
+# 生成搜索 Prompt（旧 promptbuilder，兼容入口）
+make build-auto-launch-prompt
+
+# 生成 Golden Prompt 样例
+make build-auto-launch-golden-prompts
+
+# 校验 AI 返回结果
+make validate-auto-launch-ai-response
+
+# 归一化 + 打包报告
+make build-auto-launch-byd-datang-report
+
+# 查询配置
+#   configs/event_types.yaml       事件类型定义
+#   configs/source_tiers.yaml      信源分层
+#   configs/battle_fields.yaml     战场分类
+#   configs/target_profiles.yaml   目标画像
+#   ../../configs/ls8_competitor_watchlist.csv  竞品池
+```
