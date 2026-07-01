@@ -277,6 +277,40 @@ def compute_ls6_reev_metrics(df: pd.DataFrame) -> pd.DataFrame:
         "avg_ratio": [avg_ratio] * len(idx)
     })
 
+def compute_ls8_66_metrics(df: pd.DataFrame) -> pd.DataFrame:
+    if "lock_time" not in df.columns or "series" not in df.columns:
+        raise KeyError("缺少 lock_time 或 series 列")
+    df_ls8 = df[df["series"] == "LS8"].copy()
+    df_ls8["lock_time"] = pd.to_datetime(df_ls8["lock_time"], errors="coerce")
+    df_ls8 = df_ls8[df_ls8["lock_time"].notna()]
+    launch_date = pd.Timestamp("2026-04-16")
+    df_ls8 = df_ls8[df_ls8["lock_time"] >= launch_date]
+    if df_ls8.empty:
+        return pd.DataFrame()
+    df_ls8["is_66"] = df_ls8["product_name"].apply(lambda x: "66" in str(x)).astype(int)
+    end_date = pd.Timestamp(date.today())
+    idx = pd.date_range(launch_date.date(), end_date.date(), freq="D").date
+    daily_total = df_ls8.groupby(df_ls8["lock_time"].dt.date)["order_number"].nunique().reindex(idx, fill_value=0)
+    daily_66 = df_ls8.groupby(df_ls8["lock_time"].dt.date).apply(
+        lambda g: int(g[g["is_66"] == 1]["order_number"].nunique()), include_groups=False
+    ).reindex(idx, fill_value=0)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        ratio = (daily_66 / daily_total) * 100.0
+    ratio = ratio.replace([np.inf, -np.inf], np.nan)
+    ratio_ma7 = ratio.rolling(window=7, min_periods=1).mean()
+    total_count = int(daily_total.sum())
+    count_66 = int(daily_66.sum())
+    avg_ratio = (count_66 / total_count * 100.0) if total_count > 0 else 0.0
+    return pd.DataFrame({
+        "axis_date": idx,
+        "daily_total": daily_total.values,
+        "daily_66": daily_66.values,
+        "ratio_raw": ratio.values,
+        "ratio_ma7": ratio_ma7.values,
+        "avg_ratio": [avg_ratio] * len(idx)
+    })
+
+
 def compute_reev_product_breakdown(df: pd.DataFrame) -> dict:
     """计算所有增程车型各配置内部占比 (2025 vs 2026) - 日销量占比 MA7。
     分母：当日所有增程车型总销量。
@@ -637,6 +671,63 @@ def build_ls6_reev_figure(df: pd.DataFrame) -> go.Figure:
     apply_zh_theme(fig)
     return fig
 
+def build_ls8_66_figure(df: pd.DataFrame) -> go.Figure:
+    fig = go.Figure()
+    if df.empty:
+        return fig
+    custom_data = np.stack((
+        pd.Series(df["daily_total"]).fillna(0),
+        pd.Series(df["daily_66"]).fillna(0),
+        pd.Series(df["ratio_ma7"]).fillna(0)
+    ), axis=-1)
+    def end_label(series):
+        text = [""] * len(series)
+        last = pd.Series(series).last_valid_index()
+        if last is not None:
+            text[-1] = f"<b>{series[last]:.1f}%</b>"
+        return text
+    text_end = end_label(pd.Series(df["ratio_ma7"]))
+    fig.add_trace(go.Scatter(
+        x=df["axis_date"], y=df["ratio_raw"],
+        name="每日占比 (Raw)",
+        mode="markers",
+        marker=dict(color=COLOR_DARK, size=5, opacity=0.5),
+        customdata=custom_data,
+        hovertemplate=(
+            "Raw 占比: %{y:.1f}%<br>当日总量: %{customdata[0]:.0f}<br>当日 66: %{customdata[1]:.0f}<extra></extra>"
+        )
+    ))
+    fig.add_trace(go.Scatter(
+        x=df["axis_date"], y=df["ratio_ma7"],
+        name="LS8 66度占比 (MA7)",
+        mode="lines+text",
+        text=text_end, textposition="middle right",
+        textfont=dict(color=ZH['event'], size=12), cliponaxis=False,
+        line=dict(color=ZH['event'], width=3),
+        customdata=custom_data,
+        hovertemplate=(
+            "MA7 占比: %{y:.1f}%<br>当日总量: %{customdata[0]:.0f}<br>当日 66: %{customdata[1]:.0f}<extra></extra>"
+        )
+    ))
+    avg = float(df["avg_ratio"].iloc[0]) if "avg_ratio" in df.columns else 0.0
+    fig.add_trace(go.Scatter(
+        x=[df["axis_date"].min(), df["axis_date"].max()],
+        y=[avg, avg],
+        name=f"整体均值 ({avg:.1f}%)",
+        mode="lines",
+        line=dict(color=ZH['own'], width=1.5, dash="dash"), opacity=0.6, hoverinfo="skip"
+    ))
+    fig.update_layout(
+        title="LS8 66度电占比趋势 (MA7, 上市至今)",
+        xaxis=dict(title="日期", dtick="M1", tickformat="%Y-%m-%d"),
+        yaxis=dict(title="66度占比 (MA7, %)", range=[0, 105]),
+        legend=dict(bordercolor=ZH['neutral'], borderwidth=1, font=dict(color=ZH['neutral']),
+                    orientation="v", yanchor="top", y=1, xanchor="left", x=1.02),
+        hovermode="x unified", margin=dict(l=60, r=80, t=80, b=60), height=600
+    )
+    apply_zh_theme(fig)
+    return fig
+
 def build_reev_product_breakdown_figure(metrics_dict: dict) -> go.Figure:
     """绘制所有增程车型各配置内部占比趋势图 (MA7 Smoothed, 2025 vs 2026)。"""
     fig = go.Figure()
@@ -833,6 +924,16 @@ def main():
         import traceback
         traceback.print_exc()
         fig3 = None
+
+    print("🔄 计算指标 4 (LS8 66度占比)...")
+    try:
+        ls8_metrics = compute_ls8_66_metrics(df)
+        fig4 = build_ls8_66_figure(ls8_metrics)
+    except Exception as e:
+        print(f"❌ 计算 LS8 66度占比失败: {e}")
+        import traceback
+        traceback.print_exc()
+        fig4 = None
     
     out_path.parent.mkdir(parents=True, exist_ok=True)
     
@@ -850,6 +951,9 @@ def main():
         if fig3:
             f.write("<br><hr><br>")
             f.write(fig3.to_html(full_html=False, include_plotlyjs=False))
+        if fig4:
+            f.write("<br><hr><br>")
+            f.write(fig4.to_html(full_html=False, include_plotlyjs=False))
         f.write("</body></html>")
         
     print("✅ 完成!")

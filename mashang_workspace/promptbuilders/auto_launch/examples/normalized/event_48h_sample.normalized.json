@@ -1,0 +1,324 @@
+{
+  "record_type": "brief",
+  "record_key": "brief_wenjie_m7_launch_2026-07-20_vs_ls8",
+  "our_model": "智己 LS8",
+  "event_model": "问界 M7",
+  "event_brand": "问界",
+  "event_type": "launch",
+  "battle_field": "large_six_seat_suv",
+  "time_window": {
+    "start": "2026-07-18",
+    "end": "2026-07-22"
+  },
+  "confidence_level": "medium",
+  "source_items": [
+    {
+      "tier": 1,
+      "name": "问界官网",
+      "url": "https://example.com/source-b1",
+      "evidence": "问界 M7 上市售价及配置"
+    },
+    {
+      "tier": 1,
+      "name": "问界 App",
+      "url": "https://example.com/source-b3",
+      "evidence": "定金及限时权益"
+    },
+    {
+      "tier": 2,
+      "name": "懂车帝",
+      "url": "https://example.com/source-b2",
+      "evidence": "媒体评测报道"
+    },
+    {
+      "tier": 2,
+      "name": "汽车之家",
+      "url": "https://example.com/source-b4",
+      "evidence": "对比评测"
+    },
+    {
+      "tier": 3,
+      "name": "乐道论坛",
+      "url": "https://example.com/source-b5",
+      "evidence": "用户讨论"
+    }
+  ],
+  "confirmed_facts": [
+    "问界 M7 于 2026-07-20 正式上市",
+    "售价 24.98-32.98 万元，分 4 个版本",
+    "定金 2000 元，前 10000 名赠送智驾全功能包",
+    "官宣 24h 订单突破 8000"
+  ],
+  "inferences": [
+    "问界 M7 与智己 LS8 价格带重叠度高，可能剥夺部分客户",
+    "智驾全功能包作为限时权益，可能提升转化率"
+  ],
+  "unconfirmed_claims": [
+    "部分用户担心交付时间过长（论坛传言）",
+    "智己可能在近期调整 LS8 权益以应对（主播提及）"
+  ],
+  "missing_evidence": [
+    "智己 LS8 在问界 M7 上市后的每日锁单变化",
+    "问界 M7 各版本的订单比例分布",
+    "智己对问界 M7 上市的官方反应"
+  ],
+  "followup_recommendation": {
+    "action": "monitor_72h",
+    "reasoning": "上市初期订单数据已出，但对智己 LS8 的实际影响尚未可观测，建议 72h 跟踪锁单变化"
+  },
+  "raw": {
+    "$note": "此样本数据仅用于结构测试，不代表真实事实。来源 URL 为虚构。",
+    "brief_id": "brief_wenjie_m7_launch_2026-07-20_vs_ls8",
+    "title": "问界 M7 上市 48h 简报",
+    "executive_summary": "问界 M7 于 2026-07-20 正式上市，售价 24.98-32.98 万元，与智己 LS8 价格带重叠度较高，威胁等级 3/5",
+    "our_model": "智己 LS8",
+    "event_model": "问界 M7",
+    "event_brand": "问界",
+    "event_type": "launch",
+    "event_date": "2026-07-20",
+    "battle_field": "large_six_seat_suv",
+    "time_window": {
+      "start": "2026-07-18",
+      "end": "2026-07-22"
+    },
+    "sections": [
+      {
+        "heading": "事件概要",
+        "content": {
+          "事件名称": {
+            "value": "问界 M7 新品上市发布会",
+            "confidence": "confirmed_fact",
+            "source_urls": [
+              {
+                "tier": 1,
+                "name": "问界官网",
+                "url": "https://example.com/source-b1"
+              }
+            ]
+          },
+          "日期": {
+            "value": "2026-07-20",
+            "confidence": "confirmed_fact",
+            "source_urls": [
+              {
+                "tier": 1,
+                "name": "问界官网",
+                "url": "https://example.com/source-b1"
+              }
+            ]
+          },
+          "地点": {
+            "value": "深圳",
+            "confidence": "confirmed_fact",
+            "source_urls": [
+              {
+                "tier": 1,
+                "name": "问界官网",
+                "url": "https://example.com/source-b1"
+              }
+            ]
+          },
+          "一句话总结": {
+            "value": "问界 M7 全系上市，售价 24.98-32.98 万，与智己 LS8 直接竞争",
+            "confidence": "confirmed_fact",
+            "source_urls": [
+              {
+                "tier": 1,
+                "name": "问界官网",
+                "url": "https://example.com/source-b1"
+              },
+              {
+                "tier": 2,
+                "name": "懂车帝",
+                "url": "https://example.com/source-b2"
+              }
+            ]
+          }
+        },
+        "sources": [
+          {
+            "tier": 1,
+            "name": "问界官网",
+            "url": "https://example.com/source-b1"
+          },
+          {
+            "tier": 2,
+            "name": "懂车帝",
+            "url": "https://example.com/source-b2"
+          }
+        ]
+      },
+      {
+        "heading": "价格与权益",
+        "content": {
+          "售价": {
+            "value": "24.98-32.98 万元",
+            "confidence": "confirmed_fact",
+            "source_urls": [
+              {
+                "tier": 1,
+                "name": "问界官网",
+                "url": "https://example.com/source-b1"
+              }
+            ]
+          },
+          "定金": {
+            "value": "2000 元拕保金，前 10000 名赠送智驾全功能包",
+            "confidence": "confirmed_fact",
+            "source_urls": [
+              {
+                "tier": 1,
+                "name": "问界 App",
+                "url": "https://example.com/source-b3"
+              }
+            ]
+          },
+          "限时权益": {
+            "value": "前 5000 名赠送吉利中旗下更换补贴",
+            "confidence": "confirmed_fact",
+            "source_urls": [
+              {
+                "tier": 1,
+                "name": "问界 App",
+                "url": "https://example.com/source-b3"
+              }
+            ]
+          }
+        },
+        "sources": [
+          {
+            "tier": 1,
+            "name": "问界 App",
+            "url": "https://example.com/source-b3"
+          }
+        ]
+      },
+      {
+        "heading": "媒体与用户反馈",
+        "content": {
+          "媒体评价": {
+            "value": "多数媒体认为价格具有竞争力，智驾是核心卖点",
+            "confidence": "cross_validated",
+            "source_urls": [
+              {
+                "tier": 2,
+                "name": "懂车帝",
+                "url": "https://example.com/source-b2"
+              },
+              {
+                "tier": 2,
+                "name": "汽车之家",
+                "url": "https://example.com/source-b4"
+              }
+            ]
+          },
+          "用户反馈": {
+            "value": "论坛讨论热度较高，部分用户担心交付时间",
+            "confidence": "unconfirmed_claim",
+            "source_urls": [
+              {
+                "tier": 3,
+                "name": "乐道论坛",
+                "url": "https://example.com/source-b5"
+              }
+            ]
+          },
+          "订单热度": {
+            "value": "官宣 24h 订单突破 8000",
+            "confidence": "confirmed_fact",
+            "source_urls": [
+              {
+                "tier": 1,
+                "name": "问界官微",
+                "url": "https://example.com/source-b6"
+              }
+            ]
+          }
+        },
+        "sources": [
+          {
+            "tier": 1,
+            "name": "问界官微",
+            "url": "https://example.com/source-b6"
+          },
+          {
+            "tier": 2,
+            "name": "懂车帝",
+            "url": "https://example.com/source-b2"
+          },
+          {
+            "tier": 3,
+            "name": "乐道论坛",
+            "url": "https://example.com/source-b5"
+          }
+        ]
+      }
+    ],
+    "impact_dimensions": {
+      "overlap_degree": "high",
+      "threat_level": 3,
+      "reasoning": "问界 M7 价格带 (24.98-32.98万) 与智己 LS8 (23-28万) 重叠度高，且智驾能力和品牌知名度更强，可能剥夺部分关注度"
+    },
+    "sales_response": {
+      "order_change": "暂无智己 LS8 销售数据影响报告",
+      "price_change": "智己尚未调整价格",
+      "source_url": ""
+    },
+    "source_items": [
+      {
+        "tier": 1,
+        "name": "问界官网",
+        "url": "https://example.com/source-b1",
+        "evidence": "问界 M7 上市售价及配置"
+      },
+      {
+        "tier": 1,
+        "name": "问界 App",
+        "url": "https://example.com/source-b3",
+        "evidence": "定金及限时权益"
+      },
+      {
+        "tier": 2,
+        "name": "懂车帝",
+        "url": "https://example.com/source-b2",
+        "evidence": "媒体评测报道"
+      },
+      {
+        "tier": 2,
+        "name": "汽车之家",
+        "url": "https://example.com/source-b4",
+        "evidence": "对比评测"
+      },
+      {
+        "tier": 3,
+        "name": "乐道论坛",
+        "url": "https://example.com/source-b5",
+        "evidence": "用户讨论"
+      }
+    ],
+    "confirmed_facts": [
+      "问界 M7 于 2026-07-20 正式上市",
+      "售价 24.98-32.98 万元，分 4 个版本",
+      "定金 2000 元，前 10000 名赠送智驾全功能包",
+      "官宣 24h 订单突破 8000"
+    ],
+    "inferences": [
+      "问界 M7 与智己 LS8 价格带重叠度高，可能剥夺部分客户",
+      "智驾全功能包作为限时权益，可能提升转化率"
+    ],
+    "unconfirmed_claims": [
+      "部分用户担心交付时间过长（论坛传言）",
+      "智己可能在近期调整 LS8 权益以应对（主播提及）"
+    ],
+    "missing_evidence": [
+      "智己 LS8 在问界 M7 上市后的每日锁单变化",
+      "问界 M7 各版本的订单比例分布",
+      "智己对问界 M7 上市的官方反应"
+    ],
+    "confidence_level": "medium",
+    "followup_recommendation": {
+      "action": "monitor_72h",
+      "reasoning": "上市初期订单数据已出，但对智己 LS8 的实际影响尚未可观测，建议 72h 跟踪锁单变化"
+    }
+  }
+}
