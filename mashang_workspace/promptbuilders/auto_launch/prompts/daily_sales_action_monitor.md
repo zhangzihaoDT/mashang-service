@@ -13,7 +13,7 @@
 
 ## Scope
 
-监控 `mashang_workspace/promptbuilders/auto_launch/configs/ls8_competitor_watchlist.csv` 中 `active=true` 的竞品车型，检查它们在 `{{ time_window }}` 内是否发生 `mashang_workspace/promptbuilders/auto_launch/configs/event_types.yaml` 中定义的销售动作。
+监控 `mashang_workspace/promptbuilders/auto_launch/configs/ls8_competitor_watchlist.csv` 中 `active=true` 的竞品车型，分层检索它们在对应时间窗口内的销售动作信息。
 
 ## Core Rules
 
@@ -126,7 +126,21 @@
 
 `discovery_signals` 不能使用 `high` confidence；`high` confidence 只能用于 `event_candidates`。
 
-### 8. search_audit 字段规则
+### 8. event_date 置信度规则
+
+`event_candidates[].event_date` 必须由以下至少一项支撑：
+1. source publish_time
+2. 官方页面明确权益有效期
+3. 官方公告发布日期
+4. 多个高可信媒体在同一日期报道
+
+如果 `source publish_time=unknown` 且没有明确有效期，**confidence 不得为 high**。
+
+### 9. event_model 命名一致性规则
+
+如果 `event_candidates[].event_model` 与 source 中车型命名**不完全一致**（例如 06 vs 06T、PHEV vs EV），必须进入 `needs_review` 或添加 `review_flags`，**confidence 不得为 high**。
+
+### 10. search_audit 字段规则
 
 `search_audit` 用于记录每个车型的检索覆盖情况，便于判断"没发现"是真的没事件，还是检索覆盖不足。
 
@@ -140,14 +154,23 @@
 
 ## Input Variables
 
-| 变量 | 值 |
-|------|----|
+| 变量 | 说明 |
+|------|------|
 | watchlist_path | `mashang_workspace/promptbuilders/auto_launch/configs/ls8_competitor_watchlist.csv` |
 | event_types_path | `mashang_workspace/promptbuilders/auto_launch/configs/event_types.yaml` |
 | our_model | 智己 LS8 |
 | battle_field | large_six_seat_suv |
-| time_window | {{ time_window }} |
 | monitor_date | {{ monitor_date }} |
+| confirmed_event_window | 24h primary（{{ confirmed_primary_start }}），最多 72h fallback（{{ confirmed_fallback_start }}） |
+| discovery_signal_window | 默认 7 天（{{ discovery_start }}），部分类型可扩展 14 天（{{ discovery_extended_start }}） |
+| context_window | 30 天（{{ context_start }}） |
+
+### 窗口使用规则
+
+- `confirmed_event_window` 用于 `event_candidates`。优先回看 24 小时，最多扩展到 72 小时。
+- `discovery_signal_window` 用于 `discovery_signals`。默认回看 7 天；发布会、预售、上市、交付、配置泄露、媒体预热等可扩展到 14 天。
+- `context_window` 只用于 `search_audit`、背景判断、旧事件排除，**不得直接生成 event_candidates**。
+- 如果只有 `context_window` 信息，没有当前窗口证据，应进入 `search_audit` 或 `needs_review`，而不是 `event_candidates`。
 
 ## Watchlist
 
@@ -175,6 +198,22 @@
   "battle_field": "large_six_seat_suv",
   "our_model": "智己 LS8",
   "monitor_date": "{{ monitor_date }}",
+  "window_policy": {
+    "confirmed_event_window": {
+      "primary_start": "{{ confirmed_primary_start }}",
+      "fallback_start": "{{ confirmed_fallback_start }}",
+      "end": "{{ monitor_date }}"
+    },
+    "discovery_signal_window": {
+      "default_start": "{{ discovery_start }}",
+      "extended_start": "{{ discovery_extended_start }}",
+      "end": "{{ monitor_date }}"
+    },
+    "context_window": {
+      "start": "{{ context_start }}",
+      "end": "{{ monitor_date }}"
+    }
+  },
   "time_window": {
     "start": "{{ time_window_start }}",
     "end": "{{ time_window_end }}"
@@ -267,6 +306,8 @@
 8. **discovery_signals 中的 confidence 不允许为 high**；high confidence 只能用于 event_candidates
 9. 如果某车型没有 event_candidate 也没有 discovery_signal，才进入 no_event_models
 10. 每个车型都应有一条 search_audit 记录
+11. **event_date 必须可追溯**：至少由 source publish_time、官方有效期、官方公告日期或多源同日报道之一支撑；source publish_time=unknown 且无明确有效期的，confidence 不得为 high
+12. **event_model 与 source 中车型命名必须一致**：若不完全一致（如 06 vs 06T、PHEV vs EV），必须进入 needs_review 或添加 review_flags，confidence 不得为 high
 
 ## Uncertainty Rules
 

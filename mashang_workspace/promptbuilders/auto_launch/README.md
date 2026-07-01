@@ -72,6 +72,23 @@ intake 流程自动检测输入类型：
 - 如果 `task_name == "auto_launch_daily_sales_action_monitor"` → 走 Daily Monitor 分支
 - 否则 → 走旧 brief/event 分支
 
+## Daily Monitor Window Policy
+
+Daily 是运行频率，不是检索窗口。
+
+| 层级 | 窗口 | 用途 | 输出字段 |
+|------|------|------|----------|
+| confirmed_event_window | 24h primary，最多 72h fallback | 已确认销售动作 | event_candidates |
+| discovery_signal_window | 默认 7 天，部分类型可扩展 14 天 | 销售弱信号发现 | discovery_signals |
+| context_window | 30 天 | 历史背景、权益到期、旧事件排除 | search_audit / context only |
+
+关键规则：
+- `confirmed_event_window` 用于 `event_candidates`，`discovery_signal_window` 用于 `discovery_signals`
+- `context_window` 不可直接生成 confirmed event
+- `source_publish_time=unknown` 且无明确有效期的官方权益页，不能直接 high confidence
+- 车型命名或动力形式口径不一致，需要 `review_flags` 或 `needs_review`
+- `window_policy` 可选，旧输出兼容
+
 ### Daily Monitor 分支产出
 
 | 文件 | 说明 |

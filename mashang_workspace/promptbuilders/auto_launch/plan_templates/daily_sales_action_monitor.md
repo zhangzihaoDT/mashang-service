@@ -31,16 +31,29 @@
 
 ## 时间窗口
 
+Daily Monitor 每天运行一次，但检索窗口按信息层级分层。
+
 | 变量 | 说明 |
 |------|------|
 | `{{MONITOR_DATE}}` | 当前监测日期 |
-| `{{PRIMARY_START_DATE}}` | 优先窗口开始日期（当前日期 - 1 天） |
-| `{{FALLBACK_START_DATE}}` | 扩展窗口开始日期（当前日期 - 2 天） |
+| `{{CONFIRMED_PRIMARY_START_DATE}}` | confirmed_event 优先窗口（当前日期 - 1 天） |
+| `{{CONFIRMED_FALLBACK_START_DATE}}` | confirmed_event 扩展窗口（当前日期 - 3 天） |
+| `{{DISCOVERY_START_DATE}}` | discovery_signal 默认窗口（当前日期 - 7 天） |
+| `{{DISCOVERY_EXTENDED_START_DATE}}` | discovery_signal 扩展窗口（当前日期 - 14 天） |
+| `{{CONTEXT_START_DATE}}` | context 窗口（当前日期 - 30 天） |
 
 **执行规则**：
-1. 优先回看 `{{PRIMARY_START_DATE}}` 至 `{{MONITOR_DATE}}` 共 24 小时
-2. 如果这 24 小时内没有发现明确销售动作，扩展到 `{{FALLBACK_START_DATE}}` 至 `{{MONITOR_DATE}}` 共 48 小时
-3. 如果 48 小时内仍无明确事件，在 `no_event_models` 和 `missing_evidence` 中说明
+
+| 层级 | 窗口 | 用途 | 输出字段 |
+|------|------|------|----------|
+| confirmed_event_window | 24h primary，最多 72h fallback | 已确认销售动作 | event_candidates |
+| discovery_signal_window | 默认 7 天，部分类型可扩展 14 天 | 销售弱信号发现 | discovery_signals |
+| context_window | 30 天 | 历史背景、权益到期、旧事件排除 | search_audit / context only |
+
+- `confirmed_event_window` 用于 `event_candidates`。优先回看 24 小时，最多扩展到 72 小时。
+- `discovery_signal_window` 用于 `discovery_signals`。默认回看 7 天；发布会、预售、上市、交付、配置泄露、媒体预热等可扩展到 14 天。
+- `context_window` 只用于 `search_audit`、背景判断、旧事件排除，**不得直接生成 event_candidates**。
+- 如果只有 `context_window` 信息，没有当前窗口证据，应进入 `search_audit` 或 `needs_review`，而不是 `event_candidates`。
 
 ## 执行方式
 
@@ -172,6 +185,8 @@
 8. **discovery_signals 不能使用 high confidence**；high confidence 只能用于 event_candidates
 9. **no_event_models 规则**：只有同时没有 event_candidate 也没有 discovery_signal 的车型才进入 no_event_models
 10. **每个车型都应有一条 search_audit 记录**：记录检索方向和来源覆盖情况
+11. **event_date 必须可追溯**：至少由 source publish_time、官方有效期、官方公告日期或多源同日报道之一支撑；source publish_time=unknown 且无明确有效期的，confidence 不得为 high
+12. **event_model 与 source 中车型命名必须一致**：若不完全一致（如 06 vs 06T、PHEV vs EV），必须进入 needs_review 或添加 review_flags，confidence 不得为 high
 
 ## JSON 输出 Schema
 
@@ -184,9 +199,25 @@
   "our_model": "智己 LS8",
   "monitor_date": "{{MONITOR_DATE}}",
   "time_window": {
-    "start": "{{PRIMARY_START_DATE}}",
+    "start": "{{CONFIRMED_PRIMARY_START_DATE}}",
     "end": "{{MONITOR_DATE}}",
-    "fallback_start": "{{FALLBACK_START_DATE}}"
+    "fallback_start": "{{CONFIRMED_FALLBACK_START_DATE}}"
+  },
+  "window_policy": {
+    "confirmed_event_window": {
+      "primary_start": "{{CONFIRMED_PRIMARY_START_DATE}}",
+      "fallback_start": "{{CONFIRMED_FALLBACK_START_DATE}}",
+      "end": "{{MONITOR_DATE}}"
+    },
+    "discovery_signal_window": {
+      "default_start": "{{DISCOVERY_START_DATE}}",
+      "extended_start": "{{DISCOVERY_EXTENDED_START_DATE}}",
+      "end": "{{MONITOR_DATE}}"
+    },
+    "context_window": {
+      "start": "{{CONTEXT_START_DATE}}",
+      "end": "{{MONITOR_DATE}}"
+    }
   },
   "input_assets": {
     "watchlist_path": "mashang_workspace/promptbuilders/auto_launch/configs/ls8_competitor_watchlist.csv",
@@ -202,6 +233,10 @@
       "event_name": "事件名称",
       "event_date": "YYYY-MM-DD 或 unknown",
       "confidence": "high | medium | low",
+      "discovered_date": "{{MONITOR_DATE}}",
+      "source_publish_time": "YYYY-MM-DD 或 unknown",
+      "window_match": "confirmed_event_window | discovery_signal_window | context_window | unknown",
+      "review_flags": [],
       "source_items": [
         {
           "source_name": "媒体/网站/官方账号名称",
@@ -230,6 +265,10 @@
       "signal_name": "信号描述",
       "possible_event_type": "可能的 event_type",
       "confidence": "low | medium",
+      "discovered_date": "{{MONITOR_DATE}}",
+      "source_publish_time": "YYYY-MM-DD 或 unknown",
+      "window_match": "discovery_signal_window | context_window | unknown",
+      "review_flags": [],
       "source_items": [
         {
           "source_name": "媒体/网站名称",
@@ -258,6 +297,11 @@
         "official_confirmation": true,
         "media_cross_check": true,
         "sales_weak_signals": false
+      },
+      "window_coverage": {
+        "confirmed_event_window": true,
+        "discovery_signal_window": true,
+        "context_window": true
       },
       "source_coverage": {
         "official": 2,
@@ -290,9 +334,14 @@
 | 字段层级 | 规则 |
 |----------|------|
 | `event_candidates[].confidence` | 允许 high / medium / low |
+| `event_candidates[].event_date` | 必须由以下至少一项支撑：source publish_time、官方页面明确权益有效期、官方公告发布日期、多个高可信媒体在同一日期报道；若 source publish_time=unknown 且无明确有效期，confidence 不得为 high |
+| `event_candidates[].window_match` | 允许 `confirmed_event_window` / `discovery_signal_window` / `unknown`；若为 `context_window` 则不合规 |
+| `event_candidates` 中 event_model 命名一致性 | 若 event_model 与 source 中车型命名不完全一致（如 06 vs 06T、PHEV vs EV），必须进入 `needs_review` 或添加 `review_flags`，confidence 不得为 high |
 | `discovery_signals[].confidence` | **不允许 high**，仅 low / medium |
+| `discovery_signals[].window_match` | 允许 `discovery_signal_window` / `context_window` / `unknown`；若为 `context_window`，`why_not_candidate` 必填 |
 | `discovery_signals[].why_not_candidate` | 必须说明未进入 event_candidates 的原因 |
 | `search_audit[].searched_layers` | 记录三层检索策略各层是否覆盖 |
+| `search_audit[].window_coverage` | 记录各窗口是否覆盖 |
 | `search_audit[].source_coverage` | 各来源类型的检索结果数量 |
 
 ## 输出后处理建议

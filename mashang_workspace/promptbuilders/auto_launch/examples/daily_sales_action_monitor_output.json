@@ -4,6 +4,22 @@
   "battle_field": "large_six_seat_suv",
   "our_model": "智己 LS8",
   "monitor_date": "2026-07-01",
+  "window_policy": {
+    "confirmed_event_window": {
+      "primary_start": "2026-06-30",
+      "fallback_start": "2026-06-28",
+      "end": "2026-07-01"
+    },
+    "discovery_signal_window": {
+      "default_start": "2026-06-24",
+      "extended_start": "2026-06-17",
+      "end": "2026-07-01"
+    },
+    "context_window": {
+      "start": "2026-06-01",
+      "end": "2026-07-01"
+    }
+  },
   "time_window": {
     "start": "2026-06-30",
     "end": "2026-07-01"
@@ -17,9 +33,13 @@
       "event_model": "问界 M7",
       "event_brand": "问界",
       "event_type": "official_rights_update",
-      "event_name": "问界 M7 限时购车权益更新",
+      "event_name": "问界 M7 限时购车权益更新（7 月续接）",
       "event_date": "2026-07-01",
       "confidence": "medium",
+      "discovered_date": "2026-07-01",
+      "source_publish_time": "2026-07-01",
+      "window_match": "confirmed_event_window",
+      "review_flags": [],
       "source_items": [
         {
           "source_name": "鸿蒙智行官网",
@@ -35,32 +55,32 @@
         "configuration_pressure": "low",
         "delivery_pressure": "unknown"
       },
-      "missing_evidence": [
-        "缺少权益对比数据"
-      ]
+      "missing_evidence": ["缺少权益对比数据"]
     }
   ],
   "discovery_signals": [
     {
       "event_model": "理想 i6",
       "event_brand": "理想",
-      "signal_type": "dealer_offer",
-      "signal_name": "门店端出现限时权益海报",
-      "possible_event_type": "official_rights_update",
+      "signal_type": "delivery_hint",
+      "signal_name": "理想 i6 交付节奏线索",
+      "possible_event_type": "delivery_start",
       "confidence": "low",
+      "discovered_date": "2026-07-01",
+      "source_publish_time": "2026-06-20",
+      "window_match": "discovery_signal_window",
+      "review_flags": [],
       "source_items": [
         {
           "source_name": "小红书",
-          "source_title": "理想 i6 门店权益更新",
+          "source_title": "理想 i6 已到店",
           "source_url": "https://example.com/xiaohongshu-li-i6",
           "source_tier": "user_generated",
-          "publish_time": "2026-06-30"
+          "publish_time": "2026-06-20"
         }
       ],
-      "why_not_candidate": "非官方来源，缺少品牌官方确认",
-      "missing_evidence": [
-        "缺少理想汽车官方权益公告"
-      ]
+      "why_not_candidate": "非官方来源，且距离 monitor_date 超过 7 天",
+      "missing_evidence": ["缺少理想汽车官方交付公告"]
     }
   ],
   "needs_review": [],
@@ -83,6 +103,11 @@
         "media_cross_check": true,
         "sales_weak_signals": true
       },
+      "window_coverage": {
+        "confirmed_event_window": true,
+        "discovery_signal_window": true,
+        "context_window": true
+      },
       "source_coverage": {
         "official": 1,
         "mainstream_media": 2,
@@ -92,24 +117,6 @@
       },
       "queries_used": ["问界 M7 权益", "问界 M7 懂车帝", "问界 M7 门店"],
       "coverage_note": "官方源和主流媒体有覆盖，弱信号未发现"
-    },
-    {
-      "event_model": "理想 i6",
-      "event_brand": "理想",
-      "searched_layers": {
-        "official_confirmation": true,
-        "media_cross_check": false,
-        "sales_weak_signals": true
-      },
-      "source_coverage": {
-        "official": 0,
-        "mainstream_media": 0,
-        "industry_media": 0,
-        "user_generated": 1,
-        "unknown": 0
-      },
-      "queries_used": ["理想 i6 权益", "理想 i6 门店"],
-      "coverage_note": "弱信号层有发现，但官方和媒体层未覆盖"
     }
   ]
 }
