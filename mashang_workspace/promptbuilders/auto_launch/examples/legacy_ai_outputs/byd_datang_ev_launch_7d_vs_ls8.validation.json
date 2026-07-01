@@ -1,0 +1,312 @@
+{
+  "case_name": "byd_datang_ev_launch_7d_vs_ls8",
+  "validation_status": "passed_with_schema_warnings",
+  "all_checks_passed": false,
+  "strict_schema_passed": false,
+  "tolerant_schema_passed": true,
+  "schema_gap_summary": {
+    "expected_json_paths": [
+      "event_confirmation.event_name",
+      "event_confirmation.event_date_confirmed",
+      "pricing_and_权益.price.starting_price",
+      "pricing_and_权益.权益",
+      "product_positioning.vehicle_level",
+      "product_positioning.energy_type",
+      "product_positioning.core_selling_points",
+      "competitive_analysis.competitors",
+      "media_and_user_feedback.media_coverage",
+      "impact_assessment.threat_level",
+      "evidence_trail.sources_used"
+    ],
+    "missing_json_paths": [
+      "pricing_and_权益.price.starting_price",
+      "pricing_and_权益.权益",
+      "product_positioning.vehicle_level",
+      "product_positioning.energy_type",
+      "competitive_analysis.competitors",
+      "media_and_user_feedback.media_coverage",
+      "evidence_trail.sources_used"
+    ],
+    "detected_top_level_keys": [
+      "schema_version",
+      "description",
+      "brand",
+      "model",
+      "event_type",
+      "event_date",
+      "search_time_window",
+      "event_confirmation",
+      "pricing_and_权益",
+      "product_positioning",
+      "competitive_analysis",
+      "media_and_user_feedback",
+      "impact_assessment",
+      "evidence_trail"
+    ],
+    "detected_nested_key_candidates": {
+      "search_time_window": [
+        "start",
+        "end"
+      ],
+      "event_confirmation": [
+        "event_name",
+        "event_date_confirmed",
+        "event_time",
+        "venue",
+        "official_announcement",
+        "core_slogan",
+        "evidence"
+      ],
+      "pricing_and_权益": [
+        "price_range",
+        "trims",
+        "deposit_policy",
+        "limited_权益",
+        "warranty",
+        "evidence"
+      ],
+      "product_positioning": [
+        "vehicle_class",
+        "dimensions",
+        "range",
+        "core_selling_points",
+        "target_audience",
+        "evidence"
+      ],
+      "competitive_analysis": [
+        "official_benchmarks",
+        "media_comparisons",
+        "price_positioning",
+        "differentiation",
+        "evidence"
+      ],
+      "media_and_user_feedback": [
+        "media_reviews",
+        "social_heat",
+        "order_status",
+        "evidence"
+      ],
+      "impact_assessment": [
+        "target_user_overlap",
+        "price_overlap",
+        "product_overlap",
+        "battlefield_pressure",
+        "threat_level",
+        "threat_reasons",
+        "recommendations"
+      ],
+      "evidence_trail": [
+        "tier1_official",
+        "tier2_media",
+        "tier3_social",
+        "unconfirmed_rumors"
+      ]
+    },
+    "possible_alias_matches": {}
+  },
+  "alias_matched_fields": [],
+  "checks": [
+    {
+      "check": "包含 JSON 区块",
+      "passed": true,
+      "detail": "找到 1 个 JSON 块"
+    },
+    {
+      "check": "包含 Markdown 简报区块（6/6 章节）",
+      "passed": true,
+      "detail": "检测到: 事件概要, 价格与权益, 产品核心, 竞品对比, 舆论热度, 对我方影响"
+    },
+    {
+      "check": "text presence: evidence_or_证据",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "text presence: source_url_or_https",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "text presence: publish_or_日期",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "text presence: confidence_or_可信",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "text presence: unknown_or_无法确认",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "json field: evidence_trail",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "json field: source_url_in_structure",
+      "passed": false,
+      "detail": ""
+    },
+    {
+      "check": "json field: publish_time_in_structure",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "json field: confidence_in_structure",
+      "passed": false,
+      "detail": ""
+    },
+    {
+      "check": "json field: unconfirmed_claims",
+      "passed": false,
+      "detail": ""
+    },
+    {
+      "check": "提及 event_model",
+      "passed": true,
+      "detail": "检测到: 比亚迪 大唐EV"
+    },
+    {
+      "check": "impact case: 提及 our_model",
+      "passed": true,
+      "detail": "our_model=智己 LS8"
+    },
+    {
+      "check": "impact case: our_model 出现在 AI 响应中",
+      "passed": true,
+      "detail": "✅ 找到 智己 / LS8"
+    },
+    {
+      "check": "提及至少 1 个 competitor_context 车型（非 role model）",
+      "passed": false,
+      "detail": ""
+    },
+    {
+      "check": "impact case: our_model 未出现在 detected_competitors 中",
+      "passed": true,
+      "detail": "✅ 正确排除"
+    },
+    {
+      "check": "event_model 未出现在 detected_competitors 中",
+      "passed": true,
+      "detail": "✅ 正确排除"
+    },
+    {
+      "check": "至少覆盖 3 个影响判断维度",
+      "passed": true,
+      "detail": "覆盖 6/8: 价格, 空间, 续航, 补能, 智驾, 品牌"
+    },
+    {
+      "check": "evidence 字段: 事件名称",
+      "passed": true,
+      "detail": "✅ 事件名称: 比亚迪全尺寸闪充旗舰SUV大唐EV上市发布会"
+    },
+    {
+      "check": "evidence 字段: 确认日期",
+      "passed": true,
+      "detail": "✅ 确认日期: 2026-06-17"
+    },
+    {
+      "check": "evidence 字段: 起售价",
+      "passed": false,
+      "detail": "字段 'pricing_and_权益.price.starting_price' 不存在"
+    },
+    {
+      "check": "evidence 字段: 权益列表",
+      "passed": false,
+      "detail": "字段 'pricing_and_权益.权益' 不存在"
+    },
+    {
+      "check": "evidence 字段: 车型级别",
+      "passed": false,
+      "detail": "字段 'product_positioning.vehicle_level' 不存在"
+    },
+    {
+      "check": "evidence 字段: 能源类型",
+      "passed": false,
+      "detail": "字段 'product_positioning.energy_type' 不存在"
+    },
+    {
+      "check": "evidence 字段: 核心卖点",
+      "passed": true,
+      "detail": "✅ 核心卖点: ['第二代刀片电池+950km续航', '5分钟闪充（10%-70%）', '全系标配天神之眼5.0+激光雷达', '云辇-A双腔空悬全系标配', '后轮转向（"
+    },
+    {
+      "check": "evidence 字段: 竞品对比",
+      "passed": false,
+      "detail": "字段 'competitive_analysis.competitors' 不存在"
+    },
+    {
+      "check": "evidence 字段: 媒体覆盖",
+      "passed": false,
+      "detail": "字段 'media_and_user_feedback.media_coverage' 不存在"
+    },
+    {
+      "check": "evidence 字段: 威胁等级",
+      "passed": true,
+      "detail": "✅ 威胁等级: 高"
+    },
+    {
+      "check": "evidence 字段: 证据来源",
+      "passed": false,
+      "detail": "字段 'evidence_trail.sources_used' 不存在"
+    }
+  ],
+  "errors": [],
+  "warnings": [],
+  "detected_event_model": "比亚迪 大唐EV",
+  "detected_our_model": "智己 LS8",
+  "detected_competitors": [],
+  "expected_competitors": [
+    "乐道 L80",
+    "小鹏 GX",
+    "岚图 泰山 X8 PHEV",
+    "理想 i6",
+    "问界 M7"
+  ],
+  "excluded_role_models": [
+    "event_model: 比亚迪 大唐EV",
+    "our_model: 智己 LS8"
+  ],
+  "role_detection_status": "passed",
+  "markdown_sections_detected": [
+    "事件概要",
+    "价格与权益",
+    "产品核心",
+    "竞品对比",
+    "舆论热度",
+    "对我方影响"
+  ],
+  "text_presence_check": {
+    "evidence_or_证据": true,
+    "source_url_or_https": true,
+    "publish_or_日期": true,
+    "confidence_or_可信": true,
+    "unknown_or_无法确认": true
+  },
+  "json_field_check": {
+    "evidence_trail": true,
+    "source_url_in_structure": false,
+    "publish_time_in_structure": true,
+    "confidence_in_structure": false,
+    "unconfirmed_claims": false
+  },
+  "evidence_field_coverage": {
+    "event_confirmation.event_name": true,
+    "event_confirmation.event_date_confirmed": true,
+    "pricing_and_权益.price.starting_price": false,
+    "pricing_and_权益.权益": false,
+    "product_positioning.vehicle_level": false,
+    "product_positioning.energy_type": false,
+    "product_positioning.core_selling_points": true,
+    "competitive_analysis.competitors": false,
+    "media_and_user_feedback.media_coverage": false,
+    "impact_assessment.threat_level": true,
+    "evidence_trail.sources_used": false
+  }
+}

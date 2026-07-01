@@ -13,7 +13,7 @@ Auto Launch Promptbuilder — 生成新车上市/预售/发布会等市场事件
   python mashang_workspace/promptbuilders/auto_launch/promptbuilder.py \
     --brand 智己 --model LS6 --event-type 上市 --event-date 2026-06-25 --window 48h \
     --competitors "小鹏G6,特斯拉Model Y,问界M5" \
-    --output outputs/auto_launch/prompts/ls6_search_task.md
+    --output mashang_workspace/outputs/auto_launch/prompts/ls6_search_task.md
 
   # 从 watchlist 自动推导竞品
   python mashang_workspace/promptbuilders/auto_launch/promptbuilder.py \
@@ -21,7 +21,7 @@ Auto Launch Promptbuilder — 生成新车上市/预售/发布会等市场事件
     --targets-file mashang_workspace/configs/ls8_competitor_watchlist.csv \
     --competitor-limit 5 \
     --include-priority high \
-    --output outputs/auto_launch/prompts/ls8_search_task.md
+    --output mashang_workspace/outputs/auto_launch/prompts/ls8_search_task.md
 """
 
 import csv, json, sys, argparse

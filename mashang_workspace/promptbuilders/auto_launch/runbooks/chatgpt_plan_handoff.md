@@ -58,6 +58,24 @@ python mashang_workspace/promptbuilders/auto_launch/intake/process_ai_output.py 
 - 如需汇总，可手动整理到周报/月报
 - 如需入库，等待后续 Phase（mashang-service 入库）
 
+### 第 6 步：多次 intake 后生成索引
+
+当做过多次 intake 后，可以生成统一索引：
+
+```bash
+python mashang_workspace/promptbuilders/auto_launch/indexers/build_output_index.py \
+  --input-dir mashang_workspace/outputs/auto_launch \
+  --index-json mashang_workspace/outputs/auto_launch/index.json \
+  --index-md mashang_workspace/outputs/auto_launch/index.md
+
+# 或使用 Makefile
+make auto-launch-index
+```
+
+- `index.md` 用于快速查看已沉淀事件清单
+- `index.json` 用于后续报告汇总或轻量数据处理
+- `outputs/auto_launch/` 仍然是本地运行产物，默认不提交 git
+
 ## 文件命名建议
 
 ```
@@ -88,3 +106,9 @@ mashang_workspace/outputs/auto_launch/
 | 数据库 | ❌ 不负责 |
 | 事实核验 | ❌ 不负责 |
 | 人工判断替代 | ❌ 不替代 |
+
+## Outputs 与 Examples 的边界
+
+- `mashang_workspace/outputs/auto_launch/` 只用于新 intake workflow 的 runtime run directories，默认不提交 git
+- 可提交的样例、contract、golden cases 应放在 `promptbuilders/auto_launch/examples/`
+- 旧 auto_launch_monitor 和旧 promptbuilder 的遗留产物不得写入 `outputs/auto_launch/`

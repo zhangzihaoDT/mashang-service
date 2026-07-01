@@ -54,6 +54,9 @@ mashang_workspace/outputs/miit_new_car/state/
 # Auto launch: all outputs are runtime-generated, not committed
 mashang_workspace/outputs/auto_launch/
 
+# Defensive: promptbuilders should not contain runtime outputs
+mashang_workspace/promptbuilders/outputs/
+
 # Runtime reports: LS8 user profile snapshots
 mashang_workspace/outputs/reports/ls8_user_profile_*.md
 mashang_workspace/outputs/reports/ls8_user_profile_*.html

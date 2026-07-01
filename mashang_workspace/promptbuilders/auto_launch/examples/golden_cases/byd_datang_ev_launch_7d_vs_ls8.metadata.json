@@ -1,0 +1,28 @@
+{
+  "case_name": "byd_datang_ev_launch_7d_vs_ls8",
+  "case_type": "impact_vs_our_model",
+  "core_question": "比亚迪大唐EV上市后是否影响智己LS8",
+  "event_brand": "比亚迪",
+  "event_model": "大唐EV",
+  "our_brand": "智己",
+  "our_model": "LS8",
+  "event_type": "上市",
+  "event_date": "2026-06-14 至 2026-06-20（基于 2026-06-17 前后 7d）",
+  "time_window_start": "2026-06-14",
+  "time_window_end": "2026-06-20",
+  "window": "7d",
+  "competitor_source": "watchlist",
+  "competitor_match_field": "battle_field_id",
+  "competitors": "乐道 L80, 小鹏 GX, 岚图 泰山 X8 PHEV, 理想 i6, 问界 M7",
+  "target_group": "large_six_seat_suv",
+  "target_group_source": "target_profile",
+  "same_battle_field_competitor_count": "5",
+  "supplemented_from_other_groups": "0",
+  "**validation**": {
+    "case_name": "byd_datang_ev_launch_7d_vs_ls8",
+    "validation_status": "passed",
+    "errors": [],
+    "warnings": [],
+    "unresolved_placeholders_count": 0
+  }
+}

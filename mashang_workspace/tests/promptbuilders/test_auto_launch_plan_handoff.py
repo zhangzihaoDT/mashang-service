@@ -195,8 +195,15 @@ def test_runbook_states_boundaries():
 def test_gitignore_ignores_auto_launch_outputs():
     assert GITIGNORE.exists()
     text = GITIGNORE.read_text("utf-8")
-    # The output directory should be gitignored
-    assert "outputs/auto_launch" in text
+    # The canonical output directory should be gitignored
+    assert "mashang_workspace/outputs/auto_launch/" in text
+
+
+def test_gitignore_has_defensive_promptbuilders_outputs():
+    """promptbuilders/outputs/ should be gitignored as defensive measure."""
+    assert GITIGNORE.exists()
+    text = GITIGNORE.read_text("utf-8")
+    assert "promptbuilders/outputs/" in text
 
 
 def test_gitignore_does_not_ignore_examples():
@@ -213,3 +220,62 @@ def test_gitignore_does_not_ignore_examples():
             continue  # this is about outputs, not promptbuilders
         if "promptbuilders" in line:
             pytest.fail(f".gitignore should not ignore promptbuilders examples: {line}")
+
+
+# ── F. Output path canonicalization ─────────────────────────────
+
+
+def test_no_wrong_output_paths_in_key_files():
+    """README / runbooks / Makefile should not reference promptbuilders/outputs/auto_launch."""
+    key_files = [
+        _PROJECT / "Makefile",
+        AUTO_LAUNCH / "README.md",
+        RUNBOOK,
+    ]
+    wrong_pattern = "promptbuilders/outputs/auto_launch"
+    for f in key_files:
+        if f.exists():
+            text = f.read_text("utf-8")
+            assert wrong_pattern not in text, f"{f} contains wrong output path: {wrong_pattern}"
+
+
+def test_promptbuilder_docstring_uses_canonical_output():
+    """promptbuilder.py docstring should reference mashang_workspace/outputs/auto_launch/."""
+    pb = AUTO_LAUNCH / "promptbuilder.py"
+    text = pb.read_text("utf-8")
+    assert "mashang_workspace/outputs/auto_launch/prompts/" in text
+
+
+# ── G. Legacy outputs cleanup ────────────────────────────────────
+
+
+def test_old_output_dirs_removed():
+    """Old runtime output subdirs should not exist in outputs/auto_launch."""
+    out_root = _PROJECT / "mashang_workspace" / "outputs" / "auto_launch"
+    for bad_dir in ["ai_response_examples", "prompts", "normalized", "reports"]:
+        assert not (out_root / bad_dir).exists(), \
+            f"Old output dir should be removed: {bad_dir}"
+
+
+def test_golden_cases_migrated():
+    """Golden cases should exist in promptbuilders/auto_launch/examples/golden_cases/."""
+    golden = AUTO_LAUNCH / "examples" / "golden_cases"
+    assert (golden / "byd_datang_ev_launch_7d_vs_ls8.md").exists()
+    assert (golden / "byd_datang_ev_launch_7d_vs_ls8.metadata.json").exists()
+    assert (golden / "ledao_l80_launch_48h_vs_ls8.md").exists()
+    assert (golden / "wenjie_m7_launch_72h_vs_ls8.md").exists()
+    assert (golden / "xiaomi_yu7_launch_72h_vs_competitors.md").exists()
+
+
+def test_readme_mentions_examples_boundary():
+    """README clarifies the boundary between examples/ and outputs/."""
+    text = (AUTO_LAUNCH / "README.md").read_text("utf-8")
+    assert "只用于新 intake workflow" in text
+    assert "可提交的样例" in text
+
+
+def test_runbook_mentions_examples_boundary():
+    """Runbook clarifies the boundary between examples/ and outputs/."""
+    text = RUNBOOK.read_text("utf-8")
+    assert "可提交的样例" in text
+    assert "examples/" in text

@@ -232,6 +232,14 @@ auto-launch-intake:
 			--normalized-output $(OUTPUT_PREFIX)/normalized/$(notdir $(SAMPLE:.json=.normalized.json)) \
 			--report-output $(OUTPUT_PREFIX)/reports/$(notdir $(SAMPLE:.json=.md)))
 
+## Build output index from all intake output directories
+OUT_ROOT ?= mashang_workspace/outputs/auto_launch
+auto-launch-index:
+	$(PYTHON) mashang_workspace/promptbuilders/auto_launch/indexers/build_output_index.py \
+		--input-dir $(OUT_ROOT) \
+		--index-json $(OUT_ROOT)/index.json \
+		--index-md $(OUT_ROOT)/index.md
+
 ## Capability Audit
 capability-audit:
 	$(PYTHON) mashang_workspace/eval/run_capability_audit.py --format json --output mashang_workspace/outputs/tables/capability_audit_result.json
@@ -365,6 +373,7 @@ help:
 	@echo "make auto-launch-validate  SAMPLE=... 验证 AI 输出 JSON（Prompt workflow intake）"
 	@echo "make auto-launch-normalize SAMPLE=... 归一化 AI 输出 JSON"
 	@echo "make auto-launch-intake    SAMPLE=... OUT_DIR=... 完整 intake: validate→normalize→markdown (output-dir 模式)"
+	@echo "make auto-launch-index     OUT_ROOT=... 生成 output index（Promopt workflow output archive）"
 	@echo "prompts/ + plan_templates/             核心资产（promptbuilders/auto_launch/）"
 	@echo ""
 	@echo "=== MIIT 新车公告 ==="

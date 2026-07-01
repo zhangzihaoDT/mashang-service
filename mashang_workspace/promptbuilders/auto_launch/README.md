@@ -201,9 +201,25 @@ make auto-launch-normalize SAMPLE=path/to/ai_output.json
 使用 `--output-dir` 模式后，每个事件产出 4 个文件：
 
 ```
-output_dir/
-├── raw_ai_output.json       ← 原始 AI 输出（from ChatGPT Plan）
-├── normalized.json          ← 统一结构 JSON
-├── report.md                ← 人类可读简报
-└── intake_manifest.json     ← 处理元数据
+mashang_workspace/outputs/auto_launch/   # runtime run directories (not committed)
+├── {run_id}/
+│   ├── raw_ai_output.json       ← 原始 AI 输出（from ChatGPT Plan）
+│   ├── normalized.json          ← 统一结构 JSON
+│   ├── report.md                ← 人类可读简报
+│   └── intake_manifest.json     ← 处理元数据
+└── ...
+
+promptbuilders/auto_launch/examples/     # committed samples
+├── ai_outputs/                  ← 示例 AI 输出（仅用于结构测试）
+├── normalized/                  ← 示例 normalized JSON
+├── reports/                     ← 示例 markdown 报告
+├── golden_cases/                ← 旧 promptbuilder 生成的 golden Prompt 样例
+└── legacy_prompts/              ← 旧 workflow 遗留 Prompt 参考
 ```
+
+### 边界规则
+
+- `mashang_workspace/outputs/auto_launch/` **只用于新 intake workflow 的 runtime run directories**，默认不提交 git
+- 可提交的样例、contract、golden cases 应放在 `promptbuilders/auto_launch/examples/`
+- 旧 auto_launch_monitor 和旧 promptbuilder 的遗留运行产物不得写入 `outputs/auto_launch/`
+- 旧产物已清理或迁移至 `promptbuilders/auto_launch/examples/legacy_*`

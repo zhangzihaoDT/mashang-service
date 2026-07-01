@@ -1,0 +1,108 @@
+{
+  "case_name": "byd_datang_ev_launch_7d_vs_ls8",
+  "validation_status": "passed_with_schema_warnings",
+  "schema_gap_summary": {
+    "expected_json_paths": [
+      "event_confirmation.event_name",
+      "event_confirmation.event_date_confirmed",
+      "pricing_and_权益.price.starting_price",
+      "pricing_and_权益.权益",
+      "product_positioning.vehicle_level",
+      "product_positioning.energy_type",
+      "product_positioning.core_selling_points",
+      "competitive_analysis.competitors",
+      "media_and_user_feedback.media_coverage",
+      "impact_assessment.threat_level",
+      "evidence_trail.sources_used"
+    ],
+    "missing_json_paths": [
+      "pricing_and_权益.price.starting_price",
+      "pricing_and_权益.权益",
+      "product_positioning.vehicle_level",
+      "product_positioning.energy_type",
+      "competitive_analysis.competitors",
+      "media_and_user_feedback.media_coverage",
+      "evidence_trail.sources_used"
+    ],
+    "detected_top_level_keys": [
+      "schema_version",
+      "description",
+      "brand",
+      "model",
+      "event_type",
+      "event_date",
+      "search_time_window",
+      "event_confirmation",
+      "pricing_and_权益",
+      "product_positioning",
+      "competitive_analysis",
+      "media_and_user_feedback",
+      "impact_assessment",
+      "evidence_trail"
+    ],
+    "detected_nested_key_candidates": {
+      "search_time_window": [
+        "start",
+        "end"
+      ],
+      "event_confirmation": [
+        "event_name",
+        "event_date_confirmed",
+        "event_time",
+        "venue",
+        "official_announcement",
+        "core_slogan",
+        "evidence"
+      ],
+      "pricing_and_权益": [
+        "price_range",
+        "trims",
+        "deposit_policy",
+        "limited_权益",
+        "warranty",
+        "evidence"
+      ],
+      "product_positioning": [
+        "vehicle_class",
+        "dimensions",
+        "range",
+        "core_selling_points",
+        "target_audience",
+        "evidence"
+      ],
+      "competitive_analysis": [
+        "official_benchmarks",
+        "media_comparisons",
+        "price_positioning",
+        "differentiation",
+        "evidence"
+      ],
+      "media_and_user_feedback": [
+        "media_reviews",
+        "social_heat",
+        "order_status",
+        "evidence"
+      ],
+      "impact_assessment": [
+        "target_user_overlap",
+        "price_overlap",
+        "product_overlap",
+        "battlefield_pressure",
+        "threat_level",
+        "threat_reasons",
+        "recommendations"
+      ],
+      "evidence_trail": [
+        "tier1_official",
+        "tier2_media",
+        "tier3_social",
+        "unconfirmed_rumors"
+      ]
+    },
+    "possible_alias_matches": {}
+  },
+  "evidence_risk_level": "unknown",
+  "warnings": [],
+  "hard_fails": [],
+  "source": "validate_ai_response.py + validate_battle_brief.py"
+}

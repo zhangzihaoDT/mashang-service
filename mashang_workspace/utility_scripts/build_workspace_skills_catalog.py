@@ -173,7 +173,7 @@ PROMPTBUILDER_CAPABILITIES = {
             "make validate-auto-launch-byd-datang-fixture",
             "make package-auto-launch-byd-datang-report",
         ],
-        "outputs": "outputs/auto_launch/",
+        "outputs": "mashang_workspace/outputs/auto_launch/",
     },
     "miit_new_car": {
         "name": "miit_new_car",
