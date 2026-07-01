@@ -18,7 +18,7 @@ Auto Launch Promptbuilder — 生成新车上市/预售/发布会等市场事件
   # 从 watchlist 自动推导竞品
   python mashang_workspace/promptbuilders/auto_launch/promptbuilder.py \
     --brand 智己 --model LS8 --event-type 上市 --event-date 2026-06-25 --window 48h \
-    --targets-file mashang_workspace/configs/ls8_competitor_watchlist.csv \
+    --targets-file mashang_workspace/promptbuilders/auto_launch/configs/ls8_competitor_watchlist.csv \
     --competitor-limit 5 \
     --include-priority high \
     --output mashang_workspace/outputs/auto_launch/prompts/ls8_search_task.md
@@ -613,7 +613,7 @@ def main():
     p.add_argument("--start", help="自定义开始日期（优先级高于 event-date，格式 YYYY-MM-DD）")
     p.add_argument("--end", help="自定义结束日期（格式 YYYY-MM-DD）")
     p.add_argument("--competitors", help="手动指定竞品列表（逗号分隔，优先级高于 watchlist 推导）")
-    p.add_argument("--targets-file", help="watchlist CSV 文件路径（如 mashang_workspace/configs/ls8_competitor_watchlist.csv）")
+    p.add_argument("--targets-file", help="watchlist CSV 文件路径（如 mashang_workspace/promptbuilders/auto_launch/configs/ls8_competitor_watchlist.csv）")
     p.add_argument("--target-profile-file", help="model profile YAML 文件路径（如 promptbuilders/auto_launch/configs/target_profiles.yaml）")
     p.add_argument("--battle-fields-file", help="battle fields YAML 文件路径（如 promptbuilders/auto_launch/configs/battle_fields.yaml）")
     p.add_argument("--competitor-limit", type=int, default=5, help="从 watchlist 推导竞品的最大数量（默认 5）")

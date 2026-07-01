@@ -13,7 +13,6 @@ MODULE_DIR = Path(__file__).resolve().parent
 WORKSPACE_ROOT = MODULE_DIR.parents[2]
 PROMPTBUILDER = WORKSPACE_ROOT / "promptbuilders" / "auto_launch" / "promptbuilder.py"
 OUTPUT_DIR = WORKSPACE_ROOT / "outputs" / "auto_launch" / "prompts" / "examples"
-CONFIGS_DIR = WORKSPACE_ROOT / "configs"
 AUL_CONFIGS = MODULE_DIR.parent / "configs"
 
 CASES = [
@@ -30,7 +29,7 @@ CASES = [
             "--event-type": "上市",
             "--event-date": "2026-06-25",
             "--window": "48h",
-            "--targets-file": str(CONFIGS_DIR / "ls8_competitor_watchlist.csv"),
+            "--targets-file": str(AUL_CONFIGS / "ls8_competitor_watchlist.csv"),
             "--target-profile-file": str(AUL_CONFIGS / "target_profiles.yaml"),
             "--battle-fields-file": str(AUL_CONFIGS / "battle_fields.yaml"),
             "--competitor-limit": "5",
@@ -50,7 +49,7 @@ CASES = [
             "--event-type": "上市",
             "--event-date": "2026-07-10",
             "--window": "72h",
-            "--targets-file": str(CONFIGS_DIR / "ls8_competitor_watchlist.csv"),
+            "--targets-file": str(AUL_CONFIGS / "ls8_competitor_watchlist.csv"),
             "--target-profile-file": str(AUL_CONFIGS / "target_profiles.yaml"),
             "--battle-fields-file": str(AUL_CONFIGS / "battle_fields.yaml"),
             "--competitor-limit": "5",
@@ -84,7 +83,7 @@ CASES = [
             "--event-type": "上市",
             "--event-date": "2026-06-17",
             "--window": "7d",
-            "--targets-file": str(CONFIGS_DIR / "ls8_competitor_watchlist.csv"),
+            "--targets-file": str(AUL_CONFIGS / "ls8_competitor_watchlist.csv"),
             "--target-profile-file": str(AUL_CONFIGS / "target_profiles.yaml"),
             "--battle-fields-file": str(AUL_CONFIGS / "battle_fields.yaml"),
             "--competitor-limit": "5",

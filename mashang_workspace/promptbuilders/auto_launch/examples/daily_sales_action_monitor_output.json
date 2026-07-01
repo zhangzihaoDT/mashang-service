@@ -1,0 +1,56 @@
+{
+  "$note": "此样本数据仅用于结构演示，不代表真实事实。来源 URL 为虚构。",
+  "task_name": "auto_launch_daily_sales_action_monitor",
+  "battle_field": "large_six_seat_suv",
+  "our_model": "智己 LS8",
+  "monitor_date": "2026-07-01",
+  "time_window": {
+    "start": "2026-06-30",
+    "end": "2026-07-01"
+  },
+  "input_assets": {
+    "watchlist_path": "mashang_workspace/promptbuilders/auto_launch/configs/ls8_competitor_watchlist.csv",
+    "event_types_path": "mashang_workspace/promptbuilders/auto_launch/configs/event_types.yaml"
+  },
+  "event_candidates": [
+    {
+      "event_model": "问界 M7",
+      "event_brand": "问界",
+      "event_type": "official_rights_update",
+      "event_name": "问界 M7 限时购车权益更新",
+      "event_date": "2026-07-01",
+      "confidence": "medium",
+      "source_items": [
+        {
+          "source_name": "鸿蒙智行官网",
+          "source_title": "问界 M7 限时权益政策",
+          "source_url": "https://example.com/aito-m7-rights",
+          "source_tier": "official",
+          "publish_time": "2026-07-01"
+        }
+      ],
+      "impact_vs_our_model": {
+        "price_pressure": "medium",
+        "rights_pressure": "high",
+        "configuration_pressure": "low",
+        "delivery_pressure": "unknown"
+      },
+      "missing_evidence": [
+        "问界 M7 权益更新后的实际终端成交价变化",
+        "智己 LS8 当前权益与更新后 M7 权益的逐项对比"
+      ]
+    }
+  ],
+  "no_event_models": [
+    "零跑 D19",
+    "岚图 泰山 X8 PHEV",
+    "小鹏 GX",
+    "理想 i6",
+    "乐道 L80",
+    "大众 ID. ERA 9X",
+    "阿维塔 06",
+    "领克 900",
+    "极氪 8X"
+  ],
+  "needs_review": []
+}

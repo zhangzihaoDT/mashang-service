@@ -293,7 +293,7 @@ def test_readme_does_not_call_legacy_golden():
         if "committed samples" in line:
             in_examples = True
             continue
-        if in_examples and line.strip().startswith("├──") or line.strip().startswith("└──"):
+        if in_examples and ("├──" in line.strip() or "└──" in line.strip()):
             if "legacy_promptbuilder_cases" in line:
                 found_legacy = True
             if "golden_cases" in line:

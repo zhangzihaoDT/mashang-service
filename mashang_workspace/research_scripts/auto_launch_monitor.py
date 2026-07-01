@@ -24,7 +24,7 @@ auto_launch_monitor.py (v0.5.8) 已于 2026-07 正式下线。
 历史版本记录已迁入 git 历史，不再保留运行入口。
 
 迁移的资产：
-  - watchlist 配置         → promptbuilders/auto_launch/configs/ + configs/ls8_competitor_watchlist.csv
+  - watchlist 配置         → promptbuilders/auto_launch/configs/ls8_competitor_watchlist.csv
   - event types 定义       → configs/event_types.yaml
   - source tiers 定义      → configs/source_tiers.yaml
   - battle fields 分类     → configs/battle_fields.yaml

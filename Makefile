@@ -126,7 +126,7 @@ build-auto-launch-prompt:
 		--event-type $(or $(EVENT_TYPE),上市) \
 		--event-date $(or $(EVENT_DATE),2026-06-25) \
 		--window $(or $(WINDOW),48h) \
-		$(if $(TARGETS_FILE),--targets-file "$(TARGETS_FILE)",--targets-file mashang_workspace/configs/ls8_competitor_watchlist.csv) \
+		$(if $(TARGETS_FILE),--targets-file "$(TARGETS_FILE)",--targets-file mashang_workspace/promptbuilders/auto_launch/configs/ls8_competitor_watchlist.csv) \
 		$(if $(TARGET_PROFILE_FILE),--target-profile-file "$(TARGET_PROFILE_FILE)",--target-profile-file mashang_workspace/promptbuilders/auto_launch/configs/target_profiles.yaml) \
 		$(if $(BATTLE_FIELDS_FILE),--battle-fields-file "$(BATTLE_FIELDS_FILE)",--battle-fields-file mashang_workspace/promptbuilders/auto_launch/configs/battle_fields.yaml) \
 		$(if $(TARGET_GROUP),--target-group "$(TARGET_GROUP)") \
