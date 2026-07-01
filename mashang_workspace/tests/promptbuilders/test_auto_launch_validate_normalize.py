@@ -227,3 +227,86 @@ def test_phase_2_tests_still_pass():
         capture_output=True, text=True, cwd=str(_WORKSPACE.parent)
     )
     assert result.returncode == 0, f"Phase 2 tests failed:\n{result.stdout}\n{result.stderr}"
+
+
+# ── F. URL normalization ─────────────────────────────────────────
+
+
+def _run_normalize(input_data, output_path):
+    """Run normalize as subprocess via process_ai_output (full pipe)."""
+    import tempfile
+    in_path = os.path.join(tempfile.mkdtemp(), "input.json")
+    with open(in_path, "w") as f:
+        json.dump(input_data, f)
+    result = subprocess.run(
+        [PYTHON, str(NORMALIZE_SCRIPT), in_path, "--output", output_path],
+        capture_output=True, text=True, cwd=str(_WORKSPACE)
+    )
+    return result
+
+
+def test_normalize_cleans_markdown_link_url():
+    """source_url in Markdown link format should be cleaned to pure URL."""
+    sample = {
+        "event_id": "test_event",
+        "event": {"brand": "x", "model": "x", "event_type": "x", "event_date": "2026-01-01"},
+        "battle_field": "test",
+        "source_items": [{"source_url": "[https://example.com](https://example.com)"}],
+        "confirmed_facts": ["x"], "inferences": ["x"],
+        "unconfirmed_claims": ["x"], "missing_evidence": ["x"],
+        "confidence_level": "medium",
+    }
+    with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as f:
+        out = f.name
+    try:
+        result = _run_normalize(sample, out)
+        assert result.returncode == 0
+        data = json.loads(Path(out).read_text("utf-8"))
+        url = data["source_items"][0]["source_url"]
+        assert url == "https://example.com", f"URL not cleaned: {url}"
+    finally:
+        os.unlink(out)
+
+
+def test_normalize_keeps_clean_url():
+    """Normalize should keep already clean URLs unchanged."""
+    sample = {
+        "event_id": "test_event",
+        "event": {"brand": "x", "model": "x", "event_type": "x", "event_date": "2026-01-01"},
+        "battle_field": "test",
+        "source_items": [{"source_url": "https://example.com/page"}],
+        "confirmed_facts": ["x"], "inferences": ["x"],
+        "unconfirmed_claims": ["x"], "missing_evidence": ["x"],
+        "confidence_level": "medium",
+    }
+    with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as f:
+        out = f.name
+    try:
+        result = _run_normalize(sample, out)
+        assert result.returncode == 0
+        data = json.loads(Path(out).read_text("utf-8"))
+        assert data["source_items"][0]["source_url"] == "https://example.com/page"
+    finally:
+        os.unlink(out)
+
+
+def test_normalize_handles_empty_url():
+    """Normalize should handle missing / empty source_url gracefully."""
+    sample = {
+        "event_id": "test_event",
+        "event": {"brand": "x", "model": "x", "event_type": "x", "event_date": "2026-01-01"},
+        "battle_field": "test",
+        "source_items": [{"source_url": ""}],
+        "confirmed_facts": ["x"], "inferences": ["x"],
+        "unconfirmed_claims": ["x"], "missing_evidence": ["x"],
+        "confidence_level": "medium",
+    }
+    with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as f:
+        out = f.name
+    try:
+        result = _run_normalize(sample, out)
+        assert result.returncode == 0
+        data = json.loads(Path(out).read_text("utf-8"))
+        assert data["source_items"][0]["source_url"] == ""
+    finally:
+        os.unlink(out)

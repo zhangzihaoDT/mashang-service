@@ -61,3 +61,9 @@ event_types:
     description: 官方宣布降价或涨价
     search_keywords: [降价, 涨价, 调价, 价格调整, 官方降价]
     required_modules: [pricing, competitive_analysis, media_feedback, impact_assessment]
+
+  - id: official_rights_update
+    name: 官方权益调整
+    description: 官方购车权益变化，包括限时权益到期、权益续接、权益加码/缩水、金融方案调整、置换补贴变化等
+    search_keywords: [权益, 购车权益, 限时权益, 权益调整, 权益加码, 权益到期, 金融方案, 置换补贴]
+    required_modules: [pricing, competitive_analysis, media_feedback, impact_assessment]

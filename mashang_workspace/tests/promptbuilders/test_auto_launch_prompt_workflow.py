@@ -229,6 +229,30 @@ def test_plan_no_source_no_conclusion():
         assert "来源 URL" in text, f"{name} missing source URL requirement"
 
 
+def test_plan_raw_url_constraint():
+    """Plan templates must forbid Markdown link format in source_url."""
+    for name in ["chatgpt_plan_daily_radar.md", "chatgpt_plan_event_48h.md"]:
+        text = _read_plan(name)
+        assert "纯 URL 字符串" in text or "纯URL" in text, \
+            f"{name} missing raw URL constraint"
+
+
+def test_plan_no_markdown_link_format():
+    """Plan templates must explicitly forbid [url](url) format."""
+    for name in ["chatgpt_plan_daily_radar.md", "chatgpt_plan_event_48h.md"]:
+        text = _read_plan(name)
+        assert "Markdown 链接" in text, f"{name} missing Markdown link format prohibition"
+        assert "[url](url)" in text or "[text](url)" in text, \
+            f"{name} missing [url](url) prohibition example"
+
+
+def test_plan_no_multi_url_in_one_field():
+    """Plan templates must forbid multiple URLs in a single field."""
+    for name in ["chatgpt_plan_daily_radar.md", "chatgpt_plan_event_48h.md"]:
+        text = _read_plan(name)
+        assert "多个 URL" in text, f"{name} missing multi-URL prohibition"
+
+
 # ── E. Schema basic fields ───────────────────────────────────────
 
 def _read_schema(name):
@@ -310,3 +334,32 @@ def test_replaced_monitor_is_migration_notice():
         "Migration notice still contains old logic entry point"
     assert "已下线" in text, \
         "Migration notice missing '已下线' marker"
+
+
+# ── G. Event types config ───────────────────────────────────────
+
+def _read_event_types():
+    import yaml
+    yaml_path = BASE / "configs" / "event_types.yaml"
+    with open(yaml_path, "r") as f:
+        data = yaml.safe_load(f)
+    return data
+
+
+def test_event_types_has_official_rights_update():
+    """event_types.yaml must contain official_rights_update or equivalent rights event."""
+    data = _read_event_types()
+    ids = [et["id"] for et in data.get("event_types", [])]
+    assert "official_rights_update" in ids or "benefit_adjustment" in ids, \
+        f"event_types missing rights/benefit event type. Available: {ids}"
+
+
+def test_official_rights_update_has_search_keywords():
+    """official_rights_update should have meaningful search keywords."""
+    data = _read_event_types()
+    for et in data.get("event_types", []):
+        if et["id"] in ("official_rights_update", "benefit_adjustment"):
+            assert len(et.get("search_keywords", [])) >= 3, \
+                f"{et['id']} has too few search keywords"
+            return
+    raise AssertionError("official_rights_update or benefit_adjustment not found")

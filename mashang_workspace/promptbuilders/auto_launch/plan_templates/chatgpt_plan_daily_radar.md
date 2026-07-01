@@ -102,9 +102,10 @@
 ## 约束条件
 
 1. 所有结论必须附带来源 URL，不可遗漏
-2. 区分 confirmed fact / inference / unconfirmed claim
-3. Tier 3 来源信息标注 "unconfirmed_claim"
-4. 无信息时写 "未发现"，不可编造
-5. 价格信息标注是官方价、媒体预测还是用户传闻
-6. 必须列出 missing_evidence 或 unresolved_questions（未能获取到的关键信息）
-7. 必须给出是否需要进入 48h / 72h follow-up 的判断（escalate / monitor / close）
+2. **source_url 必须是纯 URL 字符串（如 `https://example.com/page`）**；不允许 Markdown 链接格式 `[text](url)`，不允许 `[url](url)`，不允许多个 URL 写在同一字段中
+3. 区分 confirmed fact / inference / unconfirmed claim
+4. Tier 3 来源信息标注 "unconfirmed_claim"
+5. 无信息时写 "未发现"，不可编造
+6. 价格信息标注是官方价、媒体预测还是用户传闻
+7. 必须列出 missing_evidence 或 unresolved_questions（未能获取到的关键信息）
+8. 必须给出是否需要进入 48h / 72h follow-up 的判断（escalate / monitor / close）

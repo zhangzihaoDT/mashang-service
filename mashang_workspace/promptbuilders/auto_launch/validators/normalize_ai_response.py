@@ -95,10 +95,35 @@ def extract_followup(data: dict, doc_type: str):
     return {}
 
 
+def _clean_url(url: str) -> str:
+    """Clean a source_url: strip Markdown link format, whitespace, etc."""
+    if not isinstance(url, str):
+        return ""
+    url = url.strip()
+    # [url](url) → url
+    if "](" in url:
+        import re
+        m = re.match(r'\[([^\]]+)\]\(([^)]+)\)', url)
+        if m:
+            url = m.group(2).strip()
+    return url
+
+
 def normalize(data: dict) -> dict:
     """Normalize an AI output JSON into the unified structure."""
     result = run_validation(data)
     doc_type = result["type"] if result["type"] != "unknown" else "event"
+
+    # Clean source_items: pass through original fields + clean URL
+    raw_items = data.get("source_items", [])
+    cleaned_items = []
+    for item in raw_items:
+        if isinstance(item, dict):
+            item = dict(item)
+            url = item.get("source_url") or item.get("url", "")
+            item["source_url"] = _clean_url(str(url))
+            item.pop("url", None)  # normalize to source_url
+        cleaned_items.append(item)
 
     normalized = {
         "record_type": doc_type,
@@ -110,7 +135,7 @@ def normalize(data: dict) -> dict:
         "battle_field": data.get("battle_field", ""),
         "time_window": extract_time_window(data, doc_type),
         "confidence_level": data.get("confidence_level", "unknown"),
-        "source_items": data.get("source_items", []),
+        "source_items": cleaned_items,
         "confirmed_facts": data.get("confirmed_facts", []),
         "inferences": data.get("inferences", []),
         "unconfirmed_claims": data.get("unconfirmed_claims", []),

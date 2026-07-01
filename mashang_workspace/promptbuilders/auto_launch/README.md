@@ -12,34 +12,35 @@ Auto Launch 是**竞品上市事件 Prompt workflow asset**，不是爬虫监控
 
 ## 架构
 
+### 标准路径（ChatGPT Plan）
+
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│  ChatGPT Plan                                                    │
-│  (plan_templates/)                                               │
-│  定时触发 / 日常雷达 / 简报生成 / 事件判断                        │
-└──────────────────────────┬──────────────────────────────────────┘
-                           │ 输出 Markdown / JSON
-                           ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  Promptbuilders                                                  │
-│  (prompts/ + configs/ + schemas/)                                │
-│  Prompt 模板 / 配置 / 输出结构 / 校验规则                         │
-└──────────────────────────┬──────────────────────────────────────┘
-                           │ 参考经验
-                           ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  Volc Search Adapter (optional)                                  │
-│  (search_adapters/volc_search.md)                                │
-│  仅保留已验证的火山搜索 API / 只返回候选信息 / 不承担事件判断     │
-└──────────────────────────┬──────────────────────────────────────┘
-                           │ AI raw.md
-                           ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  mashang-service                                                 │
-│  (validators/ + examples/)                                       │
-│  validate_ai_response → normalize_ai_response → 入库/复盘/报告   │
-└─────────────────────────────────────────────────────────────────┘
+ChatGPT Plan (plan_templates/)
+    │
+    ▼ raw_ai_output.json
+Intake Workflow (validators/ → intake/)
+    │
+    ├── normalized.json
+    ├── report.md
+    └── intake_manifest.json
 ```
+
+### Volc-assisted 路径
+
+```
+Business Task
+    │
+    ▼
+volc_search_query_plan → search_tasks
+    │
+    ▼ (人工或外部工具执行)
+Volc Search results
+    │
+    ▼
+volc_search_result_to_event_brief → raw_ai_output.json
+    │
+    ▼
+Intake Workflow (同标准路径)
 
 ### 组件职责
 
@@ -50,8 +51,10 @@ Auto Launch 是**竞品上市事件 Prompt workflow asset**，不是爬虫监控
 | 配置 | `configs/` | 事件类型、信源分层、战场分类、目标画像的 YAML 定义 |
 | Schema | `schemas/` | JSON Schema 定义事件证据和简报的输出结构 |
 | Search Adapter | `search_adapters/` | 可选搜索后端经验文档（当前仅 Volc Search） |
-| Validator | `examples/validate_ai_response.py` | 校验 AI 返回结果的结构和来源标注 |
-| Normalizer | `examples/normalize_ai_response.py` | 将 AI raw.md 转换为标准化 evidence JSON |
+| Validator | `validators/validate_ai_response.py` | 校验 AI 输出 JSON 的结构完整性（新 canonical） |
+| Normalizer | `validators/normalize_ai_response.py` | 将 raw_ai_output.json 转换为标准化 evidence JSON（新 canonical） |
+| Old Validator（compat） | `examples/validate_ai_response.py` | 旧版校验脚本，保留兼容 |
+| Old Normalizer（compat） | `examples/normalize_ai_response.py` | 旧版归一化脚本，保留兼容 |
 | Promptbuilder CLI | `promptbuilder.py` | 旧版 CLI，渲染 `templates/search_task_prompt.md` |
 
 ## 旧 auto_launch_monitor.py
@@ -122,7 +125,9 @@ promptbuilders/auto_launch/
 │   ├── event_48h_brief.md     # 48h 简报
 │   ├── event_72h_followup.md  # 72h 跟踪
 │   ├── impact_vs_our_model.md # 影响评估
-│   └── llm_judge.md           # LLM 裁判（从旧 monitor 迁移）
+│   ├── llm_judge.md           # LLM 裁判
+│   ├── volc_search_query_plan.md           # Volc 搜索查询计划
+│   └── volc_search_result_to_event_brief.md # Volc 搜索结果结构化
 ├── plan_templates/            # ChatGPT Plan 任务描述
 │   ├── chatgpt_plan_daily_radar.md
 │   └── chatgpt_plan_event_48h.md
@@ -148,7 +153,9 @@ promptbuilders/auto_launch/
 │   └── process_ai_output.py
 ├── runbooks/                  # 实际操作指南
 │   ├── README.md
-│   └── chatgpt_plan_handoff.md
+│   ├── chatgpt_plan_handoff.md
+│   ├── pilot_run_decision_gate.md
+│   └── volc_search_assisted_pilot.md
 ├── templates/                 # 旧模板（保留兼容）
 │   ├── search_task_prompt.md
 │   └── evidence_schema.json

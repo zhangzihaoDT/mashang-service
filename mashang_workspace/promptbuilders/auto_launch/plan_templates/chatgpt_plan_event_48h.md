@@ -116,6 +116,8 @@
 }
 ```
 
+> **source_url 格式要求**：所有 source_url 字段必须为纯 URL 字符串（如 `https://example.com/page`），不允许 Markdown 链接格式（如 `[text](url)`），不允许 `[url](url)` 嵌套，不允许将多个 URL 拼接在同一字符串中。source_tier / source_name 必须单独字段填写，不要内嵌在 URL 中。
+
 ### 2. Markdown 简报
 
 ```markdown
@@ -164,10 +166,11 @@
 ## 约束条件
 
 1. 每条结论必须附带来源 URL，格式 `[Tier 层级] 来源名称: URL`
-2. 区分 confirmed_fact / cross_validated / single_source / rumor
-3. Tier 1 与 Tier 2 信息冲突时以 Tier 1 为准
-4. Tier 3 信息不得作为事实结论依据
-5. 价格信息标注是官方价、媒体预测还是用户传闻
-6. 某模块无信息时写 "未获取到"，不可编造
-7. 必须列出 missing_evidence（无法获取但影响判断的关键信息项）
-8. 必须给出是否需要进入 72h follow-up 的判断（escalate / monitor / close）
+2. **source_url 必须是纯 URL 字符串（如 `https://example.com/page`）**；不允许 Markdown 链接格式 `[text](url)`，不允许 `[url](url)`，不允许多个 URL 写在同一字段中
+3. 区分 confirmed_fact / cross_validated / single_source / rumor
+4. Tier 1 与 Tier 2 信息冲突时以 Tier 1 为准
+5. Tier 3 信息不得作为事实结论依据
+6. 价格信息标注是官方价、媒体预测还是用户传闻
+7. 某模块无信息时写 "未获取到"，不可编造
+8. 必须列出 missing_evidence（无法获取但影响判断的关键信息项）
+9. 必须给出是否需要进入 72h follow-up 的判断（escalate / monitor / close）

@@ -15,32 +15,32 @@
     {
       "tier": 1,
       "name": "问界官网",
-      "url": "https://example.com/source-b1",
-      "evidence": "问界 M7 上市售价及配置"
+      "evidence": "问界 M7 上市售价及配置",
+      "source_url": "https://example.com/source-b1"
     },
     {
       "tier": 1,
       "name": "问界 App",
-      "url": "https://example.com/source-b3",
-      "evidence": "定金及限时权益"
+      "evidence": "定金及限时权益",
+      "source_url": "https://example.com/source-b3"
     },
     {
       "tier": 2,
       "name": "懂车帝",
-      "url": "https://example.com/source-b2",
-      "evidence": "媒体评测报道"
+      "evidence": "媒体评测报道",
+      "source_url": "https://example.com/source-b2"
     },
     {
       "tier": 2,
       "name": "汽车之家",
-      "url": "https://example.com/source-b4",
-      "evidence": "对比评测"
+      "evidence": "对比评测",
+      "source_url": "https://example.com/source-b4"
     },
     {
       "tier": 3,
       "name": "乐道论坛",
-      "url": "https://example.com/source-b5",
-      "evidence": "用户讨论"
+      "evidence": "用户讨论",
+      "source_url": "https://example.com/source-b5"
     }
   ],
   "confirmed_facts": [

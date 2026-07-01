@@ -47,8 +47,8 @@
 
 ## 8. 来源
 
-| Tier | 来源名称 | URL |
-|------|----------|-----|
-| 1 | 理想官网 | https://example.com/source-1 |
-| 2 | 懂车帝 | https://example.com/source-2 |
-| 2 | 汽车之家 | https://example.com/source-3 |
+| source_id | source_tier | source_name | source_url |
+|----------|-------------|-------------|-----------|
+| ? | 1 | 理想官网 | https://example.com/source-1 |
+| ? | 2 | 懂车帝 | https://example.com/source-2 |
+| ? | 2 | 汽车之家 | https://example.com/source-3 |

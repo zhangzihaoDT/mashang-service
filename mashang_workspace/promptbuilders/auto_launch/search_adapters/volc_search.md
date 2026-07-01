@@ -95,3 +95,15 @@ export HUOSANFANGZHOU_API_KEY="your-api-key"
 > 3. 提取 sources 中的候选信息
 > 4. 将候选信息作为 Prompt 的上下文输入
 ```
+
+## Volc Search Prompt Bridge
+
+Volc Search 现在通过 Prompt Bridge 使用，而非直接集成 runner：
+
+| Prompt | 路径 | 说明 |
+|--------|------|------|
+| 查询计划 | `prompts/volc_search_query_plan.md` | 根据业务任务生成搜索 query plan |
+| 结果结构化 | `prompts/volc_search_result_to_event_brief.md` | 将搜索结果整理为 intake-ready JSON |
+| Pilot runbook | `runbooks/volc_search_assisted_pilot.md` | 完整操作流程 |
+
+Prompt Bridge 将 Volc Search 定位为 **候选信息提供者**，事件判断和结构化由 Prompt + Validator 完成。

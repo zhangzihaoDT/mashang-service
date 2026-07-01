@@ -229,3 +229,174 @@ def test_promptbuilders_readme_still_canonical():
     readme = AUTO_LAUNCH / "README.md"
     text = readme.read_text("utf-8")
     assert "Workflow Asset" in text
+
+
+# ── E. source_items rendering ────────────────────────────────────
+
+
+def test_report_source_table_no_question_marks():
+    """Report source table should not render as | ? | ? | ? |."""
+    with tempfile.NamedTemporaryFile(suffix=".md", delete=False) as f:
+        out = f.name
+    try:
+        _run([PYTHON, str(RENDER_SCRIPT), str(BRIEF_NORM), "--output", out])
+        md = Path(out).read_text("utf-8")
+        # Find the source table section
+        src_section = md[md.find("## 8. 来源"):]
+        # Check no placeholder values
+        assert "| ? | ? | ? |" not in src_section
+        assert "| ? | ? | ? | ? |" not in src_section
+    finally:
+        os.unlink(out)
+
+
+def test_report_source_shows_tier_and_name():
+    """Report source table should show source_tier and source_name."""
+    with tempfile.NamedTemporaryFile(suffix=".md", delete=False) as f:
+        out = f.name
+    try:
+        _run([PYTHON, str(RENDER_SCRIPT), str(BRIEF_NORM), "--output", out])
+        md = Path(out).read_text("utf-8")
+        assert "example.com" in md or "http" in md
+        # Should show source_tier values, not "unknown" for known tier
+        data = json.loads(BRIEF_NORM.read_text("utf-8"))
+        for item in data.get("source_items", []):
+            tier = item.get("source_tier") or item.get("tier") or ""
+            if tier or tier == 0:
+                tier_str = str(tier)
+                assert tier_str in md or f"| {tier_str} |" in md
+    finally:
+        os.unlink(out)
+
+
+# ── F. Structured field rendering ───────────────────────────────
+
+
+RENDERER_DIR = AUTO_LAUNCH / "renderers"
+
+
+def _render_with_input(normalized_data, suffix=".md"):
+    """Render arbitrary normalized data to a temp md file and return path + content."""
+    import tempfile
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+        json.dump(normalized_data, f)
+        norm_path = f.name
+    with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as f:
+        md_path = f.name
+    result = _run([
+        PYTHON, str(RENDERER_DIR / "render_markdown_report.py"),
+        norm_path, "--output", md_path,
+    ])
+    md = Path(md_path).read_text("utf-8")
+    os.unlink(norm_path)
+    os.unlink(md_path)
+    return result, md
+
+
+def test_structured_confirmed_facts_no_dict_string():
+    """Structured confirmed_facts dict should not render Python dict string."""
+    data = {
+        "record_type": "brief",
+        "record_key": "test",
+        "confirmed_facts": [
+            {"fact": "问界M7增程长续航版于6月29日上市",
+             "source_ids": ["S1", "S2"],
+             "confidence_level": "high"},
+        ],
+        "inferences": [],
+        "unconfirmed_claims": [],
+        "missing_evidence": [],
+        "source_items": [],
+    }
+    result, md = _render_with_input(data)
+    assert result.returncode == 0
+    assert "{'fact':" not in md
+    assert "问界M7增程长续航版" in md
+    assert "S1" in md
+    assert "置信度" in md
+
+
+def test_structured_inferences_no_dict_string():
+    """Structured inferences dict should not render Python dict string."""
+    data = {
+        "record_type": "brief",
+        "record_key": "test",
+        "confirmed_facts": [],
+        "inferences": [
+            {"inference": "M7长续航版与LS8价格带重叠",
+             "basis": "两车起售价均为30万级",
+             "source_ids": ["S1"],
+             "confidence_level": "medium"},
+        ],
+        "unconfirmed_claims": [],
+        "missing_evidence": [],
+        "source_items": [],
+    }
+    result, md = _render_with_input(data)
+    assert result.returncode == 0
+    assert "{'inference':" not in md
+    assert "M7长续航版" in md
+    assert "两车起售价" in md
+
+
+def test_structured_missing_evidence_no_dict_string():
+    """Structured missing_evidence dict should not render Python dict string."""
+    data = {
+        "record_type": "brief",
+        "record_key": "test",
+        "confirmed_facts": [],
+        "inferences": [],
+        "unconfirmed_claims": [],
+        "missing_evidence": [
+            {"field": "智己LS8近期锁单数据",
+             "why_it_matters": "无法判断M7上市对LS8的实际销量影响",
+             "suggested_followup": "等待下月销量数据公布"},
+        ],
+        "source_items": [],
+    }
+    result, md = _render_with_input(data)
+    assert result.returncode == 0
+    assert "{'field':" not in md
+    assert "智己LS8" in md
+    assert "无法判断" in md
+
+
+def test_structured_unconfirmed_claims_no_dict_string():
+    """Structured unconfirmed_claims dict should not render Python dict string."""
+    data = {
+        "record_type": "brief",
+        "record_key": "test",
+        "confirmed_facts": [],
+        "inferences": [],
+        "unconfirmed_claims": [
+            {"claim": "智己可能近期调整LS8权益",
+             "source_ids": ["S3"],
+             "reason_unconfirmed": "仅来自论坛用户讨论"},
+        ],
+        "missing_evidence": [],
+        "source_items": [],
+    }
+    result, md = _render_with_input(data)
+    assert result.returncode == 0
+    assert "{'claim':" not in md
+    assert "调整LS8权益" in md
+    assert "论坛用户讨论" in md
+
+
+def test_structured_string_fallback_still_works():
+    """String-array items should still render as simple bullets."""
+    data = {
+        "record_type": "brief",
+        "record_key": "test",
+        "confirmed_facts": ["普通字符串事实"],
+        "inferences": ["普通字符串推断"],
+        "unconfirmed_claims": ["普通字符串说法"],
+        "missing_evidence": ["普通字符串缺口"],
+        "source_items": [],
+    }
+    result, md = _render_with_input(data)
+    assert result.returncode == 0
+    assert "普通字符串事实" in md
+    assert "普通字符串推断" in md
+    assert "普通字符串说法" in md
+    assert "普通字符串缺口" in md

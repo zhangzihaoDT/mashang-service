@@ -15,20 +15,20 @@
     {
       "tier": 1,
       "name": "理想官网",
-      "url": "https://example.com/source-1",
-      "evidence": "理想 i6 开启预售，预售价 25-30 万"
+      "evidence": "理想 i6 开启预售，预售价 25-30 万",
+      "source_url": "https://example.com/source-1"
     },
     {
       "tier": 2,
       "name": "懂车帝",
-      "url": "https://example.com/source-2",
-      "evidence": "理想 i6 预售启动，首日订单超1000"
+      "evidence": "理想 i6 预售启动，首日订单超1000",
+      "source_url": "https://example.com/source-2"
     },
     {
       "tier": 2,
       "name": "汽车之家",
-      "url": "https://example.com/source-3",
-      "evidence": "理想 i6 配置表公布，新增小竹碳矿海外观色"
+      "evidence": "理想 i6 配置表公布，新增小竹碳矿海外观色",
+      "source_url": "https://example.com/source-3"
     }
   ],
   "confirmed_facts": [

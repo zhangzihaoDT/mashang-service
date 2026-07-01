@@ -44,10 +44,10 @@
 
 ## 8. 来源
 
-| Tier | 来源名称 | URL |
-|------|----------|-----|
-| 1 | 问界官网 | https://example.com/source-b1 |
-| 1 | 问界 App | https://example.com/source-b3 |
-| 2 | 懂车帝 | https://example.com/source-b2 |
-| 2 | 汽车之家 | https://example.com/source-b4 |
-| 3 | 乐道论坛 | https://example.com/source-b5 |
+| source_id | source_tier | source_name | source_url |
+|----------|-------------|-------------|-----------|
+| ? | 1 | 问界官网 | https://example.com/source-b1 |
+| ? | 1 | 问界 App | https://example.com/source-b3 |
+| ? | 2 | 懂车帝 | https://example.com/source-b2 |
+| ? | 2 | 汽车之家 | https://example.com/source-b4 |
+| ? | 3 | 乐道论坛 | https://example.com/source-b5 |
