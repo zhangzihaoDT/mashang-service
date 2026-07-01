@@ -4,11 +4,51 @@
   "title": "Auto Launch Brief Schema",
   "description": "竞品事件简报输出格式，对应 event_48h_brief / impact_vs_our_model 等 Prompt 的 Markdown 输出结构。",
   "type": "object",
-  "required": ["title", "sections", "evidence_quality"],
+  "required": ["brief_id", "title", "our_model", "event_model", "battle_field", "time_window", "executive_summary", "sections", "source_items", "missing_evidence", "confidence_level", "followup_recommendation"],
   "properties": {
+    "brief_id": {
+      "type": "string",
+      "description": "简报唯一标识，格式：brief_{event_brand}_{event_model}_{event_type}_{date}"
+    },
     "title": {
       "type": "string",
       "description": "简报标题，格式：{品牌} {车型} {事件类型} 简报"
+    },
+    "our_model": {
+      "type": "string",
+      "description": "我方被影响车型（本品）"
+    },
+    "event_model": {
+      "type": "string",
+      "description": "事件车型"
+    },
+    "event_brand": {
+      "type": "string",
+      "description": "事件品牌"
+    },
+    "event_type": {
+      "type": "string",
+      "description": "事件类型"
+    },
+    "event_date": {
+      "type": "string",
+      "description": "事件日期 ISO 格式"
+    },
+    "battle_field": {
+      "type": "string",
+      "description": "竞争战场"
+    },
+    "time_window": {
+      "type": "object",
+      "description": "简报覆盖的时间窗口",
+      "properties": {
+        "start": {"type": "string", "format": "date"},
+        "end": {"type": "string", "format": "date"}
+      }
+    },
+    "executive_summary": {
+      "type": "string",
+      "description": "一句话执行摘要"
     },
     "sections": {
       "type": "array",
@@ -20,7 +60,7 @@
           "heading": {"type": "string", "description": "章节标题"},
           "content": {
             "type": "object",
-            "description": "结构化内容，每个 key 为信息项名称，value 为内容及来源",
+            "description": "结构化内容",
             "additionalProperties": {
               "type": "object",
               "properties": {
@@ -56,6 +96,53 @@
           }
         }
       }
+    },
+    "impact_dimensions": {
+      "type": "object",
+      "description": "影响维度分析（适用于 impact_vs_our_model）",
+      "properties": {
+        "overlap_degree": {"type": "string", "enum": ["high", "medium", "low"]},
+        "threat_level": {"type": "integer", "minimum": 1, "maximum": 5},
+        "reasoning": {"type": "string"}
+      }
+    },
+    "sales_response": {
+      "type": "object",
+      "description": "订单/销量层面的可观测反应（适用于 72h followup）",
+      "properties": {
+        "order_change": {"type": "string"},
+        "price_change": {"type": "string"},
+        "source_url": {"type": "string", "format": "uri"}
+      }
+    },
+    "source_items": {
+      "type": "array",
+      "description": "所有来源项列表",
+      "items": {
+        "type": "object",
+        "properties": {
+          "tier": {"type": "integer", "enum": [1, 2, 3]},
+          "name": {"type": "string"},
+          "url": {"type": "string", "format": "uri"},
+          "evidence": {"type": "string"}
+        },
+        "required": ["tier", "name", "url"]
+      }
+    },
+    "missing_evidence": {
+      "type": "array",
+      "description": "缺失的关键证据列表，无法获取但影响判断的信息项",
+      "items": {"type": "string"}
+    },
+    "confidence_level": {
+      "type": "string",
+      "description": "简报整体置信度",
+      "enum": ["high", "medium", "low", "unknown"]
+    },
+    "followup_recommendation": {
+      "type": "string",
+      "description": "后续行动建议",
+      "enum": ["escalate", "monitor_72h", "close"]
     },
     "evidence_quality": {
       "type": "object",

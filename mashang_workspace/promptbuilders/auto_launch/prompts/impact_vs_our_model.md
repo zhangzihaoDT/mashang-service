@@ -13,7 +13,7 @@
 
 ## Scope
 
-评估 {{ event_model }} {{ event_type }} 对 {{ our_model }} 的影响，覆盖事件前后 {{ time_window }}。
+评估 {{ event_model }} {{ event_type }} 对 {{ our_model }} 的影响，覆盖 {{ battle_field }} 战场，时间范围为事件前后 {{ time_window }}。
 
 ## Time Window
 
@@ -23,6 +23,7 @@
 | 我方车型 | {{ our_model }} |
 | 事件类型 | {{ event_type }} |
 | 事件日期 | {{ event_date }} |
+| 竞争战场 | {{ battle_field }} |
 | 信息窗口 | 事件前 {{ pre_window }} 至 事件后 {{ post_window }} |
 
 ## Watchlist
@@ -119,7 +120,8 @@
 | 总体证据可信度 | — | {高/中/低} |
 
 ### 证据缺口
-- {未获取到但影响判断的关键信息}
+- {未获取到但影响判断的关键信息（missing_evidence）}
+- {当前无法判断的疑问（unresolved_questions）}
 ```
 
 ### 简要输出（威胁等级低时可选用）

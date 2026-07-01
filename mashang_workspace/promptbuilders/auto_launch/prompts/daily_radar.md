@@ -84,6 +84,11 @@
 
 ## 需关注事项
 - {需要进一步跟踪的事件或信号}
+
+## 未解决疑问
+- {missing_evidence：未能获取到的关键信息项}
+- {unresolved_questions：当前无法判断的疑问}
+- {是否需进入 48h follow-up: yes / no}
 ```
 
 ### 无事件输出

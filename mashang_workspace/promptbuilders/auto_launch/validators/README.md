@@ -28,6 +28,26 @@ normalize_ai_response.py ───→  normalized_evidence.json（标准化 JSON
                               + executive_brief.md（可读摘要）
 ```
 
+## Phase 2 结构测试覆盖
+
+`tests/promptbuilders/test_auto_launch_prompt_workflow.py` 覆盖以下维度：
+
+| 测试类别 | 覆盖内容 |
+|----------|----------|
+| A. 文件存在性 | README / 5 个 Prompt / 2 个 Plan / 2 个 Schema / search_adapters / validators |
+| B. Prompt 章节完整性 | 每个 Prompt 检查 Role / Output Format / Validation Rules / Uncertainty Rules / Time Window / Source Rules |
+| C. 变量占位 | `{{time_window}}` `{{battle_field}}` `{{watchlist}}` `{{event_model}}` `{{event_type}}` `{{our_model}}` |
+| D. 可信度要求 | source / confidence / confirmed_fact / inference / unconfirmed_claim / missing_evidence |
+| E. Schema 字段 | event_id / battle_field / confirmed_facts / inferences / confidence_level / followup_recommendation |
+| F. 旧入口检查 | Makefile 无 target / AGENTS.md 无引用 / 迁移说明不含旧逻辑 |
+
+## 后续 Phase 3
+
+Plan 输出进入 mashang-service 的 JSON/DB 沉淀，包含：
+- 入库 schema 适配
+- 批量 validate/normalize runner
+- 报告沉淀与历史回溯
+
 ## 用法
 
 ```bash

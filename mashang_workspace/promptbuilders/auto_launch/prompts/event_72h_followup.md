@@ -13,7 +13,7 @@
 
 ## Scope
 
-跟踪 {{ event_model }} {{ event_type }} 事件发布后的后续发展，覆盖事件后 {{ followup_window }}。
+跟踪 {{ event_model }} {{ event_type }} 事件发布后的后续发展，覆盖 {{ battle_field }} 战场，整体时间窗口 {{ time_window }}，事件后窗口 {{ followup_window }}。
 
 重点关注与 48h 简报相比的新变化。
 
@@ -24,6 +24,8 @@
 | 事件车型 | {{ event_model }} |
 | 事件类型 | {{ event_type }} |
 | 事件日期 | {{ event_date }} |
+| 竞争战场 | {{ battle_field }} |
+| 我方车型（本品） | {{ our_model }} |
 | 跟踪窗口 | 事件发生后 {{ followup_window }}（{{ followup_start }} 至 {{ followup_end }}） |
 | 上次检查时间 | {{ previous_check_time }} |
 
@@ -101,6 +103,7 @@
 - **跟进级别**: escalate / monitor / close
 - **理由**: {判断理由}
 - **建议动作**: {建议}
+- **未解决疑问**: {missing_evidence / unresolved_questions：本次仍未能确认的关键信息项}
 - **关键来源**:
   - [层级] 来源名称: URL
   - [层级] 来源名称: URL

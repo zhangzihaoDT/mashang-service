@@ -4,8 +4,12 @@
   "title": "Auto Launch Event Schema",
   "description": "结构化的竞品事件证据 JSON，由 AI 搜索输出后经 validate/normalize 生成。",
   "type": "object",
-  "required": ["event", "evidence_quality"],
+  "required": ["event_id", "event", "battle_field", "confirmed_facts", "inferences", "unconfirmed_claims", "confidence_level"],
   "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "事件唯一标识，格式：{brand}_{model}_{event_type}_{date}"
+    },
     "event": {
       "type": "object",
       "description": "事件基本信息",
@@ -20,6 +24,53 @@
         "location": {"type": "string"},
         "official_announcement_url": {"type": "string", "format": "uri"}
       }
+    },
+    "event_brand": {"type": "string", "description": "事件品牌（冗余字段，便于直接检索）"},
+    "event_model": {"type": "string", "description": "事件车型（冗余字段，便于直接检索）"},
+    "event_type": {"type": "string", "description": "事件类型（冗余字段，便于直接检索）"},
+    "event_date": {"type": "string", "description": "事件日期 ISO 格式（冗余字段）"},
+    "event_time_window": {
+      "type": "object",
+      "description": "事件关联的时间窗口",
+      "properties": {
+        "start": {"type": "string", "format": "date"},
+        "end": {"type": "string", "format": "date"}
+      }
+    },
+    "battle_field": {"type": "string", "description": "竞争战场，如 large_six_seat_suv"},
+    "source_items": {
+      "type": "array",
+      "description": "所有来源项列表",
+      "items": {
+        "type": "object",
+        "properties": {
+          "tier": {"type": "integer", "enum": [1, 2, 3]},
+          "name": {"type": "string"},
+          "url": {"type": "string", "format": "uri"},
+          "evidence": {"type": "string"}
+        },
+        "required": ["tier", "name", "url"]
+      }
+    },
+    "confirmed_facts": {
+      "type": "array",
+      "description": "经官方或多源交叉验证确认的事实",
+      "items": {"type": "string"}
+    },
+    "inferences": {
+      "type": "array",
+      "description": "基于已有信息的推断结论",
+      "items": {"type": "string"}
+    },
+    "unconfirmed_claims": {
+      "type": "array",
+      "description": "未经验证的说法或传闻",
+      "items": {"type": "string"}
+    },
+    "confidence_level": {
+      "type": "string",
+      "description": "整体置信度",
+      "enum": ["high", "medium", "low", "unknown"]
     },
     "price_and_benefits": {
       "type": "object",
@@ -113,15 +164,6 @@
         },
         "user_sentiment": {"type": "string"},
         "order_hotness": {"type": "string"}
-      }
-    },
-    "impact_on_our_model": {
-      "type": "object",
-      "properties": {
-        "overlap_degree": {"type": "string", "enum": ["high", "medium", "low"]},
-        "threat_level": {"type": "integer", "minimum": 1, "maximum": 5},
-        "reasoning": {"type": "string"},
-        "recommended_actions": {"type": "array", "items": {"type": "string"}}
       }
     },
     "evidence_quality": {

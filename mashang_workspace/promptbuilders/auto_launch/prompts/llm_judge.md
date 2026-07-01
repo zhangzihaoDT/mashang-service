@@ -125,3 +125,21 @@
 ### 污染证据特殊规则
 
 当 `evidence_polluted: true` 时，action 默认为 `reject`，除非证据本身同时满足品牌+车型+事件+日期四个条件。
+
+## Validation Rules
+
+1. 输出必须是合法 JSON，仅包含 `keep` / `action` / `target_match` / `event_is_about_target` / `source_context_type` / `evidence_quality` / `date_confidence` / `confidence` / `reasoning` 字段
+2. `action` 必须为 `keep` / `downgrade` / `reject` / `escalate` 之一
+3. `reasoning` 必须为非空字符串，解释判断依据
+4. 不允许输出非 JSON 格式的额外说明文字
+5. `source_context_type` 必须准确反映证据来源形态，不可默认为 `article_body`
+
+## Uncertainty Rules
+
+| 情况 | 处理方式 |
+|------|----------|
+| evidence 内容含糊，无法判断是否为目标车型 | `action=escalate`，`reasoning` 说明不确定原因 |
+| 多个车型混在 evidence 中 | 以目标车型是否为主语/主体判断，否则 `action=reject` |
+| evidence 太短（<20 字）无法判断 | `source_context_type=search_snippet`，`evidence_quality=low` |
+| 日期信息缺失 | `date_confidence=low`，`date_basis=source_publish_date` |
+| source_title 命中但 evidence 完全不相关 | `action=reject`，`reasoning=source_title_only` |
