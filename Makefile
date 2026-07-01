@@ -207,6 +207,26 @@ validate-auto-launch-byd-datang-report:
 		--normalized-file mashang_workspace/outputs/auto_launch/normalized/byd_datang_ev_launch_7d_vs_ls8.normalized_evidence.json \
 		--output mashang_workspace/outputs/auto_launch/reports/byd_datang_ev_launch_7d_vs_ls8/report.quality.json
 
+## AI Output Intake Workflow (validate → normalize → markdown)
+## SAMPLE: AI output JSON path (default: event_48h_sample.json)
+SAMPLE ?= mashang_workspace/promptbuilders/auto_launch/examples/ai_outputs/event_48h_sample.json
+OUTPUT_PREFIX ?= mashang_workspace/promptbuilders/auto_launch/examples
+
+## Validate AI output JSON
+auto-launch-validate:
+	$(PYTHON) mashang_workspace/promptbuilders/auto_launch/validators/validate_ai_response.py $(SAMPLE)
+
+## Normalize AI output JSON
+auto-launch-normalize:
+	$(PYTHON) mashang_workspace/promptbuilders/auto_launch/validators/normalize_ai_response.py $(SAMPLE) \
+		--output $(OUTPUT_PREFIX)/normalized/$(notdir $(SAMPLE:.json=.normalized.json))
+
+## Full Intake: validate → normalize → markdown report
+auto-launch-intake:
+	$(PYTHON) mashang_workspace/promptbuilders/auto_launch/intake/process_ai_output.py $(SAMPLE) \
+		--normalized-output $(OUTPUT_PREFIX)/normalized/$(notdir $(SAMPLE:.json=.normalized.json)) \
+		--report-output $(OUTPUT_PREFIX)/reports/$(notdir $(SAMPLE:.json=.md))
+
 ## Capability Audit
 capability-audit:
 	$(PYTHON) mashang_workspace/eval/run_capability_audit.py --format json --output mashang_workspace/outputs/tables/capability_audit_result.json
@@ -337,6 +357,9 @@ help:
 	@echo "make validate-auto-launch-byd-datang-fixture  [tolerant] 真实 AI 返回验证"
 	@echo "make package-auto-launch-byd-datang-report  打包标准化报告目录 (raw+摘要+索引+质量)"
 	@echo "make build-auto-launch-battle-brief    [EXPERIMENTAL] 生成一页摘要"
+	@echo "make auto-launch-validate  SAMPLE=... 验证 AI 输出 JSON（Prompt workflow intake）"
+	@echo "make auto-launch-normalize SAMPLE=... 归一化 AI 输出 JSON"
+	@echo "make auto-launch-intake    SAMPLE=... 完整 intake: validate→normalize→markdown"
 	@echo "prompts/ + plan_templates/             核心资产（promptbuilders/auto_launch/）"
 	@echo ""
 	@echo "=== MIIT 新车公告 ==="
