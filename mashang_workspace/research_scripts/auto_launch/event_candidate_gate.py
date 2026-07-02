@@ -26,9 +26,42 @@ def gate_clusters(clusters: list[dict], valid_event_types: set = None) -> dict:
         reasons = []
         bucket = None
 
-        # 1. Check time window
+        # Check if any source has confirmed query_window_role but is out_of_window
+        has_confirmed_out_of_window = False
+        has_confirmed_unknown_time = False
+        for si in cluster.get("source_items", []):
+            if si.get("query_window_role") == "confirmed":
+                if si.get("is_out_of_window") is True:
+                    has_confirmed_out_of_window = True
+                elif si.get("publish_time") is None or si.get("publish_time", "") == "":
+                    # Check original time_window_status from item
+                    pass
+
+        # 1. Confirmed window hard filter (Task 2)
+        # Check all source_items for confirmed + out_of_window
+        confirmed_out_count = sum(1 for si in cluster.get("source_items", [])
+                                  if si.get("query_window_role") == "confirmed"
+                                  and si.get("is_out_of_window") is True)
+        confirmed_no_time_count = sum(1 for si in cluster.get("source_items", [])
+                                       if si.get("query_window_role") == "confirmed"
+                                       and (not si.get("publish_time") or si.get("publish_time") == ""))
+
+        if confirmed_out_count > 0:
+            # All confirmed sources are out of window → context
+            non_confirmed = [si for si in cluster.get("source_items", [])
+                            if si.get("query_window_role") != "confirmed"]
+            if not non_confirmed:
+                bucket = "context_only"
+                reasons.append(f"confirmed_result_out_of_window ({confirmed_out_count} sources)")
+            # else: has non-confirmed sources that could still be candidates
+
+        if bucket is None and confirmed_no_time_count > 0 and not cluster.get("has_official_source"):
+            # Non-official confirmed source with no publish time → discovery
+            pass  # let other rules decide
+
+        # 1b. General time window check
         tws = cluster.get("time_window_status", "unknown")
-        if tws == "out_of_window":
+        if bucket is None and tws == "out_of_window":
             bucket = "context_only"
             reasons.append("time_window_out_of_window")
 

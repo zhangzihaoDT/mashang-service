@@ -120,6 +120,13 @@ def normalize_results(raw_results: list[dict], query_plan: dict, run_mode: str =
                 "event_type_ids": q.get("event_type_ids", []),
                 "source_tier_focus": q.get("source_tier_focus", []),
                 "query_role": q.get("query_role", "specific"),
+                "query_window_role": q.get("query_window_role", "discovery"),
+                "query_window_hours": q.get("query_window_hours"),
+                "query_window_days": q.get("query_window_days", 7 if q.get("query_window_role") == "discovery" else None),
+                "stage": q.get("stage", "discovery"),
+                "is_official_direct": q.get("is_official_direct", False),
+                "official_domain_target": q.get("official_domain_target"),
+                "official_account_target": q.get("official_account_target"),
             }
 
     resolver = _get_resolver()
@@ -154,6 +161,13 @@ def normalize_results(raw_results: list[dict], query_plan: dict, run_mode: str =
                 "event_type_ids": meta.get("event_type_ids", []),
                 "source_tier_focus": meta.get("source_tier_focus", []),
                 "query_role": meta.get("query_role", "specific"),
+                "query_window_role": meta.get("query_window_role", "discovery"),
+                "query_window_hours": meta.get("query_window_hours"),
+                "query_window_days": meta.get("query_window_days"),
+                "stage": meta.get("stage", "discovery"),
+                "is_official_direct": meta.get("is_official_direct", False),
+                "official_domain_target": meta.get("official_domain_target"),
+                "official_account_target": meta.get("official_account_target"),
                 "title": title,
                 "url": url,
                 "canonical_url": canonical,
@@ -170,7 +184,31 @@ def normalize_results(raw_results: list[dict], query_plan: dict, run_mode: str =
                 "is_out_of_window": tw_check["is_out_of_window"],
                 "retrieved_at": datetime.now().isoformat(),
                 "raw_rank": rank,
+                "routing_bucket": None,
+                "candidate_gate_status": None,
+                "candidate_gate_reasons": [],
+                "eligible_for_event_cluster": True,
             }
+
+            # ── Task 2: official_direct routing ──
+            stage = item.get("stage", "")
+            tws = item.get("time_window_status", "")
+            st = item.get("source_type_guess", "")
+            if stage == "official_direct" and tws != "in_window":
+                item["routing_bucket"] = "context_only"
+                item["candidate_gate_status"] = "rejected"
+                item["candidate_gate_reasons"].append("official_direct_not_in_confirmed_window")
+                item["eligible_for_event_cluster"] = False
+            if st == "official_product_page" and tws == "unknown_publish_time":
+                item["routing_bucket"] = "context_only"
+                item["candidate_gate_status"] = "rejected"
+                item["candidate_gate_reasons"].append("official_static_page_without_publish_time")
+                item["eligible_for_event_cluster"] = False
+            if st == "official_owned_platform" and stage == "official_direct" and tws != "in_window":
+                item["routing_bucket"] = "context_only"
+                item["candidate_gate_status"] = "rejected"
+                item["candidate_gate_reasons"].append("official_owned_platform_not_in_confirmed_window")
+                item["eligible_for_event_cluster"] = False
 
             if canonical not in raw_items_by_url:
                 raw_items_by_url[canonical] = item
@@ -317,6 +355,37 @@ def build_audit(user_request: str, monitor_date: str, mode: str,
         "requires_cross_check_count": cross_check,
     }
 
+    # ── routing stats (Tasks 2,5) ─────────────────────
+    routing_cnt = {"candidate_eligible": 0, "context_only": 0, "needs_review": 0}
+    od_total = od_in = od_out = od_unknown = od_routed = 0
+    for item in items:
+        rb = item.get("routing_bucket")
+        if rb == "context_only":
+            routing_cnt["context_only"] += 1
+        else:
+            routing_cnt["candidate_eligible"] += 1
+
+        if item.get("is_official_direct"):
+            od_total += 1
+            tws = item.get("time_window_status", "")
+            if tws == "in_window":
+                od_in += 1
+            elif tws == "out_of_window":
+                od_out += 1
+            else:
+                od_unknown += 1
+            if rb == "context_only":
+                od_routed += 1
+
+    routing_stats = {
+        "routing_counts": routing_cnt,
+        "official_direct_counts": {
+            "total": od_total, "in_window": od_in,
+            "out_of_window": od_out, "unknown_publish_time": od_unknown,
+            "routed_to_context_only": od_routed,
+        },
+    }
+
     audit = {
         "mode": mode,
         "monitor_date": monitor_date,
@@ -340,6 +409,7 @@ def build_audit(user_request: str, monitor_date: str, mode: str,
         "source_quality": source_quality,
         "source_resolution_quality": src_res,
         "event_extraction_readiness": readiness,
+        "routing_stats": routing_stats,
         "coverage_by_event_type": event_coverage,
         "coverage_by_target": target_coverage,
     }

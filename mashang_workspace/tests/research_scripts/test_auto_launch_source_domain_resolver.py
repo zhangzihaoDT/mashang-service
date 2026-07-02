@@ -87,3 +87,49 @@ def test_weibo_not_official():
     assert r["source_type_guess"] == "social_platform"
     assert r["source_tier_guess"] == "tier_4_social_signal"
     print("[PASS] test_weibo_not_official")
+
+
+def test_immotors_news_detail_is_tier1():
+    r = resolver.resolve("https://www.immotors.com/website/news_detail/220", "智己汽车")
+    assert r["source_type_guess"] == "official_website"
+    assert r["source_tier_guess"] == "tier_1_official"
+    print("[PASS] test_immotors_news_detail_is_tier1")
+
+
+def test_immotors_configurator_is_tier1():
+    r = resolver.resolve("https://www.immotors.com/website/configurator/ls7", "智己汽车")
+    assert r["source_type_guess"] == "official_product_page"
+    assert r["source_tier_guess"] == "tier_1_official"
+    print("[PASS] test_immotors_configurator_is_tier1")
+
+
+def test_m_immotors_community_not_tier1():
+    r = resolver.resolve("https://m.immotors.com/app/community/content?id=123", "智己")
+    assert r["source_type_guess"] == "official_owned_platform"
+    assert r["source_tier_guess"] != "tier_1_official"
+    assert r["source_tier_guess"] == "tier_4_social_signal"
+    print("[PASS] test_m_immotors_community_not_tier1")
+
+
+def test_ifeng_stays_not_official():
+    """即使正文含"官方"，news.ifeng.com 也不得 tier_1"""
+    r = resolver.resolve("https://news.ifeng.com/c/8j2k", "凤凰网",
+                         title="智己官方宣布LS9上市", snippet="智己汽车官方表示")
+    assert r["source_tier_guess"] != "tier_1_official"
+    assert r["source_tier_guess"] == "tier_5_unverified"
+    print("[PASS] test_ifeng_stays_not_official")
+
+
+def test_auto_cri_is_authoritative():
+    r = resolver.resolve("https://auto.cri.cn/20260701/123.html", "国际在线汽车频道")
+    assert r["source_type_guess"] == "authoritative_media"
+    assert r["source_tier_guess"] == "tier_3_industry_media"
+    print("[PASS] test_auto_cri_is_authoritative")
+
+
+def test_cri_is_authoritative():
+    r = resolver.resolve("https://news.cri.cn/20260701/123.html", "国际在线")
+    assert r["source_type_guess"] == "authoritative_media"
+    print("[PASS] test_cri_is_authoritative")
+
+

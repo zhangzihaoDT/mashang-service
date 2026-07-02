@@ -98,21 +98,25 @@ def _run(brand: str, brand_name: str, monitor_date: str, window_hours: int,
     # query plan
     query_plan = build_query_plan(task_config, budget_plan)
 
-    # ── official direct search queries (Task 5/P2) ──
+    # ── official direct search queries with absolute date window ──
     official_domain = "immotors.com"
+    date_label = f"{start_dt.strftime('%Y年%m月%d日')} {end_dt.strftime('%Y年%m月%d日')}"
     official_queries = [
-        {"query": f"site:{official_domain} {brand_name} 权益 过去24小时", "stage": "official_direct",
-         "query_role": "confirmed", "query_window_role": "confirmed",
-         "event_type_ids": ["benefit_adjustment"], "source_tier_focus": ["tier_1_official"]},
-        {"query": f"site:{official_domain} {brand_name} 交付 战报", "stage": "official_direct",
-         "query_role": "confirmed", "query_window_role": "confirmed",
-         "event_type_ids": ["delivery_start", "sales_milestone"], "source_tier_focus": ["tier_1_official"]},
-        {"query": f"site:{official_domain} {brand_name} OTA 发布", "stage": "official_direct",
-         "query_role": "confirmed", "query_window_role": "confirmed",
-         "event_type_ids": ["technology_release"], "source_tier_focus": ["tier_1_official"]},
-        {"query": f"site:{official_domain} {brand_name} LS9 上市", "stage": "official_direct",
-         "query_role": "confirmed", "query_window_role": "confirmed",
-         "event_type_ids": ["launch"], "source_tier_focus": ["tier_1_official"]},
+        {"query": f"site:{official_domain} {brand_name} {date_label} 权益 交付",
+         "stage": "official_direct", "query_role": "confirmed", "query_window_role": "confirmed",
+         "query_window_hours": window_hours, "query_window_days": None,
+         "is_official_direct": True, "official_domain_target": official_domain,
+         "event_type_ids": ["benefit_adjustment", "delivery_start"], "source_tier_focus": ["tier_1_official"]},
+        {"query": f"site:{official_domain} {brand_name} {date_label} OTA 技术 发布",
+         "stage": "official_direct", "query_role": "confirmed", "query_window_role": "confirmed",
+         "query_window_hours": window_hours, "query_window_days": None,
+         "is_official_direct": True, "official_domain_target": official_domain,
+         "event_type_ids": ["technology_release", "launch_event"], "source_tier_focus": ["tier_1_official"]},
+        {"query": f"site:{official_domain} {brand_name} {date_label} LS9 LS8 L6 上市 销量",
+         "stage": "official_direct", "query_role": "confirmed", "query_window_role": "confirmed",
+         "query_window_hours": window_hours, "query_window_days": None,
+         "is_official_direct": True, "official_domain_target": official_domain,
+         "event_type_ids": ["launch", "sales_milestone"], "source_tier_focus": ["tier_1_official"]},
     ]
     for t in query_plan.get("targets", []):
         if t["target_id"] == brand:

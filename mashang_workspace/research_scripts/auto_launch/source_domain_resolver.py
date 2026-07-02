@@ -58,9 +58,42 @@ class SourceDomainResolver:
         # official social accounts: brand → platform → [account names]
         self._off_social = self.cfg.get("official_social_accounts", {})
 
+    def _path_prefix(self, url: str) -> str:
+        """Extract path prefix for URL path-based rules."""
+        try:
+            parsed = urlparse(url)
+            path = parsed.path or ""
+            return path.lower()
+        except Exception:
+            return ""
+
     def resolve(self, url: str, source_name: str, title: str = "", snippet: str = "") -> dict:
         domain = self._extract_domain(url)
         subdomain = self._extract_subdomain(url)
+        path = self._path_prefix(url)
+
+        # 0a. immotors.com path-based rules
+        if domain in ("immotors.com", "www.immotors.com"):
+            if path.startswith("/app/community/"):
+                return self._result("official_owned_platform", "tier_4_social_signal", domain,
+                                    "domain matched official owned platform; author not verified")
+            if path.startswith("/website/configurator/") or path.startswith("/website/vehicle_config/"):
+                return self._result("official_product_page", "tier_1_official", domain,
+                                    "domain matched official_domains; product/config page")
+            if path.startswith("/website/news_detail/") or path.startswith("/website/news/"):
+                return self._result("official_website", "tier_1_official", domain,
+                                    "domain matched official_domains; news page")
+            # default immotors.com → official
+            return self._result("official_website", "tier_1_official", domain,
+                                "domain matched official_domains")
+
+        # 0b. m.immotors.com path-based rules
+        if domain == "m.immotors.com":
+            if path.startswith("/app/community/"):
+                return self._result("official_owned_platform", "tier_4_social_signal", domain,
+                                    "domain matched official owned platform; author not verified")
+            return self._result("official_owned_platform", "tier_4_social_signal", domain,
+                                "domain matched official owned platform; default tier_4")
 
         # 1. Official domain match (highest priority)
         if domain in self._official_domains:

@@ -95,7 +95,7 @@ def build_query_plan(task_config: dict, budget_plan: dict = None, output_path: s
                 if _official_only_mode:
                     source_focus = ["tier_1_official"]
                 query_role_val = tmpl.get("query_role", "specific_discovery")
-                query_window_role = "confirmed" if query_role_val == "overview_discovery" else "discovery"
+                query_window_role = "confirmed" if query_role_val == "confirmed" else "discovery"
                 queries.append({
                     "query": q_text,
                     "stage": tmpl.get("stage", "scout"),
@@ -122,7 +122,7 @@ def build_query_plan(task_config: dict, budget_plan: dict = None, output_path: s
                     "query": q_text,
                     "stage": "scout",
                     "query_role": qr,
-                    "query_window_role": "confirmed" if qr == "overview_discovery" else "discovery",
+                    "query_window_role": "discovery",
                     "event_type_ids": tmpl.get("event_focus", []),
                     "source_tier_focus": source_focus,
                     "purpose": tmpl.get("purpose", f"scout: {tmpl.get('event_focus', ['general'])}"),

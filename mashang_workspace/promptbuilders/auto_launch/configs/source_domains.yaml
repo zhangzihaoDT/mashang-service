@@ -365,6 +365,9 @@ authoritative_media_domains:
   - ce.cn
   - cctv.com
   - cnr.cn
+  - cri.cn
+  - news.cri.cn
+  - auto.cri.cn
   - chinanews.com.cn
   - miit.gov.cn
   - cada.cn

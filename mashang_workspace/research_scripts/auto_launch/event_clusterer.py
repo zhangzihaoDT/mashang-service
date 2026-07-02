@@ -59,6 +59,9 @@ def cluster_items(items: list[dict], brand_key: str = "im") -> dict:
     clusters: dict[str, dict] = {}
 
     for item in items:
+        # Skip items not eligible for event clustering
+        if not item.get("eligible_for_event_cluster", True):
+            continue
         title = item.get("title", "") or ""
         snippet = item.get("snippet", "") or ""
         combined = f"{title} {snippet}"
@@ -114,6 +117,11 @@ def cluster_items(items: list[dict], brand_key: str = "im") -> dict:
             "source_type": stype,
             "source_tier": tier,
             "snippet": (item.get("snippet", "") or "")[:200],
+            "query_window_role": item.get("query_window_role", "discovery"),
+            "is_out_of_window": item.get("is_out_of_window"),
+            "time_window_status": item.get("time_window_status", "unknown"),
+            "stage": item.get("stage", "discovery"),
+            "is_official_direct": item.get("is_official_direct", False),
         }
         if si not in c["source_items"]:
             c["source_items"].append(si)
