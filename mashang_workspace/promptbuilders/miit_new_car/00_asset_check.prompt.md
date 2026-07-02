@@ -18,7 +18,7 @@
 | 2 | 产品清单 JSON | `outputs/miit_new_car/product_list/batch_{N}_product_list.json` | JSON 可解析，records 数 > 0 |
 | 3 | 附件文本抽取结果 | `outputs/miit_new_car/extracted/batch_{N}_attachment_text.json` | JSON 可解析，extract_status=success |
 | 4 | 附件 1 原始文本 | `outputs/miit_new_car/extracted/text/batch_{N}/{hash}.txt` | 文件存在，大小 > 0 |
-| 5 | Watchlist CSV | `configs/miit_new_car_watchlist.csv` | 文件存在，包含目标品牌关键词 |
+| 5 | Watchlist CSV | `configs/重点关注新能源品牌.json` | 文件存在，包含目标品牌关键词 |
 | 6 | Promptbuilder 方法论 | `docs/miit_promptbuilder_draft.md` | 文件存在 |
 | 7 | E2E Runbook | `docs/miit_e2e_runbook.md` | 文件存在 |
 | 8 | Prompt Pack 模块 | `promptbuilders/miit_new_car/00~04.prompt.md` | 全部 5 个文件存在 |
@@ -86,7 +86,7 @@
 | 附件文本抽取 | `outputs/miit_new_car/extracted/batch_{N}_attachment_text.json` | 是/否 | 附件提取结果索引 | 否 | 记录 success/fail 数量，区分主附件和 tax catalog |
 | 主附件原文 | `outputs/miit_new_car/extracted/text/batch_{N}/{road_announcement_hash}.txt` | 是/否 | 道路机动车辆公告原文 | 否（但影响 allowed_analysis_scope） | 记录文件大小；如果该附件 404，说明仅有 tax catalog |
 | Tax catalog 原文 | `outputs/miit_new_car/extracted/text/batch_{N}/{tax_catalog_hash}.txt` | 是/否 | 车船税/购置税目录原文 | 否 | 降级模式下 fallback 依据 |
-| Watchlist CSV | `configs/miit_new_car_watchlist.csv` | 是/否 | 关注品牌关键词 | 否 | 记录品牌列表 |
+| Watchlist CSV | `configs/重点关注新能源品牌.json` | 是/否 | 关注品牌关键词 | 否 | 记录品牌列表 |
 | Promptbuilder 方法论 | `docs/miit_promptbuilder_draft.md` | 是/否 | 分析模板参考 | 否 | — |
 | E2E Runbook | `docs/miit_e2e_runbook.md` | 是/否 | 执行手册参考 | 否 | — |
 | Prompt Pack | `promptbuilders/miit_new_car/*.prompt.md` | 是/否 | 可复用 Prompt 模块 | 否 | — |

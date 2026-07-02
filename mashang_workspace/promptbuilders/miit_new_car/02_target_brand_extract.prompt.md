@@ -19,7 +19,7 @@
 - `extracted/text/batch_{N}/{tax_catalog_hash}.txt`（车船税/购置税目录原文，降级模式时主要数据源）
 - `extracted/batch_{N}_attachment_text.json`（附件抽取索引）
 - `evidence/batch_{N}_official_source_evidence.json`（用于确认批次元信息）
-- `configs/miit_new_car_watchlist.csv`
+- `configs/重点关注新能源品牌.json`
 
 ## 字段清洗参考
 

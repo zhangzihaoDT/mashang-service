@@ -18,6 +18,11 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+load_dotenv(_REPO_ROOT / ".env")
+
 _ROOT = Path(__file__).resolve().parents[1]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
@@ -125,21 +130,30 @@ def _week_to_date_range(data_week_str):
 
 
 def _build_period_hints(data_period_start, data_period_end):
-    """Generate period hint strings based on data_week (the week data belongs to)."""
+    """Generate period hint strings based on data_week (the week data belongs to).
+    Month-to-date (e.g. "6月1-28日") is first — CPCA articles always use month-to-date,
+    not narrow weekly ranges. Weekly-range hints come second as fallback."""
     start = datetime.strptime(data_period_start, "%Y-%m-%d")
     end = datetime.strptime(data_period_end, "%Y-%m-%d")
-    year_s = start.year
-    month_s = start.month
-    day_s = start.day
-    day_e = end.day
+    year_s, month_s, day_s = start.year, start.month, start.day
+    year_e, month_e, day_e = end.year, end.month, end.day
 
-    hints = [
-        f"{month_s}月{day_s}-{day_e}日",
-        f"{month_s}月{day_s}日-{month_s}月{day_e}日",
-        f"{year_s}年{month_s}月{day_s}日-{month_s}月{day_e}日",
-        f"{month_s}月1-{day_e}日",
-        f"{year_s}年{month_s}月1日-{month_s}月{day_e}日",
-    ]
+    same_month = month_s == month_e and year_s == year_e
+    if same_month:
+        hints = [
+            f"{month_s}月1-{day_e}日",                          # month-to-date (broad, preferred)
+            f"{month_s}月{day_s}-{day_e}日",                     # week-range
+            f"{month_s}月{day_s}日-{month_s}月{day_e}日",
+            f"{year_s}年{month_s}月{day_s}日-{month_s}月{day_e}日",
+            f"{year_s}年{month_s}月1日-{month_s}月{day_e}日",
+        ]
+    else:
+        hints = [
+            f"{month_s}月1日-{month_e}月{day_e}日",              # cross-month month-to-date
+            f"{month_s}月{day_s}日-{month_e}月{day_e}日",
+            f"{year_s}年{month_s}月{day_s}日-{month_e}月{day_e}日",
+            f"{year_s}年{month_s}月1日-{month_e}月{day_e}日",
+        ]
     return hints
 
 
@@ -208,7 +222,7 @@ def _build_queries(config, start_date, end_date, period_hints):
     # Generate augmented queries with period hints
     queries = list(keywords)  # Keep raw keywords too
     for kw in keywords:
-        for hint in period_hints[:2]:  # Top 2 period hints
+        for hint in period_hints[:3]:  # month-to-date + week-range + full-date
             # Replace "6月1-21日" etc with actual hint
             augmented = re.sub(r"\d+月\d+[-～]\d+日", hint, kw)
             if augmented != kw:
@@ -1206,7 +1220,7 @@ def _build_fact_result(cap):
                 field_sources_summary[role] = field_sources[fk]
 
         confirmation_status = capture_status
-        if has_cada and not has_conflict and fields_complete >= 3:
+        if has_cada and not has_conflict and headline_fields >= 3:
             confirmation_status = "final_confirmed"
         elif has_cada and has_conflict:
             confirmation_status = "conflict"
@@ -1380,13 +1394,14 @@ def main():
         data_period_start, data_period_end = args.start, args.end
         week_label = f"{data_period_start} ~ {data_period_end}"
     else:
-        data_week = ""
+        # Auto-calculate: data_week = ISO week of most recent Sunday
+        # CPCA publishes Wed for month-to-date data ending previous Sunday
         today = datetime.now()
-        monday = today - timedelta(days=today.weekday())
-        sunday = monday + timedelta(days=6)
-        data_period_start = monday.strftime("%Y-%m-%d")
-        data_period_end = sunday.strftime("%Y-%m-%d")
-        week_label = f"{data_period_start} ~ {data_period_end}"
+        last_sunday = today - timedelta(days=(today.weekday() + 1) % 7)
+        year, week_num, _ = last_sunday.isocalendar()
+        data_week = f"{year}-W{week_num:02d}"
+        data_period_start, data_period_end, _ = _week_to_date_range(data_week)
+        week_label = data_week
 
     # CPCA weekly data typically publishes Wednesday 16:30-18:00
     expected_publish_window = ""

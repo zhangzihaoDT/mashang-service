@@ -1,69 +1,136 @@
-# Auto Launch 事件类型定义
+# auto_launch v2 事件类型配置
 # version: v0.1
+#
+# 基于 LS8 竞品车型动态追踪 & 重点关注品牌每日营销事件监控 两个 Prompt 母版抽取
+#
+# 分组说明:
+#   shared:                 两个监控都适用的共性事件
+#   model_watch_only:       仅适合车型级监控（LS8 竞品车型动态追踪）
+#   brand_watch_only:       仅适合品牌级监控（重点关注品牌每日营销事件监控）
 
-event_types:
-  - id: launch
-    name: 上市
-    description: 新车正式上市，公布全系售价和配置
+shared_event_types:
+  - event_type_id: launch
+    event_type_cn: 新车正式上市
+    applies_to: both
+    confirmation_level: confirmed_event
     search_keywords: [上市, 正式上市, 售价公布, 上市发布]
-    required_modules: [event_confirmation, pricing, product_positioning, competitive_analysis, media_feedback, impact_assessment]
+    weak_signal_keywords: [即将上市, 有望上市, 预计售价]
 
-  - id: presale
-    name: 预售
-    description: 新车开启预售，公布预售价和预售权益
-    search_keywords: [预售, 开启预售, 预订, 盲订]
-    required_modules: [event_confirmation, pricing, competitive_analysis, media_feedback]
+  - event_type_id: presale
+    event_type_cn: 开启预售
+    applies_to: both
+    confirmation_level: confirmed_event
+    search_keywords: [预售, 开启预售, 预订, 盲订, 小订, 大定]
+    weak_signal_keywords: [即将预售, 预售在即]
 
-  - id: launch_event
-    name: 发布会
-    description: 新车发布会，可能同时公布价格或仅亮相
-    search_keywords: [发布会, 亮相, 发布, 首发]
-    required_modules: [event_confirmation, product_positioning, media_feedback]
+  - event_type_id: launch_event
+    event_type_cn: 发布会/亮相活动
+    applies_to: both
+    confirmation_level: confirmed_event
+    search_keywords: [发布会, 品牌日, 技术日, 全球发布, 生态发布]
+    weak_signal_keywords: [即将举办, 正在筹备]
 
-  - id: debut
-    name: 首发亮相
-    description: 新车首次公开亮相（车展或品牌活动），通常不公布价格
-    search_keywords: [首发, 首秀, 车展, 亮相]
-    required_modules: [event_confirmation, product_positioning, competitive_analysis, media_feedback]
+  - event_type_id: debut
+    event_type_cn: 首发亮相
+    applies_to: both
+    confirmation_level: confirmed_event
+    search_keywords: [首发, 首秀, 亮相, 车展, 实车亮相]
+    weak_signal_keywords: [渲染图, 谍照, 疑似]
 
-  - id: config_release
-    name: 配置公布
-    description: 官方公布详细配置表
-    search_keywords: [配置, 配置表, 参数, 详细配置]
-    required_modules: [product_positioning, competitive_analysis, media_feedback]
+  - event_type_id: config_release
+    event_type_cn: 配置发布
+    applies_to: both
+    confirmation_level: confirmed_event
+    search_keywords: [配置, 配置表, 参数, 版本, 详细配置]
+    weak_signal_keywords: [配置曝光, 配置流出]
 
-  - id: price_release
-    name: 价格公布
-    description: 官方公布售价（可能单独发布）
+  - event_type_id: price_release
+    event_type_cn: 售价公布
+    applies_to: both
+    confirmation_level: confirmed_event
     search_keywords: [售价, 价格, 定价, 价格公布]
-    required_modules: [event_confirmation, pricing, competitive_analysis, media_feedback]
+    weak_signal_keywords: [价格疑似, 或售]
 
-  - id: delivery_start
-    name: 开启交付
-    description: 新车开始交付给用户
-    search_keywords: [交付, 交付仪式, 首批, 提车, 开始交付]
-    required_modules: [event_confirmation, media_feedback, impact_assessment]
+  - event_type_id: delivery_start
+    event_type_cn: 交付启动/爬坡
+    applies_to: both
+    confirmation_level: confirmed_event
+    search_keywords: [交付, 首批交付, 提车, 交付仪式, 交付破万, 第X台下线]
+    weak_signal_keywords: [个别用户提车, 销售通知交付]
 
-  - id: facelift_launch
-    name: 改款上市
-    description: 现有车型的年度改款或中期改款上市
+  - event_type_id: benefit_adjustment
+    event_type_cn: 购车权益调整
+    applies_to: both
+    confirmation_level: both_possible
+    search_keywords: [限时权益, 购车权益, 金融方案, 置换补贴, 保险补贴, 权益调整, 权益加码, 权益到期]
+    weak_signal_keywords: [经销商权益, 门店额外补贴, 内部权益]
+
+  - event_type_id: official_price_change
+    event_type_cn: 官方价格调整
+    applies_to: both
+    confirmation_level: confirmed_event
+    search_keywords: [降价, 涨价, 调价, 价格调整, 官方降价, 限时价]
+    weak_signal_keywords: [经销商降价, 门店优惠]
+
+model_watch_only_event_types:
+  - event_type_id: facelift_launch
+    event_type_cn: 年度改款/中期改款上市
+    applies_to: model_watch
+    confirmation_level: confirmed_event
     search_keywords: [改款, 新款, 2026款, 年度改款, 中期改款]
-    required_modules: [event_confirmation, pricing, product_positioning, competitive_analysis, media_feedback]
+    weak_signal_keywords: [改款曝光, 新款谍照]
 
-  - id: benefit_adjustment
-    name: 限时权益调整
-    description: 限时购车权益、金融方案调整
-    search_keywords: [限时, 权益, 金融方案, 置换补贴, 保险补贴]
-    required_modules: [pricing, competitive_analysis]
+brand_watch_only_event_types:
+  - event_type_id: brand_campaign
+    event_type_cn: 品牌传播战役
+    applies_to: brand_watch
+    confirmation_level: confirmed_event
+    search_keywords: [品牌片, 广告片, 品牌主张, 品牌焕新, 品牌升级]
 
-  - id: official_price_change
-    name: 官方调价
-    description: 官方宣布降价或涨价
-    search_keywords: [降价, 涨价, 调价, 价格调整, 官方降价]
-    required_modules: [pricing, competitive_analysis, media_feedback, impact_assessment]
+  - event_type_id: sales_milestone
+    event_type_cn: 销量/订单里程碑
+    applies_to: brand_watch
+    confirmation_level: confirmed_event
+    search_keywords: [销量, 交付量, 订单破万, 大定, 锁单, 销量冠军]
 
-  - id: official_rights_update
-    name: 官方权益调整
-    description: 官方购车权益变化，包括限时权益到期、权益续接、权益加码/缩水、金融方案调整、置换补贴变化等
-    search_keywords: [权益, 购车权益, 限时权益, 权益调整, 权益加码, 权益到期, 金融方案, 置换补贴]
-    required_modules: [pricing, competitive_analysis, media_feedback, impact_assessment]
+  - event_type_id: production_milestone
+    event_type_cn: 产能里程碑
+    applies_to: brand_watch
+    confirmation_level: confirmed_event
+    search_keywords: [下线, 量产, 第X台, 产能]
+
+  - event_type_id: technology_release
+    event_type_cn: 技术传播
+    applies_to: brand_watch
+    confirmation_level: confirmed_event
+    search_keywords: [智驾, 端到端, 激光雷达, 电池, 平台, 补能, 座舱]
+
+  - event_type_id: channel_campaign
+    event_type_cn: 渠道活动
+    applies_to: brand_watch
+    confirmation_level: both_possible
+    search_keywords: [试驾, 巡展, 门店, 体验中心, 城市展厅]
+
+  - event_type_id: user_event
+    event_type_cn: 用户活动
+    applies_to: brand_watch
+    confirmation_level: confirmed_event
+    search_keywords: [用户大会, 车主活动, 粉丝节, 车友会]
+
+  - event_type_id: partnership
+    event_type_cn: 联名/代言/合作
+    applies_to: brand_watch
+    confirmation_level: confirmed_event
+    search_keywords: [联名, 代言, 合作, 赞助]
+
+  - event_type_id: executive_voice
+    event_type_cn: 高管发声
+    applies_to: brand_watch
+    confirmation_level: both_possible
+    search_keywords: [直播, 访谈, 董事长, CEO]
+
+  - event_type_id: public_opinion
+    event_type_cn: 舆情事件
+    applies_to: brand_watch
+    confirmation_level: both_possible
+    search_keywords: [回应, 争议, 投诉, 事故, 声明, 澄清]

@@ -1,0 +1,162 @@
+[
+  {
+    "catalog": "鸿蒙智行",
+    "keywords": ["鸿蒙智行", "HIMA", "华为", "huawei"],
+    "brands": [
+      {
+        "name": "问界",
+        "keywords": ["问界", "AITO", "赛力斯"],
+        "models": ["M9", "M8", "M7", "M6"]
+      },
+      {
+        "name": "智界",
+        "keywords": ["智界", "LUXEED"],
+        "models": ["V9", "R7"]
+      },
+      {
+        "name": "享界",
+        "keywords": ["享界", "STELATO"],
+        "models": ["S9", "S9T"]
+      },
+      { "name": "尊界", "keywords": ["尊界", "MAEXTRO"], "models": ["S800"] },
+      {
+        "name": "尚界",
+        "keywords": ["尚界", "SAIC"],
+        "models": ["Z7T", "Z7", "H5"]
+      }
+    ]
+  },
+  {
+    "catalog": "智己",
+    "keywords": ["智己", "IM", "上汽集团"],
+    "brands": [{ "name": "智己", "models": ["L6", "LS6", "LS8", "LS9"] }]
+  },
+  {
+    "catalog": "理想",
+    "keywords": ["理想"],
+    "brands": [
+      { "name": "理想", "models": ["L6", "L7", "L8", "L9", "i6", "i8", "MEGA"] }
+    ]
+  },
+  {
+    "catalog": "小米",
+    "keywords": ["小米汽车", "小米"],
+    "brands": [{ "name": "小米", "models": ["SU7", "YU7"] }]
+  },
+  {
+    "catalog": "蔚来汽车",
+    "keywords": ["蔚来"],
+    "brands": [
+      { "name": "蔚来", "models": ["EC6", "ES6", "ES8", "ES9", "ET5", "149"] },
+      {
+        "name": "乐道",
+        "keywords": ["乐道", "ONVO"],
+        "models": ["L60", "L80", "L90"]
+      },
+      { "name": "萤火虫", "keywords": ["萤火虫", "FIREFLY"], "models": [] }
+    ]
+  },
+  {
+    "catalog": "小鹏",
+    "keywords": ["小鹏"],
+    "brands": [
+      { "name": "小鹏", "models": ["G6", "G7", "G9", "GX", "P7", "P7+", "X9"] },
+      { "name": "MONA", "keywords": ["MONA", "小鹏"], "models": ["MONA M03"] }
+    ]
+  },
+  {
+    "catalog": "阿维塔",
+    "keywords": ["阿维塔", "AVATR"],
+    "brands": [{ "name": "阿维塔", "models": ["06", "07", "12"] }]
+  },
+  {
+    "catalog": "深蓝",
+    "keywords": ["深蓝"],
+    "brands": [
+      { "name": "深蓝", "models": ["G318", "L07", "L06", "S05", "S07", "S09"] }
+    ]
+  },
+  {
+    "catalog": "零跑",
+    "keywords": ["零跑"],
+    "brands": [
+      {
+        "name": "零跑",
+        "models": [
+          "T03",
+          "C16",
+          "C11",
+          "C10",
+          "B01",
+          "B10",
+          "A10",
+          "LAFA5",
+          "D19"
+        ]
+      }
+    ]
+  },
+  {
+    "catalog": "腾势",
+    "keywords": ["腾势", "DENZA"],
+    "brands": [{ "name": "腾势", "models": ["D9", "N9", "N8L", "Z9GT"] }]
+  },
+  {
+    "catalog": "方程豹",
+    "keywords": ["方程豹"],
+    "brands": [{ "name": "方程豹", "models": ["豹5", "豹8", "钛3", "钛7"] }]
+  },
+  {
+    "catalog": "比亚迪",
+    "keywords": ["比亚迪"],
+    "brands": [{ "name": "比亚迪", "models": [] }]
+  },
+  {
+    "catalog": "特斯拉",
+    "keywords": ["特斯拉"],
+    "brands": [
+      { "name": "特斯拉", "models": ["MODEL 3", "MODEL Y", "MODEL Y L"] }
+    ]
+  },
+  {
+    "catalog": "极氪科技",
+    "keywords": ["极氪", "领克"],
+    "brands": [
+      {
+        "name": "极氪",
+        "keywords": ["极氪"],
+        "models": ["X", "001", "007", "7X", "009", "8X", "9X"]
+      },
+      {
+        "name": "领克",
+        "keywords": ["领克"],
+        "models": ["Z20", "07", "08", "10", "900"]
+      }
+    ]
+  },
+  {
+    "catalog": "埃安",
+    "keywords": ["埃安", "AION"],
+    "brands": [
+      {
+        "name": "埃安",
+        "models": [
+          "AION UT",
+          "AION V",
+          "AION S",
+          "AION Y",
+          "AION RT",
+          "AION N60",
+          "AION i60"
+        ]
+      }
+    ]
+  },
+  {
+    "catalog": "岚图",
+    "keywords": ["岚图", "VOYAH"],
+    "brands": [
+      { "name": "岚图", "models": ["FREE", "梦想家", "知音", "泰山", "泰山X8"] }
+    ]
+  }
+]

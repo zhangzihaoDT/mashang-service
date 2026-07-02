@@ -33,7 +33,7 @@
 | 产品清单 | `outputs/miit_new_car/product_list/batch_{N}_product_list.json` | enterprise_name, brand, product_name, product_model, quality | 重点车型筛选、差异对比、竞品映射 | 需要（型号前缀可能 incomplete） |
 | watchlist diff | `outputs/miit_new_car/diff/batch_{N}_watchlist_diff.json` | watchlist 品牌命中、新增/匹配产品 | 竞品映射、威胁判断 | 需要 |
 | official evidence | `outputs/miit_new_car/evidence/batch_{N}_official_source_evidence.json` | evidence_layers（三层）、watchlist_hits、attachment_summary | 全模块入口 | 不需要 |
-| watchlist CSV | `configs/miit_new_car_watchlist.csv` | 14 个品牌 + 关键词 | 竞品映射 | 不需要（可扩展） |
+| watchlist CSV | `configs/重点关注新能源品牌.json` | 14 个品牌 + 关键词 | 竞品映射 | 不需要（可扩展） |
 
 ---
 
@@ -52,7 +52,7 @@
 **适用输入**：
 - `product_list/batch_{N}_product_list.json`
 - `extracted/text/batch_{N}/*.txt`
-- `configs/miit_new_car_watchlist.csv`
+- `configs/重点关注新能源品牌.json`
 
 **输出字段**：
 
@@ -208,7 +208,7 @@ flowchart LR
 - `product_list/batch_{N}_product_list.json`
 - `extracted/text/batch_{N}/*.txt`
 - `diff/batch_{N}_watchlist_diff.json`
-- `configs/miit_new_car_watchlist.csv`
+- `configs/重点关注新能源品牌.json`
 
 **watchlist 命中优先级**：
 

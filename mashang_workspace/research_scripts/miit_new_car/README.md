@@ -167,7 +167,7 @@ python mashang_workspace/research_scripts/miit_new_car/monitor.py --batch 408
 
 # 带自定义 watchlist
 python mashang_workspace/research_scripts/miit_new_car/monitor.py --batch 408 \
-  --watchlist mashang_workspace/configs/miit_new_car_watchlist.csv
+  --watchlist mashang_workspace/configs/重点关注新能源品牌.json
 ```
 
 ### Makefile 命令
@@ -213,7 +213,7 @@ mashang_workspace/outputs/miit_new_car/
 
 ## Watchlist 配置方式
 
-默认配置文件：`mashang_workspace/configs/miit_new_car_watchlist.csv`
+默认配置文件：`mashang_workspace/configs/重点关注新能源品牌.json`
 
 格式：
 

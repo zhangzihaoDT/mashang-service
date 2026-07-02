@@ -35,7 +35,7 @@ from research_scripts.miit_new_car.http_utils import NetworkError, get_and_reset
 
 OUTPUT_BASE = WORKSPACE_ROOT / "outputs" / "miit_new_car"
 STATE_FILE = OUTPUT_BASE / "state" / "latest_processed_batch.json"
-DEFAULT_WATCHLIST = WORKSPACE_ROOT / "configs" / "miit_new_car_watchlist.csv"
+DEFAULT_WATCHLIST = WORKSPACE_ROOT / "configs" / "重点关注新能源品牌.json"
 EVIDENCE_BASE = OUTPUT_BASE / "evidence"
 EVIDENCE_SCHEMA_VERSION = "miit_official_evidence.v0.3"
 GENERATOR_VERSION = "miit_new_car_monitor.v0.3.2"

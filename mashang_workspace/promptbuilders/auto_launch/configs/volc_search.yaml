@@ -1,0 +1,63 @@
+# Volc Search API 配置
+# version: v0.1
+# 环境变量: VOLC_SEARCH_BASE_URL, VOLC_SEARCH_API_KEY
+
+api:
+  base_url_env: VOLC_SEARCH_BASE_URL
+  api_key_env: VOLC_SEARCH_API_KEY
+  timeout_seconds: 30
+  max_retries: 3
+  retry_delay_seconds: 2
+
+defaults:
+  query_budget_per_target: 8
+  result_limit_per_query: 10
+  language: zh-CN
+  time_range_boost: true  # query 中自动附加上时间约束词
+
+search_templates:
+  brand_open_scan:
+    - pattern: "{brand} 最近{days}天 动作 消息"
+      event_focus: ["all"]
+    - pattern: "{brand} 权益 价格 最近{days}天"
+      event_focus: ["benefit_adjustment", "official_price_change"]
+    - pattern: "{brand} 订单 交付 销量 战报 最近{days}天"
+      event_focus: ["delivery_start", "sales_milestone"]
+    - pattern: "{brand} 发布会 技术 品牌 最近{days}天"
+      event_focus: ["launch_event", "technology_release", "brand_campaign"]
+    - pattern: "{brand} 门店 试驾 活动 最近{days}天"
+      event_focus: ["channel_campaign", "user_event"]
+    - pattern: "{brand} 联名 合作 代言 最近{days}天"
+      event_focus: ["partnership"]
+    - pattern: "{brand} 高管 直播 最近{days}天"
+      event_focus: ["executive_voice"]
+    - pattern: "{brand} 爆料 疑似 最近{days}天"
+      event_focus: ["rumor_or_leak"]
+
+  model_open_scan:
+    - pattern: "{model} 上市 价格 权益 最近{days}天"
+      event_focus: ["launch", "presale", "benefit_adjustment", "official_price_change"]
+    - pattern: "{model} 交付 订单 战报 最近{days}天"
+      event_focus: ["delivery_start", "order_milestone"]
+    - pattern: "{model} 改款 配置 最近{days}天"
+      event_focus: ["facelift_launch", "config_release"]
+    - pattern: "{model} 评测 媒体 最近{days}天"
+      event_focus: ["media_review_wave"]
+    - pattern: "{model} 爆料 销售 朋友園 最近{days}天"
+      event_focus: ["rumor_or_leak"]
+
+  event_specific:
+    - pattern: "{target} 上市 发布会 最近{days}天"
+      event_focus: ["launch", "launch_event"]
+    - pattern: "{target} 预售 盲订 最近{days}天"
+      event_focus: ["presale"]
+    - pattern: "{target} 降价 售价 价格调整 最近{days}天"
+      event_focus: ["official_price_change"]
+    - pattern: "{target} 权益 补贴 金融 最近{days}天"
+      event_focus: ["benefit_adjustment"]
+    - pattern: "{target} 交付 提车 最近{days}天"
+      event_focus: ["delivery_start"]
+    - pattern: "{target} 销量 订单 战报 最近{days}天"
+      event_focus: ["order_milestone", "sales_milestone"]
+    - pattern: "{target} 爆料 路透 经销商 最近{days}天"
+      event_focus: ["rumor_or_leak"]

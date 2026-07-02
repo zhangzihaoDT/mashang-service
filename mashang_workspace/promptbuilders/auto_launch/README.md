@@ -10,10 +10,12 @@ Auto Launch 是一个竞品销售动作发现 + 归类 + 证据 + 轻量影响�
 
 | 资产 | 路径 |
 |------|------|
-| 竞品 watchlist | `configs/ls8_competitor_watchlist.csv` |
+| 竞品 watchlist（车型级） | `configs/ls8_competitor_watchlist.csv` |
 | 事件类型定义 | `configs/event_types.yaml` |
 | 信源分层 | `configs/source_tiers.yaml` |
 | 战场分类 | `configs/battle_fields.yaml` |
+
+> 另有品牌级关注列表 `configs/重点关注新能源品牌.json`（24 个品牌，含 keywords / 车型），适用于 MIIT 公告监控等场景。两份 watchlist 作用不同，各司其职。
 
 ## 主链路
 

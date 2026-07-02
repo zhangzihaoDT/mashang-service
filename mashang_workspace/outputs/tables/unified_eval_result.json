@@ -1,25 +1,25 @@
 {
   "status": "success",
-  "generated_at": "2026-06-11T17:09:47",
+  "generated_at": "2026-07-02T09:16:03",
   "summary": {
     "total_suites": 3,
     "passed_suites": 3,
     "failed_suites": 0,
-    "pass_rate": 0.9706
+    "pass_rate": 0.9048
   },
   "suites": {
     "parser": {
       "status": "partial",
-      "total": 14,
-      "passed": 13,
-      "failed": 1,
-      "pass_rate": 0.9286,
-      "context_match_rate": 0.9286
+      "total": 18,
+      "passed": 14,
+      "failed": 4,
+      "pass_rate": 0.7778,
+      "context_match_rate": 0.7778
     },
     "followup": {
       "status": "success",
-      "total": 14,
-      "passed": 14,
+      "total": 18,
+      "passed": 18,
       "failed": 0
     },
     "reference": {

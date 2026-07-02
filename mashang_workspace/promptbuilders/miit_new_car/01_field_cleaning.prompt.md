@@ -64,7 +64,7 @@
 
 - `product_list/batch_{N}_product_list.json`（records 数组）
 - `extracted/text/batch_{N}/{attachment1}.txt`（附件 1 原始文本）
-- `configs/miit_new_car_watchlist.csv`
+- `configs/重点关注新能源品牌.json`
 
 ## 检查规则
 

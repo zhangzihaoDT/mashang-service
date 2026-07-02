@@ -8,7 +8,7 @@
   python mashang_workspace/research_scripts/miit_new_car/diff_watchlist.py --batch 408 --format json
 """
 
-import sys, json, csv, argparse
+import sys, json, argparse
 from pathlib import Path
 from typing import Optional
 
@@ -16,7 +16,7 @@ MODULE_DIR = Path(__file__).resolve().parent
 WORKSPACE_ROOT = MODULE_DIR.parents[1]
 sys.path.insert(0, str(WORKSPACE_ROOT))
 
-DEFAULT_WATCHLIST = WORKSPACE_ROOT / "configs" / "miit_new_car_watchlist.csv"
+DEFAULT_WATCHLIST = WORKSPACE_ROOT / "configs" / "重点关注新能源品牌.json"
 PARSED_BASE = WORKSPACE_ROOT / "outputs" / "miit_new_car" / "parsed"
 DIFF_BASE = WORKSPACE_ROOT / "outputs" / "miit_new_car" / "diff"
 STATE_FILE = WORKSPACE_ROOT / "outputs" / "miit_new_car" / "state" / "latest_processed_batch.json"
@@ -35,15 +35,41 @@ def _load_watchlist(path: Path) -> list[dict]:
     if not path.exists():
         print(f"[WARN] watchlist 不存在: {path}，使用默认空列表")
         return []
-    entries = []
-    with open(path, "r", encoding="utf-8-sig") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            brand = row.get("brand", "").strip()
-            keywords = row.get("keywords", brand).strip()
-            if brand:
-                entries.append({"brand": brand, "keywords": keywords})
-    return entries
+    with open(path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    # First pass: collect explicit keywords from standalone catalogs and brand-level keywords
+    explicit_kw = {}
+    for cat in data:
+        cat_kw_raw = cat.get("keywords", [])
+        brands = cat.get("brands", [])
+        is_standalone = len(brands) == 1 and brands[0].get("name") == cat.get("catalog")
+        for b in brands:
+            bk = b.get("keywords")
+            if bk:
+                explicit_kw[b["name"]] = ";".join(bk) if isinstance(bk, list) else str(bk)
+        if is_standalone and cat_kw_raw and brands[0]["name"] not in explicit_kw:
+            explicit_kw[brands[0]["name"]] = ";".join(cat_kw_raw) if isinstance(cat_kw_raw, list) else str(cat_kw_raw)
+
+    merged = {}
+    for cat in data:
+        catalog = cat.get("catalog", "").strip()
+        cat_kw = ";".join(cat.get("keywords", [])) if isinstance(cat.get("keywords"), list) else str(cat.get("keywords", ""))
+        brands = cat.get("brands", [{"name": catalog, "models": []}])
+        for b in brands:
+            name = b.get("name", "").strip()
+            if not name:
+                continue
+            models = b.get("models", [])
+            if name not in merged:
+                kw = explicit_kw.get(name, cat_kw if cat_kw else name)
+                merged[name] = {"brand": name, "keywords": kw, "models": list(models)}
+            else:
+                # Merge models only; keywords already locked from first pass
+                for m in models:
+                    if m not in merged[name]["models"]:
+                        merged[name]["models"].append(m)
+    return list(merged.values())
 
 
 def _load_previous_products(batch_no: int) -> list[dict]:

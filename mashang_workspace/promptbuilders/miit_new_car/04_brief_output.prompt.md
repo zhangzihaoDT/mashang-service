@@ -37,7 +37,7 @@
 | product_list JSON | `outputs/miit_new_car/product_list/batch_{N}_product_list.json` | | | |
 | 附件文本抽取 | `outputs/miit_new_car/extracted/batch_{N}_attachment_text.json` | | | |
 | 附件 1 原文 | `outputs/miit_new_car/extracted/text/batch_{N}/{hash}.txt` | | | |
-| Watchlist CSV | `configs/miit_new_car_watchlist.csv` | | | |
+| Watchlist CSV | `configs/重点关注新能源品牌.json` | | | |
 
 ### 3. 批次扫描结果
 

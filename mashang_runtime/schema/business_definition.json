@@ -39,8 +39,8 @@
   "battery_capacity_logic": {
     "52kwh": "product_name LIKE '%52%'",
     "66kwh": "product_name LIKE '%66%'",
-    "76kwh": "product_name LIKE '%LS6%' AND product_name NOT LIKE '%52%' AND product_name NOT LIKE '%66%' AND product_name NOT LIKE '%Ultra%' AND product_name NOT LIKE '%Pro Max%'",
-    "103kwh": "product_name LIKE '%LS6%' AND product_name LIKE '%Ultra%' OR product_name LIKE '%LS6%' AND product_name LIKE '%Pro Max%'"
+    "76kwh": "product_name LIKE '%LS6%' AND product_name NOT LIKE '%52%' AND product_name NOT LIKE '%66%' AND product_name NOT LIKE '%103%' AND product_name NOT LIKE '%Ultra%' AND product_name NOT LIKE '%Pro Max%'",
+    "103kwh": "product_name LIKE '%LS6%' AND product_name LIKE '%Ultra%' OR product_name LIKE '%LS6%' AND product_name LIKE '%Pro Max%' OR product_name LIKE '%LS6%' AND product_name LIKE '%103%'"
   },
   "product_type_logic": {
     "增程": "product_name LIKE '%52%' OR product_name LIKE '%66%'",
@@ -51,7 +51,7 @@
     "六座": "product_name LIKE '%六座%'"
   },
   "series_group_logic": {
-    "CM2": "product_name LIKE '%新一代%' AND product_name LIKE '%LS6%'",
+    "CM2": "product_name LIKE '%新一代%' AND product_name LIKE '%LS6%' OR product_name LIKE '%上汽一亿台限定版%' AND product_name LIKE '%LS6%'",
     "CM1": "product_name LIKE '%全新%' AND product_name LIKE '%LS6%'",
     "CM0": "product_name LIKE '%LS6%' AND product_name NOT LIKE '%全新%' AND product_name NOT LIKE '%新一代%'",
     "DM1": "product_name LIKE '%全新%' AND product_name LIKE '%L6%'",

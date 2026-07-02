@@ -29,7 +29,7 @@
 | `product_list/batch_{N}_product_list.json` | `make miit-fetch-batch` | 00, 01, 02, 03, 04 |
 | `extracted/text/batch_{N}/*.txt` | `make miit-extract-text` | 01, 02 |
 | `extracted/batch_{N}_attachment_text.json` | `make miit-extract-text` | 00, 02 |
-| `configs/miit_new_car_watchlist.csv` | 项目配置 | 02 |
+| `configs/重点关注新能源品牌.json` | 项目配置 | 02 |
 | `docs/miit_promptbuilder_draft.md` | 项目文档 | 全流程参考 |
 | `docs/miit_e2e_runbook.md` | 项目文档 | 全流程参考 |
 

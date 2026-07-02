@@ -16,7 +16,7 @@
 ## 系列分组匹配规则 (series_group_logic)
 
 ```
-CM2: product_name LIKE '%新一代%' AND product_name LIKE '%LS6%'
+CM2: (product_name LIKE '%新一代%' AND product_name LIKE '%LS6%') OR (product_name LIKE '%上汽一亿台限定版%' AND product_name LIKE '%LS6%')
 CM1: product_name LIKE '%全新%' AND product_name LIKE '%LS6%'
 CM0: product_name LIKE '%LS6%' AND NOT (全新/新一代)
 DM1: product_name LIKE '%全新%' AND product_name LIKE '%L6%'
@@ -57,8 +57,8 @@ L6  → [DM0, DM1]
 |------|----------|
 | 52kwh | product_name LIKE '%52%' |
 | 66kwh | product_name LIKE '%66%' |
-| 76kwh | LS6 AND NOT 52/66/Ultra/Pro Max |
-| 103kwh | LS6 AND (Ultra OR Pro Max) |
+| 76kwh | LS6 AND NOT 52/66/103/Ultra/Pro Max |
+| 103kwh | LS6 AND (Ultra OR Pro Max OR 103) |
 
 ## 车型上市时间窗口 (time_periods)
 
