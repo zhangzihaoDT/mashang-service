@@ -102,8 +102,15 @@ def build_task_config(intent: dict, output_path: str = None):
 
     # source strategy: expand to tier-level config
     ss = intent.get("source_strategy", {})
-    # map source_tiers yaml to tier-level config
-    source_strategy = {}
+    # preserve intent-level flags for query builder use
+    source_strategy_meta = {
+        "official_first": ss.get("official_first", True),
+        "include_authoritative_media": ss.get("include_authoritative_media", True),
+        "include_social_signals": ss.get("include_social_signals", True),
+        "social_signals_as_discovery_only": ss.get("social_signals_as_discovery_only", True),
+        "allow_unverified_as_discovery_only": ss.get("allow_unverified_as_discovery_only", True),
+    }
+    source_strategy = dict(source_strategy_meta)
     if source_tiers:
         for tier in source_tiers.get("tiers", []):
             tier_key = f"tier_{tier['tier']}_{tier['name'].replace(' ', '_')}"

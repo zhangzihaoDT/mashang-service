@@ -340,6 +340,25 @@ cpca-weekly-early-signal-json:  ## 乘联分会周度数据早源监控（JSON �
 cpca-weekly-data-capture:  ## 捕捉乘联分会周度早源数据并生成 fact_result JSON（WEEK=目标数据周，默认自动计算）
 	$(PYTHON) mashang_workspace/research_scripts/cpca_weekly_early_signal.py $(if $(WEEK),--week $(WEEK)) --format html --capture-json --write-fact-result
 
+# Auto Launch — 本品品牌每日营销监控
+auto-launch-owned-brand-daily:
+	$(PYTHON) mashang_workspace/research_scripts/auto_launch/brand_daily_marketing_watch.py \
+		--brand im \
+		--brand-name 智己 \
+		$(if $(DATE),--date $(DATE)) \
+		--window-hours $(or $(WINDOW_HOURS),24) \
+		--query-profile balanced \
+		$(if $(LIVE),--live) \
+		$(if $(REFRESH),--refresh)
+
+auto-launch-owned-brand-daily-dry-run:
+	$(PYTHON) mashang_workspace/research_scripts/auto_launch/brand_daily_marketing_watch.py \
+		--brand im \
+		--brand-name 智己 \
+		$(if $(DATE),--date $(DATE)) \
+		--window-hours $(or $(WINDOW_HOURS),24) \
+		--query-profile balanced
+
 # Workspace Skills Catalog
 build-workspace-skills-catalog:
 	$(PYTHON) mashang_workspace/utility_scripts/build_workspace_skills_catalog.py

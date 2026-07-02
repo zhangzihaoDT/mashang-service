@@ -3,7 +3,7 @@ volc_search_client.py — Volc Search API 客户端。
 
 环境变量:
   VOLC_SEARCH_BASE_URL
-  VOLC_SEARCH_API_KEY
+   DOUBAO_SEARCH_GLOBAL_API_KEY
 
 用法:
   python volc_search_client.py --query "极氪 最近7天 权益" --output results.json
@@ -33,32 +33,77 @@ class VolcSearchClient:
     def __init__(self, base_url: str = None, api_key: str = None,
                  timeout: int = 30, max_retries: int = 3, retry_delay: int = 2):
         self.base_url = base_url or os.environ.get("VOLC_SEARCH_BASE_URL", "")
-        self.api_key = api_key or os.environ.get("VOLC_SEARCH_API_KEY", "")
+        self.api_key = api_key or os.environ.get("DOUBAO_SEARCH_GLOBAL_API_KEY", "")
         self.timeout = timeout
         self.max_retries = max_retries
         self.retry_delay = retry_delay
 
         if not self.base_url or not self.api_key:
             raise VolcSearchError(
-                "Missing VOLC_SEARCH_API_KEY or VOLC_SEARCH_BASE_URL. "
+                "Missing DOUBAO_SEARCH_GLOBAL_API_KEY or VOLC_SEARCH_BASE_URL. "
                 "Please export them before running Volc Search."
             )
+
+    @property
+    def _search_path(self) -> str:
+        """豆包搜索 Global版 API 路径"""
+        return "/search_api/global_search"
+
+    def _transform_request(self, query: str, result_limit: int) -> dict:
+        """将内部查询参数转为豆包搜索 API 请求格式"""
+        return {
+            "Query": query,
+            "DocCount": result_limit,
+            "MaxSnippetLength": 500,
+            "MaxImageCountPerDoc": 0,
+        }
+
+    def _transform_response(self, raw: dict, query: str, attempt: int) -> dict:
+        """将豆包搜索 API 响应转为内部统一格式"""
+        result = raw.get("Result")
+        if not result:
+            docs = []
+        else:
+            docs = result.get("Documents", [])
+        items = []
+        for doc in docs:
+            snippets = doc.get("Snippet", [])
+            snippet_text = " ".join(
+                s.get("Text", "") for s in snippets if s.get("Type") == "text"
+            )
+            host_info = doc.get("HostInfo", {})
+            doc_info = doc.get("DocumentInfo", {})
+            items.append({
+                "title": doc.get("Title", ""),
+                "url": doc.get("Url", ""),
+                "snippet": snippet_text,
+                "source": host_info.get("Hostname", ""),
+                "source_name": host_info.get("Hostname", ""),
+                "publish_time": doc_info.get("PublishTime", ""),
+                "rank": doc.get("Rank", 0),
+            })
+
+        return {
+            "query": query,
+            "status": "success",
+            "result_count": len(items),
+            "results": items,
+            "raw_response": raw,
+            "retrieved_at": datetime.now().isoformat(),
+            "attempts": attempt,
+        }
 
     def search(self, query: str, result_limit: int = 10) -> dict:
         """执行单次搜索，返回原始响应"""
         if requests is None:
             raise VolcSearchError("requests 库未安装: pip install requests")
 
-        url = f"{self.base_url}/search"
+        url = f"{self.base_url}{self._search_path}"
         headers = {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",
         }
-        payload = {
-            "query": query,
-            "limit": result_limit,
-            "language": "zh-CN",
-        }
+        payload = self._transform_request(query, result_limit)
 
         last_error = None
         for attempt in range(1, self.max_retries + 1):
@@ -69,16 +114,7 @@ class VolcSearchClient:
                 )
                 resp.raise_for_status()
                 data = resp.json()
-
-                return {
-                    "query": query,
-                    "status": "success",
-                    "result_count": len(data.get("results", data.get("items", []))),
-                    "results": data.get("results", data.get("items", [])),
-                    "raw_response": data,
-                    "retrieved_at": datetime.now().isoformat(),
-                    "attempts": attempt,
-                }
+                return self._transform_response(data, query, attempt)
 
             except requests.exceptions.Timeout as e:
                 last_error = f"Timeout: {e}"

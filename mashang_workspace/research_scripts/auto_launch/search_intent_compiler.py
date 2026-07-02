@@ -16,6 +16,47 @@ sys.path.insert(0, str(WORKSPACE_ROOT))
 
 import yaml
 
+# ── 品牌 → 稳定英文 slug 映射 ───────────────────────
+
+_BRAND_SLUG_MAP = {
+    "极氪": "zeekr",
+    "领克": "lynk_co",
+    "问界": "aito",
+    "智界": "luxeed",
+    "享界": "stelato",
+    "尊界": "maextro",
+    "尚界": "saic_shangjie",
+    "鸿蒙智行": "hima",
+    "智己": "im",
+    "理想": "lixiang",
+    "小米": "xiaomi",
+    "小米汽车": "xiaomi",
+    "蔚来": "nio",
+    "乐道": "onvo",
+    "萤火虫": "firefly",
+    "小鹏": "xpeng",
+    "阿维塔": "avatr",
+    "深蓝": "deepal",
+    "零跑": "leapmotor",
+    "腾势": "denza",
+    "方程豹": "fangchengbao",
+    "比亚迪": "byd",
+    "特斯拉": "tesla",
+    "埃安": "aion",
+    "岚图": "voyah",
+    "大众": "volkswagen",
+    "MONA": "mona",
+}
+
+
+def _make_slug(brand: str, model: str = None) -> str:
+    """生成稳定英文 slug，优先查表，再 fallback 拼音"""
+    base = _BRAND_SLUG_MAP.get(brand, brand.lower().replace(" ", "_")[:20])
+    if model:
+        model_slug = model.lower().replace(" ", "_").replace("/", "_")
+        return f"{base}_{model_slug}"
+    return base
+
 # ── 配置加载 ──────────────────────────────────────────
 
 def _load_watchlists():
@@ -114,11 +155,13 @@ def identify_targets(request: str, brands: dict, models: dict):
             continue
         seen.add(brand_name)
         is_in_wl = "target_id" in info
+        model = info.get("model")
         targets.append({
-            "target_id": info.get("target_id", brand_name.lower().replace(" ", "_")),
-            "target_type": "model" if "model" in info and info["model"] else "brand",
+            "target_id": info.get("target_id") if is_in_wl else _make_slug(brand_name, model),
+            "target_type": "model" if model else "brand",
             "brand": brand_name,
-            "model": info.get("model"),
+            "brand_cn": brand_name,
+            "model": model,
             "matched_alias": key,
             "confidence": "high" if is_in_wl else "medium",
             "is_in_watchlist": is_in_wl,
@@ -131,10 +174,12 @@ def identify_targets(request: str, brands: dict, models: dict):
         for name, info in brands.items():
             if name in request:
                 is_in_wl = True
+                slug = _make_slug(name)
                 targets.append({
-                    "target_id": name.lower().replace(" ", "_"),
+                    "target_id": slug,
                     "target_type": "brand",
-                    "brand": info.get("keywords", [name])[0] if info.get("keywords") else name,
+                    "brand": name,
+                    "brand_cn": name,
                     "model": None,
                     "matched_alias": name,
                     "confidence": "high",
@@ -146,13 +191,14 @@ def identify_targets(request: str, brands: dict, models: dict):
 
     # ad_hoc if nothing matched
     if not targets:
-        # extract first noun-like token
         tokens = re.sub(r"[看看查查搜索最近近期天今天明天昨天都有什么动作事件消息营销]", "", request).strip()
         if tokens:
+            raw_slug = tokens[:20].replace(" ", "_")
             targets.append({
-                "target_id": tokens[:20].replace(" ", "_"),
+                "target_id": f"adhoc_{raw_slug}",
                 "target_type": "brand",
                 "brand": tokens[:10],
+                "brand_cn": tokens[:10],
                 "model": None,
                 "matched_alias": tokens[:10],
                 "confidence": "low",
@@ -187,27 +233,42 @@ def infer_time_window(request: str, monitor_date_str: str):
 
     if days is None:
         # default: primary=1, fallback=7
+        start = monitor_date - timedelta(days=1)
         return {
             "window_type": "default",
             "days": 1,
             "fallback_days": 7,
-            "start_date": (monitor_date - timedelta(days=1)).strftime("%Y-%m-%d"),
+            "start_date": start.strftime("%Y-%m-%d"),
             "end_date": monitor_date.strftime("%Y-%m-%d"),
+            "start_datetime": start.strftime("%Y-%m-%dT00:00:00+08:00"),
+            "end_datetime": monitor_date.strftime("%Y-%m-%dT23:59:59+08:00"),
+            "timezone": "Asia/Shanghai",
+            "date_inclusive": True,
         }
 
     if days == 0:
+        md = monitor_date
         return {
             "window_type": "today",
             "days": 0,
-            "start_date": monitor_date.strftime("%Y-%m-%d"),
-            "end_date": monitor_date.strftime("%Y-%m-%d"),
+            "start_date": md.strftime("%Y-%m-%d"),
+            "end_date": md.strftime("%Y-%m-%d"),
+            "start_datetime": md.strftime("%Y-%m-%dT00:00:00+08:00"),
+            "end_datetime": md.strftime("%Y-%m-%dT23:59:59+08:00"),
+            "timezone": "Asia/Shanghai",
+            "date_inclusive": True,
         }
 
+    start = monitor_date - timedelta(days=days)
     return {
         "window_type": "relative_days",
         "days": days,
-        "start_date": (monitor_date - timedelta(days=days)).strftime("%Y-%m-%d"),
+        "start_date": start.strftime("%Y-%m-%d"),
         "end_date": monitor_date.strftime("%Y-%m-%d"),
+        "start_datetime": start.strftime("%Y-%m-%dT00:00:00+08:00"),
+        "end_datetime": monitor_date.strftime("%Y-%m-%dT23:59:59+08:00"),
+        "timezone": "Asia/Shanghai",
+        "date_inclusive": True,
     }
 
 

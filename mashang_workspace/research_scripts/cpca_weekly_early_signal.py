@@ -51,7 +51,7 @@ class SearchResult:
 
 
 def _get_huoshan_api_key() -> str | None:
-    for k in ("HUOSANFANGZHOU_API_KEY", "HUOSHANFANGZHOU_API_KEY", "VOLCENGINE_API_KEY"):
+    for k in ("DOUBAO_SEARCH_GLOBAL_API_KEY",):
         v = os.environ.get(k)
         if v:
             return v
@@ -426,7 +426,7 @@ def scan(config, data_period_start, data_period_end, format="terminal"):
     data_period_start/end = the week to which the DATA belongs (data_week)."""
     api_key = _get_huoshan_api_key()
     if not api_key:
-        print("  ⚠️ API Key 未设置，使用样例数据。设置 HUOSANFANGZHOU_API_KEY。", file=sys.stderr)
+        print("  ⚠️ API Key 未设置，使用样例数据。设置 DOUBAO_SEARCH_GLOBAL_API_KEY。", file=sys.stderr)
         return _demo_results()
 
     period_hints = _build_period_hints(data_period_start, data_period_end)

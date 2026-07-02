@@ -42,7 +42,7 @@ outputs/auto_launch/search/{date}/{mode}/
 
 ```bash
 export VOLC_SEARCH_BASE_URL="https://your-instance.volcengine.com"
-export VOLC_SEARCH_API_KEY="your-api-key"
+export DOUBAO_SEARCH_GLOBAL_API_KEY="your-api-key"
 
 python mashang_workspace/research_scripts/auto_launch/volc_search_daily.py \
   --request "看看极氪最近 7 天都有什么动作" \
@@ -67,7 +67,7 @@ outputs/auto_launch/search/{date}/{mode}/
 | 变量 | 必填 | 说明 |
 |---|---|---|
 | `VOLC_SEARCH_BASE_URL` | live-run 必填 | Volc Search API 地址 |
-| `VOLC_SEARCH_API_KEY` | live-run 必填 | API Key（不会写入任何输出文件） |
+| `DOUBAO_SEARCH_GLOBAL_API_KEY` | live-run 必填 | 豆包搜索 Global版 API Key（不会写入任何输出文件） |
 
 dry-run 不需要环境变量。
 
@@ -121,7 +121,56 @@ dry-run 不需要环境变量。
 }
 ```
 
-注意：normalize 层不做事件判断，不生成 event_candidates。source_tier_guess 仅为搜索层启发式猜测。
+注意：normalize 层不做事件判断，不生成 event_candidates。
+
+source_tier_guess 仅为搜索层启发式猜测，基于 source_name、url domain、title、snippet 综合判断：
+
+| source_name | source_tier_guess | 说明 |
+|---|---|---|
+| 汽车之家、懂车帝、易车、太平洋汽车 | `tier_3_industry_media` | 汽车垂媒，不等于 confirmed event |
+| 晚点Auto、36氪、虎嗅 | `tier_3_industry_media` | 科技/财经媒体 |
+| 小红书、抖音、B站、微博 | `tier_4_social_signal` | 社交信号，仅弱信号 |
+| 销售朋友圈、经销商 | `tier_5_unverified` | 未验证信源 |
+| 官方域名(.gov.cn, immotors.com 等) | `tier_1_official` | 官方源 |
+
+### URL 去重逻辑
+
+同一 `canonical_url` 只保留一条主 item，去重参数（fragment + utm_*）后归一化。重复命中的 query 合并到：
+
+```json
+{
+  "matched_queries": [],
+  "matched_event_type_ids": [],
+  "dedupe_hit_count": 2
+}
+```
+
+### target_id slug 化
+
+target_id 统一为稳定英文 slug，不再使用中文：
+
+| 中文品牌 | target_id |
+|---|---|
+| 极氪 | zeekr |
+| 问界 M7 | aito_m7 |
+| 蔚来 | nio |
+| 理想 i6 | lixiang_i6 |
+| 鸿蒙智行 | hima |
+
+### mock-run 与 live-run 区分
+
+| 模式 | run_mode | is_mock | 来源 |
+|---|---|---|---|
+| dry-run（默认） | dry_run | — | 不生成数据文件 |
+| mock（测试） | mock | true | 测试 mock，search_audit 含 mock_warning |
+| live | live | false | 真实 Volc Search API |
+
+### search_audit 新增字段
+
+- `dedupe`: raw_item_count / normalized_item_count / duplicate_url_count / dedupe_ratio
+- `source_quality`: 各 tier 的信源数量统计
+- `run_mode` / `is_mock`: 运行模式标记
+- `mock_warning`（仅 mock 时）: "This output was generated from mock search results..."
 
 ## search_layer 与 event_layer 的边界
 

@@ -17,6 +17,8 @@ def test_brand_watch_open_scan():
     assert intent["mode"] == "brand_watch", f"Expected brand_watch, got {intent['mode']}"
     assert len(intent["targets"]) > 0
     assert intent["targets"][0]["brand"] == "极氪"
+    # target_id 应为英文 slug
+    assert intent["targets"][0]["target_id"] == "zeekr", f"Expected slug 'zeekr', got {intent['targets'][0]['target_id']}"
     assert intent["time_window"]["days"] == 7
     assert intent["time_window"]["start_date"] == "2026-06-25"
     assert intent["time_window"]["end_date"] == "2026-07-02"
@@ -26,13 +28,14 @@ def test_brand_watch_open_scan():
 
 
 def test_model_watch_specific_events():
-    """看看问界 M7 最近 7 天权益和价格有什么变化 → model_watch, 包含权益和价格"""
+    """看看问界 M7 最近 7 天权益和价格有什么变化 → model_watch"""
     intent = compile_intent("看看问界 M7 最近 7 天权益和价格有什么变化", MONITOR_DATE)
-    assert intent["mode"] == "model_watch", f"Expected model_watch, got {intent['mode']}"
+    assert intent["mode"] == "model_watch"
     assert len(intent["targets"]) > 0
+    assert intent["targets"][0]["target_id"] == "aito_m7", f"Expected slug 'aito_m7', got {intent['targets'][0]['target_id']}"
     eids = intent["event_scope"]["event_type_ids"]
-    assert "benefit_adjustment" in eids, f"Expected benefit_adjustment in {eids}"
-    assert "official_price_change" in eids, f"Expected official_price_change in {eids}"
+    assert "benefit_adjustment" in eids
+    assert "official_price_change" in eids
     print("[PASS] test_model_watch_specific_events")
 
 
@@ -64,6 +67,7 @@ def test_brand_watch_marketing():
     intent = compile_intent("看看鸿蒙智行最近有什么营销动作", MONITOR_DATE)
     assert intent["mode"] == "brand_watch"
     assert len(intent["targets"]) > 0
+    assert intent["targets"][0]["target_id"] == "hima", f"Expected slug 'hima', got {intent['targets'][0]['target_id']}"
     print("[PASS] test_brand_watch_marketing")
 
 
