@@ -210,6 +210,11 @@ def normalize_results(raw_results: list[dict], query_plan: dict, run_mode: str =
                 item["candidate_gate_reasons"].append("official_owned_platform_not_in_confirmed_window")
                 item["eligible_for_event_cluster"] = False
 
+            # Non-official_direct out_of_window / unknown_publish_time also not eligible
+            if stage != "official_direct" and item["eligible_for_event_cluster"] is not False:
+                if tws == "out_of_window" or tws == "unknown_publish_time":
+                    item["eligible_for_event_cluster"] = False
+
             if canonical not in raw_items_by_url:
                 raw_items_by_url[canonical] = item
                 raw_items_by_url[canonical]["matched_queries"] = []
