@@ -32,6 +32,13 @@ OUTPUT_BASE = WORKSPACE_ROOT / "outputs" / "miit_new_car" / "raw"
 RE_BATCH = re.compile(r"[第](\d+)[批]")
 RE_PUBLICITY = re.compile(r"(拟发布|公示)")
 
+RE_ENTERPRISE_ADMISSION = re.compile(
+    r"(新准入车辆生产企业|已准入企业变更信息清单|拟发布的新准入车辆生产企业|新增车辆生产企业|拟发布新增车辆生产企业)"
+)
+RE_ENTERPRISE_ADMISSION_SOURCE_TYPE = "enterprise_admission_change"
+RE_HTML_IMAGE_FORMAT = "html_image_attachment"
+RE_DOC_FORMAT = "document"
+
 
 def _extract_batch_no(title: str, url: str) -> int:
     m = RE_BATCH.search(title)
@@ -52,6 +59,10 @@ class _DetailParser(HTMLParser):
         self.attachments: list[dict] = []
         self._in_title = False
         self._in_zoom = False
+        self._in_anchor = False
+        self._anchor_href = ""
+        self._anchor_text = ""
+        self._anchor_title_from_attr = False
 
     def handle_starttag(self, tag, attrs):
         a = dict(attrs)
@@ -59,23 +70,56 @@ class _DetailParser(HTMLParser):
             self._in_title = True
         if tag == "div" and a.get("id") == "zoom":
             self._in_zoom = True
+            self.content_html = ""
         if self._in_zoom:
             if tag == "a" and "href" in a:
                 href = a["href"]
-                if any(ext in href for ext in [".doc", ".docx", ".xls", ".xlsx", ".pdf", "/datainfo/"]):
-                    self.attachments.append({
-                        "url": href,
-                        "title": a.get("title", a.get("alt", "")).strip(),
-                        "filename": href.rstrip("/").split("/")[-1] or "attachment",
-                    })
+                ext_lower = href.lower()
+                is_doc = any(ext in ext_lower for ext in [".doc", ".docx", ".xls", ".xlsx", ".pdf"])
+                is_datainfo = "/datainfo/" in ext_lower
+                if is_doc or is_datainfo:
+                    self._in_anchor = True
+                    self._anchor_href = href
+                    self._anchor_text = ""
+                    self._anchor_title_from_attr = False
+                    # Prefer title/alt attribute if present
+                    att_title = a.get("title", a.get("alt", "")).strip()
+                    if att_title:
+                        self._anchor_text = att_title
+                        self._anchor_title_from_attr = True
 
     def handle_endtag(self, tag):
+        if tag == "a" and self._in_anchor:
+            # Finalize attachment entry
+            href = self._anchor_href
+            ext_lower = href.lower()
+            is_datainfo = "/datainfo/" in ext_lower
+            if is_datainfo or any(ext in ext_lower for ext in [".doc", ".docx", ".xls", ".xlsx", ".pdf"]):
+                source_format = RE_HTML_IMAGE_FORMAT if is_datainfo else RE_DOC_FORMAT
+                filename = href.rstrip("/").split("/")[-1] or "attachment"
+                if is_datainfo and not filename.endswith(".html"):
+                    filename += ".html"
+                self.attachments.append({
+                    "url": href,
+                    "title": self._anchor_text.strip(),
+                    "filename": filename,
+                    "source_format": source_format,
+                })
+            self._in_anchor = False
+            self._anchor_href = ""
+            self._anchor_text = ""
+            self._anchor_title_from_attr = False
         if tag == "div" and self._in_title:
             self._in_title = False
 
     def handle_data(self, data):
         if self._in_title:
             self.title += data.strip()
+        if self._in_zoom:
+            self.content_html += data
+        # Accumulate anchor text, unless already set from title/alt attribute
+        if self._in_anchor and not self._anchor_title_from_attr:
+            self._anchor_text += data
 
 
 def _parse_html(html: str) -> _DetailParser:
@@ -140,10 +184,17 @@ def fetch_batch(
     attachments = []
     for a in parser.attachments:
         att_title = a["title"] or a["filename"]
+        source_format = a.get("source_format", RE_DOC_FORMAT)
+        # Classify source_type
+        source_type = "unknown"
+        if RE_ENTERPRISE_ADMISSION.search(att_title):
+            source_type = RE_ENTERPRISE_ADMISSION_SOURCE_TYPE
         attachments.append({
             "url": a["url"],
             "title": att_title,
             "filename": a["filename"],
+            "source_format": source_format,
+            "source_type": source_type,
         })
 
     result = {
@@ -182,11 +233,16 @@ def fetch_batch(
             "title": att["title"],
             "url": url,
             "filename": fname,
+            "source_format": att.get("source_format", "document"),
+            "source_type": att.get("source_type", "unknown"),
             "status": "skipped",
             "http_status": None,
             "local_path": str(dest) if download else None,
             "error": None,
             "retried": 0,
+            "final_url": None,
+            "content_type": None,
+            "content_length": 0,
         }
 
         if not download:
@@ -203,13 +259,20 @@ def fetch_batch(
             print(f"  跳过已存在: {dest.name}")
             continue
 
+        # For html_image_attachment, use parent detail_url as Referer
+        extra_headers = {}
+        if att.get("source_format") == "html_image_attachment":
+            extra_headers["Referer"] = detail_url
+
         try:
-            data, http_code = http_get(url, timeout=timeout)
+            data, http_code = http_get(url, timeout=timeout, headers=extra_headers if extra_headers else None)
             dest.write_bytes(data)
             entry["status"] = "downloaded"
             entry["http_status"] = http_code
             entry["local_path"] = str(dest)
-            print(f"  下载: {dest.name} ({len(data)} bytes)")
+            entry["final_url"] = url
+            entry["content_length"] = len(data)
+            print(f"  下载: {dest.name} ({len(data)} bytes, format={att.get('source_format', '?')})")
         except HTTPError as e:
             entry["status"] = "failed"
             entry["http_status"] = e.code

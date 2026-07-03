@@ -166,14 +166,16 @@ PROMPTBUILDER_CAPABILITIES = {
         "name": "auto_launch",
         "type": "Promptbuilder / Intelligence Workflow",
         "directory": "promptbuilders/auto_launch/",
-        "description": "生成竞品市场事件检索 Prompt；验证 AI raw response；归一化 evidence；Raw-first report packaging",
+        "description": "汽车上市/营销事件监控；支持车型/品牌/本品 Watch，包含搜索、信源分级、24h 窗口校验、事件聚类、candidate gate 与 raw-first report packaging。",
         "entrypoints": [
-            "make build-auto-launch-prompt",
-            "make validate-auto-launch-ai-response",
-            "make validate-auto-launch-byd-datang-fixture",
-            "make package-auto-launch-byd-datang-report",
+            "python mashang_workspace/research_scripts/auto_launch/brand_daily_marketing_watch.py --brand im --brand-name 智己",
+            "python mashang_workspace/research_scripts/auto_launch/volc_search_daily.py --request '看看极氪最近 7 天都有什么动作'",
+            "make auto-launch-owned-brand-daily",
         ],
-        "outputs": "mashang_workspace/outputs/auto_launch/",
+        "outputs": [
+            "mashang_workspace/outputs/auto_launch/search/{date}/{mode}/",
+            "mashang_workspace/outputs/auto_launch/owned_brand_daily/{date}/",
+        ],
     },
     "miit_new_car": {
         "name": "miit_new_car",
@@ -528,7 +530,7 @@ def write_html(data: dict, skills: list[dict], path: Path):
             <tr>
               <th>Skill</th>
               <th>层级</th>
-              <th>能力定位</th>
+              <th style="min-width:360px">能力定位</th>
               <th>入口文件</th>
               <th>默认输出</th>
             </tr>

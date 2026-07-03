@@ -48,7 +48,7 @@
         <img class="brand-avatar" src="../../assets/brand/raccoon_avatar_light.png" alt="" />
         <span class="brand-name">Raccoon Research</span>
       </div>
-      <span class="header-meta">workspace_skills_catalog | 2026-06-25</span>
+      <span class="header-meta">workspace_skills_catalog | 2026-07-02</span>
     </div>
   </header>
 
@@ -73,7 +73,7 @@
       <div class="kpi-card">
         <div class="label">总能力数</div>
         <div class="value">6</div>
-        <div class="change neutral">2026-06-25</div>
+        <div class="change neutral">2026-07-02</div>
       </div>
     </section>
 
@@ -85,7 +85,7 @@
             <tr>
               <th>Skill</th>
               <th>层级</th>
-              <th>能力定位</th>
+              <th style="min-width:360px">能力定位</th>
               <th>入口文件</th>
               <th>默认输出</th>
             </tr>
@@ -123,9 +123,9 @@
             <tr>
               <td><strong>auto_launch</strong></td>
               <td><span class="badge badge-pb">Promptbuilder / Intelligence Workflow</span></td>
-              <td>生成竞品市场事件检索 Prompt；验证 AI raw response；归一化</td>
-              <td><code>make build-auto-launch-prompt</code></td>
-              <td><code>outputs/auto_launch/</code></td>
+              <td>汽车上市/营销事件监控；支持车型/品牌/本品 Watch，包含搜索、信源分级、2</td>
+              <td><code>python mashang_workspace/research_scripts/auto_launch/brand_daily_marketing_watch.py</code></td>
+              <td><code>['mashang_workspace/outputs/auto_launch/search/{date}/{mode}/', 'mashang_workspace/outputs/auto_launch/owned_brand_daily/{date}/']</code></td>
             </tr>
             <tr>
               <td><strong>miit_new_car</strong></td>
@@ -318,7 +318,7 @@
             <div class="skill-name">auto_launch</div>
             <span class="skill-badge badge-pb">Promptbuilder / Intelligence Workflow</span>
           </div>
-          <div class="skill-desc">生成竞品市场事件检索 Prompt；验证 AI raw response；归一化 evidence；Raw-first report packaging</div>
+          <div class="skill-desc">汽车上市/营销事件监控；支持车型/品牌/本品 Watch，包含搜索、信源分级、24h 窗口校验、事件聚类、candidate gate 与 raw-first report packaging。</div>
           <div class="skill-meta">
             <span class="skill-tag gold">Promptbuilder</span>
             <span class="skill-tag blue">Workflow</span>
@@ -329,10 +329,9 @@
           </div>          <div class="skill-section" style="margin-top:10px">
             <div class="skill-section-label">入口命令</div>
             <div class="skill-section-value">
-                  <code>make build-auto-launch-prompt</code><br/>
-                  <code>make validate-auto-launch-ai-response</code><br/>
-                  <code>make validate-auto-launch-byd-datang-fixture</code><br/>
-                  <code>make package-auto-launch-byd-datang-report</code><br/>
+                  <code>python mashang_workspace/research_scripts/auto_launch/brand_daily_marketing_watch.py --brand im --brand-name 智己</code><br/>
+                  <code>python mashang_workspace/research_scripts/auto_launch/volc_search_daily.py --request '看看极氪最近 7 天都有什么动作'</code><br/>
+                  <code>make auto-launch-owned-brand-daily</code><br/>
             </div>
           </div>
         </div>
@@ -372,7 +371,7 @@
             <div class="skill-name">auto_launch</div>
             <span class="skill-badge badge-pb">Promptbuilder / Intelligence Workflow</span>
           </div>
-          <div class="skill-desc">生成竞品市场事件检索 Prompt；验证 AI raw response；归一化 evidence；Raw-first report packaging</div>
+          <div class="skill-desc">汽车上市/营销事件监控；支持车型/品牌/本品 Watch，包含搜索、信源分级、24h 窗口校验、事件聚类、candidate gate 与 raw-first report packaging。</div>
           <div class="skill-meta">
             <span class="skill-tag gold">Promptbuilder</span>
             <span class="skill-tag blue">Workflow</span>
@@ -383,10 +382,9 @@
           </div>          <div class="skill-section" style="margin-top:10px">
             <div class="skill-section-label">入口命令</div>
             <div class="skill-section-value">
-                  <code>make build-auto-launch-prompt</code><br/>
-                  <code>make validate-auto-launch-ai-response</code><br/>
-                  <code>make validate-auto-launch-byd-datang-fixture</code><br/>
-                  <code>make package-auto-launch-byd-datang-report</code><br/>
+                  <code>python mashang_workspace/research_scripts/auto_launch/brand_daily_marketing_watch.py --brand im --brand-name 智己</code><br/>
+                  <code>python mashang_workspace/research_scripts/auto_launch/volc_search_daily.py --request '看看极氪最近 7 天都有什么动作'</code><br/>
+                  <code>make auto-launch-owned-brand-daily</code><br/>
             </div>
           </div>
         </div>
@@ -431,7 +429,7 @@
           <div class="arch-item">
             <h3>promptbuilder workflows</h3>
             <ul>
-              <li>auto_launch — 生成竞品市场事件检索 Prompt；验证 AI raw response；归一化 evidence；</li>
+              <li>auto_launch — 汽车上市/营销事件监控；支持车型/品牌/本品 Watch，包含搜索、信源分级、24h 窗口校验、事件</li>
               <li>miit_new_car — MIIT 公告信号解释 Prompt Pack；新车申报情报分析</li>
               <li>位于 <code>mashang_workspace/promptbuilders/</code></li>
             </ul>

@@ -1253,3 +1253,764 @@ def test_road_state_machine_handles_product_name_wrap():
     rec = [r for r in records if "金华" in r["enterprise_name"]]
     assert len(rec) >= 1
     assert "XMQ6106" in rec[0]["product_model"]
+
+
+# ═══════════════════════════════════════════════════════════════════
+# V1.0: HTML Image Attachment / Enterprise Admission Change
+# ═══════════════════════════════════════════════════════════════════
+
+# ── 1. Detail parser detects .html datainfo as html_image_attachment ──
+
+def test_detail_parser_detects_html_datainfo_attachment():
+    """Parent page detail parser recognizes datainfo/... .html as html_image_attachment."""
+    from research_scripts.miit_new_car.fetch_batch import _DetailParser
+
+    html = '''<html>
+    <div class="_nk_wz_tit">第408批公示</div>
+    <div id="zoom">
+      附件1：
+      <a href="https://www.miit.gov.cn/datainfo/dljdclscqyjcpggnfbdxzrclscqyjyzrqybgxxqd/art/2026/art_193720c0ad2b4e3990193efd73132d34.html"
+         title="《道路机动车辆生产企业及产品公告》（第408批）拟发布的新准入车辆生产企业及已准入企业变更信息清单">
+        附件1：道路机动车辆生产企业及产品公告
+      </a>
+    </div></html>'''
+
+    parser = _DetailParser()
+    parser.feed(html)
+
+    assert len(parser.attachments) >= 1
+    att = parser.attachments[0]
+    assert att["source_format"] == "html_image_attachment"
+    assert "/datainfo/" in att["url"]
+    assert att["filename"].endswith(".html")
+
+
+def test_detail_parser_keeps_doc_as_document_format():
+    """Regular .doc/.docx attachments are still classified as document format."""
+    from research_scripts.miit_new_car.fetch_batch import _DetailParser
+
+    html = '''<html>
+    <div class="_nk_wz_tit">第408批公示</div>
+    <div id="zoom">
+      <a href="https://example.com/file.doc">正常附件1</a>
+      <a href="https://example.com/file.xlsx">正常附件2</a>
+    </div></html>'''
+
+    parser = _DetailParser()
+    parser.feed(html)
+
+    for att in parser.attachments:
+        assert att["source_format"] == "document"
+
+
+# ── 2. HTML datainfo URL not filtered out ──
+
+def test_html_attachment_url_is_not_filtered():
+    """.html URL in datainfo path should be kept as attachment, not filtered out."""
+    from research_scripts.miit_new_car.fetch_batch import _DetailParser
+
+    html = '''<html>
+    <div class="_nk_wz_tit">第408批公示</div>
+    <div id="zoom">
+      <a href="https://www.miit.gov.cn/datainfo/xxx/art/2026/art_xxx.html"
+         title="拟发布的新准入车辆生产企业及已准入企业变更信息清单">
+        Test Attachment
+      </a>
+    </div></html>'''
+
+    parser = _DetailParser()
+    parser.feed(html)
+
+    assert len(parser.attachments) == 1
+    assert parser.attachments[0]["source_format"] == "html_image_attachment"
+
+
+# ── 3. Source type detection from title keywords ──
+
+def test_attachment_source_type_enterprise_admission():
+    """Attachment title with enterprise admission keywords gets correct source_type."""
+    from research_scripts.miit_new_car.fetch_batch import _DetailParser
+
+    html = '''<html>
+    <div class="_nk_wz_tit">第408批公示</div>
+    <div id="zoom">
+      <a href="https://www.miit.gov.cn/datainfo/xxx/art/2026/art_xxx.html"
+         title="《道路机动车辆生产企业及产品公告》（第408批）拟发布的新准入车辆生产企业及已准入企业变更信息清单">
+        附件1
+      </a>
+    </div></html>'''
+
+    parser = _DetailParser()
+    parser.feed(html)
+
+    # Simulate what fetch_batch does after parsing
+    from research_scripts.miit_new_car.fetch_batch import RE_ENTERPRISE_ADMISSION
+    att = parser.attachments[0]
+    title = att["title"]
+    assert RE_ENTERPRISE_ADMISSION.search(title) is not None
+
+
+# ── 4. Enterprise admission parser: HTML page with image content ──
+
+def test_enterprise_admission_parse_image_page():
+    """Parse an image-backed enterprise admission HTML page → partial parse_status."""
+    from research_scripts.miit_new_car.enterprise_admission_parser import parse_enterprise_admission_page
+
+    html = '''<html>
+    <head><title>拟发布新准入车辆生产企业及已准入企业变更信息清单</title></head>
+    <body>
+    <h1>拟发布新准入车辆生产企业</h1>
+    <p><img src="/cms_files/2026/06/enterprise_list.png" alt="企业名单"></p>
+    <h2>已准入企业变更信息</h2>
+    <p><img src="https://www.miit.gov.cn/cms_files/2026/06/change_info.jpg" alt="变更信息"></p>
+    </body></html>'''
+
+    result = parse_enterprise_admission_page(
+        html=html,
+        page_url="https://www.miit.gov.cn/datainfo/xxx/art/2026/art_xxx.html",
+        parent_notice_url="https://www.miit-eidc.org.cn/art/2026/6/10/art_1691_12455.html",
+        parent_notice_title="关于《道路机动车辆生产企业及产品公告》（第408批）拟发布内容的公示",
+    )
+
+    assert result["source_type"] == "enterprise_admission_change"
+    assert result["source_format"] == "html_image_attachment"
+    assert result["parse_status"] == "partial"
+    assert result["quality"] == "low_quality"
+    assert "image" in result["quality_reason"].lower()
+    assert result["detail_asset_type"] == "image"
+    assert len(result["detail_asset_urls"]) >= 2
+
+
+def test_enterprise_admission_parse_text_page():
+    """Parse a text-based (non-image) enterprise admission page → success parse_status."""
+    from research_scripts.miit_new_car.enterprise_admission_parser import parse_enterprise_admission_page
+
+    html = '''<html>
+    <head><title>拟发布新准入车辆生产企业</title></head>
+    <body>
+    <h1>拟发布新准入车辆生产企业</h1>
+    <p>上海汽车集团股份有限公司</p>
+    <p>北京现代汽车有限公司</p>
+    </body></html>'''
+
+    result = parse_enterprise_admission_page(
+        html=html,
+        page_url="https://www.miit.gov.cn/datainfo/xxx",
+    )
+
+    assert result["parse_status"] == "success"
+    assert result["quality"] == "usable"
+    assert result["detail_asset_type"] == "text"
+
+
+def test_enterprise_admission_parse_section_headings():
+    """Section headings are correctly identified from the page."""
+    from research_scripts.miit_new_car.enterprise_admission_parser import parse_enterprise_admission_page
+
+    html = '''<html>
+    <head><title>拟发布新准入车辆生产企业</title></head>
+    <body>
+    <h1>拟发布新准入车辆生产企业</h1>
+    <h2>汽车生产企业</h2>
+    <h2>摩托车生产企业</h2>
+    <h3>已准入企业变更信息</h3>
+    </body></html>'''
+
+    result = parse_enterprise_admission_page(html=html)
+
+    assert "拟发布新准入车辆生产企业" in result["section_headings_found"]
+    assert "汽车生产企业" in result["section_headings_found"]
+    assert "摩托车生产企业" in result["section_headings_found"]
+    assert "已准入企业变更信息" in result["section_headings_found"]
+
+
+def test_enterprise_admission_no_images_found():
+    """Page with image indicators but no extractable URLs still reports partial status."""
+    from research_scripts.miit_new_car.enterprise_admission_parser import parse_enterprise_admission_page
+
+    html = '''<html>
+    <head><title>拟发布新准入车辆生产企业</title></head>
+    <body>
+    <h1>企业准入</h1>
+    <p>Image 详细信息请参见附件</p>
+    </body></html>'''
+
+    result = parse_enterprise_admission_page(html=html)
+
+    assert result["parse_status"] == "partial"
+    assert result["quality"] == "low_quality"
+
+
+def test_enterprise_admission_has_image_content_detection():
+    """has_image_content detects image-backed pages correctly."""
+    from research_scripts.miit_new_car.enterprise_admission_parser import has_image_content
+
+    assert has_image_content('<html><img src="test.png"></html>') is True
+    assert has_image_content('<html><body>text only</body></html>') is False
+    assert has_image_content('<html><a href="/cms_files/2026/file.jpg">pic</a></html>') is True
+    assert has_image_content('<html>Image 详细信息</html>') is True
+
+
+# ── 5. Enterprise admission excluded from product list ──
+
+def test_classify_attachment_type_enterprise_admission_change():
+    """Enterprise admission change text is classified correctly and excluded."""
+    from research_scripts.miit_new_car.parse_product_list import classify_attachment_type
+
+    assert classify_attachment_type("拟发布的新准入车辆生产企业及已准入企业变更信息清单") == "enterprise_admission_change"
+    assert classify_attachment_type("新准入车辆生产企业") == "enterprise_admission_change"
+    assert classify_attachment_type("已准入企业变更信息清单") == "enterprise_admission_change"
+    assert classify_attachment_type("新增车辆生产企业") == "enterprise_admission_change"
+
+
+def test_enterprise_admission_excluded_from_product_list(tmp_path, monkeypatch):
+    """Enterprise admission attachment is excluded from product list parsing."""
+    from research_scripts.miit_new_car.parse_product_list import parse_product_list
+
+    raw_dir = tmp_path / "raw" / "batch_408"
+    raw_dir.mkdir(parents=True)
+    meta = {"batch_no": 408, "status": "publicity", "publish_date": "2026-06-10", "detail_url": "http://x"}
+    (raw_dir / "metadata.json").write_text(json.dumps(meta), encoding="utf-8")
+
+    att_dir = raw_dir / "attachments"
+    att_dir.mkdir()
+    (att_dir / "enterprise_admission.html").write_text(
+        "<html><body><h1>拟发布的新准入车辆生产企业及已准入企业变更信息清单</h1></body></html>",
+        encoding="utf-8",
+    )
+    (att_dir / "normal_products.html").write_text(
+        '<html><body><h1>道路机动车辆生产企业及产品（第408批）</h1>'
+        '<table><tr><th>企业名称</th><th>产品型号</th></tr>'
+        '<tr><td>智己汽车</td><td>L6</td></tr></table></body></html>',
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr("research_scripts.miit_new_car.parse_product_list.RAW_BASE", tmp_path / "raw")
+    monkeypatch.setattr("research_scripts.miit_new_car.parse_product_list.EXTRACTED_BASE", tmp_path / "extracted")
+
+    products = parse_product_list(batch_no=408)
+    # Enterprise admission attachment should NOT produce any product records
+    for p in products:
+        assert "enterprise_admission" not in p.get("source_attachment", ""), \
+            f"Enterprise admission attachment should not appear in product list: {p['source_attachment']}"
+    # Normal products should still be parsed
+    normal = [p for p in products if "智己" in p.get("enterprise_name", "")]
+    assert len(normal) >= 1
+
+
+# ── 6. Direct access failure preserves evidence ──
+
+def test_fetch_html_datainfo_attachment_tracks_status(tmp_path, monkeypatch):
+    """Fetching a datainfo HTML attachment should capture status correctly."""
+    from research_scripts.miit_new_car.fetch_batch import fetch_batch
+
+    def mock_http_get(url, **kw):
+        if "datainfo" in url:
+            return b"<html><body>Enterprise data</body></html>", 200
+        if "detail" in url:
+            return b"<html><body>Mock</body></html>", 200
+        return b"mock", 200
+
+    monkeypatch.setattr("research_scripts.miit_new_car.fetch_batch.http_get", mock_http_get)
+    monkeypatch.setattr(
+        "research_scripts.miit_new_car.discover_batches.discover_batches",
+        lambda limit=5, pages=1, status_filter=None, force_refresh=False: (
+            [{"batch_no": 408, "detail_url": "http://mock/detail", "status": "publicity", "title": "test"}],
+            "remote",
+        ),
+    )
+
+    class MockDetailParser:
+        def __init__(self):
+            self.title = "第408批公示"
+            self.publish_date = "2026-06-10"
+            self.content_html = ""
+            self.attachments = [
+                {"url": "https://www.miit.gov.cn/datainfo/xxx/art/2026/art_xxx.html",
+                 "title": "拟发布的新准入车辆生产企业及已准入企业变更信息清单",
+                 "filename": "art_xxx.html",
+                 "source_format": "html_image_attachment"},
+            ]
+        def feed(self, html): pass
+
+    monkeypatch.setattr("research_scripts.miit_new_car.fetch_batch._DetailParser", MockDetailParser)
+
+    import tempfile
+    with tempfile.TemporaryDirectory() as td:
+        monkeypatch.setattr("research_scripts.miit_new_car.fetch_batch.OUTPUT_BASE", Path(td))
+        result = fetch_batch(batch_no=408, download=True)
+        statuses = result.get("attachment_statuses", [])
+        assert len(statuses) >= 1
+        att = statuses[0]
+        assert att["source_format"] == "html_image_attachment"
+        assert att["source_type"] == "enterprise_admission_change"
+        assert att["status"] == "downloaded" or att["status"] == "failed"
+
+
+# ── 7. Fallback: partial parse when no OCR available ──
+
+def test_enterprise_admission_partial_no_ocr():
+    """Without OCR, image-backed content reports parse_status=partial."""
+    from research_scripts.miit_new_car.enterprise_admission_parser import parse_enterprise_admission_page
+
+    html = '''<html>
+    <head><title>拟发布新准入车辆生产企业及已准入企业变更信息清单</title></head>
+    <body>
+    <h1>拟发布新准入车辆生产企业</h1>
+    <img src="/cms_files/2026/enterprise_list.png" alt="">
+    </body></html>'''
+
+    result = parse_enterprise_admission_page(html=html)
+    assert result["parse_status"] == "partial"
+    assert result["quality"] == "low_quality"
+    assert result["detail_asset_type"] == "image"
+    assert len(result["detail_asset_urls"]) >= 1
+
+
+# ── 8. Canonical section / metadata output ──
+
+def test_enterprise_admission_canonical_section():
+    """Canonical section is correctly identified from title."""
+    from research_scripts.miit_new_car.enterprise_admission_parser import parse_enterprise_admission_page
+
+    html = '''<html><head><title>拟发布新准入车辆生产企业及已准入企业变更信息清单</title></head><body>内容</body></html>'''
+
+    result = parse_enterprise_admission_page(html=html)
+    # Both appear in title; first in SECTION_CANDIDATES list wins
+    assert result["canonical_section"] in ("拟发布新准入车辆生产企业", "已准入企业变更信息")
+    assert "section_candidates" in result
+    assert len(result["section_candidates"]) >= 5
+
+
+# ── 9. Enterprise admission evidence layer in monitor ──
+
+def test_evidence_layers_includes_enterprise_admission(tmp_path, monkeypatch):
+    """Evidence JSON includes enterprise_admission_evidence layer when available."""
+    from research_scripts.miit_new_car.monitor import _write_evidence
+
+    EVIDENCE_BASE = tmp_path / "evidence"
+    monkeypatch.setattr("research_scripts.miit_new_car.monitor.EVIDENCE_BASE", EVIDENCE_BASE)
+
+    meta = {"batch_no": 408, "status": "publicity", "publish_date": "2026-06-10",
+            "detail_url": "http://example.com", "fetched_at": "", "detail_source": "remote"}
+    diff_result = {"matched_products": [], "watchlist_matched": 0, "new_products": 0, "new_watchlist_matched": 0}
+    att_statuses = [{"status": "downloaded"}]
+    ext_results = []
+    products = []
+    diagnostics = []
+    product_list = []
+
+    ea_result = {
+        "batch_no": 408,
+        "source_type": "enterprise_admission_change",
+        "source_format": "html_image_attachment",
+        "parse_status": "partial",
+        "quality": "low_quality",
+        "canonical_section": "拟发布新准入车辆生产企业",
+        "detail_asset_type": "image",
+        "detail_asset_urls": ["https://www.miit.gov.cn/cms_files/2026/img.png"],
+    }
+
+    evidence = _write_evidence(
+        408, meta, diff_result, att_statuses, ext_results, products,
+        diagnostics=diagnostics, product_list=product_list,
+        discovery_source="remote", enterprise_admission_result=ea_result,
+    )
+
+    layers = evidence.get("evidence_layers", {})
+    assert "enterprise_admission_evidence" in layers
+    ea_layer = layers["enterprise_admission_evidence"]
+    assert ea_layer["available"] is True
+    assert ea_layer["parse_status"] == "partial"
+    assert ea_layer["quality"] == "low_quality"
+    assert ea_layer["canonical_section"] == "拟发布新准入车辆生产企业"
+    assert len(ea_layer["detail_asset_urls"]) == 1
+
+    # enterprise_admission should also appear at top level
+    assert "enterprise_admission" in evidence
+    assert evidence["enterprise_admission"]["source_type"] == "enterprise_admission_change"
+
+
+def test_evidence_layers_enterprise_admission_not_required(tmp_path, monkeypatch):
+    """enterprise_admission_evidence layer is optional; schema is valid without it."""
+    from research_scripts.miit_new_car.monitor import _write_evidence, _validate_evidence_schema
+
+    EVIDENCE_BASE = tmp_path / "evidence"
+    monkeypatch.setattr("research_scripts.miit_new_car.monitor.EVIDENCE_BASE", EVIDENCE_BASE)
+
+    meta = {"batch_no": 407, "status": "official", "publish_date": "2026-06-12",
+            "detail_url": "http://x", "fetched_at": "", "detail_source": "remote"}
+    diff_result = {"matched_products": [], "watchlist_matched": 0, "new_products": 0, "new_watchlist_matched": 0}
+    att_statuses = [{"status": "downloaded"}]
+    ext_results = []
+    products = []
+    diagnostics = []
+    product_list = [{"enterprise_name": "智己", "product_model": "L6"}]
+
+    evidence = _write_evidence(
+        407, meta, diff_result, att_statuses, ext_results, products,
+        diagnostics=diagnostics, product_list=product_list,
+        discovery_source="remote",
+    )
+
+    valid, reason = _validate_evidence_schema(evidence)
+    assert valid is True, f"Schema should be valid without enterprise_admission_evidence: {reason}"
+
+
+# ── 10. Monitor summary includes enterprise admission info ──
+
+def test_run_monitor_with_enterprise_admission(monkeypatch):
+    """run_monitor processes enterprise admission attachments when present."""
+    from research_scripts.miit_new_car.monitor import run_monitor
+
+    def mock_fetch(*a, **kw):
+        return {
+            "batch_no": 408, "status": "publicity", "title": "关于第408批公示",
+            "publish_date": "2026-06-10", "detail_url": "http://a",
+            "fetched_at": "2026-06-22T00:00:00Z",
+            "detail_source": "remote",
+            "attachment_statuses": [
+                {"status": "downloaded", "source_type": "enterprise_admission_change",
+                 "source_format": "html_image_attachment",
+                 "url": "http://mock/datainfo/art.html",
+                 "local_path": "/tmp/mock/enterprise.html"},
+            ],
+        }
+    monkeypatch.setattr("research_scripts.miit_new_car.monitor.fetch_batch", mock_fetch)
+    monkeypatch.setattr("research_scripts.miit_new_car.monitor.parse_batch", lambda **kw: [])
+    monkeypatch.setattr("research_scripts.miit_new_car.monitor.diff_batch",
+                        lambda **kw: {"watchlist_matched": 0, "new_products": 0, "new_watchlist_matched": 0, "matched_products": []})
+    monkeypatch.setattr("research_scripts.miit_new_car.monitor.extract_attachment_text", lambda **kw: [])
+    monkeypatch.setattr("research_scripts.miit_new_car.monitor.diagnose_attachments", lambda **kw: [])
+    monkeypatch.setattr("research_scripts.miit_new_car.monitor.parse_product_list", lambda **kw: [])
+
+    # Mock enterprise admission processing to avoid file I/O
+    def mock_process(*a, **kw):
+        return {
+            "batch_no": 408,
+            "source_type": "enterprise_admission_change",
+            "source_format": "html_image_attachment",
+            "parse_status": "partial",
+            "quality": "low_quality",
+            "canonical_section": "拟发布新准入车辆生产企业",
+            "detail_asset_type": "image",
+            "detail_asset_urls": ["http://mock/cms_files/img.png"],
+            "section_headings_found": ["拟发布新准入车辆生产企业"],
+        }
+    monkeypatch.setattr(
+        "research_scripts.miit_new_car.monitor.process_enterprise_admission",
+        mock_process,
+    )
+
+    # Mock _write_evidence to return expected structure
+    def mock_write_evidence(**kw):
+        ea = kw.get("enterprise_admission_result")
+        return {
+            "source_type": "official",
+            "evidence_layers": {
+                "official_batch_evidence": {"available": True},
+                "official_attachment_evidence": {"available": True},
+                "official_product_list_evidence": {"available": False},
+                "enterprise_admission_evidence": {
+                    "available": True,
+                    "parse_status": ea.get("parse_status") if ea else "",
+                    "quality": ea.get("quality") if ea else "",
+                    "canonical_section": ea.get("canonical_section") if ea else "",
+                },
+            },
+            "enterprise_admission": ea or {},
+        }
+    monkeypatch.setattr("research_scripts.miit_new_car.monitor._write_evidence", mock_write_evidence)
+
+    result = run_monitor(batch_no=408, download=False, state_update=False, discovery_source="remote")
+    # Should not crash; summary should include enterprise_admission info
+    assert result["batch_no"] == 408
+
+
+# ═══════════════════════════════════════════════════════════════════
+# V1.1: datainfo_resource_extractor
+# ═══════════════════════════════════════════════════════════════════
+
+MIIT_BASE = "https://www.miit.gov.cn"
+
+
+def test_extractor_img_src():
+    """<img src='/cms_files/xxx.png'> should be extracted as image_asset_url."""
+    from research_scripts.miit_new_car.enterprise_admission_parser import datainfo_resource_extractor
+
+    html = '<html><body><img src="/cms_files/2026/06/test_image.png"></body></html>'
+    result = datainfo_resource_extractor(html, MIIT_BASE)
+
+    assert len(result["image_asset_urls"]) >= 1
+    urls = [u["url"] for u in result["image_asset_urls"]]
+    assert any("test_image.png" in u for u in urls)
+    assert any("cms_files/2026/06/test_image.png" in u for u in urls)
+    # Source should be recorded
+    assert any(u["source"] == "img.src" for u in result["image_asset_urls"])
+
+
+def test_extractor_data_src():
+    """<img data-src='...'> should be extracted as image_asset_url."""
+    from research_scripts.miit_new_car.enterprise_admission_parser import datainfo_resource_extractor
+
+    html = '<html><body><img data-src="/cms_files/2026/lazy_load.png"></body></html>'
+    result = datainfo_resource_extractor(html, MIIT_BASE)
+
+    assert len(result["image_asset_urls"]) >= 1
+    urls = [u["url"] for u in result["image_asset_urls"]]
+    assert any("lazy_load.png" in u for u in urls)
+    # Source tracking
+    assert any(u["source"] == "img.data-src" for u in result["image_asset_urls"])
+
+
+def test_extractor_data_original():
+    """<img data-original='...'> should be extracted as image_asset_url."""
+    from research_scripts.miit_new_car.enterprise_admission_parser import datainfo_resource_extractor
+
+    html = '<html><body><img data-original="/cms_files/2026/original_img.jpg"></body></html>'
+    result = datainfo_resource_extractor(html, MIIT_BASE)
+
+    assert len(result["image_asset_urls"]) >= 1
+    sources = [u["source"] for u in result["image_asset_urls"]]
+    assert "img.data-original" in sources
+
+
+def test_extractor_data_url():
+    """Elements with data-url should be extracted as image_asset_url."""
+    from research_scripts.miit_new_car.enterprise_admission_parser import datainfo_resource_extractor
+
+    html = '<html><body><div data-url="/cms_files/2026/data_url_img.jpg">content</div></body></html>'
+    result = datainfo_resource_extractor(html, MIIT_BASE)
+
+    assert len(result["image_asset_urls"]) >= 1
+    sources = [u["source"] for u in result["image_asset_urls"]]
+    assert "div.data-url" in sources
+
+
+def test_extractor_js_embedded_url():
+    """JS script content with /cms_files/xxx.jpg should be extracted via regex."""
+    from research_scripts.miit_new_car.enterprise_admission_parser import datainfo_resource_extractor
+
+    html = '''<html><head>
+<script>
+var imgUrl = "/cms_files/2026/js_embedded_image.jpg";
+var fileUrl = "/cms_files/filemanager/1226/attachments/doc.pdf";
+</script>
+</head><body></body></html>'''
+    result = datainfo_resource_extractor(html, MIIT_BASE)
+
+    # script_asset_urls should contain both URLs
+    script_urls = [u["url"] for u in result["script_asset_urls"]]
+    assert any("js_embedded_image.jpg" in u for u in script_urls)
+    assert any("doc.pdf" in u for u in script_urls)
+
+    # cms_file_urls should also contain them
+    cms_urls = [u["url"] for u in result["cms_file_urls"]]
+    assert any("js_embedded_image.jpg" in u for u in cms_urls)
+    assert any("doc.pdf" in u for u in cms_urls)
+
+
+def test_extractor_iframe():
+    """<iframe src='...'> should be extracted as iframe_urls."""
+    from research_scripts.miit_new_car.enterprise_admission_parser import datainfo_resource_extractor
+
+    html = '<html><body><iframe src="https://example.com/viewer/page.html"></iframe></body></html>'
+    result = datainfo_resource_extractor(html, MIIT_BASE)
+
+    assert len(result["iframe_urls"]) >= 1
+    urls = [u["url"] for u in result["iframe_urls"]]
+    assert "https://example.com/viewer/page.html" in urls
+    assert any(u["source"] == "iframe.src" for u in result["iframe_urls"])
+
+
+def test_extractor_image_marker_no_urls():
+    """'Image 详细信息' with no URLs → extraction_status='needs_browser_network_trace'."""
+    from research_scripts.miit_new_car.enterprise_admission_parser import datainfo_resource_extractor
+
+    html = '<html><head><title>Test</title></head><body><p>Image 详细信息请参见附件</p></body></html>'
+    result = datainfo_resource_extractor(html, MIIT_BASE)
+
+    assert result["extraction_status"] == "needs_browser_network_trace"
+    assert "Image detail marker" in result["extraction_reason"]
+    # No URLs should be found
+    assert len(result["image_asset_urls"]) == 0
+    assert len(result["linked_asset_urls"]) == 0
+    assert len(result["iframe_urls"]) == 0
+    assert len(result["cms_file_urls"]) == 0
+
+
+def test_extractor_empty_html():
+    """Empty HTML → extraction_status='needs_browser_network_trace'."""
+    from research_scripts.miit_new_car.enterprise_admission_parser import datainfo_resource_extractor
+
+    result = datainfo_resource_extractor("", MIIT_BASE)
+
+    assert result["extraction_status"] == "needs_browser_network_trace"
+    assert "empty" in result["extraction_reason"]
+
+
+def test_extractor_relative_url_resolution():
+    """Relative URLs should resolve to absolute using base_url."""
+    from research_scripts.miit_new_car.enterprise_admission_parser import datainfo_resource_extractor
+
+    html = '<html><body><img src="/cms_files/test.png"></body></html>'
+    result = datainfo_resource_extractor(html, "https://www.miit.gov.cn")
+
+    assert len(result["image_asset_urls"]) >= 1
+    url = result["image_asset_urls"][0]["url"]
+    assert url == "https://www.miit.gov.cn/cms_files/test.png"
+
+
+def test_extractor_linked_assets():
+    """<a href='...'> should be extracted as linked_asset_urls."""
+    from research_scripts.miit_new_car.enterprise_admission_parser import datainfo_resource_extractor
+
+    html = '''<html><body>
+<a href="https://www.miit.gov.cn/datainfo/other/page.html">Related Page</a>
+<a href="/cms_files/2026/doc.pdf">PDF Document</a>
+</body></html>'''
+    result = datainfo_resource_extractor(html, MIIT_BASE)
+
+    assert len(result["linked_asset_urls"]) >= 2
+    urls = [u["url"] for u in result["linked_asset_urls"]]
+    assert any("datainfo/other/page.html" in u for u in urls)
+    assert any("doc.pdf" in u for u in urls)
+    # All should have source a.href
+    assert all(u["source"] == "a.href" for u in result["linked_asset_urls"])
+
+
+def test_extractor_script_webfile():
+    """Script with webfile/upload references should be extracted."""
+    from research_scripts.miit_new_car.enterprise_admission_parser import datainfo_resource_extractor
+
+    html = '''<html><head><script>
+var f1 = "/webfile/2026/data.json";
+var f2 = "/upload/images/photo.png";
+</script></head><body></body></html>'''
+    result = datainfo_resource_extractor(html, MIIT_BASE)
+
+    script_urls = [u["url"] for u in result["script_asset_urls"]]
+    assert any("webfile/2026/data.json" in u for u in script_urls)
+    assert any("upload/images/photo.png" in u for u in script_urls)
+
+
+def test_extractor_api_candidate():
+    """JSON API URLs in script should be extracted as api_candidate_urls."""
+    from research_scripts.miit_new_car.enterprise_admission_parser import datainfo_resource_extractor
+
+    html = '''<html><head><script>
+var api = "https://api.miit.gov.cn/v1/data/2026/batch.json";
+</script></head><body></body></html>'''
+    result = datainfo_resource_extractor(html, MIIT_BASE)
+
+    api_urls = [u["url"] for u in result["api_candidate_urls"]]
+    assert any("batch.json" in u for u in api_urls)
+
+
+def test_extractor_section_candidates():
+    """Section candidates should be extracted from HTML content."""
+    from research_scripts.miit_new_car.enterprise_admission_parser import datainfo_resource_extractor
+
+    html = '<html><body><p>拟发布新准入车辆生产企业</p><p>汽车生产企业</p></body></html>'
+    result = datainfo_resource_extractor(html, MIIT_BASE)
+
+    assert "拟发布新准入车辆生产企业" in result["section_candidates"]
+    assert "汽车生产企业" in result["section_candidates"]
+
+
+def test_extractor_source_title():
+    """Page title should be extracted from <title> tag."""
+    from research_scripts.miit_new_car.enterprise_admission_parser import datainfo_resource_extractor
+
+    html = '<html><head><title>拟发布新准入车辆生产企业及已准入企业变更信息清单</title></head><body></body></html>'
+    result = datainfo_resource_extractor(html, MIIT_BASE)
+
+    assert "拟发布新准入车辆生产企业" in result["source_title"]
+    assert "已准入企业变更信息清单" in result["source_title"]
+
+
+def test_extractor_dedup():
+    """Duplicate URLs should be deduplicated."""
+    from research_scripts.miit_new_car.enterprise_admission_parser import datainfo_resource_extractor
+
+    html = '''<html><body>
+<img src="/cms_files/2026/same.png">
+<img data-src="/cms_files/2026/same.png">
+<a href="https://www.miit.gov.cn/cms_files/2026/same.png">link</a>
+</body></html>'''
+    result = datainfo_resource_extractor(html, MIIT_BASE)
+
+    # image_asset_urls should dedup the same URL from src and data-src
+    urls = [u["url"] for u in result["image_asset_urls"] if "same.png" in u["url"]]
+    assert len(urls) == 1, "Duplicate image URLs should be deduplicated"
+
+
+def test_extractor_parse_enterprise_admission_integration():
+    """parse_enterprise_admission_page should include V1.1 extraction fields."""
+    from research_scripts.miit_new_car.enterprise_admission_parser import parse_enterprise_admission_page
+
+    html = '''<html>
+<head><title>拟发布新准入车辆生产企业</title></head>
+<body>
+<h1>拟发布新准入车辆生产企业</h1>
+<img src="/cms_files/2026/img1.png" alt="pic1">
+<img data-src="/cms_files/2026/img2.png" alt="pic2">
+<a href="https://www.miit.gov.cn/datainfo/other/page.html">Link</a>
+<script>var x = "/cms_files/2026/embedded.jpg";</script>
+</body></html>'''
+    result = parse_enterprise_admission_page(html, page_url=MIIT_BASE)
+
+    # V1.1 fields should exist
+    assert "image_asset_urls" in result
+    assert "linked_asset_urls" in result
+    assert "script_asset_urls" in result
+    assert "cms_file_urls" in result
+    assert "extraction_status" in result
+    assert "extraction_reason" in result
+
+    # image_asset_urls should have both src and data-src
+    assert len(result["image_asset_urls"]) >= 2
+    sources = set(u["source"] for u in result["image_asset_urls"])
+    assert "img.src" in sources
+    assert "img.data-src" in sources
+
+    # linked_asset_urls should have the anchor
+    assert len(result["linked_asset_urls"]) >= 1
+
+    # script_asset_urls should have the embedded image
+    assert len(result["script_asset_urls"]) >= 1
+    script_urls = [u["url"] for u in result["script_asset_urls"]]
+    assert any("embedded.jpg" in u for u in script_urls)
+
+    # Backward-compatible fields should still exist
+    assert result["source_type"] == "enterprise_admission_change"
+    assert "detail_asset_urls" in result
+    assert "section_candidates" in result
+    assert "parse_status" in result
+    assert "quality" in result
+
+
+def test_extractor_resolve_url_helper():
+    """_resolve_url should handle various URL formats."""
+    from research_scripts.miit_new_car.enterprise_admission_parser import _resolve_url
+
+    base = "https://www.miit.gov.cn"
+
+    # Absolute URL unchanged
+    assert _resolve_url("https://other.com/file.jpg", base) == "https://other.com/file.jpg"
+
+    # Protocol-relative URL
+    assert _resolve_url("//cdn.miit.gov.cn/file.jpg", base) == "https://cdn.miit.gov.cn/file.jpg"
+
+    # Root-relative URL
+    assert _resolve_url("/cms_files/img.png", base) == "https://www.miit.gov.cn/cms_files/img.png"
+
+    # Relative URL
+    result = _resolve_url("img.png", "https://www.miit.gov.cn/datainfo/page.html")
+    assert result.endswith("/img.png")
+
+    # Empty URL
+    assert _resolve_url("", base) == ""
+
+    # No base URL
+    assert _resolve_url("/cms_files/img.png", "") == "/cms_files/img.png"

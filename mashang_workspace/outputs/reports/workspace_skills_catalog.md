@@ -2,7 +2,7 @@
 
 Agent Harness 能力目录
 
-生成日期：2026-06-25
+生成日期：2026-07-02
 
 本页面展示 mashang_workspace 中可被 OpenCode Agent 调用的 workspace 级 skills。
 
@@ -13,8 +13,8 @@ Agent Harness 能力目录
 | 指标 | 数值 |
 |------|------|
 | Workspace Skills | 4 |
-| Skills 输出目录 | mashang_workspace/outputs/reports/, dataset/cpca_weekly/cpca_weekly_data_capture.json   # evidence/capture 原材料, outputs/miit_new_car/promptbuilder_runs/, mashang_workspace/outputs/monthly_market_report/YYYY-MM/, outputs/auto_launch/ |
-| 最近更新 | 2026-06-25 |
+| Skills 输出目录 | mashang_workspace/outputs/monthly_market_report/YYYY-MM/, outputs/miit_new_car/promptbuilder_runs/, mashang_workspace/outputs/reports/, mashang_workspace/outputs/auto_launch/search/{date}/{mode}/, dataset/cpca_weekly/cpca_weekly_data_capture.json   # evidence/capture 原材料 |
+| 最近更新 | 2026-07-02 |
 
 ## Skills Overview
 
@@ -24,7 +24,7 @@ Agent Harness 能力目录
 | cpca-weekly-data-capture | workspace | 第一时间捕捉乘联分会/乘联会周度核心数据，比 CADA 官网更早获取 P0 早源 | `make cpca-weekly-data-capture WEEK=2026-W25` | ['dataset/cpca_weekly/cpca_weekly_data_capture.json   # evidence/capture 原材料'] |
 | monthly-market-report | workspace | monthly-market-report v0.1 是基于 `passenge | `OpenCode Agent 自动匹配 — SKILL.md 位于 .opencode/skills/monthly-market-report/` | ['mashang_workspace/outputs/monthly_market_report/YYYY-MM/'] |
 | runtime-eval-diagnosis | workspace |  | `OpenCode Agent 自动匹配 — SKILL.md 位于 .opencode/skills/runtime-eval-diagnosis/` | — |
-| auto_launch | Promptbuilder / Intelligence Workflow | 生成竞品市场事件检索 Prompt；验证 AI raw response；归一化 | `make build-auto-launch-prompt` | outputs/auto_launch/ |
+| auto_launch | Promptbuilder / Intelligence Workflow | 汽车上市/营销事件监控；支持车型/品牌/本品 Watch，包含搜索、信源分级、2 | `python mashang_workspace/research_scripts/auto_launch/brand_daily_marketing_watch.py --brand im --brand-name 智己` | ['mashang_workspace/outputs/auto_launch/search/{date}/{mode}/', 'mashang_workspace/outputs/auto_launch/owned_brand_daily/{date}/'] |
 | miit_new_car | Promptbuilder / MIIT Workflow | MIIT 公告信号解释 Prompt Pack；新车申报情报分析 | `make miit-fetch-batch BATCH=N` | outputs/miit_new_car/promptbuilder_runs/ |
 
 ## Workspace Skills 详情
@@ -83,8 +83,8 @@ Agent Harness 能力目录
 |------|------|
 | 目录 | `promptbuilders/auto_launch/` |
 | 类型 | Promptbuilder / Intelligence Workflow |
-| 能力定位 | 生成竞品市场事件检索 Prompt；验证 AI raw response；归一化 evidence；Raw-first report packaging |
-| 入口命令 | `make build-auto-launch-prompt` |
+| 能力定位 | 汽车上市/营销事件监控；支持车型/品牌/本品 Watch，包含搜索、信源分级、24h 窗口校验、事件聚类、candidate gate 与 raw-first report packaging。 |
+| 入口命令 | `python mashang_workspace/research_scripts/auto_launch/brand_daily_marketing_watch.py --brand im --brand-name 智己` |
 
 ### miit_new_car (Promptbuilder / MIIT Workflow)
 

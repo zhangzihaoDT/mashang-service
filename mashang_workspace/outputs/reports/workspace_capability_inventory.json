@@ -1,14 +1,14 @@
 {
   "inventory_name": "workspace_capability_inventory",
   "version": "0.1",
-  "generated_at": "2026-06-25 08:40:23",
+  "generated_at": "2026-07-02 08:01:18",
   "workspace": "mashang_workspace",
   "summary": {
     "skills": 6,
     "script_categories": 3,
-    "scripts": 42,
+    "scripts": 56,
     "data_assets": 6,
-    "outputs": 37,
+    "outputs": 47,
     "quality_assets": 6
   },
   "groups": [
@@ -65,7 +65,7 @@
         {
           "name": "auto_launch",
           "path": ".opencode/skills/auto_launch/",
-          "description": "生成竞品市场事件检索 Prompt；验证 AI raw response；归一化 evidence；Raw-first report packaging",
+          "description": "汽车上市/营销事件监控；支持车型/品牌/本品 Watch，包含搜索、信源分级、24h 窗口校验、事件聚类、candidate gate 与 raw-first report packaging。",
           "short_description": "",
           "group": "other",
           "entrypoint": "",
@@ -192,14 +192,158 @@
           "status": "active"
         },
         {
+          "name": "auto_launch/brand_daily_marketing_watch.py",
+          "path": "mashang_workspace/research_scripts/auto_launch/brand_daily_marketing_watch.py",
+          "category": "research_scripts",
+          "description": "brand_daily_marketing_watch.py — owned brand daily marketing event monitor.",
+          "short_description": "brand_daily_marketing_watch.py — owned brand daily marketing event monitor.",
+          "has_cli": true,
+          "likely_outputs": [
+            "unknown"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "auto_launch/event_candidate_gate.py",
+          "path": "mashang_workspace/research_scripts/auto_launch/event_candidate_gate.py",
+          "category": "research_scripts",
+          "description": "event_candidate_gate.py — deterministic candidate gating for event clusters.",
+          "short_description": "event_candidate_gate.py — deterministic candidate gating for event clusters.",
+          "has_cli": false,
+          "likely_outputs": [
+            "unknown"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "auto_launch/event_clusterer.py",
+          "path": "mashang_workspace/research_scripts/auto_launch/event_clusterer.py",
+          "category": "research_scripts",
+          "description": "event_clusterer.py — deterministic event-level clustering for normalized search results.",
+          "short_description": "event_clusterer.py — deterministic event-level clustering for normalized search",
+          "has_cli": false,
+          "likely_outputs": [
+            "unknown"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "auto_launch/normalize_search_results.py",
+          "path": "mashang_workspace/research_scripts/auto_launch/normalize_search_results.py",
+          "category": "research_scripts",
+          "description": "normalize_search_results.py — 将 Volc Search 原始搜索结果标准化为统一格式。",
+          "short_description": "normalize_search_results.py — 将 Volc Search 原始搜索结果标准化为统一格式。",
+          "has_cli": true,
+          "likely_outputs": [
+            "structured_data"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "auto_launch/search_budget_manager.py",
+          "path": "mashang_workspace/research_scripts/auto_launch/search_budget_manager.py",
+          "category": "research_scripts",
+          "description": "search_budget_manager.py — 根据 search_intent 和配置生成 search_budget_plan。",
+          "short_description": "search_budget_manager.py — 根据 search_intent 和配置生成 search_budget_plan。",
+          "has_cli": false,
+          "likely_outputs": [
+            "unknown"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "auto_launch/search_cache.py",
+          "path": "mashang_workspace/research_scripts/auto_launch/search_cache.py",
+          "category": "research_scripts",
+          "description": "search_cache.py — query cache for Volc Search API。",
+          "short_description": "search_cache.py — query cache for Volc Search API。",
+          "has_cli": false,
+          "likely_outputs": [
+            "unknown"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "auto_launch/search_intent_compiler.py",
+          "path": "mashang_workspace/research_scripts/auto_launch/search_intent_compiler.py",
+          "category": "research_scripts",
+          "description": "search_intent_compiler.py — 将用户自然语言需求转为结构化 search_intent。",
+          "short_description": "search_intent_compiler.py — 将用户自然语言需求转为结构化 search_intent。",
+          "has_cli": true,
+          "likely_outputs": [
+            "structured_data"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "auto_launch/search_task_config_builder.py",
+          "path": "mashang_workspace/research_scripts/auto_launch/search_task_config_builder.py",
+          "category": "research_scripts",
+          "description": "search_task_config_builder.py — 将 search_intent 转为可执行搜索任务配置。",
+          "short_description": "search_task_config_builder.py — 将 search_intent 转为可执行搜索任务配置。",
+          "has_cli": true,
+          "likely_outputs": [
+            "structured_data"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "auto_launch/source_domain_resolver.py",
+          "path": "mashang_workspace/research_scripts/auto_launch/source_domain_resolver.py",
+          "category": "research_scripts",
+          "description": "source_domain_resolver.py — 域名/信源解析器。",
+          "short_description": "source_domain_resolver.py — 域名/信源解析器。",
+          "has_cli": false,
+          "likely_outputs": [
+            "unknown"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "auto_launch/volc_search_client.py",
+          "path": "mashang_workspace/research_scripts/auto_launch/volc_search_client.py",
+          "category": "research_scripts",
+          "description": "volc_search_client.py — Volc Search API 客户端。",
+          "short_description": "volc_search_client.py — Volc Search API 客户端。",
+          "has_cli": true,
+          "likely_outputs": [
+            "structured_data"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "auto_launch/volc_search_daily.py",
+          "path": "mashang_workspace/research_scripts/auto_launch/volc_search_daily.py",
+          "category": "research_scripts",
+          "description": "volc_search_daily.py — Auto Launch 搜索意图转译与执行主脚本 v0.3（Search Budget & Query Strategy v2）。",
+          "short_description": "volc_search_daily.py — Auto Launch 搜索意图转译与执行主脚本 v0.",
+          "has_cli": true,
+          "likely_outputs": [
+            "unknown"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "auto_launch/volc_search_query_builder.py",
+          "path": "mashang_workspace/research_scripts/auto_launch/volc_search_query_builder.py",
+          "category": "research_scripts",
+          "description": "volc_search_query_builder.py — 根据 search_task_config + budget_plan 生成 staged query plan。",
+          "short_description": "volc_search_query_builder.py — 根据 search_task_config + budget_plan 生成 staged",
+          "has_cli": false,
+          "likely_outputs": [
+            "unknown"
+          ],
+          "status": "active"
+        },
+        {
           "name": "auto_launch_monitor.py",
           "path": "mashang_workspace/research_scripts/auto_launch_monitor.py",
           "category": "research_scripts",
           "description": "",
           "short_description": "",
-          "has_cli": true,
+          "has_cli": false,
           "likely_outputs": [
-            "structured_data"
+            "unknown"
           ],
           "status": "active"
         },
@@ -278,13 +422,14 @@
           "status": "active"
         },
         {
-          "name": "ls8_weekly_model_share.py",
-          "path": "mashang_workspace/research_scripts/ls8_weekly_model_share.py",
+          "name": "ls9_battery_weekly_share_report.py",
+          "path": "mashang_workspace/research_scripts/ls9_battery_weekly_share_report.py",
           "category": "research_scripts",
           "description": "",
           "short_description": "",
           "has_cli": true,
           "likely_outputs": [
+            "html_report",
             "structured_data"
           ],
           "status": "active"
@@ -292,6 +437,19 @@
         {
           "name": "market_report/run_monthly_market_report.py",
           "path": "mashang_workspace/research_scripts/market_report/run_monthly_market_report.py",
+          "category": "research_scripts",
+          "description": "",
+          "short_description": "",
+          "has_cli": true,
+          "likely_outputs": [
+            "html_report",
+            "structured_data"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "miit_new_car/brand_product_line_report.py",
+          "path": "mashang_workspace/research_scripts/miit_new_car/brand_product_line_report.py",
           "category": "research_scripts",
           "description": "",
           "short_description": "",
@@ -413,6 +571,18 @@
         {
           "name": "miit_new_car/parse_products.py",
           "path": "mashang_workspace/research_scripts/miit_new_car/parse_products.py",
+          "category": "research_scripts",
+          "description": "",
+          "short_description": "",
+          "has_cli": true,
+          "likely_outputs": [
+            "structured_data"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "model_share_trend.py",
+          "path": "mashang_workspace/research_scripts/model_share_trend.py",
           "category": "research_scripts",
           "description": "",
           "short_description": "",
@@ -737,11 +907,44 @@
         {
           "name": ".DS_Store",
           "path": "mashang_workspace/outputs/reports/.DS_Store",
-          "description": "生成报告，8.0 KB，other，关联能力：general_report",
-          "short_description": "other · 8.0 KB",
+          "description": "生成报告，10.0 KB，other，关联能力：general_report",
+          "short_description": "other · 10.0 KB",
           "type": "other",
-          "modified_at": "2026-06-24 07:37",
-          "size_kb": 8.0,
+          "modified_at": "2026-06-26 02:10",
+          "size_kb": 10.0,
+          "related_capability": "general_report",
+          "status": "generated"
+        },
+        {
+          "name": "CDG_2026-06_lock.html",
+          "path": "mashang_workspace/outputs/reports/CDG_2026-06_lock.html",
+          "description": "生成报告，7.3 KB，html report，关联能力：lock_analysis",
+          "short_description": "html report · 7.3 KB",
+          "type": "html_report",
+          "modified_at": "2026-07-02 01:22",
+          "size_kb": 7.3,
+          "related_capability": "lock_analysis",
+          "status": "generated"
+        },
+        {
+          "name": "LS8_week_model_report_20260626.html",
+          "path": "mashang_workspace/outputs/reports/LS8_week_model_report_20260626.html",
+          "description": "生成报告，30.4 KB，html report，关联能力：general_report",
+          "short_description": "html report · 30.4 KB",
+          "type": "html_report",
+          "modified_at": "2026-06-26 02:10",
+          "size_kb": 30.4,
+          "related_capability": "general_report",
+          "status": "generated"
+        },
+        {
+          "name": "LS9_month_model_report_20260626.html",
+          "path": "mashang_workspace/outputs/reports/LS9_month_model_report_20260626.html",
+          "description": "生成报告，24.3 KB，html report，关联能力：general_report",
+          "short_description": "html report · 24.3 KB",
+          "type": "html_report",
+          "modified_at": "2026-06-26 02:31",
+          "size_kb": 24.3,
           "related_capability": "general_report",
           "status": "generated"
         },
@@ -779,13 +982,24 @@
           "status": "generated"
         },
         {
+          "name": "auto_launch_monitor_2026-06-05_2026-06-07.md",
+          "path": "mashang_workspace/outputs/reports/auto_launch_monitor_2026-06-05_2026-06-07.md",
+          "description": "生成报告，3.5 KB，markdown report，关联能力：general_report",
+          "short_description": "markdown report · 3.5 KB",
+          "type": "markdown_report",
+          "modified_at": "2026-07-01 01:17",
+          "size_kb": 3.5,
+          "related_capability": "general_report",
+          "status": "generated"
+        },
+        {
           "name": "cpca_weekly_early_signal.html",
           "path": "mashang_workspace/outputs/reports/cpca_weekly_early_signal.html",
-          "description": "生成报告，21.3 KB，html report，关联能力：competitive_analysis",
-          "short_description": "html report · 21.3 KB",
+          "description": "生成报告，40.0 KB，html report，关联能力：competitive_analysis",
+          "short_description": "html report · 40.0 KB",
           "type": "html_report",
-          "modified_at": "2026-06-25 08:35",
-          "size_kb": 21.3,
+          "modified_at": "2026-07-02 01:01",
+          "size_kb": 40.0,
           "related_capability": "competitive_analysis",
           "status": "generated"
         },
@@ -828,7 +1042,7 @@
           "description": "生成报告，35.9 KB，html report，关联能力：prediction",
           "short_description": "html report · 35.9 KB",
           "type": "html_report",
-          "modified_at": "2026-06-24 07:28",
+          "modified_at": "2026-07-02 01:16",
           "size_kb": 35.9,
           "related_capability": "prediction",
           "status": "generated"
@@ -847,11 +1061,11 @@
         {
           "name": "ls8_battery_weekly_share.html",
           "path": "mashang_workspace/outputs/reports/ls8_battery_weekly_share.html",
-          "description": "生成报告，2951.0 KB，html report，关联能力：competitive_analysis",
-          "short_description": "html report · 2951.0 KB",
+          "description": "生成报告，2960.7 KB，html report，关联能力：competitive_analysis",
+          "short_description": "html report · 2960.7 KB",
           "type": "html_report",
-          "modified_at": "2026-06-24 07:28",
-          "size_kb": 2951.0,
+          "modified_at": "2026-06-29 02:47",
+          "size_kb": 2960.7,
           "related_capability": "competitive_analysis",
           "status": "generated"
         },
@@ -875,6 +1089,17 @@
           "modified_at": "2026-06-15 06:25",
           "size_kb": 9.4,
           "related_capability": "lock_analysis",
+          "status": "generated"
+        },
+        {
+          "name": "ls9_battery_weekly_share.html",
+          "path": "mashang_workspace/outputs/reports/ls9_battery_weekly_share.html",
+          "description": "生成报告，2943.8 KB，html report，关联能力：competitive_analysis",
+          "short_description": "html report · 2943.8 KB",
+          "type": "html_report",
+          "modified_at": "2026-06-29 03:01",
+          "size_kb": 2943.8,
+          "related_capability": "competitive_analysis",
           "status": "generated"
         },
         {
@@ -902,11 +1127,11 @@
         {
           "name": "quick_lock_ratio.html",
           "path": "mashang_workspace/outputs/reports/quick_lock_ratio.html",
-          "description": "生成报告，661.5 KB，html report，关联能力：lock_analysis",
-          "short_description": "html report · 661.5 KB",
+          "description": "生成报告，683.3 KB，html report，关联能力：lock_analysis",
+          "short_description": "html report · 683.3 KB",
           "type": "html_report",
-          "modified_at": "2026-06-25 00:26",
-          "size_kb": 661.5,
+          "modified_at": "2026-07-01 02:02",
+          "size_kb": 683.3,
           "related_capability": "lock_analysis",
           "status": "generated"
         },
@@ -935,67 +1160,89 @@
         {
           "name": "workspace_capability_inventory.html",
           "path": "mashang_workspace/outputs/reports/workspace_capability_inventory.html",
-          "description": "生成报告，38.9 KB，html report，关联能力：capability_catalog",
-          "short_description": "html report · 38.9 KB",
+          "description": "生成报告，44.5 KB，html report，关联能力：capability_catalog",
+          "short_description": "html report · 44.5 KB",
           "type": "html_report",
-          "modified_at": "2026-06-25 08:35",
-          "size_kb": 38.9,
+          "modified_at": "2026-07-02 07:57",
+          "size_kb": 44.5,
           "related_capability": "capability_catalog",
           "status": "generated"
         },
         {
           "name": "workspace_capability_inventory.json",
           "path": "mashang_workspace/outputs/reports/workspace_capability_inventory.json",
-          "description": "生成报告，49.2 KB，json contract，关联能力：capability_catalog",
-          "short_description": "json contract · 49.2 KB",
+          "description": "生成报告，61.5 KB，json contract，关联能力：capability_catalog",
+          "short_description": "json contract · 61.5 KB",
           "type": "json_contract",
-          "modified_at": "2026-06-25 08:35",
-          "size_kb": 49.2,
+          "modified_at": "2026-07-02 07:57",
+          "size_kb": 61.5,
           "related_capability": "capability_catalog",
           "status": "generated"
         },
         {
           "name": "workspace_capability_inventory.md",
           "path": "mashang_workspace/outputs/reports/workspace_capability_inventory.md",
-          "description": "生成报告，9.4 KB，markdown report，关联能力：capability_catalog",
-          "short_description": "markdown report · 9.4 KB",
+          "description": "生成报告，11.9 KB，markdown report，关联能力：capability_catalog",
+          "short_description": "markdown report · 11.9 KB",
           "type": "markdown_report",
-          "modified_at": "2026-06-25 08:35",
-          "size_kb": 9.4,
+          "modified_at": "2026-07-02 07:57",
+          "size_kb": 11.9,
           "related_capability": "capability_catalog",
           "status": "generated"
         },
         {
           "name": "workspace_skills_catalog.html",
           "path": "mashang_workspace/outputs/reports/workspace_skills_catalog.html",
-          "description": "生成报告，22.9 KB，html report，关联能力：capability_catalog",
-          "short_description": "html report · 22.9 KB",
+          "description": "生成报告，23.4 KB，html report，关联能力：capability_catalog",
+          "short_description": "html report · 23.4 KB",
           "type": "html_report",
-          "modified_at": "2026-06-25 08:40",
-          "size_kb": 22.9,
+          "modified_at": "2026-07-02 08:01",
+          "size_kb": 23.4,
           "related_capability": "capability_catalog",
           "status": "generated"
         },
         {
           "name": "workspace_skills_catalog.json",
           "path": "mashang_workspace/outputs/reports/workspace_skills_catalog.json",
-          "description": "生成报告，6.4 KB，json contract，关联能力：capability_catalog",
-          "short_description": "json contract · 6.4 KB",
+          "description": "生成报告，6.7 KB，json contract，关联能力：capability_catalog",
+          "short_description": "json contract · 6.7 KB",
           "type": "json_contract",
-          "modified_at": "2026-06-25 08:40",
-          "size_kb": 6.4,
+          "modified_at": "2026-07-02 08:01",
+          "size_kb": 6.7,
           "related_capability": "capability_catalog",
           "status": "generated"
         },
         {
           "name": "workspace_skills_catalog.md",
           "path": "mashang_workspace/outputs/reports/workspace_skills_catalog.md",
-          "description": "生成报告，6.0 KB，markdown report，关联能力：capability_catalog",
-          "short_description": "markdown report · 6.0 KB",
+          "description": "生成报告，6.4 KB，markdown report，关联能力：capability_catalog",
+          "short_description": "markdown report · 6.4 KB",
           "type": "markdown_report",
-          "modified_at": "2026-06-25 08:40",
-          "size_kb": 6.0,
+          "modified_at": "2026-07-02 08:01",
+          "size_kb": 6.4,
           "related_capability": "capability_catalog",
+          "status": "generated"
+        },
+        {
+          "name": "小鹏_product_line.md",
+          "path": "mashang_workspace/outputs/reports/小鹏_product_line.md",
+          "description": "生成报告，7.3 KB，markdown report，关联能力：general_report",
+          "short_description": "markdown report · 7.3 KB",
+          "type": "markdown_report",
+          "modified_at": "2026-06-29 05:58",
+          "size_kb": 7.3,
+          "related_capability": "general_report",
+          "status": "generated"
+        },
+        {
+          "name": "智己_product_line.md",
+          "path": "mashang_workspace/outputs/reports/智己_product_line.md",
+          "description": "生成报告，2.7 KB，markdown report，关联能力：general_report",
+          "short_description": "markdown report · 2.7 KB",
+          "type": "markdown_report",
+          "modified_at": "2026-06-29 05:53",
+          "size_kb": 2.7,
+          "related_capability": "general_report",
           "status": "generated"
         },
         {
@@ -1010,13 +1257,35 @@
           "status": "generated"
         },
         {
+          "name": "阿维塔_product_line.md",
+          "path": "mashang_workspace/outputs/reports/阿维塔_product_line.md",
+          "description": "生成报告，2.6 KB，markdown report，关联能力：general_report",
+          "short_description": "markdown report · 2.6 KB",
+          "type": "markdown_report",
+          "modified_at": "2026-06-29 05:54",
+          "size_kb": 2.6,
+          "related_capability": "general_report",
+          "status": "generated"
+        },
+        {
           "name": "2026-02/query_results.json",
           "path": "mashang_workspace/outputs/monthly_market_report/2026-02/query_results.json",
           "description": "2026-02 月报JSON results，21.1 KB",
           "short_description": "月报 · 2026-02 · 21.1 KB",
           "type": "monthly_market_output",
-          "modified_at": "2026-06-22 05:27",
+          "modified_at": "2026-07-02 01:16",
           "size_kb": 21.1,
+          "related_capability": "monthly_market_report",
+          "status": "generated"
+        },
+        {
+          "name": "2026-02/query_results.xlsx",
+          "path": "mashang_workspace/outputs/monthly_market_report/2026-02/query_results.xlsx",
+          "description": "2026-02 月报monthly output，22.5 KB",
+          "short_description": "月报 · 2026-02 · 22.5 KB",
+          "type": "monthly_market_output",
+          "modified_at": "2026-07-02 01:16",
+          "size_kb": 22.5,
           "related_capability": "monthly_market_report",
           "status": "generated"
         },
@@ -1026,7 +1295,7 @@
           "description": "2026-02 月报report draft，8.7 KB",
           "short_description": "月报 · 2026-02 · 8.7 KB",
           "type": "monthly_market_output",
-          "modified_at": "2026-06-22 05:27",
+          "modified_at": "2026-07-02 01:16",
           "size_kb": 8.7,
           "related_capability": "monthly_market_report",
           "status": "generated"
@@ -1037,7 +1306,7 @@
           "description": "2026-02 月报JSON results，0.6 KB",
           "short_description": "月报 · 2026-02 · 0.6 KB",
           "type": "monthly_market_output",
-          "modified_at": "2026-06-22 05:27",
+          "modified_at": "2026-07-02 01:16",
           "size_kb": 0.6,
           "related_capability": "monthly_market_report",
           "status": "generated"
@@ -1114,8 +1383,19 @@
           "description": "2026-12 月报JSON results，21.1 KB",
           "short_description": "月报 · 2026-12 · 21.1 KB",
           "type": "monthly_market_output",
-          "modified_at": "2026-06-22 05:27",
+          "modified_at": "2026-07-02 01:16",
           "size_kb": 21.1,
+          "related_capability": "monthly_market_report",
+          "status": "generated"
+        },
+        {
+          "name": "2026-12/query_results.xlsx",
+          "path": "mashang_workspace/outputs/monthly_market_report/2026-12/query_results.xlsx",
+          "description": "2026-12 月报monthly output，22.5 KB",
+          "short_description": "月报 · 2026-12 · 22.5 KB",
+          "type": "monthly_market_output",
+          "modified_at": "2026-07-02 01:16",
+          "size_kb": 22.5,
           "related_capability": "monthly_market_report",
           "status": "generated"
         },
@@ -1125,7 +1405,7 @@
           "description": "2026-12 月报report draft，8.7 KB",
           "short_description": "月报 · 2026-12 · 8.7 KB",
           "type": "monthly_market_output",
-          "modified_at": "2026-06-22 05:27",
+          "modified_at": "2026-07-02 01:16",
           "size_kb": 8.7,
           "related_capability": "monthly_market_report",
           "status": "generated"
@@ -1136,7 +1416,7 @@
           "description": "2026-12 月报JSON results，0.6 KB",
           "short_description": "月报 · 2026-12 · 0.6 KB",
           "type": "monthly_market_output",
-          "modified_at": "2026-06-22 05:27",
+          "modified_at": "2026-07-02 01:16",
           "size_kb": 0.6,
           "related_capability": "monthly_market_report",
           "status": "generated"
@@ -1198,9 +1478,9 @@
           "name": "pytest_tests",
           "path": "mashang_workspace/tests",
           "type": "test_suite",
-          "description": "pytest 测试套件，共 21 个测试文件。覆盖：脚本 smoke test、eval 测试、数据流水线测试、根目录清理验证、脚本分层验证。",
-          "short_description": "21 个测试文件的 pytest 套件。",
-          "eval_files": 21,
+          "description": "pytest 测试套件，共 40 个测试文件。覆盖：脚本 smoke test、eval 测试、数据流水线测试、根目录清理验证、脚本分层验证。",
+          "short_description": "40 个测试文件的 pytest 套件。",
+          "eval_files": 40,
           "config_or_case_files": 0,
           "suites": [],
           "status": "active"

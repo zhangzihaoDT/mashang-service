@@ -37,6 +37,7 @@ PRODUCT_LIST_FIELDS = [
 ]
 
 RE_TAX_KEYWORDS = re.compile(r"(购置税|车船税|减免|免税|税收)", re.IGNORECASE)
+RE_ENTERPRISE_ADMISSION = re.compile(r"(新准入车辆生产企业|已准入企业变更信息清单|拟发布的新准入车辆生产企业|新增车辆生产企业|拟发布新增车辆生产企业)")
 RE_TABLE_ROW = re.compile(r"^\s*\d+\s+", re.MULTILINE)
 RE_ROAD_ANNOUNCEMENT = re.compile(r"道路机动车辆生产企业及产品")
 RE_VEHICLE_VESSEL_TAX = re.compile(r"(享受车船税减免优惠|车船税)")
@@ -50,6 +51,9 @@ RE_PRODUCT_NAME_KEYWORDS = re.compile(r"(轿车|乘用车|客车|货车|专用�
 def classify_attachment_type(text: str, filename: str = "") -> str:
     """分类附件类型。"""
     combined = f"{text[:500]} {filename}"
+    # Check enterprise admission change first (not a product list)
+    if RE_ENTERPRISE_ADMISSION.search(combined):
+        return "enterprise_admission_change"
     if RE_ROAD_ANNOUNCEMENT.search(combined):
         return "road_product_announcement"
     if RE_VEHICLE_VESSEL_TAX.search(combined):

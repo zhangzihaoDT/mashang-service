@@ -32,6 +32,9 @@ from extract_attachment_text import extract_attachment_text
 from parse_product_list import parse_product_list
 from diagnose_attachment_urls import diagnose_attachments
 from research_scripts.miit_new_car.http_utils import NetworkError, get_and_reset_retry_count
+from research_scripts.miit_new_car.enterprise_admission_parser import (
+    process_attachment as process_enterprise_admission,
+)
 
 OUTPUT_BASE = WORKSPACE_ROOT / "outputs" / "miit_new_car"
 STATE_FILE = OUTPUT_BASE / "state" / "latest_processed_batch.json"
@@ -44,6 +47,10 @@ REQUIRED_EVIDENCE_LAYERS = [
     "official_batch_evidence",
     "official_attachment_evidence",
     "official_product_list_evidence",
+]
+
+OPTIONAL_EVIDENCE_LAYERS = [
+    "enterprise_admission_evidence",
 ]
 
 
@@ -68,6 +75,7 @@ def _load_existing_evidence(batch_no: int) -> dict | None:
 def _validate_evidence_schema(evidence: dict) -> tuple[bool, str]:
     """校验 evidence schema 是否匹配当前版本。
     返回 (valid, reason)。
+    仅检查 REQUIRED_EVIDENCE_LAYERS，OPTIONAL_EVIDENCE_LAYERS 可缺失。
     """
     if evidence.get("schema_version") != EVIDENCE_SCHEMA_VERSION:
         return False, f"schema_version 不匹配 (期望 {EVIDENCE_SCHEMA_VERSION}, 实际 {evidence.get('schema_version', '无')})"
@@ -96,10 +104,17 @@ def _compute_product_list_quality(product_list: list[dict]) -> dict:
 def _build_evidence_layers(
     batch_no: int, meta: dict, diagnostics: list[dict],
     product_list: list[dict], diff_result: dict,
+    enterprise_admission_result: dict | None = None,
+    browser_trace_evidence: dict | None = None,
 ) -> dict:
     diag_downloaded = sum(1 for d in diagnostics if d.get("download_status") == "downloaded")
     diag_failed = sum(1 for d in diagnostics if d.get("download_status") == "failed")
     pl_quality = _compute_product_list_quality(product_list)
+
+    ea_available = (
+        enterprise_admission_result is not None
+        and enterprise_admission_result.get("parse_status") != "error"
+    )
 
     return {
         "official_batch_evidence": {
@@ -119,6 +134,26 @@ def _build_evidence_layers(
             **pl_quality,
             "product_list_path": str(OUTPUT_BASE / "product_list" / f"batch_{batch_no}_product_list.json"),
         },
+        "enterprise_admission_evidence": {
+            "available": ea_available,
+            "parse_status": enterprise_admission_result.get("parse_status", "") if enterprise_admission_result else "",
+            "quality": enterprise_admission_result.get("quality", "") if enterprise_admission_result else "",
+            "canonical_section": enterprise_admission_result.get("canonical_section", "") if enterprise_admission_result else "",
+            "detail_asset_type": enterprise_admission_result.get("detail_asset_type", "") if enterprise_admission_result else "",
+            "detail_asset_urls": enterprise_admission_result.get("detail_asset_urls", []) if enterprise_admission_result else [],
+            "image_asset_urls": enterprise_admission_result.get("image_asset_urls", []) if enterprise_admission_result else [],
+            "linked_asset_urls": enterprise_admission_result.get("linked_asset_urls", []) if enterprise_admission_result else [],
+            "iframe_urls": enterprise_admission_result.get("iframe_urls", []) if enterprise_admission_result else [],
+            "script_asset_urls": enterprise_admission_result.get("script_asset_urls", []) if enterprise_admission_result else [],
+            "api_candidate_urls": enterprise_admission_result.get("api_candidate_urls", []) if enterprise_admission_result else [],
+            "cms_file_urls": enterprise_admission_result.get("cms_file_urls", []) if enterprise_admission_result else [],
+            "extraction_status": enterprise_admission_result.get("extraction_status", "") if enterprise_admission_result else "",
+            "extraction_reason": enterprise_admission_result.get("extraction_reason", "") if enterprise_admission_result else "",
+            "download_status": enterprise_admission_result.get("download_status", "") if enterprise_admission_result else "",
+            "download_error": enterprise_admission_result.get("download_error", "") if enterprise_admission_result else "",
+            "browser_trace": browser_trace_evidence is not None,
+            "browser_trace_evidence": browser_trace_evidence or {},
+        },
     }
 
 
@@ -133,6 +168,8 @@ def _write_evidence(
     product_list: list[dict],
     discovery_source: str = "remote",
     network_retry_count: int = 0,
+    enterprise_admission_result: dict | None = None,
+    browser_trace_evidence: dict | None = None,
 ) -> dict:
     watchlist_hits = []
     for p in diff_result.get("matched_products", []):
@@ -172,7 +209,12 @@ def _write_evidence(
         "discovery_source": discovery_source,
         "detail_source": meta.get("detail_source", "remote"),
         "evidence_source": "generated",
-        "evidence_layers": _build_evidence_layers(batch_no, meta, diagnostics, product_list, diff_result),
+        "evidence_layers": _build_evidence_layers(
+            batch_no, meta, diagnostics, product_list, diff_result,
+            enterprise_admission_result, browser_trace_evidence,
+        ),
+        "enterprise_admission": enterprise_admission_result or {},
+        "browser_trace_evidence": browser_trace_evidence or {},
         "artifacts": {
             "metadata": str(OUTPUT_BASE / "raw" / f"batch_{batch_no}" / "metadata.json"),
             "products_json": str(OUTPUT_BASE / "parsed" / f"batch_{batch_no}_products.json"),
@@ -238,9 +280,11 @@ def run_monitor(
     force_refresh: bool = False,
     discovery_source: str = "remote",
     pages: int = 3,
+    browser_trace: bool = False,
 ) -> dict:
     wl_path = watchlist_path or DEFAULT_WATCHLIST
     network_warnings_count = 0
+    browser_trace_evidence = None
 
     print(f"\n{'='*60}")
     print(f"  第 {batch_no} 批 MIIT 新车公告监控")
@@ -266,8 +310,153 @@ def run_monitor(
     print(f"  ✓ 第 {meta['batch_no']} 批 [{status_label}]{detail_tag} {meta.get('publish_date', '')}")
     print(f"  附件: 下载 {att_downloaded}, 跳过已存在 {att_skipped}, 失败 {att_failed}")
 
+    # 1a. Enterprise Admission Processing (if applicable)
+    enterprise_admission_result = None
+    for att_status in att_statuses:
+        if att_status.get("source_type") == "enterprise_admission_change":
+            local_path = att_status.get("local_path")
+            download_failed = att_status.get("status") == "failed"
+            att_title = att_status.get("title", "")
+            print(f"\n[1a] 企业准入变更附件: '{att_title[:80]}...'")
+            if local_path and Path(local_path).exists():
+                try:
+                    enterprise_admission_result = process_enterprise_admission(
+                        batch_no=batch_no,
+                        attachment_local_path=Path(local_path),
+                        attachment_url=att_status["url"],
+                        parent_notice_url=meta.get("detail_url", ""),
+                        parent_notice_title=meta.get("title", ""),
+                        output_dir=OUTPUT_BASE / "evidence",
+                    )
+                    ea_status = enterprise_admission_result.get("parse_status", "?")
+                    ea_quality = enterprise_admission_result.get("quality", "?")
+                    ea_images = len(enterprise_admission_result.get("detail_asset_urls", []))
+                    print(f"   状态: {ea_status}, 质量: {ea_quality}, 图片: {ea_images}")
+                except Exception as e:
+                    print(f"   [WARN] 企业准入变更解析异常: {e}")
+            elif download_failed:
+                error_msg = att_status.get("error", "unknown error")
+                print(f"   [INFO] 附件下载失败 ({error_msg}), 但 attachment metadata 已记录。")
+                # Build partial evidence from metadata even when download fails
+                # Try resource extraction even without HTML (will detect empty HTML → needs_browser_network_trace)
+                from research_scripts.miit_new_car.enterprise_admission_parser import datainfo_resource_extractor
+                extraction = datainfo_resource_extractor(
+                    datainfo_html="",
+                    datainfo_url=att_status["url"],
+                    parent_notice_url=meta.get("detail_url", ""),
+                )
+                enterprise_admission_result = {
+                    "batch_no": batch_no,
+                    "source_type": "enterprise_admission_change",
+                    "source_format": "html_image_attachment",
+                    "source_title": att_title,
+                    "parent_notice_title": meta.get("title", ""),
+                    "parent_notice_url": meta.get("detail_url", ""),
+                    "official_attachment_url": att_status["url"],
+                    "canonical_section": "拟发布新准入车辆生产企业",
+                    "section_candidates": [
+                        "拟发布的新准入车辆生产企业", "拟发布新准入车辆生产企业",
+                        "新准入车辆生产企业", "汽车生产企业", "摩托车生产企业",
+                        "三轮汽车生产企业", "已准入企业变更信息", "已准入企业变更",
+                    ],
+                    "section_headings_found": [],
+                    "parse_status": "partial",
+                    "quality": "low_quality",
+                    "quality_reason": f"attachment download failed: {error_msg}; {extraction['extraction_reason']}",
+                    "detail_asset_type": "image",
+                    "detail_asset_urls": [],
+                    "detail_asset_downloaded": False,
+                    "detail_asset_path": None,
+                    "text_snippet": "",
+                    "download_status": "failed",
+                    "download_error": error_msg,
+                    # V1.1 extraction fields
+                    "image_asset_urls": extraction["image_asset_urls"],
+                    "linked_asset_urls": extraction["linked_asset_urls"],
+                    "iframe_urls": extraction["iframe_urls"],
+                    "script_asset_urls": extraction["script_asset_urls"],
+                    "api_candidate_urls": extraction["api_candidate_urls"],
+                    "cms_file_urls": extraction["cms_file_urls"],
+                    "extraction_status": extraction["extraction_status"],
+                    "extraction_reason": extraction["extraction_reason"],
+                }
+                # Still write partial evidence
+                import json
+                ea_evidence_path = OUTPUT_BASE / "evidence" / f"batch_{batch_no}_enterprise_admission_evidence.json"
+                ea_evidence_path.parent.mkdir(parents=True, exist_ok=True)
+                with open(ea_evidence_path, "w", encoding="utf-8") as f:
+                    json.dump(enterprise_admission_result, f, ensure_ascii=False, indent=2)
+                print(f"   已输出 partial evidence: {ea_evidence_path}")
+
+                # Browser trace fallback (optional, requires --browser-trace)
+                if browser_trace and enterprise_admission_result.get("extraction_status") == "needs_browser_network_trace":
+                    print(f"   [BrowserTrace] 启动浏览器网络追踪...")
+                    try:
+                        from research_scripts.miit_new_car.browser_trace import (
+                            run_browser_trace_and_extract,
+                        )
+                        trace_result = run_browser_trace_and_extract(
+                            parent_notice_url=meta.get("detail_url", ""),
+                            attachment_title=att_title,
+                            attachment_url=att_status["url"],
+                            timeout=30000,
+                        )
+                        trace_ev = trace_result.get("browser_trace_evidence", {})
+                        browser_trace_evidence = trace_ev
+                        trace_status = trace_ev.get("browser_page_status", "")
+                        print(f"   [BrowserTrace] 状态: {trace_status}")
+                        print(f"   [BrowserTrace] 最终 URL: {trace_ev.get('browser_final_url', '')[:100]}")
+                        print(f"   [BrowserTrace] 页面标题: {trace_ev.get('browser_page_title', '')[:80]}")
+                        print(f"   [BrowserTrace] 资源数: {len(trace_ev.get('browser_resource_urls', []))}")
+                        print(f"   [BrowserTrace] 图片数: {len(trace_ev.get('browser_image_urls', []))}")
+
+                        # Always inject browser_trace_evidence into enterprise_admission_result
+                        enterprise_admission_result["browser_trace_evidence"] = trace_ev
+
+                        # If trace successfully got rendered HTML, feed back to extractor
+                        if trace_status == "success":
+                            extraction = trace_result.get("datainfo_extraction")
+                            if extraction:
+                                enterprise_admission_result.update({
+                                    "detail_asset_urls": [u["url"] for u in extraction.get("image_asset_urls", [])],
+                                    "image_asset_urls": extraction.get("image_asset_urls", []),
+                                    "linked_asset_urls": extraction.get("linked_asset_urls", []),
+                                    "iframe_urls": extraction.get("iframe_urls", []),
+                                    "script_asset_urls": extraction.get("script_asset_urls", []),
+                                    "api_candidate_urls": extraction.get("api_candidate_urls", []),
+                                    "cms_file_urls": extraction.get("cms_file_urls", []),
+                                    "extraction_status": extraction.get("extraction_status", "")
+                                        if extraction.get("extraction_status") != "needs_browser_network_trace"
+                                        else "browser_trace_success",
+                                    "extraction_reason": extraction.get("extraction_reason", ""),
+                                    "parse_status": "partial",
+                                    "quality_reason": (
+                                        f"browser trace captured page content; "
+                                        f"{extraction.get('extraction_reason', '')}"
+                                    ),
+                                    "download_status": "browser_trace_success",
+                                    "download_error": "",
+                                })
+                        else:
+                            enterprise_admission_result["quality_reason"] += (
+                                f"; browser trace result: "
+                                f"{trace_ev.get('browser_page_status', '?')} - "
+                                f"{trace_ev.get('browser_error', 'unknown error')[:120]}"
+                            )
+
+                        # Re-write evidence with browser trace results (success or failure)
+                        with open(ea_evidence_path, "w", encoding="utf-8") as f:
+                            json.dump(enterprise_admission_result, f, ensure_ascii=False, indent=2)
+                        print(f"   [BrowserTrace] 已更新 evidence (browser_trace_evidence injected)")
+                    except ImportError:
+                        print(f"   [BrowserTrace] playwright SDK not available, skipping")
+                    except Exception as e:
+                        print(f"   [BrowserTrace] 异常: {e}")
+            else:
+                print(f"   [WARN] 附件状态异常: {att_status.get('status', '?')}")
+            break
+
     # 1b. Attachment Diagnostics
-    print(f"\n[1b] 附件诊断...")
     try:
         diagnostics = diagnose_attachments(batch_no=batch_no)
     except Exception as e:
@@ -343,6 +532,8 @@ def run_monitor(
         product_list=product_list,
         discovery_source=discovery_source,
         network_retry_count=retry_count,
+        enterprise_admission_result=enterprise_admission_result,
+        browser_trace_evidence=browser_trace_evidence,
     )
 
     layers = evidence.get("evidence_layers", {})
@@ -373,6 +564,8 @@ def run_monitor(
         "evidence_source": "generated",
         "network_retry_count": retry_count,
         "network_warnings_count": network_warnings_count,
+        "browser_trace_ran": browser_trace_evidence is not None,
+        "browser_trace_status": (browser_trace_evidence or {}).get("browser_page_status", ""),
         "evidence_layers": {
             "batch": layers.get("official_batch_evidence", {}).get("available", False),
             "attachment": layers.get("official_attachment_evidence", {}).get("available", False),
@@ -408,6 +601,7 @@ def main():
     p.add_argument("--no-download", action="store_true", help="不下载附件")
     p.add_argument("--no-state-update", action="store_true", help="不更新 state 文件")
     p.add_argument("--pages", type=int, default=3, help="搜索分页页数（默认 3，搜索历史批次时需增加）")
+    p.add_argument("--browser-trace", action="store_true", help="启动 Playwright 浏览器网络追踪，用于 datainfo 页面 404 时定位资源")
     p.add_argument("--format", choices=["terminal", "json"], default="terminal")
     args = p.parse_args()
 
@@ -505,6 +699,7 @@ def main():
                 force_refresh=args.force_refresh,
                 discovery_source=discovery_source,
                 pages=args.pages,
+                browser_trace=args.browser_trace,
             )
             results.append(result)
         except Exception as e:
