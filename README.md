@@ -828,6 +828,15 @@ workspace **消费** `dataset/incoming/` 中的文件，但**不作为 Playwrigh
 
 ---
 
+## source_capture / ocr
+
+```text
+source_capture/      # 抓取/归档原图
+ocr/                 # 调火山 OCR / 其他 OCR provider
+```
+
+---
+
 ## shared
 
 `shared/` 是当前共享算子、Schema、Loader 的**唯一可信来源**。

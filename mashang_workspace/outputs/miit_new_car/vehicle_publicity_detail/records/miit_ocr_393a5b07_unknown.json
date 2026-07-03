@@ -1,0 +1,381 @@
+{
+  "schema_version": "miit_vehicle_publicity_detail.v0.1",
+  "vehicle_record_id": "miit_ocr_393a5b07_unknown",
+  "record_role": "supplement_record",
+  "join_status": "unlinked",
+  "join_candidates": [],
+  "parse_status": "partial",
+  "source_trace": {
+    "source_image_path": "source_capture/公告信息/53ad6565-e41e-4664-8bfc-5a06776b20dd.png",
+    "primary_ocr_result_id": "0133c95ba714e8ef70b7cf9eb18e56fc",
+    "primary_ocr_mode": "document_parse",
+    "fallback_ocr_result_id": "1030cd8e2c9062816807aee85305d959",
+    "fallback_ocr_mode": "general_ocr",
+    "image_sha256": "393a5b0752b8d9238d757582f109cf53edde5371332b10e4f567cadcdc88236c",
+    "primary_raw_response_path": "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/outputs/ocr/raw/volcengine/0133c95ba714e8ef70b7cf9eb18e56fc.json",
+    "fallback_raw_response_path": "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/outputs/ocr/raw/volcengine/1030cd8e2c9062816807aee85305d959.json",
+    "primary_markdown": "| 外形尺寸(mm): 货箱栏板内尺寸(mm): 排放依据标准: | 长:5085宽:2000高:1807 | | |\n| --- | --- | --- | --- |\n| 长:宽:高: | | |\n| | 燃料种类: | 纯电动 |\n| 最高车速(km/h): | 200 | 总质量(kg): | 2960 |\n| 载质量利用系数: | | 额定载质量(kg): | |\n| 转向型式: | 方向盘 | 整备质量(kg): | 2460 |\n| 轴数: | 2 | 准拖挂车总质量(kg): | |\n| 轴距(mm): | 3060 | 轮胎规格: | 255/50R20,265/45R21,HL265/40R22 |\n| 钢板弹簧片数(前/ 后): | -1- | 半挂车鞍座最大允许承载 质量(kg): | |\n| 轮胎数: | 4 | 驾驶室准乘人数(人): | |\n| 额定载客(含驾驶员) (座位数): | 6.5 | | |\n| 轮距(前/后)mm: | 前轮距:1715后轮距:1726 | 接近角/离去角(度): | 19/20 |\n| 反光标识生产企业: | | 反光标识型号: | |\n| 反光标识商标: | | 防抱死制动系统: | 有 |\n| 车辆识别代号(VIN): | LSJEL403xxxxxxxxx,LSJEL406xxxxxxx xx,LSJEL409xxxxxxxxx,LSJEL40Cxxxx XXXXX | 前悬/后悬(mm): | 985/1040 |\n| 其它: | 选装激光雷达样式轮,电动侧踏,前雷达,侧雷达,后雷达.ABS系统型号及生产企业:MKC2,欧摩威汽车系统(上海)有限公司。 新能源类型为纯电动.储能装置种类:三元锂离子电池储能装置单体生产企业:宁德时代新能源科技股份有限公司,储能装置总成 生产企业:上汽时代动力电池系统有限公司.驱动电机额定功率为:178kW,峰值功率为:300kW.该车型可选装ETC车载装置,该车 配备汽车事件数据记录系统(EDR). | | |\n| 说明: | | | |\n| 油耗申报值(L/100km): | | | |\n \n\n| 是否同期申报 | 底盘ID | 底盘型号 | 底盘生产企业 | 底盘类别 |\n| --- | --- | --- | --- | --- |\n| | | | | 承载式车身 |\n \n\n| 发动机型号 | 发动机企业 | 排量(m) | 功率(kw) | 油耗(L/100km) |\n| --- | --- | --- | --- | --- |\n| TZ230XY1252 | 华域汽车电动系统有限公司 | | 300 | |\n"
+  },
+  "fields": {
+    "product_brand": {
+      "value": null,
+      "type": "string",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "",
+      "source": "document_parse"
+    },
+    "product_model": {
+      "value": null,
+      "type": "string",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "",
+      "source": "document_parse"
+    },
+    "product_name": {
+      "value": null,
+      "type": "string",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "",
+      "source": "document_parse"
+    },
+    "enterprise_name": {
+      "value": null,
+      "type": "string",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "",
+      "source": "document_parse"
+    },
+    "registered_address": {
+      "value": null,
+      "type": "string",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "",
+      "source": "document_parse"
+    },
+    "production_address": {
+      "value": null,
+      "type": "string",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "",
+      "source": "document_parse"
+    },
+    "catalog_no": {
+      "value": null,
+      "type": "string",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "",
+      "source": "document_parse"
+    },
+    "length_mm": {
+      "value": 5085,
+      "type": "integer",
+      "unit": "mm",
+      "confidence": "high",
+      "evidence_text": "长: 5085",
+      "source": "document_parse+general_ocr"
+    },
+    "width_mm": {
+      "value": 2000,
+      "type": "integer",
+      "unit": "mm",
+      "confidence": "low",
+      "evidence_text": "宽: 2000",
+      "source": "document_parse"
+    },
+    "height_mm": {
+      "value": 1807,
+      "type": "integer",
+      "unit": "mm",
+      "confidence": "low",
+      "evidence_text": "高: 1807",
+      "source": "document_parse"
+    },
+    "wheelbase_mm": {
+      "value": 3060,
+      "type": "integer",
+      "unit": "mm",
+      "confidence": "high",
+      "evidence_text": "轴距: 3060",
+      "source": "document_parse+general_ocr"
+    },
+    "front_track_mm": {
+      "value": 1715,
+      "type": "integer",
+      "unit": "mm",
+      "confidence": "low",
+      "evidence_text": "前轮距: 1715",
+      "source": "document_parse"
+    },
+    "rear_track_mm": {
+      "value": 1726,
+      "type": "integer",
+      "unit": "mm",
+      "confidence": "low",
+      "evidence_text": "后轮距: 1726",
+      "source": "document_parse"
+    },
+    "front_overhang_mm": {
+      "value": 985,
+      "type": "integer",
+      "unit": "mm",
+      "confidence": "low",
+      "evidence_text": "前悬: 985",
+      "source": "document_parse"
+    },
+    "rear_overhang_mm": {
+      "value": 1040,
+      "type": "integer",
+      "unit": "mm",
+      "confidence": "low",
+      "evidence_text": "后悬: 1040",
+      "source": "document_parse"
+    },
+    "approach_departure_angle": {
+      "value": "19/20",
+      "type": "string",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "接近角/离去角: 19/20",
+      "source": "document_parse"
+    },
+    "tire_spec": {
+      "value": "255/50R20,265/45R21,HL265/40R22",
+      "type": "string",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "轮胎规格: 255/50R20,265/45R21,HL265/40R22",
+      "source": "document_parse"
+    },
+    "tire_count": {
+      "value": 4,
+      "type": "integer",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "轮胎数: 4",
+      "source": "document_parse"
+    },
+    "gross_mass_kg": {
+      "value": 2960,
+      "type": "integer",
+      "unit": "kg",
+      "confidence": "high",
+      "evidence_text": "总质量: 2960",
+      "source": "document_parse+general_ocr"
+    },
+    "curb_weight_kg": {
+      "value": 2460,
+      "type": "integer",
+      "unit": "kg",
+      "confidence": "high",
+      "evidence_text": "整备质量: 2460",
+      "source": "document_parse+general_ocr"
+    },
+    "rated_passenger_count": {
+      "value": 6,
+      "type": "integer",
+      "unit": "人",
+      "confidence": "low",
+      "evidence_text": "额定载客: 6",
+      "source": "document_parse"
+    },
+    "trailer_mass_kg": {
+      "value": "",
+      "type": "string",
+      "unit": "kg",
+      "confidence": "low",
+      "evidence_text": "",
+      "source": "document_parse"
+    },
+    "fuel_type": {
+      "value": "纯电动",
+      "type": "string",
+      "unit": null,
+      "confidence": "high",
+      "evidence_text": "燃料种类: 纯电动",
+      "source": "document_parse+general_ocr"
+    },
+    "emission_standard": {
+      "value": "燃料种类:",
+      "type": "string",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "排放依据标准: 燃料种类:",
+      "source": "document_parse"
+    },
+    "max_speed_kmh": {
+      "value": 200,
+      "type": "integer",
+      "unit": "km/h",
+      "confidence": "low",
+      "evidence_text": "最高车速: 200",
+      "source": "document_parse"
+    },
+    "engine_model": {
+      "value": "华域汽车电动系统有限公司",
+      "type": "string",
+      "unit": null,
+      "confidence": "high",
+      "evidence_text": "发动机型号: 华域汽车电动系统有限公司",
+      "source": "document_parse+general_ocr"
+    },
+    "engine_manufacturer": {
+      "value": null,
+      "type": "string",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "",
+      "source": "document_parse"
+    },
+    "displacement_ml": {
+      "value": 300,
+      "type": "integer",
+      "unit": "ml",
+      "confidence": "low",
+      "evidence_text": "排量: 300",
+      "source": "document_parse"
+    },
+    "power_kw": {
+      "value": 230,
+      "type": "integer",
+      "unit": "kw",
+      "confidence": "low",
+      "evidence_text": "功率: 230",
+      "source": "document_parse"
+    },
+    "chassis_model": {
+      "value": null,
+      "type": "string",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "",
+      "source": "document_parse"
+    },
+    "chassis_manufacturer": {
+      "value": null,
+      "type": "string",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "",
+      "source": "document_parse"
+    },
+    "chassis_category": {
+      "value": "承载式车身",
+      "type": "string",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "底盘类别: 承载式车身",
+      "source": "document_parse"
+    },
+    "steering_type": {
+      "value": "方向盘",
+      "type": "string",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "转向型式: 方向盘",
+      "source": "document_parse"
+    },
+    "abs": {
+      "value": "有",
+      "type": "string",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "防抱死制动系统: 有",
+      "source": "document_parse"
+    },
+    "vin_pattern": {
+      "value": "LSJEL403xxxxxxxxx,LSJEL406xxxxxxx xx,LSJEL409xxxxxxxxx,LSJEL40Cxxxx XXXXX",
+      "type": "string",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "车辆识别代号: LSJEL403xxxxxxxxx,LSJEL406xxxxxxx xx,LSJEL409xxxxxxxxx,LSJEL40Cxxxx XXXXX",
+      "source": "document_parse"
+    },
+    "other_notes_raw": {
+      "value": "选装激光雷达样式轮,电动侧踏,前雷达,侧雷达,后雷达.ABS系统型号及生产企业:MKC2,欧摩威汽车系统(上海)有限公司。 新能源类型为纯电动.储能装置种类:三元锂离子电池储能装置单体生产企业:宁德时代新能源科技股份有限公司,储能装置总成 生产企业:上汽时代动力电池系统有限公司.驱动电机额定功率为:178kW,峰值功率为:300kW.该车型可选装ETC车载装置,该车 配备汽车事件数据记录系统(EDR).",
+      "type": "string",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "其它: 选装激光雷达样式轮,电动侧踏,前雷达,侧雷达,后雷达.ABS系统型号及生产企业:MKC2,欧摩威汽车系统(上海)有限公司。 新能源类型为纯电动.储能装置种类:三元锂离子电池储能装置单体生产企业:宁德时",
+      "source": "document_parse"
+    },
+    "has_edr": {
+      "value": true,
+      "type": "boolean",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "EDR detected in 其它",
+      "source": "document_parse"
+    },
+    "has_external_charging": {
+      "value": false,
+      "type": "boolean",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "",
+      "source": "document_parse"
+    },
+    "has_towing_device": {
+      "value": false,
+      "type": "boolean",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "",
+      "source": "document_parse"
+    },
+    "has_optional_equipment": {
+      "value": false,
+      "type": "boolean",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "",
+      "source": "document_parse"
+    },
+    "battery_type": {
+      "value": "三元锂离子电池储能装置单体生产企业:宁德时代新能源科技股份有限公司,储能装置总成 生产企业:上汽时代动力电池系统有限公司.驱动电机额定功率为:178kW,峰值功率为:300kW.该车型可选装ETC车载装置,该车 配备汽车事件数据记录系统(EDR).",
+      "type": "string",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "储能装置种类: 三元锂离子电池储能装置单体生产企业:宁德时代新能源科技股份有限公司,储能装置总成 生产企业:上汽时代动力电池系统有限公司.驱动电机额定功率为:178kW,峰值功率为:300kW.该车型可选装ETC车载装置,该车 配备汽车事件数据记录系统(EDR).",
+      "source": "document_parse"
+    },
+    "battery_cell_supplier": {
+      "value": "宁德时代新能源科技股份有限公司,储能装置总成 生产企业:上汽时代动力电池系统有限公司.驱动电机额定功率为:178kW,峰值功率为:300kW.该车型可选装ETC车载装置,该车 配备汽车事件数据记录系统(EDR).",
+      "type": "string",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "储能装置单体: 宁德时代新能源科技股份有限公司,储能装置总成 生产企业:上汽时代动力电池系统有限公司.驱动电机额定功率为:178kW,峰值功率为:300kW.该车型可选装ETC车载装置,该车 配备汽车事件数据记录系统(EDR).",
+      "source": "document_parse"
+    }
+  },
+  "cross_check": {
+    "enabled": true,
+    "matched_fields": [
+      "length_mm",
+      "wheelbase_mm",
+      "gross_mass_kg",
+      "curb_weight_kg",
+      "fuel_type",
+      "engine_model"
+    ],
+    "conflicts": [],
+    "warnings": []
+  },
+  "quality": {
+    "parsed_field_count": 32,
+    "required_field_missing": [
+      "product_brand",
+      "product_model",
+      "product_name",
+      "enterprise_name"
+    ],
+    "needs_manual_review": true,
+    "quality_reason": "Missing required fields: product_brand, product_model, product_name, enterprise_name; identity fields missing; technical fields parsed; requires linking to primary vehicle record"
+  }
+}

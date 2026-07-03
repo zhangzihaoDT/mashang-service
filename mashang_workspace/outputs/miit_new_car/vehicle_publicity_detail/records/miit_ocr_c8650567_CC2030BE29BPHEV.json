@@ -1,0 +1,388 @@
+{
+  "schema_version": "miit_vehicle_publicity_detail.v0.1",
+  "vehicle_record_id": "miit_ocr_c8650567_CC2030BE29BPHEV",
+  "record_role": "primary_vehicle_record",
+  "join_status": "not_required",
+  "join_candidates": [],
+  "parse_status": "success",
+  "source_trace": {
+    "source_image_path": "source_capture/公告信息/9587437d-dea1-42a4-9f73-f343167e0c58.png",
+    "primary_ocr_result_id": "1f66a23fa88c2c6eeb22c1439ae08b59",
+    "primary_ocr_mode": "document_parse",
+    "fallback_ocr_result_id": "c9dad7e5e13b47773f573f9c9fc468c6",
+    "fallback_ocr_mode": "general_ocr",
+    "image_sha256": "c8650567186f021fe680319e5b6feb624645e64c28fb779fba37c16cd0c307d7",
+    "primary_raw_response_path": "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/outputs/ocr/raw/volcengine/1f66a23fa88c2c6eeb22c1439ae08b59.json",
+    "fallback_raw_response_path": "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/outputs/ocr/raw/volcengine/c9dad7e5e13b47773f573f9c9fc468c6.json",
+    "primary_markdown": "![fig_84510](https://pdf-bucket.tos-cn-beijing.volces.com/infer/20260703/c5b19a13a3094e5244a74f17a554c0a6_1783060730209159754.jpg) \n阳光小信无障碍 手机端 邮箱 微信 微博 RSS订阅 \n![fig_33780](https://pdf-bucket.tos-cn-beijing.volces.com/infer/20260703/c5b19a13a3094e5244a74f17a554c0a6_1783060730239222087.jpg) \n## 中华人民共和国工业和信息化部 Ministry of lndusty and Information Technology of the People's Republic of China \n## 请输入关键字 \n泪 \n## 企业申报车型公示详情 \n产品商标: \n长城牌 企业名称: 长城汽车股份有限公司 \n产品型号: \nCC2030BE29BPHEV \n产品名称: \n插电式混合动力越野乘用车 \n注册地址: \n河北省保定市莲池区朝阳南大街2266号、2299号 \n目录序号: 15 \n生产地址: \n重庆市永川区凤龙大道666号 \n查看原图 \n查看原图 \n查看原图 \n![fig_12464](https://pdf-bucket.tos-cn-beijing.volces.com/infer/20260703/c5b19a13a3094e5244a74f17a554c0a6_1783060730238608712.jpg) \n右部照片 \n![fig_06328](https://pdf-bucket.tos-cn-beijing.volces.com/infer/20260703/c5b19a13a3094e5244a74f17a554c0a6_1783060730228996961.jpg) \n后部照片 \n![fig_86492](https://pdf-bucket.tos-cn-beijing.volces.com/infer/20260703/c5b19a13a3094e5244a74f17a554c0a6_1783060730229911261.jpg) \n选装照片1 \n\n| 外形尺寸(mm): | 长:4886宽:1984高:1927 | | |\n| --- | --- | --- | --- |\n| 货箱栏板内尺寸(mm): | 长:宽:高: | | |\n| 排放依据标准: | GB18352.6-2016国VI | 燃料种类: | 汽油/电混合动力 |\n| 最高车速(km/h): | 180 | 总质量(kg): | 3355 |\n| 载质量利用系数: | | 额定载质量(kg): | |\n| 转向型式: | 方向盘 | 整备质量(kg): | 2890 |\n| 轴数: | 2 | 准拖挂车总质量(kg): | 0,750,2500 |\n| 轴距(mm): | 3010 | 轮胎规格: | 265/65R18 |\n| 钢板弹簧片数(前/后): | -/- | 半挂车鞍座最大允许承载 质量(kg): | |\n| 轮胎数: | 4 | 驾驶室准乘人数(人): | |\n| 额定载客(含驾驶员) (座位数): | 5 | | |\n| 轮距(前/后)mm: | 前轮距:1661后轮距:1675 | 接近角/离去角(度): | 38/33,38/31 |\n| 反光标识生产企业: | | 反光标识型号: | |\n| 反光标识商标: | | 防抱死制动系统: | 有 |\n| 车辆识别代号(VIN): | LGWFFVA7xxxxxxxxx | 前悬/后悬(mm): | 774/1102 |\n| 其它: | 该产品为新能源车辆,新能源类型为插电式混合动力;ABS型号/生产企业:MKC2/欧摩威汽车系统(上海)有限公司;发动机净功率 值:180kW储能装置种类:镍钴锰三元锂蓄电池;储能装置单体生产企业:蜂巢能源科技股份有限公司,储能装置总成生产企业:蜂 巢能源科技(遂宁)有限公司;选装描述:标配天窗,选装行李架,中网颜色,后部标识,轮,红外摄像头,牵引专用装置,后摄像头;其他 说明:该车型可选装ETC车载装置;该车配备汽车事件数据记录系统(EDR);允许外接充电.安装牵引专用装置不影响整车长度;准 拖挂车总质量:不带制动750kg,带制动2500kg. | | |\n| 说明: | | | |\n| 油耗申报值(L/100km): | | | |\n \n\n| 是否同期申报 | 底盘ID | 底盘型号 | 底盘生产企业 | 底盘类别 |\n| --- | --- | --- | --- | --- |\n| | | CC2030BE29BPHEV | 长城汽车股份有限公司 | 三类 |\n \n发动机型号 发动机企业 排量(ml) 长城汽车股份有限公司 1998 \n功率(kw) 油耗(L/100km) \nE20NB"
+  },
+  "fields": {
+    "product_brand": {
+      "value": "长城牌",
+      "type": "string",
+      "unit": null,
+      "confidence": "high",
+      "evidence_text": "产品商标: 长城牌",
+      "source": "document_parse+general_ocr"
+    },
+    "product_model": {
+      "value": "CC2030BE29BPHEV",
+      "type": "string",
+      "unit": null,
+      "confidence": "high",
+      "evidence_text": "产品型号: CC2030BE29BPHEV",
+      "source": "document_parse+general_ocr"
+    },
+    "product_name": {
+      "value": "插电式混合动力越野乘用车",
+      "type": "string",
+      "unit": null,
+      "confidence": "high",
+      "evidence_text": "产品名称: 插电式混合动力越野乘用车",
+      "source": "document_parse+general_ocr"
+    },
+    "enterprise_name": {
+      "value": "长城汽车股份有限公司",
+      "type": "string",
+      "unit": null,
+      "confidence": "high",
+      "evidence_text": "企业名称: 长城汽车股份有限公司",
+      "source": "document_parse+general_ocr"
+    },
+    "registered_address": {
+      "value": "河北省保定市莲池区朝阳南大街2266号、2299号",
+      "type": "string",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "注册地址: 河北省保定市莲池区朝阳南大街2266号、2299号",
+      "source": "document_parse"
+    },
+    "production_address": {
+      "value": "重庆市永川区凤龙大道666号",
+      "type": "string",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "生产地址: 重庆市永川区凤龙大道666号",
+      "source": "document_parse"
+    },
+    "catalog_no": {
+      "value": "15",
+      "type": "string",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "目录序号: 15",
+      "source": "document_parse"
+    },
+    "length_mm": {
+      "value": 4886,
+      "type": "integer",
+      "unit": "mm",
+      "confidence": "high",
+      "evidence_text": "长: 4886",
+      "source": "document_parse+general_ocr"
+    },
+    "width_mm": {
+      "value": 1984,
+      "type": "integer",
+      "unit": "mm",
+      "confidence": "low",
+      "evidence_text": "宽: 1984",
+      "source": "document_parse"
+    },
+    "height_mm": {
+      "value": 1927,
+      "type": "integer",
+      "unit": "mm",
+      "confidence": "low",
+      "evidence_text": "高: 1927",
+      "source": "document_parse"
+    },
+    "wheelbase_mm": {
+      "value": 3010,
+      "type": "integer",
+      "unit": "mm",
+      "confidence": "high",
+      "evidence_text": "轴距: 3010",
+      "source": "document_parse+general_ocr"
+    },
+    "front_track_mm": {
+      "value": 1661,
+      "type": "integer",
+      "unit": "mm",
+      "confidence": "low",
+      "evidence_text": "前轮距: 1661",
+      "source": "document_parse"
+    },
+    "rear_track_mm": {
+      "value": 1675,
+      "type": "integer",
+      "unit": "mm",
+      "confidence": "low",
+      "evidence_text": "后轮距: 1675",
+      "source": "document_parse"
+    },
+    "front_overhang_mm": {
+      "value": 774,
+      "type": "integer",
+      "unit": "mm",
+      "confidence": "low",
+      "evidence_text": "前悬: 774",
+      "source": "document_parse"
+    },
+    "rear_overhang_mm": {
+      "value": 1102,
+      "type": "integer",
+      "unit": "mm",
+      "confidence": "low",
+      "evidence_text": "后悬: 1102",
+      "source": "document_parse"
+    },
+    "approach_departure_angle": {
+      "value": "38/33,38/31",
+      "type": "string",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "接近角/离去角: 38/33,38/31",
+      "source": "document_parse"
+    },
+    "tire_spec": {
+      "value": "265/65R18",
+      "type": "string",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "轮胎规格: 265/65R18",
+      "source": "document_parse"
+    },
+    "tire_count": {
+      "value": 4,
+      "type": "integer",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "轮胎数: 4",
+      "source": "document_parse"
+    },
+    "gross_mass_kg": {
+      "value": 3355,
+      "type": "integer",
+      "unit": "kg",
+      "confidence": "high",
+      "evidence_text": "总质量: 3355",
+      "source": "document_parse+general_ocr"
+    },
+    "curb_weight_kg": {
+      "value": 2890,
+      "type": "integer",
+      "unit": "kg",
+      "confidence": "high",
+      "evidence_text": "整备质量: 2890",
+      "source": "document_parse+general_ocr"
+    },
+    "rated_passenger_count": {
+      "value": 5,
+      "type": "integer",
+      "unit": "人",
+      "confidence": "low",
+      "evidence_text": "额定载客: 5",
+      "source": "document_parse"
+    },
+    "trailer_mass_kg": {
+      "value": "0,750,2500",
+      "type": "string",
+      "unit": "kg",
+      "confidence": "low",
+      "evidence_text": "准拖挂车总质量: 0,750,2500",
+      "source": "document_parse"
+    },
+    "fuel_type": {
+      "value": "汽油/电混合动力",
+      "type": "string",
+      "unit": null,
+      "confidence": "high",
+      "evidence_text": "燃料种类: 汽油/电混合动力",
+      "source": "document_parse+general_ocr"
+    },
+    "emission_standard": {
+      "value": "GB18352.6-2016国VI",
+      "type": "string",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "排放依据标准: GB18352.6-2016国VI",
+      "source": "document_parse"
+    },
+    "max_speed_kmh": {
+      "value": 180,
+      "type": "integer",
+      "unit": "km/h",
+      "confidence": "low",
+      "evidence_text": "最高车速: 180",
+      "source": "document_parse"
+    },
+    "engine_model": {
+      "value": "E20NB",
+      "type": "string",
+      "unit": null,
+      "confidence": "high",
+      "evidence_text": "发动机型号: E20NB",
+      "source": "document_parse+general_ocr"
+    },
+    "engine_manufacturer": {
+      "value": "长城汽车股份有限公司",
+      "type": "string",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "发动机企业: 长城汽车股份有限公司",
+      "source": "document_parse"
+    },
+    "displacement_ml": {
+      "value": 1998,
+      "type": "integer",
+      "unit": "ml",
+      "confidence": "low",
+      "evidence_text": "排量: 1998",
+      "source": "document_parse"
+    },
+    "power_kw": {
+      "value": 185,
+      "type": "integer",
+      "unit": "kw",
+      "confidence": "low",
+      "evidence_text": "功率: 185",
+      "source": "document_parse"
+    },
+    "chassis_model": {
+      "value": "CC2030BE29BPHEV",
+      "type": "string",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "底盘型号: CC2030BE29BPHEV",
+      "source": "document_parse"
+    },
+    "chassis_manufacturer": {
+      "value": "长城汽车股份有限公司",
+      "type": "string",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "底盘生产企业: 长城汽车股份有限公司",
+      "source": "document_parse"
+    },
+    "chassis_category": {
+      "value": "三类",
+      "type": "string",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "底盘类别: 三类",
+      "source": "document_parse"
+    },
+    "steering_type": {
+      "value": "方向盘",
+      "type": "string",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "转向型式: 方向盘",
+      "source": "document_parse"
+    },
+    "abs": {
+      "value": "有",
+      "type": "string",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "防抱死制动系统: 有",
+      "source": "document_parse"
+    },
+    "vin_pattern": {
+      "value": "LGWFFVA7xxxxxxxxx",
+      "type": "string",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "车辆识别代号: LGWFFVA7xxxxxxxxx",
+      "source": "document_parse"
+    },
+    "other_notes_raw": {
+      "value": "该产品为新能源车辆,新能源类型为插电式混合动力;ABS型号/生产企业:MKC2/欧摩威汽车系统(上海)有限公司;发动机净功率 值:180kW储能装置种类:镍钴锰三元锂蓄电池;储能装置单体生产企业:蜂巢能源科技股份有限公司,储能装置总成生产企业:蜂 巢能源科技(遂宁)有限公司;选装描述:标配天窗,选装行李架,中网颜色,后部标识,轮,红外摄像头,牵引专用装置,后摄像头;其他 说明:该车型可选装ETC车载装置;该车配备汽车事件数据记录系统(EDR);允许外接充电.安装牵引专用装置不影响整车长度;准 拖挂车总质量:不带制动750kg,带制动2500kg.",
+      "type": "string",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "其它: 该产品为新能源车辆,新能源类型为插电式混合动力;ABS型号/生产企业:MKC2/欧摩威汽车系统(上海)有限公司;发动机净功率 值:180kW储能装置种类:镍钴锰三元锂蓄电池;储能装置单体生产企业:蜂巢",
+      "source": "document_parse"
+    },
+    "has_edr": {
+      "value": true,
+      "type": "boolean",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "EDR detected in 其它",
+      "source": "document_parse"
+    },
+    "has_external_charging": {
+      "value": true,
+      "type": "boolean",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "外接充电 detected in 其它",
+      "source": "document_parse"
+    },
+    "has_towing_device": {
+      "value": true,
+      "type": "boolean",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "拖挂 detected in 其它",
+      "source": "document_parse"
+    },
+    "has_optional_equipment": {
+      "value": true,
+      "type": "boolean",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "选装 detected in 其它",
+      "source": "document_parse"
+    },
+    "battery_type": {
+      "value": "镍钴锰三元锂蓄电池",
+      "type": "string",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "储能装置种类: 镍钴锰三元锂蓄电池",
+      "source": "document_parse"
+    },
+    "battery_cell_supplier": {
+      "value": "蜂巢能源科技股份有限公司,储能装置总成生产企业:蜂 巢能源科技(遂宁)有限公司",
+      "type": "string",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "储能装置单体: 蜂巢能源科技股份有限公司,储能装置总成生产企业:蜂 巢能源科技(遂宁)有限公司",
+      "source": "document_parse"
+    },
+    "battery_pack_supplier": {
+      "value": "蜂 巢能源科技(遂宁)有限公司",
+      "type": "string",
+      "unit": null,
+      "confidence": "low",
+      "evidence_text": "储能装置总成: 蜂 巢能源科技(遂宁)有限公司",
+      "source": "document_parse"
+    }
+  },
+  "cross_check": {
+    "enabled": true,
+    "matched_fields": [
+      "product_brand",
+      "product_model",
+      "product_name",
+      "enterprise_name",
+      "length_mm",
+      "wheelbase_mm",
+      "gross_mass_kg",
+      "curb_weight_kg",
+      "fuel_type",
+      "engine_model"
+    ],
+    "conflicts": [],
+    "warnings": []
+  },
+  "quality": {
+    "parsed_field_count": 43,
+    "required_field_missing": [],
+    "needs_manual_review": false,
+    "quality_reason": ""
+  }
+}

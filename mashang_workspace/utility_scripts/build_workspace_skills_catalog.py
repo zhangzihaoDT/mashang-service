@@ -181,12 +181,35 @@ PROMPTBUILDER_CAPABILITIES = {
         "name": "miit_new_car",
         "type": "Promptbuilder / MIIT Workflow",
         "directory": "promptbuilders/miit_new_car/",
-        "description": "MIIT 公告信号解释 Prompt Pack；新车申报情报分析",
-        "entrypoints": [
-            "make miit-fetch-batch BATCH=N",
-            "make miit-extract-text BATCH=N",
+        "description": "MIIT 新车公告全链路情报分析：批次管理、图片 OCR、结构化解析、6 信号双车对比。",
+        "scenarios": [
+            "MIIT 批次发现/抓取/附件文本抽取/产品清单解析",
+            "公告详情页截图 OCR（document_parse + general_ocr）",
+            "OCR 结果 → 结构化车辆 records JSON（43 字段）",
+            "双车对比 → 6 个关键信号框架 HTML 报告",
         ],
-        "outputs": "outputs/miit_new_car/promptbuilder_runs/",
+        "not_for": [
+            "非 MIIT 公告来源的图片 OCR",
+            "批次粒度的跨厂家汇总分析",
+            "带市场威胁强度的竞争分析",
+        ],
+        "entrypoints": [
+            "python mashang_workspace/promptbuilders/miit_new_car/miit_vehicle_publicity_image_parser.py --ocr-result <path> --fallback-ocr-result <path> --force",
+            "python mashang_workspace/promptbuilders/miit_new_car/vehicle_compare.py --record-a <path> --record-b <path> --output <path>",
+            "make miit-fetch-batch BATCH=N",
+        ],
+        "outputs": [
+            "mashang_workspace/outputs/miit_new_car/promptbuilder_runs/",
+            "mashang_workspace/outputs/miit_new_car/vehicle_publicity_detail/records/",
+            "mashang_workspace/outputs/reports/",
+            "mashang_workspace/outputs/ocr/results/",
+        ],
+        "depends_on": [
+            "ocr/（火山引擎 OCR service）",
+            "miit_vehicle_publicity_image_parser.py（OCR → records）",
+            "vehicle_compare.py（records → 6 信号报告）",
+            "docs/miit_product_param_key_signals_framework.md",
+        ],
     },
 }
 

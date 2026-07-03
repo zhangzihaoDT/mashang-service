@@ -1,0 +1,453 @@
+{
+  "source_image_path": "source_capture/公告信息/53ad6565-e41e-4664-8bfc-5a06776b20dd.png",
+  "provider": "volcengine",
+  "mode": "general_ocr",
+  "status": "success",
+  "raw_text": "外形尺寸(mm):\n长:5085宽:2000高:1807\n货箱栏板内尺寸(mm):\n长:宽:高:\n排放依据标准:\n燃料种类:\n纯电动\n200\n2960\n最高车速(km/h):\n总质量(kg):\n载质量利用系数:\n额定载质量(kg):\n转向型式:\n方向盘\n整备质量(kg):\n2460\n2\n轴数:\n准拖挂车总质量(kg):\n3060\n轴距(mm):\n轮胎规格:\n255/50R20,265/45R21,HL265/40R22\n钢板弹簧片数(前/\n半挂车鞍座最大允许承载\n-/-\n后):\n质量(kg):\n4\n轮胎数:\n驾驶室准乘人数(人):\n额定载客(含驾驶员)\n6,5\n(座位数):\n19/20\n轮距(前/后)mm:\n前轮距:1715后轮距:1726\n接近角/离去角(度):\n反光标识型号:\n反光标识生产企业:\n有\n反光标识商标:\n防抱死制动系统:\nLSJEL403xx\nLSJEL406x\n车辆识别代号(VIN):\nxx,LSJEL409xx\nxxxxxxx,LSJEL40Cxxxxx\n前悬/后悬(mm):\n985/1040\n选装激光雷达样式,轮辋,电动侧踏前雷达,侧雷达,后雷达.ABS系统型号及生产企业:MKC2,欧摩威汽车系统(上海)有限公司.\n新能源类型为纯电动.储能装置种类:三元锂离子电池.储能装置单体生产企业:宁德时代新能源科技股份有限公司,储能装置总成\n其它:\n生产企业:上汽时代动力电池系统有限公司.驱动电机额定功率为:178kW,峰值功率为:300kW.该车型可选装ETC车载装置,该车\n配备汽车事件数据记录系统(EDR).\n说明:\n油耗申报值(L/100km):\n底盘ID\n底盘型号\n是否同期申报\n底盘生产企业\n底盘类别\n承载式车身\n发动机型号\n发动机企业\n排量(ml)\n功率(kw)\n油耗(L/100km)\n300\nTZ230XY1252\n华域汽车电动系统有限公司",
+  "markdown": "外形尺寸(mm):\n长:5085宽:2000高:1807\n货箱栏板内尺寸(mm):\n长:宽:高:\n排放依据标准:\n燃料种类:\n纯电动\n200\n2960\n最高车速(km/h):\n总质量(kg):\n载质量利用系数:\n额定载质量(kg):\n转向型式:\n方向盘\n整备质量(kg):\n2460\n2\n轴数:\n准拖挂车总质量(kg):\n3060\n轴距(mm):\n轮胎规格:\n255/50R20,265/45R21,HL265/40R22\n钢板弹簧片数(前/\n半挂车鞍座最大允许承载\n-/-\n后):\n质量(kg):\n4\n轮胎数:\n驾驶室准乘人数(人):\n额定载客(含驾驶员)\n6,5\n(座位数):\n19/20\n轮距(前/后)mm:\n前轮距:1715后轮距:1726\n接近角/离去角(度):\n反光标识型号:\n反光标识生产企业:\n有\n反光标识商标:\n防抱死制动系统:\nLSJEL403xx\nLSJEL406x\n车辆识别代号(VIN):\nxx,LSJEL409xx\nxxxxxxx,LSJEL40Cxxxxx\n前悬/后悬(mm):\n985/1040\n选装激光雷达样式,轮辋,电动侧踏前雷达,侧雷达,后雷达.ABS系统型号及生产企业:MKC2,欧摩威汽车系统(上海)有限公司.\n新能源类型为纯电动.储能装置种类:三元锂离子电池.储能装置单体生产企业:宁德时代新能源科技股份有限公司,储能装置总成\n其它:\n生产企业:上汽时代动力电池系统有限公司.驱动电机额定功率为:178kW,峰值功率为:300kW.该车型可选装ETC车载装置,该车\n配备汽车事件数据记录系统(EDR).\n说明:\n油耗申报值(L/100km):\n底盘ID\n底盘型号\n是否同期申报\n底盘生产企业\n底盘类别\n承载式车身\n发动机型号\n发动机企业\n排量(ml)\n功率(kw)\n油耗(L/100km)\n300\nTZ230XY1252\n华域汽车电动系统有限公司",
+  "blocks": [
+    {
+      "text": "外形尺寸(mm):",
+      "confidence": 0.9970703125,
+      "bounding_box": null,
+      "line_num": 1
+    },
+    {
+      "text": "长:5085宽:2000高:1807",
+      "confidence": 0.9912923177083334,
+      "bounding_box": null,
+      "line_num": 2
+    },
+    {
+      "text": "货箱栏板内尺寸(mm):",
+      "confidence": 0.9964599609375,
+      "bounding_box": null,
+      "line_num": 3
+    },
+    {
+      "text": "长:宽:高:",
+      "confidence": 0.9942220052083334,
+      "bounding_box": null,
+      "line_num": 4
+    },
+    {
+      "text": "排放依据标准:",
+      "confidence": 0.9961635044642857,
+      "bounding_box": null,
+      "line_num": 5
+    },
+    {
+      "text": "燃料种类:",
+      "confidence": 0.9953125,
+      "bounding_box": null,
+      "line_num": 6
+    },
+    {
+      "text": "纯电动",
+      "confidence": 0.99853515625,
+      "bounding_box": null,
+      "line_num": 7
+    },
+    {
+      "text": "200",
+      "confidence": 0.99853515625,
+      "bounding_box": null,
+      "line_num": 8
+    },
+    {
+      "text": "2960",
+      "confidence": 0.99853515625,
+      "bounding_box": null,
+      "line_num": 9
+    },
+    {
+      "text": "最高车速(km/h):",
+      "confidence": 0.9970259232954546,
+      "bounding_box": null,
+      "line_num": 10
+    },
+    {
+      "text": "总质量(kg):",
+      "confidence": 0.99725341796875,
+      "bounding_box": null,
+      "line_num": 11
+    },
+    {
+      "text": "载质量利用系数:",
+      "confidence": 0.9967041015625,
+      "bounding_box": null,
+      "line_num": 12
+    },
+    {
+      "text": "额定载质量(kg):",
+      "confidence": 0.996826171875,
+      "bounding_box": null,
+      "line_num": 13
+    },
+    {
+      "text": "转向型式:",
+      "confidence": 0.9935546875,
+      "bounding_box": null,
+      "line_num": 14
+    },
+    {
+      "text": "方向盘",
+      "confidence": 0.9991861979166666,
+      "bounding_box": null,
+      "line_num": 15
+    },
+    {
+      "text": "整备质量(kg):",
+      "confidence": 0.9967990451388888,
+      "bounding_box": null,
+      "line_num": 16
+    },
+    {
+      "text": "2460",
+      "confidence": 0.9986572265625,
+      "bounding_box": null,
+      "line_num": 17
+    },
+    {
+      "text": "2",
+      "confidence": 0.9970703125,
+      "bounding_box": null,
+      "line_num": 18
+    },
+    {
+      "text": "轴数:",
+      "confidence": 0.9943033854166666,
+      "bounding_box": null,
+      "line_num": 19
+    },
+    {
+      "text": "准拖挂车总质量(kg):",
+      "confidence": 0.997314453125,
+      "bounding_box": null,
+      "line_num": 20
+    },
+    {
+      "text": "3060",
+      "confidence": 0.99853515625,
+      "bounding_box": null,
+      "line_num": 21
+    },
+    {
+      "text": "轴距(mm):",
+      "confidence": 0.9965122767857143,
+      "bounding_box": null,
+      "line_num": 22
+    },
+    {
+      "text": "轮胎规格:",
+      "confidence": 0.99716796875,
+      "bounding_box": null,
+      "line_num": 23
+    },
+    {
+      "text": "255/50R20,265/45R21,HL265/40R22",
+      "confidence": 0.9937941028225806,
+      "bounding_box": null,
+      "line_num": 24
+    },
+    {
+      "text": "钢板弹簧片数(前/",
+      "confidence": 0.9933268229166666,
+      "bounding_box": null,
+      "line_num": 25
+    },
+    {
+      "text": "半挂车鞍座最大允许承载",
+      "confidence": 0.9992453835227273,
+      "bounding_box": null,
+      "line_num": 26
+    },
+    {
+      "text": "-/-",
+      "confidence": 0.91796875,
+      "bounding_box": null,
+      "line_num": 27
+    },
+    {
+      "text": "后):",
+      "confidence": 0.9417317708333334,
+      "bounding_box": null,
+      "line_num": 28
+    },
+    {
+      "text": "质量(kg):",
+      "confidence": 0.9962332589285714,
+      "bounding_box": null,
+      "line_num": 29
+    },
+    {
+      "text": "4",
+      "confidence": 0.998046875,
+      "bounding_box": null,
+      "line_num": 30
+    },
+    {
+      "text": "轮胎数:",
+      "confidence": 0.996826171875,
+      "bounding_box": null,
+      "line_num": 31
+    },
+    {
+      "text": "驾驶室准乘人数(人):",
+      "confidence": 0.9857510653409091,
+      "bounding_box": null,
+      "line_num": 32
+    },
+    {
+      "text": "额定载客(含驾驶员)",
+      "confidence": 0.99033203125,
+      "bounding_box": null,
+      "line_num": 33
+    },
+    {
+      "text": "6,5",
+      "confidence": 0.9830729166666666,
+      "bounding_box": null,
+      "line_num": 34
+    },
+    {
+      "text": "(座位数):",
+      "confidence": 0.9892578125,
+      "bounding_box": null,
+      "line_num": 35
+    },
+    {
+      "text": "19/20",
+      "confidence": 0.99892578125,
+      "bounding_box": null,
+      "line_num": 36
+    },
+    {
+      "text": "轮距(前/后)mm:",
+      "confidence": 0.98837890625,
+      "bounding_box": null,
+      "line_num": 37
+    },
+    {
+      "text": "前轮距:1715后轮距:1726",
+      "confidence": 0.9805908203125,
+      "bounding_box": null,
+      "line_num": 38
+    },
+    {
+      "text": "接近角/离去角(度):",
+      "confidence": 0.9909002130681818,
+      "bounding_box": null,
+      "line_num": 39
+    },
+    {
+      "text": "反光标识型号:",
+      "confidence": 0.9972098214285714,
+      "bounding_box": null,
+      "line_num": 40
+    },
+    {
+      "text": "反光标识生产企业:",
+      "confidence": 0.9983181423611112,
+      "bounding_box": null,
+      "line_num": 41
+    },
+    {
+      "text": "有",
+      "confidence": 0.99755859375,
+      "bounding_box": null,
+      "line_num": 42
+    },
+    {
+      "text": "反光标识商标:",
+      "confidence": 0.9959542410714286,
+      "bounding_box": null,
+      "line_num": 43
+    },
+    {
+      "text": "防抱死制动系统:",
+      "confidence": 0.998046875,
+      "bounding_box": null,
+      "line_num": 44
+    },
+    {
+      "text": "LSJEL403xx",
+      "confidence": 0.97626953125,
+      "bounding_box": null,
+      "line_num": 45
+    },
+    {
+      "text": "LSJEL406x",
+      "confidence": 0.9220920138888888,
+      "bounding_box": null,
+      "line_num": 46
+    },
+    {
+      "text": "车辆识别代号(VIN):",
+      "confidence": 0.9815673828125,
+      "bounding_box": null,
+      "line_num": 47
+    },
+    {
+      "text": "xx,LSJEL409xx",
+      "confidence": 0.97802734375,
+      "bounding_box": null,
+      "line_num": 48
+    },
+    {
+      "text": "xxxxxxx,LSJEL40Cxxxxx",
+      "confidence": 0.9549618675595238,
+      "bounding_box": null,
+      "line_num": 49
+    },
+    {
+      "text": "前悬/后悬(mm):",
+      "confidence": 0.997216796875,
+      "bounding_box": null,
+      "line_num": 50
+    },
+    {
+      "text": "985/1040",
+      "confidence": 0.99896240234375,
+      "bounding_box": null,
+      "line_num": 51
+    },
+    {
+      "text": "选装激光雷达样式,轮辋,电动侧踏前雷达,侧雷达,后雷达.ABS系统型号及生产企业:MKC2,欧摩威汽车系统(上海)有限公司.",
+      "confidence": 0.9742392263104839,
+      "bounding_box": null,
+      "line_num": 52
+    },
+    {
+      "text": "新能源类型为纯电动.储能装置种类:三元锂离子电池.储能装置单体生产企业:宁德时代新能源科技股份有限公司,储能装置总成",
+      "confidence": 0.9827586206896551,
+      "bounding_box": null,
+      "line_num": 53
+    },
+    {
+      "text": "其它:",
+      "confidence": 0.97705078125,
+      "bounding_box": null,
+      "line_num": 54
+    },
+    {
+      "text": "生产企业:上汽时代动力电池系统有限公司.驱动电机额定功率为:178kW,峰值功率为:300kW.该车型可选装ETC车载装置,该车",
+      "confidence": 0.983367919921875,
+      "bounding_box": null,
+      "line_num": 55
+    },
+    {
+      "text": "配备汽车事件数据记录系统(EDR).",
+      "confidence": 0.9821506076388888,
+      "bounding_box": null,
+      "line_num": 56
+    },
+    {
+      "text": "说明:",
+      "confidence": 0.99560546875,
+      "bounding_box": null,
+      "line_num": 57
+    },
+    {
+      "text": "油耗申报值(L/100km):",
+      "confidence": 0.9970377604166667,
+      "bounding_box": null,
+      "line_num": 58
+    },
+    {
+      "text": "底盘ID",
+      "confidence": 0.996337890625,
+      "bounding_box": null,
+      "line_num": 59
+    },
+    {
+      "text": "底盘型号",
+      "confidence": 0.9976806640625,
+      "bounding_box": null,
+      "line_num": 60
+    },
+    {
+      "text": "是否同期申报",
+      "confidence": 0.9988606770833334,
+      "bounding_box": null,
+      "line_num": 61
+    },
+    {
+      "text": "底盘生产企业",
+      "confidence": 0.99853515625,
+      "bounding_box": null,
+      "line_num": 62
+    },
+    {
+      "text": "底盘类别",
+      "confidence": 0.9984130859375,
+      "bounding_box": null,
+      "line_num": 63
+    },
+    {
+      "text": "承载式车身",
+      "confidence": 0.99931640625,
+      "bounding_box": null,
+      "line_num": 64
+    },
+    {
+      "text": "发动机型号",
+      "confidence": 0.99921875,
+      "bounding_box": null,
+      "line_num": 65
+    },
+    {
+      "text": "发动机企业",
+      "confidence": 0.99951171875,
+      "bounding_box": null,
+      "line_num": 66
+    },
+    {
+      "text": "排量(ml)",
+      "confidence": 0.99365234375,
+      "bounding_box": null,
+      "line_num": 67
+    },
+    {
+      "text": "功率(kw)",
+      "confidence": 0.9923502604166666,
+      "bounding_box": null,
+      "line_num": 68
+    },
+    {
+      "text": "油耗(L/100km)",
+      "confidence": 0.9979580965909091,
+      "bounding_box": null,
+      "line_num": 69
+    },
+    {
+      "text": "300",
+      "confidence": 0.9983723958333334,
+      "bounding_box": null,
+      "line_num": 70
+    },
+    {
+      "text": "TZ230XY1252",
+      "confidence": 0.9978249289772727,
+      "bounding_box": null,
+      "line_num": 71
+    },
+    {
+      "text": "华域汽车电动系统有限公司",
+      "confidence": 0.9988199869791666,
+      "bounding_box": null,
+      "line_num": 72
+    }
+  ],
+  "tables": [],
+  "raw_response_path": "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/outputs/ocr/raw/volcengine/1030cd8e2c9062816807aee85305d959.json",
+  "error": null,
+  "image_sha256": "393a5b0752b8d9238d757582f109cf53edde5371332b10e4f567cadcdc88236c",
+  "ocr_result_id": "1030cd8e2c9062816807aee85305d959",
+  "created_at": "2026-07-03T06:38:36Z",
+  "quality": {
+    "mean_confidence": 0.9905925949350939,
+    "low_confidence_blocks": 0,
+    "needs_manual_review": false
+  }
+}

@@ -48,7 +48,7 @@
         <img class="brand-avatar" src="../../assets/brand/raccoon_avatar_light.png" alt="" />
         <span class="brand-name">Raccoon Research</span>
       </div>
-      <span class="header-meta">workspace_skills_catalog | 2026-07-02</span>
+      <span class="header-meta">workspace_skills_catalog | 2026-07-03</span>
     </div>
   </header>
 
@@ -73,7 +73,7 @@
       <div class="kpi-card">
         <div class="label">总能力数</div>
         <div class="value">6</div>
-        <div class="change neutral">2026-07-02</div>
+        <div class="change neutral">2026-07-03</div>
       </div>
     </section>
 
@@ -130,9 +130,9 @@
             <tr>
               <td><strong>miit_new_car</strong></td>
               <td><span class="badge badge-pb">Promptbuilder / MIIT Workflow</span></td>
-              <td>MIIT 公告信号解释 Prompt Pack；新车申报情报分析</td>
-              <td><code>make miit-fetch-batch BATCH=N</code></td>
-              <td><code>outputs/miit_new_car/promptbuilder_runs/</code></td>
+              <td>MIIT 新车公告全链路情报分析：批次管理、图片 OCR、结构化解析、6 信号双</td>
+              <td><code>python mashang_workspace/promptbuilders/miit_new_car/miit_vehicle_publicity_image_parser.py</code></td>
+              <td><code>['mashang_workspace/outputs/miit_new_car/promptbuilder_runs/', 'mashang_workspace/outputs/miit_new_car/vehicle_publicity_detail/records/', 'mashang_workspace/outputs/reports/', 'mashang_workspace/outputs/ocr/results/']</code></td>
             </tr>
           </tbody>
         </table>
@@ -340,7 +340,7 @@
             <div class="skill-name">miit_new_car</div>
             <span class="skill-badge badge-pb">Promptbuilder / MIIT Workflow</span>
           </div>
-          <div class="skill-desc">MIIT 公告信号解释 Prompt Pack；新车申报情报分析</div>
+          <div class="skill-desc">MIIT 新车公告全链路情报分析：批次管理、图片 OCR、结构化解析、6 信号双车对比。</div>
           <div class="skill-meta">
             <span class="skill-tag gold">Promptbuilder</span>
             <span class="skill-tag blue">Workflow</span>
@@ -351,8 +351,9 @@
           </div>          <div class="skill-section" style="margin-top:10px">
             <div class="skill-section-label">入口命令</div>
             <div class="skill-section-value">
+                  <code>python mashang_workspace/promptbuilders/miit_new_car/miit_vehicle_publicity_image_parser.py --ocr-result <path> --fallback-ocr-result <path> --force</code><br/>
+                  <code>python mashang_workspace/promptbuilders/miit_new_car/vehicle_compare.py --record-a <path> --record-b <path> --output <path></code><br/>
                   <code>make miit-fetch-batch BATCH=N</code><br/>
-                  <code>make miit-extract-text BATCH=N</code><br/>
             </div>
           </div>
         </div>
@@ -393,7 +394,7 @@
             <div class="skill-name">miit_new_car</div>
             <span class="skill-badge badge-pb">Promptbuilder / MIIT Workflow</span>
           </div>
-          <div class="skill-desc">MIIT 公告信号解释 Prompt Pack；新车申报情报分析</div>
+          <div class="skill-desc">MIIT 新车公告全链路情报分析：批次管理、图片 OCR、结构化解析、6 信号双车对比。</div>
           <div class="skill-meta">
             <span class="skill-tag gold">Promptbuilder</span>
             <span class="skill-tag blue">Workflow</span>
@@ -404,8 +405,9 @@
           </div>          <div class="skill-section" style="margin-top:10px">
             <div class="skill-section-label">入口命令</div>
             <div class="skill-section-value">
+                  <code>python mashang_workspace/promptbuilders/miit_new_car/miit_vehicle_publicity_image_parser.py --ocr-result <path> --fallback-ocr-result <path> --force</code><br/>
+                  <code>python mashang_workspace/promptbuilders/miit_new_car/vehicle_compare.py --record-a <path> --record-b <path> --output <path></code><br/>
                   <code>make miit-fetch-batch BATCH=N</code><br/>
-                  <code>make miit-extract-text BATCH=N</code><br/>
             </div>
           </div>
         </div>
@@ -430,7 +432,7 @@
             <h3>promptbuilder workflows</h3>
             <ul>
               <li>auto_launch — 汽车上市/营销事件监控；支持车型/品牌/本品 Watch，包含搜索、信源分级、24h 窗口校验、事件</li>
-              <li>miit_new_car — MIIT 公告信号解释 Prompt Pack；新车申报情报分析</li>
+              <li>miit_new_car — MIIT 新车公告全链路情报分析：批次管理、图片 OCR、结构化解析、6 信号双车对比。</li>
               <li>位于 <code>mashang_workspace/promptbuilders/</code></li>
             </ul>
           </div>
