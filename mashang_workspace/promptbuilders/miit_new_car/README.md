@@ -7,10 +7,20 @@
 | `research_scripts/miit_new_car/` | 官方信息获取与结构化（工程层） |
 | `docs/miit_promptbuilder_draft.md` | 方法论母版（Prompt 设计和迭代记录） |
 | `docs/miit_e2e_runbook.md` | 端到端执行手册（操作指引） |
-| `promptbuilders/miit_new_car/` | **可复用 Prompt 模块**（本 Pack） |
+| `docs/miit_product_param_key_signals_framework.md` | **6 个关键信号对比框架**（产品经理解读方法论） |
+| `promptbuilders/miit_new_car/` | **可复用 Prompt 模块 + 图片解析 + 双车对比脚本**（本 Pack） |
+| `ocr/` | **通用 OCR service**（火山引擎 general_ocr + document_parse） |
 | `outputs/miit_new_car/promptbuilder_runs/` | 业务解释结果沉淀区（curated business outputs） |
+| `outputs/miit_new_car/vehicle_publicity_detail/records/` | OCR 解析结构化 records JSON |
+| `outputs/reports/` | 双车对比 HTML 报告（6 个关键信号框架） |
 
-## 推荐使用顺序
+## 两条工作流
+
+### A. 批次分析工作流（传统路径）
+
+适用于从 MIIT 官网获取的批次附件数据。
+
+**推荐使用顺序**:
 
 ```
 1. 00_asset_check.prompt.md          输入资产完整性检查
@@ -21,7 +31,7 @@
 6. 05_cross_attachment_join.prompt.md（可选）跨附件字段合并
 ```
 
-## 适用输入
+**适用输入**:
 
 | 输入 | 来源 | 用于哪个 Prompt |
 |------|------|-----------------|
@@ -33,7 +43,7 @@
 | `docs/miit_promptbuilder_draft.md` | 项目文档 | 全流程参考 |
 | `docs/miit_e2e_runbook.md` | 项目文档 | 全流程参考 |
 
-## 输出文件夹说明
+**批次输出**:
 
 | 路径 | 内容 | 是否可提交 |
 |------|------|-----------|
@@ -47,6 +57,77 @@
 | `outputs/miit_new_car/diagnostics/` | 附件可用性诊断 | 不提交（runtime） |
 | `outputs/miit_new_car/discovery/` | 批次发现缓存 | 不提交（runtime） |
 | `outputs/miit_new_car/promptbuilder_runs/` | **业务简报（curated markdown）** | **可提交** |
+
+### B. 公告图片 OCR → 解析 → 对比工作流（新增）
+
+适用于从公告详情页截图 / 图片中提取单车参数并进行产品解读。
+
+**流水线**:
+
+```
+source_capture/
+  └── 公告信息/                    ← 公告截图图片（.png / .avif）
+       ↓
+ocr/                              ← 火山引擎 OCR service（QPS=1）
+  ├── mode=document_parse          ← 智能文档解析（OCRPdf API），输出 markdown + 表格
+  └── mode=general_ocr             ← 通用文字识别，输出纯文本（辅助交叉校验）
+       ↓
+mashang_workspace/outputs/ocr/
+  ├── raw/volcengine/              ← 原始 API 返回
+  └── results/                     ← 统一 OcrResult JSON
+       ↓
+miit_vehicle_publicity_image_parser.py  ← 领域解析器：OCR JSON → 结构化 records JSON
+       ↓
+mashang_workspace/outputs/miit_new_car/vehicle_publicity_detail/records/
+  └── miit_ocr_{sha8}_{model}.json ← 结构化车辆记录（43 字段，含身份/尺寸/动力/底盘/电池/选装）
+       ↓
+vehicle_compare.py                 ← 双车对比报告（6 个关键信号框架）
+       ↓
+mashang_workspace/outputs/reports/
+  └── miit_dual_vehicle_compare.html ← 产品经理解读 HTML 报告
+```
+
+**完整 CLI**:
+
+```bash
+# Step 1: OCR（document_parse 模式，推荐用于公告图片）
+python -m ocr.ocr_service --image source_capture/公告信息/<image>.png \
+  --provider volcengine --mode document_parse --force-refresh
+
+# Step 2: OCR（general_ocr 模式，辅助交叉校验）
+python -m ocr.ocr_service --image source_capture/公告信息/<image>.png \
+  --provider volcengine --mode general_ocr --force-refresh
+
+# Step 3: 解析为结构化 records JSON
+python -m mashang_workspace.promptbuilders.miit_new_car.miit_vehicle_publicity_image_parser \
+  --ocr-result mashang_workspace/outputs/ocr/results/<doc_parse_id>.json \
+  --fallback-ocr-result mashang_workspace/outputs/ocr/results/<gen_ocr_id>.json \
+  --force
+
+# Step 4: 双车对比（6 个关键信号框架 → HTML 报告）
+python -m mashang_workspace.promptbuilders.miit_new_car.vehicle_compare \
+  --record-a mashang_workspace/outputs/miit_new_car/vehicle_publicity_detail/records/<vehicle_a>.json \
+  --record-b mashang_workspace/outputs/miit_new_car/vehicle_publicity_detail/records/<vehicle_b>.json \
+  --output mashang_workspace/outputs/reports/miit_dual_vehicle_compare.html
+```
+
+**当前支持能力**:
+
+| 能力 | 脚本 | 输出 |
+|------|------|------|
+| 图片 OCR | `ocr/ocr_service.py` | OcrResult JSON（markdown + raw_text） |
+| MIIT 字段解析 | `miit_vehicle_publicity_image_parser.py` | records JSON（43 字段） |
+| 双车对比 | `vehicle_compare.py` | HTML 报告（6 个关键信号框架） |
+| 对比框架方法论 | `docs/miit_product_param_key_signals_framework.md` | 6 信号解读模板 |
+
+**输出文件夹说明（OCR 路径）**:
+
+| 路径 | 内容 | 是否可提交 |
+|------|------|-----------|
+| `outputs/miit_new_car/vehicle_publicity_detail/records/` | **结构化车辆 records JSON** | **可提交** |
+| `outputs/reports/` | **双车对比 HTML 报告** | **可提交** |
+| `outputs/ocr/results/` | OcrResult 统一 JSON | 不提交（runtime） |
+| `outputs/ocr/raw/` | OCR 原始 API 返回 | 不提交（runtime） |
 
 ## 使用方式
 
@@ -168,7 +249,7 @@ MIIT 不同附件提供不同粒度的字段。Prompt Pack 不是一刀切禁止
 
 ## 版本
 
-- **Version**: v0.4
-- **Source**: `docs/miit_promptbuilder_draft.md` v0.2 draft + 第 408 批 publicity 边界验证
-- **Date**: 2026-06-23
-- **Key changes**: 新增 degraded mode 全流程支持；新增信息边界规则；新增分附件证据边界（Source-aware Evidence Boundary），区分附件1/2/3 字段差异；01 增加附件类型感知规则；02 新增 source_attachment_type / source_supported_fields / source_join_key；03 改为按附件来源解释深度参数；04 新增"分附件证据来源说明"章节；05 新增跨附件 join 模块
+- **Version**: v0.5
+- **Source**: `docs/miit_promptbuilder_draft.md` v0.2 draft + 公告图片 OCR 工作流 v0.1
+- **Date**: 2026-07-03
+- **Key changes**: 新增公告图片 OCR → 解析 → 对比工作流（B 路径）；新增 `miit_vehicle_publicity_image_parser.py`（OCR → records JSON）；新增 `vehicle_compare.py`（6 个关键信号框架双车对比）；新增 `docs/miit_product_param_key_signals_framework.md` 对比方法论；注册 `miit_vehicle_publicity_image_parser` + `vehicle_compare` 能力

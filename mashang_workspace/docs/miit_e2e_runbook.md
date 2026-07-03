@@ -4,17 +4,29 @@
 
 本 Runbook 记录 MIIT 项目从信息获取到业务情报输出的完整链路，供后续批次重复执行参考。
 
-完整链路：
+完整链路（双路径）：
+
+**A. 批次信息分析路径**:
 
 ```
-信息获取
-→ 附件文本抽取
-→ 产品清单结构化
+信息获取（discover → fetch）
+→ 附件文本抽取（extract_attachment_text）
+→ 产品清单结构化（parse_product_list）
 → evidence 输出
-→ Promptbuilder 方法论读取
+→ Promptbuilder 方法论读取（prompt modules 00-05）
 → 目标品牌信息提取
 → 业务解释
 → 输出沉淀
+```
+
+**B. 公告图片 OCR 解析路径（v0.5 新增）**:
+
+```
+公告截图图片（source_capture/公告信息/）
+→ OCR service（ocr/ocr_service.py，火山引擎 document_parse + general_ocr）
+→ OCR 结果 JSON（outputs/ocr/results/）
+→ 领域解析（miit_vehicle_publicity_image_parser.py → records JSON）
+→ 双车对比报告（vehicle_compare.py → 6 个关键信号框架 HTML）
 ```
 
 目标：对任意指定 MIIT 批次和目标品牌（如比亚迪、智己），可一键式执行 Dry Run，验证数据质量和链路完整性，并输出可供业务解读的情报简报。
@@ -272,3 +284,7 @@ cat mashang_workspace/outputs/miit_new_car/promptbuilder_runs/batch_407_official
 | 第 407 批信号简报 | `outputs/miit_new_car/promptbuilder_runs/batch_407_official_miit_signal_brief.md` | Dry Run 样例输出 |
 | 第 407 批 Evidence | `outputs/miit_new_car/evidence/batch_407_official_source_evidence.json` | 三层证据 |
 | 项目 AGENTS.md | `AGENTS.md` | 项目级 Agent 指南 |
+| 6 个关键信号框架 | `docs/miit_product_param_key_signals_framework.md` | 产品经理解读方法论 |
+| Promptbuilder Pack README | `promptbuilders/miit_new_car/README.md` | Prompt 模块 + OCR 图片解析 + 双车对比工作流 |
+| 公告图片 OCR 解析器 | `promptbuilders/miit_new_car/miit_vehicle_publicity_image_parser.py` | OCR → 结构化 records JSON |
+| 双车对比报告 | `promptbuilders/miit_new_car/vehicle_compare.py` | 6 个关键信号框架 HTML 报告 |
