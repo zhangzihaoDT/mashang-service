@@ -3,7 +3,7 @@ import pandas as pd
 import json
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[2]
 _BUSINESS_DEF_FILE = REPO_ROOT / "shared" / "schema" / "business_definition.json"
 
 

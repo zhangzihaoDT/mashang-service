@@ -309,10 +309,20 @@ def analyze_daily_lock_orders(df, start_date, end_date):
     # 2. 分车型统计
     model_stats = {}
     for model in TARGET_MODELS:
-        model_df = daily_orders[daily_orders['series'] == model]
+        if model == "LS9":
+            model_df = daily_orders[daily_orders['series'].isin(["LS9", "LS9Hyper"])]
+        else:
+            model_df = daily_orders[daily_orders['series'] == model]
         count = model_df['order_number'].nunique()
         
         stats = {"count": count}
+        if model == "LS9":
+            ls9hyper_count = daily_orders[
+                (daily_orders['series'] == "LS9Hyper") &
+                (daily_orders['lock_time'].notna())
+            ]['order_number'].nunique()
+            if ls9hyper_count > 0:
+                stats["ls9hyper_count"] = ls9hyper_count
         
         # 对 LS6 (原CM2) 和 LS9 进行电池容量细分
         if model in ["LS6", "LS9"]:
@@ -409,7 +419,10 @@ def analyze_daily_invoice_orders(df, start_date, end_date):
     # 2. 分车型统计
     model_invoice_stats = {}
     for model in TARGET_MODELS:
-        model_df = invoice_orders[invoice_orders['series'] == model]
+        if model == "LS9":
+            model_df = invoice_orders[invoice_orders['series'].isin(["LS9", "LS9Hyper"])]
+        else:
+            model_df = invoice_orders[invoice_orders['series'] == model]
         count = model_df['order_number'].nunique()
         
         # 用户车数量
@@ -646,6 +659,9 @@ def upsert_bitable_observation(lock_stats, invoice_stats, pred_lock: float | Non
         if "六座" in sd:
             detail_parts.append(f"六座：{sd['六座']}")
         detail_str = "｜" + "，".join(detail_parts) if detail_parts else ""
+        ls9hyper = stats.get("ls9hyper_count")
+        if ls9hyper is not None:
+            detail_str += f"｜LS9Hyper: {ls9hyper}"
         lock_model_details.append(f"- {model}: {count} 单{detail_str}")
     lock_model_text = "\n".join(lock_model_details)
 
@@ -887,6 +903,9 @@ def main():
                 if "六座" in d:
                     detail_parts.append(f"六座：{d['六座']}")
             detail_str = "｜" + "，".join(detail_parts) if detail_parts else ""
+            ls9hyper = stats.get("ls9hyper_count")
+            if ls9hyper is not None:
+                detail_str += f"｜LS9Hyper: {ls9hyper}"
             print(f"   - {model}: {count}{detail_str}")
         if pred_lock is not None and pred_lock > 0:
             rate = lock_stats['total'] / pred_lock
