@@ -1,20 +1,16 @@
-"""operating_loop 测试"""
+"""operating_loop 测试 — 验证 run_day 输出路径和内容"""
 import sys, tempfile, json
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from auto_launch.src.operating_loop import run_day, _run_dir, _render_summary
-
-
-def test_run_dir_created():
-    d = _run_dir("2026-07-09")
-    assert d.exists()
-    print(f"[PASS] test_run_dir_created")
+from auto_launch.src.operating_loop import run_day, _render_summary
+from auto_launch.src import output_paths
 
 
 def test_run_day_dry_run():
     r = run_day(monitor_date="2026-07-09", live=False)
     assert r["monitor_date"] == "2026-07-09"
     assert r["live"] is False
+    assert r["run_mode"] == "owned_brand_daily_im"
     assert "outputs" in r
     for k in ("run_dir", "manifest", "audit", "source_audit_json", "source_audit_md", "brief", "summary"):
         assert k in r["outputs"], f"Missing output key: {k}"
@@ -146,18 +142,12 @@ def test_render_summary_with_source_audit():
     print(f"[PASS] test_render_summary_with_source_audit")
 
 
-if __name__ == "__main__":
-    test_run_dir_created()
-    test_run_day_dry_run()
-    test_run_day_creates_output_files()
-    test_run_day_manifest_valid_json()
-    test_run_day_audit_file()
-    test_run_day_source_audit_json()
-    test_run_day_source_audit_md()
-    test_run_day_summary_has_source_audit_section()
-    test_run_day_brief_file()
-    test_run_day_summary_file()
-    test_run_day_custom_brief_output()
-    test_render_summary()
-    test_render_summary_with_source_audit()
-    print("\n✅ 所有测试通过")
+def test_output_path_contract():
+    """验证 run_day 的输出路径符合新的输出合同"""
+    run_mode = "owned_brand_daily_im"
+    assert output_paths.run_manifest_path("2026-07-09", run_mode).name == "manifest.json"
+    assert "reports" in str(output_paths.daily_brief_md_path("2026-07-09", run_mode))
+    assert output_paths.daily_brief_md_path("2026-07-09", run_mode).name == "daily_brief.md"
+    assert "facts" in str(output_paths.facts_audit_path("2026-07-09", run_mode))
+    assert output_paths.facts_audit_path("2026-07-09", run_mode).name == "facts_audit.json"
+    print(f"[PASS] test_output_path_contract")

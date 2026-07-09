@@ -3,12 +3,12 @@
 brand_daily_marketing_watch.py — owned brand daily marketing event monitor.
 
 Reuses existing auto_launch Search Layer components.
+Output paths managed by output_paths.py.
 
 Usage:
   python brand_daily_marketing_watch.py --brand im --brand-name 智己
   python brand_daily_marketing_watch.py --brand im --brand-name 智己 --live
   python brand_daily_marketing_watch.py --brand im --brand-name 智己 --window-hours 48
-  python brand_daily_marketing_watch.py --brand im --brand-name 智己 --query-profile balanced
 """
 
 import json, sys, yaml
@@ -27,8 +27,7 @@ from auto_launch.src.normalize_search_results import normalize_results, build_au
 from auto_launch.src.search_cache import search_with_cache
 from auto_launch.src.event_clusterer import cluster_items
 from auto_launch.src.event_candidate_gate import gate_clusters
-
-DEFAULT_OUTPUT_BASE = SERVICE_ROOT / "outputs" / "owned_brand_daily"
+from auto_launch.src import output_paths
 
 
 def _load_yaml(path):
@@ -50,8 +49,11 @@ def _valid_event_types():
 
 
 def _run(brand: str, brand_name: str, monitor_date: str, window_hours: int,
-         query_profile: str, out_dir: str, dry_run: bool, refresh: bool):
-    """Execute the daily marketing watch pipeline."""
+         query_profile: str, out_dir: str = None, dry_run: bool = False, refresh: bool = False):
+    """Execute the daily marketing watch pipeline.
+
+    out_dir is deprecated — output paths are managed by output_paths.py.
+    """
     monitor_dt = datetime.strptime(monitor_date, "%Y-%m-%d")
     end_dt = monitor_dt.replace(hour=23, minute=59, second=59)
     start_dt = end_dt - timedelta(hours=window_hours)
@@ -128,16 +130,16 @@ def _run(brand: str, brand_name: str, monitor_date: str, window_hours: int,
                 t["queries"].insert(0, oq)
             break
 
-    # output
-    outdir = Path(out_dir)
-    outdir.mkdir(parents=True, exist_ok=True)
-    out_today = outdir / monitor_date.replace("-", "")
-    out_today.mkdir(parents=True, exist_ok=True)
+    # output — use output_paths
+    run_mode = output_paths.run_mode_owned_brand_daily(brand)
+    run_dir_path = output_paths.run_dir(monitor_date, run_mode)
+    search_out = output_paths.search_dir(monitor_date, run_mode)
+    reports_out = output_paths.reports_dir(monitor_date, run_mode)
 
     manifest = {
         "task_name": "owned_brand_daily_marketing_watch",
         "brand_key": brand, "brand_name": brand_name,
-        "monitor_date": monitor_date,
+        "monitor_date": monitor_date, "run_mode": run_mode,
         "time_window": {"start": _fmt(start_dt), "end": _fmt(end_dt), "window_hours": window_hours},
         "query_profile": query_profile, "output_files": [],
     }
@@ -145,10 +147,11 @@ def _run(brand: str, brand_name: str, monitor_date: str, window_hours: int,
     qc = sum(len(t.get("queries", [])) for t in query_plan.get("targets", []))
     print(f"[brand_daily] {brand_name} | {monitor_date} | 过去 {window_hours} 小时 | profile={query_profile}")
     print(f"              {qc} queries planned")
+    print(f"              输出: {run_dir_path}")
 
     if dry_run:
-        with open(out_today / "run_manifest.json", "w", encoding="utf-8") as f:
-            json.dump(manifest, f, ensure_ascii=False, indent=2)
+        manifest_path = output_paths.run_manifest_path(monitor_date, run_mode)
+        manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
         print(f"              dry-run (pass --live to execute)")
         return
 
@@ -189,17 +192,17 @@ def _run(brand: str, brand_name: str, monitor_date: str, window_hours: int,
             errors.append({"query": q_text, "error": result.get("error", "")})
 
     # raw
-    raw_path = out_today / "raw_search_results.json"
+    raw_path = output_paths.search_raw_path(monitor_date, run_mode)
     with open(raw_path, "w", encoding="utf-8") as f:
         json.dump({"task_name": "brand_daily_marketing_watch", "brand_key": brand,
-                    "brand_name": brand_name, "monitor_date": monitor_date,
+                    "brand_name": brand_name, "monitor_date": monitor_date, "run_mode": run_mode,
                     "query_count": len(all_queries), "api_calls": api_calls,
                     "results": search_results_list, "errors": errors},
                    f, ensure_ascii=False, indent=2)
 
     # normalize
     normalized = normalize_results(search_results_list, query_plan, run_mode="live")
-    norm_path = out_today / "normalized_search_results.json"
+    norm_path = output_paths.search_normalized_path(monitor_date, run_mode)
     with open(norm_path, "w", encoding="utf-8") as f:
         json.dump(normalized, f, ensure_ascii=False, indent=2)
     print(f"  [norm] {normalized['total']} items")
@@ -213,14 +216,14 @@ def _run(brand: str, brand_name: str, monitor_date: str, window_hours: int,
         scout_results=[r for r in search_results_list if r.get("meta",{}).get("stage")=="scout"],
         refine_results=[r for r in search_results_list if r.get("meta",{}).get("stage")=="refine"],
     )
-    audit_path = out_today / "search_audit.json"
+    audit_path = output_paths.search_audit_path(monitor_date, run_mode)
     with open(audit_path, "w", encoding="utf-8") as f:
         json.dump(audit, f, ensure_ascii=False, indent=2)
 
-    # --- event cluster + gate (Tasks 3+4/P1) ---
+    # --- event cluster + gate ---
     items = normalized.get("items", [])
     clustered = cluster_items(items, brand_key=brand)
-    cluster_path = out_today / "event_clusters.json"
+    cluster_path = search_out / "clusters.json"
     with open(cluster_path, "w", encoding="utf-8") as f:
         json.dump(clustered, f, ensure_ascii=False, indent=2)
     print(f"  [clusters] {clustered['cluster_count']} clusters from {len(items)} items")
@@ -228,23 +231,22 @@ def _run(brand: str, brand_name: str, monitor_date: str, window_hours: int,
     valid_eids = _valid_event_types()
     gated = gate_clusters(clustered["clusters"], valid_event_types=valid_eids)
 
-    # Write each gate bucket
-    cand_path = out_today / "brand_event_candidates.json"
+    cand_path = search_out / "candidates.json"
     with open(cand_path, "w", encoding="utf-8") as f:
         json.dump(gated["candidates"], f, ensure_ascii=False, indent=2)
     print(f"  [candidates] {len(gated['candidates'])} clusters (gated)")
 
-    sig_path = out_today / "brand_discovery_signals.json"
+    sig_path = search_out / "signals.json"
     with open(sig_path, "w", encoding="utf-8") as f:
         json.dump(gated["discovery_signals"], f, ensure_ascii=False, indent=2)
     print(f"  [signals] {len(gated['discovery_signals'])} clusters")
 
-    ctx_path = out_today / "context_only.json"
+    ctx_path = search_out / "context_only.json"
     with open(ctx_path, "w", encoding="utf-8") as f:
         json.dump(gated["context_only"], f, ensure_ascii=False, indent=2)
     print(f"  [context] {len(gated['context_only'])} clusters")
 
-    review_path = out_today / "needs_review.json"
+    review_path = search_out / "needs_review.json"
     with open(review_path, "w", encoding="utf-8") as f:
         json.dump(gated["needs_review"], f, ensure_ascii=False, indent=2)
     print(f"  [review] {len(gated['needs_review'])} clusters")
@@ -317,17 +319,18 @@ def _run(brand: str, brand_name: str, monitor_date: str, window_hours: int,
 - 是否有 OTA / 技术发布
 - 高管是否有公开发声
 """
-    md_path = out_today / "owned_brand_daily_summary.md"
+    md_path = reports_out / "marketing_watch_summary.md"
     with open(md_path, "w", encoding="utf-8") as f:
         f.write(md)
 
     # manifest
     manifest["output_files"] = [str(p) for p in [raw_path, norm_path, cluster_path, cand_path, sig_path, ctx_path, review_path, audit_path, md_path]]
-    with open(out_today / "run_manifest.json", "w", encoding="utf-8") as f:
+    manifest_path = output_paths.run_manifest_path(monitor_date, run_mode)
+    with open(manifest_path, "w", encoding="utf-8") as f:
         json.dump(manifest, f, ensure_ascii=False, indent=2)
 
     print(f"\n✅ {brand_name} | clusters={clustered['cluster_count']} | candidates={len(gated_candidates)} | signals={len(gated_signals)} | API={api_calls}")
-    print(f"   输出: {out_today}")
+    print(f"   输出: {run_dir_path}")
 
 
 if __name__ == "__main__":
@@ -337,7 +340,7 @@ if __name__ == "__main__":
     ap.add_argument("--date", default=datetime.now().strftime("%Y-%m-%d"))
     ap.add_argument("--window-hours", type=int, default=24)
     ap.add_argument("--query-profile", default="balanced")
-    ap.add_argument("--out-dir", default=str(DEFAULT_OUTPUT_BASE))
+    ap.add_argument("--out-dir", help="(deprecated) 输出路径由 output_paths.py 统一管理")
     ap.add_argument("--dry-run", action="store_true", default=True)
     ap.add_argument("--live", action="store_true")
     ap.add_argument("--refresh", action="store_true")
@@ -346,5 +349,5 @@ if __name__ == "__main__":
     _run(
         brand=args.brand, brand_name=args.brand_name, monitor_date=args.date,
         window_hours=args.window_hours, query_profile=args.query_profile,
-        out_dir=args.out_dir, dry_run=not args.live, refresh=args.refresh,
+        dry_run=not args.live, refresh=args.refresh,
     )

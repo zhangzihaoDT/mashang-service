@@ -15,6 +15,7 @@ PROJECT_ROOT = SERVICE_ROOT.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 import yaml
+from auto_launch.src import output_paths
 
 
 def _load_search_config():
@@ -67,7 +68,7 @@ def build_budget_plan(intent: dict, cli_profile: str = None,
             "enabled": not disable_cache and cache_cfg.get("enabled", True),
             "ttl_hours": cache_cfg.get("ttl_hours", 24),
             "refresh": refresh,
-            "root_dir": str(SERVICE_ROOT / "outputs" / "search_cache"),
+            "root_dir": str(output_paths.cache_dir()),
         },
         "budget_reason": _budget_reason(intent, profile_name),
     }

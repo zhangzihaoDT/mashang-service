@@ -1,87 +1,87 @@
-# Output Contract — Auto Launch 输出规范
+# Output Contract — auto_launch 输出体系
 
-## 目录结构
+## 顶层职责
 
 ```
-outputs/
-├── runs/{YYYYMMDD}/          ← ★ 主运行包（每日核心产物）
-│   ├── run_manifest.json     ← 运行元数据
-│   ├── facts_audit.json      ← 事实库质量审计
-│   ├── source_audit.json     ← 信源覆盖审计（JSON）
-│   ├── source_audit.md       ← 信源覆盖审计（Markdown）
-│   ├── daily_brief.md        ← 每日简报
-│   └── run_summary.md        ← 人类可读运行摘要
-│
-├── facts/                    ← ★ 持久事实资产
-│   └── auto_launch_facts.sqlite
-│
-├── briefs/                   ← △ 独立简报导出
-│   └── {date}.md
-│
-├── search/{date}/{mode}/     ← ○ 搜索管线调试产物
-│   ├── search_intent.json
-│   ├── search_task_config.json
-│   ├── search_budget_plan.json
-│   ├── query_plan.json
-│   ├── search_results.raw.json
-│   ├── search_results.normalized.json
-│   └── search_audit.json
-│
-├── owned_brand_daily/{date}/ ← ○ 品牌每日监控调试产物
-│   └── run_manifest.json
-│
-└── search_cache/{date}/      ← ○ API 缓存（TTL 24h，可安全删除）
-    └── *.raw.json
+auto_launch/outputs/
+├── runs/            ← 唯一业务交付入口。每次 run 的所有产物在此归档。
+├── facts/           ← 长期事实资产（SQLite），跨 run 共享，不被清理。
+├── search_cache/    ← 性能缓存（API 原始响应，TTL 24h），可安全清理。
+├── demo/            ← 非生产演示产物，标注为 _demo。
+└── _legacy/         ← 历史遗留目录归档，仅由 archive 脚本写入。
 ```
 
-## 分层说明
+### runs/ — 唯一业务交付入口
 
-| 层级 | 符号 | 说明 | 可清理 | 日常关注 |
-|------|------|------|--------|----------|
-| **主运行包** | ★ | `runs/{date}/` — run-day 直接产出 | ❌ | ✅ 优先查看 |
-| **持久资产** | ★ | `facts/` — SQLite 事实库，持续积累 | ❌ | ✅ |
-| **独立导出** | △ | `briefs/` — 由 `brief --output` 单独导出 | 条件性 ✅ | ⚠ 与 runs/*/daily_brief.md 重复时 |
-| **调试产物** | ○ | `search/`, `owned_brand_daily/` — 搜索/监控中间结果 | ✅ | ❌ 除非排查搜索问题 |
-| **缓存** | ○ | `search_cache/` — API 原始响应缓存 | ✅ | ❌ |
+每次 run（daily 监控、搜索、竞品分析）的完整产物都归档在 `runs/{YYYYMMDD}/{run_mode}/` 下。
 
-## 主运行包规范（★）
+**单次 run 的标准目录结构**
 
-每次 `run-day` 至少产出 6 个文件到 `runs/{YYYYMMDD}/`：
-
-| 文件 | 格式 | 生成步骤 | 用途 |
-|------|------|----------|------|
-| `run_manifest.json` | JSON | Step 5 | 运行元数据：命令、日期、品牌、live/dry-run、各步骤日志 |
-| `facts_audit.json` | JSON | Step 3 | 事实库质量审计：字段完成率、信源分布、质量标记 |
-| `source_audit.json` | JSON | Step 3.5 | 信源覆盖审计：官方源/垂媒/弱信源占比、期望缺失品牌 |
-| `source_audit.md` | Markdown | Step 3.5 | 信源覆盖审计人类可读版 |
-| `daily_brief.md` | Markdown | Step 4 | 每日简报：当日关键事件汇总 |
-| `run_summary.md` | Markdown | Step 6 | 运行摘要：pipeline 状态、审计摘要、信源覆盖摘要 |
-
-### 完整 run 的判断标准
-
-同时存在以上 6 个文件。
-
-## 日常使用指引
-
-```bash
-# 1. 查看当日摘要
-cat outputs/runs/{YYYYMMDD}/run_summary.md
-
-# 2. 查看每日简报
-cat outputs/runs/{YYYYMMDD}/daily_brief.md
-
-# 3. 查看信源覆盖
-cat outputs/runs/{YYYYMMDD}/source_audit.md
-
-# 4. 检查运行状态
-python -m auto_launch.cli outputs inspect
-
-# 5. 清理调试/缓存产物（dry-run）
-python -m auto_launch.cli outputs clean --older-than 7 --dry-run
+```
+runs/{YYYYMMDD}/{run_mode}/
+├── manifest.json                    ← 运行元数据（命令、参数、log）
+├── summary.md                       ← 人类可读摘要
+├── search/                          ← 搜索管线证据链
+│   ├── plan.json                    ← 合并后的搜索计划（含 intent / task_config / budget / query_plan）
+│   ├── raw.json                     ← API 原始响应
+│   ├── normalized.json              ← 标准化/去重后的 items
+│   └── audit.json                   ← 搜索质量审计
+├── facts/                           ← 事实变更记录
+│   ├── facts_delta.json             ← 本次 run 新增/更新的事实
+│   └── facts_audit.json             ← 事实库质量审计
+└── reports/                         ← 最终交付物
+    ├── daily_brief.md               ← 每日简报（Markdown）
+    ├── daily_brief.html             ← 每日简报（HTML，可选）
+    ├── source_audit.md              ← 信源覆盖审计（Markdown）
+    └── source_audit.json            ← 信源覆盖审计（JSON）
 ```
 
-## 不建议直接查看（除非排查问题）
+**文件分类**
 
-- `search/` — 搜索管线的中间产物，内容与 runs 冗余
-- `owned_brand_daily/` — 品牌监控的原始结果
-- `search_cache/` — API 缓存的原始响应
+| 类型 | 文件 | 可复现 | 可清理 | 说明 |
+|------|------|--------|--------|------|
+| 交付物 | `reports/daily_brief.md` | 可复现（从 facts 生成） | 谨慎 | 最终用户可见 |
+| 交付物 | `reports/source_audit.*` | 可复现 | 谨慎 | 质量审计报告 |
+| 证据链 | `search/*.json` | 不可复现（API 依赖） | 保留原始 | 搜索管线中间件 |
+| 元数据 | `manifest.json` | 不可复现 | 保留 | 运行记录 |
+| 摘要 | `summary.md` | 可复现 | 可清理 | 运行摘要 |
+| 事实变更 | `facts/*.json` | 可复现（从 SQLite 导出） | 可清理 | 增量审计 |
+
+> `raw.json` 是唯一**不可复现**的证据文件（API 响应可能过期），建议长期保留。
+
+### facts/ — 长期事实资产
+
+SQLite 数据库 `auto_launch_facts.sqlite`，跨 run 累积的精选事实。
+- 手动清理，不应被 `outputs clean` 自动删除。
+- 是 `runs/*/facts/` 和 `reports/` 的数据上游。
+
+### search_cache/ — 性能缓存
+
+Volc Search API 的原始响应缓存，按日期和 query hash 组织。
+- TTL 24h，可安全清理。
+- `outputs clean` 命令默认清理此目录。
+
+### demo/ — 非生产演示产物
+
+`python -m auto_launch.cli demo` 的输出。
+- 标注为非生产产物。
+- 不应混入生产 run 路径。
+
+## 已废弃/不再生成的路径
+
+以下路径**不再**由代码写入。历史数据可通过 `archive_legacy_outputs.py` 归档到 `_legacy/`。
+
+| 旧路径 | 废弃原因 | 新路径 |
+|--------|----------|--------|
+| `outputs/briefs/` | 与 `runs/{date}/{mode}/reports/daily_brief.md` 重复 | `runs/*/*/reports/daily_brief.md` |
+| `outputs/owned_brand_daily/` | 与 `runs/` 职责重叠，早期遗留目录 | `runs/*/{run_mode}/` |
+| `outputs/search/` | 搜索产物是 run 的证据链，不应作为独立业务入口 | `runs/*/*/search/` |
+
+## 规则
+
+1. **所有写入 outputs/ 的脚本必须通过 `output_paths.py` 获取路径**，不得硬编码。
+2. 日期格式统一为 `YYYYMMDD`（无横线），仅在 human-readable 场景可用 `YYYY-MM-DD`。
+3. `run_mode` 必须进入路径，不允许将不同 run_type 的产物混入同一目录。
+4. 新脚本新增输出路径时必须先扩展 `output_paths.py`。
+5. 顶层生产目录白名单：`runs/`、`facts/`、`search_cache/`、`demo/`、`_legacy/`。
+6. `facts/` 和 `search_cache/` 不被 archive 脚本移动。

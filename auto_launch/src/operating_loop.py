@@ -4,12 +4,7 @@ import json, shutil
 from pathlib import Path
 from datetime import datetime, timedelta
 
-
-def _run_dir(date_str: str) -> Path:
-    SERVICE_ROOT = Path(__file__).resolve().parent.parent
-    d = SERVICE_ROOT / "outputs" / "runs" / date_str.replace("-", "")
-    d.mkdir(parents=True, exist_ok=True)
-    return d
+from auto_launch.src import output_paths
 
 
 def run_day(monitor_date: str, brand: str = "im", brand_name: str = "智己",
@@ -22,29 +17,31 @@ def run_day(monitor_date: str, brand: str = "im", brand_name: str = "智己",
     2. 写入 facts（live 模式）
     3. facts audit
     4. 生成 brief
-    5. 写出 run_manifest.json / facts_audit.json / daily_brief.md / run_summary.md
+    5. 写出 manifest.json / facts_audit.json / daily_brief.md / summary.md
+
+    Output paths managed by output_paths.py. Run mode: owned_brand_daily_{brand}.
     """
-    from auto_launch.src.brand_daily_marketing_watch import _run, DEFAULT_OUTPUT_BASE
+    from auto_launch.src.brand_daily_marketing_watch import _run
     from auto_launch.src.fact_store import FactStore
     from auto_launch.src.brief_renderer import generate_brief
     from auto_launch.src.inbox_filter import classify
     from auto_launch.src import source_auditor
 
-    run_dir = _run_dir(monitor_date)
+    run_mode = output_paths.run_mode_owned_brand_daily(brand)
+    rd = output_paths.run_dir(monitor_date, run_mode)
     log = []
 
     # Step 1: daily
     _run(brand=brand, brand_name=brand_name, monitor_date=monitor_date,
          window_hours=window_hours, query_profile=query_profile,
-         out_dir=str(DEFAULT_OUTPUT_BASE), dry_run=not live, refresh=refresh)
+         dry_run=not live, refresh=refresh)
     log.append(("daily", "dry_run" if not live else "live",
                 f"{brand_name} {monitor_date} window={window_hours}h"))
 
     # Step 2: to-facts (live only)
     kept = 0
     if live and write_facts:
-        out_dir = DEFAULT_OUTPUT_BASE / monitor_date.replace("-", "")
-        norm_file = out_dir / "normalized_search_results.json"
+        norm_file = output_paths.search_normalized_path(monitor_date, run_mode)
         if norm_file.exists():
             data = json.loads(norm_file.read_text(encoding="utf-8"))
             items = data.get("items", [])
@@ -72,7 +69,7 @@ def run_day(monitor_date: str, brand: str = "im", brand_name: str = "智己",
     # Step 3: facts audit
     store = FactStore()
     audit = store.audit()
-    audit_path = run_dir / "facts_audit.json"
+    audit_path = output_paths.facts_audit_path(monitor_date, run_mode)
     audit_path.write_text(json.dumps(audit, ensure_ascii=False, indent=2), encoding="utf-8")
     log.append(("audit", "ok", f"{audit['total']} facts, {len(audit['warnings'])} warnings"))
 
@@ -80,9 +77,10 @@ def run_day(monitor_date: str, brand: str = "im", brand_name: str = "智己",
     facts = store.query(days=1, limit=200)
     sa_report = source_auditor.audit(facts)
     sa_md = source_auditor.render_markdown(sa_report)
-    (run_dir / "source_audit.json").write_text(
-        json.dumps(sa_report, ensure_ascii=False, indent=2), encoding="utf-8")
-    (run_dir / "source_audit.md").write_text(sa_md, encoding="utf-8")
+    sa_json_path = output_paths.source_audit_json_path(monitor_date, run_mode)
+    sa_md_path = output_paths.source_audit_md_path(monitor_date, run_mode)
+    sa_json_path.write_text(json.dumps(sa_report, ensure_ascii=False, indent=2), encoding="utf-8")
+    sa_md_path.write_text(sa_md, encoding="utf-8")
     sa_flags = len(sa_report.get("expected_flags", []))
     log.append(("source-audit", "ok",
                 f"{sa_report['official_rate']}% official, {sa_report['media_rate']}% media, {sa_flags} gaps"))
@@ -90,15 +88,19 @@ def run_day(monitor_date: str, brand: str = "im", brand_name: str = "智己",
     # Step 4: brief
     facts = store.query(days=1, limit=50)
     brief_md = generate_brief(facts)
-    brief_path = Path(brief_output) if brief_output else run_dir / "daily_brief.md"
-    brief_path.parent.mkdir(parents=True, exist_ok=True)
+    if brief_output:
+        brief_path = Path(brief_output)
+        brief_path.parent.mkdir(parents=True, exist_ok=True)
+    else:
+        brief_path = output_paths.daily_brief_md_path(monitor_date, run_mode)
     brief_path.write_text(brief_md, encoding="utf-8")
     log.append(("brief", "ok", f"{len(facts)} facts -> {brief_path}"))
 
-    # Step 5: run_manifest.json
+    # Step 5: manifest.json
     manifest = {
         "command": "run-day",
         "monitor_date": monitor_date,
+        "run_mode": run_mode,
         "brand": brand, "brand_name": brand_name,
         "window_hours": window_hours, "live": live,
         "kept": kept, "brief_facts": len(facts),
@@ -119,25 +121,25 @@ def run_day(monitor_date: str, brand: str = "im", brand_name: str = "智己",
             "low_quality": sa_report.get("low_quality_count", 0),
         },
         "outputs": {
-            "run_dir": str(run_dir),
-            "manifest": str(run_dir / "run_manifest.json"),
+            "run_dir": str(rd),
+            "manifest": str(output_paths.run_manifest_path(monitor_date, run_mode)),
             "audit": str(audit_path),
-            "source_audit_json": str(run_dir / "source_audit.json"),
-            "source_audit_md": str(run_dir / "source_audit.md"),
+            "source_audit_json": str(sa_json_path),
+            "source_audit_md": str(sa_md_path),
             "brief": str(brief_path),
-            "summary": str(run_dir / "run_summary.md"),
+            "summary": str(output_paths.run_summary_path(monitor_date, run_mode)),
         },
         "log": [{"step": s, "status": st, "detail": d, "time": datetime.now().isoformat()}
                 for s, st, d in log],
         "created_at": datetime.now().isoformat(),
     }
-    (run_dir / "run_manifest.json").write_text(
-        json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
+    manifest_path = output_paths.run_manifest_path(monitor_date, run_mode)
+    manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    # Step 6: run_summary.md
+    # Step 6: summary.md
     summary_md = _render_summary(manifest, audit, sa_report)
-    (run_dir / "run_summary.md").write_text(summary_md, encoding="utf-8")
-    log.append(("summary", "ok", str(run_dir / "run_summary.md")))
+    output_paths.run_summary_path(monitor_date, run_mode).write_text(summary_md, encoding="utf-8")
+    log.append(("summary", "ok", str(manifest_path)))
 
     return manifest
 

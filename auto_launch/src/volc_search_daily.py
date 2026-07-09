@@ -1,27 +1,23 @@
 """Layer: Search Pipeline — 完整搜索管线编排"""
 """
-volc_search_daily.py — Auto Launch 搜索意图转译与执行主脚本 v0.3（Search Budget & Query Strategy v2）。
+volc_search_daily.py — Auto Launch 搜索意图转译与执行主脚本 v0.4。
 
 完整链路:
   user_request → search_intent → search_task_config → search_budget_plan
   → query_plan → Volc Search API (cached) → raw → normalized → audit
 
+输出路径统一由 output_paths.py 管理，产物写入:
+  runs/{YYYYMMDD}/{run_mode}/search/{plan,raw,normalized,audit}.json
+
 用法:
   # dry-run (default, no API calls)
   python volc_search_daily.py --request "看看极氪最近 7 天都有什么动作"
-
-  # profile-aware
-  python volc_search_daily.py --request "看看极氪最近 7 天都有什么动作" --query-profile lite_scan
-  python volc_search_daily.py --request "看看极氪最近 7 天都有什么动作" --query-profile deep_scan
 
   # live with cache
   python volc_search_daily.py --request "看看极氪最近 7 天都有什么动作" --live
 
   # refresh cache
   python volc_search_daily.py --request "看看极氪最近 7 天都有什么动作" --live --refresh
-
-  # scout only
-  python volc_search_daily.py --request "看看极氪最近 7 天都有什么动作" --live --stage scout
 """
 
 import json, sys, os, argparse
@@ -40,8 +36,7 @@ from auto_launch.src.volc_search_query_builder import build_query_plan
 from auto_launch.src.volc_search_client import VolcSearchClient, VolcSearchError
 from auto_launch.src.normalize_search_results import normalize_results, build_audit
 from auto_launch.src.search_cache import search_with_cache
-
-OUTPUT_BASE = SERVICE_ROOT / "outputs" / "search"
+from auto_launch.src import output_paths
 
 
 def _count_queries(query_plan: dict) -> int:
@@ -63,17 +58,22 @@ def run_pipeline(request: str, monitor_date: str, force_mode: str = None,
         intent["mode"] = force_mode
 
     mode = intent["mode"]
-    outdir = OUTPUT_BASE / monitor_date / mode
-    outdir.mkdir(parents=True, exist_ok=True)
 
-    intent_path = outdir / "search_intent.json"
-    with open(intent_path, "w", encoding="utf-8") as f:
-        json.dump(intent, f, ensure_ascii=False, indent=2)
-    print(f"[intent] 已写入: {intent_path}")
+    # Determine run_mode from intent targets
+    if mode == "brand_watch" and intent.get("targets"):
+        label = intent["targets"][0].get("brand", intent["targets"][0].get("target_id", "unknown"))
+        run_mode = output_paths.run_mode_brand_watch(label)
+    elif mode == "model_watch" and intent.get("targets"):
+        label = intent["targets"][0].get("model", intent["targets"][0].get("target_id", "unknown"))
+        run_mode = output_paths.run_mode_model_watch(label)
+    else:
+        run_mode = mode
+
+    # All outputs go under runs/{YYYYMMDD}/{run_mode}/search/
+    outdir = output_paths.search_dir(monitor_date, run_mode)
 
     # ── 2. search_task_config ────────────────────────
-    config_path = outdir / "search_task_config.json"
-    task_config = build_task_config(intent, str(config_path))
+    task_config = build_task_config(intent)
 
     # ── 3. search_budget_plan ─────────────────────────
     budget_plan = build_budget_plan(
@@ -82,17 +82,24 @@ def run_pipeline(request: str, monitor_date: str, force_mode: str = None,
         refresh=refresh, disable_cache=disable_cache,
         cli_stage=stage,
     )
-    budget_path = outdir / "search_budget_plan.json"
-    with open(budget_path, "w", encoding="utf-8") as f:
-        json.dump(budget_plan, f, ensure_ascii=False, indent=2)
-    print(f"[budget] 已写入: {budget_path}")
-    print(f"        profile={budget_plan['profile']}, budget={budget_plan['query_budget_per_target']}")
+    print(f"[budget] profile={budget_plan['profile']}, budget={budget_plan['query_budget_per_target']}")
 
     # ── 4. query_plan (staged) ───────────────────────
-    plan_path = outdir / "query_plan.json"
-    query_plan = build_query_plan(task_config, budget_plan, str(plan_path))
+    query_plan = build_query_plan(task_config, budget_plan)
 
-    run_mode = "dry_run" if dry_run else "live"
+    # ── 5. Write merged plan.json ────────────────────
+    plan = {
+        "intent": intent,
+        "task_config": task_config,
+        "budget_plan": budget_plan,
+        "query_plan": query_plan,
+    }
+    plan_path = output_paths.search_plan_path(monitor_date, run_mode)
+    with open(plan_path, "w", encoding="utf-8") as f:
+        json.dump(plan, f, ensure_ascii=False, indent=2)
+    print(f"[plan] 已写入: {plan_path}")
+
+    is_dry = "dry_run" if dry_run else "live"
     planned_count = _count_queries(query_plan)
     print(f"        planned queries: {planned_count} ({budget_plan['stage']})")
 
@@ -109,6 +116,7 @@ def run_pipeline(request: str, monitor_date: str, force_mode: str = None,
             "query_budget": budget_plan["query_budget_per_target"],
             "query_count": planned_count,
             "output_dir": str(outdir),
+            "run_mode": run_mode,
         }
         print(json.dumps(summary, ensure_ascii=False, indent=2))
         return intent, task_config, budget_plan, query_plan, None, None, None
@@ -182,7 +190,7 @@ def run_pipeline(request: str, monitor_date: str, force_mode: str = None,
         "results": search_results_list,
         "errors": errors,
     }
-    raw_path = outdir / "search_results.raw.json"
+    raw_path = output_paths.search_raw_path(monitor_date, run_mode)
     with open(raw_path, "w", encoding="utf-8") as f:
         json.dump(raw_envelope, f, ensure_ascii=False, indent=2)
     print(f"[search] 原始结果已写入: {raw_path}")
@@ -193,7 +201,7 @@ def run_pipeline(request: str, monitor_date: str, force_mode: str = None,
 
     # ── 6. Normalize + Audit ─────────────────────────
     normalized = normalize_results(search_results_list, query_plan, run_mode="live")
-    norm_path = outdir / "search_results.normalized.json"
+    norm_path = output_paths.search_normalized_path(monitor_date, run_mode)
     with open(norm_path, "w", encoding="utf-8") as f:
         json.dump(normalized, f, ensure_ascii=False, indent=2)
     print(f"[normalized] {norm_path} ({normalized['total']} 条)")
@@ -203,7 +211,7 @@ def run_pipeline(request: str, monitor_date: str, force_mode: str = None,
                         api_call_count=api_call_count, cache_hit_count=cache_hit_count,
                         cache_miss_count=cache_miss_count,
                         scout_results=scout_queries, refine_results=refine_queries)
-    audit_path = outdir / "search_audit.json"
+    audit_path = output_paths.search_audit_path(monitor_date, run_mode)
     with open(audit_path, "w", encoding="utf-8") as f:
         json.dump(audit, f, ensure_ascii=False, indent=2)
     print(f"[audit] 已写入: {audit_path}")

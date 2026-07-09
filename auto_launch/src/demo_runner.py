@@ -4,7 +4,9 @@ import json
 from pathlib import Path
 from datetime import datetime
 
-DEMO_DIR = Path(__file__).resolve().parent.parent / "outputs" / "demo"
+from auto_launch.src import output_paths
+
+DEMO_DIR = output_paths.demo_dir()
 FIXTURES_DIR = Path(__file__).resolve().parent.parent / "tests" / "fixtures" / "daily_runs"
 
 

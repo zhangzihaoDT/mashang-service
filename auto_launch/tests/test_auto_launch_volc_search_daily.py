@@ -1,5 +1,6 @@
 """
 volc_search_daily 集成测试 — mock Volc Search API，验证全链路输出 v2。
+Output paths via output_paths.py.
 """
 
 import json, os, sys, shutil
@@ -7,10 +8,10 @@ from pathlib import Path
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from auto_launch.src.volc_search_daily import run_pipeline, OUTPUT_BASE
+from auto_launch.src.volc_search_daily import run_pipeline
+from auto_launch.src import output_paths
 
 TEST_DATE = "2026-07-02"
-OUTDIR = OUTPUT_BASE / TEST_DATE / "brand_watch"
 
 _URL_COUNTER = [0]
 
@@ -28,26 +29,43 @@ def _mock_search_success(query, limit=10):
         "raw_response": {}, "retrieved_at": "2026-07-02T12:00:00", "attempts": 1,
     }
 
+def _resolve_run_mode():
+    """Determine the actual run_mode from a dry-run of the pipeline."""
+    result = run_pipeline("看看极氪最近 7 天都有什么动作", TEST_DATE, dry_run=True)
+    intent = result[0]
+    label = intent["targets"][0].get("brand", "未知")
+    return output_paths.run_mode_brand_watch(label)
+
+RUN_MODE = None  # lazy init
+
+def _get_run_mode():
+    global RUN_MODE
+    if RUN_MODE is None:
+        RUN_MODE = _resolve_run_mode()
+    return RUN_MODE
+
+def _outdir():
+    return output_paths.search_dir(TEST_DATE, _get_run_mode())
+
 def _clean_output():
-    if OUTDIR.exists():
-        shutil.rmtree(OUTDIR.parent)
-    OUTDIR.mkdir(parents=True, exist_ok=True)
+    d = output_paths.run_dir(TEST_DATE, _get_run_mode())
+    if d.exists():
+        shutil.rmtree(d.parent)
 
 
 class TestDryRun:
     def setup_method(self):
         _clean_output()
 
-    def test_dry_run_produces_three_files_and_budget(self):
-        """dry-run 生成前 4 个文件（含 search_budget_plan.json）"""
+    def test_dry_run_produces_plan(self):
+        """dry-run 生成 plan.json"""
         result = run_pipeline("看看极氪最近 7 天都有什么动作", TEST_DATE, dry_run=True)
         intent, config, budget, plan = result[0], result[1], result[2], result[3]
         assert intent is not None and config is not None and budget is not None and plan is not None
 
-        fnames = [f.name for f in OUTDIR.iterdir()]
-        assert "search_budget_plan.json" in fnames, f"Missing budget plan in {fnames}"
-        assert "query_plan.json" in fnames
-        # query count = standard_scan = 5
+        sd = _outdir()
+        fnames = [f.name for f in sd.iterdir()]
+        assert "plan.json" in fnames, f"Missing plan.json in {fnames}"
         qc = sum(len(t.get("queries", [])) for t in plan.get("targets", []))
         assert qc == 5, f"Expected 5 queries for standard_scan, got {qc}"
         print(f"  [PASS] dry_run: {fnames}, queries={qc}")
@@ -78,11 +96,9 @@ class TestLiveRun:
         result = run_pipeline("看看极氪最近 7 天都有什么动作", TEST_DATE, dry_run=False)
         intent, config, budget, plan, raw, norm, audit = result
 
-        fnames = [f.name for f in OUTDIR.iterdir()]
-        expected = {"search_intent.json", "search_task_config.json",
-                     "search_budget_plan.json", "query_plan.json",
-                     "search_results.raw.json", "search_results.normalized.json",
-                     "search_audit.json"}
+        sd = _outdir()
+        fnames = [f.name for f in sd.iterdir()]
+        expected = {"plan.json", "raw.json", "normalized.json", "audit.json"}
         assert expected.issubset(set(fnames)), f"Missing: {expected - set(fnames)}"
         assert raw is not None and norm is not None and audit is not None
         print(f"  [PASS] live_run {len(fnames)} files")
@@ -91,7 +107,8 @@ class TestLiveRun:
     def test_audit_has_budget_and_stages(self, MockClient):
         MockClient.return_value.search.side_effect = _mock_search_success
         run_pipeline("看看极氪最近 7 天都有什么动作", TEST_DATE, dry_run=False)
-        with open(OUTDIR / "search_audit.json") as f:
+        sd = _outdir()
+        with open(sd / "audit.json") as f:
             data = json.load(f)
         assert "budget" in data, "Missing budget in audit"
         assert data["budget"]["profile"] == "standard_scan"
@@ -105,7 +122,8 @@ class TestLiveRun:
     def test_audit_has_cache_fields(self, MockClient):
         MockClient.return_value.search.side_effect = _mock_search_success
         run_pipeline("看看极氪最近 7 天都有什么动作", TEST_DATE, dry_run=False, disable_cache=True)
-        with open(OUTDIR / "search_audit.json") as f:
+        sd = _outdir()
+        with open(sd / "audit.json") as f:
             data = json.load(f)
         assert "api_call_count" in data["budget"]
         assert "cache_hit_count" in data["budget"]
@@ -124,7 +142,8 @@ class TestLiveRun:
         raw = result[4]
         audit = result[6]
 
-        with open(OUTDIR / "search_results.raw.json") as f:
+        sd = _outdir()
+        with open(sd / "raw.json") as f:
             raw_data = json.load(f)
         assert len(raw_data.get("errors", [])) > 0
         assert audit["budget"]["query_count_executed"] == 8

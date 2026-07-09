@@ -1,33 +1,32 @@
 """Layer: Demo — Terminal Launcher（交互式编排，仅编排已有模块）"""
 
-import sys
+import json
 from pathlib import Path
 from datetime import datetime
 
-
-_SERVICE_ROOT = Path(__file__).resolve().parent.parent
-
-
-def _run_dir(date_str: str) -> Path:
-    d = _SERVICE_ROOT / "outputs" / "runs" / date_str.replace("-", "")
-    d.mkdir(parents=True, exist_ok=True)
-    return d
+from auto_launch.src import output_paths
 
 
 def _write_run_package(date: str, summary: dict, brief: str):
-    """Write a lightweight run package after processing a daily run."""
-    run_dir = _run_dir(date)
+    """Write a lightweight run package after processing a daily run.
+
+    All outputs go to: runs/{YYYYMMDD}/{run_mode}/reports/ and runs/{YYYYMMDD}/{run_mode}/manifest.json
+    Run mode for launcher daily run: "launcher_daily_run".
+    """
+    run_mode = "launcher_daily_run"
+    rd = output_paths.run_dir(date, run_mode)
     log = []
 
-    # daily_brief.md
-    (run_dir / "daily_brief.md").write_text(brief, encoding="utf-8")
+    # daily_brief.md → reports/
+    brief_path = output_paths.daily_brief_md_path(date, run_mode)
+    brief_path.write_text(brief, encoding="utf-8")
     log.append(("brief", "ok", f"{summary['kept']} facts"))
 
-    # run_manifest.json
-    import json
+    # manifest.json
     manifest = {
         "command": "launcher_daily_run",
         "monitor_date": date,
+        "run_mode": run_mode,
         "input_channel": "launcher_daily_run",
         "raw": summary["total_raw_items"],
         "kept": summary["kept"],
@@ -37,17 +36,17 @@ def _write_run_package(date: str, summary: dict, brief: str):
         "log": [{"step": s, "status": st, "detail": d, "time": datetime.now().isoformat()}
                 for s, st, d in log],
         "outputs": {
-            "run_dir": str(run_dir),
-            "brief": str(run_dir / "daily_brief.md"),
-            "manifest": str(run_dir / "run_manifest.json"),
-            "summary": str(run_dir / "run_summary.md"),
+            "run_dir": str(rd),
+            "brief": str(brief_path),
+            "manifest": str(output_paths.run_manifest_path(date, run_mode)),
+            "summary": str(output_paths.run_summary_path(date, run_mode)),
         },
         "created_at": datetime.now().isoformat(),
     }
-    (run_dir / "run_manifest.json").write_text(
+    output_paths.run_manifest_path(date, run_mode).write_text(
         json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    # run_summary.md
+    # summary.md
     lines = [
         f"# Run Summary — Launcher Daily Run — {date}",
         "",
@@ -76,7 +75,7 @@ def _write_run_package(date: str, summary: dict, brief: str):
         f"*Generated: {manifest['created_at']}*",
         "",
     ]
-    (run_dir / "run_summary.md").write_text("\n".join(lines), encoding="utf-8")
+    output_paths.run_summary_path(date, run_mode).write_text("\n".join(lines), encoding="utf-8")
 
 
 def run_launcher():
@@ -156,16 +155,13 @@ def run_launcher():
                     print("=" * 60)
                     print(brief)
 
-                    briefs_dir = _SERVICE_ROOT / "outputs" / "briefs"
-                    briefs_dir.mkdir(parents=True, exist_ok=True)
-                    brief_path = briefs_dir / f"{date}.md"
-                    brief_path.write_text(brief, encoding="utf-8")
-
-                    # Write run package
+                    # Write run package (brief goes into runs/{date}/{run_mode}/reports/)
                     _write_run_package(date, summary, brief)
+                    run_mode = "launcher_daily_run"
+                    brief_path = output_paths.daily_brief_md_path(date, run_mode)
 
                     print(f"\n  简报已写入: {brief_path}")
-                    print(f"  运行包: {_run_dir(date)}/daily_brief.md")
+                    print(f"  运行包: {brief_path.parent}")
 
         # ── 2. 定向搜索 ──────────────────────────────────
         elif choice == "2":
@@ -276,9 +272,8 @@ def run_launcher():
                 except (EOFError, KeyboardInterrupt):
                     date_raw = ""
                 date = date_raw if date_raw else datetime.now().strftime("%Y-%m-%d")
-                briefs_dir = Path(__file__).resolve().parent.parent / "outputs" / "briefs"
-                briefs_dir.mkdir(parents=True, exist_ok=True)
-                brief_path = briefs_dir / f"{date}.md"
+                run_mode = "launcher_daily_run"
+                brief_path = output_paths.daily_brief_md_path(date, run_mode)
                 brief_path.write_text(brief, encoding="utf-8")
                 print(f"\n  简报已写入: {brief_path}")
 

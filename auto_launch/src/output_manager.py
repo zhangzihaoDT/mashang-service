@@ -1,23 +1,27 @@
-"""Layer: Intelligence Utilities — 输出管理与维护"""
+"""Layer: Intelligence Utilities — 输出管理与维护
+
+Output paths managed by output_paths.py.
+Inspects runs/ hierarchy, facts, search_cache, demo.
+Does not inspect deprecated paths (briefs/, owned_brand_daily/, top-level search/).
+"""
 
 import json
 from pathlib import Path
 from datetime import datetime, timedelta
 
-OUTPUTS_ROOT = Path(__file__).resolve().parent.parent / "outputs"
+from auto_launch.src import output_paths
 
-RUN_DIR_GLOB = "runs/*"
 RUN_REQUIRED_FILES = [
-    "run_manifest.json",
-    "facts_audit.json",
-    "source_audit.json",
-    "source_audit.md",
-    "daily_brief.md",
-    "run_summary.md",
+    "manifest.json",
+    "facts/facts_audit.json",
+    "reports/source_audit.json",
+    "reports/source_audit.md",
+    "reports/daily_brief.md",
+    "summary.md",
 ]
 
 NEVER_CLEAN = ["facts/auto_launch_facts.sqlite"]
-CLEAN_CANDIDATE_DIRS = ["search_cache", "search", "owned_brand_daily"]
+CLEAN_CANDIDATE_DIRS = ["search_cache"]
 
 
 def _parse_run_date(dir_name: str) -> str | None:
@@ -29,67 +33,68 @@ def _parse_run_date(dir_name: str) -> str | None:
 
 
 def inspect() -> dict:
-    """Scan all outputs/ subdirs and return a structured inspection report."""
-    root = OUTPUTS_ROOT
+    """Scan outputs/ subdirs and return a structured inspection report."""
+    root = output_paths.output_root()
 
-    # Runs inspection
+    # Runs inspection — scans runs/{YYYYMMDD}/{run_mode}/
     runs = []
-    for d in sorted(root.glob("runs/*")):
-        if not d.is_dir():
+    for date_dir in sorted(root.glob("runs/*")):
+        if not date_dir.is_dir():
             continue
-        date_str = _parse_run_date(d.name)
+        date_str = _parse_run_date(date_dir.name)
         if not date_str:
             continue
-        present = {f.name for f in d.iterdir() if f.is_file()}
-        missing = [f for f in RUN_REQUIRED_FILES if f not in present]
-        # also check if the run has more unexpected files
-        run_manifest = None
-        mf = d / "run_manifest.json"
-        if mf.exists():
-            try:
-                run_manifest = json.loads(mf.read_text(encoding="utf-8"))
-            except (json.JSONDecodeError, OSError):
-                pass
-        runs.append({
-            "date": date_str,
-            "dir": str(d),
-            "file_count": len(present),
-            "complete": len(missing) == 0,
-            "missing": missing,
-            "has_manifest": run_manifest is not None,
-            "manifest_command": run_manifest.get("command") if run_manifest else None,
-            "manifest_live": run_manifest.get("live") if run_manifest else None,
-        })
+        for mode_dir in sorted(date_dir.glob("*")):
+            if not mode_dir.is_dir():
+                continue
+            present = {f.name for f in mode_dir.rglob("*") if f.is_file()}
+            rel_files = {str(f.relative_to(mode_dir)) for f in mode_dir.rglob("*") if f.is_file()}
+            missing = [f for f in RUN_REQUIRED_FILES if f not in rel_files]
+            run_manifest = None
+            mf = mode_dir / "manifest.json"
+            if mf.exists():
+                try:
+                    run_manifest = json.loads(mf.read_text(encoding="utf-8"))
+                except (json.JSONDecodeError, OSError):
+                    pass
+            runs.append({
+                "date": date_str,
+                "run_mode": mode_dir.name,
+                "dir": str(mode_dir),
+                "file_count": len(present),
+                "complete": len(missing) == 0,
+                "missing": missing,
+                "has_manifest": run_manifest is not None,
+                "manifest_command": run_manifest.get("command") if run_manifest else None,
+                "manifest_live": run_manifest.get("live") if run_manifest else None,
+            })
 
     # Facts
-    facts_db = root / "facts" / "auto_launch_facts.sqlite"
+    facts_db = output_paths.fact_db_path()
     facts_exists = facts_db.exists()
     facts_size = facts_db.stat().st_size if facts_exists else 0
 
-    # Briefs (standalone, not inside runs)
-    briefs_dir = root / "briefs"
-    briefs_files = sorted(briefs_dir.glob("*.md")) if briefs_dir.exists() else []
-    briefs_list = []
-    for bf in briefs_files:
-        date_key = bf.stem  # e.g. 2026-07-09
-        duplicate = False
-        run_dir = root / "runs" / date_key.replace("-", "")
-        if run_dir.exists() and (run_dir / "daily_brief.md").exists():
-            duplicate = True
-        briefs_list.append({"path": str(bf), "date": date_key, "duplicate_brief": duplicate})
+    # Search cache counts
+    cache_dir = output_paths.cache_dir()
+    if cache_dir.exists():
+        cache_files = sorted(cache_dir.rglob("*"))
+        cache_stats = {
+            "file_count": sum(1 for f in cache_files if f.is_file()),
+            "dir_count": sum(1 for f in cache_files if f.is_dir()),
+        }
+    else:
+        cache_stats = {"file_count": 0, "dir_count": 0}
 
-    # Search / owned_brand_daily / search_cache counts
-    dir_stats = {}
-    for sub in ["search", "owned_brand_daily", "search_cache"]:
-        p = root / sub
-        if p.exists():
-            files = sorted(p.rglob("*"))
-            dir_stats[sub] = {
-                "file_count": sum(1 for f in files if f.is_file()),
-                "dir_count": sum(1 for f in files if f.is_dir()),
-            }
-        else:
-            dir_stats[sub] = {"file_count": 0, "dir_count": 0}
+    # Demo
+    demo_dir = output_paths.demo_dir()
+    if demo_dir.exists():
+        demo_files = sorted(demo_dir.rglob("*"))
+        demo_stats = {
+            "file_count": sum(1 for f in demo_files if f.is_file()),
+            "dir_count": sum(1 for f in demo_files if f.is_dir()),
+        }
+    else:
+        demo_stats = {"file_count": 0, "dir_count": 0}
 
     # Warnings
     warnings = []
@@ -97,31 +102,26 @@ def inspect() -> dict:
         warnings.append("facts/auto_launch_facts.sqlite 不存在 — 事实库为空")
     incomplete_runs = [r for r in runs if not r["complete"]]
     if incomplete_runs:
-        names = ", ".join(r["date"] for r in incomplete_runs[:3])
+        names = ", ".join(f"{r['date']}/{r['run_mode']}" for r in incomplete_runs[:3])
         total = len(incomplete_runs)
         warnings.append(f"不完整 run: {names} ({total} 个)")
-    duplicate_briefs = [b for b in briefs_list if b["duplicate_brief"]]
-    if duplicate_briefs:
-        warnings.append(f"briefs/ 中存在 {len(duplicate_briefs)} 个重复 daily_brief（与 runs/*/daily_brief.md 重复）")
 
     return {
         "outputs_root": str(root),
         "runs": {"count": len(runs), "complete": sum(1 for r in runs if r["complete"]), "list": runs},
         "facts": {"exists": facts_exists, "size_bytes": facts_size, "path": str(facts_db) if facts_exists else None},
-        "briefs": {"count": len(briefs_list), "duplicate_count": len(duplicate_briefs), "list": briefs_list},
-        "search": dir_stats["search"],
-        "owned_brand_daily": dir_stats["owned_brand_daily"],
-        "search_cache": dir_stats["search_cache"],
+        "search_cache": cache_stats,
+        "demo": demo_stats,
         "warnings": warnings,
     }
 
 
 def clean_dry_run(older_than_days: int | None = None, keep_runs: bool = True) -> dict:
-    """Identify files that are safe to delete, grouped by category.
+    """Identify files safe to delete, grouped by category.
 
-    Never listed: facts/auto_launch_facts.sqlite, runs/*/ main output files.
+    Never cleaned: facts/auto_launch_facts.sqlite, runs/*/ main output files.
     """
-    root = OUTPUTS_ROOT
+    root = output_paths.output_root()
     now = datetime.now()
     candidates = {}
     total_size = 0
@@ -144,49 +144,6 @@ def clean_dry_run(older_than_days: int | None = None, keep_runs: bool = True) ->
             total_files += 1
     candidates["search_cache"] = cache_files
 
-    # search
-    search_files = []
-    for f in sorted(root.glob("search/**/*")):
-        if not f.is_file():
-            continue
-        mtime = datetime.fromtimestamp(f.stat().st_mtime)
-        if _should_include(mtime):
-            search_files.append(str(f))
-            total_size += f.stat().st_size
-            total_files += 1
-    candidates["search"] = search_files
-
-    # owned_brand_daily
-    obd_files = []
-    for f in sorted(root.glob("owned_brand_daily/**/*")):
-        if not f.is_file():
-            continue
-        mtime = datetime.fromtimestamp(f.stat().st_mtime)
-        if _should_include(mtime):
-            obd_files.append(str(f))
-            total_size += f.stat().st_size
-            total_files += 1
-    candidates["owned_brand_daily"] = obd_files
-
-    # briefs (standalone) — only mark as deletable if duplicate with runs
-    brief_files = []
-    for f in sorted(root.glob("briefs/*.md")):
-        if not f.is_file():
-            continue
-        date_key = f.stem
-        run_dir = root / "runs" / date_key.replace("-", "")
-        if run_dir.exists() and (run_dir / "daily_brief.md").exists():
-            mtime = datetime.fromtimestamp(f.stat().st_mtime)
-            if _should_include(mtime):
-                brief_files.append({
-                    "path": str(f),
-                    "reason": "duplicate_brief — 同日期 runs/*/daily_brief.md 已存在",
-                })
-                total_size += f.stat().st_size
-                total_files += 1
-    candidates["briefs_duplicate"] = brief_files
-
-    # Summary
     dry_run = {
         "mode": "dry-run",
         "older_than_days": older_than_days,
@@ -208,12 +165,11 @@ def render_inspect(report: dict) -> str:
     # Runs
     lines.append(f"## Runs ({report['runs']['count']})")
     lines.append("")
-    lines.append(f"{'date':<14} {'complete':<10} {'files':<7} {'missing':<30}")
-    lines.append("-" * 61)
+    lines.append(f"{'date':<14} {'run_mode':<25} {'complete':<10} {'files':<7}")
+    lines.append("-" * 56)
     for r in report["runs"]["list"]:
         status = "✓" if r["complete"] else "✗"
-        missing_str = ", ".join(r["missing"][:3]) if r["missing"] else "—"
-        lines.append(f"{r['date']:<14} {status:<10} {r['file_count']:<7} {missing_str:<30}")
+        lines.append(f"{r['date']:<14} {r['run_mode']:<25} {status:<10} {r['file_count']:<7}")
     lines.append("")
 
     # Facts
@@ -225,20 +181,12 @@ def render_inspect(report: dict) -> str:
     lines.append(f"- **SQLite:** {status} ({size_kb} KB)" if f["exists"] else "- **SQLite:** ✗")
     lines.append("")
 
-    # Briefs
-    lines.append(f"## Briefs (standalone)")
-    lines.append("")
-    for b in report["briefs"]["list"]:
-        dup = " ⚠ duplicate" if b["duplicate_brief"] else ""
-        lines.append(f"- {b['date']}: {b['path']}{dup}")
-    lines.append("")
-
-    # Debug dirs
-    for label in ["search", "owned_brand_daily", "search_cache"]:
-        s = report[label]
+    # Cache & Demo
+    for label in ["search_cache", "demo"]:
+        s = report.get(label, {})
         lines.append(f"## {label}")
         lines.append("")
-        lines.append(f"- {s['file_count']} files, {s['dir_count']} dirs")
+        lines.append(f"- {s.get('file_count', 0)} files, {s.get('dir_count', 0)} dirs")
         lines.append("")
 
     # Warnings
@@ -274,16 +222,11 @@ def render_clean_dry_run(dry: dict) -> str:
         if not files:
             continue
         label = category.replace("_", " ").title()
-        if category == "briefs_duplicate":
-            lines.append(f"## Briefs (duplicate)")
-            for f in files:
-                lines.append(f"- {f['path']}  ({f['reason']})")
-        else:
-            lines.append(f"## {label} ({len(files)} files)")
-            for f in files[:10]:
-                lines.append(f"- {f}")
-            if len(files) > 10:
-                lines.append(f"  ... and {len(files) - 10} more")
+        lines.append(f"## {label} ({len(files)} files)")
+        for f in files[:10]:
+            lines.append(f"- {f}")
+        if len(files) > 10:
+            lines.append(f"  ... and {len(files) - 10} more")
         lines.append("")
 
     lines.append("---")

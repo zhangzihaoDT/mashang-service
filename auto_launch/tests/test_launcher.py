@@ -61,14 +61,15 @@ def test_choice_1_writes_facts(monkeypatch):
 
 
 def test_choice_1_generates_brief_file(monkeypatch):
-    """Brief file should be written to outputs/briefs/{date}.md."""
+    """Brief file should be written to runs/{date}/launcher_daily_run/reports/daily_brief.md."""
     from auto_launch.src.launcher import run_launcher
+    from auto_launch.src import output_paths
     daily = "## 小米 SU7 交付\n\n- 品牌: 小米\n- 车型: SU7\n- 事件类型: 交付数据\n- 时间: 2026-07-09\n- 来源: xiaomiev.com\n- 信源等级: tier_1_official\n"
     monkeypatch.setattr("builtins.input", _inputs([
         "1", "2026-07-09", daily, "/done", "y", "6",
     ]))
     run_launcher()
-    brief_path = Path(__file__).resolve().parents[2] / "auto_launch" / "outputs" / "briefs" / "2026-07-09.md"
+    brief_path = output_paths.daily_brief_md_path("2026-07-09", "launcher_daily_run")
     assert brief_path.exists()
     assert len(brief_path.read_text(encoding="utf-8")) > 50
 

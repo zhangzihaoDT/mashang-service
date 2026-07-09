@@ -3,6 +3,7 @@ import sys, json
 from pathlib import Path
 from datetime import datetime
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from auto_launch.src import output_paths
 
 
 # ── 1. Brief date from input ──────────────────────────────────────
@@ -81,28 +82,33 @@ def _make_inputs(seq):
     return mock
 
 
+def _launcher_run_dir(date_str: str) -> Path:
+    return output_paths.run_dir(date_str, "launcher_daily_run")
+
+
 def test_launcher_daily_run_writes_run_package(monkeypatch):
-    """选项 1 处理后 outputs/runs/{date}/daily_brief.md 存在"""
-    from auto_launch.src.launcher import run_launcher, _run_dir
+    """选项 1 处理后 outputs/runs/{date}/launcher_daily_run/reports/daily_brief.md 存在"""
+    from auto_launch.src.launcher import run_launcher
     daily = "## Test\n- 品牌: A\n- 车型: X\n- 事件类型: 上市\n- 时间: 2026-07-10\n- 来源: src\n- 信源等级: tier_1_official\n"
     monkeypatch.setattr("builtins.input", _make_inputs([
         "1", "2026-07-10", daily, "/done", "y", "6",
     ]))
     run_launcher()
-    run_dir = _run_dir("2026-07-10")
-    assert (run_dir / "daily_brief.md").exists()
-    assert "2026-07-10" in (run_dir / "daily_brief.md").read_text(encoding="utf-8").split("\n")[0]
+    rd = _launcher_run_dir("2026-07-10")
+    brief = rd / "reports" / "daily_brief.md"
+    assert brief.exists(), f"Missing {brief}"
+    assert "2026-07-10" in brief.read_text(encoding="utf-8").split("\n")[0]
 
 
 def test_launcher_daily_run_manifest_contains_counts(monkeypatch):
-    """run_manifest.json 包含 raw/keep/discard/inserted/updated"""
-    from auto_launch.src.launcher import run_launcher, _run_dir
+    """manifest.json 包含 raw/keep/discard/inserted/updated"""
+    from auto_launch.src.launcher import run_launcher
     daily = "## Test\n- 品牌: B\n- 车型: Y\n- 事件类型: 预售\n- 时间: 2026-07-10\n- 来源: src\n- 信源等级: tier_1_official\n"
     monkeypatch.setattr("builtins.input", _make_inputs([
         "1", "2026-07-10", daily, "/done", "y", "6",
     ]))
     run_launcher()
-    mf = _run_dir("2026-07-10") / "run_manifest.json"
+    mf = output_paths.run_manifest_path("2026-07-10", "launcher_daily_run")
     assert mf.exists()
     data = json.loads(mf.read_text(encoding="utf-8"))
     assert "raw" in data
@@ -114,14 +120,14 @@ def test_launcher_daily_run_manifest_contains_counts(monkeypatch):
 
 
 def test_launcher_daily_run_summary_contains_keep_discard(monkeypatch):
-    """run_summary.md 包含 keep/discard 信息"""
-    from auto_launch.src.launcher import run_launcher, _run_dir
+    """summary.md 包含 keep/discard 信息"""
+    from auto_launch.src.launcher import run_launcher
     daily = "## Test\n- 品牌: C\n- 车型: Z\n- 事件类型: 交付\n- 时间: 2026-07-10\n- 来源: src\n- 信源等级: tier_3_industry_media\n"
     monkeypatch.setattr("builtins.input", _make_inputs([
         "1", "2026-07-10", daily, "/done", "y", "6",
     ]))
     run_launcher()
-    md = _run_dir("2026-07-10") / "run_summary.md"
+    md = output_paths.run_summary_path("2026-07-10", "launcher_daily_run")
     assert md.exists()
     content = md.read_text(encoding="utf-8")
     assert "Kept" in content
@@ -131,7 +137,7 @@ def test_launcher_daily_run_summary_contains_keep_discard(monkeypatch):
 
 def test_outputs_inspect_recognizes_launcher_run(monkeypatch):
     """outputs inspect 能看到 launcher 产出的 runs"""
-    from auto_launch.src.launcher import run_launcher, _run_dir
+    from auto_launch.src.launcher import run_launcher
     from auto_launch.src.output_manager import inspect
     daily = "## Test\n- 品牌: D\n- 车型: W\n- 事件类型: 权益调整\n- 时间: 2026-07-10\n- 来源: src\n- 信源等级: tier_1_official\n"
     monkeypatch.setattr("builtins.input", _make_inputs([

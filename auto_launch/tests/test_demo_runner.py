@@ -110,10 +110,11 @@ def test_demo_does_not_use_real_api():
 def test_demo_does_not_break_runs_contract():
     """demo outputs to demo/ only, does not create run dirs."""
     _cleanup()
-    from auto_launch.src.output_manager import OUTPUTS_ROOT
-    runs_before = list((OUTPUTS_ROOT / "runs").glob("*"))
+    from auto_launch.src import output_paths
+    root = output_paths.output_root()
+    runs_before = list((root / "runs").glob("*"))
     manifest = run_demo(reset_store=True)
-    runs_after = list((OUTPUTS_ROOT / "runs").glob("*"))
+    runs_after = list((root / "runs").glob("*"))
     assert runs_before == runs_after
     assert "demo" in str(manifest["outputs"]["demo_dir"])
     print("[PASS] test_demo_does_not_break_runs_contract")

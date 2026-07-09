@@ -28,11 +28,11 @@ if _PROJECT_ROOT not in sys.path:
 
 
 def cmd_daily(args):
-    from auto_launch.src.brand_daily_marketing_watch import _run, DEFAULT_OUTPUT_BASE
+    from auto_launch.src.brand_daily_marketing_watch import _run
     _run(
         brand=args.brand, brand_name=args.brand_name,
         monitor_date=args.date, window_hours=args.window_hours,
-        query_profile=args.query_profile, out_dir=str(DEFAULT_OUTPUT_BASE),
+        query_profile=args.query_profile,
         dry_run=not args.live, refresh=args.refresh,
     )
     if args.to_facts and args.live:
@@ -43,10 +43,11 @@ def _daily_to_facts(args):
     """将 daily 监控的 normalized 结果写入事实库。"""
     from auto_launch.src.inbox_filter import classify
     from auto_launch.src.fact_store import FactStore
+    from auto_launch.src import output_paths
     import json
 
-    out_dir = Path(__file__).resolve().parent / "outputs" / "owned_brand_daily" / args.date.replace("-", "")
-    norm_file = out_dir / "normalized_search_results.json"
+    run_mode = output_paths.run_mode_owned_brand_daily(args.brand)
+    norm_file = output_paths.search_normalized_path(args.date, run_mode)
     if not norm_file.exists():
         print("[daily --to-facts] normalized 结果不存在，跳过")
         return
@@ -454,7 +455,7 @@ def main():
     p_run.add_argument("--date", default=datetime.now().strftime("%Y-%m-%d"))
     p_run.add_argument("--window-hours", type=int, default=24)
     p_run.add_argument("--live", action="store_true")
-    p_run.add_argument("--brief-output", help="brief 输出路径（默认 outputs/runs/{date}/daily_brief.md）")
+    p_run.add_argument("--brief-output", help="brief 输出路径（默认由 output_paths.py 管理）")
 
     # replay
     p_replay = sub.add_parser("replay", help="连续回放（支持日期范围或 inbox fixtures）")
