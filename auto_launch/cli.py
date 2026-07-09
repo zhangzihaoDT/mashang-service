@@ -11,6 +11,8 @@ Auto Launch CLI — 统一命令行入口。
   python -m auto_launch.cli source-audit --watchlist ls8 --days 7
   python -m auto_launch.cli outputs inspect
   python -m auto_launch.cli outputs clean --older-than 30 --dry-run
+  python -m auto_launch.cli demo
+  python -m auto_launch.cli demo --reset-store
 """
 
 import sys, argparse
@@ -308,6 +310,17 @@ def cmd_replay(args):
         print(f"  {r['monitor_date']}  kept={r['kept']}  brief={r['brief_facts']} facts")
 
 
+def cmd_demo(args):
+    from auto_launch.src.demo_runner import run_demo
+    manifest = run_demo(reset_store=args.reset_store)
+    print(f"[demo] {manifest['replay_summary']['days']} days, "
+          f"{manifest['replay_summary']['total_facts']} facts, "
+          f"dup_rate={manifest['replay_summary']['duplicate_rate']}%")
+    print(f"  demo_dir: {manifest['outputs']['demo_dir']}")
+    print(f"  manifest: {manifest['outputs']['manifest']}")
+    print(f"  summary: {manifest['demo_summary']}")
+
+
 def cmd_outputs(args):
     from auto_launch.src.output_manager import inspect, clean_dry_run, render_inspect, render_clean_dry_run
 
@@ -446,6 +459,10 @@ def main():
     p_replay.add_argument("--input-dir", help="inbox fixtures 目录（替代日期范围）")
     p_replay.add_argument("--reset-store", action="store_true", help="回放前重置事实库")
 
+    # demo
+    p_demo = sub.add_parser("demo", help="一键演示：replay fixtures → audit → source-audit → brief → timeline → inspect")
+    p_demo.add_argument("--reset-store", action="store_true", help="演示前清空事实库")
+
     # outputs
     p_out = sub.add_parser("outputs", help="输出管理：inspect / clean")
     out_sub = p_out.add_subparsers(dest="sub", help="outputs 子命令")
@@ -496,12 +513,14 @@ def main():
         cmd_run_day(args)
     elif args.command == "replay":
         cmd_replay(args)
-    elif args.command == "outputs":
-        cmd_outputs(args)
     elif args.command == "source-audit":
         cmd_source_audit(args)
     elif args.command == "timeline":
         cmd_timeline(args)
+    elif args.command == "demo":
+        cmd_demo(args)
+    elif args.command == "outputs":
+        cmd_outputs(args)
     else:
         parser.print_help()
 

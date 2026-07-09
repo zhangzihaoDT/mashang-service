@@ -1,8 +1,12 @@
-# Auto Launch Service
+# Auto Launch Service — v1.0 Demo Case
+
+> 多渠道信号收敛 → 持久事实库 → 信源审计 + 简报 + 时间线
+>
+> 不依赖第三方 API 即可运行 demo：`python -m auto_launch.cli demo`
 
 ## 项目定位
 
-auto_launch 是一个独立的汽车上市 / 营销事件监测服务。它不属于 mashang_workspace 的分析脚本集，而是作为 mashang-service 下的一个独立子项目存在。
+auto_launch 是一个独立的汽车上市 / 营销事件监测服务，v1.0 已完成核心能力闭环：从多渠道收集事实 → 标准化去重 → 质量审计 → 信源覆盖审计 → 简报/时间线输出。所有能力均可通过 CLI `demo` 一键演示。
 
 ## 业务问题
 
@@ -26,6 +30,7 @@ Inbox/Search → Normalize → Filter → Facts → Query/Audit
 | **Facts** | `fact_store.py` | SQLite 事实库（fingerprint 去重） |
 | **Query** | `cli.py facts` | 查询、审计、统计、导出 |
 | **Intelligence** | `event_clusterer.py`, `event_candidate_gate.py`, `brand_daily_marketing_watch.py` | 事件聚类、候选门控、品牌监控 |
+| **Demo** | `demo_runner.py` | 一键演示编排（replay → audit → source-audit → brief → timeline → inspect） |
 | **Cache** | `search_cache.py` | API 请求缓存（TTL 24h） |
 
 ## 目录结构
@@ -65,10 +70,16 @@ auto_launch/
 │   ├── source_domain_resolver.py
 │   ├── event_clusterer.py
 │   ├── event_candidate_gate.py
-│   └── brand_daily_marketing_watch.py
+│   ├── brand_daily_marketing_watch.py
+│   ├── source_auditor.py       信源覆盖审计
+│   ├── output_manager.py       输出管理（inspect / clean）
+│   └── demo_runner.py          一键演示编排
 ├── docs/
 │   ├── workflow.md             执行链路文档
-│   └── inbox.md                Inbox MVP 文档
+│   ├── inbox.md                Inbox MVP 文档
+│   ├── operating_loop.md       每日运行指南
+│   ├── output_contract.md      输出契约
+│   └── demo_case.md            Demo Case 说明
 ├── outputs/                    运行时输出
 └── tests/                      测试
     ├── test_auto_launch_search_cache.py
@@ -89,6 +100,14 @@ auto_launch/
     ├── test_fact_store.py
     ├── test_inbox_runner.py
     └── test_cli_inbox.py
+    │
+    │   v0.8+ Tests:
+    ├── test_source_auditor.py      14 tests
+    ├── test_cli_source_audit.py    7 tests
+    ├── test_output_manager.py      13 tests
+    ├── test_cli_outputs.py         7 tests
+    ├── test_demo_runner.py         10 tests
+    └── test_cli_demo.py            3 tests
 ```
 
 ## 如何运行
@@ -193,6 +212,26 @@ python -m auto_launch.cli timeline --model LS6 --event-type 权益调整 --days 
 python -m auto_launch.cli timeline --output tl.md                          # 写入文件
 ```
 
+### 一键演示
+
+```bash
+python -m auto_launch.cli demo                           # 使用 fixtures 演示（不调 API）
+python -m auto_launch.cli demo --reset-store             # 清空事实库后演示
+```
+
+Demo 编排 6 步：replay fixtures → facts audit → source-audit → brief → timeline → outputs inspect。
+
+输出到 `outputs/demo/`：
+- `demo_manifest.json` — 运行元数据
+- `demo_summary.md` — 人类可读摘要
+- `facts_audit.json` — 事实库质量审计
+- `source_audit.md` — 信源覆盖审计
+- `daily_brief.md` — 每日简报
+- `timeline.md` — 品牌/车型事件时间线
+- `outputs_inspect.md` — outputs 目录完整性检查
+
+详见 `docs/demo_case.md`。
+
 ### 输出管理
 
 ```bash
@@ -284,4 +323,5 @@ outputs/
 | v0.7 | Operating Loop & Timeline | ✓ run-day / replay / timeline |
 | v0.8 | Source Coverage Audit | ✓ 复用现有 configs，不新增 source_coverage_expectations.yaml |
 | v0.9 | Output Contract & Demo Run | ✓ outputs inspect / clean dry-run / output_contract.md |
-| v1.0 | Demo Case | |
+| v1.0 | Demo Case | ✓ demo / demo_runner / demo_case.md / outputs 7 文件 |
+| v1.1 | Impact / Battle Field | |
