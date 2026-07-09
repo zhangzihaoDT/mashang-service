@@ -19,7 +19,7 @@ def run_day(monitor_date: str, brand: str = "im", brand_name: str = "智己",
     4. 生成 brief
     5. 写出 manifest.json / facts_audit.json / daily_brief.md / summary.md
 
-    Output paths managed by output_paths.py. Run mode: owned_brand_daily_{brand}.
+    Output paths managed by output_paths.py. Run mode: brand_daily_{brand}.
     """
     from auto_launch.src.brand_daily_marketing_watch import _run
     from auto_launch.src.fact_store import FactStore
@@ -27,7 +27,7 @@ def run_day(monitor_date: str, brand: str = "im", brand_name: str = "智己",
     from auto_launch.src.inbox_filter import classify
     from auto_launch.src import source_auditor
 
-    run_mode = output_paths.run_mode_owned_brand_daily(brand)
+    run_mode = output_paths.run_mode_brand_daily(brand)
     rd = output_paths.run_dir(monitor_date, run_mode)
     log = []
 

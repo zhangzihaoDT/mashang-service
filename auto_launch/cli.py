@@ -46,7 +46,7 @@ def _daily_to_facts(args):
     from auto_launch.src import output_paths
     import json
 
-    run_mode = output_paths.run_mode_owned_brand_daily(args.brand)
+    run_mode = output_paths.run_mode_brand_daily(args.brand)
     norm_file = output_paths.search_normalized_path(args.date, run_mode)
     if not norm_file.exists():
         print("[daily --to-facts] normalized 结果不存在，跳过")

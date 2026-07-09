@@ -65,7 +65,7 @@ def test_inspect_complete_run():
         orig_root = output_paths._OUTPUT_ROOT
         output_paths._OUTPUT_ROOT = root
         try:
-            _make_run(root, "2026-07-09", "owned_brand_daily_im", complete=True)
+            _make_run(root, "2026-07-09", "brand_daily_zhiji", complete=True)
             report = inspect()
             assert report["runs"]["count"] == 1
             assert report["runs"]["list"][0]["complete"] is True
@@ -80,7 +80,7 @@ def test_inspect_incomplete_run():
         orig_root = output_paths._OUTPUT_ROOT
         output_paths._OUTPUT_ROOT = root
         try:
-            _make_run(root, "2026-07-09", "owned_brand_daily_im", complete=False)
+            _make_run(root, "2026-07-09", "brand_daily_zhiji", complete=False)
             report = inspect()
             assert report["runs"]["count"] == 1
             assert report["runs"]["list"][0]["complete"] is False
@@ -148,7 +148,7 @@ def test_clean_dry_run_never_includes_runs():
         orig_root = output_paths._OUTPUT_ROOT
         output_paths._OUTPUT_ROOT = root
         try:
-            _make_run(root, "2026-07-09", "owned_brand_daily_im", complete=True)
+            _make_run(root, "2026-07-09", "brand_daily_zhiji", complete=True)
             dry = clean_dry_run()
             all_candidates = []
             for cat_files in dry["candidates"].values():

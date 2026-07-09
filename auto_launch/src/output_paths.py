@@ -52,6 +52,10 @@ BRAND_SLUG_MAP = {
     "蔚来汽车": "nio",
     "小鹏汽车": "xpeng",
     "上汽": "saic",
+    # Internal brand keys (used by CLI --brand / run_mode)
+    "im": "zhiji",
+    "zeekr": "zeekr",
+    "nio": "nio",
 }
 
 
@@ -201,8 +205,13 @@ def source_audit_json_path(date_str: str, run_mode: str) -> Path:
 # ── Run Mode 构建函数 ───────────────────────────────────────
 # 所有 run_mode 通过 brand_to_slug 确保只含 ASCII 小写字母、数字、下划线。
 
+def run_mode_brand_daily(brand: str) -> str:
+    return f"brand_daily_{brand_to_slug(brand)}"
+
+
+# backward compat
 def run_mode_owned_brand_daily(brand: str) -> str:
-    return f"owned_brand_daily_{brand_to_slug(brand)}"
+    return run_mode_brand_daily(brand)
 
 
 def run_mode_brand_watch(brand_label: str) -> str:

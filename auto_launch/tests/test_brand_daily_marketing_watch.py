@@ -94,8 +94,8 @@ def test_makefile_target_dry_run():
 def test_output_path_contract():
     """验证新路径格式符合 output_paths 规范"""
     brand = "im"
-    run_mode = output_paths.run_mode_owned_brand_daily(brand)
-    assert run_mode == "owned_brand_daily_im"
+    run_mode = output_paths.run_mode_brand_daily(brand)
+    assert run_mode == "brand_daily_zhiji"
 
     manifest_path = output_paths.run_manifest_path("2026-07-09", run_mode)
     assert "runs" in str(manifest_path)

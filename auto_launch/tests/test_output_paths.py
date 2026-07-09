@@ -25,10 +25,11 @@ def test_brand_to_slug_known_brands():
 
 
 def test_brand_to_slug_ascii_passthrough():
-    """已有 ASCII 品牌名透传。"""
+    """已知 ASCII 品牌名返回正确 slug。"""
     assert output_paths.brand_to_slug("zhiji") == "zhiji"
-    assert output_paths.brand_to_slug("im") == "im"
+    assert output_paths.brand_to_slug("im") == "zhiji"  # mapped to zhiji
     assert output_paths.brand_to_slug("zeekr") == "zeekr"
+    assert output_paths.brand_to_slug("nio") == "nio"
 
 
 def test_brand_to_slug_unknown_sanitized():
@@ -55,11 +56,16 @@ def test_run_mode_brand_watch_no_chinese():
         assert re.match(r"^[a-z0-9_]+$", mode), f"run_mode has invalid chars: {mode}"
 
 
-def test_run_mode_owned_brand_daily_no_chinese():
-    """owned_brand_daily run_mode 不含中文。"""
-    mode = output_paths.run_mode_owned_brand_daily("智己")
-    assert mode == "owned_brand_daily_zhiji"
+def test_run_mode_brand_daily_no_chinese():
+    """brand_daily run_mode 不含中文。"""
+    mode = output_paths.run_mode_brand_daily("智己")
+    assert mode == "brand_daily_zhiji"
     assert all(ord(c) < 128 for c in mode)
+
+
+def test_run_mode_brand_daily_backward_compat():
+    """向后兼容：run_mode_owned_brand_daily 返回相同结果。"""
+    assert output_paths.run_mode_owned_brand_daily("智己") == "brand_daily_zhiji"
 
 
 def test_run_mode_brand_watch_specific():
@@ -91,3 +97,61 @@ def test_search_dir_path_no_chinese():
     path = output_paths.search_dir("2026-07-09", "brand_watch_蔚来")
     path_str = str(path)
     assert all(ord(c) < 128 for c in path_str), f"path contains non-ASCII: {path_str}"
+
+
+# ── Three run_mode types: required file contracts ─────────────
+
+def test_brand_watch_required_files():
+    """brand_watch 只要求 4 个 search 文件。"""
+    rm = output_paths.run_mode_brand_watch("蔚来")
+    assert rm == "brand_watch_nio"
+    sd = output_paths.search_dir("2026-07-09", rm)
+    expected = {"plan.json", "raw.json", "normalized.json", "audit.json"}
+    assert sd.name == "search"
+    # verify no extra required dirs
+    parent = sd.parent
+    assert not (parent / "facts").exists()
+    assert not (parent / "reports").exists()
+
+
+def test_brand_daily_required_files():
+    """brand_daily 要求完整 run package。"""
+    rm = output_paths.run_mode_brand_daily("智己")
+    assert rm == "brand_daily_zhiji"
+    rd = output_paths.run_dir("2026-07-09", rm)
+    # Standard subdirs should be accessible
+    assert output_paths.search_dir("2026-07-09", rm).parent == rd
+    assert output_paths.reports_dir("2026-07-09", rm).parent == rd
+    assert output_paths.run_facts_dir("2026-07-09", rm).parent == rd
+
+
+def test_launcher_daily_run_contract():
+    """launcher_daily_run 允许 partial，manifest 标明 input_channel。"""
+    rm = "launcher_daily_run"
+    rd = output_paths.run_dir("2026-07-09", rm)
+    # manifest and summary are always required
+    assert output_paths.run_manifest_path("2026-07-09", rm).parent == rd
+    assert output_paths.run_summary_path("2026-07-09", rm).parent == rd
+    # reports are typical but not guaranteed to exist
+    brief = output_paths.daily_brief_md_path("2026-07-09", rm)
+    assert brief.parent.name == "reports"
+
+
+def test_run_mode_brand_daily_slug():
+    """brand_daily 用 im 和 智己 都得到 zhiji slug。"""
+    assert output_paths.run_mode_brand_daily("im") == "brand_daily_zhiji"
+    assert output_paths.run_mode_brand_daily("智己") == "brand_daily_zhiji"
+
+
+def test_run_mode_brand_watch_slug():
+    """brand_watch 用 蔚来 得到 nio slug。"""
+    assert output_paths.run_mode_brand_watch("蔚来") == "brand_watch_nio"
+    assert output_paths.run_mode_brand_watch("nio") == "brand_watch_nio"
+
+
+def test_all_new_runs_ascii_only():
+    """所有新 run 目录不含中文。"""
+    for cn, expected in [("智己", "zhiji"), ("极氪", "zeekr"), ("蔚来", "nio"), ("理想", "li_auto")]:
+        for fn in [output_paths.run_mode_brand_watch, output_paths.run_mode_brand_daily]:
+            mode = fn(cn)
+            assert all(ord(c) < 128 for c in mode), f"{fn.__name__}({cn}) → {mode}"

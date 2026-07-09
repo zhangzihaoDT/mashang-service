@@ -10,7 +10,7 @@ def test_run_day_dry_run():
     r = run_day(monitor_date="2026-07-09", live=False)
     assert r["monitor_date"] == "2026-07-09"
     assert r["live"] is False
-    assert r["run_mode"] == "owned_brand_daily_im"
+    assert r["run_mode"] == "brand_daily_zhiji"
     assert "outputs" in r
     for k in ("run_dir", "manifest", "audit", "source_audit_json", "source_audit_md", "brief", "summary"):
         assert k in r["outputs"], f"Missing output key: {k}"
@@ -144,7 +144,7 @@ def test_render_summary_with_source_audit():
 
 def test_output_path_contract():
     """验证 run_day 的输出路径符合新的输出合同"""
-    run_mode = "owned_brand_daily_im"
+    run_mode = "brand_daily_zhiji"
     assert output_paths.run_manifest_path("2026-07-09", run_mode).name == "manifest.json"
     assert "reports" in str(output_paths.daily_brief_md_path("2026-07-09", run_mode))
     assert output_paths.daily_brief_md_path("2026-07-09", run_mode).name == "daily_brief.md"

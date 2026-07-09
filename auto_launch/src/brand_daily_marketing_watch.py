@@ -131,13 +131,13 @@ def _run(brand: str, brand_name: str, monitor_date: str, window_hours: int,
             break
 
     # output — use output_paths
-    run_mode = output_paths.run_mode_owned_brand_daily(brand)
+    run_mode = output_paths.run_mode_brand_daily(brand)
     run_dir_path = output_paths.run_dir(monitor_date, run_mode)
     search_out = output_paths.search_dir(monitor_date, run_mode)
     reports_out = output_paths.reports_dir(monitor_date, run_mode)
 
     manifest = {
-        "task_name": "owned_brand_daily_marketing_watch",
+        "task_name": "brand_daily_marketing_watch",
         "brand_key": brand, "brand_name": brand_name,
         "monitor_date": monitor_date, "run_mode": run_mode,
         "time_window": {"start": _fmt(start_dt), "end": _fmt(end_dt), "window_hours": window_hours},
