@@ -193,6 +193,31 @@ python -m auto_launch.cli timeline --model LS6 --event-type 权益调整 --days 
 python -m auto_launch.cli timeline --output tl.md                          # 写入文件
 ```
 
+### 输出管理
+
+```bash
+python -m auto_launch.cli outputs inspect                           # 检查 outputs 完整性
+python -m auto_launch.cli outputs clean --older-than 7 --dry-run    # 列出 7 天前可清理的调试/缓存产物
+python -m auto_launch.cli outputs clean --older-than 30 --dry-run   # 列出 30 天前可清理的产物
+```
+
+`outputs inspect` 检查：
+- 哪些 run 是完整的（6 个必要文件都在）
+- 哪些 run 缺文件
+- facts SQLite 是否存在
+- briefs 是否与 runs 中的 daily_brief 重复
+- search / owned_brand_daily / search_cache 的文件数量
+
+`outputs clean` 为 dry-run 模式，只列出可清理文件，不实际删除。清理候选包括：
+- `search_cache/*` — API 缓存（TTL 24h）
+- `search/*` — 搜索管线中间产物
+- `owned_brand_daily/*` — 每日监控中间产物
+- `briefs/*` — 仅当同日期 `runs/*/daily_brief.md` 已存在时标记为 duplicate
+
+never clean 列表：
+- `facts/auto_launch_facts.sqlite` — 持久事实资产
+- `runs/*/` — 主运行包文件
+
 ## 主要配置说明
 
 | 文件 | 用途 |
@@ -204,21 +229,37 @@ python -m auto_launch.cli timeline --output tl.md                          # 写
 | `configs/priority_brand_watchlist.yaml` | 24 个重点品牌列表 |
 | `configs/ls8_competitor_watchlist.yaml` | 10 款竞品车型列表 |
 
-## 输出文件说明
+## 输出说明
+
+详见 `docs/output_contract.md`。
+
+### 分层
+
+| 层级 | 目录 | 用途 | 可清理 |
+|------|------|------|--------|
+| ★ 主运行包 | `runs/{date}/` | `run-day` 直接产出 | ❌ |
+| ★ 持久资产 | `facts/` | SQLite 事实库 | ❌ |
+| △ 独立导出 | `briefs/` | `brief --output` 单独导出 | 条件性 ✅ |
+| ○ 调试产物 | `search/`, `owned_brand_daily/` | 搜索/监控中间结果 | ✅ |
+| ○ 缓存 | `search_cache/` | API 原始响应缓存 | ✅ |
+
+### 目录树
 
 ```
 outputs/
-├── search/{date}/{mode}/     搜索管线输出
-│   ├── search_intent.json
-│   ├── search_task_config.json
-│   ├── search_budget_plan.json
-│   ├── query_plan.json
-│   ├── search_results.raw.json
-│   ├── search_results.normalized.json
-│   └── search_audit.json
-├── owned_brand_daily/{date}/  品牌每日监控输出
-├── runs/{date}/               run-day 输出（manifest / audit / source-audit / brief / summary）
-│   ├── run_manifest.json
+├── runs/{date}/               ★ 主运行包
+│   ├── run_manifest.json     运行元数据
+│   ├── facts_audit.json      事实库质量审计
+│   ├── source_audit.json     信源覆盖审计 JSON
+│   ├── source_audit.md       信源覆盖审计 Markdown
+│   ├── daily_brief.md        每日简报
+│   └── run_summary.md        人类可读摘要
+├── facts/                     ★ 持久事实资产
+│   └── auto_launch_facts.sqlite
+├── briefs/                    △ 独立简报导出（与 runs 可能重复）
+├── search/{date}/{mode}/      ○ 搜索调试产物
+├── owned_brand_daily/{date}/  ○ 品牌监控调试产物
+└── search_cache/{date}/       ○ API 缓存
 │   ├── facts_audit.json
 │   ├── source_audit.json
 │   ├── source_audit.md
@@ -242,5 +283,5 @@ outputs/
 | v0.6 | Daily Brief from Facts | ✓ brief / brief_rank / badge |
 | v0.7 | Operating Loop & Timeline | ✓ run-day / replay / timeline |
 | v0.8 | Source Coverage Audit | ✓ 复用现有 configs，不新增 source_coverage_expectations.yaml |
-| v0.9 | Impact / Battle Field | |
+| v0.9 | Output Contract & Demo Run | ✓ outputs inspect / clean dry-run / output_contract.md |
 | v1.0 | Demo Case | |

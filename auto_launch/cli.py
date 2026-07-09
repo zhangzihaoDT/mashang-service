@@ -9,6 +9,8 @@ Auto Launch CLI — 统一命令行入口。
   python -m auto_launch.cli normalize --raw <path> --query-plan <path>
   python -m auto_launch.cli source-audit --watchlist priority --days 7
   python -m auto_launch.cli source-audit --watchlist ls8 --days 7
+  python -m auto_launch.cli outputs inspect
+  python -m auto_launch.cli outputs clean --older-than 30 --dry-run
 """
 
 import sys, argparse
@@ -306,6 +308,17 @@ def cmd_replay(args):
         print(f"  {r['monitor_date']}  kept={r['kept']}  brief={r['brief_facts']} facts")
 
 
+def cmd_outputs(args):
+    from auto_launch.src.output_manager import inspect, clean_dry_run, render_inspect, render_clean_dry_run
+
+    if args.sub == "inspect":
+        report = inspect()
+        print(render_inspect(report))
+    elif args.sub == "clean":
+        dry = clean_dry_run(older_than_days=args.older_than, keep_runs=args.keep_runs)
+        print(render_clean_dry_run(dry))
+
+
 def cmd_source_audit(args):
     import json
     from auto_launch.src.fact_store import FactStore
@@ -433,6 +446,19 @@ def main():
     p_replay.add_argument("--input-dir", help="inbox fixtures 目录（替代日期范围）")
     p_replay.add_argument("--reset-store", action="store_true", help="回放前重置事实库")
 
+    # outputs
+    p_out = sub.add_parser("outputs", help="输出管理：inspect / clean")
+    out_sub = p_out.add_subparsers(dest="sub", help="outputs 子命令")
+
+    p_out_inspect = out_sub.add_parser("inspect", help="检查 outputs 目录结构完整性")
+    p_out_clean = out_sub.add_parser("clean", help="列出可清理的调试/缓存产物（仅 dry-run）")
+    p_out_clean.add_argument("--older-than", type=int, default=None,
+                             help="仅列出超过 N 天的文件（如 30）")
+    p_out_clean.add_argument("--keep-runs", action="store_true", default=True,
+                             help="保留 runs/ 主运行包（默认开启）")
+    p_out_clean.add_argument("--dry-run", action="store_true", default=True,
+                             help="dry-run 模式（默认开启，不删除文件）")
+
     # source-audit
     p_sa = sub.add_parser("source-audit", help="信源覆盖审计")
     p_sa.add_argument("--watchlist", choices=["priority", "ls8"], default="priority",
@@ -470,6 +496,8 @@ def main():
         cmd_run_day(args)
     elif args.command == "replay":
         cmd_replay(args)
+    elif args.command == "outputs":
+        cmd_outputs(args)
     elif args.command == "source-audit":
         cmd_source_audit(args)
     elif args.command == "timeline":
