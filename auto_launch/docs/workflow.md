@@ -170,22 +170,18 @@ brand + brand_name + monitor_date + window_hours
 ## 当前已知问题
 
 1. **volc_search.yaml 的 cache.root_dir** — search_budget_manager 已硬编码 cache 路径为 `SERVICE_ROOT / "outputs" / "search_cache"`，不再从 YAML 读取
-2. **prompt 层测试** — 旧 promptbuilder 的 134 个测试用例检查的是从未创建的规划目录（prompts/, plan_templates/, schemas/ 等），迁移后不归入 service 测试 gate
-3. **Makefile 集成** — 根目录 Makefile 仍引用旧路径，未更新
-4. **能力注册表** — `build_workspace_skills_catalog.py` 等仍引用旧路径
-5. **无 48h Launch Report** — 上市 48h 报告生成器尚未实现
+2. **无 48h Launch Report** — 上市 48h 报告生成器尚未实现
 
 ## 下一步建议
 
 ### P0
-- Source Coverage Audit: 检查每个品牌/车型的信源覆盖情况
-- Event Promotion: 从 discovery_signal → candidate → confirmed 的推进机制
+- Auto Launch Inbox MVP（已完成：parser / filter / store / runner）
+- Fact Store（已完成：SQLite, fingerprint 去重）
+- keep/discard filter（已完成）
 
 ### P1
-- impact_score: 事件影响评分
-- Vehicle Memory: 基于时间序列的车型事件记忆
+- search --to-facts: search 结果直接写入 facts
+- facts query 增强: 分页 / 聚合 / 导出
 
 ### P2
-- Golden Case Report: 优秀 case 沉淀
-- 48h Launch Report: 上市 48h 简报生成器（CLI: render-report）
-- Render Pipeline: Markdown/HTML report renderer
+- daily brief: 基于 facts 生成每日简报

@@ -1,3 +1,4 @@
+"""Layer: Intelligence Utilities — 域名/信源识别"""
 """
 source_domain_resolver.py — 域名/信源解析器。
 

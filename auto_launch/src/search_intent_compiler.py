@@ -1,3 +1,4 @@
+"""Layer: Search Pipeline — 自然语言 → search_intent"""
 """
 search_intent_compiler.py — 将用户自然语言需求转为结构化 search_intent。
 

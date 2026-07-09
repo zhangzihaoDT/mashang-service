@@ -14,18 +14,19 @@ auto_launch 是一个独立的汽车上市 / 营销事件监测服务。它不�
 ## 核心链路
 
 ```
-Watchlist → Search → Normalize → Gate → Score → Report → Memory
+Inbox/Search → Normalize → Filter → Facts → Query/Audit
 ```
 
 | 阶段 | 模块 | 产出 |
 |------|------|------|
-| **Watchlist** | `configs/priority_brand_watchlist.yaml`, `configs/ls8_competitor_watchlist.yaml` | 品牌/车型目标列表 |
-| **Search** | `src/search_intent_compiler.py`, `src/volc_search_query_builder.py`, `src/volc_search_client.py` | 搜索意图 → 查询计划 → 搜索结果 |
-| **Normalize** | `src/normalize_search_results.py`, `src/source_domain_resolver.py` | URL 去重 → 信源分类 → 时间窗口校验 |
-| **Cluster** | `src/event_clusterer.py` | 将搜索结果聚类为事件候选 |
-| **Gate** | `src/event_candidate_gate.py` | 确定性规则分桶：candidate / discovery_signal / context_only / needs_review |
-| **Report** | `src/brand_daily_marketing_watch.py` | Markdown 简报 |
-| **Cache** | `src/search_cache.py` | API 请求缓存（TTL 24h） |
+| **Inbox** | `inbox_parser.py`, `inbox_runner.py` | ChatGPT daily run → raw items |
+| **Search** | `search_intent_compiler.py`, `volc_search_*.py` | 搜索意图 → 查询计划 → 搜索结果 |
+| **Normalize** | `normalize_search_results.py`, `source_domain_resolver.py` | URL 去重 → 信源分类 → 时间窗口校验 |
+| **Filter** | `inbox_filter.py` | keep/discard 二分类 |
+| **Facts** | `fact_store.py` | SQLite 事实库（fingerprint 去重） |
+| **Query** | `cli.py facts` | 查询、审计、统计、导出 |
+| **Intelligence** | `event_clusterer.py`, `event_candidate_gate.py`, `brand_daily_marketing_watch.py` | 事件聚类、候选门控、品牌监控 |
+| **Cache** | `search_cache.py` | API 请求缓存（TTL 24h） |
 
 ## 目录结构
 
@@ -42,25 +43,32 @@ auto_launch/
 │   ├── ls8_competitor_watchlist.csv
 │   ├── ls8_competitor_watchlist.yaml
 │   └── priority_brand_watchlist.yaml
-├── src/                        Python 源码
-│   ├── __init__.py
+├── src/                        Python 源码（3 层分层）
+│   │
+│   │   Inbox Core:
+│   ├── inbox_parser.py          raw 输入 → raw items
+│   ├── inbox_filter.py          keep/discard 二分类
+│   ├── fact_store.py            SQLite 事实库
+│   ├── inbox_runner.py          管线编排 + 交互模式
+│   │
+│   │   Search Pipeline:
 │   ├── search_intent_compiler.py
 │   ├── search_task_config_builder.py
 │   ├── search_budget_manager.py
 │   ├── volc_search_query_builder.py
 │   ├── volc_search_client.py
 │   ├── volc_search_daily.py
-│   ├── normalize_search_results.py
 │   ├── search_cache.py
+│   ├── normalize_search_results.py
+│   │
+│   │   Intelligence Utilities:
 │   ├── source_domain_resolver.py
 │   ├── event_clusterer.py
 │   ├── event_candidate_gate.py
 │   └── brand_daily_marketing_watch.py
-├── prompts/                    Prompt 模板（归档）
-├── runbooks/                   分析工作手册
 ├── docs/
-│   └── workflow.md            执行链路文档
-├── reports/
+│   ├── workflow.md             执行链路文档
+│   └── inbox.md                Inbox MVP 文档
 ├── outputs/                    运行时输出
 └── tests/                      测试
     ├── test_auto_launch_search_cache.py
@@ -74,43 +82,63 @@ auto_launch/
     ├── test_auto_launch_candidate_gate.py
     ├── test_auto_launch_time_window_compiler.py
     ├── test_brand_daily_marketing_watch.py
-    └── ...（promptbuilder 历史测试）
+    │
+    │   Inbox Core Tests:
+    ├── test_inbox_parser.py
+    ├── test_inbox_filter.py
+    ├── test_fact_store.py
+    ├── test_inbox_runner.py
+    └── test_cli_inbox.py
 ```
 
 ## 如何运行
 
+所有命令通过统一 CLI 入口 `python -m auto_launch.cli` 执行。
+
 ### Daily Monitor
 
 ```bash
-# 自有品牌每日营销监控 dry-run
-python -m services.auto_launch.cli daily --brand im --brand-name 智己
-
-# 自有品牌每日营销监控（执行搜索）
-python -m services.auto_launch.cli daily --brand im --brand-name 智己 --live
-
-# 指定时间窗口
-python -m services.auto_launch.cli daily --brand im --brand-name 智己 --window-hours 48
-```
-
-### 标准化搜索结果
-
-```bash
-python -m services.auto_launch.cli normalize --raw <path> --query-plan <path>
+python -m auto_launch.cli daily --brand im --brand-name 智己
+python -m auto_launch.cli daily --brand im --brand-name 智己 --live
+python -m auto_launch.cli daily --brand im --brand-name 智己 --window-hours 48
+python -m auto_launch.cli daily --brand im --brand-name 智己 --live --to-facts
 ```
 
 ### 搜索意图转译
 
 ```bash
-python -m services.auto_launch.cli search --request "看看极氪最近 7 天都有什么动作"
-python -m services.auto_launch.cli search --request "看看极氪最近 7 天都有什么动作" --live
+python -m auto_launch.cli search --request "看看极氪最近 7 天都有什么动作"
+python -m auto_launch.cli search --request "看看极氪最近 7 天都有什么动作" --live
+python -m auto_launch.cli search --request "看看极氪最近 7 天都有什么动作" --live --to-facts
 ```
 
-### 直接运行脚本
+### 标准化搜索结果
 
 ```bash
-python services/auto_launch/src/volc_search_daily.py --request "看看极氪最近 7 天都有什么动作"
-python services/auto_launch/src/brand_daily_marketing_watch.py --brand im --brand-name 智己
-python services/auto_launch/src/normalize_search_results.py --raw <path> --query-plan <path>
+python -m auto_launch.cli normalize --raw <path> --query-plan <path>
+```
+
+### Inbox Intake
+
+```bash
+python -m auto_launch.cli inbox --input daily_run.md --date 2026-07-09
+python -m auto_launch.cli inbox     # 交互模式
+```
+
+### 查询事实库
+
+```bash
+python -m auto_launch.cli facts                           # 最近 7 天
+python -m auto_launch.cli facts --brand 智己               # 按品牌
+python -m auto_launch.cli facts --model LS6               # 按车型
+python -m auto_launch.cli facts --event-type 权益调整       # 按事件类型
+python -m auto_launch.cli facts --source-tier tier_1_official  # 按信源等级
+python -m auto_launch.cli facts --days 14                 # 最近 14 天
+python -m auto_launch.cli facts --since 2026-07-01 --until 2026-07-09
+python -m auto_launch.cli facts --stats                   # 统计概览
+python -m auto_launch.cli facts --stats-by brand          # 按字段统计
+python -m auto_launch.cli facts --audit                   # 质量审计
+python -m auto_launch.cli facts --export                  # JSON 导出
 ```
 
 ## 主要配置说明
@@ -150,10 +178,14 @@ outputs/
 
 ## 后续 Roadmap
 
-- **Source Coverage Audit**: 检查每个品牌/车型的信源覆盖情况
-- **Event Promotion**: 从 discovery_signal → candidate → confirmed 的推进机制
-- **impact_score**: 事件影响评分
-- **Vehicle Memory**: 基于时间序列的车型事件记忆
-- **Golden Case Report**: 优秀 case 沉淀
-- **48h Launch Report**: 上市 48h 报告生成器
-- **Render Pipeline**: Markdown/HTML report renderer
+| 优先级 | 方向 | 状态 |
+|--------|------|------|
+| P0 | Inbox MVP | ✓ parser / filter / store / runner |
+| P0 | facts --audit 质量审计 | ✓ |
+| P0 | facts query 增强 | ✓ model / source_tier / since / until / export / stats-by |
+| P0 | daily --to-facts | ✓ |
+| P0 | search --to-facts | ✓ |
+| P1 | daily brief — 基于 facts 生成每日简报 | |
+| P1 | source coverage — 信源覆盖审计 | |
+| P2 | golden case — 事件案例沉淀 | |
+| P2 | render pipeline — Markdown/HTML 报告模板 | |

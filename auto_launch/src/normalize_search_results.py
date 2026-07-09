@@ -1,3 +1,4 @@
+"""Layer: Search Pipeline — 搜索结果标准化 + 审计"""
 """
 normalize_search_results.py — 将 Volc Search 原始搜索结果标准化为统一格式。
 

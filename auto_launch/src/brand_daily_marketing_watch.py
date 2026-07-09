@@ -1,3 +1,4 @@
+"""Layer: Intelligence Utilities — 本品品牌每日监控管线"""
 """
 brand_daily_marketing_watch.py — owned brand daily marketing event monitor.
 

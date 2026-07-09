@@ -1,3 +1,4 @@
+"""Layer: Search Pipeline — search_intent → 可执行任务配置"""
 """
 search_task_config_builder.py — 将 search_intent 转为可执行搜索任务配置。
 

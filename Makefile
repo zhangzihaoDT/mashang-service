@@ -149,75 +149,6 @@ auto-launch-normalize-results:
 		--query-plan $(QUERY_PLAN) \
 		$(if $(OUTPUT_PREFIX),--output-prefix $(OUTPUT_PREFIX))
 
-# ── 以下旧 promptbuilder targets 已归档 ─────────────────────────
-# 对应脚本未迁移至 auto_launch/src/，保留 target 但标注 TODO
-# 移入 auto_launch/ 后脚本路径改为 auto_launch/<script>
-
-## TODO: 生成 Auto Launch 示例搜索 Prompt
-## 脚本未迁移（原 mashang_workspace/promptbuilders/auto_launch/promptbuilder.py 已下线）
-build-auto-launch-prompt:
-	@echo "TODO: promptbuilder.py 未迁移至 auto_launch/，暂不可用"
-	@echo "请参见 auto_launch/README.md 了解当前能力"
-	@exit 1
-
-## TODO: 生成 Golden Prompt Cases（3 个标准样例 + 校验）
-## 脚本未迁移
-build-auto-launch-golden-prompts:
-	@echo "TODO: generate_golden_cases.py 未迁移至 auto_launch/，暂不可用"
-	@exit 1
-
-## TODO: 验证 AI 返回结果是否符合 evidence schema
-## 脚本未迁移
-validate-auto-launch-ai-response:
-	@echo "TODO: validate_ai_response.py 未迁移至 auto_launch/，暂不可用"
-	@exit 1
-
-## TODO: 验证 byd_datang_ev 真实 AI 返回结果
-validate-auto-launch-byd-datang-fixture:
-	@echo "TODO: validate_ai_response.py 未迁移至 auto_launch/，暂不可用"
-	@exit 1
-
-## TODO: 生成 byd_datang_ev 标准化证据 JSON
-build-auto-launch-byd-datang-report:
-	@echo "TODO: normalize_ai_response.py 未迁移至 auto_launch/，暂不可用"
-	@exit 1
-
-## TODO: 打包为标准化报告目录
-package-auto-launch-byd-datang-report:
-	@echo "TODO: package_ai_report.py 未迁移至 auto_launch/，暂不可用"
-	@exit 1
-
-## TODO: [EXPERIMENTAL] 生成一页摘要
-build-auto-launch-battle-brief:
-	@echo "TODO: build_battle_brief.py 未迁移至 auto_launch/，暂不可用"
-	@exit 1
-
-## TODO: [EXPERIMENTAL] 验收 executive_brief.md 摘要质量
-validate-auto-launch-byd-datang-report:
-	@echo "TODO: validate_battle_brief.py 未迁移至 auto_launch/，暂不可用"
-	@exit 1
-
-## TODO: AI Output Intake Workflow (validate → normalize → markdown)
-auto-launch-validate:
-	@echo "TODO: validate_ai_response.py 未迁移至 auto_launch/，暂不可用"
-	@exit 1
-
-auto-launch-normalize:
-	@echo "TODO: normalize_ai_response.py 未迁移至 auto_launch/，暂不可用"
-	@exit 1
-
-auto-launch-intake:
-	@echo "TODO: process_ai_output.py 未迁移至 auto_launch/，暂不可用"
-	@exit 1
-
-auto-launch-index:
-	@echo "TODO: build_output_index.py 未迁移至 auto_launch/，暂不可用"
-	@exit 1
-
-auto-launch-daily-report:
-	@echo "TODO: generate_daily_monitor_report.py 未迁移至 auto_launch/，暂不可用"
-	@exit 1
-
 ## Capability Audit
 capability-audit:
 	$(PYTHON) mashang_workspace/eval/run_capability_audit.py --format json --output mashang_workspace/outputs/tables/capability_audit_result.json
@@ -342,13 +273,12 @@ help:
 	@echo "make atp-demo        ATP 月报 Demo"
 	@echo "make backtest-demo   锁单预测回测 Demo"
 	@echo "=== Auto Launch (独立 service: auto_launch/) ==="
-	@echo "make auto-launch-owned-brand-daily         本品品牌每日营销监控 dry-run"
-	@echo "make auto-launch-owned-brand-daily-dry-run 本品品牌每日营销监控（同 dry-run）"
+	@echo "make auto-launch-owned-brand-daily         本品品牌每日营销监控"
+	@echo "make auto-launch-owned-brand-daily-dry-run 本品品牌每日营销监控（dry-run）"
 	@echo "make auto-launch-search                    Volc Search 搜索意图转译 (REQUEST=...) [dry-run]"
 	@echo "make auto-launch-normalize-results         标准化搜索结果 (RAW=... QUERY_PLAN=...)"
 	@echo "  配置目录: auto_launch/configs/"
 	@echo "  文档:      auto_launch/README.md, auto_launch/docs/workflow.md"
-	@echo "  核心资产:  旧 promptbuilders/auto_launch/ 已归档，见 auto_launch/prompts/"
 	@echo ""
 	@echo "=== MIIT 新车公告 ==="
 	@echo "make miit-discover-latest-batch  发现最新公告批次"

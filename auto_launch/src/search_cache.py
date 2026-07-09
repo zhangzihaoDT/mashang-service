@@ -1,3 +1,4 @@
+"""Layer: Search Pipeline — API 查询缓存（TTL 24h）"""
 """
 search_cache.py — query cache for Volc Search API。
 

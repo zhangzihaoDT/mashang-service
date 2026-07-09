@@ -1,3 +1,4 @@
+"""Layer: Search Pipeline — 预算分配与 profile 选择"""
 """
 search_budget_manager.py — 根据 search_intent 和配置生成 search_budget_plan。
 

@@ -1,3 +1,4 @@
+"""Layer: Search Pipeline — Volc Search API 客户端"""
 """
 volc_search_client.py — Volc Search API 客户端。
 

@@ -1,3 +1,4 @@
+"""Layer: Intelligence Utilities — 搜索结果 → 事件聚类"""
 """
 event_clusterer.py — deterministic event-level clustering for normalized search results.
 

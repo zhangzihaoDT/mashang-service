@@ -1,3 +1,4 @@
+"""Layer: Search Pipeline — 完整搜索管线编排"""
 """
 volc_search_daily.py — Auto Launch 搜索意图转译与执行主脚本 v0.3（Search Budget & Query Strategy v2）。
 

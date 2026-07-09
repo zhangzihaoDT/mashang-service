@@ -70,4 +70,4 @@ Workspace 业务监测配置目录。存放各类可复用的分析配置和关�
 
 | 文件 | 新位置 | 说明 |
 |------|--------|------|
-| `ls8_competitor_watchlist.csv` | `auto_launch/configs/ls8_competitor_watchlist.csv` | auto_launch 专属 watchlist，已移至 `auto_launch/configs/` |
+| `ls8_competitor_watchlist.csv` | `auto_launch/configs/ls8_competitor_watchlist.csv` | auto_launch 专属 watchlist |

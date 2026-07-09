@@ -1,3 +1,4 @@
+"""Layer: Intelligence Utilities — 候选事件分桶门控"""
 """
 event_candidate_gate.py — deterministic candidate gating for event clusters.
 

@@ -1,3 +1,4 @@
+"""Layer: Search Pipeline — 查询计划生成（staged）"""
 """
 volc_search_query_builder.py — 根据 search_task_config + budget_plan 生成 staged query plan。
 """
