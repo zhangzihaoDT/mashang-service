@@ -234,6 +234,25 @@ def cmd_facts(args):
         print(f"{f['fact_id']:<5} {(f['brand'] or '-'):<10} {(f['model'] or '-'):<12} {(f['event_type'] or '-'):<18} {tier:<20} {f['seen_count']:<5} {(f['last_seen'] or '')[:17]:<18} {title:<45}")
 
 
+def cmd_brief(args):
+    from auto_launch.src.fact_store import FactStore
+    from auto_launch.src.brief_renderer import generate_brief
+
+    store = FactStore()
+    facts = store.query(brand=args.brand, event_type=args.event_type,
+                        model=args.model, days=args.days,
+                        since=args.since, until=args.until,
+                        limit=args.limit)
+
+    brief_md = generate_brief(facts)
+    if args.output:
+        Path(args.output).parent.mkdir(parents=True, exist_ok=True)
+        Path(args.output).write_text(brief_md, encoding="utf-8")
+        print(f"[brief] 已写入: {args.output}")
+    else:
+        print(brief_md)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Auto Launch Service CLI")
     sub = parser.add_subparsers(dest="command", help="子命令")
@@ -289,6 +308,17 @@ def main():
     p_facts.add_argument("--audit", action="store_true", help="事实库质量审计")
     p_facts.add_argument("--export", action="store_true", help="导出为 JSON")
 
+    # brief
+    p_brief = sub.add_parser("brief", help="基于 facts 生成每日简报")
+    p_brief.add_argument("--brand", help="按品牌筛选")
+    p_brief.add_argument("--model", help="按车型筛选")
+    p_brief.add_argument("--event-type", help="按事件类型筛选")
+    p_brief.add_argument("--days", type=int, default=1, help="最近 N 天 (default: 1)")
+    p_brief.add_argument("--since", help="起始时间 (ISO format)")
+    p_brief.add_argument("--until", help="截止时间 (ISO format)")
+    p_brief.add_argument("--limit", type=int, default=50, help="最大事实数 (default: 50)")
+    p_brief.add_argument("--output", help="输出 Markdown 文件路径")
+
     args = parser.parse_args()
     if args.command == "daily":
         cmd_daily(args)
@@ -300,6 +330,8 @@ def main():
         cmd_inbox(args)
     elif args.command == "facts":
         cmd_facts(args)
+    elif args.command == "brief":
+        cmd_brief(args)
     else:
         parser.print_help()
 
