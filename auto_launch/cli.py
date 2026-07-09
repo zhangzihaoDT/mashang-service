@@ -7,11 +7,13 @@ Auto Launch CLI — 统一命令行入口。
   python -m auto_launch.cli search --request "看看极氪最近 7 天都有什么动作"
   python -m auto_launch.cli search --request "看看极氪最近 7 天都有什么动作" --live
   python -m auto_launch.cli normalize --raw <path> --query-plan <path>
+  python -m auto_launch.cli source-audit --watchlist priority --days 7
+  python -m auto_launch.cli source-audit --watchlist ls8 --days 7
 """
 
 import sys, argparse
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # Ensure project root is on path
 _PROJECT_ROOT = str(Path(__file__).resolve().parent.parent)
@@ -253,6 +255,99 @@ def cmd_brief(args):
         print(brief_md)
 
 
+def cmd_run_day(args):
+    from auto_launch.src.operating_loop import run_day
+
+    brief_output = args.brief_output or None
+    result = run_day(
+        monitor_date=args.date, brand=args.brand, brand_name=args.brand_name,
+        window_hours=args.window_hours, live=args.live,
+        brief_output=brief_output,
+    )
+    print(f"[run-day] {result['monitor_date']} {result['brand_name']} | "
+          f"live={result['live']} | brief={result['brief_facts']} facts")
+    for k, v in result["outputs"].items():
+        print(f"  {k}: {v}")
+
+
+def cmd_replay(args):
+    if args.input_dir:
+        from auto_launch.src.operating_loop import replay_from_fixtures
+        r = replay_from_fixtures(args.input_dir, reset_store=args.reset_store)
+        if "error" in r:
+            print(f"[replay] error: {r['error']}")
+            return
+        print(f"[replay] {r['days']} days, {r['total_raw']} raw, {r['total_keep']} keep")
+        print(f"  inserted={r['total_inserted']} updated={r['total_updated']}")
+        print(f"  total_facts={r['total_facts']} dup_rate={r['duplicate_rate']}%")
+        print(f"  top_brands: {r['top_brands']}")
+        for d in r["per_day"]:
+            print(f"  Day {d['day']}: {d['file']}  raw={d['raw']} keep={d['keep']}")
+        return
+
+    from auto_launch.src.operating_loop import run_day
+    from datetime import datetime as dt
+    fmt = "%Y-%m-%d"
+    start = dt.strptime(args.start_date, fmt)
+    end = dt.strptime(args.end_date, fmt) if args.end_date else start
+    if end < start:
+        start, end = end, start
+    results = []
+    current = start
+    total = (end - start).days + 1
+    for i in range(total):
+        ds = current.strftime(fmt)
+        print(f"[replay] ({i+1}/{total}) {ds} ...")
+        r = run_day(monitor_date=ds, brand=args.brand, brand_name=args.brand_name, live=args.live)
+        results.append(r)
+        current += timedelta(days=1)
+    print(f"[replay] 完成: {total} 天")
+    for r in results:
+        print(f"  {r['monitor_date']}  kept={r['kept']}  brief={r['brief_facts']} facts")
+
+
+def cmd_source_audit(args):
+    import json
+    from auto_launch.src.fact_store import FactStore
+    from auto_launch.src import source_auditor
+
+    store = FactStore()
+    facts = store.query(days=args.days, limit=args.limit)
+    report = source_auditor.audit(facts, watchlist=args.watchlist)
+
+    if args.output:
+        p = Path(args.output)
+        p.parent.mkdir(parents=True, exist_ok=True)
+        if args.format == "json":
+            p.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+        else:
+            md = source_auditor.render_markdown(report)
+            p.write_text(md, encoding="utf-8")
+        print(f"[source-audit] 已写入: {p}")
+    elif args.format == "json":
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+    else:
+        print(source_auditor.render_markdown(report))
+
+
+def cmd_timeline(args):
+    from auto_launch.src.fact_store import FactStore
+    from auto_launch.src.timeline_renderer import generate_timeline
+
+    store = FactStore()
+    facts = store.query(brand=args.brand, model=args.model,
+                        event_type=args.event_type,
+                        days=args.days, since=args.since, until=args.until,
+                        limit=args.limit)
+    md = generate_timeline(facts, brand=args.brand, model=args.model)
+    if args.output:
+        Path(args.output).parent.mkdir(parents=True, exist_ok=True)
+        Path(args.output).write_text(md, encoding="utf-8")
+        print(f"[timeline] 已写入: {args.output}")
+    else:
+        print(md)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Auto Launch Service CLI")
     sub = parser.add_subparsers(dest="command", help="子命令")
@@ -319,6 +414,45 @@ def main():
     p_brief.add_argument("--limit", type=int, default=50, help="最大事实数 (default: 50)")
     p_brief.add_argument("--output", help="输出 Markdown 文件路径")
 
+    # run-day
+    p_run = sub.add_parser("run-day", help="一键日更：daily → to-facts → audit → brief")
+    p_run.add_argument("--brand", default="im")
+    p_run.add_argument("--brand-name", default="智己")
+    p_run.add_argument("--date", default=datetime.now().strftime("%Y-%m-%d"))
+    p_run.add_argument("--window-hours", type=int, default=24)
+    p_run.add_argument("--live", action="store_true")
+    p_run.add_argument("--brief-output", help="brief 输出路径（默认 outputs/runs/{date}/daily_brief.md）")
+
+    # replay
+    p_replay = sub.add_parser("replay", help="连续回放（支持日期范围或 inbox fixtures）")
+    p_replay.add_argument("--start-date", help="起始日期 (与 --end-date 配对使用)")
+    p_replay.add_argument("--end-date", help="截止日期")
+    p_replay.add_argument("--brand", default="im")
+    p_replay.add_argument("--brand-name", default="智己")
+    p_replay.add_argument("--live", action="store_true")
+    p_replay.add_argument("--input-dir", help="inbox fixtures 目录（替代日期范围）")
+    p_replay.add_argument("--reset-store", action="store_true", help="回放前重置事实库")
+
+    # source-audit
+    p_sa = sub.add_parser("source-audit", help="信源覆盖审计")
+    p_sa.add_argument("--watchlist", choices=["priority", "ls8"], default="priority",
+                      help="期望覆盖范围: priority=24重点品牌, ls8=LS8竞品车型 (default: priority)")
+    p_sa.add_argument("--days", type=int, default=7, help="最近 N 天 (default: 7)")
+    p_sa.add_argument("--limit", type=int, default=500, help="最大事实数 (default: 500)")
+    p_sa.add_argument("--format", choices=["text", "json"], default="text", help="输出格式 (default: text)")
+    p_sa.add_argument("--output", help="输出文件路径")
+
+    # timeline
+    p_tl = sub.add_parser("timeline", help="品牌/车型事件时间线")
+    p_tl.add_argument("--brand", help="按品牌筛选")
+    p_tl.add_argument("--model", help="按车型筛选")
+    p_tl.add_argument("--event-type", help="按事件类型筛选")
+    p_tl.add_argument("--days", type=int, default=30, help="最近 N 天 (default: 30)")
+    p_tl.add_argument("--since", help="起始时间")
+    p_tl.add_argument("--until", help="截止时间")
+    p_tl.add_argument("--limit", type=int, default=100, help="最大事实数 (default: 100)")
+    p_tl.add_argument("--output", help="输出 Markdown 文件路径")
+
     args = parser.parse_args()
     if args.command == "daily":
         cmd_daily(args)
@@ -332,6 +466,14 @@ def main():
         cmd_facts(args)
     elif args.command == "brief":
         cmd_brief(args)
+    elif args.command == "run-day":
+        cmd_run_day(args)
+    elif args.command == "replay":
+        cmd_replay(args)
+    elif args.command == "source-audit":
+        cmd_source_audit(args)
+    elif args.command == "timeline":
+        cmd_timeline(args)
     else:
         parser.print_help()
 

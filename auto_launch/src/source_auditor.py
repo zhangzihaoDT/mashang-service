@@ -15,6 +15,16 @@ def _load_priority_brands() -> list[dict]:
     return data.get("brands", [])
 
 
+def _load_ls8_targets() -> list[dict]:
+    """Load LS8 competitor targets from ls8_competitor_watchlist.yaml."""
+    path = Path(__file__).resolve().parent.parent / "configs" / "ls8_competitor_watchlist.yaml"
+    if not path.exists():
+        return []
+    with open(path) as f:
+        data = yaml.safe_load(f) or {}
+    return data.get("targets", [])
+
+
 def _gather_brand_facts(brand_entry: dict, by_brand: dict) -> list[dict]:
     """Collect facts matching a watchlist brand entry (catalog name + all sub_brand names)."""
     names = [brand_entry["catalog"]]
@@ -26,6 +36,30 @@ def _gather_brand_facts(brand_entry: dict, by_brand: dict) -> list[dict]:
     return facts
 
 
+def _gather_target_facts(target: dict, by_brand: dict) -> list[dict]:
+    """Collect facts matching an LS8 competitor target (brand + model aliases)."""
+    bname = target.get("brand", "")
+    mname = target.get("model", "")
+    seen_ids = set()
+    facts = []
+    all_names = [bname] + [a for a in target.get("brand_aliases", []) if a != bname]
+    for name in all_names:
+        for f in by_brand.get(name, []):
+            fid = f.get("fact_id") or id(f)
+            if fid in seen_ids:
+                continue
+            seen_ids.add(fid)
+            if not mname or any(a.lower() in (f.get("model") or "").lower() for a in [mname] + target.get("model_aliases", [])):
+                facts.append(f)
+    if not facts and bname:
+        for f in by_brand.get(bname, []):
+            fid = f.get("fact_id") or id(f)
+            if fid not in seen_ids:
+                facts.append(f)
+                seen_ids.add(fid)
+    return facts
+
+
 def _tier_label(tier: str) -> str:
     labels = {"tier_1_official": "official", "tier_2_authoritative": "authoritative",
               "tier_3_industry_media": "auto_media", "tier_4_social_signal": "social",
@@ -33,9 +67,21 @@ def _tier_label(tier: str) -> str:
     return labels.get(tier, "unknown")
 
 
-def audit(facts: list[dict]) -> dict:
+def audit(facts: list[dict], watchlist: str = "priority") -> dict:
+    """
+    Source quality coverage audit.
+
+    Parameters
+    ----------
+    facts : list[dict]
+        Facts from FactStore.query().
+    watchlist : str
+        Which watchlist to use for expected coverage checks.
+        "priority" — use priority_brand_watchlist.yaml (24 key brands).
+        "ls8"     — use ls8_competitor_watchlist.yaml (10 competitor targets).
+    """
     if not facts:
-        return {"total": 0, "warnings": ["no facts"]}
+        return {"total": 0, "warnings": ["no facts"], "watchlist": watchlist}
 
     total = len(facts)
     brands = set()
@@ -119,23 +165,38 @@ def audit(facts: list[dict]) -> dict:
                 "source_tier": f.get("source_tier"), "flags": lq_flags,
             })
 
-    # Expected source coverage check — brand list derived from priority_brand_watchlist.yaml
-    # replaces the deleted source_coverage_expectations.yaml
-    priority_brands = _load_priority_brands()
+    # Expected source coverage check — brand list derived from watchlist config
     expected_flags = []
-    for entry in priority_brands:
-        bname = entry["catalog"]
-        bfacts = _gather_brand_facts(entry, by_brand)
-        if not bfacts:
-            continue
-        has_official = any(_tier_label(f.get("source_tier", "")) == "official" for f in bfacts)
-        has_auto_media = any(_tier_label(f.get("source_tier", "")) == "auto_media" for f in bfacts)
-        if not has_official:
-            expected_flags.append({"brand": bname, "flag": "expected_official_missing",
-                                   "detail": f"未找到 {bname} 官方源事实"})
-        if not has_auto_media:
-            expected_flags.append({"brand": bname, "flag": "expected_auto_media_missing",
-                                   "detail": f"未找到 {bname} 汽车媒体源事实"})
+    if watchlist == "ls8":
+        ls8_targets = _load_ls8_targets()
+        for t in ls8_targets:
+            bname = t.get("display_name", t["target_id"])
+            bfacts = _gather_target_facts(t, by_brand)
+            if not bfacts:
+                continue
+            has_official = any(_tier_label(f.get("source_tier", "")) == "official" for f in bfacts)
+            has_auto_media = any(_tier_label(f.get("source_tier", "")) == "auto_media" for f in bfacts)
+            if not has_official:
+                expected_flags.append({"brand": bname, "flag": "expected_official_missing",
+                                       "detail": f"未找到 {bname} 官方源事实"})
+            if not has_auto_media:
+                expected_flags.append({"brand": bname, "flag": "expected_auto_media_missing",
+                                       "detail": f"未找到 {bname} 汽车媒体源事实"})
+    else:
+        priority_brands = _load_priority_brands()
+        for entry in priority_brands:
+            bname = entry["catalog"]
+            bfacts = _gather_brand_facts(entry, by_brand)
+            if not bfacts:
+                continue
+            has_official = any(_tier_label(f.get("source_tier", "")) == "official" for f in bfacts)
+            has_auto_media = any(_tier_label(f.get("source_tier", "")) == "auto_media" for f in bfacts)
+            if not has_official:
+                expected_flags.append({"brand": bname, "flag": "expected_official_missing",
+                                       "detail": f"未找到 {bname} 官方源事实"})
+            if not has_auto_media:
+                expected_flags.append({"brand": bname, "flag": "expected_auto_media_missing",
+                                       "detail": f"未找到 {bname} 汽车媒体源事实"})
 
     # Suggestions
     suggestions = []
@@ -153,6 +214,7 @@ def audit(facts: list[dict]) -> dict:
 
     return {
         "total": total,
+        "watchlist": watchlist,
         "brands": len(brands),
         "models": len(models),
         "official_count": official_count,
@@ -177,6 +239,8 @@ def render_markdown(report: dict) -> str:
         return "# Source Coverage Audit\n\n（无数据）\n"
 
     lines = ["# Source Coverage Audit", ""]
+    watchlist_label = f" ({report.get('watchlist', 'priority')})" if report.get("watchlist") else ""
+    lines.append(f"**Watchlist:** {report.get('watchlist', 'priority')}  ")
     lines.append(f"**Total facts:** {report['total']}  ")
     lines.append(f"**Brands covered:** {report['brands']}  ")
     lines.append(f"**Models covered:** {report['models']}  ")

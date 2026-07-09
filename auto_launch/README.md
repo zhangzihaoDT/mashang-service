@@ -141,6 +141,58 @@ python -m auto_launch.cli facts --audit                   # 质量审计
 python -m auto_launch.cli facts --export                  # JSON 导出
 ```
 
+### 一键日更
+
+```bash
+python -m auto_launch.cli run-day                          # dry-run
+python -m auto_launch.cli run-day --live                   # 真实执行
+python -m auto_launch.cli run-day --date 2026-07-09 --brief-output brief.md
+```
+
+run-day 执行：daily → to-facts → audit → source-audit → brief，输出到 `outputs/runs/{date}/`。
+
+输出文件：
+- `run_manifest.json` — 运行元数据（含 `source_audit_summary`）
+- `facts_audit.json` — 质量审计
+- `source_audit.json` — 信源覆盖审计 JSON
+- `source_audit.md` — 信源覆盖审计 Markdown
+- `daily_brief.md` — 每日简报
+- `run_summary.md` — 人类可读摘要（含信源覆盖小节）
+
+### 信源覆盖审计
+
+```bash
+python -m auto_launch.cli source-audit                           # 默认 7 天，priority watchlist
+python -m auto_launch.cli source-audit --watchlist priority       # 24 重点品牌覆盖审计
+python -m auto_launch.cli source-audit --watchlist ls8            # LS8 竞品车型覆盖审计
+python -m auto_launch.cli source-audit --days 14                  # 最近 14 天
+python -m auto_launch.cli source-audit --format json              # JSON 输出
+python -m auto_launch.cli source-audit --output sa.md             # 写入文件
+```
+
+source-audit 复用现有 configs，**不新增** `source_coverage_expectations.yaml`：
+- 品牌期望列表来自 `priority_brand_watchlist.yaml`
+- LS8 竞品列表来自 `ls8_competitor_watchlist.yaml`
+- 信源分级来自 `source_tiers.yaml`
+- 官方域名来自 `source_domains.yaml`
+
+### 连续回放
+
+```bash
+python -m auto_launch.cli replay --start-date 2026-07-07 --end-date 2026-07-09
+python -m auto_launch.cli replay --input-dir tests/fixtures/daily_runs
+python -m auto_launch.cli replay --input-dir tests/fixtures/daily_runs --reset-store
+```
+
+### 事件时间线
+
+```bash
+python -m auto_launch.cli timeline --days 30                               # 全部
+python -m auto_launch.cli timeline --brand 智己 --days 30                   # 按品牌
+python -m auto_launch.cli timeline --model LS6 --event-type 权益调整 --days 14
+python -m auto_launch.cli timeline --output tl.md                          # 写入文件
+```
+
 ## 主要配置说明
 
 | 文件 | 用途 |
@@ -165,7 +217,13 @@ outputs/
 │   ├── search_results.normalized.json
 │   └── search_audit.json
 ├── owned_brand_daily/{date}/  品牌每日监控输出
+├── runs/{date}/               run-day 输出（manifest / audit / source-audit / brief / summary）
 │   ├── run_manifest.json
+│   ├── facts_audit.json
+│   ├── source_audit.json
+│   ├── source_audit.md
+│   ├── daily_brief.md
+│   ├── run_summary.md
 │   ├── raw_search_results.json
 │   ├── normalized_search_results.json
 │   ├── event_clusters.json
@@ -176,16 +234,13 @@ outputs/
 └── search_cache/{date}/       API 缓存
 ```
 
-## 后续 Roadmap
+## Roadmap
 
-| 优先级 | 方向 | 状态 |
-|--------|------|------|
-| P0 | Inbox MVP | ✓ parser / filter / store / runner |
-| P0 | facts --audit 质量审计 | ✓ |
-| P0 | facts query 增强 | ✓ model / source_tier / since / until / export / stats-by |
-| P0 | daily --to-facts | ✓ |
-| P0 | search --to-facts | ✓ |
-| P1 | daily brief — 基于 facts 生成每日简报 | |
-| P1 | source coverage — 信源覆盖审计 | |
-| P2 | golden case — 事件案例沉淀 | |
-| P2 | render pipeline — Markdown/HTML 报告模板 | |
+| 版本 | 方向 | 状态 |
+|------|------|------|
+| v0.5 | Fact Quality Loop | ✓ facts audit / stats / export / to-facts |
+| v0.6 | Daily Brief from Facts | ✓ brief / brief_rank / badge |
+| v0.7 | Operating Loop & Timeline | ✓ run-day / replay / timeline |
+| v0.8 | Source Coverage Audit | ✓ 复用现有 configs，不新增 source_coverage_expectations.yaml |
+| v0.9 | Impact / Battle Field | |
+| v1.0 | Demo Case | |
