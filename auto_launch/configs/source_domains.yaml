@@ -302,12 +302,18 @@ official_social_accounts:
 # ── 汽车垂媒 ──────────────────────────────────────
 vertical_auto_media_domains:
   - autohome.com.cn
+  - m.autohome.com.cn
   - car.autohome.com.cn
   - chejiahao.autohome.com.cn
   - dongchedi.com
+  - m.dongchedi.com
   - dcdapp.com
   - yiche.com
+  - m.yiche.com
+  - news.yiche.com
+  - car.yiche.com
   - bitauto.com
+  - m.bitauto.com
   - pcauto.com.cn
   - xcar.com.cn
   - autoreport.cn
@@ -320,7 +326,9 @@ vertical_auto_media_domains:
   - evlook.com
   - cheyun.com
   - auto.gasgoo.com
+  - m.auto.gasgoo.com
   - gasgoo.com
+  - m.gasgoo.com
   - auto.ifeng.com # 凤凰网汽车
   - auto.sina.com.cn # 新浪汽车
   - auto.qq.com # 腾讯汽车
@@ -339,6 +347,7 @@ vertical_auto_media_domains:
 tech_biz_media_domains:
   - 36kr.com
   - huxiu.com
+  - finance.sina.com.cn # 新浪财经（非汽车频道，但属于财经媒体）
   - latepost.com
   - gasgoo.com
   - auto.gasgoo.com

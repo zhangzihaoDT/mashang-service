@@ -27,10 +27,15 @@ _SOURCE_TIER_PRIORITY = {
 
 _EVENT_TYPE_GROUPS = OrderedDict([
     ("上市/预售", ["上市", "预售", "预订", "盲订", "发布", "新品发布", "发布会", "亮相", "首发"]),
-    ("价格/权益", ["价格", "降价", "涨价", "权益", "权益调整", "补贴", "限时", "官方价格调整"]),
-    ("交付/销量", ["交付", "开启交付", "交付数据", "销量", "销量里程碑", "订单", "战报"]),
-    ("产品/技术", ["改款", "改款上市", "新款", "OTA", "技术", "技术发布", "配置"]),
-    ("品牌/合作", ["合作", "战略合作", "联名", "代言", "融资", "品牌"]),
+    ("价格/权益", ["价格", "降价", "涨价", "权益", "权益调整", "补贴", "限时", "官方价格调整", "benefit_adjustment"]),
+    ("交付/销量", ["交付", "开启交付", "交付数据", "销量", "销量里程碑", "订单", "战报",
+                   "delivery_start", "delivery_metric", "sales_milestone", "order_milestone",
+                   "monthly_sales", "monthly_delivery", "sales_data"]),
+    ("产品/技术", ["改款", "改款上市", "新款", "OTA", "技术", "技术发布", "配置",
+                   "technology_release", "ota_update", "product_update"]),
+    ("品牌/合作", ["合作", "战略合作", "联名", "代言", "融资", "品牌",
+                   "channel_campaign", "store_activity", "dealer_activity", "partnership",
+                   "brand_campaign", "executive_voice", "public_opinion"]),
     ("其他", []),
 ])
 
@@ -61,7 +66,7 @@ def brief_rank(item: dict) -> tuple:
     return (et_score + st_score + seen + penalty, last_seen)
 
 
-def generate_brief(facts: list[dict], title: str = None) -> str:
+def generate_brief(facts: list[dict], title: str = None, brief_date: str = None) -> str:
     """
     基于 facts 生成 Markdown 简报。
     返回 Markdown 字符串。
@@ -70,7 +75,11 @@ def generate_brief(facts: list[dict], title: str = None) -> str:
         return _empty_brief(title)
 
     ranked = sorted(facts, key=brief_rank, reverse=True)
-    date_str = datetime.now().strftime("%Y-%m-%d")
+    if brief_date:
+        date_str = brief_date
+    else:
+        dates = [f.get("event_date") for f in facts if f.get("event_date")]
+        date_str = max(set(dates), key=dates.count) if dates else datetime.now().strftime("%Y-%m-%d")
     brief_title = title or f"Auto Launch 每日简报 — {date_str}"
 
     lines = [f"# {brief_title}", ""]
@@ -148,9 +157,13 @@ def generate_brief(facts: list[dict], title: str = None) -> str:
     total = len(facts)
     brands = len(by_brand)
     top_brand = max(by_brand.items(), key=lambda x: len(x[1])) if by_brand else ("-", [])
+    top_count = len(top_brand[1])
     has_official = any("tier_1" in (i.get("source_tier") or "") for i in ranked)
     lines.append(f"- 今日共收录 **{total}** 条事实，涉及 **{brands}** 个品牌")
-    lines.append(f"- 最活跃品牌：**{top_brand[0]}**（{len(top_brand[1])} 条）")
+    if top_count <= 1 and brands > 1:
+        lines.append(f"- 品牌分布较分散，未出现明显高频品牌")
+    else:
+        lines.append(f"- 最活跃品牌：**{top_brand[0]}**（{top_count} 条）")
     lines.append(f"- 官方源覆盖：{'✅ 有' if has_official else '❌ 无'}")
     if ranked[0].get("event_type"):
         lines.append(f"- 最高优先级事件类型：**{ranked[0]['event_type']}**")

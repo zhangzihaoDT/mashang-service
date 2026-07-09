@@ -42,6 +42,9 @@ CREATE INDEX IF NOT EXISTS idx_facts_last_seen ON facts(last_seen);
 """
 
 
+_DELIVERY_KEYWORDS = ["delivery", "sales", "交付", "销量", "战报", "交付量", "交付数据", "销量数据"]
+
+
 def _normalize_title(title: str) -> str:
     """简单的 title 归一化：去空格、去标点、小写"""
     import re
@@ -50,8 +53,46 @@ def _normalize_title(title: str) -> str:
     return t[:100]
 
 
+def _extract_period(event_date: str, title: str) -> str:
+    """从 event_date 或 title 提取时间段（如 2026-06、6月）"""
+    if event_date and len(event_date) >= 7:
+        return event_date[:7]
+    import re
+    for pat in [r"(\d{4})年(\d{1,2})月", r"(\d{4})-(\d{2})", r"(\d{1,2})月", r"上半年", r"下半年"]:
+        m = re.search(pat, title)
+        if m:
+            return m.group(0)
+    return ""
+
+
+def _extract_core_numbers(title: str) -> str:
+    """提取 title 中的核心数字用于交付类事件去重，排除百分比"""
+    import re
+    clean = title.replace(",", "").replace("，", "").replace(" ", "")
+    all_nums = re.findall(r'(?<!\d)(\d{3,})(?!\d)', clean)
+    # Exclude numbers that are clearly percentages (followed by %)
+    percentages = set()
+    for m in re.finditer(r'(\d{2,})%', title.replace(",", "")):
+        percentages.add(m.group(1))
+    nums = [n for n in all_nums if n not in percentages]
+    return "|".join(sorted(set(nums)))
+
+
+def _is_delivery_event(event_type: str) -> bool:
+    """判断是否属于需语义去重的交付/销量类事件"""
+    if not event_type:
+        return False
+    et = event_type.lower()
+    return any(kw in et for kw in _DELIVERY_KEYWORDS)
+
+
 def _build_fingerprint(brand: str, model: str, event_type: str, event_date: str, title: str) -> str:
-    raw = f"{brand or ''}|{model or ''}|{event_type or ''}|{event_date or ''}|{_normalize_title(title)}"
+    if _is_delivery_event(event_type):
+        period = _extract_period(event_date, title)
+        numbers = _extract_core_numbers(title)
+        raw = f"delivery_metric|{brand or ''}|{model or ''}|{period}|{numbers}"
+    else:
+        raw = f"{brand or ''}|{model or ''}|{event_type or ''}|{event_date or ''}|{_normalize_title(title)}"
     return hashlib.md5(raw.encode("utf-8")).hexdigest()
 
 
@@ -136,8 +177,11 @@ class FactStore:
             params.append(source_tier)
         if days is not None:
             cutoff = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%dT%H:%M:%S")
-            wheres.append("last_seen >= ?")
+            date_cutoff = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
+            # Include facts seen recently OR with a recent event_date
+            wheres.append("(last_seen >= ? OR (event_date IS NOT NULL AND event_date >= ?))")
             params.append(cutoff)
+            params.append(date_cutoff)
         if since:
             wheres.append("last_seen >= ?")
             params.append(since)

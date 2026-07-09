@@ -5,6 +5,80 @@ from pathlib import Path
 from datetime import datetime
 
 
+_SERVICE_ROOT = Path(__file__).resolve().parent.parent
+
+
+def _run_dir(date_str: str) -> Path:
+    d = _SERVICE_ROOT / "outputs" / "runs" / date_str.replace("-", "")
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+
+def _write_run_package(date: str, summary: dict, brief: str):
+    """Write a lightweight run package after processing a daily run."""
+    run_dir = _run_dir(date)
+    log = []
+
+    # daily_brief.md
+    (run_dir / "daily_brief.md").write_text(brief, encoding="utf-8")
+    log.append(("brief", "ok", f"{summary['kept']} facts"))
+
+    # run_manifest.json
+    import json
+    manifest = {
+        "command": "launcher_daily_run",
+        "monitor_date": date,
+        "input_channel": "launcher_daily_run",
+        "raw": summary["total_raw_items"],
+        "kept": summary["kept"],
+        "discarded": summary["discarded"],
+        "inserted": sum(1 for fr in summary.get("fact_results", []) if fr.get("action") == "inserted"),
+        "updated": sum(1 for fr in summary.get("fact_results", []) if fr.get("action") == "updated"),
+        "log": [{"step": s, "status": st, "detail": d, "time": datetime.now().isoformat()}
+                for s, st, d in log],
+        "outputs": {
+            "run_dir": str(run_dir),
+            "brief": str(run_dir / "daily_brief.md"),
+            "manifest": str(run_dir / "run_manifest.json"),
+            "summary": str(run_dir / "run_summary.md"),
+        },
+        "created_at": datetime.now().isoformat(),
+    }
+    (run_dir / "run_manifest.json").write_text(
+        json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    # run_summary.md
+    lines = [
+        f"# Run Summary — Launcher Daily Run — {date}",
+        "",
+        f"**Input channel:** launcher_daily_run",
+        f"**Raw items:** {summary['total_raw_items']}",
+        f"**Kept:** {summary['kept']}",
+        f"**Discarded:** {summary['discarded']}",
+        f"**Inserted:** {manifest['inserted']}",
+        f"**Updated:** {manifest['updated']}",
+        "",
+        "## Pipeline",
+        "",
+    ]
+    for entry in manifest["log"]:
+        lines.append(f"- **{entry['step']}** ({entry['status']}) — {entry['detail']}")
+    lines += [
+        "",
+        "## Outputs",
+        "",
+    ]
+    for k, v in manifest["outputs"].items():
+        lines.append(f"- {k}: {v}")
+    lines += [
+        "",
+        "---",
+        f"*Generated: {manifest['created_at']}*",
+        "",
+    ]
+    (run_dir / "run_summary.md").write_text("\n".join(lines), encoding="utf-8")
+
+
 def run_launcher():
     """Main interactive launcher loop."""
     from auto_launch.src.inbox_runner import run_text, _print_summary
@@ -75,18 +149,23 @@ def run_launcher():
                     resp = "n"
                 if resp in ("", "y", "yes"):
                     facts = summary["kept_items"]
-                    brief = generate_brief(facts)
+                    brief = generate_brief(facts, brief_date=date)
                     print()
                     print("=" * 60)
                     print("  每日简报")
                     print("=" * 60)
                     print(brief)
 
-                    briefs_dir = Path(__file__).resolve().parent.parent / "outputs" / "briefs"
+                    briefs_dir = _SERVICE_ROOT / "outputs" / "briefs"
                     briefs_dir.mkdir(parents=True, exist_ok=True)
                     brief_path = briefs_dir / f"{date}.md"
                     brief_path.write_text(brief, encoding="utf-8")
+
+                    # Write run package
+                    _write_run_package(date, summary, brief)
+
                     print(f"\n  简报已写入: {brief_path}")
+                    print(f"  运行包: {_run_dir(date)}/daily_brief.md")
 
         # ── 2. 定向搜索 ──────────────────────────────────
         elif choice == "2":
