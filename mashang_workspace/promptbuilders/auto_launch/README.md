@@ -1,5 +1,11 @@
 # Auto Launch Promptbuilder
 
+> **DEPRECATED — 此目录已迁移。**
+> 完整 auto_launch 服务现已移至 `auto_launch/`。
+> 所有 Python 脚本、测试、CLI 入口、配置文件已迁移。
+> 本目录保留作为历史 Prompt 资产归档，请勿再通过本目录路径运行或引用。
+> 新路径: `services/auto_launch/`
+
 ## 1. 项目定位
 
 `promptbuilders/auto_launch/` 是面向 **智己 LS8 竞品车型与重点新能源品牌** 的汽车上市 / 销售 / 营销事件发现体系。

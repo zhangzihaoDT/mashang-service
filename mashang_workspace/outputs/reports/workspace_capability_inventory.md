@@ -2,7 +2,7 @@
 
 Workspace 能力总览：skills / scripts / data assets / outputs / evaluation
 
-生成时间：2026-07-02 08:01:18
+生成时间：2026-07-09 04:40:00
 Workspace：mashang_workspace
 
 ---
@@ -12,9 +12,9 @@ Workspace：mashang_workspace
 | 能力类型 | 数量 |
 |---------|------|
 | Skills（Agent 会什么） | 6 |
-| Scripts（Agent 能调用什么） | 56 |
+| Scripts（Agent 能调用什么） | 59 |
 | Data Assets（Agent 能查什么） | 6 |
-| Outputs / Reports（Agent 已沉淀什么） | 47 |
+| Outputs / Reports（Agent 已沉淀什么） | 51 |
 | Evaluation / Quality（Agent 是否可靠） | 6 |
 
 ---
@@ -29,8 +29,8 @@ Agent 可以通过 skill 匹配识别任务类型、选择执行方式、调用�
 | 2 | cpca-weekly-data-capture | 第一时间捕捉乘联分会周度核心数据，并生成带置信度的三句话 fact_result JSON | active |
 | 3 | monthly-market-report | workspace 层的月度汽车市场报告生成 Skill。基于 passenger_insurance 现有 6 张预聚合单表，按月运行 24 ... | active |
 | 4 | runtime-eval-diagnosis | Diagnose mashang runtime eval reports, including hard_pass, soft_pass, f... | active |
-| 5 | auto_launch | 汽车上市/营销事件监控；支持车型/品牌/本品 Watch，包含搜索、信源分级、24h 窗口校验、事件聚类、candidate gate 与 ra... | active |
-| 6 | miit_new_car | MIIT 公告信号解释 Prompt Pack；新车申报情报分析 | active |
+| 5 | auto_launch | 汽车上市/营销事件独立监控服务；搜索意图编译 → query plan → Volc Search API → 信源分级 → URL 去重 → ... | active |
+| 6 | miit_new_car | MIIT 新车公告全链路情报分析：批次管理、图片 OCR、结构化解析、6 信号双车对比。 | active |
 
 ---
 
@@ -70,34 +70,37 @@ Agent 可直接调用的 Python 脚本，按功能分为 runtime（稳定运行�
 | 28 | ls9_battery_weekly_share_report.py |  | active |
 | 29 | market_report/run_monthly_market_report.py |  | active |
 | 30 | miit_new_car/brand_product_line_report.py |  | active |
-| 31 | miit_new_car/check_text_extractors.py |  | active |
-| 32 | miit_new_car/diagnose_attachment_urls.py |  | active |
-| 33 | miit_new_car/diff_watchlist.py |  | active |
-| 34 | miit_new_car/discover_batches.py |  | active |
-| 35 | miit_new_car/extract_attachment_text.py |  | active |
-| 36 | miit_new_car/fetch_batch.py |  | active |
-| 37 | miit_new_car/http_utils.py |  | active |
-| 38 | miit_new_car/monitor.py |  | active |
-| 39 | miit_new_car/parse_product_list.py |  | active |
-| 40 | miit_new_car/parse_products.py |  | active |
-| 41 | model_share_trend.py |  | active |
-| 42 | passenger_insurance/check_passenger_insurance_asset.py |  | active |
-| 43 | pk_weekly_ls8_ls9.py | name: pk_weekly_compare_ls8_ls9
+| 31 | miit_new_car/browser_trace.py | Playwright browser network trace fallback for datainfo page resource dis... | active |
+| 32 | miit_new_car/check_text_extractors.py |  | active |
+| 33 | miit_new_car/diagnose_attachment_urls.py |  | active |
+| 34 | miit_new_car/diff_watchlist.py |  | active |
+| 35 | miit_new_car/discover_batches.py |  | active |
+| 36 | miit_new_car/enterprise_admission_parser.py | Parse MIIT 工信部 enterprise admission change HTML attachment. | active |
+| 37 | miit_new_car/extract_attachment_text.py |  | active |
+| 38 | miit_new_car/fetch_batch.py |  | active |
+| 39 | miit_new_car/http_utils.py |  | active |
+| 40 | miit_new_car/monitor.py |  | active |
+| 41 | miit_new_car/parse_product_list.py |  | active |
+| 42 | miit_new_car/parse_products.py |  | active |
+| 43 | model_share_trend.py |  | active |
+| 44 | passenger_insurance/check_passenger_insurance_asset.py |  | active |
+| 45 | pk_weekly_ls8_ls9.py | name: pk_weekly_compare_ls8_ls9
 use: python research_scripts/pk_weekly_l... | active |
-| 44 | quick_lock_ratio.py |  | active |
-| 45 | release_curve_analysis.py |  | active |
-| 46 | structured_business_forecast.py | 脚本作用：
+| 46 | quick_lock_ratio.py |  | active |
+| 47 | release_curve_analysis.py |  | active |
+| 48 | structured_business_forecast.py | 脚本作用：
 1) 基于日度矩阵（index_summary_daily_matrix）做结构化业务预测，核心恒等式为 lock_orders =... | active |
-| 47 | build_daily_matrix.py |  | active |
-| 48 | build_workspace_capability_inventory.py |  | active |
-| 49 | build_workspace_skills_catalog.py |  | active |
-| 50 | data_dictionary.py |  | active |
-| 51 | dataset_validate.py |  | active |
-| 52 | generate_eval_cases.py |  | active |
-| 53 | render_html_report.py |  | active |
-| 54 | skills_attainment_rate_alert.py |  | active |
-| 55 | skills_order_observation_daily.py |  | active |
-| 56 | voc_theme_analysis.py |  | active |
+| 49 | build_daily_matrix.py |  | active |
+| 50 | build_lock_trend_report.py |  | active |
+| 51 | build_workspace_capability_inventory.py |  | active |
+| 52 | build_workspace_skills_catalog.py |  | active |
+| 53 | data_dictionary.py |  | active |
+| 54 | dataset_validate.py |  | active |
+| 55 | generate_eval_cases.py |  | active |
+| 56 | render_html_report.py |  | active |
+| 57 | skills_attainment_rate_alert.py |  | active |
+| 58 | skills_order_observation_daily.py |  | active |
+| 59 | voc_theme_analysis.py |  | active |
 
 ---
 
@@ -126,49 +129,53 @@ Agent 执行后沉淀的输出成果，包括 reports/ 下的品牌化 HTML 报�
 | 2 | CDG_2026-06_lock.html | html report · 7.3 KB | generated |
 | 3 | LS8_week_model_report_20260626.html | html report · 30.4 KB | generated |
 | 4 | LS9_month_model_report_20260626.html | html report · 24.3 KB | generated |
-| 5 | agent_execution_trace.md | markdown report · 5.4 KB | generated |
-| 6 | atp_2026-04.html | html report · 7.7 KB | generated |
-| 7 | atp_2026-05.html | html report · 7.7 KB | generated |
-| 8 | auto_launch_monitor_2026-06-05_2026-06-07.md | markdown report · 3.5 KB | generated |
-| 9 | cpca_weekly_early_signal.html | html report · 40.0 KB | generated |
-| 10 | daily_msg_report.html | html report · 25.8 KB | generated |
-| 11 | followup_trace_ls8_city.md | markdown report · 9.4 KB | generated |
-| 12 | june_2026_forecast.html | html report · 5.9 KB | generated |
-| 13 | lock_predict_backtest.html | html report · 35.9 KB | generated |
-| 14 | lock_release_curve.html | html report · 75.4 KB | generated |
-| 15 | ls8_battery_weekly_share.html | html report · 2960.7 KB | generated |
-| 16 | ls8_city_distribution_2026-06-14.html | html report · 11.8 KB | generated |
-| 17 | ls8_city_distribution_report.html | html report · 9.4 KB | generated |
-| 18 | ls9_battery_weekly_share.html | html report · 2943.8 KB | generated |
-| 19 | passenger_insurance_workspace_smoke.md | markdown report · 1.1 KB | generated |
-| 20 | pk_weekly_compare_ls8_ls9.html | html report · 13.6 KB | generated |
-| 21 | quick_lock_ratio.html | html report · 683.3 KB | generated |
-| 22 | w24_weekend_analysis.html | html report · 19.3 KB | generated |
-| 23 | w24_weekend_analysis.md | markdown report · 4.1 KB | generated |
-| 24 | workspace_capability_inventory.html | html report · 44.5 KB | generated |
-| 25 | workspace_capability_inventory.json | json contract · 61.5 KB | generated |
-| 26 | workspace_capability_inventory.md | markdown report · 11.9 KB | generated |
-| 27 | workspace_skills_catalog.html | html report · 23.4 KB | generated |
-| 28 | workspace_skills_catalog.json | json contract · 6.7 KB | generated |
-| 29 | workspace_skills_catalog.md | markdown report · 6.4 KB | generated |
-| 30 | 小鹏_product_line.md | markdown report · 7.3 KB | generated |
-| 31 | 智己_product_line.md | markdown report · 2.7 KB | generated |
-| 32 | 竞争洞察A3人群流转.html | html report · 416.8 KB | generated |
-| 33 | 阿维塔_product_line.md | markdown report · 2.6 KB | generated |
-| 34 | 2026-02/query_results.json | 月报 · 2026-02 · 21.1 KB | generated |
-| 35 | 2026-02/query_results.xlsx | 月报 · 2026-02 · 22.5 KB | generated |
-| 36 | 2026-02/report_draft.md | 月报 · 2026-02 · 8.7 KB | generated |
-| 37 | 2026-02/run_metadata.json | 月报 · 2026-02 · 0.6 KB | generated |
-| 38 | 2026-03/query_results.json | 月报 · 2026-03 · 497.1 KB | generated |
-| 39 | 2026-03/report_draft.md | 月报 · 2026-03 · 15.8 KB | generated |
-| 40 | 2026-03/run_metadata.json | 月报 · 2026-03 · 0.6 KB | generated |
-| 41 | 2026-05/query_results.json | 月报 · 2026-05 · 501.5 KB | generated |
-| 42 | 2026-05/report_draft.md | 月报 · 2026-05 · 15.9 KB | generated |
-| 43 | 2026-05/run_metadata.json | 月报 · 2026-05 · 0.6 KB | generated |
-| 44 | 2026-12/query_results.json | 月报 · 2026-12 · 21.1 KB | generated |
-| 45 | 2026-12/query_results.xlsx | 月报 · 2026-12 · 22.5 KB | generated |
-| 46 | 2026-12/report_draft.md | 月报 · 2026-12 · 8.7 KB | generated |
-| 47 | 2026-12/run_metadata.json | 月报 · 2026-12 · 0.6 KB | generated |
+| 5 | _ma7_test.html | html report · 90.1 KB | generated |
+| 6 | agent_execution_trace.md | markdown report · 5.4 KB | generated |
+| 7 | atp_2026-04.html | html report · 7.7 KB | generated |
+| 8 | atp_2026-05.html | html report · 7.7 KB | generated |
+| 9 | atp_2026-06.html | html report · 7.6 KB | generated |
+| 10 | auto_launch_monitor_2026-06-05_2026-06-07.md | markdown report · 3.5 KB | generated |
+| 11 | cpca_weekly_early_signal.html | html report · 40.0 KB | generated |
+| 12 | daily_msg_report.html | html report · 25.8 KB | generated |
+| 13 | followup_trace_ls8_city.md | markdown report · 9.4 KB | generated |
+| 14 | june_2026_forecast.html | html report · 5.9 KB | generated |
+| 15 | lock_predict_backtest.html | html report · 35.9 KB | generated |
+| 16 | lock_release_curve.html | html report · 75.4 KB | generated |
+| 17 | lock_trend_report.html | html report · 220.9 KB | generated |
+| 18 | ls8_battery_weekly_share.html | html report · 2960.7 KB | generated |
+| 19 | ls8_city_distribution_2026-06-14.html | html report · 11.8 KB | generated |
+| 20 | ls8_city_distribution_report.html | html report · 9.4 KB | generated |
+| 21 | ls9_battery_weekly_share.html | html report · 2943.8 KB | generated |
+| 22 | miit_dual_vehicle_compare.html | html report · 9.5 KB | generated |
+| 23 | passenger_insurance_workspace_smoke.md | markdown report · 1.1 KB | generated |
+| 24 | pk_weekly_compare_ls8_ls9.html | html report · 13.6 KB | generated |
+| 25 | quick_lock_ratio.html | html report · 683.3 KB | generated |
+| 26 | w24_weekend_analysis.html | html report · 19.3 KB | generated |
+| 27 | w24_weekend_analysis.md | markdown report · 4.1 KB | generated |
+| 28 | workspace_capability_inventory.html | html report · 44.6 KB | generated |
+| 29 | workspace_capability_inventory.json | json contract · 61.6 KB | generated |
+| 30 | workspace_capability_inventory.md | markdown report · 11.9 KB | generated |
+| 31 | workspace_skills_catalog.html | html report · 23.5 KB | generated |
+| 32 | workspace_skills_catalog.json | json contract · 8.3 KB | generated |
+| 33 | workspace_skills_catalog.md | markdown report · 7.1 KB | generated |
+| 34 | 小鹏_product_line.md | markdown report · 7.3 KB | generated |
+| 35 | 智己_product_line.md | markdown report · 2.7 KB | generated |
+| 36 | 竞争洞察A3人群流转.html | html report · 416.8 KB | generated |
+| 37 | 阿维塔_product_line.md | markdown report · 2.6 KB | generated |
+| 38 | 2026-02/query_results.json | 月报 · 2026-02 · 21.1 KB | generated |
+| 39 | 2026-02/query_results.xlsx | 月报 · 2026-02 · 22.5 KB | generated |
+| 40 | 2026-02/report_draft.md | 月报 · 2026-02 · 8.7 KB | generated |
+| 41 | 2026-02/run_metadata.json | 月报 · 2026-02 · 0.6 KB | generated |
+| 42 | 2026-03/query_results.json | 月报 · 2026-03 · 497.1 KB | generated |
+| 43 | 2026-03/report_draft.md | 月报 · 2026-03 · 15.8 KB | generated |
+| 44 | 2026-03/run_metadata.json | 月报 · 2026-03 · 0.6 KB | generated |
+| 45 | 2026-05/query_results.json | 月报 · 2026-05 · 501.5 KB | generated |
+| 46 | 2026-05/report_draft.md | 月报 · 2026-05 · 15.9 KB | generated |
+| 47 | 2026-05/run_metadata.json | 月报 · 2026-05 · 0.6 KB | generated |
+| 48 | 2026-12/query_results.json | 月报 · 2026-12 · 21.1 KB | generated |
+| 49 | 2026-12/query_results.xlsx | 月报 · 2026-12 · 22.5 KB | generated |
+| 50 | 2026-12/report_draft.md | 月报 · 2026-12 · 8.7 KB | generated |
+| 51 | 2026-12/run_metadata.json | 月报 · 2026-12 · 0.6 KB | generated |
 
 ---
 
@@ -181,7 +188,7 @@ Agent 能力的质量保障体系，包括统一 Eval 框架、上下文解析�
 | 1 | eval_suites | 统一 Eval 框架，6 suites。 | active |
 | 2 | context_parser | 自然语言 → 结构化 context。 | active |
 | 3 | followup_runner | 多轮追问评测。 | active |
-| 4 | pytest_tests | 40 个测试文件的 pytest 套件。 | active |
+| 4 | pytest_tests | 41 个测试文件的 pytest 套件。 | active |
 | 5 | cached_eval_report | 缓存的 Eval 报告（5 suites, N/A） | generated |
 | 6 | regression_notes | Regression 测试文档。 | generated |
 

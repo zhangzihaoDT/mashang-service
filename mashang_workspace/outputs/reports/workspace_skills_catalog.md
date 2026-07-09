@@ -2,7 +2,7 @@
 
 Agent Harness 能力目录
 
-生成日期：2026-07-03
+生成日期：2026-07-09
 
 本页面展示 mashang_workspace 中可被 OpenCode Agent 调用的 workspace 级 skills。
 
@@ -13,8 +13,8 @@ Agent Harness 能力目录
 | 指标 | 数值 |
 |------|------|
 | Workspace Skills | 4 |
-| Skills 输出目录 | dataset/cpca_weekly/cpca_weekly_data_capture.json   # evidence/capture 原材料, mashang_workspace/outputs/miit_new_car/promptbuilder_runs/, mashang_workspace/outputs/reports/, mashang_workspace/outputs/auto_launch/search/{date}/{mode}/, mashang_workspace/outputs/monthly_market_report/YYYY-MM/ |
-| 最近更新 | 2026-07-03 |
+| Skills 输出目录 | mashang_workspace/outputs/miit_new_car/promptbuilder_runs/, dataset/cpca_weekly/cpca_weekly_data_capture.json   # evidence/capture 原材料, mashang_workspace/outputs/reports/, auto_launch/outputs/search/{date}/{mode}/, mashang_workspace/outputs/monthly_market_report/YYYY-MM/ |
+| 最近更新 | 2026-07-09 |
 
 ## Skills Overview
 
@@ -24,7 +24,7 @@ Agent Harness 能力目录
 | cpca-weekly-data-capture | workspace | 第一时间捕捉乘联分会/乘联会周度核心数据，比 CADA 官网更早获取 P0 早源 | `make cpca-weekly-data-capture WEEK=2026-W25` | ['dataset/cpca_weekly/cpca_weekly_data_capture.json   # evidence/capture 原材料'] |
 | monthly-market-report | workspace | monthly-market-report v0.1 是基于 `passenge | `OpenCode Agent 自动匹配 — SKILL.md 位于 .opencode/skills/monthly-market-report/` | ['mashang_workspace/outputs/monthly_market_report/YYYY-MM/'] |
 | runtime-eval-diagnosis | workspace |  | `OpenCode Agent 自动匹配 — SKILL.md 位于 .opencode/skills/runtime-eval-diagnosis/` | — |
-| auto_launch | Promptbuilder / Intelligence Workflow | 汽车上市/营销事件监控；支持车型/品牌/本品 Watch，包含搜索、信源分级、2 | `python mashang_workspace/research_scripts/auto_launch/brand_daily_marketing_watch.py --brand im --brand-name 智己` | ['mashang_workspace/outputs/auto_launch/search/{date}/{mode}/', 'mashang_workspace/outputs/auto_launch/owned_brand_daily/{date}/'] |
+| auto_launch | Standalone Service (auto_launch/) | 汽车上市/营销事件独立监控服务；搜索意图编译 → query plan → Vo | `python -m auto_launch.cli daily --brand im --brand-name 智己` | ['auto_launch/outputs/search/{date}/{mode}/', 'auto_launch/outputs/owned_brand_daily/{date}/'] |
 | miit_new_car | Promptbuilder / MIIT Workflow | MIIT 新车公告全链路情报分析：批次管理、图片 OCR、结构化解析、6 信号双 | `python mashang_workspace/promptbuilders/miit_new_car/miit_vehicle_publicity_image_parser.py --ocr-result <path> --fallback-ocr-result <path> --force` | ['mashang_workspace/outputs/miit_new_car/promptbuilder_runs/', 'mashang_workspace/outputs/miit_new_car/vehicle_publicity_detail/records/', 'mashang_workspace/outputs/reports/', 'mashang_workspace/outputs/ocr/results/'] |
 
 ## Workspace Skills 详情
@@ -77,14 +77,17 @@ Agent Harness 能力目录
 | 入口命令 | `OpenCode Agent 自动匹配 — SKILL.md 位于 .opencode/skills/runtime-eval-diagnosis/` |
 | 默认输出 | — |
 
-### auto_launch (Promptbuilder / Intelligence Workflow)
+### auto_launch
 
 | 字段 | 内容 |
 |------|------|
-| 目录 | `promptbuilders/auto_launch/` |
-| 类型 | Promptbuilder / Intelligence Workflow |
-| 能力定位 | 汽车上市/营销事件监控；支持车型/品牌/本品 Watch，包含搜索、信源分级、24h 窗口校验、事件聚类、candidate gate 与 raw-first report packaging。 |
-| 入口命令 | `python mashang_workspace/research_scripts/auto_launch/brand_daily_marketing_watch.py --brand im --brand-name 智己` |
+| 目录 | `auto_launch/` |
+| 层级 | workspace |
+| 能力定位 | 汽车上市/营销事件独立监控服务；搜索意图编译 → query plan → Volc Search API → 信源分级 → URL 去重 → 事件聚类 → candidate gate → Markdown 简报。 |
+| 适用场景 | 本品品牌每日营销事件监控、竞品车型动态追踪、搜索意图编译 → Volc Search 执行、搜索结果标准化 + 信源分级、事件聚类 + candidate gate 分桶 |
+| 不适用场景 | 生成长篇竞品分析报告、替代完整爬虫/ETL 系统、非汽车行业的通用事件监测 |
+| 入口命令 | `python -m auto_launch.cli daily --brand im --brand-name 智己` |
+| 默认输出 | ['auto_launch/outputs/search/{date}/{mode}/', 'auto_launch/outputs/owned_brand_daily/{date}/'] |
 
 ### miit_new_car (Promptbuilder / MIIT Workflow)
 
@@ -101,7 +104,7 @@ Agent Harness 能力目录
 - `.opencode/skills/cpca-weekly-data-capture/` — cpca-weekly-data-capture (workspace skill)
 - `.opencode/skills/monthly-market-report/` — monthly-market-report (workspace skill)
 - `.opencode/skills/runtime-eval-diagnosis/` — runtime-eval-diagnosis (workspace skill)
-- `promptbuilders/auto_launch/` — auto_launch (Promptbuilder / Intelligence Workflow)
+- `auto_launch/` — auto_launch (Standalone Service (auto_launch/))
 - `promptbuilders/miit_new_car/` — miit_new_car (Promptbuilder / MIIT Workflow)
 - `utility_scripts/build_workspace_skills_catalog.py` — 本页生成脚本
 - `utility_scripts/render_html_report.py` — 品牌化报告渲染脚本

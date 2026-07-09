@@ -3,7 +3,7 @@ search_task_config_builder.py — 将 search_intent 转为可执行搜索任务�
 
 用法:
   python search_task_config_builder.py \
-    --intent mashang_workspace/outputs/auto_launch/search/2026-07-02/brand_watch/search_intent.json
+    --intent auto_launch/outputs/search/2026-07-02/brand_watch/search_intent.json
 """
 
 import json, sys

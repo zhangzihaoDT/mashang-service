@@ -76,7 +76,7 @@ def test_makefile_target_dry_run():
     """Makefile target 可被 dry-run 检查"""
     import subprocess
     result = subprocess.run(
-        [sys.executable, str(Path(sys.path[0]) / "research_scripts/auto_launch/brand_daily_marketing_watch.py"),
+        [sys.executable, str(Path(sys.path[0]) / "auto_launch/src/brand_daily_marketing_watch.py"),
          "--brand", "im", "--brand-name", "智己", "--date", "2026-07-02"],
         capture_output=True, text=True, cwd=Path(sys.path[0])
     )

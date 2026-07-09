@@ -65,7 +65,7 @@ def build_budget_plan(intent: dict, cli_profile: str = None,
             "enabled": not disable_cache and cache_cfg.get("enabled", True),
             "ttl_hours": cache_cfg.get("ttl_hours", 24),
             "refresh": refresh,
-            "root_dir": str(WORKSPACE_ROOT / cache_cfg.get("root_dir", "outputs/auto_launch/search_cache")),
+            "root_dir": str(WORKSPACE_ROOT / cache_cfg.get("root_dir", "auto_launch/outputs/search_cache")),
         },
         "budget_reason": _budget_reason(intent, profile_name),
     }

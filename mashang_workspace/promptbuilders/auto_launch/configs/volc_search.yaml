@@ -46,7 +46,7 @@ query_profiles:
 
 cache:
   enabled: true
-  root_dir: outputs/auto_launch/search_cache
+  root_dir: auto_launch/outputs/search_cache
   ttl_hours: 24
   key_fields:
     - provider

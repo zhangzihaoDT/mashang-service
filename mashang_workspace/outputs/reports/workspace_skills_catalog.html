@@ -48,7 +48,7 @@
         <img class="brand-avatar" src="../../assets/brand/raccoon_avatar_light.png" alt="" />
         <span class="brand-name">Raccoon Research</span>
       </div>
-      <span class="header-meta">workspace_skills_catalog | 2026-07-03</span>
+      <span class="header-meta">workspace_skills_catalog | 2026-07-09</span>
     </div>
   </header>
 
@@ -62,18 +62,18 @@
     <section class="kpi-grid">
       <div class="kpi-card">
         <div class="label">Workspace Skills</div>
-        <div class="value">4</div>
+        <div class="value">5</div>
         <div class="change neutral">OpenCode Agent 自动匹配</div>
       </div>
       <div class="kpi-card">
         <div class="label">Promptbuilder Workflows</div>
-        <div class="value">2</div>
+        <div class="value">1</div>
         <div class="change neutral">Intelligence Workflow</div>
       </div>
       <div class="kpi-card">
         <div class="label">总能力数</div>
         <div class="value">6</div>
-        <div class="change neutral">2026-07-03</div>
+        <div class="change neutral">2026-07-09</div>
       </div>
     </section>
 
@@ -122,10 +122,10 @@
             </tr>
             <tr>
               <td><strong>auto_launch</strong></td>
-              <td><span class="badge badge-pb">Promptbuilder / Intelligence Workflow</span></td>
-              <td>汽车上市/营销事件监控；支持车型/品牌/本品 Watch，包含搜索、信源分级、2</td>
-              <td><code>python mashang_workspace/research_scripts/auto_launch/brand_daily_marketing_watch.py</code></td>
-              <td><code>['mashang_workspace/outputs/auto_launch/search/{date}/{mode}/', 'mashang_workspace/outputs/auto_launch/owned_brand_daily/{date}/']</code></td>
+              <td><span class="badge badge-ws">Standalone Service (auto_launch/)</span></td>
+              <td>汽车上市/营销事件独立监控服务；搜索意图编译 → query plan → Vo</td>
+              <td><code>python -m auto_launch.cli daily</code></td>
+              <td><code>['auto_launch/outputs/search/{date}/{mode}/', 'auto_launch/outputs/owned_brand_daily/{date}/']</code></td>
             </tr>
             <tr>
               <td><strong>miit_new_car</strong></td>
@@ -316,22 +316,42 @@
         <div class="skill-card">
           <div class="skill-card-header">
             <div class="skill-name">auto_launch</div>
-            <span class="skill-badge badge-pb">Promptbuilder / Intelligence Workflow</span>
+            <span class="skill-badge badge-ws">Standalone Service (auto_launch/)</span>
           </div>
-          <div class="skill-desc">汽车上市/营销事件监控；支持车型/品牌/本品 Watch，包含搜索、信源分级、24h 窗口校验、事件聚类、candidate gate 与 raw-first report packaging。</div>
+          <div class="skill-desc">汽车上市/营销事件独立监控服务；搜索意图编译 → query plan → Volc Search API → 信源分级 → URL 去重 → 事件聚类 → candidate gate → Markdown 简报。</div>
           <div class="skill-meta">
-            <span class="skill-tag gold">Promptbuilder</span>
-            <span class="skill-tag blue">Workflow</span>
+            <span class="skill-tag blue">品牌</span>
           </div>
           <div class="skill-section">
             <div class="skill-section-label">目录</div>
-            <div class="skill-section-value"><code>promptbuilders/auto_launch/</code></div>
+            <div class="skill-section-value"><code>auto_launch/</code></div>
+          </div>          <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="skill-section">
+              <div class="skill-section-label">适用场景</div>
+              <div class="skill-section-value">
+                <ul>
+                  <li>本品品牌每日营销事件监控</li>
+                  <li>竞品车型动态追踪</li>
+                  <li>搜索意图编译 → Volc Search 执行</li>
+                  <li>搜索结果标准化 + 信源分级</li>
+                  <li>事件聚类 + candidate gate 分桶</li>
+                </ul>
+              </div>
+            </div>
+            <div class="skill-section">
+              <div class="skill-section-label">不适用场景</div>
+              <div class="skill-section-value">
+                <ul>
+                  <li>生成长篇竞品分析报告</li>
+                  <li>替代完整爬虫/ETL 系统</li>
+                  <li>非汽车行业的通用事件监测</li>
+                </ul>
+              </div>
+            </div>
           </div>          <div class="skill-section" style="margin-top:10px">
             <div class="skill-section-label">入口命令</div>
             <div class="skill-section-value">
-                  <code>python mashang_workspace/research_scripts/auto_launch/brand_daily_marketing_watch.py --brand im --brand-name 智己</code><br/>
-                  <code>python mashang_workspace/research_scripts/auto_launch/volc_search_daily.py --request '看看极氪最近 7 天都有什么动作'</code><br/>
-                  <code>make auto-launch-owned-brand-daily</code><br/>
+                  <code>python -m auto_launch.cli daily</code>
             </div>
           </div>
         </div>
@@ -369,28 +389,6 @@
       
         <div class="skill-card">
           <div class="skill-card-header">
-            <div class="skill-name">auto_launch</div>
-            <span class="skill-badge badge-pb">Promptbuilder / Intelligence Workflow</span>
-          </div>
-          <div class="skill-desc">汽车上市/营销事件监控；支持车型/品牌/本品 Watch，包含搜索、信源分级、24h 窗口校验、事件聚类、candidate gate 与 raw-first report packaging。</div>
-          <div class="skill-meta">
-            <span class="skill-tag gold">Promptbuilder</span>
-            <span class="skill-tag blue">Workflow</span>
-          </div>
-          <div class="skill-section">
-            <div class="skill-section-label">目录</div>
-            <div class="skill-section-value"><code>promptbuilders/auto_launch/</code></div>
-          </div>          <div class="skill-section" style="margin-top:10px">
-            <div class="skill-section-label">入口命令</div>
-            <div class="skill-section-value">
-                  <code>python mashang_workspace/research_scripts/auto_launch/brand_daily_marketing_watch.py --brand im --brand-name 智己</code><br/>
-                  <code>python mashang_workspace/research_scripts/auto_launch/volc_search_daily.py --request '看看极氪最近 7 天都有什么动作'</code><br/>
-                  <code>make auto-launch-owned-brand-daily</code><br/>
-            </div>
-          </div>
-        </div>
-        <div class="skill-card">
-          <div class="skill-card-header">
             <div class="skill-name">miit_new_car</div>
             <span class="skill-badge badge-pb">Promptbuilder / MIIT Workflow</span>
           </div>
@@ -425,13 +423,13 @@
               <li>cpca-weekly-data-capture — 第一时间捕捉乘联分会/乘联会周度核心数据，比 CADA 官网更早获取 P0 早源</li>
               <li>monthly-market-report — monthly-market-report v0.1 是基于 `passenge</li>
               <li>runtime-eval-diagnosis — </li>
+              <li>auto_launch — 汽车上市/营销事件独立监控服务；搜索意图编译 → query plan → Vo</li>
               <li>位于 <code>mashang_workspace/.opencode/skills/</code></li>
             </ul>
           </div>
           <div class="arch-item">
             <h3>promptbuilder workflows</h3>
             <ul>
-              <li>auto_launch — 汽车上市/营销事件监控；支持车型/品牌/本品 Watch，包含搜索、信源分级、24h 窗口校验、事件</li>
               <li>miit_new_car — MIIT 新车公告全链路情报分析：批次管理、图片 OCR、结构化解析、6 信号双车对比。</li>
               <li>位于 <code>mashang_workspace/promptbuilders/</code></li>
             </ul>

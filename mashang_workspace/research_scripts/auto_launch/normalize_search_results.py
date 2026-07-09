@@ -3,7 +3,7 @@ normalize_search_results.py — 将 Volc Search 原始搜索结果标准化为�
 
 用法:
   python normalize_search_results.py \
-    --raw outputs/auto_launch/search/2026-07-02/brand_watch/search_results.raw.json
+    --raw auto_launch/outputs/search/2026-07-02/brand_watch/search_results.raw.json
 """
 
 import json, sys, re

@@ -53,6 +53,7 @@ mashang_workspace/outputs/miit_new_car/state/
 
 # Auto launch: all outputs are runtime-generated, not committed
 mashang_workspace/outputs/auto_launch/
+auto_launch/outputs/
 
 # Defensive: promptbuilders should not contain runtime outputs
 mashang_workspace/promptbuilders/outputs/

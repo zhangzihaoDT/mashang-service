@@ -117,135 +117,106 @@ miit-diagnose-attachments:
 miit-parse-product-list:
 	$(PYTHON) mashang_workspace/research_scripts/miit_new_car/parse_product_list.py --batch $(BATCH)
 
-## 生成 Auto Launch 示例搜索 Prompt
-## 支持覆盖参数: TARGETS_FILE TARGET_PROFILE_FILE BATTLE_FIELDS_FILE TARGET_BRAND TARGET_MODEL TARGET_GROUP EVENT_TYPE EVENT_DATE WINDOW COMPETITOR_LIMIT INCLUDE_PRIORITY
+## Auto Launch — 本品品牌每日营销监控（新 CLI）
+auto-launch-owned-brand-daily:
+	$(PYTHON) -m auto_launch.cli daily \
+		--brand im \
+		--brand-name 智己 \
+		$(if $(DATE),--date $(DATE)) \
+		--window-hours $(or $(WINDOW_HOURS),24) \
+		$(if $(LIVE),--live) \
+		$(if $(REFRESH),--refresh)
+
+auto-launch-owned-brand-daily-dry-run:
+	$(PYTHON) -m auto_launch.cli daily \
+		--brand im \
+		--brand-name 智己 \
+		$(if $(DATE),--date $(DATE)) \
+		--window-hours $(or $(WINDOW_HOURS),24)
+
+## Auto Launch — Volc Search 搜索意图转译与执行
+auto-launch-search:
+	$(PYTHON) -m auto_launch.cli search \
+		--request "$(or $(REQUEST),看看极氪最近 7 天都有什么动作)" \
+		$(if $(DATE),--date $(DATE)) \
+		$(if $(LIVE),--live) \
+		$(if $(QUERY_PROFILE),--query-profile $(QUERY_PROFILE))
+
+## Auto Launch — 标准化搜索结果
+auto-launch-normalize-results:
+	$(PYTHON) -m auto_launch.cli normalize \
+		--raw $(RAW) \
+		--query-plan $(QUERY_PLAN) \
+		$(if $(OUTPUT_PREFIX),--output-prefix $(OUTPUT_PREFIX))
+
+# ── 以下旧 promptbuilder targets 已归档 ─────────────────────────
+# 对应脚本未迁移至 auto_launch/src/，保留 target 但标注 TODO
+# 移入 auto_launch/ 后脚本路径改为 auto_launch/<script>
+
+## TODO: 生成 Auto Launch 示例搜索 Prompt
+## 脚本未迁移（原 mashang_workspace/promptbuilders/auto_launch/promptbuilder.py 已下线）
 build-auto-launch-prompt:
-	$(PYTHON) mashang_workspace/promptbuilders/auto_launch/promptbuilder.py \
-		--brand $(or $(TARGET_BRAND),智己) \
-		--model $(or $(TARGET_MODEL),LS8) \
-		--event-type $(or $(EVENT_TYPE),上市) \
-		--event-date $(or $(EVENT_DATE),2026-06-25) \
-		--window $(or $(WINDOW),48h) \
-		$(if $(TARGETS_FILE),--targets-file "$(TARGETS_FILE)",--targets-file mashang_workspace/promptbuilders/auto_launch/configs/ls8_competitor_watchlist.csv) \
-		$(if $(TARGET_PROFILE_FILE),--target-profile-file "$(TARGET_PROFILE_FILE)",--target-profile-file mashang_workspace/promptbuilders/auto_launch/configs/target_profiles.yaml) \
-		$(if $(BATTLE_FIELDS_FILE),--battle-fields-file "$(BATTLE_FIELDS_FILE)",--battle-fields-file mashang_workspace/promptbuilders/auto_launch/configs/battle_fields.yaml) \
-		$(if $(TARGET_GROUP),--target-group "$(TARGET_GROUP)") \
-		--competitor-limit $(or $(COMPETITOR_LIMIT),5) \
-		--include-priority $(or $(INCLUDE_PRIORITY),high) \
-		--output mashang_workspace/outputs/auto_launch/prompts/ls8_search_task.md
+	@echo "TODO: promptbuilder.py 未迁移至 auto_launch/，暂不可用"
+	@echo "请参见 auto_launch/README.md 了解当前能力"
+	@exit 1
 
-## 生成 Golden Prompt Cases（3 个标准样例 + 校验）
+## TODO: 生成 Golden Prompt Cases（3 个标准样例 + 校验）
+## 脚本未迁移
 build-auto-launch-golden-prompts:
-	$(PYTHON) mashang_workspace/promptbuilders/auto_launch/examples/generate_golden_cases.py
+	@echo "TODO: generate_golden_cases.py 未迁移至 auto_launch/，暂不可用"
+	@exit 1
 
-## 验证 AI 返回结果是否符合 evidence schema 和输出结构要求
-## 支持覆盖参数: CASE_NAME RAW_FILE PROMPT_FILE OUTPUT
+## TODO: 验证 AI 返回结果是否符合 evidence schema
+## 脚本未迁移
 validate-auto-launch-ai-response:
-	$(PYTHON) mashang_workspace/promptbuilders/auto_launch/examples/validate_ai_response.py \
-		--strict \
-		--case-name $(or $(CASE_NAME),sample_response) \
-		--raw-file $(or $(RAW_FILE),mashang_workspace/promptbuilders/auto_launch/examples/fixtures/sample_response.synthetic.raw.md) \
-		--prompt-file $(or $(PROMPT_FILE),mashang_workspace/outputs/auto_launch/prompts/examples/byd_datang_ev_launch_7d_vs_ls8.md) \
-		--output $(or $(OUTPUT),mashang_workspace/outputs/auto_launch/ai_response_examples/sample_response.validation.json)
+	@echo "TODO: validate_ai_response.py 未迁移至 auto_launch/，暂不可用"
+	@exit 1
 
-## 验证 byd_datang_ev 真实 AI 返回结果
-## 使用前: 将 DeepSeek/ChatGPT 搜索结果保存为 outputs/auto_launch/ai_response_examples/byd_datang_ev_launch_7d_vs_ls8.raw.md
+## TODO: 验证 byd_datang_ev 真实 AI 返回结果
 validate-auto-launch-byd-datang-fixture:
-	@if [ ! -f mashang_workspace/outputs/auto_launch/ai_response_examples/byd_datang_ev_launch_7d_vs_ls8.raw.md ]; then \
-		echo ""; \
-		echo "  ⚠️  未找到真实 AI 返回结果。请先完成以下步骤："; \
-		echo ""; \
-		echo "  1. 打开以下 Prompt 文件，复制全部内容："; \
-		echo "     mashang_workspace/outputs/auto_launch/prompts/examples/byd_datang_ev_launch_7d_vs_ls8.md"; \
-		echo ""; \
-		echo "  2. 将内容粘贴到 DeepSeek / ChatGPT 的搜索对话中"; \
-		echo ""; \
-		echo "  3. 等待 AI 搜索完成后，将完整返回结果保存为："; \
-		echo "     mashang_workspace/outputs/auto_launch/ai_response_examples/byd_datang_ev_launch_7d_vs_ls8.raw.md"; \
-		echo ""; \
-		echo "  4. 重新运行: make validate-auto-launch-byd-datang-fixture"; \
-		echo ""; \
-		exit 1; \
-	fi
-	$(PYTHON) mashang_workspace/promptbuilders/auto_launch/examples/validate_ai_response.py \
-		--case-name byd_datang_ev_launch_7d_vs_ls8 \
-		--raw-file mashang_workspace/outputs/auto_launch/ai_response_examples/byd_datang_ev_launch_7d_vs_ls8.raw.md \
-		--prompt-file mashang_workspace/outputs/auto_launch/prompts/examples/byd_datang_ev_launch_7d_vs_ls8.md \
-		--output mashang_workspace/outputs/auto_launch/ai_response_examples/byd_datang_ev_launch_7d_vs_ls8.validation.json
+	@echo "TODO: validate_ai_response.py 未迁移至 auto_launch/，暂不可用"
+	@exit 1
 
-## 生成 byd_datang_ev 标准化证据 JSON
-## 前置条件: make validate-auto-launch-byd-datang-fixture 已通过
+## TODO: 生成 byd_datang_ev 标准化证据 JSON
 build-auto-launch-byd-datang-report:
-	$(PYTHON) mashang_workspace/promptbuilders/auto_launch/examples/normalize_ai_response.py \
-		--case-name byd_datang_ev_launch_7d_vs_ls8 \
-		--raw-file mashang_workspace/outputs/auto_launch/ai_response_examples/byd_datang_ev_launch_7d_vs_ls8.raw.md \
-		--prompt-file mashang_workspace/outputs/auto_launch/prompts/examples/byd_datang_ev_launch_7d_vs_ls8.md \
-		--validation-file mashang_workspace/outputs/auto_launch/ai_response_examples/byd_datang_ev_launch_7d_vs_ls8.validation.json \
-		--normalized-output mashang_workspace/outputs/auto_launch/normalized/byd_datang_ev_launch_7d_vs_ls8.normalized_evidence.json \
-		--report-output mashang_workspace/outputs/auto_launch/reports/byd_datang_ev_launch_7d_vs_ls8/executive_brief.md
+	@echo "TODO: normalize_ai_response.py 未迁移至 auto_launch/，暂不可用"
+	@exit 1
 
-## 打包为标准化报告目录（raw.md + 摘要 + 索引 + 质量）
-## 依赖: raw.md + validation.json + normalized_evidence.json
-package-auto-launch-byd-datang-report: build-auto-launch-byd-datang-report
-	$(PYTHON) mashang_workspace/promptbuilders/auto_launch/examples/package_ai_report.py \
-		--case-name byd_datang_ev_launch_7d_vs_ls8 \
-		--raw-file mashang_workspace/outputs/auto_launch/ai_response_examples/byd_datang_ev_launch_7d_vs_ls8.raw.md \
-		--validation-file mashang_workspace/outputs/auto_launch/ai_response_examples/byd_datang_ev_launch_7d_vs_ls8.validation.json \
-		--normalized-file mashang_workspace/outputs/auto_launch/normalized/byd_datang_ev_launch_7d_vs_ls8.normalized_evidence.json \
-		--output-dir mashang_workspace/outputs/auto_launch/reports/byd_datang_ev_launch_7d_vs_ls8
+## TODO: 打包为标准化报告目录
+package-auto-launch-byd-datang-report:
+	@echo "TODO: package_ai_report.py 未迁移至 auto_launch/，暂不可用"
+	@exit 1
 
-## [EXPERIMENTAL] 生成一页摘要（不替代 raw.md）
+## TODO: [EXPERIMENTAL] 生成一页摘要
 build-auto-launch-battle-brief:
-	$(PYTHON) mashang_workspace/promptbuilders/auto_launch/examples/build_battle_brief.py \
-		--normalized-file $(or $(NORMALIZED_FILE),mashang_workspace/outputs/auto_launch/normalized/byd_datang_ev_launch_7d_vs_ls8.normalized_evidence.json) \
-		--output $(or $(REPORT_OUTPUT),mashang_workspace/outputs/auto_launch/reports/byd_datang_ev_launch_7d_vs_ls8/executive_brief.md)
+	@echo "TODO: build_battle_brief.py 未迁移至 auto_launch/，暂不可用"
+	@exit 1
 
-## [EXPERIMENTAL] 验收 executive_brief.md 摘要质量
+## TODO: [EXPERIMENTAL] 验收 executive_brief.md 摘要质量
 validate-auto-launch-byd-datang-report:
-	$(PYTHON) mashang_workspace/promptbuilders/auto_launch/examples/validate_battle_brief.py \
-		--brief-file mashang_workspace/outputs/auto_launch/reports/byd_datang_ev_launch_7d_vs_ls8/executive_brief.md \
-		--normalized-file mashang_workspace/outputs/auto_launch/normalized/byd_datang_ev_launch_7d_vs_ls8.normalized_evidence.json \
-		--output mashang_workspace/outputs/auto_launch/reports/byd_datang_ev_launch_7d_vs_ls8/report.quality.json
+	@echo "TODO: validate_battle_brief.py 未迁移至 auto_launch/，暂不可用"
+	@exit 1
 
-## AI Output Intake Workflow (validate → normalize → markdown)
-## SAMPLE: AI output JSON path (default: event_48h_sample.json)
-## OUT_DIR: if set, uses --output-dir mode (auto-generates raw/normalized/report/manifest)
-SAMPLE ?= mashang_workspace/promptbuilders/auto_launch/examples/ai_outputs/event_48h_sample.json
-OUTPUT_PREFIX ?= mashang_workspace/promptbuilders/auto_launch/examples
-
-## Validate AI output JSON
+## TODO: AI Output Intake Workflow (validate → normalize → markdown)
 auto-launch-validate:
-	$(PYTHON) mashang_workspace/promptbuilders/auto_launch/validators/validate_ai_response.py $(SAMPLE)
+	@echo "TODO: validate_ai_response.py 未迁移至 auto_launch/，暂不可用"
+	@exit 1
 
-## Normalize AI output JSON
 auto-launch-normalize:
-	$(PYTHON) mashang_workspace/promptbuilders/auto_launch/validators/normalize_ai_response.py $(SAMPLE) \
-		--output $(OUTPUT_PREFIX)/normalized/$(notdir $(SAMPLE:.json=.normalized.json))
+	@echo "TODO: normalize_ai_response.py 未迁移至 auto_launch/，暂不可用"
+	@exit 1
 
-## Full Intake: validate → normalize → markdown report
-## If OUT_DIR is set, uses --output-dir mode; otherwise uses --normalized-output/--report-output
 auto-launch-intake:
-	$(if $(OUT_DIR),\
-		$(PYTHON) mashang_workspace/promptbuilders/auto_launch/intake/process_ai_output.py $(SAMPLE) \
-			--output-dir $(OUT_DIR),\
-		$(PYTHON) mashang_workspace/promptbuilders/auto_launch/intake/process_ai_output.py $(SAMPLE) \
-			--normalized-output $(OUTPUT_PREFIX)/normalized/$(notdir $(SAMPLE:.json=.normalized.json)) \
-			--report-output $(OUTPUT_PREFIX)/reports/$(notdir $(SAMPLE:.json=.md)))
+	@echo "TODO: process_ai_output.py 未迁移至 auto_launch/，暂不可用"
+	@exit 1
 
-## Build output index from all intake output directories
-OUT_ROOT ?= mashang_workspace/outputs/auto_launch
 auto-launch-index:
-	$(PYTHON) mashang_workspace/promptbuilders/auto_launch/indexers/build_output_index.py \
-		--input-dir $(OUT_ROOT) \
-		--index-json $(OUT_ROOT)/index.json \
-		--index-md $(OUT_ROOT)/index.md
+	@echo "TODO: build_output_index.py 未迁移至 auto_launch/，暂不可用"
+	@exit 1
 
-## Generate Daily Monitor Report from intake outputs
-## OUT_DIR: Daily Monitor intake output directory (default: daily_monitor)
-OUT_DIR ?= mashang_workspace/outputs/auto_launch/daily_monitor
 auto-launch-daily-report:
-	$(PYTHON) mashang_workspace/promptbuilders/auto_launch/reports/generate_daily_monitor_report.py \
-		--input-dir $(OUT_DIR)
+	@echo "TODO: generate_daily_monitor_report.py 未迁移至 auto_launch/，暂不可用"
+	@exit 1
 
 ## Capability Audit
 capability-audit:
@@ -340,25 +311,6 @@ cpca-weekly-early-signal-json:  ## 乘联分会周度数据早源监控（JSON �
 cpca-weekly-data-capture:  ## 捕捉乘联分会周度早源数据并生成 fact_result JSON（WEEK=目标数据周，默认自动计算）
 	$(PYTHON) mashang_workspace/research_scripts/cpca_weekly_early_signal.py $(if $(WEEK),--week $(WEEK)) --format html --capture-json --write-fact-result
 
-# Auto Launch — 本品品牌每日营销监控
-auto-launch-owned-brand-daily:
-	$(PYTHON) mashang_workspace/research_scripts/auto_launch/brand_daily_marketing_watch.py \
-		--brand im \
-		--brand-name 智己 \
-		$(if $(DATE),--date $(DATE)) \
-		--window-hours $(or $(WINDOW_HOURS),24) \
-		--query-profile balanced \
-		$(if $(LIVE),--live) \
-		$(if $(REFRESH),--refresh)
-
-auto-launch-owned-brand-daily-dry-run:
-	$(PYTHON) mashang_workspace/research_scripts/auto_launch/brand_daily_marketing_watch.py \
-		--brand im \
-		--brand-name 智己 \
-		$(if $(DATE),--date $(DATE)) \
-		--window-hours $(or $(WINDOW_HOURS),24) \
-		--query-profile balanced
-
 # Workspace Skills Catalog
 build-workspace-skills-catalog:
 	$(PYTHON) mashang_workspace/utility_scripts/build_workspace_skills_catalog.py
@@ -389,19 +341,14 @@ help:
 	@echo "make reference-eval  Reference Eval"
 	@echo "make atp-demo        ATP 月报 Demo"
 	@echo "make backtest-demo   锁单预测回测 Demo"
-	@echo "=== Auto Launch (竞品上市事件 Prompt 工作流) ==="
-	@echo "make build-auto-launch-prompt          生成搜索 Prompt"
-	@echo "make build-auto-launch-golden-prompts  生成 4 个 Golden Prompt 样例"
-	@echo "make validate-auto-launch-ai-response  [strict] synthetic AI 返回验证"
-	@echo "make validate-auto-launch-byd-datang-fixture  [tolerant] 真实 AI 返回验证"
-	@echo "make package-auto-launch-byd-datang-report  打包标准化报告目录 (raw+摘要+索引+质量)"
-	@echo "make build-auto-launch-battle-brief    [EXPERIMENTAL] 生成一页摘要"
-	@echo "make auto-launch-validate  SAMPLE=... 验证 AI 输出 JSON（Prompt workflow intake）"
-	@echo "make auto-launch-normalize SAMPLE=... 归一化 AI 输出 JSON"
-	@echo "make auto-launch-intake    SAMPLE=... OUT_DIR=... 完整 intake: validate→normalize→markdown (output-dir 模式)"
-	@echo "make auto-launch-index     OUT_ROOT=... 生成 output index（Prompt workflow output archive）"
-	@echo "make auto-launch-daily-report OUT_DIR=... 生成 Daily Monitor 日报 report (MD + HTML)"
-	@echo "prompts/ + plan_templates/             核心资产（promptbuilders/auto_launch/）"
+	@echo "=== Auto Launch (独立 service: auto_launch/) ==="
+	@echo "make auto-launch-owned-brand-daily         本品品牌每日营销监控 dry-run"
+	@echo "make auto-launch-owned-brand-daily-dry-run 本品品牌每日营销监控（同 dry-run）"
+	@echo "make auto-launch-search                    Volc Search 搜索意图转译 (REQUEST=...) [dry-run]"
+	@echo "make auto-launch-normalize-results         标准化搜索结果 (RAW=... QUERY_PLAN=...)"
+	@echo "  配置目录: auto_launch/configs/"
+	@echo "  文档:      auto_launch/README.md, auto_launch/docs/workflow.md"
+	@echo "  核心资产:  旧 promptbuilders/auto_launch/ 已归档，见 auto_launch/prompts/"
 	@echo ""
 	@echo "=== MIIT 新车公告 ==="
 	@echo "make miit-discover-latest-batch  发现最新公告批次"

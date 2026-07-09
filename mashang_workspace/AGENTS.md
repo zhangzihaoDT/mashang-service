@@ -129,7 +129,7 @@ python mashang_workspace/eval/run_eval.py --suite parser  # 单套件
 | `python runtime_scripts/lock_city_distribution.py` | 城市分布 | runtime |
 | `python research_scripts/release_curve_analysis.py` | 释放曲线 | research |
 | `python research_scripts/cohort_forecast.py` | 预测锁单 | research |
-| `promptbuilders/auto_launch/prompts/` + `plan_templates/` | 竞品上市事件 Prompt 工作流资产（旧 auto_launch_monitor.py 已下线） | prompt asset |
+| `auto_launch/prompts/` | 竞品上市事件 Prompt 工作流资产 — 已迁移至 `auto_launch/` | prompt asset |
 | `python research_scripts/cpca_weekly_early_signal.py --week 2026-W26` | 乘联分会周度数据早源监控（WEEK=数据归属周） | research |
 | `make cpca-weekly-early-signal WEEK=2026-W26` | 早源监控（终端输出）WEEK=要监控的数据周 | make |
 | `make cpca-weekly-early-signal-html WEEK=2026-W26` | 早源监控（HTML 报告）WEEK=要监控的数据周 | make |

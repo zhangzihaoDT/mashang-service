@@ -1,0 +1,115 @@
+# LS8 竞品车型监控列表 (从 CSV 转换)
+# version: v0.1
+
+watchlist_name: LS8 竞争关注品牌-车型列表
+battlefield: large_six_seat_suv
+targets:
+  - target_id: leapmotor_d19
+    brand: 零跑
+    brand_aliases: [零跑, Leapmotor, LEAPMOTOR]
+    model: D19
+    model_aliases: [零跑D19, 零跑 D19, Leapmotor D19, LEAPMOTOR D19]
+    display_name: 零跑 D19
+    battlefield_id: large_six_seat_suv
+    ecosystem_group: 新势力SUV
+    priority: high
+    active: true
+
+  - target_id: voyah_taishan_x8_phev
+    brand: 岚图
+    brand_aliases: [岚图, VOYAH]
+    model: 泰山 X8 PHEV
+    model_aliases: [岚图泰山, 岚图泰山X8, 岚图X8 PHEV, 泰山X8 PHEV, VOYAH Taishan]
+    display_name: 岚图 泰山 X8 PHEV
+    battlefield_id: large_six_seat_suv
+    ecosystem_group: 央国企新能源SUV
+    priority: high
+    active: true
+
+  - target_id: xpeng_gx
+    brand: 小鹏
+    brand_aliases: [小鹏, XPENG, Xpeng]
+    model: GX
+    model_aliases: [小鹏GX, 小鹏 GX, XPENG GX, Xpeng GX]
+    display_name: 小鹏 GX
+    battlefield_id: large_six_seat_suv
+    ecosystem_group: 新势力SUV
+    priority: high
+    active: true
+
+  - target_id: li_i6
+    brand: 理想
+    brand_aliases: [理想, Li Auto, Lixiang]
+    model: i6
+    model_aliases: [理想i6, 理想 i6, Li Auto i6]
+    display_name: 理想 i6
+    battlefield_id: large_six_seat_suv
+    ecosystem_group: 新势力SUV
+    priority: high
+    active: true
+
+  - target_id: onvo_l80
+    brand: 乐道
+    brand_aliases: [乐道, 乐道汽车, ONVO, 蔚来乐道, NIO ONVO]
+    model: L80
+    model_aliases: [乐道L80, 乐道 L80, ONVO L80, 蔚来乐道L80, 乐道汽车L80]
+    display_name: 乐道 L80
+    battlefield_id: large_six_seat_suv
+    ecosystem_group: 蔚来系SUV
+    priority: high
+    active: true
+
+  - target_id: vw_id_era_9x
+    brand: 大众
+    brand_aliases: [大众, Volkswagen, VW, ID. ERA, ID ERA]
+    model: ID. ERA 9X
+    model_aliases: [ID. ERA 9X, ID ERA 9X, ERA 9X, 大众ID. ERA, 大众 ID. ERA 9X]
+    display_name: 大众 ID. ERA 9X
+    battlefield_id: large_six_seat_suv
+    ecosystem_group: 合资新能源SUV
+    priority: medium
+    active: true
+
+  - target_id: aito_m7
+    brand: 问界
+    brand_aliases: [问界, AITO, 鸿蒙智行]
+    model: M7
+    model_aliases: [问界M7, 问界 M7, AITO M7, 鸿蒙智行M7]
+    display_name: 问界 M7
+    battlefield_id: large_six_seat_suv
+    ecosystem_group: 华为系SUV
+    priority: high
+    active: true
+
+  - target_id: avatr_06
+    brand: 阿维塔
+    brand_aliases: [阿维塔, AVATR]
+    model: 06
+    model_aliases: [阿维塔06, 阿维塔 06, AVATR 06]
+    display_name: 阿维塔 06
+    battlefield_id: large_six_seat_suv
+    ecosystem_group: 华为系SUV
+    priority: high
+    active: true
+
+  - target_id: lynk_900
+    brand: 领克
+    brand_aliases: [领克, Lynk & Co, LYNK & CO]
+    model: 900
+    model_aliases: [领克900, 领克 900, Lynk & Co 900, LYNK & CO 900]
+    display_name: 领克 900
+    battlefield_id: large_six_seat_suv
+    ecosystem_group: 吉利系SUV
+    priority: medium
+    active: true
+
+  - target_id: zeekr_8x
+    brand: 极氪
+    brand_aliases: [极氪, ZEEKR, Zeekr]
+    model: 8X
+    model_aliases: [极氪8X, 极氪 8X, ZEEKR 8X, Zeekr 8X]
+    display_name: 极氪 8X
+    battlefield_id: large_six_seat_suv
+    ecosystem_group: 吉利系SUV
+    priority: medium
+    active: true

@@ -58,7 +58,7 @@
         <img class="brand-avatar" src="../../assets/brand/raccoon_avatar_light.png" alt="" />
         <span class="brand-name">Raccoon Research</span>
       </div>
-      <span class="header-meta">workspace_capability_inventory | 2026-07-02</span>
+      <span class="header-meta">workspace_capability_inventory | 2026-07-09</span>
     </div>
   </header>
 
@@ -79,7 +79,7 @@
 
       <div class="kpi-card">
         <div class="label">Callable Scripts</div>
-        <div class="value">56</div>
+        <div class="value">59</div>
         <div class="change neutral">3 categories</div>
       </div>
 
@@ -91,7 +91,7 @@
 
       <div class="kpi-card">
         <div class="label">Generated Outputs</div>
-        <div class="value">47</div>
+        <div class="value">51</div>
         <div class="change neutral">reports / data / charts</div>
       </div>
 
@@ -120,7 +120,7 @@
           <div>
             <div class="cap-label">Scripts</div>
             <div class="cap-sub">Agent 能调用什么</div>
-            <div class="cap-count">56 项资产</div>
+            <div class="cap-count">59 项资产</div>
           </div>
         </div>
 
@@ -138,7 +138,7 @@
           <div>
             <div class="cap-label">Outputs</div>
             <div class="cap-sub">Agent 已沉淀什么</div>
-            <div class="cap-count">47 项资产</div>
+            <div class="cap-count">51 项资产</div>
           </div>
         </div>
 
@@ -208,7 +208,7 @@
               <div class="inv-card-name">auto_launch</div>
               <span class="skill-badge badge-green">active</span>
             </div>
-            <div class="inv-card-desc">汽车上市/营销事件监控；支持车型/品牌/本品 Watch，包含搜索、信源分级、24h 窗口校验、事件聚类、candidate gate 与 raw-first report packaging。</div>
+            <div class="inv-card-desc">汽车上市/营销事件独立监控服务；搜索意图编译 → query plan → Volc Search API → 信源分级 → URL 去重 → 事件聚类 → candidate gate → Markdown 简报。</div>
             <div class="inv-card-fields">
               <div class="inv-field"><span class="inv-field-label">Path</span><code>.opencode/skills/auto_launch/</code></div>
             </div>
@@ -219,7 +219,7 @@
               <div class="inv-card-name">miit_new_car</div>
               <span class="skill-badge badge-green">active</span>
             </div>
-            <div class="inv-card-desc">MIIT 公告信号解释 Prompt Pack；新车申报情报分析</div>
+            <div class="inv-card-desc">MIIT 新车公告全链路情报分析：批次管理、图片 OCR、结构化解析、6 信号双车对比。</div>
             <div class="inv-card-fields">
               <div class="inv-field"><span class="inv-field-label">Path</span><code>.opencode/skills/miit_new_car/</code></div>
             </div>
@@ -386,6 +386,11 @@
               <td><span class="badge-tag">active</span></td>
             </tr>
             <tr>
+              <td><strong>miit_new_car/browser_trace.py</strong></td>
+              <td>Playwright browser network trace fallback for datainfo page </td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
               <td><strong>miit_new_car/check_text_extractors.py</strong></td>
               <td>未声明</td>
               <td><span class="badge-tag">active</span></td>
@@ -403,6 +408,11 @@
             <tr>
               <td><strong>miit_new_car/discover_batches.py</strong></td>
               <td>未声明</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
+              <td><strong>miit_new_car/enterprise_admission_parser.py</strong></td>
+              <td>Parse MIIT 工信部 enterprise admission change HTML attachment.</td>
               <td><span class="badge-tag">active</span></td>
             </tr>
             <tr>
@@ -469,6 +479,11 @@ use: python research_scripts</td>
             </tr>
             <tr>
               <td><strong>build_daily_matrix.py</strong></td>
+              <td>未声明</td>
+              <td><span class="badge-tag">active</span></td>
+            </tr>
+            <tr>
+              <td><strong>build_lock_trend_report.py</strong></td>
               <td>未声明</td>
               <td><span class="badge-tag">active</span></td>
             </tr>
@@ -623,6 +638,11 @@ use: python research_scripts</td>
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>
+              <td><strong>_ma7_test.html</strong></td>
+              <td>html report · 90.1 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
               <td><strong>agent_execution_trace.md</strong></td>
               <td>markdown report · 5.4 KB</td>
               <td><span class="badge-tag">generated</span></td>
@@ -635,6 +655,11 @@ use: python research_scripts</td>
             <tr>
               <td><strong>atp_2026-05.html</strong></td>
               <td>html report · 7.7 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
+              <td><strong>atp_2026-06.html</strong></td>
+              <td>html report · 7.6 KB</td>
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>
@@ -673,6 +698,11 @@ use: python research_scripts</td>
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>
+              <td><strong>lock_trend_report.html</strong></td>
+              <td>html report · 220.9 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
               <td><strong>ls8_battery_weekly_share.html</strong></td>
               <td>html report · 2960.7 KB</td>
               <td><span class="badge-tag">generated</span></td>
@@ -690,6 +720,11 @@ use: python research_scripts</td>
             <tr>
               <td><strong>ls9_battery_weekly_share.html</strong></td>
               <td>html report · 2943.8 KB</td>
+              <td><span class="badge-tag">generated</span></td>
+            </tr>
+            <tr>
+              <td><strong>miit_dual_vehicle_compare.html</strong></td>
+              <td>html report · 9.5 KB</td>
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>
@@ -719,12 +754,12 @@ use: python research_scripts</td>
             </tr>
             <tr>
               <td><strong>workspace_capability_inventory.html</strong></td>
-              <td>html report · 44.5 KB</td>
+              <td>html report · 44.6 KB</td>
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>
               <td><strong>workspace_capability_inventory.json</strong></td>
-              <td>json contract · 61.5 KB</td>
+              <td>json contract · 61.6 KB</td>
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>
@@ -734,17 +769,17 @@ use: python research_scripts</td>
             </tr>
             <tr>
               <td><strong>workspace_skills_catalog.html</strong></td>
-              <td>html report · 23.4 KB</td>
+              <td>html report · 23.5 KB</td>
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>
               <td><strong>workspace_skills_catalog.json</strong></td>
-              <td>json contract · 6.7 KB</td>
+              <td>json contract · 8.3 KB</td>
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>
               <td><strong>workspace_skills_catalog.md</strong></td>
-              <td>markdown report · 6.4 KB</td>
+              <td>markdown report · 7.1 KB</td>
               <td><span class="badge-tag">generated</span></td>
             </tr>
             <tr>
@@ -884,9 +919,9 @@ use: python research_scripts</td>
               <div class="inv-card-name">pytest_tests</div>
               <span class="skill-badge badge-green">active</span>
             </div>
-            <div class="inv-card-desc">40 个测试文件的 pytest 套件。</div>
+            <div class="inv-card-desc">41 个测试文件的 pytest 套件。</div>
             <div class="inv-card-fields">
-              <div class="inv-field"><span class="inv-field-label">Path</span><code>mashang_workspace/tests</code></div><div class="inv-field"><span class="inv-field-label">Files</span>40</div>
+              <div class="inv-field"><span class="inv-field-label">Path</span><code>mashang_workspace/tests</code></div><div class="inv-field"><span class="inv-field-label">Files</span>41</div>
             </div>
           </div>
 

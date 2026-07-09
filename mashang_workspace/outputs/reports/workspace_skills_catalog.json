@@ -1,6 +1,6 @@
 {
   "workspace": "mashang_workspace",
-  "generated_at": "2026-07-03",
+  "generated_at": "2026-07-09",
   "skills": [
     {
       "name": "branded-html-report",
@@ -128,17 +128,33 @@
     },
     {
       "name": "auto_launch",
-      "type": "Promptbuilder / Intelligence Workflow",
-      "directory": "promptbuilders/auto_launch/",
-      "description": "汽车上市/营销事件监控；支持车型/品牌/本品 Watch，包含搜索、信源分级、24h 窗口校验、事件聚类、candidate gate 与 raw-first report packaging。",
+      "type": "Standalone Service (auto_launch/)",
+      "directory": "auto_launch/",
+      "description": "汽车上市/营销事件独立监控服务；搜索意图编译 → query plan → Volc Search API → 信源分级 → URL 去重 → 事件聚类 → candidate gate → Markdown 简报。",
       "entrypoints": [
-        "python mashang_workspace/research_scripts/auto_launch/brand_daily_marketing_watch.py --brand im --brand-name 智己",
-        "python mashang_workspace/research_scripts/auto_launch/volc_search_daily.py --request '看看极氪最近 7 天都有什么动作'",
+        "python -m auto_launch.cli daily --brand im --brand-name 智己",
+        "python -m auto_launch.cli search --request '看看极氪最近 7 天都有什么动作'",
         "make auto-launch-owned-brand-daily"
       ],
       "outputs": [
-        "mashang_workspace/outputs/auto_launch/search/{date}/{mode}/",
-        "mashang_workspace/outputs/auto_launch/owned_brand_daily/{date}/"
+        "auto_launch/outputs/search/{date}/{mode}/",
+        "auto_launch/outputs/owned_brand_daily/{date}/"
+      ],
+      "docs": [
+        "auto_launch/README.md",
+        "auto_launch/docs/workflow.md"
+      ],
+      "scenarios": [
+        "本品品牌每日营销事件监控",
+        "竞品车型动态追踪",
+        "搜索意图编译 → Volc Search 执行",
+        "搜索结果标准化 + 信源分级",
+        "事件聚类 + candidate gate 分桶"
+      ],
+      "not_for": [
+        "生成长篇竞品分析报告",
+        "替代完整爬虫/ETL 系统",
+        "非汽车行业的通用事件监测"
       ]
     },
     {

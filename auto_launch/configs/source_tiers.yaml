@@ -1,0 +1,200 @@
+# Auto Launch 信源分层配置
+# version: v0.2
+#
+# 合并来源:
+#   - 原 source_tiers.yaml v0.1（既有的 3 层结构 + 具体媒体列表）
+#   - source_tiers.common.draft.json（基于两个 Prompt 母版抽取的 5 级体系 + 用途说明）
+#
+# 层级说明:
+#   Tier 1: 官方一手信息     → 最高优先级，可独立确认正式事件
+#   Tier 2: 权威垂直/行业媒体 → 需交叉验证，不可单源确认
+#   Tier 3: 科技/财经/商业媒体 → 独家信息需升级验证
+#   Tier 4: 社交信号         → 仅弱信号，不可确认事件
+#   Tier 5: 未经验证         → 仅弱信号，可信度最低
+#
+# 用途说明:
+#   model_watch:  主力用 Tier 2 发现销售动作，Tier 1 验证
+#   brand_watch:  主力用 Tier 1 发现营销动作，Tier 4 评估传播
+
+tiers:
+  # ─────────────────────────────────────────────────
+  # Tier 1: 官方一手信息
+  # ─────────────────────────────────────────────────
+  - tier: 1
+    name: 官方一手信息
+    weight: 1.0
+    description: 品牌官方渠道发布的一手信息，可单独确认正式事件
+    best_for: "售价、配置、权益的官方权威确认"
+    model_watch_usage: "verification — 车型级监控中作为验证锚点"
+    brand_watch_usage: "primary — 品牌级监控的主力发现源"
+    sources:
+      - name: 品牌官网
+        type: official
+        examples: [https://www.immotors.com, https://www.byd.com]
+        evidence_level: high
+      - name: 官方App/小程序
+        type: official
+        examples: [IM智己App, 蔚来App, 理想App, 比亚迪App]
+        evidence_level: high
+      - name: 官方微博
+        type: official
+        examples: ["@IM智己汽车", "@比亚迪汽车"]
+        evidence_level: high
+      - name: 官方微信公众号
+        type: official
+        evidence_level: high
+      - name: 官方视频号/抖音号
+        type: official
+        evidence_level: high
+      - name: 官方新闻中心/新闻稿
+        type: official
+        evidence_level: high
+      - name: 官方新闻发布会/直播
+        type: official
+        evidence_level: high
+
+  # ─────────────────────────────────────────────────
+  # Tier 2: 权威垂直/行业媒体
+  # ─────────────────────────────────────────────────
+  - tier: 2
+    name: 权威垂直媒体与行业媒体
+    weight: 0.7
+    description: "汽车垂直媒体和行业专业媒体。需 2 家以上交叉验证方可确认正式事件，单源不得确认。"
+    best_for: "车型报道、上市新闻、配置解读、价格报道、供应链信息"
+    model_watch_usage: "primary — 车型级监控的主力发现源"
+    brand_watch_usage: "secondary — 品牌级监控的辅助发现源"
+    sources:
+      - name: 汽车之家
+        type: vertical_media
+        examples: [https://www.autohome.com.cn]
+        evidence_level: medium
+      - name: 懂车帝
+        type: vertical_media
+        examples: [https://www.dongchedi.com]
+        evidence_level: medium
+      - name: 易车
+        type: vertical_media
+        examples: [https://www.yiche.com]
+        evidence_level: medium
+      - name: 爱卡汽车
+        type: vertical_media
+        examples: [https://www.xcar.com.cn]
+        evidence_level: medium
+      - name: 新出行
+        type: vertical_media
+        examples: [https://www.xchuxing.com]
+        evidence_level: medium
+      - name: 第一电动网
+        type: industry_media
+        evidence_level: medium
+      - name: 盖世汽车
+        type: industry_media
+        evidence_level: medium
+      - name: 网通社
+        type: industry_media
+        evidence_level: medium
+      - name: 太平洋汽车
+        type: vertical_media
+        evidence_level: medium
+      - name: 有驾
+        type: vertical_media
+        evidence_level: medium
+      - name: 车东西
+        type: industry_media
+        evidence_level: medium
+
+  # ─────────────────────────────────────────────────
+  # Tier 3: 科技/财经/商业媒体
+  # ─────────────────────────────────────────────────
+  - tier: 3
+    name: 科技/财经/商业媒体
+    weight: 0.6
+    description: "科技、财经、商业类媒体。独家信息作为 discovery_signal，交叉验证后可升级。"
+    best_for: "独家报道、深度分析、战略解读、内幕消息"
+    model_watch_usage: "supplementary — 独家销售动作发现"
+    brand_watch_usage: "supplementary — 品牌战略/行业分析"
+    sources:
+      - name: 晚点Auto
+        type: tech_media
+        evidence_level: medium
+      - name: 36氪
+        type: tech_media
+        evidence_level: medium
+      - name: 虎嗅
+        type: tech_media
+        evidence_level: medium
+      - name: 财经汽车
+        type: biz_media
+        evidence_level: medium
+      - name: 经济观察报
+        type: biz_media
+        evidence_level: medium
+      - name: 界面新闻
+        type: biz_media
+        evidence_level: medium
+      - name: 澎湃新闻
+        type: biz_media
+        evidence_level: medium
+      - name: 新浪财经/新浪汽车
+        type: biz_media
+        evidence_level: medium
+      - name: 腾讯汽车
+        type: biz_media
+        evidence_level: medium
+
+  # ─────────────────────────────────────────────────
+  # Tier 4: 社交信号
+  # ─────────────────────────────────────────────────
+  - tier: 4
+    name: 社交平台与渠道信号
+    weight: 0.4
+    description: "社交平台上的用户讨论、传播热度、经销商信息。仅作为 weak_signal，不可确认正式事件。"
+    best_for: "传播热度评估、用户口碑、舆情扩散、价格松动信号"
+    model_watch_usage: "weak_signal — 价格/区域促销发现"
+    brand_watch_usage: "weak_signal_with_monitoring — 传播评估/舆情监控"
+    sources:
+      - name: 微博（非官方）
+        type: social
+        evidence_level: low
+      - name: 小红书
+        type: social
+        evidence_level: low
+      - name: 抖音
+        type: short_video
+        evidence_level: low
+      - name: B站
+        type: short_video
+        evidence_level: low
+      - name: 知乎
+        type: social
+        evidence_level: low
+      - name: 经销商账号/销售朋友圈
+        type: dealer
+        evidence_level: low
+      - name: 汽车报价平台
+        type: dealer
+        evidence_level: low
+
+  # ─────────────────────────────────────────────────
+  # Tier 5: 未经验证
+  # ─────────────────────────────────────────────────
+  - tier: 5
+    name: 论坛/社区/未经验证
+    weight: 0.2
+    description: "公开论坛、车主社区、品牌社区中的用户讨论。不可用于正式事件，可能含早期爆料但无法验证。"
+    best_for: "用户反馈、交付进度、早期爆料"
+    model_watch_usage: "weak_signal — 早期线索发现"
+    brand_watch_usage: "weak_signal — 用户口碑"
+    sources:
+      - name: 车主论坛/BBS
+        type: forum
+        evidence_level: low
+      - name: 汽车之家论坛
+        type: forum
+        evidence_level: low
+      - name: 懂车帝社群/车友圈
+        type: forum
+        evidence_level: low
+      - name: 品牌官方社区（非官方确认帖）
+        type: forum
+        evidence_level: low

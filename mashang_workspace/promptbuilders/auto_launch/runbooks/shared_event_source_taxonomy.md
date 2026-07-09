@@ -13,8 +13,8 @@ auto_launch 项目已拆分为两个独立能力：
 
 | 文件 | 定位 |
 |------|------|
-| `promptbuilders/auto_launch/LS8 竞品车型动态追踪.md` | model_watch：车型级销售动作监控 |
-| `promptbuilders/auto_launch/重点关注品牌每日营销事件监控.md` | brand_watch：品牌级营销事件监控 |
+| `auto_launch/prompts/LS8 竞品车型动态追踪.md` | model_watch：车型级销售动作监控 |
+| `auto_launch/prompts/重点关注品牌每日营销事件监控.md` | brand_watch：品牌级营销事件监控 |
 
 ## 3. 共性 event taxonomy
 
