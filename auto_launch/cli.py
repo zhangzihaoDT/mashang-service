@@ -13,6 +13,8 @@ Auto Launch CLI — 统一命令行入口。
   python -m auto_launch.cli outputs clean --older-than 30 --dry-run
   python -m auto_launch.cli demo
   python -m auto_launch.cli demo --reset-store
+  python -m auto_launch.cli launch               # 交互式启动器（推荐）
+  python -m auto_launch.cli start                # 别名
 """
 
 import sys, argparse
@@ -310,6 +312,11 @@ def cmd_replay(args):
         print(f"  {r['monitor_date']}  kept={r['kept']}  brief={r['brief_facts']} facts")
 
 
+def cmd_launch(args):
+    from auto_launch.src.launcher import run_launcher
+    run_launcher()
+
+
 def cmd_demo(args):
     from auto_launch.src.demo_runner import run_demo
     manifest = run_demo(reset_store=args.reset_store)
@@ -459,6 +466,10 @@ def main():
     p_replay.add_argument("--input-dir", help="inbox fixtures 目录（替代日期范围）")
     p_replay.add_argument("--reset-store", action="store_true", help="回放前重置事实库")
 
+    # launch
+    sub.add_parser("launch", help="交互式启动器（推荐入口）")
+    sub.add_parser("start", help="交互式启动器（launch 别名）")
+
     # demo
     p_demo = sub.add_parser("demo", help="一键演示：replay fixtures → audit → source-audit → brief → timeline → inspect")
     p_demo.add_argument("--reset-store", action="store_true", help="演示前清空事实库")
@@ -517,6 +528,8 @@ def main():
         cmd_source_audit(args)
     elif args.command == "timeline":
         cmd_timeline(args)
+    elif args.command in ("launch", "start"):
+        cmd_launch(args)
     elif args.command == "demo":
         cmd_demo(args)
     elif args.command == "outputs":

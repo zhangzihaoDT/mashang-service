@@ -1,86 +1,78 @@
-# Auto Launch — 项目状态
+# Auto Launch v1.0 — Status
 
-## 项目定位
+## 定位
 
-Auto Launch 是 mashang-service 根目录下的一个**独立子项目**（`auto_launch/`），定位为汽车上市 / 营销事件监测服务。不属于 mashang_workspace 的分析脚本集，不依赖 workspace 上下文。
+汽车上市 / 营销事件事实库服务样板案例，展示如何将 AI 搜索结果与 daily run 信息沉淀为可审计、可复用、可连续运行的事实资产。
 
-当前项目处于"先收缩、再放大"策略的收缩阶段，重心已转向 **Inbox MVP** 极简信息漏斗：
+## 当前状态
+
+### 输入 / 运行
+
+| 命令 | 用途 |
+|------|------|
+| `inbox --input` | 从 Markdown 解析结构化事件 |
+| `search --to-facts` | 搜索意图转译 → 搜索结果 → 写入 facts |
+| `daily --to-facts` | 品牌每日监控 → 搜索结果 → 写入 facts |
+| `run-day` | 一键日更：daily → to-facts → audit → source-audit → brief |
+| `demo` | 一键演示：replay fixtures → audit → source-audit → brief → timeline → inspect |
+
+### 事实资产
+
+- **存储**：SQLite (`outputs/facts/auto_launch_facts.sqlite`)
+- **去重**：fingerprint-based，seen_count 追踪重复出现
+- **字段**：brand / model / event_type / event_date / title / source_name / source_url / source_tier / input_channel
+
+### 治理能力
+
+| 能力 | 说明 |
+|------|------|
+| `facts --audit` | 字段完成率、信源分布、重复率、质量标记 |
+| `source-audit` | 信源覆盖审计（official/media/weak）、brand catalog 期望覆盖 |
+| `outputs inspect` | outputs 目录完整性检查、duplicate brief 检测、运行包状态 |
+
+### 消费能力
+
+| 能力 | 说明 |
+|------|------|
+| `brief` | 基于 facts 的每日简报 |
+| `timeline` | 品牌/车型事件时间线 |
+
+### 输出规范
+
+| 包 | 路径 | 说明 |
+|----|------|------|
+| 主运行包 | `outputs/runs/{date}/` | 6 文件：manifest / audit / source-audit(2) / brief / summary |
+| 演示包 | `outputs/demo/` | 8 文件：manifest / summary / audit / source-audit(2) / brief / timeline / inspect |
+| 调试产物 | `outputs/search/`, `owned_brand_daily/`, `search_cache/` | 可清理的中间产物 |
+
+### 配置
+
+| 文件 | 用途 |
+|------|------|
+| `configs/event_types.yaml` | 19 类事件类型定义 |
+| `configs/source_tiers.yaml` | 5 层信源分级（Tier 1-5） |
+| `configs/source_domains.yaml` | 24 品牌官方域名 + 媒体/社交分类 |
+| `configs/priority_brand_watchlist.yaml` | 24 重点品牌 + 车型列表 |
+| `configs/ls8_competitor_watchlist.yaml` | 10 款竞品车型列表 |
+| `configs/volc_search.yaml` | API 参数 + query profiles |
+
+### 测试
 
 ```
-raw 输入 → keep/discard → facts 库 → 查询
+210 tests passed (pytest auto_launch/tests/ -q)
 ```
 
-## 目录结构
+## 不会做的事
 
-```
-auto_launch/
-├── STATUS.md           ← 本文件
-├── README.md           项目说明
-├── cli.py              统一 CLI 入口（daily / search / normalize / inbox / facts）
-├── __init__.py
-├── configs/            7 个配置文件
-├── src/                16 个 Python 模块
-│   ├── (核心搜索管线 13 模块)
-│   └── inbox_*.py      Inbox MVP（parser / filter / runner）
-│   └── fact_store.py   事实库（SQLite）
-├── docs/
-│   ├── workflow.md     执行链路文档
-│   └── inbox.md        Inbox MVP 文档
-├── outputs/            运行时输出（gitignored）
-└── tests/              16 个测试文件（11 核心 + 5 Inbox）
-```
+- UI / HTML / Streamlit / Dashboard
+- impact_score / battle-brief / report 类型
+- outputs clean 的真实删除（仅 dry-run）
 
-## 当前已实现能力
+## 文档
 
-### 搜索管线（核心）
-
-- 搜索意图编译 → 任务配置 → 预算分配 → 查询计划 → Volc Search API → 标准化 → 信源解析 → 事件聚类 → 候选门控 → 品牌监控
-
-### Inbox MVP（新增）
-
-- raw text 解析 / 结构化 Markdown 提取
-- keep/discard 二分类（品牌+事件类型+动作关键词规则）
-- SQLite 事实库（fingerprint 去重，seen_count 更新）
-- 交互模式（粘贴 → 解析 → 确认写入）
-- 事实查询（按品牌/车型/事件类型/时间窗口）
-
-### CLI 能力
-
-```bash
-python -m auto_launch.cli daily        # 品牌每日监控
-python -m auto_launch.cli search       # 搜索意图转译
-python -m auto_launch.cli normalize    # 搜索结果标准化
-python -m auto_launch.cli inbox        # Inbox 导入（--input 或交互）
-python -m auto_launch.cli facts        # 事实库查询
-```
-
-## 清理完成项
-
-本轮（2026-07-09）已完成以下清理：
-
-- 删除 Makefile 中 13 个 TODO / 已下线 targets
-- 删除 `auto_launch/tests/` 中 9 个旧 promptbuilder 测试文件
-- 删除 `mashang_workspace/research_scripts/auto_launch/`（旧源码）
-- 删除 `mashang_workspace/promptbuilders/auto_launch/`（旧配置+Prompt）
-- 删除 `mashang_workspace/research_scripts/auto_launch_monitor.py`
-- 删除 `mashang_workspace/tests/promptbuilders/` 中 9 个旧测试文件
-- 删除 `mashang_workspace/tests/research_scripts/` 中 11 个旧测试文件
-- 删除 `auto_launch/prompts/`（旧 promptbuilder 归档，不参与运行时）
-- 删除 `auto_launch/runbooks/`（旧分析手册，不参与运行时）
-- 清理 `auto_launch/reports/` 空目录
-
-## 已知问题
-
-1. **workspace_capability_inventory.json** 中的旧路径是文件扫描结果的历史快照，不影响运行
-2. `mashang_workspace/docs/miit_*` 文档中引用 `auto_launch_monitor` 的部分未更新
-
-## 下一阶段建议
-
-| 优先级 | 方向 | 说明 |
-|--------|------|------|
-| P0 | Auto Launch Inbox MVP | ✓ 已完成（parser / filter / store / runner） |
-| P0 | Fact Store | ✓ 已完成（SQLite, fingerprint 去重） |
-| P0 | keep/discard filter | ✓ 已完成 |
-| P1 | search --to-facts | search 结果直接写入 facts |
-| P1 | facts query 增强 | 分页 / 聚合 / 导出 |
-| P2 | daily brief | 基于 facts 生成每日简报 |
+| 文件 | 说明 |
+|------|------|
+| `docs/output_contract.md` | 输出分层规范 |
+| `docs/demo_case.md` | Demo Case 说明（能力矩阵、边界、扩展方向） |
+| `docs/operating_loop.md` | 每日运行指南 |
+| `README.md` | 项目主文档 |

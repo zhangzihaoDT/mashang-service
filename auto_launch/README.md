@@ -107,8 +107,20 @@ auto_launch/
     ├── test_output_manager.py      13 tests
     ├── test_cli_outputs.py         7 tests
     ├── test_demo_runner.py         10 tests
-    └── test_cli_demo.py            3 tests
+    ├── test_cli_demo.py            3 tests
+    ├── test_launcher.py            11 tests
+    └── test_cli_launcher.py        7 tests
 ```
+
+## 推荐使用方式
+
+```bash
+# 交互式启动器 — 无需记住子命令
+python -m auto_launch.cli launch
+python -m auto_launch.cli start    # 别名
+```
+
+高级用户可直接使用子命令获得更精细的控制。
 
 ## 如何运行
 
