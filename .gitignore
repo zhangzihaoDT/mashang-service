@@ -55,6 +55,9 @@ mashang_workspace/outputs/miit_new_car/state/
 mashang_workspace/outputs/auto_launch/
 auto_launch/outputs/
 
+# Workspace report HTMLs: runtime-generated, not committed
+mashang_workspace/outputs/reports/*.html
+
 # Defensive: promptbuilders should not contain runtime outputs
 mashang_workspace/promptbuilders/outputs/
 
