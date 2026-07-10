@@ -69,9 +69,9 @@ python3 -m auto_launch.cli launch
 outputs/runs/{YYYYMMDD}/
 ├── launcher_daily_run/       ← daily 摄入简报
 │   └── reports/daily_brief.md
-├── brand_watch_{slug}/       ← search 搜索简报 + 原始证据
+├── brand_watch_{slug}/       ← search 原始证据
 │   ├── search/{plan,raw,normalized,audit}.json
-│   └── reports/daily_brief.md
+│   └── reports/daily_brief.md   ← 追加 report --pipeline search 后生成
 └── brand_daily_{slug}/       ← report --type brand-daily
     └── reports/brand_daily_summary.md
 ```
