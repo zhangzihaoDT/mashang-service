@@ -15,10 +15,10 @@ def _inputs(sequence: list):
     return mock_input
 
 
-def test_menu_render_exit_6(monkeypatch):
-    """Select 6 to exit immediately."""
+def test_menu_render_exit_7(monkeypatch):
+    """Select 7 to exit immediately."""
     from auto_launch.src.launcher import run_launcher
-    monkeypatch.setattr("builtins.input", _inputs(["6"]))
+    monkeypatch.setattr("builtins.input", _inputs(["7"]))
     run_launcher()
 
 
@@ -32,7 +32,7 @@ def test_exit_via_q(monkeypatch):
 def test_choice_1_cancel(monkeypatch):
     """Select 1 then /cancel."""
     from auto_launch.src.launcher import run_launcher
-    monkeypatch.setattr("builtins.input", _inputs(["1", "2026-07-09", "/cancel", "6"]))
+    monkeypatch.setattr("builtins.input", _inputs(["1", "2026-07-09", "/cancel", "7"]))
     run_launcher()
 
 
@@ -41,7 +41,7 @@ def test_choice_1_daily_run(monkeypatch):
     from auto_launch.src.launcher import run_launcher
     daily = "## 智己 LS6 权益调整\n\n- 品牌: 智己\n- 车型: LS6\n- 事件类型: 权益调整\n- 时间: 2026-07-09\n- 来源: immotors.com\n- 信源等级: tier_1_official\n"
     monkeypatch.setattr("builtins.input", _inputs([
-        "1", "2026-07-09", daily, "/done", "y", "6",
+        "1", "2026-07-09", daily, "/done", "y", "7",
     ]))
     run_launcher()
 
@@ -52,7 +52,7 @@ def test_choice_1_writes_facts(monkeypatch):
     from auto_launch.src.launcher import run_launcher
     daily = "## 理想 L6 上市\n\n- 品牌: 理想\n- 车型: L6\n- 事件类型: 上市\n- 时间: 2026-07-09\n- 来源: lixiang.com\n- 信源等级: tier_1_official\n"
     monkeypatch.setattr("builtins.input", _inputs([
-        "1", "2026-07-09", daily, "/done", "y", "6",
+        "1", "2026-07-09", daily, "/done", "y", "7",
     ]))
     run_launcher()
     store = FactStore()
@@ -66,7 +66,7 @@ def test_choice_1_generates_brief_file(monkeypatch):
     from auto_launch.src import output_paths
     daily = "## 小米 SU7 交付\n\n- 品牌: 小米\n- 车型: SU7\n- 事件类型: 交付数据\n- 时间: 2026-07-09\n- 来源: xiaomiev.com\n- 信源等级: tier_1_official\n"
     monkeypatch.setattr("builtins.input", _inputs([
-        "1", "2026-07-09", daily, "/done", "y", "6",
+        "1", "2026-07-09", daily, "/done", "y", "7",
     ]))
     run_launcher()
     brief_path = output_paths.daily_brief_md_path("2026-07-09", "launcher_daily_run")
@@ -78,7 +78,7 @@ def test_choice_2_not_live(monkeypatch):
     """Select 2 with live=N — no real API call."""
     from auto_launch.src.launcher import run_launcher
     monkeypatch.setattr("builtins.input", _inputs([
-        "2", "看看极氪最近7天", "2026-07-09", "n", "6",
+        "2", "看看极氪最近7天", "2026-07-09", "n", "7",
     ]))
     run_launcher()
 
@@ -87,25 +87,25 @@ def test_choice_3_view_facts(monkeypatch):
     """Select 3 to view facts — doesn't crash."""
     from auto_launch.src.launcher import run_launcher
     monkeypatch.setattr("builtins.input", _inputs([
-        "3", "7", "", "6",
+        "3", "7", "", "7",
     ]))
     run_launcher()
 
 
-def test_choice_4_brief(monkeypatch):
-    """Select 4 — generates brief from existing facts, answers 'n' to file write."""
+def test_choice_4_report_brand_daily(monkeypatch):
+    """Select 4 then 1 (brand-daily) — generates brand daily report."""
     from auto_launch.src.launcher import run_launcher
     monkeypatch.setattr("builtins.input", _inputs([
-        "4", "90", "", "n", "6",
+        "4", "1", "智己", "7",
     ]))
     run_launcher()
 
 
-def test_choice_5_inspect(monkeypatch):
-    """Select 5 — renders outputs inspect."""
+def test_choice_6_inspect(monkeypatch):
+    """Select 6 — renders outputs inspect."""
     from auto_launch.src.launcher import run_launcher
     monkeypatch.setattr("builtins.input", _inputs([
-        "5", "6",
+        "6", "7",
     ]))
     run_launcher()
 
@@ -114,7 +114,7 @@ def test_invalid_choice(monkeypatch):
     """Invalid choice shows error and returns to menu."""
     from auto_launch.src.launcher import run_launcher
     monkeypatch.setattr("builtins.input", _inputs([
-        "0", "6",
+        "0", "7",
     ]))
     run_launcher()
 

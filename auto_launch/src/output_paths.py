@@ -73,6 +73,40 @@ def brand_to_slug(name: str) -> str:
     return slug if slug else "unknown"
 
 
+def resolve_brand(brand_input: str) -> tuple[str, str]:
+    """将品牌标识符解析为 (slug, display_name)。
+
+    接受以下输入:
+      - 中文名: "智己", "极氪"
+      - ASCII slug: "zhiji", "zeekr"
+      - 内部 key: "im", "zeekr"
+
+    返回 (slug, 显示名)，显示名优先使用中文。
+    """
+    # Build reverse slug → display_name map (prefer shortest Chinese name)
+    _display_by_slug: dict[str, str] = {}
+    for name, slug in BRAND_SLUG_MAP.items():
+        is_chinese = any('\u4e00' <= c <= '\u9fff' for c in name)
+        if slug not in _display_by_slug:
+            _display_by_slug[slug] = name
+        elif is_chinese and len(name) < len(_display_by_slug.get(slug, '')):
+            # Shorter Chinese name wins (e.g. "极氪" over "极氪科技")
+            _display_by_slug[slug] = name
+
+    # 1. Direct key lookup
+    if brand_input in BRAND_SLUG_MAP:
+        slug = BRAND_SLUG_MAP[brand_input]
+        return slug, _display_by_slug.get(slug, slug)
+
+    # 2. Convert to slug, then check reverse map
+    slug = brand_to_slug(brand_input)
+    if slug in _display_by_slug:
+        return slug, _display_by_slug[slug]
+
+    # 3. Fallback: slug is the identifier itself
+    return slug, brand_input
+
+
 def validate_run_mode(run_mode: str) -> str:
     """验证 run_mode 只含 [a-z0-9_]，否则 sanitize。"""
     cleaned = re.sub(r"[^a-z0-9_]", "_", run_mode.lower()).strip("_")

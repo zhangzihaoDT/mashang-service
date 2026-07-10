@@ -1,9 +1,19 @@
-"""Layer: Inbox Core — 基于 facts 生成 Markdown 每日简报"""
+"""Layer: Inbox Core — 基于 facts 生成去重聚类简报"""
+"""
+brief_renderer.py — facts → daily brief markdown。
+
+关键特性:
+  - 自动过滤 is_test / quality_status=test|invalid 数据
+  - event-level dedup / clustering
+  - 结构化简报：今日重点 → 品牌速览 → 事件类型 → 观察 → 信源质量
+  - 空状态报告
+"""
 
 from datetime import datetime
 from collections import defaultdict, OrderedDict
 
-# 事件类型排序权重（数值越高越优先）
+_MARK_TEST_BRANDS = {"A", "B", "C", "D"}
+
 _EVENT_TYPE_PRIORITY = {
     "上市": 100, "预售": 95, "预订": 90, "盲订": 88,
     "价格": 85, "降价": 85, "涨价": 80,
@@ -25,185 +35,322 @@ _SOURCE_TIER_PRIORITY = {
     "tier_5_unverified": 20,
 }
 
-_EVENT_TYPE_GROUPS = OrderedDict([
-    ("上市/预售", ["上市", "预售", "预订", "盲订", "发布", "新品发布", "发布会", "亮相", "首发"]),
-    ("价格/权益", ["价格", "降价", "涨价", "权益", "权益调整", "补贴", "限时", "官方价格调整", "benefit_adjustment"]),
-    ("交付/销量", ["交付", "开启交付", "交付数据", "销量", "销量里程碑", "订单", "战报",
-                   "delivery_start", "delivery_metric", "sales_milestone", "order_milestone",
-                   "monthly_sales", "monthly_delivery", "sales_data"]),
-    ("产品/技术", ["改款", "改款上市", "新款", "OTA", "技术", "技术发布", "配置",
-                   "technology_release", "ota_update", "product_update"]),
-    ("品牌/合作", ["合作", "战略合作", "联名", "代言", "融资", "品牌",
-                   "channel_campaign", "store_activity", "dealer_activity", "partnership",
-                   "brand_campaign", "executive_voice", "public_opinion"]),
-    ("其他", []),
-])
+# 事件类型 English → Chinese 显示名映射
+_EVENT_TYPE_DISPLAY = {
+    "launch": "上市",
+    "presale": "预售",
+    "preorder": "预订",
+    "blind_order": "盲订",
+    "benefit_adjustment": "权益调整",
+    "price_adjustment": "价格调整",
+    "delivery_start": "交付",
+    "delivery_metric": "交付数据",
+    "sales_milestone": "销量里程碑",
+    "order_milestone": "订单里程碑",
+    "technology_release": "技术发布",
+    "ota_update": "OTA 更新",
+    "product_update": "产品更新",
+    "launch_event": "发布会",
+    "channel_campaign": "渠道活动",
+    "store_activity": "门店活动",
+    "dealer_activity": "经销商活动",
+    "partnership": "合作",
+    "brand_campaign": "品牌活动",
+    "executive_voice": "高管发声",
+    "public_opinion": "舆情",
+    "test_drive": "试驾",
+    "recall": "召回",
+    "funding": "融资",
+}
+
+# 频道/平台后缀 → 清理
+_CLEAN_TITLE_SUFFIXES = [
+    "_易车", "_手机新浪网", "_新浪财经_新浪网", "_新浪汽车",
+    "|手机新浪网", "|zeekr 9x",
+    "_zaker新闻", "_太平洋汽车", "_懂车帝",
+]
 
 
-def brief_rank(item: dict) -> tuple:
-    """
-    计算单条事实的排序分值。
-    返回 tuple 用于 sorted(..., reverse=True)。
-    维度：事件类型权重 + 信源权重 + seen_count + 最近出现时间 - 缺失惩罚。
-    """
-    et = (item.get("event_type") or "")[:10]
+def _display_event_type(raw: str) -> str:
+    """将原始 event_type 映射为中文显示名。"""
+    if not raw:
+        return "其他"
+    # Direct match
+    if raw in _EVENT_TYPE_DISPLAY:
+        return _EVENT_TYPE_DISPLAY[raw]
+    # Chinese already
+    for cn in _EVENT_TYPE_PRIORITY:
+        if cn in raw:
+            return cn
+    # Partial match
+    for eng, cn in _EVENT_TYPE_DISPLAY.items():
+        if eng in raw:
+            return cn
+    return raw
+
+
+def _clean_title(title: str) -> str:
+    """清理标题中的站点后缀/平台水印。"""
+    if not title:
+        return ""
+    t = title.strip()
+    for suf in _CLEAN_TITLE_SUFFIXES:
+        if suf in t:
+            t = t.split(suf)[0].strip()
+    # Trim trailing site patterns: " - 新浪", "_易车" etc
+    import re
+    t = re.sub(r"[/_|]\s*(手机)?新浪.*$", "", t)
+    t = re.sub(r"[/_|]\s*易车.*$", "", t)
+    t = re.sub(r"[/_|]\s*(汽车之家|太平洋汽车|懂车帝|zaker).*$", "", t)
+    return t[:80]
+
+
+# ── Filtering ──
+
+def _is_clean_fact(fact: dict) -> bool:
+    """判断是否属于有效事实（非测试、非夹具）。"""
+    if fact.get("is_test"):
+        return False
+    qs = fact.get("quality_status") or ""
+    if qs in ("test", "invalid"):
+        return False
+    brand = (fact.get("brand") or "").strip()
+    if brand in _MARK_TEST_BRANDS:
+        return False
+    title = (fact.get("title") or "").strip()
+    if title == "Test":
+        return False
+    source = (fact.get("source_name") or "").strip()
+    if source == "src":
+        return False
+    return True
+
+
+def clean_facts(facts: list[dict]) -> list[dict]:
+    return [f for f in facts if _is_clean_fact(f)]
+
+
+# ── Event-level dedup / clustering ──
+
+def _normalize_title_for_key(title: str) -> str:
+    """截取前 40 字符作为聚类 key 的一部分。"""
+    return (title or "")[:40].strip()
+
+
+def _make_event_key(fact: dict) -> str:
+    brand = (fact.get("brand") or "").strip()
+    model = (fact.get("model") or "").strip()
+    event_type = _display_event_type(fact.get("event_type", ""))
+    title = _normalize_title_for_key(_clean_title(fact.get("title", "")))
+    return f"{brand}|{model}|{event_type}|{title}"
+
+
+def _cluster_facts(facts: list[dict]) -> list[dict]:
+    """将 facts 按事件聚类，每类合并来源计数。"""
+    clusters: dict[str, dict] = {}
+    for f in facts:
+        key = _make_event_key(f)
+        if key not in clusters:
+            clusters[key] = {
+                "brand": f.get("brand", ""),
+                "model": f.get("model", ""),
+                "event_type": _display_event_type(f.get("event_type", "")),
+                "title": _clean_title(f.get("title", "")),
+                "source_count": 0,
+                "sources": [],
+                "best_source_tier": f.get("source_tier", ""),
+                "last_seen": f.get("last_seen", ""),
+                "seen_count": 0,
+            }
+        c = clusters[key]
+        c["source_count"] += 1
+        c["seen_count"] += f.get("seen_count", 1)
+        src = f.get("source_name", "") or ""
+        if src and src not in c["sources"]:
+            c["sources"].append(src)
+        tier = f.get("source_tier", "") or ""
+        if tier and (_SOURCE_TIER_PRIORITY.get(tier, 0) > _SOURCE_TIER_PRIORITY.get(c["best_source_tier"], 0)):
+            c["best_source_tier"] = tier
+        ls = f.get("last_seen", "") or ""
+        if ls > c["last_seen"]:
+            c["last_seen"] = ls
+            c["title"] = _clean_title(f.get("title", ""))
+    return list(clusters.values())
+
+
+def _brief_rank(cluster: dict) -> tuple:
+    et = (cluster.get("event_type") or "")[:10]
     et_score = max((v for k, v in _EVENT_TYPE_PRIORITY.items() if k in et), default=30)
-
-    st = item.get("source_tier") or ""
+    st = cluster.get("best_source_tier") or ""
     st_score = max((v for k, v in _SOURCE_TIER_PRIORITY.items() if k in st), default=10)
+    source_count = min(cluster.get("source_count", 1), 20)
+    return (et_score + st_score + source_count, cluster.get("last_seen", ""))
 
-    seen = min(item.get("seen_count", 1), 20)
-    last_seen = item.get("last_seen") or ""
 
-    penalty = 0
-    if not item.get("source_url"):
-        penalty -= 10
-    if not item.get("event_date"):
-        penalty -= 5
-    if not item.get("model"):
-        penalty -= 3
-
-    return (et_score + st_score + seen + penalty, last_seen)
-
+# ── Generate brief ──
 
 def generate_brief(facts: list[dict], title: str = None, brief_date: str = None) -> str:
     """
-    基于 facts 生成 Markdown 简报。
-    返回 Markdown 字符串。
-    """
-    if not facts:
-        return _empty_brief(title)
+    从 facts 生成去重聚类简报。
 
-    ranked = sorted(facts, key=brief_rank, reverse=True)
+    自动:
+      1. 过滤 is_test / quality_status 非 valid 数据
+      2. event-level dedup + source count
+      3. 结构: 今日重点 → 品牌动作速览 → 事件类型 → 今日观察 → 信源质量
+
+    如果有效 facts 为空，生成空状态报告。
+    """
+    clean = clean_facts(facts)
+    filtered_count = len(facts) - len(clean)
+    clusters = _cluster_facts(clean)
+    ranked = sorted(clusters, key=_brief_rank, reverse=True)
+
     if brief_date:
         date_str = brief_date
     else:
-        dates = [f.get("event_date") for f in facts if f.get("event_date")]
+        dates = [f.get("event_date") for f in clean if f.get("event_date")]
         date_str = max(set(dates), key=dates.count) if dates else datetime.now().strftime("%Y-%m-%d")
+
     brief_title = title or f"Auto Launch 每日简报 — {date_str}"
+
+    if not clusters:
+        return _empty_brief(title, filtered_count)
+
+    # Count brands
+    brands_in = set(c["brand"] for c in clusters if c.get("brand"))
+    has_official = any("tier_1" in (c.get("best_source_tier") or "") for c in clusters)
 
     lines = [f"# {brief_title}", ""]
 
-    # ── Section 1: 今日最值得关注 ──────────────────────────
-    top = ranked[:5]
-    lines.append("## 今日最值得关注")
+    # ── 今日重点 ──
+    lines.append("## 今日重点")
     lines.append("")
-    for i, item in enumerate(top, 1):
-        brand = item.get("brand") or "?"
-        model = item.get("model") or ""
-        et = item.get("event_type") or "?"
-        title_text = (item.get("title") or "")[:60]
-        tier = item.get("source_tier") or ""
+    top = ranked[:5]
+    for i, c in enumerate(top, 1):
+        brand = c.get("brand") or "?"
+        model = c.get("model") or ""
+        et = c.get("event_type") or "?"
+        title_text = (c.get("title") or "")[:60]
+        src_cnt = c.get("source_count", 1)
+        sources = c.get("sources", [])
+        tier = c.get("best_source_tier") or ""
         tier_label = _tier_label(tier)
-        source = item.get("source_name") or "?"
-        seen = item.get("seen_count", 1)
-        badge = _badge(item)
         model_tag = f" {model}" if model else ""
+        badge = _badge(c)
+        evidence = f"（{src_cnt} 个来源）" if src_cnt > 1 else ""
         lines.append(f"  {i}. **[{brand}{model_tag}]** {et} — {title_text}  {badge}")
-        lines.append(f"     {tier_label} · {source} · 出现 {seen} 次")
+        lines.append(f"     {tier_label} · {', '.join(sources[:2])} {evidence}")
         lines.append("")
     lines.append("")
 
-    # ── Section 2: 按品牌聚合 ──────────────────────────────
-    lines.append("## 按品牌")
+    # ── 品牌动作速览 ──
+    lines.append("## 品牌动作速览")
     lines.append("")
-    by_brand = defaultdict(list)
-    for item in ranked:
-        by_brand[item.get("brand") or "未知"].append(item)
+    by_brand: dict[str, list] = defaultdict(list)
+    for c in ranked:
+        by_brand[c.get("brand") or "未知"].append(c)
     for brand, items in sorted(by_brand.items()):
         lines.append(f"### {brand}")
         lines.append("")
-        for item in items:
-            model = item.get("model") or ""
-            et = item.get("event_type") or "?"
-            title_text = (item.get("title") or "")[:50]
-            badge = _badge(item)
+        for c in items:
+            model = c.get("model") or ""
+            et = c.get("event_type") or "?"
+            title_text = (c.get("title") or "")[:50]
+            src_cnt = c.get("source_count", 1)
+            badge = _badge(c)
             model_tag = f" {model}" if model else ""
-            lines.append(f"- **{et}**{model_tag} — {title_text}  {badge}")
+            evidence = f"（{src_cnt} 个来源）" if src_cnt > 1 else ""
+            lines.append(f"- **{et}**{model_tag} — {title_text}  {badge} {evidence}")
         lines.append("")
 
-    # ── Section 3: 按事件类型聚合 ──────────────────────────
-    lines.append("## 按事件类型")
+    # ── 事件类型分布 ──
+    lines.append("## 事件类型分布")
     lines.append("")
-    grouped = _group_by_event_type(ranked)
-    for group_name, group_items in grouped:
-        if not group_items:
-            continue
-        lines.append(f"### {group_name}")
-        lines.append("")
-        for item in group_items:
-            brand = item.get("brand") or "?"
-            model = item.get("model") or ""
-            title_text = (item.get("title") or "")[:50]
-            badge = _badge(item)
-            model_tag = f" {model}" if model else ""
-            lines.append(f"- **{brand}{model_tag}** — {title_text}  {badge}")
-        lines.append("")
+    by_event_type: dict[str, list] = defaultdict(list)
+    for c in clusters:
+        by_event_type[c.get("event_type") or "其他"].append(c)
+    for et, items in sorted(by_event_type.items(), key=lambda x: len(x[1]), reverse=True):
+        brand_list = ", ".join(sorted(set(c["brand"] for c in items if c.get("brand"))))
+        count = sum(c["source_count"] for c in items)
+        lines.append(f"- **{et}** — {len(items)} 事件 / {count} 来源 — {brand_list}")
+    lines.append("")
 
-    # ── Section 4: 信源质量 ────────────────────────────────
+    # ── 今日观察 ──
+    lines.append("## 今日观察")
+    lines.append("")
+    et_counts = defaultdict(int)
+    for c in clusters:
+        for ek, score in _EVENT_TYPE_PRIORITY.items():
+            if ek in (c.get("event_type") or ""):
+                et_counts[ek] += c["source_count"]
+                break
+    dominant = sorted(et_counts.items(), key=lambda x: x[1], reverse=True)
+    lines.append(f"- 今日共收录 **{len(clusters)}** 个事件（{len(clean)} 条原始事实），涉及 **{len(brands_in)}** 个品牌。")
+    if filtered_count > 0:
+        lines.append(f"- 已自动过滤 **{filtered_count}** 条测试 / 无效数据。")
+    if dominant:
+        lines.append(f"- 主要动作集中在 **{dominant[0][0]}**，其余为 {', '.join(k for k, _ in dominant[1:3])}。")
+    if has_official:
+        lines.append(f"- 官方源覆盖：✅ 有。")
+    else:
+        lines.append(f"- 官方源覆盖：❌ 今日 facts 未命中官方源。")
+    lines.append("")
+
+    # ── 信源质量 ──
     lines.append("## 信源质量")
     lines.append("")
-    by_tier = defaultdict(int)
-    for item in ranked:
-        by_tier[item.get("source_tier") or "unknown"] += 1
+    by_tier: dict[str, int] = defaultdict(int)
+    for c in clusters:
+        by_tier[c.get("best_source_tier") or "unknown"] += 1
     for tier, cnt in sorted(by_tier.items(), key=lambda x: _SOURCE_TIER_PRIORITY.get(x[0], 0), reverse=True):
         bar = "█" * min(cnt * 3, 30)
         lines.append(f"- {_tier_label(tier):<30} {bar} {cnt}")
     lines.append("")
 
-    # ── Section 5: 今日观察 ────────────────────────────────
-    lines.append("## 今日观察")
-    lines.append("")
-    total = len(facts)
-    brands = len(by_brand)
-    top_brand = max(by_brand.items(), key=lambda x: len(x[1])) if by_brand else ("-", [])
-    top_count = len(top_brand[1])
-    has_official = any("tier_1" in (i.get("source_tier") or "") for i in ranked)
-    lines.append(f"- 今日共收录 **{total}** 条事实，涉及 **{brands}** 个品牌")
-    if top_count <= 1 and brands > 1:
-        lines.append(f"- 品牌分布较分散，未出现明显高频品牌")
-    else:
-        lines.append(f"- 最活跃品牌：**{top_brand[0]}**（{top_count} 条）")
-    lines.append(f"- 官方源覆盖：{'✅ 有' if has_official else '❌ 无'}")
-    if ranked[0].get("event_type"):
-        lines.append(f"- 最高优先级事件类型：**{ranked[0]['event_type']}**")
-    lines.append("")
-
-    # ── Section 6: Facts Audit 摘要 ────────────────────────
+    # ── Footer ──
     lines.append("---")
     lines.append("")
     lines.append(f"*简报生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M')}*")
-    lines.append(f"*数据来源: auto_launch facts 库 {total} 条事实*")
+    lines.append(f"*数据来源: auto_launch facts 库 | {len(clusters)} 个聚类事件 / {len(clean)} 条原始事实*")
     lines.append("")
 
     return "\n".join(lines)
 
 
-def _empty_brief(title: str = None) -> str:
+def _empty_brief(title: str = None, filtered_count: int = 0) -> str:
     date_str = datetime.now().strftime("%Y-%m-%d")
     t = title or f"Auto Launch 每日简报 — {date_str}"
+    filter_note = f"\n已过滤 test/invalid 数据 {filtered_count} 条。" if filtered_count else ""
     return f"""# {t}
 
-## 今日最值得关注
+## 今日重点
 
-（无）— 当前事实库无匹配数据。
+（无）— 当前 facts 库无匹配有效事实。{filter_note}
+
+## 品牌动作速览
+
+facts 库未发现可用于生成简报的有效事实。
 
 ## 今日观察
 
-- 事实库为空，请通过 inbox 或 search --to-facts 导入事实。
+- facts 库为空或全部被过滤，无法生成简报。
+- 请通过 daily 或 search --to-facts 导入事实。
+
+## 信源质量
+
+（无）
 """
 
 
-def _badge(item: dict) -> str:
-    """为事实生成半角 badge 标签"""
-    et = (item.get("event_type") or "")[:10]
+def _badge(cluster: dict) -> str:
+    et = (cluster.get("event_type") or "")[:10]
     high_priority_ets = ["上市", "预售", "价格", "降价", "权益", "交付"]
     if any(k in et for k in high_priority_ets):
         return "`HOT`"
-    if "tier_1" in (item.get("source_tier") or ""):
+    if "tier_1" in (cluster.get("best_source_tier") or ""):
         return "`official`"
-    if item.get("seen_count", 1) >= 3:
-        return "`repeated`"
+    if cluster.get("source_count", 1) >= 3:
+        return "`multi-source`"
     return ""
 
 
@@ -218,25 +365,57 @@ def _tier_label(tier: str) -> str:
     return labels.get(tier, tier)
 
 
+# ── Backward compat exports ──
+
 def _group_by_event_type(items: list) -> list[tuple[str, list]]:
-    """按事件类型分组，返回 [(group_name, items), ...]"""
-    ungrouped = []
-    by_group = defaultdict(list)
+    """Legacy: group by event type category (used by tests)."""
+    groups: dict[str, list] = defaultdict(list)
     for item in items:
         et = item.get("event_type") or ""
         placed = False
-        for group_name, keywords in _EVENT_TYPE_GROUPS.items():
+        for gname, keywords in _EVENT_TYPE_GROUPS.items():
             if any(k in et for k in keywords):
-                by_group[group_name].append(item)
+                groups[gname].append(item)
                 placed = True
                 break
         if not placed:
-            ungrouped.append(item)
-
+            groups["其他"].append(item)
     result = []
     for gname, _ in _EVENT_TYPE_GROUPS.items():
-        if by_group.get(gname):
-            result.append((gname, by_group[gname]))
-    if ungrouped:
-        result.append(("其他", ungrouped))
+        if groups.get(gname):
+            result.append((gname, groups[gname]))
+    if groups.get("其他"):
+        result.append(("其他", groups["其他"]))
     return result
+
+
+_EVENT_TYPE_GROUPS = OrderedDict([
+    ("上市/预售", ["上市", "预售", "预订", "盲订", "发布", "新品发布", "发布会", "亮相", "首发"]),
+    ("价格/权益", ["价格", "降价", "涨价", "权益", "权益调整", "补贴", "限时", "官方价格调整", "benefit_adjustment"]),
+    ("交付/销量", ["交付", "开启交付", "交付数据", "销量", "销量里程碑", "订单", "战报",
+                   "delivery_start", "delivery_metric", "sales_milestone", "order_milestone",
+                   "monthly_sales", "monthly_delivery", "sales_data"]),
+    ("产品/技术", ["改款", "改款上市", "新款", "OTA", "技术", "技术发布", "配置",
+                   "technology_release", "ota_update", "product_update"]),
+    ("品牌/合作", ["合作", "战略合作", "联名", "代言", "融资", "品牌",
+                   "channel_campaign", "store_activity", "dealer_activity", "partnership",
+                   "brand_campaign", "executive_voice", "public_opinion"]),
+    ("其他", []),
+])
+
+def brief_rank(item: dict) -> tuple:
+    """Legacy: compute rank for a single fact (used by tests)."""
+    et = (item.get("event_type") or "")[:10]
+    et_score = max((v for k, v in _EVENT_TYPE_PRIORITY.items() if k in et), default=30)
+    st = item.get("source_tier") or ""
+    st_score = max((v for k, v in _SOURCE_TIER_PRIORITY.items() if k in st), default=10)
+    seen = min(item.get("seen_count", 1), 20)
+    last_seen = item.get("last_seen") or ""
+    penalty = 0
+    if not item.get("source_url"):
+        penalty -= 10
+    if not item.get("event_date"):
+        penalty -= 5
+    if not item.get("model"):
+        penalty -= 3
+    return (et_score + st_score + seen + penalty, last_seen)

@@ -1,4 +1,4 @@
-"""Layer: Inbox Core — SQLite 事实库（fingerprint 去重）"""
+"""Layer: Inbox Core — SQLite 事实库（fingerprint 去重 + 质量标记）"""
 """
 fact_store.py — SQLite 本地事实库。
 
@@ -15,7 +15,7 @@ from datetime import datetime, timedelta
 
 DEFAULT_DB_PATH = Path(__file__).resolve().parents[1] / "outputs" / "facts" / "auto_launch_facts.sqlite"
 
-SCHEMA = """
+BASE_SCHEMA = """
 CREATE TABLE IF NOT EXISTS facts (
     fact_id         INTEGER PRIMARY KEY AUTOINCREMENT,
     fingerprint     TEXT NOT NULL UNIQUE,
@@ -41,12 +41,21 @@ CREATE INDEX IF NOT EXISTS idx_facts_event_type ON facts(event_type);
 CREATE INDEX IF NOT EXISTS idx_facts_last_seen ON facts(last_seen);
 """
 
+_MIGRATIONS = [
+    "ALTER TABLE facts ADD COLUMN source_pipeline TEXT DEFAULT 'manual'",
+    "ALTER TABLE facts ADD COLUMN run_id TEXT DEFAULT ''",
+    "ALTER TABLE facts ADD COLUMN run_mode TEXT DEFAULT ''",
+    "ALTER TABLE facts ADD COLUMN is_test INTEGER DEFAULT 0",
+    "ALTER TABLE facts ADD COLUMN quality_status TEXT DEFAULT 'valid'",
+]
+
+_MARK_TEST_BRANDS = {"A", "B", "C", "D"}
+
 
 _DELIVERY_KEYWORDS = ["delivery", "sales", "交付", "销量", "战报", "交付量", "交付数据", "销量数据"]
 
 
 def _normalize_title(title: str) -> str:
-    """简单的 title 归一化：去空格、去标点、小写"""
     import re
     t = title.lower().strip()
     t = re.sub(r"[^\w\u4e00-\u9fff]", "", t)
@@ -54,7 +63,6 @@ def _normalize_title(title: str) -> str:
 
 
 def _extract_period(event_date: str, title: str) -> str:
-    """从 event_date 或 title 提取时间段（如 2026-06、6月）"""
     if event_date and len(event_date) >= 7:
         return event_date[:7]
     import re
@@ -66,11 +74,9 @@ def _extract_period(event_date: str, title: str) -> str:
 
 
 def _extract_core_numbers(title: str) -> str:
-    """提取 title 中的核心数字用于交付类事件去重，排除百分比"""
     import re
     clean = title.replace(",", "").replace("，", "").replace(" ", "")
     all_nums = re.findall(r'(?<!\d)(\d{3,})(?!\d)', clean)
-    # Exclude numbers that are clearly percentages (followed by %)
     percentages = set()
     for m in re.finditer(r'(\d{2,})%', title.replace(",", "")):
         percentages.add(m.group(1))
@@ -79,7 +85,6 @@ def _extract_core_numbers(title: str) -> str:
 
 
 def _is_delivery_event(event_type: str) -> bool:
-    """判断是否属于需语义去重的交付/销量类事件"""
     if not event_type:
         return False
     et = event_type.lower()
@@ -96,18 +101,69 @@ def _build_fingerprint(brand: str, model: str, event_type: str, event_date: str,
     return hashlib.md5(raw.encode("utf-8")).hexdigest()
 
 
+def _infer_is_test(item: dict) -> bool:
+    """推断一条事实是否属于测试/夹具数据。"""
+    brand = (item.get("brand") or "").strip()
+    title = (item.get("title") or "").strip()
+    source_name = (item.get("source_name") or "").strip()
+    pipeline = (item.get("source_pipeline") or "").strip()
+    if pipeline in ("test", "fixture"):
+        return True
+    if brand in _MARK_TEST_BRANDS:
+        return True
+    if title == "Test":
+        return True
+    if source_name == "src":
+        return True
+    return False
+
+
+def _infer_quality_status(item: dict) -> str:
+    """推断一条事实的质量状态。"""
+    if _infer_is_test(item):
+        return "test"
+    return "valid"
+
+
 class FactStore:
     def __init__(self, db_path: str = None):
         self.db_path = db_path or str(DEFAULT_DB_PATH)
         Path(self.db_path).parent.mkdir(parents=True, exist_ok=True)
         self._conn = sqlite3.connect(self.db_path)
         self._conn.row_factory = sqlite3.Row
-        self._conn.executescript(SCHEMA)
+        self._conn.executescript(BASE_SCHEMA)
+        self._run_migrations()
         self._cur = self._conn.cursor()
+        self._migrate_existing_records()
+
+    def _run_migrations(self):
+        for sql in _MIGRATIONS:
+            try:
+                self._conn.execute(sql)
+            except sqlite3.OperationalError:
+                pass  # column already exists
+        self._conn.commit()
+
+    def _migrate_existing_records(self):
+        """为已有记录补充 quality 标记（幂等）。"""
+        self._cur.execute(
+            "UPDATE facts SET is_test=1, quality_status='test' "
+            "WHERE brand IN ('A','B','C','D') AND (is_test IS NULL OR is_test=0)"
+        )
+        self._cur.execute(
+            "UPDATE facts SET is_test=1, quality_status='test' "
+            "WHERE title='Test' AND (is_test IS NULL OR is_test=0)"
+        )
+        self._cur.execute(
+            "UPDATE facts SET is_test=1, quality_status='test' "
+            "WHERE source_name='src' AND (is_test IS NULL OR is_test=0)"
+        )
+        self._conn.commit()
 
     def insert(self, item: dict) -> dict:
         """
         插入或更新事实。
+        自动推断 is_test / quality_status。
         返回: {"action": "inserted" | "updated", "fact_id": int, "seen_count": int}
         """
         brand = item.get("brand", "") or ""
@@ -117,6 +173,12 @@ class FactStore:
         title = item.get("title", "") or ""
         fingerprint = _build_fingerprint(brand, model, event_type, event_date, title)
         now = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+
+        is_test = 1 if _infer_is_test(item) else 0
+        quality_status = _infer_quality_status(item)
+        source_pipeline = item.get("source_pipeline", "manual")
+        run_id = item.get("run_id", "")
+        run_mode = item.get("run_mode", "")
 
         existing = self._cur.execute(
             "SELECT fact_id, seen_count, first_seen FROM facts WHERE fingerprint = ?",
@@ -141,8 +203,9 @@ class FactStore:
             """INSERT INTO facts
                (fingerprint, first_seen, last_seen, seen_count, brand, model,
                 event_type, event_date, title, claim, source_name, source_url,
-                source_tier, input_channel, raw_excerpt, created_at)
-               VALUES (?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                source_tier, input_channel, raw_excerpt, created_at,
+                source_pipeline, run_id, run_mode, is_test, quality_status)
+               VALUES (?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (
                 fingerprint, now, now,
                 brand or None, model or None, event_type or None,
@@ -150,6 +213,7 @@ class FactStore:
                 item.get("source_name") or None, item.get("source_url") or None,
                 item.get("source_tier") or None, item.get("input_channel", "inbox"),
                 item.get("raw_excerpt", "")[:500], now,
+                source_pipeline, run_id, run_mode, is_test, quality_status,
             )
         )
         self._conn.commit()
@@ -159,13 +223,17 @@ class FactStore:
     def query(self, brand: str = None, event_type: str = None,
               model: str = None, source_tier: str = None,
               days: int = None, since: str = None, until: str = None,
-              limit: int = 50) -> list[dict]:
-        """查询事实，支持按 brand / event_type / model / source_tier / days / since / until 过滤"""
+              limit: int = 50, exclude_test: bool = True,
+              source_pipeline: str = None) -> list[dict]:
+        """查询事实，支持过滤。exclude_test=True 时过滤测试/无效数据。"""
         wheres = []
         params = []
         if brand:
             wheres.append("brand = ?")
             params.append(brand)
+        if source_pipeline:
+            wheres.append("source_pipeline = ?")
+            params.append(source_pipeline)
         if event_type:
             wheres.append("event_type = ?")
             params.append(event_type)
@@ -178,7 +246,6 @@ class FactStore:
         if days is not None:
             cutoff = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%dT%H:%M:%S")
             date_cutoff = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
-            # Include facts seen recently OR with a recent event_date
             wheres.append("(last_seen >= ? OR (event_date IS NOT NULL AND event_date >= ?))")
             params.append(cutoff)
             params.append(date_cutoff)
@@ -188,6 +255,9 @@ class FactStore:
         if until:
             wheres.append("last_seen <= ?")
             params.append(until)
+        if exclude_test:
+            wheres.append("(is_test IS NULL OR is_test = 0)")
+            wheres.append("(quality_status IS NULL OR quality_status NOT IN ('test', 'invalid'))")
 
         sql = "SELECT * FROM facts"
         if wheres:
@@ -198,30 +268,31 @@ class FactStore:
         rows = self._cur.execute(sql, params).fetchall()
         return [dict(r) for r in rows]
 
-    def get_stats(self) -> dict:
-        total = self._cur.execute("SELECT COUNT(*) as c FROM facts").fetchone()["c"]
+    def get_stats(self, exclude_test: bool = True) -> dict:
+        exclude_clause = "WHERE (is_test IS NULL OR is_test = 0) AND (quality_status IS NULL OR quality_status NOT IN ('test', 'invalid'))" if exclude_test else ""
+        total = self._cur.execute(f"SELECT COUNT(*) as c FROM facts {exclude_clause}").fetchone()["c"]
         by_brand = {
             r["brand"]: r["c"]
             for r in self._cur.execute(
-                "SELECT brand, COUNT(*) as c FROM facts WHERE brand IS NOT NULL GROUP BY brand ORDER BY c DESC"
+                f"SELECT brand, COUNT(*) as c FROM facts {exclude_clause} AND brand IS NOT NULL GROUP BY brand ORDER BY c DESC"
             ).fetchall()
         }
         by_source_tier = {
             r["source_tier"]: r["c"]
             for r in self._cur.execute(
-                "SELECT source_tier, COUNT(*) as c FROM facts WHERE source_tier IS NOT NULL GROUP BY source_tier ORDER BY c DESC"
+                f"SELECT source_tier, COUNT(*) as c FROM facts {exclude_clause} AND source_tier IS NOT NULL GROUP BY source_tier ORDER BY c DESC"
             ).fetchall()
         }
         by_event_type = {
             r["event_type"]: r["c"]
             for r in self._cur.execute(
-                "SELECT event_type, COUNT(*) as c FROM facts WHERE event_type IS NOT NULL GROUP BY event_type ORDER BY c DESC"
+                f"SELECT event_type, COUNT(*) as c FROM facts {exclude_clause} AND event_type IS NOT NULL GROUP BY event_type ORDER BY c DESC"
             ).fetchall()
         }
         by_input_channel = {
             r["input_channel"]: r["c"]
             for r in self._cur.execute(
-                "SELECT input_channel, COUNT(*) as c FROM facts GROUP BY input_channel ORDER BY c DESC"
+                f"SELECT input_channel, COUNT(*) as c FROM facts {exclude_clause} GROUP BY input_channel ORDER BY c DESC"
             ).fetchall()
         }
         return {
@@ -232,57 +303,49 @@ class FactStore:
             "by_input_channel": by_input_channel,
         }
 
-    def stats_by(self, column: str) -> dict:
-        """按任意字段分组统计"""
+    def stats_by(self, column: str, exclude_test: bool = True) -> dict:
+        exclude_clause = "WHERE (is_test IS NULL OR is_test = 0) AND (quality_status IS NULL OR quality_status NOT IN ('test', 'invalid'))" if exclude_test else ""
         rows = self._cur.execute(
-            f"SELECT {column} as k, COUNT(*) as c FROM facts GROUP BY {column} ORDER BY c DESC"
+            f"SELECT {column} as k, COUNT(*) as c FROM facts {exclude_clause} GROUP BY {column} ORDER BY c DESC"
         ).fetchall()
         return {r["k"] or "(空)": r["c"] for r in rows}
 
     def audit(self) -> dict:
-        """事实库质量审计"""
         total = self._cur.execute("SELECT COUNT(*) as c FROM facts").fetchone()["c"]
         if total == 0:
             return {"total": 0, "completeness": {}, "warnings": ["事实库为空"]}
 
-        # 字段完成率
         fields = ["brand", "model", "event_type", "event_date", "source_name", "source_url", "source_tier"]
         completeness = {}
         for f in fields:
             cnt = self._cur.execute(f"SELECT COUNT(*) as c FROM facts WHERE {f} IS NOT NULL AND {f} != ''").fetchone()["c"]
             completeness[f] = {"filled": cnt, "total": total, "pct": round(cnt / total * 100, 1)}
 
-        # 信源质量分布
         tier_dist = {
             r["source_tier"]: r["c"]
             for r in self._cur.execute(
                 "SELECT source_tier, COUNT(*) as c FROM facts WHERE source_tier IS NOT NULL GROUP BY source_tier ORDER BY c DESC"
             ).fetchall()
         }
-
-        # 输入渠道分布
         channel_dist = {
             r["input_channel"]: r["c"]
             for r in self._cur.execute(
                 "SELECT input_channel, COUNT(*) as c FROM facts GROUP BY input_channel ORDER BY c DESC"
             ).fetchall()
         }
-
-        # 去重效果：fingerprint 碰撞率
         unique_fps = self._cur.execute("SELECT COUNT(DISTINCT fingerprint) as c FROM facts").fetchone()["c"]
         dup_rate = round((total - unique_fps) / total * 100, 1) if total > 0 else 0
-
-        # 无品牌/无事件类型的事实
         no_brand = self._cur.execute("SELECT COUNT(*) as c FROM facts WHERE brand IS NULL OR brand = ''").fetchone()["c"]
         no_event = self._cur.execute("SELECT COUNT(*) as c FROM facts WHERE event_type IS NULL OR event_type = ''").fetchone()["c"]
+        is_test_cnt = self._cur.execute("SELECT COUNT(*) as c FROM facts WHERE is_test = 1").fetchone()["c"]
 
         warnings = []
         if no_brand > 0:
             warnings.append(f"{no_brand} 条事实缺少品牌")
         if no_event > 0:
             warnings.append(f"{no_event} 条事实缺少事件类型")
-        if no_brand > 0 and no_brand == total:
-            warnings.append("所有事实均缺少品牌，inbox_filter 可能未生效")
+        if is_test_cnt > 0:
+            warnings.append(f"{is_test_cnt} 条测试/fixture 数据 (is_test=1)")
         for f, v in completeness.items():
             if v["pct"] < 50:
                 warnings.append(f"字段 '{f}' 完成率仅 {v['pct']}%")
@@ -293,12 +356,11 @@ class FactStore:
             "source_tier_distribution": tier_dist,
             "input_channel_distribution": channel_dist,
             "dedup": {"unique_fingerprints": unique_fps, "duplicate_rate_pct": dup_rate},
-            "quality_flags": {"no_brand": no_brand, "no_event_type": no_event},
+            "quality_flags": {"no_brand": no_brand, "no_event_type": no_event, "is_test": is_test_cnt},
             "warnings": warnings,
         }
 
     def export_json(self, rows: list[dict]) -> str:
-        """将查询结果导出为 JSON 字符串"""
         return json.dumps(rows, ensure_ascii=False, indent=2)
 
     def close(self):

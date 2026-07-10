@@ -1,4 +1,4 @@
-"""Layer: Inbox Core — 日更运行、回放"""
+"""Layer: Orchestration — 日更运行、回放（run-day shortcut）"""
 
 import json, shutil
 from pathlib import Path
@@ -7,23 +7,23 @@ from datetime import datetime, timedelta
 from auto_launch.src import output_paths
 
 
-def run_day(monitor_date: str, brand: str = "im", brand_name: str = "智己",
+def run_day(monitor_date: str, brand: str = "zhiji", brand_name: str = "智己",
             window_hours: int = 24, query_profile: str = "balanced",
             live: bool = False, refresh: bool = False,
             write_facts: bool = True, brief_output: str = None) -> dict:
     """
-    一键日更：
-    1. daily 监控
+    [编排] run-day shortcut: search → facts → report.
+
+    1. search (_run: 搜索 pipeline → normalized)
     2. 写入 facts（live 模式）
-    3. facts audit
-    4. 生成 brief
-    5. 写出 manifest.json / facts_audit.json / daily_brief.md / summary.md
+    3. report (run_brand_daily_report: 从 facts 读 → 生成品牌日报)
+    4. facts audit + source audit
 
     Output paths managed by output_paths.py. Run mode: brand_daily_{brand}.
+    不是三层核心能力，仅为编排 shortcut。
     """
-    from auto_launch.src.brand_daily_marketing_watch import _run
+    from auto_launch.src.brand_daily_marketing_watch import _run, run_brand_daily_report
     from auto_launch.src.fact_store import FactStore
-    from auto_launch.src.brief_renderer import generate_brief
     from auto_launch.src.inbox_filter import classify
     from auto_launch.src import source_auditor
 
@@ -31,11 +31,11 @@ def run_day(monitor_date: str, brand: str = "im", brand_name: str = "智己",
     rd = output_paths.run_dir(monitor_date, run_mode)
     log = []
 
-    # Step 1: daily
+    # Step 1: search (_run = 搜索 pipeline)
     _run(brand=brand, brand_name=brand_name, monitor_date=monitor_date,
          window_hours=window_hours, query_profile=query_profile,
          dry_run=not live, refresh=refresh)
-    log.append(("daily", "dry_run" if not live else "live",
+    log.append(("search", "dry_run" if not live else "live",
                 f"{brand_name} {monitor_date} window={window_hours}h"))
 
     # Step 2: to-facts (live only)
@@ -57,7 +57,7 @@ def run_day(monitor_date: str, brand: str = "im", brand_name: str = "智己",
                         "source_name": item.get("source_name", ""),
                         "source_url": item.get("url", ""),
                         "source_tier": item.get("source_tier_guess", ""),
-                        "input_channel": "daily_to_facts",
+                        "input_channel": "search_to_facts",
                     }
                     if classify(inbox_item)["decision"] == "keep":
                         store.insert(inbox_item)
@@ -85,20 +85,18 @@ def run_day(monitor_date: str, brand: str = "im", brand_name: str = "智己",
     log.append(("source-audit", "ok",
                 f"{sa_report['official_rate']}% official, {sa_report['media_rate']}% media, {sa_flags} gaps"))
 
-    # Step 4: brief
-    facts = store.query(days=1, limit=50)
-    brief_md = generate_brief(facts)
-    if brief_output:
-        brief_path = Path(brief_output)
-        brief_path.parent.mkdir(parents=True, exist_ok=True)
-    else:
-        brief_path = output_paths.daily_brief_md_path(monitor_date, run_mode)
-    brief_path.write_text(brief_md, encoding="utf-8")
-    log.append(("brief", "ok", f"{len(facts)} facts -> {brief_path}"))
+    # Step 4: report = run_brand_daily_report (复用 report 的 facts-to-report 逻辑)
+    facts = store.query(brand=brand_name, days=max(1, window_hours // 24 + 1), limit=100)
+    report_manifest = run_brand_daily_report(
+        facts=facts, brand_slug=brand, brand_name=brand_name,
+        monitor_date=monitor_date, window_hours=window_hours,
+    )
+    log.append(("report", "ok", f"{len(facts)} facts -> brand_daily report"))
 
     # Step 5: manifest.json
     manifest = {
         "command": "run-day",
+        "note": "编排 shortcut: search → facts → report（非三层核心能力）",
         "monitor_date": monitor_date,
         "run_mode": run_mode,
         "brand": brand, "brand_name": brand_name,
@@ -126,7 +124,7 @@ def run_day(monitor_date: str, brand: str = "im", brand_name: str = "智己",
             "audit": str(audit_path),
             "source_audit_json": str(sa_json_path),
             "source_audit_md": str(sa_md_path),
-            "brief": str(brief_path),
+            "report_manifest": report_manifest.get("outputs", {}).get("report", ""),
             "summary": str(output_paths.run_summary_path(monitor_date, run_mode)),
         },
         "log": [{"step": s, "status": st, "detail": d, "time": datetime.now().isoformat()}
@@ -211,7 +209,7 @@ def _render_summary(manifest: dict, audit: dict, sa_report: dict = None) -> str:
 def replay_from_fixtures(fixtures_dir: str, reset_store: bool = False) -> dict:
     """
     从 inbox fixtures 回放多天数据。
-    每个 fixture 文件作为一天的 inbox 输入处理。
+    每个 fixture 文件作为一天的 daily 输入处理。
     """
     from auto_launch.src.fact_store import FactStore
     from auto_launch.src.inbox_runner import run_text

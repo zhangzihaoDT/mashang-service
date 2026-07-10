@@ -337,8 +337,10 @@ mashang-service/
 | 预测锁单 | `python mashang_workspace/research_scripts/cohort_forecast.py` | research |
 | 回测 | `python mashang_workspace/research_scripts/lock_predict_backtest.py` | research |
 | 同比分析 | `python mashang_workspace/research_scripts/quick_lock_ratio.py` | research |
-| Auto Launch 监控 | `python -m auto_launch.cli daily --brand im --brand-name 智己` | service |
 | Auto Launch 搜索 | `python -m auto_launch.cli search --request "看看极氪最近 7 天都有什么动作"` | service |
+| Auto Launch Daily 摄入 | `python -m auto_launch.cli daily --input <file>` | service |
+| Auto Launch 品牌日报 | `python -m auto_launch.cli report --type brand-daily --brand 智己` | service |
+| Auto Launch 完整日更 | `python -m auto_launch.cli run-day --brand 智己` | service |
 | Auto Launch 测试 | `pytest auto_launch/tests/ -q` | service |
 | VOC 分析 | `python mashang_workspace/utility_scripts/voc_theme_analysis.py` | utility |
 | 数据字典 | `python mashang_workspace/utility_scripts/data_dictionary.py` | utility |

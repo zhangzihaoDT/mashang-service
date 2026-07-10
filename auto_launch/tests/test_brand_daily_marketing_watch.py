@@ -84,7 +84,7 @@ def test_makefile_target_dry_run():
     script_path = Path(__file__).resolve().parents[2] / "auto_launch/src/brand_daily_marketing_watch.py"
     result = subprocess.run(
         [sys.executable, str(script_path),
-         "--brand", "im", "--brand-name", "智己", "--date", "2026-07-02"],
+         "--brand", "zhiji", "--brand-name", "智己", "--date", "2026-07-02"],
         capture_output=True, text=True, cwd=Path(__file__).resolve().parents[2]
     )
     assert "dry-run" in result.stdout or "dry_run" in result.stdout or "queries planned" in result.stdout

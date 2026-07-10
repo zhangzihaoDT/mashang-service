@@ -24,12 +24,12 @@ def test_cli_start_help():
     print("[PASS] test_cli_start_help")
 
 
-def test_cli_launch_exit_via_6():
-    """Launch and exit via option 6."""
+def test_cli_launch_exit_via_7():
+    """Launch and exit via option 7."""
     r = subprocess.run(
         [sys.executable, CLI, "launch"],
         capture_output=True, text=True, cwd=Path(sys.path[0]),
-        input="6\n", timeout=5,
+        input="7\n", timeout=5,
     )
     assert r.returncode == 0
     assert "Auto Launch" in r.stdout
@@ -54,7 +54,7 @@ def test_cli_start_alias():
     r = subprocess.run(
         [sys.executable, CLI, "start"],
         capture_output=True, text=True, cwd=Path(sys.path[0]),
-        input="6\n", timeout=5,
+        input="7\n", timeout=5,
     )
     assert r.returncode == 0
     assert "Auto Launch" in r.stdout
@@ -66,18 +66,18 @@ def test_cli_launch_choice_3():
     r = subprocess.run(
         [sys.executable, CLI, "launch"],
         capture_output=True, text=True, cwd=Path(sys.path[0]),
-        input="3\n7\n\n6\n", timeout=5,
+        input="3\n7\n\n7\n", timeout=5,
     )
     assert r.returncode == 0
     print("[PASS] test_cli_launch_choice_3")
 
 
-def test_cli_launch_choice_5():
-    """Select option 5 (outputs inspect) then exit."""
+def test_cli_launch_choice_6():
+    """Select option 6 (outputs inspect) then exit."""
     r = subprocess.run(
         [sys.executable, CLI, "launch"],
         capture_output=True, text=True, cwd=Path(sys.path[0]),
-        input="5\n6\n", timeout=5,
+        input="6\n7\n", timeout=5,
     )
     assert r.returncode == 0
     assert "Outputs Inspection Report" in r.stdout or "Runs" in r.stdout
@@ -87,9 +87,9 @@ def test_cli_launch_choice_5():
 if __name__ == "__main__":
     test_cli_launch_help()
     test_cli_start_help()
-    test_cli_launch_exit_via_6()
+    test_cli_launch_exit_via_7()
     test_cli_launch_exit_via_q()
     test_cli_start_alias()
     test_cli_launch_choice_3()
-    test_cli_launch_choice_5()
+    test_cli_launch_choice_6()
     print("\n✅ 所有 CLI launcher 测试通过")

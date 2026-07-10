@@ -1,20 +1,28 @@
 """
 Auto Launch CLI — 统一命令行入口。
 
+三层产品能力:
+  search  = 联网搜索 → 归一化 → 写入 facts 库（发现层）
+  daily   = 处理 ChatGPT Daily Run → 写入 facts 库（摄入层）
+  report  = 从 facts 库读取 → 生成目标报告（报告层）
+
+facts 是共享中间层：
+  search ─┐
+          ├── facts ─── report
+  daily ──┘
+
+辅助命令:
+  facts     = 查看 facts 库状态、统计、筛选、审计
+  run-day   = shortcut: search + report（编排层，非核心能力）
+  launch    = 交互式入口
+
 用法:
-  python -m auto_launch.cli daily --brand im --brand-name 智己
-  python -m auto_launch.cli daily --brand im --brand-name 智己 --live
   python -m auto_launch.cli search --request "看看极氪最近 7 天都有什么动作"
-  python -m auto_launch.cli search --request "看看极氪最近 7 天都有什么动作" --live
-  python -m auto_launch.cli normalize --raw <path> --query-plan <path>
-  python -m auto_launch.cli source-audit --watchlist priority --days 7
-  python -m auto_launch.cli source-audit --watchlist ls8 --days 7
-  python -m auto_launch.cli outputs inspect
-  python -m auto_launch.cli outputs clean --older-than 30 --dry-run
-  python -m auto_launch.cli demo
-  python -m auto_launch.cli demo --reset-store
-  python -m auto_launch.cli launch               # 交互式启动器（推荐）
-  python -m auto_launch.cli start                # 别名
+  python -m auto_launch.cli daily --input path/to/chatgpt_daily.md
+  python -m auto_launch.cli report --type brand-daily --brand 智己
+  python -m auto_launch.cli run-day --brand 智己
+  python -m auto_launch.cli facts --stats
+  python -m auto_launch.cli launch
 """
 
 import sys, argparse
@@ -27,62 +35,45 @@ if _PROJECT_ROOT not in sys.path:
     sys.path.insert(0, _PROJECT_ROOT)
 
 
+# ── daily: ChatGPT Daily Run ingestion ────────────────────────────
+
 def cmd_daily(args):
-    from auto_launch.src.brand_daily_marketing_watch import _run
-    _run(
-        brand=args.brand, brand_name=args.brand_name,
-        monitor_date=args.date, window_hours=args.window_hours,
-        query_profile=args.query_profile,
-        dry_run=not args.live, refresh=args.refresh,
-    )
-    if args.to_facts and args.live:
-        _daily_to_facts(args)
+    """[摄入层] 处理 ChatGPT Daily Run 并写入 facts 库。
+    支持 --then-report 做 ingest → report orchestration。
+    """
+    from auto_launch.src.inbox_runner import run_file, run_text, _print_summary
 
-
-def _daily_to_facts(args):
-    """将 daily 监控的 normalized 结果写入事实库。"""
-    from auto_launch.src.inbox_filter import classify
-    from auto_launch.src.fact_store import FactStore
-    from auto_launch.src import output_paths
-    import json
-
-    run_mode = output_paths.run_mode_brand_daily(args.brand)
-    norm_file = output_paths.search_normalized_path(args.date, run_mode)
-    if not norm_file.exists():
-        print("[daily --to-facts] normalized 结果不存在，跳过")
+    if args.input:
+        summary = run_file(args.input, date=args.date)
+    elif args.text:
+        summary = run_text(args.text, date=args.date)
+    else:
+        print("[daily] 请指定 --input <文件> 或 --text <内容>")
+        print("  示例: python -m auto_launch.cli daily --input chatgpt_daily.md")
+        print("  示例: python -m auto_launch.cli daily --text '...ChatGPT Daily Run 内容...'")
         return
 
-    with open(norm_file) as f:
-        data = json.load(f)
+    _print_summary(summary)
 
-    items = data.get("items", [])
-    if not items:
-        print("[daily --to-facts] 无 items 可处理")
-        return
+    # ── --then-report daily-brief ──
+    if args.then_report == "daily-brief" and summary.get("kept", 0) > 0:
+        print()
+        print("─" * 50)
+        print(f"[daily] 生成 daily brief...")
+        from auto_launch.src.brief_renderer import generate_brief
+        from pathlib import Path
+        brief_md = generate_brief(summary["kept_items"], brief_date=args.date)
+        output_dir = Path("auto_launch/outputs/runs") / args.date.replace("-", "") / "launcher_daily_run" / "reports"
+        output_dir.mkdir(parents=True, exist_ok=True)
+        output_path = output_dir / "daily_brief.md"
+        output_path.write_text(brief_md, encoding="utf-8")
+        print(f"  已写入: {output_path.resolve()}")
 
-    store = FactStore()
-    kept = 0
-    for item in items:
-        inbox_item = {
-            "brand": args.brand_name,
-            "model": "",
-            "event_type": (item.get("matched_event_type_ids") or [None])[0] if item.get("matched_event_type_ids") else None,
-            "title": item.get("title", "")[:200],
-            "claim": (item.get("snippet") or "")[:500],
-            "source_name": item.get("source_name", ""),
-            "source_url": item.get("url", ""),
-            "source_tier": item.get("source_tier_guess", ""),
-            "input_channel": "daily_to_facts",
-        }
-        result = classify(inbox_item)
-        if result["decision"] == "keep":
-            fr = store.insert(inbox_item)
-            kept += 1
 
-    print(f"[daily --to-facts] 完成: {kept} keep (from {len(items)} items)")
-
+# ── search: web search ingestion ──────────────────────────────────
 
 def cmd_search(args):
+    """[发现层] 联网搜索 → 归一化 → 写入 facts 库。"""
     from auto_launch.src.volc_search_daily import run_pipeline
     result = run_pipeline(
         request=args.request, monitor_date=args.date,
@@ -125,6 +116,7 @@ def _search_to_facts(pipeline_result):
         tid = item.get("target_id", "")
         tm = target_map.get(tid, {"brand": "", "model": ""})
 
+        from auto_launch.src.inbox_runner import _generate_run_id
         inbox_item = {
             "brand": tm["brand"],
             "model": tm["model"],
@@ -135,6 +127,8 @@ def _search_to_facts(pipeline_result):
             "source_url": item.get("url", ""),
             "source_tier": item.get("source_tier_guess", ""),
             "input_channel": "search_to_facts",
+            "source_pipeline": "search",
+            "run_id": _generate_run_id(),
         }
 
         result = classify(inbox_item)
@@ -150,21 +144,69 @@ def _search_to_facts(pipeline_result):
     print(f"\n[to-facts] 完成: {kept} keep / {discarded} discard")
 
 
+# ── report: facts → report generation ─────────────────────────────
+
+def cmd_report(args):
+    """[报告层] 从 facts 库读取并生成目标报告。"""
+    from auto_launch.src import output_paths
+    from auto_launch.src.fact_store import FactStore
+
+    report_type = args.type
+
+    if report_type == "brand-daily":
+        from auto_launch.src.brand_daily_marketing_watch import run_brand_daily_report
+        brand_slug, brand_name = output_paths.resolve_brand(args.brand)
+        if args.brand_name:
+            brand_name = args.brand_name
+
+        store = FactStore()
+        facts = store.query(brand=brand_name, days=max(1, args.window_hours // 24 + 1),
+                            limit=args.limit)
+
+        manifest = run_brand_daily_report(
+            facts=facts, brand_slug=brand_slug, brand_name=brand_name,
+            monitor_date=args.date, window_hours=args.window_hours,
+        )
+        if not facts:
+            print(f"  ⚠ {brand_name} facts 库无数据，已生成空状态报告")
+            print(f"    建议: auto_launch search --request '关于{brand_name}...' --to-facts --live")
+
+    elif report_type == "daily-brief":
+        from auto_launch.src.llm_brief_renderer import generate_llm_brief
+        from auto_launch.src.brief_renderer import generate_brief as _fallback_brief
+        store = FactStore()
+        facts = store.query(brand=args.brand, event_type=args.event_type,
+                            model=args.model, days=args.days,
+                            since=args.since, until=args.until, limit=args.limit,
+                            source_pipeline=args.pipeline)
+        if args.no_llm:
+            brief_md = _fallback_brief(facts)
+        else:
+            brief_md = generate_llm_brief(facts, brief_date=args.date, pipeline=args.pipeline)
+            if not brief_md:
+                print("[report] LLM 不可用，降级到规则脚本")
+                brief_md = _fallback_brief(facts)
+        if args.output:
+            Path(args.output).parent.mkdir(parents=True, exist_ok=True)
+            Path(args.output).write_text(brief_md, encoding="utf-8")
+            print(f"[report --type daily-brief] 已写入: {args.output}")
+        else:
+            print(brief_md)
+
+    else:
+        print(f"[report] 不支持的 report type: {report_type}")
+        print(f"  支持的 type: brand-daily, daily-brief")
+
+
+# ── normalize (low-level, not part of 3-layer) ────────────────────
+
 def cmd_normalize(args):
     from auto_launch.src.normalize_search_results import process
     normalized, audit = process(args.raw, args.query_plan, args.output_prefix)
     print(f"Normalized: {normalized['total']} items | Audit: {audit['query_count']} queries")
 
 
-def cmd_inbox(args):
-    from auto_launch.src.inbox_runner import run_file, run_interactive
-    if args.input:
-        summary = run_file(args.input, date=args.date)
-        from auto_launch.src.inbox_runner import _print_summary
-        _print_summary(summary)
-    else:
-        run_interactive()
-
+# ── facts: inspect facts store ────────────────────────────────────
 
 def cmd_facts(args):
     from auto_launch.src.fact_store import FactStore
@@ -243,39 +285,31 @@ def cmd_facts(args):
         print(f"{f['fact_id']:<5} {(f['brand'] or '-'):<10} {(f['model'] or '-'):<12} {(f['event_type'] or '-'):<18} {tier:<20} {f['seen_count']:<5} {(f['last_seen'] or '')[:17]:<18} {title:<45}")
 
 
-def cmd_brief(args):
-    from auto_launch.src.fact_store import FactStore
-    from auto_launch.src.brief_renderer import generate_brief
-
-    store = FactStore()
-    facts = store.query(brand=args.brand, event_type=args.event_type,
-                        model=args.model, days=args.days,
-                        since=args.since, until=args.until,
-                        limit=args.limit)
-
-    brief_md = generate_brief(facts)
-    if args.output:
-        Path(args.output).parent.mkdir(parents=True, exist_ok=True)
-        Path(args.output).write_text(brief_md, encoding="utf-8")
-        print(f"[brief] 已写入: {args.output}")
-    else:
-        print(brief_md)
-
+# ── run-day: shortcut (search + report) ───────────────────────────
 
 def cmd_run_day(args):
+    """[编排] shortcut: search → facts → report。"""
+    from auto_launch.src import output_paths
     from auto_launch.src.operating_loop import run_day
+
+    brand_slug, brand_name = output_paths.resolve_brand(args.brand)
+    if args.brand_name:
+        brand_name = args.brand_name
 
     brief_output = args.brief_output or None
     result = run_day(
-        monitor_date=args.date, brand=args.brand, brand_name=args.brand_name,
+        monitor_date=args.date, brand=brand_slug, brand_name=brand_name,
         window_hours=args.window_hours, live=args.live,
+        refresh=args.refresh, query_profile=args.query_profile,
         brief_output=brief_output,
     )
     print(f"[run-day] {result['monitor_date']} {result['brand_name']} | "
-          f"live={result['live']} | brief={result['brief_facts']} facts")
+          f"live={result['live']} | report={result['brief_facts']} facts")
     for k, v in result["outputs"].items():
         print(f"  {k}: {v}")
 
+
+# ── replay ────────────────────────────────────────────────────────
 
 def cmd_replay(args):
     if args.input_dir:
@@ -313,10 +347,14 @@ def cmd_replay(args):
         print(f"  {r['monitor_date']}  kept={r['kept']}  brief={r['brief_facts']} facts")
 
 
+# ── launch: interactive entry ─────────────────────────────────────
+
 def cmd_launch(args):
     from auto_launch.src.launcher import run_launcher
     run_launcher()
 
+
+# ── demo ──────────────────────────────────────────────────────────
 
 def cmd_demo(args):
     from auto_launch.src.demo_runner import run_demo
@@ -329,6 +367,8 @@ def cmd_demo(args):
     print(f"  summary: {manifest['demo_summary']}")
 
 
+# ── outputs management ────────────────────────────────────────────
+
 def cmd_outputs(args):
     from auto_launch.src.output_manager import inspect, clean_dry_run, render_inspect, render_clean_dry_run
 
@@ -339,6 +379,8 @@ def cmd_outputs(args):
         dry = clean_dry_run(older_than_days=args.older_than, keep_runs=args.keep_runs)
         print(render_clean_dry_run(dry))
 
+
+# ── source-audit ──────────────────────────────────────────────────
 
 def cmd_source_audit(args):
     import json
@@ -364,6 +406,8 @@ def cmd_source_audit(args):
         print(source_auditor.render_markdown(report))
 
 
+# ── timeline ──────────────────────────────────────────────────────
+
 def cmd_timeline(args):
     from auto_launch.src.fact_store import FactStore
     from auto_launch.src.timeline_renderer import generate_timeline
@@ -382,23 +426,25 @@ def cmd_timeline(args):
         print(md)
 
 
+# ── main ──────────────────────────────────────────────────────────
+
 def main():
     parser = argparse.ArgumentParser(description="Auto Launch Service CLI")
-    sub = parser.add_subparsers(dest="command", help="子命令")
+    sub = parser.add_subparsers(dest="command", help="能力层级")
 
-    # daily
-    p_daily = sub.add_parser("daily", help="自有品牌每日营销监控")
-    p_daily.add_argument("--brand", default="im")
-    p_daily.add_argument("--brand-name", default="智己")
-    p_daily.add_argument("--date", default=datetime.now().strftime("%Y-%m-%d"))
-    p_daily.add_argument("--window-hours", type=int, default=24)
-    p_daily.add_argument("--query-profile", default="balanced")
-    p_daily.add_argument("--live", action="store_true")
-    p_daily.add_argument("--refresh", action="store_true")
-    p_daily.add_argument("--to-facts", action="store_true", help="将监控结果写入事实库")
+    # ── 三层核心入口 ──
 
-    # search
-    p_search = sub.add_parser("search", help="搜索意图转译与执行")
+    # daily = ChatGPT Daily Run 摄入层
+    p_daily = sub.add_parser("daily", help="[摄入层] 处理 ChatGPT Daily Run → 写入 facts 库")
+    p_daily.add_argument("--input", help="ChatGPT Daily Run markdown 文件路径")
+    p_daily.add_argument("--text", help="ChatGPT Daily Run 文本内容（替代 --input）")
+    p_daily.add_argument("--date", default=datetime.now().strftime("%Y-%m-%d"),
+                         help="事实日期（默认今天）")
+    p_daily.add_argument("--then-report", choices=["daily-brief"],
+                         help="摄入后自动生成 report（例如 daily-brief）")
+
+    # search = 联网搜索发现层
+    p_search = sub.add_parser("search", help="[发现层] 联网搜索 → 归一化 → 写入 facts 库")
     p_search.add_argument("--request", default="看看极氪最近 7 天都有什么动作")
     p_search.add_argument("--date", default=datetime.now().strftime("%Y-%m-%d"))
     p_search.add_argument("--mode", choices=["brand_watch", "model_watch"])
@@ -411,19 +457,42 @@ def main():
     p_search.add_argument("--stage", choices=["scout", "refine", "all"], default="all")
     p_search.add_argument("--to-facts", action="store_true", help="将搜索结果写入事实库")
 
-    # normalize
-    p_norm = sub.add_parser("normalize", help="标准化搜索结果")
+    # report = facts → 报告层
+    p_report = sub.add_parser("report", help="[报告层] 从 facts 库生成目标报告（不搜索）")
+    p_report.add_argument("--type", required=True, choices=["brand-daily", "daily-brief"],
+                          help="报告类型: brand-daily=品牌日报, daily-brief=每日简报")
+    p_report.add_argument("--brand", help="品牌名（--type brand-daily 必填，支持中文/slug）")
+    p_report.add_argument("--brand-name", help="品牌显示名（可选，默认从 --brand 自动解析）")
+    p_report.add_argument("--date", default=datetime.now().strftime("%Y-%m-%d"))
+    p_report.add_argument("--window-hours", type=int, default=24)
+    p_report.add_argument("--limit", type=int, default=100, help="最大 facts 数 (default: 100)")
+    p_report.add_argument("--model", help="车型筛选（--type daily-brief 可选）")
+    p_report.add_argument("--event-type", help="事件类型筛选（--type daily-brief 可选）")
+    p_report.add_argument("--days", type=int, default=1, help="最近 N 天（--type daily-brief）")
+    p_report.add_argument("--since", help="起始时间（ISO format）")
+    p_report.add_argument("--until", help="截止时间（ISO format）")
+    p_report.add_argument("--pipeline", choices=["search", "daily", "manual"],
+                          help="按来源过滤（search/daily/manual）")
+    p_report.add_argument("--no-llm", action="store_true",
+                          help="禁用 LLM，使用规则脚本生成简报（默认使用 LLM）")
+    p_report.add_argument("--output", help="输出文件路径")
+
+    # ── 辅助命令 ──
+
+    # normalize (low-level)
+    p_norm = sub.add_parser("normalize", help="标准化搜索结果（底层工具）")
     p_norm.add_argument("--raw", required=True)
     p_norm.add_argument("--query-plan", required=True)
     p_norm.add_argument("--output-prefix")
 
-    # inbox
-    p_inbox = sub.add_parser("inbox", help="Inbox Intake — 解析 daily run 并写入事实库")
+    # inbox (daily 的别名，保留向后兼容)
+    p_inbox = sub.add_parser("inbox", help="[别名] 同 daily --input，处理 ChatGPT Daily Run")
     p_inbox.add_argument("--input", help="ChatGPT daily run markdown 文件路径")
-    p_inbox.add_argument("--date", default=datetime.now().strftime("%Y-%m-%d"), help="事实日期")
+    p_inbox.add_argument("--date", default=datetime.now().strftime("%Y-%m-%d"),
+                         help="事实日期")
 
     # facts
-    p_facts = sub.add_parser("facts", help="查询事实库")
+    p_facts = sub.add_parser("facts", help="查看 facts 库状态、统计、筛选、审计")
     p_facts.add_argument("--brand", help="按品牌筛选")
     p_facts.add_argument("--model", help="按车型筛选")
     p_facts.add_argument("--event-type", help="按事件类型筛选")
@@ -437,25 +506,18 @@ def main():
     p_facts.add_argument("--audit", action="store_true", help="事实库质量审计")
     p_facts.add_argument("--export", action="store_true", help="导出为 JSON")
 
-    # brief
-    p_brief = sub.add_parser("brief", help="基于 facts 生成每日简报")
-    p_brief.add_argument("--brand", help="按品牌筛选")
-    p_brief.add_argument("--model", help="按车型筛选")
-    p_brief.add_argument("--event-type", help="按事件类型筛选")
-    p_brief.add_argument("--days", type=int, default=1, help="最近 N 天 (default: 1)")
-    p_brief.add_argument("--since", help="起始时间 (ISO format)")
-    p_brief.add_argument("--until", help="截止时间 (ISO format)")
-    p_brief.add_argument("--limit", type=int, default=50, help="最大事实数 (default: 50)")
-    p_brief.add_argument("--output", help="输出 Markdown 文件路径")
-
-    # run-day
-    p_run = sub.add_parser("run-day", help="一键日更：daily → to-facts → audit → brief")
-    p_run.add_argument("--brand", default="im")
-    p_run.add_argument("--brand-name", default="智己")
+    # run-day = shortcut (search + report)
+    p_run = sub.add_parser("run-day",
+                           help="[编排] shortcut: search + report 完整链路（非核心能力层）")
+    p_run.add_argument("--brand", required=True,
+                       help="品牌名（支持中文/英文 slug，如 智己/zhiji/im）")
+    p_run.add_argument("--brand-name", help="品牌显示名（可选，默认从 --brand 自动解析）")
     p_run.add_argument("--date", default=datetime.now().strftime("%Y-%m-%d"))
     p_run.add_argument("--window-hours", type=int, default=24)
-    p_run.add_argument("--live", action="store_true")
-    p_run.add_argument("--brief-output", help="brief 输出路径（默认由 output_paths.py 管理）")
+    p_run.add_argument("--live", action="store_true", help="执行真实搜索（否则 dry-run）")
+    p_run.add_argument("--refresh", action="store_true", help="强制刷新缓存")
+    p_run.add_argument("--query-profile", default="balanced")
+    p_run.add_argument("--brief-output", help="report 输出路径（默认由 output_paths.py 管理）")
 
     # replay
     p_replay = sub.add_parser("replay", help="连续回放（支持日期范围或 inbox fixtures）")
@@ -467,9 +529,9 @@ def main():
     p_replay.add_argument("--input-dir", help="inbox fixtures 目录（替代日期范围）")
     p_replay.add_argument("--reset-store", action="store_true", help="回放前重置事实库")
 
-    # launch
-    sub.add_parser("launch", help="交互式启动器（推荐入口）")
-    sub.add_parser("start", help="交互式启动器（launch 别名）")
+    # launch / start
+    sub.add_parser("launch", help="交互式入口（推荐）")
+    sub.add_parser("start", help="交互式入口（launch 别名）")
 
     # demo
     p_demo = sub.add_parser("demo", help="一键演示：replay fixtures → audit → source-audit → brief → timeline → inspect")
@@ -478,7 +540,6 @@ def main():
     # outputs
     p_out = sub.add_parser("outputs", help="输出管理：inspect / clean")
     out_sub = p_out.add_subparsers(dest="sub", help="outputs 子命令")
-
     p_out_inspect = out_sub.add_parser("inspect", help="检查 outputs 目录结构完整性")
     p_out_clean = out_sub.add_parser("clean", help="列出可清理的调试/缓存产物（仅 dry-run）")
     p_out_clean.add_argument("--older-than", type=int, default=None,
@@ -508,19 +569,21 @@ def main():
     p_tl.add_argument("--limit", type=int, default=100, help="最大事实数 (default: 100)")
     p_tl.add_argument("--output", help="输出 Markdown 文件路径")
 
+    # ── dispatch ──
     args = parser.parse_args()
+
     if args.command == "daily":
         cmd_daily(args)
     elif args.command == "search":
         cmd_search(args)
+    elif args.command == "report":
+        cmd_report(args)
     elif args.command == "normalize":
         cmd_normalize(args)
     elif args.command == "inbox":
         cmd_inbox(args)
     elif args.command == "facts":
         cmd_facts(args)
-    elif args.command == "brief":
-        cmd_brief(args)
     elif args.command == "run-day":
         cmd_run_day(args)
     elif args.command == "replay":
@@ -537,6 +600,17 @@ def main():
         cmd_outputs(args)
     else:
         parser.print_help()
+
+
+def cmd_inbox(args):
+    """[别名] 同 daily --input。"""
+    from auto_launch.src.inbox_runner import run_file, _print_summary
+    if args.input:
+        summary = run_file(args.input, date=args.date)
+        _print_summary(summary)
+    else:
+        from auto_launch.src.inbox_runner import run_interactive
+        run_interactive()
 
 
 if __name__ == "__main__":

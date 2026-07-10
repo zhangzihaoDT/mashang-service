@@ -6,9 +6,9 @@ Reuses existing auto_launch Search Layer components.
 Output paths managed by output_paths.py.
 
 Usage:
-  python brand_daily_marketing_watch.py --brand im --brand-name 智己
-  python brand_daily_marketing_watch.py --brand im --brand-name 智己 --live
-  python brand_daily_marketing_watch.py --brand im --brand-name 智己 --window-hours 48
+  python brand_daily_marketing_watch.py --brand zhiji --brand-name 智己
+  python brand_daily_marketing_watch.py --brand zhiji --brand-name 智己 --live
+  python brand_daily_marketing_watch.py --brand zhiji --brand-name 智己 --window-hours 48
 """
 
 import json, sys, yaml
@@ -331,6 +331,149 @@ def _run(brand: str, brand_name: str, monitor_date: str, window_hours: int,
 
     print(f"\n✅ {brand_name} | clusters={clustered['cluster_count']} | candidates={len(gated_candidates)} | signals={len(gated_signals)} | API={api_calls}")
     print(f"   输出: {run_dir_path}")
+
+
+def run_brand_daily_report(facts: list[dict], brand_slug: str, brand_name: str,
+                           monitor_date: str, window_hours: int = 24) -> dict:
+    """[report --type brand-daily] 从 facts 库生成品牌日报（不执行搜索）。
+
+    Outputs:
+      runs/YYYYMMDD/brand_daily_{slug}/manifest.json
+      runs/YYYYMMDD/brand_daily_{slug}/summary.md
+      runs/YYYYMMDD/brand_daily_{slug}/reports/brand_daily_summary.md
+
+    纯 facts 只读 — facts 为空时生成空状态报告。
+    Returns manifest dict.
+    """
+    run_mode = output_paths.run_mode_brand_daily(brand_slug)
+    rd = output_paths.run_dir(monitor_date, run_mode)
+    reports_out = output_paths.reports_dir(monitor_date, run_mode)
+
+    monitor_dt = datetime.strptime(monitor_date, "%Y-%m-%d")
+    end_dt = monitor_dt.replace(hour=23, minute=59, second=59)
+    start_dt = end_dt - timedelta(hours=window_hours)
+
+    def _fmt(dt):
+        return dt.strftime("%Y-%m-%dT%H:%M:%S+08:00")
+
+    # Group facts by event_type
+    from collections import defaultdict
+    by_event_type: dict[str, list] = defaultdict(list)
+    for f in facts:
+        et = f.get("event_type") or "未分类"
+        by_event_type[et].append(f)
+
+    total = len(facts)
+
+    # ── reports/brand_daily_summary.md ──
+    if not facts:
+        conclusion = (f"{brand_name} 在过去 {window_hours} 小时内 facts 库中无相关事实。"
+                      "请先运行 `auto_launch search --to-facts` 搜索该品牌动态，"
+                      "或使用 `auto_launch daily --refresh-search` 一键搜索并生成日报。")
+    else:
+        conclusion = (f"facts 库共收录 **{total}** 条 {brand_name} 相关事实，"
+                      f"涵盖 **{len(by_event_type)}** 个事件类型。")
+
+    md_lines = [
+        f"# {brand_name} 品牌日报 — {monitor_date}",
+        "",
+        "**数据来源**: facts 库 (auto_launch_facts.sqlite)",
+        f"**时间窗口**: 过去 {window_hours} 小时 ({_fmt(start_dt)} ~ {_fmt(end_dt)})",
+        "**生成方式**: 基于事实库读取，未执行联网搜索",
+        "（如需最新数据请先运行 `auto_launch search --to-facts --live`）" if not facts else '',
+        "",
+        "## 今日结论",
+        "",
+        conclusion,
+        "",
+    ]
+    if total == 0:
+        md_lines.append("---\n")
+        md_lines.append(f"*生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M')}*\n")
+    else:
+        md_lines.append("## 事实总览\n")
+        md_lines.append("| 事件类型 | 数量 | 最新出现 |\n|----------|------|----------|\n")
+        for et, items in sorted(by_event_type.items(), key=lambda x: len(x[1]), reverse=True):
+            latest = max(items, key=lambda x: x.get("last_seen", ""))
+            last_seen = (latest.get("last_seen") or "")[:10]
+            md_lines.append(f"| {et} | {len(items)} | {last_seen} |\n")
+
+        md_lines.append("\n## 详细事实\n")
+        sorted_facts = sorted(facts, key=lambda x: x.get("last_seen", ""), reverse=True)
+        for i, f in enumerate(sorted_facts, 1):
+            title = (f.get("title") or "")[:80]
+            et = f.get("event_type") or "?"
+            tier = f.get("source_tier") or "?"
+            source = f.get("source_name") or "?"
+            last_seen = (f.get("last_seen") or "")[:16]
+            model = f.get("model") or ""
+            model_tag = f" [{model}]" if model else ""
+            md_lines.append(f"{i}. **[{et}]{model_tag}** {title}")
+            md_lines.append(f"   {source} | {tier} | 最近: {last_seen}\n")
+
+        md_lines.append("---\n")
+        md_lines.append(f"*生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M')}*\n")
+
+    md = "\n".join(md_lines)
+    md_path = reports_out / "brand_daily_summary.md"
+    md_path.write_text(md, encoding="utf-8")
+
+    # ── summary.md ──
+    summary_lines = [
+        f"# 品牌日报摘要 — {brand_name} — {monitor_date}",
+        "",
+        f"**数据源**: facts 库 | **时间窗口**: 过去 {window_hours} 小时",
+        f"**事实数**: {total} | **事件类型数**: {len(by_event_type)}",
+        "",
+    ]
+    if facts:
+        summary_lines.append("## 事件类型分布\n")
+        for et, items in sorted(by_event_type.items(), key=lambda x: len(x[1]), reverse=True):
+            pct = round(len(items) / total * 100, 1)
+            bar = "█" * int(pct / 5) + "░" * (20 - int(pct / 5))
+            summary_lines.append(f"  {et:<24} {bar} {len(items)} ({pct}%)")
+        summary_lines.append("")
+    else:
+        summary_lines.append("facts 库无匹配数据。\n")
+    summary_lines.append("---\n")
+    summary_lines.append(f"*生成时间: {datetime.now().isoformat()}*\n")
+    summary_path = output_paths.run_summary_path(monitor_date, run_mode)
+    summary_path.write_text("\n".join(summary_lines), encoding="utf-8")
+
+    # ── manifest.json ──
+    manifest = {
+        "command": "report",
+        "report_type": "brand-daily",
+        "task_name": "brand_daily_report",
+        "brand": brand_slug,
+        "brand_name": brand_name,
+        "monitor_date": monitor_date,
+        "run_mode": run_mode,
+        "data_source": "facts_store",
+        "time_window": {"start": _fmt(start_dt), "end": _fmt(end_dt), "window_hours": window_hours},
+        "fact_count": total,
+        "event_type_count": len(by_event_type),
+        "has_data": total > 0,
+        "outputs": {
+            "run_dir": str(rd),
+            "manifest": str(output_paths.run_manifest_path(monitor_date, run_mode)),
+            "summary": str(summary_path),
+            "report": str(md_path),
+        },
+        "warning": "facts 库无该品牌数据" if total == 0 else None,
+        "suggestion": ("请先运行 `auto_launch search --to-facts --live`"
+                       if total == 0 else None),
+        "created_at": datetime.now().isoformat(),
+    }
+    manifest_path = output_paths.run_manifest_path(monitor_date, run_mode)
+    manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    print(f"[report --type brand-daily] {brand_name} | {monitor_date} | 基于 facts 库 | {total} 条事实")
+    if total == 0:
+        print(f"            ⚠ facts 库无数据 — 建议: auto_launch search --to-facts --live")
+    print(f"            输出: {rd}")
+
+    return manifest
 
 
 if __name__ == "__main__":

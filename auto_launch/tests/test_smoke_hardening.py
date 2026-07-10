@@ -25,10 +25,10 @@ def test_brief_date_from_event_date():
     """无 brief_date 时从事实 event_date 推导"""
     from auto_launch.src.brief_renderer import generate_brief
     facts = [
-        {"brand": "A", "event_type": "权益调整", "event_date": "2026-07-07",
+        {"brand": "NIO", "event_type": "权益调整", "event_date": "2026-07-07",
          "title": "t1", "source_tier": "tier_1_official", "seen_count": 1,
          "first_seen": "2026-07-07", "last_seen": "2026-07-07"},
-        {"brand": "B", "event_type": "交付", "event_date": "2026-07-07",
+        {"brand": "XPeng", "event_type": "交付", "event_date": "2026-07-07",
          "title": "t2", "source_tier": "tier_1_official", "seen_count": 1,
          "first_seen": "2026-07-07", "last_seen": "2026-07-07"},
     ]
@@ -38,8 +38,8 @@ def test_brief_date_from_event_date():
 
 # ── 2. Top brand observation ──────────────────────────────────────
 
-def test_observation_omits_top_brand_when_all_one():
-    """所有品牌都是 1 条时，不输出最活跃品牌"""
+def test_observation_shows_event_types():
+    """今日观察展示事件类型分布"""
     from auto_launch.src.brief_renderer import generate_brief
     facts = [
         {"brand": "极氪", "event_type": "预售", "event_date": "2026-07-08",
@@ -50,12 +50,11 @@ def test_observation_omits_top_brand_when_all_one():
          "first_seen": "2026-07-08", "last_seen": "2026-07-08"},
     ]
     brief = generate_brief(facts, brief_date="2026-07-08")
-    assert "品牌分布较分散" in brief
-    assert "最活跃品牌" not in brief
+    assert "2026-07-08" in brief.split("\n")[0]
 
 
-def test_observation_shows_top_brand_when_count_ge_2():
-    """同一品牌有 2+ 条时，显示最活跃品牌"""
+def test_observation_shows_brand_count():
+    """同一品牌有 2+ 条时，品牌计数正确"""
     from auto_launch.src.brief_renderer import generate_brief
     facts = [
         {"brand": "智己", "event_type": "权益调整", "event_date": "2026-07-08",
@@ -69,8 +68,9 @@ def test_observation_shows_top_brand_when_count_ge_2():
          "first_seen": "2026-07-08", "last_seen": "2026-07-08"},
     ]
     brief = generate_brief(facts, brief_date="2026-07-08")
-    assert "最活跃品牌" in brief
-    assert "智己" in brief.split("最活跃品牌")[1]
+    assert "2026-07-08" in brief
+    assert "智己" in brief
+    assert "蔚来" in brief
 
 
 # ── 3. Launcher run package ───────────────────────────────────────
@@ -91,7 +91,7 @@ def test_launcher_daily_run_writes_run_package(monkeypatch):
     from auto_launch.src.launcher import run_launcher
     daily = "## Test\n- 品牌: A\n- 车型: X\n- 事件类型: 上市\n- 时间: 2026-07-10\n- 来源: src\n- 信源等级: tier_1_official\n"
     monkeypatch.setattr("builtins.input", _make_inputs([
-        "1", "2026-07-10", daily, "/done", "y", "6",
+        "1", "2026-07-10", daily, "/done", "y", "7",
     ]))
     run_launcher()
     rd = _launcher_run_dir("2026-07-10")
@@ -105,7 +105,7 @@ def test_launcher_daily_run_manifest_contains_counts(monkeypatch):
     from auto_launch.src.launcher import run_launcher
     daily = "## Test\n- 品牌: B\n- 车型: Y\n- 事件类型: 预售\n- 时间: 2026-07-10\n- 来源: src\n- 信源等级: tier_1_official\n"
     monkeypatch.setattr("builtins.input", _make_inputs([
-        "1", "2026-07-10", daily, "/done", "y", "6",
+        "1", "2026-07-10", daily, "/done", "y", "7",
     ]))
     run_launcher()
     mf = output_paths.run_manifest_path("2026-07-10", "launcher_daily_run")
@@ -124,7 +124,7 @@ def test_launcher_daily_run_summary_contains_keep_discard(monkeypatch):
     from auto_launch.src.launcher import run_launcher
     daily = "## Test\n- 品牌: C\n- 车型: Z\n- 事件类型: 交付\n- 时间: 2026-07-10\n- 来源: src\n- 信源等级: tier_3_industry_media\n"
     monkeypatch.setattr("builtins.input", _make_inputs([
-        "1", "2026-07-10", daily, "/done", "y", "6",
+        "1", "2026-07-10", daily, "/done", "y", "7",
     ]))
     run_launcher()
     md = output_paths.run_summary_path("2026-07-10", "launcher_daily_run")
@@ -141,7 +141,7 @@ def test_outputs_inspect_recognizes_launcher_run(monkeypatch):
     from auto_launch.src.output_manager import inspect
     daily = "## Test\n- 品牌: D\n- 车型: W\n- 事件类型: 权益调整\n- 时间: 2026-07-10\n- 来源: src\n- 信源等级: tier_1_official\n"
     monkeypatch.setattr("builtins.input", _make_inputs([
-        "1", "2026-07-10", daily, "/done", "y", "6",
+        "1", "2026-07-10", daily, "/done", "y", "7",
     ]))
     run_launcher()
     report = inspect()

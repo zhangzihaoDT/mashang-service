@@ -168,7 +168,7 @@ PROMPTBUILDER_CAPABILITIES = {
         "directory": "auto_launch/",
         "description": "汽车上市/营销事件独立监控服务；搜索意图编译 → query plan → Volc Search API → 信源分级 → URL 去重 → 事件聚类 → candidate gate → Markdown 简报。",
         "entrypoints": [
-            "python -m auto_launch.cli daily --brand im --brand-name 智己",
+            "python -m auto_launch.cli report --type brand-daily --brand 智己",
             "python -m auto_launch.cli search --request '看看极氪最近 7 天都有什么动作'",
             "make auto-launch-owned-brand-daily",
         ],

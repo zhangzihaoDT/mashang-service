@@ -80,6 +80,7 @@ def _write_run_package(date: str, summary: dict, brief: str):
 
 def run_launcher():
     """Main interactive launcher loop."""
+    from auto_launch.src import output_paths
     from auto_launch.src.inbox_runner import run_text, _print_summary
     from auto_launch.src.fact_store import FactStore
     from auto_launch.src.brief_renderer import generate_brief
@@ -91,22 +92,27 @@ def run_launcher():
         print("  Auto Launch")
         print("=" * 50)
         print()
-        print("  1. 处理 ChatGPT Daily Run")
-        print("  2. 定向搜索并写入事实库")
-        print("  3. 查看事实库")
-        print("  4. 生成今日简报")
-        print("  5. 查看 outputs 状态")
-        print("  6. 退出")
+        print("  [三层架构] search ─┐")
+        print("                    ├── facts ─── report")
+        print("              daily ─┘")
+        print()
+        print("  1. 处理 ChatGPT Daily Run 并写入 facts  [daily]")
+        print("  2. 定向搜索并写入 facts                [search]")
+        print("  3. 查看 facts 库                       [facts]")
+        print("  4. 从 facts 生成 report                [report]")
+        print("  5. 一键运行 search + report            [run-day]")
+        print("  6. 查看 outputs 状态")
+        print("  7. 退出")
         print()
 
         try:
-            choice = input("请选择 [1-6]: ").strip()
+            choice = input("请选择 [1-7]: ").strip()
         except (EOFError, KeyboardInterrupt):
             print()
             break
 
-        # ── 6. 退出 ─────────────────────────────────────
-        if choice in ("6", "q", "quit", "exit"):
+        # ── 7. 退出 ─────────────────────────────────────
+        if choice in ("7", "q", "quit", "exit"):
             print("[launcher] 再见")
             break
 
@@ -118,7 +124,7 @@ def run_launcher():
                 break
             date = date_raw if date_raw else datetime.now().strftime("%Y-%m-%d")
             print()
-            print("粘贴 daily run 文本，输入 /done 结束：")
+            print("粘贴 ChatGPT Daily Run 文本，输入 /done 结束：")
             lines = []
             while True:
                 try:
@@ -143,25 +149,26 @@ def run_launcher():
             if summary["kept"] > 0:
                 print()
                 try:
-                    resp = input("生成并显示简报？(Y/n): ").strip().lower()
+                    resp = input(f"已写入 facts：{summary['kept']} 条事实。是否立即生成今日简报？[Y/n]: ").strip().lower()
                 except (EOFError, KeyboardInterrupt):
-                    resp = "n"
+                    resp = "y"
                 if resp in ("", "y", "yes"):
-                    facts = summary["kept_items"]
-                    brief = generate_brief(facts, brief_date=date)
+                    from auto_launch.src.brief_renderer import generate_brief as _generate_clean_brief
+                    brief = _generate_clean_brief(summary["kept_items"], brief_date=date)
                     print()
                     print("=" * 60)
                     print("  每日简报")
                     print("=" * 60)
                     print(brief)
 
-                    # Write run package (brief goes into runs/{date}/{run_mode}/reports/)
+                    # Write run package
                     _write_run_package(date, summary, brief)
-                    run_mode = "launcher_daily_run"
-                    brief_path = output_paths.daily_brief_md_path(date, run_mode)
+                    brief_path = output_paths.daily_brief_md_path(date, "launcher_daily_run")
 
                     print(f"\n  简报已写入: {brief_path}")
                     print(f"  运行包: {brief_path.parent}")
+                else:
+                    print("[launcher] 跳过简报生成，facts 已写入。")
 
         # ── 2. 定向搜索 ──────────────────────────────────
         elif choice == "2":
@@ -237,50 +244,102 @@ def run_launcher():
                     et = (f["event_type"] or "-")[:16]
                     print(f"  {f['fact_id']:<5} {b:<12} {m:<12} {et:<18} {tier:<20} {title:<40}")
 
-        # ── 4. 生成简报 ──────────────────────────────────
+        # ── 4. 从 facts 生成 report ──────────────────────
         elif choice == "4":
+            print()
+            print("  [report] 报告类型:")
+            print("    1. brand-daily — 品牌日报")
+            print("    2. daily-brief — 每日简报")
+            print()
             try:
-                days_raw = input("最近 N 天 (默认 1): ").strip()
+                rt = input("选择 [1-2]: ").strip()
+            except (EOFError, KeyboardInterrupt):
+                continue
+
+            if rt == "1":
+                try:
+                    brand = input("品牌名: ").strip()
+                except (EOFError, KeyboardInterrupt):
+                    continue
+                if not brand:
+                    print("[launcher] 品牌名不能为空")
+                    continue
+                from auto_launch.src import output_paths
+                from auto_launch.src.brand_daily_marketing_watch import run_brand_daily_report
+                slug, name = output_paths.resolve_brand(brand)
+                store = FactStore()
+                facts = store.query(brand=name, days=1, limit=100)
+                manifest = run_brand_daily_report(
+                    facts=facts, brand_slug=slug, brand_name=name,
+                    monitor_date=datetime.now().strftime("%Y-%m-%d"),
+                )
+                if facts:
+                    print(f"\n  [report] {name} 品牌日报已生成: {manifest['outputs']['report']}")
+                else:
+                    print(f"\n  [report] {name} facts 库无数据，已生成空状态报告")
+
+            elif rt == "2":
+                try:
+                    days_raw = input("最近 N 天 (默认 1): ").strip()
+                except (EOFError, KeyboardInterrupt):
+                    continue
+                days = int(days_raw) if days_raw.isdigit() else 1
+                try:
+                    brand = input("品牌筛选 (可选，回车跳过): ").strip()
+                except (EOFError, KeyboardInterrupt):
+                    brand = ""
+                store = FactStore()
+                facts = store.query(days=days, brand=brand or None, limit=100)
+                if not facts:
+                    print("[launcher] 无 facts，无法生成简报")
+                    continue
+                brief = generate_brief(facts)
+                print()
+                print("=" * 60)
+                print("  每日简报")
+                print("=" * 60)
+                print(brief)
+                try:
+                    resp = input("\n写入文件？(y/N): ").strip().lower()
+                except (EOFError, KeyboardInterrupt):
+                    resp = "n"
+                if resp == "y":
+                    date = datetime.now().strftime("%Y-%m-%d")
+                    run_mode = "launcher_daily_run"
+                    brief_path = output_paths.daily_brief_md_path(date, run_mode)
+                    brief_path.write_text(brief, encoding="utf-8")
+                    print(f"\n  简报已写入: {brief_path}")
+            else:
+                print("[launcher] 无效选择")
+
+        # ── 5. 一键运行 search + report ──────────────────
+        elif choice == "5":
+            try:
+                brand = input("品牌名: ").strip()
             except (EOFError, KeyboardInterrupt):
                 break
-            days = int(days_raw) if days_raw.isdigit() else 1
-            try:
-                brand = input("品牌筛选 (可选，回车跳过): ").strip()
-            except (EOFError, KeyboardInterrupt):
-                brand = ""
-            store = FactStore()
-            if brand:
-                facts = store.query(days=days, brand=brand, limit=100)
-            else:
-                facts = store.query(days=days, limit=100)
-            if not facts:
-                print("[launcher] 无 facts，无法生成简报")
+            if not brand:
+                print("[launcher] 品牌名不能为空")
                 continue
-            brief = generate_brief(facts)
-            print()
-            print("=" * 60)
-            print("  每日简报")
-            print("=" * 60)
-            print(brief)
             try:
-                resp = input("\n写入文件？(y/N): ").strip().lower()
+                live = input("执行真实搜索？(y/N): ").strip().lower()
             except (EOFError, KeyboardInterrupt):
-                resp = "n"
-            if resp == "y":
-                try:
-                    date_raw = input("日期 (默认今天): ").strip()
-                except (EOFError, KeyboardInterrupt):
-                    date_raw = ""
-                date = date_raw if date_raw else datetime.now().strftime("%Y-%m-%d")
-                run_mode = "launcher_daily_run"
-                brief_path = output_paths.daily_brief_md_path(date, run_mode)
-                brief_path.write_text(brief, encoding="utf-8")
-                print(f"\n  简报已写入: {brief_path}")
+                live = "n"
+            from auto_launch.src import output_paths
+            slug, name = output_paths.resolve_brand(brand)
+            from auto_launch.src.operating_loop import run_day
+            date = datetime.now().strftime("%Y-%m-%d")
+            result = run_day(
+                monitor_date=date, brand=slug, brand_name=name,
+                live=(live == "y"),
+            )
+            print(f"\n[run-day] {name} | live={result['live']}")
+            print(f"  输出: {result['outputs']['run_dir']}")
 
-        # ── 5. 查看 outputs 状态 ─────────────────────────
-        elif choice == "5":
+        # ── 6. 查看 outputs 状态 ─────────────────────────
+        elif choice == "6":
             report = inspect()
             print(render_inspect(report))
 
         else:
-            print("[launcher] 无效选择，请输入 1-6")
+            print("[launcher] 无效选择，请输入 1-7")

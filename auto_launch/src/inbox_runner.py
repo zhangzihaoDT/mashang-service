@@ -3,11 +3,11 @@
 inbox_runner.py — Inbox 管线编排。
 
 流程:
-  输入 (文件/stdin/交互)
-    → inbox_parser.parse_text()
-    → inbox_filter.classify() per item
-    → fact_store.insert() for keep items
-    → summary output
+   输入 (文件/stdin/交互)
+     → inbox_parser.parse_text()
+     → inbox_filter.classify() per item
+     → fact_store.insert() for keep items (with pipeline metadata)
+     → summary output
 """
 
 import sys
@@ -18,17 +18,32 @@ from . import inbox_parser, inbox_filter
 from .fact_store import FactStore
 
 
-def run_file(file_path: str, date: str = None, write_facts: bool = True) -> dict:
+def _generate_run_id() -> str:
+    return datetime.now().strftime("%Y%m%d_%H%M%S")
+
+
+def run_file(file_path: str, date: str = None, write_facts: bool = True,
+             source_pipeline: str = "daily", run_id: str = None, run_mode: str = "") -> dict:
     """从文件读取并处理"""
     text = Path(file_path).read_text(encoding="utf-8")
-    return run_text(text, date=date, write_facts=write_facts, input_channel=f"file:{file_path}")
+    return run_text(text, date=date, write_facts=write_facts,
+                    input_channel=f"file:{file_path}",
+                    source_pipeline=source_pipeline, run_id=run_id, run_mode=run_mode)
 
 
 def run_text(raw_text: str, date: str = None, write_facts: bool = True,
-             input_channel: str = "inbox") -> dict:
-    """处理原始文本"""
+             input_channel: str = "inbox",
+             source_pipeline: str = "daily", run_id: str = None, run_mode: str = "") -> dict:
+    """处理原始文本并可选写入 facts。"""
     effective_date = date or datetime.now().strftime("%Y-%m-%d")
+    rid = run_id or _generate_run_id()
     items = inbox_parser.parse_text(raw_text, default_date=effective_date)
+
+    # Tag items with pipeline metadata
+    for item in items:
+        item["source_pipeline"] = source_pipeline
+        item["run_id"] = rid
+        item["run_mode"] = run_mode or input_channel
 
     keep_items = []
     discard_items = []
@@ -55,6 +70,7 @@ def run_text(raw_text: str, date: str = None, write_facts: bool = True,
         "kept_items": keep_items,
         "discarded_items": discard_items,
         "date": effective_date,
+        "run_id": rid,
     }
     return summary
 
@@ -94,6 +110,8 @@ def run_interactive() -> dict:
             store = FactStore()
             fact_results = []
             for ki in summary["kept_items"]:
+                ki["source_pipeline"] = "daily"
+                ki["run_id"] = summary.get("run_id", "")
                 fr = store.insert(ki)
                 fact_results.append(fr)
             summary["fact_results"] = fact_results

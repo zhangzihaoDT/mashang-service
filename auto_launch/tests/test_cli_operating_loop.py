@@ -15,7 +15,7 @@ def test_cli_run_day_help():
 
 
 def test_cli_run_day_dry_run():
-    r = subprocess.run([sys.executable, CLI, "run-day", "--date", "2026-07-09"],
+    r = subprocess.run([sys.executable, CLI, "run-day", "--brand", "智己", "--date", "2026-07-09"],
                        capture_output=True, text=True, cwd=Path(sys.path[0]))
     assert r.returncode == 0
     assert "run-day" in r.stdout
