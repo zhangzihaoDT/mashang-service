@@ -18,6 +18,14 @@ coverage.xml
 
 .DS_Store
 
+# MIIT 新车申报照片（左/右部照、后部照、选装照）
+MIIT/409-*/*/
+MIIT/**/*.jpg
+MIIT/**/*.png
+MIIT/**/*.webp
+# MIIT Playwright 临时快照
+MIIT/*.yml
+
 /.query_agent_memory.json
 /agent/.query_agent_memory.json
 
