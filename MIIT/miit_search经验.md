@@ -259,11 +259,85 @@ python3 MIIT/miit_report.py --open        # 生成后自动用浏览器打开
 
 简报格式：品牌卡片 → 能源类型分组 → 车型表格（企业名称、产品名称、产品型号），顶部统计看板展示总新车数和活跃品牌数。
 
-### 管线二：车型详情归档
+### 管线二：车型详情归档（全自动化）
 
-品牌搜索结果 → 人工选定目标品牌 → Playwright 打开详情页 → 提取参数 + 下载照片 → 归档为 `409-品牌/` 文件夹。
+品牌搜索结果 → 脚本自动抓取详情页 → 提取参数 + 下载照片 → 归档为 `409-品牌/` 文件夹。
 
-当前这一步尚未完全自动化（需手动点击车型型号获取详情页 URL），原因：每个车型详情的 UUID 无法从搜索 API 响应中直接推导，需要从页面点击触发。
+#### 2.1 数据流
+
+```
+miit_search.py 搜索结果含 detail_url
+        ↓
+miit_archive_detail.py —──→ 409-品牌/
+  ├ requests 抓取详情页 HTML      ├ {model_id}-{产品名称}.md
+  ├ 正则解析 6 个 <table>          ├ {model_id}/
+  ├ 下载 2~3 张照片                 │   ├ 左-右部照片.jpg
+  └ 生成 Markdown 存档              │   ├ 后部照片.jpg
+                                    │   └ 选装照片1.jpg
+```
+
+#### 2.2 关键改进：detail_url 自动提取
+
+之前 Pipeline 2 需要人工点击车型型号获取详情页 URL，因为搜索结果页的 API 响应返回的是 HTML，UUID 隐藏在 `<a href="...">` 中。现在的解法：在 `miit_search.py` 的 `_parse_table_html()` 中，从第一栏（标题）的 `<a href>` 中直接提取：
+
+```python
+url_m = re.search(r'href="([^"]+)"', tds[0])
+detail_url = url_m.group(1) if url_m else ""
+```
+
+搜索结果行的 `detail_url` 随 JSON 一起存入 `scan_batch_XXX.md`，供 `miit_archive_detail.py` 使用。
+
+#### 2.3 CLI 用法
+
+```bash
+# 归档单个品牌
+python3 MIIT/miit_archive_detail.py --brand 小鹏
+
+# 归档所有有搜索结果但未归档的品牌
+python3 MIIT/miit_archive_detail.py --all-missing
+
+# 预览（不实际执行）
+python3 MIIT/miit_archive_detail.py --all-missing --dry-run
+```
+
+#### 2.4 归档文件结构
+
+```
+409-品牌/
+├── {model_id}-{产品名称}.md          # 完整参数文档
+└── {model_id}/
+    ├── 左-右部照片.jpg
+    ├── 后部照片.jpg
+    └── 选装照片1.jpg
+```
+
+`.md` 文件包含：基本信息 → 尺寸参数 → 动力系统 → 底盘信息 → 车辆照片（含原始 URL 链接）。照片本身 gitignored（大文件），只提交 .md。
+
+#### 2.5 详情页解析
+
+详情页使用 `requests` 直接抓取（无需 Playwright），加 Referer 头绕过 MIIT 反爬。
+
+**表格结构**（共 5 个有效 table）：
+
+| 表格 | 内容 | 布局类型 | 解析方式 |
+|------|------|----------|----------|
+| Table 0 | 基本信息（商标/型号/企业/地址） | 交错 th/td 对 | 成对提取 |
+| Table 1 | 尺寸参数（外形/轴距/质量/轮胎/其它） | 交错 th/td 对 | 成对提取 |
+| Table 2 | 底盘信息 | 表头 + 数据行 | th→td 映射 |
+| Table 3 | 发动机参数（型号/企业/排量/功率） | 表头 + 数据行 | th→td 映射 |
+| Table 4 | 意见反馈 | 跳过 | — |
+
+**布局检测**：脚本自动判断每张 table 的布局类型——如果某行同时包含 `<th>` 和 `<td>` 则为交错型，否则为表头+数据行型。
+
+#### 2.6 卡点
+
+**卡点：照片 URL 在详情页中重复**
+
+详情页每张照片出现两次（`<a href>` 和内部的 `<img src>`）。用 `re.findall(r'查看原图\s*</a>')` 只匹配锚文本为"查看原图"的链接，天然去重。
+
+**卡点：部分车型无选装照片**
+
+特斯拉 Model Y 焕新版只有 2 张照片（无选装照片）。脚本不会报错，归档目录中该文件缺失属于正常情况。
 
 ### 管线三：批次附件下载 + 车船税目录解析（doc → JSON/MD）
 
@@ -512,6 +586,5 @@ xiaomi_reports/
 - 支持多批次对比（如 408 批 vs 409 批）
 - 命中后自动标识新增车型 vs 改款车型
 - 差异增量通知（飞书/webhook）
-- 车型详情归档自动化：从搜索结果 HTML 中提取各车型的详情页 URL，替代人工点击
 - 车船税解析的 schema 自动推断：从 header 行自动匹配字段，无需硬编码
 - 报告生成模板可配置：支持不同的参数清单模板（如商用车 vs 乘用车）
