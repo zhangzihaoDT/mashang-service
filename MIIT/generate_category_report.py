@@ -95,7 +95,7 @@ body {
 .compare-table { width: 100%; border-collapse: collapse; }
 .compare-table { width: 100%; table-layout: fixed; border-collapse: collapse; }
 .compare-table th { padding: 8px 12px; font-size: 12px; font-weight: 600; color: var(--zh-muted); background: var(--zh-group-bg); border-bottom: 1px solid var(--zh-border); text-align: left; word-break: break-all; }
-.compare-table th:first-child { padding-left: 20px; width: 100px; }
+.compare-table th:first-child { padding-left: 20px; width: 180px; }
 .compare-table td { padding: 8px 12px; font-size: 13px; border-bottom: 1px solid #f0ede8; vertical-align: top; word-break: break-all; }
 .compare-table td:first-child { padding-left: 20px; font-weight: 500; color: var(--zh-muted); white-space: nowrap; }
 .compare-table tr.diff td { background: var(--diff-bg); }

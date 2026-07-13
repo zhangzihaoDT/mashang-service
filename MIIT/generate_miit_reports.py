@@ -79,7 +79,7 @@ body {
 .inline-params { padding: 14px 24px; font-size: 14px; color: var(--zh-text); }
 .compare-table { width: 100%; border-collapse: collapse; }
 .compare-table th { padding: 10px 18px; font-size: 12px; font-weight: 600; color: var(--zh-muted); background: var(--zh-group-bg); border-bottom: 1px solid var(--zh-border); text-align: left; white-space: nowrap; }
-.compare-table th:first-child { padding-left: 24px; width: 140px; }
+.compare-table th:first-child { padding-left: 20px; width: 180px; }
 .compare-table td { padding: 10px 18px; font-size: 14px; border-bottom: 1px solid #f0ede8; vertical-align: top; }
 .compare-table td:first-child { padding-left: 24px; font-weight: 500; color: var(--zh-muted); white-space: nowrap; }
 .compare-table tr.diff td { background: var(--diff-bg); }
