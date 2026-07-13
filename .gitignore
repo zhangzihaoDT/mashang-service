@@ -26,6 +26,12 @@ MIIT/**/*.webp
 # MIIT Playwright 临时快照
 MIIT/*.yml
 
+# MIIT 生成产物 — 简报/扫描/报告目录，不提交
+MIIT/report_batch_*.html
+MIIT/scan_batch_*.md
+MIIT/*_reports/
+MIIT/工信部新车-history/
+
 /.query_agent_memory.json
 /agent/.query_agent_memory.json
 

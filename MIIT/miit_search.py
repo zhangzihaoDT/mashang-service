@@ -2,7 +2,7 @@
 """
 MIIT 公告品牌搜索工具
 
-从 priority_brand_watchlist.yaml 读取品牌列表，
+从 brand_watchlist.yaml 读取品牌列表，
 在指定批次的 MIIT 新产品公示中搜索各品牌的新车申报信息。
 
 用法:
@@ -36,12 +36,26 @@ BASE_PARAMS = {
 
 # ── 路径 ────────────────────────────────────────────────────────────
 HERE = Path(__file__).parent
-WATCHLIST_PATH = HERE.parent / "auto_launch" / "configs" / "priority_brand_watchlist.yaml"
+WATCHLIST_PATH = HERE / "brand_watchlist.yaml"
 
 
 def load_watchlist():
+    """Load and flatten MIIT/brand_watchlist.yaml into brand list format.
+
+    Original format is category-grouped:
+       一线新能源:
+         - 小米
+         - 蔚来
+
+    Returns same structure as old priority_brand_watchlist.yaml for compatibility.
+    """
     with open(WATCHLIST_PATH, "r", encoding="utf-8") as f:
-        return yaml.safe_load(f)
+        data = yaml.safe_load(f)
+    brands = []
+    for category, names in data.items():
+        for name in names:
+            brands.append({"catalog": name, "keywords": [name]})
+    return {"brands": brands, "watchlist_name": "MIIT 公告关注品牌清单"}
 
 
 HEADERS = {
@@ -52,7 +66,24 @@ HEADERS = {
                "xcpgs409dwdwe233/index.html",
     "X-Requested-With": "XMLHttpRequest",
     "Accept": "*/*",
+    "sec-ch-ua": '"Not;A=Brand";v="8", "Chromium";v="150", "Google Chrome";v="150"',
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": '"macOS"',
 }
+
+# Shared session for cookie persistence
+SESSION = requests.Session()
+SESSION.headers.update(HEADERS)
+
+# Warm up: visit the page once to get past kong gateway anti-bot checks
+try:
+    SESSION.get(
+        "https://www.miit.gov.cn/datainfo/dljdclscqyjcpgg/"
+        "xcpgs409dwdwe233/index.html",
+        timeout=15,
+    )
+except Exception:
+    pass  # non-fatal; the page visit is just for cookie priming
 
 
 def search_batch(batch: str, cpsb: str = "", qymc: str = "") -> dict:
@@ -76,7 +107,7 @@ def search_batch(batch: str, cpsb: str = "", qymc: str = "") -> dict:
     }
     params = {**BASE_PARAMS, "paramJson": json.dumps(param_json, ensure_ascii=False, separators=(",", ":"))}
 
-    resp = requests.get(MIIT_API, params=params, headers=HEADERS, timeout=30)
+    resp = SESSION.get(MIIT_API, params=params, timeout=30)
     resp.raise_for_status()
     data = resp.json()
 
@@ -169,7 +200,7 @@ def search_brand_in_batch(brand_entry: dict, batch: str) -> dict:
                 results.setdefault("errors", []).append(
                     f"{label}={term}: {e}"
                 )
-        time.sleep(0.5)
+        time.sleep(1.0)
 
     # 去重 (同一型号只保留一条)
     seen = set()

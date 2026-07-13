@@ -24,8 +24,8 @@ test:
 ## CI 门禁（CI-safe suites + 测试）
 ci:
 	$(PYTHON) mashang_workspace/eval/run_eval.py --suite ci --format json --output outputs/tables/unified_eval_result.json
-	pytest mashang_workspace/tests/test_root_cleanup.py \
-		mashang_workspace/tests/test_result_contract.py \
+	$(PYTHON) -m pytest mashang_workspace/tests/test_root_cleanup.py \
+		mashang_workspace/tests/scripts/test_result_contract.py \
 		mashang_workspace/tests/eval/test_context_parser.py \
 		mashang_workspace/tests/eval/test_followup_runner.py \
 		mashang_workspace/tests/eval/test_numeric_eval.py \
