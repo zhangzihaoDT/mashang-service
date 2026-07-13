@@ -30,6 +30,7 @@ MIIT/*.yml
 MIIT/report_batch_*.html
 MIIT/scan_batch_*.md
 MIIT/*_reports/
+MIIT/miit_category_reports/
 MIIT/工信部新车-history/
 
 /.query_agent_memory.json

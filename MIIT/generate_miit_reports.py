@@ -111,10 +111,12 @@ def read_md(md_path: Path) -> dict:
         (r'排量\(ml\)\s*\|\s*(.+?)\s*\|', "排量_ml"),
         (r'发动机最大净功率\(kW\)\s*\|\s*(.+?)\s*\|', "发动机最大净功率_kW"),
         (r'驱动电机峰值功率\(kW\)\s*\|\s*(.+?)\s*\|', "驱动电机峰值功率_kW"),
+        (r'功率\(kw\)\s*\|\s*(.+?)\s*\|', "功率_kw"),
         (r'储能装置种类\s*\|\s*(.+?)\s*\|', "储能装置种类"),
         (r'电池单体/总成企业\s*\|\s*(.+?)\s*\|', "电池单体_总成企业"),
         (r'新能源类型\s*\|\s*(.+?)\s*\|', "新能源类型"),
         (r'额定载客\(人\)\s*\|\s*(.+?)\s*\|', "额定载客_人"),
+        (r'额定载客（含驾驶员）（座位数）\s*\|\s*(.+?)\s*\|', "额定载客_人"),
         (r'WLTC燃料消耗量\s*\|\s*(.+?)\s*\|', "WLTC燃料消耗量"),
     ]:
         m = re.search(pattern, text)
@@ -174,14 +176,14 @@ def extract_all_params(md_data: dict, model_id: str, tax_index: dict) -> Ordered
     tax_rec = tax_index.get(model_id, {})
     p = OrderedDict()
 
-    dim_raw = md_data.get("外形尺寸(mm)", "")
+    dim_raw = md_data.get("外形尺寸(mm)", "") or md_data.get("外形尺寸", "")
     if dim_raw:
         dims = _parse_dims(dim_raw)
         for label in ["长", "宽", "高"]:
             v = dims.get(label, "")
             if v:
                 p[f"{label}(mm)"] = v
-    wb = md_data.get("轴距(mm)", "")
+    wb = md_data.get("轴距(mm)", "") or md_data.get("轴距", "")
     if wb:
         m = re.search(r'\d+', wb)
         if m:
@@ -190,29 +192,48 @@ def extract_all_params(md_data: dict, model_id: str, tax_index: dict) -> Ordered
     energy = md_data.get("新能源类型", "")
     if energy:
         p["申报动力形式"] = energy
+    elif "纯电动" in md_data.get("燃料种类", ""):
+        p["申报动力形式"] = "纯电动"
     elif "增程" in md_data.get("产品名称", ""):
         p["申报动力形式"] = "插电式增程混合动力"
+    elif "混合" in md_data.get("燃料种类", ""):
+        p["申报动力形式"] = "插电式混合动力"
 
-    parts = []
-    for field, suffix in [("发动机型号", ""), ("排量_ml", "ml"), ("发动机最大净功率_kW", "kW")]:
-        v = md_data.get(field, "")
-        if v:
-            parts.append(f"{v}{suffix}" if suffix else v)
-    eng_co = md_data.get("发动机企业", "")
-    if eng_co and parts:
-        parts.append(eng_co)
-    if parts:
-        p["增程器"] = " / ".join(parts)
+    if p.get("申报动力形式", "") != "纯电动":
+        parts = []
+        for field, suffix in [("发动机型号", ""), ("排量_ml", "ml"), ("发动机最大净功率_kW", "kW")]:
+            v = md_data.get(field, "")
+            if v and v != "-":
+                parts.append(f"{v}{suffix}" if suffix else v)
+        eng_co = md_data.get("发动机企业", "")
+        if eng_co and parts:
+            parts.append(eng_co)
+        if parts:
+            p["增程器"] = " / ".join(parts)
 
-    motor = md_data.get("驱动电机峰值功率_kW", "")
+    motor = md_data.get("驱动电机峰值功率_kW", "") or md_data.get("功率_kw", "")
     if motor:
         p["驱动电机"] = motor if not re.match(r'^[\d/\s.]+$', motor) else f"{motor}kW"
 
     batt_type = md_data.get("储能装置种类", "")
+    if not batt_type:
+        other = md_data.get("其它", "")
+        if other:
+            m = re.search(r'储能装置种类[：:]([^，,;。\d]+)', other)
+            if m:
+                batt_type = m.group(1).strip()
     if batt_type:
         p["电池类型"] = batt_type
 
     supplier = md_data.get("电池单体_总成企业", "")
+    if not supplier:
+        other = md_data.get("其它", "")
+        if other:
+            m = re.search(r'(?:储能装置)?单体生产企业[：:]([^，,;。\d]+)', other)
+            if not m:
+                m = re.search(r'(?:储能装置)?总成生产企业[：:]([^，,;。\d]+)', other)
+            if m:
+                supplier = m.group(1).strip()
     if supplier:
         p["电芯及电池总成"] = supplier
 
@@ -225,10 +246,18 @@ def extract_all_params(md_data: dict, model_id: str, tax_index: dict) -> Ordered
         p["纯电续航（WLTC）"] = f"{wltc}km"
 
     passengers = md_data.get("额定载客_人", "")
+    if not passengers:
+        for key in md_data:
+            if "额定载客" in key or "座位" in key:
+                v = md_data[key]
+                m = re.search(r'\d+', v)
+                if m:
+                    passengers = m.group()
+                    break
     if passengers:
         p["座位数"] = passengers
 
-    curb = tax_rec.get("整车整备质量_kg", "") or md_data.get("整备质量(kg)", "")
+    curb = tax_rec.get("整车整备质量_kg", "") or md_data.get("整备质量(kg)", "") or md_data.get("整备质量", "")
     if curb:
         p["整备质量"] = f"{curb}kg"
 
@@ -237,24 +266,58 @@ def extract_all_params(md_data: dict, model_id: str, tax_index: dict) -> Ordered
 
 # ── Grouping ─────────────────────────────────────────────────────
 
+def _model_base_id(mid: str) -> str:
+    """Strip trailing variant suffix (BEV/PHEV/HEV/REEV + digits)."""
+    base = re.sub(r'(BEV|PHEV|HEV|REEV)\w*$', '', mid)
+    base = re.sub(r'\d+$', '', base)
+    return base
+
+
 def group_models(
     model_infos: list[dict], tax_index: dict
 ) -> list[dict]:
-    """Group model variants by 通用名称 (first-level), then sub-name."""
-    groups: dict[str, list[dict]] = {}
+    """Group model variants by 通用名称, with smart fallback.
 
+    1. Use 通用名称 from 车船税 (normalized: take first name if comma-separated)
+    2. If missing, compute a model base ID (strip variant suffix) and check
+       if any model sharing that base has a 通用名称 — if so, share it.
+    3. Final fallback: model base ID.
+    """
+    # First pass: determine raw group key
     for info in model_infos:
         model_id = info["model_id"]
         tax_rec = tax_index.get(model_id, {})
-        common_name = tax_rec.get("通用名称", "")
-        # Fallback: use first 4 chars of model ID prefix
-        group_key = common_name or model_id[:7]
-        groups.setdefault(group_key, []).append(info)
+        raw = tax_rec.get("通用名称", "")
+        common_name = raw.split(",")[0].strip() if raw else ""
+        info["_group_key"] = common_name or ""
+        info["_base_id"] = _model_base_id(model_id)
+
+    # Second pass: build base_id → 通用名称 map; share across variants
+    base_to_name: dict[str, str] = {}
+    for info in model_infos:
+        if info["_group_key"]:
+            base = info["_base_id"]
+            if base not in base_to_name:
+                base_to_name[base] = info["_group_key"]
+
+    for info in model_infos:
+        if not info["_group_key"]:
+            base = info["_base_id"]
+            if base in base_to_name:
+                info["_group_key"] = base_to_name[base]
+
+    # Third pass: final fallback to base_id
+    for info in model_infos:
+        if not info["_group_key"]:
+            info["_group_key"] = info["_base_id"]
+
+    # Group
+    groups: dict[str, list[dict]] = {}
+    for info in model_infos:
+        groups.setdefault(info["_group_key"], []).append(info)
 
     result = []
     for group_key, members in groups.items():
-        # Sub-group within group: detect product_name variants
-        pnames = set(m.get("product_name", "") for m in members)
         result.append({
             "group_name": group_key,
             "members": sorted(members, key=lambda x: x["model_id"]),

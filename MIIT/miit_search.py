@@ -148,11 +148,15 @@ def _parse_table_html(html: str) -> list[dict]:
             def extract(td):
                 text = re.sub(r'<[^>]+>', ' ', td)
                 return re.sub(r'\s+', ' ', text).strip()
+            # Extract detail URL from first column's anchor
+            url_m = re.search(r'href=\"([^\"]+)\"', tds[0])
+            detail_url = url_m.group(1) if url_m else ""
             rows.append({
                 "qymc": extract(tds[2]),
                 "cpsb": extract(tds[3]),
                 "cpmc": extract(tds[4]),
                 "cpxh": extract(tds[5]),
+                "detail_url": detail_url,
             })
 
     # 跳过表头行

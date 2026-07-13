@@ -15,6 +15,7 @@ import argparse
 import json
 import re
 import sys
+import time
 from pathlib import Path
 
 import requests
@@ -341,6 +342,8 @@ def main():
         print(f"\n=== {b['catalog']} ({b['total_count']}款) {mode}===")
         for model in b["all_rows"]:
             archive_model(model, brand_dir, dry_run=args.dry_run)
+            if not args.dry_run:
+                time.sleep(1)
 
 
 if __name__ == "__main__":
