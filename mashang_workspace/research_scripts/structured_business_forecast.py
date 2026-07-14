@@ -567,6 +567,121 @@ def _regime_bootstrap_forecast(
     }
 
 
+def _calendar_regime_posterior_correction(
+    month_actual_df: pd.DataFrame,
+    regime_reference: dict,
+    regime_inputs: dict,
+    remaining_wkd: int,
+    remaining_wke: int,
+    prior_strength: float | None = None,
+    posterior_weight: float | None = None,
+) -> dict:
+    """Gamma-Poisson 贝叶斯后验校正：用当月实际数据更新 regime prior。
+
+    对工作日/周末分别做 conjugate update:
+      Prior:  lock_orders ~ Gamma(α=prior_mean×eff_n, β=eff_n)
+      Likelihood: 当月观测 ~ Poisson(λ)
+      Posterior:  Gamma(α+S, β+n)  →  posterior_mean = (α+S)/(β+n)
+
+    有效先验样本量 (effective_n) 优先级:
+      1. prior_strength（直接指定等效观测日数）
+      2. posterior_weight × historical_n（系数缩放）
+      3. 默认: min(historical_n, 30)
+
+    Parameters
+    ----------
+    prior_strength : float, optional
+        直接指定等效先验观测日数。effective_n = min(historical_n, prior_strength)
+    posterior_weight : float, optional
+        历史 prior 权重系数 (0, 1]。
+        effective_n = historical_n × posterior_weight
+        优先级低于 prior_strength。
+
+    Returns
+    -------
+    dict with prior/likelihood/posterior/correction details.
+    """
+    prior_wkd_mean = regime_reference.get("weekday", {}).get("mode",
+                      regime_reference.get("weekday", {}).get("p50", 185))
+    prior_wke_mean = regime_reference.get("weekend", {}).get("mode",
+                      regime_reference.get("weekend", {}).get("p50", 207))
+    hist_wkd_n = float(regime_inputs.get("weekday", {}).get("lock_rate", {}).get("n", 156))
+    hist_wke_n = float(regime_inputs.get("weekend", {}).get("lock_rate", {}).get("n", 63))
+
+    # Determine effective prior n
+    if prior_strength is not None and prior_strength > 0:
+        eff_wkd_n = min(hist_wkd_n, prior_strength)
+        eff_wke_n = min(hist_wke_n, prior_strength)
+        source = f"prior_strength={prior_strength}"
+    elif posterior_weight is not None and 0 < posterior_weight <= 1:
+        eff_wkd_n = hist_wkd_n * posterior_weight
+        eff_wke_n = hist_wke_n * posterior_weight
+        source = f"posterior_weight={posterior_weight}"
+    else:
+        default_n = 30.0
+        eff_wkd_n = min(hist_wkd_n, default_n)
+        eff_wke_n = min(hist_wke_n, default_n)
+        source = f"default (min historical, {default_n})"
+
+    alpha_wkd = prior_wkd_mean * eff_wkd_n
+    beta_wkd = eff_wkd_n
+    alpha_wke = prior_wke_mean * eff_wke_n
+    beta_wke = eff_wke_n
+
+    # Observed month-to-date
+    if month_actual_df is not None and not month_actual_df.empty:
+        obs = month_actual_df[["lock_orders"]].copy()
+        obs["dow"] = pd.to_datetime(obs.index).dayofweek
+        obs_wkd = obs[obs["dow"] < 5]
+        obs_wke = obs[obs["dow"] >= 5]
+        S_wkd = float(obs_wkd["lock_orders"].sum()) if len(obs_wkd) > 0 else 0.0
+        n_wkd = len(obs_wkd)
+        S_wke = float(obs_wke["lock_orders"].sum()) if len(obs_wke) > 0 else 0.0
+        n_wke = len(obs_wke)
+    else:
+        S_wkd = n_wkd = S_wke = n_wke = 0
+
+    # Posterior
+    post_alpha_wkd = alpha_wkd + S_wkd
+    post_beta_wkd = beta_wkd + n_wkd
+    post_alpha_wke = alpha_wke + S_wke
+    post_beta_wke = beta_wke + n_wke
+    post_wkd_mean = post_alpha_wkd / post_beta_wkd if post_beta_wkd > 0 else prior_wkd_mean
+    post_wke_mean = post_alpha_wke / post_beta_wke if post_beta_wke > 0 else prior_wke_mean
+
+    wk_factor = post_wkd_mean / prior_wkd_mean if prior_wkd_mean > 0 else 1.0
+    we_factor = post_wke_mean / prior_wke_mean if prior_wke_mean > 0 else 1.0
+
+    remaining_raw = remaining_wkd * prior_wkd_mean + remaining_wke * prior_wke_mean
+    remaining_post = remaining_wkd * post_wkd_mean + remaining_wke * post_wke_mean
+
+    return {
+        "enabled": 1,
+        "method": "gamma_poisson_calendar_regime",
+        "prior_strength_source": source,
+        "prior": {
+            "weekday": {"mean": round(prior_wkd_mean, 2), "raw_n": round(hist_wkd_n, 1), "effective_n": round(eff_wkd_n, 1)},
+            "weekend": {"mean": round(prior_wke_mean, 2), "raw_n": round(hist_wke_n, 1), "effective_n": round(eff_wke_n, 1)},
+        },
+        "likelihood": {
+            "weekday": {"sum": round(S_wkd, 1), "n": n_wkd, "observed_mean": round(S_wkd / n_wkd, 1) if n_wkd > 0 else None},
+            "weekend": {"sum": round(S_wke, 1), "n": n_wke, "observed_mean": round(S_wke / n_wke, 1) if n_wke > 0 else None},
+        },
+        "posterior": {
+            "weekday": {"mean": round(post_wkd_mean, 2), "effective_n": round(post_beta_wkd, 1)},
+            "weekend": {"mean": round(post_wke_mean, 2), "effective_n": round(post_beta_wke, 1)},
+        },
+        "correction_factor": {
+            "weekday": round(wk_factor, 4),
+            "weekend": round(we_factor, 4),
+        },
+        "remaining_prior": round(remaining_raw, 2),
+        "remaining_posterior": round(remaining_post, 2),
+        "adjustment_vs_baseline": round(remaining_post - remaining_raw, 2),
+        "adjustment_rate": round((remaining_post - remaining_raw) / remaining_raw, 4) if remaining_raw > 0 else 0.0,
+    }
+
+
 def _parse_target_month(value: str) -> tuple[pd.Timestamp, pd.Timestamp]:
     month_start = pd.to_datetime(f"{value}-01", errors="coerce")
     if pd.isna(month_start):
@@ -586,6 +701,12 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--lookback-history", type=int, default=365)
     parser.add_argument("--forecast-days", type=int, default=28)
     parser.add_argument("--bias-eval-days", type=int, default=365)
+    parser.add_argument("--prior-strength", type=float, default=None,
+                        help="有效先验样本量（等效历史观测日）。默认=min(historical_n, 30)。"
+                             "值越小当月数据影响力越大。")
+    parser.add_argument("--posterior-weight", type=float, default=None,
+                        help="历史 prior 权重系数 (0,1]。与 prior-strength 互斥，"
+                             "优先级低于 prior-strength。effective_n = historical_n × weight")
     parser.add_argument("--output", default=None)
     return parser.parse_args()
 
@@ -837,6 +958,35 @@ def main() -> None:
             remaining_bc_p50 = remaining_p50 * month_bias_factor
             remaining_bc_p90 = remaining_p90 * month_bias_factor
             remaining_bc_mode = remaining_mode * month_bias_factor
+
+            # Calendar-regime posterior correction: 用当月实际观测更新 regime prior
+            if not month_actual_df.empty and len(future_dates_month) > 0:
+                fdow = future_dates_month.dayofweek
+                rem_wkd = int((fdow < 5).sum())
+                rem_wke = int((fdow >= 5).sum())
+                posterior = _calendar_regime_posterior_correction(
+                    month_actual_df=month_actual_df,
+                    regime_reference=month_regime_reference,
+                    regime_inputs=month_calibration.get("regime_inputs", {}),
+                    remaining_wkd=rem_wkd,
+                    remaining_wke=rem_wke,
+                    prior_strength=args.prior_strength,
+                    posterior_weight=args.posterior_weight,
+                )
+                # Blend: weighted average of bias-corrected baseline and posterior
+                post_mode = posterior["remaining_posterior"]
+                bl_mode = remaining_bc_mode
+                blend_mode = post_mode  # full posterior as correction layer
+                blend_p10 = blend_mode * (remaining_bc_p10 / remaining_bc_mode) if remaining_bc_mode > 0 else post_mode
+                blend_p50 = blend_mode * (remaining_bc_p50 / remaining_bc_mode) if remaining_bc_mode > 0 else post_mode
+                blend_p90 = blend_mode * (remaining_bc_p90 / remaining_bc_mode) if remaining_bc_mode > 0 else post_mode
+                calendar_correction = posterior
+            else:
+                calendar_correction = {"enabled": 0}
+                blend_mode = remaining_bc_mode
+                blend_p10 = remaining_bc_p10
+                blend_p50 = remaining_bc_p50
+                blend_p90 = remaining_bc_p90
         else:
             month_calibration = {
                 "enabled": 0,
@@ -857,6 +1007,7 @@ def main() -> None:
             }
             remaining_p10 = remaining_p50 = remaining_p90 = remaining_mode = 0.0
             remaining_bc_p10 = remaining_bc_p50 = remaining_bc_p90 = remaining_bc_mode = 0.0
+            calendar_correction = {"enabled": 0}
 
         month_totals = {
             "actual_lock_orders_to_date": round(float(actual_sum), 2),
@@ -877,15 +1028,38 @@ def main() -> None:
             "month_lock_orders_bias_corrected_p50": round(float(actual_sum + remaining_bc_p50), 2),
             "month_lock_orders_bias_corrected_p90": round(float(actual_sum + remaining_bc_p90), 2),
             "regime_daily_lock_orders_reference": month_regime_reference,
+            "calendar_regime_posterior_correction": calendar_correction,
         }
+        if calendar_correction.get("enabled"):
+            month_totals["remaining_lock_orders_calendar_corrected_mode"] = round(float(blend_mode), 2)
+            month_totals["remaining_lock_orders_calendar_corrected_p10"] = round(float(blend_p10), 2)
+            month_totals["remaining_lock_orders_calendar_corrected_p50"] = round(float(blend_p50), 2)
+            month_totals["remaining_lock_orders_calendar_corrected_p90"] = round(float(blend_p90), 2)
+            month_totals["month_lock_orders_calendar_corrected_mode"] = round(float(actual_sum + blend_mode), 2)
+            month_totals["month_lock_orders_calendar_corrected_p10"] = round(float(actual_sum + blend_p10), 2)
+            month_totals["month_lock_orders_calendar_corrected_p50"] = round(float(actual_sum + blend_p50), 2)
+            month_totals["month_lock_orders_calendar_corrected_p90"] = round(float(actual_sum + blend_p90), 2)
 
         month_label = target_month_for_summary.split("-")[1].lstrip("0")
-        decision_summary = (
+        baseline_summary = (
             f"截至 {pd.Timestamp(actual_end).month}/{pd.Timestamp(actual_end).day} 已锁单 {float(actual_sum):g}；"
             f"预计 {month_label} 月整月（bias 校正后）最可能值约 {float(month_totals['month_lock_orders_bias_corrected_mode']):.2f}，"
             f"P50 约 {float(month_totals['month_lock_orders_bias_corrected_p50']):.2f}，"
             f"区间 [{float(month_totals['month_lock_orders_bias_corrected_p10']):.2f}, {float(month_totals['month_lock_orders_bias_corrected_p90']):.2f}]。"
         )
+        if calendar_correction.get("enabled"):
+            corr = month_totals["month_lock_orders_calendar_corrected_mode"]
+            corr_p50 = month_totals["month_lock_orders_calendar_corrected_p50"]
+            corr_p10 = month_totals["month_lock_orders_calendar_corrected_p10"]
+            corr_p90 = month_totals["month_lock_orders_calendar_corrected_p90"]
+            psrc = calendar_correction.get("prior_strength_source", "")
+            decision_summary = (
+                f"{baseline_summary} "
+                f"经 calendar-regime 后验校正({psrc})后最可能值约 {corr:.2f}，"
+                f"P50 约 {corr_p50:.2f}，区间 [{corr_p10:.2f}, {corr_p90:.2f}]。"
+            )
+        else:
+            decision_summary = baseline_summary
 
         result["scenario_forecast"]["month_forecast"] = {
             "target_month": target_month_for_summary,

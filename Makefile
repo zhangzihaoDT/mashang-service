@@ -67,6 +67,25 @@ atp-demo:
 backtest-demo:
 	$(PYTHON) mashang_workspace/research_scripts/lock_predict_backtest.py --format json
 
+## ─── Forecast ────────────────────────────────────────────────────
+
+## 锁单月度预估（结构化预测 + Calendar-Regime 后验校正）
+## 用法: make lock-forecast AS_OF=2026-07-13 TARGET_MONTH=2026-07 PRIOR_STRENGTH=30
+lock-forecast:
+	$(PYTHON) mashang_workspace/research_scripts/structured_business_forecast.py \
+		--as-of $(or $(AS_OF),$(shell date +%Y-%m-%d)) \
+		--target-month $(or $(TARGET_MONTH),$(shell date +%Y-%m)) \
+		$(if $(PRIOR_STRENGTH),--prior-strength $(PRIOR_STRENGTH))
+
+## 开票月度预估（条件概率模型，与锁单预测共享 prior-strength）
+## 用法: make invoice-forecast AS_OF=2026-07-13 TARGET_MONTH=2026-07 LOCK_REGIME=mode PRIOR_STRENGTH=30
+invoice-forecast:
+	$(PYTHON) mashang_workspace/research_scripts/invoice_monthly_forecast.py \
+		--as-of $(or $(AS_OF),$(shell date +%Y-%m-%d)) \
+		--target-month $(or $(TARGET_MONTH),$(shell date +%Y-%m)) \
+		$(if $(LOCK_REGIME),--lock-regime $(LOCK_REGIME)) \
+		$(if $(PRIOR_STRENGTH),--prior-strength $(PRIOR_STRENGTH))
+
 ## MIIT 新车公告批次监控 (V0.2)
 ## 发现最新公告
 miit-discover-latest-batch:
@@ -272,6 +291,10 @@ help:
 	@echo "make reference-eval  Reference Eval"
 	@echo "make atp-demo        ATP 月报 Demo"
 	@echo "make backtest-demo   锁单预测回测 Demo"
+	@echo ""
+	@echo "=== Forecast ==="
+	@echo "make lock-forecast         锁单月度预估（结构化预测）"
+	@echo "make invoice-forecast      开票月度预估（条件概率模型）"
 	@echo "=== Auto Launch (独立 service: auto_launch/) ==="
 	@echo "make auto-launch-owned-brand-daily         本品品牌每日营销监控"
 	@echo "make auto-launch-owned-brand-daily-dry-run 本品品牌每日营销监控（dry-run）"

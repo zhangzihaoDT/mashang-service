@@ -337,6 +337,8 @@ mashang-service/
 | 预测锁单 | `python mashang_workspace/research_scripts/cohort_forecast.py` | research |
 | 回测 | `python mashang_workspace/research_scripts/lock_predict_backtest.py` | research |
 | 同比分析 | `python mashang_workspace/research_scripts/quick_lock_ratio.py` | research |
+| 锁单月度预估 | `make lock-forecast` 或 `python mashang_workspace/research_scripts/structured_business_forecast.py --as-of YYYY-MM-DD --target-month YYYY-MM [--prior-strength N]` | research |
+| 开票月度预估 | `make invoice-forecast` 或 `python mashang_workspace/research_scripts/invoice_monthly_forecast.py --as-of YYYY-MM-DD --target-month YYYY-MM --lock-regime mode` | research |
 | Auto Launch 搜索 | `python -m auto_launch.cli search --request "看看极氪最近 7 天都有什么动作"` | service |
 | Auto Launch Daily 摄入 | `python -m auto_launch.cli daily --input <file>` | service |
 | Auto Launch 品牌日报 | `python -m auto_launch.cli report --type brand-daily --brand 智己` | service |
