@@ -12,6 +12,8 @@
 其中：
   r7 = sum(lock_7) / sum(lock_30)  — 历史完全成熟cohort中7日锁单占30日锁单比例
   r0 = sum(lock0) / sum(lock_30)   — 历史完全成熟cohort中当日锁单占30日锁单比例
+
+基准计算限定近 24 个月内的成熟 cohort，避免早期高转化率数据长期拉高基准。
 """
 
 import pandas as pd
@@ -83,7 +85,8 @@ def run_mature_lock_prediction_operator(
     work["_age"] = (snapshot_date - work["_date"]).dt.days
 
     # ── 1. 从完全成熟 cohort (age >= 30) 计算历史比率 ──
-    mature = work[work["_age"] >= 30].copy()
+    window_start = snapshot_date - pd.DateOffset(months=24)
+    mature = work[(work["_age"] >= 30) & (work["_date"] >= window_start)].copy()
     if mature.empty:
         return {
             "type": "mature_lock_prediction",
