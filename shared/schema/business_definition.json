@@ -34,6 +34,10 @@
       "start": "2026-03-26",
       "end": "2026-04-16",
       "finish": "2026-05-31"
+    },
+    "LS9Hyper": {
+      "end": "2026-07-16",
+      "finish": "2026-07-31"
     }
   },
   "battery_capacity_logic": {

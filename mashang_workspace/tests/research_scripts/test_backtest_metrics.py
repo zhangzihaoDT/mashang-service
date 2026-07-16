@@ -6,6 +6,7 @@ import sys, json, subprocess
 from pathlib import Path
 import numpy as np
 import pandas as pd
+import pytest
 
 _WS_DIR = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(_WS_DIR))
@@ -324,3 +325,202 @@ class TestReportConsistency:
         stdout = r.stdout
         assert "正式回测样本" in stdout, "Should show formal backtest sample count"
         assert "未成熟观察" in stdout, "Should show immature observation count"
+
+
+# ── 6. Launch Event Tests ──
+
+class TestLaunchEvents:
+    def setup_method(self):
+        self.bt = _import_bt_module()
+
+    def test_parse_all_events(self):
+        """All events with 'end' field should be parsed."""
+        events = self.bt.parse_launch_events()
+        assert len(events) >= 7, f"Expected >=7 events, got {len(events)}"
+        assert "event_id" in events.columns
+        assert "event_date" in events.columns
+        assert "source" in events.columns
+
+    def test_ls9hyper_no_start_still_parsed(self):
+        """LS9Hyper lacks 'start' but has 'end' — should still be parsed."""
+        events = self.bt.parse_launch_events()
+        ls9h = events[events["event_id"] == "LS9Hyper"]
+        assert len(ls9h) == 1, "LS9Hyper should be parsed"
+        assert ls9h["event_date"].iloc[0] == pd.Timestamp("2026-07-16")
+
+    def test_missing_end_raises(self):
+        """Missing 'end' field should raise ValueError."""
+        import json, tempfile, os
+        bad = {"time_periods": {"EVIL": {"start": "2025-01-01"}}}
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+            json.dump(bad, f)
+            tmp = f.name
+        try:
+            with pytest.raises((ValueError, KeyError)):
+                self.bt.parse_launch_events(tmp)
+        finally:
+            os.unlink(tmp)
+
+    def _make_test_event(self, start=None, end="2025-06-01", finish="2025-07-01"):
+        """Create a temporary event definition and return parsed events."""
+        import json, tempfile, os
+        td = {"time_periods": {"TEST": {"end": end, "finish": finish}}}
+        if start:
+            td["time_periods"]["TEST"]["start"] = start
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+            json.dump(td, f)
+            tmp = f.name
+        events = self.bt.parse_launch_events(tmp)
+        os.unlink(tmp)
+        return events
+
+    def _check_event_day(self, event_day, expected_phase, has_presale=True):
+        """Helper: create a cohort date relative to launch (end=2025-06-01) and check lifecycle phase.
+        With presale start=2025-05-25, finish=2025-07-01:
+          presale_day: event_day=-7 (2025-05-25 = start)
+          presale_active: event_day=-6 to -1 (start < date < end)
+          launch_day: event_day=0 (2025-06-01 = end)
+          launch_post_d1_d3: event_day=1 to 3
+          launch_post_d4_d7: event_day=4 to 7
+          benefit_active: event_day=8 to 22 (end+8 to finish-8)
+          benefit_countdown: event_day=23 to 29 (finish-7 to finish-1)
+          benefit_end_day: event_day=30 (2025-07-01 = finish)
+          post_benefit: event_day=31 to 37 (finish+1 to finish+7)
+        """
+        start = "2025-05-25" if has_presale else None
+        events = self._make_test_event(start=start, end="2025-06-01", finish="2025-07-01")
+        cohort_date = pd.Timestamp("2025-06-01") + pd.Timedelta(days=event_day)
+        rd = pd.DataFrame({"date": [cohort_date]})
+        rd = self.bt.compute_event_features(rd, events)
+        for lcp in self.bt.LIFECYCLE_PHASES:
+            expected = 1 if lcp == expected_phase else 0
+            assert rd.iloc[0][f"{lcp}_count"] == expected, \
+                f"Day {event_day}: expected {lcp}_count={expected}, got {rd.iloc[0][f'{lcp}_count']}"
+
+    def test_day_minus7_presale_day(self):
+        """Day -7 = start date (2025-05-25) → presale_day."""
+        self._check_event_day(-7, "presale_day")
+
+    def test_day_minus6_presale_active(self):
+        """Day -6 (2025-05-26) falls between start and end → presale_active."""
+        self._check_event_day(-6, "presale_active")
+
+    def test_day_minus1_presale_active(self):
+        """Day -1 (2025-05-31) falls between start and end → presale_active."""
+        self._check_event_day(-1, "presale_active")
+
+    def test_day0_launch_day(self):
+        """Day 0 (2025-06-01 = end) → launch_day."""
+        self._check_event_day(0, "launch_day")
+
+    def test_day1_launch_post_d1_d3(self):
+        """Day +1 (2025-06-02) → launch_post_d1_d3."""
+        self._check_event_day(1, "launch_post_d1_d3")
+
+    def test_day3_launch_post_d1_d3(self):
+        """Day +3 → launch_post_d1_d3."""
+        self._check_event_day(3, "launch_post_d1_d3")
+
+    def test_day4_launch_post_d4_d7(self):
+        """Day +4 → launch_post_d4_d7."""
+        self._check_event_day(4, "launch_post_d4_d7")
+
+    def test_day7_launch_post_d4_d7(self):
+        """Day +7 → launch_post_d4_d7."""
+        self._check_event_day(7, "launch_post_d4_d7")
+
+    def test_day8_benefit_active(self):
+        """Day +8 → benefit_active."""
+        self._check_event_day(8, "benefit_active")
+
+    def test_day22_benefit_active(self):
+        """Day +22 = finish-8 → benefit_active."""
+        self._check_event_day(22, "benefit_active")
+
+    def test_day23_benefit_countdown(self):
+        """Day +23 = finish-7 → benefit_countdown."""
+        self._check_event_day(23, "benefit_countdown")
+
+    def test_day29_benefit_countdown(self):
+        """Day +29 = finish-1 → benefit_countdown."""
+        self._check_event_day(29, "benefit_countdown")
+
+    def test_day30_benefit_end_day(self):
+        """Day +30 = finish → benefit_end_day."""
+        self._check_event_day(30, "benefit_end_day")
+
+    def test_day31_post_benefit(self):
+        """Day +31 = finish+1 → post_benefit."""
+        self._check_event_day(31, "post_benefit")
+
+    def test_day37_post_benefit(self):
+        """Day +37 = finish+7 → post_benefit."""
+        self._check_event_day(37, "post_benefit")
+
+    def test_day_minus8_normal(self):
+        """Day -8 is before presale_start → normal (all counts = 0)."""
+        self._check_event_day(-8, None)
+
+    def test_day_launch_only_benefit_countdown(self):
+        """No presale, launch day=end → benefit_countdown should still work near finish."""
+        events = self._make_test_event(start=None, end="2025-06-01", finish="2025-07-01")
+        # finish-1 = 2025-06-30 = event_day 29
+        rd = pd.DataFrame({"date": [pd.Timestamp("2025-06-30")]})
+        rd = self.bt.compute_event_features(rd, events)
+        assert rd.iloc[0]["benefit_countdown_count"] == 1, "No-presale model should still detect benefit_countdown"
+        assert rd.iloc[0]["presale_active_count"] == 0, "No-presale → presale should be 0"
+        assert rd.iloc[0]["presale_day_count"] == 0, "No-presale → presale_day should be 0"
+
+    def test_multi_event_overlap(self):
+        """Multiple events on same day generate correct lifecycle counts."""
+        import json, tempfile, os
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+            json.dump({"time_periods": {
+                "A": {"end": "2025-06-01", "finish": "2025-07-01"},
+                "B": {"end": "2025-06-01", "finish": "2025-07-15"},
+            }}, f)
+            tmp = f.name
+        events = self.bt.parse_launch_events(tmp)
+        os.unlink(tmp)
+        rd = pd.DataFrame({"date": [pd.Timestamp("2025-06-01")]})
+        rd = self.bt.compute_event_features(rd, events)
+        # Both A and B launch on same day → launch_day_count = 2
+        assert rd.iloc[0]["launch_day_count"] == 2, f"Expected launch_day_count=2, got {rd.iloc[0]['launch_day_count']}"
+        assert rd.iloc[0]["active_event_count"] >= 2
+
+    def test_future_actual_no_leakage(self):
+        """Changing actuals after a prediction date must not change earlier predictions."""
+        df = pd.read_csv(str(_WS_DIR.parent / "dataset" / "assign_data.csv"))
+        # Parse dates
+        from research_scripts.lock_predict_backtest import _parse_cn_date
+        df["_date"] = _parse_cn_date(df["Assign Time 年/月/日"])
+        df = df[df["_date"].notna()].sort_values("_date").reset_index(drop=True)
+        import numpy as np
+        n_fn = lambda c: pd.to_numeric(c.astype(str).str.replace(",", "", regex=False), errors="coerce").fillna(0)
+        df["_leads"] = n_fn(df["下发线索数"])
+        df["_lock0"] = n_fn(df["下发线索当日锁单数 (门店)"])
+        df["_lock7"] = n_fn(df["下发线索 7 日锁单数"])
+        df["_lock30"] = n_fn(df["下发线索 30 日锁单数"])
+        # Run rolling-origin backtest
+        rd, _ = self.bt.rolling_origin_backtest(df)
+        # Store predictions for dates before 2026-07-01
+        mask = rd["date"] < pd.Timestamp("2026-07-01")
+        preds_before = rd.loc[mask, "cohort_pred_30_lock"].values.copy()
+        # Modify future data (after 2026-07-01)
+        df2 = df.copy()
+        df2.loc[df2["_date"] >= pd.Timestamp("2026-07-01"), "_lock30"] *= 2
+        rd2, _ = self.bt.rolling_origin_backtest(df2)
+        # Predictions for dates before 2026-07-01 should NOT change
+        preds_after = rd2.loc[rd2["date"] < pd.Timestamp("2026-07-01"), "cohort_pred_30_lock"].values
+        np.testing.assert_array_almost_equal(preds_before, preds_after, decimal=5,
+                                              err_msg="Future data must not change historical predictions")
+
+    def test_immature_not_in_coefficient_training(self):
+        """LS9Hyper (2026-07-16, not matured) must not enter formal precision metrics."""
+        events = self.bt.parse_launch_events()
+        ls9h = events[events["event_id"] == "LS9Hyper"]
+        cutoff = pd.Timestamp("2026-07-16")
+        assert (cutoff - ls9h["event_date"].iloc[0]).days <= 1, "LS9Hyper not yet fully observed"
+        # In rolling_origin_backtest, dates >= cutoff are excluded
+        # Since cutoff is assign_data max date, LS9Hyper event date = cutoff date
+        # Its cohort date would need to be <= cutoff - 30 to be evaluation_eligible

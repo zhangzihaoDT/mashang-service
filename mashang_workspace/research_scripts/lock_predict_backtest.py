@@ -14,7 +14,7 @@ Output:
     outputs/reports/lock_predict_backtest.html
 """
 
-import sys, argparse, json
+import sys, argparse, json, warnings
 from pathlib import Path
 from datetime import datetime, timedelta
 
@@ -46,6 +46,28 @@ THRESHOLDS = {
     "median_actual_forecast_ratio_min": 0.95,
     "median_actual_forecast_ratio_max": 1.05,
 }
+
+# ── Launch Event Model Config ──
+EVENT_SOURCE = REPO_ROOT / "shared" / "schema" / "business_definition.json"
+EVENT_CONFIG = {
+    "enabled": True,
+    "source_path": "shared/schema/business_definition.json",
+    "prior_strength": 30,
+    "include_overlap_features": True,
+    "max_multiplier": 3.0,
+    "acceptance": {
+        "overall_wape_relative_improvement_min": 0.03,
+        "event_window_wape_relative_improvement_min": 0.10,
+        "normal_window_wape_degradation_max_pp": 0.01,
+    },
+}
+LIFECYCLE_PHASES = [
+    "presale_day", "presale_active", "launch_day",
+    "launch_post_d1_d3", "launch_post_d4_d7",
+    "benefit_active", "benefit_countdown", "benefit_end_day",
+    "post_benefit",
+]
+HAS_EVENTS = False
 
 # ── Brand Colors ──
 OWN = ZH["own"]
@@ -116,6 +138,224 @@ def load_daily_lock_count():
     daily.columns = ["date", "daily_lock_count"]
     daily["date"] = pd.to_datetime(daily["date"])
     return daily
+
+
+# ── Launch Event Parsing ──
+
+def parse_launch_events(source_path=None):
+    global HAS_EVENTS
+    path = Path(source_path or EVENT_SOURCE)
+    if not path.exists():
+        warnings.warn(f"事件定义文件不存在: {path}")
+        HAS_EVENTS = False
+        return pd.DataFrame()
+    with open(str(path)) as f:
+        data = json.load(f)
+    periods = data.get("time_periods", {})
+    if not periods:
+        warnings.warn("事件定义文件中无 time_periods")
+        HAS_EVENTS = False
+        return pd.DataFrame()
+    rows = []
+    for eid, info in periods.items():
+        # end is required
+        if "end" not in info:
+            raise ValueError(f"事件 {eid} 缺少必要字段 'end'")
+        try:
+            end_dt = pd.Timestamp(info["end"]).normalize()
+        except Exception:
+            raise ValueError(f"事件 {eid} 的 end 日期非法: {info['end']}")
+        if pd.isna(end_dt):
+            raise ValueError(f"事件 {eid} 的 end 无法解析为日期: {info['end']}")
+        # start is optional
+        start_dt = None
+        if "start" in info and info["start"]:
+            try:
+                start_dt = pd.Timestamp(info["start"]).normalize()
+            except Exception:
+                raise ValueError(f"事件 {eid} 的 start 日期非法: {info['start']}")
+        # finish is required
+        if "finish" not in info:
+            raise ValueError(f"事件 {eid} 缺少必要字段 'finish'")
+        try:
+            finish_dt = pd.Timestamp(info["finish"]).normalize()
+        except Exception:
+            raise ValueError(f"事件 {eid} 的 finish 日期非法: {info['finish']}")
+        if pd.isna(finish_dt):
+            raise ValueError(f"事件 {eid} 的 finish 无法解析为日期: {info['finish']}")
+        row = {
+            "event_id": eid, "event_name": eid, "event_type": "launch",
+            "event_date": end_dt,  # keep for backward compat
+            "presale_date": start_dt,
+            "launch_date": end_dt,
+            "benefit_end_date": finish_dt,
+            "has_presale": start_dt is not None,
+            "source": str(path),
+        }
+        rows.append(row)
+    events = pd.DataFrame(rows).sort_values("event_date").reset_index(drop=True)
+    HAS_EVENTS = len(events) > 0
+    return events
+
+
+def compute_event_features(rd, events, date_col="date"):
+    if events.empty:
+        for k in LIFECYCLE_PHASES:
+            rd[f"{k}_count"] = 0
+        rd["active_event_count"] = 0
+        rd["has_event_overlap"] = 0
+        rd["same_series_overlap"] = 0
+        rd["in_lifecycle_window"] = False
+        rd["active_lifecycle_ids"] = ""
+        return rd
+
+    rd = rd.copy()
+    for k in LIFECYCLE_PHASES:
+        rd[f"{k}_count"] = 0
+    rd["active_event_count"] = 0
+    rd["has_event_overlap"] = 0
+    rd["same_series_overlap"] = 0
+    rd["in_lifecycle_window"] = False
+    rd["active_lifecycle_ids"] = ""
+
+    def _get_phase(eid, cd, ev):
+        """Determine lifecycle stage for a single model on a given date."""
+        ld = ev["launch_date"]
+        bd = ev["benefit_end_date"]
+        has_ps = ev["has_presale"]
+        sd = ev["presale_date"]
+
+        if cd == bd:
+            return "benefit_end_day"
+        if has_ps and sd and (bd - pd.Timedelta(days=7) <= cd <= bd - pd.Timedelta(days=1)):
+            return "benefit_countdown"
+        if has_ps and sd and cd == sd:
+            return "presale_day"
+        if has_ps and sd and (sd < cd < ld):
+            return "presale_active"
+        if cd == ld:
+            return "launch_day"
+        if ld < cd <= ld + pd.Timedelta(days=3):
+            return "launch_post_d1_d3"
+        if ld + pd.Timedelta(days=3) < cd <= ld + pd.Timedelta(days=7):
+            return "launch_post_d4_d7"
+        if ld + pd.Timedelta(days=7) < cd <= bd - pd.Timedelta(days=8):
+            return "benefit_active"
+        if bd < cd <= bd + pd.Timedelta(days=7):
+            return "post_benefit"
+        # benefit_countdown for models without presale
+        if not has_ps and bd - pd.Timedelta(days=7) <= cd <= bd - pd.Timedelta(days=1):
+            return "benefit_countdown"
+        return None
+
+    for idx, row in rd.iterrows():
+        cd = row[date_col]
+        active_ids = []
+        active_phases = []
+        for _, ev in events.iterrows():
+            phase = _get_phase(ev["event_id"], cd, ev)
+            if phase:
+                rd.at[idx, f"{phase}_count"] += 1
+                active_ids.append(ev["event_id"])
+                active_phases.append(phase)
+        rd.at[idx, "active_event_count"] = len(active_ids)
+        rd.at[idx, "has_event_overlap"] = 1 if len(active_ids) > 1 else 0
+        rd.at[idx, "in_lifecycle_window"] = len(active_ids) > 0
+        rd.at[idx, "active_lifecycle_ids"] = ",".join(active_ids)
+
+    return rd
+
+
+def compute_rolling_event_coefficients(rd, df, events):
+    if events.empty:
+        return None
+    ps = EVENT_CONFIG["prior_strength"]
+    dates = sorted(rd["date"].unique())
+    df_events = compute_event_features(df, events, date_col="_date")
+    coefficients = []
+    for d in dates:
+        available = df_events[df_events["_date"] < d]
+        mature = available[available["_date"] <= d - pd.Timedelta(days=30)]
+        if mature.empty or mature["_leads"].sum() <= 0:
+            coefficients.append({k: 0.0 for k in LIFECYCLE_PHASES})
+            continue
+        phase_betas = {}
+        for pk in LIFECYCLE_PHASES:
+            in_phase = mature[mature[f"{pk}_count"] > 0]
+            not_in = mature[mature[f"{pk}_count"] == 0]
+            if len(in_phase) < 3:
+                phase_betas[pk] = 0.0
+                continue
+            obs_rate = float(in_phase["_lock30"].sum()) / float(in_phase["_leads"].sum()) if in_phase["_leads"].sum() > 0 else 0
+            base_rate = float(not_in["_lock30"].sum()) / float(not_in["_leads"].sum()) if not_in["_leads"].sum() > 0 else obs_rate
+            if base_rate <= 0 or obs_rate <= 0:
+                phase_betas[pk] = 0.0
+                continue
+            obs_log_ratio = np.log(obs_rate / base_rate)
+            w = len(in_phase)
+            posterior_beta = (w * obs_log_ratio + ps * 0.0) / (w + ps)
+            phase_betas[pk] = posterior_beta
+        coefficients.append(phase_betas)
+    return coefficients
+
+
+def apply_event_multiplier_log(control_pred, betas, count_features):
+    if betas is None:
+        return control_pred
+    total_beta = 0.0
+    for pk in LIFECYCLE_PHASES:
+        count = count_features.get(pk, 0)
+        if count > 0:
+            total_beta += betas.get(pk, 0.0) * count
+    total_beta = max(min(total_beta, np.log(EVENT_CONFIG["max_multiplier"])),
+                     np.log(1.0 / EVENT_CONFIG["max_multiplier"]))
+    return control_pred * np.exp(total_beta)
+
+
+def compute_event_window_metrics(el):
+    """Compute metrics for lifecycle window."""
+    ew = el[el["in_lifecycle_window"]].copy() if "in_lifecycle_window" in el.columns else pd.DataFrame()
+    if ew.empty:
+        return None
+    actual = ew["cohort_actual_30_lock"].values.astype(float)
+    forecast = ew["cohort_pred_30_lock"].values.astype(float)
+    error = actual - forecast
+    abs_err = np.abs(error)
+    sq_err = error ** 2
+    sa = actual.sum()
+    if sa <= 0:
+        return {"n": len(ew), "mae": np.nan, "rmse": np.nan, "wape": np.nan, "mape": np.nan, "bias_pct": np.nan, "r2": np.nan}
+    mae = float(abs_err.mean())
+    rmse = float(np.sqrt(sq_err.mean()))
+    wape = float(abs_err.sum() / sa)
+    non_zero = actual > 0
+    ape = abs_err[non_zero] / actual[non_zero]
+    mape = float(ape.mean()) if len(ape) > 0 else np.nan
+    bias = float((sa - forecast.sum()) / sa)
+    if np.std(actual) > 0 and np.std(forecast) > 0:
+        r2 = 1 - sq_err.sum() / ((actual - actual.mean()) ** 2).sum()
+    else:
+        r2 = np.nan
+    return {"n": len(ew), "mae": mae, "rmse": rmse, "wape": wape, "mape": mape, "bias_pct": bias, "r2": r2}
+
+
+def compute_normal_window_metrics(el):
+    """Compute metrics for normal period (not in any lifecycle window)."""
+    nw = el[~el["in_lifecycle_window"]].copy() if "in_lifecycle_window" in el.columns else el.copy()
+    if nw.empty:
+        return None
+    actual = nw["cohort_actual_30_lock"].values.astype(float)
+    if "cohort_pred_30_lock" in nw.columns:
+        forecast = nw["cohort_pred_30_lock"].values.astype(float)
+    else:
+        forecast = np.zeros_like(actual)
+    error = actual - forecast
+    abs_err = np.abs(error)
+    sa = actual.sum()
+    if sa <= 0:
+        return {"n": len(nw)}
+    wape = float(abs_err.sum() / sa)
+    return {"n": len(nw), "wape": wape}
 
 
 def compute_rolling_rates(df, as_of_date):
@@ -487,7 +727,13 @@ def build_executive_summary(metrics, bl_metrics, thresholds_status):
     return "；".join(lines) if lines else "模型评估完成。"
 
 
-def generate_html(rd, cutoff, metrics, bl_metrics, stratified, thresholds_status, summary):
+def generate_html(rd, cutoff, metrics, bl_metrics, stratified, thresholds_status, summary,
+                   events=None, metrics_tc1=None, metrics_tc2=None, metrics_tc3=None,
+                   ev_metrics=None, nw_metrics=None, phase_metrics=None):
+    if events is None or (isinstance(events, pd.DataFrame) and events.empty):
+        events = pd.DataFrame()
+    ev_metrics = ev_metrics or {}
+    nw_metrics = nw_metrics or {}
     from plotly import graph_objects as go
     from plotly.subplots import make_subplots
 
@@ -616,7 +862,183 @@ def generate_html(rd, cutoff, metrics, bl_metrics, stratified, thresholds_status
                        hovermode="x unified", showlegend=True,
                        legend=dict(orientation="h", y=1.02, x=0))
 
-    # ── Top 10 Exceptions Table ──
+        # ── Launch Event Experiment Section ──
+    event_html = ""
+    if HAS_EVENTS and metrics_tc1 is not None:
+        models_def = [
+            ("Control", "cohort_pred_30_lock", metrics),
+            ("Treatment C1", "cohort_pred_treatment_c1", metrics_tc1),
+            ("Treatment C2", "cohort_pred_treatment_c2", metrics_tc2) if metrics_tc2 else None,
+            ("Treatment C3", "cohort_pred_treatment_c3", metrics_tc3) if metrics_tc3 else None,
+        ]
+        models_def = [m for m in models_def if m is not None]
+        comp_rows = ""
+        ev_key_map = {"Control": "control", "Treatment C1": "treatment_c1",
+                       "Treatment C2": "treatment_c2", "Treatment C3": "treatment_c3"}
+        for mname, _, mm in models_def:
+            ev_key = ev_key_map.get(mname, "control")
+            ew_val = (ev_metrics.get(ev_key) or {}).get("wape", np.nan)
+            nw_val = (nw_metrics.get(ev_key) or {}).get("wape", np.nan)
+            ew_s = f"{ew_val:.1%}" if not np.isnan(ew_val) else "N/A"
+            nw_s = f"{nw_val:.1%}" if not np.isnan(nw_val) else "N/A"
+            w20 = f"{mm.get('within_20pct', np.nan):.1%}" if not np.isnan(mm.get('within_20pct', np.nan)) else "N/A"
+            comp_rows += f"""<tr>
+<td>{mname}</td>
+<td>{mm['mae']:.1f}</td>
+<td>{mm['rmse']:.1f}</td>
+<td>{mm['wape']:.1%}</td>
+<td>{mm.get('mape', np.nan):.1%}</td>
+<td>{mm.get('r2', np.nan):.3f}</td>
+<td>{mm.get('bias_pct', np.nan):+.1%}</td>
+<td>{w20}</td>
+<td>{ew_s}</td>
+<td>{nw_s}</td>
+</tr>"""
+
+        phase_rows = ""
+        for pk in LIFECYCLE_PHASES:
+            pm = phase_metrics.get(pk, {})
+            if not pm:
+                continue
+            cw = f"{pm['control_wape']:.1%}"
+            if "treatment_c1_wape" in pm:
+                tw = f"{pm['treatment_c1_wape']:.1%}"
+                imp = f"{pm['wape_improvement']:.1%}" if not np.isnan(pm.get('wape_improvement', np.nan)) else "N/A"
+            else:
+                tw = cw
+                imp = "—"
+            phase_rows += f"""<tr>
+<td>{pk}</td>
+<td>{pm['n']}</td>
+<td>{pm['sum_actual']:,}</td>
+<td>{pm.get('control_sum', 0):,.1f}</td>
+<td>{pm.get('treatment_c1_sum', 0):,.1f}</td>
+<td>{cw}</td>
+<td>{tw}</td>
+<td>{imp}</td>
+</tr>"""
+
+        event_plot_html = ""
+        if not events.empty:
+            from plotly import graph_objects as go
+            el = rd[rd["evaluation_eligible"]].copy()
+            aligned = []
+            for _, ev in events.iterrows():
+                ed = ev["event_date"]
+                for _, r in el.iterrows():
+                    e_day = (r["date"] - ed).days
+                    if -7 <= e_day <= 30:
+                        aligned.append({
+                            "event_id": ev["event_id"],
+                            "event_day": e_day,
+                            "actual": r["cohort_actual_30_lock"],
+                            "control_fc": r["cohort_pred_30_lock"],
+                            "treatment_c1_fc": r.get("cohort_pred_treatment_c1", r["cohort_pred_30_lock"]),
+                        })
+            if aligned:
+                adf = pd.DataFrame(aligned)
+                by_day = adf.groupby("event_day").agg(
+                    n=("actual", "count"),
+                    avg_actual=("actual", "mean"),
+                    avg_control=("control_fc", "mean"),
+                    avg_treatment_c1=("treatment_c1_fc", "mean"),
+                ).reset_index()
+                by_day["ratio_control"] = by_day["avg_actual"] / by_day["avg_control"]
+                by_day["ratio_treatment"] = by_day["avg_actual"] / by_day["avg_treatment_c1"]
+                edates = by_day["event_day"].tolist()
+                n_counts = by_day["n"].tolist()
+                r_c = by_day["ratio_control"].tolist()
+                r_t = by_day["ratio_treatment"].tolist()
+
+                fig_ev = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.06,
+                                        subplot_titles=("Actual / Control 比值 (对齐Day 0)", "Actual / Treatment C1 比值 (对齐Day 0)"))
+                fig_ev.add_trace(go.Scatter(x=edates, y=r_c, mode="lines+markers",
+                                             name="Actual/Control", line=dict(color=OWN, width=1.5),
+                                             marker=dict(size=5)), row=1, col=1)
+                fig_ev.add_trace(go.Bar(x=edates, y=n_counts, name="样本数",
+                                        marker=dict(color=ASH, opacity=0.4), yaxis="y2"), row=1, col=1)
+                fig_ev.add_trace(go.Scatter(x=edates, y=r_t, mode="lines+markers",
+                                             name="Actual/Treatment", line=dict(color=EVENT, width=1.5),
+                                             marker=dict(size=5)), row=2, col=1)
+                fig_ev.add_hline(y=1, line=dict(color=MUTED_COLOR, width=1, dash="dash"), row=1, col=1)
+                fig_ev.add_hline(y=1, line=dict(color=MUTED_COLOR, width=1, dash="dash"), row=2, col=1)
+                apply_zh_theme(fig_ev)
+                fig_ev.update_layout(
+                    height=500, margin=dict(l=60, r=30, t=30, b=30),
+                    hovermode="x unified", showlegend=True,
+                    legend=dict(orientation="h", y=1.02, x=0),
+                )
+                fig_ev.update_yaxes(title_text="比值", row=1, col=1)
+                fig_ev.update_yaxes(title_text="样本数", secondary_y=True, row=1, col=1)
+                fig_ev.update_xaxes(title_text="Event Day", row=2, col=1)
+                event_plot_html = f'<div class="chart-box"><h2>上市事件对齐时间图</h2><div id="chart-event-aligned"></div></div>'
+                event_plot_script = f'var fig_ev = {fig_ev.to_json()};\nPlotly.newPlot("chart-event-aligned", fig_ev.data, fig_ev.layout, {{displayModeBar: false}});'
+            else:
+                event_plot_script = ""
+        else:
+            event_plot_script = ""
+
+        imp_overall = (metrics["wape"] - metrics_tc1["wape"]) / metrics["wape"] if metrics["wape"] > 0 else 0
+        ew_ctrl = (ev_metrics.get("control") or {}).get("wape", np.nan)
+        ew_tc1 = (ev_metrics.get("treatment_c1") or {}).get("wape", np.nan)
+        imp_ew = (ew_ctrl - ew_tc1) / ew_ctrl if (not np.isnan(ew_ctrl) and ew_ctrl > 0) else 0
+        nw_ctrl = (nw_metrics.get("control") or {}).get("wape", np.nan)
+        nw_tc1 = (nw_metrics.get("treatment_c1") or {}).get("wape", np.nan)
+        nw_degrad = (nw_tc1 - nw_ctrl) if (not np.isnan(nw_ctrl) and not np.isnan(nw_tc1)) else 0
+        acc = EVENT_CONFIG["acceptance"]
+        checks = {
+            "全样本WAPE改善 ≥ 3%": imp_overall >= acc["overall_wape_relative_improvement_min"],
+            "生命周期窗口WAPE改善 ≥ 10%": imp_ew >= acc["event_window_wape_relative_improvement_min"],
+            "常规期WAPE恶化 ≤ 1pp": nw_degrad <= acc["normal_window_wape_degradation_max_pp"],
+        }
+        check_rows = ""
+        for label, passed in checks.items():
+            icon = "✅" if passed else "❌"
+            check_rows += f"<tr><td>{label}</td><td>{icon}</td></tr>"
+
+        event_html = f"""
+<div class="section-title">上市事件生命周期实验</div>
+<div class="panel">
+  <p style="font-size:13px;color:var(--muted);padding:4px 0">
+    事件来源: {EVENT_SOURCE} | 事件数量: {len(events)} | 
+    最早上市: {events['event_date'].min().date() if not events.empty else 'N/A'} | 
+    最晚上市: {events['event_date'].max().date() if not events.empty else 'N/A'}
+  </p>
+  <p style="font-size:13px;color:var(--muted);padding:4px 0">
+    生命周期: presale_day/presale_active/launch_day/launch_post_d1_d3/launch_post_d4_d7/benefit_active/benefit_countdown/benefit_end_day/post_benefit |
+    先验强度: {EVENT_CONFIG["prior_strength"]}
+  </p>
+  <p style="font-size:13px;color:var(--text);padding:4px 0">
+    正式回测可用: {len(el[el['in_lifecycle_window']])} 个Cohort | 
+    当前未成熟: {int(rd.loc[~rd['evaluation_eligible'], 'in_lifecycle_window'].sum())} 个Cohort
+  </p>
+</div>
+<div class="chart-box">
+  <h2>Control / Treatment C 系列对比</h2>
+  <div style="overflow-x:auto;">
+  <table><thead><tr><th>模型</th><th>MAE</th><th>RMSE</th><th>WAPE</th><th>MAPE</th><th>R²</th><th>Bias%</th><th>±20%命中率</th><th>生命周期WAPE</th><th>常规期WAPE</th></tr></thead>
+  <tbody>{comp_rows}</tbody></table>
+  </div>
+</div>
+<div class="chart-box">
+  <h2>生命周期阶段表现 (Control vs Treatment C1)</h2>
+  <div style="overflow-x:auto;">
+  <table><thead><tr><th>阶段</th><th>样本</th><th>实际总量</th><th>Control预测</th><th>Treatment预测</th><th>Control WAPE</th><th>Treatment WAPE</th><th>WAPE改善</th></tr></thead>
+  <tbody>{phase_rows}</tbody></table>
+  </div>
+</div>
+{event_plot_html}
+<div class="chart-box">
+  <h2>模型升级验收检查</h2>
+  <div style="overflow-x:auto;">
+  <table><thead><tr><th>条件</th><th>结果</th></tr></thead>
+  <tbody>{check_rows}</tbody></table>
+  </div>
+</div>
+<script>
+{event_plot_script}
+</script>
+"""
     top10 = metrics.get("top10_exceptions", [])
     top10_rows = ""
     for r10 in top10:
@@ -801,6 +1223,8 @@ for name, m in bl_metrics.items()) + '</tbody></table>' if bl_metrics else '<p s
 </div>
 <div class="chart-box">{'<div id="chart-baseline"></div>' if fig4 else ''}</div>
 
+{event_html}
+
 <div class="section-title">经营观察: 自然日锁单节奏</div>
 <div class="chart-box">
   <h2>自然日经营观察 (DailyLockCount vs Cohort预测参考值)</h2>
@@ -927,8 +1351,113 @@ def main():
         rd = compute_baseline_historical_weekday(df, rd)
         rd = compute_baseline_rolling_rate(df, rd)
 
+        # ── Launch Event Experiment ──
+        events = parse_launch_events()
+        rd = compute_event_features(rd, events)
+        coeffs_list = compute_rolling_event_coefficients(rd, df, events)
+        rd["cohort_pred_treatment_c1"] = rd["cohort_pred_30_lock"]
+        rd["cohort_pred_treatment_c2"] = rd["cohort_pred_30_lock"]
+        rd["cohort_pred_treatment_c3"] = rd["cohort_pred_30_lock"]
+
+        if HAS_EVENTS and coeffs_list is not None:
+            sorted_dates = sorted(rd["date"].unique())
+            coeff_map = dict(zip(sorted_dates, coeffs_list))
+            for idx, r in rd.iterrows():
+                betas = coeff_map.get(r["date"], {k: 0.0 for k in LIFECYCLE_PHASES})
+                cf = {k: r[f"{k}_count"] for k in LIFECYCLE_PHASES}
+                cf["has_event_overlap"] = r.get("has_event_overlap", 0)
+                cf["active_event_count"] = r.get("active_event_count", 0)
+
+                # C1: lifecycle only
+                c1 = apply_event_multiplier_log(r["cohort_pred_30_lock"], betas, cf)
+                rd.at[idx, "cohort_pred_treatment_c1"] = round(c1, 1)
+
+                # C2: lifecycle + overlap
+                cf2 = dict(cf)
+                overlap_beta = 0.0
+                if cf2.get("has_event_overlap", 0):
+                    overlap_beta = -0.05
+                total_beta = sum(betas.get(k, 0.0) * cf2.get(k, 0) for k in LIFECYCLE_PHASES)
+                total_beta += overlap_beta * cf2.get("has_event_overlap", 0)
+                total_beta = max(min(total_beta, np.log(EVENT_CONFIG["max_multiplier"])),
+                                 np.log(1.0 / EVENT_CONFIG["max_multiplier"]))
+                c2 = r["cohort_pred_30_lock"] * np.exp(total_beta)
+                rd.at[idx, "cohort_pred_treatment_c2"] = round(c2, 1)
+
+                # C3: same as C2 (series overlap not implemented without series data)
+                rd.at[idx, "cohort_pred_treatment_c3"] = round(c2, 1)
+
         el = rd[rd["evaluation_eligible"]].copy()
         metrics = compute_official_metrics(rd)
+
+        # Treatment metrics (using same evaluation_eligible set)
+        def _metrics_for_treat_col(treat_col):
+            """Compute official metrics using treat_col as forecast, avoiding duplicate column."""
+            el_t = rd[rd["evaluation_eligible"]].copy()
+            # Build forecast array directly
+            fc = el_t[treat_col].values.astype(float)
+            ac = el_t["cohort_actual_30_lock"].values.astype(float)
+            error = ac - fc
+            abs_error = np.abs(error)
+            sq_error = error ** 2
+            sum_actual = ac.sum()
+            n = len(el_t)
+            mae = float(abs_error.mean())
+            rmse = float(np.sqrt(sq_error.mean()))
+            wape = float(abs_error.sum() / sum_actual) if sum_actual > 0 else np.nan
+            non_zero = ac > 0
+            ape = np.abs(ac[non_zero] - fc[non_zero]) / ac[non_zero]
+            mape = float(ape.mean()) if len(ape) > 0 else np.nan
+            mape_excluded = n - len(ape)
+            mean_error = float(error.mean())
+            median_error = float(np.median(error))
+            bias_pct = (sum_actual - fc.sum()) / sum_actual if sum_actual > 0 else np.nan
+            over_count = int((error < 0).sum())
+            under_count = int((error > 0).sum())
+            median_ae = float(np.median(abs_error))
+            p80_ae = float(np.percentile(abs_error, 80))
+            p90_ae = float(np.percentile(abs_error, 90))
+            p95_ae = float(np.percentile(abs_error, 95))
+            max_ae = float(abs_error.max())
+            within_10 = float((abs_error / ac <= 0.1).mean()) if np.all(ac > 0) else np.nan
+            within_20 = float((abs_error / ac <= 0.2).mean()) if np.all(ac > 0) else np.nan
+            within_30 = float((abs_error / ac <= 0.3).mean()) if np.all(ac > 0) else np.nan
+            corr = float(np.corrcoef(ac, fc)[0, 1]) if np.std(ac) > 0 and np.std(fc) > 0 else np.nan
+            r2 = 1 - sq_error.sum() / ((ac - ac.mean()) ** 2).sum() if ((ac - ac.mean()) ** 2).sum() > 0 else np.nan
+
+            top10_idx = np.argsort(abs_error)[-10:][::-1]
+            top10_ae_contrib = abs_error[top10_idx].sum() / abs_error.sum() if abs_error.sum() > 0 else np.nan
+            top5_ae_contrib = abs_error[top10_idx[:5]].sum() / abs_error.sum() if abs_error.sum() > 0 else np.nan
+            top2_ae_contrib = abs_error[top10_idx[:2]].sum() / abs_error.sum() if abs_error.sum() > 0 else np.nan
+            top10_se_contrib = sq_error[top10_idx].sum() / sq_error.sum() if sq_error.sum() > 0 else np.nan
+            top5_se_contrib = sq_error[top10_idx[:5]].sum() / sq_error.sum() if sq_error.sum() > 0 else np.nan
+            top2_se_contrib = sq_error[top10_idx[:2]].sum() / sq_error.sum() if sq_error.sum() > 0 else np.nan
+
+            top10_df = el_t.iloc[top10_idx][["date", "cohort_assign_count", "prediction_method"]].copy()
+            top10_df["cohort_pred_30_lock"] = fc[top10_idx]
+            top10_df["cohort_actual_30_lock"] = ac[top10_idx].astype(int)
+            top10_df["error"] = error[top10_idx]
+            top10_df["abs_error"] = abs_error[top10_idx]
+            top10_df["relative_error"] = np.where(ac[top10_idx] > 0, abs_error[top10_idx] / ac[top10_idx], np.nan)
+            top10_df = top10_df.sort_values("date")
+
+            return {
+                "n": n, "mae": mae, "rmse": rmse, "mape": mape, "mape_excluded": mape_excluded,
+                "wape": wape, "r2": r2, "correlation": corr,
+                "mean_error": mean_error, "median_error": median_error,
+                "bias_pct": bias_pct, "over_count": over_count, "under_count": under_count,
+                "median_ae": median_ae, "p80_ae": p80_ae, "p90_ae": p90_ae, "p95_ae": p95_ae, "max_ae": max_ae,
+                "within_10pct": within_10, "within_20pct": within_20, "within_30pct": within_30,
+                "top10_ae_contribution_pct": top10_ae_contrib, "top5_ae_contribution_pct": top5_ae_contrib,
+                "top2_ae_contribution_pct": top2_ae_contrib,
+                "top10_se_contribution_pct": top10_se_contrib, "top5_se_contribution_pct": top5_se_contrib,
+                "top2_se_contribution_pct": top2_se_contrib,
+                "top10_exceptions": top10_df.to_dict("records"),
+                "sum_actual": int(sum_actual), "sum_forecast": round(fc.sum(), 1),
+            }
+        metrics_tc1 = _metrics_for_treat_col("cohort_pred_treatment_c1") if HAS_EVENTS else None
+        metrics_tc2 = _metrics_for_treat_col("cohort_pred_treatment_c2") if HAS_EVENTS else None
+        metrics_tc3 = _metrics_for_treat_col("cohort_pred_treatment_c3") if HAS_EVENTS else None
 
         bl_metrics = {}
         for bl_name in ["baseline_weekday", "baseline_rolling_rate"]:
@@ -937,14 +1466,73 @@ def main():
                 label = {"baseline_weekday": "历史同星期基线", "baseline_rolling_rate": "滚动转化率基线"}
                 bl_metrics[label.get(bl_name, bl_name)] = bl_m
 
+        # Lifecycle window metrics for Control and Treatment
+        ev_metrics = {"control": compute_event_window_metrics(el)}
+        nw_metrics = {"control": compute_normal_window_metrics(el)}
+        if HAS_EVENTS:
+            ev_mask = rd.loc[rd["evaluation_eligible"], "in_lifecycle_window"].values
+            for treat_col, key in [("cohort_pred_treatment_c1", "treatment_c1"),
+                                    ("cohort_pred_treatment_c2", "treatment_c2"),
+                                    ("cohort_pred_treatment_c3", "treatment_c3")]:
+                if treat_col not in rd.columns:
+                    continue
+                sub = rd[rd["evaluation_eligible"]][["cohort_actual_30_lock", treat_col]].copy()
+                sub.columns = ["cohort_actual_30_lock", "cohort_pred_30_lock"]
+                sub["in_lifecycle_window"] = ev_mask
+                ev_metrics[key] = compute_event_window_metrics(sub)
+                nw_metrics[key] = compute_normal_window_metrics(sub)
+
+        # Phase-level breakdown
+        phase_metrics = {}
+        if HAS_EVENTS:
+            for pk in LIFECYCLE_PHASES:
+                in_p = el[el[f"{pk}_count"] > 0]
+                if in_p.empty:
+                    continue
+                ac = in_p["cohort_actual_30_lock"].values.astype(float)
+                fc = in_p["cohort_pred_30_lock"].values.astype(float)
+                sa = ac.sum()
+                if sa <= 0:
+                    continue
+                pm = {
+                    "n": len(in_p),
+                    "sum_actual": int(sa),
+                    "control_sum": round(fc.sum(), 1),
+                    "control_wape": round(float(np.abs(ac - fc).sum() / sa), 4),
+                    "control_bias": round(float((sa - fc.sum()) / sa), 4),
+                }
+                if metrics_tc1:
+                    fc_tc1 = in_p["cohort_pred_treatment_c1"].values.astype(float)
+                    pm["treatment_c1_sum"] = round(fc_tc1.sum(), 1)
+                    pm["treatment_c1_wape"] = round(float(np.abs(ac - fc_tc1).sum() / sa), 4)
+                    pm["treatment_c1_bias"] = round(float((sa - fc_tc1.sum()) / sa), 4)
+                    pm["wape_improvement"] = round(
+                        (pm["control_wape"] - pm["treatment_c1_wape"]) / pm["control_wape"], 4
+                    ) if pm["control_wape"] > 0 else np.nan
+                phase_metrics[pk] = pm
+
         stratified = compute_stratified_metrics(el)
         thresholds_status = check_thresholds(metrics)
         summary = build_executive_summary(metrics, bl_metrics, thresholds_status)
 
+        # Update the event_note in stratified
+        if HAS_EVENTS:
+            stratified["event_note"] = "已加载上市事件生命周期特征。详见上市事件生命周期实验模块。"
+
         if args.format == "terminal":
             print_terminal(metrics, bl_metrics, stratified, thresholds_status, summary, bt_start, bt_end, cutoff, n_immature)
+            if HAS_EVENTS and metrics_tc1:
+                print(f"\n  {GOLD}■{RST} {DEEP_B}{BOLD}上市事件实验摘要{RST}")
+                print(f"    Control WAPE:  {metrics['wape']:.1%}")
+                print(f"    Treatment C1:  {metrics_tc1['wape']:.1%}  (相对改善 {(metrics['wape'] - metrics_tc1['wape']) / metrics['wape']:.1%})")
+                if metrics_tc2:
+                    print(f"    Treatment C2:  {metrics_tc2['wape']:.1%}  (相对改善 {(metrics['wape'] - metrics_tc2['wape']) / metrics['wape']:.1%})")
+                if metrics_tc3:
+                    print(f"    Treatment C3:  {metrics_tc3['wape']:.1%}  (相对改善 {(metrics['wape'] - metrics_tc3['wape']) / metrics['wape']:.1%})")
 
-        html_path = generate_html(rd, cutoff, metrics, bl_metrics, stratified, thresholds_status, summary)
+        html_path = generate_html(rd, cutoff, metrics, bl_metrics, stratified, thresholds_status, summary,
+                                   events=events, metrics_tc1=metrics_tc1, metrics_tc2=metrics_tc2, metrics_tc3=metrics_tc3,
+                                   ev_metrics=ev_metrics, nw_metrics=nw_metrics, phase_metrics=phase_metrics)
 
         if args.format == "terminal":
             print(f"\n  {GOLD}■{RST} {DEEP_B}{BOLD}输出{RST}")
@@ -954,36 +1542,44 @@ def main():
             "data_source": str(ASSIGN_CSV),
             "time_window": {"start_date": str(bt_start.date()), "end_date": str(bt_end.date())},
             "filters": {"evaluation_eligible_only": True, "mature_window_months": 24},
-            "metric_definition": "rolling-origin backtest: MAE/RMSE/MAPE/WAPE/R²/Bias/分层评估/双基线对照",
+            "metric_definition": "rolling-origin backtest: MAE/RMSE/MAPE/WAPE/R²/Bias/分层评估/双基线对照/上市事件生命周期实验",
         }
-        result = {
-            "summary": f"回测完成: N={metrics['n']}, MAE={metrics['mae']:.2f}, WAPE={metrics['wape']:.1%}, MAPE={metrics['mape']:.1%}, R²={metrics['r2']:.3f}, Bias={metrics['bias_pct']:+.1%}",
-            "metrics": {
-                "n": metrics["n"], "mae": round(metrics["mae"], 2), "rmse": round(metrics["rmse"], 2),
-                "mape": round(metrics["mape"], 4) if not np.isnan(metrics["mape"]) else None,
-                "wape": round(metrics["wape"], 4), "r2": round(metrics["r2"], 4) if not np.isnan(metrics["r2"]) else None,
-                "correlation": round(metrics["correlation"], 4) if not np.isnan(metrics["correlation"]) else None,
-                "bias_pct": round(metrics["bias_pct"], 4) if not np.isnan(metrics["bias_pct"]) else None,
-                "immature_count": n_immature,
-            },
+        result_metrics = {
+            "n": metrics["n"], "mae": round(metrics["mae"], 2), "rmse": round(metrics["rmse"], 2),
+            "mape": round(metrics["mape"], 4) if not np.isnan(metrics["mape"]) else None,
+            "wape": round(metrics["wape"], 4), "r2": round(metrics["r2"], 4) if not np.isnan(metrics["r2"]) else None,
+            "correlation": round(metrics["correlation"], 4) if not np.isnan(metrics["correlation"]) else None,
+            "bias_pct": round(metrics["bias_pct"], 4) if not np.isnan(metrics["bias_pct"]) else None,
+            "immature_count": n_immature,
         }
+        if metrics_tc1:
+            result_metrics["treatment_c1_wape"] = round(metrics_tc1["wape"], 4)
+        summary_str = f"回测完成: N={metrics['n']}, Control WAPE={metrics['wape']:.1%}"
+        if metrics_tc1:
+            summary_str += f", Treatment C1 WAPE={metrics_tc1['wape']:.1%}"
+        result = {"summary": summary_str, "metrics": result_metrics}
 
+        warnings_list = ["模型基于三段式成熟度假设", "节假日日历暂未实现", "生命周期模型为 log-additive 近似"]
+        if not HAS_EVENTS:
+            warnings_list.append("上市事件生命周期数据暂缺")
         contract = build_success_contract(
             script="research_scripts/lock_predict_backtest.py", command=cmd,
             scope=scope, result=result,
-            warnings=["模型基于三段式成熟度假设", "事件标签数据暂缺", "节假日日历暂未实现"],
+            warnings=warnings_list,
             followup_context={"metric": "cohort_forecast_backtest", "available_dimensions": ["cohort_date", "month", "weekday"]},
         )
 
     except Exception as e:
         import traceback
+        tb_str = traceback.format_exc()
         contract = build_error_contract(
             script="research_scripts/lock_predict_backtest.py", command=cmd,
             error_message=str(e),
-            warnings=[traceback.format_exc()],
+            warnings=[tb_str],
         )
         if args.format == "terminal":
             print(f"\n  {GOLD}⚠ 异常: {e}{RST}")
+            print(tb_str[-2000:])
 
     if args.format == "json":
         if args.output:
