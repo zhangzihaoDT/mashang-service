@@ -72,6 +72,7 @@ def parse_args():
     p.add_argument("--start-date", type=str, help="开始日期 (YYYY-MM-DD)")
     p.add_argument("--end-date", type=str, help="结束日期 (YYYY-MM-DD)")
     p.add_argument("--series", type=str, required=True, help="车系过滤")
+    p.add_argument("--order-type", type=str, default=None, help="订单类型过滤 (如 用户车、大客户等)")
     p.add_argument("--output", type=str, help="输出目录")
     p.add_argument("--format", type=str, default="terminal", choices=["terminal", "json"])
     p.add_argument("--limit", type=int, default=10, help="省份 TOPN (默认 10)")
@@ -139,6 +140,8 @@ def main():
     df_f = df[mask]
     if args.series:
         df_f = df_f[df_f["series"] == args.series]
+    if args.order_type:
+        df_f = df_f[df_f["order_type"] == args.order_type]
 
     total = len(df_f)
 
@@ -174,10 +177,14 @@ def main():
         time_window["start_date"] = args.start_date
         time_window["end_date"] = args.end_date
 
+    filters = {"series": args.series}
+    if args.order_type:
+        filters["order_type"] = args.order_type
+
     scope = {
         "data_source": str(ORDER_PARQUET),
         "time_window": time_window,
-        "filters": {"series": args.series},
+        "filters": filters,
         "metric_definition": "gender=owner_gender, age=owner_age(2026-owner_age), city_tier/province=license_city映射",
     }
 
@@ -247,6 +254,7 @@ def main():
 
     ctx = {
         "metric": "user_profile", "series": args.series,
+        "order_type": args.order_type,
         "available_dimensions": ["owner_gender", "age_cohort", "city_tier", "province"],
         "top_entities": top_entities,
         "age_field": "owner_age",

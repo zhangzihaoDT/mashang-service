@@ -358,6 +358,22 @@ def analyze_daily_lock_orders(df, start_date, end_date):
             if capacity_counts:
                 stats["details"] = capacity_counts
 
+        # LS9 variant breakdown (Ultra / Hyper)
+        if model == "LS9":
+            variant_counts = {"Ultra": 0, "Hyper": 0}
+            unique_orders = model_df[['order_number', 'product_name']].drop_duplicates('order_number')
+            for _, row in unique_orders.iterrows():
+                p_name = row['product_name']
+                if pd.isna(p_name):
+                    continue
+                p_name = str(p_name)
+                if "Hyper" in p_name:
+                    variant_counts["Hyper"] += 1
+                elif "Ultra" in p_name:
+                    variant_counts["Ultra"] += 1
+            if any(v > 0 for v in variant_counts.values()):
+                stats["variant_details"] = variant_counts
+
         if model == "LS8":
             seat_counts = {label: 0 for label in seat_count_labels}
             unique_orders = model_df[['order_number', 'product_name']].drop_duplicates('order_number')
@@ -658,6 +674,9 @@ def upsert_bitable_observation(lock_stats, invoice_stats, pred_lock: float | Non
             detail_parts.append(f"五座：{sd['五座']}")
         if "六座" in sd:
             detail_parts.append(f"六座：{sd['六座']}")
+        vd = stats.get("variant_details") or {}
+        for variant, v_count in vd.items():
+            detail_parts.append(f"{variant}：{v_count}")
         detail_str = "｜" + "，".join(detail_parts) if detail_parts else ""
         ls9hyper = stats.get("ls9hyper_count")
         if ls9hyper is not None:
@@ -752,6 +771,10 @@ def send_feishu_notification(lock_stats, invoice_stats, pred_lock=None):
                 detail_parts.append(f"五座：{d['五座']}")
             if "六座" in d:
                 detail_parts.append(f"六座：{d['六座']}")
+        if "variant_details" in stats:
+            vd = stats["variant_details"]
+            for variant, v_count in vd.items():
+                detail_parts.append(f"{variant}：{v_count}")
         detail_str = "｜" + "，".join(detail_parts) if detail_parts else ""
         lock_model_details.append(f"- {model}: {count} 单{detail_str}")
     lock_model_text = "\n".join(lock_model_details)
@@ -902,6 +925,10 @@ def main():
                     detail_parts.append(f"五座：{d['五座']}")
                 if "六座" in d:
                     detail_parts.append(f"六座：{d['六座']}")
+            if "variant_details" in stats:
+                vd = stats["variant_details"]
+                for variant, v_count in vd.items():
+                    detail_parts.append(f"{variant}：{v_count}")
             detail_str = "｜" + "，".join(detail_parts) if detail_parts else ""
             ls9hyper = stats.get("ls9hyper_count")
             if ls9hyper is not None:
