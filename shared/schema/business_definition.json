@@ -42,7 +42,7 @@
   },
   "battery_capacity_logic": {
     "52kwh": "product_name LIKE '%52%'",
-    "66kwh": "product_name LIKE '%66%'",
+    "66kwh": "product_name LIKE '%66%' OR product_name LIKE '%Hyper%'",
     "76kwh": "product_name LIKE '%LS6%' AND product_name NOT LIKE '%52%' AND product_name NOT LIKE '%66%' AND product_name NOT LIKE '%103%' AND product_name NOT LIKE '%Ultra%' AND product_name NOT LIKE '%Pro Max%'",
     "103kwh": "product_name LIKE '%LS6%' AND product_name LIKE '%Ultra%' OR product_name LIKE '%LS6%' AND product_name LIKE '%Pro Max%' OR product_name LIKE '%LS6%' AND product_name LIKE '%103%'"
   },
