@@ -136,20 +136,19 @@ miit-diagnose-attachments:
 miit-parse-product-list:
 	$(PYTHON) mashang_workspace/research_scripts/miit_new_car/parse_product_list.py --batch $(BATCH)
 
-## Auto Launch — 本品品牌每日营销监控（新 CLI）
+## Auto Launch — 本品品牌日报（从 facts 库生成，报告层）
 auto-launch-owned-brand-daily:
-	$(PYTHON) -m auto_launch.cli daily \
-		--brand im \
-		--brand-name 智己 \
+	$(PYTHON) -m auto_launch.cli report --type brand-daily \
+		--brand $(or $(BRAND),im) \
+		$(if $(BRAND_NAME),--brand-name $(BRAND_NAME)) \
 		$(if $(DATE),--date $(DATE)) \
 		--window-hours $(or $(WINDOW_HOURS),24) \
-		$(if $(LIVE),--live) \
-		$(if $(REFRESH),--refresh)
+		$(if $(LIMIT),--limit $(LIMIT))
 
 auto-launch-owned-brand-daily-dry-run:
-	$(PYTHON) -m auto_launch.cli daily \
-		--brand im \
-		--brand-name 智己 \
+	$(PYTHON) -m auto_launch.cli report --type brand-daily \
+		--brand $(or $(BRAND),im) \
+		$(if $(BRAND_NAME),--brand-name $(BRAND_NAME)) \
 		$(if $(DATE),--date $(DATE)) \
 		--window-hours $(or $(WINDOW_HOURS),24)
 
@@ -296,8 +295,8 @@ help:
 	@echo "make lock-forecast         锁单月度预估（结构化预测）"
 	@echo "make invoice-forecast      开票月度预估（条件概率模型）"
 	@echo "=== Auto Launch (独立 service: auto_launch/) ==="
-	@echo "make auto-launch-owned-brand-daily         本品品牌每日营销监控"
-	@echo "make auto-launch-owned-brand-daily-dry-run 本品品牌每日营销监控（dry-run）"
+	@echo "make auto-launch-owned-brand-daily         本品品牌日报（从 facts 生成，报告层）BRAND=im BRAND_NAME=智己"
+	@echo "make auto-launch-owned-brand-daily-dry-run 本品品牌日报（dry-run，同上）"
 	@echo "make auto-launch-search                    Volc Search 搜索意图转译 (REQUEST=...) [dry-run]"
 	@echo "make auto-launch-normalize-results         标准化搜索结果 (RAW=... QUERY_PLAN=...)"
 	@echo "  配置目录: auto_launch/configs/"

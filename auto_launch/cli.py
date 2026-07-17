@@ -25,14 +25,18 @@ facts 是共享中间层：
   python -m auto_launch.cli launch
 """
 
-import sys, argparse
+import sys, argparse, os
 from pathlib import Path
 from datetime import datetime, timedelta
+from dotenv import load_dotenv
 
 # Ensure project root is on path
 _PROJECT_ROOT = str(Path(__file__).resolve().parent.parent)
 if _PROJECT_ROOT not in sys.path:
     sys.path.insert(0, _PROJECT_ROOT)
+
+# Load .env from project root
+load_dotenv(Path(_PROJECT_ROOT) / ".env")
 
 
 # ── daily: ChatGPT Daily Run ingestion ────────────────────────────
