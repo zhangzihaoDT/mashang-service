@@ -202,6 +202,25 @@
 | order_type   | str       | 订单类型（关联自 order_data，如用户车/员工/试驾车等）  |
 | vin          | str       | 车辆识别代码（关联自 order_data）                     |
 
+### passenger_insurance（乘用车上险数据）
+
+6 张表，覆盖 2020-01-01 → 2026-06-01，数据源为 Tableau。
+
+| 表 | Grain | 维度 | 指标 | 用途 |
+|:---|:------|:-----|:-----|:-----|
+| `market_energy_monthly` | date_month + fuel_type_group + fuel_type | date_month, fuel_type_group, fuel_type | sales, weighted_tp | 市场总量、能源结构、纯电/插混/增程走势、价格重心 |
+| `brand_monthly` | date_month + brand | date_month, brand, brand_group, brand_luxury_group, oem_group, oem, brand_country, ownership_type, domestic_import | sales, weighted_tp | 品牌排名、品牌份额、品牌分组竞争、价格重心 |
+| `model_monthly` | date_month + brand + model + sub_model + sub_model_id | date_month, brand, brand_series, model, sub_model, sub_model_id, fuel_type, fuel_type_group, body_type, vehicle_level, vehicle_level_group, saic_segment, drive_type, drive_type_group | sales, weighted_tp | 车型排名、品牌内车型结构、级别/燃料/驱动分布 |
+| `geo_monthly` | date_month + province + city + city_tier_group + fuel_type_group | date_month, province, city, region_group, city_tier_2025, city_tier_group, fuel_type_group | sales, weighted_tp | 省市市场、城市线级、区域新能源渗透 |
+| `price_segment_monthly` | date_month + tp_bucket_5w + tp_bucket_10w + fuel_type_group + body_type + vehicle_level_group | date_month, tp_bucket_5w, tp_bucket_10w, fuel_type_group, body_type, vehicle_level_group | sales, weighted_tp | 价格带市场容量、价格带 × 能源 × 车身 × 级别交叉 |
+| `product_segment_monthly` | date_month + saic_segment + body_type + vehicle_level + vehicle_level_group + fuel_type_group + drive_type_group | date_month, saic_segment, body_type, vehicle_level, vehicle_level_group, fuel_type_group, drive_type_group | sales, weighted_tp, weighted_length_mm, weighted_width_mm, weighted_height_mm, weighted_wheelbase_mm | 细分市场、车身/级别/驱动结构、大车化趋势、产品尺寸重心 |
+
+**字段说明**：
+- `sales`: 上险销量（辆），核心聚合指标
+- `weighted_tp`: 价格重心（元），销量加权平均成交价
+- `weighted_length_mm` / `weighted_width_mm` / `weighted_height_mm` / `weighted_wheelbase_mm`: 销量加权平均尺寸（mm），仅 `product_segment_monthly` 有
+- `date_month`: 月粒度日期，格式 `YYYY-MM-01`
+
 ## 3. 微信群聊消息 (wechat_sync)
 
 由外部工具 `获取微信群聊记录` 定期同步生成，每个群聊一个独立 Parquet 文件。`dataset` 参数为群聊名称（即文件名不含 `.parquet` 的部分）。
