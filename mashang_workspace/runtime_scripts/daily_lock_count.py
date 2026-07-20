@@ -22,6 +22,7 @@ if str(_WS_ROOT) not in sys.path:
 import pandas as pd
 from datetime import datetime, timedelta
 from utils.result_contract import build_success_contract, save_contract_json, contract_to_terminal
+from utils.business import get_launch_date
 
 ORDER_PARQUET = REPO_ROOT / "dataset" / "order_data.parquet"
 
@@ -34,10 +35,21 @@ def parse_args():
     p.add_argument("--model", type=str, help="具体车型过滤")
     p.add_argument("--city", type=str, help="城市过滤 (license_city)")
     p.add_argument("--output", type=str, help="输出目录 (默认 outputs/tables/)")
+    p.add_argument("--since-launch", type=str, default=None,
+                   help="从 business_definition 中该车系的上市日开始计算，覆盖 --start-date")
     p.add_argument("--format", type=str, default="terminal", choices=["terminal", "csv", "json"])
     return p.parse_args()
 
 def resolve_time_range(args):
+    if args.since_launch:
+        series = args.since_launch
+        ld = get_launch_date(series)
+        if ld is None:
+            print(f"错误: business_definition 中未找到 {series} 的上市时间", file=sys.stderr)
+            sys.exit(1)
+        s = pd.Timestamp(ld)
+        e = pd.Timestamp(datetime.now().date()) + timedelta(days=1)
+        return s, e, f"{ld}~now", "range"
     if args.date:
         d = pd.Timestamp(args.date)
         return d, d + timedelta(days=1), args.date, "date"
@@ -58,7 +70,8 @@ def main():
     mask = (df["lock_time"] >= t_start) & (df["lock_time"] < t_end)
     df_f = df[mask]
 
-    if args.series: df_f = df_f[df_f["series"] == args.series]
+    series_filter = args.series or args.since_launch
+    if series_filter: df_f = df_f[df_f["series"] == series_filter]
     if args.model: df_f = df_f[df_f["product_name"].str.contains(args.model, na=False)]
     if args.city: df_f = df_f[df_f["license_city"] == args.city]
 
@@ -70,6 +83,10 @@ def main():
         time_window["date"] = t_label
         time_window["start_date"] = t_label
         time_window["end_date"] = t_label
+    elif args.since_launch:
+        time_window["start_date"] = t_start.strftime("%Y-%m-%d")
+        time_window["end_date"] = (t_end - timedelta(days=1)).strftime("%Y-%m-%d")
+        time_window["since_launch"] = args.since_launch
     else:
         time_window["start_date"] = args.start_date
         time_window["end_date"] = args.end_date
@@ -77,7 +94,7 @@ def main():
     scope = {
         "data_source": str(ORDER_PARQUET),
         "time_window": time_window,
-        "filters": {"series": args.series, "model": args.model, "city": args.city},
+        "filters": {"series": series_filter, "model": args.model, "city": args.city},
         "metric_definition": "lock_count = COUNTD(order_number WHERE lock_time IS NOT NULL)",
     }
     result = {
@@ -94,8 +111,9 @@ def main():
 
     ctx = {"metric": "lock_count", "available_dimensions": ["series", "product_name", "license_city", "store_city"]}
     if tw_type == "date": ctx["date"] = t_label
+    elif args.since_launch: ctx.update({"since_launch": args.since_launch})
     else: ctx.update({"start_date": args.start_date, "end_date": args.end_date})
-    if args.series: ctx["series"] = args.series
+    if series_filter: ctx["series"] = series_filter
 
     contract = build_success_contract(
         script="scripts/daily_lock_count.py", command=cmd, scope=scope,

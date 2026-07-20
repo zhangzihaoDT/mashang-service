@@ -287,6 +287,14 @@ In this project, the visual system should behave as a data product style, not as
 
 Use the raccoon avatar or brand wordmark only in report headers, footers, cover pages, empty states, and final signatures.
 
+## 上市时间查询规则
+
+**涉及"上市以来/上市至今"等时间范围时，必须使用 `business_definition.json` 中 `time_periods.{series}.end` 字段，不得从数据中取 `lock_time` 的最小值推断。**
+
+- 优先使用脚本的 `--since-launch` 参数（如 `daily_lock_count.py --since-launch LS9`）
+- 临时分析使用 `utils.business.get_launch_date(series)` 获取上市日期
+- `business_definition.json` 路径：`shared/schema/business_definition.json`
+
 Charts, tables, and metric cards should remain clean, readable, and data-first.
 
 Default output path for branded reports:

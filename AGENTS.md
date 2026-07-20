@@ -61,6 +61,8 @@ mashang-service 是一个**汽车业务数据分析项目**，包含以下分支
 1. **优先阅读 docs**：`docs/` 目录下的文档是首要参考资料，包含业务术语、指标口径、车型映射、时间规则、分析范式、追问规则。
 2. **优先复用 scripts**：`scripts/` 已有 13+ 个独立脚本，新需求优先基于现有脚本扩展。
 3. **不要随意修改原始数据**：`dataset/` 下的 CSV/Parquet 是原始数据，分析应使用副本或只读方式。
+
+**上市时间必须从业务定义读取**：涉及"上市以来"的时间范围，必须使用 `shared/schema/business_definition.json` 中 `time_periods.{series}.end` 字段，不得从数据中取 `lock_time` 最小值推断。脚本优先使用 `--since-launch` 参数，临时分析使用 `mashang_workspace/utils/business.py` 的 `get_launch_date()`。
 4. **不要编造数据**：在数据无法支撑结论时，明确说明"无数据/数据不足"。
 5. **所有分析结果必须说明来源**：包括数据源、过滤条件、时间窗口、指标口径。
 6. **临时代码放 scratch/ 或 outputs/**，稳定脚本再沉淀到 `scripts/`。
