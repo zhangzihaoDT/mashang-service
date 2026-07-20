@@ -1,0 +1,1852 @@
+{
+  "report_month": "2026-06",
+  "generated_at": "2026-07-17T16:29:49.754449",
+  "executive_summary": {
+    "total_sales": 1686614,
+    "yoy_sales_pct": -23.6,
+    "yoy_arrow": "↓",
+    "mom_sales_pct": 12.8,
+    "mom_arrow": "↑",
+    "nev_penetration": 59.2,
+    "nev_pen_mom": -1.9,
+    "nev_pen_yoy": 8.7,
+    "weighted_tp": 171865,
+    "weighted_tp_mom": 3111,
+    "prev_total_sales": 1495148,
+    "ly_total_sales": 2206794,
+    "insights": [
+      "插电式混合动力增长 11%",
+      "纯电动增长 10%",
+      "汽油增长 19%",
+      "大众份额+1.3pct",
+      "丰田份额+0.6pct"
+    ]
+  },
+  "overall_market": {
+    "total_sales": 1686614,
+    "mom_pct": 12.8,
+    "yoy_pct": -23.6,
+    "weighted_tp": 171865,
+    "tp_mom": 3111,
+    "nev_penetration": 59.2,
+    "nev_pen_mom": -1.9,
+    "nev_pen_yoy": 8.7,
+    "energy_breakdown": [
+      {
+        "group": "新能源",
+        "type": "插电式混合动力",
+        "sales": 235708,
+        "share_pct": 14.0,
+        "mom_pct": 10.8,
+        "weighted_tp": 183098
+      },
+      {
+        "group": "其他能源",
+        "type": "柴油",
+        "sales": 1465,
+        "share_pct": 0.1,
+        "mom_pct": -13.2,
+        "weighted_tp": 221837
+      },
+      {
+        "group": "新能源",
+        "type": "纯电动",
+        "sales": 687194,
+        "share_pct": 40.7,
+        "mom_pct": 10.1,
+        "weighted_tp": 155840
+      },
+      {
+        "group": "其他能源",
+        "type": "非插电式混合动力",
+        "sales": 101785,
+        "share_pct": 6.0,
+        "mom_pct": 15.9,
+        "weighted_tp": 193296
+      },
+      {
+        "group": "其他能源",
+        "type": "非插电式增程型电动",
+        "sales": 9,
+        "share_pct": 0.0,
+        "mom_pct": 80.0,
+        "weighted_tp": 0
+      },
+      {
+        "group": "其他能源",
+        "type": "汽油",
+        "sales": 584549,
+        "share_pct": 34.7,
+        "mom_pct": 18.8,
+        "weighted_tp": 166993
+      },
+      {
+        "group": "其他能源",
+        "type": "双燃料",
+        "sales": 1163,
+        "share_pct": 0.1,
+        "mom_pct": -17.1,
+        "weighted_tp": 23810
+      },
+      {
+        "group": "新能源",
+        "type": "增程型电动",
+        "sales": 74741,
+        "share_pct": 4.4,
+        "mom_pct": -1.0,
+        "weighted_tp": 294049
+      }
+    ],
+    "nev_structure": {
+      "bev_share": 68.9,
+      "phev_share": 23.6,
+      "reev_share": 7.5
+    }
+  },
+  "brand_landscape": {
+    "total_sales": 1686614,
+    "top20": [
+      {
+        "brand": "比亚迪",
+        "sales": 177370,
+        "weighted_tp": 91075,
+        "share_pct": 10.5,
+        "prev_sales": 161548,
+        "mom_pct": 9.8
+      },
+      {
+        "brand": "丰田",
+        "sales": 129526,
+        "weighted_tp": 204437,
+        "share_pct": 7.7,
+        "prev_sales": 106470,
+        "mom_pct": 21.7
+      },
+      {
+        "brand": "大众",
+        "sales": 123571,
+        "weighted_tp": 183453,
+        "share_pct": 7.3,
+        "prev_sales": 90438,
+        "mom_pct": 36.6
+      },
+      {
+        "brand": "吉利银河",
+        "sales": 75304,
+        "weighted_tp": 94192,
+        "share_pct": 4.5,
+        "prev_sales": 72827,
+        "mom_pct": 3.4
+      },
+      {
+        "brand": "零跑",
+        "sales": 70361,
+        "weighted_tp": 116561,
+        "share_pct": 4.2,
+        "prev_sales": 62989,
+        "mom_pct": 11.7
+      },
+      {
+        "brand": "吉利",
+        "sales": 59831,
+        "weighted_tp": 85439,
+        "share_pct": 3.5,
+        "prev_sales": 55696,
+        "mom_pct": 7.4
+      },
+      {
+        "brand": "特斯拉",
+        "sales": 52100,
+        "weighted_tp": 272447,
+        "share_pct": 3.1,
+        "prev_sales": 47737,
+        "mom_pct": 9.1
+      },
+      {
+        "brand": "五菱",
+        "sales": 46313,
+        "weighted_tp": 66228,
+        "share_pct": 2.7,
+        "prev_sales": 47821,
+        "mom_pct": -3.2
+      },
+      {
+        "brand": "奔驰",
+        "sales": 41826,
+        "weighted_tp": 473292,
+        "share_pct": 2.5,
+        "prev_sales": 34577,
+        "mom_pct": 21.0
+      },
+      {
+        "brand": "宝马",
+        "sales": 40293,
+        "weighted_tp": 376432,
+        "share_pct": 2.4,
+        "prev_sales": 35060,
+        "mom_pct": 14.9
+      },
+      {
+        "brand": "奥迪",
+        "sales": 36966,
+        "weighted_tp": 299704,
+        "share_pct": 2.2,
+        "prev_sales": 30552,
+        "mom_pct": 21.0
+      },
+      {
+        "brand": "小米",
+        "sales": 34768,
+        "weighted_tp": 251619,
+        "share_pct": 2.1,
+        "prev_sales": 32937,
+        "mom_pct": 5.6
+      },
+      {
+        "brand": "本田",
+        "sales": 34183,
+        "weighted_tp": 96303,
+        "share_pct": 2.0,
+        "prev_sales": 30296,
+        "mom_pct": 12.8
+      },
+      {
+        "brand": "启源",
+        "sales": 33243,
+        "weighted_tp": 101945,
+        "share_pct": 2.0,
+        "prev_sales": 28462,
+        "mom_pct": 16.8
+      },
+      {
+        "brand": "长安",
+        "sales": 33035,
+        "weighted_tp": 78681,
+        "share_pct": 2.0,
+        "prev_sales": 31901,
+        "mom_pct": 3.6
+      },
+      {
+        "brand": "小鹏",
+        "sales": 32212,
+        "weighted_tp": 189866,
+        "share_pct": 1.9,
+        "prev_sales": 25854,
+        "mom_pct": 24.6
+      },
+      {
+        "brand": "理想",
+        "sales": 31117,
+        "weighted_tp": 325955,
+        "share_pct": 1.8,
+        "prev_sales": 33012,
+        "mom_pct": -5.7
+      },
+      {
+        "brand": "日产",
+        "sales": 30393,
+        "weighted_tp": 69134,
+        "share_pct": 1.8,
+        "prev_sales": 28035,
+        "mom_pct": 8.4
+      },
+      {
+        "brand": "AITO",
+        "sales": 29572,
+        "weighted_tp": 352804,
+        "share_pct": 1.8,
+        "prev_sales": 34781,
+        "mom_pct": -15.0
+      },
+      {
+        "brand": "奇瑞",
+        "sales": 28707,
+        "weighted_tp": 41436,
+        "share_pct": 1.7,
+        "prev_sales": 22780,
+        "mom_pct": 26.0
+      }
+    ],
+    "share_changes": [
+      {
+        "brand": "大众",
+        "share_chg": 1.3
+      },
+      {
+        "brand": "丰田",
+        "share_chg": 0.6
+      },
+      {
+        "brand": "AITO",
+        "share_chg": -0.6
+      },
+      {
+        "brand": "五菱",
+        "share_chg": -0.5
+      },
+      {
+        "brand": "吉利银河",
+        "share_chg": -0.4
+      },
+      {
+        "brand": "理想",
+        "share_chg": -0.4
+      },
+      {
+        "brand": "极氪",
+        "share_chg": -0.3
+      },
+      {
+        "brand": "尚界",
+        "share_chg": 0.3
+      },
+      {
+        "brand": "比亚迪",
+        "share_chg": -0.3
+      },
+      {
+        "brand": "奇瑞",
+        "share_chg": 0.2
+      }
+    ],
+    "group_analysis": [
+      {
+        "field": "brand_luxury_group",
+        "rows": [
+          {
+            "group": "非豪华",
+            "sales": 1248835,
+            "share_pct": 74.0,
+            "share_chg": 0.7
+          },
+          {
+            "group": "新豪华",
+            "sales": 278172,
+            "share_pct": 16.5,
+            "share_chg": -1.0
+          },
+          {
+            "group": "一线豪华（BBA）",
+            "sales": 119085,
+            "share_pct": 7.1,
+            "share_chg": null
+          },
+          {
+            "group": "其他豪华",
+            "sales": 40118,
+            "share_pct": 2.4,
+            "share_chg": -0.1
+          },
+          {
+            "group": "启境",
+            "sales": 404,
+            "share_pct": 0.0,
+            "share_chg": null
+          }
+        ]
+      },
+      {
+        "field": "ownership_type",
+        "rows": [
+          {
+            "group": "个人",
+            "sales": 1399516,
+            "share_pct": 83.0,
+            "share_chg": -3.5
+          },
+          {
+            "group": "单位",
+            "sales": 237970,
+            "share_pct": 14.1,
+            "share_chg": 3.3
+          },
+          {
+            "group": "不确定",
+            "sales": 49128,
+            "share_pct": 2.9,
+            "share_chg": 0.1
+          }
+        ]
+      }
+    ]
+  },
+  "model_ranking": {
+    "top50": [
+      {
+        "brand": "吉利银河",
+        "model": "星愿",
+        "sub_model": "星愿",
+        "fuel_type": "纯电动",
+        "sales": 33874,
+        "weighted_tp": 67498,
+        "share_pct": 2.0
+      },
+      {
+        "brand": "特斯拉",
+        "model": "MODEL Y",
+        "sub_model": "MODEL Y",
+        "fuel_type": "纯电动",
+        "sales": 27641,
+        "weighted_tp": 273905,
+        "share_pct": 1.6
+      },
+      {
+        "brand": "零跑",
+        "model": "零跑A10",
+        "sub_model": "零跑A10",
+        "fuel_type": "纯电动",
+        "sales": 25883,
+        "weighted_tp": 79030,
+        "share_pct": 1.5
+      },
+      {
+        "brand": "理想",
+        "model": "理想i6",
+        "sub_model": "理想i6",
+        "fuel_type": "纯电动",
+        "sales": 21442,
+        "weighted_tp": 240884,
+        "share_pct": 1.3
+      },
+      {
+        "brand": "启源",
+        "model": "Q05",
+        "sub_model": "Q05",
+        "fuel_type": "纯电动",
+        "sales": 19129,
+        "weighted_tp": 79861,
+        "share_pct": 1.1
+      },
+      {
+        "brand": "小米",
+        "model": "小米SU7",
+        "sub_model": "小米SU7",
+        "fuel_type": "纯电动",
+        "sales": 18338,
+        "weighted_tp": 240732,
+        "share_pct": 1.1
+      },
+      {
+        "brand": "比亚迪",
+        "model": "元",
+        "sub_model": "元UP",
+        "fuel_type": "纯电动",
+        "sales": 17915,
+        "weighted_tp": 78863,
+        "share_pct": 1.1
+      },
+      {
+        "brand": "比亚迪",
+        "model": "宋",
+        "sub_model": "宋Pro DM-i",
+        "fuel_type": "插电式混合动力",
+        "sales": 16453,
+        "weighted_tp": 111831,
+        "share_pct": 1.0
+      },
+      {
+        "brand": "小鹏",
+        "model": "MONA M03",
+        "sub_model": "MONA M03",
+        "fuel_type": "纯电动",
+        "sales": 14865,
+        "weighted_tp": 130254,
+        "share_pct": 0.9
+      },
+      {
+        "brand": "丰田",
+        "model": "凯美瑞",
+        "sub_model": "凯美瑞 双擎",
+        "fuel_type": "非插电式混合动力",
+        "sales": 14353,
+        "weighted_tp": 148906,
+        "share_pct": 0.9
+      },
+      {
+        "brand": "五菱",
+        "model": "五菱缤果",
+        "sub_model": "缤果Pro",
+        "fuel_type": "纯电动",
+        "sales": 14058,
+        "weighted_tp": 63285,
+        "share_pct": 0.8
+      },
+      {
+        "brand": "大众",
+        "model": "迈腾",
+        "sub_model": "迈腾",
+        "fuel_type": "汽油",
+        "sales": 13941,
+        "weighted_tp": 158978,
+        "share_pct": 0.8
+      },
+      {
+        "brand": "大众",
+        "model": "探岳",
+        "sub_model": "探岳",
+        "fuel_type": "汽油",
+        "sales": 13573,
+        "weighted_tp": 142030,
+        "share_pct": 0.8
+      },
+      {
+        "brand": "比亚迪",
+        "model": "海豚",
+        "sub_model": "海豚 EV",
+        "fuel_type": "纯电动",
+        "sales": 13204,
+        "weighted_tp": 82450,
+        "share_pct": 0.8
+      },
+      {
+        "brand": "MG",
+        "model": "MG4 EV",
+        "sub_model": "MG4 EV",
+        "fuel_type": "纯电动",
+        "sales": 13034,
+        "weighted_tp": 78229,
+        "share_pct": 0.8
+      },
+      {
+        "brand": "特斯拉",
+        "model": "MODEL 3",
+        "sub_model": "MODEL 3",
+        "fuel_type": "纯电动",
+        "sales": 12900,
+        "weighted_tp": 232841,
+        "share_pct": 0.8
+      },
+      {
+        "brand": "五菱",
+        "model": "宏光MINI EV",
+        "sub_model": "宏光MINI EV",
+        "fuel_type": "纯电动",
+        "sales": 12125,
+        "weighted_tp": 38744,
+        "share_pct": 0.7
+      },
+      {
+        "brand": "宝马",
+        "model": "3系",
+        "sub_model": "3系",
+        "fuel_type": "汽油",
+        "sales": 11999,
+        "weighted_tp": 237692,
+        "share_pct": 0.7
+      },
+      {
+        "brand": "深蓝",
+        "model": "S05",
+        "sub_model": "S05 EV",
+        "fuel_type": "纯电动",
+        "sales": 11989,
+        "weighted_tp": 119325,
+        "share_pct": 0.7
+      },
+      {
+        "brand": "奔驰",
+        "model": "E级",
+        "sub_model": "E级",
+        "fuel_type": "汽油",
+        "sales": 11964,
+        "weighted_tp": 369036,
+        "share_pct": 0.7
+      },
+      {
+        "brand": "吉利",
+        "model": "缤越",
+        "sub_model": "缤越",
+        "fuel_type": "汽油",
+        "sales": 11854,
+        "weighted_tp": 67609,
+        "share_pct": 0.7
+      },
+      {
+        "brand": "大众",
+        "model": "帕萨特",
+        "sub_model": "帕萨特",
+        "fuel_type": "汽油",
+        "sales": 11833,
+        "weighted_tp": 151280,
+        "share_pct": 0.7
+      },
+      {
+        "brand": "比亚迪",
+        "model": "海狮06",
+        "sub_model": "海狮06 EV",
+        "fuel_type": "纯电动",
+        "sales": 11725,
+        "weighted_tp": 162322,
+        "share_pct": 0.7
+      },
+      {
+        "brand": "大众",
+        "model": "速腾",
+        "sub_model": "速腾",
+        "fuel_type": "汽油",
+        "sales": 11365,
+        "weighted_tp": 110646,
+        "share_pct": 0.7
+      },
+      {
+        "brand": "比亚迪",
+        "model": "海狮05",
+        "sub_model": "海狮05 DM-i",
+        "fuel_type": "插电式混合动力",
+        "sales": 11255,
+        "weighted_tp": 112307,
+        "share_pct": 0.7
+      },
+      {
+        "brand": "奔驰",
+        "model": "GLC级",
+        "sub_model": "GLC级",
+        "fuel_type": "汽油",
+        "sales": 11231,
+        "weighted_tp": 326895,
+        "share_pct": 0.7
+      },
+      {
+        "brand": "丰田",
+        "model": "锋兰达",
+        "sub_model": "锋兰达",
+        "fuel_type": "汽油",
+        "sales": 10861,
+        "weighted_tp": 87999,
+        "share_pct": 0.6
+      },
+      {
+        "brand": "比亚迪",
+        "model": "秦",
+        "sub_model": "秦PLUS DM-i",
+        "fuel_type": "插电式混合动力",
+        "sales": 10718,
+        "weighted_tp": 78182,
+        "share_pct": 0.6
+      },
+      {
+        "brand": "小米",
+        "model": "YU7",
+        "sub_model": "YU7",
+        "fuel_type": "纯电动",
+        "sales": 10543,
+        "weighted_tp": 261997,
+        "share_pct": 0.6
+      },
+      {
+        "brand": "吉利",
+        "model": "星越",
+        "sub_model": "星越L",
+        "fuel_type": "汽油",
+        "sales": 10237,
+        "weighted_tp": 133415,
+        "share_pct": 0.6
+      },
+      {
+        "brand": "吉利",
+        "model": "博越",
+        "sub_model": "博越L",
+        "fuel_type": "汽油",
+        "sales": 10078,
+        "weighted_tp": 100488,
+        "share_pct": 0.6
+      },
+      {
+        "brand": "比亚迪",
+        "model": "海鸥",
+        "sub_model": "海鸥 EV",
+        "fuel_type": "纯电动",
+        "sales": 9941,
+        "weighted_tp": 66270,
+        "share_pct": 0.6
+      },
+      {
+        "brand": "丰田",
+        "model": "RAV4荣放",
+        "sub_model": "RAV4荣放 双擎",
+        "fuel_type": "非插电式混合动力",
+        "sales": 9843,
+        "weighted_tp": 156432,
+        "share_pct": 0.6
+      },
+      {
+        "brand": "奇瑞QQ",
+        "model": "QQ",
+        "sub_model": "QQ3 EV",
+        "fuel_type": "纯电动",
+        "sales": 9806,
+        "weighted_tp": 69310,
+        "share_pct": 0.6
+      },
+      {
+        "brand": "蔚来",
+        "model": "蔚来ES9",
+        "sub_model": "蔚来ES9",
+        "fuel_type": "纯电动",
+        "sales": 9641,
+        "weighted_tp": 566558,
+        "share_pct": 0.6
+      },
+      {
+        "brand": "本田",
+        "model": "雅阁",
+        "sub_model": "雅阁",
+        "fuel_type": "汽油",
+        "sales": 9594,
+        "weighted_tp": 139601,
+        "share_pct": 0.6
+      },
+      {
+        "brand": "日产",
+        "model": "轩逸",
+        "sub_model": "轩逸经典",
+        "fuel_type": "汽油",
+        "sales": 9532,
+        "weighted_tp": 61900,
+        "share_pct": 0.6
+      },
+      {
+        "brand": "奔驰",
+        "model": "C级",
+        "sub_model": "C级",
+        "fuel_type": "汽油",
+        "sales": 9520,
+        "weighted_tp": 243385,
+        "share_pct": 0.6
+      },
+      {
+        "brand": "零跑",
+        "model": "零跑C10",
+        "sub_model": "零跑C10 EV",
+        "fuel_type": "纯电动",
+        "sales": 9388,
+        "weighted_tp": 124253,
+        "share_pct": 0.6
+      },
+      {
+        "brand": "蔚来",
+        "model": "蔚来ES8",
+        "sub_model": "蔚来ES8",
+        "fuel_type": "纯电动",
+        "sales": 9268,
+        "weighted_tp": 397832,
+        "share_pct": 0.5
+      },
+      {
+        "brand": "大众",
+        "model": "途岳",
+        "sub_model": "途岳新锐",
+        "fuel_type": "汽油",
+        "sales": 9243,
+        "weighted_tp": 86894,
+        "share_pct": 0.5
+      },
+      {
+        "brand": "本田",
+        "model": "CR-V",
+        "sub_model": "CR-V",
+        "fuel_type": "汽油",
+        "sales": 8934,
+        "weighted_tp": 149524,
+        "share_pct": 0.5
+      },
+      {
+        "brand": "大众",
+        "model": "途观",
+        "sub_model": "途观L",
+        "fuel_type": "汽油",
+        "sales": 8911,
+        "weighted_tp": 145170,
+        "share_pct": 0.5
+      },
+      {
+        "brand": "丰田",
+        "model": "铂智3X",
+        "sub_model": "铂智3X",
+        "fuel_type": "纯电动",
+        "sales": 8831,
+        "weighted_tp": 117309,
+        "share_pct": 0.5
+      },
+      {
+        "brand": "丰田",
+        "model": "卡罗拉锐放",
+        "sub_model": "卡罗拉锐放",
+        "fuel_type": "汽油",
+        "sales": 8524,
+        "weighted_tp": 84680,
+        "share_pct": 0.5
+      },
+      {
+        "brand": "大众",
+        "model": "朗逸",
+        "sub_model": "朗逸新锐",
+        "fuel_type": "汽油",
+        "sales": 8273,
+        "weighted_tp": 67118,
+        "share_pct": 0.5
+      },
+      {
+        "brand": "比亚迪",
+        "model": "宋Ultra",
+        "sub_model": "宋Ultra EV",
+        "fuel_type": "纯电动",
+        "sales": 8212,
+        "weighted_tp": 167680,
+        "share_pct": 0.5
+      },
+      {
+        "brand": "吉利",
+        "model": "星瑞",
+        "sub_model": "星瑞",
+        "fuel_type": "汽油",
+        "sales": 8192,
+        "weighted_tp": 97000,
+        "share_pct": 0.5
+      },
+      {
+        "brand": "丰田",
+        "model": "卡罗拉锐放",
+        "sub_model": "卡罗拉锐放 双擎",
+        "fuel_type": "非插电式混合动力",
+        "sales": 8186,
+        "weighted_tp": 98439,
+        "share_pct": 0.5
+      },
+      {
+        "brand": "奇瑞",
+        "model": "瑞虎8",
+        "sub_model": "瑞虎8",
+        "fuel_type": "汽油",
+        "sales": 8089,
+        "weighted_tp": 101264,
+        "share_pct": 0.5
+      }
+    ],
+    "new_entries_top20": [
+      {
+        "brand": "大众",
+        "model": "帕萨特",
+        "sub_model": "帕萨特",
+        "sales": 11833
+      },
+      {
+        "brand": "小米",
+        "model": "YU7",
+        "sub_model": "YU7",
+        "sales": 10543
+      },
+      {
+        "brand": "蔚来",
+        "model": "蔚来ES9",
+        "sub_model": "蔚来ES9",
+        "sales": 9641
+      },
+      {
+        "brand": "本田",
+        "model": "雅阁",
+        "sub_model": "雅阁",
+        "sales": 9594
+      },
+      {
+        "brand": "大众",
+        "model": "途岳",
+        "sub_model": "途岳新锐",
+        "sales": 9243
+      },
+      {
+        "brand": "丰田",
+        "model": "铂智3X",
+        "sub_model": "铂智3X",
+        "sales": 8831
+      },
+      {
+        "brand": "大众",
+        "model": "朗逸",
+        "sub_model": "朗逸新锐",
+        "sales": 8273
+      },
+      {
+        "brand": "丰田",
+        "model": "卡罗拉锐放",
+        "sub_model": "卡罗拉锐放 双擎",
+        "sales": 8186
+      },
+      {
+        "brand": "奇瑞",
+        "model": "瑞虎8",
+        "sub_model": "瑞虎8",
+        "sales": 8089
+      }
+    ],
+    "bev_top10": [
+      {
+        "brand": "吉利银河",
+        "model": "星愿",
+        "sales": 33874.0
+      },
+      {
+        "brand": "特斯拉",
+        "model": "MODEL Y",
+        "sales": 27641.0
+      },
+      {
+        "brand": "零跑",
+        "model": "零跑A10",
+        "sales": 25883.0
+      },
+      {
+        "brand": "理想",
+        "model": "理想i6",
+        "sales": 21442.0
+      },
+      {
+        "brand": "启源",
+        "model": "Q05",
+        "sales": 19129.0
+      },
+      {
+        "brand": "小米",
+        "model": "小米SU7",
+        "sales": 18338.0
+      },
+      {
+        "brand": "比亚迪",
+        "model": "元",
+        "sales": 17915.0
+      },
+      {
+        "brand": "小鹏",
+        "model": "MONA M03",
+        "sales": 14865.0
+      },
+      {
+        "brand": "五菱",
+        "model": "五菱缤果",
+        "sales": 14058.0
+      },
+      {
+        "brand": "比亚迪",
+        "model": "海豚",
+        "sales": 13204.0
+      }
+    ],
+    "phev_top10": [
+      {
+        "brand": "比亚迪",
+        "model": "宋",
+        "sales": 16453.0
+      },
+      {
+        "brand": "比亚迪",
+        "model": "海狮05",
+        "sales": 11255.0
+      },
+      {
+        "brand": "比亚迪",
+        "model": "秦",
+        "sales": 10718.0
+      },
+      {
+        "brand": "方程豹",
+        "model": "钛7",
+        "sales": 7643.0
+      },
+      {
+        "brand": "方程豹",
+        "model": "钛7",
+        "sales": 7270.0
+      },
+      {
+        "brand": "比亚迪",
+        "model": "海豹05",
+        "sales": 6984.0
+      },
+      {
+        "brand": "比亚迪",
+        "model": "秦",
+        "sales": 6168.0
+      },
+      {
+        "brand": "哈弗",
+        "model": "哈弗猛龙",
+        "sales": 6117.0
+      },
+      {
+        "brand": "极氪",
+        "model": "极氪9X",
+        "sales": 5972.0
+      },
+      {
+        "brand": "比亚迪",
+        "model": "海豹06",
+        "sales": 5688.0
+      }
+    ],
+    "reev_top10": [
+      {
+        "brand": "理想",
+        "model": "理想L9",
+        "sales": 6048.0
+      },
+      {
+        "brand": "AITO",
+        "model": "问界M9",
+        "sales": 6039.0
+      },
+      {
+        "brand": "零跑",
+        "model": "零跑D19",
+        "sales": 4811.0
+      },
+      {
+        "brand": "AITO",
+        "model": "问界M6",
+        "sales": 4291.0
+      },
+      {
+        "brand": "小鹏",
+        "model": "GX",
+        "sales": 3859.0
+      },
+      {
+        "brand": "智界",
+        "model": "智界V9",
+        "sales": 3670.0
+      },
+      {
+        "brand": "北京越野",
+        "model": "BJ40",
+        "sales": 3146.0
+      },
+      {
+        "brand": "大众",
+        "model": "ID.ERA 9X",
+        "sales": 2984.0
+      },
+      {
+        "brand": "零跑",
+        "model": "零跑C16",
+        "sales": 2481.0
+      },
+      {
+        "brand": "日产",
+        "model": "NX8",
+        "sales": 2460.0
+      }
+    ]
+  },
+  "product_structure": {
+    "body_type": [
+      {
+        "body_type": "MPV",
+        "sales": 73449,
+        "share_pct": 4.4,
+        "prev_sales": 62936,
+        "mom_pct": 16.7
+      },
+      {
+        "body_type": "SUV",
+        "sales": 935215,
+        "share_pct": 55.4,
+        "prev_sales": 824684,
+        "mom_pct": 13.4
+      },
+      {
+        "body_type": "跑车",
+        "sales": 656,
+        "share_pct": 0.0,
+        "prev_sales": 750,
+        "mom_pct": -12.5
+      },
+      {
+        "body_type": "轿车",
+        "sales": 677294,
+        "share_pct": 40.2,
+        "prev_sales": 606778,
+        "mom_pct": 11.6
+      }
+    ],
+    "vehicle_level": [
+      {
+        "vehicle_level_group": "A",
+        "sales": 520559,
+        "share_pct": 30.9,
+        "prev_sales": 446504,
+        "mom_pct": 16.6
+      },
+      {
+        "vehicle_level_group": "A0",
+        "sales": 164902,
+        "share_pct": 9.8,
+        "prev_sales": 162177,
+        "mom_pct": 1.7
+      },
+      {
+        "vehicle_level_group": "A00",
+        "sales": 26551,
+        "share_pct": 1.6,
+        "prev_sales": 30691,
+        "mom_pct": -13.5
+      },
+      {
+        "vehicle_level_group": "B",
+        "sales": 636990,
+        "share_pct": 37.8,
+        "prev_sales": 556489,
+        "mom_pct": 14.5
+      },
+      {
+        "vehicle_level_group": "C",
+        "sales": 244307,
+        "share_pct": 14.5,
+        "prev_sales": 230282,
+        "mom_pct": 6.1
+      },
+      {
+        "vehicle_level_group": "D",
+        "sales": 92649,
+        "share_pct": 5.5,
+        "prev_sales": 68255,
+        "mom_pct": 35.7
+      },
+      {
+        "vehicle_level_group": "跑车",
+        "sales": 656,
+        "share_pct": 0.0,
+        "prev_sales": 750,
+        "mom_pct": -12.5
+      }
+    ],
+    "drive_type": [
+      {
+        "drive_type_group": "前轮驱动",
+        "sales": 938620,
+        "share_pct": 55.7
+      },
+      {
+        "drive_type_group": "后轮驱动",
+        "sales": 431158,
+        "share_pct": 25.6
+      },
+      {
+        "drive_type_group": "四轮驱动",
+        "sales": 316836,
+        "share_pct": 18.8
+      }
+    ],
+    "size_metrics": {
+      "weighted_length_mm": {
+        "current": 4728.0,
+        "prev": 4713.1,
+        "chg": 14.9
+      },
+      "weighted_width_mm": {
+        "current": 1875.5,
+        "prev": 1875.1,
+        "chg": 0.4
+      },
+      "weighted_height_mm": {
+        "current": 1617.5,
+        "prev": 1618.1,
+        "chg": -0.6
+      },
+      "weighted_wheelbase_mm": {
+        "current": 2819.0,
+        "prev": 2813.4,
+        "chg": 5.6
+      }
+    }
+  },
+  "price_analysis": {
+    "price_bands": [
+      {
+        "tp_bucket_5w": "10-15万",
+        "sales": 494037,
+        "weighted_tp": 123944.11456470912,
+        "share_pct": 29.3,
+        "prev_sales": 414383,
+        "mom_pct": 19.2
+      },
+      {
+        "tp_bucket_5w": "5-10万",
+        "sales": 410143,
+        "weighted_tp": 78130.06802911518,
+        "share_pct": 24.3,
+        "prev_sales": 353183,
+        "mom_pct": 16.1
+      },
+      {
+        "tp_bucket_5w": "15-20万",
+        "sales": 213428,
+        "weighted_tp": 171476.58158142617,
+        "share_pct": 12.7,
+        "prev_sales": 184467,
+        "mom_pct": 15.7
+      },
+      {
+        "tp_bucket_5w": "20-25万",
+        "sales": 174404,
+        "weighted_tp": 230362.64152266324,
+        "share_pct": 10.3,
+        "prev_sales": 160004,
+        "mom_pct": 9.0
+      },
+      {
+        "tp_bucket_5w": "25-30万",
+        "sales": 130621,
+        "weighted_tp": 272634.352998548,
+        "share_pct": 7.7,
+        "prev_sales": 116682,
+        "mom_pct": 11.9
+      },
+      {
+        "tp_bucket_5w": "30-35万",
+        "sales": 95251,
+        "weighted_tp": 327198.0054660426,
+        "share_pct": 5.6,
+        "prev_sales": 90329,
+        "mom_pct": 5.4
+      },
+      {
+        "tp_bucket_5w": "其他",
+        "sales": 38571,
+        "weighted_tp": 0.0,
+        "share_pct": 2.3,
+        "prev_sales": 58017,
+        "mom_pct": -33.5
+      },
+      {
+        "tp_bucket_5w": "35-40万",
+        "sales": 37566,
+        "weighted_tp": 374241.08986176515,
+        "share_pct": 2.2,
+        "prev_sales": 32593,
+        "mom_pct": 15.3
+      },
+      {
+        "tp_bucket_5w": "5万以下",
+        "sales": 28044,
+        "weighted_tp": 27426.895557466836,
+        "share_pct": 1.7,
+        "prev_sales": 33777,
+        "mom_pct": -17.0
+      },
+      {
+        "tp_bucket_5w": "45-50万",
+        "sales": 19473,
+        "weighted_tp": 473355.3713850759,
+        "share_pct": 1.2,
+        "prev_sales": 6730,
+        "mom_pct": 189.3
+      },
+      {
+        "tp_bucket_5w": "55-60万",
+        "sales": 17150,
+        "weighted_tp": 571098.9749689498,
+        "share_pct": 1.0,
+        "prev_sales": 3942,
+        "mom_pct": 335.1
+      },
+      {
+        "tp_bucket_5w": "60万以上",
+        "sales": 10388,
+        "weighted_tp": 1172352.7522440283,
+        "share_pct": 0.6,
+        "prev_sales": 12948,
+        "mom_pct": -19.8
+      },
+      {
+        "tp_bucket_5w": "50-55万",
+        "sales": 9253,
+        "weighted_tp": 517614.81771413184,
+        "share_pct": 0.5,
+        "prev_sales": 11097,
+        "mom_pct": -16.6
+      },
+      {
+        "tp_bucket_5w": "40-45万",
+        "sales": 8285,
+        "weighted_tp": 424132.1792613741,
+        "share_pct": 0.5,
+        "prev_sales": 16996,
+        "mom_pct": -51.3
+      }
+    ],
+    "nev_price_bands": [
+      {
+        "tp_bucket_5w": "10-15万",
+        "body_type": "SUV",
+        "sales": 154288
+      },
+      {
+        "tp_bucket_5w": "5-10万",
+        "body_type": "轿车",
+        "sales": 146331
+      },
+      {
+        "tp_bucket_5w": "10-15万",
+        "body_type": "轿车",
+        "sales": 113408
+      },
+      {
+        "tp_bucket_5w": "15-20万",
+        "body_type": "SUV",
+        "sales": 88005
+      },
+      {
+        "tp_bucket_5w": "25-30万",
+        "body_type": "SUV",
+        "sales": 73019
+      },
+      {
+        "tp_bucket_5w": "20-25万",
+        "body_type": "SUV",
+        "sales": 71321
+      },
+      {
+        "tp_bucket_5w": "5-10万",
+        "body_type": "SUV",
+        "sales": 69877
+      },
+      {
+        "tp_bucket_5w": "20-25万",
+        "body_type": "轿车",
+        "sales": 45895
+      },
+      {
+        "tp_bucket_5w": "30-35万",
+        "body_type": "SUV",
+        "sales": 37079
+      },
+      {
+        "tp_bucket_5w": "15-20万",
+        "body_type": "轿车",
+        "sales": 27114
+      },
+      {
+        "tp_bucket_5w": "5万以下",
+        "body_type": "轿车",
+        "sales": 25295
+      },
+      {
+        "tp_bucket_5w": "35-40万",
+        "body_type": "SUV",
+        "sales": 21515
+      },
+      {
+        "tp_bucket_5w": "30-35万",
+        "body_type": "MPV",
+        "sales": 17641
+      },
+      {
+        "tp_bucket_5w": "其他",
+        "body_type": "轿车",
+        "sales": 14401
+      },
+      {
+        "tp_bucket_5w": "其他",
+        "body_type": "SUV",
+        "sales": 14027
+      },
+      {
+        "tp_bucket_5w": "25-30万",
+        "body_type": "轿车",
+        "sales": 13311
+      },
+      {
+        "tp_bucket_5w": "45-50万",
+        "body_type": "SUV",
+        "sales": 12555
+      },
+      {
+        "tp_bucket_5w": "55-60万",
+        "body_type": "SUV",
+        "sales": 9672
+      },
+      {
+        "tp_bucket_5w": "50-55万",
+        "body_type": "SUV",
+        "sales": 8056
+      },
+      {
+        "tp_bucket_5w": "25-30万",
+        "body_type": "MPV",
+        "sales": 4747
+      },
+      {
+        "tp_bucket_5w": "45-50万",
+        "body_type": "MPV",
+        "sales": 4682
+      },
+      {
+        "tp_bucket_5w": "其他",
+        "body_type": "MPV",
+        "sales": 4453
+      },
+      {
+        "tp_bucket_5w": "30-35万",
+        "body_type": "轿车",
+        "sales": 4407
+      },
+      {
+        "tp_bucket_5w": "40-45万",
+        "body_type": "SUV",
+        "sales": 3752
+      },
+      {
+        "tp_bucket_5w": "10-15万",
+        "body_type": "MPV",
+        "sales": 3583
+      },
+      {
+        "tp_bucket_5w": "20-25万",
+        "body_type": "MPV",
+        "sales": 3269
+      },
+      {
+        "tp_bucket_5w": "40-45万",
+        "body_type": "MPV",
+        "sales": 3015
+      },
+      {
+        "tp_bucket_5w": "60万以上",
+        "body_type": "轿车",
+        "sales": 968
+      },
+      {
+        "tp_bucket_5w": "35-40万",
+        "body_type": "MPV",
+        "sales": 837
+      },
+      {
+        "tp_bucket_5w": "60万以上",
+        "body_type": "SUV",
+        "sales": 400
+      },
+      {
+        "tp_bucket_5w": "50-55万",
+        "body_type": "MPV",
+        "sales": 327
+      },
+      {
+        "tp_bucket_5w": "55-60万",
+        "body_type": "轿车",
+        "sales": 114
+      },
+      {
+        "tp_bucket_5w": "5-10万",
+        "body_type": "MPV",
+        "sales": 55
+      },
+      {
+        "tp_bucket_5w": "50-55万",
+        "body_type": "轿车",
+        "sales": 54
+      },
+      {
+        "tp_bucket_5w": "35-40万",
+        "body_type": "轿车",
+        "sales": 49
+      },
+      {
+        "tp_bucket_5w": "15-20万",
+        "body_type": "MPV",
+        "sales": 48
+      },
+      {
+        "tp_bucket_5w": "其他",
+        "body_type": "跑车",
+        "sales": 36
+      },
+      {
+        "tp_bucket_5w": "60万以上",
+        "body_type": "MPV",
+        "sales": 20
+      },
+      {
+        "tp_bucket_5w": "30-35万",
+        "body_type": "跑车",
+        "sales": 6
+      },
+      {
+        "tp_bucket_5w": "45-50万",
+        "body_type": "轿车",
+        "sales": 6
+      },
+      {
+        "tp_bucket_5w": "60万以上",
+        "body_type": "跑车",
+        "sales": 3
+      },
+      {
+        "tp_bucket_5w": "5万以下",
+        "body_type": "SUV",
+        "sales": 2
+      }
+    ]
+  },
+  "geographic": {
+    "province_top20": [
+      {
+        "province": "广东省",
+        "sales": 197914,
+        "share_pct": 11.7
+      },
+      {
+        "province": "浙江省",
+        "sales": 146687,
+        "share_pct": 8.7
+      },
+      {
+        "province": "江苏省",
+        "sales": 133459,
+        "share_pct": 7.9
+      },
+      {
+        "province": "山东省",
+        "sales": 128491,
+        "share_pct": 7.6
+      },
+      {
+        "province": "河南省",
+        "sales": 89088,
+        "share_pct": 5.3
+      },
+      {
+        "province": "四川省",
+        "sales": 84273,
+        "share_pct": 5.0
+      },
+      {
+        "province": "河北省",
+        "sales": 82304,
+        "share_pct": 4.9
+      },
+      {
+        "province": "北京市",
+        "sales": 65638,
+        "share_pct": 3.9
+      },
+      {
+        "province": "安徽省",
+        "sales": 61350,
+        "share_pct": 3.6
+      },
+      {
+        "province": "上海市",
+        "sales": 57544,
+        "share_pct": 3.4
+      },
+      {
+        "province": "湖北省",
+        "sales": 54690,
+        "share_pct": 3.2
+      },
+      {
+        "province": "湖南省",
+        "sales": 50423,
+        "share_pct": 3.0
+      },
+      {
+        "province": "辽宁省",
+        "sales": 48352,
+        "share_pct": 2.9
+      },
+      {
+        "province": "陕西省",
+        "sales": 43032,
+        "share_pct": 2.6
+      },
+      {
+        "province": "福建省",
+        "sales": 40089,
+        "share_pct": 2.4
+      },
+      {
+        "province": "江西省",
+        "sales": 39651,
+        "share_pct": 2.4
+      },
+      {
+        "province": "重庆市",
+        "sales": 37594,
+        "share_pct": 2.2
+      },
+      {
+        "province": "云南省",
+        "sales": 35103,
+        "share_pct": 2.1
+      },
+      {
+        "province": "广西壮族自治区",
+        "sales": 34940,
+        "share_pct": 2.1
+      },
+      {
+        "province": "内蒙古自治区",
+        "sales": 34844,
+        "share_pct": 2.1
+      }
+    ],
+    "city_top20": [
+      {
+        "city": "北京市",
+        "sales": 65638,
+        "share_pct": 3.9
+      },
+      {
+        "city": "广州市",
+        "sales": 59973,
+        "share_pct": 3.6
+      },
+      {
+        "city": "上海市",
+        "sales": 57544,
+        "share_pct": 3.4
+      },
+      {
+        "city": "成都市",
+        "sales": 50212,
+        "share_pct": 3.0
+      },
+      {
+        "city": "杭州市",
+        "sales": 39806,
+        "share_pct": 2.4
+      },
+      {
+        "city": "重庆市",
+        "sales": 37594,
+        "share_pct": 2.2
+      },
+      {
+        "city": "深圳市",
+        "sales": 35508,
+        "share_pct": 2.1
+      },
+      {
+        "city": "郑州市",
+        "sales": 35271,
+        "share_pct": 2.1
+      },
+      {
+        "city": "苏州市",
+        "sales": 33333,
+        "share_pct": 2.0
+      },
+      {
+        "city": "武汉市",
+        "sales": 29794,
+        "share_pct": 1.8
+      },
+      {
+        "city": "天津市",
+        "sales": 28471,
+        "share_pct": 1.7
+      },
+      {
+        "city": "宁波市",
+        "sales": 27900,
+        "share_pct": 1.7
+      },
+      {
+        "city": "西安市",
+        "sales": 25732,
+        "share_pct": 1.5
+      },
+      {
+        "city": "东莞市",
+        "sales": 25289,
+        "share_pct": 1.5
+      },
+      {
+        "city": "济南市",
+        "sales": 23271,
+        "share_pct": 1.4
+      },
+      {
+        "city": "合肥市",
+        "sales": 22316,
+        "share_pct": 1.3
+      },
+      {
+        "city": "南京市",
+        "sales": 22312,
+        "share_pct": 1.3
+      },
+      {
+        "city": "长沙市",
+        "sales": 21688,
+        "share_pct": 1.3
+      },
+      {
+        "city": "沈阳市",
+        "sales": 20510,
+        "share_pct": 1.2
+      },
+      {
+        "city": "青岛市",
+        "sales": 17190,
+        "share_pct": 1.0
+      }
+    ],
+    "city_tier": [
+      {
+        "city_tier_group": "一线",
+        "sales": 218663,
+        "share_pct": 13.0,
+        "prev_sales": 147761,
+        "mom_pct": 48.0
+      },
+      {
+        "city_tier_group": "三线及以下",
+        "sales": 656110,
+        "share_pct": 38.9,
+        "prev_sales": 612612,
+        "mom_pct": 7.1
+      },
+      {
+        "city_tier_group": "二线",
+        "sales": 377767,
+        "share_pct": 22.4,
+        "prev_sales": 347488,
+        "mom_pct": 8.7
+      },
+      {
+        "city_tier_group": "新一线",
+        "sales": 434074,
+        "share_pct": 25.7,
+        "prev_sales": 387287,
+        "mom_pct": 12.1
+      }
+    ],
+    "nev_penetration_by_tier": [
+      {
+        "tier": "二线",
+        "nev_penetration": 59.4,
+        "pen_chg": -1.7
+      },
+      {
+        "tier": "三线及以下",
+        "nev_penetration": 57.0,
+        "pen_chg": -0.7
+      },
+      {
+        "tier": "新一线",
+        "nev_penetration": 61.4,
+        "pen_chg": -2.6
+      },
+      {
+        "tier": "一线",
+        "nev_penetration": 60.6,
+        "pen_chg": -6.3
+      }
+    ],
+    "region": [
+      {
+        "region_group": "华东",
+        "sales": 478780,
+        "share_pct": 28.4,
+        "prev_sales": 418949,
+        "mom_pct": 14.3
+      },
+      {
+        "region_group": "华北",
+        "sales": 338473,
+        "share_pct": 20.1,
+        "prev_sales": 294582,
+        "mom_pct": 14.9
+      },
+      {
+        "region_group": "华南",
+        "sales": 243950,
+        "share_pct": 14.5,
+        "prev_sales": 203770,
+        "mom_pct": 19.7
+      },
+      {
+        "region_group": "华中",
+        "sales": 194201,
+        "share_pct": 11.5,
+        "prev_sales": 176321,
+        "mom_pct": 10.1
+      },
+      {
+        "region_group": "西南",
+        "sales": 187687,
+        "share_pct": 11.1,
+        "prev_sales": 165531,
+        "mom_pct": 13.4
+      },
+      {
+        "region_group": "西北",
+        "sales": 140910,
+        "share_pct": 8.4,
+        "prev_sales": 142098,
+        "mom_pct": -0.8
+      },
+      {
+        "region_group": "东北",
+        "sales": 102613,
+        "share_pct": 6.1,
+        "prev_sales": 93897,
+        "mom_pct": 9.3
+      }
+    ]
+  },
+  "deep_insight": {
+    "winners": [
+      {
+        "type": "品牌",
+        "name": "大众",
+        "change": 1.3,
+        "unit": "pct"
+      }
+    ],
+    "losers": [
+      {
+        "type": "品牌",
+        "name": "AITO",
+        "change": 0.6,
+        "unit": "pct",
+        "direction": "down"
+      }
+    ],
+    "structural_changes": [],
+    "price_changes": [
+      "55-60万增长335%"
+    ],
+    "new_trends": []
+  },
+  "change_detection": {
+    "changes": [
+      {
+        "module": "市场",
+        "indicator": "总销量",
+        "change": "+12.8% MoM",
+        "percentile": "P75",
+        "level": "🟢"
+      },
+      {
+        "module": "能源",
+        "indicator": "新能源渗透率",
+        "change": "59.2% (-1.9pct)",
+        "percentile": "P96",
+        "level": "🔴"
+      },
+      {
+        "module": "产品",
+        "indicator": "SUV 份额",
+        "change": "55.4% (+0.3pct)",
+        "percentile": "P100",
+        "level": "🔴"
+      }
+    ]
+  },
+  "watch_list": {
+    "suv_share": 55.44926106388303,
+    "suv_prev": 55.15734897147306,
+    "suv_trend": "↑"
+  }
+}
