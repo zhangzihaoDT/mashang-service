@@ -71,6 +71,7 @@ def build_daily_panel(
     daily = daily[all_series].copy()
     daily.index = pd.to_datetime(daily.index)
     daily = daily.sort_index()
+    daily["dow"] = daily.index.dayofweek  # Mon=0, Sun=6
 
     if start:
         daily = daily[daily.index >= pd.Timestamp(start)]
@@ -81,6 +82,26 @@ def build_daily_panel(
     return daily
 
 
+def _deseasonalize(
+    panel: pd.DataFrame, series_list: list[str], base_start: date, base_end: date
+) -> tuple[pd.DataFrame, dict[str, np.ndarray]]:
+    """按星期去季节化：计算各车系各星期的因子，除以因子得到去季节化序列。
+
+    返回 (去季节化 panel, {车系: dow_factors})，dow_factors[0]=周一因子。
+    """
+    base = panel.loc[pd.Timestamp(base_start):pd.Timestamp(base_end)]
+    panel = panel.copy()
+    factors: dict[str, np.ndarray] = {}
+    for s in series_list:
+        dow_mean = np.array([base.loc[base["dow"] == d, s].mean() for d in range(7)])
+        overall = base[s].mean()
+        # Avoid division by zero; minimum factor = 0.3
+        dow_factor = np.maximum(dow_mean / max(overall, 1), 0.3)
+        factors[s] = dow_factor
+        panel[s] = panel[s].values / panel["dow"].map({d: factors[s][d] for d in range(7)}).values
+    return panel, factors
+
+
 def synthetic_control(
     panel: pd.DataFrame,
     target: str = "LS9",
@@ -89,42 +110,53 @@ def synthetic_control(
     weight_base_start: date = date(2026, 6, 21),
     weight_base_end: date = date(2026, 7, 15),
 ) -> dict:
-    """合成控制：基期比例赋权 + 量级缩放。
+    """合成控制：星期去季节化 + 基期比例赋权 + 量级缩放。
 
-    权重计算：基期内各 donor 与 target 的日均锁单比值归一化，
-    比值大的 donor（与 target 规模更接近）获得更高权重。
-
-    反事实计算：先用基期均值将 donor 缩放到 target 量级，
-    再加权求和。保证基期内反事实均值 ≈ target 均值。
+    步骤：
+      1. 在基期内计算各车系的星期因子（dow_factor）
+      2. 用因子去除各序列的季节性
+      3. 在去季节化数据上计算权重和反事实
+      4. 用 LS9 的星期因子将反事实加回季节性
     """
     if donor_cols is None:
         donor_cols = ["LS6", "L6", "LS8"]
+    all_series = [target] + donor_cols
 
-    base = panel.loc[pd.Timestamp(weight_base_start):pd.Timestamp(weight_base_end)]
-    pre = panel[panel.index < pd.Timestamp(treatment_date)].copy()
-    post = panel[panel.index >= pd.Timestamp(treatment_date)].copy()
+    # 1. Deseasonalize
+    panel_ds, dow_factors = _deseasonalize(panel, all_series, weight_base_start, weight_base_end)
+    ls9_factor = dow_factors[target]
+
+    base = panel_ds.loc[pd.Timestamp(weight_base_start):pd.Timestamp(weight_base_end)]
+    pre = panel_ds[panel_ds.index < pd.Timestamp(treatment_date)].copy()
+    post = panel_ds[panel_ds.index >= pd.Timestamp(treatment_date)].copy()
     post_dates = post.index
 
-    # Target & donor base means
+    # 2. Weights from deseasonalized base
     target_base = base[target].mean()
     donor_base = {c: base[c].mean() for c in donor_cols}
-
-    # Ratio weights: donors with scale closer to target get higher weight
     ratios = np.array([target_base / max(donor_base[c], 1) for c in donor_cols])
     weights = ratios / ratios.sum()
     weight_dict = dict(zip(donor_cols, weights))
 
-    # Counterfactual: scale each donor to target level, then weight
+    # 3. Counterfactual on deseasonalized data
     def _cf(period):
         cf = np.zeros(len(period))
         for i, c in enumerate(donor_cols):
             cf += weights[i] * period[c].values / donor_base[c] * target_base
         return cf
 
-    cf_pre = _cf(pre)
-    cf_post = _cf(post)
-    actual_pre = pre[target].values
-    actual_post = post[target].values
+    # 4. Re-seasonalize using LS9's own dow factors
+    def _resea(cf_values, period):
+        dow = period["dow"].values
+        return cf_values * np.array([ls9_factor[int(d)] for d in dow])
+
+    cf_pre_ds = _cf(pre)
+    cf_post_ds = _cf(post)
+    cf_pre = _resea(cf_pre_ds, pre)
+    cf_post = _resea(cf_post_ds, post)
+
+    actual_pre = pre[target].values * np.array([ls9_factor[int(d)] for d in pre["dow"].values])
+    actual_post = post[target].values * np.array([ls9_factor[int(d)] for d in post["dow"].values])
 
     mse = np.mean((actual_pre - cf_pre) ** 2)
     rmse = np.sqrt(mse)
@@ -133,12 +165,15 @@ def synthetic_control(
     avg_ate = np.mean(ate)
     cumulative_ate = np.cumsum(ate)
 
+    dow_desc = {0:"周一",1:"周二",2:"周三",3:"周四",4:"周五",5:"周六",6:"周日"}
+
     return {
         "weights": weight_dict,
-        "weight_method": "基期比例赋权 + 量级缩放（保证基期内反事实 ≈ target 均值）",
+        "weight_method": "星期去季节化 + 基期比例赋权 + 量级缩放",
         "weight_base": f"{weight_base_start} ~ {weight_base_end}",
         "target_base_mean": round(target_base, 1),
         "donor_base_means": {c: round(donor_base[c], 1) for c in donor_cols},
+        "dow_factors": {dow_desc[k]: round(float(v), 3) for k, v in enumerate(dow_factors[target])},
         "pre_mse": mse,
         "pre_rmse": rmse,
         "pre_period": f"{pre.index[0].date()} ~ {pre.index[-1].date()}",
@@ -258,6 +293,7 @@ def format_output(sc_result: dict, mech: dict | None = None) -> str:
     w = sc_result["weights"]
     w_str = "  ".join(f"{k}={v:.3f}" for k, v in sorted(w.items(), key=lambda x: -x[1]))
     d_str = "  ".join(f"{k}={v}" for k, v in sorted(sc_result.get("donor_base_means", {}).items()))
+    dow_str = "  ".join(f"{k}={v}" for k, v in sc_result.get("dow_factors", {}).items())
     lines = [
         "=" * 60,
         "  LS9 Hyper 上市锁单效果评估 — 合成控制",
@@ -266,11 +302,14 @@ def format_output(sc_result: dict, mech: dict | None = None) -> str:
         f"  预处理期: {sc_result['pre_period']}",
         f"  处理期:   {sc_result['post_period']}",
         "",
-        "  ── 权重方法 ──",
+        "  ── 方法 ──",
         f"  {sc_result.get('weight_method', '')}",
         f"  权重基期: {sc_result.get('weight_base', '')}",
         "",
         f"  基期日均锁单:  LS9={sc_result.get('target_base_mean', '')}  {d_str}",
+        "",
+        "  ── LS9 星期因子 (去季节化用) ──",
+        f"  {dow_str}",
         "",
         "  ── Donor Weights ──",
         f"  {w_str}",
@@ -347,10 +386,6 @@ if __name__ == "__main__":
     print("  已知偏差来源：")
     print("  1. Donor 与 target 同属上汽品牌，可能存在同品牌")
     print("     流量带动或替代效应，使估计存在偏差。")
-    print("  2. 处理期（07-16~07-20）包含 2 个周末日（40%），")
-    print("     LS9 周末锁单（日均 ~88）显著高于平日（~59），")
-    print("     合成控制虽通过 donor 的周末波动部分控制了该效应，")
-    print("     但各车系的周末弹性不同，无法完全消除。")
     print("=" * 60)
     print()
     print(format_output(sc_result, mech))
