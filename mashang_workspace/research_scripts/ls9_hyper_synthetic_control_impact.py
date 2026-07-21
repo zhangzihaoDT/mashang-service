@@ -81,26 +81,6 @@ def build_daily_panel(
     return daily
 
 
-def _compute_scale_weights(
-    panel: pd.DataFrame,
-    target: str,
-    donor_cols: list[str],
-    base_start: date,
-    base_end: date,
-) -> np.ndarray:
-    """按基期各 donor 与 target 的日均锁单比例赋权。
-    
-    思路：在基期内，先求每个 donor 与 target 的日均锁单比值，
-    再将比值归一化为权重。比值大的 donor（与 target 规模接近）获得更高权重，
-    避免绝对规模大的 donor（如 LS6）主导反事实。
-    """
-    base = panel.loc[pd.Timestamp(base_start):pd.Timestamp(base_end)]
-    target_mean = base[target].mean()
-    ratios = np.array([target_mean / max(base[c].mean(), 1) for c in donor_cols])
-    weights = ratios / ratios.sum()
-    return weights
-
-
 def synthetic_control(
     panel: pd.DataFrame,
     target: str = "LS9",
@@ -109,19 +89,40 @@ def synthetic_control(
     weight_base_start: date = date(2026, 6, 21),
     weight_base_end: date = date(2026, 7, 15),
 ) -> dict:
+    """合成控制：基期比例赋权 + 量级缩放。
+
+    权重计算：基期内各 donor 与 target 的日均锁单比值归一化，
+    比值大的 donor（与 target 规模更接近）获得更高权重。
+
+    反事实计算：先用基期均值将 donor 缩放到 target 量级，
+    再加权求和。保证基期内反事实均值 ≈ target 均值。
+    """
     if donor_cols is None:
         donor_cols = ["LS6", "L6", "LS8"]
 
+    base = panel.loc[pd.Timestamp(weight_base_start):pd.Timestamp(weight_base_end)]
     pre = panel[panel.index < pd.Timestamp(treatment_date)].copy()
     post = panel[panel.index >= pd.Timestamp(treatment_date)].copy()
     post_dates = post.index
 
-    # Compute weights from base period proportion
-    weights = _compute_scale_weights(panel, target, donor_cols, weight_base_start, weight_base_end)
+    # Target & donor base means
+    target_base = base[target].mean()
+    donor_base = {c: base[c].mean() for c in donor_cols}
 
-    # Counterfactual on original scale
-    cf_pre = (pre[donor_cols] * weights).sum(axis=1).values
-    cf_post = (post[donor_cols] * weights).sum(axis=1).values
+    # Ratio weights: donors with scale closer to target get higher weight
+    ratios = np.array([target_base / max(donor_base[c], 1) for c in donor_cols])
+    weights = ratios / ratios.sum()
+    weight_dict = dict(zip(donor_cols, weights))
+
+    # Counterfactual: scale each donor to target level, then weight
+    def _cf(period):
+        cf = np.zeros(len(period))
+        for i, c in enumerate(donor_cols):
+            cf += weights[i] * period[c].values / donor_base[c] * target_base
+        return cf
+
+    cf_pre = _cf(pre)
+    cf_post = _cf(post)
     actual_pre = pre[target].values
     actual_post = post[target].values
 
@@ -133,9 +134,11 @@ def synthetic_control(
     cumulative_ate = np.cumsum(ate)
 
     return {
-        "weights": dict(zip(donor_cols, weights)),
-        "weight_method": "基期比例赋权（各 donor 与 target 的基期日均锁单比值归一化）",
+        "weights": weight_dict,
+        "weight_method": "基期比例赋权 + 量级缩放（保证基期内反事实 ≈ target 均值）",
         "weight_base": f"{weight_base_start} ~ {weight_base_end}",
+        "target_base_mean": round(target_base, 1),
+        "donor_base_means": {c: round(donor_base[c], 1) for c in donor_cols},
         "pre_mse": mse,
         "pre_rmse": rmse,
         "pre_period": f"{pre.index[0].date()} ~ {pre.index[-1].date()}",
@@ -254,6 +257,7 @@ def decompose_mechanism(
 def format_output(sc_result: dict, mech: dict | None = None) -> str:
     w = sc_result["weights"]
     w_str = "  ".join(f"{k}={v:.3f}" for k, v in sorted(w.items(), key=lambda x: -x[1]))
+    d_str = "  ".join(f"{k}={v}" for k, v in sorted(sc_result.get("donor_base_means", {}).items()))
     lines = [
         "=" * 60,
         "  LS9 Hyper 上市锁单效果评估 — 合成控制",
@@ -266,9 +270,10 @@ def format_output(sc_result: dict, mech: dict | None = None) -> str:
         f"  {sc_result.get('weight_method', '')}",
         f"  权重基期: {sc_result.get('weight_base', '')}",
         "",
+        f"  基期日均锁单:  LS9={sc_result.get('target_base_mean', '')}  {d_str}",
+        "",
         "  ── Donor Weights ──",
         f"  {w_str}",
-        f"  预处理 RMSE: {sc_result['pre_rmse']:.2f}",
         "",
         "  ── 合成控制效果估计 ──",
         f"  处理后日均估计增量: {sc_result['avg_ate']:+.1f} 锁单/日",
