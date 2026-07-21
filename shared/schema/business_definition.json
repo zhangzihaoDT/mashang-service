@@ -70,6 +70,12 @@
     "LS6": ["CM0", "CM1", "CM2"],
     "L6": ["DM0", "DM1"]
   },
+  "ls9_variant_logic": {
+    "Hyper": "product_name LIKE '%Hyper%' AND product_name LIKE '%LS9%'",
+    "52 Ultra": "product_name = '智己LS9 52 Ultra'",
+    "66 Ultra": "product_name = '智己LS9 66 Ultra'",
+    "52 Ultra 线控版": "product_name = '智己LS9 52 Ultra 线控版'"
+  },
   "age_limit": [18, 80],
   "business_knowledge": {
     "main_selling_models_seats_6": {
