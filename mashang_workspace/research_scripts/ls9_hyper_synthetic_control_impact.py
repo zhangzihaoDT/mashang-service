@@ -28,7 +28,6 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from scipy.optimize import minimize
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -82,64 +81,49 @@ def build_daily_panel(
     return daily
 
 
+def _compute_scale_weights(
+    panel: pd.DataFrame,
+    target: str,
+    donor_cols: list[str],
+    base_start: date,
+    base_end: date,
+) -> np.ndarray:
+    """按基期各 donor 与 target 的日均锁单比例赋权。
+    
+    思路：在基期内，先求每个 donor 与 target 的日均锁单比值，
+    再将比值归一化为权重。比值大的 donor（与 target 规模接近）获得更高权重，
+    避免绝对规模大的 donor（如 LS6）主导反事实。
+    """
+    base = panel.loc[pd.Timestamp(base_start):pd.Timestamp(base_end)]
+    target_mean = base[target].mean()
+    ratios = np.array([target_mean / max(base[c].mean(), 1) for c in donor_cols])
+    weights = ratios / ratios.sum()
+    return weights
+
+
 def synthetic_control(
     panel: pd.DataFrame,
     target: str = "LS9",
     donor_cols: list[str] | None = None,
     treatment_date: date = date(2026, 7, 16),
+    weight_base_start: date = date(2026, 6, 21),
+    weight_base_end: date = date(2026, 7, 15),
 ) -> dict:
     if donor_cols is None:
         donor_cols = ["LS6", "L6", "LS8"]
 
     pre = panel[panel.index < pd.Timestamp(treatment_date)].copy()
     post = panel[panel.index >= pd.Timestamp(treatment_date)].copy()
-
-    # Scale: divide each donor by its pre-treatment mean so all are ~1
-    scales = {c: pre[c].mean() for c in donor_cols + [target]}
-    for c in donor_cols + [target]:
-        if scales[c] > 0:
-            pre[c] = pre[c] / scales[c]
-            if c in post.columns:
-                post[c] = post[c] / scales[c]
-
-    y_pre = pre[target].values
-    X_pre = pre[donor_cols].values
-    y_post = post[target].values
-    X_post = post[donor_cols].values
     post_dates = post.index
 
-    n_donors = len(donor_cols)
-
-    def objective(w):
-        pred = X_pre @ w
-        return np.sum((y_pre - pred) ** 2) + 1e-6 * np.sum(w ** 2)  # small ridge
-
-    constraints = [{"type": "eq", "fun": lambda w: np.sum(w) - 1.0}]
-    bounds = [(0, 1)] * n_donors
-    w0 = np.ones(n_donors) / n_donors
-
-    # Try multiple starting points for robustness
-    best_result = None
-    best_val = np.inf
-    for seed_offset in range(5):
-        np.random.seed(42 + seed_offset)
-        w0_r = np.random.dirichlet(np.ones(n_donors))
-        res = minimize(objective, w0_r, bounds=bounds, constraints=constraints, method="SLSQP", options={"maxiter": 2000})
-        if res.fun < best_val:
-            best_val = res.fun
-            best_result = res
-
-    weights = best_result.x
-    # Rescale weights back to original scale
-    raw_weights = weights / scales[target]
-    for i, c in enumerate(donor_cols):
-        raw_weights[i] = raw_weights[i] * scales[c]
+    # Compute weights from base period proportion
+    weights = _compute_scale_weights(panel, target, donor_cols, weight_base_start, weight_base_end)
 
     # Counterfactual on original scale
-    cf_pre = X_pre @ weights * scales[target]
-    cf_post = X_post @ weights * scales[target]
-    actual_pre = y_pre * scales[target]
-    actual_post = y_post * scales[target]
+    cf_pre = (pre[donor_cols] * weights).sum(axis=1).values
+    cf_post = (post[donor_cols] * weights).sum(axis=1).values
+    actual_pre = pre[target].values
+    actual_post = post[target].values
 
     mse = np.mean((actual_pre - cf_pre) ** 2)
     rmse = np.sqrt(mse)
@@ -150,6 +134,8 @@ def synthetic_control(
 
     return {
         "weights": dict(zip(donor_cols, weights)),
+        "weight_method": "基期比例赋权（各 donor 与 target 的基期日均锁单比值归一化）",
+        "weight_base": f"{weight_base_start} ~ {weight_base_end}",
         "pre_mse": mse,
         "pre_rmse": rmse,
         "pre_period": f"{pre.index[0].date()} ~ {pre.index[-1].date()}",
@@ -184,7 +170,7 @@ def plot_results(result: dict, target: str = "LS9", output: str | None = None):
     ax1.axvline(pd.Timestamp(treatment_date), color="#999", linewidth=1, linestyle=":", alpha=0.6)
     ax1.text(pd.Timestamp(treatment_date), ax1.get_ylim()[1] * 0.95, "Hyper 上市", fontsize=9, color="#999", ha="right")
     ax1.fill_between(result["post_dates"], result["actual"], result["counterfactual"],
-                      color=C_GOLD, alpha=0.15, label=f"日均估计增量={result['avg_ate']:.1f}")
+                      color=C_GOLD, alpha=0.15, label=f"反事实（基期比例赋权）")
     ax1.set_ylabel(f"{target} 日锁单数", fontsize=11, color=C_BLUE)
     ax1.legend(fontsize=10, framealpha=0.8)
     ax1.grid(True, alpha=0.1, color="#6B7C8F")
@@ -275,6 +261,10 @@ def format_output(sc_result: dict, mech: dict | None = None) -> str:
         "",
         f"  预处理期: {sc_result['pre_period']}",
         f"  处理期:   {sc_result['post_period']}",
+        "",
+        "  ── 权重方法 ──",
+        f"  {sc_result.get('weight_method', '')}",
+        f"  权重基期: {sc_result.get('weight_base', '')}",
         "",
         "  ── Donor Weights ──",
         f"  {w_str}",
