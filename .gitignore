@@ -85,6 +85,7 @@ mashang_workspace/outputs/reports/ls8_user_profile_*.html
 
 # Local chart scratch outputs
 outputs/charts/
+mashang_workspace/outputs/charts/
 
 auto_launch/outputs/runs/
 
