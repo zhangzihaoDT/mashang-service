@@ -146,9 +146,7 @@ def _build_bar_colors(series, highlight_indices=None):
 
 
 # ── Data Loading ──
-schema_path = _ROOT / 'schema' / 'business_definition.json'
-if not schema_path.exists():
-    schema_path = _PROJECT_ROOT / 'shared' / 'schema' / 'business_definition.json'
+schema_path = _PROJECT_ROOT / 'shared' / 'schema' / 'business_definition.json'
 with open(str(schema_path)) as f:
     biz = json.load(f)
 

@@ -38,6 +38,27 @@ SHARED_DIR = _PROJECT_ROOT / "shared"
 SHARED_OPERATORS_DIR = SHARED_DIR / "operators"
 SHARED_SCHEMA_DIR = SHARED_DIR / "schema"
 BUSINESS_DEFINITION_PATH = SHARED_SCHEMA_DIR / "business_definition.json"
+SHARED_DATA_PATH_MD = SHARED_SCHEMA_DIR / "data_path.md"
+
+
+def resolve_data_path(description_keyword: str) -> Path | None:
+    """从 shared/schema/data_path.md 中按描述关键词查找对应的数据路径。
+
+    data_path.md 是外部数据源的唯一登记处，每行格式：{描述}：{路径}
+    """
+    if not SHARED_DATA_PATH_MD.exists():
+        return None
+    for line in SHARED_DATA_PATH_MD.read_text(encoding="utf-8").splitlines():
+        if "：" not in line:
+            continue
+        desc, path_raw = line.split("：", 1)
+        if description_keyword in desc:
+            # data_path.md 是 markdown，路径中的下划线会被转义（\_ → _）
+            path = path_raw.strip().replace("\\_", "_").replace("\\", "")
+            p = Path(path)
+            if p.exists():
+                return p
+    return None
 
 
 def ensure_workspace_on_path() -> None:

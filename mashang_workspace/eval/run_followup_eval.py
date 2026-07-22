@@ -25,7 +25,7 @@ from datetime import datetime, date, timedelta
 from pathlib import Path
 from typing import Any
 
-import sys; from pathlib import Path; sys.path.insert(0, str(Path(__file__).resolve().parents[1])); from utils.paths import WORKSPACE_ROOT, PROJECT_ROOT
+import sys; from pathlib import Path; sys.path.insert(0, str(Path(__file__).resolve().parents[1])); from utils.paths import WORKSPACE_ROOT, PROJECT_ROOT, SHARED_SCHEMA_DIR
 DEFAULT_CASES = WORKSPACE_ROOT / "eval" / "cases" / "followup_cases.json"
 FOLLOWUP_OUTPUT_DIR = WORKSPACE_ROOT / "outputs" / "tables"
 
@@ -96,7 +96,7 @@ def _resolve_date_range(time_window: str, as_of: date, series: str | None = None
         return start.strftime("%Y-%m-%d"), end.strftime("%Y-%m-%d"), None
     if tw == "since_launch":
         try:
-            bdef_path = PROJECT_ROOT / "schema" / "business_definition.json"
+            bdef_path = SHARED_SCHEMA_DIR / "business_definition.json"
             if bdef_path.exists():
                 with open(bdef_path) as f:
                     bdef = json.load(f)

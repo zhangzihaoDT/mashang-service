@@ -6,6 +6,7 @@
 微信群聊：/Users/zihao\_/Documents/github/mashang-service/dataset/wechat/\*.parquet
 正反向对比：/Users/zihao\*/Documents/coding/dataset/original/业务数据记录\_竞争PK（正反向排名）.csv
 智己大区分布：/Users/zihao\_/Documents/coding/dataset/original/store_region_business_definition_data.csv
+门店信息（门店代码/名称/城市/大区/类型/开业时间/停业时间）：/Users/zihao\_/Documents/coding/dataset/original/store_info.csv
 
 ---
 

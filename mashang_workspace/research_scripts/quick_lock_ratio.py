@@ -46,9 +46,7 @@ DEFAULT_INPUT = REPO_ROOT / "dataset" / "order_data.parquet"
 _REPORT_DIR = _WS_ROOT / "outputs" / "reports"
 _REPORT_DIR.mkdir(parents=True, exist_ok=True)
 DEFAULT_OUT = _REPORT_DIR / "quick_lock_ratio.html"
-BUSINESS_DEF_PATH = Path(
-    "/Users/zihao_/Documents/github/mashang-service/schema/business_definition.json"
-)
+BUSINESS_DEF_PATH = REPO_ROOT / "shared" / "schema" / "business_definition.json"
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="绘制锁单累计同比分析图")

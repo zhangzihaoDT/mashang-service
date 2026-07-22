@@ -694,7 +694,7 @@ def _parse_target_month(value: str) -> tuple[pd.Timestamp, pd.Timestamp]:
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--matrix-csv", default=str(DEFAULT_MATRIX_CSV))
-    parser.add_argument("--business-definition", default=str(Path(__file__).resolve().parents[1] / "schema" / "business_definition.json"))
+    parser.add_argument("--business-definition", default=str(Path(__file__).resolve().parents[2] / "shared" / "schema" / "business_definition.json"))
     parser.add_argument("--as-of", default=None)
     parser.add_argument("--target-month", default=None)
     parser.add_argument("--lookback-recent", type=int, default=30)

@@ -102,5 +102,5 @@ Turn 1: {metric: lock_count_share, time_window: last_7_days, series: LS6, group_
 
 1. 不接入 LLM，不处理真正的自然语言理解
 2. symbolic time_window 的"今天"使用 `--as-of-date` 参数控制
-3. `since_launch` 依赖 `schema/business_definition.json` 或硬编码的上市日期
+3. `since_launch` 依赖 `shared/schema/business_definition.json` 或硬编码的上市日期
 4. filter 的语义理解（如"大电池组"→具体 SQL）不在本阶段处理
