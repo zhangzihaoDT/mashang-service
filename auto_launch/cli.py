@@ -190,12 +190,19 @@ def cmd_report(args):
             if not brief_md:
                 print("[report] LLM 不可用，降级到规则脚本")
                 brief_md = _fallback_brief(facts)
-        if args.output:
-            Path(args.output).parent.mkdir(parents=True, exist_ok=True)
-            Path(args.output).write_text(brief_md, encoding="utf-8")
-            print(f"[report --type daily-brief] 已写入: {args.output}")
-        else:
-            print(brief_md)
+        if not args.output:
+            date_str = args.date or datetime.now().strftime("%Y-%m-%d")
+            args.output = f"auto_launch/outputs/runs/{date_str.replace('-', '')}/daily_brief.md"
+        Path(args.output).parent.mkdir(parents=True, exist_ok=True)
+        Path(args.output).write_text(brief_md, encoding="utf-8")
+        print(f"[report --type daily-brief] 已写入: {args.output}")
+        print()
+        print(brief_md)
+
+        if args.sync:
+            from auto_launch.src.feishu_sender import send_brief_to_feishu
+            ds = args.date or datetime.now().strftime("%Y-%m-%d")
+            send_brief_to_feishu(brief_md, date_str=ds)
 
     else:
         print(f"[report] 不支持的 report type: {report_type}")
@@ -479,6 +486,8 @@ def main():
                           help="按来源过滤（search/daily/manual）")
     p_report.add_argument("--no-llm", action="store_true",
                           help="禁用 LLM，使用规则脚本生成简报（默认使用 LLM）")
+    p_report.add_argument("--sync", action="store_true",
+                          help="生成后同步到飞书群（仅 daily-brief）")
     p_report.add_argument("--output", help="输出文件路径")
 
     # ── 辅助命令 ──
