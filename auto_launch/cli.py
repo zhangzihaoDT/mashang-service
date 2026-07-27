@@ -196,7 +196,9 @@ def cmd_report(args):
                                        signals=signals, brand_statuses=brand_statuses,
                                        brand_volumes=brand_volumes)
         else:
-            brief_md = generate_llm_brief(facts, brief_date=brief_date, pipeline=args.pipeline)
+            brief_md = generate_llm_brief(facts, brief_date=brief_date, pipeline=args.pipeline,
+                                           signals=signals, brand_statuses=brand_statuses,
+                                           brand_volumes=brand_volumes)
             if not brief_md:
                 print("[report] LLM 不可用，降级到规则脚本")
                 brief_md = _fallback_brief(facts, brief_date=brief_date,

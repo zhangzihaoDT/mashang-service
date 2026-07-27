@@ -10,7 +10,13 @@ _DEEPSEEK_API_KEY_ENV = "DEEPSEEK_API_KEY"
 _DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
 _DEFAULT_MODEL = "deepseek-chat"
 
-_DAILY_BRIEF_PROMPT = """你是一个新能源汽车行业分析师。根据 facts 中的营销事件事实，生成一份三段式每日简报。
+_DAILY_BRIEF_PROMPT = """你是一个新能源汽车行业分析师。根据以下数据生成一份四段式每日简报。
+
+数据包含：
+- 确认事件（facts）：已核实的事件
+- 待审查信号（signals）：未确认但值得追踪的线索
+- 品牌覆盖状态（statuses）：无新增动作的品牌列表
+- 品牌声量观察（volumes）：品牌动作与声量描述
 
 必须严格按照以下格式输出，不要使用代码块：
 
@@ -18,7 +24,7 @@ _DAILY_BRIEF_PROMPT = """你是一个新能源汽车行业分析师。根据 fac
 {date_with_weekday}
 
 📊 今日概况
-事件 {event_count}｜品牌 {brand_count}｜官方 {official_pct}%
+事件 {event_count}｜信号 {signal_count}｜覆盖品牌 {brand_status_count}｜声量 {volume_count}
 
 🔥 今日重点
 ① **品牌 / 车型 / 类型**：核心动作描述（来源名称）
@@ -26,16 +32,21 @@ _DAILY_BRIEF_PROMPT = """你是一个新能源汽车行业分析师。根据 fac
 ③ **品牌 / 车型 / 类型**：核心动作描述（来源名称）
 ④ **品牌 / 车型 / 类型**：核心动作描述（来源名称）
 
+👀 待关注
+- 简要说明未确认但值得注意的信号（如有）
+- 简要说明品牌声量趋势（如有）
+- 简要说明覆盖品牌范围（如有）
+
 写作要求：
-- 今日重点按重要程度排列，最多 4 条
-- 事件类型用两个字简称：配置发布→发布, 技术传播→OTA, OTA更新→OTA, 开启预售→预售, 权益调整→权益, 交付启动→交付, 交付数据→交付, 销量里程碑→销量, 发布会/亮相活动→亮相, 品牌传播战役→品牌, 高管发声→发声, 首发亮相→亮相, 售价公布→售价, 购车权益调整→权益, 官方价格调整→调价, 年度改款/中期改款上市→改款, 联名/代言/合作→合作, 舆情事件→舆情
+- 今日重点按重要程度排列，最多 4 条，如确认事件不足可从信号中补充
+- 事件类型用两个字简称：配置发布→发布, 技术传播→OTA, OTA更新→OTA, 开启预售→预售, 权益调整→权益, 交付启动→交付, 交付数据→交付, 销量里程碑→销量, 发布会/亮相活动→亮相, 品牌传播战役→品牌, 高管发声→发声, 首发亮相→亮相, 售价公布→售价, 购车权益调整→权益, 官方价格调整→调价, 年度改款/中期改款上市→改款, 联名/代言/合作→合作, 舆情事件→舆情, partnership→合作
 - 每条采用 "① **品牌 / 车型 / 类型**：动作描述（来源名称）" 格式
 - 车型为空时格式为 "① **品牌 / 类型**：动作描述（来源）"
 - 动作描述用一句话概括核心事实，不含来源名称
 - 来源名称放在末尾括号内，简短（括号外无空格），如（比亚迪官方）
-- 整个简报不超过 20 行
+- 整个简报不超过 30 行
 - 少于 4 条时列实际条数
-- 只使用 facts 信息，不编造
+- 只使用提供的数据，不编造
 - 专业、简洁、中文"""
 
 _RANGE_BRIEF_PROMPT = """你是一个新能源汽车行业分析师。根据 facts 中的营销事件事实，生成一份三段式周期简报。
@@ -112,6 +123,9 @@ def _prompt_for_pipeline(pipeline: str = None, stats: dict = None, date_str: str
             "event_count": stats.get("event_count", 0),
             "brand_count": stats.get("brand_count", 0),
             "official_pct": stats.get("official_pct", 0),
+            "signal_count": stats.get("signal_count", 0),
+            "brand_status_count": stats.get("brand_status_count", 0),
+            "volume_count": stats.get("volume_count", 0),
         }
         return prompt, ctx
     ctx = {
@@ -128,26 +142,70 @@ def _load_api_key() -> Optional[str]:
     return os.environ.get(_DEEPSEEK_API_KEY_ENV) or os.environ.get("DEEPSEEK_API_KEY")
 
 
-def _build_user_message(facts: list[dict]) -> str:
-    """将 facts 组装为 LLM 输入文本。"""
-    if not facts:
-        return "facts 库为空，无法生成简报。"
+def _build_user_message(facts: list[dict], signals: list[dict] = None,
+                        brand_statuses: list[dict] = None,
+                        brand_volumes: list[dict] = None) -> str:
+    """将 facts + signals + brand_status + brand_volume 组装为 LLM 输入文本。"""
+    parts = []
 
-    lines = ["以下是今日 facts 库中的营销事件事实，请生成简报：", ""]
-    for i, f in enumerate(facts, 1):
-        brand = f.get("brand") or "?"
-        model = f.get("model") or ""
-        et = f.get("event_type") or "?"
-        title = (f.get("title") or "")[:100]
-        source = f.get("source_name") or "?"
-        tier = f.get("source_tier") or "?"
-        model_tag = f" / {model}" if model else ""
-        lines.append(f"{i}. [{brand}{model_tag}] {et}: {title}（{source}, {tier}）")
+    facts = facts or []
+    signals = signals or []
+    brand_statuses = brand_statuses or []
+    brand_volumes = brand_volumes or []
 
-    return "\n".join(lines)
+    if not facts and not signals and not brand_statuses and not brand_volumes:
+        return "数据为空，无法生成简报。"
+
+    if facts:
+        parts.append("=== 确认事件（facts） ===")
+        for i, f in enumerate(facts, 1):
+            brand = f.get("brand") or "?"
+            model = f.get("model") or ""
+            et = f.get("event_type") or "?"
+            title = (f.get("title") or "")[:100]
+            source = f.get("source_name") or "?"
+            tier = f.get("source_tier") or "?"
+            model_tag = f" / {model}" if model else ""
+            parts.append(f"{i}. [{brand}{model_tag}] {et}: {title}（{source}, {tier}）")
+
+    if signals:
+        parts.append("")
+        parts.append("=== 待审查弱信号 ===")
+        for i, s in enumerate(signals, 1):
+            brand = s.get("brand") or "?"
+            signal_text = (s.get("claim") or s.get("title") or "")[:120]
+            note = (s.get("note") or "")[:80]
+            parts.append(f"{i}. [{brand}] {signal_text}")
+            if note:
+                parts.append(f"   原因: {note}")
+
+    if brand_statuses:
+        parts.append("")
+        parts.append(f"=== 品牌覆盖状态（{len(brand_statuses)} 个品牌，均为无新增动作） ===")
+        for s in brand_statuses:
+            brand = s.get("brand") or "?"
+            phase = s.get("status_phase") or ""
+            status_note = f" — {phase[:40]}" if phase else ""
+            parts.append(f"  {brand}{status_note}")
+
+    if brand_volumes:
+        parts.append("")
+        parts.append("=== 品牌声量观察 ===")
+        for v in brand_volumes:
+            brand = v.get("brand") or "?"
+            summary = (v.get("claim") or "")[:80]
+            action_type = v.get("event_type") or v.get("action_type") or ""
+            intensity = v.get("intensity") or ""
+            tags = f"（{action_type} | {intensity}）" if action_type or intensity else ""
+            parts.append(f"  {brand} {tags}: {summary}")
+
+    return "\n".join(parts)
 
 
-def generate_llm_brief(facts: list[dict], brief_date: str = None, pipeline: str = None) -> str:
+def generate_llm_brief(facts: list[dict], brief_date: str = None, pipeline: str = None,
+                       signals: list[dict] = None,
+                       brand_statuses: list[dict] = None,
+                       brand_volumes: list[dict] = None) -> str:
     """
     用 LLM 生成简报。
 
@@ -168,7 +226,14 @@ def generate_llm_brief(facts: list[dict], brief_date: str = None, pipeline: str 
     brand_count = len(brands)
     official_count = sum(1 for f in facts if f.get("source_tier") == "tier_1_official")
     official_pct = round(official_count / event_count * 100) if event_count else 0
-    stats = {"event_count": event_count, "brand_count": brand_count, "official_pct": official_pct}
+    signals = signals or []
+    brand_statuses = brand_statuses or []
+    brand_volumes = brand_volumes or []
+    stats = {
+        "event_count": event_count, "brand_count": brand_count, "official_pct": official_pct,
+        "signal_count": len(signals), "brand_status_count": len(brand_statuses),
+        "volume_count": len(brand_volumes),
+    }
 
     prompt_template, ctx = _prompt_for_pipeline(pipeline, stats, date_str)
 
@@ -177,9 +242,10 @@ def generate_llm_brief(facts: list[dict], brief_date: str = None, pipeline: str 
         ctx["brand_focused"] = f"{next(iter(brands))} " if len(brands) == 1 else ""
 
     system_prompt = prompt_template.format(**ctx)
-    user_msg = _build_user_message(facts)
+    user_msg = _build_user_message(facts, signals=signals, brand_statuses=brand_statuses,
+                                   brand_volumes=brand_volumes)
 
-    if not facts:
+    if not facts and not signals and not brand_statuses and not brand_volumes:
         return _empty_brief(date_str, pipeline=pipeline, stats=stats)
 
     try:
