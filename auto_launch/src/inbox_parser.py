@@ -15,7 +15,7 @@ import re
 from typing import Optional
 
 _SECTION_TYPE_PATTERNS = [
-    (r"(品牌新事件|品牌动态|确认事件|可入库确认|确认事实|confirmed|🔴)", "brand_events"),
+    (r"(品牌新事件|品牌动态|确认事件|可入库确认|确认事实|今日重点(营销)?事件|confirmed|🔴)", "brand_events"),
     (r"(待审查信号|待确认信号|审查中|弱信号|待复核|review|🟡)", "review_signals"),
     (r"(品牌状态总览|品牌状态|未发现.*新增动作|无新增动作|⚪)", "brand_status"),
     (r"(品牌声量观察|声量观察|声量|📊)", "brand_volume"),
@@ -29,29 +29,35 @@ _KNOWN_BRANDS = [
 ]
 
 _COLUMN_MAP = {
-    "品牌": "brand",
-    "车型": "model",
-    "事件类型": "event_type",
-    "可能事件类型": "event_type",
-    "action_type": "event_type",
-    "摘要": "claim",
-    "事件": "title",
-    "信号描述": "claim",
-    "信号": "claim",
-    "signal": "claim",
-    "action_summary": "claim",
-    "来源": "source_name",
-    "信源等级": "source_tier",
-    "source_tier": "source_tier",
-    "当前阶段": "status_phase",
-    "status": "status_phase",
-    "最近事件": "last_event",
-    "上次更新": "last_updated",
-    "备注": "note",
-    "signal_date": "event_date",
-    "reason_not_confirmed": "note",
-    "continue_tracking": "continue_tracking",
-}
+        "品牌": "brand",
+        "车型": "model",
+        "车型/对象": "model",
+        "事件类型": "event_type",
+        "可能事件类型": "event_type",
+        "event_type": "event_type",
+        "action_type": "event_type",
+        "摘要": "claim",
+        "事件": "title",
+        "事件摘要": "claim",
+        "信号描述": "claim",
+        "信号": "claim",
+        "signal": "claim",
+        "动态": "claim",
+        "action_summary": "claim",
+        "来源": "source_name",
+        "信源等级": "source_tier",
+        "source_tier": "source_tier",
+        "当前阶段": "status_phase",
+        "status": "status_phase",
+        "状态": "status_phase",
+        "最近事件": "last_event",
+        "上次更新": "last_updated",
+        "备注": "note",
+        "判断": "note",
+        "signal_date": "event_date",
+        "reason_not_confirmed": "note",
+        "continue_tracking": "continue_tracking",
+    }
 
 
 def _detect_section_type(header: str) -> str:
