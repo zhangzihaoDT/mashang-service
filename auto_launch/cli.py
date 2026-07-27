@@ -178,7 +178,7 @@ def cmd_report(args):
                             since=args.since, until=args.until, limit=args.limit,
                             source_pipeline=args.pipeline,
                             monitor_date=args.date)
-        signals = store.get_signals(brand=args.brand, days=args.days)
+        signals = store.get_signals(brand=args.brand, days=args.days, monitor_date=args.date)
         brand_statuses = store.get_brand_status(brand=args.brand)
         brand_volumes = store.get_brand_volume(brand=args.brand, days=args.days)
 

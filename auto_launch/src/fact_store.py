@@ -69,6 +69,7 @@ CREATE TABLE IF NOT EXISTS signals (
     source_tier     TEXT,
     status          TEXT NOT NULL DEFAULT 'open',
     note            TEXT,
+    monitor_date    TEXT,
     input_channel   TEXT DEFAULT 'inbox',
     created_at      TEXT NOT NULL
 );
@@ -130,6 +131,7 @@ _MIGRATIONS = [
     "ALTER TABLE facts ADD COLUMN quality_status TEXT DEFAULT 'valid'",
     "ALTER TABLE brand_volume ADD COLUMN fingerprint TEXT",
     "ALTER TABLE facts ADD COLUMN monitor_date TEXT",
+    "ALTER TABLE signals ADD COLUMN monitor_date TEXT",
 ]
 
 _MARK_TEST_BRANDS = {"A", "B", "C", "D"}
@@ -372,12 +374,13 @@ class FactStore:
                 "seen_count": existing["seen_count"] + 1,
             }
 
+        monitor_date = item.get("monitor_date") or item.get("event_date") or now[:10]
         self._cur.execute(
             """INSERT INTO signals
                (fingerprint, first_seen, last_seen, seen_count, brand, model,
                 event_type, event_date, title, claim, source_name, source_tier,
-                status, note, input_channel, created_at)
-               VALUES (?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, 'open', ?, ?, ?)""",
+                status, note, monitor_date, input_channel, created_at)
+               VALUES (?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, 'open', ?, ?, ?, ?)""",
             (
                 fingerprint, now, now,
                 item.get("brand"), item.get("model"),
@@ -385,14 +388,15 @@ class FactStore:
                 item.get("title", "")[:200], item.get("claim", "")[:1000],
                 item.get("source_name"), item.get("source_tier"),
                 item.get("note", "")[:500],
-                item.get("input_channel", "inbox"), now,
+                monitor_date, item.get("input_channel", "inbox"), now,
             )
         )
         self._conn.commit()
         return {"action": "inserted", "signal_id": self._cur.lastrowid, "seen_count": 1}
 
     def get_signals(self, brand: str = None, status: str = None,
-                    days: int = None, limit: int = 50) -> list[dict]:
+                    days: int = None, limit: int = 50,
+                    monitor_date: str = None) -> list[dict]:
         wheres = []
         params = []
         if brand:
@@ -401,6 +405,9 @@ class FactStore:
         if status:
             wheres.append("status = ?")
             params.append(status)
+        if monitor_date:
+            wheres.append("monitor_date = ?")
+            params.append(monitor_date)
         if days is not None:
             cutoff = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%dT%H:%M:%S")
             wheres.append("last_seen >= ?")
