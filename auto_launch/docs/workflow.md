@@ -167,21 +167,23 @@ brand + brand_name + monitor_date + window_hours
 | `src/event_candidate_gate.py` | 候选事件门控 | 166 lines |
 | `src/brand_daily_marketing_watch.py` | 自有品牌监控 | 348 lines |
 
+## 日报摄入链路 (daily)
+
+另见 [`docs/daily_report_pipeline.md`](daily_report_pipeline.md)。
+
+```
+Planner 日报 (## 章节 + Markdown 表格)
+  ↓
+inbox_parser.parse_contract() → 识别 4 类 section_type
+  ↓
+inbox_filter.route() → 按 section_type 路由
+  ↓
+fact_store.upsert() → facts / evidence / signals / brand_status / brand_volume
+  ↓
+audit_coverage()
+```
+
 ## 当前已知问题
 
 1. **volc_search.yaml 的 cache.root_dir** — search_budget_manager 已硬编码 cache 路径为 `SERVICE_ROOT / "outputs" / "search_cache"`，不再从 YAML 读取
 2. **无 48h Launch Report** — 上市 48h 报告生成器尚未实现
-
-## 下一步建议
-
-### P0
-- Auto Launch Inbox MVP（已完成：parser / filter / store / runner）
-- Fact Store（已完成：SQLite, fingerprint 去重）
-- keep/discard filter（已完成）
-
-### P1
-- search --to-facts: search 结果直接写入 facts
-- facts query 增强: 分页 / 聚合 / 导出
-
-### P2
-- daily brief: 基于 facts 生成每日简报
