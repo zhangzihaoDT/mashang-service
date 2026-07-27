@@ -29,6 +29,7 @@
 | 指标名     | 聚合                | 强制过滤条件                         | 时间字段                 | 说明                     |
 | :--------- | :------------------ | :----------------------------------- | :----------------------- | :----------------------- |
 | **锁单量** | count(order_number) | `lock_time` IS NOT NULL              | `lock_time`              |                          |
+| **批售数量** | count(distinct vin) | `lock_time` IS NOT NULL, `order_type` NOT IN ('员工', '经销商员工') | `lock_time` | 锁单去重 VIN，剔除内部员工订单；反映真实市场销量 |
 | **交付数** | count(order_number) | `delivery_date` IS NOT NULL          | `delivery_date`          |                          |
 | **开票数** | count(order_number) | `invoice_upload_time` IS NOT NULL    | `invoice_upload_time`    | 不要用 order_create_date |
 | **小订数** | count(order_number) | `intention_payment_time` IS NOT NULL | `intention_payment_time` |                          |
@@ -191,35 +192,137 @@
 
 ### config_attribute.parquet (Total Rows: 4452631 · Unique Orders: 274692 · Unique Attributes: 63)
 
-| Column Name  | Data Type | Description                                        |
-| :----------- | :-------- | :------------------------------------------------- |
-| Order Number | str       | 订单号（与 `order_data.order_number` 对应）          |
+| Column Name  | Data Type | Description                                           |
+| :----------- | :-------- | :---------------------------------------------------- |
+| Order Number | str       | 订单号（与 `order_data.order_number` 对应）           |
 | Attribute    | str       | 选配项名称（含内饰、外饰、轮毂、动力电池等）          |
-| value        | str       | 选配项取值                                          |
-| option_flag  | str       | 选装标记（Y/N，Y=已选装）                              |
-| required     | str       | 是否标配（Y/N，Y=标配，N=选装）                        |
-| price        | Int64     | 选配价格（元），空值表示无额外费用或不可单独计价       |
-| order_type   | str       | 订单类型（关联自 order_data，如用户车/员工/试驾车等）  |
+| value        | str       | 选配项取值                                            |
+| option_flag  | str       | 选装标记（Y/N，Y=已选装）                             |
+| required     | str       | 是否标配（Y/N，Y=标配，N=选装）                       |
+| price        | Int64     | 选配价格（元），空值表示无额外费用或不可单独计价      |
+| order_type   | str       | 订单类型（关联自 order_data，如用户车/员工/试驾车等） |
 | vin          | str       | 车辆识别代码（关联自 order_data）                     |
 
 ### passenger_insurance（乘用车上险数据）
 
 6 张表，覆盖 2020-01-01 → 2026-06-01，数据源为 Tableau。
 
-| 表 | Grain | 维度 | 指标 | 用途 |
-|:---|:------|:-----|:-----|:-----|
-| `market_energy_monthly` | date_month + fuel_type_group + fuel_type | date_month, fuel_type_group, fuel_type | sales, weighted_tp | 市场总量、能源结构、纯电/插混/增程走势、价格重心 |
-| `brand_monthly` | date_month + brand | date_month, brand, brand_group, brand_luxury_group, oem_group, oem, brand_country, ownership_type, domestic_import | sales, weighted_tp | 品牌排名、品牌份额、品牌分组竞争、价格重心 |
-| `model_monthly` | date_month + brand + model + sub_model + sub_model_id | date_month, brand, brand_series, model, sub_model, sub_model_id, fuel_type, fuel_type_group, body_type, vehicle_level, vehicle_level_group, saic_segment, drive_type, drive_type_group | sales, weighted_tp | 车型排名、品牌内车型结构、级别/燃料/驱动分布 |
-| `geo_monthly` | date_month + province + city + city_tier_group + fuel_type_group | date_month, province, city, region_group, city_tier_2025, city_tier_group, fuel_type_group | sales, weighted_tp | 省市市场、城市线级、区域新能源渗透 |
-| `price_segment_monthly` | date_month + tp_bucket_5w + tp_bucket_10w + fuel_type_group + body_type + vehicle_level_group | date_month, tp_bucket_5w, tp_bucket_10w, fuel_type_group, body_type, vehicle_level_group | sales, weighted_tp | 价格带市场容量、价格带 × 能源 × 车身 × 级别交叉 |
-| `product_segment_monthly` | date_month + saic_segment + body_type + vehicle_level + vehicle_level_group + fuel_type_group + drive_type_group | date_month, saic_segment, body_type, vehicle_level, vehicle_level_group, fuel_type_group, drive_type_group | sales, weighted_tp, weighted_length_mm, weighted_width_mm, weighted_height_mm, weighted_wheelbase_mm | 细分市场、车身/级别/驱动结构、大车化趋势、产品尺寸重心 |
+| 表                        | Grain                                                                                                            | 维度                                                                                                                                                                                   | 指标                                                                                                 | 用途                                                   |
+| :------------------------ | :--------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------- | :----------------------------------------------------- |
+| `market_energy_monthly`   | date_month + fuel_type_group + fuel_type                                                                         | date_month, fuel_type_group, fuel_type                                                                                                                                                 | sales, weighted_tp                                                                                   | 市场总量、能源结构、纯电/插混/增程走势、价格重心       |
+| `brand_monthly`           | date_month + brand                                                                                               | date_month, brand, brand_group, brand_luxury_group, oem_group, oem, brand_country, ownership_type, domestic_import                                                                     | sales, weighted_tp                                                                                   | 品牌排名、品牌份额、品牌分组竞争、价格重心             |
+| `model_monthly`           | date_month + brand + model + sub_model + sub_model_id                                                            | date_month, brand, brand_series, model, sub_model, sub_model_id, fuel_type, fuel_type_group, body_type, vehicle_level, vehicle_level_group, saic_segment, drive_type, drive_type_group | sales, weighted_tp                                                                                   | 车型排名、品牌内车型结构、级别/燃料/驱动分布           |
+| `geo_monthly`             | date_month + province + city + city_tier_group + fuel_type_group                                                 | date_month, province, city, region_group, city_tier_2025, city_tier_group, fuel_type_group                                                                                             | sales, weighted_tp                                                                                   | 省市市场、城市线级、区域新能源渗透                     |
+| `price_segment_monthly`   | date_month + tp_bucket_5w + tp_bucket_10w + fuel_type_group + body_type + vehicle_level_group                    | date_month, tp_bucket_5w, tp_bucket_10w, fuel_type_group, body_type, vehicle_level_group                                                                                               | sales, weighted_tp                                                                                   | 价格带市场容量、价格带 × 能源 × 车身 × 级别交叉        |
+| `product_segment_monthly` | date_month + saic_segment + body_type + vehicle_level + vehicle_level_group + fuel_type_group + drive_type_group | date_month, saic_segment, body_type, vehicle_level, vehicle_level_group, fuel_type_group, drive_type_group                                                                             | sales, weighted_tp, weighted_length_mm, weighted_width_mm, weighted_height_mm, weighted_wheelbase_mm | 细分市场、车身/级别/驱动结构、大车化趋势、产品尺寸重心 |
 
 **字段说明**：
+
 - `sales`: 上险销量（辆），核心聚合指标
 - `weighted_tp`: 价格重心（元），销量加权平均成交价
 - `weighted_length_mm` / `weighted_width_mm` / `weighted_height_mm` / `weighted_wheelbase_mm`: 销量加权平均尺寸（mm），仅 `product_segment_monthly` 有
 - `date_month`: 月粒度日期，格式 `YYYY-MM-01`
+
+### delivery_inventory.parquet (Total Rows: 231657 · Columns: 9 · Time Range: 2021-12 ~ 2026-07)
+
+| Column Name | Data Type | Description |
+|:------------|:----------|:------------|
+| vin | string | 车辆识别代码（VIN），主标识字段 |
+| Real As Offline Time | datetime64[us] | 车辆最早的生产完成时间 |
+| Real Qc Offline Time | datetime64[us] | 实际质检完成时间 |
+| First In Inv Time | datetime64[us] | 车辆最早进入库存的时间 |
+| Actual In Inv Time | datetime64[us] | 当前一次实际入库时间 |
+| Actual Waybill Out Time | datetime64[us] | 实际运单发运时间 |
+| Real In Dc Time | datetime64[us] | 实际到达交付中心时间 |
+| Out Delivery Center Time | datetime64[us] | 实际离开交付中心时间 |
+| Schedule Effective Time | datetime64[us] | 排程或计划正式生效时间 |
+
+**时间顺序链**：
+
+`Real As Offline Time` → `Real Qc Offline Time` → `First / Actual In Inv Time` → `Actual Waybill Out Time` → `Real In Dc Time` → `Out Delivery Center Time`
+
+**数据源说明**：当前 `delivery_inventory` 表仅收录已通过质检的车辆（`real_as_offline_time` 和 `real_qc_offline_time` 均为 100% 非空），因此排产中、已下线待质检、工厂库存等早期状态在本表中无法观测。
+
+**核心原则**：
+- **车辆位置**看 `physical_stage`（仅依赖事件时间字段）
+- **订单匹配**看 `lock_time`（有则为已匹配，无则可能是未匹配或非标准业务）
+- **非标准业务（大客户批售、试驾车、仅批售等）不要求存在 `lock_time`**，不应视为数据异常
+- 库存统计统一使用 `physical_stage`，不受 `lock_time` 缺失影响
+
+**字段说明**：
+
+`Schedule Effective Time` 为排程或计划正式生效时间，不等同于"排产最早记录时间"。同一 VIN 若有多条排产记录，需取 `MIN(Schedule Effective Time)` 才能得到最早一次排产记录。
+
+#### VIN 生命周期状态机（三层架构）
+
+通过 `vin` 串联 `order_data.parquet`（`lock_time`、`delivery_date`）与本表。状态判定分为三层，互不覆盖：
+
+##### 第一层：physical_stage（物理位置）
+
+仅依赖车辆事件时间字段，不受订单状态影响，用于库存统计。
+
+| 物理位置 | 判断逻辑（从后往前匹配首个非空） |
+|:---------|:-------------------------------|
+| 已质检待入库 | `Real Qc Offline Time` 非空，`First In Inv Time` 为空 |
+| 工厂库存 | `First In Inv Time` 非空，`Actual Waybill Out Time` 为空 |
+| 在途 | `Actual Waybill Out Time` 非空，`Real In Dc Time` 为空 |
+| 交付中心库存 | `Real In Dc Time` 非空，`Out Delivery Center Time` 为空 |
+| 已离开交付中心 | `Out Delivery Center Time` 非空 |
+
+##### 第二层：order_relation（订单关系）
+
+仅依赖订单关联状态，不覆盖物理位置。
+
+| 订单关系 | 判断逻辑 |
+|:---------|:---------|
+| 已锁单 | `lock_time` 非空 |
+| 订单已关联但锁单时间缺失 | VIN 存在于 `order_data`，但 `lock_time` 为空 |
+| 未关联 | VIN 不在 `order_data` 中 |
+
+##### 第三层：vin_lifecycle_status（合并展示）
+
+合并物理位置 + 订单关系。**注意**："订单已关联但锁单时间缺失" 不覆盖物理位置，这类车辆仍保留其 `physical_stage` 信息。
+
+**16 类常规状态**：
+
+| 状态 | 物理位置 | 订单关系 |
+|:-----|:---------|:---------|
+| 已锁单待排产 | 无任何进度事件 | 已锁单 |
+| 已排产待下线_未匹配 | 已排产待下线 | 未关联 |
+| 已排产待下线_已锁单 | 已排产待下线 | 已锁单 |
+| 已下线待质检_未匹配 | 已下线待质检 | 未关联 |
+| 已下线待质检_已锁单 | 已下线待质检 | 已锁单 |
+| 已质检待入库_未匹配 | 已质检待入库 | 未关联 |
+| 已质检待入库_已锁单 | 已质检待入库 | 已锁单 |
+| 工厂库存_未匹配 | 工厂库存 | 未关联 |
+| 工厂库存_已锁单待发运 | 工厂库存 | 已锁单 |
+| 在途_未匹配 | 在途 | 未关联 |
+| 在途_已锁单 | 在途 | 已锁单 |
+| 交付中心库存_未匹配 | 交付中心库存 | 未关联 |
+| 交付中心库存_已锁单待交付 | 交付中心库存 | 已锁单 |
+| 已离开交付中心_未匹配 | 已离开交付中心 | 未关联 |
+| 已离开交付中心_已锁单 | 已离开交付中心 | 已锁单 |
+| 已交付 | 已离开交付中心且 `delivery_date` 非空 | — |
+
+**3 类特殊状态**：
+
+| 状态 | 判断逻辑 |
+|:-----|:---------|
+| 订单已关联但锁单时间缺失 | `physical_stage` 保留，`order_relation` 为"订单已关联但锁单时间缺失" |
+| 退款待重新匹配 | `actual_refund_time` 非空 |
+| 数据异常或状态未知 | 无法归入上述任何状态 |
+
+**当前数据集分布（231,657 VIN）**：
+
+| 物理位置 | 已锁单 | 订单已关联但锁单时间缺失 | 未关联 | 合计 |
+|:---------|------:|----------------------:|------:|-----:|
+| 已质检待入库 | 21 | 110 | 6,707 | 6,838 |
+| 在途 | 17 | 0 | 499 | 516 |
+| 交付中心库存 | 399 | 201 | 13,771 | 14,371 |
+| 已离开交付中心 | 189,209 | 3,250 | 17,473 | 209,932 |
+| **合计** | **189,646** | **3,561** | **38,450** | **231,657** |
+
+库存统计应使用第一层 `physical_stage`：工厂库存 0、在途 516、交付中心库存 14,371。`lock_time` 缺失不影响物理库存位置判定。
 
 ## 3. 微信群聊消息 (wechat_sync)
 
@@ -227,13 +330,13 @@
 
 ### 3.1 可用字段
 
-| 字段名 | 类型 | 说明 |
-|:-------|:-----|:-----|
-| message_id | int64 | 消息 ID（递增，用于增量同步） |
-| group_name | string | 群聊名称 |
-| sender_name | string | 发送者微信 ID |
-| content | string | 文字消息内容 |
-| timestamp | datetime64[ns] | 发送时间 |
+| 字段名      | 类型           | 说明                          |
+| :---------- | :------------- | :---------------------------- |
+| message_id  | int64          | 消息 ID（递增，用于增量同步） |
+| group_name  | string         | 群聊名称                      |
+| sender_name | string         | 发送者微信 ID                 |
+| content     | string         | 文字消息内容                  |
+| timestamp   | datetime64[ns] | 发送时间                      |
 
 ### 3.2 查询示例
 
