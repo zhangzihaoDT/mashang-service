@@ -24,7 +24,6 @@ def run_day(monitor_date: str, brand: str = "zhiji", brand_name: str = "智己",
     """
     from auto_launch.src.brand_daily_marketing_watch import _run, run_brand_daily_report
     from auto_launch.src.fact_store import FactStore
-    from auto_launch.src.inbox_filter import classify
     from auto_launch.src import source_auditor
 
     run_mode = output_paths.run_mode_brand_daily(brand)
@@ -59,7 +58,7 @@ def run_day(monitor_date: str, brand: str = "zhiji", brand_name: str = "智己",
                         "source_tier": item.get("source_tier_guess", ""),
                         "input_channel": "search_to_facts",
                     }
-                    if classify(inbox_item)["decision"] == "keep":
+                    if inbox_item["brand"] or inbox_item["event_type"]:
                         store.insert(inbox_item)
                         kept += 1
                 log.append(("to-facts", "ok", f"{kept} keep from {len(items)} items"))

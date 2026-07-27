@@ -13,17 +13,48 @@ daily ──┘
 ```
 
 - **search**: web search → normalized evidence → facts store
-- **daily**: ChatGPT Daily Run → extracted events → facts store
+- **daily**: Planner 日报 / ChatGPT Daily Run → 按章节路由 → 多表写入
 - **report**: facts store → target report (brand-daily, daily-brief)
 
 Facts is the shared middle layer. search and daily are independent ingestion paths.
 
+## Inbox Pipeline (daily 摄入层)
+
+当前支持两种输入源，自动检测并走对应管线：
+
+### 1. Planner 日报 (推荐)
+
+结构化日报，带 `##` 章节标题 + Markdown 表格。4 种章节类型：
+
+| 章节标题模式 | section_type | 路由目标 | 表 |
+|-------------|-------------|---------|----|
+| 可入库确认事件 / 品牌新事件 / confirmed | `brand_events` | confirmed_fact | `facts` + `evidence` |
+| 高优先级弱信号 / 待复核 / review | `review_signals` | review_signal | `signals` |
+| 未发现新增动作的品牌 / 品牌状态 | `brand_status` | brand_status | `brand_status` (upsert) |
+| 品牌声量观察 / 声量 | `brand_volume` | brand_volume | `brand_volume` |
+
+管线：`parse_contract → validate → route → upsert → audit`
+
+### 2. Legacy 自由文本 (向后兼容)
+
+传统 `## 标题 + - key: value` 格式或纯文本。走原有 keep/discard 二分类后写入 `facts` 表。
+
+## Fact Store 多表架构
+
+| 表 | 用途 | 写入来源 |
+|----|------|---------|
+| `facts` | 事件主表 (confirmed facts, fingerprint 去重) | Planner brand_events / legacy keep |
+| `evidence` | 多信源证据 (关联 facts.fact_id) | facts insert 时自动写入 |
+| `signals` | 弱信号 / 待审查 (fingerprint 去重, status=open) | Planner review_signals |
+| `brand_status` | 品牌状态快照 (按 brand 幂等 upsert) | Planner brand_status |
+| `brand_volume` | 品牌声量观测 (含 claim/type/intensity/evidence) | Planner brand_volume |
+
 ## CLI Contract
 
 | Command | Role | Search? | Write facts? | Report? |
-|---|---|---|---:|---:|
+|---|---|---|---|---:|---:|
 | `search` | web search ingestion | yes | yes | no |
-| `daily` | ChatGPT Daily Run ingestion | no | yes | no |
+| `daily` | Planner 日报 / Legacy 文本摄入 | no | yes | no |
 | `report` | facts-to-report generation | no | no | yes |
 | `facts` | inspect facts | no | no | no |
 | `run-day` | shortcut: search + report | yes | yes | yes |
@@ -31,16 +62,12 @@ Facts is the shared middle layer. search and daily are independent ingestion pat
 
 ## Report Generation
 
-`report --type daily-brief` uses **LLM by default** (DeepSeek):
+`report --type daily-brief` 使用 **规则脚本** (`--no-llm` 默认)，同时查询 facts + signals + brand_status + brand_volume 四表：
 
-- LLM generates structured 5-section brief: 今日重点 → 品牌动作速览 → 事件类型分布 → 今日观察 → 信源质量
-- LLM merges similar events (e.g. 3 条交付数据 → 1 条 "交付数据亮眼" + 具体增长率)
-- LLM provides analytical judgment (今日观察), not template filling
-- Falls back to rule-based script if LLM unavailable (`--no-llm` to force rule-based)
-
-Pipeline context:
-- `--pipeline search` → 标题 "搜索简报（基于公开搜索发现）"，措辞反映数据来源
-- `--pipeline daily` → 标题 "每日简报（基于 facts 库收录的事件）"
+- **今日重点**: facts 聚类 top 5
+- **待审查信号**: signals 列表 (含原因/来源)
+- **品牌动作速览**: facts 按品牌分组
+- **事件类型分布**: facts 按 event_type 聚合
 
 ## Data Quality
 
@@ -53,6 +80,7 @@ Pipeline context:
 ## Known Decisions
 
 - **daily** no longer means brand daily report (→ `report --type brand-daily`)
+- **daily** now auto-detects Planner 日报 vs legacy text
 - **report** never searches. Empty facts → empty-state report with suggestion
 - **run-day** is orchestration only, not a core layer
 - `resolve_brand()` is the only brand normalization entrypoint

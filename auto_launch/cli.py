@@ -94,8 +94,7 @@ def cmd_search(args):
 
 
 def _search_to_facts(pipeline_result):
-    """将 Volc Search 的 normalized items 通过 inbox_filter 写入 fact_store。"""
-    from auto_launch.src.inbox_filter import classify
+    """将 Volc Search 的 normalized items 写入 fact_store。"""
     from auto_launch.src.fact_store import FactStore
 
     intent, task_config, budget_plan, query_plan, search_results_list, normalized, audit = pipeline_result
@@ -104,7 +103,6 @@ def _search_to_facts(pipeline_result):
         print("[to-facts] 无 normalized items 可处理")
         return
 
-    # Build target_id → (brand, model) mapping from query_plan
     target_map = {}
     for t in query_plan.get("targets", []):
         target_map[t["target_id"]] = {
@@ -114,7 +112,6 @@ def _search_to_facts(pipeline_result):
 
     store = FactStore()
     kept = 0
-    discarded = 0
 
     for item in normalized["items"]:
         tid = item.get("target_id", "")
@@ -135,17 +132,14 @@ def _search_to_facts(pipeline_result):
             "run_id": _generate_run_id(),
         }
 
-        result = classify(inbox_item)
-        if result["decision"] == "keep":
+        if inbox_item["brand"] or inbox_item["event_type"]:
             fr = store.insert(inbox_item)
             kept += 1
             action = "新增" if fr["action"] == "inserted" else "更新"
             title_short = (inbox_item["title"] or "")[:50]
             print(f"  [keep] {action} fact_id={fr['fact_id']} seen={fr['seen_count']} — {title_short}")
-        else:
-            discarded += 1
 
-    print(f"\n[to-facts] 完成: {kept} keep / {discarded} discard")
+    print(f"\n[to-facts] 完成: {kept} 条写入")
 
 
 # ── report: facts → report generation ─────────────────────────────
@@ -183,16 +177,38 @@ def cmd_report(args):
                             model=args.model, days=args.days,
                             since=args.since, until=args.until, limit=args.limit,
                             source_pipeline=args.pipeline)
+        signals = store.get_signals(brand=args.brand, days=args.days)
+        brand_statuses = store.get_brand_status(brand=args.brand)
+        brand_volumes = store.get_brand_volume(brand=args.brand, days=args.days)
+
+        # Determine brief_date: range mode if days > 1 or since/until set
+        brief_date = args.date
+        is_range = bool(args.days and args.days > 1) or bool(args.since) or bool(args.until)
+        if is_range:
+            event_dates = [f.get("event_date") for f in facts if f.get("event_date")]
+            if len(event_dates) >= 2:
+                brief_date = f"{min(event_dates)}~{max(event_dates)}"
+            elif len(event_dates) == 1:
+                brief_date = event_dates[0]
+
         if args.no_llm:
-            brief_md = _fallback_brief(facts)
+            brief_md = _fallback_brief(facts, brief_date=brief_date,
+                                       signals=signals, brand_statuses=brand_statuses,
+                                       brand_volumes=brand_volumes)
         else:
-            brief_md = generate_llm_brief(facts, brief_date=args.date, pipeline=args.pipeline)
+            brief_md = generate_llm_brief(facts, brief_date=brief_date, pipeline=args.pipeline)
             if not brief_md:
                 print("[report] LLM 不可用，降级到规则脚本")
-                brief_md = _fallback_brief(facts)
+                brief_md = _fallback_brief(facts, brief_date=brief_date,
+                                           signals=signals, brand_statuses=brand_statuses,
+                                           brand_volumes=brand_volumes)
         if not args.output:
-            date_str = args.date or datetime.now().strftime("%Y-%m-%d")
-            args.output = f"auto_launch/outputs/runs/{date_str.replace('-', '')}/daily_brief.md"
+            if is_range:
+                fs = brief_date.replace("~", "_to_") if brief_date else (args.date or datetime.now().strftime("%Y-%m-%d"))
+                args.output = f"auto_launch/outputs/runs/{fs}/daily_brief.md"
+            else:
+                date_str = args.date or datetime.now().strftime("%Y-%m-%d")
+                args.output = f"auto_launch/outputs/runs/{date_str.replace('-', '')}/daily_brief.md"
         Path(args.output).parent.mkdir(parents=True, exist_ok=True)
         Path(args.output).write_text(brief_md, encoding="utf-8")
         print(f"[report --type daily-brief] 已写入: {args.output}")
@@ -201,7 +217,7 @@ def cmd_report(args):
 
         if args.sync:
             from auto_launch.src.feishu_sender import send_brief_to_feishu
-            ds = args.date or datetime.now().strftime("%Y-%m-%d")
+            ds = brief_date or (args.date or datetime.now().strftime("%Y-%m-%d"))
             send_brief_to_feishu(brief_md, date_str=ds)
 
     else:

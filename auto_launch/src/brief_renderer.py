@@ -189,138 +189,185 @@ def _brief_rank(cluster: dict) -> tuple:
 
 # ── Generate brief ──
 
-def generate_brief(facts: list[dict], title: str = None, brief_date: str = None) -> str:
+def generate_brief(facts: list[dict], title: str = None, brief_date: str = None,
+                   signals: list[dict] = None,
+                   brand_statuses: list[dict] = None,
+                   brand_volumes: list[dict] = None) -> str:
     """
-    从 facts 生成去重聚类简报。
+    从 facts（+ 可选 signals / brand_statuses / brand_volumes）生成简报。
 
-    自动:
-      1. 过滤 is_test / quality_status 非 valid 数据
-      2. event-level dedup + source count
-      3. 结构: 今日重点 → 品牌动作速览 → 事件类型 → 今日观察 → 信源质量
-
-    如果有效 facts 为空，生成空状态报告。
+    brief_date 支持 "YYYY-MM-DD"（单日）或 "YYYY-MM-DD~YYYY-MM-DD"（周期）格式。
+    如果有效 facts 为空，生成空状态报告（含额外数据时仍输出各章节）。
     """
     clean = clean_facts(facts)
     filtered_count = len(facts) - len(clean)
     clusters = _cluster_facts(clean)
     ranked = sorted(clusters, key=_brief_rank, reverse=True)
 
+    is_range = brief_date and "~" in brief_date
     if brief_date:
         date_str = brief_date
     else:
         dates = [f.get("event_date") for f in clean if f.get("event_date")]
         date_str = max(set(dates), key=dates.count) if dates else datetime.now().strftime("%Y-%m-%d")
 
-    brief_title = title or f"Auto Launch 每日简报 — {date_str}"
+    report_type_label = "周期简报" if is_range else "每日简报"
+    brief_title = title or f"Auto Launch {report_type_label} — {date_str}"
 
-    if not clusters:
+    # Check if we have any data at all
+    has_facts = bool(clusters)
+    has_extra = bool(signals) or bool(brand_statuses) or bool(brand_volumes)
+    has_any = has_facts or has_extra
+
+    if not has_any:
         return _empty_brief(title, filtered_count)
 
     # Count brands
     brands_in = set(c["brand"] for c in clusters if c.get("brand"))
     has_official = any("tier_1" in (c.get("best_source_tier") or "") for c in clusters)
 
+    section_label = "近期重点" if is_range else "今日重点"
+    period_label = "本周期" if is_range else "今日"
+
     lines = [f"# {brief_title}", ""]
 
-    # ── 今日重点 ──
-    lines.append("## 今日重点")
-    lines.append("")
-    top = ranked[:5]
-    for i, c in enumerate(top, 1):
-        brand = c.get("brand") or "?"
-        model = c.get("model") or ""
-        et = c.get("event_type") or "?"
-        title_text = (c.get("title") or "")[:60]
-        src_cnt = c.get("source_count", 1)
-        sources = c.get("sources", [])
-        tier = c.get("best_source_tier") or ""
-        tier_label = _tier_label(tier)
-        model_tag = f" {model}" if model else ""
-        badge = _badge(c)
-        evidence = f"（{src_cnt} 个来源）" if src_cnt > 1 else ""
-        lines.append(f"  {i}. **[{brand}{model_tag}]** {et} — {title_text}  {badge}")
-        lines.append(f"     {tier_label} · {', '.join(sources[:2])} {evidence}")
+    # ── 近期/今日重点（facts 部分） ──
+    if has_facts:
+        lines.append(f"## {section_label}")
         lines.append("")
-    lines.append("")
-
-    # ── 品牌动作速览 ──
-    lines.append("## 品牌动作速览")
-    lines.append("")
-    by_brand: dict[str, list] = defaultdict(list)
-    for c in ranked:
-        by_brand[c.get("brand") or "未知"].append(c)
-    for brand, items in sorted(by_brand.items()):
-        lines.append(f"### {brand}")
-        lines.append("")
-        for c in items:
+        top = ranked[:5]
+        for i, c in enumerate(top, 1):
+            brand = c.get("brand") or "?"
             model = c.get("model") or ""
             et = c.get("event_type") or "?"
-            title_text = (c.get("title") or "")[:50]
+            title_text = (c.get("title") or "")[:60]
             src_cnt = c.get("source_count", 1)
-            badge = _badge(c)
+            sources = c.get("sources", [])
+            tier = c.get("best_source_tier") or ""
+            tier_label = _tier_label(tier)
             model_tag = f" {model}" if model else ""
+            badge = _badge(c)
             evidence = f"（{src_cnt} 个来源）" if src_cnt > 1 else ""
-            lines.append(f"- **{et}**{model_tag} — {title_text}  {badge} {evidence}")
+            lines.append(f"  {i}. **[{brand}{model_tag}]** {et} — {title_text}  {badge}")
+            lines.append(f"     {tier_label} · {', '.join(sources[:2])} {evidence}")
+            lines.append("")
         lines.append("")
 
+    # ── 待审查信号 ──
+    if signals:
+        lines.append("## 待审查信号")
+        lines.append("")
+        for i, s in enumerate(signals, 1):
+            brand = s.get("brand") or ""
+            signal_text = (s.get("claim") or s.get("title") or "")[:100]
+            note = (s.get("note") or "")[:80]
+            source = s.get("source_name") or ""
+            model = s.get("model") or ""
+            model_tag = f" [{model}]" if model else ""
+            lines.append(f"  {i}. **{brand}{model_tag}**: {signal_text}")
+            if note:
+                lines.append(f"     原因: {note}")
+            if source:
+                lines.append(f"     来源: {source}")
+            lines.append("")
+        lines.append("")
+
+    # ── 品牌动作速览（facts） ──
+    if has_facts:
+        lines.append("## 品牌动作速览")
+        lines.append("")
+        by_brand: dict[str, list] = defaultdict(list)
+        for c in ranked:
+            by_brand[c.get("brand") or "未知"].append(c)
+        for brand, items in sorted(by_brand.items()):
+            lines.append(f"### {brand}")
+            lines.append("")
+            for c in items:
+                model = c.get("model") or ""
+                et = c.get("event_type") or "?"
+                title_text = (c.get("title") or "")[:50]
+                src_cnt = c.get("source_count", 1)
+                badge = _badge(c)
+                model_tag = f" {model}" if model else ""
+                evidence = f"（{src_cnt} 个来源）" if src_cnt > 1 else ""
+                lines.append(f"- **{et}**{model_tag} — {title_text}  {badge} {evidence}")
+            lines.append("")
+
     # ── 事件类型分布 ──
-    lines.append("## 事件类型分布")
-    lines.append("")
-    by_event_type: dict[str, list] = defaultdict(list)
-    for c in clusters:
-        by_event_type[c.get("event_type") or "其他"].append(c)
-    for et, items in sorted(by_event_type.items(), key=lambda x: len(x[1]), reverse=True):
-        brand_list = ", ".join(sorted(set(c["brand"] for c in items if c.get("brand"))))
-        count = sum(c["source_count"] for c in items)
-        lines.append(f"- **{et}** — {len(items)} 事件 / {count} 来源 — {brand_list}")
-    lines.append("")
-
-    # ── 今日观察 ──
-    lines.append("## 今日观察")
-    lines.append("")
-    et_counts = defaultdict(int)
-    for c in clusters:
-        for ek, score in _EVENT_TYPE_PRIORITY.items():
-            if ek in (c.get("event_type") or ""):
-                et_counts[ek] += c["source_count"]
-                break
-    dominant = sorted(et_counts.items(), key=lambda x: x[1], reverse=True)
-    lines.append(f"- 今日共收录 **{len(clusters)}** 个事件（{len(clean)} 条原始事实），涉及 **{len(brands_in)}** 个品牌。")
-    if filtered_count > 0:
-        lines.append(f"- 已自动过滤 **{filtered_count}** 条测试 / 无效数据。")
-    if dominant:
-        lines.append(f"- 主要动作集中在 **{dominant[0][0]}**，其余为 {', '.join(k for k, _ in dominant[1:3])}。")
-    if has_official:
-        lines.append(f"- 官方源覆盖：✅ 有。")
-    else:
-        lines.append(f"- 官方源覆盖：❌ 今日 facts 未命中官方源。")
-    lines.append("")
-
-    # ── 信源质量 ──
-    lines.append("## 信源质量")
-    lines.append("")
-    by_tier: dict[str, int] = defaultdict(int)
-    for c in clusters:
-        by_tier[c.get("best_source_tier") or "unknown"] += 1
-    for tier, cnt in sorted(by_tier.items(), key=lambda x: _SOURCE_TIER_PRIORITY.get(x[0], 0), reverse=True):
-        bar = "█" * min(cnt * 3, 30)
-        lines.append(f"- {_tier_label(tier):<30} {bar} {cnt}")
-    lines.append("")
+    if has_facts:
+        lines.append("## 事件类型分布")
+        lines.append("")
+        by_event_type: dict[str, list] = defaultdict(list)
+        for c in clusters:
+            by_event_type[c.get("event_type") or "其他"].append(c)
+        for et, items in sorted(by_event_type.items(), key=lambda x: len(x[1]), reverse=True):
+            brand_list = ", ".join(sorted(set(c["brand"] for c in items if c.get("brand"))))
+            count = sum(c["source_count"] for c in items)
+            lines.append(f"- **{et}** — {len(items)} 事件 / {count} 来源 — {brand_list}")
+        lines.append("")
 
     # ── Footer ──
     lines.append("---")
     lines.append("")
+    total_sources = ["facts"]
+    if signals:
+        total_sources.append(f"{len(signals)} signals")
+    if brand_statuses:
+        total_sources.append(f"{len(brand_statuses)} statuses")
+    if brand_volumes:
+        total_sources.append(f"{len(brand_volumes)} volumes")
     lines.append(f"*简报生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M')}*")
-    lines.append(f"*数据来源: auto_launch facts 库 | {len(clusters)} 个聚类事件 / {len(clean)} 条原始事实*")
+    lines.append(f"*数据来源: auto_launch {' + '.join(total_sources)}*")
     lines.append("")
 
     return "\n".join(lines)
 
 
-def _empty_brief(title: str = None, filtered_count: int = 0) -> str:
+def _empty_brief(title: str = None, filtered_count: int = 0,
+                 signals: list[dict] = None,
+                 brand_statuses: list[dict] = None,
+                 brand_volumes: list[dict] = None) -> str:
     date_str = datetime.now().strftime("%Y-%m-%d")
     t = title or f"Auto Launch 每日简报 — {date_str}"
     filter_note = f"\n已过滤 test/invalid 数据 {filtered_count} 条。" if filtered_count else ""
+
+    has_extra = bool(signals) or bool(brand_statuses) or bool(brand_volumes)
+    if has_extra:
+        lines = [f"# {t}", ""]
+        lines.append("## 今日重点")
+        lines.append("")
+        lines.append(f"（无）— 当前 facts 库无匹配有效事实。{filter_note}")
+        lines.append("")
+        if signals:
+            lines.append("## 待审查信号")
+            lines.append("")
+            for i, s in enumerate(signals, 1):
+                brand = s.get("brand") or ""
+                signal_text = (s.get("claim") or s.get("title") or "")[:100]
+                note = (s.get("note") or "")[:80]
+                source = s.get("source_name") or ""
+                model = s.get("model") or ""
+                model_tag = f" [{model}]" if model else ""
+                lines.append(f"  {i}. **{brand}{model_tag}**: {signal_text}")
+                if note:
+                    lines.append(f"     原因: {note}")
+                if source:
+                    lines.append(f"     来源: {source}")
+                lines.append("")
+            lines.append("")
+        lines.append("---")
+        lines.append("")
+        total = ["facts (空)"]
+        if signals:
+            total.append(f"{len(signals)} signals")
+        if brand_statuses:
+            total.append(f"{len(brand_statuses)} statuses")
+        if brand_volumes:
+            total.append(f"{len(brand_volumes)} volumes")
+        lines.append(f"*数据来源: auto_launch {' + '.join(total)}*")
+        lines.append("")
+        return "\n".join(lines)
+
     return f"""# {t}
 
 ## 今日重点
@@ -331,12 +378,7 @@ def _empty_brief(title: str = None, filtered_count: int = 0) -> str:
 
 facts 库未发现可用于生成简报的有效事实。
 
-## 今日观察
-
-- facts 库为空或全部被过滤，无法生成简报。
-- 请通过 daily 或 search --to-facts 导入事实。
-
-## 信源质量
+## 事件类型分布
 
 （无）
 """

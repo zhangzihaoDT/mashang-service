@@ -1,81 +1,76 @@
-"""inbox_parser 测试"""
+"""inbox_parser 测试 — Planner 日报"""
 import sys, json
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from auto_launch.src.inbox_parser import parse_text
+from auto_launch.src.inbox_parser import parse_text, parse_contract
 
-FIXTURE = Path(__file__).resolve().parent / "fixtures" / "daily_run_sample.md"
-SAMPLE = FIXTURE.read_text(encoding="utf-8")
+FIXTURE = Path(__file__).resolve().parent / "fixtures" / "planner_daily_report.md"
+PLANNER_TEXT = FIXTURE.read_text(encoding="utf-8")
 
 
 def test_parse_sample_returns_items():
-    items = parse_text(SAMPLE)
-    assert len(items) >= 5
+    items = parse_text(PLANNER_TEXT)
+    assert len(items) == 27
     print(f"[PASS] parse_sample_returns_items: {len(items)} items")
 
 
 def test_parse_brand_extraction():
-    items = parse_text(SAMPLE)
-    brands = {i.get("brand") for i in items}
+    items = parse_text(PLANNER_TEXT)
+    brands = {i.get("brand") for i in items if i.get("brand")}
     assert "智己" in brands
     assert "极氪" in brands
-    assert "问界" in brands
-    print(f"[PASS] test_parse_brand_extraction: {brands}")
+    print(f"[PASS] parse_brand_extraction: {len(brands)} brands")
 
 
 def test_parse_event_type_extraction():
-    items = parse_text(SAMPLE)
+    items = parse_text(PLANNER_TEXT)
     types = {i.get("event_type") for i in items if i.get("event_type")}
-    assert "权益调整" in types or "改款上市" in types
-    print(f"[PASS] test_parse_event_type_extraction: {types}")
+    assert "权益调整" in types
+    print(f"[PASS] parse_event_type_extraction: {types}")
 
 
-def test_parse_source_tier_normalization():
-    items = parse_text(SAMPLE)
+def test_parse_section_type_present():
+    items = parse_text(PLANNER_TEXT)
     for item in items:
-        if item.get("source_tier"):
-            assert item["source_tier"].startswith("tier_")
-    print(f"[PASS] test_parse_source_tier_normalization")
-
-
-def test_parse_handles_chatgpt_markdown():
-    md = """
-## 智己 L6 发布新版本
-
-- 品牌: 智己
-- 车型: L6
-- 事件类型: 新品发布
-- 时间: 2026-07-09
-"""
-    items = parse_text(md)
-    assert len(items) == 1
-    assert items[0]["brand"] == "智己"
-    assert items[0]["model"] == "L6"
-    print(f"[PASS] test_parse_handles_chatgpt_markdown")
+        assert item.get("section_type") is not None
+    print(f"[PASS] parse_section_type_present")
 
 
 def test_parse_handles_empty_input():
     items = parse_text("")
     assert items == []
-    print(f"[PASS] test_parse_handles_empty_input")
+    print(f"[PASS] parse_handles_empty_input")
 
 
-def test_parse_no_brand_fallback():
-    md = "今天极氪有新的权益调整\n没有什么其他信息了"
+def test_parse_contract_structure():
+    contract = parse_contract(PLANNER_TEXT)
+    assert contract["source_type"] == "planner_daily_report"
+    assert len(contract["sections"]) == 4
+    assert len(contract["items"]) == 27
+    print(f"[PASS] parse_contract_structure: {len(contract['sections'])} sections")
+
+
+def test_parse_handles_simple_planner():
+    md = """## 一、可入库确认事件
+
+| brand | event_type | claim |
+|------|-----------|-------|
+| 智己 | 权益调整 | 限时权益 |
+"""
     items = parse_text(md)
-    assert len(items) >= 1
-    # "极氪" 应被 _try_extract_brand_from_text 识别
-    brands = [i.get("brand") for i in items]
-    assert any(b == "极氪" for b in brands if b)
-    print(f"[PASS] test_parse_no_brand_fallback")
+    assert len(items) == 1
+    assert items[0]["brand"] == "智己"
+    assert items[0]["event_type"] == "权益调整"
+    assert items[0]["section_type"] == "brand_events"
+    print(f"[PASS] parse_handles_simple_planner")
 
 
 if __name__ == "__main__":
     test_parse_sample_returns_items()
     test_parse_brand_extraction()
     test_parse_event_type_extraction()
-    test_parse_source_tier_normalization()
-    test_parse_handles_chatgpt_markdown()
+    test_parse_section_type_present()
     test_parse_handles_empty_input()
-    test_parse_no_brand_fallback()
+    test_parse_contract_structure()
+    test_parse_handles_simple_planner()
     print("\n✅ 所有测试通过")

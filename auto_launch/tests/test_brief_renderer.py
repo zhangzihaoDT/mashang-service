@@ -28,7 +28,7 @@ def test_empty_facts_returns_empty_brief():
 def test_generate_includes_new_sections():
     facts = [_fact(), _fact(brand="极氪", model="7X", event_type="开启交付", title="极氪 7X 开启交付")]
     md = generate_brief(facts)
-    for section in ["今日重点", "品牌动作速览", "事件类型分布", "信源质量", "今日观察"]:
+    for section in ["今日重点", "品牌动作速览", "事件类型分布", "信源质量", "观察"]:
         assert section in md, f"Missing section: {section}"
     print(f"[PASS] test_generate_includes_new_sections")
 

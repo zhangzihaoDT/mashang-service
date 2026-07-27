@@ -1,76 +1,56 @@
-"""inbox_filter 测试"""
+"""inbox_filter 测试 — Planner 日报路由"""
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from auto_launch.src.inbox_filter import classify
+from auto_launch.src.inbox_filter import route
 
 
-def _item(brand=None, model=None, event_type=None, title="", claim="", source_name=None, category=None):
-    return {
-        "brand": brand, "model": model, "event_type": event_type,
-        "title": title, "claim": claim, "source_name": source_name,
-        "category": category,
-    }
+def _item(brand=None, section_type=None, event_type=None, claim="", model=None):
+    return {"brand": brand, "section_type": section_type,
+            "event_type": event_type, "claim": claim, "model": model}
 
 
-def test_keep_brand_model_event_type():
-    """明确品牌/车型/事件类型 → keep"""
-    r = classify(_item(brand="智己", model="LS6", event_type="权益调整",
-                        title="智己 LS6 权益调整", claim="限时权益", source_name="immotors.com"))
-    assert r["decision"] == "keep"
-    print(f"[PASS] test_keep_brand_model_event_type")
+def test_route_brand_event_to_confirmed_fact():
+    r = route(_item(brand="理想", section_type="brand_events", event_type="partnership"))
+    assert r["decision"] == "route"
+    assert r["route_to"] == "confirmed_fact"
 
 
-def test_keep_brand_with_action_keyword():
-    """品牌 + 营销动作关键词 → keep"""
-    r = classify(_item(brand="极氪", title="极氪 7X 开启交付", claim="首批交付"))
-    assert r["decision"] == "keep"
-    print(f"[PASS] test_keep_brand_with_action_keyword")
+def test_route_review_signal():
+    r = route(_item(brand="极氪", section_type="review_signals", claim="境外锁车争议"))
+    assert r["decision"] == "route"
+    assert r["route_to"] == "review_signal"
 
 
-def test_keep_watchlist_event():
-    """品牌 + 上市/交付/权益 → keep"""
-    r = classify(_item(brand="智己", model="L6", title="智己 L6 正式上市"))
-    assert r["decision"] == "keep"
-    print(f"[PASS] test_keep_watchlist_event")
+def test_route_brand_status():
+    r = route(_item(brand="问界", section_type="brand_status"))
+    assert r["decision"] == "route"
+    assert r["route_to"] == "brand_status"
 
 
-def test_discard_no_brand():
-    """无品牌无车型 → discard"""
-    r = classify(_item(title="宁德时代发布第三代换电方案", event_type="技术发布"))
-    assert r["decision"] == "discard"
-    assert "no_brand_or_model" in r["reason"]
-    print(f"[PASS] test_discard_no_brand")
+def test_route_brand_volume():
+    r = route(_item(brand="小米", section_type="brand_volume"))
+    assert r["decision"] == "route"
+    assert r["route_to"] == "brand_volume"
 
 
-def test_discard_opinion():
-    """主观评论/预测 → discard"""
-    r = classify(_item(brand="智己", title="我觉得智己下半年会卖得很好", claim="预计销量翻倍"))
-    assert r["decision"] == "discard"
-    assert "opinion_or_prediction" in r["reason"]
-    print(f"[PASS] test_discard_opinion")
+def test_route_unknown_section():
+    r = route(_item(brand="智己", section_type="unknown"))
+    assert r["decision"] == "route"
+    assert r["route_to"] == "other"
 
 
-def test_discard_no_event():
-    """无事件类型也无动作关键词 → discard"""
-    r = classify(_item(brand="宝马", title="宝马今年感觉不错", claim="看起来很好"))
-    assert r["decision"] == "discard"
-    print(f"[PASS] test_discard_no_event")
-
-
-def test_discard_no_structured_fact():
-    """无法形成结构化事实 → discard"""
-    r = classify(_item(brand="特斯拉", title="特斯拉", claim="一些消息"))
-    assert r["decision"] == "discard"
-    print(f"[PASS] test_discard_no_structured_fact")
+def test_route_no_section_type():
+    r = route(_item(brand="智己"))
+    assert r["decision"] == "route"
+    assert r["route_to"] == "other"
 
 
 if __name__ == "__main__":
-    test_keep_brand_model_event_type()
-    test_keep_brand_with_action_keyword()
-    test_keep_watchlist_event()
-    test_discard_no_brand()
-    test_discard_opinion()
-    test_discard_no_event()
-    test_discard_no_structured_fact()
+    test_route_brand_event_to_confirmed_fact()
+    test_route_review_signal()
+    test_route_brand_status()
+    test_route_brand_volume()
+    test_route_unknown_section()
+    test_route_no_section_type()
     print("\n✅ 所有测试通过")

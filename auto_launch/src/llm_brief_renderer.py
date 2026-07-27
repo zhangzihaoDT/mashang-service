@@ -38,6 +38,34 @@ _DAILY_BRIEF_PROMPT = """你是一个新能源汽车行业分析师。根据 fac
 - 只使用 facts 信息，不编造
 - 专业、简洁、中文"""
 
+_RANGE_BRIEF_PROMPT = """你是一个新能源汽车行业分析师。根据 facts 中的营销事件事实，生成一份三段式周期简报。
+
+必须严格按照以下格式输出，不要使用代码块：
+
+🚗 重点新能源品牌营销事件监控（周期）
+{date_with_weekday}
+
+📊 周期概况
+事件 {event_count}｜品牌 {brand_count}｜官方 {official_pct}%
+
+🔥 近期重点
+① **品牌 / 车型 / 类型**：核心动作描述（来源名称）
+② **品牌 / 车型 / 类型**：核心动作描述（来源名称）
+③ **品牌 / 车型 / 类型**：核心动作描述（来源名称）
+④ **品牌 / 车型 / 类型**：核心动作描述（来源名称）
+
+写作要求：
+- 近期重点按重要程度排列，最多 4 条
+- 事件类型用两个字简称：配置发布→发布, 技术传播→OTA, OTA更新→OTA, 开启预售→预售, 权益调整→权益, 交付启动→交付, 交付数据→交付, 销量里程碑→销量, 发布会/亮相活动→亮相, 品牌传播战役→品牌, 高管发声→发声, 首发亮相→亮相, 售价公布→售价, 购车权益调整→权益, 官方价格调整→调价, 年度改款/中期改款上市→改款, 联名/代言/合作→合作, 舆情事件→舆情
+- 每条采用 "① **品牌 / 车型 / 类型**：动作描述（来源名称）" 格式
+- 车型为空时格式为 "① **品牌 / 类型**：动作描述（来源）"
+- 动作描述用一句话概括核心事实，不含来源名称
+- 来源名称放在末尾括号内，简短（括号外无空格），如（比亚迪官方）
+- 整个简报不超过 20 行
+- 少于 4 条时列实际条数
+- 只使用 facts 信息，不编造
+- 专业、简洁、中文"""
+
 _SEARCH_BRIEF_PROMPT = """你是一个新能源汽车行业分析师。根据搜索发现的事件事实，生成一份{pipeline_label}。
 
 报告必须包含以下五部分：
@@ -71,15 +99,21 @@ def _prompt_for_pipeline(pipeline: str = None, stats: dict = None, date_str: str
     """根据 pipeline 返回 (prompt_template, context_dict)。"""
     weekdays = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
     if pipeline == "daily":
-        dt = datetime.strptime(date_str, "%Y-%m-%d") if date_str else datetime.now()
-        date_with_weekday = f"{date_str or dt.strftime('%Y-%m-%d')}（{weekdays[dt.weekday()]}）"
+        is_range = date_str and "~" in date_str
+        if is_range:
+            date_with_weekday = f"监测周期：{date_str}"
+            prompt = _RANGE_BRIEF_PROMPT
+        else:
+            dt = datetime.strptime(date_str, "%Y-%m-%d") if date_str else datetime.now()
+            date_with_weekday = f"{date_str or dt.strftime('%Y-%m-%d')}（{weekdays[dt.weekday()]}）"
+            prompt = _DAILY_BRIEF_PROMPT
         ctx = {
             "date_with_weekday": date_with_weekday,
             "event_count": stats.get("event_count", 0),
             "brand_count": stats.get("brand_count", 0),
             "official_pct": stats.get("official_pct", 0),
         }
-        return _DAILY_BRIEF_PROMPT, ctx
+        return prompt, ctx
     ctx = {
         "pipeline_label": "搜索简报（基于公开搜索发现的事件）",
         "section_primary": "重点事件",
@@ -188,7 +222,8 @@ def generate_llm_brief(facts: list[dict], brief_date: str = None, pipeline: str 
 
 def _empty_brief(date_str: str, pipeline: str = None, stats: dict = None) -> str:
     stats = stats or {}
-    if pipeline == "daily":
+    is_range = date_str and "~" in date_str
+    if pipeline == "daily" and not is_range:
         weekdays = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
         dt = datetime.strptime(date_str, "%Y-%m-%d") if date_str else datetime.now()
         wd = f"{date_str or dt.strftime('%Y-%m-%d')}（{weekdays[dt.weekday()]}）"
@@ -200,9 +235,11 @@ def _empty_brief(date_str: str, pipeline: str = None, stats: dict = None) -> str
 
 🔥 今日重点
 （无）— 当前 facts 库为空"""
-    return f"""# Auto Launch 每日简报 — {date_str}
+    report_type_label = "周期简报" if is_range else "每日简报"
+    section_label = "近期重点" if is_range else "今日重点"
+    return f"""# Auto Launch {report_type_label} — {date_str}
 
-## 今日重点
+## {section_label}
 
 （无）— 当前 facts 库无匹配有效事实。
 
@@ -210,7 +247,7 @@ def _empty_brief(date_str: str, pipeline: str = None, stats: dict = None) -> str
 
 facts 库未发现可用于生成简报的有效事实。
 
-## 今日观察
+## 观察
 
 - facts 库为空或全部被过滤，无法生成简报。
 - 请通过 daily 或 search --to-facts 导入事实。
