@@ -43,6 +43,7 @@ CREATE TABLE IF NOT EXISTS facts (
     source_tier     TEXT,
     input_channel   TEXT DEFAULT 'inbox',
     raw_excerpt     TEXT,
+    monitor_date    TEXT,
     created_at      TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_facts_fingerprint ON facts(fingerprint);
@@ -128,6 +129,7 @@ _MIGRATIONS = [
     "ALTER TABLE facts ADD COLUMN is_test INTEGER DEFAULT 0",
     "ALTER TABLE facts ADD COLUMN quality_status TEXT DEFAULT 'valid'",
     "ALTER TABLE brand_volume ADD COLUMN fingerprint TEXT",
+    "ALTER TABLE facts ADD COLUMN monitor_date TEXT",
 ]
 
 _MARK_TEST_BRANDS = {"A", "B", "C", "D"}
@@ -288,20 +290,21 @@ class FactStore:
                 "last_seen": now,
             }
 
+        monitor_date = item.get("monitor_date") or item.get("event_date") or now[:10]
         self._cur.execute(
             """INSERT INTO facts
                (fingerprint, first_seen, last_seen, seen_count, brand, model,
                 event_type, event_date, title, claim, source_name, source_url,
-                source_tier, input_channel, raw_excerpt, created_at,
+                source_tier, input_channel, raw_excerpt, monitor_date, created_at,
                 source_pipeline, run_id, run_mode, is_test, quality_status)
-               VALUES (?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+               VALUES (?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (
                 fingerprint, now, now,
                 brand or None, model or None, event_type or None,
                 event_date or None, title, item.get("claim", ""),
                 item.get("source_name") or None, item.get("source_url") or None,
                 item.get("source_tier") or None, item.get("input_channel", "inbox"),
-                item.get("raw_excerpt", "")[:500], now,
+                item.get("raw_excerpt", "")[:500], monitor_date, now,
                 source_pipeline, run_id, run_mode, is_test, quality_status,
             )
         )
@@ -521,7 +524,9 @@ class FactStore:
               model: str = None, source_tier: str = None,
               days: int = None, since: str = None, until: str = None,
               limit: int = 50, exclude_test: bool = True,
-              source_pipeline: str = None) -> list[dict]:
+              source_pipeline: str = None,
+              event_date: str = None,
+              monitor_date: str = None) -> list[dict]:
         wheres = []
         params = []
         if brand:
@@ -539,6 +544,12 @@ class FactStore:
         if source_tier:
             wheres.append("source_tier = ?")
             params.append(source_tier)
+        if event_date:
+            wheres.append("event_date = ?")
+            params.append(event_date)
+        if monitor_date:
+            wheres.append("monitor_date = ?")
+            params.append(monitor_date)
         if days is not None:
             cutoff = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%dT%H:%M:%S")
             date_cutoff = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")

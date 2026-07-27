@@ -176,7 +176,8 @@ def cmd_report(args):
         facts = store.query(brand=args.brand, event_type=args.event_type,
                             model=args.model, days=args.days,
                             since=args.since, until=args.until, limit=args.limit,
-                            source_pipeline=args.pipeline)
+                            source_pipeline=args.pipeline,
+                            monitor_date=args.date)
         signals = store.get_signals(brand=args.brand, days=args.days)
         brand_statuses = store.get_brand_status(brand=args.brand)
         brand_volumes = store.get_brand_volume(brand=args.brand, days=args.days)

@@ -30,6 +30,7 @@ def run_text(raw_text: str, date: str = None, write_facts: bool = True,
         item["run_id"] = rid
         item["run_mode"] = run_mode or input_channel
         item["input_channel"] = input_channel
+        item["monitor_date"] = effective_date
 
     store = FactStore() if write_facts else None
 
