@@ -26,14 +26,14 @@
 
 #### 1.2.1 计数类 — `order_number` count + 时间字段非空
 
-| 指标名     | 聚合                | 强制过滤条件                         | 时间字段                 | 说明                     |
-| :--------- | :------------------ | :----------------------------------- | :----------------------- | :----------------------- |
-| **锁单量** | count(order_number) | `lock_time` IS NOT NULL              | `lock_time`              |                          |
-| **批售数量** | count(distinct vin) | `lock_time` IS NOT NULL, `order_type` NOT IN ('员工', '经销商员工') | `lock_time` | 锁单去重 VIN，剔除内部员工订单；反映真实市场销量 |
-| **交付数** | count(order_number) | `delivery_date` IS NOT NULL          | `delivery_date`          |                          |
-| **开票数** | count(order_number) | `invoice_upload_time` IS NOT NULL    | `invoice_upload_time`    | 不要用 order_create_date |
-| **小订数** | count(order_number) | `intention_payment_time` IS NOT NULL | `intention_payment_time` |                          |
-| **大定数** | count(order_number) | `deposit_payment_time` IS NOT NULL   | `deposit_payment_time`   |                          |
+| 指标名       | 聚合                | 强制过滤条件                                                        | 时间字段                 | 说明                                             |
+| :----------- | :------------------ | :------------------------------------------------------------------ | :----------------------- | :----------------------------------------------- |
+| **锁单量**   | count(order_number) | `lock_time` IS NOT NULL                                             | `lock_time`              |                                                  |
+| **批售数量** | count(distinct vin) | `lock_time` IS NOT NULL, `order_type` NOT IN ('员工', '经销商员工') | `lock_time`              | 锁单去重 VIN，剔除内部员工订单；反映真实市场销量 |
+| **交付数**   | count(order_number) | `delivery_date` IS NOT NULL                                         | `delivery_date`          |                                                  |
+| **开票数**   | count(order_number) | `invoice_upload_time` IS NOT NULL                                   | `invoice_upload_time`    | 不要用 order_create_date                         |
+| **小订数**   | count(order_number) | `intention_payment_time` IS NOT NULL                                | `intention_payment_time` |                                                  |
+| **大定数**   | count(order_number) | `deposit_payment_time` IS NOT NULL                                  | `deposit_payment_time`   |                                                  |
 
 #### 1.2.2 均值类 — mean + 业务过滤
 
@@ -223,106 +223,82 @@
 - `weighted_length_mm` / `weighted_width_mm` / `weighted_height_mm` / `weighted_wheelbase_mm`: 销量加权平均尺寸（mm），仅 `product_segment_monthly` 有
 - `date_month`: 月粒度日期，格式 `YYYY-MM-01`
 
-### delivery_inventory.parquet (Total Rows: 231657 · Columns: 9 · Time Range: 2021-12 ~ 2026-07)
+### delivery_inventory.parquet (Total Rows: 239,673 · Columns: 12 · Time Range: 2021-12 ~ 2026-07)
 
-| Column Name | Data Type | Description |
-|:------------|:----------|:------------|
-| vin | string | 车辆识别代码（VIN），主标识字段 |
-| Real As Offline Time | datetime64[us] | 车辆最早的生产完成时间 |
-| Real Qc Offline Time | datetime64[us] | 实际质检完成时间 |
-| First In Inv Time | datetime64[us] | 车辆最早进入库存的时间 |
-| Actual In Inv Time | datetime64[us] | 当前一次实际入库时间 |
-| Actual Waybill Out Time | datetime64[us] | 实际运单发运时间 |
-| Real In Dc Time | datetime64[us] | 实际到达交付中心时间 |
-| Out Delivery Center Time | datetime64[us] | 实际离开交付中心时间 |
-| Schedule Effective Time | datetime64[us] | 排程或计划正式生效时间 |
+| Column Name              | Data Type      | Description                             |
+| :----------------------- | :------------- | :-------------------------------------- |
+| vin                      | string         | 车辆识别代码（VIN），主标识字段         |
+| is_retailed               | string         | 是否零售上报（Y/N），标记车辆是否已完成零售上报 |
+| bloc_name                 | string         | 库存归属合作集团名称                    |
+| Real As Offline Time     | datetime64[us] | 车辆最早的生产完成时间                  |
+| Real Qc Offline Time     | datetime64[us] | 实际质检完成时间                        |
+| First In Inv Time        | datetime64[us] | 车辆最早进入库存的时间                  |
+| Actual In Inv Time       | datetime64[us] | 当前一次实际入库时间                    |
+| Actual Waybill Out Time  | datetime64[us] | 实际运单发运时间                        |
+| Real In Dc Time          | datetime64[us] | 实际到达交付中心时间                    |
+| Out Delivery Center Time | datetime64[us] | 实际离开交付中心时间                    |
+| Schedule Effective Time  | datetime64[us] | 排程或计划正式生效时间                  |
+| Order Binding Time       | datetime64[us] | 订单与具体 VIN 绑定时间                 |
+| Real Out Vdc Time        | datetime64[us] | 实际离开 VDC（车辆配送中心/中转库）时间 |
+| Attribute Dealer Date    | datetime64[us] | 经销商属性分配/确认日期                 |
 
-**时间顺序链**：
+#### VIN 编码规律
 
-`Real As Offline Time` → `Real Qc Offline Time` → `First / Actual In Inv Time` → `Actual Waybill Out Time` → `Real In Dc Time` → `Out Delivery Center Time`
+所有 VIN 以 `LSJ` 开头（上汽 WMI 代码），17 位标准编码。前 5 位可唯一识别车系：
 
-**数据源说明**：当前 `delivery_inventory` 表仅收录已通过质检的车辆（`real_as_offline_time` 和 `real_qc_offline_time` 均为 100% 非空），因此排产中、已下线待质检、工厂库存等早期状态在本表中无法观测。
+| 前5位 | 对应车系 |
+|:------|:---------|
+| `LSJEL` | LS8 |
+| `LSJEH` | LS9 |
+| `LSJWL` | LS7 |
+| `LSJWR` | LS6 |
+| `LSJWT` | L6 |
+| `LSJE3` | L7 |
 
-**核心原则**：
-- **车辆位置**看 `physical_stage`（仅依赖事件时间字段）
-- **订单匹配**看 `lock_time`（有则为已匹配，无则可能是未匹配或非标准业务）
-- **非标准业务（大客户批售、试驾车、仅批售等）不要求存在 `lock_time`**，不应视为数据异常
-- 库存统计统一使用 `physical_stage`，不受 `lock_time` 缺失影响
+各位置含义：
+- 第4位：`E` = LS8/LS9/L7 平台，`W` = LS7/LS6/L6 平台
+- 第5位：车系级标识（需结合第4位）；`L`=LS7(4=W)/LS8(4=E), `H`=LS9, `R`=LS6, `T`=L6, `3`=L7
+- 第6位：`4` = 主流设计代，`6` = L7 独立平台
+- 第10位：车型年份（`S`=2025, `T`=2026, `V`=2027）
 
-**字段说明**：
+### 库存分类模型
 
-`Schedule Effective Time` 为排程或计划正式生效时间，不等同于"排产最早记录时间"。同一 VIN 若有多条排产记录，需取 `MIN(Schedule Effective Time)` 才能得到最早一次排产记录。
+本表采用"物理位置 × 业务状态"二维分类。DC（交付中心）为经销商接车节点，DC内库存归属经销商端。
 
-#### VIN 生命周期状态机（三层架构）
+**物理位置（physical_position）：**
 
-通过 `vin` 串联 `order_data.parquet`（`lock_time`、`delivery_date`）与本表。状态判定分为三层，互不覆盖：
-
-##### 第一层：physical_stage（物理位置）
-
-仅依赖车辆事件时间字段，不受订单状态影响，用于库存统计。
-
-| 物理位置 | 判断逻辑（从后往前匹配首个非空） |
-|:---------|:-------------------------------|
-| 已质检待入库 | `Real Qc Offline Time` 非空，`First In Inv Time` 为空 |
-| 工厂库存 | `First In Inv Time` 非空，`Actual Waybill Out Time` 为空 |
-| 在途 | `Actual Waybill Out Time` 非空，`Real In Dc Time` 为空 |
-| 交付中心库存 | `Real In Dc Time` 非空，`Out Delivery Center Time` 为空 |
-| 已离开交付中心 | `Out Delivery Center Time` 非空 |
-
-##### 第二层：order_relation（订单关系）
-
-仅依赖订单关联状态，不覆盖物理位置。
-
-| 订单关系 | 判断逻辑 |
-|:---------|:---------|
-| 已锁单 | `lock_time` 非空 |
-| 订单已关联但锁单时间缺失 | VIN 存在于 `order_data`，但 `lock_time` 为空 |
-| 未关联 | VIN 不在 `order_data` 中 |
-
-##### 第三层：vin_lifecycle_status（合并展示）
-
-合并物理位置 + 订单关系。**注意**："订单已关联但锁单时间缺失" 不覆盖物理位置，这类车辆仍保留其 `physical_stage` 信息。
-
-**16 类常规状态**：
-
-| 状态 | 物理位置 | 订单关系 |
-|:-----|:---------|:---------|
-| 已锁单待排产 | 无任何进度事件 | 已锁单 |
-| 已排产待下线_未匹配 | 已排产待下线 | 未关联 |
-| 已排产待下线_已锁单 | 已排产待下线 | 已锁单 |
-| 已下线待质检_未匹配 | 已下线待质检 | 未关联 |
-| 已下线待质检_已锁单 | 已下线待质检 | 已锁单 |
-| 已质检待入库_未匹配 | 已质检待入库 | 未关联 |
-| 已质检待入库_已锁单 | 已质检待入库 | 已锁单 |
-| 工厂库存_未匹配 | 工厂库存 | 未关联 |
-| 工厂库存_已锁单待发运 | 工厂库存 | 已锁单 |
-| 在途_未匹配 | 在途 | 未关联 |
-| 在途_已锁单 | 在途 | 已锁单 |
-| 交付中心库存_未匹配 | 交付中心库存 | 未关联 |
-| 交付中心库存_已锁单待交付 | 交付中心库存 | 已锁单 |
-| 已离开交付中心_未匹配 | 已离开交付中心 | 未关联 |
-| 已离开交付中心_已锁单 | 已离开交付中心 | 已锁单 |
-| 已交付 | 已离开交付中心且 `delivery_date` 非空 | — |
-
-**3 类特殊状态**：
-
-| 状态 | 判断逻辑 |
+| 位置 | 判断逻辑 |
 |:-----|:---------|
-| 订单已关联但锁单时间缺失 | `physical_stage` 保留，`order_relation` 为"订单已关联但锁单时间缺失" |
-| 退款待重新匹配 | `actual_refund_time` 非空 |
-| 数据异常或状态未知 | 无法归入上述任何状态 |
+| VDC内 | 已进入库存链，`Real Out Vdc Time` 为空 |
+| VDC→DC在途 | `Real Out Vdc Time` 非空，`Real In Dc Time` 为空 |
+| DC内 | `Real In Dc Time` 非空，`Out Delivery Center Time` 为空 |
+| 已离开DC | `Out Delivery Center Time` 非空 |
+| 未进入物流链 | 无任何库存/物流事件 |
 
-**当前数据集分布（231,657 VIN）**：
+**业务分类（business_classification）：**
 
-| 物理位置 | 已锁单 | 订单已关联但锁单时间缺失 | 未关联 | 合计 |
-|:---------|------:|----------------------:|------:|-----:|
-| 已质检待入库 | 21 | 110 | 6,707 | 6,838 |
-| 在途 | 17 | 0 | 499 | 516 |
-| 交付中心库存 | 399 | 201 | 13,771 | 14,371 |
-| 已离开交付中心 | 189,209 | 3,250 | 17,473 | 209,932 |
-| **合计** | **189,646** | **3,561** | **38,450** | **231,657** |
+| 业务分类 | 归属 | 说明 |
+|:---------|:-----|:-----|
+| 总部可控(VDC内/在途) | 总部 | VDC内 + VDC→DC在途，总部可调配 |
+| 经销商端(DC在库) | 经销商 | DC内，经销商前置仓 |
+| 经销商端已锁单 | 经销商 | 已离店、已锁单 |
+| 经销商端未锁单 | 经销商 | 已离店、未锁单 |
+| 历史直营已售车辆 | 已售 | 2022 年直营模式，有订单无 Dealer Attribute |
+| 未进入物流链 | — | 尚未进入物流体系 |
 
-库存统计应使用第一层 `physical_stage`：工厂库存 0、在途 516、交付中心库存 14,371。`lock_time` 缺失不影响物理库存位置判定。
+**核心库存指标（2026-07-28）：**
+
+| 指标 | 数量 | 说明 |
+|:-----|-----:|:-----|
+| 总部可控(VDC内/在途) | 714 | VDC内 + VDC→DC在途 |
+| 经销商端(DC在库) | 15,883 | 物理在 DC 的全部车辆 |
+| **★ 国内DC在库_未开票** | **9,504** | **核心库存监控指标**。国内DC物理库存扣除已开票车辆；bloc_name 不为"上汽国际"或"海外"（剔除出口库存） |
+| 经销商端未锁单 | 11,498 | 经销商责任、尚未锁单 |
+| 经销商端责任合计 | 27,381 | DC在库 + 已离店未锁单 |
+
+**口径说明：** `物理位置=DC内` + `bloc_name` 不为上汽国际/海外（剔除出口）+ `invoice_upload_time` 为空（未开票）。反映国内经销商端交付中心中，已到店、未开票的实物库存，即当前可售现车供给水平。
+
+**算子路径：** `shared/operators/dealer_unsold_inventory.py`
 
 ## 3. 微信群聊消息 (wechat_sync)
 
