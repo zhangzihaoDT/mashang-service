@@ -1,5 +1,5 @@
 PYTHON ?= .venv/bin/python
-.PHONY: eval full-eval core-eval research-eval capability-audit test ci data-dict lock-demo parser-demo followup-demo numeric-eval reference-eval atp-demo backtest-demo clean-outputs dataset-update dataset-validate daily-observation-dry-run daily-observation-sync daily-data-pipeline-dry-run daily-data-pipeline render-official-doc render-official-doc-smoke build-workspace-skills-catalog build-workspace-capability-inventory miit-discover-latest-batch miit-discover-batches miit-fetch-batch miit-new-car-monitor miit-latest-publicity miit-latest-official miit-latest-publicity-refresh miit-latest-official-refresh miit-extract-text miit-check-text-extractors miit-diagnose-attachments miit-parse-product-list
+.PHONY: eval full-eval core-eval research-eval capability-audit test ci data-dict lock-demo parser-demo followup-demo numeric-eval reference-eval atp-demo backtest-demo clean-outputs dataset-update dataset-validate daily-observation-dry-run daily-observation-sync daily-data-pipeline-dry-run daily-data-pipeline render-official-doc render-official-doc-smoke build-workspace-skills-catalog build-workspace-capability-inventory miit-discover-latest-batch miit-discover-batches miit-fetch-batch miit-new-car-monitor miit-latest-publicity miit-latest-official miit-latest-publicity-refresh miit-latest-official-refresh miit-extract-text miit-check-text-extractors miit-diagnose-attachments miit-parse-product-list inventory-status inventory-trend inventory-report
 
 ## 默认 Eval（core + parser + followup + reference，不含 research）
 eval:
@@ -130,6 +130,19 @@ miit-check-text-extractors:
 
 ## 诊断附件下载
 miit-diagnose-attachments:
+
+## 库存核心指标查询
+inventory-status:
+	$(PYTHON) -c "import pandas as pd, importlib.util; from pathlib import Path; REPO_ROOT=Path('.'); spec=importlib.util.spec_from_file_location('d', REPO_ROOT/'shared/operators/dealer_unsold_inventory.py'); d=importlib.util.module_from_spec(spec); spec.loader.exec_module(d); inv=pd.read_parquet(REPO_ROOT/'dataset/delivery_inventory.parquet'); odf=pd.read_parquet(REPO_ROOT/'dataset/order_data.parquet'); df=d.compute(inv, odf); r=d.report(df); core=r.get('国内DC在库_未开票',0); series_map={'LSJEL':'LS8','LSJEH':'LS9','LSJWL':'LS7','LSJWR':'LS6','LSJWT':'L6','LSJE3':'L7'}; df['series']=df['vin'].str[:5].map(series_map).fillna('其他'); print('========================================'); print('  核心库存监控指标'); print('========================================'); print(f'  国内DC在库_未开票: {core:,}'); print(); [print(f'  {s}: {len(df[(df.series==s)&(df.is_dc_domestic_uninvoiced==1)]):>5,}') for s in ['LS8','LS6','LS9','L6','LS7','L7']]; print('========================================')"
+
+## 库存趋势 HTML 报告
+inventory-trend:
+	$(PYTHON) mashang_workspace/research_scripts/dc_inventory_trend_report.py
+
+## 库存详细分析报告
+inventory-report:
+	$(PYTHON) mashang_workspace/utility_scripts/generate_delivery_inventory_report.py
+
 	$(PYTHON) mashang_workspace/research_scripts/miit_new_car/diagnose_attachment_urls.py --batch $(BATCH)
 
 ## 解析产品清单主表
@@ -322,6 +335,11 @@ help:
 	@echo "make miit-extract-text BATCH=N   抽取指定批次附件文本"
 	@echo "make miit-check-text-extractors  检查文本抽取工具"
 	@echo "make miit-diagnose-attachments BATCH=N  诊断附件下载"
+	@echo ""
+	@echo "=== Inventory ==="
+	@echo "make inventory-status     查询核心库存指标（国内DC在库_未开票）"
+	@echo "make inventory-trend      生成库存趋势 HTML 报告"
+	@echo "make inventory-report     生成库存详细分析报告"
 	@echo "make miit-parse-product-list BATCH=N  解析产品清单主表"
 	@echo ""
 	@echo "=== Audit ==="
