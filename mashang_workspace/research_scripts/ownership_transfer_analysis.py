@@ -6,15 +6,16 @@
 
 口径说明：
   - 经销商归属时点 = attribute_dealer_date（经销商属性确认日期）
-  - 归属口径 = bloc_name 非空（已归属至经销商集团）
-  - 出口识别 = bloc_name ∈ {上汽国际, 海外, T F Motors (Cambodia) Co., Ltd, 亚洲}
+  - 归属口径 = attribute_dealer_date 非空即视为完成经销商归属
+  - 出口识别 = bloc_name ∈ {上汽国际, 海外, T F Motors (Cambodia) Co., Ltd, 亚洲}（bloc_name 为空视为国内）
+  - --dispatched 模式：品牌归属条件（bloc_name != 上汽销售）+ 终端完成条件（非已绑定待开票 / 非有开票无交付记录）
 
 物流链路（统一命名）：
   - 物流前阶段（未进入 VDC） → VIN 已归属但尚未下线/入库
   - VDC 内                → 总部库内
   - VDC→DC 在途           → 发运途中
   - DC 在库               → 经销商收到车，待售
-  - 已离开 DC             → 消费者完成交付（国内 99.4% 有开票+交付日期）
+   - 已离开 DC             → 消费者交付完成 / 非零售业务交付（国内约 0.4% 无消费者订单）
 
 用法:
   python research_scripts/ownership_transfer_analysis.py
@@ -85,61 +86,10 @@ def classify(df: pd.DataFrame, start_date: str, end_date: str,
     mask = (
         (attr_col >= start_date)
         & (attr_col < end_exclusive)
-        & df["bloc_name"].notna()
-        & (df["bloc_name"] != "")
     )
     if dispatched:
-        is_export = df["bloc_name"].isin(EXPORT_BLOC_NAMES)
-        is_shangqi_sales = df["bloc_name"] == "上汽销售"
-
-        export_dispatch = pd.to_datetime(df["real_out_vdc_time"], errors="coerce")
-        export_dispatch_ok = export_dispatch.notna() & (export_dispatch < end_exclusive)
-
-        # 国内 dispatch：仅物流字段
-        out = pd.to_datetime(df["real_out_vdc_time"], errors="coerce")
-        in_dc = pd.to_datetime(df["real_in_dc_time"], errors="coerce")
-        odc = pd.to_datetime(df["out_delivery_center_time"], errors="coerce")
-
-        out_ok = out.notna() & (out < end_exclusive)
-        downstream_ok = (in_dc.notna() & (in_dc < end_exclusive)) | (odc.notna() & (odc < end_exclusive))
-
-        confirmed = out_ok
-        inferred_high = ~out_ok & downstream_ok
-        conflict = out_ok & (out >= end_exclusive) & downstream_ok
-
-        domestic_dispatch = confirmed | inferred_high | conflict
-
-        # 上汽销售豁免
-        dispatch_ok = (
-            (is_export & export_dispatch_ok)
-            | (~is_export & (is_shangqi_sales | domestic_dispatch))
-        )
-        mask = mask & dispatch_ok
-
-        # dispatch 质量（覆盖全部车辆）
-        quality = pd.Series("其他", index=df.index)
-
-        # 国内非上汽销售
-        non_sq = ~is_export & ~is_shangqi_sales
-        quality.loc[non_sq & confirmed] = "国内 confirmed"
-        quality.loc[non_sq & inferred_high] = "国内 inferred_high"
-        quality.loc[non_sq & conflict] = "国内 conflict"
-        quality.loc[non_sq & ~domestic_dispatch] = "国内 未通过"
-
-        # 出口
-        out_missing = export_dispatch.isna()
-        out_late = export_dispatch.notna() & (export_dispatch >= end_exclusive)
-        quality.loc[is_export & export_dispatch_ok] = "出口 confirmed"
-        quality.loc[is_export & out_missing] = "出口 unverifiable"
-        quality.loc[is_export & out_late] = "出口 late_primary"
-
-        # 上汽销售（豁免进入）
-        sq_passed = is_shangqi_sales & ~export_dispatch_ok & ~domestic_dispatch
-        sq_physical = is_shangqi_sales & domestic_dispatch
-        quality.loc[sq_physical] = "上汽销售 physical"
-        quality.loc[sq_passed] = "上汽销售 special_rule"
-
-        df["dispatch_quality"] = quality
+        brand_eligible = df["bloc_name"] != "上汽销售"  # 品牌归属条件
+        mask = mask & brand_eligible
 
     result = df[mask].copy()
     result["attr_date"] = attr_col[mask]
@@ -165,10 +115,28 @@ def classify(df: pd.DataFrame, start_date: str, end_date: str,
     result["delivery_status"] = "未知"
     result.loc[is_left_dc & has_invoice & has_delivery, "delivery_status"] = "消费者交付完成"
     result.loc[is_left_dc & ~has_invoice & ~has_delivery & has_binding, "delivery_status"] = "已绑定待开票"
-    result.loc[is_left_dc & ~has_invoice & ~has_delivery & ~has_binding, "delivery_status"] = "非零售用途"
+    result.loc[is_left_dc & ~has_invoice & ~has_delivery & ~has_binding, "delivery_status"] = "非零售业务交付"
     # Edge: has invoice or delivery but not both
     result.loc[is_left_dc & has_invoice & ~has_delivery, "delivery_status"] = "待核查：有开票、无交付记录"
     result.loc[is_left_dc & ~has_invoice & has_delivery, "delivery_status"] = "待核查：有交付、无开票记录"
+
+    # dispatched 模式：品牌归属 + 终端完成双重条件
+    if dispatched:
+        final_delivery = ~result["delivery_status"].isin({
+            "已绑定待开票", "待核查：有开票、无交付记录", "待核查：有交付、无开票记录",
+        })  # 终端完成条件
+        result = result[final_delivery].copy()
+
+    # 非零售业务交付可靠性校验
+    LOGISTICS_CHAIN = [
+        "real_as_offline_time", "real_qc_offline_time",
+        "first_in_inv_time", "real_out_vdc_time",
+        "real_in_dc_time", "out_delivery_center_time",
+    ]
+    if "schedule_effective_time" in result.columns:
+        LOGISTICS_CHAIN = ["schedule_effective_time"] + LOGISTICS_CHAIN
+    result["logistics_chain_complete"] = result[LOGISTICS_CHAIN].notna().all(axis=1)
+    result["order_system_zero"] = ~has_invoice & ~has_delivery & ~has_binding
 
     return result
 
@@ -201,7 +169,7 @@ def build_tree(df: pd.DataFrame):
 
         if pos == "已离开 DC":
             left_dc_count = cnt
-            for status in ["消费者交付完成", "已绑定待开票", "非零售用途",
+            for status in ["消费者交付完成", "已绑定待开票", "非零售业务交付",
                            "待核查：有开票、无交付记录", "待核查：有交付、无开票记录"]:
                 sub = pos_df[pos_df["delivery_status"] == status]
                 if sub.empty:
@@ -271,12 +239,13 @@ def _find_counts(tree, labels):
 
 
 def print_summary(tree, total, left_dc_count, dispatched=False,
-                  domestic_total=None, counts=None, quality=None):
+                  domestic_total=None, counts=None, quality=None,
+                  non_retail_validation=None):
     print(f"{'='*68}")
     title = "车辆流转与交付状态分析（bloc_name 归属口径）"
     print(f"  {title}")
     if dispatched:
-        print(f"  收窄：出口认 real_out_vdc_time，国内认下游节点 < cutoff")
+        print(f"  收窄：品牌归属（剔除上汽销售）+ 终端完成（剔除待开票、有开票无交付）")
     print(f"{'='*68}")
     print()
 
@@ -293,7 +262,7 @@ def print_summary(tree, total, left_dc_count, dispatched=False,
         left = counts.get("已离开 DC", 0)
         delivered = counts.get("消费者交付完成", 0)
         bound = counts.get("已绑定待开票", 0)
-        non_retail = counts.get("非零售用途", 0)
+        non_retail = counts.get("非零售业务交付", 0)
         review = sum(v for k, v in counts.items() if k.startswith("待核查"))
         dt = domestic_total or (pre + vdc + tr + dc + left)
         print()
@@ -313,13 +282,27 @@ def print_summary(tree, total, left_dc_count, dispatched=False,
         print(f"    {'合计':30s}  {_fmt(total_q)}")
         print()
 
+    if non_retail_validation:
+        nr = non_retail_validation
+        print(f"  非零售业务交付可靠性校验：")
+        print(f"    数量                           {nr['count']}")
+        print(f"    物流链路完整（7 步全）          {nr['chain_complete']}/{nr['count']}")
+        print(f"    订单系统零痕迹                   {nr['order_zero']}/{nr['count']}")
+        if nr.get('chain_breaks'):
+            print(f"    链路断点分布：")
+            for col, n in nr['chain_breaks']:
+                print(f"      {col:35s} 缺失 {n}")
+        if nr.get('has_any_order_footprint', 0) > 0:
+            print(f"    有订单系统痕迹（异常）           {nr['has_any_order_footprint']}")
+        print()
+
     print()
     print(f"  出口范围：上汽国际、海外、亚洲、T F Motors (Cambodia)、Momenta Europe GmbH、Vision Start Albania")
     print(f"  数据来源：delivery_inventory.parquet + order_data.parquet")
     print(f"  口径定义：")
     print(f"    消费者交付完成 → 已离开 DC，且存在交付记录")
     print(f"    已绑定待开票   → 已离开 DC、有订单绑定，无开票且无交付记录")
-    print(f"    非零售用途     → 已离开 DC、无订单绑定，无开票且无交付记录")
+    print(f"    非零售业务交付     → 已离开 DC，未关联消费者订单，但具备实际物流流转记录")
     print(f"    待核查         → 已离开 DC、有开票记录但无交付记录")
     print()
 
@@ -345,11 +328,11 @@ def run(inv_path=DEFAULT_INV, odf_path=DEFAULT_ODF,
         return [{"label": l, "count": _to_native(c), "series": s,
                  "children": _tree_to_dict(ch)} for l, c, s, ch in t]
 
-    filters = {"attribute_dealer_date": f"[{start_date}, {end_date}]（含 end_date 全天）", "bloc_name": "not null"}
-    metric = "bloc_name 归属口径: attribute_dealer_date 在窗口内且 bloc_name 非空视为完成经销商归属"
+    filters = {"attribute_dealer_date": f"[{start_date}, {end_date}]（含 end_date 全天）"}
+    metric = "经销商归属口径: attribute_dealer_date 在窗口内即视为完成经销商归属（bloc_name 用于出口/国内分类，不参与筛选）"
     if dispatched:
-        filters["dispatched"] = "已下线且已发运 (real_as_offline_time & real_out_vdc_time 均非空)"
-        metric += "，收窄至已工厂下线且已发运"
+        filters["dispatched"] = "剔除上汽销售 + 已绑定待开票 + 有开票无交付记录"
+        metric += "，保守交付口径：剔除上汽销售、已绑定待开票、有开票无交付记录"
 
     if fmt == "json":
         summary = {
@@ -369,12 +352,15 @@ def run(inv_path=DEFAULT_INV, odf_path=DEFAULT_ODF,
                 "domestic_sum": "待入物流 1,117 + VDC内 5 + 在途 22 + DC在库 6,454 + 已离开DC left_dc",
                 "left_dc_sum": "交付完成 24,228 + 待开票 31 + 非零售 83 + 异常 3",
             },
+            "quality": {
+                "non_retail": non_retail_validation,
+            } if non_retail_validation else {},
             "artifacts": {},
         }
         return summary
     else:
         labels = {"物流前阶段（未进入 VDC）", "VDC 内", "VDC→DC 在途", "DC 在库",
-                  "已离开 DC", "消费者交付完成", "已绑定待开票", "非零售用途",
+                  "已离开 DC", "消费者交付完成", "已绑定待开票", "非零售业务交付",
                   "待核查：有开票、无交付记录", "待核查：有交付、无开票记录"}
         counts = _find_counts(tree, labels)
         domestic_node = tree[1] if len(tree) > 1 and tree[1][0] == "国内" else None
@@ -386,8 +372,37 @@ def run(inv_path=DEFAULT_INV, odf_path=DEFAULT_ODF,
             q_all = classified["dispatch_quality"].value_counts()
             quality = {k: int(v) for k, v in q_all.items()}
 
+        # 非零售业务交付可靠性校验（仅国内，出口按不同链路管理）
+        LOGISTICS_CHAIN_CHECK = [
+            "schedule_effective_time", "real_as_offline_time", "real_qc_offline_time",
+            "first_in_inv_time", "real_out_vdc_time", "real_in_dc_time",
+            "out_delivery_center_time",
+        ]
+        domestic = classified[~classified["is_export"]]
+        non_retail = domestic[domestic["delivery_status"] == "非零售业务交付"]
+        non_retail_validation = None
+        if len(non_retail) > 0:
+            chain_breaks = []
+            for col in LOGISTICS_CHAIN_CHECK:
+                missing = non_retail[col].isna().sum()
+                if missing > 0:
+                    chain_breaks.append((col, int(missing)))
+            has_any_footprint = (
+                non_retail["invoice_upload_time"].notna()
+                | non_retail["delivery_date"].notna()
+                | non_retail["order_binding_time"].notna()
+            ).sum()
+            non_retail_validation = {
+                "count": len(non_retail),
+                "chain_complete": int(non_retail["logistics_chain_complete"].sum()),
+                "order_zero": int(non_retail["order_system_zero"].sum()),
+                "chain_breaks": chain_breaks if chain_breaks else None,
+                "has_any_order_footprint": int(has_any_footprint),
+            }
+
         print_summary(tree, total, left_dc_count, dispatched=dispatched,
-                      domestic_total=domestic_total, counts=counts, quality=quality)
+                      domestic_total=domestic_total, counts=counts, quality=quality,
+                      non_retail_validation=non_retail_validation)
         return None
 
 
@@ -398,7 +413,7 @@ def main():
     parser.add_argument("--start-date", default="2026-01-01")
     parser.add_argument("--end-date", default="2026-06-30")
     parser.add_argument("--dispatched", action="store_true",
-                        help="收窄：仅含已工厂下线且已发运的车辆（real_as_offline_time + real_out_vdc_time 均非空）")
+                        help="收窄：剔除上汽销售 + 已绑定待开票 + 有开票无交付记录（保守交付口径）")
     parser.add_argument("--format", "-f", choices=["text", "json"], default="text")
     args = parser.parse_args()
 
