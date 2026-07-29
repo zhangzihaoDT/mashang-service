@@ -13,6 +13,8 @@
     - is_dc_domestic_uninvoiced（国内DC在库_未开票）为核心库存指标:
         physical_position=DC内 + bloc_name NOT IN (上汽国际, 海外) + invoice_upload_time IS NULL
         即剔除出口库存和已开票车辆后的国内DC物理库存。
+    - is_corporate_order（对公批售标记）: owner_identity_no 为企业标识（统一社会信用代码或旧版企业注册号）
+        而非个人身份证号。此类订单没有个人锁单流程（lock_time 为空），order_type 通常也为空。
 """
 
 import pandas as pd
@@ -32,6 +34,30 @@ BUSINESS_CLASSES = [
     "总部可控(VDC内/在途)", "经销商端(DC在库)", "经销商端已锁单", "经销商端未锁单",
     "历史直营已售车辆", "直营流程待核验", "未进入物流链", "其他特殊流程",
 ]
+
+
+def _is_corporate_owner(owner_identity_no) -> bool:
+    """判断 owner_identity_no 是否为企业标识（对公批售），而非个人身份证。"""
+    import re, datetime as _dt
+    if owner_identity_no is None:
+        return False
+    s = str(owner_identity_no).strip().upper()
+    if len(s) != 18:
+        return False
+    # 含字母（非末尾X，或X在非末位）→ 统一社会信用代码
+    for i, ch in enumerate(s):
+        if ch.isalpha() and ch != 'X':
+            return True
+        if ch == 'X' and i < 17:
+            return True
+    # 纯数字，非身份证日期格式 → 旧版企业注册号
+    if s.isdigit():
+        try:
+            _dt.datetime.strptime(s[6:14], "%Y%m%d")
+            return False  # 有效日期 → 身份证
+        except ValueError:
+            return True   # 无效日期 → 企业注册号
+    return False
 
 
 def _to_datetime(df, cols):
@@ -69,13 +95,22 @@ def compute(inv: pd.DataFrame, odf: pd.DataFrame = None) -> pd.DataFrame:
     if odf is not None:
         order_vins = set(odf["vin"].dropna().astype(str).unique())
         inv["has_order"] = inv["vin"].astype(str).isin(order_vins)
-        # 携带开票信息
-        inv_inv = odf[["vin", "invoice_upload_time"]].drop_duplicates(subset="vin").rename(
+        # 携带开票信息和 owner_identity_no
+        inv_fields = odf[["vin", "invoice_upload_time", "owner_identity_no"]].drop_duplicates(subset="vin").rename(
             columns={"invoice_upload_time": "order_invoice_upload_time"})
-        inv = inv.merge(inv_inv, on="vin", how="left")
+        inv = inv.merge(inv_fields, on="vin", how="left")
+        # 对公批售标记（owner_identity_no 为企业标识而非个人身份证）
+        if "owner_identity_no" in inv.columns:
+            inv["is_corporate_order"] = inv["owner_identity_no"].apply(
+                lambda x: _is_corporate_owner(x) if pd.notna(x) else False
+            ).astype(int)
+            inv = inv.drop(columns=["owner_identity_no"])
+        else:
+            inv["is_corporate_order"] = 0
     else:
         inv["has_order"] = inv["order_binding_time"].notna()
         inv["order_invoice_upload_time"] = pd.NaT
+        inv["is_corporate_order"] = 0
 
     inv["is_locked"] = (
         inv["order_binding_time"].notna()
@@ -201,6 +236,7 @@ def report(inv: pd.DataFrame) -> dict:
     result["待销现车(DC在库_未进入订单表)"] = int(inv["is_dc_showroom_car"].sum())
     result["待销现车(剔除海外)"] = int(inv["is_dc_showroom_domestic"].sum()) if "is_dc_showroom_domestic" in inv.columns else 0
     result["国内DC在库_未开票"] = int(inv["is_dc_domestic_uninvoiced"].sum()) if "is_dc_domestic_uninvoiced" in inv.columns else 0
+    result["对公批售订单数"] = int(inv["is_corporate_order"].sum()) if "is_corporate_order" in inv.columns else 0
     return result
 
 

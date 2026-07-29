@@ -125,6 +125,7 @@ python mashang_workspace/eval/run_eval.py --suite parser  # 单套件
 | 命令 | 说明 | 层级 |
 |------|------|------|
 | `python runtime_scripts/daily_lock_count.py` | 每日锁单 | runtime |
+| `python runtime_scripts/daily_dc_inventory_change.py --date YYYY-MM-DD` | 单日 DC 库存变动分析 — 库存变化 × 开票流水交叉分析 | runtime |
 | `python runtime_scripts/lock_by_model.py --limit 5` | 车型拆分 | runtime |
 | `python runtime_scripts/lock_city_distribution.py` | 城市分布 | runtime |
 | `python research_scripts/release_curve_analysis.py` | 释放曲线 | research |

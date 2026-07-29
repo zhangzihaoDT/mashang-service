@@ -144,6 +144,16 @@
 - **常用场景**：锁单数、开票数、交付数的零售口径汇总
 - **注意事项**：ATP（平均开票价格）默认即为用户车口径
 
+### 对公批售（企业订单）
+
+- **业务含义**：企业客户批量订单，owner_identity_no 为统一社会信用代码（企业税号），不具有个人锁单流程（lock_time 为空），order_type 通常也为空。
+- **判定口径**：`owner_identity_no` 为 18 位且包含非末尾 X 的字母（A-Z），即判定为统一社会信用代码。
+- **数据集**：`order_data.parquet`
+- **筛选字段**：`owner_identity_no`
+- **判定函数**：`utils.business.is_corporate_owner()`
+- **数据来源**：`shared/schema/business_definition.json` 中 `corporate_order_detection` 定义
+- **注意事项**：此类订单在计算终端零售开票数时应排除（仅统计用户车口径）。对公批售订单有完整物流链路（real_in_dc_time, out_delivery_center_time, order_binding_time 等），但缺少 lock_time 和 order_type。
+
 ### 用户车标准输出格式
 
 涉及锁单/开票/交付三口径的分车系汇总，统一按以下格式输出：

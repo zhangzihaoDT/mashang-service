@@ -34,6 +34,7 @@ ensure_shared_on_path()
 
 from operators.mature_lock_prediction import run_mature_lock_prediction_operator
 from operators.assign_conversion import _parse_cn_date
+from utils.business import is_corporate_owner
 load_dotenv(REPO_ROOT / ".env")
 
 # 配置常量
@@ -416,14 +417,31 @@ def analyze_daily_invoice_orders(df, start_date, end_date):
     df_copy = df.copy()
     df_copy['invoice_upload_time'] = pd.to_datetime(df_copy['invoice_upload_time'], errors='coerce').dt.date
     
-    # 筛选条件：
-    # 1. invoice_upload_time 在目标日期范围内
-    # 2. lock_time 不为空 (题目要求：有 invoice_upload_time 且有 lock_time)
-    invoice_orders = df_copy[
+    # 第一步：全部开票记录（不锁 lock_time 过滤），用于对公批售等补充标注
+    raw_invoice_all = df_copy[
         (df_copy['invoice_upload_time'] >= start_date) & 
-        (df_copy['invoice_upload_time'] <= end_date) &
-        (df_copy['lock_time'].notna())
+        (df_copy['invoice_upload_time'] <= end_date)
     ]
+    total_raw_invoice = raw_invoice_all['order_number'].nunique()
+
+    # 从全量开票记录中检测对公批售订单（owner_identity_no 为统一社会信用代码的企业订单）
+    total_corporate_count = 0
+    corporate_model_count = {}
+    if 'owner_identity_no' in raw_invoice_all.columns:
+        corporate_mask = raw_invoice_all['owner_identity_no'].apply(is_corporate_owner)
+        total_corporate_count = raw_invoice_all[corporate_mask]['order_number'].nunique()
+        # 分解到车型
+        for model in TARGET_MODELS:
+            if model == "LS9":
+                m = raw_invoice_all[corporate_mask & raw_invoice_all['series'].isin(["LS9", "LS9Hyper"])]
+            else:
+                m = raw_invoice_all[corporate_mask & (raw_invoice_all['series'] == model)]
+            cnt = m['order_number'].nunique()
+            if cnt > 0:
+                corporate_model_count[model] = cnt
+
+    # 第二步：标准口径 — 有 lock_time 的开票
+    invoice_orders = raw_invoice_all[raw_invoice_all['lock_time'].notna()]
     
     # 1. 计算总开票数 (基于 order_number 去重)
     total_invoice_count = invoice_orders['order_number'].nunique()
@@ -462,7 +480,10 @@ def analyze_daily_invoice_orders(df, start_date, end_date):
         "start_date": start_date,
         "end_date": end_date,
         "total": total_invoice_count,
+        "total_raw": total_raw_invoice,
         "total_user_car": total_user_car_count,
+        "total_corporate": total_corporate_count,
+        "corporate_models": corporate_model_count,
         "models": model_invoice_stats
     }
 
@@ -693,6 +714,10 @@ def upsert_bitable_observation(lock_stats, invoice_stats, pred_lock: float | Non
         )
     invoice_model_text = "\n".join(invoice_model_details)
 
+    corp = invoice_stats.get("total_corporate", 0)
+    if corp > 0:
+        invoice_model_text += f"\n对公批售：{corp} 台"
+
     attainment_rate = None
     is_warning = False
     if pred_lock is not None and pred_lock > 0:
@@ -831,7 +856,11 @@ def send_feishu_notification(lock_stats, invoice_stats, pred_lock=None):
                     "tag": "div",
                     "text": {
                         "tag": "lark_md",
-                        "content": f"**{invoice_label}：** {invoice_stats['total']} ({invoice_stats['total_user_car']}) 台\n{invoice_model_text}"
+                        "content": (
+                            f"**{invoice_label}：** {invoice_stats['total']} ({invoice_stats['total_user_car']}) 台"
+                            + (f"（不含对公批售 {invoice_stats.get('total_corporate', 0)} 台）" if invoice_stats.get('total_corporate', 0) > 0 else "")
+                            + f"\n{invoice_model_text}"
+                        )
                     }
                 },
                 {
@@ -942,7 +971,19 @@ def main():
             
         print("-" * 30)
         
-        print(f"🚚 总开票数: {invoice_stats['total']} ({invoice_stats['total_user_car']}) 台")
+        total_corp = invoice_stats.get('total_corporate', 0)
+        raw_total = invoice_stats.get('total_raw', invoice_stats['total'])
+        corp_parts = []
+        if total_corp > 0:
+            cm = invoice_stats.get('corporate_models', {})
+            for m in ['LS6', 'LS8', 'LS9', 'L6', 'LS7', 'L7']:
+                if m in cm:
+                    corp_parts.append(f"{m}：{cm[m]}")
+            corp_detail = "，".join(corp_parts) if corp_parts else ""
+            corp_note = f"，不含对公批售 {total_corp} 台" + (f"（{corp_detail}）" if corp_detail else "")
+        else:
+            corp_note = ""
+        print(f"🚚 总开票数: {invoice_stats['total']} ({invoice_stats['total_user_car']}) 台{corp_note}")
         print("   车型分布 (开票):")
         for model, info in invoice_stats['models'].items():
             price_display = f"{info['avg_price']/10000:.1f}w" if info['avg_price'] > 0 else "N/A"

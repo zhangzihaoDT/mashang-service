@@ -236,6 +236,13 @@ daily-data-pipeline-dry-run: dataset-validate daily-observation-dry-run
 ## 注意：会刷新 dataset 并同步外部系统
 daily-data-pipeline: dataset-update dataset-validate daily-observation-sync
 
+## 单日 DC 库存变动分析（默认昨天）
+dc-inventory-change:
+	$(PYTHON) mashang_workspace/runtime_scripts/daily_dc_inventory_change.py
+
+dc-inventory-change-date:
+	$(PYTHON) mashang_workspace/runtime_scripts/daily_dc_inventory_change.py --date $(DATE)
+
 ## [废弃] 请使用 daily-observation-dry-run 替代
 daily-sync-dry-run:
 	@echo "[DEPRECATED] Use 'make daily-observation-dry-run' instead."
