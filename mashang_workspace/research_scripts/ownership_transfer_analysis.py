@@ -1,31 +1,22 @@
 #!/usr/bin/env python3
 """
-车辆流转与交付状态分析 — 基于 attribute_dealer_date + bloc_name 归属口径。
+车辆 Dispatch 分析 — 国内=订单绑定, 出口=出厂发运。
 
-分析车辆在 H1 内完成经销商归属确认时的物理位置与交付状态。
-
-口径说明：
-  - 经销商归属时点 = attribute_dealer_date（经销商属性确认日期）
-  - 归属口径 = attribute_dealer_date 非空即视为完成经销商归属
-  - 出口识别 = bloc_name ∈ {上汽国际, 海外, T F Motors (Cambodia) Co., Ltd, 亚洲}（bloc_name 为空视为国内）
-  - --dispatched 模式：品牌归属条件（bloc_name != 上汽销售）+ 终端完成条件（非已绑定待开票 / 非有开票无交付记录）
-
-物流链路（统一命名）：
-  - 物流前阶段（未进入 VDC） → VIN 已归属但尚未下线/入库
-  - VDC 内                → 总部库内
-  - VDC→DC 在途           → 发运途中
-  - DC 在库               → 经销商收到车，待售
-   - 已离开 DC             → 消费者交付完成 / 非零售业务交付（国内约 0.4% 无消费者订单）
+口径：
+  国内 Dispatch = order_binding_time 在窗口内
+  出口 Dispatch = actual_waybill_out_time 在窗口内（出厂进入出口运输链）
+  业务 Dispatch = 国内 Dispatch ∪ 出口 Dispatch
+  同时输出出口离港出关量（out_dc）和出厂→离港中位周期
+  可选排除：--exclude-test-drive 剔除试驾车
 
 用法:
   python research_scripts/ownership_transfer_analysis.py
   python research_scripts/ownership_transfer_analysis.py --start-date 2026-01-01 --end-date 2026-06-30
-  python research_scripts/ownership_transfer_analysis.py --dispatched
+  python research_scripts/ownership_transfer_analysis.py --exclude-test-drive
   python research_scripts/ownership_transfer_analysis.py --format json
 """
 
 import argparse
-from datetime import date, datetime
 import json
 from pathlib import Path
 import sys
@@ -35,7 +26,6 @@ import numpy as np
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT))
-_WS_ROOT = Path(__file__).resolve().parents[1]
 
 DEFAULT_INV = REPO_ROOT / "dataset" / "delivery_inventory.parquet"
 DEFAULT_ODF = REPO_ROOT / "dataset" / "order_data.parquet"
@@ -53,6 +43,8 @@ VIN_SERIES_MAP = {
     "LSJWR": "LS6", "LSJWT": "L6", "LSJE3": "L7",
 }
 
+ALL_SERIES = ["LS6", "LS9", "L6", "LS8", "LS7", "L7"]
+
 
 def _fmt(n):
     return f"{n:,}"
@@ -67,353 +59,284 @@ def get_series(vin: str) -> str:
 def load_data(inv_path: Path, odf_path: Path):
     inv = pd.read_parquet(inv_path)
     odf = pd.read_parquet(odf_path)
-
     inv["has_order"] = inv["vin"].isin(odf["vin"].dropna().astype(str))
-
     merged = inv.merge(
-        odf[["vin", "invoice_upload_time", "delivery_date", "lock_time"]].drop_duplicates(subset="vin"),
+        odf[["vin", "invoice_upload_time", "delivery_date", "lock_time", "order_type"]].drop_duplicates(subset="vin"),
         on="vin", how="left",
     )
     return merged
 
 
-def classify(df: pd.DataFrame, start_date: str, end_date: str,
-             dispatched: bool = False) -> pd.DataFrame:
-    attr_col = pd.to_datetime(df["attribute_dealer_date"], errors="coerce")
-    # end_date 作为日期字符串传入（如 "2026-06-30"），
-    # 实际范围取 [start_date, end_date + 1 天)，避免漏掉当日时分秒记录
-    end_exclusive = pd.Timestamp(end_date) + pd.Timedelta(days=1)
-    mask = (
-        (attr_col >= start_date)
-        & (attr_col < end_exclusive)
-    )
-    if dispatched:
-        brand_eligible = df["bloc_name"] != "上汽销售"  # 品牌归属条件
-        mask = mask & brand_eligible
+def classify_dispatch(df: pd.DataFrame, start_date: str, end_date: str,
+                       exclude_test_drive: bool = False) -> dict:
+    end_excl = pd.Timestamp(end_date) + pd.Timedelta(days=1)
+    out_dc = pd.to_datetime(df["out_delivery_center_time"], errors="coerce")
+    waybill = pd.to_datetime(df["actual_waybill_out_time"], errors="coerce")
+    binding = pd.to_datetime(df["order_binding_time"], errors="coerce")
+    in_dc = pd.to_datetime(df["real_in_dc_time"], errors="coerce")
+    attr = pd.to_datetime(df["attribute_dealer_date"], errors="coerce")
+    invoice = pd.to_datetime(df["invoice_upload_time"], errors="coerce")
+    delivery = pd.to_datetime(df["delivery_date"], errors="coerce")
 
-    result = df[mask].copy()
-    result["attr_date"] = attr_col[mask]
+    def in_h1(ts):
+        return (ts >= start_date) & (ts < end_excl)
+
+    is_export = df["bloc_name"].isin(EXPORT_BLOC_NAMES)
+
+    # 国内 Dispatch
+    delivery_r = in_h1(delivery)
+    dom_delivery = ~is_export & delivery_r
+    dom_invoice_only = ~is_export & in_h1(invoice) & ~delivery_r
+    dom_dispatch = dom_delivery | dom_invoice_only
+
+    # 出口 Dispatch
+    exp_dispatch = is_export & in_h1(waybill)
+
+    business = dom_dispatch | exp_dispatch
+
+    # 剔除试驾车
+    if exclude_test_drive and "order_type" in df.columns:
+        not_test = df["order_type"] != "试驾车"
+        business = business & not_test
+        dom_dispatch = dom_dispatch & not_test
+        exp_dispatch = exp_dispatch & not_test
+
+    result = df[business].copy()
+    result["is_export"] = is_export[business]
+    result["dispatch_track"] = np.where(result["is_export"], "出口 Dispatch", "国内 Dispatch")
+    result["dispatch_event"] = "其他"
+    result.loc[~result["is_export"] & dom_delivery[business], "dispatch_event"] = "交付"
+    result.loc[~result["is_export"] & dom_invoice_only[business], "dispatch_event"] = "开票"
+    result.loc[result["is_export"], "dispatch_event"] = "出厂发运"
+
     result["vin_series"] = result["vin"].apply(get_series)
-    result["is_export"] = result["bloc_name"].isin(EXPORT_BLOC_NAMES)
 
-    # Physical position
+    delivery_ts = pd.to_datetime(result["delivery_date"], errors="coerce")
+    invoice_ts = pd.to_datetime(result["invoice_upload_time"], errors="coerce")
+    waybill_ts = pd.to_datetime(result["actual_waybill_out_time"], errors="coerce")
+    result["event_time"] = np.where(
+        ~result["is_export"],
+        np.where(result["dispatch_event"] == "交付", delivery_ts, invoice_ts),
+        waybill_ts
+    )
+    result["event_month"] = pd.to_datetime(result["event_time"]).dt.month
+
+    as_of = pd.Timestamp(end_date) + pd.Timedelta(days=1)
+    for col in ["first_in_inv_time", "real_out_vdc_time", "real_in_dc_time", "out_delivery_center_time"]:
+        result[col + "_ts"] = pd.to_datetime(result[col], errors="coerce")
     pos_cond = [
-        result["out_delivery_center_time"].notna(),
-        result["real_in_dc_time"].notna(),
-        result["real_out_vdc_time"].notna(),
-        result["first_in_inv_time"].notna(),
+        result["out_delivery_center_time_ts"].notna() & (result["out_delivery_center_time_ts"] <= as_of),
+        result["real_in_dc_time_ts"].notna() & (result["real_in_dc_time_ts"] <= as_of),
+        result["real_out_vdc_time_ts"].notna() & (result["real_out_vdc_time_ts"] <= as_of),
+        result["first_in_inv_time_ts"].notna() & (result["first_in_inv_time_ts"] <= as_of),
     ]
     pos_choice = ["已离开 DC", "DC 在库", "VDC→DC 在途", "VDC 内"]
     result["physical_position"] = np.select(pos_cond, pos_choice, default="物流前阶段（未进入 VDC）")
 
-    # Sub-classify 已离开 DC
-    has_invoice = result["invoice_upload_time"].notna()
-    has_delivery = result["delivery_date"].notna()
-    has_binding = result["order_binding_time"].notna()
-    is_left_dc = result["physical_position"] == "已离开 DC"
+    # 出口仅归属未发运
+    exp_attr_only = is_export & in_h1(attr) & ~exp_dispatch
+    if exclude_test_drive:
+        exp_attr_only = exp_attr_only & not_test
 
-    result["delivery_status"] = "未知"
-    result.loc[is_left_dc & has_invoice & has_delivery, "delivery_status"] = "消费者交付完成"
-    result.loc[is_left_dc & ~has_invoice & ~has_delivery & has_binding, "delivery_status"] = "已绑定待开票"
-    result.loc[is_left_dc & ~has_invoice & ~has_delivery & ~has_binding, "delivery_status"] = "非零售业务交付"
-    # Edge: has invoice or delivery but not both
-    result.loc[is_left_dc & has_invoice & ~has_delivery, "delivery_status"] = "待核查：有开票、无交付记录"
-    result.loc[is_left_dc & ~has_invoice & has_delivery, "delivery_status"] = "待核查：有交付、无开票记录"
+    # 出口后续物流统计
+    nt_full = df["order_type"] != "试驾车" if "order_type" in df.columns else True
+    exp_base = is_export & nt_full
+    exp_wb_h1 = exp_base & in_h1(waybill)
+    exp_out_h1 = exp_base & in_h1(out_dc)
+    exp_both_h1 = exp_wb_h1 & exp_out_h1
+    exp_wb_only_h1 = exp_wb_h1 & ~exp_out_h1
+    exp_out_only_h1 = exp_out_h1 & ~exp_wb_h1
+    median_gap = None
+    if exp_both_h1.sum() > 0:
+        gap = (out_dc[exp_both_h1] - waybill[exp_both_h1]).dt.total_seconds() / 86400
+        median_gap = int(gap.median())
 
-    # dispatched 模式：品牌归属 + 终端完成双重条件
-    if dispatched:
-        final_delivery = ~result["delivery_status"].isin({
-            "已绑定待开票", "待核查：有开票、无交付记录", "待核查：有交付、无开票记录",
-        })  # 终端完成条件
-        result = result[final_delivery].copy()
-
-    # 非零售业务交付可靠性校验
-    LOGISTICS_CHAIN = [
-        "real_as_offline_time", "real_qc_offline_time",
-        "first_in_inv_time", "real_out_vdc_time",
-        "real_in_dc_time", "out_delivery_center_time",
-    ]
-    if "schedule_effective_time" in result.columns:
-        LOGISTICS_CHAIN = ["schedule_effective_time"] + LOGISTICS_CHAIN
-    result["logistics_chain_complete"] = result[LOGISTICS_CHAIN].notna().all(axis=1)
-    result["order_system_zero"] = ~has_invoice & ~has_delivery & ~has_binding
-
-    return result
-
-
-def build_tree(df: pd.DataFrame):
-    """Build a nested tree: list of (label, count, series_str, children)."""
-    total = len(df)
-    n_export = df["is_export"].sum()
-    n_domestic = total - n_export
-    domestic = df[~df["is_export"]]
-
-    # Export children
-    export_breakdown = df[df["is_export"]].groupby("bloc_name").size().sort_values(ascending=False)
-    export_children = []
-    for bloc, cnt in export_breakdown.items():
-        export_children.append((bloc, int(cnt), "", []))
-
-    # Domestic children: physical positions
-    pos_order = ["物流前阶段（未进入 VDC）", "VDC 内", "VDC→DC 在途", "DC 在库", "已离开 DC"]
-    domestic_children = []
-    left_dc_children = []
-    left_dc_count = 0
-
-    for pos in pos_order:
-        pos_df = domestic[domestic["physical_position"] == pos]
-        if pos_df.empty:
-            continue
-        series = ", ".join(f"{s}={c}" for s, c in sorted(pos_df["vin_series"].value_counts().to_dict().items()))
-        cnt = len(pos_df)
-
-        if pos == "已离开 DC":
-            left_dc_count = cnt
-            for status in ["消费者交付完成", "已绑定待开票", "非零售业务交付",
-                           "待核查：有开票、无交付记录", "待核查：有交付、无开票记录"]:
-                sub = pos_df[pos_df["delivery_status"] == status]
-                if sub.empty:
-                    continue
-                sub_series = ", ".join(f"{s}={c}" for s, c in sorted(sub["vin_series"].value_counts().to_dict().items()))
-                left_dc_children.append((status, len(sub), sub_series, []))
-            domestic_children.append((pos, cnt, series, left_dc_children))
-        else:
-            domestic_children.append((pos, cnt, series, []))
-
-    tree = [
-        ("出口", int(n_export), "", export_children),
-        ("国内", int(n_domestic), "", domestic_children),
-    ]
-    return tree, total, left_dc_count
+    return {
+        "main": result,
+        "exp_attr_only": int(exp_attr_only.sum()),
+        "exp_logistics": {
+            "both_h1": int(exp_both_h1.sum()),
+            "waybill_only_h1": int(exp_wb_only_h1.sum()),
+            "out_dc_only_h1": int(exp_out_only_h1.sum()),
+            "out_dc_total": int(exp_out_h1.sum()),
+            "waybill_to_out_dc_median_days": median_gap,
+            "both_sample": int(exp_both_h1.sum()),
+        },
+        "stats": {
+            "dom_total": int(dom_dispatch.sum()),
+            "exp_total": int(exp_dispatch.sum()),
+            "total": int(business.sum()),
+        },
+    }
 
 
-def _render_tree(tree, indent=0, parent_is_last=None, is_root=True):
-    """Render tree recursively. Returns list of lines."""
-    lines = []
-    for i, (label, count, series, children) in enumerate(tree):
-        is_last = (i == len(tree) - 1)
+def print_summary(classified: dict, start_date: str, end_date: str):
+    df = classified["main"]
+    stats = classified["stats"]
 
-        # Build prefix
-        if is_root:
-            prefix = ""
-        else:
-            prefix_parts = []
-            for level in range(1, indent):
-                if parent_is_last and level < len(parent_is_last) and parent_is_last[level]:
-                    prefix_parts.append("   ")
-                else:
-                    prefix_parts.append("│  ")
-            prefix = "".join(prefix_parts)
+    total = stats["total"]
+    n_dom = stats["dom_total"]
+    n_exp = stats["exp_total"]
+    n_exp_attr = classified["exp_attr_only"]
+    log = classified.get("exp_logistics", {})
 
-        # Build branch
-        if is_root:
-            branch = ""
-        elif is_last:
-            branch = "└─ "
-        else:
-            branch = "├─ "
+    # ── 校验 ──
+    dom_vins = set(df[~df["is_export"]].index)
+    exp_vins = set(df[df["is_export"]].index)
+    assert dom_vins.isdisjoint(exp_vins), "国内与出口 VIN 有重叠"
+    assert len(dom_vins | exp_vins) == total, f"VIN 并集 != 合计: {len(dom_vins | exp_vins)} != {total}"
 
-        series_str = f"  |  {series}" if series else ""
-        line = f"  {prefix}{branch}{label}：{_fmt(count)} 辆{series_str}"
-        lines.append(line)
-
-        if children:
-            child_parent_is_last = (parent_is_last or []) + [is_last]
-            child_lines = _render_tree(children, indent + 1, child_parent_is_last, is_root=False)
-            lines.extend(child_lines)
-
-    return lines
-
-
-def _find_counts(tree, labels):
-    """Extract counts from tree by label. tree is [(label, count, series, children), ...]"""
-    result = {}
-    def _walk(nodes):
-        for label, count, series, children in nodes:
-            if label in labels:
-                result[label] = count
-            if children:
-                _walk(children)
-    _walk(tree)
-    return result
-
-
-def print_summary(tree, total, left_dc_count, dispatched=False,
-                  domestic_total=None, counts=None, quality=None,
-                  non_retail_validation=None):
     print(f"{'='*68}")
-    title = "车辆流转与交付状态分析（bloc_name 归属口径）"
-    print(f"  {title}")
-    if dispatched:
-        print(f"  收窄：品牌归属（剔除上汽销售）+ 终端完成（剔除待开票、有开票无交付）")
+    print(f"  车辆 Dispatch 分析")
+    print(f"  时间范围：{start_date} ~ {end_date}")
     print(f"{'='*68}")
     print()
+    print(f"  业务 Dispatch：{_fmt(total)} 辆")
+    print(f"  ├─ 国内 Dispatch：{_fmt(n_dom)} 辆")
+    print(f"  │  └─ 口径：交付或开票发生在 H1")
+    print(f"  └─ 出口 Dispatch：{_fmt(n_exp)} 辆")
+    print(f"     └─ 口径：出厂发运 waybill 发生在 H1")
+    print()
+    print(f"  出口物流跟踪（不计入 Dispatch）")
+    print()
+    print(f"  H1 出厂发运                     {_fmt(n_exp)}")
+    print(f"  ├─ H1 内完成离港                {_fmt(log.get('both_h1', 0))}")
+    print(f"  └─ H1 末仍等待离港              {_fmt(log.get('waybill_only_h1', 0))}")
+    print()
+    print(f"  H1 离港总量                     {_fmt(log.get('out_dc_total', 0))}")
+    print(f"  ├─ 来自 H1 出厂                 {_fmt(log.get('both_h1', 0))}")
+    print(f"  └─ 来自 H1 前出厂               {_fmt(log.get('out_dc_only_h1', 0))}")
+    print()
+    if n_exp_attr > 0:
+        print(f"  出口仅归属未发运                  {_fmt(n_exp_attr)}")
+    median_gap = log.get("waybill_to_out_dc_median_days")
+    if median_gap is not None:
+        print(f"  出厂→离港中位周期                 {median_gap} 天")
+    print()
+    print(f"  注：出口 Dispatch 采用出厂发运作为统计节点，离港通常约 {median_gap} 天后发生，")
+    print(f"      因此 H1 出厂车辆有相当一部分将在 H2 完成离港。")
+    print()
 
-    # Wrap tree with root node for proper rendering
-    full_tree = [("总量", total, "", tree)]
-    for line in _render_tree(full_tree, is_root=True):
-        print(line)
-
-    if counts:
-        pre = counts.get("物流前阶段（未进入 VDC）", 0)
-        vdc = counts.get("VDC 内", 0)
-        tr = counts.get("VDC→DC 在途", 0)
-        dc = counts.get("DC 在库", 0)
-        left = counts.get("已离开 DC", 0)
-        delivered = counts.get("消费者交付完成", 0)
-        bound = counts.get("已绑定待开票", 0)
-        non_retail = counts.get("非零售业务交付", 0)
-        review = sum(v for k, v in counts.items() if k.startswith("待核查"))
-        dt = domestic_total or (pre + vdc + tr + dc + left)
-        print()
-        print(f"  验算：国内 {_fmt(dt)} = 物流前 {_fmt(pre)} + VDC 内 {_fmt(vdc)} + 在途 {_fmt(tr)} + DC 在库 {_fmt(dc)} + 已离开 DC {_fmt(left)}")
-        print(f"       已离开 DC {_fmt(left)} = 交付完成 {_fmt(delivered)} + 待开票 {_fmt(bound)} + 非零售 {_fmt(non_retail)} + 待核查 {_fmt(review)}")
-
-    if quality:
-        print(f"  dispatch 质量验算：")
-        order = ["国内 confirmed", "国内 inferred_high", "国内 conflict",
-                 "上汽销售 physical", "上汽销售 special_rule",
-                 "出口 confirmed", "出口 unverifiable", "出口 late_primary"]
-        total_q = 0
-        for key in order:
-            if key in quality:
-                print(f"    {key:30s}  {_fmt(quality[key])}")
-                total_q += quality[key]
-        print(f"    {'合计':30s}  {_fmt(total_q)}")
-        print()
-
-    if non_retail_validation:
-        nr = non_retail_validation
-        print(f"  非零售业务交付可靠性校验：")
-        print(f"    数量                           {nr['count']}")
-        print(f"    物流链路完整（7 步全）          {nr['chain_complete']}/{nr['count']}")
-        print(f"    订单系统零痕迹                   {nr['order_zero']}/{nr['count']}")
-        if nr.get('chain_breaks'):
-            print(f"    链路断点分布：")
-            for col, n in nr['chain_breaks']:
-                print(f"      {col:35s} 缺失 {n}")
-        if nr.get('has_any_order_footprint', 0) > 0:
-            print(f"    有订单系统痕迹（异常）           {nr['has_any_order_footprint']}")
-        print()
+    print("  按车系：")
+    for s in ALL_SERIES:
+        dom_s = df[(df["vin_series"] == s) & ~df["is_export"]]
+        exp_s = df[(df["vin_series"] == s) & df["is_export"]]
+        parts = [f"    {s:>6s}"]
+        parts.append(f"  国内 {_fmt(len(dom_s)):>10s}")
+        parts.append(f"  出口 {_fmt(len(exp_s)):>10s}")
+        parts.append(f"  合计 {_fmt(len(dom_s)+len(exp_s)):>8s}")
+        print("".join(parts))
 
     print()
-    print(f"  出口范围：上汽国际、海外、亚洲、T F Motors (Cambodia)、Momenta Europe GmbH、Vision Start Albania")
+    monthly = df.groupby(["event_month", "dispatch_track"]).size().unstack(fill_value=0)
+    print("  月度趋势：")
+    header = f"    {'月份':>4s}"
+    for c in ["国内 Dispatch", "出口 Dispatch"]:
+        if c in monthly.columns:
+            header += f"  {c:>14s}"
+    header += f"  {'合计':>8s}"
+    print(header)
+    for month in sorted(monthly.index):
+        parts = [f"    {month:>4d}月"]
+        row_total = 0
+        for c in ["国内 Dispatch", "出口 Dispatch"]:
+            if c in monthly.columns:
+                v = monthly.loc[month, c]
+                parts.append(f"  {_fmt(v):>14s}")
+                row_total += v
+        parts.append(f"  {_fmt(row_total):>8s}")
+        print("".join(parts))
+    print()
+
     print(f"  数据来源：delivery_inventory.parquet + order_data.parquet")
-    print(f"  口径定义：")
-    print(f"    消费者交付完成 → 已离开 DC，且存在交付记录")
-    print(f"    已绑定待开票   → 已离开 DC、有订单绑定，无开票且无交付记录")
-    print(f"    非零售业务交付     → 已离开 DC，未关联消费者订单，但具备实际物流流转记录")
-    print(f"    待核查         → 已离开 DC、有开票记录但无交付记录")
+    print(f"  口径：")
+    print(f"    国内 Dispatch = delivery_date 在窗口内（交付）")
+    print(f"                    ∪ invoice_upload_time 在窗口内且无交付（仅开票）")
+    print(f"    出口 Dispatch = actual_waybill_out_time 在窗口内（出厂发运）")
     print()
+
+
+def _build_result_contract(classified: dict, start_date: str, end_date: str) -> dict:
+    df = classified["main"]
+    stats = classified["stats"]
+
+    series_list = []
+    for s in ALL_SERIES:
+        sub = df[df["vin_series"] == s]
+        entry = {
+            "series": s,
+            "total": len(sub),
+            "domestic": int((~sub["is_export"]).sum()),
+            "export": int(sub["is_export"].sum()),
+        }
+        series_list.append(entry)
+
+    monthly_list = []
+    for m, grp in df.groupby("event_month"):
+        entry = {
+            "month": int(m),
+            "total": len(grp),
+            "domestic": int((~grp["is_export"]).sum()),
+            "export": int(grp["is_export"].sum()),
+        }
+        monthly_list.append(entry)
+    monthly_list.sort(key=lambda x: x["month"])
+
+    def _to_native(v):
+        if isinstance(v, (np.integer,)): return int(v)
+        if isinstance(v, (np.floating,)): return float(v)
+        if isinstance(v, dict): return {k: _to_native(v) for k, v in v.items()}
+        return v
+
+    return {
+        "status": "success",
+        "script": "research_scripts/ownership_transfer_analysis.py",
+        "scope": {
+            "data_source": "delivery_inventory.parquet + order_data.parquet",
+            "time_window": {"start": start_date, "end": end_date},
+            "metric_definition": "国内=交付or开票; 出口=出厂发运",
+        },
+        "result": _to_native({
+            "total": stats["total"],
+            "domestic_dispatch": stats["dom_total"],
+            "export_dispatch": stats["exp_total"],
+            "export_logistics": classified.get("exp_logistics", {}),
+            "export_attr_only_no_dispatch": classified["exp_attr_only"],
+            "by_series": series_list,
+            "monthly": monthly_list,
+        }),
+        "artifacts": {},
+    }
 
 
 def run(inv_path=DEFAULT_INV, odf_path=DEFAULT_ODF,
         start_date="2026-01-01", end_date="2026-06-30",
-        dispatched=False, fmt="text"):
+        series=None, exclude_test_drive=False, fmt="text"):
 
     merged = load_data(inv_path, odf_path)
-    classified = classify(merged, start_date, end_date, dispatched=dispatched)
-    tree, total, left_dc_count = build_tree(classified)
+    classified = classify_dispatch(merged, start_date, end_date,
+                                    exclude_test_drive=exclude_test_drive)
 
-    def _to_native(v):
-        if isinstance(v, (np.integer,)):
-            return int(v)
-        if isinstance(v, (np.floating,)):
-            return float(v)
-        if isinstance(v, dict):
-            return {k: _to_native(v) for k, v in v.items()}
-        return v
-
-    def _tree_to_dict(t):
-        return [{"label": l, "count": _to_native(c), "series": s,
-                 "children": _tree_to_dict(ch)} for l, c, s, ch in t]
-
-    filters = {"attribute_dealer_date": f"[{start_date}, {end_date}]（含 end_date 全天）"}
-    metric = "经销商归属口径: attribute_dealer_date 在窗口内即视为完成经销商归属（bloc_name 用于出口/国内分类，不参与筛选）"
-    if dispatched:
-        filters["dispatched"] = "剔除上汽销售 + 已绑定待开票 + 有开票无交付记录"
-        metric += "，保守交付口径：剔除上汽销售、已绑定待开票、有开票无交付记录"
+    if series:
+        series_set = {s.strip() for s in series.split(",")}
+        mask = classified["main"]["vin_series"].isin(series_set)
+        classified["main"] = classified["main"][mask]
 
     if fmt == "json":
-        summary = {
-            "status": "success",
-            "script": "research_scripts/ownership_transfer_analysis.py",
-            "scope": {
-                "data_source": "delivery_inventory.parquet + order_data.parquet",
-                "time_window": {"start": start_date, "end": end_date},
-                "filters": filters,
-                "metric_definition": metric,
-            },
-            "result": {
-                "total": _to_native(total),
-                "tree": _tree_to_dict(tree),
-            },
-            "validation": {
-                "domestic_sum": "待入物流 1,117 + VDC内 5 + 在途 22 + DC在库 6,454 + 已离开DC left_dc",
-                "left_dc_sum": "交付完成 24,228 + 待开票 31 + 非零售 83 + 异常 3",
-            },
-            "quality": {
-                "non_retail": non_retail_validation,
-            } if non_retail_validation else {},
-            "artifacts": {},
-        }
-        return summary
+        return _build_result_contract(classified, start_date, end_date)
     else:
-        labels = {"物流前阶段（未进入 VDC）", "VDC 内", "VDC→DC 在途", "DC 在库",
-                  "已离开 DC", "消费者交付完成", "已绑定待开票", "非零售业务交付",
-                  "待核查：有开票、无交付记录", "待核查：有交付、无开票记录"}
-        counts = _find_counts(tree, labels)
-        domestic_node = tree[1] if len(tree) > 1 and tree[1][0] == "国内" else None
-        domestic_total = domestic_node[1] if domestic_node else None
-
-        # dispatch 质量分类
-        quality = None
-        if dispatched and "dispatch_quality" in classified.columns:
-            q_all = classified["dispatch_quality"].value_counts()
-            quality = {k: int(v) for k, v in q_all.items()}
-
-        # 非零售业务交付可靠性校验（仅国内，出口按不同链路管理）
-        LOGISTICS_CHAIN_CHECK = [
-            "schedule_effective_time", "real_as_offline_time", "real_qc_offline_time",
-            "first_in_inv_time", "real_out_vdc_time", "real_in_dc_time",
-            "out_delivery_center_time",
-        ]
-        domestic = classified[~classified["is_export"]]
-        non_retail = domestic[domestic["delivery_status"] == "非零售业务交付"]
-        non_retail_validation = None
-        if len(non_retail) > 0:
-            chain_breaks = []
-            for col in LOGISTICS_CHAIN_CHECK:
-                missing = non_retail[col].isna().sum()
-                if missing > 0:
-                    chain_breaks.append((col, int(missing)))
-            has_any_footprint = (
-                non_retail["invoice_upload_time"].notna()
-                | non_retail["delivery_date"].notna()
-                | non_retail["order_binding_time"].notna()
-            ).sum()
-            non_retail_validation = {
-                "count": len(non_retail),
-                "chain_complete": int(non_retail["logistics_chain_complete"].sum()),
-                "order_zero": int(non_retail["order_system_zero"].sum()),
-                "chain_breaks": chain_breaks if chain_breaks else None,
-                "has_any_order_footprint": int(has_any_footprint),
-            }
-
-        print_summary(tree, total, left_dc_count, dispatched=dispatched,
-                      domestic_total=domestic_total, counts=counts, quality=quality,
-                      non_retail_validation=non_retail_validation)
+        print_summary(classified, start_date, end_date)
         return None
 
 
 def main():
-    parser = argparse.ArgumentParser(description="车辆流转与交付状态分析（bloc_name 归属口径）")
+    parser = argparse.ArgumentParser(description="车辆 Dispatch 分析（国内=订单绑定, 出口=离港出关∪出厂发运）")
     parser.add_argument("--inv-path", type=Path, default=DEFAULT_INV)
     parser.add_argument("--odf-path", type=Path, default=DEFAULT_ODF)
     parser.add_argument("--start-date", default="2026-01-01")
     parser.add_argument("--end-date", default="2026-06-30")
-    parser.add_argument("--dispatched", action="store_true",
-                        help="收窄：剔除上汽销售 + 已绑定待开票 + 有开票无交付记录（保守交付口径）")
+    parser.add_argument("--series", help="车系过滤（逗号分隔，如 LS6,LS9）")
+    parser.add_argument("--exclude-test-drive", action="store_true", help="剔除试驾车")
     parser.add_argument("--format", "-f", choices=["text", "json"], default="text")
     args = parser.parse_args()
 
@@ -422,7 +345,8 @@ def main():
         odf_path=args.odf_path,
         start_date=args.start_date,
         end_date=args.end_date,
-        dispatched=args.dispatched,
+        series=args.series,
+        exclude_test_drive=args.exclude_test_drive,
         fmt=args.format,
     )
 
