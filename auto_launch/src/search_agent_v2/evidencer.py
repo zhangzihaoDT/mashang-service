@@ -11,6 +11,14 @@
     - identity 从 intent 继承，不再参与 evidence coverage
     - source 改为搜索结果元数据检测，不再做正文覆盖
     - 输出 coverage_numerator / coverage_denominator / coverage_formula
+  v2.2:
+    - match_keywords 语义覆盖检测替代 label 匹配
+    - profile 级停止阈值（stop_thresholds）
+    - publication_tier_map 中文媒体名→信源类型映射
+    - 搜索查询加入 douyin/bilibili 平台关键词
+  v2.3:
+    - claim_evaluator 模块：claim-level evidence 评估
+    - 7 级证据质量：missing → mention_only → indirect → qualitative → quantitative → officially_confirmed → contradicted
 """
 
 import yaml
@@ -20,7 +28,7 @@ MODULE_DIR = Path(__file__).resolve().parent
 SERVICE_ROOT = MODULE_DIR.parent.parent
 CONFIG_PATH = SERVICE_ROOT / "configs" / "search_agent_v2.yaml"
 
-COVERAGE_FORMULA_VERSION = "v2.1"
+COVERAGE_FORMULA_VERSION = "v2.2"
 
 
 def _load_config():
@@ -40,7 +48,17 @@ def _count_independent_sources(results: list[dict]) -> int:
 
 
 def _count_official_sources(results: list[dict], config: dict) -> int:
-    """统计搜索结果中来自官方源的唯一信源数（按域名去重）"""
+    """统计搜索结果中来自官方源的唯一信源数
+
+    检测顺序：
+      1. publication_tier_map 中标记为 official 的出版物
+      2. source_tiers.tier_1_official.domains 域名提示
+      3. 域名后缀规则
+    """
+    pub_map = (config or {}).get("publication_tier_map", {})
+    # 收集所有标记为 official 的出版物名称
+    official_pub_names = {pub.lower() for pub, tier in pub_map.items() if tier == "official"}
+
     tiers = config.get("source_tiers", {})
     tier_1 = tiers.get("tier_1_official", {})
     official_domain_hints = tier_1.get("domains", [])
@@ -48,16 +66,23 @@ def _count_official_sources(results: list[dict], config: dict) -> int:
     official_domains = set()
     for r in results:
         for item in r.get("results", []):
-            src = (item.get("source", "") or item.get("source_name", "")).lower()
-            if not src:
+            src = (item.get("source", "") or item.get("source_name", "") or "")
+            src_lower = src.lower().strip()
+            if not src_lower:
                 continue
-            if any(hint in src for hint in official_domain_hints):
-                official_domains.add(src)
+            # 出版物映射表
+            if any(pub in src_lower for pub in official_pub_names):
+                official_domains.add(src_lower)
                 continue
-            if any(src.endswith(f".{d}") for d in ["gov.cn", "12365auto.cn"]):
-                official_domains.add(src)
-            if any(kw in src for kw in ["official", "官网", "weixin.qq.com"]):
-                official_domains.add(src)
+            # 域名提示
+            if any(hint in src_lower for hint in official_domain_hints):
+                official_domains.add(src_lower)
+                continue
+            # 域名后缀 + 官方关键词
+            if any(src_lower.endswith(f".{d}") for d in ["gov.cn", "12365auto.cn"]):
+                official_domains.add(src_lower)
+            if any(kw in src_lower for kw in ["official", "官网", "weixin.qq.com"]):
+                official_domains.add(src_lower)
     return len(official_domains)
 
 
@@ -288,30 +313,52 @@ def _calc_shared_origin_ratio(results: list[dict], config: dict) -> float:
     return shared_count / max(len(all_snippets), 1)
 
 
-def _count_source_tier_types(results: list[dict]) -> set:
+def _classify_source(source_name: str, pub_map: dict) -> str | None:
+    """根据出版物名称映射 + 域名规则判断信源类型"""
+    name = source_name.lower().strip()
+    # 优先查出版物映射表
+    for pub, tier in pub_map.items():
+        if pub.lower() in name:
+            return tier
+    # 回退域名规则
+    if ".gov" in name or "official" in name or "官网" in name:
+        return "official"
+    if any(kw in name for kw in ["dealer", "4s", "store", "经销"]):
+        return "dealer"
+    if any(kw in name for kw in ["social", "weibo", "weixin", "xiaohongshu", "bbs", "tieba"]):
+        return "social"
+    if name.endswith((".com", ".cn", ".net", ".org")):
+        return "media"
+    return None
+
+
+def _count_source_tier_types(results: list[dict], config: dict = None) -> set:
     """统计结果覆盖的信源层级类型数"""
+    pub_map = (config or {}).get("publication_tier_map", {})
     tier_types = set()
     for r in results:
         for item in r.get("results", []):
-            src = (item.get("source", "") or item.get("source_name", "")).lower()
+            src = (item.get("source", "") or item.get("source_name", "") or "")
             if not src:
                 continue
-            domain = src
-            if ".gov" in domain or "official" in domain:
-                tier_types.add("official")
-            elif any(kw in domain for kw in ["dealer", "4s", "store", "经销"]):
-                tier_types.add("dealer")
-            elif any(kw in domain for kw in ["social", "weibo", "weixin", "xiaohongshu", "bbs", "tieba"]):
-                tier_types.add("social")
-            elif domain.endswith((".com", ".cn", ".net", ".org")):
-                tier_types.add("media")
+            tier = _classify_source(src, pub_map)
+            if tier:
+                tier_types.add(tier)
     return tier_types
+
+
+def _merge_thresholds(base_cond: dict, profile_overrides: dict) -> dict:
+    """合并全局条件与 profile 级停阈值，profile 值优先"""
+    merged = dict(base_cond)
+    merged.update(profile_overrides)
+    return merged
 
 
 def evaluate_evidence(results: list[dict], config: dict, field_defs: dict,
                       mode: str, round_num: int, total_calls: int,
                       effective_hard_limits: dict = None,
-                      identity_from_intent: set[str] = None) -> dict:
+                      identity_from_intent: set[str] = None,
+                      stop_thresholds: dict = None) -> dict:
     """对当前搜索结果进行证据评估，返回决策建议
 
     Args:
@@ -340,7 +387,7 @@ def evaluate_evidence(results: list[dict], config: dict, field_defs: dict,
         _compute_fields_coverage(results, field_defs, mode, identity_from_intent)
     unresolved_claims = _check_high_risk_claims(results, config)
     shared_ratio = _calc_shared_origin_ratio(results, config)
-    tier_types = _count_source_tier_types(results)
+    tier_types = _count_source_tier_types(results, config)
 
     metrics = {
         "independent_sources": independent_sources,
@@ -368,10 +415,14 @@ def evaluate_evidence(results: list[dict], config: dict, field_defs: dict,
     }
 
     dt = policy.get("decision_table", [])
+    profile_thresholds = stop_thresholds or {}
 
     for entry in dt:
         condition_name = entry["condition"]
-        cond_def = policy.get("conditions", {}).get(condition_name, {})
+        base_cond = policy.get("conditions", {}).get(condition_name, {})
+        # profile 级阈值覆盖全局条件
+        profile_overrides = profile_thresholds.get(condition_name, {})
+        cond_def = _merge_thresholds(base_cond, profile_overrides)
         conclusion_status = entry["conclusion_status"]
         stop_reason = entry["stop_reason"]
 

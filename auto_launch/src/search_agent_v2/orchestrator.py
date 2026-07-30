@@ -29,6 +29,7 @@ from auto_launch.src import output_paths
 from auto_launch.src.search_agent_v2.evidencer import evaluate_evidence
 from auto_launch.src.search_agent_v2.gap_analyzer import analyze_gaps
 from auto_launch.src.search_agent_v2.query_rewriter import rewrite_queries
+from auto_launch.src.search_agent_v2.claim_evaluator import evaluate_claims
 
 CONFIG_PATH = SERVICE_ROOT / "configs" / "search_agent_v2.yaml"
 
@@ -160,9 +161,11 @@ def run_agent_loop(request: str, monitor_date: str = None,
 
     field_defs = config.get("field_definitions", {})
     evidence_mode = "buzz_watch" if is_buzz else mode
+    profile_stop_thresholds = profile.get("stop_thresholds", {})
 
     print(f"[agent] profile={profile_name}, max_rounds={max_rounds}, max_queries={max_queries}, max_calls={max_calls}")
     print(f"[agent] acceptable_evidence={acceptable_evidence}")
+    print(f"[agent] stop_thresholds={profile_stop_thresholds}")
 
     # ── 3. 初始化 ───────────────────────────────────────
     all_results = []
@@ -197,6 +200,7 @@ def run_agent_loop(request: str, monitor_date: str = None,
                     all_results, config, field_defs, evidence_mode, round_num, total_api_calls,
                     effective_hard_limits=effective_hard_limits,
                     identity_from_intent=identity_fields,
+                    stop_thresholds=profile_stop_thresholds,
                 )
                 final_gap = analyze_gaps(
                     all_results, task_config,
@@ -236,6 +240,7 @@ def run_agent_loop(request: str, monitor_date: str = None,
                 all_results, config, field_defs, evidence_mode, round_num, total_api_calls,
                 effective_hard_limits=effective_hard_limits,
                 identity_from_intent=identity_fields,
+                stop_thresholds=profile_stop_thresholds,
             )
             gap = analyze_gaps(
                 all_results, task_config,
@@ -318,6 +323,7 @@ def run_agent_loop(request: str, monitor_date: str = None,
             all_results, config, field_defs, evidence_mode, round_num, total_api_calls,
             effective_hard_limits=effective_hard_limits,
             identity_from_intent=identity_fields,
+            stop_thresholds=profile_stop_thresholds,
         )
         print(f"\n[evidence] independent_sources={evidence['metrics']['independent_sources']}, "
               f"official_sources={evidence['metrics']['official_sources']}, "
@@ -345,6 +351,7 @@ def run_agent_loop(request: str, monitor_date: str = None,
                 all_results, config, field_defs, evidence_mode, round_num, total_api_calls,
                 effective_hard_limits=effective_hard_limits,
                 identity_from_intent=identity_fields,
+                stop_thresholds=profile_stop_thresholds,
             )
             final_evidence = evidence
             final_gap = analyze_gaps(
@@ -362,7 +369,14 @@ def run_agent_loop(request: str, monitor_date: str = None,
         )
         print(f"[gap] objectives: {gap['next_search_objectives'][:3]}")
 
-    # ── 7. 汇总 ──────────────────────────────────────────
+    # ── 7. Claim-level 证据评估（v2.3）─────────────────────
+    claims = evaluate_claims(
+        all_results, config.get("field_definitions", {}), evidence_mode,
+        publication_tier_map=config.get("publication_tier_map", {}),
+        identity_fields=identity_fields,
+    )
+
+    # ── 8. 汇总 ──────────────────────────────────────────
     final = {
         "user_request": request,
         "monitor_date": monitor_date,
@@ -373,11 +387,22 @@ def run_agent_loop(request: str, monitor_date: str = None,
         "total_api_calls": total_api_calls,
         "final_evidence": final_evidence,
         "final_gap": final_gap,
+        "claims": claims,
         "conclusion_status": final_evidence.get("conclusion_status"),
         "stop_reason": final_evidence.get("stop_reason"),
         "condition_met": final_evidence.get("condition_met"),
         "metrics": final_evidence.get("metrics", {}),
     }
+
+    # Print claim summary
+    print(f"\n[claims] Claim-level 证据评估:")
+    for c in claims:
+        ev_count = c.get("evidence_count", 0)
+        best = c.get("best_quality", "?")
+        print(f"  {c['label']}: {c['status']} (best={best}, evidence={ev_count})")
+        if c.get("evidence"):
+            top = c["evidence"][0]
+            print(f"    e.g. [{top['source']}] {top['title'][:50]} quality={top['quality']}")
 
     mode_label = "(dry-run)" if dry_run else "(live)"
     print(f"\n{'='*60}")
