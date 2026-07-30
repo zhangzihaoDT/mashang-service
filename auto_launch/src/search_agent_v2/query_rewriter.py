@@ -52,7 +52,7 @@ def rewrite_queries(gap: dict, task_config: dict, existing_queries: list[dict] =
     target = targets[0] if targets else {}
     brand = target.get("brand", "")
     model = target.get("model", "")
-    display = model if model else brand
+    display = f"{brand} {model}".strip() if model else brand
     time_window = task_config.get("time_window", {})
     days = time_window.get("days", 7)
 

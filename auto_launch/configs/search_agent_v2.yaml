@@ -101,23 +101,27 @@ high_risk_claims:
   - range_mileage           # 续航里程
   - safety_rating           # 安全评级
 
-# ── 声量热度专项字段 ─────────────────────────────────────
-# 适用于搜索微信指数、社交声量、讨论热度等需求
+# ── 字段体系（三层结构: identity / metadata / evidence）───
+# identity: 识别目标身份（品牌/车型）
+# metadata: 事件基本信息（时间/类型/来源）
+# evidence: 实际发现的关键事实（核心结论）
 field_definitions:
   brand_watch:
-    required:
+    identity:
       - field: brand
         label: 品牌名称
         weight: 1.0
+    metadata:
       - field: event_date
         label: 事件日期
         weight: 0.8
       - field: event_type
         label: 事件类型
-        weight: 0.8
+        weight: 0.7
       - field: source
         label: 信息来源
         weight: 0.6
+    evidence:
       - field: key_fact
         label: 关键事实
         weight: 1.0
@@ -130,22 +134,24 @@ field_definitions:
         weight: 0.4
 
   model_watch:
-    required:
+    identity:
       - field: brand
         label: 品牌名称
         weight: 1.0
       - field: model
         label: 车型名称
         weight: 1.0
+    metadata:
       - field: event_date
         label: 事件日期
         weight: 0.8
       - field: event_type
         label: 事件类型
-        weight: 0.8
+        weight: 0.7
       - field: source
         label: 信息来源
         weight: 0.6
+    evidence:
       - field: key_fact
         label: 关键事实
         weight: 1.0
@@ -161,23 +167,24 @@ field_definitions:
         weight: 0.5
 
   buzz_watch:
-    required:
+    identity:
       - field: brand
         label: 品牌名称
         weight: 1.0
       - field: model
         label: 车型名称
         weight: 1.0
-      - field: buzz_volume
-        label: 声量信号
-        weight: 1.0
+    metadata:
       - field: source
         label: 信息来源
         weight: 0.6
+    evidence:
+      - field: buzz_volume
+        label: 声量信号
+        weight: 1.0
       - field: key_fact
         label: 关键事实
         weight: 0.8
-    optional:
       - field: wechat_index
         label: 微信指数
         weight: 0.7
@@ -187,6 +194,7 @@ field_definitions:
       - field: sentiment
         label: 情感倾向
         weight: 0.4
+    optional: []
 
 # ── 初始 Query 模板（缺口驱动改写用）────────────────────
 # 仅用于第 1 轮初始搜索。后续轮次由 gap_analyzer + query_rewriter 生成。

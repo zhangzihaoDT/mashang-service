@@ -61,7 +61,7 @@ brands:
         models: [G6, G7, G9, GX, P7, P7+, X9]
       - name: MONA
         keywords: [MONA, 小鹏]
-        models: [MONA M03, MONA L03]
+        models: [L03, M03]
 
   - catalog: 阿维塔
     keywords: [阿维塔, AVATR]

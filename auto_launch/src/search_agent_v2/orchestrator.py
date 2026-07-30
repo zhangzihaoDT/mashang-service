@@ -107,8 +107,10 @@ def run_agent_loop(request: str, monitor_date: str = None,
     mode = task_config.get("mode", "brand_watch")
     targets = task_config.get("targets", [])
     brand = targets[0].get("brand", "") if targets else ""
-    model = targets[0].get("model", "") if targets else ""
-    display = model if model else brand
+    # model 从 intent 读（task_config 的 _resolve_target_aliases 丢失了具体匹配的 model）
+    intent_targets = intent.get("targets", [])
+    model = intent_targets[0].get("model", "") if intent_targets else ""
+    display = f"{brand} {model}".strip() if model else brand
     time_window = task_config.get("time_window", {})
     days = time_window.get("days", 7)
 
@@ -121,10 +123,11 @@ def run_agent_loop(request: str, monitor_date: str = None,
     config = _load_config()
     profile_name, profile = _select_profile(request, config, cli_profile)
 
-    hard_limits = config.get("search_stop_policy", {}).get("hard_limits", {})
-    max_rounds = cli_max_rounds or profile.get("max_rounds", hard_limits.get("max_rounds", 3))
-    max_queries = cli_max_queries or profile.get("max_queries", hard_limits.get("max_queries", 10))
-    max_calls = cli_max_calls or profile.get("max_provider_calls", hard_limits.get("max_provider_calls", 15))
+    default_limits = config.get("search_stop_policy", {}).get("hard_limits", {})
+    max_rounds = cli_max_rounds or profile.get("max_rounds", default_limits.get("max_rounds", 3))
+    max_queries = cli_max_queries or profile.get("max_queries", default_limits.get("max_queries", 10))
+    max_calls = cli_max_calls or profile.get("max_provider_calls", default_limits.get("max_provider_calls", 15))
+    effective_hard_limits = {"max_rounds": max_rounds, "max_queries": max_queries, "max_provider_calls": max_calls}
     acceptable_evidence = profile.get("acceptable_evidence", ["confirmed"])
 
     field_defs = config.get("field_definitions", {})
@@ -162,7 +165,8 @@ def run_agent_loop(request: str, monitor_date: str = None,
             print(f"[agent] 无新查询生成，停止")
             if not dry_run:
                 final_evidence = evaluate_evidence(
-                    all_results, config, field_defs, evidence_mode, round_num, total_api_calls
+                    all_results, config, field_defs, evidence_mode, round_num, total_api_calls,
+                    effective_hard_limits=effective_hard_limits,
                 )
                 final_gap = analyze_gaps(
                     all_results, task_config,
@@ -201,7 +205,8 @@ def run_agent_loop(request: str, monitor_date: str = None,
 
             # 模拟证据评估以便输出计划
             mock_evidence = evaluate_evidence(
-                all_results, config, field_defs, evidence_mode, round_num, total_api_calls
+                all_results, config, field_defs, evidence_mode, round_num, total_api_calls,
+                effective_hard_limits=effective_hard_limits,
             )
             gap = analyze_gaps(
                 all_results, task_config,
@@ -281,7 +286,8 @@ def run_agent_loop(request: str, monitor_date: str = None,
 
         # ── 5. 证据评估 ──────────────────────────────────
         evidence = evaluate_evidence(
-            all_results, config, field_defs, evidence_mode, round_num, total_api_calls
+            all_results, config, field_defs, evidence_mode, round_num, total_api_calls,
+            effective_hard_limits=effective_hard_limits,
         )
         print(f"\n[evidence] independent_sources={evidence['metrics']['independent_sources']}, "
               f"official_sources={evidence['metrics']['official_sources']}, "
@@ -306,7 +312,8 @@ def run_agent_loop(request: str, monitor_date: str = None,
         if round_num >= max_rounds:
             print(f"\n[agent] 达到最大轮次 ({max_rounds})")
             evidence = evaluate_evidence(
-                all_results, config, field_defs, evidence_mode, round_num, total_api_calls
+                all_results, config, field_defs, evidence_mode, round_num, total_api_calls,
+                effective_hard_limits=effective_hard_limits,
             )
             final_evidence = evidence
             final_gap = analyze_gaps(
