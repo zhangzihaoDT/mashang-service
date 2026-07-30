@@ -1,5 +1,5 @@
 """
-所有权转移分析报告 — 基于 ownership_transfer_analysis.py 动态计算生成 HTML 报告.
+Brand Shipments 报告 — 基于 brand_shipments_analysis.py 动态计算生成 HTML 报告.
 
 输出:
   - outputs/reports/ownership_transfer_2026H1.html
@@ -19,7 +19,7 @@ _REPORT_DIR.mkdir(parents=True, exist_ok=True)
 
 OUTPUT_HTML = str(_REPORT_DIR / 'ownership_transfer_2026H1.html')
 STATIC_PREFIX = '../..'
-ANALYSIS_SCRIPT = _WS / 'research_scripts' / 'ownership_transfer_analysis.py'
+ANALYSIS_SCRIPT = _WS / 'research_scripts' / 'brand_shipments_analysis.py'
 
 
 def run_analysis(**kwargs):

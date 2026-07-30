@@ -11,10 +11,9 @@ Brand Shipments（品牌出货量）分析 — 国内=开票, 出口=出厂发�
   可选排除：--exclude-test-drive 剔除试驾车
 
 用法:
-  python research_scripts/ownership_transfer_analysis.py
-  python research_scripts/ownership_transfer_analysis.py --start-date 2026-01-01 --end-date 2026-06-30
-  python research_scripts/ownership_transfer_analysis.py --exclude-test-drive
-  python research_scripts/ownership_transfer_analysis.py --format json
+  python research_scripts/brand_shipments_analysis.py
+  python research_scripts/brand_shipments_analysis.py --start-date 2026-01-01 --end-date 2026-06-30
+  python research_scripts/brand_shipments_analysis.py --format json
 """
 
 import argparse
@@ -306,7 +305,7 @@ def _build_result_contract(classified: dict, start_date: str, end_date: str) -> 
 
     return {
         "status": "success",
-        "script": "research_scripts/ownership_transfer_analysis.py",
+        "script": "research_scripts/brand_shipments_analysis.py",
         "scope": {
             "data_source": "delivery_inventory.parquet + order_data.parquet",
             "time_window": {"start": start_date, "end": end_date},
