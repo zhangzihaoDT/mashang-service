@@ -1,9 +1,11 @@
-# search_agent_v2.yaml — Auto Launch Agent 搜索闭环配置 v2
+# search_agent_v2.yaml — Auto Launch Agent 搜索闭环配置 v2.2
 #
 # 核心变化：
 #   1. 停止由证据驱动，不由模板数量决定
 #   2. Query 生成由信息缺口驱动，不由固定 stage 决定
-#   3. Profile 控制最大资源边界和可接受的证据等级，不控制具体 Query 数量
+#   3. Profile 控制最大资源边界 + 停止阈值（stop_thresholds）
+#   4. match_keywords 字段覆盖检测 + publication_tier_map 信源类型映射
+#   5. 搜索查询自带 douyin/bilibili 等平台关键词
 #
 # 环境变量（复用 V1）:
 #   VOLC_SEARCH_BASE_URL
@@ -27,15 +29,35 @@ query_profiles:
     max_rounds: 1
     max_queries: 3
     max_provider_calls: 5
-    acceptable_evidence: confirmed       # 必须达到 confirmed 才停止
+    acceptable_evidence: confirmed
     use_case: daily_watch_quick_check
+    stop_thresholds:
+      confirmed:
+        min_independent_sources: 2
+        min_official_sources: 1
+        required_fields_coverage: 0.8
+      fallback:
+        min_independent_sources: 3
+        min_source_tier_types: 2
+        max_shared_origin_ratio: 0.5
+        required_fields_coverage: 0.7
 
   standard_scan:
     max_rounds: 2
     max_queries: 6
     max_provider_calls: 8
-    acceptable_evidence: [confirmed, probable]  # confirmed 或 probable 均可
+    acceptable_evidence: [confirmed, probable]
     use_case: user_open_scan
+    stop_thresholds:
+      confirmed:
+        min_independent_sources: 3
+        min_official_sources: 1
+        required_fields_coverage: 0.8
+      fallback:
+        min_independent_sources: 5
+        min_source_tier_types: 2
+        max_shared_origin_ratio: 0.5
+        required_fields_coverage: 0.7
 
   deep_scan:
     max_rounds: 3
@@ -43,6 +65,16 @@ query_profiles:
     max_provider_calls: 15
     acceptable_evidence: [confirmed, probable]
     use_case: event_deep_dive
+    stop_thresholds:
+      confirmed:
+        min_independent_sources: 5
+        min_official_sources: 2
+        required_fields_coverage: 0.9
+      fallback:
+        min_independent_sources: 8
+        min_source_tier_types: 3
+        max_shared_origin_ratio: 0.4
+        required_fields_coverage: 0.8
 
 # ── 停止策略 ────────────────────────────────────────────
 search_stop_policy:
@@ -217,7 +249,7 @@ field_definitions:
       - field: social_discussion
         label: 社交讨论
         weight: 0.6
-        match_keywords: ["小红书", "微博", "抖音", "讨论", "话题", "社交"]
+        match_keywords: ["小红书", "微博", "抖音", "bilibili", "B站", "讨论", "话题", "社交"]
       - field: sentiment
         label: 情感倾向
         weight: 0.4
@@ -256,7 +288,7 @@ initial_queries:
     - pattern: "{target} 声量 热度 讨论 最近{days}天"
       purpose: social_buzz_check
       source_tier_focus: [tier_3_industry_media, tier_4_social_signal]
-    - pattern: "{target} 关注度 搜索指数 话题 最近{days}天"
+    - pattern: "{target} 关注度 搜索指数 抖音 bilibili 话题 最近{days}天"
       purpose: attention_index_check
       source_tier_focus: [tier_3_industry_media, tier_4_social_signal]
 
@@ -318,7 +350,7 @@ gap_query_rules:
   social_discussion:
     - pattern: "{target} 小红书 微博 讨论 最近{days}天"
       purpose: 查找社交讨论
-    - pattern: "{target} 抖音 话题 播放 最近{days}天"
+    - pattern: "{target} 抖音 bilibili 话题 播放 最近{days}天"
       purpose: 查找短视频热度
   sentiment:
     - pattern: "{target} 口碑 评价 满意度 最近{days}天"
@@ -346,6 +378,69 @@ source_tiers:
     label: 未验证源
     weight: 0.2
     domains: []
+
+# ── 出版物 → 信源类型映射 ──────────────────────────────
+# 搜索 API 返回中文出版物名称（非 URL），
+# 此映射将常见媒体名映射到 source_tier_types 分类（official/media/social/dealer）
+publication_tier_map:
+  # 官方源
+  智己汽车: official
+  IM智己汽车: official
+  MG Motor Europe新闻室: official
+  MG: official
+  # 社交平台
+  微博: social
+  今日头条: social
+  领库: social
+  抖音: social
+  抖音百科: social
+  bilibili: social
+  B站: social
+  NGA玩家社区: social
+  # 汽车垂直媒体
+  凤凰网汽车频道: media
+  手机新浪汽车: media
+  车家号: media
+  汽车之家: media
+  易车: media
+  太平洋汽车: media
+  太平洋号: media
+  汽车头条: media
+  什么值得买社区频道: media
+  汽车网评: media
+  车主之家: media
+  # 综合/财经媒体
+  新浪: media
+  新浪财经: media
+  网易新闻客户端: media
+  腾讯网: media
+  腾讯云: media
+  澎湃新闻: media
+  南方+客户端: media
+  星岛记事: media
+  国际金融报: media
+  京报网: media
+  手机搜狐网: media
+  搜狐汽车: media
+  凤凰网: media
+  ZAKER: media
+  手机网易网: media
+  搜狐: media
+  # 科技/IT媒体
+  CSDN博客: media
+  中关村在线: media
+  卢松松博客: media
+  199IT: media
+  企拓网: media
+  随手查学习工具: media
+  树叶云: media
+  软文轩: media
+  素颜: media
+  # 英文商业/数据
+  Chartmetric: media
+  lunarscrap: media
+  HypeAuditor: media
+  EVMagz: media
 
 # ── 共享起源检测 ───────────────────────────────────────
 shared_origin_detection:

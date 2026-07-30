@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Search Agent v2.3 — 证据驱动的搜索闭环</title>
+<style>
+  :root {
+    --zh-blue: #174A7C;
+    --zh-deep-blue: #06213D;
+    --zh-cyan: #7ECDEB;
+    --zh-light-blue: #DDEFF8;
+    --zh-cream: #FFF9EF;
+    --zh-raccoon-gold: #D79A36;
+    --zh-brown: #7A4A24;
+    --zh-text: #1F2D3D;
+    --zh-muted: #6B7C8F;
+    --zh-card: #FFFFFF;
+    --zh-border: #E2E8F0;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Noto Sans CJK SC", sans-serif;
+    background: var(--zh-cream);
+    color: var(--zh-text);
+    line-height: 1.6;
+    padding: 0;
+  }
+  .header {
+    background: var(--zh-deep-blue);
+    padding: 48px 24px 40px;
+    text-align: center;
+    position: relative;
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--zh-raccoon-gold), var(--zh-cyan), var(--zh-raccoon-gold));
+  }
+  .header h1 {
+    color: #fff;
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+  .header .subtitle {
+    color: var(--zh-cyan);
+    font-size: 14px;
+    margin-top: 8px;
+    opacity: 0.85;
+  }
+  .header .badge {
+    display: inline-block;
+    background: var(--zh-raccoon-gold);
+    color: #fff;
+    font-size: 12px;
+    padding: 2px 12px;
+    border-radius: 12px;
+    margin-top: 12px;
+    font-weight: 500;
+  }
+  .container { max-width: 960px; margin: 0 auto; padding: 32px 20px 80px; }
+  .card {
+    background: var(--zh-card);
+    border-radius: 12px;
+    padding: 28px 32px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    border: 1px solid var(--zh-border);
+  }
+  .card h2 {
+    color: var(--zh-blue);
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--zh-light-blue);
+  }
+  .card h3 {
+    color: var(--zh-text);
+    font-size: 15px;
+    font-weight: 600;
+    margin: 20px 0 10px;
+  }
+  .card h3:first-of-type { margin-top: 0; }
+  .card p { margin-bottom: 12px; color: var(--zh-text); font-size: 14px; }
+  .card ul { margin: 0 0 12px 20px; font-size: 14px; }
+  .card li { margin-bottom: 6px; }
+  code {
+    background: #F1F5F9;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-family: "SF Mono", "Fira Code", monospace;
+    color: #1a1a2e;
+  }
+  pre {
+    background: #F8FAFC;
+    border: 1px solid var(--zh-border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    overflow-x: auto;
+    font-size: 13px;
+    line-height: 1.5;
+    margin: 12px 0;
+    font-family: "SF Mono", "Fira Code", monospace;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    margin: 12px 0;
+  }
+  th, td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--zh-border);
+  }
+  th {
+    background: var(--zh-light-blue);
+    color: var(--zh-blue);
+    font-weight: 600;
+    font-size: 13px;
+  }
+  tr:last-child td { border-bottom: none; }
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    padding: 1px 8px;
+    border-radius: 10px;
+    font-weight: 500;
+  }
+  .tag-blue { background: #DBEAFE; color: #1D4ED8; }
+  .tag-green { background: #D1FAE5; color: #047857; }
+  .tag-amber { background: #FEF3C7; color: #B45309; }
+  .tag-red { background: #FEE2E2; color: #B91C1C; }
+  .tag-purple { background: #EDE9FE; color: #6D28D9; }
+  .flow {
+    display: flex; align-items: center; justify-content: center;
+    flex-wrap: wrap; gap: 6px; margin: 16px 0;
+    font-size: 13px;
+  }
+  .flow-step {
+    background: var(--zh-light-blue);
+    color: var(--zh-blue);
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .flow-arrow { color: var(--zh-muted); font-size: 16px; }
+  .flow-split {
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+  }
+  .flow-split .flow-step { font-size: 12px; padding: 4px 10px; }
+  .highlight-box {
+    background: #FFF9EF;
+    border-left: 3px solid var(--zh-raccoon-gold);
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+    margin: 12px 0;
+    font-size: 14px;
+  }
+  .zh-mark {
+    text-align: center;
+    padding: 32px 0 0;
+    color: var(--zh-muted);
+    font-size: 12px;
+    border-top: 1px solid var(--zh-border);
+    margin-top: 40px;
+  }
+  .zh-mark span { color: var(--zh-raccoon-gold); }
+  @media (max-width: 640px) {
+    .header h1 { font-size: 22px; }
+    .card { padding: 20px; }
+    .flow { font-size: 12px; }
+    .flow-step { padding: 4px 10px; }
+  }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>Search Agent v2.3</h1>
+  <div class="subtitle">证据驱动的 Agent 搜索闭环</div>
+  <div class="badge">v2.3 &mdash; 2026-07-30</div>
+</div>
+<div class="container">
+
+<div class="card">
+  <h2>架构总览</h2>
+  <p>从自然语言搜索请求出发，经过意图编译、证据驱动的迭代搜索、缺口分析、停止决策，最终输出结构化结论和 claim-level 证据评估。</p>
+
+  <div class="flow">
+    <span class="flow-step">意图编译</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step">初始搜索</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step">证据评估</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step">缺口分析</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step">查询改写</span>
+    <span class="flow-arrow">↻</span>
+  </div>
+
+  <div class="highlight-box">
+    <strong>核心分层原则</strong>：<br>
+    <code>Coverage</code> 负责搜索循环控制（搜够没有），<code>Claim</code> 负责结果理解（搜到的东西意味着什么）。两套系统互不污染。
+  </div>
+</div>
+
+<div class="card">
+  <h2>模块说明</h2>
+
+  <h3>意图编译器（<code>search_intent_compiler.py</code>）</h3>
+  <p>将自然语言请求解析为结构化意图：目标车型（brand+model）、监控模式（brand_watch / model_watch / buzz_watch）、时间窗口、事件范围、信源策略。</p>
+
+  <h3>Agent 搜索循环（<code>orchestrator.py</code>）</h3>
+  <p>多轮迭代搜索：Round 1 使用 profile 初始查询模板，后续轮次由缺口分析驱动。</p>
+  <ul>
+    <li>初始查询已自带 <code>抖音 bilibili 话题</code> 等平台关键词</li>
+    <li>支持 <code>--batch</code> 批量多车型 + <code>--fresh</code> 禁止混入缓存</li>
+  </ul>
+
+  <h3>证据评估器（<code>evidencer.py</code>）</h3>
+  <p>field-level 覆盖检测 + 停止决策。包含三部分：</p>
+  <ul>
+    <li><strong>字段覆盖</strong>：三层加权（identity×0 + metadata×0.6 + evidence×0.8），使用 <code>match_keywords</code> 语义匹配</li>
+    <li><strong>信源分类</strong>：<code>publication_tier_map</code> 将中文媒体名映射为 official / media / social</li>
+    <li><strong>停止决策</strong>：按优先级评估 confirmed → fallback → hard_limit → weak_signal，阈值由 profile 的 <code>stop_thresholds</code> 控制</li>
+  </ul>
+
+  <h3>Claim 评估器（<code>claim_evaluator.py</code>）&mdash; <span class="tag tag-green">v2.3 新增</span></h3>
+  <p>将 field-level binary coverage 升级为 claim-level multi-quality evidence。两个正交维度：</p>
+  <ul>
+    <li><code>quality</code>：证据本身是什么（mention_only / qualitative / quantitative / official）</li>
+    <li><code>direction</code>：证据支持还是反对 claim（support / contradict / neutral）</li>
+  </ul>
+  <p>两个聚合维度：</p>
+  <ul>
+    <li><code>value</code>：结论内容（high / low / positive / negative / mixed / present）</li>
+    <li><code>status</code>：确信度（unknown / partial / probable / confirmed）</li>
+  </ul>
+
+  <h3>缺口分析 + 查询改写（<code>gap_analyzer.py</code> + <code>query_rewriter.py</code>）</h3>
+  <p>基于 missing_fields + source_tier_gaps + unresolved_claims 生成下一轮搜索目标。仅 field-level 参与循环控制，claim-level 不干预搜索。</p>
+</div>
+
+<div class="card">
+  <h2>Profile 体系</h2>
+  <p>三个预置 profile，控制资源边界和停止阈值：</p>
+  <table>
+    <tr><th>Profile</th><th>轮次/查询/API</th><th>confirmed 条件</th><th>fallback 条件</th></tr>
+    <tr>
+      <td><span class="tag tag-blue">lite_scan</span></td>
+      <td>1 / 3 / 5</td>
+      <td>≥2源 + ≥1官源 + ≥80%</td>
+      <td>≥3源 + ≥2类型 + ≥70%</td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-amber">standard_scan</span></td>
+      <td>2 / 6 / 8</td>
+      <td>≥3源 + ≥1官源 + ≥80%</td>
+      <td>≥5源 + ≥2类型 + ≥70%</td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-red">deep_scan</span></td>
+      <td>3 / 10 / 15</td>
+      <td>≥5源 + ≥2官源 + ≥90%</td>
+      <td>≥8源 + ≥3类型 + ≥80%</td>
+    </tr>
+  </table>
+</div>
+
+<div class="card">
+  <h2>证据质量体系</h2>
+  <p>每个 <code>EvidenceItem</code> 包含两个正交维度：</p>
+
+  <h3>quality（证据本身是什么）</h3>
+  <table>
+    <tr><th>等级</th><th>含义</th><th>判断依据</th><th>分数</th></tr>
+    <tr><td><span class="tag tag-purple">official</span></td><td>官方源</td><td>publication_tier_map 标记为 official</td><td>+3</td></tr>
+    <tr><td><span class="tag tag-blue">quantitative</span></td><td>有定量数据</td><td>包含数字+单位（"999台"、"34.98万"）</td><td>+2</td></tr>
+    <tr><td><span class="tag tag-green">qualitative</span></td><td>有定性描述</td><td>含程度/情感词（"爆火"、"热议"）</td><td>+1</td></tr>
+    <tr><td><span class="tag tag-amber">mention_only</span></td><td>仅提及</td><td>命中 match_keywords 但无实质细节</td><td>0</td></tr>
+  </table>
+
+  <h3>direction（证据对 claim 的支持关系）</h3>
+  <table>
+    <tr><th>方向</th><th>含义</th></tr>
+    <tr><td><span class="tag tag-green">support</span></td><td>支持 claim 默认值</td></tr>
+    <tr><td><span class="tag tag-red">contradict</span></td><td>含 field 相关的反证关键词（如 sentiment 的"投诉"、"被骂"）</td></tr>
+    <tr><td><span class="tag tag-amber">neutral</span></td><td>中性</td></tr>
+  </table>
+
+  <h3>Claim 聚合</h3>
+  <p>分数制聚合：</p>
+  <table>
+    <tr><th>总分</th><th>status</th><th>说明</th></tr>
+    <tr><td>≥6</td><td><span class="tag tag-green">confirmed</span></td><td>有官方或充足的定量证据</td></tr>
+    <tr><td>3-5</td><td><span class="tag tag-blue">probable</span></td><td>有定量数据支撑</td></tr>
+    <tr><td>1-2</td><td><span class="tag tag-amber">partial</span></td><td>有定性描述</td></tr>
+    <tr><td>0</td><td><span class="tag tag-red">unknown</span></td><td>证据不足</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <h2>v2.3 基线变更</h2>
+  <table>
+    <tr><th>版本</th><th>变更</th></tr>
+    <tr><td>v2.1</td><td>identity 从 intent 继承；source 元数据检测；wechat_index 拆分；coverage 分子/分母/公式输出</td></tr>
+    <tr><td>v2.2</td><td>match_keywords 语义覆盖检测；profile 级 stop_thresholds；publication_tier_map；搜索查询加入 douyin/bilibili 关键词</td></tr>
+    <tr><td><strong>v2.3</strong></td><td><strong>claim_evaluator</strong> 模块：quality/direction 正交维度 + value/status 拆分聚合 + 分数制证据聚合</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <h2>输出结构</h2>
+  <pre>{
+  "user_request": "看看 MG 07 的微信指数和声量热度最近 7 天",
+  "conclusion_status": "confirmed",
+  "stop_reason": "evidence_sufficient",
+  "condition_met": "confirmed",
+  "final_evidence": {
+    "metrics": {
+      "independent_sources": 19,
+      "official_sources": 2,
+      "fields_coverage": 1.0,
+      "coverage_formula": "v2.2",
+      "source_tier_types": ["media", "official", "social"],
+      ...
+    }
+  },
+  "claims": [
+    {
+      "field": "buzz_volume",
+      "label": "声量信号",
+      "value": "high",
+      "status": "confirmed",
+      "evidence_count": 16,
+      "best_quality": "quantitative",
+      "evidence": [
+        {
+          "source": "今日头条",
+          "title": "15万级塞满30万配置!MG 07预售...",
+          "quality": "quantitative",
+          "direction": "support"
+        }
+      ]
+    }
+  ]
+}</pre>
+</div>
+
+<div class="card">
+  <h2>使用方式</h2>
+  <pre># 单车型 deep_scan
+python -m auto_launch.src.search_agent_v2.run \
+  --request "看看 MG 07 的微信指数和声量热度最近 7 天" \
+  --live --fresh --profile deep_scan
+
+# 批量多车型
+python -m auto_launch.src.search_agent_v2.run \
+  --batch --targets "MG 07" "智己 LS9" \
+  --live --fresh --profile deep_scan
+
+# lite_scan 快速问答
+python -m auto_launch.src.search_agent_v2.run \
+  --request "MG 07 声量怎么样" \
+  --live --profile lite_scan</pre>
+</div>
+
+<div class="zh-mark">
+  <span>zihao</span> &middot; Auto Launch &middot; search_agent_v2.3
+</div>
+
+</div>
+</body>
+</html>
