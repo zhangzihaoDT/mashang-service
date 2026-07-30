@@ -73,19 +73,40 @@ def _select_profile(request: str, config: dict, cli_profile: str = None) -> tupl
     return name, profiles.get(name, profiles.get("standard_scan", {}))
 
 
+def _extract_identity_fields(task_config: dict, intent: dict) -> set[str]:
+    """从 intent 提取 identity 字段集合"""
+    fields = {"brand"}
+    targets = intent.get("targets", [])
+    if targets:
+        model = targets[0].get("model", "")
+        if model:
+            fields.add("model")
+    mode = task_config.get("mode", "brand_watch")
+    if mode in ("model_watch", "buzz_watch"):
+        if not targets or not targets[0].get("model"):
+            pass
+        else:
+            fields.add("model")
+    return fields
+
+
 def run_agent_loop(request: str, monitor_date: str = None,
                    cli_profile: str = None, dry_run: bool = True,
                    cli_max_rounds: int = None, cli_max_queries: int = None,
                    cli_max_calls: int = None,
-                   refresh: bool = False, disable_cache: bool = False):
+                   refresh: bool = False, disable_cache: bool = False,
+                   fresh_run: bool = False):
     """执行 Agent 搜索闭环
+
+    Args:
+        fresh_run: 如果为 True，强制刷新缓存（禁止混入旧结果）
 
     Returns:
         final: {
             "user_request": str,
             "monitor_date": str,
             "profile": str,
-            "rounds": list[dict],       # 每轮详情
+            "rounds": list[dict],
             "final_evidence": dict,
             "final_gap": dict,
             "conclusion_status": str | None,
@@ -98,6 +119,10 @@ def run_agent_loop(request: str, monitor_date: str = None,
     if monitor_date is None:
         monitor_date = datetime.now().strftime("%Y-%m-%d")
 
+    if fresh_run:
+        refresh = True
+        disable_cache = True
+
     # ── 1. 编译意图（复用 V1 的意图编译器）───────────────
     with contextlib.redirect_stdout(io.StringIO()):
         intent, task_config, _, query_plan = v1_intent_compile(
@@ -107,14 +132,17 @@ def run_agent_loop(request: str, monitor_date: str = None,
     mode = task_config.get("mode", "brand_watch")
     targets = task_config.get("targets", [])
     brand = targets[0].get("brand", "") if targets else ""
-    # model 从 intent 读（task_config 的 _resolve_target_aliases 丢失了具体匹配的 model）
     intent_targets = intent.get("targets", [])
     model = intent_targets[0].get("model", "") if intent_targets else ""
     display = f"{brand} {model}".strip() if model else brand
     time_window = task_config.get("time_window", {})
     days = time_window.get("days", 7)
 
-    # 检测声量/热度/微信指数类请求，切换到 buzz_watch 初始模板
+    # 提取 identity 字段（从 intent 继承，不用于 coverage 评分）
+    identity_fields = _extract_identity_fields(task_config, intent)
+    print(f"[agent] identity_fields from intent: {identity_fields}")
+
+    # 检测声量/热度/微信指数类请求
     buzz_kw = ["微信指数", "声量", "热度", "讨论度", "搜索指数", "百度指数", "关注度", "口碑"]
     is_buzz = any(kw in request for kw in buzz_kw)
     initial_mode = "buzz_watch" if is_buzz else mode
@@ -147,6 +175,8 @@ def run_agent_loop(request: str, monitor_date: str = None,
 
     if dry_run:
         print(f"[agent] DRY-RUN: 不执行实际搜索")
+    if fresh_run:
+        print(f"[agent] FRESH-RUN: 强制刷新缓存，禁止混入旧结果")
 
     # ── 4. Agent Loop ───────────────────────────────────
     while True:
@@ -157,7 +187,6 @@ def run_agent_loop(request: str, monitor_date: str = None,
         if round_num == 1:
             new_queries = _load_initial_queries(initial_mode, brand, days, display)
         else:
-            # 缺口驱动改写
             query_budget = max(1, max_queries - len(all_queries))
             new_queries = rewrite_queries(gap, task_config, all_queries, round_num, query_budget)
 
@@ -167,6 +196,7 @@ def run_agent_loop(request: str, monitor_date: str = None,
                 final_evidence = evaluate_evidence(
                     all_results, config, field_defs, evidence_mode, round_num, total_api_calls,
                     effective_hard_limits=effective_hard_limits,
+                    identity_from_intent=identity_fields,
                 )
                 final_gap = analyze_gaps(
                     all_results, task_config,
@@ -175,7 +205,6 @@ def run_agent_loop(request: str, monitor_date: str = None,
                 )
             break
 
-        # 硬限制检查
         if len(all_queries) + len(new_queries) > max_queries:
             new_queries = new_queries[:max_queries - len(all_queries)]
         if total_api_calls >= max_calls:
@@ -203,10 +232,10 @@ def run_agent_loop(request: str, monitor_date: str = None,
             }
             rounds_log.append(round_log)
 
-            # 模拟证据评估以便输出计划
             mock_evidence = evaluate_evidence(
                 all_results, config, field_defs, evidence_mode, round_num, total_api_calls,
                 effective_hard_limits=effective_hard_limits,
+                identity_from_intent=identity_fields,
             )
             gap = analyze_gaps(
                 all_results, task_config,
@@ -288,10 +317,12 @@ def run_agent_loop(request: str, monitor_date: str = None,
         evidence = evaluate_evidence(
             all_results, config, field_defs, evidence_mode, round_num, total_api_calls,
             effective_hard_limits=effective_hard_limits,
+            identity_from_intent=identity_fields,
         )
         print(f"\n[evidence] independent_sources={evidence['metrics']['independent_sources']}, "
               f"official_sources={evidence['metrics']['official_sources']}, "
               f"fields_coverage={evidence['metrics']['fields_coverage']}")
+        print(f"[evidence] coverage: {evidence['metrics']['coverage_numerator']} / {evidence['metrics']['coverage_denominator']} ({evidence['metrics']['coverage_formula']})")
         print(f"[evidence] condition_met={evidence['condition_met'] or 'pending'}")
         print(f"[evidence] covered_fields={evidence['covered_fields']}")
         print(f"[evidence] missing_fields={evidence['missing_fields']}")
@@ -308,12 +339,12 @@ def run_agent_loop(request: str, monitor_date: str = None,
             )
             break
 
-        # 硬限制深度检查（如果有剩余 API）
         if round_num >= max_rounds:
             print(f"\n[agent] 达到最大轮次 ({max_rounds})")
             evidence = evaluate_evidence(
                 all_results, config, field_defs, evidence_mode, round_num, total_api_calls,
                 effective_hard_limits=effective_hard_limits,
+                identity_from_intent=identity_fields,
             )
             final_evidence = evidence
             final_gap = analyze_gaps(
@@ -323,7 +354,7 @@ def run_agent_loop(request: str, monitor_date: str = None,
             )
             break
 
-        # ── 6. 缺口分析（为下一轮做准备）───────────────────
+        # ── 6. 缺口分析 ────────────────────────────────────
         gap = analyze_gaps(
             all_results, task_config,
             set(evidence["covered_fields"]), set(evidence["missing_fields"]),
@@ -348,7 +379,6 @@ def run_agent_loop(request: str, monitor_date: str = None,
         "metrics": final_evidence.get("metrics", {}),
     }
 
-    # 打印摘要
     mode_label = "(dry-run)" if dry_run else "(live)"
     print(f"\n{'='*60}")
     print(f"[agent] 搜索闭环完成 {mode_label}")
@@ -362,5 +392,7 @@ def run_agent_loop(request: str, monitor_date: str = None,
     print(f"  独立来源:         {final_evidence['metrics'].get('independent_sources', 0)}")
     print(f"  官方来源:         {final_evidence['metrics'].get('official_sources', 0)}")
     print(f"  字段覆盖率:       {final_evidence['metrics'].get('fields_coverage', 0.0):.0%}")
+    print(f"  覆盖公式:         {final_evidence['metrics'].get('coverage_formula', 'N/A')}")
+    print(f"  覆盖分数:         {final_evidence['metrics'].get('coverage_numerator', 0)} / {final_evidence['metrics'].get('coverage_denominator', 0)}")
 
     return final

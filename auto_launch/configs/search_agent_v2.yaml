@@ -111,89 +111,117 @@ field_definitions:
       - field: brand
         label: 品牌名称
         weight: 1.0
+        match_keywords: []
     metadata:
       - field: event_date
         label: 事件日期
         weight: 0.8
+        match_keywords: ["日期", "时间", "今天", "昨天", "月", "日", "年"]
       - field: event_type
         label: 事件类型
         weight: 0.7
+        match_keywords: ["发布", "预售", "上市", "交付", "活动", "发布会", "亮相", "首秀"]
       - field: source
         label: 信息来源
         weight: 0.6
+        match_keywords: ["来源", "报道", "发布"]
     evidence:
       - field: key_fact
         label: 关键事实
         weight: 1.0
+        match_keywords: ["发布", "预售", "上市", "售罄", "交付", "首发", "公布", "宣布", "开启", "推出"]
     optional:
       - field: official_confirmation
         label: 官方确认
         weight: 0.5
+        match_keywords: ["官方", "公告", "回应", "声明", "官宣"]
       - field: sales_status
         label: 销售状态
         weight: 0.4
+        match_keywords: ["销量", "战报", "订单", "交付", "开售", "售罄"]
 
   model_watch:
     identity:
       - field: brand
         label: 品牌名称
         weight: 1.0
+        match_keywords: []
       - field: model
         label: 车型名称
         weight: 1.0
+        match_keywords: []
     metadata:
       - field: event_date
         label: 事件日期
         weight: 0.8
+        match_keywords: ["日期", "时间", "今天", "昨天", "月", "日", "年"]
       - field: event_type
         label: 事件类型
         weight: 0.7
+        match_keywords: ["发布", "预售", "上市", "交付", "活动", "发布会", "亮相", "首秀"]
       - field: source
         label: 信息来源
         weight: 0.6
+        match_keywords: ["来源", "报道", "发布"]
     evidence:
       - field: key_fact
         label: 关键事实
         weight: 1.0
+        match_keywords: ["发布", "预售", "上市", "售罄", "交付", "首发", "公布", "宣布", "开启", "推出"]
     optional:
       - field: price_change
         label: 价格变化
         weight: 0.5
+        match_keywords: ["价格", "售价", "涨价", "降价", "调价", "预售", "万"]
       - field: official_confirmation
         label: 官方确认
         weight: 0.5
+        match_keywords: ["官方", "公告", "回应", "声明", "官宣"]
       - field: benefit_adjustment
         label: 权益调整
         weight: 0.5
+        match_keywords: ["权益", "优惠", "补贴", "金融", "置换"]
 
   buzz_watch:
     identity:
       - field: brand
         label: 品牌名称
         weight: 1.0
+        match_keywords: []
       - field: model
         label: 车型名称
         weight: 1.0
+        match_keywords: []
     metadata:
       - field: source
         label: 信息来源
         weight: 0.6
+        match_keywords: ["来源", "报道", "发布"]
     evidence:
       - field: buzz_volume
         label: 声量信号
         weight: 1.0
+        match_keywords: ["热度", "声量", "爆火", "刷屏", "热议", "关注度", "火", "疯", "抢空", "卖光"]
       - field: key_fact
         label: 关键事实
         weight: 0.8
-      - field: wechat_index
-        label: 微信指数
+        match_keywords: ["发布", "预售", "上市", "售罄", "交付", "首发", "公布", "宣布", "开启", "推出"]
+      - field: wechat_mention
+        label: 微信提及
+        weight: 0.4
+        match_keywords: ["微信", "公众号", "文章"]
+      - field: wechat_value
+        label: 微信指数值
         weight: 0.7
+        match_keywords: ["微信指数", "指数", "排行榜"]
       - field: social_discussion
         label: 社交讨论
         weight: 0.6
+        match_keywords: ["小红书", "微博", "抖音", "讨论", "话题", "社交"]
       - field: sentiment
         label: 情感倾向
         weight: 0.4
+        match_keywords: ["口碑", "评价", "投诉", "好评", "差评", "满意度", "骂", "赞", "争议"]
     optional: []
 
 # ── 初始 Query 模板（缺口驱动改写用）────────────────────
@@ -277,11 +305,16 @@ gap_query_rules:
       purpose: 查找声量热度
     - pattern: "{target} 关注度 搜索指数 百度指数 最近{days}天"
       purpose: 查找搜索指数
-  wechat_index:
+  wechat_mention:
+    - pattern: "{target} 微信公众号 文章 最近{days}天"
+      purpose: 查找微信提及
+    - pattern: "{target} 微信 讨论 最近{days}天"
+      purpose: 查找微信讨论
+  wechat_value:
     - pattern: "{target} 微信指数 最近{days}天"
-      purpose: 查找微信指数
-    - pattern: "{target} 微信公众号 文章 阅读 最近{days}天"
-      purpose: 查找微信文章热度
+      purpose: 查找微信指数值
+    - pattern: "{target} 微信指数 数据 最近{days}天"
+      purpose: 查找微信指数数据
   social_discussion:
     - pattern: "{target} 小红书 微博 讨论 最近{days}天"
       purpose: 查找社交讨论

@@ -66,8 +66,10 @@ def analyze_gaps(results: list[dict], task_config: dict,
             objectives.append(f"确认{brand}的上市发布状态")
         elif mf == "buzz_volume":
             objectives.append(f"查找{brand}的声量热度数据（微信指数/百度指数/讨论度）")
-        elif mf == "wechat_index":
-            objectives.append(f"查找{brand}的微信指数或微信公众号文章热度")
+        elif mf == "wechat_mention":
+            objectives.append(f"查找{brand}在微信公众号/文章中的提及情况")
+        elif mf == "wechat_value":
+            objectives.append(f"查找{brand}的微信指数具体数值")
         elif mf == "social_discussion":
             objectives.append(f"查找{brand}在小红书、微博、抖音等平台的讨论热度")
         elif mf == "sentiment":

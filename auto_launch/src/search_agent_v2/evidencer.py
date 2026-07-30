@@ -5,6 +5,12 @@
   2. fallback    — 非官方源但多源互证（类型多样、非同源）
   3. hard_limit  — 达到资源上限
   4. weak_signal — 资源耗尽但信号微弱
+
+变更记录:
+  v2.1:
+    - identity 从 intent 继承，不再参与 evidence coverage
+    - source 改为搜索结果元数据检测，不再做正文覆盖
+    - 输出 coverage_numerator / coverage_denominator / coverage_formula
 """
 
 import yaml
@@ -13,6 +19,8 @@ from pathlib import Path
 MODULE_DIR = Path(__file__).resolve().parent
 SERVICE_ROOT = MODULE_DIR.parent.parent
 CONFIG_PATH = SERVICE_ROOT / "configs" / "search_agent_v2.yaml"
+
+COVERAGE_FORMULA_VERSION = "v2.1"
 
 
 def _load_config():
@@ -46,7 +54,6 @@ def _count_official_sources(results: list[dict], config: dict) -> int:
             if any(hint in src for hint in official_domain_hints):
                 official_domains.add(src)
                 continue
-            # 仅通过域名判断是否为官方源，不依赖正文关键字
             if any(src.endswith(f".{d}") for d in ["gov.cn", "12365auto.cn"]):
                 official_domains.add(src)
             if any(kw in src for kw in ["official", "官网", "weixin.qq.com"]):
@@ -54,20 +61,60 @@ def _count_official_sources(results: list[dict], config: dict) -> int:
     return len(official_domains)
 
 
-def _flatten_fields(defs: dict, tier: str = None) -> list:
+def _flatten_fields(defs: dict, tier: str = None,
+                    exclude_identity: bool = False) -> list:
     """展开 identity/metadata/evidence 三层字段为平面列表"""
     fields = []
     tiers = ["identity", "metadata", "evidence"]
     for t in tiers:
         if tier and t != tier:
             continue
+        if exclude_identity and t == "identity":
+            continue
         fields.extend(defs.get(t, []))
     fields.extend(defs.get("optional", []))
     return fields
 
 
-def _coverage_tier_breakdown(results: list[dict], defs: dict) -> dict:
-    """分别计算三层覆盖率"""
+def _check_source_coverage(results: list[dict]) -> bool:
+    """检查是否有任何搜索结果包含非空 source/source_name 元数据"""
+    for r in results:
+        for item in r.get("results", []):
+            src = item.get("source", "") or item.get("source_name", "")
+            if src:
+                return True
+    return False
+
+
+def _field_text_matches(fd: dict, text: str) -> bool:
+    """检查文本是否匹配字段的覆盖检测条件
+
+    检测优先级:
+      1. match_keywords（首选）— 配置中的关键词列表
+      2. label（回退）— 字段显示名称
+      3. field（次回退）— 字段英文名
+    """
+    match_kw = fd.get("match_keywords", [])
+    if match_kw:
+        for kw in match_kw:
+            if kw in text:
+                return True
+    label = fd.get("label", "").lower()
+    if label and label in text:
+        return True
+    field_name = fd.get("field", "")
+    if field_name and field_name in text:
+        return True
+    return False
+
+
+def _coverage_tier_breakdown(results: list[dict], defs: dict,
+                             identity_from_intent: set[str] = None) -> dict:
+    """分别计算三层覆盖率
+
+    identity 层：从 intent 继承，始终 100%
+    """
+    identity_from_intent = identity_from_intent or set()
     breakdown = {}
     for tier in ["identity", "metadata", "evidence"]:
         tier_fields = defs.get(tier, [])
@@ -75,20 +122,31 @@ def _coverage_tier_breakdown(results: list[dict], defs: dict) -> dict:
             breakdown[tier] = {"total": 0, "covered": 0, "weight": 0.0, "covered_weight": 0.0}
             continue
         covered = set()
-        for r in results:
-            for item in r.get("results", []):
-                text = (
-                    (item.get("title", "") or "")
-                    + " " + (item.get("snippet", "") or "")
-                    + " " + (item.get("source", "") or "")
-                ).lower()
-                for fd in tier_fields:
-                    field = fd["field"]
-                    if field in covered:
-                        continue
-                    label = fd.get("label", field).lower()
-                    if field in text or label in text:
-                        covered.add(field)
+
+        if tier == "identity":
+            # identity 从 intent 继承，始终覆盖
+            for fd in tier_fields:
+                field = fd["field"]
+                if field in identity_from_intent:
+                    covered.add(field)
+        else:
+            for r in results:
+                for item in r.get("results", []):
+                    text = (
+                        (item.get("title", "") or "")
+                        + " " + (item.get("snippet", "") or "")
+                    ).lower()
+                    for fd in tier_fields:
+                        field = fd["field"]
+                        if field in covered:
+                            continue
+                        if field == "source":
+                            if _check_source_coverage([r]):
+                                covered.add(field)
+                                continue
+                        if _field_text_matches(fd, text):
+                            covered.add(field)
+
         total_w = sum(fd.get("weight", 1.0) for fd in tier_fields)
         covered_w = sum(fd.get("weight", 1.0) for fd in tier_fields if fd["field"] in covered)
         breakdown[tier] = {
@@ -100,38 +158,54 @@ def _coverage_tier_breakdown(results: list[dict], defs: dict) -> dict:
     return breakdown
 
 
-def _compute_fields_coverage(results: list[dict], field_defs: dict, mode: str) -> tuple[float, set, set]:
+def _compute_fields_coverage(results: list[dict], field_defs: dict, mode: str,
+                             identity_from_intent: set[str] = None) -> tuple:
     """计算字段覆盖率和已覆盖/缺失字段
 
-    三层加权: identity × 1.0, metadata × 0.6, evidence × 0.8
+    三层加权: identity × 0（从 intent 继承，不参与评分）
+              metadata × 0.6, evidence × 0.8
+
+    Returns:
+        (coverage, covered_fields, missing_fields, breakdown, formula_info)
     """
+    identity_from_intent = identity_from_intent or set()
     defs = field_defs.get(mode, {})
-    required = _flatten_fields(defs, tier=None)
+    # 排除 identity 层：identity 不参与 coverage 评分
+    required = _flatten_fields(defs, tier=None, exclude_identity=True)
 
     all_fields = required
     if not all_fields:
-        return 1.0, set(), set()
+        return 1.0, set(), set(), {}, _formula_info(0, 0)
 
     covered = set()
+
+    # identity 字段从 intent 继承
+    for fd in defs.get("identity", []):
+        if fd["field"] in identity_from_intent:
+            covered.add(fd["field"])
+
     for r in results:
         for item in r.get("results", []):
             text = (
                 (item.get("title", "") or "")
                 + " " + (item.get("snippet", "") or "")
-                + " " + (item.get("source", "") or "")
             ).lower()
             for fd in all_fields:
                 field = fd["field"]
                 if field in covered:
                     continue
-                label = fd.get("label", field).lower()
-                if field in text or label in text:
+                # source 字段走元数据检测
+                if field == "source":
+                    if _check_source_coverage(results):
+                        covered.add(field)
+                    continue
+                if _field_text_matches(fd, text):
                     covered.add(field)
 
-    breakdown = _coverage_tier_breakdown(results, defs)
+    breakdown = _coverage_tier_breakdown(results, defs, identity_from_intent)
 
-    # 三层加权: identity=1.0, metadata=0.6, evidence=0.8
-    tier_weights = {"identity": 1.0, "metadata": 0.6, "evidence": 0.8}
+    # 加权：identity=0（不参与评分）, metadata=0.6, evidence=0.8
+    tier_weights = {"identity": 0.0, "metadata": 0.6, "evidence": 0.8}
     total_weighted = 0.0
     covered_weighted = 0.0
     for tier, data in breakdown.items():
@@ -142,13 +216,29 @@ def _compute_fields_coverage(results: list[dict], field_defs: dict, mode: str) -
 
     coverage = covered_weighted / total_weighted if total_weighted > 0 else 0.0
 
+    # 缺失字段（排除 identity，因其始终覆盖）
+    all_non_identity = all_fields
     missing_fields = set()
-    for fd in all_fields:
+    for fd in all_non_identity:
         if fd["field"] not in covered:
             missing_fields.add(fd["field"])
-    covered_fields = {fd["field"] for fd in all_fields if fd["field"] in covered}
+    covered_fields = {fd["field"] for fd in all_non_identity if fd["field"] in covered}
+    # identity 字段也计入 covered
+    for fd in defs.get("identity", []):
+        if fd["field"] in identity_from_intent:
+            covered_fields.add(fd["field"])
 
-    return coverage, covered_fields, missing_fields, breakdown
+    formula_info = _formula_info(covered_weighted, total_weighted)
+
+    return coverage, covered_fields, missing_fields, breakdown, formula_info
+
+
+def _formula_info(covered_weighted: float, total_weighted: float) -> dict:
+    return {
+        "coverage_numerator": round(covered_weighted, 4),
+        "coverage_denominator": round(total_weighted, 4),
+        "coverage_formula": COVERAGE_FORMULA_VERSION,
+    }
 
 
 def _check_high_risk_claims(results: list[dict], config: dict) -> list[str]:
@@ -164,7 +254,7 @@ def _check_high_risk_claims(results: list[dict], config: dict) -> list[str]:
             ).lower()
             for claim in high_risk:
                 if claim in text:
-                    pass  # claim 出现在结果中，需要进一步判断是否解决了
+                    pass
 
     return unresolved
 
@@ -184,7 +274,6 @@ def _calc_shared_origin_ratio(results: list[dict], config: dict) -> float:
 
     shared_count = 0
     seen = set()
-    # 简单近似：以标题前 30 字为指纹，重复计为同源
     for r in results:
         for item in r.get("results", []):
             title = (item.get("title", "") or "").strip()
@@ -221,8 +310,12 @@ def _count_source_tier_types(results: list[dict]) -> set:
 
 def evaluate_evidence(results: list[dict], config: dict, field_defs: dict,
                       mode: str, round_num: int, total_calls: int,
-                      effective_hard_limits: dict = None) -> dict:
+                      effective_hard_limits: dict = None,
+                      identity_from_intent: set[str] = None) -> dict:
     """对当前搜索结果进行证据评估，返回决策建议
+
+    Args:
+        identity_from_intent: 从 intent 继承的身份字段集合（如 {"brand", "model"}）
 
     Returns:
         decision: {
@@ -233,17 +326,18 @@ def evaluate_evidence(results: list[dict], config: dict, field_defs: dict,
             "metrics": {...},
         }
     """
-    # 统一配置路径：支持传入完整 config 或 search_stop_policy 子集
+    identity_from_intent = identity_from_intent or set()
+
     if "search_stop_policy" in config:
         policy = config["search_stop_policy"]
     else:
         policy = config
     hard_limits = effective_hard_limits or policy.get("hard_limits", {})
 
-    # 本轮累计指标
     independent_sources = _count_independent_sources(results)
     official_sources = _count_official_sources(results, config)
-    coverage, covered_fields, missing_fields, tier_breakdown = _compute_fields_coverage(results, field_defs, mode)
+    coverage, covered_fields, missing_fields, tier_breakdown, formula_info = \
+        _compute_fields_coverage(results, field_defs, mode, identity_from_intent)
     unresolved_claims = _check_high_risk_claims(results, config)
     shared_ratio = _calc_shared_origin_ratio(results, config)
     tier_types = _count_source_tier_types(results)
@@ -252,6 +346,9 @@ def evaluate_evidence(results: list[dict], config: dict, field_defs: dict,
         "independent_sources": independent_sources,
         "official_sources": official_sources,
         "fields_coverage": round(coverage, 3),
+        "coverage_numerator": formula_info["coverage_numerator"],
+        "coverage_denominator": formula_info["coverage_denominator"],
+        "coverage_formula": formula_info["coverage_formula"],
         "unresolved_high_risk_claims": len(unresolved_claims),
         "shared_origin_ratio": round(shared_ratio, 3),
         "source_tier_types": sorted(tier_types),
@@ -333,7 +430,6 @@ def evaluate_evidence(results: list[dict], config: dict, field_defs: dict,
                 return decision
 
         elif condition_name == "weak_signal":
-            # 达到 hard_limit 但证据仍不足时自然回落到此项
             if len(results) >= hard_limits.get("max_queries", 10):
                 decision.update({
                     "should_stop": True,
