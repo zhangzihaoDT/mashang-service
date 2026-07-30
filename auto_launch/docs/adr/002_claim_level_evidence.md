@@ -15,73 +15,121 @@
 fields_coverage: {
   buzz_volume: covered,      # ✓
   sentiment: missing,        # ✗
-  ...
 }
 ```
 
 无法回答：
 - 关于某个结论的**证据链**是什么？
-- 单个证据的**可信度**有多高？（是官方数据还是路边社？是定量的还是定性的？）
-- 是否存在**反证**？
+- 单个证据的**可信度**有多高？
+- 证据是**支持还是反对**这个结论？
+- 结论的**具体内容是什么**（声量高/低？口碑正面/负面？）？
 
 ## 方案
 
-将证据评估从 **field-level binary coverage** 升级为 **claim-level multi-quality evidence**：
+将证据评估从 **field-level binary coverage** 升级为 **claim-level multi-quality evidence**。
+
+核心原则：`claim_evaluate` 是纯分析模块，不参与搜索循环控制。
 
 ```
-旧：task → results → overall decision
-新：task → claims → 每个 claim 的 evidence set → 每个 evidence 的 quality → 整体 conclusion
+Coverage 负责: Search Loop
+Claim    负责: Result Understanding
 ```
 
 ### 数据结构
 
+Evidence 有两个正交维度：
+
+```
+quality    — 证据本身是什么（mention_only / qualitative / quantitative / official）
+direction  — 证据对 claim 的支持关系（support / contradict / neutral）
+```
+
 ```python
-EvidenceQuality = missing | mention_only | indirect | qualitative
-                 | quantitative | officially_confirmed | contradicted
+# 证据质量（描述"证据是什么"）
+EvidenceQuality = missing | mention_only
+                 | qualitative        # 有定性描述（程度/情感词）
+                 | quantitative       # 有定量数据（数字+单位）
+                 | official           # 官方源
+
+# 证据方向（描述"证据支持还是反对 claim"）
+EvidenceDirection = support | contradict | neutral
 
 EvidenceItem = {
-  source: str,        # 信源名称
-  title: str,         # 标题
-  snippet: str,       # 正文片段
-  quality: str,       # 证据质量等级
-  claim_field: str    # 关联的 claim 字段
+  source: str,
+  title: str,
+  quality: str,         # mention_only | qualitative | quantitative | official
+  direction: str,       # support | contradict | neutral
+  claim_field: str,
 }
 
 Claim = {
-  field: str,         # 字段名（如 buzz_volume）
-  label: str,         # 中文标签（如 "声量信号"）
-  status: str,        # unknown | partial | probable | confirmed | contradicted
+  field: str,           # 字段名（如 buzz_volume）
+  label: str,           # 中文标签（如 "声量信号"）
+
+  value: str,           # 聚合后的结论内容
+                        #   buzz_volume → high / low
+                        #   sentiment   → positive / negative / mixed
+                        #   key_fact    → present / absent
+                        #   依 evidence 的 direction 分布推断
+
+  status: str,          # 聚合后的确信度
+                        #   unknown  — 证据不足
+                        #   partial  — 有定性证据
+                        #   probable — 有定量证据
+                        #   confirmed— 有官方证据
+
   evidence: [EvidenceItem],
-  summary: str
+  summary: str,
 }
 ```
 
-### 证据质量等级定义
+### 证据质量定义
 
-| 等级 | 含义 | 判断依据 |
-|------|------|----------|
+| quality | 含义 | 判断依据 |
+|---------|------|----------|
 | `missing` | 无相关结果 | 未命中 match_keywords |
-| `mention_only` | 仅提及，无实质信息 | 命中关键词但 snippet 无细节 |
-| `indirect` | 间接相关 | 同一品牌/车型有结果但非该字段 |
+| `mention_only` | 仅提及关键词 | 命中 match_keywords 但无实质细节 |
 | `qualitative` | 有定性描述 | 含程度/情感词（"爆火"、"热议"、"好评"） |
 | `quantitative` | 有定量数据 | 含数字+单位（"999台"、"27分钟"、"34.98万"） |
-| `officially_confirmed` | 官方确认 | 信源为 official 类型 |
-| `contradicted` | 反证 | 含否定词+负面/正面反转（"断崖式下滑" vs "爆火"） |
+| `official` | 官方源 | 信源为 official 类型 |
 
-### Claim 状态聚合规则
+### direction 判断逻辑
 
-| evidence 分布 | claim status |
-|---------------|-------------|
-| 全部 missing | unknown |
-| 有 contradicted | contradicted |
-| 有 officially_confirmed | confirmed |
-| 有 quantitative + 多源 | probable |
-| 有 qualitative + 多源 | partial |
-| 仅 mention_only | unknown |
+对每条 evidence，判断它对 claim 默认值的支持/反对关系：
+
+```
+if 文本含 field 相关的反证关键词 → direction = contradict
+elif 文本支持该 field 的默认值   → direction = support
+else                             → direction = neutral
+```
+
+反证关键词按 field 配置（如 `sentiment` 的 "投诉"、"被骂"；`buzz_volume` 的 "无人问津"、"零关注"），非全局一刀切。
+
+### Claim 状态聚合
+
+```
+score = sum(evidence quality scores)
+
+  official      +3
+  quantitative  +2
+  qualitative  +1
+  mention_only  0
+
+≥6  → confirmed
+3~5 → probable
+1~2 → partial
+0   → unknown
+```
+
+### Claim value 推断
+
+```
+support_count >> contradict_count → value = 默认正面值
+contradict_count >> support_count → value = 负面值
+support ≈ contradict              → value = mixed
+```
 
 ### 集成方式
-
-不重写现有 pipeline，而是在现有 evidence 评估后**追加一层**：
 
 ```
 Search → evaluate_evidence（field-level coverage，原流程不变）
@@ -89,16 +137,16 @@ Search → evaluate_evidence（field-level coverage，原流程不变）
        → gap_analyze → rewrite → loop
 ```
 
-`claim_evaluate` 是纯分析模块，不参与搜索循环控制。它的输出附加在最终返回结果中。
+`claim_evaluate` 不改变停止决策逻辑，claim 状态仅供分析和报告使用。
 
 ### 与现有体系的兼容性
 
 - 保留 field-level `tier_breakdown` 和 `fields_coverage`（向下兼容）
-- `claim_evaluate` 输出作为 `final_evidence` 的 `claims` 子字段
-- 不改变停止决策逻辑，claim 状态仅供分析和报告使用
+- `claim_evaluate` 输出作为最终结果的 `claims` 子字段
+- 不改变搜索循环的停止条件
 
 ### 不做的事
 
-- 不引入 LLM 做 claim extraction（当前用规则）
+- 不引入 LLM 做 claim extraction
 - 不改变搜索循环的停止条件
 - 不替换 field-level coverage

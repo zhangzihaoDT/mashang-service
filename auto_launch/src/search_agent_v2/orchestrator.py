@@ -399,10 +399,11 @@ def run_agent_loop(request: str, monitor_date: str = None,
     for c in claims:
         ev_count = c.get("evidence_count", 0)
         best = c.get("best_quality", "?")
-        print(f"  {c['label']}: {c['status']} (best={best}, evidence={ev_count})")
+        value = c.get("value", "?")
+        print(f"  {c['label']}: value={value}, status={c['status']} (best={best}, n={ev_count})")
         if c.get("evidence"):
             top = c["evidence"][0]
-            print(f"    e.g. [{top['source']}] {top['title'][:50]} quality={top['quality']}")
+            print(f"    e.g. [{top['source']}] quality={top['quality']} dir={top['direction']} → {top['title'][:50]}")
 
     mode_label = "(dry-run)" if dry_run else "(live)"
     print(f"\n{'='*60}")
