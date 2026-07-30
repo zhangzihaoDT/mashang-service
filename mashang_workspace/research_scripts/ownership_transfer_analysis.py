@@ -4,9 +4,10 @@
 
 口径：
   国内 Dispatch = order_binding_time 在窗口内
-  出口 Dispatch = actual_waybill_out_time 在窗口内（出厂进入出口运输链）
+  出口 Dispatch = actual_waybill_out_time 在窗口内（出厂发运）
   业务 Dispatch = 国内 Dispatch ∪ 出口 Dispatch
   同时输出出口离港出关量（out_dc）和出厂→离港中位周期
+  剔除：试驾车（order_type = '试驾车'）
   可选排除：--exclude-test-drive 剔除试驾车
 
 用法:
@@ -68,8 +69,8 @@ def load_data(inv_path: Path, odf_path: Path):
 
 
 def classify_dispatch(df: pd.DataFrame, start_date: str, end_date: str,
-                       exclude_test_drive: bool = False) -> dict:
-    end_excl = pd.Timestamp(end_date) + pd.Timedelta(days=1)
+                       exclude_test_drive: bool = True) -> dict:
+    end_excl = pd.Timestamp(end_date)
     out_dc = pd.to_datetime(df["out_delivery_center_time"], errors="coerce")
     waybill = pd.to_datetime(df["actual_waybill_out_time"], errors="coerce")
     binding = pd.to_datetime(df["order_binding_time"], errors="coerce")
@@ -84,10 +85,7 @@ def classify_dispatch(df: pd.DataFrame, start_date: str, end_date: str,
     is_export = df["bloc_name"].isin(EXPORT_BLOC_NAMES)
 
     # 国内 Dispatch
-    delivery_r = in_h1(delivery)
-    dom_delivery = ~is_export & delivery_r
-    dom_invoice_only = ~is_export & in_h1(invoice) & ~delivery_r
-    dom_dispatch = dom_delivery | dom_invoice_only
+    dom_dispatch = ~is_export & in_h1(invoice)
 
     # 出口 Dispatch
     exp_dispatch = is_export & in_h1(waybill)
@@ -105,20 +103,14 @@ def classify_dispatch(df: pd.DataFrame, start_date: str, end_date: str,
     result["is_export"] = is_export[business]
     result["dispatch_track"] = np.where(result["is_export"], "出口 Dispatch", "国内 Dispatch")
     result["dispatch_event"] = "其他"
-    result.loc[~result["is_export"] & dom_delivery[business], "dispatch_event"] = "交付"
-    result.loc[~result["is_export"] & dom_invoice_only[business], "dispatch_event"] = "开票"
+    result.loc[~result["is_export"], "dispatch_event"] = "开票"
     result.loc[result["is_export"], "dispatch_event"] = "出厂发运"
 
     result["vin_series"] = result["vin"].apply(get_series)
 
-    delivery_ts = pd.to_datetime(result["delivery_date"], errors="coerce")
     invoice_ts = pd.to_datetime(result["invoice_upload_time"], errors="coerce")
     waybill_ts = pd.to_datetime(result["actual_waybill_out_time"], errors="coerce")
-    result["event_time"] = np.where(
-        ~result["is_export"],
-        np.where(result["dispatch_event"] == "交付", delivery_ts, invoice_ts),
-        waybill_ts
-    )
+    result["event_time"] = np.where(~result["is_export"], invoice_ts, waybill_ts)
     result["event_month"] = pd.to_datetime(result["event_time"]).dt.month
 
     as_of = pd.Timestamp(end_date) + pd.Timedelta(days=1)
@@ -133,13 +125,16 @@ def classify_dispatch(df: pd.DataFrame, start_date: str, end_date: str,
     pos_choice = ["已离开 DC", "DC 在库", "VDC→DC 在途", "VDC 内"]
     result["physical_position"] = np.select(pos_cond, pos_choice, default="物流前阶段（未进入 VDC）")
 
-    # 出口仅归属未发运
+    # 出口仅归属未离港
     exp_attr_only = is_export & in_h1(attr) & ~exp_dispatch
     if exclude_test_drive:
         exp_attr_only = exp_attr_only & not_test
 
-    # 出口后续物流统计
-    nt_full = df["order_type"] != "试驾车" if "order_type" in df.columns else True
+    # 出口物流跟踪统计
+    if exclude_test_drive and "order_type" in df.columns:
+        nt_full = df["order_type"] != "试驾车"
+    else:
+        nt_full = True
     exp_base = is_export & nt_full
     exp_wb_h1 = exp_base & in_h1(waybill)
     exp_out_h1 = exp_base & in_h1(out_dc)
@@ -151,12 +146,22 @@ def classify_dispatch(df: pd.DataFrame, start_date: str, end_date: str,
         gap = (out_dc[exp_both_h1] - waybill[exp_both_h1]).dt.total_seconds() / 86400
         median_gap = int(gap.median())
 
+    # 出口仅归属未离港（attr only）
+    exp_attr_only = is_export & in_h1(attr) & ~exp_dispatch
+    if exclude_test_drive:
+        exp_attr_only = exp_attr_only & not_test
+
+    # 双口径补充：real_out_vdc_time（不剔除试驾车）
+    out_vdc_h1 = (pd.to_datetime(df["real_out_vdc_time"], errors="coerce") >= start_date) & \
+                 (pd.to_datetime(df["real_out_vdc_time"], errors="coerce") < end_excl)
+
     return {
         "main": result,
         "exp_attr_only": int(exp_attr_only.sum()),
+        "out_vdc_h1": int(out_vdc_h1.sum()),
         "exp_logistics": {
             "both_h1": int(exp_both_h1.sum()),
-            "waybill_only_h1": int(exp_wb_only_h1.sum()),
+            "wb_only_h1": int(exp_wb_only_h1.sum()),
             "out_dc_only_h1": int(exp_out_only_h1.sum()),
             "out_dc_total": int(exp_out_h1.sum()),
             "waybill_to_out_dc_median_days": median_gap,
@@ -188,32 +193,43 @@ def print_summary(classified: dict, start_date: str, end_date: str):
 
     print(f"{'='*68}")
     print(f"  车辆 Dispatch 分析")
-    print(f"  时间范围：{start_date} ~ {end_date}")
+    print(f"  时间范围：[{start_date}, {end_date})")
     print(f"{'='*68}")
     print()
     print(f"  业务 Dispatch：{_fmt(total)} 辆")
     print(f"  ├─ 国内 Dispatch：{_fmt(n_dom)} 辆")
-    print(f"  │  └─ 口径：交付或开票发生在 H1")
+    print(f"  │  └─ 口径：开票发生在 H1")
     print(f"  └─ 出口 Dispatch：{_fmt(n_exp)} 辆")
-    print(f"     └─ 口径：出厂发运 waybill 发生在 H1")
+    print(f"     └─ 口径：出厂发运（waybill）发生在 H1")
     print()
     print(f"  出口物流跟踪（不计入 Dispatch）")
     print()
-    print(f"  H1 出厂发运                     {_fmt(n_exp)}")
-    print(f"  ├─ H1 内完成离港                {_fmt(log.get('both_h1', 0))}")
-    print(f"  └─ H1 末仍等待离港              {_fmt(log.get('waybill_only_h1', 0))}")
+    both_h1 = log.get('both_h1', 0)
+    wb_only_h1 = log.get('wb_only_h1', 0)
+    out_dc_total = log.get('out_dc_total', 0)
+    out_dc_only_h1 = log.get('out_dc_only_h1', 0)
+    print(f"  H1 出厂发运 {_fmt(n_exp)} 辆中：")
+    print(f"    ├─ H1 内完成离港    {_fmt(both_h1)}")
+    print(f"    └─ H1 末未离港      {_fmt(wb_only_h1)}")
     print()
-    print(f"  H1 离港总量                     {_fmt(log.get('out_dc_total', 0))}")
-    print(f"  ├─ 来自 H1 出厂                 {_fmt(log.get('both_h1', 0))}")
-    print(f"  └─ 来自 H1 前出厂               {_fmt(log.get('out_dc_only_h1', 0))}")
+    print(f"  H1 离港 {_fmt(out_dc_total)} 辆来源：")
+    print(f"    ├─ 来自 H1 出厂     {_fmt(both_h1)}")
+    print(f"    └─ 来自 H1 前出厂   {_fmt(out_dc_only_h1)}")
     print()
     if n_exp_attr > 0:
-        print(f"  出口仅归属未发运                  {_fmt(n_exp_attr)}")
+        print(f"  出口仅归属未发运（不计入）         {_fmt(n_exp_attr)}")
+    print(f"  （以上已剔除试驾车）")
+    out_vdc = classified.get("out_vdc_h1", 0)
+    print()
+    print(f"  Real Out VDC Time（参考口径）")
+    print(f"  H1 内离开 VDC: {_fmt(out_vdc)} 辆")
     median_gap = log.get("waybill_to_out_dc_median_days")
     if median_gap is not None:
         print(f"  出厂→离港中位周期                 {median_gap} 天")
     print()
-    print(f"  注：出口 Dispatch 采用出厂发运作为统计节点，离港通常约 {median_gap} 天后发生，")
+    gap_text = f"约 {median_gap} 天后" if median_gap is not None else "约 75 天后"
+    print(f"  注：出口 Dispatch 采用出厂发运（actual_waybill_out_time）作为统计节点，")
+    print(f"      离港通常 {gap_text} 发生，")
     print(f"      因此 H1 出厂车辆有相当一部分将在 H2 完成离港。")
     print()
 
@@ -250,9 +266,9 @@ def print_summary(classified: dict, start_date: str, end_date: str):
 
     print(f"  数据来源：delivery_inventory.parquet + order_data.parquet")
     print(f"  口径：")
-    print(f"    国内 Dispatch = delivery_date 在窗口内（交付）")
-    print(f"                    ∪ invoice_upload_time 在窗口内且无交付（仅开票）")
+    print(f"    国内 Dispatch = invoice_upload_time 在窗口内（开票）")
     print(f"    出口 Dispatch = actual_waybill_out_time 在窗口内（出厂发运）")
+    print(f"    剔除：试驾车（order_type = '试驾车'）")
     print()
 
 
@@ -294,7 +310,7 @@ def _build_result_contract(classified: dict, start_date: str, end_date: str) -> 
         "scope": {
             "data_source": "delivery_inventory.parquet + order_data.parquet",
             "time_window": {"start": start_date, "end": end_date},
-            "metric_definition": "国内=交付or开票; 出口=出厂发运",
+            "metric_definition": "国内=开票; 出口=出厂发运; 剔除试驾车",
         },
         "result": _to_native({
             "total": stats["total"],
@@ -302,6 +318,7 @@ def _build_result_contract(classified: dict, start_date: str, end_date: str) -> 
             "export_dispatch": stats["exp_total"],
             "export_logistics": classified.get("exp_logistics", {}),
             "export_attr_only_no_dispatch": classified["exp_attr_only"],
+            "real_out_vdc_time_h1": classified.get("out_vdc_h1", 0),
             "by_series": series_list,
             "monthly": monthly_list,
         }),
@@ -311,7 +328,7 @@ def _build_result_contract(classified: dict, start_date: str, end_date: str) -> 
 
 def run(inv_path=DEFAULT_INV, odf_path=DEFAULT_ODF,
         start_date="2026-01-01", end_date="2026-06-30",
-        series=None, exclude_test_drive=False, fmt="text"):
+        series=None, exclude_test_drive=True, fmt="text"):
 
     merged = load_data(inv_path, odf_path)
     classified = classify_dispatch(merged, start_date, end_date,
@@ -336,7 +353,7 @@ def main():
     parser.add_argument("--start-date", default="2026-01-01")
     parser.add_argument("--end-date", default="2026-06-30")
     parser.add_argument("--series", help="车系过滤（逗号分隔，如 LS6,LS9）")
-    parser.add_argument("--exclude-test-drive", action="store_true", help="剔除试驾车")
+    parser.add_argument("--no-exclude-test-drive", action="store_true", help="不剔除试驾车（默认剔除）")
     parser.add_argument("--format", "-f", choices=["text", "json"], default="text")
     args = parser.parse_args()
 
@@ -346,7 +363,7 @@ def main():
         start_date=args.start_date,
         end_date=args.end_date,
         series=args.series,
-        exclude_test_drive=args.exclude_test_drive,
+        exclude_test_drive=not args.no_exclude_test_drive,
         fmt=args.format,
     )
 

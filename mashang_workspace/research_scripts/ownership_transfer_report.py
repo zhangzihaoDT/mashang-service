@@ -1,5 +1,5 @@
 """
-所有权转移分析报告 — 基于 ownership_transfer_analysis.py 输出生成 HTML 报告.
+所有权转移分析报告 — 基于 ownership_transfer_analysis.py 双口径输出生成 HTML 报告.
 
 输出:
   - outputs/reports/ownership_transfer_2026H1.html
@@ -16,254 +16,179 @@ _REPORT_DIR.mkdir(parents=True, exist_ok=True)
 OUTPUT_HTML = str(_REPORT_DIR / 'ownership_transfer_2026H1.html')
 STATIC_PREFIX = '../..'
 
+# ── 核心数据（从 ownership_transfer_analysis.py 2026 H1 输出） ──
+DATA = {
+    'total': 40274,
+    'domestic': 30905,
+    'export': 9369,
+    'real_out_vdc': 40125,
+    'export_logistics': {
+        'both_h1': 2851,
+        'wb_only_h1': 6518,
+        'out_dc_total': 5690,
+        'out_dc_only_h1': 2839,
+    },
+    'median_days': 76,
+    'export_channels': [
+        ('上汽国际', 8424, 'https://www.saicmotor.com'),
+        ('海外', 825, ''),
+        ('亚洲', 54, ''),
+        ('T F Motors (Cambodia)', 23, ''),
+        ('Momenta Europe GmbH.', 14, ''),
+        ('VISION START ME -FZCO', 0, ''),
+    ],
+    'by_series': [
+        ('LS6', 13947, 4186),
+        ('LS9', 7734, 34),
+        ('L6', 2904, 5139),
+        ('LS8', 6110, 2),
+        ('LS7', 135, 8),
+        ('L7', 75, 0),
+    ],
+    'monthly': [
+        (1, 4115, 1867),
+        (2, 2935, 1381),
+        (3, 4333, 712),
+        (4, 6716, 1944),
+        (5, 7477, 1792),
+        (6, 5329, 1673),
+    ],
+}
 
-def _series_breakdown(s: str) -> str:
-    """Convert series count string like 'L6=7, LS6=147' to HTML badges."""
-    if not s:
-        return ''
-    parts = []
-    for item in s.split(', '):
-        k, v = item.split('=')
-        parts.append(f'<span class="series-badge">{k}</span> <strong>{v}</strong>')
-    return ', '.join(parts)
+export_pct = round(DATA['export'] / DATA['total'] * 100, 1)
 
+now = datetime.now().strftime('%Y-%m-%d %H:%M')
 
-def _add_tree_rows(nodes, depth=0, parent_label=None):
-    """Recursively build table rows for the tree structure."""
-    rows = ''
-    for i, node in enumerate(nodes):
-        label, count, series, children = node
-        is_last = i == len(nodes) - 1
-        indent = depth * 24
-        branch_class = ''
-        is_leaf = not children
-
-        if depth == 0:
-            section_class = 'tree-root'
-        elif depth == 1:
-            section_class = 'tree-branch'
-        elif depth == 2:
-            section_class = 'tree-leaf'
-        else:
-            section_class = 'tree-twig'
-
-        if parent_label == '国内' and is_last:
-            section_class += ' row-highlight'
-
-        rows += f'''
-        <tr class="tree-row {section_class}">
-          <td style="padding-left:{indent + 12}px;">
-            <span class="tree-marker">{"└ " if is_leaf and depth > 0 else ""}{label}</span>
-          </td>
-          <td class="num">{count:,}</td>
-          <td class="series-cell">{_series_breakdown(series)}</td>
-        </tr>'''
-
-        if children:
-            rows += _add_tree_rows(children, depth + 1, label)
-    return rows
-
-
-def build_html():
-    now = datetime.now().strftime('%Y-%m-%d %H:%M')
-
-    tree = [
-        ("出口", 9005, "", [
-            ("上汽国际", 8064, "", []),
-            ("海外", 832, "", []),
-            ("亚洲", 69, "", []),
-            ("T F Motors (Cambodia) Co., Ltd", 23, "", []),
-            ("Momenta Europe GmbH.", 14, "", []),
-            ("VISION START ME -FZCO 阿尔巴尼亚", 3, "", []),
-        ]),
-        ("国内", 31082, "", [
-            ("物流前阶段（未进入 VDC）", 230, "L6=7, LS6=147, LS7=1, LS8=57, LS9=18", []),
-            ("VDC 内", 5, "LS6=5", []),
-            ("VDC→DC 在途", 24, "L6=4, LS6=15, LS8=3, LS9=2", []),
-            ("DC 在库", 6759, "L6=550, L7=7, LS6=2566, LS7=18, LS8=2541, LS9=1077", [
-            ]),
-            ("已离开 DC", 24064, "L6=1938, L7=13, LS6=8008, LS7=45, LS8=7182, LS9=6878", [
-                ("消费者交付完成", 23961, "L6=1935, L7=13, LS6=7974, LS7=44, LS8=7150, LS9=6845", []),
-                ("非零售业务交付", 103, "L6=3, LS6=34, LS7=1, LS8=32, LS9=33", []),
-            ]),
-        ]),
-    ]
-
-    series_data = {
-        '总量': 40087,
-        '出口': 9005,
-        '国内': 31082,
-        '消费者交付完成': 23961,
-        '非零售业务交付': 103,
-        'DC 在库': 6759,
-        '物流前阶段': 230,
-    }
-
-    tree_rows = _add_tree_rows(tree)
-
-    total_export = 9005
-    total_domestic = 31082
-    total = 40087
-    delivery_rate = round(23961 / total_domestic * 100, 1)
-    export_pct = round(total_export / total * 100, 1)
-
-    html = f'''<!DOCTYPE html>
+html = f'''<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>车辆流转与交付状态 — 2026 H1</title>
+  <title>车辆 Dispatch 分析报告 — 2026 H1</title>
   <link rel="stylesheet" href="{STATIC_PREFIX}/templates/report_style.css" />
   <style>
-    .tree-table {{
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
+    .dispatch-summary {{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
     }}
-    .tree-table th {{
-      text-align: left;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--zh-deep-blue);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      padding: 10px 12px;
-      background: var(--zh-panel);
-      border-bottom: 2px solid var(--zh-blue);
+    .dispatch-summary .primary {{
+      grid-column: 1 / -1;
     }}
-    .tree-table td {{
-      padding: 8px 12px;
-      border-bottom: 1px solid var(--zh-border);
+    .dispatch-card {{
+      background: var(--zh-card);
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 1px 4px rgba(6,33,61,.06);
     }}
-    .tree-table .num {{
-      font-variant-numeric: tabular-nums;
+    .dispatch-card .value {{
+      font-size: 28px;
       font-weight: 700;
-      text-align: right;
-      width: 100px;
+      color: var(--zh-deep-blue);
     }}
-    .tree-table .series-cell {{
-      width: 280px;
+    .dispatch-card .label {{
       font-size: 13px;
-      color: var(--zh-text);
-    }}
-    .tree-row.tree-root td {{
-      font-weight: 700;
-      color: var(--zh-deep-blue);
-      background: var(--zh-table-section);
-    }}
-    .tree-row.tree-branch td {{
-      font-weight: 600;
-      color: var(--zh-blue);
-    }}
-    .tree-row.tree-leaf td {{
-      color: var(--zh-text);
-    }}
-    .tree-row.tree-twig td {{
       color: var(--zh-muted);
+      margin-top: 2px;
+    }}
+    .dispatch-card .sub {{
+      font-size: 12px;
+      color: var(--zh-muted);
+      margin-top: 4px;
+    }}
+    .dispatch-card.accent {{
+      border-left: 4px solid var(--zh-blue);
+    }}
+    .dispatch-card.export {{
+      border-left: 4px solid var(--zh-raccoon-gold);
+    }}
+    .dispatch-card.reference {{
+      border-left: 4px solid var(--status-warning);
+    }}
+    .logistics-tree {{
+      padding: 12px 0;
+    }}
+    .logistics-node {{
+      padding: 6px 0;
+    }}
+    .logistics-node .lv {{
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--zh-deep-blue);
+    }}
+    .logistics-node .lc {{
       font-size: 13px;
+      color: var(--zh-muted);
+      margin-left: 4px;
     }}
-    .tree-row.row-highlight td {{
-      background: var(--zh-table-section);
+    .logistics-node .indent {{
+      padding-left: 24px;
     }}
-    .tree-row.row-highlight td:first-child {{
-      border-left: 3px solid var(--zh-blue);
+    .logistics-node .indent2 {{
+      padding-left: 48px;
     }}
-    .tree-marker {{
-      font-size: 13px;
-    }}
-    .series-badge {{
+    .pill {{
       display: inline-block;
       font-size: 11px;
       font-weight: 600;
       color: var(--zh-blue);
       background: rgba(23,74,124,.08);
-      padding: 1px 6px;
-      border-radius: 4px;
-      margin-right: 2px;
+      padding: 1px 8px;
+      border-radius: 10px;
+      margin: 2px;
     }}
-    .validation-grid {{
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 16px;
-    }}
-    .validation-card {{
-      background: var(--zh-panel);
-      border-radius: 8px;
-      padding: 16px;
-      font-size: 13px;
-    }}
-    .validation-card h4 {{
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--zh-deep-blue);
-      margin-bottom: 8px;
-    }}
-    .validation-card .check-row {{
+    .series-bar {{
       display: flex;
-      justify-content: space-between;
-      padding: 4px 0;
-      border-bottom: 1px solid var(--zh-border);
-    }}
-    .validation-card .check-row:last-child {{
-      border-bottom: none;
-    }}
-    .validation-card .check-label {{
-      color: var(--zh-muted);
-    }}
-    .validation-card .check-value {{
-      font-weight: 600;
-    }}
-    .check-pass {{ color: var(--status-positive); }}
-    .check-warn {{ color: var(--status-warning); }}
-    .check-fail {{ color: var(--status-negative); }}
-    .flow-card {{
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 16px;
-      background: var(--zh-card);
-      border-radius: 8px;
-      box-shadow: 0 1px 4px rgba(6,33,61,.06);
-      border-left: 4px solid var(--zh-blue);
-    }}
-    .flow-card .flow-label {{
-      font-size: 13px;
-      color: var(--zh-muted);
-    }}
-    .flow-card .flow-value {{
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--zh-deep-blue);
-    }}
-    .flow-chain {{
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      gap: 6px;
       flex-wrap: wrap;
-      padding: 16px 0;
     }}
-    .flow-step {{
-      text-align: center;
+    .bar-cell {{
+      flex: 1;
       min-width: 80px;
     }}
-    .flow-step .step-count {{
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--zh-deep-blue);
-    }}
-    .flow-step .step-label {{
+    .bar-cell .bar-label {{
       font-size: 11px;
       color: var(--zh-muted);
-      margin-top: 2px;
     }}
-    .flow-arrow {{
-      color: var(--zh-border);
-      font-size: 18px;
+    .bar-cell .bar-value {{
+      font-size: 14px;
+      font-weight: 700;
     }}
-    @media (max-width: 640px) {{
-      .flow-chain {{ flex-direction: column; align-items: flex-start; }}
-      .flow-arrow {{ transform: rotate(90deg); }}
+    .bar-track {{
+      height: 6px;
+      background: var(--zh-border);
+      border-radius: 4px;
+      margin-top: 4px;
+      overflow: hidden;
+    }}
+    .bar-fill {{
+      height: 100%;
+      border-radius: 4px;
+      background: var(--zh-blue);
+    }}
+    .bar-fill.gold {{ background: var(--zh-raccoon-gold); }}
+    .monthly-table {{
+      width: 100%;
+      font-size: 13px;
+      border-collapse: collapse;
+    }}
+    .monthly-table th {{
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--zh-deep-blue);
+      padding: 8px 12px;
+      border-bottom: 2px solid var(--zh-blue);
+    }}
+    .monthly-table td {{
+      padding: 6px 12px;
+      border-bottom: 1px solid var(--zh-border);
+    }}
+    .monthly-table .num {{
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
     }}
   </style>
 </head>
@@ -282,127 +207,108 @@ def build_html():
 <main class="container">
 
   <section class="hero">
-    <h1>车辆流转与交付状态分析</h1>
-    <p>2026 H1 · bloc_name 归属口径 · 品牌归属 + 终端完成收窄</p>
+    <h1>车辆 Dispatch 分析</h1>
+    <p>2026 H1 · 双口径：Dispatch（国内=开票 / 出口=出厂发运） + Real Out VDC Time</p>
   </section>
 
-  <div class="summary-grid">
-    <div class="summary-card positive">
-      <div class="summary-value">{total:,}</div>
-      <div class="summary-label">归属总量（含出口）</div>
-      <div class="summary-hint">2026-01-01 ~ 2026-06-30</div>
+  <div class="dispatch-summary">
+    <div class="dispatch-card primary accent">
+      <div class="value">{DATA['total']:,}</div>
+      <div class="label">业务 Dispatch</div>
+      <div class="sub">国内 开票 in H1 = {DATA['domestic']:,} · 出口 waybill in H1 = {DATA['export']:,} · 剔除试驾车</div>
     </div>
-    <div class="summary-card">
-      <div class="summary-value">{total_domestic:,}</div>
-      <div class="summary-label">国内</div>
-      <div class="summary-hint">{export_pct}% 出口</div>
+    <div class="dispatch-card">
+      <div class="value">{DATA['domestic']:,}</div>
+      <div class="label">国内 Dispatch</div>
+      <div class="sub">invoice_upload_time in [2026-01-01, 2026-06-30)</div>
     </div>
-    <div class="summary-card neutral">
-      <div class="summary-value">{total_export:,}</div>
-      <div class="summary-label">出口</div>
-      <div class="summary-hint">上汽国际 + 海外等 6 个渠道</div>
+    <div class="dispatch-card export">
+      <div class="value">{DATA['export']:,}</div>
+      <div class="label">出口 Dispatch</div>
+      <div class="sub">actual_waybill_out_time in 区间 · 占比 {export_pct}%</div>
     </div>
-    <div class="summary-card positive">
-      <div class="summary-value">{23961:,}</div>
-      <div class="summary-label">消费者交付完成</div>
-      <div class="summary-hint">国内交付率 {delivery_rate}%</div>
-    </div>
-    <div class="summary-card warning">
-      <div class="summary-value">{6759:,}</div>
-      <div class="summary-label">DC 在库</div>
-      <div class="summary-hint">LS6={2566} · LS8={2541} · LS9={1077} · L6={550}</div>
-    </div>
-    <div class="summary-card neutral">
-      <div class="summary-value">{103:,}</div>
-      <div class="summary-label">非零售业务交付</div>
-      <div class="summary-hint">占国内已离开 DC 的 0.4%</div>
+    <div class="dispatch-card reference">
+      <div class="value">{DATA['real_out_vdc']:,}</div>
+      <div class="label">Real Out VDC Time（参考口径）</div>
+      <div class="sub">real_out_vdc_time in 区间 · 不含试驾车</div>
     </div>
   </div>
 
   <div class="card">
-    <h2>物流链路总览</h2>
-    <div class="flow-chain">
-      <div class="flow-step">
-        <div class="step-count">{230:,}</div>
-        <div class="step-label">物流前</div>
+    <h2>出口物流跟踪</h2>
+    <div class="logistics-tree">
+      <div class="logistics-node">
+        <span class="lv">{DATA['export']:,}</span><span class="lc">H1 出厂发运（waybill）</span>
       </div>
-      <span class="flow-arrow">→</span>
-      <div class="flow-step">
-        <div class="step-count">{5:,}</div>
-        <div class="step-label">VDC 内</div>
+      <div class="logistics-node indent">
+        <span class="lv">{DATA['export_logistics']['both_h1']:,}</span><span class="lc">├─ H1 内完成离港</span>
       </div>
-      <span class="flow-arrow">→</span>
-      <div class="flow-step">
-        <div class="step-count">{24:,}</div>
-        <div class="step-label">在途</div>
+      <div class="logistics-node indent">
+        <span class="lv">{DATA['export_logistics']['wb_only_h1']:,}</span><span class="lc">└─ H1 末未离港</span>
       </div>
-      <span class="flow-arrow">→</span>
-      <div class="flow-step" style="border-left:3px solid var(--status-warning);padding-left:12px;">
-        <div class="step-count">{6759:,}</div>
-        <div class="step-label">DC 在库</div>
+      <div style="height:8px;"></div>
+      <div class="logistics-node">
+        <span class="lv">{DATA['export_logistics']['out_dc_total']:,}</span><span class="lc">H1 离港总量（out_delivery_center_time）</span>
       </div>
-      <span class="flow-arrow">→</span>
-      <div class="flow-step" style="border-left:3px solid var(--status-positive);padding-left:12px;">
-        <div class="step-count">{24064:,}</div>
-        <div class="step-label">已离开 DC</div>
+      <div class="logistics-node indent">
+        <span class="lv">{DATA['export_logistics']['both_h1']:,}</span><span class="lc">├─ 来自 H1 出厂</span>
       </div>
+      <div class="logistics-node indent">
+        <span class="lv">{DATA['export_logistics']['out_dc_only_h1']:,}</span><span class="lc">└─ 来自 H1 前出厂</span>
+      </div>
+      <div style="height:8px;"></div>
+      <div class="logistics-node">
+        <span class="lv" style="font-size:13px;font-weight:600;">出厂→离港中位周期</span>
+        <span class="lc" style="font-size:15px;font-weight:700;color:var(--zh-raccoon-gold);">{DATA['median_days']} 天</span>
+      </div>
+      <p style="font-size:12px;color:var(--zh-muted);margin-top:8px;">
+        注：出口 Dispatch 采用出厂发运（waybill）作为统计节点，离港通常约 {DATA['median_days']} 天后发生，
+        因此 H1 出厂车辆有相当一部分将在 H2 完成离港。
+      </p>
     </div>
-    <p class="section-note">
-      验算：国内 {total_domestic:,} = 物流前 230 + VDC 内 5 + 在途 24 + DC 在库 6,759 + 已离开 DC 24,064
-    </p>
   </div>
 
   <div class="card">
-    <h2>树形结构 · 车辆归属与流转</h2>
+    <h2>按车系</h2>
+    <div class="series-bar">
+      {''.join(f'''
+      <div class="bar-cell">
+        <div class="bar-label">{s}</div>
+        <div class="bar-value">{d:,}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:{d/DATA['total']*100:.1f}%"></div></div>
+        <div style="font-size:11px;color:var(--zh-muted);">出口 {e:,}</div>
+      </div>''' for s, d, e in DATA['by_series'])}
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>月度趋势</h2>
     <div class="table-wrap">
-      <table class="tree-table">
+      <table class="monthly-table">
         <thead>
           <tr>
-            <th style="width:50%;">节点</th>
-            <th style="width:15%;text-align:right;">数量</th>
-            <th style="width:35%;">车系分布</th>
+            <th>月份</th>
+            <th class="num">国内 Dispatch</th>
+            <th class="num">出口 Dispatch</th>
+            <th class="num">合计</th>
           </tr>
         </thead>
         <tbody>
-          {tree_rows}
+          {''.join(f'''
+          <tr>
+            <td>{m}月</td>
+            <td class="num">{d:,}</td>
+            <td class="num">{e:,}</td>
+            <td class="num">{d+e:,}</td>
+          </tr>''' for m, d, e in DATA['monthly'])}
+          <tr style="font-weight:700;border-top:2px solid var(--zh-blue);">
+            <td>合计</td>
+            <td class="num">{sum(d for _,d,_ in DATA['monthly']):,}</td>
+            <td class="num">{sum(e for _,_,e in DATA['monthly']):,}</td>
+            <td class="num">{DATA['total']:,}</td>
+          </tr>
         </tbody>
       </table>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>非零售业务交付可靠性校验</h2>
-    <div class="validation-grid">
-      <div class="validation-card">
-        <h4>基本数量</h4>
-        <div class="check-row">
-          <span class="check-label">非零售业务交付数量</span>
-          <span class="check-value">103</span>
-        </div>
-        <div class="check-row">
-          <span class="check-label">物流链路完整（7 步全）</span>
-          <span class="check-value check-pass">100 / 103</span>
-        </div>
-        <div class="check-row">
-          <span class="check-label">订单系统零痕迹</span>
-          <span class="check-value check-pass">103 / 103</span>
-        </div>
-      </div>
-      <div class="validation-card">
-        <h4>链路断点</h4>
-        <div class="check-row">
-          <span class="check-label">schedule_effective_time 缺失</span>
-          <span class="check-value check-warn">3</span>
-        </div>
-        <div class="check-row">
-          <span class="check-label">其余 6 步（下线→QC→入库→出库→DC→交付）</span>
-          <span class="check-value check-pass">0 缺失</span>
-        </div>
-        <div class="check-row">
-          <span class="check-label">交付完成</span>
-          <span class="check-value" style="font-weight:600;color:var(--status-positive);">23,961 辆</span>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -418,12 +324,7 @@ def build_html():
           </tr>
         </thead>
         <tbody>
-          <tr><td>上汽国际</td><td class="num">8,064</td><td class="num">89.6%</td></tr>
-          <tr><td>海外</td><td class="num">832</td><td class="num">9.2%</td></tr>
-          <tr><td>亚洲</td><td class="num">69</td><td class="num">0.8%</td></tr>
-          <tr><td>T F Motors (Cambodia) Co., Ltd</td><td class="num">23</td><td class="num">0.3%</td></tr>
-          <tr><td>Momenta Europe GmbH.</td><td class="num">14</td><td class="num">0.2%</td></tr>
-          <tr><td>VISION START ME -FZCO 阿尔巴尼亚</td><td class="num">3</td><td class="num">&lt;0.1%</td></tr>
+          {''.join(f'<tr><td>{c}</td><td class="num">{n:,}</td><td class="num">{n/DATA["export"]*100:.1f}%</td></tr>' for c, n, _ in DATA['export_channels'] if n > 0)}
         </tbody>
       </table>
     </div>
@@ -443,24 +344,24 @@ def build_html():
         <div class="method-icon" style="background:var(--zh-gold-100);color:var(--zh-gold-700);">T</div>
         <div class="method-body">
           <strong>时间窗口</strong><br/>
-          2026-01-01 ~ 2026-06-30（含当日）
+          [2026-01-01, 2026-06-30) · 不含 6/30
         </div>
       </div>
       <div class="method-item">
         <div class="method-icon" style="background:#E8F8FD;color:#2D6FA3;">F</div>
         <div class="method-body">
           <strong>过滤条件</strong><br/>
-          dispatched 模式：剔除上汽销售 + 已绑定待开票 + 有开票无交付记录
+          剔除试驾车（order_type = '试驾车'）
         </div>
       </div>
       <div class="method-item">
         <div class="method-icon" style="background:#F3F6F8;color:#374151;">M</div>
         <div class="method-body">
           <strong>口径定义</strong><br/>
-          消费者交付完成 → 已离开 DC，且存在交付记录<br/>
-          非零售业务交付 → 已离开 DC，未关联消费者订单，但具备实际物流流转记录<br/>
-          已绑定待开票 → 已离开 DC、有订单绑定，无开票且无交付记录（已排除）<br/>
-          待核查 → 已离开 DC、有开票记录但无交付记录（已排除）
+          国内 Dispatch = invoice_upload_time 在窗口内（开票）<br/>
+          出口 Dispatch = actual_waybill_out_time 在窗口内（出厂发运）<br/>
+          业务 Dispatch = 国内 ∪ 出口 · 去重 · VIN 唯一性已校验<br/>
+          参考口径 = real_out_vdc_time 在窗口内
         </div>
       </div>
     </div>
@@ -476,9 +377,5 @@ def build_html():
 </body>
 </html>'''
 
-    Path(OUTPUT_HTML).write_text(html, encoding='utf-8')
-    print(f'报告已生成: {OUTPUT_HTML}')
-
-
-if __name__ == '__main__':
-    build_html()
+Path(OUTPUT_HTML).write_text(html, encoding='utf-8')
+print(f'报告已生成: {OUTPUT_HTML}')
