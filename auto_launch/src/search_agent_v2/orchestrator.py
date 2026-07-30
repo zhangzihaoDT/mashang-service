@@ -38,12 +38,18 @@ def _load_config():
         return yaml.safe_load(f)
 
 
-def _load_initial_queries(mode: str, brand: str, days: int) -> list[dict]:
+def _load_initial_queries(mode: str, brand: str, days: int, display: str = None) -> list[dict]:
     config = _load_config()
     initial = config.get("initial_queries", {}).get(mode, [])
+    if not initial:
+        initial = config.get("initial_queries", {}).get("brand_watch", [])
+    target = display or brand
     queries = []
     for tmpl in initial:
-        q_text = tmpl["pattern"].replace("{brand}", brand).replace("{days}", str(days))
+        q_text = (tmpl["pattern"]
+                  .replace("{brand}", brand)
+                  .replace("{target}", target)
+                  .replace("{days}", str(days)))
         queries.append({
             "query": q_text,
             "purpose": tmpl.get("purpose", ""),
@@ -101,8 +107,15 @@ def run_agent_loop(request: str, monitor_date: str = None,
     mode = task_config.get("mode", "brand_watch")
     targets = task_config.get("targets", [])
     brand = targets[0].get("brand", "") if targets else ""
+    model = targets[0].get("model", "") if targets else ""
+    display = model if model else brand
     time_window = task_config.get("time_window", {})
     days = time_window.get("days", 7)
+
+    # 检测声量/热度/微信指数类请求，切换到 buzz_watch 初始模板
+    buzz_kw = ["微信指数", "声量", "热度", "讨论度", "搜索指数", "百度指数", "关注度", "口碑"]
+    is_buzz = any(kw in request for kw in buzz_kw)
+    initial_mode = "buzz_watch" if is_buzz else mode
 
     # ── 2. 加载配置 ─────────────────────────────────────
     config = _load_config()
@@ -115,6 +128,7 @@ def run_agent_loop(request: str, monitor_date: str = None,
     acceptable_evidence = profile.get("acceptable_evidence", ["confirmed"])
 
     field_defs = config.get("field_definitions", {})
+    evidence_mode = "buzz_watch" if is_buzz else mode
 
     print(f"[agent] profile={profile_name}, max_rounds={max_rounds}, max_queries={max_queries}, max_calls={max_calls}")
     print(f"[agent] acceptable_evidence={acceptable_evidence}")
@@ -138,8 +152,7 @@ def run_agent_loop(request: str, monitor_date: str = None,
         print(f"[agent] Round {round_num}")
 
         if round_num == 1:
-            # 初始搜索
-            new_queries = _load_initial_queries(mode, brand, days)
+            new_queries = _load_initial_queries(initial_mode, brand, days, display)
         else:
             # 缺口驱动改写
             query_budget = max(1, max_queries - len(all_queries))
@@ -149,7 +162,7 @@ def run_agent_loop(request: str, monitor_date: str = None,
             print(f"[agent] 无新查询生成，停止")
             if not dry_run:
                 final_evidence = evaluate_evidence(
-                    all_results, config, field_defs, mode, round_num, total_api_calls
+                    all_results, config, field_defs, evidence_mode, round_num, total_api_calls
                 )
                 final_gap = analyze_gaps(
                     all_results, task_config,
@@ -188,7 +201,7 @@ def run_agent_loop(request: str, monitor_date: str = None,
 
             # 模拟证据评估以便输出计划
             mock_evidence = evaluate_evidence(
-                all_results, config, field_defs, mode, round_num, total_api_calls
+                all_results, config, field_defs, evidence_mode, round_num, total_api_calls
             )
             gap = analyze_gaps(
                 all_results, task_config,
@@ -268,7 +281,7 @@ def run_agent_loop(request: str, monitor_date: str = None,
 
         # ── 5. 证据评估 ──────────────────────────────────
         evidence = evaluate_evidence(
-            all_results, config, field_defs, mode, round_num, total_api_calls
+            all_results, config, field_defs, evidence_mode, round_num, total_api_calls
         )
         print(f"\n[evidence] independent_sources={evidence['metrics']['independent_sources']}, "
               f"official_sources={evidence['metrics']['official_sources']}, "
@@ -293,7 +306,7 @@ def run_agent_loop(request: str, monitor_date: str = None,
         if round_num >= max_rounds:
             print(f"\n[agent] 达到最大轮次 ({max_rounds})")
             evidence = evaluate_evidence(
-                all_results, config, field_defs, mode, round_num, total_api_calls
+                all_results, config, field_defs, evidence_mode, round_num, total_api_calls
             )
             final_evidence = evidence
             final_gap = analyze_gaps(

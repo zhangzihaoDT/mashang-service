@@ -90,8 +90,19 @@ search_stop_policy:
     max_queries: 10
     max_provider_calls: 15
 
-# ── 字段体系 ────────────────────────────────────────────
-# 各目标类型的预定义字段，用于 required_fields_coverage 计算
+# ── 高风险 Claim 定义 ───────────────────────────────────
+high_risk_claims:
+  - price_change            # 价格变动
+  - sales_volume            # 销量数据
+  - launch_status           # 上市状态
+  - partnership             # 合作关系
+  - liability               # 事故责任
+  - recall                  # 召回
+  - range_mileage           # 续航里程
+  - safety_rating           # 安全评级
+
+# ── 声量热度专项字段 ─────────────────────────────────────
+# 适用于搜索微信指数、社交声量、讨论热度等需求
 field_definitions:
   brand_watch:
     required:
@@ -149,16 +160,33 @@ field_definitions:
         label: 权益调整
         weight: 0.5
 
-# ── 高风险 Claim 定义 ───────────────────────────────────
-high_risk_claims:
-  - price_change            # 价格变动
-  - sales_volume            # 销量数据
-  - launch_status           # 上市状态
-  - partnership             # 合作关系
-  - liability               # 事故责任
-  - recall                  # 召回
-  - range_mileage           # 续航里程
-  - safety_rating           # 安全评级
+  buzz_watch:
+    required:
+      - field: brand
+        label: 品牌名称
+        weight: 1.0
+      - field: model
+        label: 车型名称
+        weight: 1.0
+      - field: buzz_volume
+        label: 声量信号
+        weight: 1.0
+      - field: source
+        label: 信息来源
+        weight: 0.6
+      - field: key_fact
+        label: 关键事实
+        weight: 0.8
+    optional:
+      - field: wechat_index
+        label: 微信指数
+        weight: 0.7
+      - field: social_discussion
+        label: 社交讨论
+        weight: 0.6
+      - field: sentiment
+        label: 情感倾向
+        weight: 0.4
 
 # ── 初始 Query 模板（缺口驱动改写用）────────────────────
 # 仅用于第 1 轮初始搜索。后续轮次由 gap_analyzer + query_rewriter 生成。
@@ -183,6 +211,17 @@ initial_queries:
       source_tier_focus: [tier_1_official, tier_3_industry_media]
     - pattern: "{target} 评测 试驾 口碑 最近{days}天"
       purpose: public_reaction
+      source_tier_focus: [tier_3_industry_media, tier_4_social_signal]
+
+  buzz_watch:
+    - pattern: "{target} 微信指数 最近{days}天"
+      purpose: wechat_index_check
+      source_tier_focus: [tier_3_industry_media, tier_4_social_signal]
+    - pattern: "{target} 声量 热度 讨论 最近{days}天"
+      purpose: social_buzz_check
+      source_tier_focus: [tier_3_industry_media, tier_4_social_signal]
+    - pattern: "{target} 关注度 搜索指数 话题 最近{days}天"
+      purpose: attention_index_check
       source_tier_focus: [tier_3_industry_media, tier_4_social_signal]
 
 # ── Gap → Query 改写规则 ────────────────────────────────
@@ -225,6 +264,24 @@ gap_query_rules:
   safety_rating:
     - pattern: "{target} 安全 碰撞 评级 测试"
       purpose: 查找安全评价
+  buzz_volume:
+    - pattern: "{target} 声量 热度 讨论度 最近{days}天"
+      purpose: 查找声量热度
+    - pattern: "{target} 关注度 搜索指数 百度指数 最近{days}天"
+      purpose: 查找搜索指数
+  wechat_index:
+    - pattern: "{target} 微信指数 最近{days}天"
+      purpose: 查找微信指数
+    - pattern: "{target} 微信公众号 文章 阅读 最近{days}天"
+      purpose: 查找微信文章热度
+  social_discussion:
+    - pattern: "{target} 小红书 微博 讨论 最近{days}天"
+      purpose: 查找社交讨论
+    - pattern: "{target} 抖音 话题 播放 最近{days}天"
+      purpose: 查找短视频热度
+  sentiment:
+    - pattern: "{target} 口碑 评价 满意度 最近{days}天"
+      purpose: 查找口碑情感
 
 # ── 信源分级 ────────────────────────────────────────────
 source_tiers:

@@ -37,8 +37,8 @@ def main():
     parser.add_argument("--profile", choices=["lite_scan", "standard_scan", "deep_scan"],
                         help="强制指定搜索 profile（默认根据请求自动推断）")
     parser.add_argument("--dry-run", action="store_true", default=True,
-                        help="dry-run 模式（默认）")
-    parser.add_argument("--live", action="store_true",
+                        help="dry-run 模式（默认，--live 可取消）")
+    parser.add_argument("--live", action="store_false", dest="dry_run",
                         help="实际执行搜索（取消 dry-run）")
     parser.add_argument("--max-rounds", type=int,
                         help="最大搜索轮次（覆盖 profile 设置）")
@@ -61,7 +61,7 @@ def main():
         request=args.request,
         monitor_date=args.date,
         cli_profile=args.profile,
-        dry_run=not args.live,
+        dry_run=args.dry_run,
         cli_max_rounds=args.max_rounds,
         cli_max_queries=args.max_queries,
         cli_max_calls=args.max_calls,

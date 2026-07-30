@@ -61,7 +61,7 @@ brands:
         models: [G6, G7, G9, GX, P7, P7+, X9]
       - name: MONA
         keywords: [MONA, 小鹏]
-        models: [MONA M03]
+        models: [MONA M03, MONA L03]
 
   - catalog: 阿维塔
     keywords: [阿维塔, AVATR]
@@ -114,6 +114,20 @@ brands:
       - name: 领克
         keywords: [领克]
         models: [Z20, 07, 08, 10, 900]
+
+  - catalog: 吉利银河
+    keywords: [吉利, 银河, GEELY, GALAXY]
+    sub_brands:
+      - name: 吉利银河
+        keywords: [吉利银河, 银河]
+        models: [TT, E5, L6, L7, E8]
+
+  - catalog: MG
+    keywords: [MG, 名爵]
+    sub_brands:
+      - name: MG
+        keywords: [MG, 名爵]
+        models: [07, 4, Cyberster, S5, ES5]
 
   - catalog: 埃安
     keywords: [埃安, AION]
