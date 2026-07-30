@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-车辆 Dispatch 分析 — 国内=订单绑定, 出口=出厂发运。
+Brand Shipments（品牌出货量）分析 — 国内=开票, 出口=出厂发运。
 
 口径：
-  国内 Dispatch = order_binding_time 在窗口内
-  出口 Dispatch = actual_waybill_out_time 在窗口内（出厂发运）
-  业务 Dispatch = 国内 Dispatch ∪ 出口 Dispatch
+  国内 Shipments = invoice_upload_time 在窗口内（开票）
+  出口 Shipments = actual_waybill_out_time 在窗口内（出厂发运）
+  Brand Shipments = 国内 Shipments ∪ 出口 Shipments
   同时输出出口离港出关量（out_dc）和出厂→离港中位周期
   剔除：试驾车（order_type = '试驾车'）
   可选排除：--exclude-test-drive 剔除试驾车
@@ -101,7 +101,7 @@ def classify_dispatch(df: pd.DataFrame, start_date: str, end_date: str,
 
     result = df[business].copy()
     result["is_export"] = is_export[business]
-    result["dispatch_track"] = np.where(result["is_export"], "出口 Dispatch", "国内 Dispatch")
+    result["dispatch_track"] = np.where(result["is_export"], "出口 Shipments", "国内 Shipments")
     result["dispatch_event"] = "其他"
     result.loc[~result["is_export"], "dispatch_event"] = "开票"
     result.loc[result["is_export"], "dispatch_event"] = "出厂发运"
@@ -192,17 +192,17 @@ def print_summary(classified: dict, start_date: str, end_date: str):
     assert len(dom_vins | exp_vins) == total, f"VIN 并集 != 合计: {len(dom_vins | exp_vins)} != {total}"
 
     print(f"{'='*68}")
-    print(f"  车辆 Dispatch 分析")
+    print(f"  Brand Shipments（品牌出货量）")
     print(f"  时间范围：[{start_date}, {end_date})")
     print(f"{'='*68}")
     print()
-    print(f"  业务 Dispatch：{_fmt(total)} 辆")
-    print(f"  ├─ 国内 Dispatch：{_fmt(n_dom)} 辆")
+    print(f"  Brand Shipments：{_fmt(total)} 辆")
+    print(f"  ├─ 国内 Shipments：{_fmt(n_dom)} 辆")
     print(f"  │  └─ 口径：开票发生在 H1")
-    print(f"  └─ 出口 Dispatch：{_fmt(n_exp)} 辆")
+    print(f"  └─ 出口 Shipments：{_fmt(n_exp)} 辆")
     print(f"     └─ 口径：出厂发运（waybill）发生在 H1")
     print()
-    print(f"  出口物流跟踪（不计入 Dispatch）")
+    print(f"  出口物流跟踪（不计入 Shipments）")
     print()
     both_h1 = log.get('both_h1', 0)
     wb_only_h1 = log.get('wb_only_h1', 0)
@@ -217,7 +217,7 @@ def print_summary(classified: dict, start_date: str, end_date: str):
     print(f"    └─ 来自 H1 前出厂   {_fmt(out_dc_only_h1)}")
     print()
     if n_exp_attr > 0:
-        print(f"  出口仅归属未发运（不计入）         {_fmt(n_exp_attr)}")
+        print(f"  出口仅归属未发运（不计入 Shipments）{_fmt(n_exp_attr)}")
     print(f"  （以上已剔除试驾车）")
     out_vdc = classified.get("out_vdc_h1", 0)
     print()
@@ -228,7 +228,7 @@ def print_summary(classified: dict, start_date: str, end_date: str):
         print(f"  出厂→离港中位周期                 {median_gap} 天")
     print()
     gap_text = f"约 {median_gap} 天后" if median_gap is not None else "约 75 天后"
-    print(f"  注：出口 Dispatch 采用出厂发运（actual_waybill_out_time）作为统计节点，")
+    print(f"  注：出口 Shipments 采用出厂发运（actual_waybill_out_time）作为统计节点，")
     print(f"      离港通常 {gap_text} 发生，")
     print(f"      因此 H1 出厂车辆有相当一部分将在 H2 完成离港。")
     print()
@@ -247,7 +247,7 @@ def print_summary(classified: dict, start_date: str, end_date: str):
     monthly = df.groupby(["event_month", "dispatch_track"]).size().unstack(fill_value=0)
     print("  月度趋势：")
     header = f"    {'月份':>4s}"
-    for c in ["国内 Dispatch", "出口 Dispatch"]:
+    for c in ["国内 Shipments", "出口 Shipments"]:
         if c in monthly.columns:
             header += f"  {c:>14s}"
     header += f"  {'合计':>8s}"
@@ -255,7 +255,7 @@ def print_summary(classified: dict, start_date: str, end_date: str):
     for month in sorted(monthly.index):
         parts = [f"    {month:>4d}月"]
         row_total = 0
-        for c in ["国内 Dispatch", "出口 Dispatch"]:
+        for c in ["国内 Shipments", "出口 Shipments"]:
             if c in monthly.columns:
                 v = monthly.loc[month, c]
                 parts.append(f"  {_fmt(v):>14s}")
@@ -266,8 +266,8 @@ def print_summary(classified: dict, start_date: str, end_date: str):
 
     print(f"  数据来源：delivery_inventory.parquet + order_data.parquet")
     print(f"  口径：")
-    print(f"    国内 Dispatch = invoice_upload_time 在窗口内（开票）")
-    print(f"    出口 Dispatch = actual_waybill_out_time 在窗口内（出厂发运）")
+    print(f"    国内 Shipments = invoice_upload_time 在窗口内（开票）")
+    print(f"    出口 Shipments = actual_waybill_out_time 在窗口内（出厂发运）")
     print(f"    剔除：试驾车（order_type = '试驾车'）")
     print()
 
@@ -310,7 +310,7 @@ def _build_result_contract(classified: dict, start_date: str, end_date: str) -> 
         "scope": {
             "data_source": "delivery_inventory.parquet + order_data.parquet",
             "time_window": {"start": start_date, "end": end_date},
-            "metric_definition": "国内=开票; 出口=出厂发运; 剔除试驾车",
+            "metric_definition": "Brand Shipments: 国内=开票; 出口=出厂发运; 剔除试驾车",
         },
         "result": _to_native({
             "total": stats["total"],
@@ -347,7 +347,7 @@ def run(inv_path=DEFAULT_INV, odf_path=DEFAULT_ODF,
 
 
 def main():
-    parser = argparse.ArgumentParser(description="车辆 Dispatch 分析（国内=订单绑定, 出口=离港出关∪出厂发运）")
+    parser = argparse.ArgumentParser(description="Brand Shipments（品牌出货量）分析（国内=开票, 出口=出厂发运）")
     parser.add_argument("--inv-path", type=Path, default=DEFAULT_INV)
     parser.add_argument("--odf-path", type=Path, default=DEFAULT_ODF)
     parser.add_argument("--start-date", default="2026-01-01")

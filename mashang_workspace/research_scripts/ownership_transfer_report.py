@@ -75,7 +75,7 @@ def build_html():
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>车辆 Dispatch 分析报告 — 2026 H1</title>
+   <title>Brand Shipments — 2026 H1</title>
   <link rel="stylesheet" href="{STATIC_PREFIX}/templates/report_style.css" />
   <style>
     .dispatch-summary {{
@@ -137,24 +137,24 @@ def build_html():
 <main class="container">
 
   <section class="hero">
-    <h1>车辆 Dispatch 分析</h1>
-    <p>2026 H1 · 双口径：Dispatch（国内=开票 / 出口=出厂发运） + Real Out VDC Time</p>
+    <h1>Brand Shipments（品牌出货量）</h1>
+    <p>2026 H1 · 双口径：国内=开票 / 出口=出厂发运 + Real Out VDC Time</p>
   </section>
 
   <div class="dispatch-summary">
     <div class="dispatch-card primary accent">
       <div class="value">{total:,}</div>
-      <div class="label">业务 Dispatch</div>
+      <div class="label">Brand Shipments</div>
       <div class="sub">国内 开票 in H1 = {domestic:,} · 出口 waybill in H1 = {export:,} · 剔除试驾车</div>
     </div>
     <div class="dispatch-card">
       <div class="value">{domestic:,}</div>
-      <div class="label">国内 Dispatch</div>
+      <div class="label">国内 Shipments</div>
       <div class="sub">invoice_upload_time in [2026-01-01, 2026-06-30)</div>
     </div>
     <div class="dispatch-card export">
       <div class="value">{export:,}</div>
-      <div class="label">出口 Dispatch</div>
+      <div class="label">出口 Shipments</div>
       <div class="sub">actual_waybill_out_time in 区间 · 占比 {export_pct}%</div>
     </div>
     <div class="dispatch-card reference">
@@ -167,7 +167,7 @@ def build_html():
   <div class="card">
     <h2>口径对比说明</h2>
     <p style="font-size:13px;line-height:1.7;color:var(--zh-text);">
-      <strong>业务 Dispatch（{total:,}）</strong> 采用双口径：国内以<strong>开票（invoice）</strong>为统计节点（销售完成标志），
+      <strong>Brand Shipments（{total:,}）</strong> 采用双口径：国内以<strong>开票（invoice）</strong>为统计节点（销售完成标志），
       出口以<strong>出厂发运（waybill）</strong>为统计节点（进入出口运输链的标志）。两者使用不同的业务事件，
       分别贴合国内和出口的实际业务流程，但口径不统一。
     </p>
@@ -227,7 +227,7 @@ def build_html():
         <span class="lc" style="font-size:15px;font-weight:700;color:var(--zh-raccoon-gold);">{log['waybill_to_out_dc_median_days']} 天</span>
       </div>
       <p style="font-size:12px;color:var(--zh-muted);margin-top:8px;">
-        注：出口 Dispatch 采用出厂发运（waybill）作为统计节点，离港通常约 {log['waybill_to_out_dc_median_days']} 天后发生，
+        注：出口 Shipments 采用出厂发运（waybill）作为统计节点，离港通常约 {log['waybill_to_out_dc_median_days']} 天后发生，
         因此 H1 出厂车辆有相当一部分将在 H2 完成离港。
       </p>
     </div>
@@ -253,8 +253,8 @@ def build_html():
         <thead>
           <tr>
             <th>月份</th>
-            <th class="num">国内 Dispatch</th>
-            <th class="num">出口 Dispatch</th>
+            <th class="num">国内 Shipments</th>
+            <th class="num">出口 Shipments</th>
             <th class="num">合计</th>
           </tr>
         </thead>
@@ -323,9 +323,9 @@ def build_html():
         <div class="method-icon" style="background:#F3F6F8;color:#374151;">M</div>
         <div class="method-body">
           <strong>口径定义</strong><br/>
-          国内 Dispatch = invoice_upload_time 在窗口内（开票）<br/>
-          出口 Dispatch = actual_waybill_out_time 在窗口内（出厂发运）<br/>
-          业务 Dispatch = 国内 ∪ 出口 · 去重 · VIN 唯一性已校验<br/>
+          国内 Shipments = invoice_upload_time 在窗口内（开票）<br/>
+          出口 Shipments = actual_waybill_out_time 在窗口内（出厂发运）<br/>
+          Brand Shipments = 国内 ∪ 出口 · 去重 · VIN 唯一性已校验<br/>
           参考口径 = real_out_vdc_time 在窗口内
         </div>
       </div>
