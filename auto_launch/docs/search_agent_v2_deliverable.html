@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Auto Launch Agent 搜索闭环 V2 — 交付报告</title>
+<style>
+  :root {
+    --zh-blue: #174A7C;
+    --zh-deep-blue: #06213D;
+    --zh-cyan: #7ECDEB;
+    --zh-light-blue: #DDEFF8;
+    --zh-cream: #FFF9EF;
+    --zh-raccoon-gold: #D79A36;
+    --zh-brown: #7A4A24;
+    --zh-text: #1F2D3D;
+    --zh-muted: #6B7C8F;
+    --zh-card: #FFFFFF;
+    --zh-border: #E5E9F0;
+    --zh-green: #2E7D5E;
+    --zh-red: #B84A4A;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: var(--zh-cream);
+    color: var(--zh-text);
+    line-height: 1.7;
+    padding: 40px 24px;
+  }
+
+  .container { max-width: 960px; margin: 0 auto; }
+
+  /* ── Header ── */
+  .report-header {
+    text-align: center;
+    padding: 48px 32px 36px;
+    background: white;
+    border-radius: 16px;
+    margin-bottom: 28px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    border-top: 4px solid var(--zh-blue);
+    position: relative;
+  }
+
+  .report-header .brand-mark {
+    position: absolute;
+    top: 16px; right: 20px;
+    font-size: 11px;
+    color: var(--zh-muted);
+    letter-spacing: 0.5px;
+  }
+
+  .report-header h1 {
+    font-size: 26px;
+    color: var(--zh-deep-blue);
+    margin-bottom: 6px;
+    font-weight: 700;
+  }
+
+  .report-header .subtitle {
+    font-size: 15px;
+    color: var(--zh-muted);
+    margin-bottom: 8px;
+  }
+
+  .report-header .meta {
+    font-size: 13px;
+    color: var(--zh-muted);
+  }
+
+  .report-header .meta span { margin: 0 8px; }
+
+  .status-badge {
+    display: inline-block;
+    background: var(--zh-light-blue);
+    color: var(--zh-blue);
+    font-size: 12px;
+    padding: 3px 12px;
+    border-radius: 20px;
+    margin-top: 10px;
+    font-weight: 500;
+  }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--zh-card);
+    border-radius: 12px;
+    padding: 28px 32px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    border: 1px solid var(--zh-border);
+  }
+
+  .card h2 {
+    font-size: 18px;
+    color: var(--zh-blue);
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--zh-light-blue);
+    font-weight: 600;
+  }
+
+  .card h3 {
+    font-size: 15px;
+    color: var(--zh-text);
+    margin: 16px 0 8px;
+    font-weight: 600;
+  }
+
+  .card p { margin-bottom: 10px; }
+
+  /* ── File Tree ── */
+  .file-tree {
+    background: #F8FAFC;
+    border: 1px solid var(--zh-border);
+    border-radius: 8px;
+    padding: 18px 22px;
+    font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace;
+    font-size: 13px;
+    line-height: 2;
+  }
+  .file-tree .dir { color: var(--zh-blue); font-weight: 600; }
+  .file-tree .file { color: var(--zh-text); }
+  .file-tree .comment { color: var(--zh-muted); font-style: italic; font-weight: 400; }
+  .file-tree .indent { padding-left: 24px; }
+  .file-tree .indent2 { padding-left: 48px; }
+
+  /* ── Tables ── */
+  table.diff {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    margin: 8px 0;
+  }
+
+  table.diff th {
+    background: var(--zh-light-blue);
+    color: var(--zh-blue);
+    font-weight: 600;
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 2px solid var(--zh-blue);
+  }
+
+  table.diff td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--zh-border);
+    vertical-align: top;
+  }
+
+  table.diff tr:last-child td { border-bottom: none; }
+
+  .v1-cell { background: #FFF5F5; }
+  .v2-cell { background: #F0FFF4; }
+
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    padding: 1px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+    margin-right: 4px;
+  }
+  .tag-v1 { background: #FED7D7; color: #9B2C2C; }
+  .tag-v2 { background: #C6F6D5; color: #276749; }
+
+  /* ── Stop Policy ── */
+  .policy-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+    margin: 12px 0;
+  }
+
+  .policy-card {
+    border: 1px solid var(--zh-border);
+    border-radius: 10px;
+    padding: 18px;
+    background: #FAFCFE;
+  }
+
+  .policy-card .title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .policy-card .status {
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 2px 10px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+  }
+
+  .status-confirmed { background: #C6F6D5; color: #276749; }
+  .status-probable { background: #FEFCBF; color: #744210; }
+  .status-insufficient { background: #FED7D7; color: #9B2C2C; }
+
+  .policy-card .cond { font-size: 12.5px; color: var(--zh-muted); line-height: 1.8; }
+
+  /* ── CLI ── */
+  pre.cli {
+    background: #1F2937;
+    color: #E2E8F0;
+    padding: 16px 20px;
+    border-radius: 8px;
+    font-family: "SF Mono", "Fira Code", monospace;
+    font-size: 13px;
+    line-height: 1.9;
+    overflow-x: auto;
+    margin: 8px 0;
+  }
+
+  pre.cli .comment { color: #94A3B8; }
+
+  /* ── Architecture ── */
+  .arch-flow {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin: 16px 0;
+  }
+
+  .arch-flow .node {
+    background: var(--zh-light-blue);
+    color: var(--zh-blue);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+  }
+
+  .arch-flow .arrow { color: var(--zh-muted); font-size: 18px; }
+
+  .arch-flow .decision {
+    background: #EDF2F7;
+    border: 1px dashed var(--zh-muted);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 12px;
+    color: var(--zh-muted);
+    text-align: center;
+  }
+
+  /* ── Footer ── */
+  .report-footer {
+    text-align: center;
+    padding: 32px 0 12px;
+    color: var(--zh-muted);
+    font-size: 12px;
+  }
+
+  .report-footer .sig {
+    font-size: 13px;
+    color: var(--zh-raccoon-gold);
+    font-weight: 500;
+    letter-spacing: 1px;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 640px) {
+    body { padding: 16px 12px; }
+    .card { padding: 20px 16px; }
+    .report-header { padding: 32px 16px; }
+    .report-header h1 { font-size: 20px; }
+    .policy-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ────────────────── Header ────────────────── -->
+  <div class="report-header">
+    <div class="brand-mark">ZH</div>
+    <h1>Auto Launch Agent 搜索闭环 V2</h1>
+    <div class="subtitle">证据驱动的搜索管线 · 阶段性交付报告</div>
+    <div class="meta">
+      <span>2026-07-30</span>
+      <span>·</span>
+      <span>v2.0.0</span>
+      <span>·</span>
+      <span>mashang-service/auto_launch</span>
+    </div>
+    <div class="status-badge">✅ 基线已创建 · dry-run 通过</div>
+  </div>
+
+  <!-- ────────────────── Overview ────────────────── -->
+  <div class="card">
+    <h2>核心变化</h2>
+    <p>V2 将搜索管线从<strong>固定模板编排</strong>，重构为<strong>证据驱动的 Agent 闭环</strong>。核心区别：</p>
+
+    <table class="diff">
+      <tr>
+        <th style="width:20%">维度</th>
+        <th style="width:40%">V1 (旧基线)</th>
+        <th style="width:40%">V2 (新基线)</th>
+      </tr>
+      <tr>
+        <td><strong>停止条件</strong></td>
+        <td class="v1-cell">固定模板全部执行完毕即结束</td>
+        <td class="v2-cell">三层证据判断：<span class="tag tag-v2">confirmed</span> / <span class="tag tag-v2">fallback</span> / <span class="tag tag-v2">hard_limit</span></td>
+      </tr>
+      <tr>
+        <td><strong>Query 生成</strong></td>
+        <td class="v1-cell">brand_scout → brand_refine → brand_deep 固定 staged 模板</td>
+        <td class="v2-cell">初始模板 → gap_analyzer 识别缺口 → query_rewriter 动态生成</td>
+      </tr>
+      <tr>
+        <td><strong>Profile</strong></td>
+        <td class="v1-cell">控制固定的 Query 数量</td>
+        <td class="v2-cell">控制最大资源边界 + 可接受证据等级</td>
+      </tr>
+      <tr>
+        <td><strong>信源策略</strong></td>
+        <td class="v1-cell">按层级分类（tier_1 ~ tier_5）</td>
+        <td class="v2-cell">增加共享起源检测 + 信源类型多样性检查</td>
+      </tr>
+      <tr>
+        <td><strong>证据模型</strong></td>
+        <td class="v1-cell">无显式证据评估</td>
+        <td class="v2-cell">独立来源计数 / 官方源计数 / 字段覆盖率 / 高风险 Claim 追踪</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- ────────────────── Pipeline ────────────────── -->
+  <div class="card">
+    <h2>管线架构</h2>
+    <div class="arch-flow">
+      <span class="node">搜索</span>
+      <span class="arrow">→</span>
+      <span class="node">信息缺口<br>识别</span>
+      <span class="arrow">→</span>
+      <span class="node">搜索结果<br>评价</span>
+      <span class="arrow">→</span>
+      <span class="node">动态 Query<br>改写</span>
+      <span class="arrow">→</span>
+      <span class="node">证据充分性<br>判断</span>
+      <span class="arrow">→</span>
+      <span class="decision">不充分 ↻ 继续</span>
+      <span class="arrow">→</span>
+      <span class="node" style="background:#C6F6D5;color:#276749;">充分 ✓ 停止</span>
+    </div>
+    <p style="margin-top:16px;font-size:13px;color:var(--zh-muted);">
+      <code>max_rounds</code> / <code>max_queries</code> / <code>max_provider_calls</code> 仅为安全上限，<br>
+      真正的完成条件：现有证据是否足以支持一个明确、可审计的回答。
+    </p>
+  </div>
+
+  <!-- ────────────────── Stop Policy ────────────────── -->
+  <div class="card">
+    <h2>三层停止策略</h2>
+    <p>按优先级顺序评估——满足任意一级即停止：</p>
+
+    <div class="policy-grid">
+      <div class="policy-card">
+        <div class="title">① confirmed</div>
+        <div class="status status-confirmed">conclusion: confirmed</div>
+        <div class="cond">
+          independent_sources &ge; 2<br>
+          official_sources &ge; 1<br>
+          fields_coverage &ge; 80%<br>
+          unresolved_high_risk_claims = 0
+        </div>
+      </div>
+
+      <div class="policy-card">
+        <div class="title">② fallback</div>
+        <div class="status status-probable">conclusion: probable</div>
+        <div class="cond">
+          independent_sources &ge; 3<br>
+          source_tier_types &ge; 2<br>
+          shared_origin_ratio &le; 50%<br>
+          allowed: media / dealer / social<br>
+          fields_coverage &ge; 70%<br>
+          unresolved_high_risk_claims = 0
+        </div>
+      </div>
+
+      <div class="policy-card">
+        <div class="title">③ hard_limit</div>
+        <div class="status status-insufficient">conclusion: insufficient_evidence</div>
+        <div class="cond">
+          max_rounds exceeded<br>
+          max_queries exceeded<br>
+          max_provider_calls exceeded
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ────────────────── Files ────────────────── -->
+  <div class="card">
+    <h2>新增文件</h2>
+    <p>V1 文件全部未动。新增 7 个文件：</p>
+
+    <div class="file-tree">
+      <div><span class="dir">auto_launch/</span></div>
+      <div class="indent"><span class="dir">configs/</span></div>
+      <div class="indent2"><span class="file">search_agent_v2.yaml</span> <span class="comment">← 新基线配置（停止策略、profile、gap规则）</span></div>
+      <div>&nbsp;</div>
+      <div class="indent"><span class="dir">src/search_agent_v2/</span></div>
+      <div class="indent2"><span class="file">__init__.py</span> <span class="comment">← 模块声明</span></div>
+      <div class="indent2"><span class="file">run.py</span> <span class="comment">← CLI 入口（--live / --profile / --format json）</span></div>
+      <div class="indent2"><span class="file">orchestrator.py</span> <span class="comment">← Agent 搜索主循环</span></div>
+      <div class="indent2"><span class="file">evidencer.py</span> <span class="comment">← 三层停止判断引擎</span></div>
+      <div class="indent2"><span class="file">gap_analyzer.py</span> <span class="comment">← 结构化缺口分析</span></div>
+      <div class="indent2"><span class="file">query_rewriter.py</span> <span class="comment">← 缺口驱动 Query 改写</span></div>
+    </div>
+  </div>
+
+  <!-- ────────────────── Usage ────────────────── -->
+  <div class="card">
+    <h2>用法</h2>
+
+    <pre class="cli"><span class="comment"># dry-run（默认，不调用 API）</span>
+python -m auto_launch.src.search_agent_v2.run \
+  --request "看看极氪最近 7 天都有什么动作"
+
+<span class="comment"># 指定 profile</span>
+python -m auto_launch.src.search_agent_v2.run \
+  --request "深入分析小米最近 30 天传播" --profile deep_scan
+
+<span class="comment"># 正式执行</span>
+python -m auto_launch.src.search_agent_v2.run \
+  --request "看看问界 M7 最近权益变化" --live
+
+<span class="comment"># JSON 输出</span>
+python -m auto_launch.src.search_agent_v2.run \
+  --request "看看极氪最近 7 天" --format json
+
+<span class="comment"># 输出到文件</span>
+python -m auto_launch.src.search_agent_v2.run \
+  --request "看看极氪最近 7 天" --output outputs/agent_run.json</pre>
+  </div>
+
+  <!-- ────────────────── Verification ────────────────── -->
+  <div class="card">
+    <h2>Dry-run 验证结果</h2>
+
+    <table class="diff">
+      <tr>
+        <th>测试场景</th>
+        <th>profile</th>
+        <th>轮次</th>
+        <th>查询量</th>
+        <th>缺口驱动</th>
+        <th>结果</th>
+      </tr>
+      <tr>
+        <td>"看看极氪最近 7 天都有什么动作"</td>
+        <td><span class="tag tag-v2">standard_scan</span></td>
+        <td>2</td>
+        <td>5（3 初始 + 2 gap）</td>
+        <td>event_date, official</td>
+        <td>✅ 达 max_rounds 安全停止</td>
+      </tr>
+      <tr>
+        <td>"深入分析小米 SU7 最近 30 天传播"</td>
+        <td><span class="tag tag-v2">deep_scan</span></td>
+        <td>3</td>
+        <td>5（3 初始 + 2 gap）</td>
+        <td>event_date, official</td>
+        <td>✅ 达 max_rounds 安全停止</td>
+      </tr>
+      <tr>
+        <td>"看看问界 M7 最近权益变化"</td>
+        <td><span class="tag tag-v2">standard_scan</span></td>
+        <td>2</td>
+        <td>5（3 初始 + 2 gap）</td>
+        <td>event_date, official</td>
+        <td>✅ model_watch 模式正常</td>
+      </tr>
+    </table>
+    <p style="font-size:13px;color:var(--zh-muted);margin-top:8px;">
+      * dry-run 模式下 mock 结果为空，证据不达标，均由 hard_limit 安全停止。<br>
+      上线后真实 API 数据将触发 confirmed / fallback 正常停止分支。
+    </p>
+  </div>
+
+  <!-- ────────────────── Profile ────────────────── -->
+  <div class="card">
+    <h2>Profile 对比</h2>
+
+    <table class="diff">
+      <tr>
+        <th>Profile</th>
+        <th>max_rounds</th>
+        <th>max_queries</th>
+        <th>max_calls</th>
+        <th>可接受证据</th>
+        <th>场景</th>
+      </tr>
+      <tr>
+        <td><strong>lite_scan</strong></td>
+        <td>1</td>
+        <td>3</td>
+        <td>5</td>
+        <td>confirmed 仅</td>
+        <td>每日快速检查</td>
+      </tr>
+      <tr>
+        <td><strong>standard_scan</strong></td>
+        <td>2</td>
+        <td>6</td>
+        <td>8</td>
+        <td>confirmed / probable</td>
+        <td>用户开放式扫描</td>
+      </tr>
+      <tr>
+        <td><strong>deep_scan</strong></td>
+        <td>3</td>
+        <td>10</td>
+        <td>15</td>
+        <td>confirmed / probable</td>
+        <td>事件深度复盘</td>
+      </tr>
+    </table>
+
+    <p style="margin-top:12px;">
+      Profile 不再决定「必须执行多少条 Query」，而是控制「最多花多少资源」和「什么级别的证据可以停止」。
+    </p>
+  </div>
+
+  <!-- ────────────────── Key Design ────────────────── -->
+  <div class="card">
+    <h2>关键设计决策</h2>
+
+    <h3>1. 正常停止（confirmed）</h3>
+    <p>官方源 + 多独立源 + 字段覆盖达标 + 无高风险未解决 Claim。结论可输出为 <strong>confirmed</strong>。</p>
+
+    <h3>2. 降级停止（fallback）</h3>
+    <p>当事件本身只出现在非官方渠道（经销商、社交、媒体互证）时允许降级。增加两个防护：</p>
+    <ul style="margin-left:20px;margin-bottom:10px;line-height:2;">
+      <li><code>min_source_tier_types &ge; 2</code> — 避免全部来自同一类别</li>
+      <li><code>max_shared_origin_ratio &le; 50%</code> — 避免多家媒体转载同一稿件被计为独立来源</li>
+    </ul>
+    <p>结论输出为 <strong>probable</strong>。</p>
+
+    <h3>3. 强制终止（hard_limit）</h3>
+    <p>达到资源上限时，返回 <strong>insufficient_evidence</strong>，不强撑 confirmed 结论。</p>
+
+    <h3>4. 缺口驱动改写</h3>
+    <p>每轮搜索后生成结构化 gap（answered_fields / missing_fields / unresolved_claims / next_search_objectives），再由 gap 生成下一轮 Query。每轮 Query 不同、针对性强，而非套固定模板。</p>
+  </div>
+
+  <!-- ────────────────── Footer ────────────────── -->
+  <div class="report-footer">
+    <div class="sig">zihao</div>
+    <p>mashang-service / auto_launch · search_agent_v2 · 阶段性交付</p>
+    <p style="font-size:11px;">V1 文件未动 · 全量变更可追溯 · dry-run 已通过</p>
+  </div>
+
+</div>
+</body>
+</html>

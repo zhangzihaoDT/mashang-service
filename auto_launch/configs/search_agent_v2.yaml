@@ -1,0 +1,256 @@
+# search_agent_v2.yaml — Auto Launch Agent 搜索闭环配置 v2
+#
+# 核心变化：
+#   1. 停止由证据驱动，不由模板数量决定
+#   2. Query 生成由信息缺口驱动，不由固定 stage 决定
+#   3. Profile 控制最大资源边界和可接受的证据等级，不控制具体 Query 数量
+#
+# 环境变量（复用 V1）:
+#   VOLC_SEARCH_BASE_URL
+#   DOUBAO_SEARCH_GLOBAL_API_KEY
+
+api:
+  base_url_env: VOLC_SEARCH_BASE_URL
+  api_key_env: DOUBAO_SEARCH_GLOBAL_API_KEY
+  timeout_seconds: 30
+  max_retries: 3
+  retry_delay_seconds: 2
+
+defaults:
+  language: zh-CN
+  time_range_boost: true
+
+# ── Profile ─────────────────────────────────────────────
+# 三个等级，控制的是最大资源边界和可接受证据等级，不是 Query 数量
+query_profiles:
+  lite_scan:
+    max_rounds: 1
+    max_queries: 3
+    max_provider_calls: 5
+    acceptable_evidence: confirmed       # 必须达到 confirmed 才停止
+    use_case: daily_watch_quick_check
+
+  standard_scan:
+    max_rounds: 2
+    max_queries: 6
+    max_provider_calls: 8
+    acceptable_evidence: [confirmed, probable]  # confirmed 或 probable 均可
+    use_case: user_open_scan
+
+  deep_scan:
+    max_rounds: 3
+    max_queries: 10
+    max_provider_calls: 15
+    acceptable_evidence: [confirmed, probable]
+    use_case: event_deep_dive
+
+# ── 停止策略 ────────────────────────────────────────────
+search_stop_policy:
+  # 条件决策表：按顺序评估，满足即停止
+  decision_table:
+    - condition: confirmed
+      conclusion_status: confirmed
+      stop_reason: evidence_sufficient
+
+    - condition: fallback
+      conclusion_status: probable
+      stop_reason: fallback_acceptable
+
+    - condition: hard_limit
+      conclusion_status: insufficient_evidence
+      stop_reason: hard_limit_reached
+
+    - condition: weak_signal
+      conclusion_status: weak_signal
+      stop_reason: evidence_below_threshold
+
+  conditions:
+    confirmed:
+      min_independent_sources: 2
+      min_official_sources: 1
+      required_fields_coverage: 0.8
+      unresolved_high_risk_claims: 0
+
+    fallback:
+      min_independent_sources: 3
+      min_source_tier_types: 2
+      max_shared_origin_ratio: 0.5
+      allowed_source_tiers:
+        - media
+        - dealer
+        - social
+      required_fields_coverage: 0.7
+      unresolved_high_risk_claims: 0
+
+    hard_limit: {}
+    weak_signal: {}
+
+  hard_limits:
+    max_rounds: 3
+    max_queries: 10
+    max_provider_calls: 15
+
+# ── 字段体系 ────────────────────────────────────────────
+# 各目标类型的预定义字段，用于 required_fields_coverage 计算
+field_definitions:
+  brand_watch:
+    required:
+      - field: brand
+        label: 品牌名称
+        weight: 1.0
+      - field: event_date
+        label: 事件日期
+        weight: 0.8
+      - field: event_type
+        label: 事件类型
+        weight: 0.8
+      - field: source
+        label: 信息来源
+        weight: 0.6
+      - field: key_fact
+        label: 关键事实
+        weight: 1.0
+    optional:
+      - field: official_confirmation
+        label: 官方确认
+        weight: 0.5
+      - field: sales_status
+        label: 销售状态
+        weight: 0.4
+
+  model_watch:
+    required:
+      - field: brand
+        label: 品牌名称
+        weight: 1.0
+      - field: model
+        label: 车型名称
+        weight: 1.0
+      - field: event_date
+        label: 事件日期
+        weight: 0.8
+      - field: event_type
+        label: 事件类型
+        weight: 0.8
+      - field: source
+        label: 信息来源
+        weight: 0.6
+      - field: key_fact
+        label: 关键事实
+        weight: 1.0
+    optional:
+      - field: price_change
+        label: 价格变化
+        weight: 0.5
+      - field: official_confirmation
+        label: 官方确认
+        weight: 0.5
+      - field: benefit_adjustment
+        label: 权益调整
+        weight: 0.5
+
+# ── 高风险 Claim 定义 ───────────────────────────────────
+high_risk_claims:
+  - price_change            # 价格变动
+  - sales_volume            # 销量数据
+  - launch_status           # 上市状态
+  - partnership             # 合作关系
+  - liability               # 事故责任
+  - recall                  # 召回
+  - range_mileage           # 续航里程
+  - safety_rating           # 安全评级
+
+# ── 初始 Query 模板（缺口驱动改写用）────────────────────
+# 仅用于第 1 轮初始搜索。后续轮次由 gap_analyzer + query_rewriter 生成。
+initial_queries:
+  brand_watch:
+    - pattern: "{brand} 最近{days}天 官方 动作 交付 权益 OTA"
+      purpose: overview_discovery
+      source_tier_focus: [tier_1_official, tier_3_industry_media]
+    - pattern: "{brand} 交付 销量 战报 最近{days}天"
+      purpose: sales_milestone_check
+      source_tier_focus: [tier_1_official, tier_3_industry_media]
+    - pattern: "{brand} 权益 价格 限时 最近{days}天"
+      purpose: benefit_price_check
+      source_tier_focus: [tier_1_official, tier_3_industry_media]
+
+  model_watch:
+    - pattern: "{target} 上市 发布 交付 最近{days}天"
+      purpose: lifecycle_status
+      source_tier_focus: [tier_1_official, tier_3_industry_media]
+    - pattern: "{target} 权益 价格 配置 最近{days}天"
+      purpose: product_config_check
+      source_tier_focus: [tier_1_official, tier_3_industry_media]
+    - pattern: "{target} 评测 试驾 口碑 最近{days}天"
+      purpose: public_reaction
+      source_tier_focus: [tier_3_industry_media, tier_4_social_signal]
+
+# ── Gap → Query 改写规则 ────────────────────────────────
+# missing_field → 推荐改写方向
+gap_query_rules:
+  event_date:
+    - pattern: "{target} {event_type} 时间 日期"
+      purpose: 补充事件时间
+  official_confirmation:
+    - pattern: "{target} 官方 回应 公告"
+      purpose: 查找官方确认
+    - pattern: "{target} 官方发布 {event_type}"
+      purpose: 官方发布确认
+  sales_status:
+    - pattern: "{target} 销售 开售 到店 下单"
+      purpose: 查找销售状态
+    - pattern: "{target} 交付 开启 提车"
+      purpose: 查找交付状态
+  price_change:
+    - pattern: "{target} 价格 降价 涨价 调价"
+      purpose: 查找价格变化
+    - pattern: "{target} 售价 官方指导价 调整"
+      purpose: 查找官方价格
+  benefit_adjustment:
+    - pattern: "{target} 权益 优惠 补贴 金融"
+      purpose: 查找权益调整
+    - pattern: "{target} 限时 权益 政策"
+      purpose: 查找限时权益
+  dealer_info:
+    - pattern: "{target} 经销商 到店 优惠"
+      purpose: 查找经销商信息
+    - pattern: "{target} 门店 试驾 体验"
+      purpose: 查找门店动态
+  partnership:
+    - pattern: "{target} 合作 联名 签约"
+      purpose: 查找合作关系
+  launch_status:
+    - pattern: "{target} 上市 发布 发布会"
+      purpose: 查找上市状态
+  safety_rating:
+    - pattern: "{target} 安全 碰撞 评级 测试"
+      purpose: 查找安全评价
+
+# ── 信源分级 ────────────────────────────────────────────
+source_tiers:
+  tier_1_official:
+    label: 官方源
+    weight: 1.0
+    domains: []
+  tier_2_authoritative_media:
+    label: 权威媒体
+    weight: 0.8
+    domains: []
+  tier_3_industry_media:
+    label: 行业媒体
+    weight: 0.6
+    domains: []
+  tier_4_social_signal:
+    label: 社交信号
+    weight: 0.4
+    domains: []
+  tier_5_unverified:
+    label: 未验证源
+    weight: 0.2
+    domains: []
+
+# ── 共享起源检测 ───────────────────────────────────────
+shared_origin_detection:
+  enabled: true
+  cross_share_threshold: 0.7    # 内容相似度超此阈值为同源
+  max_shared_origin_ratio: 0.5  # 同源结果不超过此比例

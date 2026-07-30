@@ -2,7 +2,7 @@
 Brand Shipments 报告 — 基于 brand_shipments_analysis.py 动态计算生成 HTML 报告.
 
 输出:
-  - outputs/reports/ownership_transfer_2026H1.html
+  - outputs/reports/brand_shipments_2026H1.html
 """
 
 import json
@@ -17,7 +17,7 @@ sys.path.insert(0, str(_ROOT))
 _REPORT_DIR = _WS / 'outputs' / 'reports'
 _REPORT_DIR.mkdir(parents=True, exist_ok=True)
 
-OUTPUT_HTML = str(_REPORT_DIR / 'ownership_transfer_2026H1.html')
+OUTPUT_HTML = str(_REPORT_DIR / 'brand_shipments_2026H1.html')
 STATIC_PREFIX = '../..'
 ANALYSIS_SCRIPT = _WS / 'research_scripts' / 'brand_shipments_analysis.py'
 
