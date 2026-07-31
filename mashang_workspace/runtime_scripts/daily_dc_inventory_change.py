@@ -1,24 +1,29 @@
 #!/usr/bin/env python
 """
-单日 DC 库存变动分析 — 解释库存为什么从昨天变成了今天。
+DC 库存变动分析 — 解释库存为什么从昨天变成了今天。
 
 核心价值不是记录当天发生了什么，而是对账：
   库存变化 = 入库 - 出库
   开票数 ≠ 库存减少（受入库对冲、已出库补开票、出库未开票影响）
 
+支持单日分析或时间范围汇总。
+
 用法:
     python runtime_scripts/daily_dc_inventory_change.py
     python runtime_scripts/daily_dc_inventory_change.py --date 2026-07-28
+    python runtime_scripts/daily_dc_inventory_change.py --start-date 2026-07-28 --end-date 2026-07-30
     python runtime_scripts/daily_dc_inventory_change.py --format json
     python runtime_scripts/daily_dc_inventory_change.py --date 2026-07-28 --format json --output outputs/tables/
 """
 
-import sys, argparse, json
+import sys, argparse, json, os, requests, time
 from pathlib import Path
+from dotenv import load_dotenv
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT))
 _WS_ROOT = Path(__file__).resolve().parents[1]
+load_dotenv(REPO_ROOT / ".env")
 if str(_WS_ROOT) not in sys.path:
     sys.path.insert(0, str(_WS_ROOT))
 
@@ -43,11 +48,18 @@ MODELS = ["LS6", "LS8", "LS9", "L6", "LS7", "L7"]
 
 
 def parse_args():
-    p = argparse.ArgumentParser(description="单日 DC 库存变动分析")
+    p = argparse.ArgumentParser(description="DC 库存变动分析 — 单日或时间范围")
     p.add_argument("--date", type=str, default=None, help="目标日期 (YYYY-MM-DD，默认昨天)")
+    p.add_argument("--start-date", type=str, default=None, help="开始日期 (YYYY-MM-DD)")
+    p.add_argument("--end-date", type=str, default=None, help="结束日期 (YYYY-MM-DD)")
     p.add_argument("--output", type=str, help="输出目录")
     p.add_argument("--format", type=str, default="terminal", choices=["terminal", "json"])
-    return p.parse_args()
+    p.add_argument("--webhook", type=str, default=None, nargs="?", const="env",
+                    help="发送到飞书 webhook（传值或默认从 FS_WEBHOOK_URL 读取）")
+    args = p.parse_args()
+    if args.start_date and not args.end_date:
+        p.error("--start-date 需要配合 --end-date 使用")
+    return args
 
 
 def analyze_day(target_date: str) -> dict:
@@ -91,6 +103,11 @@ def analyze_day(target_date: str) -> dict:
 
     exited["series"] = exited["vin"].str[:5].map(SERIES_MAP).fillna("其他")
     exit_by_model = {m: int((exited["series"] == m).sum()) for m in MODELS if (exited["series"] == m).sum() > 0}
+
+    # ── 库存车型拆解 ──
+    domestic["series"] = domestic["vin"].str[:5].map(SERIES_MAP).fillna("其他")
+    curr_inventory = domestic[domestic["vin"].astype(str).isin(curr_set)]
+    inventory_by_model = {m: int((curr_inventory["series"] == m).sum()) for m in MODELS if (curr_inventory["series"] == m).sum() > 0}
 
 
 
@@ -142,6 +159,7 @@ def analyze_day(target_date: str) -> dict:
             "exits_by_outdc_driven": exit_outdc_driven,
             "exits_only_invoice_no_outdc": exit_only_invoice_no_outdc,
             "exits_by_model": exit_by_model,
+            "by_model": inventory_by_model,
         },
         "invoice": {
             "raw_total": raw_total,
@@ -156,6 +174,112 @@ def analyze_day(target_date: str) -> dict:
             "exit_without_invoice": exit_no_invoice,
         },
     }
+
+
+def analyze_range(start_date: str, end_date: str) -> dict:
+    days = []
+    start = pd.Timestamp(start_date).normalize()
+    end = pd.Timestamp(end_date).normalize()
+    cursor = start
+    while cursor <= end:
+        days.append(analyze_day(cursor.strftime("%Y-%m-%d")))
+        cursor += timedelta(days=1)
+
+    inv_first = days[0]["inventory"]["prev_day"]
+    inv_last = days[-1]["inventory"]["curr_day"]
+    total_arrivals = sum(d["inventory"]["arrivals"] for d in days)
+    total_exits = sum(d["inventory"]["exits_total"] for d in days)
+    total_invoice = sum(d["invoice"]["raw_total"] for d in days)
+    total_prior_exit = sum(d["reconciliation"]["invoice_vins_with_prior_exit"] for d in days)
+    total_exit_no_invoice = sum(d["reconciliation"]["exit_without_invoice"] for d in days)
+
+    exit_by_model = {}
+    for d in days:
+        for m, c in d["inventory"].get("exits_by_model", {}).items():
+            exit_by_model[m] = exit_by_model.get(m, 0) + c
+
+    invoice_by_model = {}
+    for d in days:
+        for m, info in d["invoice"].get("by_model", {}).items():
+            if m not in invoice_by_model:
+                invoice_by_model[m] = {"total": 0, "user_car": 0}
+            invoice_by_model[m]["total"] += info["total"]
+            invoice_by_model[m]["user_car"] += info["user_car"]
+
+    inventory_by_model = days[-1]["inventory"].get("by_model", {})
+
+    return {
+        "start_date": start_date,
+        "end_date": end_date,
+        "days": days,
+        "summary": {
+            "inventory_start": inv_first,
+            "inventory_end": inv_last,
+            "net_change": inv_last - inv_first,
+            "total_arrivals": total_arrivals,
+            "total_exits": total_exits,
+            "total_invoice": total_invoice,
+            "invoice_vins_with_prior_exit": total_prior_exit,
+            "exit_without_invoice": total_exit_no_invoice,
+            "exit_by_model": exit_by_model,
+            "invoice_by_model": invoice_by_model,
+            "inventory_by_model": inventory_by_model,
+        },
+    }
+
+
+def format_range_terminal(report: dict) -> str:
+    s = report["summary"]
+    days = report["days"]
+    lines = []
+    lines.append(f"📦 DC 库存变动汇总（{report['start_date']} → {report['end_date']}，共 {len(days)} 天）")
+    lines.append("")
+    lines.append("📊 库存概况")
+    lines.append(f"开始时（{report['start_date']} 开盘）：{s['inventory_start']:,} 台")
+    lines.append(f"结束时（{report['end_date']} 收盘）：{s['inventory_end']:,} 台")
+    lines.append(f"净变化：{s['net_change']:+d} 台")
+    lines.append("")
+    lines.append("📋 逐日明细")
+    lines.append(f"{'日期':<12} {'开盘库存':<10} {'收盘库存':<10} {'入库':<8} {'出库':<8} {'净变':<8} {'开票':<6}")
+    lines.append("-" * 62)
+    for d in days:
+        inv = d["inventory"]
+        invc = d["invoice"]
+        lines.append(f"{d['date']:<12} {inv['prev_day']:<10,} {inv['curr_day']:<10,} {inv['arrivals']:<8} {inv['exits_total']:<8} {inv['net_change']:<+8} {invc['raw_total']:<6}")
+    total_invoice = s["total_invoice"]
+    lines.append("-" * 62)
+    lines.append(f"{'合计':<12} {'':<10} {'':<10} {s['total_arrivals']:<8} {s['total_exits']:<8} {s['net_change']:<+8} {total_invoice:<6}")
+    lines.append("")
+    lines.append("🚚 出库车型汇总")
+    for m in ["LS6", "LS8", "LS9", "L6", "LS7", "L7"]:
+        if m in s["exit_by_model"]:
+            lines.append(f"  - {m}：{s['exit_by_model'][m]} 台")
+    if s.get("inventory_by_model"):
+        lines.append("")
+        lines.append("📦 当前 DC 库存余量")
+        for m in ["LS6", "LS8", "LS9", "L6", "LS7", "L7"]:
+            if m in s["inventory_by_model"]:
+                lines.append(f"  - {m}：{s['inventory_by_model'][m]:,} 台")
+    lines.append("")
+    lines.append("🧾 开票汇总")
+    lines.append(f"总开票：{s['total_invoice']} 台")
+    for m in ["LS6", "LS8", "LS9", "L6", "LS7", "L7"]:
+        if m in s["invoice_by_model"]:
+            info = s["invoice_by_model"][m]
+            lines.append(f"  - {m}：{info['total']} 台（用户车 {info['user_car']} 台）")
+    lines.append("")
+    lines.append("🔍 差异归因")
+    lines.append(f"开票 {s['total_invoice']} 台 ≠ 库存减少 {abs(s['net_change'])} 台")
+    lines.append(f"· 入库对冲：+{s['total_arrivals']} 台（新到 DC）")
+    lines.append(f"· 已出库补开票：-{s['invoice_vins_with_prior_exit']} 台")
+    lines.append(f"· 出库未开票：+{s['exit_without_invoice']} 台")
+    lines.append("──")
+    net_calc = s["total_arrivals"] - s["total_exits"]
+    lines.append(f"库存净变化 = 入库 {s['total_arrivals']} - 出库 {s['total_exits']} = {net_calc}  ✓")
+    lines.append("")
+    lines.append("---")
+    lines.append(f"统计时间：{datetime.now().strftime('%Y-%m-%d %H:%M')} | 脚本：daily_dc_inventory_change.py")
+    return "\n".join(lines)
 
 
 def format_terminal(report: dict) -> str:
@@ -186,6 +310,9 @@ def format_terminal(report: dict) -> str:
     if inv.get("exits_by_model"):
         parts = [f"{m} {inv['exits_by_model'][m]}" for m in MODELS if m in inv.get("exits_by_model", {})]
         lines.append(f"出库车型：{'、'.join(parts)}")
+    if inv.get("by_model"):
+        parts = [f"{m} {inv['by_model'][m]}" for m in MODELS if m in inv.get("by_model", {})]
+        lines.append(f"DC 库存余量：{'、'.join(parts)}")
     lines.append("")
 
     # ── 当日开票 ──
@@ -217,33 +344,151 @@ def format_terminal(report: dict) -> str:
     return "\n".join(lines)
 
 
+def build_feishu_card(report: dict, is_range: bool) -> dict:
+    if is_range:
+        s = report["summary"]
+        days = report["days"]
+        daily_rows = "\n".join(
+            f"{d['date']}  开盘 {d['inventory']['prev_day']:,} → 收盘 {d['inventory']['curr_day']:,}  "
+            f"入库 {d['inventory']['arrivals']}  出库 {d['inventory']['exits_total']}  净变 {d['inventory']['net_change']:+d}"
+            for d in days
+        )
+        exit_models = "、".join(f"{m} {s['exit_by_model'][m]}" for m in ["LS6","LS8","LS9","L6","LS7","L7"] if m in s.get("exit_by_model", {}))
+        inv_by_model_items = "、".join(
+            f"{m} {s['inventory_by_model'][m]:,}" for m in ["LS6","LS8","LS9","L6","LS7","L7"] if m in s.get("inventory_by_model", {})
+        ) if s.get("inventory_by_model") else ""
+        inv_by_model_line = f"\n\n**DC 库存余量：** {inv_by_model_items}" if inv_by_model_items else ""
+        content = (
+            f"**📦 DC 库存变动汇总（{report['start_date']} → {report['end_date']}）**\n\n"
+            f"**库存水位：** {s['inventory_start']:,} → {s['inventory_end']:,}（净变 {s['net_change']:+d}）{inv_by_model_line}\n\n"
+            f"**逐日明细：**\n{daily_rows}\n\n"
+            f"**出库车型：** {exit_models}\n"
+            f"**总开票：** {s['total_invoice']} 台\n\n"
+            f"**差异归因：**\n"
+            f"开票 {s['total_invoice']} 台 ≠ 库存减少 {abs(s['net_change'])} 台\n"
+            f"· 入库对冲 +{s['total_arrivals']}  已出库补开票 -{s['invoice_vins_with_prior_exit']}  出库未开票 +{s['exit_without_invoice']}\n"
+            f"净变 = 入库 {s['total_arrivals']} - 出库 {s['total_exits']} = {s['net_change']} ✓"
+        )
+    else:
+        inv = report["inventory"]
+        invc = report["invoice"]
+        rec = report["reconciliation"]
+        exit_models = "、".join(f"{m} {inv['exits_by_model'][m]}" for m in ["LS6","LS8","LS9","L6","LS7","L7"] if m in inv.get("exits_by_model", {}))
+        invoice_lines = "\n".join(
+            f"- {m}：{info['total']} 台（用户车 {info['user_car']}）"
+            for m in ["LS6","LS8","LS9","L6","LS7","L7"] if m in invc.get("by_model", {})
+        )
+        inv_by_model_items = "、".join(
+            f"{m} {inv['by_model'][m]:,}" for m in ["LS6","LS8","LS9","L6","LS7","L7"] if m in inv.get("by_model", {})
+        ) if inv.get("by_model") else ""
+        inv_by_model_line = f"\nDC 库存余量：{inv_by_model_items}" if inv_by_model_items else ""
+        content = (
+            f"**📦 DC 库存变动分析（{report['date']}）**\n\n"
+            f"**库存概况：** {inv['prev_day']:,} → {inv['curr_day']:,}（净变 {inv['net_change']:+d}）{inv_by_model_line}\n\n"
+            f"**当日流转：** 入库 {inv['arrivals']}  出库 {inv['exits_total']} 台\n"
+            f"出库车型：{exit_models}\n\n"
+            f"**开票：** {invc['raw_total']} 台\n{invoice_lines}\n\n"
+            f"**差异归因：**\n"
+            f"开票 {invc['raw_total']} 台 ≠ 库存减少 {abs(inv['net_change'])} 台\n"
+            f"· 入库对冲 +{inv['arrivals']}  已出库补开票 -{rec['invoice_vins_with_prior_exit']}  出库未开票 +{rec['exit_without_invoice']}\n"
+            f"净变 = 入库 {inv['arrivals']} - 出库 {inv['exits_total']} = {inv['net_change']} ✓"
+        )
+
+    return {
+        "msg_type": "interactive",
+        "card": {
+            "header": {
+                "title": {"tag": "plain_text", "content": "📦 DC 库存变动"},
+                "template": "indigo",
+            },
+            "elements": [
+                {"tag": "div", "text": {"tag": "lark_md", "content": content}},
+                {"tag": "hr"},
+                {"tag": "note", "elements": [{"tag": "plain_text", "content": f"统计时间：{datetime.now().strftime('%Y-%m-%d %H:%M')}"}]},
+            ],
+        },
+    }
+
+
+def send_to_feishu(webhook_url: str, card: dict):
+    for attempt in range(3):
+        try:
+            resp = requests.post(webhook_url, json=card, timeout=10)
+            resp.raise_for_status()
+            result = resp.json()
+            code = result.get("StatusCode") or result.get("code")
+            if code == 0:
+                print("✅ 飞书消息发送成功")
+                return
+            elif code == 11232:
+                time.sleep(2 * (attempt + 1))
+                continue
+            else:
+                print(f"❌ 飞书消息发送异常: {result}")
+                return
+        except Exception as e:
+            print(f"❌ 发送飞书消息失败: {e}")
+            if attempt < 2:
+                time.sleep(2)
+    print("❌ 重试次数耗尽")
+
+
 def main():
     args = parse_args()
-    target = args.date or (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
 
-    report = analyze_day(target)
+    if args.start_date and args.end_date:
+        report = analyze_range(args.start_date, args.end_date)
+        target_label = f"{args.start_date}_to_{args.end_date}"
+        is_range = True
+    else:
+        target = args.date or (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+        report = analyze_day(target)
+        target_label = target
+        is_range = False
+
+    cmd = "python runtime_scripts/daily_dc_inventory_change.py"
+    if args.start_date:
+        cmd += f" --start-date {args.start_date} --end-date {args.end_date}"
+    elif args.date:
+        cmd += f" --date {args.date}"
 
     if args.format == "json":
         contract = build_success_contract(
             script="runtime_scripts/daily_dc_inventory_change.py",
+            command=cmd,
             scope={
                 "data_source": "dataset/delivery_inventory.parquet + dataset/order_data.parquet",
-                "target_date": target,
+                "target_date": target_label,
                 "metric_definition": "国内DC在库_未开票 事件回放",
             },
             result=report,
             followup_context={
                 "metric": "dc_inventory_change",
-                "date": target,
+                "date": target_label,
             },
         )
         out_dir = Path(args.output) if args.output else _WS_ROOT / "outputs" / "tables"
         out_dir.mkdir(parents=True, exist_ok=True)
-        out_path = out_dir / f"dc_inventory_change_{target}.json"
+        out_path = out_dir / f"dc_inventory_change_{target_label}.json"
         save_contract_json(contract, out_path)
         print(json.dumps(contract, ensure_ascii=False, indent=2))
     else:
-        print(format_terminal(report))
+        if "days" in report:
+            print(format_range_terminal(report))
+        else:
+            print(format_terminal(report))
+
+    # ── 飞书推送 ──
+    if args.webhook is not None:
+        if args.webhook == "env":
+            webhook_url = os.getenv("FS_WEBHOOK_URL")
+        else:
+            webhook_url = args.webhook
+        if not webhook_url:
+            print("❌ 未找到 FS_WEBHOOK_URL，跳过飞书推送")
+        else:
+            card = build_feishu_card(report, is_range)
+            send_to_feishu(webhook_url, card)
 
     return 0
 
