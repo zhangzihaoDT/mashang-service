@@ -1,0 +1,75 @@
+{
+  "snapshot": {
+    "date": "2026-07-31",
+    "captured_at": "2026-07-31T09:03:00+08:00",
+    "source": "智己汽车官网 immotors.com"
+  },
+  "models": {
+    "L6": {
+      "msrp_starting": 21.99,
+      "price_detail": "全新智己L6 Max ¥219,900",
+      "currency": "CNY",
+      "unit": "万元",
+      "source_url": "https://www.immotors.com/website/configurator/l6?type=config",
+      "source_type": "configurator_msrp",
+      "note": "同时展示限时一口价 189,900 元起（立减 30,000）"
+    },
+    "LS6": {
+      "msrp_starting": 22.99,
+      "price_detail": "新一代智己LS6 52 Max ¥229,900",
+      "currency": "CNY",
+      "unit": "万元",
+      "source_url": "https://www.immotors.com/website/configurator/ls6?type=config",
+      "source_type": "configurator_msrp",
+      "note": "同时展示增程版限时一口价 189,900 元起（立减 40,000）；纯电版限时现金立减至高 23,000 元"
+    },
+    "LS8": {
+      "msrp_starting": 24.98,
+      "price_detail": "24.98万元起，智己LS8震撼上市",
+      "currency": "CNY",
+      "unit": "万元",
+      "source_url": "https://www.immotors.com/website/news?theme=dark",
+      "source_type": "official_news_launch_price",
+      "note": "此为上市权益价；官方指导价 26.18 万元起。配置器需 JS 交互选择版本后显示价格，本次未提取到配置器 MSRP"
+    },
+    "LS9": {
+      "msrp_starting": 31.98,
+      "price_detail": "31.98万元起，智己LS9全系标配线控转向",
+      "currency": "CNY",
+      "unit": "万元",
+      "source_url": "https://www.immotors.com/website/news_detail/234",
+      "source_type": "official_news_launch_price",
+      "note": "全系权益价 31.98 万元起；LS9 Hyper 权益价 34.98 万元"
+    },
+    "LS7": {
+      "msrp_starting": 33.99,
+      "price_detail": "LS7 Ultra ¥339,900",
+      "currency": "CNY",
+      "unit": "万元",
+      "source_url": "https://www.immotors.com/website/configurator/ls7?type=config",
+      "source_type": "configurator_msrp",
+      "note": "配置器当前仅展示 Ultra 版本（¥339,900），可能非最低配版本"
+    },
+    "L7": {
+      "msrp_starting": 29.99,
+      "price_detail": "L7 Max 超长续航版 ¥299,900",
+      "currency": "CNY",
+      "unit": "万元",
+      "source_url": "https://www.immotors.com/website/configurator/l7?type=config",
+      "source_type": "configurator_msrp",
+      "note": ""
+    }
+  },
+  "pipeline": {
+    "tools_used": [
+      "auto_launch.cli search (VolcSearch API, deep_scan profile)",
+      "Playwright browser (page.goto / page.evaluate)"
+    ],
+    "sniffing_method": "直接浏览官方配置器 configurator/*?type=config 提取 MSRP；配置器不可用时（LS8/LS9）从官方新闻中心 news_detail/* 提取上市发布价",
+    "confidence": {
+      "S级_配置器MSRP": ["L6", "LS6", "LS7", "L7"],
+      "A级_官方新闻价": ["LS8", "LS9"]
+    },
+    "doc_ref": "mashang_workspace/docs/im_official_guide_price_sourcing.md"
+  }
+}

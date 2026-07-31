@@ -1,0 +1,68 @@
+{
+  "status": "success",
+  "script": "runtime_scripts/daily_dc_inventory_change.py",
+  "command": "python runtime_scripts/daily_dc_inventory_change.py --date 2026-07-30",
+  "generated_at": "2026-07-31T08:51:58",
+  "scope": {
+    "data_source": "dataset/delivery_inventory.parquet + dataset/order_data.parquet",
+    "time_window": {},
+    "filters": {},
+    "metric_definition": "国内DC在库_未开票 事件回放",
+    "target_date": "2026-07-30"
+  },
+  "result": {
+    "date": "2026-07-30",
+    "inventory": {
+      "prev_day": 9270,
+      "curr_day": 9055,
+      "net_change": -215,
+      "arrivals": 28,
+      "exits_total": 243,
+      "exits_by_invoice_driven": 233,
+      "exits_by_outdc_driven": 10,
+      "exits_only_invoice_no_outdc": 188,
+      "exits_by_model": {
+        "LS6": 142,
+        "LS8": 43,
+        "LS9": 30,
+        "L6": 28
+      }
+    },
+    "invoice": {
+      "raw_total": 267,
+      "retail_total": 267,
+      "user_car": 266,
+      "corporate_total": 0,
+      "corporate_by_model": {},
+      "by_model": {
+        "LS6": {
+          "total": 150,
+          "user_car": 150
+        },
+        "LS8": {
+          "total": 51,
+          "user_car": 50
+        },
+        "LS9": {
+          "total": 33,
+          "user_car": 33
+        },
+        "L6": {
+          "total": 33,
+          "user_car": 33
+        }
+      }
+    },
+    "reconciliation": {
+      "invoice_vins_with_prior_exit": 34,
+      "exit_without_invoice": 10
+    }
+  },
+  "artifacts": {},
+  "followup_context": {
+    "metric": "dc_inventory_change",
+    "date": "2026-07-30"
+  },
+  "warnings": [],
+  "errors": []
+}

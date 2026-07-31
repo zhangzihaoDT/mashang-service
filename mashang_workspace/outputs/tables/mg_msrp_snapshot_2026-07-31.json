@@ -1,0 +1,94 @@
+{
+  "snapshot": {
+    "date": "2026-07-31",
+    "captured_at": "2026-07-31T09:20:00+08:00",
+    "source": "上汽MG名爵官网 saicmg.com + 第三方媒体交叉验证"
+  },
+  "models": {
+    "全新MG4": {
+      "msrp_starting": 6.88,
+      "price_detail": "437 随心版 统一零售价 6.88万元",
+      "currency": "CNY",
+      "unit": "万元",
+      "source_url": "https://www.saicmg.com/configure.html?vehicle=mg4new",
+      "source_type": "configurator_msrp",
+      "note": "全系共5个版本：随心版6.88万 / 从容版7.68万 / 自由版8.38万 / 智趣版9.68万 / 半固态安芯版10.28万"
+    },
+    "MG5 2026款": {
+      "msrp_starting": 8.19,
+      "price_detail": "180DVVT 全球抢先版 81,900元",
+      "currency": "CNY",
+      "unit": "万元",
+      "source_url": "https://www.saicmg.com/configure.html?vehicle=mg5mce",
+      "source_type": "configurator_msrp",
+      "note": "全系共4个版本：全球抢先版81,900 / 全球豪华版85,900 / 全球旗舰版95,900 / 全球旗舰MAX版98,900"
+    },
+    "MG 4X": {
+      "msrp_starting": 9.98,
+      "price_detail": "510半固态自由版 官方指导价 99,800元",
+      "currency": "CNY",
+      "unit": "万元",
+      "source_url": "https://www.saicmg.com/configure.html?vehicle=mg4x",
+      "source_type": "configurator_msrp",
+      "note": "全系共4个版本：510半固态自由版9.98万 / 510半固态智享版10.98万 / 610自由版10.68万 / 610智享版11.68万"
+    },
+    "MG 07": {
+      "msrp_starting": 12.59,
+      "price_detail": "预售价 12.59-16.59万元",
+      "currency": "CNY",
+      "unit": "万元",
+      "source_url": "https://www.saicmg.com/vehicles/sedan/mg07.html",
+      "source_type": "pre_sale_price",
+      "note": "2026-07-29 开启预售，尚未正式上市。5个版本：650舒享版12.59万 / 610激光雷达版13.59万 / 610旗舰版14.59万 / 845激光雷达版15.59万 / 845旗舰版16.59万。正式上市指导价可能调整"
+    },
+    "MG7 2026款": {
+      "msrp_starting": 13.79,
+      "price_detail": "官方指导价 13.79-17.89万元",
+      "currency": "CNY",
+      "unit": "万元",
+      "source_url": "https://mpcauto.pcvideo.com.cn/hj/article/3227329.html",
+      "source_type": "third_party_official_msrp",
+      "note": "来自太平洋号报道（官方发布会信息），限时补贴价11.69-15.49万元。官方配置器未提取到可读价格文本"
+    }
+  },
+  "gaps": [
+    {
+      "model": "MG6 XLINE 猎鲨版",
+      "reason": "官方配置器(configure.html?vehicle=mg6xline)未提取到可读价格文本"
+    },
+    {
+      "model": "MG Cyberster",
+      "reason": "官方配置器(configure.html?vehicle=cyberster)未提取到可读价格文本"
+    },
+    {
+      "model": "MG ES5",
+      "reason": "官方配置器(configure.html?vehicle=mg-es5)未提取到可读价格文本"
+    }
+  ],
+  "pipeline": {
+    "tools_used": [
+      "auto_launch.cli search (VolcSearch API, brand_watch mode, deep_scan)",
+      "Playwright browser (page.goto / page.evaluate / TreeWalker)"
+    ],
+    "pages_visited": [
+      "https://www.saicmg.com/ — 首页，获取车型列表与 URL",
+      "https://www.saicmg.com/vehicles/sedan/mg07.html — MG07 详情页",
+      "https://www.saicmg.com/vehicles/sedan/mg5mce.html — MG5 详情页",
+      "https://www.saicmg.com/vehicles/sedan/mg4new.html — 2026款MG4 详情页",
+      "https://www.saicmg.com/configure.html?vehicle=mg5mce — MG5 配置表（含价格）",
+      "https://www.saicmg.com/configure.html?vehicle=mg4new — MG4 配置表（含价格）",
+      "https://www.saicmg.com/configure.html?vehicle=mg4x — MG4X 配置表（含价格）",
+      "https://www.saicmg.com/configure.html?vehicle=mg7 — MG7 配置表（价格不可读）",
+      "https://www.saicmg.com/configure.html?vehicle=mg6xline — MG6 XLINE 配置表（价格不可读）",
+      "https://www.saicmg.com/configure.html?vehicle=cyberster — Cyberster 配置表（价格不可读）",
+      "https://www.saicmg.com/configure.html?vehicle=mg-es5 — ES5 配置表（价格不可读）"
+    ],
+    "sniffing_method": "官方配置表 extract plain text 提取统一零售价/官方指导价；配置表不可读时通过 auto_launch 搜索结果中的第三方权威媒体获取 MSRP",
+    "confidence": {
+      "S级_配置器MSRP": ["全新MG4", "MG5 2026款", "MG 4X"],
+      "A级_第三方官方信息": ["MG7 2026款"],
+      "B级_预售价格": ["MG 07"],
+      "缺失_配置器价格不可读": ["MG6 XLINE", "MG Cyberster", "MG ES5"]
+    }
+  }
+}

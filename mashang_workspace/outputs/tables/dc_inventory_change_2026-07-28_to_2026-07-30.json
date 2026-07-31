@@ -1,0 +1,216 @@
+{
+  "status": "success",
+  "script": "runtime_scripts/daily_dc_inventory_change.py",
+  "command": "python runtime_scripts/daily_dc_inventory_change.py --start-date 2026-07-28 --end-date 2026-07-30",
+  "generated_at": "2026-07-31T08:52:05",
+  "scope": {
+    "data_source": "dataset/delivery_inventory.parquet + dataset/order_data.parquet",
+    "time_window": {},
+    "filters": {},
+    "metric_definition": "国内DC在库_未开票 事件回放",
+    "target_date": "2026-07-28_to_2026-07-30"
+  },
+  "result": {
+    "start_date": "2026-07-28",
+    "end_date": "2026-07-30",
+    "days": [
+      {
+        "date": "2026-07-28",
+        "inventory": {
+          "prev_day": 9597,
+          "curr_day": 9423,
+          "net_change": -174,
+          "arrivals": 74,
+          "exits_total": 248,
+          "exits_by_invoice_driven": 220,
+          "exits_by_outdc_driven": 28,
+          "exits_only_invoice_no_outdc": 138,
+          "exits_by_model": {
+            "LS6": 163,
+            "LS8": 35,
+            "LS9": 24,
+            "L6": 24,
+            "LS7": 2
+          }
+        },
+        "invoice": {
+          "raw_total": 257,
+          "retail_total": 244,
+          "user_car": 234,
+          "corporate_total": 13,
+          "corporate_by_model": {
+            "LS6": 13
+          },
+          "by_model": {
+            "LS6": {
+              "total": 152,
+              "user_car": 149
+            },
+            "LS8": {
+              "total": 38,
+              "user_car": 34
+            },
+            "LS9": {
+              "total": 26,
+              "user_car": 25
+            },
+            "L6": {
+              "total": 26,
+              "user_car": 26
+            },
+            "LS7": {
+              "total": 2,
+              "user_car": 0
+            }
+          }
+        },
+        "reconciliation": {
+          "invoice_vins_with_prior_exit": 37,
+          "exit_without_invoice": 28
+        }
+      },
+      {
+        "date": "2026-07-29",
+        "inventory": {
+          "prev_day": 9423,
+          "curr_day": 9270,
+          "net_change": -153,
+          "arrivals": 54,
+          "exits_total": 207,
+          "exits_by_invoice_driven": 201,
+          "exits_by_outdc_driven": 6,
+          "exits_only_invoice_no_outdc": 150,
+          "exits_by_model": {
+            "LS6": 132,
+            "LS8": 32,
+            "LS9": 24,
+            "L6": 19
+          }
+        },
+        "invoice": {
+          "raw_total": 229,
+          "retail_total": 229,
+          "user_car": 227,
+          "corporate_total": 0,
+          "corporate_by_model": {},
+          "by_model": {
+            "LS6": {
+              "total": 141,
+              "user_car": 140
+            },
+            "LS8": {
+              "total": 40,
+              "user_car": 40
+            },
+            "LS9": {
+              "total": 26,
+              "user_car": 26
+            },
+            "L6": {
+              "total": 22,
+              "user_car": 21
+            }
+          }
+        },
+        "reconciliation": {
+          "invoice_vins_with_prior_exit": 28,
+          "exit_without_invoice": 6
+        }
+      },
+      {
+        "date": "2026-07-30",
+        "inventory": {
+          "prev_day": 9270,
+          "curr_day": 9055,
+          "net_change": -215,
+          "arrivals": 28,
+          "exits_total": 243,
+          "exits_by_invoice_driven": 233,
+          "exits_by_outdc_driven": 10,
+          "exits_only_invoice_no_outdc": 188,
+          "exits_by_model": {
+            "LS6": 142,
+            "LS8": 43,
+            "LS9": 30,
+            "L6": 28
+          }
+        },
+        "invoice": {
+          "raw_total": 267,
+          "retail_total": 267,
+          "user_car": 266,
+          "corporate_total": 0,
+          "corporate_by_model": {},
+          "by_model": {
+            "LS6": {
+              "total": 150,
+              "user_car": 150
+            },
+            "LS8": {
+              "total": 51,
+              "user_car": 50
+            },
+            "LS9": {
+              "total": 33,
+              "user_car": 33
+            },
+            "L6": {
+              "total": 33,
+              "user_car": 33
+            }
+          }
+        },
+        "reconciliation": {
+          "invoice_vins_with_prior_exit": 34,
+          "exit_without_invoice": 10
+        }
+      }
+    ],
+    "summary": {
+      "inventory_start": 9597,
+      "inventory_end": 9055,
+      "net_change": -542,
+      "total_arrivals": 156,
+      "total_exits": 698,
+      "total_invoice": 753,
+      "invoice_vins_with_prior_exit": 99,
+      "exit_without_invoice": 44,
+      "exit_by_model": {
+        "LS6": 437,
+        "LS8": 110,
+        "LS9": 78,
+        "L6": 71,
+        "LS7": 2
+      },
+      "invoice_by_model": {
+        "LS6": {
+          "total": 443,
+          "user_car": 439
+        },
+        "LS8": {
+          "total": 129,
+          "user_car": 124
+        },
+        "LS9": {
+          "total": 85,
+          "user_car": 84
+        },
+        "L6": {
+          "total": 81,
+          "user_car": 80
+        },
+        "LS7": {
+          "total": 2,
+          "user_car": 0
+        }
+      }
+    }
+  },
+  "artifacts": {},
+  "followup_context": {
+    "metric": "dc_inventory_change",
+    "date": "2026-07-28_to_2026-07-30"
+  },
+  "warnings": [],
+  "errors": []
+}
