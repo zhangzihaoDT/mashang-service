@@ -235,12 +235,12 @@ def format_range_terminal(report: dict) -> str:
     lines.append(f"📦 DC 库存变动汇总（{report['start_date']} → {report['end_date']}，共 {len(days)} 天）")
     lines.append("")
     lines.append("📊 库存概况")
-    lines.append(f"开始时（{report['start_date']} 开盘）：{s['inventory_start']:,} 台")
-    lines.append(f"结束时（{report['end_date']} 收盘）：{s['inventory_end']:,} 台")
+    lines.append(f"开始时（{report['start_date']} 期初）：{s['inventory_start']:,} 台")
+    lines.append(f"结束时（{report['end_date']} 期末）：{s['inventory_end']:,} 台")
     lines.append(f"净变化：{s['net_change']:+d} 台")
     lines.append("")
     lines.append("📋 逐日明细")
-    lines.append(f"{'日期':<12} {'开盘库存':<10} {'收盘库存':<10} {'入库':<8} {'出库':<8} {'净变':<8} {'开票':<6}")
+    lines.append(f"{'日期':<12} {'期初库存':<10} {'期末库存':<10} {'入库':<8} {'出库':<8} {'净变':<8} {'开票':<6}")
     lines.append("-" * 62)
     for d in days:
         inv = d["inventory"]
@@ -345,54 +345,74 @@ def format_terminal(report: dict) -> str:
 
 
 def build_feishu_card(report: dict, is_range: bool) -> dict:
+    def block(*lines):
+        return "\n".join(line for line in lines if line)
+
     if is_range:
         s = report["summary"]
         days = report["days"]
         daily_rows = "\n".join(
-            f"{d['date']}  开盘 {d['inventory']['prev_day']:,} → 收盘 {d['inventory']['curr_day']:,}  "
+            f"{d['date']}  期初 {d['inventory']['prev_day']:,} → 期末 {d['inventory']['curr_day']:,}  "
             f"入库 {d['inventory']['arrivals']}  出库 {d['inventory']['exits_total']}  净变 {d['inventory']['net_change']:+d}"
             for d in days
         )
         exit_models = "、".join(f"{m} {s['exit_by_model'][m]}" for m in ["LS6","LS8","LS9","L6","LS7","L7"] if m in s.get("exit_by_model", {}))
-        inv_by_model_items = "、".join(
+        inv_items = "、".join(
             f"{m} {s['inventory_by_model'][m]:,}" for m in ["LS6","LS8","LS9","L6","LS7","L7"] if m in s.get("inventory_by_model", {})
-        ) if s.get("inventory_by_model") else ""
-        inv_by_model_line = f"\n\n**DC 库存余量：** {inv_by_model_items}" if inv_by_model_items else ""
-        content = (
-            f"**📦 DC 库存变动汇总（{report['start_date']} → {report['end_date']}）**\n\n"
-            f"**库存水位：** {s['inventory_start']:,} → {s['inventory_end']:,}（净变 {s['net_change']:+d}）{inv_by_model_line}\n\n"
-            f"**逐日明细：**\n{daily_rows}\n\n"
-            f"**出库车型：** {exit_models}\n"
-            f"**总开票：** {s['total_invoice']} 台\n\n"
-            f"**差异归因：**\n"
-            f"开票 {s['total_invoice']} 台 ≠ 库存减少 {abs(s['net_change'])} 台\n"
-            f"· 入库对冲 +{s['total_arrivals']}  已出库补开票 -{s['invoice_vins_with_prior_exit']}  出库未开票 +{s['exit_without_invoice']}\n"
-            f"净变 = 入库 {s['total_arrivals']} - 出库 {s['total_exits']} = {s['net_change']} ✓"
         )
+        blocks = [
+            f"**📦 DC 库存变动汇总（{report['start_date']} → {report['end_date']}）**",
+            f"**库存水位：** {s['inventory_start']:,} → {s['inventory_end']:,}（净变 {s['net_change']:+d}）",
+        ]
+        if inv_items:
+            blocks.append(f"**DC 库存余量：** {inv_items}")
+        blocks.append(block("**逐日明细：**", daily_rows))
+        if exit_models:
+            blocks.append(f"**出库车型：** {exit_models}")
+        blocks.append(f"**总开票：** {s['total_invoice']} 台")
+        blocks.append(
+            block(
+                "**差异归因：**",
+                f"开票 {s['total_invoice']} 台 ≠ 库存减少 {abs(s['net_change'])} 台",
+                f"· 入库对冲 +{s['total_arrivals']}  已出库补开票 -{s['invoice_vins_with_prior_exit']}  出库未开票 +{s['exit_without_invoice']}",
+                f"净变 = 入库 {s['total_arrivals']} - 出库 {s['total_exits']} = {s['net_change']} ✓",
+            )
+        )
+        content = "\n\n".join(blocks)
     else:
         inv = report["inventory"]
         invc = report["invoice"]
         rec = report["reconciliation"]
         exit_models = "、".join(f"{m} {inv['exits_by_model'][m]}" for m in ["LS6","LS8","LS9","L6","LS7","L7"] if m in inv.get("exits_by_model", {}))
         invoice_lines = "\n".join(
-            f"- {m}：{info['total']} 台（用户车 {info['user_car']}）"
+            f"- {m}：{invc['by_model'][m]['total']} 台（用户车 {invc['by_model'][m]['user_car']}）"
             for m in ["LS6","LS8","LS9","L6","LS7","L7"] if m in invc.get("by_model", {})
         )
-        inv_by_model_items = "、".join(
+        inv_items = "、".join(
             f"{m} {inv['by_model'][m]:,}" for m in ["LS6","LS8","LS9","L6","LS7","L7"] if m in inv.get("by_model", {})
-        ) if inv.get("by_model") else ""
-        inv_by_model_line = f"\nDC 库存余量：{inv_by_model_items}" if inv_by_model_items else ""
-        content = (
-            f"**📦 DC 库存变动分析（{report['date']}）**\n\n"
-            f"**库存概况：** {inv['prev_day']:,} → {inv['curr_day']:,}（净变 {inv['net_change']:+d}）{inv_by_model_line}\n\n"
-            f"**当日流转：** 入库 {inv['arrivals']}  出库 {inv['exits_total']} 台\n"
-            f"出库车型：{exit_models}\n\n"
-            f"**开票：** {invc['raw_total']} 台\n{invoice_lines}\n\n"
-            f"**差异归因：**\n"
-            f"开票 {invc['raw_total']} 台 ≠ 库存减少 {abs(inv['net_change'])} 台\n"
-            f"· 入库对冲 +{inv['arrivals']}  已出库补开票 -{rec['invoice_vins_with_prior_exit']}  出库未开票 +{rec['exit_without_invoice']}\n"
-            f"净变 = 入库 {inv['arrivals']} - 出库 {inv['exits_total']} = {inv['net_change']} ✓"
         )
+        blocks = [
+            f"**📦 DC 库存变动分析（{report['date']}）**",
+            f"**库存概况：** {inv['prev_day']:,} → {inv['curr_day']:,}（净变 {inv['net_change']:+d}）",
+        ]
+        if inv_items:
+            blocks.append(f"**DC 库存余量：** {inv_items}")
+        blocks.append(
+            block(
+                f"**当日流转：** 入库 {inv['arrivals']}  出库 {inv['exits_total']} 台",
+                f"**出库车型：** {exit_models}",
+            )
+        )
+        blocks.append(block(f"**开票：** {invc['raw_total']} 台", invoice_lines))
+        blocks.append(
+            block(
+                "**差异归因：**",
+                f"开票 {invc['raw_total']} 台 ≠ 库存减少 {abs(inv['net_change'])} 台",
+                f"· 入库对冲 +{inv['arrivals']}  已出库补开票 -{rec['invoice_vins_with_prior_exit']}  出库未开票 +{rec['exit_without_invoice']}",
+                f"净变 = 入库 {inv['arrivals']} - 出库 {inv['exits_total']} = {inv['net_change']} ✓",
+            )
+        )
+        content = "\n\n".join(blocks)
 
     return {
         "msg_type": "interactive",
