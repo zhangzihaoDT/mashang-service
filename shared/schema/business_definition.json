@@ -40,6 +40,69 @@
       "finish": "2026-08-31"
     }
   },
+  "presale_periods": {
+    "description": "各车型预售期管理（预售时间 = 预售小订从 0 突变为 >0 的首个集中收集日，基于订单日报2.0 全历史快照 2025-11-26~2026-08-01）。",
+    "MG 07": {
+      "start": "2026-07-29",
+      "detection_rule": "预售小订 0→>0 突变首日",
+      "detection_source": "订单日报2.0 重点车型(订单) 每日小订（07/29 值 5148）"
+    },
+    "至境L7 BEV": {
+      "start": "2026-07-24",
+      "detection_rule": "预售小订 0→>0 突变首日",
+      "detection_source": "订单日报2.0（04/26~07/23 均为 0，07/24 值 95）"
+    },
+    "五菱星光560": {
+      "start": "2025-12-11",
+      "detection_rule": "预售小订 0→>0 突变首日",
+      "detection_source": "订单日报2.0（12/05~12/10 为 0，12/11 值 1288）"
+    },
+    "至境世家": {
+      "start": "2025-12-05",
+      "detection_rule": "预售小订 0→>0 突变首日（首日存在零星值 1~4，集中收集日为 12/05 值 1733）",
+      "detection_source": "订单日报2.0"
+    },
+    "华境S": {
+      "start": "2026-04-07",
+      "detection_rule": "预售小订 0→>0 突变首日",
+      "detection_source": "订单日报2.0（03/03~04/06 为 0，04/07 值 655）"
+    },
+    "尚界Z7": {
+      "start": "2026-04-22",
+      "detection_rule": "预售小订 0→>0 突变首日",
+      "detection_source": "订单日报2.0（04/22 值 4565）"
+    },
+    "大众ID.ERA 9X": {
+      "start": "2026-04-25",
+      "detection_rule": "预售小订 0→>0 突变首日",
+      "detection_source": "订单日报2.0（04/25 值 5004；旧快照命名含空格：大众ID. ERA 9X）"
+    },
+    "至境E7": {
+      "start": "2026-04-22",
+      "detection_rule": "预售小订 0→>0 突变首日（03/14 起有零星值，集中收集日为 04/22 值 1456）",
+      "detection_source": "订单日报2.0"
+    },
+    "奥迪E7X": {
+      "start": "2026-05-29",
+      "detection_rule": "预售小订 0→>0 突变首日",
+      "detection_source": "订单日报2.0（04/26~05/28 为 0，05/29 值 2395）"
+    },
+    "五菱星光L": {
+      "start": "2026-05-28",
+      "detection_rule": "预售小订 0→>0 突变首日",
+      "detection_source": "订单日报2.0（04/28~05/27 为 0，05/28 值 335）"
+    },
+    "MG 4X": {
+      "start": "2026-05-27",
+      "detection_rule": "预售小订 0→>0 突变首日（05/26 值 2 为零星，集中收集日为 05/27 值 2756）",
+      "detection_source": "订单日报2.0"
+    },
+    "荣威新i6": {
+      "start": "2026-05-05",
+      "detection_rule": "预售小订 0→>0 突变首日（04/13 起有零星值，集中收集日为 05/05 值 1754）",
+      "detection_source": "订单日报2.0"
+    }
+  },
   "battery_capacity_logic": {
     "52kwh": "product_name LIKE '%52%'",
     "66kwh": "product_name LIKE '%66%' OR product_name LIKE '%Hyper%'",
