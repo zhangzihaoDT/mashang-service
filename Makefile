@@ -1,9 +1,10 @@
 PYTHON ?= .venv/bin/python
 .PHONY: eval full-eval core-eval research-eval capability-audit test ci data-dict lock-demo parser-demo followup-demo numeric-eval reference-eval atp-demo backtest-demo clean-outputs dataset-update dataset-validate daily-observation-dry-run daily-observation-sync daily-data-pipeline-dry-run daily-data-pipeline render-official-doc render-official-doc-smoke build-workspace-skills-catalog build-workspace-capability-inventory miit-discover-latest-batch miit-discover-batches miit-fetch-batch miit-new-car-monitor miit-latest-publicity miit-latest-official miit-latest-publicity-refresh miit-latest-official-refresh miit-extract-text miit-check-text-extractors miit-diagnose-attachments miit-parse-product-list inventory-status inventory-trend inventory-report
 
-## 默认 Eval（core + parser + followup + reference，不含 research）
+## 生成 Eval 结果（显式产物 unified_eval_result.json）
+## 用法: make eval [SUITE=default|ci|all|research|core]
 eval:
-	$(PYTHON) mashang_workspace/eval/run_eval.py --suite default
+	$(PYTHON) mashang_workspace/eval/run_eval.py --suite $(or $(SUITE),default) --format terminal --output mashang_workspace/outputs/tables/unified_eval_result.json
 
 ## 完整 Eval（含 research）
 full-eval:
@@ -21,9 +22,9 @@ research-eval:
 test:
 	$(PYTHON) -m pytest mashang_workspace/tests -q
 
-## CI 门禁（CI-safe suites + 测试）
+## CI 门禁 = 复用 eval(CI-safe) + 数据无关测试
 ci:
-	$(PYTHON) mashang_workspace/eval/run_eval.py --suite ci --format json --output outputs/tables/unified_eval_result.json
+	$(MAKE) eval SUITE=ci
 	$(PYTHON) -m pytest mashang_workspace/tests/test_root_cleanup.py \
 		mashang_workspace/tests/test_model_positioning_loader.py \
 		mashang_workspace/tests/scripts/test_result_contract.py \
@@ -303,12 +304,12 @@ clean-outputs:
 ## 帮助
 help:
 	@echo "=== Eval / Test ==="
-	@echo "make eval            默认 Eval（core + parser + followup + reference）"
+	@echo "make eval            生成 Eval 结果（显式产物，SUITE 可选）"
 	@echo "make full-eval       完整 Eval（含 research）"
 	@echo "make core-eval       Core 脚本 Eval"
 	@echo "make research-eval   Research 脚本 Eval"
 	@echo "make test            完整测试"
-	@echo "make ci              CI 门禁"
+	@echo "make ci              完整质量检查 = eval(CI-safe) + 测试"
 	@echo ""
 	@echo "=== Analysis Demos ==="
 	@echo "make data-dict       数据字典"

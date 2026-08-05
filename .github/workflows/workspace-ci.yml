@@ -38,6 +38,7 @@ jobs:
       - name: Run pytest (data-independent tests only)
         run: |
           pytest mashang_workspace/tests/test_root_cleanup.py \
+                 mashang_workspace/tests/test_model_positioning_loader.py \
                  mashang_workspace/tests/test_result_contract.py \
                  mashang_workspace/tests/eval/test_context_parser.py \
                  mashang_workspace/tests/eval/test_followup_runner.py \

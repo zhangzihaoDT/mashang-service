@@ -342,6 +342,12 @@ def main():
             suite_results[name] = {"status": "error", "error": str(e)}
             errors.append(f"{name}: {e}")
 
+    # 统一 suite pass_rate 到 0-1（兼容部分 runner 返回百分比格式）
+    for _res in suite_results.values():
+        _pr = _res.get("pass_rate")
+        if isinstance(_pr, (int, float)) and _pr > 1:
+            _res["pass_rate"] = _pr / 100
+
     output = {
         "status": "success" if len(errors) == 0 else "partial",
         "generated_at": datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
@@ -358,13 +364,14 @@ def main():
 
     out_path = resolve_output_path(args.output if hasattr(args, "output") else None)
 
+    body = json.dumps(output, ensure_ascii=False, indent=2)
+    if out_path:
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(body, encoding="utf-8")
+        print(f"[Output] JSON: {out_path}")
+
     if args.format == "json":
-        body = json.dumps(output, ensure_ascii=False, indent=2)
-        if out_path:
-            out_path.parent.mkdir(parents=True, exist_ok=True)
-            out_path.write_text(body, encoding="utf-8")
-            print(f"[Output] JSON: {out_path}")
-        else:
+        if not out_path:
             print(body)
     else:
         print(f"{'='*60}")
