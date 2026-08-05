@@ -427,7 +427,7 @@ def analyze_daily_invoice_orders(df, start_date, end_date):
     # 从全量开票记录中检测对公批售订单（owner_identity_no 为统一社会信用代码的企业订单）
     total_corporate_count = 0
     corporate_model_count = {}
-    if 'owner_identity_no' in raw_invoice_all.columns:
+    if len(raw_invoice_all) > 0 and 'owner_identity_no' in raw_invoice_all.columns:
         corporate_mask = raw_invoice_all['owner_identity_no'].apply(is_corporate_owner)
         total_corporate_count = raw_invoice_all[corporate_mask]['order_number'].nunique()
         # 分解到车型
