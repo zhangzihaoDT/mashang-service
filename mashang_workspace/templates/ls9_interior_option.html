@@ -1,0 +1,122 @@
+{% extends "report_base_plain.html" %}
+
+{% block content %}
+{% set o = data.overall %}
+
+<section class="card">
+  <h2>总览 · 指定范围用户车锁单选配分布（{{ data.ls9_launch }} 起）</h2>
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="label">总锁单（用户车）</div>
+      <div class="value">{{ o.tot }}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="label">确认付费率</div>
+      <div class="value">{{ o.confirmed_rate }}%</div>
+      <div class="change up">{{ o.confirmed }}/{{ o.tot }} 单</div>
+    </div>
+    <div class="kpi-card">
+      <div class="label">推定付费选装率</div>
+      <div class="value">{{ o.inferred_rate }}%</div>
+      <div class="change up">{{ o.confirmed + o.inferred }}/{{ o.tot }} 单</div>
+    </div>
+    <div class="kpi-card">
+      <div class="label">价格缺失推断</div>
+      <div class="value">{{ o.inferred }}</div>
+      <div class="change neutral">线控版麂皮</div>
+    </div>
+  </div>
+
+  <h3>内饰选择分布</h3>
+  <div class="table-wrap"><table class="data-table">
+    <thead><tr><th>内饰选择</th><th>订单数</th><th>占比</th><th>付费（含推断）</th><th>标配/免费</th><th>推断订单占比</th></tr></thead>
+    <tbody>
+      {% for d in o.selection_distribution %}
+      <tr>
+        <td>{{ d.value }}</td>
+        <td><div class="barcell" title="{{ d.count }} 单"><div class="bar" style="width:{{ (d.count / o.tot * 100) | round }}%;"></div><div class="txt">{{ d.count }}</div></div></td>
+        <td>{{ d.share }}%</td>
+        <td>{{ d.paid if d.paid is not none else '—' }}</td>
+        <td>{{ d.std_free if d.std_free is not none else '—' }}</td>
+        <td>{{ (d.inferred_share | string + '%') if d.inferred_share is not none else '—' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table></div>
+  <p class="section-note">每单均有内饰记录；先看选了什么（订单数），再看该选项的商业性质。付费（含推断）=确认付费+价格缺失推断；标配/免费=Hyper 麂皮标配+线控版橙黑/大地橘免费可选；推断订单占比=价格缺失推断/付费（含推断），即付费订单中价格缺失的比例。免费配色行不适用付费标注。</p>
+</section>
+
+{% for ph in ['phase1','phase2'] %}
+{% set P = data[ph] %}
+{% set MX = P.matrix %}
+<section class="card">
+  <h2>{% if ph == 'phase1' %}阶段一{% else %}阶段二{% endif %} · {{ P.range }} · 各车型内饰选择分布</h2>
+  <div class="table-wrap"><table class="data-table">
+    <thead>
+      <tr>
+        <th>选配</th>
+        {% for m in MX.models %}<th>{{ m }}{% if m == 'Hyper' %}<span class="badge badge-gold">麂皮标配</span>{% endif %}</th>{% endfor %}
+        <th>总计</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="section-row">
+        <td>锁单数</td>
+        {% for c in MX.lock_counts %}<td>{{ c }}</td>{% endfor %}
+        <td>{{ MX.tot }}</td>
+      </tr>
+      {% for r in MX.rows %}
+      <tr>
+        <td>{{ r.label }}{% if r.paid %}<span class="badge badge-blue">付费</span>{% endif %}</td>
+        {% for c in r.cells %}<td>{{ c }}</td>{% endfor %}
+        <td><strong>{{ r.total }}</strong></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table></div>
+
+  <p class="section-note">
+    {% if ph == 'phase1' %}阶段一为 LS9 上市后（{{ data.ls9_launch }} ~ {{ data.hyper_launch }} 前一日，不含 07-16），合计 {{ P.tot }} 单。
+    {% else %}阶段二为 LS9Hyper 上市后（{{ data.hyper_launch }} 起，含 07-16），合计 {{ P.tot }} 单；Hyper 车型麂皮为标配。
+    {% endif %}
+    行=各内饰选择，列=车型，末列=总计（该选配跨车型订单数）。付费选装列带"付费"标记；深/浅麂皮、橙黑/大地橘在 Hyper 上为标配。配置按 value_code 归并。
+  </p>
+</section>
+{% endfor %}
+
+<section class="card">
+  <h2>月度选装率趋势</h2>
+  <div class="table-wrap"><table class="data-table">
+    <thead><tr><th>月份</th><th>锁单数</th><th>确认付费</th><th>推定付费</th><th>标配</th><th>确认付费率</th><th>推定付费率</th></tr></thead>
+    <tbody>
+      {% for r in data.monthly %}
+      <tr>
+        <td>{{ r.value }}</td>
+        <td>{{ r.count }}</td>
+        <td>{{ r.confirmed }}</td><td>{{ r.paid }}</td><td>{{ r.standard }}</td>
+        <td><span class="badge {{ 'badge-blue' if r.confirmed_rate > 5 else 'badge-gold' }}">{{ r.confirmed_rate }}%</span></td>
+        <td><span class="badge {{ 'badge-blue' if r.inferred_rate > 5 else 'badge-gold' }}">{{ r.inferred_rate }}%</span></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table></div>
+  <p class="section-note">分界为 LS9Hyper 上市（{{ data.hyper_launch }}）。5 月前选装率接近 0，6 月起抬升，阶段二放大。</p>
+</section>
+
+<section class="card">
+  <h2>业务解读</h2>
+  <p>{{ data.interpretation }}</p>
+</section>
+
+<section class="card">
+  <h2>数据口径</h2>
+  <table class="data-table scope-table">
+    <tbody>
+      <tr><td class="scope-label"><strong>数据源</strong></td><td>{{ data.data_source }}</td></tr>
+      <tr><td class="scope-label"><strong>时间</strong></td><td>自上市以来 {{ data.ls9_launch }} 起；阶段一 ~ {{ data.hyper_launch }}，阶段二 {{ data.hyper_launch }} 起</td></tr>
+      <tr><td class="scope-label"><strong>筛选</strong></td><td>{{ data.filters }}</td></tr>
+      <tr><td class="scope-label"><strong>口径</strong></td><td>{{ data.metric_definition }}</td></tr>
+    </tbody>
+  </table>
+</section>
+{% endblock %}

@@ -41,13 +41,14 @@ mashang-service/
 |------|------|------|
 | `dataset/order_data.parquet` | Parquet | 订单主表 (445,915 行) |
 | `dataset/assign_data.csv` | CSV | 下发线索表 (1,184 行) |
-| `dataset/config_attribute.parquet` | Parquet | 选配属性表 (2,196,954 行) |
+| `dataset/config_attribute.parquet` | Parquet | 选配属性表 (含 value_code 配置 code) |
 | `dataset/lock_attribution_data.parquet` | Parquet | 锁单归因表 |
 | `dataset/test_drive_data.csv` | CSV | 试驾数据 |
-| `dataset/config_attribute_data_2023.csv` | CSV | 2023 选配数据 |
-| `dataset/config_attribute_data_2024.csv` | CSV | 2024 选配数据 |
-| `dataset/config_attribute_data_2025.csv` | CSV | 2025 选配数据 |
-| `dataset/config_attribute_data_2026.csv` | CSV | 2026 选配数据 |
+| `dataset/config_attribute_data.csv` | CSV | 2023 选配快照（含 Value 配置 code） |
+| `dataset/config_attribute_data2024.csv` | CSV | 2024 选配快照（含 Value 配置 code） |
+| `dataset/config_attribute_data2025.csv` | CSV | 2025 选配快照（含 Value 配置 code） |
+| `dataset/config_attribute_data2026.csv` | CSV | 2026 选配快照（含 Value 配置 code） |
+| `dataset/config_attribute_data_update.csv` | CSV | 最新 Tableau 视图变更增量（mobile 路线） |
 | `dataset/order_data_2023.csv` | CSV | 2023 订单数据 |
 | `dataset/order_data_2024.csv` | CSV | 2024 订单数据 |
 | `dataset/order_data_2025.csv` | CSV | 2025 订单数据 |

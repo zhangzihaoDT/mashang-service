@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ title | default("数据分析报告") }}</title>
+  <link rel="stylesheet" href="{{ static_prefix | default('..') }}/templates/report_style.css" />
+</head>
+<body>
+  <header>
+    <div class="container">
+      <span class="header-meta">{{ meta | default("") }}</span>
+    </div>
+  </header>
+
+  <main class="container">
+    {% if hero_title %}
+    <section class="hero">
+      <h1>{{ hero_title }}</h1>
+      {% if hero_subtitle %}
+      <p>{{ hero_subtitle }}</p>
+      {% endif %}
+    </section>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer>
+    <div class="brand-sentence">用数据、AI 和一点点常识，研究复杂世界。</div>
+  </footer>
+</body>
+</html>
