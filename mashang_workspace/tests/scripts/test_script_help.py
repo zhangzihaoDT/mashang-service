@@ -50,6 +50,7 @@ CORE_SCRIPTS = [
     "cohort_forecast.py",
     "voc_theme_analysis.py",
     "data_dictionary.py",
+    "dc_showroom_age_report.py",
 ]
 
 

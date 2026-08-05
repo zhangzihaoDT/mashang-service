@@ -25,6 +25,7 @@ test:
 ci:
 	$(PYTHON) mashang_workspace/eval/run_eval.py --suite ci --format json --output outputs/tables/unified_eval_result.json
 	$(PYTHON) -m pytest mashang_workspace/tests/test_root_cleanup.py \
+		mashang_workspace/tests/test_model_positioning_loader.py \
 		mashang_workspace/tests/scripts/test_result_contract.py \
 		mashang_workspace/tests/eval/test_context_parser.py \
 		mashang_workspace/tests/eval/test_followup_runner.py \

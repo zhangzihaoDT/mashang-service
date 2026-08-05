@@ -1,0 +1,213 @@
+# 车型定位与场景定义 — 品牌产品体系知识模型
+# ============================================================
+# 唯一事实源（Single Source of Truth）：
+#   车型定位 / 目标人群 / 核心场景 / 细分市场(segment) / 品牌使命(priority) / 产品赛道(archetype)
+# 后续模块（竞品归类、用户画像、营销标签、车型介绍生成、新车型扩展）
+# 应从此文件读取车型知识，不再另维护一套。
+#
+# 维护方: mashang workspace
+# 版本: 2026-08
+# ============================================================
+
+description: >
+  主力车型的产品定位、目标人群、核心场景、细分市场、品牌使命与产品赛道。
+  用于车型对比、竞品归类（按产品赛道聚类后再按品牌/价格/动力细分）、用户画像与营销标签。
+
+# priority 语义（产品在品牌中的使命，而非消费者定位）
+#   volume      = 销量担当
+#   strategic   = 家庭市场主力
+#   flagship    = 品牌旗舰
+#   technology  = 技术旗舰、品牌形象
+
+# ── 产品赛道定义（product_archetypes）────────────────────
+# 2024~2026 市场已收敛为四个稳定赛道。
+# 赛道按用户需求划分（而非仅尺寸）：LS6 智能运动年轻 vs LS8 空间舒适家庭。
+# Brandmine 做竞品分析时：先按产品赛道聚类，再按品牌/价格/动力形式细分。
+product_archetypes:
+  intelligent_sport_sedan:
+    label: 智能运动轿车
+    needs:
+      - 智能
+      - 运动
+      - 年轻
+  intelligent_sport_suv:
+    label: 智能运动大五座 SUV
+    needs:
+      - 智能
+      - 运动
+      - 城市通勤
+  family_large_5seat_suv:
+    label: 家庭大五座 SUV
+    needs:
+      - 空间
+      - 舒适
+      - 家庭出行
+  luxury_flagship_6seat_suv:
+    label: 豪华旗舰大六座 SUV
+    needs:
+      - 豪华
+      - 多人出行
+      - 商务
+
+# 车型 → 产品赛道（含自研 + 竞品，竞品归类直接消费此映射）
+# 注意：一个竞品可能同时进入多个自研车型的 competitors（登记视角），
+# 但此处只登记其主赛道（用于赛道聚类）。
+product_archetype:
+  # 智能运动大五座 SUV
+  LS6: intelligent_sport_suv
+  Tesla Model Y: intelligent_sport_suv
+  XPeng G6: intelligent_sport_suv
+  Zeekr 7X: intelligent_sport_suv
+  Onvo L60: intelligent_sport_suv
+  Xiaomi YU7: intelligent_sport_suv
+  AITO M5: intelligent_sport_suv
+  NIO ES6: intelligent_sport_suv
+
+  # 家庭大五座 SUV
+  LS8: family_large_5seat_suv
+  XPeng G9L: family_large_5seat_suv
+  Xiaomi Pengcheng N70: family_large_5seat_suv
+  Li Auto L7: family_large_5seat_suv
+  AITO M8: family_large_5seat_suv
+  Li Auto L8: family_large_5seat_suv
+  Denza N8L: family_large_5seat_suv
+  Wey Lanshan: family_large_5seat_suv
+
+  # 豪华旗舰大六座 SUV
+  LS9: luxury_flagship_6seat_suv
+  Li Auto L9: luxury_flagship_6seat_suv
+  AITO M9: luxury_flagship_6seat_suv
+  XPeng GX: luxury_flagship_6seat_suv
+  Xiaomi Pengcheng N90: luxury_flagship_6seat_suv
+  Denza N9: luxury_flagship_6seat_suv
+  NIO ES8: luxury_flagship_6seat_suv
+  "Lynk & Co 900": luxury_flagship_6seat_suv
+
+  # 智能运动轿车
+  L6: intelligent_sport_sedan
+  Xiaomi SU7: intelligent_sport_sedan
+  Tesla Model 3: intelligent_sport_sedan
+  Zeekr 007: intelligent_sport_sedan
+  NIO ET5: intelligent_sport_sedan
+  XPeng P7+: intelligent_sport_sedan
+  "Smart #6": intelligent_sport_sedan
+
+model_positioning:
+  LS6:
+    name: 智己LS6
+    position: 运动大五座 SUV
+    body_type: SUV
+    seats: 五座
+    segment: midsize_suv
+    priority: volume
+    archetype: intelligent_sport_suv
+    target_users:
+      - 年轻夫妻
+      - 一孩家庭
+    core_scenario:
+      - 城市通勤
+      - 周末自驾
+    selling_points:
+      - 驾驶乐趣
+      - 智能科技
+      - 年轻化
+    competitors:
+      tier1:
+        - Tesla Model Y
+        - XPeng G6
+        - Zeekr 7X
+        - Onvo L60
+      tier2:
+        - Xiaomi YU7
+        - AITO M5
+        - NIO ES6
+    note: 主打运动操控与智能化，面向年轻家庭的性能 SUV。
+
+  LS8:
+    name: 智己LS8
+    position: 家庭大五座 SUV
+    body_type: SUV
+    seats: 五座（可选六座）
+    segment: large_suv
+    priority: strategic
+    archetype: family_large_5seat_suv
+    target_users:
+      - 二孩家庭
+    core_scenario:
+      - 家庭出游
+      - 长途旅行
+    selling_points:
+      - 空间最大化
+      - 舒适
+      - 家庭体验
+    competitors:
+      tier1:
+        - XPeng G9L
+        - Xiaomi Pengcheng N70
+        - Li Auto L7
+        - AITO M8
+      tier2:
+        - Li Auto L8
+        - Denza N8L
+        - Wey Lanshan
+    note: 以家庭空间为核心诉求的中大型 SUV。tier1 优先大五座家庭 SUV，六座属性更强的理想 L8 放 tier2。
+
+  LS9:
+    name: 智己LS9
+    position: 豪华旗舰大六座 SUV
+    body_type: SUV
+    seats: 六座
+    segment: fullsize_suv
+    priority: flagship
+    archetype: luxury_flagship_6seat_suv
+    target_users:
+      - 多孩家庭
+      - 商务人士
+    core_scenario:
+      - 商务接待
+      - 多孩出行
+    selling_points:
+      - 豪华
+      - 尊享
+      - 旗舰体验
+    competitors:
+      tier1:
+        - Li Auto L9
+        - AITO M9
+        - XPeng GX
+        - Xiaomi Pengcheng N90
+      tier2:
+        - Denza N9
+        - NIO ES8
+        - "Lynk & Co 900"
+    note: 品牌旗舰，六座布局，兼具家用与商务属性。
+
+  L6:
+    name: 智己L6
+    position: 运动科技轿车
+    body_type: 轿车
+    seats: 五座
+    segment: midsize_sedan
+    priority: technology
+    archetype: intelligent_sport_sedan
+    target_users:
+      - 年轻白领
+      - 小家庭
+      - 科技先锋
+    core_scenario:
+      - 城市通勤
+      - 个人驾驶
+    selling_points:
+      - 操控
+      - 智能座舱
+      - 科技体验
+    competitors:
+      tier1:
+        - Xiaomi SU7
+        - Tesla Model 3
+        - Zeekr 007
+        - NIO ET5
+      tier2:
+        - XPeng P7+
+        - "Smart #6"
+    note: 运动科技轿车（五座），智能运动轿车赛道。
