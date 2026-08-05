@@ -73,6 +73,9 @@ auto_launch/outputs/
 # Workspace report HTMLs: runtime-generated, not committed
 mashang_workspace/outputs/reports/*.html
 
+# CI eval output — regenerated on every make ci, not committed
+mashang_workspace/outputs/tables/unified_eval_result.json
+
 # Defensive: promptbuilders should not contain runtime outputs
 mashang_workspace/promptbuilders/outputs/
 

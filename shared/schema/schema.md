@@ -223,7 +223,7 @@
 - `weighted_length_mm` / `weighted_width_mm` / `weighted_height_mm` / `weighted_wheelbase_mm`: 销量加权平均尺寸（mm），仅 `product_segment_monthly` 有
 - `date_month`: 月粒度日期，格式 `YYYY-MM-01`
 
-### delivery_inventory.parquet (Total Rows: 239,673 · Columns: 12 · Time Range: 2021-12 ~ 2026-07)
+### delivery_inventory.parquet (Total Rows: 239,916 · Columns: 14 · Time Range: 2021-12 ~ 2026-08)
 
 | Column Name              | Data Type      | Description                             |
 | :----------------------- | :------------- | :-------------------------------------- |
