@@ -1,0 +1,56 @@
+{% extends "report_base.html" %}
+
+{% block content %}
+<section class="kpi-grid">
+  <div class="kpi-card"><div class="label">用户车锁单</div><div class="value">{{ data.total_orders }}</div><div class="change neutral">上市以来</div></div>
+  <div class="kpi-card"><div class="label">已选订单</div><div class="value">{{ data.selected_orders }}</div><div class="change neutral">有已选记录</div></div>
+  <div class="kpi-card"><div class="label">未选订单</div><div class="value">{{ data.unselected_orders }}</div><div class="change neutral">无已选记录</div></div>
+</section>
+
+<section class="card">
+  <h2>已选/未选差异配置摘录</h2>
+  <div class="table-wrap"><table class="data-table">
+    <thead><tr><th>归属</th><th>属性</th><th>配置值</th><th>订单数</th><th>所在分类占比</th></tr></thead>
+    <tbody>
+      {% for row in data.diff_rows %}
+      <tr>
+        <td><span class="badge {{ 'badge-gold' if row['归属'] == '仅未选' else 'badge-muted' }}">{{ row['归属'] }}</span></td>
+        <td>{{ row['属性'] }}</td><td>{{ row['配置值'] }}</td>
+        <td>{{ row['订单数'] }}</td><td>{{ row['所在分类占比'] }}%</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table></div>
+  <p class="section-note">差异/共性按属性名（Attribute name）判定：仅一组出现该属性记录即差异（如 舒适包、超远距高精度双激光雷达、已选），两组均有即共性。所在分类占比 = 该属性订单数 / 所在分组（已选或未选）订单总数。</p>
+</section>
+
+<section class="card">
+  <h2>共性配置分版本矩阵</h2>
+  <div class="table-wrap"><table class="data-table">
+    <thead><tr><th>属性</th><th>配置值</th>{% for version in data.versions %}<th>{{ version }}</th>{% endfor %}<th>总计</th></tr></thead>
+    <tbody>
+      <tr><td>-</td><td><strong>锁单数</strong></td>{% for c in data.version_counts %}<td>{{ c }}</td>{% endfor %}<td>{{ data.total_orders }}</td></tr>
+      {% for row in data.common_matrix %}
+      <tr>
+        <td>{{ row['属性'] }}</td><td>{{ row['配置值'] }}</td>
+        {% for rate in row['cell_rates'] %}
+        <td>{{ rate }}%</td>
+        {% endfor %}
+        <td>{{ row['总占比'] }}%</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table></div>
+  <p class="section-note">分车型矩阵仅使用两组共有的属性（Attribute）一起分析，属性下各配置值分列展示；列=版本组；百分比为该版本内拥有该配置订单数 / 该版本总订单数。</p>
+</section>
+
+<section class="card">
+  <h2>数据口径</h2>
+  <table class="data-table scope-table"><tbody>
+    <tr><td class="scope-label"><strong>数据源</strong></td><td>{{ data.scope.data_source }}</td></tr>
+    <tr><td class="scope-label"><strong>时间</strong></td><td>{{ data.start_date }} 至 {{ data.as_of }}</td></tr>
+    <tr><td class="scope-label"><strong>筛选</strong></td><td>series=LS8，order_type=用户车，lock_time 为上市以来</td></tr>
+    <tr><td class="scope-label"><strong>口径</strong></td><td>{{ data.scope.metric_definition }}</td></tr>
+  </tbody></table>
+</section>
+{% endblock %}

@@ -1,0 +1,774 @@
+{
+  "description": "基于 (Attribute, value_code) 的配置业务语义定义。报告脚本消费此表，替代代码内硬编码判定。value_code 为 NaN 的历史行按 (Attribute, value) 经 aliases 反推归并（已校验 0 歧义）。noise 属性为极小量 NaN-only 历史噪音行。",
+  "coverage": {
+    "series": [
+      "LS8",
+      "LS9"
+    ],
+    "scope_note": "当前覆盖 LS8 + LS9"
+  },
+  "series": {
+    "LS8": {
+      "attributes": {
+        "21.5英寸4K二排观影屏": {
+          "category": "后排娱乐",
+          "semantic": "boolean",
+          "display_name": "21.5英寸4K二排观影屏",
+          "codes": {
+            "Y": {
+              "display": "是",
+              "included": true,
+              "aliases": [
+                "是"
+              ],
+              "order_count": 16
+            },
+            "N": {
+              "display": "否",
+              "included": false,
+              "aliases": [
+                "否"
+              ],
+              "order_count": 47
+            }
+          }
+        },
+        "21.5英寸二排娱乐屏": {
+          "category": "后排娱乐",
+          "semantic": "boolean",
+          "display_name": "21.5英寸二排娱乐屏",
+          "codes": {
+            "Y": {
+              "display": "是",
+              "included": true,
+              "aliases": [],
+              "order_count": 0
+            },
+            "N": {
+              "display": "否",
+              "included": false,
+              "aliases": [],
+              "order_count": 0
+            }
+          }
+        },
+        "21.5英寸二排观影屏": {
+          "category": "后排娱乐",
+          "semantic": "boolean",
+          "display_name": "21.5英寸二排观影屏",
+          "codes": {
+            "Y": {
+              "display": "是",
+              "included": true,
+              "aliases": [
+                "是"
+              ],
+              "order_count": 2110
+            },
+            "N": {
+              "display": "否",
+              "included": false,
+              "aliases": [
+                "否"
+              ],
+              "order_count": 9611
+            }
+          }
+        },
+        "IM 智控地暖系统": {
+          "category": "座舱舒适",
+          "semantic": "boolean",
+          "display_name": "IM 智控地暖系统",
+          "codes": {
+            "Y": {
+              "display": "是",
+              "included": true,
+              "aliases": [
+                "是"
+              ],
+              "order_count": 371
+            },
+            "N": {
+              "display": "否",
+              "included": false,
+              "aliases": [
+                "否"
+              ],
+              "order_count": 14705
+            }
+          }
+        },
+        "全线控转向系统": {
+          "category": "底盘操控",
+          "semantic": "boolean",
+          "display_name": "全线控转向系统",
+          "codes": {
+            "Y": {
+              "display": "是",
+              "included": true,
+              "aliases": [
+                "是"
+              ],
+              "order_count": 2473
+            },
+            "N": {
+              "display": "否",
+              "included": false,
+              "aliases": [
+                "否"
+              ],
+              "order_count": 3696
+            }
+          }
+        },
+        "内饰": {
+          "category": "内饰",
+          "semantic": "enum",
+          "display_name": "内饰",
+          "codes": {
+            "IN2-ASH": {
+              "display": "大象灰黑",
+              "included": true,
+              "aliases": [
+                "大象灰黑",
+                "大地象灰 深"
+              ],
+              "order_count": 8112
+            },
+            "IN3-ASA": {
+              "display": "大象灰棕",
+              "included": true,
+              "aliases": [
+                "大象灰棕",
+                "琥珀棕"
+              ],
+              "order_count": 4190
+            },
+            "IN2-AMA": {
+              "display": "大象灰米",
+              "included": true,
+              "aliases": [
+                "大象灰米",
+                "大地象灰 浅"
+              ],
+              "order_count": 3363
+            }
+          }
+        },
+        "后排娱乐屏（仅5座可选）": {
+          "category": "后排娱乐",
+          "semantic": "boolean",
+          "display_name": "后排娱乐屏（仅5座可选）",
+          "codes": {
+            "Y": {
+              "display": "是",
+              "included": true,
+              "aliases": [
+                "是"
+              ],
+              "order_count": 525
+            },
+            "N": {
+              "display": "否",
+              "included": false,
+              "aliases": [
+                "否"
+              ],
+              "order_count": 64
+            }
+          }
+        },
+        "地暖": {
+          "category": "座舱舒适",
+          "semantic": "boolean",
+          "display_name": "地暖",
+          "codes": {
+            "Y": {
+              "display": "是",
+              "included": true,
+              "aliases": [
+                "是"
+              ],
+              "order_count": 7
+            },
+            "N": {
+              "display": "否",
+              "included": false,
+              "aliases": [
+                "否"
+              ],
+              "order_count": 582
+            }
+          }
+        },
+        "外饰": {
+          "category": "外饰",
+          "semantic": "enum",
+          "display_name": "外饰",
+          "codes": {
+            "EX1-PYX": {
+              "display": "奥林匹斯黑",
+              "included": true,
+              "aliases": [
+                "奥林匹斯黑",
+                "星耀黑"
+              ],
+              "order_count": 6501
+            },
+            "EX1-AEG": {
+              "display": "帕米尔灰",
+              "included": true,
+              "aliases": [
+                "帕米尔灰",
+                "小象灰"
+              ],
+              "order_count": 4825
+            },
+            "EX1-WSE": {
+              "display": "阿尔卑斯白",
+              "included": true,
+              "aliases": [
+                "阿尔卑斯白",
+                "慕斯白"
+              ],
+              "order_count": 1934
+            },
+            "EX1-SSA": {
+              "display": "乔戈里银",
+              "included": true,
+              "aliases": [
+                "乔戈里银",
+                "勋章银"
+              ],
+              "order_count": 1614
+            },
+            "EX1-GYC": {
+              "display": "布莱德绿",
+              "included": true,
+              "aliases": [
+                "布莱德绿",
+                "约克角绿"
+              ],
+              "order_count": 791
+            }
+          }
+        },
+        "已选": {
+          "category": "选装包",
+          "semantic": "selection_tier",
+          "display_name": "已选配置",
+          "codes": {
+            "Stand": {
+              "display": "超远距高精度激光雷达",
+              "included": true,
+              "aliases": [
+                "超远距高精度激光雷达"
+              ],
+              "order_count": 1074,
+              "price": 0,
+              "note": "标配激光雷达"
+            },
+            "Pro": {
+              "display": "奢华智选包",
+              "included": true,
+              "aliases": [
+                "奢华智选包",
+                "奢华智选包+520雷达"
+              ],
+              "order_count": 13256,
+              "price": 9800
+            },
+            "Plus": {
+              "display": "奢华智选包及一体式超广域探射灯",
+              "included": true,
+              "aliases": [
+                "奢华智选包及一体式超广域探射灯"
+              ],
+              "order_count": 729,
+              "price": 13600,
+              "note": "含奢华智选包 + 探射灯"
+            }
+          }
+        },
+        "方向盘": {
+          "category": "方向盘",
+          "semantic": "enum",
+          "display_name": "方向盘",
+          "codes": {
+            "Oval": {
+              "display": "超广角视野全幅柔感瞬热方向盘",
+              "included": true,
+              "aliases": [
+                "超广角视野全幅柔感瞬热方向盘",
+                "小全幅"
+              ],
+              "order_count": 11599
+            },
+            "Full": {
+              "display": "全幅柔感瞬热方向盘",
+              "included": true,
+              "aliases": [
+                "全幅柔感瞬热方向盘"
+              ],
+              "order_count": 4066
+            }
+          }
+        },
+        "智慧舒享包": {
+          "category": "noise",
+          "semantic": "noise"
+        },
+        "激光雷达": {
+          "category": "noise",
+          "semantic": "noise"
+        },
+        "线控转向": {
+          "category": "底盘操控",
+          "semantic": "boolean",
+          "display_name": "线控转向",
+          "codes": {
+            "Y": {
+              "display": "是",
+              "included": true,
+              "aliases": [
+                "是"
+              ],
+              "order_count": 92
+            },
+            "N": {
+              "display": "否",
+              "included": false,
+              "aliases": [
+                "否"
+              ],
+              "order_count": 497
+            }
+          }
+        },
+        "舒适包": {
+          "category": "座舱舒适",
+          "semantic": "boolean",
+          "display_name": "舒适包",
+          "codes": {
+            "Y": {
+              "display": "是",
+              "included": true,
+              "aliases": [
+                "是"
+              ],
+              "order_count": 17
+            },
+            "N": {
+              "display": "否",
+              "included": false,
+              "aliases": [],
+              "order_count": 0
+            }
+          }
+        },
+        "舒适包  （音响/机械按摩等）": {
+          "category": "座舱舒适",
+          "semantic": "boolean",
+          "display_name": "舒适包（音响/机械按摩等）",
+          "codes": {
+            "Y": {
+              "display": "是",
+              "included": true,
+              "aliases": [
+                "是"
+              ],
+              "order_count": 589
+            },
+            "N": {
+              "display": "否",
+              "included": false,
+              "aliases": [],
+              "order_count": 0
+            }
+          }
+        },
+        "超远距高精度双激光雷达": {
+          "category": "智能驾驶",
+          "semantic": "enum",
+          "display_name": "超远距高精度双激光雷达",
+          "codes": {
+            "Pro": {
+              "display": "高阶",
+              "included": true,
+              "aliases": [
+                "高阶"
+              ],
+              "order_count": 534
+            },
+            "Stand": {
+              "display": "标准",
+              "included": true,
+              "aliases": [
+                "标准"
+              ],
+              "order_count": 72
+            }
+          }
+        },
+        "超远距高精度激光雷达": {
+          "category": "noise",
+          "semantic": "noise"
+        },
+        "轮毂": {
+          "category": "轮毂",
+          "semantic": "enum",
+          "display_name": "轮毂",
+          "codes": {
+            "SD-TI21-J": {
+              "display": "21英寸星耀超多辐豪华轮辋",
+              "included": true,
+              "aliases": [
+                "21英寸星耀超多辐豪华轮辋",
+                "21英寸运动高性能轮辋（精车）"
+              ],
+              "order_count": 14107
+            },
+            "SD-TI21": {
+              "display": "21英寸星夜黑超多辐豪华轮辋",
+              "included": true,
+              "aliases": [
+                "21英寸星夜黑超多辐豪华轮辋",
+                "21英寸运动高性能轮辋"
+              ],
+              "order_count": 644
+            },
+            "SD-TI20-J": {
+              "display": "20英寸星刃十辐运动轮辋",
+              "included": true,
+              "aliases": [
+                "20英寸星刃十辐运动轮辋"
+              ],
+              "order_count": 601
+            },
+            "SD-TI22": {
+              "display": "22英寸星冕镜面超奢轮辋",
+              "included": true,
+              "aliases": [
+                "22英寸星冕镜面超奢轮辋"
+              ],
+              "order_count": 313
+            }
+          }
+        },
+        "顶探照灯": {
+          "category": "智能交互",
+          "semantic": "boolean",
+          "display_name": "顶探照灯",
+          "codes": {
+            "Y": {
+              "display": "是",
+              "included": true,
+              "aliases": [],
+              "order_count": 0
+            },
+            "N": {
+              "display": "否",
+              "included": false,
+              "aliases": [
+                "否"
+              ],
+              "order_count": 606
+            }
+          }
+        }
+      }
+    },
+    "LS9": {
+      "attributes": {
+        "内饰": {
+          "category": "内饰",
+          "semantic": "enum",
+          "display_name": "内饰",
+          "codes": {
+            "IN2-ASH": {
+              "display": "大地象灰 深",
+              "included": true,
+              "aliases": [
+                "大地象灰 深",
+                "深色内饰"
+              ],
+              "order_count": 14727
+            },
+            "IN2-AMA": {
+              "display": "大地象灰 浅",
+              "included": true,
+              "aliases": [
+                "大地象灰 浅"
+              ],
+              "order_count": 10575
+            },
+            "IN1-ASH": {
+              "display": "深色内饰（麂皮）",
+              "included": true,
+              "aliases": [
+                "深色内饰（麂皮）",
+                "大地象灰 深（超纤丝柔麂皮绒顶棚）"
+              ],
+              "order_count": 460
+            },
+            "IN1-AMA": {
+              "display": "浅色内饰（麂皮）",
+              "included": true,
+              "aliases": [
+                "浅色内饰（麂皮）",
+                "大地象灰 浅（超纤丝柔麂皮绒顶棚）"
+              ],
+              "order_count": 243
+            },
+            "IN2-ASF": {
+              "display": "大地橘色",
+              "included": true,
+              "aliases": [
+                "大地橘色",
+                "橙黑色"
+              ],
+              "order_count": 342
+            }
+          }
+        },
+        "动力电池": {
+          "category": "动力电池",
+          "semantic": "enum",
+          "display_name": "动力电池",
+          "codes": {
+            "52": {
+              "display": "52度电池",
+              "included": true,
+              "aliases": [
+                "52度电池"
+              ],
+              "order_count": 2
+            }
+          }
+        },
+        "外饰": {
+          "category": "外饰",
+          "semantic": "enum",
+          "display_name": "外饰",
+          "codes": {
+            "EX1-PYX": {
+              "display": "奥林匹斯黑",
+              "included": true,
+              "aliases": [
+                "奥林匹斯黑"
+              ],
+              "order_count": 12937
+            },
+            "EX1-JND": {
+              "display": "波罗蒂蓝",
+              "included": true,
+              "aliases": [
+                "波罗蒂蓝",
+                "星寰蓝"
+              ],
+              "order_count": 8285
+            },
+            "EX1-SSA": {
+              "display": "乔戈里银",
+              "included": true,
+              "aliases": [
+                "乔戈里银"
+              ],
+              "order_count": 2846
+            },
+            "EX1-AEG": {
+              "display": "高加索灰",
+              "included": true,
+              "aliases": [
+                "高加索灰"
+              ],
+              "order_count": 2279
+            }
+          }
+        },
+        "拖挂尾勾": {
+          "category": "拖挂",
+          "semantic": "boolean",
+          "display_name": "拖挂尾勾",
+          "codes": {
+            "Y": {
+              "display": "是",
+              "included": true,
+              "aliases": [
+                "是"
+              ],
+              "order_count": 500
+            },
+            "N": {
+              "display": "否",
+              "included": false,
+              "aliases": [
+                "否"
+              ],
+              "order_count": 341
+            }
+          }
+        },
+        "拖挂系统": {
+          "category": "拖挂",
+          "semantic": "boolean",
+          "display_name": "拖挂系统",
+          "codes": {
+            "Y": {
+              "display": "是",
+              "included": true,
+              "aliases": [
+                "是"
+              ],
+              "order_count": 2296
+            },
+            "N": {
+              "display": "否",
+              "included": false,
+              "aliases": [
+                "否"
+              ],
+              "order_count": 23210
+            }
+          }
+        },
+        "方向盘": {
+          "category": "方向盘",
+          "semantic": "enum",
+          "display_name": "方向盘",
+          "codes": {
+            "Half": {
+              "display": "半幅方向盘",
+              "included": true,
+              "aliases": [
+                "半幅方向盘"
+              ],
+              "order_count": 13878
+            },
+            "Full": {
+              "display": "全幅方向盘",
+              "included": true,
+              "aliases": [
+                "全幅方向盘"
+              ],
+              "order_count": 12168
+            },
+            "Oval": {
+              "display": "小全幅方向盘",
+              "included": true,
+              "aliases": [
+                "小全幅方向盘"
+              ],
+              "order_count": 301
+            }
+          }
+        },
+        "智能冷暖双用冰箱": {
+          "category": "座舱舒适",
+          "semantic": "boolean",
+          "display_name": "智能冷暖双用冰箱",
+          "codes": {
+            "Y": {
+              "display": "是",
+              "included": true,
+              "aliases": [
+                "是"
+              ],
+              "order_count": 25506
+            },
+            "N": {
+              "display": "否",
+              "included": false,
+              "aliases": [],
+              "order_count": 0
+            }
+          }
+        },
+        "激光雷达": {
+          "category": "智能驾驶",
+          "semantic": "enum",
+          "display_name": "激光雷达",
+          "codes": {
+            "Pro": {
+              "display": "高阶+Thor",
+              "included": true,
+              "aliases": [
+                "高阶+Thor"
+              ],
+              "order_count": 26345
+            }
+          }
+        },
+        "线控转向": {
+          "category": "底盘操控",
+          "semantic": "boolean",
+          "display_name": "线控转向",
+          "codes": {
+            "Y": {
+              "display": "是",
+              "included": true,
+              "aliases": [
+                "是"
+              ],
+              "order_count": 458
+            },
+            "N": {
+              "display": "否",
+              "included": false,
+              "aliases": [
+                "否"
+              ],
+              "order_count": 32
+            }
+          }
+        },
+        "车载冰箱": {
+          "category": "座舱舒适",
+          "semantic": "boolean",
+          "display_name": "车载冰箱",
+          "codes": {
+            "Y": {
+              "display": "是",
+              "included": true,
+              "aliases": [
+                "是"
+              ],
+              "order_count": 839
+            },
+            "N": {
+              "display": "否",
+              "included": false,
+              "aliases": [],
+              "order_count": 0
+            }
+          }
+        },
+        "轮毂": {
+          "category": "轮毂",
+          "semantic": "enum",
+          "display_name": "轮毂",
+          "codes": {
+            "SD-TI21": {
+              "display": "21英寸星耀超多辐豪华轮辋",
+              "included": true,
+              "aliases": [
+                "21英寸星耀超多辐豪华轮辋",
+                "21英寸星耀超多辐轮辋",
+                "21英寸轮辋"
+              ],
+              "order_count": 20354
+            },
+            "SD-TI22": {
+              "display": "22英寸星冕镜面超奢轮辋",
+              "included": true,
+              "aliases": [
+                "22英寸星冕镜面超奢轮辋"
+              ],
+              "order_count": 5993
+            }
+          }
+        }
+      }
+    }
+  }
+}

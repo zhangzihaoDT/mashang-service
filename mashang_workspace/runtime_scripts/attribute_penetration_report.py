@@ -7,9 +7,10 @@
 - 同一 (Attribute, value_code) 的多个显示名归并为一个配置（如 Stand = 标准 / 标准+Orin）；
 - value_code 为 N 或 value 为"否"的行表示未含该配置，不计入渗透率分子；
 - 覆盖独立属性行 + "已选"聚合属性（LS8 独有，value 含关键词时计入，
-  如"已选"=超远距高精度激光雷达即 LS8 标配激光雷达的记录）；
-- 按 business_definition.json 的 config_packages 业务定义展开选装包：
-  订单已选某选装包且包内含关键词时计入（如"奢华智选包"内含 520线超视域激光雷达）。
+  如"已选"=超远距高精度激光雷达即 LS8 标配激光雷达的记录）。
+
+注：旧的"选装包业务展开"（config_packages，如奢华智选包→包内配置）已废弃移除。
+配置渗透率仅基于显式配置行统计；配置拥有率综合分析见 ls8_configuration_selection_report.py。
 
 用法:
     python scripts/attribute_penetration_report.py                            # 默认分析激光雷达
@@ -32,7 +33,6 @@ from utils.result_contract import build_success_contract, save_contract_json, co
 
 ORDER_PARQUET = REPO_ROOT / "dataset" / "order_data.parquet"
 CONFIG_PARQUET = REPO_ROOT / "dataset" / "config_attribute.parquet"
-BUSINESS_DEF = REPO_ROOT / "shared" / "schema" / "business_definition.json"
 
 def parse_args():
     p = argparse.ArgumentParser(description="配置渗透率分析")
@@ -140,96 +140,6 @@ def match_attribute_rows(config_in_scope, keyword):
     return pd.concat([indep, sel_match], ignore_index=True)
 
 
-def load_config_packages():
-    """读取 business_definition.json 的 config_packages 业务定义。
-
-    返回 {选装包名: {series, attribute, value_code, display_name, price, included_configs}}
-    """
-    try:
-        with open(BUSINESS_DEF, encoding="utf-8") as f:
-            bd = json.load(f)
-        pkgs = bd.get("config_packages", {}) or {}
-        return {k: v for k, v in pkgs.items() if isinstance(v, dict) and v.get("included_configs")}
-    except Exception:
-        return {}
-
-
-def expand_package_orders(config_in_scope, keyword, config_packages):
-    """按 config_packages 展开选装包：订单已选某选装包，且该包业务定义内含 keyword → 计入渗透率。
-
-    冲突消解：包定义可配置 attribute_match（包内配置项 → 独立属性行关键词）。
-    当订单已选该包、且存在匹配 attribute_match 关键词的独立属性行时，该订单的该配置
-    以显式行为准，不通过包展开计入——避免包定义（如奢华智选包含 21 寸轮毂）
-    覆盖订单实际显式选装（如实际选 22 寸轮毂）。
-
-    返回:
-      (package_orders: set[str], matched_packages: list[str])
-      package_orders 是该关键词下由选装包展开、且无显式冲突的订单集合。
-    """
-    package_orders = set()
-    matched_packages = []
-    if not config_packages or SELECTED_ATTRIBUTE not in set(config_in_scope["Attribute"]):
-        return package_orders, matched_packages
-
-    sel = config_in_scope[config_in_scope["Attribute"] == SELECTED_ATTRIBUTE]
-    sel_code = sel.copy()
-    if "value_code" in sel_code.columns:
-        sel_code["value_code"] = sel_code["value_code"].astype(str).str.strip()
-
-    indep = config_in_scope[(config_in_scope["Attribute"] != SELECTED_ATTRIBUTE)]
-
-    for name, pkg in config_packages.items():
-        included = pkg.get("included_configs") or []
-        attr_match = pkg.get("attribute_match") or {}
-        # 命中包内配置项的 keyword（含寸/英寸归一化）
-        variants = _keyword_variants(keyword)
-        hit_items = [c for c in included if any(v in str(c) for v in variants)]
-        if not hit_items:
-            continue
-        code = str(pkg.get("value_code") or "").strip()
-        display = str(pkg.get("display_name") or "")
-        mask = pd.Series(False, index=sel_code.index)
-        if code:
-            mask |= sel_code["value_code"].eq(code)
-        if display:
-            mask |= sel_code["value"].astype(str).str.contains(display, na=False)
-        if not mask.any():
-            continue
-        pkg_orders = set(sel_code.loc[mask, "Order Number"].astype(str))
-
-        # 冲突消解：对命中的包内配置项，若有 attribute_match 关键词，
-        # 检查订单的独立行 value 是否与包配置一致：
-        #   - 独立行 value 含包配置特征词（如"21寸轮毂"→匹配"21"）→ 一致，由显式行计入；
-        #   - 独立行 value 不含 → 与包配置冲突（如实际选 22 寸）→ 排除，避免包展开误计。
-        for item in hit_items:
-            mws = attr_match.get(item) or []
-            if not mws:
-                continue
-            hit = indep[
-                indep["Attribute"].astype(str).str.contains("|".join(mws), na=False)
-                | indep["value"].astype(str).str.contains("|".join(mws), na=False)
-            ]
-            if not len(hit):
-                continue
-            # 提取包配置的尺寸特征（如"21寸"→"21"），独立行 value 若含该特征视为一致
-            feat = ""
-            for ch in item:
-                if ch.isdigit():
-                    feat += ch
-                elif feat:
-                    break
-            consistent = pd.Series(False, index=hit.index)
-            if feat:
-                consistent = hit["value"].astype(str).str.contains(feat, na=False)
-            conflict_orders = set(hit.loc[~consistent, "Order Number"].astype(str))
-            pkg_orders -= conflict_orders
-
-        if pkg_orders:
-            package_orders |= pkg_orders
-            matched_packages.append(name)
-    return package_orders, matched_packages
-
-
 def main():
     args = parse_args()
     t_start, t_end, t_label, tw_type = resolve_time_range(args)
@@ -250,9 +160,6 @@ def main():
     config_df = pd.read_parquet(str(CONFIG_PARQUET))
     config_in_scope = config_df[config_df["Order Number"].isin(order_ids)]
     attr_filtered = match_attribute_rows(config_in_scope, args.attribute)
-
-    config_packages = load_config_packages()
-    package_orders, matched_packages = expand_package_orders(config_in_scope, args.attribute, config_packages)
 
     value_code_map = build_value_code_map(config_df)
 
@@ -275,7 +182,6 @@ def main():
     recs = pd.DataFrame(rows) if rows else pd.DataFrame(columns=["order_number", "value", "value_code", "label", "penetrated"])
 
     penetrated_orders = set(recs.loc[recs["penetrated"], "order_number"]) if len(recs) else set()
-    penetrated_orders |= package_orders
     penetration_rate = round(len(penetrated_orders) / total_orders * 100, 1) if total_orders else 0
 
     items = []
@@ -299,8 +205,7 @@ def main():
             f"{args.attribute} 渗透率 = 含该配置的订单数 / 总订单数；"
             f"含该配置 = 配置表按 value_code 解析（Y/档位=含，N/否=不含）；"
             f"显示名按 (Attribute, value_code) 归并（同一属性下同 code 多个显示名视为同一配置）；"
-            f"覆盖独立属性行 + '已选'聚合属性（LS8 独有，value 含关键词时计入）；"
-            f"并按 config_packages 业务定义展开选装包（已选该包且包内含关键词时计入）"
+            f"覆盖独立属性行 + '已选'聚合属性（LS8 独有，value 含关键词时计入）"
         ),
     }
     result = {
@@ -309,8 +214,6 @@ def main():
             "total_orders": total_orders,
             "penetrated_orders": len(penetrated_orders),
             "penetration_rate_pct": penetration_rate,
-            "package_expanded_orders": len(package_orders),
-            "matched_packages": matched_packages,
         },
         "dimensions": [{"name": "value", "items": dim_items}],
     }
