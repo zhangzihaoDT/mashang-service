@@ -159,6 +159,48 @@ python scripts/skills_atp_price.py 2026-05 --output outputs/reports/atp_2026-05.
 **工具**：`tools/multitable_metric_tool.py`
 **模板库**：`tools/config_cross_analysis_templates.py` (17 个模板)
 
+### 配置表 value_code 解析规则
+
+`config_attribute.parquet` 为 EAV 长表，字段：`Attribute`（属性名）、`value`（显示名）、`value_code`（配置 code）、`required`、`price`。
+
+**核心规律：`value_code` 是配置的唯一稳定标识，`value` 是显示名。**
+
+- 同一 `(Attribute, value_code)` 在不同车型/批次下可能对应多个显示名，需按 value_code 归并（取出现最多者），例如：
+  - `激光雷达 | Stand`：LS6 显示为"标准+Orin"/"标准"
+  - `内饰 | IN2-AMA`：LS9 显示为"大地象灰 浅"，LS8 显示为"大象灰米"
+  - `外饰 | EX1-PYX`：LS9 显示为"奥林匹斯黑"，LS8 另有"星耀黑"
+- value_code 语义（跨属性通用档位）：`Y`=是、`N`=否、`Stand`=标准、`Pro`=高阶、`Plus`=增强
+- 渗透率判定：`value_code` 为 `N` 或 value 为"否/无/未选" → 未含；`Y`/`Stand`/`Pro`/`Plus` 等档位码 → 含；value_code 缺失时回退 value 文本判断
+
+### "已选"聚合属性（LS8 独有）
+
+**`已选` 是 LS8 车型独有的 Attribute 名**（截至当前数据仅 LS8 有，17,933 单），用于编码 LS8 的配置包/核心配置。它有 3 个 value_code，各有对应的 value 显示名：
+
+| value_code | value（显示名） | 含义 | 参考价 |
+|------------|----------------|------|--------|
+| `Stand` | 超远距高精度激光雷达 | LS8 标配激光雷达 | 0 |
+| `Pro` | 奢华智选包 | 付费选装包 | 4800~9800 |
+| `Plus` | 奢华智选包及一体式超广域探射灯 | 付费选装包 + 探射灯 | 13600 |
+
+注意：
+- 部分历史行 value_code 为空（2874 行），但 value 显示名仍可识别，按 value 文本判断
+- `Pro` 另有"奢华智选包+520雷达"（2 单）等变体显示名
+- 分析激光雷达渗透率时，**必须下探"已选"的 value**：`已选=Stand`（超远距高精度激光雷达）即 LS8 标配激光雷达记录，不应遗漏
+- 配套脚本：`runtime_scripts/attribute_penetration_report.py` 已按 `(Attribute, value_code)` 归并并覆盖"已选"属性
+
+### 选装包业务展开（config_packages）与冲突消解
+
+`shared/schema/business_definition.json` 的 `config_packages` 定义"选装包 → 实际配置集合"的业务展开：
+已选某选装包（如 `已选=Pro` 奢华智选包）的订单，视为实际拥有包内 `included_configs` 列出的配置
+（如 520线超视域激光雷达、B&O豪华音响、21寸轮毂＋马牌静音胎等）。
+
+**冲突消解规则**（attribute_penetration_report.py）：
+- 包内配置项若配置了 `attribute_match`（包内配置 → 独立属性行关键词），则检查订单的独立属性行：
+  - 独立行 value 与包配置**一致**（如 21 寸轮毂 vs 21英寸星耀超多辐豪华轮辋）→ 由显式行计入
+  - 独立行 value 与包配置**不一致**（如包定义 21 寸、实际选 22 英寸）→ 排除该订单，避免包展开误计
+- 尺寸归一化：查询含"寸"的关键词同时匹配数据中的"英寸"写法（如"21寸"→"21英寸"）
+- 结果中 `package_expanded_orders` 标注由选装包展开的订单数，`matched_packages` 标注命中的选装包
+
 ## 数据字典查询
 
 ```
