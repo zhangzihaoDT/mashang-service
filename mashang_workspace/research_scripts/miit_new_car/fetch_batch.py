@@ -66,9 +66,9 @@ class _DetailParser(HTMLParser):
 
     def handle_starttag(self, tag, attrs):
         a = dict(attrs)
-        if tag == "div" and a.get("class") == "_nk_wz_tit":
+        if tag == "div" and (a.get("class") in ("_nk_wz_tit", "ctitle") or a.get("id") in ("con_con",)):
             self._in_title = True
-        if tag == "div" and a.get("id") == "zoom":
+        if tag == "div" and (a.get("id") in ("zoom", "con_con") or a.get("class") in ("con_con",)):
             self._in_zoom = True
             self.content_html = ""
         if self._in_zoom:
@@ -182,15 +182,18 @@ def fetch_batch(
     status = "publicity" if RE_PUBLICITY.search(title) else "official"
 
     attachments = []
+    from urllib.parse import urljoin
     for a in parser.attachments:
         att_title = a["title"] or a["filename"]
         source_format = a.get("source_format", RE_DOC_FORMAT)
+        # Resolve relative href (e.g. /cms_files/...) against detail_url
+        att_url = urljoin(detail_url, a["url"])
         # Classify source_type
         source_type = "unknown"
         if RE_ENTERPRISE_ADMISSION.search(att_title):
             source_type = RE_ENTERPRISE_ADMISSION_SOURCE_TYPE
         attachments.append({
-            "url": a["url"],
+            "url": att_url,
             "title": att_title,
             "filename": a["filename"],
             "source_format": source_format,

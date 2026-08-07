@@ -1,48 +1,135 @@
 #!/usr/bin/env python3
 """
-MIIT Pipeline 2: 车型详情归档
+MIIT Pipeline 2: 车型详情归档（可恢复的数据任务）
 
-从搜索结果中的 detail_url 抓取车型详情页，
-提取参数、下载照片，归档为 409-品牌/ 文件夹。
+抓取策略（失败分类 + 有限重试 + checkpoint/resume）:
+  - 状态分类: SUCCESS / NOT_FOUND / TRANSIENT_ERROR / BLOCKED / PARSE_ERROR
+  - 瞬态失败 (timeout / 5xx / connection reset) 有限重试:
+      max_retries=3, backoff = 2**n + random_jitter
+  - 每次请求后保存 fetch_status_{batch}.json checkpoint
+  - --retry-failed 只补抓 TRANSIENT_ERROR / BLOCKED 车型
+  - 已成功数据不删除: 失败时标记 data_status=STALE + last_success
+  - 原始页面缓存到 raw/{batch}/{brand}/，抓取失败时可从缓存恢复解析
 
 用法:
-  python3 miit_archive_detail.py --brand 小鹏        # 归档指定品牌
-  python3 miit_archive_detail.py --brand 小鹏 --dry-run  # 预览
-  python3 miit_archive_detail.py --all-missing      # 归档所有未归档品牌
+  python3 miit_archive_detail.py --batch 410 --all-missing    # 归档所有未归档品牌
+  python3 miit_archive_detail.py --batch 410 --retry-failed   # 只补抓失败车型
+  python3 miit_archive_detail.py --brand 零跑 --batch 410
+  python3 miit_archive_detail.py --brand 零跑 --dry-run       # 预览
 """
 
 import argparse
 import json
+import random
 import re
 import sys
 import time
+from collections import Counter
+from datetime import datetime
 from pathlib import Path
 
 import requests
 
 HERE = Path(__file__).parent
 MIIT_BASE = "https://www.miit.gov.cn"
+RAW_BASE = HERE / "raw"          # 原始页面缓存: raw/{batch}/{brand}/{model_id}.html
 
-# 共享 Session（与 miit_search.py 保持一致）
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-                  "AppleWebKit/537.36 (KHTML, like Gecko) "
-                  "Chrome/150.0.0.0 Safari/537.36",
-    "Referer": "https://www.miit.gov.cn/datainfo/dljdclscqyjcpgg/"
-               "xcpgs409dwdwe233/index.html",
-}
-SESSION = requests.Session()
-SESSION.headers.update(HEADERS)
+# 网络参数（政府站点，保守设置）
+TIMEOUT = (10, 60)               # connect=10s, read=60s
+MAX_RETRIES = 3
+REQUEST_INTERVAL = (0.8, 1.5)    # 请求间隔随机化
 
-# Warm up
+# 失败分类
+SUCCESS = "SUCCESS"
+NOT_FOUND = "NOT_FOUND"
+TRANSIENT_ERROR = "TRANSIENT_ERROR"
+BLOCKED = "BLOCKED"
+PARSE_ERROR = "PARSE_ERROR"
+SKIPPED = "SKIPPED"              # 无 detail_url 等数据问题，非抓取结果
+RETRYABLE = {TRANSIENT_ERROR, BLOCKED}
+
+# 复用 miit_search.py 的批次配置（pageId / iframe index）
 try:
-    SESSION.get(
-        "https://www.miit.gov.cn/datainfo/dljdclscqyjcpgg/"
-        "xcpgs409dwdwe233/index.html",
-        timeout=15,
-    )
-except Exception:
+    from miit_search import BATCH_CONFIG, DEFAULT_BATCH
+except ImportError:
+    BATCH_CONFIG = {"409": {"pageId": "49d24aca2b7f42e599691da4cc329220", "index": "xcpgs409dwdwe233"}}
+    DEFAULT_BATCH = "409"
+
+# 公示日期（用于 .md 标题元信息），可按需补充
+BATCH_DATE = {"409": "2026-07-07", "410": "2026-08-07"}
+
+
+class MiitError(Exception):
     pass
+
+
+class TransientError(MiitError):
+    """timeout / 5xx / connection reset —— 可重试"""
+
+
+class BlockedError(MiitError):
+    """403 / 429 / 验证码 / 风控 —— 不可重试，需人工介入"""
+
+
+class NotFoundError(MiitError):
+    """404 —— 明确不存在"""
+
+
+def status_of_exc(e) -> str:
+    if isinstance(e, NotFoundError):
+        return NOT_FOUND
+    if isinstance(e, BlockedError):
+        return BLOCKED
+    return TRANSIENT_ERROR
+
+
+def short_label(e) -> str:
+    if isinstance(e, NotFoundError):
+        return "MIIT_NOT_FOUND"
+    if isinstance(e, BlockedError):
+        return "MIIT_BLOCKED"
+    if isinstance(e, requests.exceptions.ReadTimeout):
+        return "MIIT_TIMEOUT"
+    if isinstance(e, requests.exceptions.ConnectTimeout):
+        return "MIIT_CONN_TIMEOUT"
+    if isinstance(e, requests.exceptions.ConnectionError):
+        return "MIIT_CONN_RESET"
+    return "MIIT_NETWORK"
+
+
+def get_batch_date(batch: str) -> str:
+    return BATCH_DATE.get(batch, "")
+
+
+def get_batch_cfg(batch: str) -> dict:
+    return BATCH_CONFIG.get(batch, BATCH_CONFIG[DEFAULT_BATCH])
+
+
+def build_headers(batch: str) -> dict:
+    cfg = get_batch_cfg(batch)
+    return {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                      "AppleWebKit/537.36 (KHTML, like Gecko) "
+                      "Chrome/150.0.0.0 Safari/537.36",
+        "Referer": f"https://www.miit.gov.cn/datainfo/dljdclscqyjcpgg/"
+                   f"{cfg['index']}/index.html",
+    }
+
+
+SESSION = requests.Session()
+
+
+def _prime_session(batch: str):
+    SESSION.headers.update(build_headers(batch))
+    cfg = get_batch_cfg(batch)
+    try:
+        SESSION.get(
+            f"https://www.miit.gov.cn/datainfo/dljdclscqyjcpgg/"
+            f"{cfg['index']}/index.html",
+            timeout=(10, 30),
+        )
+    except Exception:
+        pass
 
 
 def load_scan(batch: str = "409") -> dict:
@@ -55,11 +142,107 @@ def load_scan(batch: str = "409") -> dict:
     return json.loads(m.group(1))
 
 
-def fetch_detail_page(detail_url: str) -> str:
+def _is_block_page(text: str) -> bool:
+    head = text[:2000]
+    return any(kw in head for kw in ("安全验证", "访问验证", "请输入验证码"))
+
+
+def fetch_detail_page(detail_url: str, model_id: str = "",
+                      max_retries: int = MAX_RETRIES):
+    """抓取详情页，对瞬态失败有限重试。
+
+    Returns: (html, attempts)
+    Raises: NotFoundError / BlockedError / TransientError（重试耗尽后）
+    """
     full_url = MIIT_BASE + detail_url
-    resp = SESSION.get(full_url, timeout=30)
-    resp.raise_for_status()
-    return resp.text
+    last_err: MiitError | None = None
+    attempts = 0
+    for attempt in range(1, max_retries + 1):
+        attempts = attempt
+        try:
+            resp = SESSION.get(full_url, timeout=TIMEOUT)
+            code = resp.status_code
+            if code == 404:
+                raise NotFoundError(f"HTTP 404 页面不存在")
+            if code in (403, 429) or _is_block_page(resp.text):
+                raise BlockedError(f"HTTP {code} 被拦截/风控")
+            if code >= 500:
+                raise TransientError(f"HTTP {code} 服务端错误")
+            resp.raise_for_status()
+            return resp.text, attempts
+        except (NotFoundError, BlockedError) as e:
+            raise e
+        except requests.exceptions.ReadTimeout as e:
+            last_err = TransientError("Read timed out")
+        except requests.exceptions.ConnectTimeout as e:
+            last_err = TransientError(f"连接超时 ({e})")
+        except requests.exceptions.ConnectionError as e:
+            last_err = TransientError(f"connection reset ({e})")
+        except requests.exceptions.RequestException as e:
+            last_err = TransientError(f"请求失败 ({e})")
+        if attempt < max_retries:
+            delay = 2 ** attempt + random.uniform(0, 1)
+            print(f"    ⚠ {model_id or full_url} 瞬态失败，{delay:.1f}s 后重试 {attempt}/{max_retries}")
+            time.sleep(delay)
+    raise last_err or TransientError("未知网络错误")
+
+
+def raw_cache_path(batch: str, brand: str, model_id: str) -> Path:
+    return RAW_BASE / batch / brand / f"{model_id}.html"
+
+
+class FetchState:
+    """每个车型的抓取状态 checkpoint（fetch_status_{batch}.json）"""
+
+    def __init__(self, batch: str):
+        self.batch = batch
+        self.path = HERE / f"fetch_status_{batch}.json"
+        self.data: dict = {}
+        if self.path.exists():
+            try:
+                self.data = json.loads(self.path.read_text(encoding="utf-8"))
+            except Exception:
+                self.data = {}
+
+    def get(self, model_id: str, default=None):
+        return self.data.get(model_id, default)
+
+    def record(self, model_id, detail_url, status, attempts=0,
+               last_error="", last_success=None, action="", code=""):
+        prev = self.data.get(model_id, {})
+        if status == SUCCESS:
+            last_success = last_success or datetime.now().strftime("%Y-%m-%d")
+            data_status = "FRESH"
+        else:
+            last_success = prev.get("last_success")
+            data_status = "STALE" if last_success else "MISSING"
+        self.data[model_id] = {
+            "status": status,
+            "code": code or status,
+            "detail_url": detail_url,
+            "attempts": attempts,
+            "last_error": last_error,
+            "last_success": last_success,
+            "data_status": data_status,
+            "action": action,
+            "updated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        }
+
+    def save(self):
+        tmp = self.path.with_suffix(".json.tmp")
+        tmp.write_text(json.dumps(self.data, ensure_ascii=False, indent=2),
+                       encoding="utf-8")
+        tmp.replace(self.path)
+
+    def retry_queue(self, brands) -> list[tuple[dict, dict]]:
+        """处于 TRANSIENT_ERROR / BLOCKED 且尚未归档成功的车型。"""
+        queue = []
+        for b in brands:
+            for m in b["all_rows"]:
+                rec = self.get(m["cpxh"]) or {}
+                if rec.get("status") in RETRYABLE:
+                    queue.append((b, m))
+        return queue
 
 
 def parse_tables(html: str) -> list[dict]:
@@ -70,8 +253,6 @@ def parse_tables(html: str) -> list[dict]:
          <tr><th>key1:</th><td>val1</td><th>key2:</th><td>val2</td></tr>
       B) Header row (<th>...) + data row(s) (<td>...) (Tables 2, 3).
     """
-    S = requests.Session()
-    S.headers.update(HEADERS)
     results = []
     table_pattern = re.compile(r'<table[^>]*>(.*?)</table>', re.DOTALL)
 
@@ -162,23 +343,28 @@ def extract_photos(html: str) -> list[dict]:
     return [{"url": url} for url in links if url not in seen and not seen.add(url)]
 
 
-def download_photo(url: str, dest: Path):
+def download_photo(url: str, dest: Path, batch: str = DEFAULT_BATCH):
     full_url = MIIT_BASE + url
-    resp = SESSION.get(full_url, timeout=60, headers={
-        "Referer": "https://www.miit.gov.cn/datainfo/dljdclscqyjcpgg/"
-                   "xcpgs409dwdwe233/index.html",
+    cfg = get_batch_cfg(batch)
+    resp = SESSION.get(full_url, timeout=TIMEOUT, headers={
+        "Referer": f"https://www.miit.gov.cn/datainfo/dljdclscqyjcpgg/"
+                   f"{cfg['index']}/index.html",
     })
     resp.raise_for_status()
     dest.write_bytes(resp.content)
 
 
 def tables_to_md(tables: list[dict], model_id: str, product_name: str,
-                 cpsb: str, qymc: str, detail_url: str, photos: list[dict]) -> str:
+                 cpsb: str, qymc: str, detail_url: str, photos: list[dict],
+                 batch: str = DEFAULT_BATCH) -> str:
     brand_display = cpsb.replace("牌", "").strip()
-    title = f"工信部第409批新车公示 — {cpsb}{product_name}"
+    pub_date = get_batch_date(batch)
+    title = f"工信部第{batch}批新车公示 — {cpsb}{product_name}"
 
-    lines = [f"# {title}", "", "> 数据来源：工信部道路机动车辆生产企业及产品公告",
-             "> 公示时间：2026-07-07", ""]
+    lines = [f"# {title}", "", "> 数据来源：工信部道路机动车辆生产企业及产品公告"]
+    if pub_date:
+        lines.append(f"> 公示时间：{pub_date}")
+    lines.append("")
 
     for table_data in tables:
         # Determine section name
@@ -223,7 +409,7 @@ def tables_to_md(tables: list[dict], model_id: str, product_name: str,
 
     lines.append("---")
     lines.append("")
-    lines.append(f"> 存档时间：2026-07-13")
+    lines.append(f"> 存档时间：{datetime.now().strftime('%Y-%m-%d')}")
     lines.append(f"> 来源：{MIIT_BASE}{detail_url}")
 
     return "\n".join(lines)
@@ -240,52 +426,99 @@ def extract_optional_config(table_data: dict) -> list[str]:
     return [i.strip() for i in items if i.strip()]
 
 
-def archive_model(model: dict, brand_dir: Path, dry_run: bool = False) -> bool:
+def archive_model(model: dict, brand_dir: Path, state: FetchState, brand: str,
+                  batch: str = DEFAULT_BATCH, dry_run: bool = False,
+                  prefer_cache: bool = True) -> dict:
+    """归档单个车型，返回结构化结果。
+
+    Returns: {brand, model_id, status, code, attempts, last_error,
+              last_success, action}
+    """
     model_id = model["cpxh"]
     product_name = model["cpmc"]
     cpsb = model["cpsb"]
     qymc = model["qymc"]
     detail_url = model.get("detail_url", "")
 
+    result = {
+        "brand": brand, "model_id": model_id, "status": SKIPPED,
+        "code": "SKIPPED", "attempts": 0, "last_error": "",
+        "last_success": None, "action": "",
+    }
+
     if not detail_url:
         print(f"  ⚠ {model_id}: 无 detail_url，跳过")
-        return False
+        result["action"] = "missing_url"
+        return result
 
     md_filename = f"{model_id}-{product_name}.md"
     image_dir = brand_dir / model_id
     md_path = brand_dir / md_filename
 
     if md_path.exists():
-        print(f"  - {model_id}: 已存在，跳过")
-        return False
+        print(f"  - {model_id}: 已归档，跳过")
+        last_success = datetime.fromtimestamp(md_path.stat().st_mtime).strftime("%Y-%m-%d")
+        state.record(model_id, detail_url, SUCCESS, last_success=last_success,
+                     action="exists", code="EXISTS")
+        result.update(status=SUCCESS, code="EXISTS", action="exists",
+                      last_success=last_success)
+        return result
 
     print(f"  → {model_id} ({product_name})")
     if dry_run:
-        return True
+        result.update(status=SUCCESS, action="preview")
+        return result
 
-    # Fetch detail page
+    raw_cache = raw_cache_path(batch, brand, model_id)
+
+    # 抓取详情页（瞬态失败有限重试 + 分类）
+    html = None
+    attempts = 0
+    from_cache = False
     try:
-        html = fetch_detail_page(detail_url)
-    except Exception as e:
-        print(f"    ✗ 抓取失败: {e}")
-        return False
+        html, attempts = fetch_detail_page(detail_url, model_id=model_id)
+        raw_cache.parent.mkdir(parents=True, exist_ok=True)
+        raw_cache.write_text(html, encoding="utf-8")
+    except (NotFoundError, BlockedError, TransientError) as e:
+        if prefer_cache and raw_cache.exists():
+            html = raw_cache.read_text(encoding="utf-8")
+            from_cache = True
+            state.record(model_id, detail_url, TRANSIENT_ERROR, attempts=attempts,
+                         last_error=f"{short_label(e)}，已从缓存恢复", action="cache_restored",
+                         code=short_label(e))
+            print(f"    ↻ 网络失败，从缓存恢复解析: {model_id}")
+        else:
+            status = status_of_exc(e)
+            state.record(model_id, detail_url, status, attempts=attempts,
+                         last_error=str(e), action="deferred_retry",
+                         code=short_label(e))
+            print(f"    ✗ {short_label(e)} ({e}) attempts={attempts} action=deferred_retry")
+            result.update(status=status, code=short_label(e), attempts=attempts,
+                          last_error=str(e), action="deferred_retry",
+                          last_success=(state.data.get(model_id) or {}).get("last_success"))
+            return result
 
-    # Parse tables
+    # 解析表格
     tables = parse_tables(html)
     if not tables:
-        print(f"    ✗ 未解析到表格数据")
-        return False
+        state.record(model_id, detail_url, PARSE_ERROR, attempts=attempts,
+                     last_error="未解析到表格数据", action="needs_inspection",
+                     code="MIIT_PARSE_ERROR")
+        print(f"    ✗ MIIT_PARSE_ERROR: 未解析到表格数据")
+        result.update(status=PARSE_ERROR, code="MIIT_PARSE_ERROR", attempts=attempts,
+                      last_error="未解析到表格数据", action="needs_inspection")
+        return result
 
-    # Extract photos (links only, for the .md)
+    # 提取照片 (links only, for the .md)
     photos = extract_photos(html)
 
-    # Generate .md
+    # 生成 .md
     md_content = tables_to_md(tables, model_id, product_name, cpsb, qymc,
-                               detail_url, photos)
+                               detail_url, photos, batch=batch)
     image_dir.mkdir(parents=True, exist_ok=True)
     md_path.write_text(md_content, encoding="utf-8")
 
-    # Download photos
+    # 下载照片
     view_names = ["左-右部照片.jpg", "后部照片.jpg", "选装照片1.jpg"]
     for i, photo in enumerate(photos[:3]):
         if i >= 3:
@@ -293,57 +526,143 @@ def archive_model(model: dict, brand_dir: Path, dry_run: bool = False) -> bool:
         dest = image_dir / view_names[i]
         if not dest.exists():
             try:
-                download_photo(photo["url"], dest)
+                download_photo(photo["url"], dest, batch=batch)
                 print(f"    📷 {view_names[i]}")
             except Exception as e:
                 print(f"    ⚠ 照片{i+1}下载失败: {e}")
 
+    action = "cache_restored" if from_cache else "archived"
+    state.record(model_id, detail_url, SUCCESS, attempts=attempts,
+                 action=action, code="SUCCESS")
     print(f"    ✓ 归档完成")
-    return True
+    result.update(status=SUCCESS, code="SUCCESS", attempts=attempts,
+                  last_success=datetime.now().strftime("%Y-%m-%d"), action=action)
+    return result
+
+
+def print_summary(results: list[dict], batch: str):
+    counts = Counter(r["status"] for r in results)
+    total = len(results)
+    success = counts.get(SUCCESS, 0)
+    transient = counts.get(TRANSIENT_ERROR, 0)
+    not_found = counts.get(NOT_FOUND, 0)
+    blocked = counts.get(BLOCKED, 0)
+    parse_err = counts.get(PARSE_ERROR, 0)
+    skipped = counts.get(SKIPPED, 0)
+    retry_queue = transient + blocked
+    coverage = (success / total * 100) if total else 0.0
+
+    print("")
+    print("=" * 50)
+    print(f"MIIT 抓取完成 (batch {batch})")
+    print("")
+    print(f"车型数        {total}")
+    print(f"成功          {success}")
+    print(f"暂时失败       {transient}")
+    print(f"明确不存在     {not_found}")
+    print(f"被拦截         {blocked}")
+    print(f"解析失败       {parse_err}")
+    print(f"跳过(无详情页) {skipped}")
+    print("")
+    print(f"coverage      {coverage:.1f}%")
+    print(f"retry queue   {retry_queue}")
+    print("")
+
+    # 失败车型明细（按品牌分组）
+    failures = [r for r in results if r["status"] in (RETRYABLE | {PARSE_ERROR, NOT_FOUND, BLOCKED})]
+    if failures:
+        print("待补抓 / 异常明细:")
+        by_brand: dict[str, list] = {}
+        for r in failures:
+            by_brand.setdefault(r["brand"], []).append(r)
+        for brand, items in by_brand.items():
+            print(f"=== {brand} ===")
+            for r in items:
+                print(f"{r['model_id']}")
+                print(f"  {r['code']}")
+                print(f"  attempts: {r['attempts']}")
+                print(f"  last_success: {r['last_success'] or 'none'}")
+                print(f"  action: {r['action']}")
+                print(f"  error: {r['last_error'] or '-'}")
+                print("")
 
 
 def main():
-    parser = argparse.ArgumentParser(description="MIIT Pipeline 2: 车型详情归档")
-    parser.add_argument("--brand", help="归档指定品牌 (如 小鹏)")
-    parser.add_argument("--batch", default="409")
+    parser = argparse.ArgumentParser(description="MIIT Pipeline 2: 车型详情归档（可恢复）")
+    parser.add_argument("--brand", help="归档指定品牌 (如 零跑)")
+    parser.add_argument("--batch", default=DEFAULT_BATCH)
     parser.add_argument("--dry-run", action="store_true", help="仅预览，不执行")
     parser.add_argument("--all-missing", action="store_true",
                         help="归档所有有搜索结果但未归档的品牌")
+    parser.add_argument("--retry-failed", action="store_true",
+                        help="只补抓 TRANSIENT_ERROR / BLOCKED 车型（--no-cache 关闭缓存恢复）")
+    parser.add_argument("--no-cache", action="store_true",
+                        help="抓取失败时不要从原始页面缓存恢复")
+    parser.add_argument("--retries", type=int, default=MAX_RETRIES,
+                        help=f"瞬态失败最大重试次数 (默认 {MAX_RETRIES})")
     args = parser.parse_args()
 
     data = load_scan(args.batch)
     brands = data["brands"]
+    state = FetchState(args.batch)
+    _prime_session(args.batch)
+    prefix = f"{args.batch}-"
 
-    if not args.all_missing and not args.brand:
-        print("请指定 --brand 或 --all-missing", file=sys.stderr)
-        sys.exit(1)
-
-    # 确定目标品牌
-    if args.all_missing:
-        # 找到所有有数据但无对应 409-xxx 目录的品牌
-        existing_dirs = {d.name for d in HERE.glob("409-*") if d.is_dir()}
-        target_brands = []
-        for b in brands:
-            if b["total_count"] == 0:
-                continue
-            dir_name = f"409-{b['catalog']}"
-            if dir_name not in existing_dirs:
-                target_brands.append(b)
-        target_brands = [b for b in target_brands if b["total_count"] > 0]
+    if args.retry_failed:
+        targets = state.retry_queue(brands)
+        if args.brand:
+            targets = [(b, m) for b, m in targets if b["catalog"] == args.brand]
+        if not targets:
+            print("无待补抓车型 (fetch_status 中无 TRANSIENT_ERROR / BLOCKED)")
+            return
     else:
-        target_brands = [b for b in brands if b["catalog"] == args.brand]
-        if not target_brands:
-            print(f"未找到品牌: {args.brand}", file=sys.stderr)
+        if not args.all_missing and not args.brand:
+            print("请指定 --brand 或 --all-missing 或 --retry-failed", file=sys.stderr)
             sys.exit(1)
+        # 确定目标品牌
+        if args.all_missing:
+            # 品牌目录下只要还有未归档车型 (无对应 .md) 就属于未完成
+            target_brands = []
+            for b in brands:
+                if b["total_count"] == 0:
+                    continue
+                brand_dir = HERE / f"{prefix}{b['catalog']}"
+                missing = [
+                    m for m in b["all_rows"]
+                    if not (brand_dir / f"{m['cpxh']}-{m['cpmc']}.md").exists()
+                ]
+                if missing:
+                    target_brands.append(b)
+            target_brands = [b for b in target_brands if b["total_count"] > 0]
+        else:
+            target_brands = [b for b in brands if b["catalog"] == args.brand]
+            if not target_brands:
+                print(f"未找到品牌: {args.brand}", file=sys.stderr)
+                sys.exit(1)
+        targets = [(b, m) for b in target_brands for m in b["all_rows"]]
 
     mode = "[DRY RUN]" if args.dry_run else ""
-    for b in target_brands:
-        brand_dir = HERE / f"409-{b['catalog']}"
-        print(f"\n=== {b['catalog']} ({b['total_count']}款) {mode}===")
-        for model in b["all_rows"]:
-            archive_model(model, brand_dir, dry_run=args.dry_run)
+    results = []
+    try:
+        cur_brand = None
+        for b, model in targets:
+            if b["catalog"] != cur_brand:
+                cur_brand = b["catalog"]
+                print(f"\n=== {cur_brand} ({b['total_count']}款) {mode}===")
+            brand_dir = HERE / f"{prefix}{cur_brand}"
+            res = archive_model(model, brand_dir, state, str(cur_brand), batch=args.batch,
+                                dry_run=args.dry_run, prefer_cache=not args.no_cache)
+            results.append(res)
             if not args.dry_run:
-                time.sleep(1)
+                time.sleep(random.uniform(*REQUEST_INTERVAL))
+    except KeyboardInterrupt:
+        state.save()
+        print("\n收到中断，已保存 checkpoint，可用 --retry-failed 继续", file=sys.stderr)
+        sys.exit(130)
+
+    state.save()
+    if not args.dry_run:
+        print_summary(results, args.batch)
 
 
 if __name__ == "__main__":

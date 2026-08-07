@@ -23,9 +23,10 @@ Step 4: 报告 —— 将信息加工为分类对比 HTML
 | 步骤 | 命令 | 前置条件 | 产出 |
 |------|------|----------|------|
 | 1. 搜索 | `python3 MIIT/miit_report.py --batch 410` | `brand_watchlist.yaml` | `scan_batch_410.md` + `report_batch_410.html` |
-| 2. 归档 | `python3 MIIT/miit_archive_detail.py --all-missing` | scan 中有 `detail_url` | `409-品牌/*.md` |
-| 3. 补充 | `python3 MIIT/parse_车船税.py`（+ 前置 doc 下载/转换） | 批次页附件 `.doc` | `车型清单_第XX批车船税.json` |
-| 4. 报告 | `python3 MIIT/generate_category_report.py --all` | 归档目录 + 车船税 JSON | `miit_category_reports/` |
+| 2. 归档 | `python3 MIIT/miit_archive_detail.py --batch 410 --all-missing` | scan 中有 `detail_url` | `410-品牌/*.md` |
+| 3. 补充 | `python3 MIIT/parse_车船税.py`（+ 前置 doc 下载/转换） | 批次页附件 `.doc` | `车型清单_第89批车船税.json` |
+| 4. 报告 | `python3 MIIT/generate_category_report.py --batch 410 --all --output-dir miit_category_reports_410` | 归档目录 + 车船税 JSON | `miit_category_reports_410/` |
+| 4b. 参数宽表 | `python3 MIIT/409-Parameter/wide_table.py --batch 410` | 归档目录 + 车船税 JSON | `MIIT/410-Parameter/` |
 
 > 注：Step 1 和 Step 2 可跨越执行——搜索后先用 `--brand` 归档特定品牌，不需要等全量搜索完毕。Step 3 依赖批次附件发布（通常比公告晚 3-5 天），可以滞后执行；报告在 Step 3 之前可生成，但不含电池容量/续航/通用名称等车船税字段。
 
@@ -41,6 +42,7 @@ Step 4: 报告 —— 将信息加工为分类对比 HTML
 | `parse_车船税.py` | 解析车船税 doc → JSON/MD | 三 |
 | `generate_miit_reports.py` | 单品牌车型对比 HTML（旧 Pipeline 4） | 四 |
 | `generate_category_report.py` | 按分类生成多品牌车型对比 HTML | 四 |
+| `409-Parameter/wide_table.py` | 参数宽表生成（支持 `--batch` 跨批次复用） | 4b |
 
 ### 配置与数据
 
@@ -48,7 +50,8 @@ Step 4: 报告 —— 将信息加工为分类对比 HTML
 |------|------|
 | `brand_watchlist.yaml` | 关注品牌清单，按分类分组 |
 | `公告批次.md` | 批次索引，记录每批的公告页/简报/归档 |
-| `车型清单_第88批车船税.json` | 车船税结构化数据，含通用名称/电池容量/续航 |
+| `车型清单_第89批车船税.json` | 车船税结构化数据，含通用名称/电池容量/续航 |
+| `model_name_map.json` | 车型通用名称映射（车船税缺失车型的命名补充） |
 | `scan_batch_XXX.md` | 品牌扫描快照（管线一产物，可重放） |
 
 ---
@@ -68,8 +71,8 @@ python3 MIIT/miit_report.py --open                    # 生成后自动打开浏
 
 | 文件 | 格式 | 说明 |
 |------|------|------|
-| `scan_batch_409.md` | Markdown (含 JSON 块) | 搜索结果快照，可重放 |
-| `report_batch_409.html` | HTML | 品牌搜索简报，按分类分组 |
+| `scan_batch_410.md` | Markdown (含 JSON 块) | 搜索结果快照，可重放 |
+| `report_batch_410.html` | HTML | 品牌搜索简报，按分类分组 |
 
 ### 数据流
 
@@ -88,28 +91,32 @@ brand_watchlist.yaml → miit_search.py → MIIT API
 - 需设置 Referer / X-Requested-With / User-Agent 三头，否则 403
 - 响应 `data.html` 为 HTML 片段，用正则从 `<td>` 提取字段
 - `detail_url` 从第一栏 `<a href>` 中提取
+- **批次配置**：每个公告批次有独立 `pageId` / iframe index，需在 `miit_search.py:BATCH_CONFIG` 登记（409/410 已登记）
 
 ---
 
 ## 管线二：车型详情归档
 
-从搜索结果的 `detail_url` 自动抓取详情页，提取参数和照片，归档为 `409-品牌/`。
+从搜索结果的 `detail_url` 自动抓取详情页，提取参数和照片，归档为 `{batch}-品牌/`。
 
 ```bash
 # 归档单个品牌
-python3 MIIT/miit_archive_detail.py --brand 小鹏
+python3 MIIT/miit_archive_detail.py --brand 小鹏 --batch 410
 
-# 归档所有未归档品牌
-python3 MIIT/miit_archive_detail.py --all-missing
+# 归档所有有搜索结果但未归档品牌（按车型 .md 是否存在判定）
+python3 MIIT/miit_archive_detail.py --batch 410 --all-missing
 
 # 预览
-python3 MIIT/miit_archive_detail.py --all-missing --dry-run
+python3 MIIT/miit_archive_detail.py --batch 410 --all-missing --dry-run
+
+# 只补抓之前失败/被拦截的车型（checkpoint resume）
+python3 MIIT/miit_archive_detail.py --batch 410 --retry-failed
 ```
 
 ### 归档目录结构
 
 ```
-409-品牌/
+410-品牌/
 ├── {model_id}-{产品名称}.md          # 完整参数文档
 └── {model_id}/
     ├── 左-右部照片.jpg
@@ -122,7 +129,7 @@ python3 MIIT/miit_archive_detail.py --all-missing --dry-run
 ```
 miit_search.py 搜索结果含 detail_url
         ↓
-miit_archive_detail.py —──→ 409-品牌/
+miit_archive_detail.py —──→ {batch}-品牌/
   ├ requests 抓取详情页 HTML      ├ {model_id}-{产品名称}.md
   ├ 正则解析 <table>               ├ {model_id}/
   └ 下载 2~3 张照片                 │   ├ 左-右部照片.jpg
@@ -142,13 +149,64 @@ miit_archive_detail.py —──→ 409-品牌/
 
 注：纯电车型的 Table 3 实际描述驱动电机，`功率(kw)` 字段映射为 `驱动电机峰值功率`。
 
+### 失败处理模型（410 批重构核心）
+
+**原则：抓取任务不追求 single-run perfection，而追求 pipeline reliability。** 每次尽可能推进数据状态，失败可识别、可恢复、可补抓，最终数据逐渐达到完整。
+
+#### 1. 失败分类（多状态，不再二元成功/失败）
+
+| 状态 | 含义 | 处理 |
+|------|------|------|
+| `SUCCESS` | 成功拿到数据 | 写入归档 |
+| `NOT_FOUND` | 明确确认页面/车型不存在（404） | 记录，不再重试 |
+| `TRANSIENT_ERROR` | timeout / 502/503 / connection reset | 有限重试，耗尽后进 retry 队列 |
+| `BLOCKED` | 403 / 429 / 验证码 / 风控 | 记录，需人工介入 |
+| `PARSE_ERROR` | 页面拿到但结构解析失败 | 记录，保留 raw 供排查 |
+| `SKIPPED` | 无 detail_url 等数据问题 | 跳过 |
+
+> 关键：`Read timed out` 归入 `TRANSIENT_ERROR` 而非 `FAILED`，这是整个恢复系统能正确工作的前提。
+
+#### 2. 瞬态失败有限重试（不拖死整批）
+
+- `max_retries=3`（`--retries` 可调）
+- `backoff = 2 ** attempt + random_jitter`（约 2s → 4s → 8s + 抖动）
+- 重试耗尽即记录 `deferred_retry` 跳过，继续下一款——**快速失败、跳过、整批推进**
+
+#### 3. 网络参数（政府站点保守设置）
+
+- `timeout=(10, 60)`：connect timeout 10s / read timeout 60s（`Read timed out` 说明连接已建立，只是响应慢，需调大 read）
+- 请求间隔随机 `0.8~1.5s`，串行抓取，**不做高并发**（政府站点不适合程序化高频访问）
+- `--retries` 可覆盖；403/429 或页面含"安全验证/验证码"识别为 BLOCKED
+
+#### 4. checkpoint / resume（一次性脚本 → 可恢复数据任务）
+
+- 每款车型状态写入 `fetch_status_{batch}.json`：
+  ```json
+  {"FZ7000BEVB05L": {"status": "TRANSIENT_ERROR", "attempts": 3,
+    "last_error": "Read timed out", "last_success": "2026-08-06",
+    "data_status": "STALE", "action": "deferred_retry"}}
+  ```
+- `--retry-failed`：只补抓 `TRANSIENT_ERROR / BLOCKED` 车型
+- Ctrl-C 中断也会落盘，可用 `--retry-failed` 继续
+- `data_status`: `FRESH`（本次成功）/ `STALE`（历史成功+本次失败）/ `MISSING`
+
+#### 5. 不污染正式数据（保鲜原则）
+
+- `.md` 只在解析成功后写入；失败不删除旧数据
+- 原始页面缓存到 `MIIT/raw/{batch}/{brand}/`，网络失败时可从缓存恢复解析（`--no-cache` 关闭）
+- 失败时输出 `data_status=STALE + last_success`，标记 freshness
+
+#### 6. 汇总日志
+
+末尾输出：车型数 / 成功 / 暂时失败 / 明确不存在 / 被拦截 / 解析失败 / coverage / retry queue，并按品牌分组列出失败明细（`⚠ MIIT_TIMEOUT / attempts / last_success / action`），一眼判断是整体站点故障还是个别车型问题。
+
 ### 卡点
 
 **照片 URL 重复**：每张照片在 HTML 中出现两次（`<a href>` + 内部 `<img src>`），通过匹配 `查看原图` 锚文本去重。
 
 **部分车型缺选装照片**：如特斯拉 Model Y 焕新版只有 2 张照片，归档中缺少 `选装照片1.jpg` 属正常。
 
-**限流**：每款车型间 `time.sleep(1)`。
+**`--all-missing` 判定**：按车型 `.md` 是否存在判定（而非品牌目录是否已建），避免目录已建但车型未归档时空转。
 
 ---
 
@@ -157,7 +215,7 @@ miit_archive_detail.py —──→ 409-品牌/
 从批次页附件下载车船税减免目录 `.doc`，解析为结构化 JSON + Markdown。
 
 ```bash
-# 下载附件
+# 下载附件（批次公示页第4个附件：车船税第XX批车型清单）
 curl -L -o 车型清单.doc \
   -H "User-Agent: ..." \
   -H "Referer: https://www.miit.gov.cn/jgsj/zbys/qcgy/art/2026/art_xxx.html" \
@@ -168,10 +226,10 @@ textutil -convert txt -output 车型清单.txt 车型清单.doc
 
 # 解析
 python3 MIIT/parse_车船税.py \
-  --input 车型清单_第88批车船税.txt \
-  --output 车型清单_第88批车船税 \
-  --batch "第八十八批" \
-  --date "2026-07-10"
+  --input 车型清单_第89批车船税.txt \
+  --output 车型清单_第89批车船税 \
+  --batch "第八十九批" \
+  --date "2026-08-07"
 ```
 
 ### Doc 解析要点
@@ -179,42 +237,58 @@ python3 MIIT/parse_车船税.py \
 - `.doc` 是 OLE2 二进制格式，用 macOS `textutil` 转纯文本
 - Word 表格单元格用 `\x07` 分隔，每行是一个表格
 - 空单元格从上一行继承值（Word 合并单元格行为）
-- 不同分类的数据行索引不同（插混乘用车在第 13 行，纯电商用车在第 14 行等）
+
+### 分类识别（410 批重构核心）
+
+**不要按位置映射分类，要按表头列签名识别。** 各批次 section 顺序可能不同、也可能缺段（410 批就没有「汽柴油重型货车」段），按位置映射会让后续所有分类错位。
+
+`_detect_section()` 根据数据行表头列（如 `动力蓄电池组总质量` 带"组"=纯电商用车、`通用名称+产品型号+发动机排量(ml)`=插混乘用车、`燃料电池系统额定功率`=燃料电池等）识别所属分类，天然兼容缺段/顺序变化。
+
+### 覆盖范围（重要口径）
+
+车船税目录**只收录申请了减免的车型**，纯电乘用车、燃油车通常不在其中。每批命中率取决于该批申报结构：
+
+- 409 批：17 款 watchlist 车型中插混/增程全命中
+- 410 批：17 款中仅 4 款命中（问界M8 增程×2、猛士X700×2），其余 13 款纯电/燃油缺失属正常
+
+缺失车型的电池容量/续航/通用名称可走**减免车辆购置税的新能源汽车车型目录**（另一公告）或 `model_name_map.json` 命名映射补。
 
 ### 产出物
 
 | 文件 | 用途 |
 |------|------|
-| `车型清单_第88批车船税.json` | 结构化数据，含按分类/schema/品牌索引 |
-| `车型清单_第88批车船税.md` | 可阅读文档 |
+| `车型清单_第89批车船税.json` | 结构化数据，含按分类/schema/品牌索引 |
+| `车型清单_第89批车船税.md` | 可阅读文档 |
 
 ### 关键字段映射
 
-通用名称、电池容量（`动力蓄电池总能量_kWh`）、纯电续航（`纯电动续驶里程_km`）、整备质量（`整车整备质量_kg`）等字段供管线四使用。
+通用名称、电池容量（`动力蓄电池总能量_kWh`）、纯电续航（`纯电动续驶里程_km`）、整备质量（`整车整备质量_kg`）等字段供管线四/4b 使用。
 
 ---
 
 ## 管线四：分类车型对比报告
 
-结合管线二的归档数据 + 管线三的车船税数据，按 `brand_watchlist.yaml` 的分类生成多品牌车型对比 HTML。
+结合管线二的归档数据 + 管线三的车船税数据 + `model_name_map.json` 命名映射，按 `brand_watchlist.yaml` 的分类生成多品牌车型对比 HTML。
 
 ```bash
 # 生成单个分类
-python3 MIIT/generate_category_report.py --category 一线新能源
+python3 MIIT/generate_category_report.py --batch 410 --category 一线新能源
 
 # 生成全部分类 + index
-python3 MIIT/generate_category_report.py --all
+python3 MIIT/generate_category_report.py --batch 410 --all --output-dir miit_category_reports_410
 ```
+
+> 410 起需传 `--batch`（自动切换归档目录前缀 / 公示日期 / 车船税文件）；409 默认行为不变。输出建议用独立目录（如 `miit_category_reports_410/`）避免覆盖上一批报告。
 
 ### 报告结构
 
 ```
-miit_category_reports/
+miit_category_reports_410/
 ├── index.html              ← 4 个分类导航
-├── 一线新能源.html          ← 小米/理想/小鹏/特斯拉
-├── 二线新能源.html          ← 岚图/腾势/魏牌
-├── 华为五界三境.html        ← 问界/享界/智界/启境
-└── 硬派方盒子.html          ← 爱咖/猛士/方程豹
+├── 一线新能源.html          ← 零跑
+├── 二线新能源.html          ← 领克/魏牌
+├── 华为五界三境.html        ← 问界/智界
+└── 硬派方盒子.html          ← 爱咖/猛士
 ```
 
 ### 每个分类页面包含
@@ -225,12 +299,28 @@ miit_category_reports/
 
 ### 车型合并规则
 
-通过 `group_models()` 将同一车型的不同配置变体合并到一个卡片中：
+通过 `group_models()` 将同一车型的不同配置变体合并到一个卡片中，**名称优先级**：
 
-1. 优先使用车船税 `通用名称`（如"小米澎程N70"）
-2. 纯电/插混同 base ID 的共享通用名称（如岚图梦想家 BEV+PHEV 合并）
-3. 逗号分隔的多名称取第一个（如 "V25,V25S" → "V25"）
-4. 最终 fallback 到型号 base ID
+1. 车船税 `通用名称`（如"问界M8"、"猛士X700"）
+2. `model_name_map.json` 本地映射（车船税缺失车型的命名补充）
+3. 纯电/插混同 base ID 的共享通用名称
+4. 逗号分隔的多名称取第一个（如 "V25,V25S" → "V25"）
+5. 最终 fallback 到型号 base ID
+
+### 车型名称映射（`model_name_map.json`）
+
+车船税不含纯电/燃油车型，其市场名称通过公开报道检索沉淀到本地映射表：
+
+```json
+{"models": {
+  "FZ7000BEVB05K": {"name": "零跑B01", "confidence": "medium", "note": "4490mm 与B01申报吻合"},
+  "CC6530DC21HABEV": {"name": "魏牌V9X", "confidence": "high", "note": "5299/2025/3150 与V9X完全吻合"}
+}}
+```
+
+- 每条含 `name / confidence / note`（尺寸依据、报道来源）
+- `confidence`: high=尺寸完全吻合+媒体命名 / medium=尺寸吻合 / low=待确认（兜底写 `{品牌}新车型(今日刚公示,无公开名称)`）
+- 命名来源：车家号 / 网易 / 新浪 / 汽车之家 / 腾讯等公开报道，按型号+品牌搜索验证，用尺寸交叉确认
 
 ### 参数提取
 
@@ -251,6 +341,21 @@ miit_category_reports/
 
 ---
 
+## 管线 4b：参数宽表（410 起新增）
+
+从归档 `.md` + 车船税 JSON 生成结构化参数宽表（品牌/型号/电机/电池/供应商/衍生指标），`409-Parameter/wide_table.py` 通过 `--batch` 跨批次复用。
+
+```bash
+python3 MIIT/409-Parameter/wide_table.py --batch 410   # → MIIT/410-Parameter/
+python3 MIIT/409-Parameter/wide_table.py --batch 410 --output-dir 自定义目录
+```
+
+- 输出：`{batch}-Parameter/wide_table.csv` + `wide_table.md`（含衍生指标汇总、供应商覆盖结构、垂直整合分类）
+- 新批次只需在 `BATCH_PATHS` 登记 scan / 车船税文件名
+- 字段口径与衍生指标说明见 `MIIT/409-Parameter/README.md`
+
+---
+
 ## API 技术要点
 
 ### 反爬绕过
@@ -265,7 +370,7 @@ miit_category_reports/
 | 操作 | 间隔 |
 |------|------|
 | 品牌搜索（API） | 隐式（API 自带） |
-| 详情页/照片抓取 | 1s（脚本内 `time.sleep(1)`） |
+| 详情页/照片抓取 | 0.8~1.5s 随机（脚本内） |
 | 附件下载 | 建议 1s+ |
 
 ### 数据格式
@@ -274,6 +379,7 @@ miit_category_reports/
 - 详情页为静态 HTML，含 5 个有效 `<table>`
 - 表格布局分两种：交错 th/td 对 / 表头+数据行
 - 照片链接为 `/cms_files/filemanager/datainfo/cpgs/{hash}@{size}.jpg`
+- 批次公示页在 `https://www.miit.gov.cn/jgsj/zbys/qcgy/` 栏目下，附件 4 为车船税 doc
 
 ---
 
@@ -302,13 +408,18 @@ miit_category_reports/
 | JSON 转义 | HTML 中 `\"` | `json.loads()` 还原 |
 | 照片 URL 转义 | href 匹配不到 | 先还原 HTML |
 | 其它字段 | 电池/电机信息隐藏在长文本中 | 正则提取 |
+| Read timed out | 抓详情页超时且脚本卡死 | 失败分类 TRANSIENT_ERROR + 有限重试 + checkpoint，不再拖死整批 |
+| 车船税解析错位 | 批次缺某分类段导致后续全错位 | 按表头列签名识别分类，不按位置映射 |
+| 纯电/燃油车型无名称 | 车船税目录不含，报告显示空基名 | `model_name_map.json` 命名映射补 |
 
 ---
 
 ## 后续可扩展
 
-- 多批次对比（408 vs 409）
+- 多批次对比（409 vs 410）
 - 新增车型 vs 改款车型自动标识
 - 差异增量通知（飞书/webhook）
 - 车船税 schema 自动推断
 - 报告模板可配置（商用车 vs 乘用车）
+- 纯电车型容量/续航：接入减免车辆购置税的新能源汽车车型目录
+- `model_name_map.json` 自动更新（公示后跟踪媒体报道自动补充命名）

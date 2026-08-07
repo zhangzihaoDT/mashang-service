@@ -138,6 +138,18 @@ def load_tax_index(tax_path: str) -> dict:
     return indexed
 
 
+def load_name_map() -> dict:
+    """Load 车型通用名称映射（model_name_map.json），车船税缺失车型的名称补充。"""
+    path = Path(__file__).parent / "model_name_map.json"
+    if not path.exists():
+        return {}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        return {k: v["name"] for k, v in data.get("models", {}).items() if v.get("name")}
+    except (json.JSONDecodeError, TypeError, AttributeError):
+        return {}
+
+
 def img_to_b64(path: Path) -> str:
     raw = path.read_bytes()
     ext = path.suffix.lower()
@@ -274,22 +286,25 @@ def _model_base_id(mid: str) -> str:
 
 
 def group_models(
-    model_infos: list[dict], tax_index: dict
+    model_infos: list[dict], tax_index: dict, name_map: dict | None = None
 ) -> list[dict]:
     """Group model variants by 通用名称, with smart fallback.
 
-    1. Use 通用名称 from 车船税 (normalized: take first name if comma-separated)
-    2. If missing, compute a model base ID (strip variant suffix) and check
+    优先级：
+    1. 车船税 通用名称 (normalized: take first name if comma-separated)
+    2. model_name_map.json 本地映射（车船税缺失车型的名称补充）
+    3. If missing, compute a model base ID (strip variant suffix) and check
        if any model sharing that base has a 通用名称 — if so, share it.
-    3. Final fallback: model base ID.
+    4. Final fallback: model base ID.
     """
+    name_map = name_map or {}
     # First pass: determine raw group key
     for info in model_infos:
         model_id = info["model_id"]
         tax_rec = tax_index.get(model_id, {})
         raw = tax_rec.get("通用名称", "")
         common_name = raw.split(",")[0].strip() if raw else ""
-        info["_group_key"] = common_name or ""
+        info["_group_key"] = common_name or name_map.get(model_id, "") or ""
         info["_base_id"] = _model_base_id(model_id)
 
     # Second pass: build base_id → 通用名称 map; share across variants
@@ -553,7 +568,8 @@ def main():
         })
 
     # Step 2: Group by 通用名称
-    groups = group_models(model_infos, tax_index)
+    name_map = load_name_map()
+    groups = group_models(model_infos, tax_index, name_map)
     entries = []
 
     for g in groups:

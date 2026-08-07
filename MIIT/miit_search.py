@@ -24,9 +24,21 @@ import yaml
 
 # ── MIIT API 配置 ──────────────────────────────────────────────────
 MIIT_API = "https://www.miit.gov.cn/api-gateway/jpaas-publish-server/front/page/build/unit"
-BASE_PARAMS = {
+# 每个公告批次对应独立的 pageId 与 iframe 索引目录，需按批次切换
+BATCH_CONFIG = {
+    "409": {
+        "pageId": "49d24aca2b7f42e599691da4cc329220",
+        "index": "xcpgs409dwdwe233",
+    },
+    "410": {
+        "pageId": "f7397ceb83214c88b85595615baf5d03",
+        "index": "xcpgs410we24r34",
+    },
+}
+DEFAULT_BATCH = "409"
+
+BASE_PARAMS_TEMPLATE = {
     "webId": "b3eba6883f9240e2b51025f690afbae8",
-    "pageId": "49d24aca2b7f42e599691da4cc329220",
     "parseType": "buildstatic",
     "pageType": "column",
     "tagId": "信息列表",
@@ -58,32 +70,41 @@ def load_watchlist():
     return {"brands": brands, "watchlist_name": "MIIT 公告关注品牌清单"}
 
 
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-                  "AppleWebKit/537.36 (KHTML, like Gecko) "
-                  "Chrome/150.0.0.0 Safari/537.36",
-    "Referer": "https://www.miit.gov.cn/datainfo/dljdclscqyjcpgg/"
-               "xcpgs409dwdwe233/index.html",
-    "X-Requested-With": "XMLHttpRequest",
-    "Accept": "*/*",
-    "sec-ch-ua": '"Not;A=Brand";v="8", "Chromium";v="150", "Google Chrome";v="150"',
-    "sec-ch-ua-mobile": "?0",
-    "sec-ch-ua-platform": '"macOS"',
-}
+def get_batch_config(batch: str) -> dict:
+    return BATCH_CONFIG.get(batch, BATCH_CONFIG[DEFAULT_BATCH])
+
+
+def build_headers(batch: str) -> dict:
+    cfg = get_batch_config(batch)
+    return {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                      "AppleWebKit/537.36 (KHTML, like Gecko) "
+                      "Chrome/150.0.0.0 Safari/537.36",
+        "Referer": f"https://www.miit.gov.cn/datainfo/dljdclscqyjcpgg/"
+                   f"{cfg['index']}/index.html",
+        "X-Requested-With": "XMLHttpRequest",
+        "Accept": "*/*",
+        "sec-ch-ua": '"Not;A=Brand";v="8", "Chromium";v="150", "Google Chrome";v="150"',
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": '"macOS"',
+    }
+
 
 # Shared session for cookie persistence
 SESSION = requests.Session()
-SESSION.headers.update(HEADERS)
 
-# Warm up: visit the page once to get past kong gateway anti-bot checks
-try:
-    SESSION.get(
-        "https://www.miit.gov.cn/datainfo/dljdclscqyjcpgg/"
-        "xcpgs409dwdwe233/index.html",
-        timeout=15,
-    )
-except Exception:
-    pass  # non-fatal; the page visit is just for cookie priming
+
+def _prime_session(batch: str):
+    cfg = get_batch_config(batch)
+    SESSION.headers.update(build_headers(batch))
+    try:
+        SESSION.get(
+            f"https://www.miit.gov.cn/datainfo/dljdclscqyjcpgg/"
+            f"{cfg['index']}/index.html",
+            timeout=15,
+        )
+    except Exception:
+        pass  # non-fatal; the page visit is just for cookie priming
 
 
 def search_batch(batch: str, cpsb: str = "", qymc: str = "") -> dict:
@@ -91,6 +112,8 @@ def search_batch(batch: str, cpsb: str = "", qymc: str = "") -> dict:
     调用 MIIT API 搜索指定批次。
     cpsb: 产品商标  qymc: 企业名称
     """
+    cfg = get_batch_config(batch)
+    _prime_session(batch)
     search_obj = {
         "title": "",
         "PICI": batch,
@@ -105,7 +128,8 @@ def search_batch(batch: str, cpsb: str = "", qymc: str = "") -> dict:
         "search": json.dumps(search_obj, ensure_ascii=False, separators=(",", ":")),
         "pageSize": "20",
     }
-    params = {**BASE_PARAMS, "paramJson": json.dumps(param_json, ensure_ascii=False, separators=(",", ":"))}
+    base_params = {**BASE_PARAMS_TEMPLATE, "pageId": cfg["pageId"]}
+    params = {**base_params, "paramJson": json.dumps(param_json, ensure_ascii=False, separators=(",", ":"))}
 
     resp = SESSION.get(MIIT_API, params=params, timeout=30)
     resp.raise_for_status()
@@ -240,7 +264,7 @@ def format_text_report(brand_results: list[dict]) -> str:
 
 def main():
     parser = argparse.ArgumentParser(description="MIIT 公告品牌搜索工具")
-    parser.add_argument("--batch", default="409", help="公告批次号 (默认 409)")
+    parser.add_argument("--batch", default=DEFAULT_BATCH, help=f"公告批次号 (默认 {DEFAULT_BATCH})")
     parser.add_argument("--brand", help="只搜索指定品牌 catalog (如 智己)")
     parser.add_argument("--format", choices=["text", "json"], default="text", help="输出格式")
     args = parser.parse_args()

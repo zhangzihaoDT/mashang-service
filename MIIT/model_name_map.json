@@ -1,0 +1,61 @@
+{
+  "_comment": "MIIT 车型通用名称映射 — 车船税目录缺失车型的名称补充。来源：公开媒体报道（车家号/网易/新浪/汽车之家/腾讯，2026-08-07 检索）。用于 generate_category_report.py Step4 分组名。confidence: high=尺寸完全吻合+媒体命名 / medium=尺寸吻合 / low=待确认",
+  "source": "公开报道检索 2026-08-07",
+  "models": {
+    "FZ7000BEVB05K": {
+      "name": "零跑B01",
+      "confidence": "medium",
+      "note": "4490mm 纯电轿车，与 B01 申报尺寸吻合；同系 FZ7000BEVB01F"
+    },
+    "FZ7000BEVB05L": {
+      "name": "零跑B01",
+      "confidence": "medium",
+      "note": "4490mm 纯电轿车，与 B01 申报尺寸吻合；同系 FZ7000BEVB01F"
+    },
+    "FZ7000BEVB05J": {
+      "name": "零跑B01",
+      "confidence": "medium",
+      "note": "4490mm 纯电轿车，与 B01 申报尺寸吻合；同系 FZ7000BEVB01F"
+    },
+    "SQR6500BEVEHX6": {
+      "name": "智界RX",
+      "confidence": "high",
+      "note": "5020mm 全新 SUV，网易/新浪 2026-08-01 报道智界RX 申报电耗"
+    },
+    "SQR6500BEVEHX7": {
+      "name": "智界RX",
+      "confidence": "high",
+      "note": "5020mm 全新 SUV，网易/新浪 2026-08-01 报道智界RX 申报电耗"
+    },
+    "SQR6500BEVEHY9": {
+      "name": "智界R7",
+      "confidence": "medium",
+      "note": "4982/2950mm，与智界R7（4956/2950）尺寸吻合，疑为改款"
+    },
+    "CC6530DC21HABEV": {
+      "name": "魏牌V9X",
+      "confidence": "high",
+      "note": "5299/2025/1825/3150 六座，与魏牌V9X 申报尺寸完全吻合；本批为纯电版"
+    },
+    "CC6531BD24DHEV": {
+      "name": "魏牌高山8",
+      "confidence": "high",
+      "note": "5280/3145mm，与高山8（5280/1960/1900/3145）完全吻合"
+    },
+    "CC6542BD24CPHEV": {
+      "name": "魏牌高山9",
+      "confidence": "high",
+      "note": "5410/3275mm，与高山9（5410/1960/1890/3275）完全吻合"
+    },
+    "MR7156D100": {
+      "name": "领克03",
+      "confidence": "high",
+      "note": "4700mm 汽油轿车，命名领克03"
+    },
+    "NEQ6510REEVS5DL": {
+      "name": "iCar V27 Max",
+      "confidence": "high",
+      "note": "5055mm 增程 SUV，命名 iCar V27 Max"
+    }
+  }
+}

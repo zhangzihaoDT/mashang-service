@@ -57,11 +57,9 @@
 ## 复用方法
 
 ```bash
-python wide_table.py
+python wide_table.py                        # 生成 409 批（默认）
+python wide_table.py --batch 410            # 生成 410 批 → MIIT/410-Parameter/
+python wide_table.py --batch 410 --output-dir outputs/410  # 自定义输出目录
 ```
 
-脚本自动从同级父目录读取 `scan_batch_NNN.md` 和 `NNN-品牌/`。若用于新批次，需：
-
-1. 复制 `wide_table.py` 到新批次目录（如 `410-Parameter/`）
-2. 在 `wide_table.py` 中修改 `SCAN_PATH` 和 `TAX_PATH` 路径指向新批次文件
-3. 运行 `python wide_table.py`
+脚本通过 `--batch` 从 `BATCH_PATHS` 查找对应 scan / 车船税文件，输出到 `MIIT/{batch}-Parameter/`。新批次只需在 `BATCH_PATHS` 中登记 scan 与车船税文件名即可复用。

@@ -31,7 +31,12 @@ MIIT/report_batch_*.html
 MIIT/scan_batch_*.md
 MIIT/*_reports/
 MIIT/miit_category_reports/
+MIIT/miit_category_reports_*/
 MIIT/工信部新车-history/
+# MIIT 抓取 checkpoint / 原始页面缓存（可再生产物）
+MIIT/fetch_status_*.json
+MIIT/raw/
+/miit_*.log
 
 /.query_agent_memory.json
 /agent/.query_agent_memory.json

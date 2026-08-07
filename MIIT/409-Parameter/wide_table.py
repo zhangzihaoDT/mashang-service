@@ -16,12 +16,18 @@ Derived metrics:
 import json
 import re
 import csv
+import argparse
 from pathlib import Path
 
 HERE = Path(__file__).parent
 MIIT = HERE.parent  # parent is MIIT/
-SCAN_PATH = MIIT / "scan_batch_409.md"
-TAX_PATH = MIIT / "车型清单_第88批车船税.json"
+
+# 批次 → (scan 文件名, 车船税 JSON 文件名)。按需补充新批次。
+BATCH_PATHS = {
+    "409": ("scan_batch_409.md", "车型清单_第88批车船税.json"),
+    "410": ("scan_batch_410.md", "车型清单_第89批车船税.json"),
+}
+DEFAULT_BATCH = "409"
 
 # ── Battery chemistry normalization ──
 
@@ -136,9 +142,9 @@ def load_tax_index(path: Path) -> dict:
     return index
 
 
-def read_brand_md(brand: str, model_id: str) -> dict | None:
-    """Read the .md detail file for a model from 409-{brand}/ directory."""
-    brand_dir = MIIT / f"409-{brand}"
+def read_brand_md(brand: str, model_id: str, batch: str = DEFAULT_BATCH) -> dict | None:
+    """Read the .md detail file for a model from {batch}-{brand}/ directory."""
+    brand_dir = MIIT / f"{batch}-{brand}"
     if not brand_dir.exists():
         return None
     for f in brand_dir.iterdir():
@@ -676,6 +682,21 @@ def supplier_summary(records: list[dict], by_model: bool = True, by_group: bool 
 
 
 def main():
+    parser = argparse.ArgumentParser(description="MIIT 新车参数宽表生成器")
+    parser.add_argument("--batch", default=DEFAULT_BATCH,
+                        help=f"公告批次号（默认 {DEFAULT_BATCH}），如 410")
+    parser.add_argument("--output-dir", default="",
+                        help="输出目录（默认 MIIT/{batch}-Parameter/）")
+    args = parser.parse_args()
+
+    batch = args.batch
+    scan_name, tax_name = BATCH_PATHS.get(
+        batch, BATCH_PATHS[DEFAULT_BATCH])
+    SCAN_PATH = MIIT / scan_name
+    TAX_PATH = MIIT / tax_name
+    out_dir = Path(args.output_dir) if args.output_dir else MIIT / f"{batch}-Parameter"
+    out_dir.mkdir(parents=True, exist_ok=True)
+
     models = parse_scan_md(SCAN_PATH)
     print(f"Found {len(models)} models in scan file")
 
@@ -691,7 +712,7 @@ def main():
         mid = m["model_id"]
         brand = m["brand"]
 
-        md_data = read_brand_md(brand, mid)
+        md_data = read_brand_md(brand, mid, batch)
         tax_data = tax_index.get(mid, {})
 
         if md_data is None:
@@ -735,19 +756,19 @@ def main():
         "missing_reason", "metric_scope",
     ]
 
-    csv_path = HERE / "wide_table.csv"
+    csv_path = out_dir / "wide_table.csv"
     with open(csv_path, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=field_names, extrasaction="ignore")
         w.writeheader()
         for rec in records:
             w.writerow(rec)
     print(f"CSV written: {csv_path}")
-    md_path = HERE / "wide_table.md"
+    md_path = out_dir / "wide_table.md"
     with open(md_path, "w", encoding="utf-8") as f:
-        f.write("# 第409批 MIIT 新车参数宽表\n\n")
+        f.write(f"# 第{batch}批 MIIT 新车参数宽表\n\n")
         f.write(f"**数据来源**: 附件1 企业申报详情页 + 附件2 车船税目录\n\n")
         f.write(f"**行数(含配置展开)**: {len(records)} 行 | ")
-        f.write(f"**原始车型数**: 50 | ")
+        f.write(f"**原始车型数**: {n_original} | ")
         f.write(f"附件1缺失: {len(missing_md)} | ")
         f.write(f"附件2缺失: {len(missing_tax)}\n\n")
         f.write("> 备注：含 `/` 的续航/质量字段已按配置版本展开为独立行。电机功率中 `/` 表前/后双电机，不做拆分。\n\n")
@@ -786,11 +807,10 @@ def main():
         # Per-brand breakdown (deduplicated by original model)
         f.write("## 各品牌车型数量\n\n")
         f.write("> 统计口径：按原始产品型号去重（去除#1/#2配置后缀），下同。\n\n")
-        from collections import Counter
-        brand_counts = Counter()
+        from collections import defaultdict
+        brand_counts: dict[str, set[str]] = defaultdict(set)
         for r in records:
             mid = r.get("产品型号", "").split("#")[0]
-            brand_counts[r["品牌"]] = brand_counts.get(r["品牌"], set())
             brand_counts[r["品牌"]].add(mid)
         f.write(f"| 品牌 | 原始车型数 | 配置行数 |\n|------|:--------:|:-------:|\n")
         for b in sorted(brand_counts, key=lambda x: len(brand_counts[x]), reverse=True):
@@ -852,8 +872,8 @@ def main():
             if ev_eds:
                 f.write(f"- 纯电动（车型等权 {len(ev_deduped)}个）平均近似电耗: {round(sum(ev_eds)/len(ev_eds), 1)} kWh/100km\n")
         if phev_deduped:
-            phev_ranges_model = [r.get("_range_num") for r in phev_deduped if r.get("_range_num")]
-            phev_ranges_config = [r.get("_range_num") for r in phev_all if r.get("_range_num")]
+            phev_ranges_model = [r["_range_num"] for r in phev_deduped if isinstance(r.get("_range_num"), (int, float))]
+            phev_ranges_config = [r["_range_num"] for r in phev_all if isinstance(r.get("_range_num"), (int, float))]
             if phev_ranges_model:
                 f.write(f"- PHEV/增程（车型等权 {len(phev_ranges_model)}个）平均纯电续航: {round(sum(phev_ranges_model)/len(phev_ranges_model))} km\n")
                 if len(phev_ranges_config) != len(phev_ranges_model):

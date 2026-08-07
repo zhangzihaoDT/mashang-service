@@ -27,7 +27,7 @@ SEP = '\x07'
 
 # ── 各分类的字段 schema ──────────────────────────────────────────
 
-SECTION_SCHEMAS = OrderedDict([
+SECTION_SCHEMAS: "OrderedDict[str, dict]" = OrderedDict([
     ("节能乘用车", {
         "header": "（一）乘用车",
         "schema": [
@@ -93,18 +93,42 @@ SECTION_SCHEMAS = OrderedDict([
 ])
 
 
+def _detect_section(header_cells: list[str]) -> str | None:
+    """根据数据行表头列判断所属分类（不依赖顺序，兼容缺省分类的批次）。
+
+    表头列差异（从 .txt 实际导出列名归纳）：
+      - 节能乘用车:  通用名称 + 车辆型号 + 排量(ml)（无 产品型号）
+      - 天然气商用车: 车辆型号 + 产品名称 + 燃料种类（无 产品型号/通用名称）
+      - 汽柴油货车:  最大设计总质量(kg)
+      - 插混乘用车:  通用名称 + 产品型号 + 发动机排量(ml)（小写 l）
+      - 纯电商用车:  动力蓄电池组总质量(kg)（带"组"）
+      - 插混商用车:  产品名称 + 产品型号 + 发动机排量(mL)（大写 L）
+      - 燃料电池:    燃料电池系统额定功率(kW)
+    """
+    head = "\t".join(header_cells[:24])
+    if "燃料电池系统额定功率" in head:
+        return "燃料电池汽车"
+    if "动力蓄电池组总质量" in head:
+        return "纯电动商用车"
+    if "最大设计总质量" in head:
+        return "汽柴油重型货车"
+    if "通用名称" in head and "产品型号" in head:
+        return "插电式混合动力乘用车"
+    if "产品型号" in head and "发动机排量(mL)" in head:
+        return "插电式混合动力商用车"
+    if "通用名称" in head and "车辆型号" in head:
+        return "节能乘用车"
+    if "燃料种类" in head and "产品名称" in head:
+        return "天然气"  # 轻型/重型同列名，按出现顺序解析
+    return None
+
+
 def parse_txt(input_path: str) -> dict:
     """Main parse function: reads txt → structured dict"""
     raw = Path(input_path).read_text(encoding="utf-8")
     lines = raw.split('\n')
 
     section_names = list(SECTION_SCHEMAS.keys())
-
-    data_line_indices = []
-    for i, line in enumerate(lines):
-        stripped = line.strip()
-        if stripped.startswith("序号"):
-            data_line_indices.append(i)
 
     result = {
         "title": "《享受车船税减免优惠的节约能源 使用新能源汽车车型目录》",
@@ -118,27 +142,33 @@ def parse_txt(input_path: str) -> dict:
     }
 
     known_brands = set()
+    gas_occurrence = 0
 
-    for idx, section_name in enumerate(section_names):
-        if idx >= len(data_line_indices):
-            result["stats"][section_name] = 0
-            result["sections"][section_name] = {
-                "records": [], "count": 0,
-                "schema": SECTION_SCHEMAS[section_name]["schema"]
-            }
+    for line in lines:
+        stripped = line.strip()
+        if not stripped.startswith("序号"):
             continue
+        cells = [c.strip() for c in stripped.split(SEP)]
 
-        line_idx = data_line_indices[idx]
-        line = lines[line_idx]
-        schema = SECTION_SCHEMAS[section_name]["schema"]
+        section = _detect_section(cells)
+        if section is None:
+            continue  # 序号 单独一行等非扁平格式，跳过
+        if section == "天然气":
+            gas_occurrence += 1
+            section = ("天然气轻型商用车" if gas_occurrence == 1
+                       else "天然气重型商用车")
+
+        schema = SECTION_SCHEMAS.get(section, {}).get("schema", [])
+        if not schema:
+            continue
         records = _parse_data_line(line, schema)
 
-        result["sections"][section_name] = {
+        result["sections"][section] = {
             "records": records,
             "count": len(records),
             "schema": schema,
         }
-        result["stats"][section_name] = len(records)
+        result["stats"][section] = len(records)
 
         for rec in records:
             brand = rec.get("企业名称", "")
@@ -146,8 +176,17 @@ def parse_txt(input_path: str) -> dict:
                 brand = brand.strip()
                 known_brands.add(brand)
                 result["by_brand"].setdefault(brand, {})
-                result["by_brand"][brand].setdefault(section_name, [])
-                result["by_brand"][brand][section_name].append(rec)
+                result["by_brand"][brand].setdefault(section, [])
+                result["by_brand"][brand][section].append(rec)
+
+    # 未出现的分类补空结构，保持 section_order 完整
+    for section_name in section_names:
+        if section_name not in result["sections"]:
+            result["sections"][section_name] = {
+                "records": [], "count": 0,
+                "schema": SECTION_SCHEMAS[section_name]["schema"],
+            }
+            result["stats"][section_name] = 0
 
     result["brands"] = sorted(known_brands)
     result["stats"]["total_brands"] = len(known_brands)
