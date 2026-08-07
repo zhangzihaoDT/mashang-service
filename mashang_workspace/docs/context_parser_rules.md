@@ -31,6 +31,7 @@ dry-run / execute
 | `group_by` | 分组维度 |
 | `filters` | 过滤器列表 (additive) |
 | `analysis_type` | 分析类型 |
+| `baseline` | 对比基准时间窗口（「相比…均值」时出现，不覆盖主 `time_window`） |
 | `limit` | TopN 限制 |
 | `confidence` | 解析置信度 0.0~1.0 |
 
@@ -87,6 +88,34 @@ dry-run / execute
 2. 第二轮起: 文本中未出现的字段从上一轮继承
 3. Filters 是累加的 (additive)
 4. Time window/metric/series/group_by 可显式覆盖
+
+## 分析类型 (analysis_type) 规则
+
+| 用户说 | analysis_type |
+|--------|---------------|
+| 同比/环比/对比/变化 | `compare` |
+| 相比/较/对比 …(近 N 日/昨日/…)均值 | `compare` + 记录 `baseline` |
+| 生成结论/日报/摘要/总结 | `summary` |
+| 趋势/走势/波动 | `trend` |
+| 占比/份额 | `share` |
+
+## 对比基准 (baseline) 语义
+
+当用户使用「相比/较/对比 …均值」表达对比基准时：
+
+- `baseline` 记录基准时间窗口（如 `last_7_days`），**不覆盖**主 `time_window`（主窗口继续从上轮继承）
+- 同时设置 `analysis_type = compare`
+
+示例：
+
+```
+上一轮: 昨天(yesterday) LS8 城市分布 (lock_count, group_by=city)
+用户:   "哪些城市相比近 7 日均值下降明显？"
+  → time_window = yesterday (继承)
+  → baseline    = last_7_days
+  → analysis_type = compare
+```
+
 
 ## 当前模式
 

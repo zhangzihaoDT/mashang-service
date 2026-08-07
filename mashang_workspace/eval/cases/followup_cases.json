@@ -8,7 +8,7 @@
         "expected_context": {
           "metric": "lock_count",
           "time_window": "yesterday",
-          "group_by": "series"
+          "group_by": "model"
         }
       },
       {

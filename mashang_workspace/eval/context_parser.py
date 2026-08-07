@@ -33,7 +33,6 @@ METRIC_RULES: list[tuple[re.Pattern, str, float]] = [
     (re.compile(r"增程占比趋势"), "reev_share_trend", 0.92),
     (re.compile(r"增程和纯电占比|增程和纯电|能源类型"), "lock_count_share", 0.88),
     (re.compile(r"占比|率[^字]|结构|份额"), "lock_count_share", 0.75),
-    (re.compile(r"分布"), "lock_count_share", 0.60),
     (re.compile(r"锁单数|锁单量|锁单"), "lock_count", 0.85),
     (re.compile(r"预测"), "cohort_forecast", 0.60),
 ]
@@ -85,6 +84,7 @@ ANALYSIS_TYPE_RULES: list[tuple[re.Pattern, str, float]] = [
     (re.compile(r"释放曲线"), "release_curve", 0.93),
     (re.compile(r"回测|backtest"), "backtest", 0.90),
     (re.compile(r"同比|环比|对比|变化"), "compare", 0.80),
+    (re.compile(r"生成.*(?:结论|日报|摘要|总结)|(?:结论|日报|摘要|总结)"), "summary", 0.85),
     (re.compile(r"趋势|走势|波动"), "trend", 0.75),
     (re.compile(r"占比|份额|share"), "share", 0.70),
 ]
@@ -152,6 +152,40 @@ def _extract_city(text: str) -> tuple[str | None, float]:
         if m:
             return m.group(1), conf
     return None, 0.0
+
+
+# ─── 6b. 对比基准提取 ────────────────────────────────────────────────────────
+
+# 识别「相比/较/对比…(近 N 日|昨日|上周|上月…)均值/平均」的基准引用。
+# 命中时返回基准时间窗口字符串，如 last_7_days / last_30_days / yesterday / last_month。
+COMPARE_BASELINE_PATTERN = re.compile(
+    r"(?:相比|相较于|较|对比)\s*(?:近|最近)?\s*"
+    r"(\d+)\s*(天|日|周|星期|个月|月)"
+    r"\s*(?:的)?\s*(?:均值|平均)"
+)
+
+
+def _extract_compare_baseline(text: str) -> tuple[str | None, str | None]:
+    """从文本提取对比基准时间窗口。
+
+    返回 (baseline_window, analysis_type)：
+      - baseline_window: 基准窗口（last_N_days / last_month 等），未命中返回 None
+      - analysis_type:   始终为 "compare"（仅当命中时）
+    """
+    m = COMPARE_BASELINE_PATTERN.search(text)
+    if not m:
+        return None, None
+    n = int(m.group(1))
+    unit = m.group(2)
+    if unit in ("天", "日"):
+        baseline = f"last_{n}_days"
+    elif unit in ("周", "星期"):
+        baseline = f"last_{n * 7}_days"
+    elif unit in ("个月", "月"):
+        baseline = f"last_{n * 30}_days"
+    else:
+        baseline = None
+    return baseline, "compare"
 
 
 def _resolve_result_reference(text: str, previous_result_context: dict | None,
@@ -312,10 +346,18 @@ def parse_context(user_text: str, previous_context: dict | None = None,
         confidences["metric"] = m_conf
 
     # 2. Time Window
-    t_key, t_val, t_conf = _match_rules(text, TIME_WINDOW_RULES)
-    if t_key:
-        parsed["time_window"] = t_key
-        confidences["time_window"] = t_conf
+    #    先检测「相比…均值」对比基准：命中时该窗口为基准，不作为主窗口覆盖上轮
+    baseline_window, baseline_type = _extract_compare_baseline(text)
+    if baseline_window:
+        parsed["baseline"] = baseline_window
+        confidences["baseline"] = 0.90
+        parsed["analysis_type"] = baseline_type
+        confidences["analysis_type"] = 0.85
+    else:
+        t_key, t_val, t_conf = _match_rules(text, TIME_WINDOW_RULES)
+        if t_key:
+            parsed["time_window"] = t_key
+            confidences["time_window"] = t_conf
 
     # 3. Series
     series, series_conf = _extract_series(text)
@@ -379,7 +421,7 @@ def parse_context(user_text: str, previous_context: dict | None = None,
     overridden = {}
 
     inherit_fields = {"metric", "series", "model", "city", "time_window",
-                      "group_by", "analysis_type", "limit"}
+                      "group_by", "analysis_type", "limit", "baseline"}
 
     for field in inherit_fields:
         if field in parsed:

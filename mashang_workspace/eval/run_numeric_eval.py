@@ -22,6 +22,16 @@ import sys; from pathlib import Path; sys.path.insert(0, str(Path(__file__).reso
 DEFAULT_CASES = WORKSPACE_ROOT / "eval" / "cases" / "numeric_cases.json"
 
 
+def _resolve_command(command: str) -> str:
+    """将命令开头的 python 替换为当前解释器，避免依赖系统 PATH 中的 python。"""
+    stripped = command.strip()
+    if stripped.startswith("python "):
+        return sys.executable + stripped[len("python"):]
+    if stripped.startswith("python3 "):
+        return sys.executable + stripped[len("python3"):]
+    return command
+
+
 def _field_exists(data: dict, field_path: str) -> bool:
     """检查嵌套字段是否存在，如 'result.dimensions'。"""
     parts = field_path.split(".")
@@ -60,7 +70,7 @@ def _check_metric(contract: dict, key: str, expected_val: dict) -> tuple[bool, s
 
 def evaluate_case(case: dict, timeout: int = 60) -> dict:
     case_id = case.get("case_id", "unknown")
-    command = case.get("command", "")
+    command = _resolve_command(case.get("command", ""))
     expected = case.get("expected", {})
     checks = []
 
