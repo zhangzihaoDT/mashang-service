@@ -283,33 +283,6 @@
     "notes": "扫描 dataset/ 目录输出字段清单，终端/csv/json 格式。"
   },
   {
-    "capability_id": "skills_atp_price",
-    "name": "ATP 价格月报（原脚本）",
-    "tier": "runtime",
-    "status": "active_reference",
-    "script": "mashang_workspace/runtime_scripts/skills_atp_price.py",
-    "auto_schedulable": false,
-    "result_contract": false,
-    "numeric_eval_case": null,
-    "contract_gate": false,
-    "followup_supported": false,
-    "docs": [],
-    "promotion": {
-      "current_stage": "legacy_script",
-      "eligible_for_runtime_productization": false,
-      "eligible_for_runtime_script": true,
-      "blocked_reasons": [
-        "已被 atp_price_report.py 替代",
-        "保留原脚本用于口径验证",
-        "legacy script; must be wrapped before promotion"
-      ],
-      "eligible_for_runtime_v2": false,
-      "runtime_v2_candidate": false,
-      "candidate_stage": "not_eligible"
-    },
-    "notes": "原 ATP 脚本，180 行。已被 wrapper atp_price_report.py 替代。"
-  },
-  {
     "capability_id": "voc_theme_analysis",
     "name": "VOC 主题分析",
     "tier": "utility",

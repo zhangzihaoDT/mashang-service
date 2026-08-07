@@ -26,16 +26,19 @@ def test_runtime_scripts_is_real_dir():
     assert not RUNTIME_SCRIPTS_DIR.is_symlink(), "runtime_scripts 不应是 symlink"
 
 
-def test_runtime_scripts_has_7_scripts():
-    """runtime_scripts 下存在 7 个 runtime scripts。"""
+def test_runtime_scripts_has_6_scripts():
+    """runtime_scripts 下存在 6 个 runtime scripts。"""
     files = {f.name for f in RUNTIME_SCRIPTS_DIR.iterdir() if f.suffix == ".py"}
     expected = {
         "daily_lock_count.py", "lock_by_model.py", "lock_city_distribution.py",
         "assign_conversion_analysis.py", "attribute_penetration_report.py",
-        "atp_price_report.py", "skills_atp_price.py",
+        "atp_price_report.py",
     }
     missing = expected - files
     assert not missing, f"runtime_scripts 缺少: {missing}"
+
+    # skills_atp_price.py 已反向合并进 atp_price_report.py 后删除
+    assert "skills_atp_price.py" not in files, "skills_atp_price.py 应已删除（已合并进 atp_price_report.py）"
 
 
 def test_research_scripts_has_scripts():
@@ -79,12 +82,14 @@ def test_capability_registry_runtime_scripts_paths():
 
 
 def test_capability_registry_research_scripts_paths():
-    """capability_registry 中 research script paths 指向 research_scripts/。"""
+    """capability_registry 中 research script paths 指向 research_scripts/ 或 promptbuilders/。"""
+    valid_prefixes = ("research_scripts", "promptbuilders")
     registry = json.loads(REGISTRY_PATH.read_text())
     for cap in registry:
         if cap.get("tier") == "research":
             sp = cap.get("script", "")
-            assert "research_scripts" in sp, f"{cap['capability_id']} script path 不是 research_scripts: {sp}"
+            assert any(p in sp for p in valid_prefixes), \
+                f"{cap['capability_id']} script path 不是 {valid_prefixes}: {sp}"
             full_path = WORKSPACE_ROOT / sp.replace("mashang_workspace/", "")
             assert full_path.exists(), f"{cap['capability_id']} 脚本不存在: {full_path}"
 
