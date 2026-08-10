@@ -56,7 +56,7 @@
 ```bash
 # 完整生成（自动检测可用格式）
 python scripts/render_official_document.py \
-  --input skills/official_document_render/examples/project_application_sample.md \
+  --input .opencode/skills/official_document_render/examples/project_application_sample.md \
   --output-dir outputs/submission \
   --basename 项目申报书_示例 \
   --formats html,pdf,docx

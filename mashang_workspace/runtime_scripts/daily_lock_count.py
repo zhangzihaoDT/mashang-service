@@ -54,7 +54,8 @@ def resolve_time_range(args):
         d = pd.Timestamp(args.date)
         return d, d + timedelta(days=1), args.date, "date"
     if args.start_date and args.end_date:
-        s, e = pd.Timestamp(args.start_date), pd.Timestamp(args.end_date)
+        s = pd.Timestamp(args.start_date)
+        e = pd.Timestamp(args.end_date) + timedelta(days=1)
         return s, e, f"{args.start_date}~{args.end_date}", "range"
     yesterday = datetime.now() - timedelta(days=1)
     d = pd.Timestamp(yesterday.date())

@@ -11,7 +11,7 @@ from pathlib import Path
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_REPO_ROOT))
 
-SAMPLE_MD = _REPO_ROOT / "skills" / "official_document_render" / "examples" / "project_application_sample.md"
+SAMPLE_MD = _REPO_ROOT / ".opencode" / "skills" / "official_document_render" / "examples" / "project_application_sample.md"
 SCRIPT = _REPO_ROOT / "scripts" / "render_official_document.py"
 SMOKE_DIR = _REPO_ROOT / "outputs" / "smoke" / "official_document_render"
 

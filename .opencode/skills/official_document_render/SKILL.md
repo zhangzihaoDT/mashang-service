@@ -104,6 +104,6 @@ project_application_print.html
 |------|------|
 | `scripts/render_official_document.py` | 核心渲染脚本 |
 | `scripts/smoke_test_official_document_render.py` | Smoke test |
-| `skills/official_document_render/README.md` | 人类开发者文档 |
-| `skills/official_document_render/templates/official_print.css` | 正式排版 CSS 模板 |
-| `skills/official_document_render/examples/project_application_sample.md` | 示例 Markdown |
+| `.opencode/skills/official_document_render/README.md` | 人类开发者文档 |
+| `.opencode/skills/official_document_render/templates/official_print.css` | 正式排版 CSS 模板 |
+| `.opencode/skills/official_document_render/examples/project_application_sample.md` | 示例 Markdown |

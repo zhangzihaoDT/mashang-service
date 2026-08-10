@@ -181,7 +181,7 @@ These are clearly frozen, superseded, or no longer in active use:
 | Path | Reason | Suggested Action |
 |------|--------|------------------|
 | `mashang_runtime/` | Fully frozen, 0 imports from workspace. Operators are duplicated in `shared/`. Schema duplicated in `shared/`. | 🟡 **Rename to `mashang_runtime.legacy/`** to signal frozen status. Keep in repo for reference. |
-| `skills/` (root) | Duplicate of `.opencode/skills/`. Both contain opencode skill definitions. Root `skills/official_document_render/` appears unused after OpenCode migrated to `.opencode/` skills. | 🟡 **Move content to `.opencode/skills/`** if still needed, then delete root `skills/`. |
+| `skills/` (root) | Duplicate of `.opencode/skills/`; the official document render assets have been consolidated into the repo-level OpenCode skill directory. | 🟢 **Completed** — root `skills/` removed; keep `.opencode/skills/official_document_render/`. |
 | `test/` (6 files) | Gitignored, explicitly marked as "temporary analysis scripts". Already gitignored. Archival not urgent. | 🟢 **No action needed** — already gitignored. |
 | `main.py` (root) | Thin wrapper: calls `mashang_runtime.main`. The runtime is frozen; this wrapper has no workspace consumers. | 🟡 **Add deprecation notice** but don't delete — may be used by external scripts. |
 | `feishu_bot.py` (root) | Thin wrapper: calls `mashang_runtime.feishu_bot`. Same as `main.py`. | 🟡 **Add deprecation notice**. |
@@ -383,7 +383,7 @@ mashang-service/
 |------|--------|------|
 | 3.1 | Rename `mashang_runtime/` → `mashang_runtime.legacy/` | 🟡 May break scripts referencing the path. Check `make`, `main.py`, `feishu_bot.py` first |
 | 3.2 | Update `main.py` and `feishu_bot.py` to import from new path | 🟡 Directly depends on 3.1 |
-| 3.3 | Move `skills/official_document_render/` → `.opencode/skills/` | 🟡 Depends on OpenCode recognizing it there |
+| 3.3 | Move `skills/official_document_render/` → `.opencode/skills/` | 🟢 Completed; renderer and smoke test now use the consolidated path |
 
 ### Phase 4 — Structural Optimization (Requires Testing)
 
@@ -462,7 +462,7 @@ The following operations carry elevated risk and should only be done after thoro
 # Update main.py and feishu_bot.py import paths
 
 # Phase 4: Consolidate skills
-# git mv skills/official_document_render .opencode/skills/
+# Consolidated into .opencode/skills/official_document_render/
 # git rm skills/
 
 # Verify no breakage:

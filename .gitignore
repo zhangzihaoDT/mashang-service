@@ -98,6 +98,9 @@ mashang_workspace/outputs/reports/ls8_user_profile_*.html
 outputs/charts/
 mashang_workspace/outputs/charts/
 
+# Smoke test runtime outputs (regenerated on every run)
+outputs/smoke/
+
 auto_launch/outputs/runs/
 
 # auto_launch migration backup

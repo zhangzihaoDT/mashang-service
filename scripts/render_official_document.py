@@ -18,7 +18,7 @@ from pathlib import Path
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_REPO_ROOT))
 
-SKILL_DIR = _REPO_ROOT / "skills" / "official_document_render"
+SKILL_DIR = _REPO_ROOT / ".opencode" / "skills" / "official_document_render"
 TEMPLATE_DIR = SKILL_DIR / "templates"
 CSS_PATH = TEMPLATE_DIR / "official_print.css"
 OUTPUTS_DIR = _REPO_ROOT / "outputs"

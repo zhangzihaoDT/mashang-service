@@ -20,7 +20,7 @@ def _visible_items(directory: Path):
     )
 
 
-DOCS_ALLOWLIST = frozenset({"passenger_insurance_dataset.md"})
+DOCS_ALLOWLIST = frozenset({"passenger_insurance_dataset.md", "cpca_market_research.md"})
 SCRIPTS_ALLOWLIST = frozenset({
     "__init__.py",
     "build_passenger_insurance_dataset.py",

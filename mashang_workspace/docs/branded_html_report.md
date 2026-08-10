@@ -81,7 +81,7 @@ workspace skills 目录页面，用于展示 mashang_workspace 下已沉淀的 w
 
 ## 不要做的事
 
-- 不要用于正式申报书/通知/公文（用 repo root `official_document_render`）
+- 不要用于正式申报书/通知/公文（用 repo-level `.opencode/skills/official_document_render`）
 - 不要用于 Word/PDF 输出
 - 不要重新设计视觉风格
 - 不要硬编码具体报告内容

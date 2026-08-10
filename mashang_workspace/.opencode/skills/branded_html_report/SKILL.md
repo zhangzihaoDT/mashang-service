@@ -28,7 +28,7 @@ description: 生成 mashang_workspace 专属的品牌化 HTML 数据报告，适
 - PPT
 - 纯命令行日志
 
-如用户要求"正式通知风 Word/PDF"，应使用 repo 根目录的 `official_document_render` skill，调用 `scripts/render_official_document.py`。
+如用户要求"正式通知风 Word/PDF"，应使用 repo-level `.opencode/skills/official_document_render` skill，调用 `scripts/render_official_document.py`。
 
 ## 默认输出位置
 
@@ -120,13 +120,13 @@ python utility_scripts/render_html_report.py \
 7. 输出生成路径；
 8. 如涉及图表，确认图表文件路径正确或 Plotly CDN 可访问；
 9. 如涉及模型或预测，必须包含数据口径、模型假设和回测/误差说明；
-10. 如果用户明确要求"正式通知风 Word/PDF"，切换到 repo 根目录 `official_document_render` skill。
+10. 如果用户明确要求"正式通知风 Word/PDF"，切换到 repo-level `.opencode/skills/official_document_render` skill。
 
 ## 不涉及的行为
 
 - 不生成 Word/PDF 正式材料
 - 不生成政府公文风
-- 不引入 repo root 的 `official_document_render` 逻辑
+- 不引入 repo-level `official_document_render` 逻辑
 - 不删除已有 outputs/reports 下的任何报告
 - 不改写现有模板或品牌资产
 
