@@ -1,0 +1,31 @@
+# MIIT 批次统一配置 —— 唯一的 batch 信息源
+#
+# 各层脚本（scripts/ 下）只从这里读取批次信息，不再各自写死
+# pageId / 日期 / 车船税批次 / 文件名。
+#
+# 字段说明：
+#   notice_date       公告公示日期
+#   archive_date      归档/报告存档时间（报告页脚用）
+#   page_id           搜索 API 对应的批次 pageId（sources 搜索用）
+#   index             公告批次 iframe 索引目录（Referer / 详情页用）
+#   vehicle_tax_batch 该批对应的车船税减免目录批次号
+#   scan_file         P1 扫描产物文件名（data/search_results/ 下）
+#   tax_file          车船税结构化文件名（data/vehicle_tax/ 下）
+
+409:
+  notice_date: 2026-07-07
+  archive_date: 2026-07-13
+  page_id: 49d24aca2b7f42e599691da4cc329220
+  index: xcpgs409dwdwe233
+  vehicle_tax_batch: 88
+  scan_file: scan_batch_409.md
+  tax_file: 车型清单_第88批车船税.json
+
+410:
+  notice_date: 2026-08-07
+  archive_date: 2026-08-07
+  page_id: f7397ceb83214c88b85595615baf5d03
+  index: xcpgs410we24r34
+  vehicle_tax_batch: 89
+  scan_file: scan_batch_410.md
+  tax_file: 车型清单_第89批车船税.json

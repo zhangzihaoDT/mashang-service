@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MIIT Scan (P1 产物)",
+  "description": "scan_batch_XXX.md 内嵌 JSON 块的结构（品牌扫描快照）。",
+  "type": "object",
+  "required": ["watchlist", "batch", "brands"],
+  "properties": {
+    "watchlist": {
+      "type": "string"
+    },
+    "batch": {
+      "type": "string"
+    },
+    "brands": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["catalog", "searches", "all_rows", "total_count"],
+        "properties": {
+          "catalog": {
+            "type": "string",
+            "description": "品牌"
+          },
+          "searches": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field": { "type": "string" },
+                "term": { "type": "string" },
+                "count": { "type": "integer" }
+              }
+            }
+          },
+          "all_rows": {
+            "type": "array",
+            "description": "车型行，结构见 vehicle.schema.json",
+            "items": { "type": "object" }
+          },
+          "total_count": {
+            "type": "integer"
+          }
+        }
+      }
+    }
+  }
+}

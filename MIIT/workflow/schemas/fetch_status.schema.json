@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MIIT Fetch Status Record",
+  "description": "P2 归档管线的车型抓取状态 checkpoint（state/fetch_status_{batch}.json 的每个记录）。",
+  "type": "object",
+  "required": ["status", "detail_url", "attempts"],
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": ["SUCCESS", "NOT_FOUND", "TRANSIENT_ERROR", "BLOCKED", "PARSE_ERROR", "SKIPPED"]
+    },
+    "code": {
+      "type": "string",
+      "description": "状态码（如 MIIT_TIMEOUT / MIIT_BLOCKED / EXISTS / SUCCESS）"
+    },
+    "detail_url": {
+      "type": "string"
+    },
+    "attempts": {
+      "type": "integer"
+    },
+    "last_error": {
+      "type": "string"
+    },
+    "last_success": {
+      "type": "string",
+      "format": "date"
+    },
+    "data_status": {
+      "type": "string",
+      "enum": ["FRESH", "STALE", "MISSING"]
+    },
+    "action": {
+      "type": "string",
+      "description": "archived / deferred_retry / cache_restored / exists / needs_inspection / missing_url"
+    },
+    "updated_at": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,178 @@
+{
+  "FZ7000BEVB05K": {
+    "status": "SUCCESS",
+    "code": "SUCCESS",
+    "detail_url": "/datainfo/dljdclscqyjcpgg/xcpgs410we24r34/art/2026/art_224125efb5314762aa93b13cced8496d.html",
+    "attempts": 1,
+    "last_error": "",
+    "last_success": "2026-08-07",
+    "data_status": "FRESH",
+    "action": "archived",
+    "updated_at": "2026-08-07 14:23:36"
+  },
+  "FZ7000BEVB05L": {
+    "status": "SUCCESS",
+    "code": "SUCCESS",
+    "detail_url": "/datainfo/dljdclscqyjcpgg/xcpgs410we24r34/art/2026/art_3a0be75e1f584d1db7febeb2901e9bcd.html",
+    "attempts": 2,
+    "last_error": "",
+    "last_success": "2026-08-07",
+    "data_status": "FRESH",
+    "action": "archived",
+    "updated_at": "2026-08-07 14:24:40"
+  },
+  "FZ7000BEVB05J": {
+    "status": "SUCCESS",
+    "code": "SUCCESS",
+    "detail_url": "/datainfo/dljdclscqyjcpgg/xcpgs410we24r34/art/2026/art_add19c1214d4481e858b394210b323d9.html",
+    "attempts": 1,
+    "last_error": "",
+    "last_success": "2026-08-07",
+    "data_status": "FRESH",
+    "action": "archived",
+    "updated_at": "2026-08-07 14:25:29"
+  },
+  "CC6531BD24DHEV": {
+    "status": "SUCCESS",
+    "code": "SUCCESS",
+    "detail_url": "/datainfo/dljdclscqyjcpgg/xcpgs410we24r34/art/2026/art_bcc69920d53b416ca6e6b360a261d8e3.html",
+    "attempts": 2,
+    "last_error": "",
+    "last_success": "2026-08-07",
+    "data_status": "FRESH",
+    "action": "archived",
+    "updated_at": "2026-08-07 14:26:58"
+  },
+  "CC6542BD24CPHEV": {
+    "status": "SUCCESS",
+    "code": "SUCCESS",
+    "detail_url": "/datainfo/dljdclscqyjcpgg/xcpgs410we24r34/art/2026/art_2e85c932d245429fb1a7d67e8b740618.html",
+    "attempts": 1,
+    "last_error": "",
+    "last_success": "2026-08-07",
+    "data_status": "FRESH",
+    "action": "archived",
+    "updated_at": "2026-08-07 14:27:17"
+  },
+  "CC6530DC21HABEV": {
+    "status": "SUCCESS",
+    "code": "SUCCESS",
+    "detail_url": "/datainfo/dljdclscqyjcpgg/xcpgs410we24r34/art/2026/art_bec16bf0eca94f5cb439478a8e6e7974.html",
+    "attempts": 2,
+    "last_error": "",
+    "last_success": "2026-08-07",
+    "data_status": "FRESH",
+    "action": "archived",
+    "updated_at": "2026-08-07 14:28:23"
+  },
+  "SKE6522DBEVR2": {
+    "status": "SUCCESS",
+    "code": "SUCCESS",
+    "detail_url": "/datainfo/dljdclscqyjcpgg/xcpgs410we24r34/art/2026/art_cd4bf9adab8b4d8cb326c42bc6cae8d1.html",
+    "attempts": 2,
+    "last_error": "",
+    "last_success": "2026-08-07",
+    "data_status": "FRESH",
+    "action": "archived",
+    "updated_at": "2026-08-07 14:29:28"
+  },
+  "SKE6522DREEVR2": {
+    "status": "SUCCESS",
+    "code": "SUCCESS",
+    "detail_url": "/datainfo/dljdclscqyjcpgg/xcpgs410we24r34/art/2026/art_26ecf893623f4d17901998c8d4819bb9.html",
+    "attempts": 2,
+    "last_error": "",
+    "last_success": "2026-08-07",
+    "data_status": "FRESH",
+    "action": "archived",
+    "updated_at": "2026-08-07 14:30:42"
+  },
+  "SKE6522DBEVR1": {
+    "status": "SUCCESS",
+    "code": "SUCCESS",
+    "detail_url": "/datainfo/dljdclscqyjcpgg/xcpgs410we24r34/art/2026/art_ebc3be46701e4554b83f95fecb556378.html",
+    "attempts": 1,
+    "last_error": "",
+    "last_success": "2026-08-07",
+    "data_status": "FRESH",
+    "action": "archived",
+    "updated_at": "2026-08-07 14:30:44"
+  },
+  "SKE6522DREEVR1": {
+    "status": "SUCCESS",
+    "code": "SUCCESS",
+    "detail_url": "/datainfo/dljdclscqyjcpgg/xcpgs410we24r34/art/2026/art_a30bfac4679f4aeb8e3de839f47cb60c.html",
+    "attempts": 1,
+    "last_error": "",
+    "last_success": "2026-08-07",
+    "data_status": "FRESH",
+    "action": "archived",
+    "updated_at": "2026-08-07 14:30:53"
+  },
+  "SQR6500BEVEHX7": {
+    "status": "SUCCESS",
+    "code": "SUCCESS",
+    "detail_url": "/datainfo/dljdclscqyjcpgg/xcpgs410we24r34/art/2026/art_dec9a5ac5e214f289a3e882c4bd1decd.html",
+    "attempts": 1,
+    "last_error": "",
+    "last_success": "2026-08-07",
+    "data_status": "FRESH",
+    "action": "archived",
+    "updated_at": "2026-08-07 14:30:55"
+  },
+  "SQR6500BEVEHX6": {
+    "status": "SUCCESS",
+    "code": "SUCCESS",
+    "detail_url": "/datainfo/dljdclscqyjcpgg/xcpgs410we24r34/art/2026/art_f77b3c33bab14590b22402c1432f379c.html",
+    "attempts": 1,
+    "last_error": "",
+    "last_success": "2026-08-07",
+    "data_status": "FRESH",
+    "action": "archived",
+    "updated_at": "2026-08-07 14:30:57"
+  },
+  "SQR6500BEVEHY9": {
+    "status": "SUCCESS",
+    "code": "SUCCESS",
+    "detail_url": "/datainfo/dljdclscqyjcpgg/xcpgs410we24r34/art/2026/art_5f6dad29d23a4cd3a73a08f786ccd25b.html",
+    "attempts": 1,
+    "last_error": "",
+    "last_success": "2026-08-07",
+    "data_status": "FRESH",
+    "action": "archived",
+    "updated_at": "2026-08-07 14:31:16"
+  },
+  "NEQ6510REEVS5DL": {
+    "status": "SUCCESS",
+    "code": "SUCCESS",
+    "detail_url": "/datainfo/dljdclscqyjcpgg/xcpgs410we24r34/art/2026/art_3209702578dc4a91971547df5d6f3811.html",
+    "attempts": 1,
+    "last_error": "",
+    "last_success": "2026-08-07",
+    "data_status": "FRESH",
+    "action": "archived",
+    "updated_at": "2026-08-07 14:31:18"
+  },
+  "EQ6500MS5F0REEV": {
+    "status": "SUCCESS",
+    "code": "SUCCESS",
+    "detail_url": "/datainfo/dljdclscqyjcpgg/xcpgs410we24r34/art/2026/art_254c872519a54a3b9c19ead149069de3.html",
+    "attempts": 1,
+    "last_error": "",
+    "last_success": "2026-08-07",
+    "data_status": "FRESH",
+    "action": "archived",
+    "updated_at": "2026-08-07 14:31:20"
+  },
+  "EQ6500MS5F3PHEV": {
+    "status": "SUCCESS",
+    "code": "SUCCESS",
+    "detail_url": "/datainfo/dljdclscqyjcpgg/xcpgs410we24r34/art/2026/art_853403e734f24c2b87d3bae217f49f52.html",
+    "attempts": 1,
+    "last_error": "",
+    "last_success": "2026-08-07",
+    "data_status": "FRESH",
+    "action": "archived",
+    "updated_at": "2026-08-07 14:31:22"
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MIIT Vehicle Row",
+  "description": "车型行契约：P1 scan 的行字段（qymc/cpsb/cpmc/cpxh/detail_url），同时是未来 product_master 的字段目标。车型身份 vehicle_record_id = \"{batch_no}:{model_code}\"，型号不假设全局唯一。",
+  "type": "object",
+  "required": ["batch_no", "cpsb", "cpmc", "cpxh"],
+  "properties": {
+    "vehicle_record_id": {
+      "type": "string",
+      "description": "车型唯一身份：{batch_no}:{model_code}（canonical key）"
+    },
+    "batch_no": {
+      "type": "string",
+      "description": "公告批次号（身份组成部分）"
+    },
+    "manufacturer": {
+      "type": "string",
+      "description": "企业名称（product_master 字段）"
+    },
+    "qymc": {
+      "type": "string",
+      "description": "企业名称（scan 行字段）"
+    },
+    "brand": {
+      "type": "string",
+      "description": "品牌（product_master 字段）"
+    },
+    "cpsb": {
+      "type": "string",
+      "description": "产品商标（scan 行字段）"
+    },
+    "product_name": {
+      "type": "string",
+      "description": "产品名称（product_master 字段）"
+    },
+    "cpmc": {
+      "type": "string",
+      "description": "产品名称（scan 行字段）"
+    },
+    "model_code": {
+      "type": "string",
+      "description": "产品型号（product_master 字段）"
+    },
+    "cpxh": {
+      "type": "string",
+      "description": "产品型号（scan 行字段）"
+    },
+    "detail_url": {
+      "type": "string",
+      "description": "详情页相对 URL"
+    },
+    "publish_date": {
+      "type": "string",
+      "format": "date",
+      "description": "公示日期（product_master 字段）"
+    },
+    "source": {
+      "type": "string",
+      "description": "数据来源"
+    }
+  }
+}
