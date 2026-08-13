@@ -1,0 +1,43 @@
+{
+  "schema_version": "eidc_import_manifest.v2",
+  "batch_no": "407",
+  "source": "eidc",
+  "stage": "confirmed",
+  "fetch_mode": "fresh_rebuild",
+  "legacy_source": null,
+  "parser_version": "eidc_source/eidc_parser (MIIT)",
+  "imported_at": "2026-08-12T05:52:47Z",
+  "source_url": "https://www.miit-eidc.org.cn/art/2026/6/12/art_1691_12457.html",
+  "announcement_no": "2026年第14号",
+  "publish_date": "2026-06-12 11:12",
+  "vehicle_tax_batch": "86",
+  "purchase_tax_batch": "31",
+  "attachments": [
+    {
+      "title": "1.道路机动车辆生产企业及产品（第407批）.doc",
+      "url": "https://www.miit.gov.cn/cms_files/filemanager/1226211233/attach/20265/b43b6a0d1ffb47eba041adefa8541476.doc",
+      "filename": "b43b6a0d1ffb47eba041adefa8541476.doc",
+      "download_status": "cached",
+      "sha256": "83b326c5a57f3654395b4b7ff6b2bc9045b351b5836a0d2dc9a72e2b3507eb03",
+      "size": 3965952
+    },
+    {
+      "title": "2.享受车船税减免优惠的节约能源 使用新能源汽车车型目录（第八十六批）.doc",
+      "url": "https://www.miit.gov.cn/cms_files/filemanager/1226211233/attach/20265/9da5e8eab94f46e79e4a29196851c23d.doc",
+      "filename": "9da5e8eab94f46e79e4a29196851c23d.doc",
+      "download_status": "cached",
+      "sha256": "da4c20ce86b6c915f81fbf81357e5b29eac6954ed8cb92dd9000e270ced15850",
+      "size": 765440
+    },
+    {
+      "title": "3.减免车辆购置税的新能源汽车车型目录（第三十一批）.doc",
+      "url": "https://www.miit.gov.cn/cms_files/filemanager/1226211233/attach/20265/feab2b5562ef4ae0a857c85d32907c45.doc",
+      "filename": "feab2b5562ef4ae0a857c85d32907c45.doc",
+      "download_status": "cached",
+      "sha256": "99234d725140bf7c00e333329e073a24d4e40baa8cfcc60ff3f41dd28aee5e6b",
+      "size": 929280
+    }
+  ],
+  "raw_product_rows": 1424,
+  "notes": "fresh_rebuild：直接来自 EIDC 官方正式公告附件，非 legacy 导入"
+}

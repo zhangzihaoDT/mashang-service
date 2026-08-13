@@ -13,9 +13,13 @@ P3 车船税解析（03_parse_vehicle_tax）
    ↓  data/vehicle_tax/车型清单_第XX批车船税.json
 P4 参数宽表（04_build_wide_table）
    ↓  data/wide_tables/wide_table_{batch}.csv
+P4.5 统一 Dataset（07_build_vehicle_dataset）
+   ↓  data/vehicle_parameters/product_master + vehicle_parameter（Gov proposed + EIDC confirmed，passenger scope）
 P5 报告（05_generate_brand_report / 06_generate_category_report）
    ↓  reports/batch_{batch}/
 ```
+
+EIDC confirmed（09_fetch_eidc_batch → eidc_parser → 07 build_eidc_rows）与 Gov proposed 共用同一 canonical 出口；401-408 全 fresh rebuild，legacy 导入已删除。
 
 ## 5 类资产（顶层认知入口）
 
@@ -33,7 +37,7 @@ MIIT/
 ├── Makefile
 ├── reports/           ① 最终报告（batch_409/ batch_410/）
 ├── data/              ② 事实数据（按内容命名：search_results / vehicle_details / vehicle_photos / raw_html / vehicle_tax / vehicle_parameters / wide_tables / fetch_status）
-├── scripts/           ③ 执行脚本（01~06 按管线编号平铺 + miit_gov_search / miit_paths / report_common / tests）
+├── scripts/           ③ 执行脚本（01~07 按管线编号平铺 + miit_gov_search / miit_paths / report_common / tests）
 ├── runs/              ④ 运行记录（batch_409.md batch_410.md）
 └── workflow/          ⑤ 规则与配置（pipeline.md commands.md batches.yaml brand_watchlist.yaml model_name_map.json schemas/ docs/）
 ```
@@ -46,10 +50,16 @@ MIIT/
 | `02_archive_vehicle_details.py` | P2 | 车型详情归档（可恢复：失败分类 + checkpoint + retry） |
 | `03_parse_vehicle_tax.py` | P3 | 车船税 doc/txt → json/md |
 | `04_build_wide_table.py` | P4 | 参数宽表 csv/md |
+| `07_build_vehicle_dataset.py` | P4.5 | 统一 Dataset（product_master / vehicle_parameter，canonical 事实层，passenger scope） |
 | `05_generate_brand_report.py` | P5 | 单品牌车型对比 HTML |
 | `06_generate_category_report.py` | P5 | 按分类多品牌对比 HTML |
 | `miit_gov_search.py` | sources | MIIT 搜索底层（HTTP/反爬/API），供 01 调用 |
 | `miit_paths.py` | utils | 统一路径/批次配置入口（唯一 I/O 基座） |
+| `vehicle_record_builder.py` | utils | **公共领域逻辑**：原始资料→标准字段（parse_detail/merge_tax/resolve_name/build_record/build_eidc_record/classify/derive_metrics/explode_variants），04/07 共用 |
+| `09_fetch_eidc_batch.py` | EIDC source | EIDC 公告抓取/解析/归档（fresh，401-408） |
+| `eidc_parser.py` | EIDC source | EIDC 附件 source record 解析（road/tax/purchase） |
+| `eidc_doc_extract.py` | EIDC source | 超大 .doc 备用提取（olefile FIB 文本区） |
+| `eidc_summary_fresh.py` | EIDC 验收 | 每批 fresh summary（schema_status） |
 | `report_common.py` | utils | P5 公共逻辑（参数提取/车型分组/对比渲染），05/06 共用 |
 
 ## 车型身份（canonical key）
@@ -58,6 +68,27 @@ MIIT/
 同一型号未来可能在不同批次再次申报（参数变更/扩展/重新申报），必须用批次号区分版本，
 避免历史数据被覆盖。对应文件名：
 `data/vehicle_details/{batch}_{model_code}-{产品名}.md`、`data/vehicle_photos/{batch}_{model_code}/`、`data/raw_html/{batch}_{model_code}.html`。
+
+### 领域逻辑层（vehicle_record_builder.py）
+
+**`vehicle_record_builder.py` 是「原始资料 → 标准字段」的公共领域逻辑层**，04 宽表与 07 统一 Dataset 共同 import，双向消除重复，canonical 构建器不再反向依赖消费脚本。
+
+```
+                    raw sources
+                        ↓
+              vehicle_record_builder      parse_detail / merge_tax / resolve_name /
+                 /            \           build_record / derive_metrics / explode_variants
+                ↓              ↓
+product_master/parameter   wide_table
+   车型一行                  配置一行
+```
+
+- `parse_detail(model, batch)`：读取并解析详情页 .md
+- `merge_tax(model_id, batch)`：按型号合并车船税记录
+- `resolve_name(model, tax)`：通用名称解析（车船税 > model_name_map）
+- `build_record(model, md, tax)`：一行标准记录
+- `derive_metrics(record)`：就地计算衍生指标（首值口径）
+- `explode_variants(records)`：多配置展开（宽表用，配置一行）
 
 ## data/ 二级目录（按内容命名）
 
@@ -68,7 +99,7 @@ MIIT/
 | `vehicle_photos/` | P2 公告照片（{batch}_{型号}/ 下） | P2 |
 | `raw_html/` | 原始详情页缓存（{batch}_{型号}.html） | P2 |
 | `vehicle_tax/` | 车船税 doc/txt/json/md | P3 |
-| `vehicle_parameters/` | 结构化车型参数（canonical 目标层，暂未产出） | P2/P3→canonical |
+| `vehicle_parameters/` | 结构化车型参数（canonical 事实层：product_master / vehicle_parameter） | P4.5 |
 | `wide_tables/` | P4 参数宽表 csv/md | P4 |
 | `fetch_status/` | checkpoint / 抓取状态 | P2 |
 
@@ -81,6 +112,7 @@ MIIT/
 | 2. 归档 | `python3 MIIT/scripts/02_archive_vehicle_details.py --batch 410 --all-missing` | scan 中有 `detail_url` | `data/vehicle_details/*.md` + `data/vehicle_photos/` |
 | 3. 补充 | `python3 MIIT/scripts/03_parse_vehicle_tax.py`（+ 前置 doc 下载/转换） | 批次页附件 `.doc` | `data/vehicle_tax/车型清单_第89批车船税.json` |
 | 4. 宽表 | `python3 MIIT/scripts/04_build_wide_table.py --batch 410` | 归档目录 + 车船税 JSON | `data/wide_tables/wide_table_410.csv` |
+| 4.5. 统一Dataset | `python3 MIIT/scripts/07_build_vehicle_dataset.py` | 全部批次归档 + 车船税 | `data/vehicle_parameters/product_master.{csv,json}` + `vehicle_parameter.{csv,json}` |
 | 5. 报告 | `python3 MIIT/scripts/06_generate_category_report.py --batch 410 --all --output-dir batch_410/category_report` | 归档目录 + 车船税 JSON | `reports/batch_410/category_report/` |
 
 > Step 1 和 Step 2 可跨越执行——搜索后先用 `--brand` 归档特定品牌，不需要等全量搜索完毕。Step 3 依赖批次附件发布（通常比公告晚 3-5 天），可以滞后执行；报告在 Step 3 之前可生成，但不含电池容量/续航/通用名称等车船税字段。
@@ -257,6 +289,44 @@ python3 MIIT/scripts/04_build_wide_table.py --batch 410 --output-dir 自定义�
 - 新批次只需在 `workflow/batches.yaml` 登记 scan / 车船税文件名
 - 字段口径与衍生指标说明见 `data/wide_tables/README.md`
 
+## 管线 P4.5：统一 Dataset（canonical 事实层）
+
+```bash
+python3 MIIT/scripts/07_build_vehicle_dataset.py             # → data/vehicle_parameters/
+python3 MIIT/scripts/07_build_vehicle_dataset.py --batch 410 --output-dir /tmp/x   # 单批隔离输出
+make -C MIIT miit-dataset
+```
+
+- 从 `workflow/batches.yaml` 登记的全部批次构建两张规范表，**一车型一行**，身份 `vehicle_record_id = {batch_no}:{model_code}`
+  - `product_master`：车型身份主表（batch_no/model_code/brand/manufacturer/product_name/common_name/detail_url/publish_date/source）
+  - `vehicle_parameter`：车型参数事实表（尺寸/轴距/整备/电池/电芯·总成供应商/电机/容量·续航/增程器/衍生指标/质量标记）
+- 与 P4 宽表的区别：宽表按配置展开（一配置一行），统一 Dataset 一车型一行，多配置保留原始串 + `variant_count` 标记
+- 字段契约见 `workflow/schemas/product_master.schema.json` / `vehicle_parameter.schema.json`
+- 口径说明见 `data/vehicle_parameters/README.md`
+
+## 管线 P4.5b：EIDC confirmed（fresh rebuild）
+
+```bash
+python3 MIIT/scripts/09_fetch_eidc_batch.py --batch 408     # source 抓取/解析/归档
+python3 MIIT/scripts/07_build_vehicle_dataset.py             # canonical（Gov + EIDC 统一）
+python3 MIIT/scripts/eidc_summary_fresh.py                   # 每批 fresh 验收
+```
+
+- 输入：`data/eidc/batch_{401..408}/product_list.json`（fresh，eidc_parser 全量解析，含 `source_section`）
+- 流程：`normalize model_code → classify source record → passenger scope gate → tax/purchase enrichment → build_eidc_record → canonical`
+- 写入：`product_master` / `vehicle_parameter`，`source=eidc, stage=confirmed`，`observation_id={batch}:{model_code}:confirmed`
+- **canonical scope**：仅 `vehicle_category == passenger_vehicle`（`model_code valid AND passenger`）进入；非乘用车完整保留在 `data/eidc/` source archive
+- 超大附件（32MB 完整版目录）：`eidc_doc_extract.py`（olefile FIB 文本区提取）→ 03/10 parser
+- legacy 导入已随迁移删除（见 `data/eidc/migration_eidc_fresh_rebuild.json`）
+
+### 观测时间轴（401–410）
+
+| 批次 | source | stage | 说明 |
+|------|--------|-------|------|
+| 401–408 | eidc | confirmed | 正式公告（全部 fresh rebuild） |
+| 409–410 | miit_gov | proposed | 当前 Gov 公示 |
+| 409–410 未来 | eidc | confirmed | EIDC 同批正式发布后形成双观测 |
+
 ## 管线 P5：报告
 
 ### 单品牌车型对比（05）
@@ -406,5 +476,4 @@ reports/batch_410/category_report/
 - 报告模板可配置（商用车 vs 乘用车）
 - 纯电车型容量/续航：接入减免车辆购置税的新能源汽车车型目录
 - `model_name_map.json` 自动更新（公示后跟踪媒体报道自动补充命名）
-- 统一 Dataset：product_master / vehicle_parameter → `data/vehicle_parameters/`
 - 自动发现 pageId；接入 EIDC 双源（未来 `data/eidc/`）

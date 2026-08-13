@@ -1,0 +1,678 @@
+{
+  "imported_at": "2026-08-12T01:45:00Z",
+  "source": "eidc",
+  "stage": "confirmed",
+  "batches": [
+    {
+      "schema_version": "eidc_import_manifest.v1",
+      "batch_no": "401",
+      "source": "eidc",
+      "stage": "confirmed",
+      "legacy_source": "mashang_workspace/research_scripts/miit_new_car",
+      "parser_version": "legacy workspace miit_new_car v0.3.2 (parse_product_list road_doc_state_machine / html_table)",
+      "imported_at": "2026-08-12T01:45:00Z",
+      "source_url": "https://www.miit-eidc.org.cn/art/2025/12/15/art_1691_11915.html",
+      "batch_status": "official",
+      "publish_date": "",
+      "legacy_generator_version": "miit_new_car_monitor.v0.3.2",
+      "artifact_files": {
+        "batch_401/attachment_text_src/1584888df2a141d3be85fda969cf64c5.txt": "9792bcb1a5dea12f5becc4a98deb4111d0840f2cdbeb1e2ae1da2345772d9b61",
+        "batch_401/attachment_text_src/4103a4036d2c423cb7e5a1f6af895434.txt": "2e817576c2376748c9095f3b7848203589dbdf95ef3099a13b9bb052c6ba5e84",
+        "batch_401/attachment_text_src/85b8c6305d804db499eb5c46a598fb44.txt": "2db7ac63962e744bdef943e1e585583c02508fd6d4988c32f3ca94973f7ad8d3",
+        "batch_401/product_list.json": "0336453292171b11b10e30d1d136952498e0275aaa05da95582a10a3311ef27f",
+        "batch_401/raw_metadata.json": "8fceff75d4dca954c4a4a90336314626b3abd0c6a93474c9ba3130360cb4e0a6",
+        "batch_401/source_evidence.json": "f1024ab93f109ec1c9c382b5f8ae71e23f49f93dc21b6b73315943cf284b0845"
+      },
+      "notes": "原样归档自 workspace outputs/miit_new_car；product_list 为 legacy 状态机解析存在字段错位，quality 由 source_evidence.json 记录。attachment_links/download_status 自 raw_links/raw_attachment_status 收敛。",
+      "attachment_links": [
+        {
+          "url": "https://wap.miit.gov.cn/cms_files/filemanager/1226211233/attach/202511/85b8c6305d804db499eb5c46a598fb44.doc",
+          "title": "85b8c6305d804db499eb5c46a598fb44.doc",
+          "filename": "85b8c6305d804db499eb5c46a598fb44.doc"
+        },
+        {
+          "url": "https://wap.miit.gov.cn/cms_files/filemanager/1226211233/attach/202511/4103a4036d2c423cb7e5a1f6af895434.doc",
+          "title": "4103a4036d2c423cb7e5a1f6af895434.doc",
+          "filename": "4103a4036d2c423cb7e5a1f6af895434.doc"
+        },
+        {
+          "url": "https://wap.miit.gov.cn/cms_files/filemanager/1226211233/attach/202512/1584888df2a141d3be85fda969cf64c5.doc",
+          "title": "1584888df2a141d3be85fda969cf64c5.doc",
+          "filename": "1584888df2a141d3be85fda969cf64c5.doc"
+        }
+      ],
+      "attachment_download_status": [
+        {
+          "title": "85b8c6305d804db499eb5c46a598fb44.doc",
+          "url": "https://wap.miit.gov.cn/cms_files/filemanager/1226211233/attach/202511/85b8c6305d804db499eb5c46a598fb44.doc",
+          "filename": "85b8c6305d804db499eb5c46a598fb44.doc",
+          "status": "downloaded",
+          "http_status": 200,
+          "local_path": "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/outputs/miit_new_car/raw/batch_401/attachments/85b8c6305d804db499eb5c46a598fb44.doc",
+          "error": null,
+          "retried": 0
+        },
+        {
+          "title": "4103a4036d2c423cb7e5a1f6af895434.doc",
+          "url": "https://wap.miit.gov.cn/cms_files/filemanager/1226211233/attach/202511/4103a4036d2c423cb7e5a1f6af895434.doc",
+          "filename": "4103a4036d2c423cb7e5a1f6af895434.doc",
+          "status": "downloaded",
+          "http_status": 200,
+          "local_path": "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/outputs/miit_new_car/raw/batch_401/attachments/4103a4036d2c423cb7e5a1f6af895434.doc",
+          "error": null,
+          "retried": 0
+        },
+        {
+          "title": "1584888df2a141d3be85fda969cf64c5.doc",
+          "url": "https://wap.miit.gov.cn/cms_files/filemanager/1226211233/attach/202512/1584888df2a141d3be85fda969cf64c5.doc",
+          "filename": "1584888df2a141d3be85fda969cf64c5.doc",
+          "status": "downloaded",
+          "http_status": 200,
+          "local_path": "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/outputs/miit_new_car/raw/batch_401/attachments/1584888df2a141d3be85fda969cf64c5.doc",
+          "error": null,
+          "retried": 0
+        }
+      ],
+      "raw_detail_html_sha256": "9870e41151b8caa8b380720b58afeb53f36cb929c27e631fa07a996f17239e9b",
+      "attachment_files_sha256": {
+        "1584888df2a141d3be85fda969cf64c5.doc": "bba2afa16ac3ec8cc0c7778a7281cefbd43ea398a797e97e56e2e99dfef9b1f3",
+        "4103a4036d2c423cb7e5a1f6af895434.doc": "ff68fbae28de0b2b66563d8db6be2a0b467634922caee00100131ca6939947e4",
+        "85b8c6305d804db499eb5c46a598fb44.doc": "089c8ec36b66b0b766d190bb1b82d2356035405c75d6c7a048086ef39bb9dbdf"
+      }
+    },
+    {
+      "schema_version": "eidc_import_manifest.v1",
+      "batch_no": "402",
+      "source": "eidc",
+      "stage": "confirmed",
+      "legacy_source": "mashang_workspace/research_scripts/miit_new_car",
+      "parser_version": "legacy workspace miit_new_car v0.3.2 (parse_product_list road_doc_state_machine / html_table)",
+      "imported_at": "2026-08-12T01:45:00Z",
+      "source_url": "https://www.miit-eidc.org.cn/art/2025/12/31/art_1691_11974.html",
+      "batch_status": "official",
+      "publish_date": "",
+      "legacy_generator_version": "miit_new_car_monitor.v0.3.2",
+      "artifact_files": {
+        "batch_402/attachment_text_src/7da211ab707e465bb1035fc27c493392.txt": "3d8f6a1ec0eeb5056fc36516ec00ff0430e66838f02c5cf0dd7c146b1749ffd1",
+        "batch_402/attachment_text_src/bb82e1113d234f4aba9b71b592a32c8c.txt": "57e755c9f1ed6dff3417a3f06e874a20d451a39deb3447ba4591cfc9f148f9d4",
+        "batch_402/attachment_text_src/e1062993ecdf4fb99eacd605615800f9.txt": "5be06806d4e80c435e17bea17a578d6c0f8a1a1e3ef6b75d28640114a1ba4ad5",
+        "batch_402/product_list.json": "67b3b46f725b3f6d0795938858016a89c85bb5b114527c75e54375319d2c251a",
+        "batch_402/raw_metadata.json": "801968be549d0a5af1246b8d14e49dbb27eb0e782401edcfb1ed7b4eabff4cc3",
+        "batch_402/source_evidence.json": "13779f12560be9c06f4a83f808685603eabbd2d7e77c809d5b19b35824eca946"
+      },
+      "notes": "原样归档自 workspace outputs/miit_new_car；product_list 为 legacy 状态机解析存在字段错位，quality 由 source_evidence.json 记录。attachment_links/download_status 自 raw_links/raw_attachment_status 收敛。",
+      "attachment_links": [
+        {
+          "url": "https://www.miit.gov.cn/cms_files/filemanager/1226211233/attach/202512/7da211ab707e465bb1035fc27c493392.doc",
+          "title": "7da211ab707e465bb1035fc27c493392.doc",
+          "filename": "7da211ab707e465bb1035fc27c493392.doc"
+        },
+        {
+          "url": "https://www.miit.gov.cn/cms_files/filemanager/1226211233/attach/202512/e1062993ecdf4fb99eacd605615800f9.doc",
+          "title": "e1062993ecdf4fb99eacd605615800f9.doc",
+          "filename": "e1062993ecdf4fb99eacd605615800f9.doc"
+        },
+        {
+          "url": "https://www.miit.gov.cn/cms_files/filemanager/1226211233/attach/202512/bb82e1113d234f4aba9b71b592a32c8c.doc",
+          "title": "bb82e1113d234f4aba9b71b592a32c8c.doc",
+          "filename": "bb82e1113d234f4aba9b71b592a32c8c.doc"
+        },
+        {
+          "url": "https://www.miit.gov.cn/cms_files/filemanager/1226211233/attach/202512/8282cf3fc0ed446d9695cf4e4d402d15.doc",
+          "title": "8282cf3fc0ed446d9695cf4e4d402d15.doc",
+          "filename": "8282cf3fc0ed446d9695cf4e4d402d15.doc"
+        }
+      ],
+      "attachment_download_status": [
+        {
+          "title": "7da211ab707e465bb1035fc27c493392.doc",
+          "url": "https://www.miit.gov.cn/cms_files/filemanager/1226211233/attach/202512/7da211ab707e465bb1035fc27c493392.doc",
+          "filename": "7da211ab707e465bb1035fc27c493392.doc",
+          "status": "downloaded",
+          "http_status": 200,
+          "local_path": "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/outputs/miit_new_car/raw/batch_402/attachments/7da211ab707e465bb1035fc27c493392.doc",
+          "error": null,
+          "retried": 0
+        },
+        {
+          "title": "e1062993ecdf4fb99eacd605615800f9.doc",
+          "url": "https://www.miit.gov.cn/cms_files/filemanager/1226211233/attach/202512/e1062993ecdf4fb99eacd605615800f9.doc",
+          "filename": "e1062993ecdf4fb99eacd605615800f9.doc",
+          "status": "downloaded",
+          "http_status": 200,
+          "local_path": "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/outputs/miit_new_car/raw/batch_402/attachments/e1062993ecdf4fb99eacd605615800f9.doc",
+          "error": null,
+          "retried": 0
+        },
+        {
+          "title": "bb82e1113d234f4aba9b71b592a32c8c.doc",
+          "url": "https://www.miit.gov.cn/cms_files/filemanager/1226211233/attach/202512/bb82e1113d234f4aba9b71b592a32c8c.doc",
+          "filename": "bb82e1113d234f4aba9b71b592a32c8c.doc",
+          "status": "downloaded",
+          "http_status": 200,
+          "local_path": "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/outputs/miit_new_car/raw/batch_402/attachments/bb82e1113d234f4aba9b71b592a32c8c.doc",
+          "error": null,
+          "retried": 0
+        },
+        {
+          "title": "8282cf3fc0ed446d9695cf4e4d402d15.doc",
+          "url": "https://www.miit.gov.cn/cms_files/filemanager/1226211233/attach/202512/8282cf3fc0ed446d9695cf4e4d402d15.doc",
+          "filename": "8282cf3fc0ed446d9695cf4e4d402d15.doc",
+          "status": "downloaded",
+          "http_status": 200,
+          "local_path": "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/outputs/miit_new_car/raw/batch_402/attachments/8282cf3fc0ed446d9695cf4e4d402d15.doc",
+          "error": null,
+          "retried": 0
+        }
+      ],
+      "raw_detail_html_sha256": "e29c4f772ab0726f23396c8ceef087fadec3a65ed70f29f53aa6d1a45090c28b",
+      "attachment_files_sha256": {
+        "7da211ab707e465bb1035fc27c493392.doc": "8dd6f0073e9069ad33c8658008f24f24b054cd55cf14f4ba20a3fad12dbe361b",
+        "8282cf3fc0ed446d9695cf4e4d402d15.doc": "f25b795a16c3115387a650bae97abde7e133839c74edaaf1caa8a33ee50eb04c",
+        "bb82e1113d234f4aba9b71b592a32c8c.doc": "fd57640d9163a8554568a79d9272890bad9d30042911ea6fe9629c02b7d207d3",
+        "e1062993ecdf4fb99eacd605615800f9.doc": "1e025ced966194f153c8cde083ab880ef4cd0884fa6cd0a13ab5865d3aea9249"
+      }
+    },
+    {
+      "schema_version": "eidc_import_manifest.v1",
+      "batch_no": "403",
+      "source": "eidc",
+      "stage": "confirmed",
+      "legacy_source": "mashang_workspace/research_scripts/miit_new_car",
+      "parser_version": "legacy workspace miit_new_car v0.3.2 (parse_product_list road_doc_state_machine / html_table)",
+      "imported_at": "2026-08-12T01:45:00Z",
+      "source_url": "https://www.miit-eidc.org.cn/art/2026/2/9/art_1691_12093.html",
+      "batch_status": "official",
+      "publish_date": "",
+      "legacy_generator_version": "miit_new_car_monitor.v0.3.2",
+      "artifact_files": {
+        "batch_403/attachment_text_src/827cfd3c4cd54b26b2ec5b4cda75b94b.txt": "d8ea73f0cdaf1d3bbf30e989c0ee2215d8860dbf576892cc44bdb2515cff5728",
+        "batch_403/attachment_text_src/a59ee2e27a6c4285bc9c3ee3141792b6.txt": "d347f97a5d829b66f4b1e5c7af6f02e170b2732e5b8b43220c18c5ad00633d91",
+        "batch_403/product_list.json": "b36a9f8cae343f20830072a18d2baaa4cb4c920186be76bc82e03172644a0d72",
+        "batch_403/raw_metadata.json": "ddd9129c40fe507d1cea2a00b1b66375c98aa6b23e4feea2ba1afe59650efe81",
+        "batch_403/source_evidence.json": "bf15aebd9fa9f73b43be8105d15f52aeb5a43fd31e7c86097a48b50e4d12c7ba"
+      },
+      "notes": "原样归档自 workspace outputs/miit_new_car；product_list 为 legacy 状态机解析存在字段错位，quality 由 source_evidence.json 记录。attachment_links/download_status 自 raw_links/raw_attachment_status 收敛。",
+      "attachment_links": [
+        {
+          "url": "https://www.miit.gov.cn/cms_files/filemanager/1226211233/attach/20262/827cfd3c4cd54b26b2ec5b4cda75b94b.doc",
+          "title": "827cfd3c4cd54b26b2ec5b4cda75b94b.doc",
+          "filename": "827cfd3c4cd54b26b2ec5b4cda75b94b.doc"
+        },
+        {
+          "url": "https://www.miit.gov.cn/cms_files/filemanager/1226211233/attach/20262/b625890782724e19b900eede08511848.doc",
+          "title": "b625890782724e19b900eede08511848.doc",
+          "filename": "b625890782724e19b900eede08511848.doc"
+        },
+        {
+          "url": "https://www.miit.gov.cn/cms_files/filemanager/1226211233/attach/20262/a59ee2e27a6c4285bc9c3ee3141792b6.doc",
+          "title": "a59ee2e27a6c4285bc9c3ee3141792b6.doc",
+          "filename": "a59ee2e27a6c4285bc9c3ee3141792b6.doc"
+        }
+      ],
+      "attachment_download_status": [
+        {
+          "title": "827cfd3c4cd54b26b2ec5b4cda75b94b.doc",
+          "url": "https://www.miit.gov.cn/cms_files/filemanager/1226211233/attach/20262/827cfd3c4cd54b26b2ec5b4cda75b94b.doc",
+          "filename": "827cfd3c4cd54b26b2ec5b4cda75b94b.doc",
+          "status": "downloaded",
+          "http_status": 200,
+          "local_path": "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/outputs/miit_new_car/raw/batch_403/attachments/827cfd3c4cd54b26b2ec5b4cda75b94b.doc",
+          "error": null,
+          "retried": 0
+        },
+        {
+          "title": "b625890782724e19b900eede08511848.doc",
+          "url": "https://www.miit.gov.cn/cms_files/filemanager/1226211233/attach/20262/b625890782724e19b900eede08511848.doc",
+          "filename": "b625890782724e19b900eede08511848.doc",
+          "status": "downloaded",
+          "http_status": 200,
+          "local_path": "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/outputs/miit_new_car/raw/batch_403/attachments/b625890782724e19b900eede08511848.doc",
+          "error": null,
+          "retried": 0
+        },
+        {
+          "title": "a59ee2e27a6c4285bc9c3ee3141792b6.doc",
+          "url": "https://www.miit.gov.cn/cms_files/filemanager/1226211233/attach/20262/a59ee2e27a6c4285bc9c3ee3141792b6.doc",
+          "filename": "a59ee2e27a6c4285bc9c3ee3141792b6.doc",
+          "status": "downloaded",
+          "http_status": 200,
+          "local_path": "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/outputs/miit_new_car/raw/batch_403/attachments/a59ee2e27a6c4285bc9c3ee3141792b6.doc",
+          "error": null,
+          "retried": 0
+        }
+      ],
+      "raw_detail_html_sha256": "36ad41e940811f39b2ad3619807f6c68d3734c221e8f0e090af795fa35904123",
+      "attachment_files_sha256": {
+        "827cfd3c4cd54b26b2ec5b4cda75b94b.doc": "c5b1ff33c69fc9a4b68c5840756ca8aa5c756d0b46053bf54013c343e16f0808",
+        "a59ee2e27a6c4285bc9c3ee3141792b6.doc": "79e58c381e0d7ca6748f92cdade26ca3e6dff8bac0399b365a88447bce7ba2e0",
+        "b625890782724e19b900eede08511848.doc": "8a5d0a5c24e7e6fcf6999e674214892c4223411fa485181577bfcfc641ed8dc6"
+      }
+    },
+    {
+      "schema_version": "eidc_import_manifest.v1",
+      "batch_no": "404",
+      "source": "eidc",
+      "stage": "confirmed",
+      "legacy_source": "mashang_workspace/research_scripts/miit_new_car",
+      "parser_version": "legacy workspace miit_new_car v0.3.2 (parse_product_list road_doc_state_machine / html_table)",
+      "imported_at": "2026-08-12T01:45:00Z",
+      "source_url": "https://www.miit-eidc.org.cn/art/2026/3/18/art_1691_12168.html",
+      "batch_status": "official",
+      "publish_date": "",
+      "legacy_generator_version": "miit_new_car_monitor.v0.3.2",
+      "artifact_files": {
+        "batch_404/attachment_text_src/270aa376394745ff9db54a33b88a6601.txt": "70c1efb710e20c62e81650d94f7e7a8bf7bf0e9042838d290ab8667c5e399ce1",
+        "batch_404/attachment_text_src/8bc15bdcc247439791fe2fe157259344.txt": "877ad7f0a7858a5d140c40bebbea409b6ec34e09e78f85856cdf6985ec3903fa",
+        "batch_404/attachment_text_src/fd1a53df508147759ed37783d7713d8f.txt": "8729bee80c9499a4000c48db19e900a538616b467f01f37e821958f7aca701b6",
+        "batch_404/product_list.json": "71fe177a6a3fe44ba6beb3a90912c07d63748034b8c891d189e28db4c57dfcef",
+        "batch_404/raw_metadata.json": "b663056a657620fd894e24b1aa080a174c135c238c9eff3f30409017dd49676f",
+        "batch_404/source_evidence.json": "7d571bdd7059d10dd4c28034ca965d6c28ed445665206811434706e12ff59b16"
+      },
+      "notes": "原样归档自 workspace outputs/miit_new_car；product_list 为 legacy 状态机解析存在字段错位，quality 由 source_evidence.json 记录。attachment_links/download_status 自 raw_links/raw_attachment_status 收敛。",
+      "attachment_links": [
+        {
+          "url": "https://www.miit.gov.cn/cms_files/filemanager/1226211233/attach/20263/270aa376394745ff9db54a33b88a6601.doc",
+          "title": "270aa376394745ff9db54a33b88a6601.doc",
+          "filename": "270aa376394745ff9db54a33b88a6601.doc"
+        },
+        {
+          "url": "https://www.miit.gov.cn/cms_files/filemanager/1226211233/attach/20263/fd1a53df508147759ed37783d7713d8f.doc",
+          "title": "fd1a53df508147759ed37783d7713d8f.doc",
+          "filename": "fd1a53df508147759ed37783d7713d8f.doc"
+        },
+        {
+          "url": "https://www.miit.gov.cn/cms_files/filemanager/1226211233/attach/20263/8bc15bdcc247439791fe2fe157259344.doc",
+          "title": "8bc15bdcc247439791fe2fe157259344.doc",
+          "filename": "8bc15bdcc247439791fe2fe157259344.doc"
+        }
+      ],
+      "attachment_download_status": [
+        {
+          "title": "270aa376394745ff9db54a33b88a6601.doc",
+          "url": "https://www.miit.gov.cn/cms_files/filemanager/1226211233/attach/20263/270aa376394745ff9db54a33b88a6601.doc",
+          "filename": "270aa376394745ff9db54a33b88a6601.doc",
+          "status": "downloaded",
+          "http_status": 200,
+          "local_path": "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/outputs/miit_new_car/raw/batch_404/attachments/270aa376394745ff9db54a33b88a6601.doc",
+          "error": null,
+          "retried": 0
+        },
+        {
+          "title": "fd1a53df508147759ed37783d7713d8f.doc",
+          "url": "https://www.miit.gov.cn/cms_files/filemanager/1226211233/attach/20263/fd1a53df508147759ed37783d7713d8f.doc",
+          "filename": "fd1a53df508147759ed37783d7713d8f.doc",
+          "status": "downloaded",
+          "http_status": 200,
+          "local_path": "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/outputs/miit_new_car/raw/batch_404/attachments/fd1a53df508147759ed37783d7713d8f.doc",
+          "error": null,
+          "retried": 0
+        },
+        {
+          "title": "8bc15bdcc247439791fe2fe157259344.doc",
+          "url": "https://www.miit.gov.cn/cms_files/filemanager/1226211233/attach/20263/8bc15bdcc247439791fe2fe157259344.doc",
+          "filename": "8bc15bdcc247439791fe2fe157259344.doc",
+          "status": "downloaded",
+          "http_status": 200,
+          "local_path": "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/outputs/miit_new_car/raw/batch_404/attachments/8bc15bdcc247439791fe2fe157259344.doc",
+          "error": null,
+          "retried": 0
+        }
+      ],
+      "raw_detail_html_sha256": "1b9427732c7963fb5f9fcbe8e14c334794be8ada7920b0c8c19289de635653cc",
+      "attachment_files_sha256": {
+        "270aa376394745ff9db54a33b88a6601.doc": "e3202fe76c3529f35a04cd19f2f5433e9306a9dc295f58646c341f84e2c69a67",
+        "8bc15bdcc247439791fe2fe157259344.doc": "0ccd7783b084d1a4c8eca63d2568d2e21dda1c1c0a34255f53787b0d45a111c6",
+        "fd1a53df508147759ed37783d7713d8f.doc": "707af248d96aee05e181113b28292cf66575ed5aec1e4569f81a00bc764a0d2d"
+      }
+    },
+    {
+      "schema_version": "eidc_import_manifest.v1",
+      "batch_no": "405",
+      "source": "eidc",
+      "stage": "confirmed",
+      "legacy_source": "mashang_workspace/research_scripts/miit_new_car",
+      "parser_version": "legacy workspace miit_new_car v0.3.2 (parse_product_list road_doc_state_machine / html_table)",
+      "imported_at": "2026-08-12T01:45:00Z",
+      "source_url": "https://www.miit-eidc.org.cn/art/2026/4/14/art_1691_12236.html",
+      "batch_status": "official",
+      "publish_date": "",
+      "legacy_generator_version": "miit_new_car_monitor.v0.3.2",
+      "artifact_files": {
+        "batch_405/attachment_text_src/9fc7d0f84f41439cab0cdae460b5f86e.txt": "7b5db5de3083ac88db3f03158fd54d198fc69323cf8ccf2023091b49057a320c",
+        "batch_405/attachment_text_src/d3e7ac43e8f845d99f69badb42f487ae.txt": "6fd9420965e1b86d3195cb2c9751aff567487122560da16213173df409ae5ef2",
+        "batch_405/attachment_text_src/d77fcb89517548bdad850de0be836d75.txt": "cf6263a2bd433eba98a983c2d2b008f465a0fa0576e5831c0a6689e570f8fade",
+        "batch_405/product_list.json": "d5711fe7be11d1fe4bb37e6e2fcab07ed744c9381c59bdbed78e49fba0ace6d6",
+        "batch_405/raw_metadata.json": "a27eb46f71ea0a6b3420d3214c7ff3ee7e187be4c2afb14c828000f26f73c274",
+        "batch_405/source_evidence.json": "5141ccdfdebfaec1ee26861fb70dfc1c9b1decd15742a3e6de9fdc6f7aae4072"
+      },
+      "notes": "原样归档自 workspace outputs/miit_new_car；product_list 为 legacy 状态机解析存在字段错位，quality 由 source_evidence.json 记录。attachment_links/download_status 自 raw_links/raw_attachment_status 收敛。",
+      "attachment_links": [
+        {
+          "url": "https://wap.miit.gov.cn/cms_files/filemanager/1226211233/attach/20263/d77fcb89517548bdad850de0be836d75.doc",
+          "title": "d77fcb89517548bdad850de0be836d75.doc",
+          "filename": "d77fcb89517548bdad850de0be836d75.doc"
+        },
+        {
+          "url": "https://wap.miit.gov.cn/cms_files/filemanager/1226211233/attach/20263/9fc7d0f84f41439cab0cdae460b5f86e.doc",
+          "title": "9fc7d0f84f41439cab0cdae460b5f86e.doc",
+          "filename": "9fc7d0f84f41439cab0cdae460b5f86e.doc"
+        },
+        {
+          "url": "https://wap.miit.gov.cn/cms_files/filemanager/1226211233/attach/20263/d3e7ac43e8f845d99f69badb42f487ae.doc",
+          "title": "d3e7ac43e8f845d99f69badb42f487ae.doc",
+          "filename": "d3e7ac43e8f845d99f69badb42f487ae.doc"
+        }
+      ],
+      "attachment_download_status": [
+        {
+          "title": "d77fcb89517548bdad850de0be836d75.doc",
+          "url": "https://wap.miit.gov.cn/cms_files/filemanager/1226211233/attach/20263/d77fcb89517548bdad850de0be836d75.doc",
+          "filename": "d77fcb89517548bdad850de0be836d75.doc",
+          "status": "downloaded",
+          "http_status": 200,
+          "local_path": "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/outputs/miit_new_car/raw/batch_405/attachments/d77fcb89517548bdad850de0be836d75.doc",
+          "error": null,
+          "retried": 0
+        },
+        {
+          "title": "9fc7d0f84f41439cab0cdae460b5f86e.doc",
+          "url": "https://wap.miit.gov.cn/cms_files/filemanager/1226211233/attach/20263/9fc7d0f84f41439cab0cdae460b5f86e.doc",
+          "filename": "9fc7d0f84f41439cab0cdae460b5f86e.doc",
+          "status": "downloaded",
+          "http_status": 200,
+          "local_path": "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/outputs/miit_new_car/raw/batch_405/attachments/9fc7d0f84f41439cab0cdae460b5f86e.doc",
+          "error": null,
+          "retried": 0
+        },
+        {
+          "title": "d3e7ac43e8f845d99f69badb42f487ae.doc",
+          "url": "https://wap.miit.gov.cn/cms_files/filemanager/1226211233/attach/20263/d3e7ac43e8f845d99f69badb42f487ae.doc",
+          "filename": "d3e7ac43e8f845d99f69badb42f487ae.doc",
+          "status": "downloaded",
+          "http_status": 200,
+          "local_path": "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/outputs/miit_new_car/raw/batch_405/attachments/d3e7ac43e8f845d99f69badb42f487ae.doc",
+          "error": null,
+          "retried": 0
+        }
+      ],
+      "raw_detail_html_sha256": "bc423a95604e391ee3374c12da185f3c4ba0994d43a1ba7d9fe70e86471071d9",
+      "attachment_files_sha256": {
+        "9fc7d0f84f41439cab0cdae460b5f86e.doc": "883e44ccd0b7dfd4b3387ec67a0b0d1df52ded310b1327865baa13a0fb10a4e4",
+        "d3e7ac43e8f845d99f69badb42f487ae.doc": "e720e0592086cae252711ec7b6e9401a47ee2fb1dcb3460b4531ed7e989c09fd",
+        "d77fcb89517548bdad850de0be836d75.doc": "29438cfed433a98a3926926791d4c08f09017934aacef9791bf3cd4dd8cc7d03"
+      }
+    },
+    {
+      "schema_version": "eidc_import_manifest.v1",
+      "batch_no": "406",
+      "source": "eidc",
+      "stage": "confirmed",
+      "legacy_source": "mashang_workspace/research_scripts/miit_new_car",
+      "parser_version": "legacy workspace miit_new_car v0.3.2 (parse_product_list road_doc_state_machine / html_table)",
+      "imported_at": "2026-08-12T01:45:00Z",
+      "source_url": "https://www.miit-eidc.org.cn/art/2026/5/9/art_1691_12292.html",
+      "batch_status": "official",
+      "publish_date": "",
+      "legacy_generator_version": "miit_new_car_monitor.v0.3.2",
+      "artifact_files": {
+        "batch_406/attachment_text_src/7ef7905198e642c7bc2e12755c54d11e.txt": "b37f898984168334fa350c60325f1bf2d9f72cf67bf62d9d9bf738eb33d1afe2",
+        "batch_406/attachment_text_src/de417ae61c604655ac6d30e4c60411c9.txt": "ae3cafe84236a543cc7f4de140074cfe888f1f3ec4b313946bef17a997b8067c",
+        "batch_406/attachment_text_src/f66eea329f224580a312ab5b26b09f75.txt": "867e9d1a621713e315554cf1e956c354deda9ccc9d493c973b3cfe495c4ecb91",
+        "batch_406/product_list.json": "aa8339ba4330fe867f949eb6a083ff920dac0ea626813d6084bafa0bf3c786b9",
+        "batch_406/raw_metadata.json": "6e1e44779669e395719c7bf6be2bcd3b92341d278dde1e9ad4473ec19dc5b444",
+        "batch_406/source_evidence.json": "af540d6e627488724f555f87de56918afe2a155b7b047d26a04a272bc4781c61"
+      },
+      "notes": "原样归档自 workspace outputs/miit_new_car；product_list 为 legacy 状态机解析存在字段错位，quality 由 source_evidence.json 记录。attachment_links/download_status 自 raw_links/raw_attachment_status 收敛。",
+      "attachment_links": [
+        {
+          "url": "https://www.miit.gov.cn/cms_files/filemanager/1226211233/attach/20264/f66eea329f224580a312ab5b26b09f75.doc",
+          "title": "f66eea329f224580a312ab5b26b09f75.doc",
+          "filename": "f66eea329f224580a312ab5b26b09f75.doc"
+        },
+        {
+          "url": "https://www.miit.gov.cn/cms_files/filemanager/1226211233/attach/20264/de417ae61c604655ac6d30e4c60411c9.doc",
+          "title": "de417ae61c604655ac6d30e4c60411c9.doc",
+          "filename": "de417ae61c604655ac6d30e4c60411c9.doc"
+        },
+        {
+          "url": "https://www.miit.gov.cn/cms_files/filemanager/1226211233/attach/20264/7ef7905198e642c7bc2e12755c54d11e.doc",
+          "title": "7ef7905198e642c7bc2e12755c54d11e.doc",
+          "filename": "7ef7905198e642c7bc2e12755c54d11e.doc"
+        }
+      ],
+      "attachment_download_status": [
+        {
+          "title": "f66eea329f224580a312ab5b26b09f75.doc",
+          "url": "https://www.miit.gov.cn/cms_files/filemanager/1226211233/attach/20264/f66eea329f224580a312ab5b26b09f75.doc",
+          "filename": "f66eea329f224580a312ab5b26b09f75.doc",
+          "status": "downloaded",
+          "http_status": 200,
+          "local_path": "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/outputs/miit_new_car/raw/batch_406/attachments/f66eea329f224580a312ab5b26b09f75.doc",
+          "error": null,
+          "retried": 0
+        },
+        {
+          "title": "de417ae61c604655ac6d30e4c60411c9.doc",
+          "url": "https://www.miit.gov.cn/cms_files/filemanager/1226211233/attach/20264/de417ae61c604655ac6d30e4c60411c9.doc",
+          "filename": "de417ae61c604655ac6d30e4c60411c9.doc",
+          "status": "downloaded",
+          "http_status": 200,
+          "local_path": "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/outputs/miit_new_car/raw/batch_406/attachments/de417ae61c604655ac6d30e4c60411c9.doc",
+          "error": null,
+          "retried": 0
+        },
+        {
+          "title": "7ef7905198e642c7bc2e12755c54d11e.doc",
+          "url": "https://www.miit.gov.cn/cms_files/filemanager/1226211233/attach/20264/7ef7905198e642c7bc2e12755c54d11e.doc",
+          "filename": "7ef7905198e642c7bc2e12755c54d11e.doc",
+          "status": "downloaded",
+          "http_status": 200,
+          "local_path": "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/outputs/miit_new_car/raw/batch_406/attachments/7ef7905198e642c7bc2e12755c54d11e.doc",
+          "error": null,
+          "retried": 0
+        }
+      ],
+      "raw_detail_html_sha256": "447fd92e7019012538f4c47ddf8909a316e6ea52b763db7335162920aa4ca4e0",
+      "attachment_files_sha256": {
+        "7ef7905198e642c7bc2e12755c54d11e.doc": "791ee9fa8f3446fb4d8e8191b0c92b87932cb9a564300116f4700430df3cadaf",
+        "de417ae61c604655ac6d30e4c60411c9.doc": "b4497651446168cd3ea7d656bb165f4e57df1853581e0aa9944f249ee5da389a",
+        "f66eea329f224580a312ab5b26b09f75.doc": "24787dfaa61dbd8afb50baecb7851407d1de21921282f76f17ad0a6228bde8d4"
+      }
+    },
+    {
+      "schema_version": "eidc_import_manifest.v1",
+      "batch_no": "407",
+      "source": "eidc",
+      "stage": "confirmed",
+      "legacy_source": "mashang_workspace/research_scripts/miit_new_car",
+      "parser_version": "legacy workspace miit_new_car v0.3.2 (parse_product_list road_doc_state_machine / html_table)",
+      "imported_at": "2026-08-12T01:45:00Z",
+      "source_url": "https://www.miit-eidc.org.cn/art/2026/6/12/art_1691_12457.html",
+      "batch_status": "official",
+      "publish_date": "",
+      "legacy_generator_version": "miit_new_car_monitor.v0.3.2",
+      "artifact_files": {
+        "batch_407/attachment_text_src/9da5e8eab94f46e79e4a29196851c23d.txt": "f4efc7bd9a7d355073f47e9fabc53ca8e2589f488508ef35d844efe3236b19f2",
+        "batch_407/attachment_text_src/b43b6a0d1ffb47eba041adefa8541476.txt": "9cb8546d3697a3985c8997a523769ae40a14ea0a1769063e252f47de7a7f350d",
+        "batch_407/attachment_text_src/feab2b5562ef4ae0a857c85d32907c45.txt": "13d8bbddae961b404d970f34f3d3608313e0d8eccb38fb0c0d7a965f17382255",
+        "batch_407/product_list.json": "bb0bbd57eb57904f3b12383b9bce3fa521e37daa48fc351deff369e5f744a466",
+        "batch_407/raw_metadata.json": "8df7eda61c42d0e5c1a01bc63298ce98e2c1e1e4318a1baeedd3ad192e195d48",
+        "batch_407/source_evidence.json": "b17bc5a812693b86713af6419fc63a3cb1e8ea9b238c7ea8384fbe211aadb9a1"
+      },
+      "notes": "原样归档自 workspace outputs/miit_new_car；product_list 为 legacy 状态机解析存在字段错位，quality 由 source_evidence.json 记录。attachment_links/download_status 自 raw_links/raw_attachment_status 收敛。",
+      "attachment_links": [
+        {
+          "url": "https://www.miit.gov.cn/cms_files/filemanager/1226211233/attach/20265/b43b6a0d1ffb47eba041adefa8541476.doc",
+          "title": "b43b6a0d1ffb47eba041adefa8541476.doc",
+          "filename": "b43b6a0d1ffb47eba041adefa8541476.doc"
+        },
+        {
+          "url": "https://www.miit.gov.cn/cms_files/filemanager/1226211233/attach/20265/9da5e8eab94f46e79e4a29196851c23d.doc",
+          "title": "9da5e8eab94f46e79e4a29196851c23d.doc",
+          "filename": "9da5e8eab94f46e79e4a29196851c23d.doc"
+        },
+        {
+          "url": "https://www.miit.gov.cn/cms_files/filemanager/1226211233/attach/20265/feab2b5562ef4ae0a857c85d32907c45.doc",
+          "title": "feab2b5562ef4ae0a857c85d32907c45.doc",
+          "filename": "feab2b5562ef4ae0a857c85d32907c45.doc"
+        }
+      ],
+      "attachment_download_status": [
+        {
+          "title": "b43b6a0d1ffb47eba041adefa8541476.doc",
+          "url": "https://www.miit.gov.cn/cms_files/filemanager/1226211233/attach/20265/b43b6a0d1ffb47eba041adefa8541476.doc",
+          "filename": "b43b6a0d1ffb47eba041adefa8541476.doc",
+          "status": "skipped",
+          "http_status": null,
+          "local_path": "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/outputs/miit_new_car/raw/batch_407/attachments/b43b6a0d1ffb47eba041adefa8541476.doc",
+          "error": null,
+          "retried": 0
+        },
+        {
+          "title": "9da5e8eab94f46e79e4a29196851c23d.doc",
+          "url": "https://www.miit.gov.cn/cms_files/filemanager/1226211233/attach/20265/9da5e8eab94f46e79e4a29196851c23d.doc",
+          "filename": "9da5e8eab94f46e79e4a29196851c23d.doc",
+          "status": "skipped",
+          "http_status": null,
+          "local_path": "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/outputs/miit_new_car/raw/batch_407/attachments/9da5e8eab94f46e79e4a29196851c23d.doc",
+          "error": null,
+          "retried": 0
+        },
+        {
+          "title": "feab2b5562ef4ae0a857c85d32907c45.doc",
+          "url": "https://www.miit.gov.cn/cms_files/filemanager/1226211233/attach/20265/feab2b5562ef4ae0a857c85d32907c45.doc",
+          "filename": "feab2b5562ef4ae0a857c85d32907c45.doc",
+          "status": "skipped",
+          "http_status": null,
+          "local_path": "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/outputs/miit_new_car/raw/batch_407/attachments/feab2b5562ef4ae0a857c85d32907c45.doc",
+          "error": null,
+          "retried": 0
+        }
+      ],
+      "raw_detail_html_sha256": "a62fd94acb95c4d699cf8b195102883e5290027a06b2e003fe44710f1138ab06",
+      "attachment_files_sha256": {
+        "9da5e8eab94f46e79e4a29196851c23d.doc": "da4c20ce86b6c915f81fbf81357e5b29eac6954ed8cb92dd9000e270ced15850",
+        "b43b6a0d1ffb47eba041adefa8541476.doc": "83b326c5a57f3654395b4b7ff6b2bc9045b351b5836a0d2dc9a72e2b3507eb03",
+        "feab2b5562ef4ae0a857c85d32907c45.doc": "99234d725140bf7c00e333329e073a24d4e40baa8cfcc60ff3f41dd28aee5e6b"
+      }
+    },
+    {
+      "schema_version": "eidc_import_manifest.v1",
+      "batch_no": "408",
+      "source": "eidc",
+      "stage": "confirmed",
+      "legacy_source": "mashang_workspace/research_scripts/miit_new_car",
+      "parser_version": "legacy workspace miit_new_car v0.3.2 (parse_product_list road_doc_state_machine / html_table)",
+      "imported_at": "2026-08-12T01:45:00Z",
+      "source_url": "https://www.miit-eidc.org.cn/art/2026/6/10/art_1691_12455.html",
+      "batch_status": "publicity",
+      "publish_date": "",
+      "legacy_generator_version": "miit_new_car_monitor.v0.3.2",
+      "artifact_files": {
+        "batch_408/attachment_text_src/6c21fe395db64002b6ce92df31c7b285.txt": "799ffce0202c1b2b53df71d2192475d98fedc4e4010c80c82951fbde02e92660",
+        "batch_408/enterprise_admission_evidence.json": "df30d77365dc3070eb93f8315a7d1cd9182ffa29b74790a9be68572c3d1d745a",
+        "batch_408/product_list.json": "d8c456592f2180844700e8fd34bbd6a228416a89747051861af9fc06f4a97484",
+        "batch_408/raw_metadata.json": "c3f019fd2bdac81ba71de650ddfcbb00cf8d54147abca659440d3f92d28dd7c1",
+        "batch_408/source_evidence.json": "55d2461ee273f80382e32f8a6785890c234b92a4900e50f35ffdc38bc2a2601d"
+      },
+      "notes": "原样归档自 workspace outputs/miit_new_car；product_list 为 legacy 状态机解析存在字段错位，quality 由 source_evidence.json 记录。attachment_links/download_status 自 raw_links/raw_attachment_status 收敛。",
+      "attachment_links": [
+        {
+          "url": "https://www.miit.gov.cn/datainfo/dljdclscqyjcpggnfbdxzrclscqyjyzrqybgxxqd/art/2026/art_193720c0ad2b4e3990193efd73132d34.html",
+          "title": "1.《道路机动车辆生产企业及产品公告》（第408批）拟发布的新准入车辆生产企业及已准入企业变更信息清单",
+          "filename": "art_193720c0ad2b4e3990193efd73132d34.html",
+          "source_format": "html_image_attachment",
+          "source_type": "enterprise_admission_change"
+        },
+        {
+          "url": "https://www.miit.gov.cn/datainfo/cpgg/art/2026/art_2b16a3a2b8a347929b8535de66d8158a.html",
+          "title": "2.申报《道路机动车辆生产企业及产品公告》（第408批）的车辆新产品公示清单",
+          "filename": "art_2b16a3a2b8a347929b8535de66d8158a.html",
+          "source_format": "html_image_attachment",
+          "source_type": "unknown"
+        },
+        {
+          "url": "https://www.miit.gov.cn/datainfo/cpgg/art/2026/art_d0f4ded25d8c47488fa8c3943af5ab32.html",
+          "title": "3.申报《道路机动车辆生产企业及产品公告》（第408批）的车辆变更扩展产品公示清单",
+          "filename": "art_d0f4ded25d8c47488fa8c3943af5ab32.html",
+          "source_format": "html_image_attachment",
+          "source_type": "unknown"
+        },
+        {
+          "url": "https://wap.miit.gov.cn/cms_files/filemanager/1226211233/attach/20265/6c21fe395db64002b6ce92df31c7b285.doc",
+          "title": "4.《享受车船税减免优惠的节约能源 使用新能源汽车车型目录》（第八十七批）拟发布的车型清单.doc",
+          "filename": "6c21fe395db64002b6ce92df31c7b285.doc",
+          "source_format": "document",
+          "source_type": "unknown"
+        }
+      ],
+      "attachment_download_status": [
+        {
+          "title": "1.《道路机动车辆生产企业及产品公告》（第408批）拟发布的新准入车辆生产企业及已准入企业变更信息清单",
+          "url": "https://www.miit.gov.cn/datainfo/dljdclscqyjcpggnfbdxzrclscqyjyzrqybgxxqd/art/2026/art_193720c0ad2b4e3990193efd73132d34.html",
+          "filename": "art_193720c0ad2b4e3990193efd73132d34.html",
+          "source_format": "html_image_attachment",
+          "source_type": "enterprise_admission_change",
+          "status": "failed",
+          "http_status": null,
+          "local_path": "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/outputs/miit_new_car/raw/batch_408/attachments/art_193720c0ad2b4e3990193efd73132d34.html",
+          "error": "HTTP 404 https://www.miit.gov.cn/datainfo/dljdclscqyjcpggnfbdxzrclscqyjyzrqybgxxqd/art/2026/art_193720c0ad2b4e3990193efd73132d34.html",
+          "retried": 0,
+          "final_url": null,
+          "content_type": null,
+          "content_length": 0
+        },
+        {
+          "title": "2.申报《道路机动车辆生产企业及产品公告》（第408批）的车辆新产品公示清单",
+          "url": "https://www.miit.gov.cn/datainfo/cpgg/art/2026/art_2b16a3a2b8a347929b8535de66d8158a.html",
+          "filename": "art_2b16a3a2b8a347929b8535de66d8158a.html",
+          "source_format": "html_image_attachment",
+          "source_type": "unknown",
+          "status": "failed",
+          "http_status": null,
+          "local_path": "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/outputs/miit_new_car/raw/batch_408/attachments/art_2b16a3a2b8a347929b8535de66d8158a.html",
+          "error": "HTTP 404 https://www.miit.gov.cn/datainfo/cpgg/art/2026/art_2b16a3a2b8a347929b8535de66d8158a.html",
+          "retried": 0,
+          "final_url": null,
+          "content_type": null,
+          "content_length": 0
+        },
+        {
+          "title": "3.申报《道路机动车辆生产企业及产品公告》（第408批）的车辆变更扩展产品公示清单",
+          "url": "https://www.miit.gov.cn/datainfo/cpgg/art/2026/art_d0f4ded25d8c47488fa8c3943af5ab32.html",
+          "filename": "art_d0f4ded25d8c47488fa8c3943af5ab32.html",
+          "source_format": "html_image_attachment",
+          "source_type": "unknown",
+          "status": "failed",
+          "http_status": null,
+          "local_path": "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/outputs/miit_new_car/raw/batch_408/attachments/art_d0f4ded25d8c47488fa8c3943af5ab32.html",
+          "error": "HTTP 404 https://www.miit.gov.cn/datainfo/cpgg/art/2026/art_d0f4ded25d8c47488fa8c3943af5ab32.html",
+          "retried": 0,
+          "final_url": null,
+          "content_type": null,
+          "content_length": 0
+        },
+        {
+          "title": "4.《享受车船税减免优惠的节约能源 使用新能源汽车车型目录》（第八十七批）拟发布的车型清单.doc",
+          "url": "https://wap.miit.gov.cn/cms_files/filemanager/1226211233/attach/20265/6c21fe395db64002b6ce92df31c7b285.doc",
+          "filename": "6c21fe395db64002b6ce92df31c7b285.doc",
+          "source_format": "document",
+          "source_type": "unknown",
+          "status": "skipped",
+          "http_status": null,
+          "local_path": "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/outputs/miit_new_car/raw/batch_408/attachments/6c21fe395db64002b6ce92df31c7b285.doc",
+          "error": null,
+          "retried": 0,
+          "final_url": null,
+          "content_type": null,
+          "content_length": 0
+        }
+      ],
+      "raw_detail_html_sha256": "c083de62c9c5f06530ce3173f49430531408433700e0d607c7bbf68b68357f8e",
+      "attachment_files_sha256": {
+        "6c21fe395db64002b6ce92df31c7b285.doc": "4edfbcd3d55f5564f00b21da0b3e0e1d6d661bf573e95619dafecf5512369b31"
+      }
+    }
+  ]
+}

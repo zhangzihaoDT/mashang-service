@@ -224,8 +224,10 @@ PROMPTBUILDER_CAPABILITIES = {
             "ocr/（火山引擎 OCR service）",
             "miit_vehicle_publicity_image_parser.py（OCR → records）",
             "vehicle_compare.py（records → 6 信号报告）",
-            "docs/miit_product_param_key_signals_framework.md",
+            "MIIT/data/eidc/（历史数据归档）",
         ],
+        "status": "deprecated",
+        "status_note": "实现已随 workspace miit_new_car 移除；历史数据成果归档于 MIIT/data/eidc/，能力在 MIIT/scripts 重新实现中",
     },
 }
 

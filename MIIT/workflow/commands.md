@@ -5,7 +5,7 @@
 ## 一键
 
 ```bash
-make -C MIIT miit-run BATCH=410   # P1 搜索 → P2 归档 → P4 宽表 → P5 报告
+make -C MIIT miit-run BATCH=410   # P1 搜索 → P2 归档 → P4 宽表 → P4.5 统一Dataset → P5 报告
 ```
 
 ## 分步（脚本按管线顺序编号，平铺在 scripts/）
@@ -21,6 +21,10 @@ make -C MIIT miit-run BATCH=410   # P1 搜索 → P2 归档 → P4 宽表 → P5
 | 2d. 预览 | `python3 MIIT/scripts/02_archive_vehicle_details.py --batch 410 --all-missing --dry-run` |
 | 3. 车船税解析（手动） | 见下方"车船税补充" |
 | 4. 参数宽表 | `python3 MIIT/scripts/04_build_wide_table.py --batch 410` |
+| 4.5. 统一Dataset | `python3 MIIT/scripts/07_build_vehicle_dataset.py`（Gov proposed + EIDC confirmed，passenger scope） |
+| EIDC fresh 抓取 | `python3 MIIT/scripts/09_fetch_eidc_batch.py --batch 408` |
+| EIDC fresh 验收 | `python3 MIIT/scripts/eidc_summary_fresh.py` |
+| EIDC 超大doc提取 | `python3 MIIT/scripts/eidc_doc_extract.py --input a.doc --output a.txt` |
 | 5. 分类报告 | `python3 MIIT/scripts/06_generate_category_report.py --batch 410 --all --output-dir batch_410/category_report` |
 | 5b. 单品牌报告 | `python3 MIIT/scripts/05_generate_brand_report.py --batch 409 --brand 小米 --output-dir batch_409/brand_report --batch-label "第409批"` |
 
@@ -56,6 +60,8 @@ python3 MIIT/scripts/03_parse_vehicle_tax.py \
 | 抓取状态 checkpoint | `data/fetch_status/fetch_status_{batch}.json` |
 | 车船税结构化 | `data/vehicle_tax/车型清单_第XX批车船税.json` |
 | 参数宽表 | `data/wide_tables/wide_table_{batch}.csv` |
+| 统一Dataset | `data/vehicle_parameters/product_master.csv` + `vehicle_parameter.csv` |
+| EIDC历史归档 | `data/eidc/batch_{401..408}/`（含 import_manifest.json provenance） |
 | 分类报告 | `reports/batch_{batch}/category_report/` |
 
 ## 其他

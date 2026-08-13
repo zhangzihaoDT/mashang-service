@@ -89,9 +89,9 @@ make numeric-eval     # Numeric Eval
 make reference-eval   # Reference Eval
 make dataset-validate # 校验 dataset 完整性
 make daily-observation-dry-run  # 每日观察预检
-make miit-discover-latest-batch  # 发现最新公告批次
-make miit-new-car-monitor        # 自动监控最新公告批次
 ```
+
+> MIIT 公告情报已迁移至根 `MIIT/` 模块（`make -C MIIT miit-run`）；workspace 旧 `miit_new_car` 实现已移除。
 
 ## CI 门禁
 
@@ -145,62 +145,16 @@ python mashang_workspace/eval/run_eval.py --suite parser  # 单套件
 | `python eval/run_followup_eval.py` | 追问 Runner | eval |
 | `python eval/run_numeric_eval.py` | 数值校验 | eval |
 | `pytest tests -q` | 全量测试 | test |
-| `make miit-discover-latest-batch` | 发现最新公告批次 | make |
-| `make miit-discover-batches PAGES=3` | 多页发现公告批次 | make |
-| `make miit-fetch-batch BATCH=408` | 抓取指定批次 | make |
-| `make miit-new-car-monitor` | 监控最新批次 | make |
-| `make miit-latest-publicity` | 监控最新公示批次 | make |
-| `make miit-latest-official` | 监控最新正式公告批次 | make |
-| `make miit-extract-text BATCH=N` | 附件文本抽取 | make |
-| `make miit-latest-publicity-refresh` | 重新获取最新公示（允许缓存） | make |
-| `make miit-latest-official-refresh` | 重新获取最新正式公告（允许缓存） | make |
 
-## MIIT New Car Monitor / 工信部新车公告批次监控
+## MIIT 公告情报 / 工信部新车公告
 
-### 能力定位
-
-自动发现工信部装备工业发展中心「公告发布」栏目的最新批次，抓取官方详情页与附件，解析产品清单，并与重点品牌 watchlist 做增量 diff。
-
-属于 **official source ingestion / automotive intelligence** 能力，输出可被 OpenCode/Agent 后续读取复用。
-
-### 模块位置
-
-```
-mashang_workspace/research_scripts/miit_new_car/
-├── discover_batches.py   # 列表页解析 → 自动发现最新批次
-├── fetch_batch.py        # 详情页抓取 + 附件下载 + 本地缓存
-├── parse_products.py     # 附件解析 → CSV/JSON/Markdown
-├── diff_watchlist.py     # Watchlist 匹配 + 与上一批增量 diff
-├── monitor.py            # 串联完整流水线
-├── http_utils.py         # HTTP 请求工具（重试/backoff/NetworkError）
-└── README.md             # 完整文档
-```
-
-### 常用命令
+> **已迁移**：MIIT 公告情报能力已收敛到根 `MIIT/` 模块（Gov 公示 + EIDC 历史），workspace 不再维护独立实现。
+> 历史批次（401–408）数据成果归档于 `MIIT/data/eidc/`，使用方式见 `MIIT/README.md` 与 `MIIT/workflow/pipeline.md`。
 
 ```bash
-make miit-discover-latest-batch              # 打印最新批次
-make miit-discover-batches PAGES=3           # 多页发现
-make miit-fetch-batch BATCH=408              # 抓取指定批次
-make miit-new-car-monitor                    # 监控最新批次
-make miit-latest-publicity                   # 监控最新公示（幂等，复用 evidence）
-make miit-latest-official                    # 监控最新正式公告（幂等）
-make miit-latest-publicity-refresh           # 重新获取最新公示（允许缓存）
-make miit-latest-official-refresh            # 重新获取最新正式公告
-make miit-extract-text BATCH=N               # 附件文本抽取
-```
-
-### 输出目录
-
-```
-mashang_workspace/outputs/miit_new_car/
-├── raw/                 # 原始 HTML 和附件（不提交 git）
-├── discovery/           # 多页发现结果 JSON/MD
-├── parsed/              # 结构化产品解析 CSV/JSON/MD
-├── extracted/           # 附件文本抽取 JSON/MD
-├── diff/                # Watchlist 增量 diff JSON/MD
-├── evidence/            # Official Source Evidence JSON
-└── state/               # 最新处理批次记录
+make -C MIIT miit-run BATCH=410      # 一键 P1 搜索 → P2 归档 → P4 宽表 → P4.5 Dataset → P5 报告
+make -C MIIT miit-dataset            # 重建统一 Dataset（product_master / vehicle_parameter）
+make -C MIIT test                    # MIIT 冒烟测试
 ```
 
 ## Passenger Insurance Data Asset / 乘用车上险数据资产

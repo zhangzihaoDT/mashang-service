@@ -80,7 +80,8 @@ mashang-service/
 | `scripts/generate_eval_cases.py` | Eval case 生成 (~292 行) | `scripts/` |
 | `research_scripts/pk_weekly_ls8_ls9.py` | LS8 vs LS9 周度对比 | `research_scripts/` |
 | `research_scripts/competition_a3_flow.py` | A3 人群流转分析 | `research_scripts/` |
-| `research_scripts/miit_new_car/` | MIIT 新车公告批次监控 V0.2.1 — official source ingestion（latest-publicity/official 分流、多页发现、DOCX 文本抽取、附件状态管理、evidence 证据输出、HTTP 重试与 backoff、discovery/detail cache fallback、已处理幂等复用、--refresh/--force-refresh） | `research_scripts/` |
+
+> MIIT 新车公告监控（原 `research_scripts/miit_new_car/`）实现已随重构移除，历史数据成果归档于 `MIIT/data/eidc/`，能力在 `MIIT/scripts/` 重新实现。
 
 ## 5. 配置、业务定义、指标口径
 

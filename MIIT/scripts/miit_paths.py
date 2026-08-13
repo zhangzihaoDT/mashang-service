@@ -29,6 +29,7 @@ VEHICLE_TAX_DIR = DATA_DIR / "vehicle_tax"              # P3 车船税 doc/txt/j
 VEHICLE_PARAMETERS_DIR = DATA_DIR / "vehicle_parameters"  # 结构化车型参数（canonical 目标层）
 WIDE_TABLES_DIR = DATA_DIR / "wide_tables"              # P4 参数宽表 csv/md
 FETCH_STATUS_DIR = DATA_DIR / "fetch_status"            # P2 checkpoint / 抓取状态
+EIDC_DIR = DATA_DIR / "eidc"                            # EIDC 历史批次归档（401-408, confirmed 层）
 
 # ① 最终报告（reports/）
 REPORTS_DIR = MIIT_ROOT / "reports"

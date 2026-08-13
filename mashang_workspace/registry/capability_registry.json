@@ -314,58 +314,58 @@
     "capability_id": "miit_vehicle_publicity_image_parser",
     "name": "MIIT 公告图片 OCR 解析器",
     "tier": "research",
-    "status": "active",
-    "script": "mashang_workspace/promptbuilders/miit_new_car/miit_vehicle_publicity_image_parser.py",
+    "status": "retired",
+    "script": "MIIT/scripts/08_import_eidc_history.py",
     "auto_schedulable": false,
     "result_contract": false,
     "numeric_eval_case": null,
     "contract_gate": false,
     "followup_supported": false,
     "docs": [
-      "mashang_workspace/docs/miit_product_param_key_signals_framework.md",
-      "mashang_workspace/promptbuilders/miit_new_car/README.md"
+      "MIIT/workflow/pipeline.md",
+      "MIIT/data/eidc/README.md"
     ],
     "promotion": {
-      "current_stage": "research_script",
+      "current_stage": "retired",
       "eligible_for_runtime_productization": false,
       "eligible_for_runtime_script": false,
       "blocked_reasons": [
-        "P0: only OCR result parsing, no LLM signal interpretation yet",
-        "research script; depends on ocr/ service"
+        "实现已迁移移除（workspace miit_new_car → MIIT/ 模块）",
+        "历史 OCR 产物归档于 MIIT/data/eidc/vehicle_publicity_detail/"
       ],
       "eligible_for_runtime_v2": false,
       "runtime_v2_candidate": false,
       "candidate_stage": "not_eligible"
     },
-    "notes": "消费 ocr/ 输出的 OcrResult JSON，提取 43 个结构化车辆字段。依赖火山引擎 OCR service。"
+    "notes": "已退役：原 promptbuilders/miit_new_car 实现于 2026-08 移除，能力在 MIIT/scripts 重新实现。"
   },
   {
     "capability_id": "miit_vehicle_compare",
     "name": "MIIT 双车对比报告",
     "tier": "research",
-    "status": "active",
-    "script": "mashang_workspace/promptbuilders/miit_new_car/vehicle_compare.py",
+    "status": "retired",
+    "script": "MIIT/scripts/06_generate_category_report.py",
     "auto_schedulable": false,
     "result_contract": false,
     "numeric_eval_case": null,
     "contract_gate": false,
     "followup_supported": false,
     "docs": [
-      "mashang_workspace/docs/miit_product_param_key_signals_framework.md",
-      "mashang_workspace/promptbuilders/miit_new_car/README.md"
+      "MIIT/workflow/pipeline.md",
+      "MIIT/workflow/docs/公告批次.md"
     ],
     "promotion": {
-      "current_stage": "research_script",
+      "current_stage": "retired",
       "eligible_for_runtime_productization": false,
       "eligible_for_runtime_script": false,
       "blocked_reasons": [
-        "P0: HTML report only, no structured data output",
-        "research script; depends on miit_vehicle_publicity_image_parser results"
+        "实现已迁移移除（workspace miit_new_car → MIIT/ 模块）",
+        "对比报告能力由 MIIT 06_generate_category_report 承接"
       ],
       "eligible_for_runtime_v2": false,
       "runtime_v2_candidate": false,
       "candidate_stage": "not_eligible"
     },
-    "notes": "基于 6 个关键信号框架生成双车对比 HTML 报告。依赖 miit_vehicle_publicity_image_parser 输出的 records JSON。"
+    "notes": "已退役：原 promptbuilders/miit_new_car 实现于 2026-08 移除，能力在 MIIT/scripts 重新实现。"
   }
 ]

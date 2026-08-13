@@ -1,5 +1,5 @@
 PYTHON ?= .venv/bin/python
-.PHONY: eval full-eval core-eval research-eval capability-audit test ci data-dict lock-demo parser-demo followup-demo numeric-eval reference-eval atp-demo backtest-demo clean-outputs dataset-update dataset-validate daily-observation-dry-run daily-observation-sync daily-data-pipeline-dry-run daily-data-pipeline render-official-doc render-official-doc-smoke build-workspace-skills-catalog build-workspace-capability-inventory miit-discover-latest-batch miit-discover-batches miit-fetch-batch miit-new-car-monitor miit-latest-publicity miit-latest-official miit-latest-publicity-refresh miit-latest-official-refresh miit-extract-text miit-check-text-extractors miit-diagnose-attachments miit-parse-product-list inventory-status inventory-trend inventory-report
+.PHONY: eval full-eval core-eval research-eval capability-audit test ci data-dict lock-demo parser-demo followup-demo numeric-eval reference-eval atp-demo backtest-demo clean-outputs dataset-update dataset-validate daily-observation-dry-run daily-observation-sync daily-data-pipeline-dry-run daily-data-pipeline render-official-doc render-official-doc-smoke build-workspace-skills-catalog build-workspace-capability-inventory inventory-status inventory-trend inventory-report
 
 ## 生成 Eval 结果（显式产物 unified_eval_result.json）
 ## 用法: make eval [SUITE=default|ci|all|research|core]
@@ -88,51 +88,6 @@ invoice-forecast:
 		$(if $(LOCK_REGIME),--lock-regime $(LOCK_REGIME)) \
 		$(if $(PRIOR_STRENGTH),--prior-strength $(PRIOR_STRENGTH))
 
-## MIIT 新车公告批次监控 (V0.2)
-## 发现最新公告
-miit-discover-latest-batch:
-	$(PYTHON) mashang_workspace/research_scripts/miit_new_car/discover_batches.py --limit 5
-
-## 发现多页公告
-miit-discover-batches:
-	$(PYTHON) mashang_workspace/research_scripts/miit_new_car/discover_batches.py --pages $(or $(PAGES),1)
-
-## 抓取指定批次
-## 支持 PAGES 参数搜索历史批次：make miit-fetch-batch BATCH=402 PAGES=10
-miit-fetch-batch:
-	$(PYTHON) mashang_workspace/research_scripts/miit_new_car/monitor.py --batch $(BATCH) --pages $(or $(PAGES),3)
-
-## 监控最新批次
-miit-new-car-monitor:
-	$(PYTHON) mashang_workspace/research_scripts/miit_new_car/monitor.py --latest
-
-## 监控最新公示批次
-miit-latest-publicity:
-	$(PYTHON) mashang_workspace/research_scripts/miit_new_car/monitor.py --latest-publicity
-
-## 监控最新正式公告批次
-miit-latest-official:
-	$(PYTHON) mashang_workspace/research_scripts/miit_new_car/monitor.py --latest-official
-
-## 监控最新公示（刷新）
-miit-latest-publicity-refresh:
-	$(PYTHON) mashang_workspace/research_scripts/miit_new_car/monitor.py --latest-publicity --refresh
-
-## 监控最新正式公告（刷新）
-miit-latest-official-refresh:
-	$(PYTHON) mashang_workspace/research_scripts/miit_new_car/monitor.py --latest-official --refresh
-
-## 抽取指定批次附件文本
-miit-extract-text:
-	$(PYTHON) mashang_workspace/research_scripts/miit_new_car/extract_attachment_text.py --batch $(BATCH)
-
-## 检查文本抽取工具
-miit-check-text-extractors:
-	$(PYTHON) mashang_workspace/research_scripts/miit_new_car/check_text_extractors.py
-
-## 诊断附件下载
-miit-diagnose-attachments:
-
 ## 库存核心指标查询
 inventory-status:
 	$(PYTHON) -c "import pandas as pd, importlib.util; from pathlib import Path; REPO_ROOT=Path('.'); spec=importlib.util.spec_from_file_location('d', REPO_ROOT/'shared/operators/dealer_unsold_inventory.py'); d=importlib.util.module_from_spec(spec); spec.loader.exec_module(d); inv=pd.read_parquet(REPO_ROOT/'dataset/delivery_inventory.parquet'); odf=pd.read_parquet(REPO_ROOT/'dataset/order_data.parquet'); df=d.compute(inv, odf); r=d.report(df); core=r.get('国内DC在库_未开票',0); series_map={'LSJEL':'LS8','LSJEH':'LS9','LSJWL':'LS7','LSJWR':'LS6','LSJWT':'L6','LSJE3':'L7'}; df['series']=df['vin'].str[:5].map(series_map).fillna('其他'); print('========================================'); print('  核心库存监控指标'); print('========================================'); print(f'  国内DC在库_未开票: {core:,}'); print(); [print(f'  {s}: {len(df[(df.series==s)&(df.is_dc_domestic_uninvoiced==1)]):>5,}') for s in ['LS8','LS6','LS9','L6','LS7','L7']]; print('========================================')"
@@ -144,12 +99,6 @@ inventory-trend:
 ## 库存详细分析报告
 inventory-report:
 	$(PYTHON) mashang_workspace/utility_scripts/generate_delivery_inventory_report.py
-
-	$(PYTHON) mashang_workspace/research_scripts/miit_new_car/diagnose_attachment_urls.py --batch $(BATCH)
-
-## 解析产品清单主表
-miit-parse-product-list:
-	$(PYTHON) mashang_workspace/research_scripts/miit_new_car/parse_product_list.py --batch $(BATCH)
 
 ## Auto Launch — 本品品牌日报（从 facts 库生成，报告层）
 auto-launch-owned-brand-daily:
@@ -332,24 +281,10 @@ help:
 	@echo "  配置目录: auto_launch/configs/"
 	@echo "  文档:      auto_launch/README.md, auto_launch/docs/workflow.md"
 	@echo ""
-	@echo "=== MIIT 新车公告 ==="
-	@echo "make miit-discover-latest-batch  发现最新公告批次"
-	@echo "make miit-discover-batches PAGES=N  多页发现公告批次"
-	@echo "make miit-fetch-batch BATCH=N    抓取指定批次"
-	@echo "make miit-new-car-monitor        监控最新批次"
-	@echo "make miit-latest-publicity       监控最新公示批次（幂等）"
-	@echo "make miit-latest-official        监控最新正式公告批次（幂等）"
-	@echo "make miit-latest-publicity-refresh  重新获取最新公示"
-	@echo "make miit-latest-official-refresh   重新获取最新正式公告"
-	@echo "make miit-extract-text BATCH=N   抽取指定批次附件文本"
-	@echo "make miit-check-text-extractors  检查文本抽取工具"
-	@echo "make miit-diagnose-attachments BATCH=N  诊断附件下载"
-	@echo ""
 	@echo "=== Inventory ==="
 	@echo "make inventory-status     查询核心库存指标（国内DC在库_未开票）"
 	@echo "make inventory-trend      生成库存趋势 HTML 报告"
 	@echo "make inventory-report     生成库存详细分析报告"
-	@echo "make miit-parse-product-list BATCH=N  解析产品清单主表"
 	@echo ""
 	@echo "=== Audit ==="
 	@echo "make capability-audit  Capability Audit"

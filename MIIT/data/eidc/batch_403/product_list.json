@@ -1,0 +1,6252 @@
+[
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国第一汽车集团有限公司",
+    "catalog_no_raw": "1",
+    "brand_raw": "一汽牌",
+    "product_name_raw": "插电式增程混合动力轿车",
+    "model_code_raw": "CA7159",
+    "vehicle_type_raw": "插电式增程混合动力轿车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国第一汽车集团有限公司",
+    "catalog_no_raw": "1",
+    "brand_raw": "解放牌",
+    "product_name_raw": "冷藏车",
+    "model_code_raw": "CA5030X",
+    "vehicle_type_raw": "冷藏车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国第一汽车集团有限公司",
+    "catalog_no_raw": "1",
+    "brand_raw": "解放牌",
+    "product_name_raw": "厢式货车",
+    "model_code_raw": "CA5170X",
+    "vehicle_type_raw": "厢式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国第一汽车集团有限公司",
+    "catalog_no_raw": "1",
+    "brand_raw": "解放牌",
+    "product_name_raw": "换电式纯电动冷藏车",
+    "model_code_raw": "CA5040X",
+    "vehicle_type_raw": "换电式纯电动冷藏车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国第一汽车集团有限公司",
+    "catalog_no_raw": "1",
+    "brand_raw": "解放牌",
+    "product_name_raw": "牵引汽车",
+    "model_code_raw": "CA4180",
+    "vehicle_type_raw": "牵引汽车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国第一汽车集团有限公司",
+    "catalog_no_raw": "1",
+    "brand_raw": "解放牌",
+    "product_name_raw": "牵引汽车",
+    "model_code_raw": "CA4250",
+    "vehicle_type_raw": "牵引汽车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国第一汽车集团有限公司",
+    "catalog_no_raw": "1",
+    "brand_raw": "解放牌",
+    "product_name_raw": "牵引汽车",
+    "model_code_raw": "CA4251",
+    "vehicle_type_raw": "牵引汽车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国第一汽车集团有限公司",
+    "catalog_no_raw": "1",
+    "brand_raw": "解放牌",
+    "product_name_raw": "换电式纯电动厢式货车",
+    "model_code_raw": "CA5040X",
+    "vehicle_type_raw": "换电式纯电动厢式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国第一汽车集团有限公司",
+    "catalog_no_raw": "1",
+    "brand_raw": "解放牌",
+    "product_name_raw": "换电式纯电动栏板式货车",
+    "model_code_raw": "CA1040",
+    "vehicle_type_raw": "换电式纯电动栏板式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国第一汽车集团有限公司",
+    "catalog_no_raw": "1",
+    "brand_raw": "解放牌",
+    "product_name_raw": "换电式纯电动载货汽车底盘",
+    "model_code_raw": "CA1040",
+    "vehicle_type_raw": "换电式纯电动载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国第一汽车集团有限公司",
+    "catalog_no_raw": "1",
+    "brand_raw": "解放牌",
+    "product_name_raw": "栏板式货车",
+    "model_code_raw": "CA1124",
+    "vehicle_type_raw": "栏板式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国第一汽车集团有限公司",
+    "catalog_no_raw": "1",
+    "brand_raw": "解放牌",
+    "product_name_raw": "混合动力越野汽车底盘",
+    "model_code_raw": "CA2310",
+    "vehicle_type_raw": "混合动力越野汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国第一汽车集团有限公司",
+    "catalog_no_raw": "1",
+    "brand_raw": "解放牌",
+    "product_name_raw": "纯电动仓栅式货车",
+    "model_code_raw": "CA5049CCY",
+    "vehicle_type_raw": "纯电动仓栅式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国第一汽车集团有限公司",
+    "catalog_no_raw": "1",
+    "brand_raw": "解放牌",
+    "product_name_raw": "纯电动仓栅式货车",
+    "model_code_raw": "CA5110CCY",
+    "vehicle_type_raw": "纯电动仓栅式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国第一汽车集团有限公司",
+    "catalog_no_raw": "1",
+    "brand_raw": "解放牌",
+    "product_name_raw": "纯电动冷藏车",
+    "model_code_raw": "CA5030X",
+    "vehicle_type_raw": "纯电动冷藏车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国第一汽车集团有限公司",
+    "catalog_no_raw": "1",
+    "brand_raw": "解放牌",
+    "product_name_raw": "纯电动厢式货车",
+    "model_code_raw": "CA5049X",
+    "vehicle_type_raw": "纯电动厢式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国第一汽车集团有限公司",
+    "catalog_no_raw": "1",
+    "brand_raw": "解放牌",
+    "product_name_raw": "纯电动厢式货车",
+    "model_code_raw": "CA5110X",
+    "vehicle_type_raw": "纯电动厢式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国第一汽车集团有限公司",
+    "catalog_no_raw": "1",
+    "brand_raw": "解放牌",
+    "product_name_raw": "纯电动多用途货车",
+    "model_code_raw": "CA1030",
+    "vehicle_type_raw": "纯电动多用途货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国第一汽车集团有限公司",
+    "catalog_no_raw": "1",
+    "brand_raw": "解放牌",
+    "product_name_raw": "纯电动多用途货车底盘",
+    "model_code_raw": "CA1030",
+    "vehicle_type_raw": "纯电动多用途货车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国第一汽车集团有限公司",
+    "catalog_no_raw": "1",
+    "brand_raw": "解放牌",
+    "product_name_raw": "纯电动栏板式货车",
+    "model_code_raw": "CA1049",
+    "vehicle_type_raw": "纯电动栏板式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国第一汽车集团有限公司",
+    "catalog_no_raw": "1",
+    "brand_raw": "解放牌",
+    "product_name_raw": "纯电动自卸式货车",
+    "model_code_raw": "CA3310",
+    "vehicle_type_raw": "纯电动自卸式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国第一汽车集团有限公司",
+    "catalog_no_raw": "1",
+    "brand_raw": "解放牌",
+    "product_name_raw": "纯电动自卸汽车底盘",
+    "model_code_raw": "CA3310",
+    "vehicle_type_raw": "纯电动自卸汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国第一汽车集团有限公司",
+    "catalog_no_raw": "1",
+    "brand_raw": "解放牌",
+    "product_name_raw": "纯电动车厢可卸式汽车",
+    "model_code_raw": "CA5044ZKX",
+    "vehicle_type_raw": "纯电动车厢可卸式汽车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国第一汽车集团有限公司",
+    "catalog_no_raw": "1",
+    "brand_raw": "解放牌",
+    "product_name_raw": "纯电动车辆运输车",
+    "model_code_raw": "CA5250TCL",
+    "vehicle_type_raw": "纯电动车辆运输车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国第一汽车集团有限公司",
+    "catalog_no_raw": "1",
+    "brand_raw": "解放牌",
+    "product_name_raw": "纯电动载货汽车底盘",
+    "model_code_raw": "CA1049",
+    "vehicle_type_raw": "纯电动载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国第一汽车集团有限公司",
+    "catalog_no_raw": "1",
+    "brand_raw": "解放牌",
+    "product_name_raw": "纯电动载货汽车底盘",
+    "model_code_raw": "CA1110",
+    "vehicle_type_raw": "纯电动载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国第一汽车集团有限公司",
+    "catalog_no_raw": "1",
+    "brand_raw": "解放牌",
+    "product_name_raw": "纯电动载货汽车底盘",
+    "model_code_raw": "CA1250",
+    "vehicle_type_raw": "纯电动载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国第一汽车集团有限公司",
+    "catalog_no_raw": "1",
+    "brand_raw": "解放牌",
+    "product_name_raw": "翼开启厢式货车",
+    "model_code_raw": "CA5170X",
+    "vehicle_type_raw": "翼开启厢式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "一汽-大众汽车有限公司",
+    "catalog_no_raw": "2",
+    "brand_raw": "大众牌",
+    "product_name_raw": "插电式混合动力多用途乘用车",
+    "model_code_raw": "FV6472",
+    "vehicle_type_raw": "插电式混合动力多用途乘用车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "一汽-大众汽车有限公司",
+    "catalog_no_raw": "2",
+    "brand_raw": "大众牌",
+    "product_name_raw": "插电式混合动力轿车",
+    "model_code_raw": "FV7157",
+    "vehicle_type_raw": "插电式混合动力轿车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "一汽-大众汽车有限公司",
+    "catalog_no_raw": "2",
+    "brand_raw": "大众牌",
+    "product_name_raw": "轿车",
+    "model_code_raw": "FV7152",
+    "vehicle_type_raw": "轿车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风商用车有限公司",
+    "catalog_no_raw": "3",
+    "brand_raw": "东风牌",
+    "product_name_raw": "牵引汽车",
+    "model_code_raw": "DFH4250",
+    "vehicle_type_raw": "牵引汽车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风商用车有限公司",
+    "catalog_no_raw": "3",
+    "brand_raw": "东风牌",
+    "product_name_raw": "牵引汽车",
+    "model_code_raw": "DFH4180",
+    "vehicle_type_raw": "牵引汽车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风商用车有限公司",
+    "catalog_no_raw": "3",
+    "brand_raw": "东风牌",
+    "product_name_raw": "厢式货车",
+    "model_code_raw": "DFH5180X",
+    "vehicle_type_raw": "厢式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风商用车有限公司",
+    "catalog_no_raw": "3",
+    "brand_raw": "东风牌",
+    "product_name_raw": "厢式运输车底盘",
+    "model_code_raw": "DFH5180X",
+    "vehicle_type_raw": "厢式运输车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风商用车有限公司",
+    "catalog_no_raw": "3",
+    "brand_raw": "东风牌",
+    "product_name_raw": "纯电动仓栅式货车",
+    "model_code_raw": "DFH5310CCY",
+    "vehicle_type_raw": "纯电动仓栅式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风商用车有限公司",
+    "catalog_no_raw": "3",
+    "brand_raw": "东风牌",
+    "product_name_raw": "纯电动厢式货车",
+    "model_code_raw": "DFH5310X",
+    "vehicle_type_raw": "纯电动厢式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风商用车有限公司",
+    "catalog_no_raw": "3",
+    "brand_raw": "东风牌",
+    "product_name_raw": "纯电动栏板式货车",
+    "model_code_raw": "DFH1310",
+    "vehicle_type_raw": "纯电动栏板式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风商用车有限公司",
+    "catalog_no_raw": "3",
+    "brand_raw": "东风牌",
+    "product_name_raw": "纯电动载货汽车底盘",
+    "model_code_raw": "DFH1310",
+    "vehicle_type_raw": "纯电动载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风商用车有限公司",
+    "catalog_no_raw": "3",
+    "brand_raw": "东风牌",
+    "product_name_raw": "越野汽车底盘",
+    "model_code_raw": "DFH2250",
+    "vehicle_type_raw": "越野汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风商用车有限公司",
+    "catalog_no_raw": "3",
+    "brand_raw": "东风牌",
+    "product_name_raw": "载货汽车底盘",
+    "model_code_raw": "EQ1253",
+    "vehicle_type_raw": "载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风汽车股份有限公司",
+    "catalog_no_raw": "3",
+    "brand_raw": "东风牌",
+    "product_name_raw": "仓栅式货车",
+    "model_code_raw": "EQ5020CCY",
+    "vehicle_type_raw": "仓栅式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风汽车股份有限公司",
+    "catalog_no_raw": "3",
+    "brand_raw": "东风牌",
+    "product_name_raw": "供水车",
+    "model_code_raw": "EQ5100GGS",
+    "vehicle_type_raw": "供水车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风汽车股份有限公司",
+    "catalog_no_raw": "3",
+    "brand_raw": "东风牌",
+    "product_name_raw": "医疗车",
+    "model_code_raw": "EQ5040X",
+    "vehicle_type_raw": "医疗车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风汽车股份有限公司",
+    "catalog_no_raw": "3",
+    "brand_raw": "东风牌",
+    "product_name_raw": "厢式货车",
+    "model_code_raw": "EQ5020X",
+    "vehicle_type_raw": "厢式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风汽车股份有限公司",
+    "catalog_no_raw": "3",
+    "brand_raw": "东风牌",
+    "product_name_raw": "商务车",
+    "model_code_raw": "EQ5041X",
+    "vehicle_type_raw": "商务车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风汽车股份有限公司",
+    "catalog_no_raw": "3",
+    "brand_raw": "东风牌",
+    "product_name_raw": "易燃气体厢式运输车",
+    "model_code_raw": "EQ5045X",
+    "vehicle_type_raw": "易燃气体厢式运输车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风汽车股份有限公司",
+    "catalog_no_raw": "3",
+    "brand_raw": "东风牌",
+    "product_name_raw": "易燃气体厢式运输车",
+    "model_code_raw": "EQ5100X",
+    "vehicle_type_raw": "易燃气体厢式运输车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风汽车股份有限公司",
+    "catalog_no_raw": "3",
+    "brand_raw": "东风牌",
+    "product_name_raw": "易燃气体厢式运输车",
+    "model_code_raw": "EQ5157X",
+    "vehicle_type_raw": "易燃气体厢式运输车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风汽车股份有限公司",
+    "catalog_no_raw": "3",
+    "brand_raw": "东风牌",
+    "product_name_raw": "易燃气体厢式运输车",
+    "model_code_raw": "EQ5185X",
+    "vehicle_type_raw": "易燃气体厢式运输车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风汽车股份有限公司",
+    "catalog_no_raw": "3",
+    "brand_raw": "东风牌",
+    "product_name_raw": "易燃气体厢式运输车",
+    "model_code_raw": "EQ5127X",
+    "vehicle_type_raw": "易燃气体厢式运输车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风汽车股份有限公司",
+    "catalog_no_raw": "3",
+    "brand_raw": "东风牌",
+    "product_name_raw": "栏板式货车",
+    "model_code_raw": "EQ1020",
+    "vehicle_type_raw": "栏板式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风汽车股份有限公司",
+    "catalog_no_raw": "3",
+    "brand_raw": "东风牌",
+    "product_name_raw": "轻型载货汽车底盘",
+    "model_code_raw": "EQ1020",
+    "vehicle_type_raw": "轻型载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风汽车集团有限公司",
+    "catalog_no_raw": "3",
+    "brand_raw": "东风牌",
+    "product_name_raw": "牵引汽车",
+    "model_code_raw": "EQ4250",
+    "vehicle_type_raw": "牵引汽车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风汽车集团有限公司",
+    "catalog_no_raw": "3",
+    "brand_raw": "华神牌",
+    "product_name_raw": "平板式货车",
+    "model_code_raw": "DFD5143TPB",
+    "vehicle_type_raw": "平板式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风汽车集团有限公司",
+    "catalog_no_raw": "3",
+    "brand_raw": "华神牌",
+    "product_name_raw": "平板式货车",
+    "model_code_raw": "DFD5163TPB",
+    "vehicle_type_raw": "平板式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风汽车集团有限公司",
+    "catalog_no_raw": "3",
+    "brand_raw": "华神牌",
+    "product_name_raw": "平板式货车",
+    "model_code_raw": "DFD5113TPB",
+    "vehicle_type_raw": "平板式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风汽车集团有限公司",
+    "catalog_no_raw": "3",
+    "brand_raw": "华神牌",
+    "product_name_raw": "普通液体运输车",
+    "model_code_raw": "DFD5263GPG",
+    "vehicle_type_raw": "普通液体运输车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风汽车集团有限公司",
+    "catalog_no_raw": "3",
+    "brand_raw": "华神牌",
+    "product_name_raw": "自卸式货车",
+    "model_code_raw": "DFD2113",
+    "vehicle_type_raw": "自卸式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风汽车集团有限公司",
+    "catalog_no_raw": "3",
+    "brand_raw": "华神牌",
+    "product_name_raw": "载货汽车底盘",
+    "model_code_raw": "DFD1143",
+    "vehicle_type_raw": "载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风汽车集团有限公司",
+    "catalog_no_raw": "3",
+    "brand_raw": "华神牌",
+    "product_name_raw": "载货汽车底盘",
+    "model_code_raw": "DFD1073",
+    "vehicle_type_raw": "载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风汽车集团有限公司",
+    "catalog_no_raw": "3",
+    "brand_raw": "华神牌",
+    "product_name_raw": "载货汽车底盘",
+    "model_code_raw": "DFD1263",
+    "vehicle_type_raw": "载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风汽车集团有限公司",
+    "catalog_no_raw": "3",
+    "brand_raw": "华神牌",
+    "product_name_raw": "载货汽车底盘",
+    "model_code_raw": "DFD1123",
+    "vehicle_type_raw": "载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风汽车集团有限公司",
+    "catalog_no_raw": "3",
+    "brand_raw": "华神牌",
+    "product_name_raw": "载货汽车底盘",
+    "model_code_raw": "DFD1163",
+    "vehicle_type_raw": "载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风汽车集团有限公司",
+    "catalog_no_raw": "3",
+    "brand_raw": "华神牌",
+    "product_name_raw": "载货汽车底盘",
+    "model_code_raw": "DFD1113",
+    "vehicle_type_raw": "载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风汽车集团有限公司",
+    "catalog_no_raw": "3",
+    "brand_raw": "华神牌",
+    "product_name_raw": "随车起重运输车",
+    "model_code_raw": "DFD5163JSQ",
+    "vehicle_type_raw": "随车起重运输车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "上汽大众汽车有限公司",
+    "catalog_no_raw": "5",
+    "brand_raw": "大众汽车(VOLKSWAGEN)牌",
+    "product_name_raw": "插电式增程混合动力多用途乘用车",
+    "model_code_raw": "SVW6521",
+    "vehicle_type_raw": "插电式增程混合动力多用途乘用车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "上汽通用汽车有限公司",
+    "catalog_no_raw": "6",
+    "brand_raw": "别克(BUICK)牌",
+    "product_name_raw": "插电式混合动力运动型乘用车",
+    "model_code_raw": "SGM6481",
+    "vehicle_type_raw": "插电式混合动力运动型乘用车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "北汽福田汽车股份有限公司",
+    "catalog_no_raw": "9",
+    "brand_raw": "福田牌",
+    "product_name_raw": "商务车",
+    "model_code_raw": "BJ5048X",
+    "vehicle_type_raw": "商务车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "北汽福田汽车股份有限公司",
+    "catalog_no_raw": "9",
+    "brand_raw": "福田牌",
+    "product_name_raw": "客车",
+    "model_code_raw": "BJ6906",
+    "vehicle_type_raw": "客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "北汽福田汽车股份有限公司",
+    "catalog_no_raw": "9",
+    "brand_raw": "福田牌",
+    "product_name_raw": "工程车",
+    "model_code_raw": "BJ5048X",
+    "vehicle_type_raw": "工程车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "北汽福田汽车股份有限公司",
+    "catalog_no_raw": "9",
+    "brand_raw": "福田牌",
+    "product_name_raw": "插电式混合动力低入口城市客车",
+    "model_code_raw": "BJ6129",
+    "vehicle_type_raw": "插电式混合动力低入口城市客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "北汽福田汽车股份有限公司",
+    "catalog_no_raw": "9",
+    "brand_raw": "福田牌",
+    "product_name_raw": "栏板式货车",
+    "model_code_raw": "BJ1044",
+    "vehicle_type_raw": "栏板式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "北汽福田汽车股份有限公司",
+    "catalog_no_raw": "9",
+    "brand_raw": "福田牌",
+    "product_name_raw": "牵引汽车",
+    "model_code_raw": "BJ4259",
+    "vehicle_type_raw": "牵引汽车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "北汽福田汽车股份有限公司",
+    "catalog_no_raw": "9",
+    "brand_raw": "福田牌",
+    "product_name_raw": "牵引汽车",
+    "model_code_raw": "BJ4189",
+    "vehicle_type_raw": "牵引汽车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "北汽福田汽车股份有限公司",
+    "catalog_no_raw": "9",
+    "brand_raw": "福田牌",
+    "product_name_raw": "纯电动低地板城市客车",
+    "model_code_raw": "BJ6851",
+    "vehicle_type_raw": "纯电动低地板城市客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "北汽福田汽车股份有限公司",
+    "catalog_no_raw": "9",
+    "brand_raw": "福田牌",
+    "product_name_raw": "纯电动冷藏车",
+    "model_code_raw": "BJ5030X",
+    "vehicle_type_raw": "纯电动冷藏车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "北汽福田汽车股份有限公司",
+    "catalog_no_raw": "9",
+    "brand_raw": "福田牌",
+    "product_name_raw": "纯电动城市客车",
+    "model_code_raw": "BJ6117",
+    "vehicle_type_raw": "纯电动城市客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "北汽福田汽车股份有限公司",
+    "catalog_no_raw": "9",
+    "brand_raw": "福田牌",
+    "product_name_raw": "纯电动城市客车",
+    "model_code_raw": "BJ6851",
+    "vehicle_type_raw": "纯电动城市客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "北汽福田汽车股份有限公司",
+    "catalog_no_raw": "9",
+    "brand_raw": "福田牌",
+    "product_name_raw": "纯电动救险车",
+    "model_code_raw": "BJ5037X",
+    "vehicle_type_raw": "纯电动救险车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "北汽福田汽车股份有限公司",
+    "catalog_no_raw": "9",
+    "brand_raw": "福田牌",
+    "product_name_raw": "纯电动清洗车",
+    "model_code_raw": "BJ5104GQX",
+    "vehicle_type_raw": "纯电动清洗车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "北汽福田汽车股份有限公司",
+    "catalog_no_raw": "9",
+    "brand_raw": "福田牌",
+    "product_name_raw": "纯电动自装卸式垃圾车",
+    "model_code_raw": "BJ5020ZZZ",
+    "vehicle_type_raw": "纯电动自装卸式垃圾车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "北汽福田汽车股份有限公司",
+    "catalog_no_raw": "9",
+    "brand_raw": "福田牌",
+    "product_name_raw": "纯电动路面养护车",
+    "model_code_raw": "BJ5040TYH",
+    "vehicle_type_raw": "纯电动路面养护车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "北汽福田汽车股份有限公司",
+    "catalog_no_raw": "9",
+    "brand_raw": "福田牌",
+    "product_name_raw": "纯电动车厢可卸式垃圾车",
+    "model_code_raw": "BJ5040ZXX",
+    "vehicle_type_raw": "纯电动车厢可卸式垃圾车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "北汽福田汽车股份有限公司",
+    "catalog_no_raw": "9",
+    "brand_raw": "福田牌",
+    "product_name_raw": "纯电动车厢可卸式垃圾车",
+    "model_code_raw": "BJ5031ZXX",
+    "vehicle_type_raw": "纯电动车厢可卸式垃圾车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "北汽福田汽车股份有限公司",
+    "catalog_no_raw": "9",
+    "brand_raw": "福田牌",
+    "product_name_raw": "纯电动载货汽车底盘",
+    "model_code_raw": "BJ1045",
+    "vehicle_type_raw": "纯电动载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "北汽福田汽车股份有限公司",
+    "catalog_no_raw": "9",
+    "brand_raw": "福田牌",
+    "product_name_raw": "纯电动邮政车",
+    "model_code_raw": "BJ5033X",
+    "vehicle_type_raw": "纯电动邮政车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "北汽福田汽车股份有限公司",
+    "catalog_no_raw": "9",
+    "brand_raw": "福田牌",
+    "product_name_raw": "自卸式货车",
+    "model_code_raw": "BJ3075",
+    "vehicle_type_raw": "自卸式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "北汽福田汽车股份有限公司",
+    "catalog_no_raw": "9",
+    "brand_raw": "福田牌",
+    "product_name_raw": "自卸汽车底盘",
+    "model_code_raw": "BJ3075",
+    "vehicle_type_raw": "自卸汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "北汽福田汽车股份有限公司",
+    "catalog_no_raw": "9",
+    "brand_raw": "福田牌",
+    "product_name_raw": "载货汽车底盘",
+    "model_code_raw": "BJ1048",
+    "vehicle_type_raw": "载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "北汽福田汽车股份有限公司",
+    "catalog_no_raw": "9",
+    "brand_raw": "福田牌",
+    "product_name_raw": "载货汽车底盘",
+    "model_code_raw": "BJ1044",
+    "vehicle_type_raw": "载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "北汽福田汽车股份有限公司",
+    "catalog_no_raw": "9",
+    "brand_raw": "福田牌",
+    "product_name_raw": "载货汽车底盘",
+    "model_code_raw": "BJ1124",
+    "vehicle_type_raw": "载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "北京奔驰汽车有限公司",
+    "catalog_no_raw": "10",
+    "brand_raw": "梅赛德斯-奔驰(Mercedes-Benz)牌",
+    "product_name_raw": "纯电动运动型乘用车",
+    "model_code_raw": "BJ6496",
+    "vehicle_type_raw": "纯电动运动型乘用车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "北京福田戴姆勒汽车有限公司",
+    "catalog_no_raw": "12",
+    "brand_raw": "欧曼牌",
+    "product_name_raw": "牵引汽车",
+    "model_code_raw": "BJ4251",
+    "vehicle_type_raw": "牵引汽车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "北京福田戴姆勒汽车有限公司",
+    "catalog_no_raw": "12",
+    "brand_raw": "欧曼牌",
+    "product_name_raw": "牵引汽车",
+    "model_code_raw": "BJ4259",
+    "vehicle_type_raw": "牵引汽车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "长城汽车股份有限公司",
+    "catalog_no_raw": "15",
+    "brand_raw": "魏牌牌",
+    "product_name_raw": "插电式混合动力多用途乘用车",
+    "model_code_raw": "CC6500",
+    "vehicle_type_raw": "插电式混合动力多用途乘用车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "长城汽车股份有限公司",
+    "catalog_no_raw": "15",
+    "brand_raw": "魏牌牌",
+    "product_name_raw": "插电式混合动力多用途乘用车",
+    "model_code_raw": "CC6510",
+    "vehicle_type_raw": "插电式混合动力多用途乘用车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "北奔重型汽车集团有限公司",
+    "catalog_no_raw": "27",
+    "brand_raw": "北奔牌",
+    "product_name_raw": "牵引汽车",
+    "model_code_raw": "ND4250",
+    "vehicle_type_raw": "牵引汽车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "北奔重型汽车集团有限公司",
+    "catalog_no_raw": "27",
+    "brand_raw": "北奔牌",
+    "product_name_raw": "纯电动自卸式货车",
+    "model_code_raw": "ND3310",
+    "vehicle_type_raw": "纯电动自卸式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "北奔重型汽车集团有限公司",
+    "catalog_no_raw": "27",
+    "brand_raw": "北奔牌",
+    "product_name_raw": "纯电动自卸汽车底盘",
+    "model_code_raw": "ND3310",
+    "vehicle_type_raw": "纯电动自卸汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "重庆长安跨越商用车有限公司",
+    "catalog_no_raw": "27",
+    "brand_raw": "长安牌",
+    "product_name_raw": "仓栅式货车",
+    "model_code_raw": "CKS5032CCY",
+    "vehicle_type_raw": "仓栅式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "重庆长安跨越商用车有限公司",
+    "catalog_no_raw": "27",
+    "brand_raw": "长安牌",
+    "product_name_raw": "仓栅式货车",
+    "model_code_raw": "CKS5031CCY",
+    "vehicle_type_raw": "仓栅式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "重庆长安跨越商用车有限公司",
+    "catalog_no_raw": "27",
+    "brand_raw": "长安牌",
+    "product_name_raw": "栏板式货车",
+    "model_code_raw": "CKS1021",
+    "vehicle_type_raw": "栏板式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "重庆长安跨越商用车有限公司",
+    "catalog_no_raw": "27",
+    "brand_raw": "长安牌",
+    "product_name_raw": "纯电动厢式货车",
+    "model_code_raw": "CKS5031X",
+    "vehicle_type_raw": "纯电动厢式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "重庆长安跨越商用车有限公司",
+    "catalog_no_raw": "27",
+    "brand_raw": "长安牌",
+    "product_name_raw": "载货汽车底盘",
+    "model_code_raw": "CKS1021",
+    "vehicle_type_raw": "载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "山东凯马汽车制造有限公司",
+    "catalog_no_raw": "31",
+    "brand_raw": "凯马牌",
+    "product_name_raw": "纯电动仓栅式货车",
+    "model_code_raw": "KMC5042CCY",
+    "vehicle_type_raw": "纯电动仓栅式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "山东凯马汽车制造有限公司",
+    "catalog_no_raw": "31",
+    "brand_raw": "凯马牌",
+    "product_name_raw": "纯电动冷藏车",
+    "model_code_raw": "KMC5042X",
+    "vehicle_type_raw": "纯电动冷藏车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "上汽大通汽车有限公司",
+    "catalog_no_raw": "41",
+    "brand_raw": "大通牌",
+    "product_name_raw": "纯电动厢式货车",
+    "model_code_raw": "SH5027X",
+    "vehicle_type_raw": "纯电动厢式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "上汽大通汽车有限公司",
+    "catalog_no_raw": "41",
+    "brand_raw": "大通牌",
+    "product_name_raw": "纯电动载货汽车底盘",
+    "model_code_raw": "SH1027",
+    "vehicle_type_raw": "纯电动载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "上汽大通汽车有限公司",
+    "catalog_no_raw": "41",
+    "brand_raw": "跃进牌",
+    "product_name_raw": "仓栅式货车",
+    "model_code_raw": "SH5043CCY",
+    "vehicle_type_raw": "仓栅式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "上汽大通汽车有限公司",
+    "catalog_no_raw": "41",
+    "brand_raw": "跃进牌",
+    "product_name_raw": "仓栅式货车",
+    "model_code_raw": "SH5033CCY",
+    "vehicle_type_raw": "仓栅式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "上汽大通汽车有限公司",
+    "catalog_no_raw": "41",
+    "brand_raw": "跃进牌",
+    "product_name_raw": "冷藏车",
+    "model_code_raw": "SH5043X",
+    "vehicle_type_raw": "冷藏车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "上汽大通汽车有限公司",
+    "catalog_no_raw": "41",
+    "brand_raw": "跃进牌",
+    "product_name_raw": "厢式货车",
+    "model_code_raw": "SH5043X",
+    "vehicle_type_raw": "厢式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "上汽大通汽车有限公司",
+    "catalog_no_raw": "41",
+    "brand_raw": "跃进牌",
+    "product_name_raw": "厢式货车",
+    "model_code_raw": "SH5033X",
+    "vehicle_type_raw": "厢式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "上汽大通汽车有限公司",
+    "catalog_no_raw": "41",
+    "brand_raw": "跃进牌",
+    "product_name_raw": "换电式纯电动仓栅式货车",
+    "model_code_raw": "SH5047CCY",
+    "vehicle_type_raw": "换电式纯电动仓栅式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "上汽大通汽车有限公司",
+    "catalog_no_raw": "41",
+    "brand_raw": "跃进牌",
+    "product_name_raw": "换电式纯电动栏板式货车",
+    "model_code_raw": "SH1047",
+    "vehicle_type_raw": "换电式纯电动栏板式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "上汽大通汽车有限公司",
+    "catalog_no_raw": "41",
+    "brand_raw": "跃进牌",
+    "product_name_raw": "栏板式货车",
+    "model_code_raw": "SH1033",
+    "vehicle_type_raw": "栏板式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "上汽大通汽车有限公司",
+    "catalog_no_raw": "41",
+    "brand_raw": "跃进牌",
+    "product_name_raw": "栏板式货车",
+    "model_code_raw": "SH1043",
+    "vehicle_type_raw": "栏板式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "上汽大通汽车有限公司",
+    "catalog_no_raw": "41",
+    "brand_raw": "跃进牌",
+    "product_name_raw": "载货汽车底盘",
+    "model_code_raw": "SH1033",
+    "vehicle_type_raw": "载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "上汽大通汽车有限公司",
+    "catalog_no_raw": "41",
+    "brand_raw": "跃进牌",
+    "product_name_raw": "载货汽车底盘",
+    "model_code_raw": "SH1043",
+    "vehicle_type_raw": "载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "上海申沃客车有限公司",
+    "catalog_no_raw": "42",
+    "brand_raw": "申沃牌",
+    "product_name_raw": "纯电动低入口城市客车",
+    "model_code_raw": "SWB6800",
+    "vehicle_type_raw": "纯电动低入口城市客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "上海申沃客车有限公司",
+    "catalog_no_raw": "42",
+    "brand_raw": "申沃牌",
+    "product_name_raw": "纯电动低地板城市客车",
+    "model_code_raw": "SWB6120",
+    "vehicle_type_raw": "纯电动低地板城市客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "上海申沃客车有限公司",
+    "catalog_no_raw": "42",
+    "brand_raw": "申沃牌",
+    "product_name_raw": "纯电动低地板城市客车",
+    "model_code_raw": "SWB6909",
+    "vehicle_type_raw": "纯电动低地板城市客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "上海申沃客车有限公司",
+    "catalog_no_raw": "42",
+    "brand_raw": "申沃牌",
+    "product_name_raw": "纯电动低地板城市客车",
+    "model_code_raw": "SWB6129",
+    "vehicle_type_raw": "纯电动低地板城市客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "上海申沃客车有限公司",
+    "catalog_no_raw": "42",
+    "brand_raw": "申沃牌",
+    "product_name_raw": "纯电动低地板城市客车",
+    "model_code_raw": "SWB6910",
+    "vehicle_type_raw": "纯电动低地板城市客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "南京汽车集团有限公司",
+    "catalog_no_raw": "44",
+    "brand_raw": "依维柯牌",
+    "product_name_raw": "厢式货车",
+    "model_code_raw": "NJ5046X",
+    "vehicle_type_raw": "厢式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "南京汽车集团有限公司",
+    "catalog_no_raw": "44",
+    "brand_raw": "依维柯牌",
+    "product_name_raw": "宿营车",
+    "model_code_raw": "NJ5046TSY",
+    "vehicle_type_raw": "宿营车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "北汽蓝谷麦格纳汽车有限公司",
+    "catalog_no_raw": "45",
+    "brand_raw": "极狐(ARCFOX)牌",
+    "product_name_raw": "插电式增程混合动力轿车",
+    "model_code_raw": "BJ7150",
+    "vehicle_type_raw": "插电式增程混合动力轿车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "北汽蓝谷麦格纳汽车有限公司",
+    "catalog_no_raw": "45",
+    "brand_raw": "极狐(ARCFOX)牌",
+    "product_name_raw": "纯电动轿车",
+    "model_code_raw": "BJ7001",
+    "vehicle_type_raw": "纯电动轿车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "北汽重型汽车有限公司",
+    "catalog_no_raw": "45",
+    "brand_raw": "北京牌",
+    "product_name_raw": "牵引汽车",
+    "model_code_raw": "BJ4250",
+    "vehicle_type_raw": "牵引汽车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "浙江飞碟汽车制造有限公司",
+    "catalog_no_raw": "51",
+    "brand_raw": "飞碟牌",
+    "product_name_raw": "厢式货车",
+    "model_code_raw": "FD5040X",
+    "vehicle_type_raw": "厢式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "浙江飞碟汽车制造有限公司",
+    "catalog_no_raw": "51",
+    "brand_raw": "飞碟牌",
+    "product_name_raw": "纯电动仓栅式货车",
+    "model_code_raw": "FD5043CCY",
+    "vehicle_type_raw": "纯电动仓栅式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "浙江飞碟汽车制造有限公司",
+    "catalog_no_raw": "51",
+    "brand_raw": "飞碟牌",
+    "product_name_raw": "纯电动仓栅式货车",
+    "model_code_raw": "FD5044CCY",
+    "vehicle_type_raw": "纯电动仓栅式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "浙江飞碟汽车制造有限公司",
+    "catalog_no_raw": "51",
+    "brand_raw": "飞碟牌",
+    "product_name_raw": "纯电动厢式货车",
+    "model_code_raw": "FD5044X",
+    "vehicle_type_raw": "纯电动厢式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "浙江吉利汽车有限公司",
+    "catalog_no_raw": "52",
+    "brand_raw": "吉利牌",
+    "product_name_raw": "插电式混合动力轿车",
+    "model_code_raw": "MR7151",
+    "vehicle_type_raw": "插电式混合动力轿车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "浙江吉利汽车有限公司",
+    "catalog_no_raw": "52",
+    "brand_raw": "极氪牌",
+    "product_name_raw": "插电式混合动力多用途乘用车",
+    "model_code_raw": "MR6511",
+    "vehicle_type_raw": "插电式混合动力多用途乘用车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "浙江豪情汽车制造有限公司",
+    "catalog_no_raw": "52",
+    "brand_raw": "吉利牌",
+    "product_name_raw": "插电式混合动力轿车",
+    "model_code_raw": "HQ7151",
+    "vehicle_type_raw": "插电式混合动力轿车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "浙江豪情汽车制造有限公司",
+    "catalog_no_raw": "52",
+    "brand_raw": "远程牌",
+    "product_name_raw": "纯电动多用途乘用车",
+    "model_code_raw": "JL6501",
+    "vehicle_type_raw": "纯电动多用途乘用车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "安徽安凯汽车股份有限公司",
+    "catalog_no_raw": "55",
+    "brand_raw": "安凯牌",
+    "product_name_raw": "纯电动低地板城市客车",
+    "model_code_raw": "HFF6602",
+    "vehicle_type_raw": "纯电动低地板城市客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "安徽江淮汽车集团股份有限公司",
+    "catalog_no_raw": "56",
+    "brand_raw": "江淮牌",
+    "product_name_raw": "仓栅式货车",
+    "model_code_raw": "HFC5036CCY",
+    "vehicle_type_raw": "仓栅式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "安徽江淮汽车集团股份有限公司",
+    "catalog_no_raw": "56",
+    "brand_raw": "江淮牌",
+    "product_name_raw": "冷藏车",
+    "model_code_raw": "HFC5036X",
+    "vehicle_type_raw": "冷藏车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "安徽江淮汽车集团股份有限公司",
+    "catalog_no_raw": "56",
+    "brand_raw": "江淮牌",
+    "product_name_raw": "冷藏车",
+    "model_code_raw": "HFC5043X",
+    "vehicle_type_raw": "冷藏车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "安徽江淮汽车集团股份有限公司",
+    "catalog_no_raw": "56",
+    "brand_raw": "江淮牌",
+    "product_name_raw": "厢式货车",
+    "model_code_raw": "HFC5036X",
+    "vehicle_type_raw": "厢式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "安徽江淮汽车集团股份有限公司",
+    "catalog_no_raw": "56",
+    "brand_raw": "江淮牌",
+    "product_name_raw": "墙面清洗车",
+    "model_code_raw": "HFC5181TXQ",
+    "vehicle_type_raw": "墙面清洗车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "安徽江淮汽车集团股份有限公司",
+    "catalog_no_raw": "56",
+    "brand_raw": "江淮牌",
+    "product_name_raw": "换电式纯电动厢式货车",
+    "model_code_raw": "HFC5043X",
+    "vehicle_type_raw": "换电式纯电动厢式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "安徽江淮汽车集团股份有限公司",
+    "catalog_no_raw": "56",
+    "brand_raw": "江淮牌",
+    "product_name_raw": "换电式纯电动载货汽车底盘",
+    "model_code_raw": "HFC1043",
+    "vehicle_type_raw": "换电式纯电动载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "安徽江淮汽车集团股份有限公司",
+    "catalog_no_raw": "56",
+    "brand_raw": "江淮牌",
+    "product_name_raw": "栏板式货车",
+    "model_code_raw": "HFC1036",
+    "vehicle_type_raw": "栏板式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "安徽江淮汽车集团股份有限公司",
+    "catalog_no_raw": "56",
+    "brand_raw": "江淮牌",
+    "product_name_raw": "纯电动冷藏车",
+    "model_code_raw": "HFC5043X",
+    "vehicle_type_raw": "纯电动冷藏车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "安徽江淮汽车集团股份有限公司",
+    "catalog_no_raw": "56",
+    "brand_raw": "江淮牌",
+    "product_name_raw": "纯电动厢式货车",
+    "model_code_raw": "HFC5043X",
+    "vehicle_type_raw": "纯电动厢式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "安徽江淮汽车集团股份有限公司",
+    "catalog_no_raw": "56",
+    "brand_raw": "江淮牌",
+    "product_name_raw": "牵引汽车",
+    "model_code_raw": "HFC4259",
+    "vehicle_type_raw": "牵引汽车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "安徽江淮汽车集团股份有限公司",
+    "catalog_no_raw": "56",
+    "brand_raw": "江淮牌",
+    "product_name_raw": "纯电动载货汽车底盘",
+    "model_code_raw": "HFC1043",
+    "vehicle_type_raw": "纯电动载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "安徽江淮汽车集团股份有限公司",
+    "catalog_no_raw": "56",
+    "brand_raw": "江淮牌",
+    "product_name_raw": "翼开启厢式货车",
+    "model_code_raw": "HFC5036X",
+    "vehicle_type_raw": "翼开启厢式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "安徽江淮汽车集团股份有限公司",
+    "catalog_no_raw": "56",
+    "brand_raw": "江淮牌",
+    "product_name_raw": "载货汽车底盘",
+    "model_code_raw": "HFC1181",
+    "vehicle_type_raw": "载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "安徽江淮汽车集团股份有限公司",
+    "catalog_no_raw": "56",
+    "brand_raw": "江淮牌",
+    "product_name_raw": "载货汽车底盘",
+    "model_code_raw": "HFC1036",
+    "vehicle_type_raw": "载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "零跑汽车有限公司",
+    "catalog_no_raw": "58",
+    "brand_raw": "零跑牌",
+    "product_name_raw": "插电式增程混合动力多用途乘用车",
+    "model_code_raw": "FZ6530",
+    "vehicle_type_raw": "插电式增程混合动力多用途乘用车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "零跑汽车有限公司",
+    "catalog_no_raw": "58",
+    "brand_raw": "零跑牌",
+    "product_name_raw": "纯电动多用途乘用车",
+    "model_code_raw": "FZ6430",
+    "vehicle_type_raw": "纯电动多用途乘用车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "零跑汽车有限公司",
+    "catalog_no_raw": "58",
+    "brand_raw": "零跑牌",
+    "product_name_raw": "纯电动多用途乘用车",
+    "model_code_raw": "FZ6530",
+    "vehicle_type_raw": "纯电动多用途乘用车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江铃汽车股份有限公司",
+    "catalog_no_raw": "61",
+    "brand_raw": "江铃牌",
+    "product_name_raw": "插电式增程混合动力车厢可卸式汽车",
+    "model_code_raw": "JX5044ZKX",
+    "vehicle_type_raw": "插电式增程混合动力车厢可卸式汽车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江西江铃集团晶马汽车有限公司",
+    "catalog_no_raw": "62",
+    "brand_raw": "晶马牌",
+    "product_name_raw": "客车",
+    "model_code_raw": "JMV6776",
+    "vehicle_type_raw": "客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江西江铃集团晶马汽车有限公司",
+    "catalog_no_raw": "62",
+    "brand_raw": "晶马牌",
+    "product_name_raw": "客车",
+    "model_code_raw": "JMV6710",
+    "vehicle_type_raw": "客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江西江铃集团晶马汽车有限公司",
+    "catalog_no_raw": "62",
+    "brand_raw": "晶马牌",
+    "product_name_raw": "客车",
+    "model_code_raw": "JMV6605",
+    "vehicle_type_raw": "客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江西江铃集团晶马汽车有限公司",
+    "catalog_no_raw": "62",
+    "brand_raw": "晶马牌",
+    "product_name_raw": "客车",
+    "model_code_raw": "JMV6721",
+    "vehicle_type_raw": "客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江西江铃集团晶马汽车有限公司",
+    "catalog_no_raw": "62",
+    "brand_raw": "晶马牌",
+    "product_name_raw": "客车",
+    "model_code_raw": "JMV6602",
+    "vehicle_type_raw": "客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江西江铃集团晶马汽车有限公司",
+    "catalog_no_raw": "62",
+    "brand_raw": "晶马牌",
+    "product_name_raw": "客车",
+    "model_code_raw": "JMV6772",
+    "vehicle_type_raw": "客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江西江铃集团晶马汽车有限公司",
+    "catalog_no_raw": "62",
+    "brand_raw": "晶马牌",
+    "product_name_raw": "客车",
+    "model_code_raw": "JMV6600",
+    "vehicle_type_raw": "客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江西江铃集团晶马汽车有限公司",
+    "catalog_no_raw": "62",
+    "brand_raw": "晶马牌",
+    "product_name_raw": "客车",
+    "model_code_raw": "JMV6775",
+    "vehicle_type_raw": "客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江西江铃集团晶马汽车有限公司",
+    "catalog_no_raw": "62",
+    "brand_raw": "晶马牌",
+    "product_name_raw": "客车",
+    "model_code_raw": "JMV6773",
+    "vehicle_type_raw": "客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江西江铃集团晶马汽车有限公司",
+    "catalog_no_raw": "62",
+    "brand_raw": "晶马牌",
+    "product_name_raw": "客车",
+    "model_code_raw": "JMV6720",
+    "vehicle_type_raw": "客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江西江铃集团晶马汽车有限公司",
+    "catalog_no_raw": "62",
+    "brand_raw": "晶马牌",
+    "product_name_raw": "客车底盘",
+    "model_code_raw": "JMV6750",
+    "vehicle_type_raw": "客车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江西江铃集团晶马汽车有限公司",
+    "catalog_no_raw": "62",
+    "brand_raw": "晶马牌",
+    "product_name_raw": "客车底盘",
+    "model_code_raw": "JMV6581",
+    "vehicle_type_raw": "客车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江西江铃集团晶马汽车有限公司",
+    "catalog_no_raw": "62",
+    "brand_raw": "晶马牌",
+    "product_name_raw": "客车底盘",
+    "model_code_raw": "JMV6690",
+    "vehicle_type_raw": "客车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江西江铃集团晶马汽车有限公司",
+    "catalog_no_raw": "62",
+    "brand_raw": "晶马牌",
+    "product_name_raw": "客车底盘",
+    "model_code_raw": "JMV6752",
+    "vehicle_type_raw": "客车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江西江铃集团晶马汽车有限公司",
+    "catalog_no_raw": "62",
+    "brand_raw": "晶马牌",
+    "product_name_raw": "客车底盘",
+    "model_code_raw": "JMV6571",
+    "vehicle_type_raw": "客车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江西江铃集团晶马汽车有限公司",
+    "catalog_no_raw": "62",
+    "brand_raw": "晶马牌",
+    "product_name_raw": "客车底盘",
+    "model_code_raw": "JMV6570",
+    "vehicle_type_raw": "客车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江西江铃集团晶马汽车有限公司",
+    "catalog_no_raw": "62",
+    "brand_raw": "晶马牌",
+    "product_name_raw": "客车底盘",
+    "model_code_raw": "JMV6600",
+    "vehicle_type_raw": "客车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江西江铃集团晶马汽车有限公司",
+    "catalog_no_raw": "62",
+    "brand_raw": "晶马牌",
+    "product_name_raw": "宿营车",
+    "model_code_raw": "JMV5044TSY",
+    "vehicle_type_raw": "宿营车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江西江铃集团晶马汽车有限公司",
+    "catalog_no_raw": "62",
+    "brand_raw": "晶马牌",
+    "product_name_raw": "宿营车",
+    "model_code_raw": "JMV5046X",
+    "vehicle_type_raw": "宿营车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江西江铃集团晶马汽车有限公司",
+    "catalog_no_raw": "62",
+    "brand_raw": "晶马牌",
+    "product_name_raw": "水雾消防车",
+    "model_code_raw": "JMV5040GXF",
+    "vehicle_type_raw": "水雾消防车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国重汽集团济南卡车股份有限公司",
+    "catalog_no_raw": "63",
+    "brand_raw": "豪沃牌",
+    "product_name_raw": "纯电动翼开启厢式货车",
+    "model_code_raw": "ZZ5257X",
+    "vehicle_type_raw": "纯电动翼开启厢式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国重汽集团济南卡车股份有限公司",
+    "catalog_no_raw": "63",
+    "brand_raw": "豪沃牌",
+    "product_name_raw": "纯电动自卸式货车",
+    "model_code_raw": "ZZ3257",
+    "vehicle_type_raw": "纯电动自卸式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国重汽集团济南卡车股份有限公司",
+    "catalog_no_raw": "63",
+    "brand_raw": "豪沃牌",
+    "product_name_raw": "纯电动自卸式货车",
+    "model_code_raw": "ZZ3317",
+    "vehicle_type_raw": "纯电动自卸式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国重汽集团济南卡车股份有限公司",
+    "catalog_no_raw": "63",
+    "brand_raw": "豪沃牌",
+    "product_name_raw": "纯电动自卸汽车底盘",
+    "model_code_raw": "ZZ3317",
+    "vehicle_type_raw": "纯电动自卸汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国重汽集团济南卡车股份有限公司",
+    "catalog_no_raw": "63",
+    "brand_raw": "豪沃牌",
+    "product_name_raw": "纯电动载货汽车底盘",
+    "model_code_raw": "ZZ1257",
+    "vehicle_type_raw": "纯电动载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国重汽集团济南卡车股份有限公司",
+    "catalog_no_raw": "63",
+    "brand_raw": "豪沃牌",
+    "product_name_raw": "纯电动载货汽车底盘",
+    "model_code_raw": "ZZ1327",
+    "vehicle_type_raw": "纯电动载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国重汽集团济南商用车有限公司",
+    "catalog_no_raw": "63",
+    "brand_raw": "汕德卡牌",
+    "product_name_raw": "纯电动仓栅式货车",
+    "model_code_raw": "ZZ5186CCY",
+    "vehicle_type_raw": "纯电动仓栅式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国重汽集团济南商用车有限公司",
+    "catalog_no_raw": "63",
+    "brand_raw": "汕德卡牌",
+    "product_name_raw": "纯电动冷藏车",
+    "model_code_raw": "ZZ5186X",
+    "vehicle_type_raw": "纯电动冷藏车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国重汽集团济南商用车有限公司",
+    "catalog_no_raw": "63",
+    "brand_raw": "汕德卡牌",
+    "product_name_raw": "纯电动自卸式货车",
+    "model_code_raw": "ZZ3256",
+    "vehicle_type_raw": "纯电动自卸式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国重汽集团济南商用车有限公司",
+    "catalog_no_raw": "63",
+    "brand_raw": "汕德卡牌",
+    "product_name_raw": "纯电动自卸式货车",
+    "model_code_raw": "ZZ3316",
+    "vehicle_type_raw": "纯电动自卸式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国重汽集团济南商用车有限公司",
+    "catalog_no_raw": "63",
+    "brand_raw": "豪沃牌",
+    "product_name_raw": "仓栅式货车",
+    "model_code_raw": "ZZ5047CCY",
+    "vehicle_type_raw": "仓栅式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国重汽集团济南商用车有限公司",
+    "catalog_no_raw": "63",
+    "brand_raw": "豪沃牌",
+    "product_name_raw": "冷藏车",
+    "model_code_raw": "ZZ5047X",
+    "vehicle_type_raw": "冷藏车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国重汽集团济南商用车有限公司",
+    "catalog_no_raw": "63",
+    "brand_raw": "豪沃牌",
+    "product_name_raw": "厢式货车",
+    "model_code_raw": "ZZ5047X",
+    "vehicle_type_raw": "厢式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国重汽集团济南商用车有限公司",
+    "catalog_no_raw": "63",
+    "brand_raw": "豪沃牌",
+    "product_name_raw": "栏板式货车",
+    "model_code_raw": "ZZ1047",
+    "vehicle_type_raw": "栏板式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国重汽集团济南商用车有限公司",
+    "catalog_no_raw": "63",
+    "brand_raw": "豪沃牌",
+    "product_name_raw": "纯电动仓栅式货车",
+    "model_code_raw": "ZZ5047CCY",
+    "vehicle_type_raw": "纯电动仓栅式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国重汽集团济南商用车有限公司",
+    "catalog_no_raw": "63",
+    "brand_raw": "豪沃牌",
+    "product_name_raw": "纯电动冷藏车",
+    "model_code_raw": "ZZ5047X",
+    "vehicle_type_raw": "纯电动冷藏车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国重汽集团济南商用车有限公司",
+    "catalog_no_raw": "63",
+    "brand_raw": "豪沃牌",
+    "product_name_raw": "纯电动厢式货车",
+    "model_code_raw": "ZZ5047X",
+    "vehicle_type_raw": "纯电动厢式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国重汽集团济南商用车有限公司",
+    "catalog_no_raw": "63",
+    "brand_raw": "豪沃牌",
+    "product_name_raw": "纯电动栏板式货车",
+    "model_code_raw": "ZZ1047",
+    "vehicle_type_raw": "纯电动栏板式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国重汽集团济南商用车有限公司",
+    "catalog_no_raw": "63",
+    "brand_raw": "豪沃牌",
+    "product_name_raw": "纯电动车厢可卸式汽车",
+    "model_code_raw": "ZZ5047ZKX",
+    "vehicle_type_raw": "纯电动车厢可卸式汽车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国重汽集团济南商用车有限公司",
+    "catalog_no_raw": "63",
+    "brand_raw": "豪沃牌",
+    "product_name_raw": "纯电动载货汽车底盘",
+    "model_code_raw": "ZZ1047",
+    "vehicle_type_raw": "纯电动载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国重汽集团济南商用车有限公司",
+    "catalog_no_raw": "63",
+    "brand_raw": "豪沃牌",
+    "product_name_raw": "载货汽车底盘",
+    "model_code_raw": "ZZ1047",
+    "vehicle_type_raw": "载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国重汽集团济宁商用车有限公司",
+    "catalog_no_raw": "63",
+    "brand_raw": "豪沃牌",
+    "product_name_raw": "牵引汽车",
+    "model_code_raw": "ZZ4187",
+    "vehicle_type_raw": "牵引汽车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国重汽集团济宁商用车有限公司",
+    "catalog_no_raw": "63",
+    "brand_raw": "豪沃牌",
+    "product_name_raw": "车辆运输车",
+    "model_code_raw": "ZZ5257TCL",
+    "vehicle_type_raw": "车辆运输车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国重汽集团福建海西汽车有限公司",
+    "catalog_no_raw": "63",
+    "brand_raw": "豪曼牌",
+    "product_name_raw": "检修车",
+    "model_code_raw": "ZZ5048X",
+    "vehicle_type_raw": "检修车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国重汽集团福建海西汽车有限公司",
+    "catalog_no_raw": "63",
+    "brand_raw": "豪曼牌",
+    "product_name_raw": "纯电动仓栅式货车",
+    "model_code_raw": "ZZ5048CCY",
+    "vehicle_type_raw": "纯电动仓栅式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国重汽集团福建海西汽车有限公司",
+    "catalog_no_raw": "63",
+    "brand_raw": "豪曼牌",
+    "product_name_raw": "纯电动冷藏车",
+    "model_code_raw": "ZZ5048X",
+    "vehicle_type_raw": "纯电动冷藏车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国重汽集团福建海西汽车有限公司",
+    "catalog_no_raw": "63",
+    "brand_raw": "豪曼牌",
+    "product_name_raw": "纯电动厢式货车",
+    "model_code_raw": "ZZ5048X",
+    "vehicle_type_raw": "纯电动厢式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国重汽集团福建海西汽车有限公司",
+    "catalog_no_raw": "63",
+    "brand_raw": "豪曼牌",
+    "product_name_raw": "纯电动栏板式货车",
+    "model_code_raw": "ZZ1048",
+    "vehicle_type_raw": "纯电动栏板式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国重汽集团福建海西汽车有限公司",
+    "catalog_no_raw": "63",
+    "brand_raw": "豪曼牌",
+    "product_name_raw": "纯电动载货汽车底盘",
+    "model_code_raw": "ZZ1048",
+    "vehicle_type_raw": "纯电动载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "潍柴新能源商用车有限公司",
+    "catalog_no_raw": "67",
+    "brand_raw": "蓝擎牌",
+    "product_name_raw": "仓栅式货车",
+    "model_code_raw": "YTQ5115CCY",
+    "vehicle_type_raw": "仓栅式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "潍柴新能源商用车有限公司",
+    "catalog_no_raw": "67",
+    "brand_raw": "蓝擎牌",
+    "product_name_raw": "冷藏车",
+    "model_code_raw": "YTQ5041X",
+    "vehicle_type_raw": "冷藏车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "潍柴新能源商用车有限公司",
+    "catalog_no_raw": "67",
+    "brand_raw": "蓝擎牌",
+    "product_name_raw": "厢式货车",
+    "model_code_raw": "YTQ5115X",
+    "vehicle_type_raw": "厢式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "潍柴新能源商用车有限公司",
+    "catalog_no_raw": "67",
+    "brand_raw": "蓝擎牌",
+    "product_name_raw": "换电式纯电动仓栅式货车",
+    "model_code_raw": "YTQ5042CCY",
+    "vehicle_type_raw": "换电式纯电动仓栅式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "潍柴新能源商用车有限公司",
+    "catalog_no_raw": "67",
+    "brand_raw": "蓝擎牌",
+    "product_name_raw": "换电式纯电动冷藏车",
+    "model_code_raw": "YTQ5042X",
+    "vehicle_type_raw": "换电式纯电动冷藏车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "潍柴新能源商用车有限公司",
+    "catalog_no_raw": "67",
+    "brand_raw": "蓝擎牌",
+    "product_name_raw": "换电式纯电动厢式货车",
+    "model_code_raw": "YTQ5042X",
+    "vehicle_type_raw": "换电式纯电动厢式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "潍柴新能源商用车有限公司",
+    "catalog_no_raw": "67",
+    "brand_raw": "蓝擎牌",
+    "product_name_raw": "换电式纯电动载货汽车底盘",
+    "model_code_raw": "YTQ1042",
+    "vehicle_type_raw": "换电式纯电动载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "潍柴新能源商用车有限公司",
+    "catalog_no_raw": "67",
+    "brand_raw": "蓝擎牌",
+    "product_name_raw": "插电式混合动力载货汽车底盘",
+    "model_code_raw": "YTQ1093",
+    "vehicle_type_raw": "插电式混合动力载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "潍柴新能源商用车有限公司",
+    "catalog_no_raw": "67",
+    "brand_raw": "蓝擎牌",
+    "product_name_raw": "栏板式货车",
+    "model_code_raw": "YTQ1115",
+    "vehicle_type_raw": "栏板式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "潍柴新能源商用车有限公司",
+    "catalog_no_raw": "67",
+    "brand_raw": "蓝擎牌",
+    "product_name_raw": "载货汽车底盘",
+    "model_code_raw": "YTQ1115",
+    "vehicle_type_raw": "载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "潍柴新能源商用车有限公司",
+    "catalog_no_raw": "67",
+    "brand_raw": "蓝擎牌",
+    "product_name_raw": "载货汽车底盘",
+    "model_code_raw": "YTQ1071",
+    "vehicle_type_raw": "载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "潍柴新能源商用车有限公司",
+    "catalog_no_raw": "67",
+    "brand_raw": "黑豹牌",
+    "product_name_raw": "工具车",
+    "model_code_raw": "YTQ5021X",
+    "vehicle_type_raw": "工具车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国一拖集团有限公司",
+    "catalog_no_raw": "69",
+    "brand_raw": "东方红牌",
+    "product_name_raw": "纯电动车厢可卸式垃圾车",
+    "model_code_raw": "LT5311ZXX",
+    "vehicle_type_raw": "纯电动车厢可卸式垃圾车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "宇通客车股份有限公司",
+    "catalog_no_raw": "71",
+    "brand_raw": "宇通牌",
+    "product_name_raw": "插电式混合动力检修车",
+    "model_code_raw": "ZK5038X",
+    "vehicle_type_raw": "插电式混合动力检修车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "宇通客车股份有限公司",
+    "catalog_no_raw": "71",
+    "brand_raw": "宇通牌",
+    "product_name_raw": "救护车",
+    "model_code_raw": "ZK5068X",
+    "vehicle_type_raw": "救护车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "宇通客车股份有限公司",
+    "catalog_no_raw": "71",
+    "brand_raw": "宇通牌",
+    "product_name_raw": "纯电动低地板城市客车",
+    "model_code_raw": "ZK6607",
+    "vehicle_type_raw": "纯电动低地板城市客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "宇通客车股份有限公司",
+    "catalog_no_raw": "71",
+    "brand_raw": "宇通牌",
+    "product_name_raw": "纯电动医疗车",
+    "model_code_raw": "ZK5090X",
+    "vehicle_type_raw": "纯电动医疗车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "宇通客车股份有限公司",
+    "catalog_no_raw": "71",
+    "brand_raw": "宇通牌",
+    "product_name_raw": "纯电动医疗车",
+    "model_code_raw": "ZK5137X",
+    "vehicle_type_raw": "纯电动医疗车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "湖北新楚风汽车股份有限公司",
+    "catalog_no_raw": "73",
+    "brand_raw": "楚风牌",
+    "product_name_raw": "换电式纯电动载货汽车底盘",
+    "model_code_raw": "HQG1313",
+    "vehicle_type_raw": "换电式纯电动载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "湖北新楚风汽车股份有限公司",
+    "catalog_no_raw": "73",
+    "brand_raw": "楚风牌",
+    "product_name_raw": "纯电动清洗车",
+    "model_code_raw": "HQG5180GQX",
+    "vehicle_type_raw": "纯电动清洗车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "湖北三环汽车有限公司",
+    "catalog_no_raw": "76",
+    "brand_raw": "十通牌",
+    "product_name_raw": "纯电动仓栅式货车",
+    "model_code_raw": "STQ5046CCY",
+    "vehicle_type_raw": "纯电动仓栅式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "湖北三环汽车有限公司",
+    "catalog_no_raw": "76",
+    "brand_raw": "十通牌",
+    "product_name_raw": "牵引汽车",
+    "model_code_raw": "STQ4255",
+    "vehicle_type_raw": "牵引汽车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "湖北三环汽车有限公司",
+    "catalog_no_raw": "76",
+    "brand_raw": "十通牌",
+    "product_name_raw": "纯电动载货汽车底盘",
+    "model_code_raw": "STQ1046",
+    "vehicle_type_raw": "纯电动载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "湖北三环汽车有限公司",
+    "catalog_no_raw": "76",
+    "brand_raw": "十通牌",
+    "product_name_raw": "自卸式货车",
+    "model_code_raw": "STQ3092",
+    "vehicle_type_raw": "自卸式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "湖北三环汽车有限公司",
+    "catalog_no_raw": "76",
+    "brand_raw": "十通牌",
+    "product_name_raw": "自卸汽车底盘",
+    "model_code_raw": "STQ3092",
+    "vehicle_type_raw": "自卸汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "比亚迪汽车工业有限公司",
+    "catalog_no_raw": "79",
+    "brand_raw": "比亚迪牌",
+    "product_name_raw": "插电式混合动力多用途乘用车",
+    "model_code_raw": "BYD6460",
+    "vehicle_type_raw": "插电式混合动力多用途乘用车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "比亚迪汽车工业有限公司",
+    "catalog_no_raw": "79",
+    "brand_raw": "比亚迪牌",
+    "product_name_raw": "纯电动低地板城市客车",
+    "model_code_raw": "BYD6900",
+    "vehicle_type_raw": "纯电动低地板城市客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "比亚迪汽车工业有限公司",
+    "catalog_no_raw": "79",
+    "brand_raw": "比亚迪牌",
+    "product_name_raw": "牵引汽车",
+    "model_code_raw": "BYD4250",
+    "vehicle_type_raw": "牵引汽车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "比亚迪汽车工业有限公司",
+    "catalog_no_raw": "79",
+    "brand_raw": "比亚迪牌",
+    "product_name_raw": "纯电动多用途乘用车",
+    "model_code_raw": "BYD6480",
+    "vehicle_type_raw": "纯电动多用途乘用车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "比亚迪汽车工业有限公司",
+    "catalog_no_raw": "79",
+    "brand_raw": "比亚迪牌",
+    "product_name_raw": "纯电动多用途乘用车",
+    "model_code_raw": "BYD6460",
+    "vehicle_type_raw": "纯电动多用途乘用车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "比亚迪汽车工业有限公司",
+    "catalog_no_raw": "79",
+    "brand_raw": "比亚迪牌",
+    "product_name_raw": "纯电动轿车",
+    "model_code_raw": "BYD7000",
+    "vehicle_type_raw": "纯电动轿车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "比亚迪汽车工业有限公司",
+    "catalog_no_raw": "79",
+    "brand_raw": "比亚迪牌",
+    "product_name_raw": "纯电动轿车",
+    "model_code_raw": "BYD7001",
+    "vehicle_type_raw": "纯电动轿车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "比亚迪汽车工业有限公司",
+    "catalog_no_raw": "79",
+    "brand_raw": "比亚迪牌",
+    "product_name_raw": "纯电动轿车",
+    "model_code_raw": "BYD7004",
+    "vehicle_type_raw": "纯电动轿车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "比亚迪汽车工业有限公司",
+    "catalog_no_raw": "79",
+    "brand_raw": "腾势牌",
+    "product_name_raw": "插电式混合动力轿车",
+    "model_code_raw": "QCJ7200",
+    "vehicle_type_raw": "插电式混合动力轿车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "比亚迪汽车工业有限公司",
+    "catalog_no_raw": "79",
+    "brand_raw": "腾势牌",
+    "product_name_raw": "纯电动轿车",
+    "model_code_raw": "QCJ7000",
+    "vehicle_type_raw": "纯电动轿车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "比亚迪汽车工业有限公司",
+    "catalog_no_raw": "79",
+    "brand_raw": "领汇牌",
+    "product_name_raw": "插电式混合动力多用途乘用车",
+    "model_code_raw": "QCJ6520",
+    "vehicle_type_raw": "插电式混合动力多用途乘用车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "比亚迪汽车工业有限公司",
+    "catalog_no_raw": "79",
+    "brand_raw": "领汇牌",
+    "product_name_raw": "纯电动轿车",
+    "model_code_raw": "QCJ7009",
+    "vehicle_type_raw": "纯电动轿车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "比亚迪汽车工业有限公司",
+    "catalog_no_raw": "79",
+    "brand_raw": "领汇牌",
+    "product_name_raw": "纯电动轿车",
+    "model_code_raw": "QCJ7000",
+    "vehicle_type_raw": "纯电动轿车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "比亚迪汽车工业有限公司",
+    "catalog_no_raw": "79",
+    "brand_raw": "领汇牌",
+    "product_name_raw": "纯电动轿车",
+    "model_code_raw": "QCJ7008",
+    "vehicle_type_raw": "纯电动轿车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "三一汽车制造有限公司",
+    "catalog_no_raw": "80",
+    "brand_raw": "三一牌",
+    "product_name_raw": "插电式增程混合动力混凝土泵车",
+    "model_code_raw": "SYM5230THB",
+    "vehicle_type_raw": "插电式增程混合动力混凝土泵车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "三一汽车制造有限公司",
+    "catalog_no_raw": "80",
+    "brand_raw": "三一牌",
+    "product_name_raw": "插电式增程混合动力混凝土泵车底盘",
+    "model_code_raw": "SYM5230THB",
+    "vehicle_type_raw": "插电式增程混合动力混凝土泵车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "三一汽车制造有限公司",
+    "catalog_no_raw": "80",
+    "brand_raw": "三一牌",
+    "product_name_raw": "纯电动混凝土搅拌运输车",
+    "model_code_raw": "SYM5326GJB",
+    "vehicle_type_raw": "纯电动混凝土搅拌运输车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "三一汽车制造有限公司",
+    "catalog_no_raw": "80",
+    "brand_raw": "三一牌",
+    "product_name_raw": "纯电动自卸式货车",
+    "model_code_raw": "SYM3311",
+    "vehicle_type_raw": "纯电动自卸式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "三一汽车制造有限公司",
+    "catalog_no_raw": "80",
+    "brand_raw": "三一牌",
+    "product_name_raw": "纯电动载货汽车底盘",
+    "model_code_raw": "SYM1320",
+    "vehicle_type_raw": "纯电动载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "湖南汽车制造有限责任公司",
+    "catalog_no_raw": "83",
+    "brand_raw": "三一牌",
+    "product_name_raw": "牵引汽车",
+    "model_code_raw": "HQC4250",
+    "vehicle_type_raw": "牵引汽车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "深圳东风汽车有限公司",
+    "catalog_no_raw": "85",
+    "brand_raw": "汉成牌",
+    "product_name_raw": "纯电动洗扫车",
+    "model_code_raw": "SE5120TXS",
+    "vehicle_type_raw": "纯电动洗扫车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风柳州汽车有限公司",
+    "catalog_no_raw": "91",
+    "brand_raw": "东风牌",
+    "product_name_raw": "多用途货车",
+    "model_code_raw": "LZ1030",
+    "vehicle_type_raw": "多用途货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风柳州汽车有限公司",
+    "catalog_no_raw": "91",
+    "brand_raw": "东风牌",
+    "product_name_raw": "插电式混合动力福祉车",
+    "model_code_raw": "LZ5030X",
+    "vehicle_type_raw": "插电式混合动力福祉车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风柳州汽车有限公司",
+    "catalog_no_raw": "91",
+    "brand_raw": "乘龙牌",
+    "product_name_raw": "冷藏车",
+    "model_code_raw": "LZ5180X",
+    "vehicle_type_raw": "冷藏车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风柳州汽车有限公司",
+    "catalog_no_raw": "91",
+    "brand_raw": "乘龙牌",
+    "product_name_raw": "牵引汽车",
+    "model_code_raw": "LZ4250",
+    "vehicle_type_raw": "牵引汽车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风柳州汽车有限公司",
+    "catalog_no_raw": "91",
+    "brand_raw": "乘龙牌",
+    "product_name_raw": "牵引汽车",
+    "model_code_raw": "LZ4181",
+    "vehicle_type_raw": "牵引汽车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风柳州汽车有限公司",
+    "catalog_no_raw": "91",
+    "brand_raw": "乘龙牌",
+    "product_name_raw": "牵引汽车",
+    "model_code_raw": "LZ4252",
+    "vehicle_type_raw": "牵引汽车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风柳州汽车有限公司",
+    "catalog_no_raw": "91",
+    "brand_raw": "乘龙牌",
+    "product_name_raw": "牵引汽车",
+    "model_code_raw": "LZ4254",
+    "vehicle_type_raw": "牵引汽车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风柳州汽车有限公司",
+    "catalog_no_raw": "91",
+    "brand_raw": "乘龙牌",
+    "product_name_raw": "牵引汽车",
+    "model_code_raw": "LZ4253",
+    "vehicle_type_raw": "牵引汽车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风柳州汽车有限公司",
+    "catalog_no_raw": "91",
+    "brand_raw": "乘龙牌",
+    "product_name_raw": "纯电动侧帘式货车",
+    "model_code_raw": "LZ5250",
+    "vehicle_type_raw": "纯电动侧帘式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风柳州汽车有限公司",
+    "catalog_no_raw": "91",
+    "brand_raw": "乘龙牌",
+    "product_name_raw": "纯电动厢式货车",
+    "model_code_raw": "LZ5181X",
+    "vehicle_type_raw": "纯电动厢式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风柳州汽车有限公司",
+    "catalog_no_raw": "91",
+    "brand_raw": "乘龙牌",
+    "product_name_raw": "纯电动畜禽运输车",
+    "model_code_raw": "LZ5310CCQ",
+    "vehicle_type_raw": "纯电动畜禽运输车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风柳州汽车有限公司",
+    "catalog_no_raw": "91",
+    "brand_raw": "乘龙牌",
+    "product_name_raw": "纯电动自卸汽车底盘",
+    "model_code_raw": "LZ3250",
+    "vehicle_type_raw": "纯电动自卸汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风柳州汽车有限公司",
+    "catalog_no_raw": "91",
+    "brand_raw": "乘龙牌",
+    "product_name_raw": "纯电动载货汽车底盘",
+    "model_code_raw": "LZ1181",
+    "vehicle_type_raw": "纯电动载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风柳州汽车有限公司",
+    "catalog_no_raw": "91",
+    "brand_raw": "乘龙牌",
+    "product_name_raw": "纯电动载货汽车底盘",
+    "model_code_raw": "LZ1310",
+    "vehicle_type_raw": "纯电动载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风柳州汽车有限公司",
+    "catalog_no_raw": "91",
+    "brand_raw": "乘龙牌",
+    "product_name_raw": "载货汽车底盘",
+    "model_code_raw": "LZ1316",
+    "vehicle_type_raw": "载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "上汽红岩汽车有限公司",
+    "catalog_no_raw": "94",
+    "brand_raw": "红岩牌",
+    "product_name_raw": "纯电动载货汽车底盘",
+    "model_code_raw": "CQ1181",
+    "vehicle_type_raw": "纯电动载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "庆铃汽车股份有限公司",
+    "catalog_no_raw": "95",
+    "brand_raw": "庆铃牌(繁体)牌",
+    "product_name_raw": "纯电动仓栅式货车",
+    "model_code_raw": "QL5040CCY",
+    "vehicle_type_raw": "纯电动仓栅式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "庆铃汽车股份有限公司",
+    "catalog_no_raw": "95",
+    "brand_raw": "庆铃牌(繁体)牌",
+    "product_name_raw": "纯电动冷藏车",
+    "model_code_raw": "QL5040X",
+    "vehicle_type_raw": "纯电动冷藏车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "庆铃汽车股份有限公司",
+    "catalog_no_raw": "95",
+    "brand_raw": "庆铃牌(繁体)牌",
+    "product_name_raw": "纯电动厢式货车",
+    "model_code_raw": "QL5040X",
+    "vehicle_type_raw": "纯电动厢式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "庆铃汽车股份有限公司",
+    "catalog_no_raw": "95",
+    "brand_raw": "庆铃牌(繁体)牌",
+    "product_name_raw": "纯电动栏板式货车",
+    "model_code_raw": "QL1040",
+    "vehicle_type_raw": "纯电动栏板式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "庆铃汽车股份有限公司",
+    "catalog_no_raw": "95",
+    "brand_raw": "庆铃牌(繁体)牌",
+    "product_name_raw": "纯电动栏板式货车",
+    "model_code_raw": "QL1070",
+    "vehicle_type_raw": "纯电动栏板式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "庆铃汽车股份有限公司",
+    "catalog_no_raw": "95",
+    "brand_raw": "庆铃牌(繁体)牌",
+    "product_name_raw": "纯电动载货汽车底盘",
+    "model_code_raw": "QL1040",
+    "vehicle_type_raw": "纯电动载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "重庆长安汽车股份有限公司",
+    "catalog_no_raw": "96",
+    "brand_raw": "阿维塔（AVATR）牌",
+    "product_name_raw": "插电式增程混合动力轿车",
+    "model_code_raw": "SC7150",
+    "vehicle_type_raw": "插电式增程混合动力轿车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "重庆长安汽车股份有限公司",
+    "catalog_no_raw": "96",
+    "brand_raw": "阿维塔（AVATR）牌",
+    "product_name_raw": "纯电动轿车",
+    "model_code_raw": "SC7000",
+    "vehicle_type_raw": "纯电动轿车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中植一客成都汽车有限公司",
+    "catalog_no_raw": "100",
+    "brand_raw": "中植汽车牌",
+    "product_name_raw": "纯电动低地板城市客车",
+    "model_code_raw": "CDL6110",
+    "vehicle_type_raw": "纯电动低地板城市客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中植一客成都汽车有限公司",
+    "catalog_no_raw": "100",
+    "brand_raw": "中植汽车牌",
+    "product_name_raw": "纯电动厢式垃圾车",
+    "model_code_raw": "CDL5180ZXL",
+    "vehicle_type_raw": "纯电动厢式垃圾车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中植一客成都汽车有限公司",
+    "catalog_no_raw": "100",
+    "brand_raw": "中植汽车牌",
+    "product_name_raw": "纯电动城市客车",
+    "model_code_raw": "CDL6720",
+    "vehicle_type_raw": "纯电动城市客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中植一客成都汽车有限公司",
+    "catalog_no_raw": "100",
+    "brand_raw": "中植汽车牌",
+    "product_name_raw": "纯电动客车",
+    "model_code_raw": "CDL6112",
+    "vehicle_type_raw": "纯电动客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中植一客成都汽车有限公司",
+    "catalog_no_raw": "100",
+    "brand_raw": "中植汽车牌",
+    "product_name_raw": "纯电动路面养护车",
+    "model_code_raw": "CDL5030TYH",
+    "vehicle_type_raw": "纯电动路面养护车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "四川野马汽车股份有限公司",
+    "catalog_no_raw": "101",
+    "brand_raw": "野马牌",
+    "product_name_raw": "纯电动多用途乘用车",
+    "model_code_raw": "SQJ6460",
+    "vehicle_type_raw": "纯电动多用途乘用车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "比亚迪汽车有限公司",
+    "catalog_no_raw": "108",
+    "brand_raw": "方程豹牌",
+    "product_name_raw": "纯电动多用途乘用车",
+    "model_code_raw": "QCJ6460",
+    "vehicle_type_raw": "纯电动多用途乘用车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "比亚迪汽车有限公司",
+    "catalog_no_raw": "108",
+    "brand_raw": "比亚迪牌",
+    "product_name_raw": "插电式混合动力多用途乘用车",
+    "model_code_raw": "BYD6480",
+    "vehicle_type_raw": "插电式混合动力多用途乘用车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "比亚迪汽车有限公司",
+    "catalog_no_raw": "108",
+    "brand_raw": "比亚迪牌",
+    "product_name_raw": "纯电动多用途乘用车",
+    "model_code_raw": "BYD6480",
+    "vehicle_type_raw": "纯电动多用途乘用车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "比亚迪汽车有限公司",
+    "catalog_no_raw": "108",
+    "brand_raw": "比亚迪牌",
+    "product_name_raw": "纯电动轿车",
+    "model_code_raw": "BYD7000",
+    "vehicle_type_raw": "纯电动轿车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "陕西汽车集团股份有限公司",
+    "catalog_no_raw": "110",
+    "brand_raw": "陕汽牌",
+    "product_name_raw": "仓栅式货车",
+    "model_code_raw": "SX5319CCY",
+    "vehicle_type_raw": "仓栅式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "陕西汽车集团股份有限公司",
+    "catalog_no_raw": "110",
+    "brand_raw": "陕汽牌",
+    "product_name_raw": "平板式货车",
+    "model_code_raw": "SX5185TPB",
+    "vehicle_type_raw": "平板式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "陕西汽车集团股份有限公司",
+    "catalog_no_raw": "110",
+    "brand_raw": "陕汽牌",
+    "product_name_raw": "牵引汽车",
+    "model_code_raw": "SX4257",
+    "vehicle_type_raw": "牵引汽车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "陕西汽车集团股份有限公司",
+    "catalog_no_raw": "110",
+    "brand_raw": "陕汽牌",
+    "product_name_raw": "牵引汽车",
+    "model_code_raw": "SX4259",
+    "vehicle_type_raw": "牵引汽车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "陕西汽车集团股份有限公司",
+    "catalog_no_raw": "110",
+    "brand_raw": "陕汽牌",
+    "product_name_raw": "栏板式货车",
+    "model_code_raw": "SX1189",
+    "vehicle_type_raw": "栏板式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "陕西汽车集团股份有限公司",
+    "catalog_no_raw": "110",
+    "brand_raw": "陕汽牌",
+    "product_name_raw": "纯电动自卸式货车",
+    "model_code_raw": "SX3317",
+    "vehicle_type_raw": "纯电动自卸式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "陕西汽车集团股份有限公司",
+    "catalog_no_raw": "110",
+    "brand_raw": "陕汽牌",
+    "product_name_raw": "纯电动自卸汽车底盘",
+    "model_code_raw": "SX3317",
+    "vehicle_type_raw": "纯电动自卸汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "陕西汽车集团股份有限公司",
+    "catalog_no_raw": "110",
+    "brand_raw": "陕汽牌",
+    "product_name_raw": "纯电动载货汽车底盘",
+    "model_code_raw": "SX1180",
+    "vehicle_type_raw": "纯电动载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "陕西汽车集团股份有限公司",
+    "catalog_no_raw": "110",
+    "brand_raw": "陕汽牌",
+    "product_name_raw": "自卸式货车",
+    "model_code_raw": "SX3181",
+    "vehicle_type_raw": "自卸式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "陕西汽车集团股份有限公司",
+    "catalog_no_raw": "110",
+    "brand_raw": "陕汽牌",
+    "product_name_raw": "自卸式货车",
+    "model_code_raw": "SX3180",
+    "vehicle_type_raw": "自卸式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "陕西汽车集团股份有限公司",
+    "catalog_no_raw": "110",
+    "brand_raw": "陕汽牌",
+    "product_name_raw": "自卸式货车",
+    "model_code_raw": "SX3251",
+    "vehicle_type_raw": "自卸式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "陕西汽车集团股份有限公司",
+    "catalog_no_raw": "110",
+    "brand_raw": "陕汽牌",
+    "product_name_raw": "自卸汽车底盘",
+    "model_code_raw": "SX3181",
+    "vehicle_type_raw": "自卸汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "陕西汽车集团股份有限公司",
+    "catalog_no_raw": "110",
+    "brand_raw": "陕汽牌",
+    "product_name_raw": "自卸汽车底盘",
+    "model_code_raw": "SX3180",
+    "vehicle_type_raw": "自卸汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "金龙联合汽车工业(苏州)有限公司",
+    "catalog_no_raw": "112",
+    "brand_raw": "海格牌",
+    "product_name_raw": "客车",
+    "model_code_raw": "KLQ6826",
+    "vehicle_type_raw": "客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "金龙联合汽车工业(苏州)有限公司",
+    "catalog_no_raw": "112",
+    "brand_raw": "海格牌",
+    "product_name_raw": "纯电动低地板双层城市客车",
+    "model_code_raw": "KLQ6129",
+    "vehicle_type_raw": "纯电动低地板双层城市客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "金龙联合汽车工业(苏州)有限公司",
+    "catalog_no_raw": "112",
+    "brand_raw": "海格牌",
+    "product_name_raw": "纯电动多功能抑尘车",
+    "model_code_raw": "KLQ5180TDY",
+    "vehicle_type_raw": "纯电动多功能抑尘车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "金龙联合汽车工业(苏州)有限公司",
+    "catalog_no_raw": "112",
+    "brand_raw": "海格牌",
+    "product_name_raw": "纯电动客车",
+    "model_code_raw": "KLQ6116",
+    "vehicle_type_raw": "纯电动客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风商用车新疆有限公司",
+    "catalog_no_raw": "115",
+    "brand_raw": "东风牌",
+    "product_name_raw": "供液车",
+    "model_code_raw": "DFV5327TGY",
+    "vehicle_type_raw": "供液车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风商用车新疆有限公司",
+    "catalog_no_raw": "115",
+    "brand_raw": "东风牌",
+    "product_name_raw": "自卸式货车",
+    "model_code_raw": "DFV3141",
+    "vehicle_type_raw": "自卸式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风商用车新疆有限公司",
+    "catalog_no_raw": "115",
+    "brand_raw": "东风牌",
+    "product_name_raw": "自卸式货车",
+    "model_code_raw": "DFV3181",
+    "vehicle_type_raw": "自卸式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风商用车新疆有限公司",
+    "catalog_no_raw": "115",
+    "brand_raw": "东风牌",
+    "product_name_raw": "自卸式货车",
+    "model_code_raw": "DFV3121",
+    "vehicle_type_raw": "自卸式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风商用车新疆有限公司",
+    "catalog_no_raw": "115",
+    "brand_raw": "东风牌",
+    "product_name_raw": "自卸式货车",
+    "model_code_raw": "DFV3161",
+    "vehicle_type_raw": "自卸式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "奇瑞商用车(安徽)有限公司",
+    "catalog_no_raw": "119",
+    "brand_raw": "威麟牌",
+    "product_name_raw": "多用途货车",
+    "model_code_raw": "SQR1030",
+    "vehicle_type_raw": "多用途货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "奇瑞商用车(安徽)有限公司",
+    "catalog_no_raw": "119",
+    "brand_raw": "威麟牌",
+    "product_name_raw": "多用途货车底盘",
+    "model_code_raw": "SQR1030",
+    "vehicle_type_raw": "多用途货车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "奇瑞商用车(安徽)有限公司",
+    "catalog_no_raw": "119",
+    "brand_raw": "威麟牌",
+    "product_name_raw": "宿营车",
+    "model_code_raw": "SQR5031TSY",
+    "vehicle_type_raw": "宿营车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "奇瑞商用车(安徽)有限公司",
+    "catalog_no_raw": "119",
+    "brand_raw": "开瑞牌",
+    "product_name_raw": "纯电动仓栅式货车",
+    "model_code_raw": "SQR5037CCY",
+    "vehicle_type_raw": "纯电动仓栅式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "奇瑞商用车(安徽)有限公司",
+    "catalog_no_raw": "119",
+    "brand_raw": "开瑞牌",
+    "product_name_raw": "纯电动厢式货车",
+    "model_code_raw": "SQR5037X",
+    "vehicle_type_raw": "纯电动厢式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "奇瑞商用车(安徽)有限公司",
+    "catalog_no_raw": "119",
+    "brand_raw": "开瑞牌",
+    "product_name_raw": "纯电动栏板式货车",
+    "model_code_raw": "SQR1037",
+    "vehicle_type_raw": "纯电动栏板式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "奇瑞商用车(安徽)有限公司",
+    "catalog_no_raw": "119",
+    "brand_raw": "开瑞牌",
+    "product_name_raw": "纯电动畜禽运输车",
+    "model_code_raw": "SQR5040CCQ",
+    "vehicle_type_raw": "纯电动畜禽运输车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "奇瑞商用车(安徽)有限公司",
+    "catalog_no_raw": "119",
+    "brand_raw": "开瑞牌",
+    "product_name_raw": "纯电动载货汽车底盘",
+    "model_code_raw": "SQR1037",
+    "vehicle_type_raw": "纯电动载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "奇瑞汽车股份有限公司",
+    "catalog_no_raw": "119",
+    "brand_raw": "智界牌",
+    "product_name_raw": "插电式增程混合动力多用途乘用车",
+    "model_code_raw": "SQR6540",
+    "vehicle_type_raw": "插电式增程混合动力多用途乘用车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "上海汽车集团股份有限公司",
+    "catalog_no_raw": "122",
+    "brand_raw": "智己牌",
+    "product_name_raw": "插电式增程混合动力运动型乘用车",
+    "model_code_raw": "CSA6531",
+    "vehicle_type_raw": "插电式增程混合动力运动型乘用车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "上海汽车集团股份有限公司",
+    "catalog_no_raw": "122",
+    "brand_raw": "荣威牌",
+    "product_name_raw": "轿车",
+    "model_code_raw": "CSA7151",
+    "vehicle_type_raw": "轿车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "厦门金龙联合汽车工业有限公司",
+    "catalog_no_raw": "123",
+    "brand_raw": "金龙牌",
+    "product_name_raw": "客车",
+    "model_code_raw": "XMQ6775",
+    "vehicle_type_raw": "客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "厦门金龙联合汽车工业有限公司",
+    "catalog_no_raw": "123",
+    "brand_raw": "金龙牌",
+    "product_name_raw": "纯电动城市客车",
+    "model_code_raw": "XMQ6825",
+    "vehicle_type_raw": "纯电动城市客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "厦门金龙联合汽车工业有限公司",
+    "catalog_no_raw": "123",
+    "brand_raw": "金龙牌",
+    "product_name_raw": "纯电动客车",
+    "model_code_raw": "XMQ6755",
+    "vehicle_type_raw": "纯电动客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "厦门金龙联合汽车工业有限公司",
+    "catalog_no_raw": "123",
+    "brand_raw": "金龙牌",
+    "product_name_raw": "纯电动客车",
+    "model_code_raw": "XMQ6716",
+    "vehicle_type_raw": "纯电动客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "厦门金龙联合汽车工业有限公司",
+    "catalog_no_raw": "123",
+    "brand_raw": "金龙牌",
+    "product_name_raw": "纯电动客车",
+    "model_code_raw": "XMQ6825",
+    "vehicle_type_raw": "纯电动客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "厦门金龙联合汽车工业有限公司",
+    "catalog_no_raw": "123",
+    "brand_raw": "金龙牌",
+    "product_name_raw": "纯电动客车",
+    "model_code_raw": "XMQ6905",
+    "vehicle_type_raw": "纯电动客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "厦门金龙联合汽车工业有限公司",
+    "catalog_no_raw": "123",
+    "brand_raw": "金龙牌",
+    "product_name_raw": "纯电动客车",
+    "model_code_raw": "XMQ6115",
+    "vehicle_type_raw": "纯电动客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "厦门金龙联合汽车工业有限公司",
+    "catalog_no_raw": "123",
+    "brand_raw": "金龙牌",
+    "product_name_raw": "纯电动客车",
+    "model_code_raw": "XMQ6125",
+    "vehicle_type_raw": "纯电动客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "厦门金龙旅行车有限公司",
+    "catalog_no_raw": "124",
+    "brand_raw": "金旅牌",
+    "product_name_raw": "客车",
+    "model_code_raw": "XML6122",
+    "vehicle_type_raw": "客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "厦门金龙旅行车有限公司",
+    "catalog_no_raw": "124",
+    "brand_raw": "金旅牌",
+    "product_name_raw": "客车",
+    "model_code_raw": "XML6112",
+    "vehicle_type_raw": "客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "厦门金龙旅行车有限公司",
+    "catalog_no_raw": "124",
+    "brand_raw": "金旅牌",
+    "product_name_raw": "客车",
+    "model_code_raw": "XML6601",
+    "vehicle_type_raw": "客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "厦门金龙旅行车有限公司",
+    "catalog_no_raw": "124",
+    "brand_raw": "金旅牌",
+    "product_name_raw": "展示车",
+    "model_code_raw": "XML5026X",
+    "vehicle_type_raw": "展示车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "厦门金龙旅行车有限公司",
+    "catalog_no_raw": "124",
+    "brand_raw": "金旅牌",
+    "product_name_raw": "纯电动低入口城市客车",
+    "model_code_raw": "XML6855",
+    "vehicle_type_raw": "纯电动低入口城市客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "厦门金龙旅行车有限公司",
+    "catalog_no_raw": "124",
+    "brand_raw": "金旅牌",
+    "product_name_raw": "纯电动低地板城市客车",
+    "model_code_raw": "XML6705",
+    "vehicle_type_raw": "纯电动低地板城市客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "厦门金龙旅行车有限公司",
+    "catalog_no_raw": "124",
+    "brand_raw": "金旅牌",
+    "product_name_raw": "纯电动城市客车",
+    "model_code_raw": "XML6605",
+    "vehicle_type_raw": "纯电动城市客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "厦门金龙旅行车有限公司",
+    "catalog_no_raw": "124",
+    "brand_raw": "金旅牌",
+    "product_name_raw": "纯电动客车",
+    "model_code_raw": "XML6548",
+    "vehicle_type_raw": "纯电动客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中通客车股份有限公司",
+    "catalog_no_raw": "125",
+    "brand_raw": "中通牌",
+    "product_name_raw": "客车",
+    "model_code_raw": "LCK6119",
+    "vehicle_type_raw": "客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中通客车股份有限公司",
+    "catalog_no_raw": "125",
+    "brand_raw": "中通牌",
+    "product_name_raw": "客车",
+    "model_code_raw": "LCK6759",
+    "vehicle_type_raw": "客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中通客车股份有限公司",
+    "catalog_no_raw": "125",
+    "brand_raw": "中通牌",
+    "product_name_raw": "客车",
+    "model_code_raw": "LCK6609",
+    "vehicle_type_raw": "客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中通客车股份有限公司",
+    "catalog_no_raw": "125",
+    "brand_raw": "中通牌",
+    "product_name_raw": "纯电动客车",
+    "model_code_raw": "LCK6759",
+    "vehicle_type_raw": "纯电动客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "上海申龙客车有限公司",
+    "catalog_no_raw": "129",
+    "brand_raw": "申龙牌",
+    "product_name_raw": "工具车",
+    "model_code_raw": "SLK5030X",
+    "vehicle_type_raw": "工具车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "上海申龙客车有限公司",
+    "catalog_no_raw": "129",
+    "brand_raw": "申龙牌",
+    "product_name_raw": "工具车",
+    "model_code_raw": "SLK5021X",
+    "vehicle_type_raw": "工具车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "上海申龙客车有限公司",
+    "catalog_no_raw": "129",
+    "brand_raw": "申龙牌",
+    "product_name_raw": "工具车",
+    "model_code_raw": "SLK5031X",
+    "vehicle_type_raw": "工具车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "上海申龙客车有限公司",
+    "catalog_no_raw": "129",
+    "brand_raw": "申龙牌",
+    "product_name_raw": "工具车",
+    "model_code_raw": "SLK5023X",
+    "vehicle_type_raw": "工具车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "上海申龙客车有限公司",
+    "catalog_no_raw": "129",
+    "brand_raw": "申龙牌",
+    "product_name_raw": "混合动力工具车",
+    "model_code_raw": "SLK5022X",
+    "vehicle_type_raw": "混合动力工具车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "吉利四川商用车有限公司",
+    "catalog_no_raw": "138",
+    "brand_raw": "远程牌",
+    "product_name_raw": "甲醇插电式增程混合动力客车",
+    "model_code_raw": "DNC6111",
+    "vehicle_type_raw": "甲醇插电式增程混合动力客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "吉利四川商用车有限公司",
+    "catalog_no_raw": "138",
+    "brand_raw": "远程牌",
+    "product_name_raw": "纯电动低入口城市客车",
+    "model_code_raw": "DNC6851",
+    "vehicle_type_raw": "纯电动低入口城市客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "吉利四川商用车有限公司",
+    "catalog_no_raw": "138",
+    "brand_raw": "远程牌",
+    "product_name_raw": "纯电动低入口城市客车",
+    "model_code_raw": "DNC6107",
+    "vehicle_type_raw": "纯电动低入口城市客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "吉利四川商用车有限公司",
+    "catalog_no_raw": "138",
+    "brand_raw": "远程牌",
+    "product_name_raw": "纯电动低入口城市客车",
+    "model_code_raw": "DNC6101",
+    "vehicle_type_raw": "纯电动低入口城市客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "吉利四川商用车有限公司",
+    "catalog_no_raw": "138",
+    "brand_raw": "远程牌",
+    "product_name_raw": "纯电动低地板城市客车",
+    "model_code_raw": "DNC6851",
+    "vehicle_type_raw": "纯电动低地板城市客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "吉利四川商用车有限公司",
+    "catalog_no_raw": "138",
+    "brand_raw": "远程牌",
+    "product_name_raw": "纯电动低地板城市客车",
+    "model_code_raw": "DNC6707",
+    "vehicle_type_raw": "纯电动低地板城市客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "吉利四川商用车有限公司",
+    "catalog_no_raw": "138",
+    "brand_raw": "远程牌",
+    "product_name_raw": "纯电动低地板城市客车",
+    "model_code_raw": "DNC6907",
+    "vehicle_type_raw": "纯电动低地板城市客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "吉利四川商用车有限公司",
+    "catalog_no_raw": "138",
+    "brand_raw": "远程牌",
+    "product_name_raw": "纯电动客车",
+    "model_code_raw": "DNC6111",
+    "vehicle_type_raw": "纯电动客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江苏九龙汽车制造有限公司",
+    "catalog_no_raw": "141",
+    "brand_raw": "大马牌",
+    "product_name_raw": "纯电动城市客车",
+    "model_code_raw": "HKL6540",
+    "vehicle_type_raw": "纯电动城市客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "南京金龙客车制造有限公司",
+    "catalog_no_raw": "142",
+    "brand_raw": "创维牌",
+    "product_name_raw": "换电式纯电动自卸式货车",
+    "model_code_raw": "NJL3310",
+    "vehicle_type_raw": "换电式纯电动自卸式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "南京金龙客车制造有限公司",
+    "catalog_no_raw": "142",
+    "brand_raw": "创维牌",
+    "product_name_raw": "换电式纯电动载货汽车底盘",
+    "model_code_raw": "NJL1310",
+    "vehicle_type_raw": "换电式纯电动载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "南京金龙客车制造有限公司",
+    "catalog_no_raw": "142",
+    "brand_raw": "创维牌",
+    "product_name_raw": "纯电动多用途乘用车",
+    "model_code_raw": "NJL6470",
+    "vehicle_type_raw": "纯电动多用途乘用车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "南京金龙客车制造有限公司",
+    "catalog_no_raw": "142",
+    "brand_raw": "创维牌",
+    "product_name_raw": "纯电动载货汽车底盘",
+    "model_code_raw": "NJL1180",
+    "vehicle_type_raw": "纯电动载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中恒天越野汽车有限公司",
+    "catalog_no_raw": "147",
+    "brand_raw": "天马牌",
+    "product_name_raw": "工具车",
+    "model_code_raw": "KZ5020X",
+    "vehicle_type_raw": "工具车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中恒天越野汽车有限公司",
+    "catalog_no_raw": "147",
+    "brand_raw": "天马牌",
+    "product_name_raw": "混合动力工具车",
+    "model_code_raw": "KZ5020X",
+    "vehicle_type_raw": "混合动力工具车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "四川南骏汽车集团有限公司",
+    "catalog_no_raw": "152",
+    "brand_raw": "南骏牌",
+    "product_name_raw": "燃料电池冷藏车",
+    "model_code_raw": "NJA5040X",
+    "vehicle_type_raw": "燃料电池冷藏车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "四川南骏汽车集团有限公司",
+    "catalog_no_raw": "152",
+    "brand_raw": "南骏牌",
+    "product_name_raw": "燃料电池厢式货车",
+    "model_code_raw": "NJA5040X",
+    "vehicle_type_raw": "燃料电池厢式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "四川南骏汽车集团有限公司",
+    "catalog_no_raw": "152",
+    "brand_raw": "南骏牌",
+    "product_name_raw": "燃料电池载货汽车底盘",
+    "model_code_raw": "NJA1040",
+    "vehicle_type_raw": "燃料电池载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "程力汽车集团股份有限公司",
+    "catalog_no_raw": "153",
+    "brand_raw": "程力牌",
+    "product_name_raw": "纯电动车厢可卸式垃圾车",
+    "model_code_raw": "CL5310ZXX",
+    "vehicle_type_raw": "纯电动车厢可卸式垃圾车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "斯堪尼亚制造（中国）有限公司",
+    "catalog_no_raw": "157",
+    "brand_raw": "斯堪尼亚牌",
+    "product_name_raw": "牵引汽车",
+    "model_code_raw": "SAS4261",
+    "vehicle_type_raw": "牵引汽车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "斯堪尼亚制造（中国）有限公司",
+    "catalog_no_raw": "157",
+    "brand_raw": "斯堪尼亚牌",
+    "product_name_raw": "牵引汽车",
+    "model_code_raw": "SAS4181",
+    "vehicle_type_raw": "牵引汽车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "神河汽车有限公司",
+    "catalog_no_raw": "161",
+    "brand_raw": "神河联达牌",
+    "product_name_raw": "牵引汽车",
+    "model_code_raw": "ESH4180",
+    "vehicle_type_raw": "牵引汽车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "神河汽车有限公司",
+    "catalog_no_raw": "161",
+    "brand_raw": "神河联达牌",
+    "product_name_raw": "牵引汽车",
+    "model_code_raw": "ESH4250",
+    "vehicle_type_raw": "牵引汽车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "珠海广通汽车有限公司",
+    "catalog_no_raw": "169",
+    "brand_raw": "广通牌",
+    "product_name_raw": "纯电动客车底盘",
+    "model_code_raw": "GTQ6810",
+    "vehicle_type_raw": "纯电动客车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "奇瑞新能源汽车股份有限公司",
+    "catalog_no_raw": "174",
+    "brand_raw": "奇瑞牌",
+    "product_name_raw": "纯电动轿车",
+    "model_code_raw": "NEQ7000",
+    "vehicle_type_raw": "纯电动轿车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "奇瑞万达贵州客车股份有限公司",
+    "catalog_no_raw": "184",
+    "brand_raw": "万达牌",
+    "product_name_raw": "客车",
+    "model_code_raw": "WD6127",
+    "vehicle_type_raw": "客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "奇瑞万达贵州客车股份有限公司",
+    "catalog_no_raw": "184",
+    "brand_raw": "万达牌",
+    "product_name_raw": "插电式增程混合动力客车",
+    "model_code_raw": "WD6901",
+    "vehicle_type_raw": "插电式增程混合动力客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "奇瑞万达贵州客车股份有限公司",
+    "catalog_no_raw": "184",
+    "brand_raw": "万达牌",
+    "product_name_raw": "纯电动低地板城市客车",
+    "model_code_raw": "WD6857",
+    "vehicle_type_raw": "纯电动低地板城市客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "奇瑞万达贵州客车股份有限公司",
+    "catalog_no_raw": "184",
+    "brand_raw": "万达牌",
+    "product_name_raw": "纯电动客车",
+    "model_code_raw": "WD6117",
+    "vehicle_type_raw": "纯电动客车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "山东雷驰新能源汽车有限公司",
+    "catalog_no_raw": "192",
+    "brand_raw": "雷驰牌",
+    "product_name_raw": "纯电动仓栅式货车",
+    "model_code_raw": "HLD5041CCY",
+    "vehicle_type_raw": "纯电动仓栅式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "山东雷驰新能源汽车有限公司",
+    "catalog_no_raw": "192",
+    "brand_raw": "雷驰牌",
+    "product_name_raw": "纯电动厢式货车",
+    "model_code_raw": "HLD5041X",
+    "vehicle_type_raw": "纯电动厢式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "山东雷驰新能源汽车有限公司",
+    "catalog_no_raw": "192",
+    "brand_raw": "雷驰牌",
+    "product_name_raw": "纯电动栏板式货车",
+    "model_code_raw": "HLD1041",
+    "vehicle_type_raw": "纯电动栏板式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "山东雷驰新能源汽车有限公司",
+    "catalog_no_raw": "192",
+    "brand_raw": "雷驰牌",
+    "product_name_raw": "牵引汽车",
+    "model_code_raw": "HLD4252",
+    "vehicle_type_raw": "牵引汽车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "山东雷驰新能源汽车有限公司",
+    "catalog_no_raw": "192",
+    "brand_raw": "雷驰牌",
+    "product_name_raw": "纯电动载货汽车底盘",
+    "model_code_raw": "HLD1041",
+    "vehicle_type_raw": "纯电动载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "湖北世纪中远车辆有限公司",
+    "catalog_no_raw": "195",
+    "brand_raw": "中悦牌",
+    "product_name_raw": "牵引汽车",
+    "model_code_raw": "ZYP4180",
+    "vehicle_type_raw": "牵引汽车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "浙江新吉奥汽车有限公司",
+    "catalog_no_raw": "198",
+    "brand_raw": "吉奥牌",
+    "product_name_raw": "工具车",
+    "model_code_raw": "NGA5020X",
+    "vehicle_type_raw": "工具车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "浙江新吉奥汽车有限公司",
+    "catalog_no_raw": "198",
+    "brand_raw": "吉奥牌",
+    "product_name_raw": "工具车",
+    "model_code_raw": "NGA5030X",
+    "vehicle_type_raw": "工具车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "浙江新吉奥汽车有限公司",
+    "catalog_no_raw": "198",
+    "brand_raw": "吉奥牌",
+    "product_name_raw": "插电式混合动力工具车",
+    "model_code_raw": "NGA5022X",
+    "vehicle_type_raw": "插电式混合动力工具车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "浙江新吉奥汽车有限公司",
+    "catalog_no_raw": "198",
+    "brand_raw": "吉奥牌",
+    "product_name_raw": "插电式混合动力工具车",
+    "model_code_raw": "NGA5021X",
+    "vehicle_type_raw": "插电式混合动力工具车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "浙江新吉奥汽车有限公司",
+    "catalog_no_raw": "198",
+    "brand_raw": "吉奥牌",
+    "product_name_raw": "插电式混合动力工具车",
+    "model_code_raw": "NGA5030X",
+    "vehicle_type_raw": "插电式混合动力工具车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "浙江新吉奥汽车有限公司",
+    "catalog_no_raw": "198",
+    "brand_raw": "吉奥牌",
+    "product_name_raw": "插电式混合动力工具车",
+    "model_code_raw": "NGA5023X",
+    "vehicle_type_raw": "插电式混合动力工具车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "浙江新吉奥汽车有限公司",
+    "catalog_no_raw": "198",
+    "brand_raw": "吉奥牌",
+    "product_name_raw": "插电式混合动力工具车",
+    "model_code_raw": "NGA5025X",
+    "vehicle_type_raw": "插电式混合动力工具车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "浙江新吉奥汽车有限公司",
+    "catalog_no_raw": "198",
+    "brand_raw": "吉奥牌",
+    "product_name_raw": "混合动力工具车",
+    "model_code_raw": "NGA5024X",
+    "vehicle_type_raw": "混合动力工具车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "浙江新吉奥汽车有限公司",
+    "catalog_no_raw": "198",
+    "brand_raw": "吉奥牌",
+    "product_name_raw": "混合动力工具车",
+    "model_code_raw": "NGA5020X",
+    "vehicle_type_raw": "混合动力工具车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江西吉利新能源商用车有限公司",
+    "catalog_no_raw": "207",
+    "brand_raw": "远程牌",
+    "product_name_raw": "纯电动仓栅式货车",
+    "model_code_raw": "JGL5041CCY",
+    "vehicle_type_raw": "纯电动仓栅式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江西吉利新能源商用车有限公司",
+    "catalog_no_raw": "207",
+    "brand_raw": "远程牌",
+    "product_name_raw": "纯电动冷藏车",
+    "model_code_raw": "JGL5041X",
+    "vehicle_type_raw": "纯电动冷藏车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江西吉利新能源商用车有限公司",
+    "catalog_no_raw": "207",
+    "brand_raw": "远程牌",
+    "product_name_raw": "纯电动厢式货车",
+    "model_code_raw": "JGL5041X",
+    "vehicle_type_raw": "纯电动厢式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江西吉利新能源商用车有限公司",
+    "catalog_no_raw": "207",
+    "brand_raw": "远程牌",
+    "product_name_raw": "纯电动载货汽车底盘",
+    "model_code_raw": "JGL1121",
+    "vehicle_type_raw": "纯电动载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江西吉利新能源商用车有限公司",
+    "catalog_no_raw": "207",
+    "brand_raw": "远程牌",
+    "product_name_raw": "纯电动载货汽车底盘",
+    "model_code_raw": "JGL1041",
+    "vehicle_type_raw": "纯电动载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "河南福田智蓝新能源汽车有限公司",
+    "catalog_no_raw": "211",
+    "brand_raw": "福田牌",
+    "product_name_raw": "纯电动厢式货车",
+    "model_code_raw": "BJ5040X",
+    "vehicle_type_raw": "纯电动厢式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "大众汽车（安徽）有限公司",
+    "catalog_no_raw": "212",
+    "brand_raw": "大众汽车牌",
+    "product_name_raw": "纯电动多用途乘用车",
+    "model_code_raw": "VWA6470",
+    "vehicle_type_raw": "纯电动多用途乘用车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "蔚来汽车科技（安徽）有限公司",
+    "catalog_no_raw": "214",
+    "brand_raw": "蔚来牌",
+    "product_name_raw": "换电式纯电动多用途乘用车",
+    "model_code_raw": "NAL6543",
+    "vehicle_type_raw": "换电式纯电动多用途乘用车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "广汽埃安新能源汽车股份有限公司",
+    "catalog_no_raw": "216",
+    "brand_raw": "昊铂牌",
+    "product_name_raw": "插电式增程混合动力轿车",
+    "model_code_raw": "AHC7150",
+    "vehicle_type_raw": "插电式增程混合动力轿车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "小米汽车科技有限公司",
+    "catalog_no_raw": "217",
+    "brand_raw": "小米牌",
+    "product_name_raw": "纯电动轿车",
+    "model_code_raw": "XMA7001",
+    "vehicle_type_raw": "纯电动轿车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "宇通商用车有限公司",
+    "catalog_no_raw": "219",
+    "brand_raw": "宇通牌",
+    "product_name_raw": "纯电动仓栅式货车",
+    "model_code_raw": "ZKH5045CCY",
+    "vehicle_type_raw": "纯电动仓栅式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "宇通商用车有限公司",
+    "catalog_no_raw": "219",
+    "brand_raw": "宇通牌",
+    "product_name_raw": "纯电动冷藏车",
+    "model_code_raw": "ZKH5045X",
+    "vehicle_type_raw": "纯电动冷藏车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "宇通商用车有限公司",
+    "catalog_no_raw": "219",
+    "brand_raw": "宇通牌",
+    "product_name_raw": "纯电动冷藏车",
+    "model_code_raw": "ZKH5180X",
+    "vehicle_type_raw": "纯电动冷藏车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "宇通商用车有限公司",
+    "catalog_no_raw": "219",
+    "brand_raw": "宇通牌",
+    "product_name_raw": "纯电动厢式货车",
+    "model_code_raw": "ZKH5180X",
+    "vehicle_type_raw": "纯电动厢式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "宇通商用车有限公司",
+    "catalog_no_raw": "219",
+    "brand_raw": "宇通牌",
+    "product_name_raw": "纯电动厢式货车",
+    "model_code_raw": "ZKH5045X",
+    "vehicle_type_raw": "纯电动厢式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "宇通商用车有限公司",
+    "catalog_no_raw": "219",
+    "brand_raw": "宇通牌",
+    "product_name_raw": "纯电动厢式货车",
+    "model_code_raw": "ZKH5046X",
+    "vehicle_type_raw": "纯电动厢式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "宇通商用车有限公司",
+    "catalog_no_raw": "219",
+    "brand_raw": "宇通牌",
+    "product_name_raw": "纯电动栏板式货车",
+    "model_code_raw": "ZKH1047",
+    "vehicle_type_raw": "纯电动栏板式货车",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "宇通商用车有限公司",
+    "catalog_no_raw": "219",
+    "brand_raw": "宇通牌",
+    "product_name_raw": "纯电动载货汽车底盘",
+    "model_code_raw": "ZKH1140",
+    "vehicle_type_raw": "纯电动载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "宇通商用车有限公司",
+    "catalog_no_raw": "219",
+    "brand_raw": "宇通牌",
+    "product_name_raw": "纯电动载货汽车底盘",
+    "model_code_raw": "ZKH1047",
+    "vehicle_type_raw": "纯电动载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "宇通商用车有限公司",
+    "catalog_no_raw": "219",
+    "brand_raw": "宇通牌",
+    "product_name_raw": "纯电动载货汽车底盘",
+    "model_code_raw": "ZKH1180",
+    "vehicle_type_raw": "纯电动载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "宇通商用车有限公司",
+    "catalog_no_raw": "219",
+    "brand_raw": "宇通牌",
+    "product_name_raw": "纯电动载货汽车底盘",
+    "model_code_raw": "ZKH1046",
+    "vehicle_type_raw": "纯电动载货汽车底盘",
+    "source_section": "一、汽车生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "徐州工程机械集团有限公司",
+    "catalog_no_raw": "(十)48",
+    "brand_raw": "徐工牌",
+    "product_name_raw": "全地面起重机",
+    "model_code_raw": "XZJ5550JQZ",
+    "vehicle_type_raw": "全地面起重机",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "济宁家庆专用车（集团）有限公司",
+    "catalog_no_raw": "(十五)535",
+    "brand_raw": "鲁济家庆牌",
+    "product_name_raw": "汽车起重机",
+    "model_code_raw": "LFV5160JQZ",
+    "vehicle_type_raw": "汽车起重机",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "济宁久邦工程机械设备有限公司",
+    "catalog_no_raw": "(十五)549",
+    "brand_raw": "鸿昇久邦牌",
+    "product_name_raw": "汽车起重机",
+    "model_code_raw": "JBP5440JQZ",
+    "vehicle_type_raw": "汽车起重机",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "湖北舜德专用汽车有限公司",
+    "catalog_no_raw": "(十七)116",
+    "brand_raw": "舜德牌",
+    "product_name_raw": "汽车起重机",
+    "model_code_raw": "SDS5180JQZ",
+    "vehicle_type_raw": "汽车起重机",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国第一汽车集团有限公司",
+    "catalog_no_raw": "1",
+    "brand_raw": "解放牌",
+    "product_name_raw": "特种作业车底盘",
+    "model_code_raw": "CA5230",
+    "vehicle_type_raw": "特种作业车底盘",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "徐州徐工汽车制造有限公司",
+    "catalog_no_raw": "48",
+    "brand_raw": "徐工牌",
+    "product_name_raw": "特种作业车底盘",
+    "model_code_raw": "XGA546",
+    "vehicle_type_raw": "特种作业车底盘",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国重汽集团济南商用车有限公司",
+    "catalog_no_raw": "63",
+    "brand_raw": "汕德卡牌",
+    "product_name_raw": "特种作业车底盘",
+    "model_code_raw": "ZZ5466TV5",
+    "vehicle_type_raw": "特种作业车底盘",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "东风柳州汽车有限公司",
+    "catalog_no_raw": "91",
+    "brand_raw": "乘龙牌",
+    "product_name_raw": "特种作业车底盘",
+    "model_code_raw": "LZ5236TQZ",
+    "vehicle_type_raw": "特种作业车底盘",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "上汽红岩汽车有限公司",
+    "catalog_no_raw": "94",
+    "brand_raw": "红岩牌",
+    "product_name_raw": "特种作业车底盘",
+    "model_code_raw": "CQ5237TXF",
+    "vehicle_type_raw": "特种作业车底盘",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "徐州工程机械集团有限公司",
+    "catalog_no_raw": "(十)48",
+    "brand_raw": "徐工牌",
+    "product_name_raw": "全地面起重机",
+    "model_code_raw": "XZJ5600JQZ",
+    "vehicle_type_raw": "全地面起重机",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "中国重汽集团泰安五岳专用汽车有限公司",
+    "catalog_no_raw": "(十五)33",
+    "brand_raw": "五岳牌",
+    "product_name_raw": "油田专用车底盘",
+    "model_code_raw": "TAZ5836TYT",
+    "vehicle_type_raw": "油田专用车底盘",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "湖北一专汽车股份有限公司",
+    "catalog_no_raw": "(十七)118",
+    "brand_raw": "专致牌",
+    "product_name_raw": "修井机",
+    "model_code_raw": "YZZ5440TXJ",
+    "vehicle_type_raw": "修井机",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "宝岛车业集团有限公司",
+    "catalog_no_raw": "6",
+    "brand_raw": "宝岛牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "BD1200DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "无锡宝岛车业科技有限公司",
+    "catalog_no_raw": "6",
+    "brand_raw": "极讯牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "JX1200DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "无锡宝岛车业科技有限公司",
+    "catalog_no_raw": "6",
+    "brand_raw": "极讯牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "JX1500DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "重庆众沃车业有限公司",
+    "catalog_no_raw": "9",
+    "brand_raw": "汗血悍马牌",
+    "product_name_raw": "正三轮摩托车",
+    "model_code_raw": "HX150ZH",
+    "vehicle_type_raw": "正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "浙江大隆金辰车辆制造有限公司",
+    "catalog_no_raw": "15",
+    "brand_raw": "广雅牌",
+    "product_name_raw": "两轮摩托车",
+    "model_code_raw": "GY150T",
+    "vehicle_type_raw": "两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "河南绿佳车业有限公司",
+    "catalog_no_raw": "18",
+    "brand_raw": "绿佳牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "LJ1200DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "益阳金城摩托车有限公司",
+    "catalog_no_raw": "25",
+    "brand_raw": "劲达牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "JD3000DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "益阳金城摩托车有限公司",
+    "catalog_no_raw": "25",
+    "brand_raw": "劲驰牌",
+    "product_name_raw": "两轮摩托车",
+    "model_code_raw": "JC150T",
+    "vehicle_type_raw": "两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "常州光阳摩托车有限公司",
+    "catalog_no_raw": "30",
+    "brand_raw": "常光牌",
+    "product_name_raw": "两轮摩托车",
+    "model_code_raw": "CK150T",
+    "vehicle_type_raw": "两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "天津金箭电动车有限公司",
+    "catalog_no_raw": "31",
+    "brand_raw": "金箭牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "JJ1200DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "浙江绿源电动车有限公司",
+    "catalog_no_raw": "35",
+    "brand_raw": "绿源牌",
+    "product_name_raw": "电动两轮轻便摩托车",
+    "model_code_raw": "LY800DQT",
+    "vehicle_type_raw": "电动两轮轻便摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江苏跃进摩托车制造有限责任公司",
+    "catalog_no_raw": "36",
+    "brand_raw": "跃进牌",
+    "product_name_raw": "正三轮摩托车",
+    "model_code_raw": "YJ800ZK",
+    "vehicle_type_raw": "正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "浙江春风动力股份有限公司",
+    "catalog_no_raw": "38",
+    "brand_raw": "春风牌",
+    "product_name_raw": "两轮摩托车",
+    "model_code_raw": "CF400",
+    "vehicle_type_raw": "两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "浙江春风动力股份有限公司",
+    "catalog_no_raw": "38",
+    "brand_raw": "极核牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "ZH1300DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "浙江春风动力股份有限公司",
+    "catalog_no_raw": "38",
+    "brand_raw": "极核牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "ZH1600DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "浙江春风动力股份有限公司",
+    "catalog_no_raw": "38",
+    "brand_raw": "极核牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "ZH3500DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江苏绿能电动车科技有限公司",
+    "catalog_no_raw": "62",
+    "brand_raw": "绿能牌",
+    "product_name_raw": "电动两轮轻便摩托车",
+    "model_code_raw": "LN500DQT",
+    "vehicle_type_raw": "电动两轮轻便摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江苏绿能电动车科技有限公司",
+    "catalog_no_raw": "62",
+    "brand_raw": "绿能牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "LN1200DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "四川天鹰安尔达车业有限公司",
+    "catalog_no_raw": "67",
+    "brand_raw": "安尔达牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "AED1200DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "广东台田新能源科技有限公司",
+    "catalog_no_raw": "67",
+    "brand_raw": "原雅牌",
+    "product_name_raw": "两轮摩托车",
+    "model_code_raw": "YY125T",
+    "vehicle_type_raw": "两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "广东台田新能源科技有限公司",
+    "catalog_no_raw": "67",
+    "brand_raw": "原雅牌",
+    "product_name_raw": "两轮摩托车",
+    "model_code_raw": "YY150T",
+    "vehicle_type_raw": "两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "济南大隆机车工业有限公司",
+    "catalog_no_raw": "68",
+    "brand_raw": "世纪风牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "SJF1500DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "山东中铃车辆制造有限公司",
+    "catalog_no_raw": "71",
+    "brand_raw": "海戈牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "HG2000DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "广东大福摩托车有限公司",
+    "catalog_no_raw": "74",
+    "brand_raw": "豪达牌",
+    "product_name_raw": "两轮摩托车",
+    "model_code_raw": "HD150T",
+    "vehicle_type_raw": "两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "河南新鸽摩托车有限公司",
+    "catalog_no_raw": "77",
+    "brand_raw": "新鸽牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "XG1200DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "河南新鸽摩托车有限公司",
+    "catalog_no_raw": "77",
+    "brand_raw": "新鸽牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "XG1500DZH",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "山东巴士新能源车业有限公司",
+    "catalog_no_raw": "78",
+    "brand_raw": "金迪牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "JD1500DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "雅迪科技集团有限公司",
+    "catalog_no_raw": "80",
+    "brand_raw": "雅迪牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "YD12000D",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "雅迪科技集团有限公司",
+    "catalog_no_raw": "80",
+    "brand_raw": "雅迪牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "YD1200DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "雅迪科技集团有限公司",
+    "catalog_no_raw": "80",
+    "brand_raw": "雅迪牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "YD2000DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "雅迪科技集团有限公司",
+    "catalog_no_raw": "80",
+    "brand_raw": "雅迪牌",
+    "product_name_raw": "电动两轮轻便摩托车",
+    "model_code_raw": "YD1200DQT",
+    "vehicle_type_raw": "电动两轮轻便摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "雅迪科技集团有限公司",
+    "catalog_no_raw": "80",
+    "brand_raw": "雅迪牌",
+    "product_name_raw": "电动两轮轻便摩托车",
+    "model_code_raw": "YD500DQT",
+    "vehicle_type_raw": "电动两轮轻便摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "雅迪科技集团有限公司",
+    "catalog_no_raw": "80",
+    "brand_raw": "雅迪牌",
+    "product_name_raw": "电动两轮轻便摩托车",
+    "model_code_raw": "YD600DQT",
+    "vehicle_type_raw": "电动两轮轻便摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江门市迪豪摩托车有限公司",
+    "catalog_no_raw": "82",
+    "brand_raw": "豪天牌",
+    "product_name_raw": "两轮摩托车",
+    "model_code_raw": "HT150",
+    "vehicle_type_raw": "两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "小刀新能源科技股份有限公司",
+    "catalog_no_raw": "83",
+    "brand_raw": "小刀牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "XD1200DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "小刀新能源科技股份有限公司",
+    "catalog_no_raw": "83",
+    "brand_raw": "小刀牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "XD1500DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "小刀新能源科技股份有限公司",
+    "catalog_no_raw": "83",
+    "brand_raw": "速点牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "SD1500DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "小刀新能源科技股份有限公司",
+    "catalog_no_raw": "83",
+    "brand_raw": "速点牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "SD2500DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "广东小刀新能源科技有限公司",
+    "catalog_no_raw": "83",
+    "brand_raw": "小刀牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "XD1200DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "广东小刀新能源科技有限公司",
+    "catalog_no_raw": "83",
+    "brand_raw": "小刀牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "XD1500DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "重庆小刀新能源科技有限公司",
+    "catalog_no_raw": "83",
+    "brand_raw": "小刀牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "XD1200DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "重庆小刀新能源科技有限公司",
+    "catalog_no_raw": "83",
+    "brand_raw": "小刀牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "XD1500DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "重庆小刀新能源科技有限公司",
+    "catalog_no_raw": "83",
+    "brand_raw": "小刀牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "XD1200DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "重庆小刀新能源科技有限公司",
+    "catalog_no_raw": "83",
+    "brand_raw": "小刀牌",
+    "product_name_raw": "电动正三轮轻便摩托车",
+    "model_code_raw": "XD500DQZ",
+    "vehicle_type_raw": "电动正三轮轻便摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江苏爱玛车业科技有限公司",
+    "catalog_no_raw": "90",
+    "brand_raw": "斯波兹曼牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "SP1000DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江苏爱玛车业科技有限公司",
+    "catalog_no_raw": "90",
+    "brand_raw": "斯波兹曼牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "SP1200DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江苏爱玛车业科技有限公司",
+    "catalog_no_raw": "90",
+    "brand_raw": "爱玛牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "AM1200DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "广州五羊摩托有限公司",
+    "catalog_no_raw": "91",
+    "brand_raw": "五羊牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "WY1200DZH",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "广州福羊科技有限公司",
+    "catalog_no_raw": "97",
+    "brand_raw": "飞鹰牌",
+    "product_name_raw": "两轮摩托车",
+    "model_code_raw": "FY110T",
+    "vehicle_type_raw": "两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "济南轻骑铃木摩托车有限公司",
+    "catalog_no_raw": "98",
+    "brand_raw": "铃木牌",
+    "product_name_raw": "两轮摩托车",
+    "model_code_raw": "US125T",
+    "vehicle_type_raw": "两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "常州豪爵铃木摩托车有限公司",
+    "catalog_no_raw": "100",
+    "brand_raw": "铃木(SUZUKI)牌",
+    "product_name_raw": "两轮摩托车",
+    "model_code_raw": "GSX250R",
+    "vehicle_type_raw": "两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江苏淮海新能源车辆有限公司",
+    "catalog_no_raw": "106",
+    "brand_raw": "淮海牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "HH1500DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江苏淮海新能源车辆有限公司",
+    "catalog_no_raw": "106",
+    "brand_raw": "淮海牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "HH2000DZH",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "五羊-本田摩托(广州)有限公司",
+    "catalog_no_raw": "112",
+    "brand_raw": "本田(HONDA)牌",
+    "product_name_raw": "两轮摩托车",
+    "model_code_raw": "WH500",
+    "vehicle_type_raw": "两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "重庆隆鑫机车有限公司",
+    "catalog_no_raw": "117",
+    "brand_raw": "无极牌",
+    "product_name_raw": "两轮摩托车",
+    "model_code_raw": "LX400T",
+    "vehicle_type_raw": "两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "重庆隆鑫机车有限公司",
+    "catalog_no_raw": "117",
+    "brand_raw": "无极牌",
+    "product_name_raw": "两轮摩托车",
+    "model_code_raw": "LX500",
+    "vehicle_type_raw": "两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "重庆隆鑫机车有限公司",
+    "catalog_no_raw": "117",
+    "brand_raw": "无极牌",
+    "product_name_raw": "两轮摩托车",
+    "model_code_raw": "LX500GS",
+    "vehicle_type_raw": "两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "重庆隆鑫机车有限公司",
+    "catalog_no_raw": "117",
+    "brand_raw": "无极牌",
+    "product_name_raw": "两轮摩托车",
+    "model_code_raw": "LX600",
+    "vehicle_type_raw": "两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江苏宗申车业有限公司",
+    "catalog_no_raw": "118",
+    "brand_raw": "宗申牌",
+    "product_name_raw": "正三轮摩托车",
+    "model_code_raw": "ZS150ZH",
+    "vehicle_type_raw": "正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江苏宗申车业有限公司",
+    "catalog_no_raw": "118",
+    "brand_raw": "宗申牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "ZS1200DZH",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江苏宗申车业有限公司",
+    "catalog_no_raw": "118",
+    "brand_raw": "宗申牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "ZS1500DZH",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江苏宗申车业有限公司",
+    "catalog_no_raw": "118",
+    "brand_raw": "宗申牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "ZS2200DZH",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "重庆宗申车辆有限公司",
+    "catalog_no_raw": "118",
+    "brand_raw": "宗申牌",
+    "product_name_raw": "正三轮摩托车",
+    "model_code_raw": "ZS150ZH",
+    "vehicle_type_raw": "正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "重庆宗申车辆有限公司",
+    "catalog_no_raw": "118",
+    "brand_raw": "宗申牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "ZS3000DZH",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "浙江日雅摩托车有限公司",
+    "catalog_no_raw": "128",
+    "brand_raw": "雷猫牌",
+    "product_name_raw": "两轮轻便摩托车",
+    "model_code_raw": "LM50QT",
+    "vehicle_type_raw": "两轮轻便摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "重庆万虎机电有限责任公司",
+    "catalog_no_raw": "131",
+    "brand_raw": "万虎牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "WH3000DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "重庆银钢科技(集团)有限公司",
+    "catalog_no_raw": "139",
+    "brand_raw": "银钢牌",
+    "product_name_raw": "正三轮摩托车",
+    "model_code_raw": "YG1500ZH",
+    "vehicle_type_raw": "正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "天津金美尚科技有限责任公司",
+    "catalog_no_raw": "140",
+    "brand_raw": "金彭牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "JP1500DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "天津金美尚科技有限责任公司",
+    "catalog_no_raw": "140",
+    "brand_raw": "金彭牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "JP800DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江苏金彭集团有限公司",
+    "catalog_no_raw": "140",
+    "brand_raw": "吉途牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "JT1000DZH",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江苏金彭集团有限公司",
+    "catalog_no_raw": "140",
+    "brand_raw": "吉途牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "JT1500DZH",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江苏金彭集团有限公司",
+    "catalog_no_raw": "140",
+    "brand_raw": "金彭牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "JP1300DZH",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江苏金彭集团有限公司",
+    "catalog_no_raw": "140",
+    "brand_raw": "金彭牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "JP1500DZH",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "南京三叶金鹰摩托车有限公司",
+    "catalog_no_raw": "144",
+    "brand_raw": "瑞摩牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "RM9000D",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "广东新日机电有限公司",
+    "catalog_no_raw": "151",
+    "brand_raw": "新日牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "XR1200DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江苏新日电动车股份有限公司",
+    "catalog_no_raw": "151",
+    "brand_raw": "新日牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "XR1000DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江苏新日电动车股份有限公司",
+    "catalog_no_raw": "151",
+    "brand_raw": "新日牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "XR1200DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江苏新日电动车股份有限公司",
+    "catalog_no_raw": "151",
+    "brand_raw": "新日牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "XR2000DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "河北立马车业科技有限公司",
+    "catalog_no_raw": "152",
+    "brand_raw": "立马牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "LM1200DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "广州豪进摩托车股份有限公司",
+    "catalog_no_raw": "153",
+    "brand_raw": "猎变牌",
+    "product_name_raw": "两轮摩托车",
+    "model_code_raw": "LB350T",
+    "vehicle_type_raw": "两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "河南立马电动车科技有限公司",
+    "catalog_no_raw": "160",
+    "brand_raw": "立马牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "LM1000DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "天津钻豹科技有限公司",
+    "catalog_no_raw": "162",
+    "brand_raw": "五星钻豹牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "ZB1000DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "山东易航新能源车业有限公司",
+    "catalog_no_raw": "166",
+    "brand_raw": "盛昊牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "SH5000DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "山东雷迈新能源车业有限公司",
+    "catalog_no_raw": "166",
+    "brand_raw": "小通牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "XT1000DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "山东雷迈新能源车业有限公司",
+    "catalog_no_raw": "166",
+    "brand_raw": "盛昊篷车牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "SHP1500DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "天津渤海新能源科技有限公司",
+    "catalog_no_raw": "168",
+    "brand_raw": "邦德·富士达牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "FSD1200DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "无锡赛克车业科技有限公司",
+    "catalog_no_raw": "170",
+    "brand_raw": "星赛克牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "XSK1500DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "无锡赛克车业科技有限公司",
+    "catalog_no_raw": "170",
+    "brand_raw": "赛行牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "SX4000DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "天津大安电动车有限公司",
+    "catalog_no_raw": "173",
+    "brand_raw": "大安·罗纳多牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "DA1500DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "九号科技有限公司",
+    "catalog_no_raw": "176",
+    "brand_raw": "九号牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "JH1200DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "九号科技有限公司",
+    "catalog_no_raw": "176",
+    "brand_raw": "九号牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "JH3000DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "九号科技有限公司",
+    "catalog_no_raw": "176",
+    "brand_raw": "九号牌",
+    "product_name_raw": "电动两轮轻便摩托车",
+    "model_code_raw": "JH1200DQT",
+    "vehicle_type_raw": "电动两轮轻便摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "九号科技有限公司",
+    "catalog_no_raw": "176",
+    "brand_raw": "九号牌",
+    "product_name_raw": "电动两轮轻便摩托车",
+    "model_code_raw": "JH800DQT",
+    "vehicle_type_raw": "电动两轮轻便摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "无锡新大洲电动车有限公司",
+    "catalog_no_raw": "178",
+    "brand_raw": "派睿牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "PR5000DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "山东金博电动车有限公司",
+    "catalog_no_raw": "181",
+    "brand_raw": "金博牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "JB1200DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "山东金博电动车有限公司",
+    "catalog_no_raw": "181",
+    "brand_raw": "金博牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "JB1500DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "山东鲁阔车辆制造有限公司",
+    "catalog_no_raw": "192",
+    "brand_raw": "鲁客牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "LK1500DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "天津美派电动科技有限公司",
+    "catalog_no_raw": "202",
+    "brand_raw": "欧派牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "OP1200DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "天津市兴世达科技有限公司",
+    "catalog_no_raw": "210",
+    "brand_raw": "比德文 BYVIN牌",
+    "product_name_raw": "电动两轮轻便摩托车",
+    "model_code_raw": "BDW500DQT",
+    "vehicle_type_raw": "电动两轮轻便摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "天津市兴世达科技有限公司",
+    "catalog_no_raw": "210",
+    "brand_raw": "比德文 BYVIN牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "BDW1500DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "徐州美邦电动车科技有限公司",
+    "catalog_no_raw": "215",
+    "brand_raw": "美邦牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "MB1000DZH",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "徐州美邦电动车科技有限公司",
+    "catalog_no_raw": "215",
+    "brand_raw": "美邦牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "MB1000DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "徐州美邦电动车科技有限公司",
+    "catalog_no_raw": "215",
+    "brand_raw": "美邦牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "MB1200DZH",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "天津踏浪科技股份有限公司",
+    "catalog_no_raw": "218",
+    "brand_raw": "黛玛牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "DM800DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "浙江莫里尼机车有限公司",
+    "catalog_no_raw": "221",
+    "brand_raw": "摩托莫里尼牌",
+    "product_name_raw": "两轮摩托车",
+    "model_code_raw": "MM350",
+    "vehicle_type_raw": "两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "台州市壹酷新能源科技有限公司",
+    "catalog_no_raw": "226",
+    "brand_raw": "壹酷牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "YK3000DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "无锡赛鸽电动车科技有限公司",
+    "catalog_no_raw": "230",
+    "brand_raw": "赛鸽牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "SG1200DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "无锡赛鸽电动车科技有限公司",
+    "catalog_no_raw": "230",
+    "brand_raw": "赛鸽牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "SG1200DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江苏常丰车业有限公司",
+    "catalog_no_raw": "231",
+    "brand_raw": "久丰牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "JF1000DZH",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江苏常丰车业有限公司",
+    "catalog_no_raw": "231",
+    "brand_raw": "久丰牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "JF1200DZH",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江苏常丰车业有限公司",
+    "catalog_no_raw": "231",
+    "brand_raw": "乐生牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "LS1200DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "徐州专用汽车有限责任公司",
+    "catalog_no_raw": "232",
+    "brand_raw": "金艺牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "JY1000DZH",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "徐州专用汽车有限责任公司",
+    "catalog_no_raw": "232",
+    "brand_raw": "金艺牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "JY1000DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江苏都盛机车有限公司",
+    "catalog_no_raw": "235",
+    "brand_raw": "昊丰牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "HF1200DZH",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江苏永久摩托车科技有限公司",
+    "catalog_no_raw": "240",
+    "brand_raw": "永久牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "YJ1200DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "天津嘉陵电动车有限公司",
+    "catalog_no_raw": "242",
+    "brand_raw": "艾步牌",
+    "product_name_raw": "电动两轮轻便摩托车",
+    "model_code_raw": "AB400DQT",
+    "vehicle_type_raw": "电动两轮轻便摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "上海凤凰自行车江苏有限公司",
+    "catalog_no_raw": "244",
+    "brand_raw": "凤凰牌",
+    "product_name_raw": "电动两轮轻便摩托车",
+    "model_code_raw": "FH800DQT",
+    "vehicle_type_raw": "电动两轮轻便摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "上海凤凰自行车江苏有限公司",
+    "catalog_no_raw": "244",
+    "brand_raw": "凤凰牌",
+    "product_name_raw": "电动正三轮轻便摩托车",
+    "model_code_raw": "FH500DQZ",
+    "vehicle_type_raw": "电动正三轮轻便摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "嘉兴雅马哈车业有限公司",
+    "catalog_no_raw": "251",
+    "brand_raw": "松越牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "SY1200DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "山东省禾海汽车科技有限公司",
+    "catalog_no_raw": "255",
+    "brand_raw": "牛奔小客牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "HH1000DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "安徽雅迪机车有限公司",
+    "catalog_no_raw": "261",
+    "brand_raw": "雅迪牌",
+    "product_name_raw": "电动两轮轻便摩托车",
+    "model_code_raw": "YD1200DQT",
+    "vehicle_type_raw": "电动两轮轻便摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "安徽雅迪机车有限公司",
+    "catalog_no_raw": "261",
+    "brand_raw": "雅迪牌",
+    "product_name_raw": "电动两轮轻便摩托车",
+    "model_code_raw": "YD500DQT",
+    "vehicle_type_raw": "电动两轮轻便摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "安徽雅迪机车有限公司",
+    "catalog_no_raw": "261",
+    "brand_raw": "雅迪牌",
+    "product_name_raw": "电动两轮轻便摩托车",
+    "model_code_raw": "YD600DQT",
+    "vehicle_type_raw": "电动两轮轻便摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "安徽雅迪机车有限公司",
+    "catalog_no_raw": "261",
+    "brand_raw": "雅迪牌",
+    "product_name_raw": "电动两轮轻便摩托车",
+    "model_code_raw": "YD800DQT",
+    "vehicle_type_raw": "电动两轮轻便摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "贵州新山地新能源汽车制造有限公司",
+    "catalog_no_raw": "267",
+    "brand_raw": "山地牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "NSD4000DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "广汉腾兴摩托车有限公司",
+    "catalog_no_raw": "270",
+    "brand_raw": "禾兴政宇牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "ZY1500DZH",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "什邡市伊科车业有限公司",
+    "catalog_no_raw": "273",
+    "brand_raw": "伊格玛牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "YK1500DZH",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "什邡市伊科车业有限公司",
+    "catalog_no_raw": "273",
+    "brand_raw": "伊格玛牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "YK1500DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "什邡市伊科车业有限公司",
+    "catalog_no_raw": "273",
+    "brand_raw": "宝航鹰牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "BHY1500DZH",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江苏汉彭机车有限公司",
+    "catalog_no_raw": "281",
+    "brand_raw": "富彭牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "FP1500DZH",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "河南省双枪摩托车有限责任公司",
+    "catalog_no_raw": "286",
+    "brand_raw": "双枪牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "SQ1800DZH",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "浙江奔宝车业有限公司",
+    "catalog_no_raw": "289",
+    "brand_raw": "奔宝牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "BB1200DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "浙江奔宝车业有限公司",
+    "catalog_no_raw": "289",
+    "brand_raw": "奔宝牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "BB1200DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "浙江奔宝车业有限公司",
+    "catalog_no_raw": "289",
+    "brand_raw": "奔宝牌",
+    "product_name_raw": "电动正三轮轻便摩托车",
+    "model_code_raw": "BB500DQZ",
+    "vehicle_type_raw": "电动正三轮轻便摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "三安车业集团有限公司",
+    "catalog_no_raw": "297",
+    "brand_raw": "三安牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "SA2000DZH",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "天津星畅电动车有限公司",
+    "catalog_no_raw": "303",
+    "brand_raw": "哈牛牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "HN1200DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "重庆虬龙科技有限公司",
+    "catalog_no_raw": "311",
+    "brand_raw": "虬龙牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "QL4000DY",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江苏迈超机车有限公司",
+    "catalog_no_raw": "321",
+    "brand_raw": "友铭牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "YM1000DZH",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江苏迈超机车有限公司",
+    "catalog_no_raw": "321",
+    "brand_raw": "友铭牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "YM1000DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "杭州土星动力科技有限公司",
+    "catalog_no_raw": "333",
+    "brand_raw": "奔达牌",
+    "product_name_raw": "两轮摩托车",
+    "model_code_raw": "BD600",
+    "vehicle_type_raw": "两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "广东建雅摩托车科技有限公司",
+    "catalog_no_raw": "337",
+    "brand_raw": "广建雅牌",
+    "product_name_raw": "两轮摩托车",
+    "model_code_raw": "GJY150T",
+    "vehicle_type_raw": "两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "浙江千喜车业有限公司",
+    "catalog_no_raw": "342",
+    "brand_raw": "小飞哥牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "XFG1200DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江苏圣传龙帝新能源科技有限公司",
+    "catalog_no_raw": "347",
+    "brand_raw": "神州号牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "SZH1200DZH",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江苏迈威机车有限公司",
+    "catalog_no_raw": "350",
+    "brand_raw": "江淮牛电牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "ND1200DZH",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江苏迈威机车有限公司",
+    "catalog_no_raw": "350",
+    "brand_raw": "江淮牛电牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "ND1200DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "山东北易车业有限公司",
+    "catalog_no_raw": "358",
+    "brand_raw": "金沃牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "JW1200DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "洛阳北易三轮摩托车有限公司",
+    "catalog_no_raw": "359",
+    "brand_raw": "易星牌",
+    "product_name_raw": "正三轮摩托车",
+    "model_code_raw": "YX800ZK",
+    "vehicle_type_raw": "正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "重庆嘉陵嘉鹏工业有限公司",
+    "catalog_no_raw": "360",
+    "brand_raw": "嘉陵牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "JL1200DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "菏泽心爱车业有限公司",
+    "catalog_no_raw": "362",
+    "brand_raw": "心爱牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "XA1000DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "台州市智龙科技有限公司",
+    "catalog_no_raw": "364",
+    "brand_raw": "古思特牌",
+    "product_name_raw": "两轮摩托车",
+    "model_code_raw": "GST150T",
+    "vehicle_type_raw": "两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "山东众信新能源车业有限公司",
+    "catalog_no_raw": "367",
+    "brand_raw": "鲁佳牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "LJ800DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "重庆雅迪科技有限公司",
+    "catalog_no_raw": "376",
+    "brand_raw": "雅迪牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "YD1500DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "重庆雅迪科技有限公司",
+    "catalog_no_raw": "376",
+    "brand_raw": "雅迪牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "YD2000DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "重庆雅迪科技有限公司",
+    "catalog_no_raw": "376",
+    "brand_raw": "雅迪牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "YD3000DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "万佳昌盛（天津）科技有限公司",
+    "catalog_no_raw": "377",
+    "brand_raw": "瑞仕达牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "RSD1200DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "广西绿源电动车有限公司",
+    "catalog_no_raw": "389",
+    "brand_raw": "绿源牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "LY1000DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江苏迅逸电动科技有限公司",
+    "catalog_no_raw": "392",
+    "brand_raw": "电盟牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "XY3000DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江苏迅逸电动科技有限公司",
+    "catalog_no_raw": "392",
+    "brand_raw": "电盟牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "XY4000DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "廊坊隆翔新能源科技有限公司",
+    "catalog_no_raw": "400",
+    "brand_raw": "小夏牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "XX1500DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "重庆爱玛车业科技有限公司",
+    "catalog_no_raw": "405",
+    "brand_raw": "爱玛牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "AM1200DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "重庆爱玛车业科技有限公司",
+    "catalog_no_raw": "405",
+    "brand_raw": "爱玛牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "AM1000DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "天津爱玛车业科技有限公司",
+    "catalog_no_raw": "430",
+    "brand_raw": "爱玛牌",
+    "product_name_raw": "电动两轮轻便摩托车",
+    "model_code_raw": "AM400DQT",
+    "vehicle_type_raw": "电动两轮轻便摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "天津爱玛车业科技有限公司",
+    "catalog_no_raw": "430",
+    "brand_raw": "爱玛牌",
+    "product_name_raw": "电动两轮轻便摩托车",
+    "model_code_raw": "AM500DQT",
+    "vehicle_type_raw": "电动两轮轻便摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "天津爱玛车业科技有限公司",
+    "catalog_no_raw": "430",
+    "brand_raw": "爱玛牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "AM1000DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "河南爱玛车业有限公司",
+    "catalog_no_raw": "431",
+    "brand_raw": "爱玛牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "AM1000DZH",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "河南爱玛车业有限公司",
+    "catalog_no_raw": "431",
+    "brand_raw": "爱玛牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "AM1000DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "台铃科技股份有限公司",
+    "catalog_no_raw": "435",
+    "brand_raw": "台铃牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "TL3000DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "廊坊万利新能源科技有限公司",
+    "catalog_no_raw": "437",
+    "brand_raw": "万利兴牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "WLX1200DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "廊坊万利新能源科技有限公司",
+    "catalog_no_raw": "437",
+    "brand_raw": "安帅牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "AS1200DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "廊坊万利新能源科技有限公司",
+    "catalog_no_raw": "437",
+    "brand_raw": "海川牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "HC1200DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "廊坊万利新能源科技有限公司",
+    "catalog_no_raw": "437",
+    "brand_raw": "领点牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "LD1200DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江苏大隆建豪新能源工业有限公司",
+    "catalog_no_raw": "438",
+    "brand_raw": "义本牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "YB4000DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江苏大隆建豪新能源工业有限公司",
+    "catalog_no_raw": "438",
+    "brand_raw": "福本牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "FB8000DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "台铃电动科技（天津）有限公司",
+    "catalog_no_raw": "439",
+    "brand_raw": "台铃牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "TL1200DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "四川驿兴传飞新能源科技有限公司",
+    "catalog_no_raw": "444",
+    "brand_raw": "洪鑫胜利达牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "SLD1500DZH",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江苏珠峰机电科技有限公司",
+    "catalog_no_raw": "446",
+    "brand_raw": "昊跃牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "HY1200DZH",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "广西立马电动车科技有限公司",
+    "catalog_no_raw": "450",
+    "brand_raw": "立马牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "LM1000DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "常州浩万新能源科技有限公司",
+    "catalog_no_raw": "458",
+    "brand_raw": "号外牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "HW35000DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "徐州大齐帅新能源科技有限公司",
+    "catalog_no_raw": "467",
+    "brand_raw": "金邑牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "JY1000DZH",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "徐州大齐帅新能源科技有限公司",
+    "catalog_no_raw": "467",
+    "brand_raw": "金邑牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "JY1200DZH",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "山东东米汽车科技有限公司",
+    "catalog_no_raw": "482",
+    "brand_raw": "东米牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "DM1500DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "天津永久智能科技有限公司",
+    "catalog_no_raw": "486",
+    "brand_raw": "永久牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "YJ1200DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "天津永久智能科技有限公司",
+    "catalog_no_raw": "486",
+    "brand_raw": "永久牌",
+    "product_name_raw": "电动正三轮轻便摩托车",
+    "model_code_raw": "YJ500DQZ",
+    "vehicle_type_raw": "电动正三轮轻便摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "恩牛（山东）智能科技有限公司",
+    "catalog_no_raw": "487",
+    "brand_raw": "恩牛牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "EN1000DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "浙江恒伟车业有限公司",
+    "catalog_no_raw": "491",
+    "brand_raw": "绿佳牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "LJ1200DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "台州爱玛机车制造有限公司",
+    "catalog_no_raw": "507",
+    "brand_raw": "爱玛牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "AM1000DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "台州爱玛机车制造有限公司",
+    "catalog_no_raw": "507",
+    "brand_raw": "爱玛牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "AM1200DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "台州爱玛机车制造有限公司",
+    "catalog_no_raw": "507",
+    "brand_raw": "爱玛牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "AM2500DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "星链（重庆）新能源电动车有限公司",
+    "catalog_no_raw": "509",
+    "brand_raw": "三条牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "ST1500DZH",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "金乡县盛展新能源汽车有限公司",
+    "catalog_no_raw": "511",
+    "brand_raw": "鲁星牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "LX1200DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "山东乾通重工科技有限公司",
+    "catalog_no_raw": "516",
+    "brand_raw": "永冠牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "YG1000DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "台州市牛丁电动车科技有限公司",
+    "catalog_no_raw": "518",
+    "brand_raw": "牛丁牌",
+    "product_name_raw": "电动两轮轻便摩托车",
+    "model_code_raw": "ND800DQT",
+    "vehicle_type_raw": "电动两轮轻便摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江苏锐猫电动科技有限公司",
+    "catalog_no_raw": "520",
+    "brand_raw": "锐猫牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "RM1500DZK",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "重庆张雪机车工业有限公司",
+    "catalog_no_raw": "527",
+    "brand_raw": "张雪机车牌",
+    "product_name_raw": "两轮摩托车",
+    "model_code_raw": "ZX500GS",
+    "vehicle_type_raw": "两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "河南飞博车业有限公司",
+    "catalog_no_raw": "530",
+    "brand_raw": "搏马牌",
+    "product_name_raw": "两轮摩托车",
+    "model_code_raw": "BM125T",
+    "vehicle_type_raw": "两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "四川易行时代动力科技有限公司",
+    "catalog_no_raw": "531",
+    "brand_raw": "易行时代牌",
+    "product_name_raw": "两轮摩托车",
+    "model_code_raw": "YSD250",
+    "vehicle_type_raw": "两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "丽水爱玛车业科技有限公司",
+    "catalog_no_raw": "532",
+    "brand_raw": "爱玛牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "AM1000DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "丽水爱玛车业科技有限公司",
+    "catalog_no_raw": "532",
+    "brand_raw": "爱玛牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "AM1200DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "丽水爱玛车业科技有限公司",
+    "catalog_no_raw": "532",
+    "brand_raw": "爱玛牌",
+    "product_name_raw": "电动两轮摩托车",
+    "model_code_raw": "AM1500DT",
+    "vehicle_type_raw": "电动两轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "江苏骏之翔新能源科技有限公司",
+    "catalog_no_raw": "539",
+    "brand_raw": "鹿熊牌",
+    "product_name_raw": "电动正三轮摩托车",
+    "model_code_raw": "LX1200DZH",
+    "vehicle_type_raw": "电动正三轮摩托车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "山东五征集团有限公司",
+    "catalog_no_raw": "156",
+    "brand_raw": "五征牌",
+    "product_name_raw": "自卸三轮汽车",
+    "model_code_raw": "7Y-850DF1N4",
+    "vehicle_type_raw": "自卸三轮汽车",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "(项)",
+    "catalog_no_raw": "备注",
+    "brand_raw": "",
+    "product_name_raw": "",
+    "model_code_raw": "中国第一汽车集团有限公司",
+    "vehicle_type_raw": "",
+    "source_section": "汽车起重机生产企业"
+  },
+  {
+    "batch_no": "403",
+    "manufacturer_raw": "1",
+    "catalog_no_raw": "200",
+    "brand_raw": "",
+    "product_name_raw": "",
+    "model_code_raw": "",
+    "vehicle_type_raw": "",
+    "source_section": "汽车起重机生产企业"
+  }
+]

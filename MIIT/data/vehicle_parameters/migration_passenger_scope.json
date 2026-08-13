@@ -1,0 +1,35 @@
+{
+  "title": "MIIT canonical 收敛为乘用车业务事实层 — 迁移验收",
+  "migration": {
+    "old_canonical_rows": 5219,
+    "old_passenger_rows": 411,
+    "new_canonical_rows": 416,
+    "delta": 5
+  },
+  "reconciliation": {
+    "missing_after_scope_change": 0,
+    "new_only": 5,
+    "new_only_detail": [
+      "407:KLF5040X:confirmed — 救险车 + 纯电动旅居车（同 chassis 多车型，旅居车为乘用车变体）",
+      "407:NJ5046X:confirmed — 救护车 + 旅居车（旅居车为乘用车变体）",
+      "408:BJ5030X:confirmed — 插电增程后勤保障服务车 + 插电增程旅居车（旅居车为乘用车变体）",
+      "408:JKF5030X:confirmed — 商务车/巡逻车/指挥车/旅居车/通信车 7 记录（旅居车为乘用车变体）",
+      "408:WSJ5020X:confirmed — 纯电动售货车 + 纯电动旅居车（旅居车为乘用车变体）"
+    ],
+    "root_cause": "旧流程按 product_list 首条记录分类（上述模型首记录为商用车→旧 canonical 作为 commercial 存在）；新流程逐 source record 分类，旅居车/商务车变体使这些 chassis 通过 passenger gate。416 = 411 旧乘用车 + 5 重分类（commercial→passenger），无数据丢失。"
+  },
+  "new_canonical": {
+    "rows": 416,
+    "all_passenger": true,
+    "non_passenger_in_canonical": 0,
+    "per_batch": {
+      "401": 26, "402": 32, "403": 8, "404": 14, "405": 15, "406": 26,
+      "407": 96, "408": 133, "409": 49, "410": 17
+    }
+  },
+  "source_full_retention": {
+    "407": {"records": 1424, "passenger": 109, "non_passenger": 1315},
+    "408": {"records": 1881, "passenger": 146, "non_passenger": 1735}
+  },
+  "conclusion": "Source archive = full regulatory universe; Canonical Dataset = passenger vehicle business scope. 无静默数据损失。"
+}

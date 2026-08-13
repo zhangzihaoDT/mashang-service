@@ -5,8 +5,9 @@
 
 ```
 runs/
-├── batch_409.md    ← 409 运行记录
-└── batch_410.md
+├── batch_409.md         ← 409 运行记录
+├── batch_410.md
+└── eidc_fresh_rebuild.md ← EIDC 401-408 fresh rebuild 工程经验（olefile / scope gate / 验收纪律）
 ```
 
 每个文件含 4 节：

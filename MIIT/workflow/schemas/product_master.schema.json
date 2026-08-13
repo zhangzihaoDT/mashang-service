@@ -1,0 +1,70 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MIIT Product Master Row",
+  "description": "车型身份主表：一车型一行（canonical 层，由 07_build_vehicle_dataset / 08_import_eidc_history 产出）。身份 vehicle_record_id = \"{batch_no}:{model_code}\"，同一 model_code 跨批次再次申报视为不同版本记录。观测维度 observation_id = \"{batch_no}:{model_code}:{stage}\"。",
+  "type": "object",
+  "required": ["vehicle_record_id", "batch_no", "model_code", "brand", "manufacturer", "product_name"],
+  "properties": {
+    "vehicle_record_id": {
+      "type": "string",
+      "description": "车型唯一身份：{batch_no}:{model_code}（canonical key）"
+    },
+    "observation_id": {
+      "type": "string",
+      "description": "观测身份：{batch_no}:{model_code}:{stage}（同车型不同观测 stage 用；未来 EIDC 也发布该批时形成双观测）"
+    },
+    "batch_no": {
+      "type": "string",
+      "description": "公告批次号"
+    },
+    "model_code": {
+      "type": "string",
+      "description": "产品型号（公告申报型号）"
+    },
+    "brand": {
+      "type": "string",
+      "description": "品牌（关注清单分类下）"
+    },
+    "manufacturer": {
+      "type": "string",
+      "description": "企业名称"
+    },
+    "product_name": {
+      "type": "string",
+      "description": "公告申报产品名称"
+    },
+    "common_name": {
+      "type": "string",
+      "description": "市场通用名称（车船税通用名称 / model_name_map 补充；可为空=纯电等未命名车型）"
+    },
+    "detail_url": {
+      "type": "string",
+      "description": "详情页绝对 URL"
+    },
+    "publish_date": {
+      "type": "string",
+      "format": "date",
+      "description": "公示日期（来自 batches.yaml notice_date 或 EIDC source_url）"
+    },
+    "source": {
+      "type": "string",
+      "enum": ["miit_gov", "eidc"],
+      "description": "数据来源：miit_gov=工信部公告（Gov 公示/详情页）/ eidc=工信部装备工业发展中心（正式公告历史）"
+    },
+    "stage": {
+      "type": "string",
+      "enum": ["proposed", "confirmed"],
+      "description": "观测阶段：proposed=公示中（Gov 409/410 当前）/ confirmed=已正式发布（EIDC 401-408 历史）"
+    },
+    "record_quality": {
+      "type": "string",
+      "enum": ["high", "medium", "low"],
+      "description": "型号可靠性：high=product_model 直接合法 / medium=字段重定位 / low=无法可靠定位（EIDC legacy 字段错位）"
+    },
+    "tax_catalog_match_flag": {
+      "type": "string",
+      "enum": ["0", "1"],
+      "description": "是否命中车船税目录（1=命中，可拿到容量/续航/整备；0=未命中属正常口径）"
+    }
+  }
+}

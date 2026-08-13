@@ -13,7 +13,7 @@ BATCH ?= 410
 PY ?= python3
 MIIT_ROOT := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 
-.PHONY: miit-scan miit-archive miit-archive-retry miit-enrich miit-build miit-report miit-run test
+.PHONY: miit-scan miit-archive miit-archive-retry miit-enrich miit-build miit-dataset miit-eidc-fetch miit-eidc-tax miit-report miit-run test
 
 miit-scan:
 	$(PY) $(MIIT_ROOT)/scripts/01_scan_batch.py --batch $(BATCH)
@@ -31,10 +31,20 @@ miit-enrich:
 miit-build:
 	$(PY) $(MIIT_ROOT)/scripts/04_build_wide_table.py --batch $(BATCH)
 
+miit-dataset:
+	$(PY) $(MIIT_ROOT)/scripts/07_build_vehicle_dataset.py
+
+miit-eidc-fetch:
+	$(PY) $(MIIT_ROOT)/scripts/09_fetch_eidc_batch.py --batch $(BATCH)
+
+miit-eidc-tax:
+	@echo "P3 车船税：03_parse_vehicle_tax.py 解析 data/eidc/batch_$(BATCH)/attachment_text_src/ 下的车船税 .txt"
+	@echo "购置税：10_parse_purchase_tax.py 解析购置税 .txt"
+
 miit-report:
 	$(PY) $(MIIT_ROOT)/scripts/06_generate_category_report.py --batch $(BATCH) --all --output-dir batch_$(BATCH)/category_report
 
-miit-run: miit-scan miit-archive miit-build miit-report
+miit-run: miit-scan miit-archive miit-build miit-dataset miit-report
 	@echo "Batch $(BATCH) done. 报告见 reports/batch_$(BATCH)/"
 
 test:

@@ -71,6 +71,10 @@ mashang_workspace/outputs/miit_new_car/diff/
 mashang_workspace/outputs/miit_new_car/evidence/
 mashang_workspace/outputs/miit_new_car/state/
 
+# MIIT EIDC 历史归档：原始附件二进制（.doc）不提交，仅本地保留证据
+MIIT/data/eidc/*/attachments/
+MIIT/data/eidc/*/raw_detail.html
+
 # Auto launch: all outputs are runtime-generated, not committed
 mashang_workspace/outputs/auto_launch/
 auto_launch/outputs/

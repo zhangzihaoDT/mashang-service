@@ -1,0 +1,39 @@
+{
+  "title": "EIDC legacy 删除记录 — fresh rebuild 完成后迁移态清理",
+  "date": "2026-08-13",
+  "context": "EIDC 401-408 已完成 fresh rebuild（官方公告 → 全量解析 → passenger scope gate → canonical），legacy 导入产物被新事实层严格支配，无独立价值。",
+  "deleted": {
+    "legacy_dirs": ["batch_401/legacy", "batch_402/legacy", "batch_403/legacy", "batch_404/legacy", "batch_405/legacy", "batch_406/legacy", "batch_407/legacy", "batch_408/legacy"],
+    "scripts": ["scripts/08_archive_eidc_legacy.py", "scripts/08_import_eidc_history.py"],
+    "reason": "legacy 已由 fresh 完整替代；legacy 附件与 fresh 附件对比无 legacy_only 唯一 evidence（7/8 批完全一致，408 公示版车船税与正式版内容一致）"
+  },
+  "reconciliation": {
+    "legacy_passenger_401_406": 121,
+    "fresh_passenger_401_406": 536,
+    "fresh_only": 415,
+    "legacy_only": 0,
+    "canonical_total_401_410": 831,
+    "canonical_non_passenger": 0,
+    "note": "legacy_only=0 且 legacy 附件均可在 fresh/source 层找到等价内容，删除不损失任何唯一业务事实或 source evidence。"
+  },
+  "fresh_source_retained": {
+    "note": "删除的是 legacy 中间解析产物与迁移工具；fresh source archive 完整保留：",
+    "per_batch": {
+      "product_list.json": "fresh source records（含 source_section）",
+      "raw_metadata.json": "公告页元数据",
+      "import_manifest.json": "provenance（sha256/tax 批次）",
+      "attachment_text_src": "附件 txt",
+      "attachments": "原始 .doc",
+      "raw_detail.html": "公告页缓存"
+    }
+  },
+  "current_pipeline": [
+    "EIDC 401-408 confirmed source",
+    "  → fresh parser（eidc_parser）",
+    "  → passenger scope gate（classify_source_record + is_canonical_in_scope）",
+    "  → regulatory enrichment（vehicle_tax / purchase_tax）",
+    "  → canonical（data/vehicle_parameters/，07 唯一入口）",
+    "Gov 409-410 proposed source",
+    "  → same canonical contract（07）"
+  ]
+}

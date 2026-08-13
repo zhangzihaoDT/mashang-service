@@ -1,0 +1,92 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MIIT Vehicle Parameter Row",
+  "description": "车型参数事实表：一车型一行（canonical 层，由 07_build_vehicle_dataset / 08_import_eidc_history 产出）。身份 vehicle_record_id = \"{batch_no}:{model_code}\"，与 product_master 一一对应。",
+  "type": "object",
+  "required": ["vehicle_record_id", "batch_no", "model_code", "brand"],
+  "properties": {
+    "vehicle_record_id": {
+      "type": "string",
+      "description": "车型唯一身份：{batch_no}:{model_code}（canonical key）"
+    },
+    "observation_id": {
+      "type": "string",
+      "description": "观测身份：{batch_no}:{model_code}:{stage}"
+    },
+    "batch_no": { "type": "string", "description": "公告批次号" },
+    "model_code": { "type": "string", "description": "产品型号" },
+    "brand": { "type": "string", "description": "品牌" },
+    "common_name": { "type": "string", "description": "市场通用名称（可为空）" },
+    "source": {
+      "type": "string",
+      "enum": ["miit_gov", "eidc"],
+      "description": "数据来源：miit_gov / eidc"
+    },
+    "stage": {
+      "type": "string",
+      "enum": ["proposed", "confirmed"],
+      "description": "观测阶段：proposed=公示中 / confirmed=已正式发布"
+    },
+    "record_quality": {
+      "type": "string",
+      "enum": ["high", "medium", "low"],
+      "description": "型号可靠性分级"
+    },
+    "energy_type": {
+      "type": "string",
+      "description": "动力形式：纯电动 / 插电式增程混合动力 / 插电式混合动力 / 燃料电池 / 空"
+    },
+    "length_mm": { "type": "string", "description": "车长(mm)，多配置用逗号分隔" },
+    "width_mm": { "type": "string", "description": "车宽(mm)" },
+    "height_mm": { "type": "string", "description": "车高(mm)" },
+    "wheelbase_mm": { "type": "string", "description": "轴距(mm)，多配置用逗号分隔" },
+    "curb_weight_kg": { "type": "string", "description": "整备质量原始串（可含 '/' 多配置）" },
+    "curb_weight_num": { "type": "string", "description": "整备质量数值（首值）" },
+    "battery_capacity_kwh": { "type": "string", "description": "电池容量原始串(kWh)" },
+    "battery_capacity_num": { "type": "string", "description": "电池容量数值（首值）" },
+    "battery_mass_kg": { "type": "string", "description": "电池质量原始串(kg)" },
+    "battery_mass_num": { "type": "string", "description": "电池质量数值（首值）" },
+    "ev_range_km": { "type": "string", "description": "纯电续航原始串(km)" },
+    "ev_range_num": { "type": "string", "description": "纯电续航数值（首值）" },
+    "battery_type": { "type": "string", "description": "储能装置种类原始文本（如 磷酸铁锂蓄电池）" },
+    "battery_chemistry": {
+      "type": "string",
+      "enum": ["", "LFP", "NCM", "OTHER"],
+      "description": "电池化学体系码：LFP=磷酸铁锂 / NCM=三元锂 / OTHER=其他"
+    },
+    "battery_chemistry_cn": { "type": "string", "description": "电池化学体系中文" },
+    "motor_power_kw": { "type": "string", "description": "电机功率原始串(如 160/227kW)" },
+    "motor_count": { "type": "string", "description": "电机数量" },
+    "motor_total_peak_kw": { "type": "string", "description": "电机总峰值功率(kW)" },
+    "single_multi_motor": { "type": "string", "description": "单电机 / N电机" },
+    "cell_supplier": { "type": "string", "description": "电池单体生产企业" },
+    "pack_supplier": { "type": "string", "description": "电池总成生产企业" },
+    "cell_supplier_group": { "type": "string", "description": "单体供应商集团（BYD/CATL/其他）" },
+    "pack_supplier_group": { "type": "string", "description": "总成供应商集团" },
+    "vertical_integration_flag": {
+      "type": "string",
+      "enum": ["", "same_company", "same_group", "cross_group"],
+      "description": "垂直整合：same_company=同一企业 / same_group=同集团 / cross_group=跨企业"
+    },
+    "range_extender": { "type": "string", "description": "增程器（发动机型号/排量/功率/企业）" },
+    "seat_count": { "type": "string", "description": "座位数" },
+    "approx_energy_consumption_kwh_100km": {
+      "type": "string",
+      "description": "总电量口径近似电耗(kWh/100km)=电池总能量÷纯电续航×100，非官方口径"
+    },
+    "battery_energy_density_wh_kg": { "type": "string", "description": "电池包能量密度(Wh/kg)" },
+    "km_per_kwh": { "type": "string", "description": "单位电量续航(km/kWh)" },
+    "battery_mass_ratio_pct": { "type": "string", "description": "电池质量占整备质量比(%)" },
+    "variant_count": {
+      "type": "string",
+      "description": "该型号配置版本数（容量/质量/续航/整备 按 '/' 拆分取最大值；>1 表示多配置）"
+    },
+    "tax_catalog_match_flag": { "type": "string", "enum": ["0", "1"], "description": "是否命中车船税目录" },
+    "metric_scope": {
+      "type": "string",
+      "description": "衍生指标覆盖口径：全数据 / 仅增程·插混 / 数据缺失"
+    },
+    "source_detail": { "type": "string", "description": "来源详情页文件名" },
+    "source_tax": { "type": "string", "description": "来源车船税分类段（未命中为空）" }
+  }
+}

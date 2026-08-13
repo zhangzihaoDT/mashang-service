@@ -1,0 +1,2039 @@
+{
+  "schema_version": "eidc_duplicate_audit.v1",
+  "batch_no": "408",
+  "summary": {
+    "valid_rows": 1879,
+    "unique_model_code": 1713,
+    "duplicate_model_count": 133,
+    "duplicate_rows_total": 299,
+    "rows_eliminated_by_dedup": 166,
+    "EXACT_DUPLICATE": 0,
+    "SAME_ENTERPRISE_MULTI_NAME": 107,
+    "CROSS_ENTERPRISE_COLLISION": 25,
+    "OTHER": 1
+  },
+  "cross_enterprise_collision_subclasses": {
+    "MULTI_SITE_SAME_BRAND": 9,
+    "CROSS_ENT_SAME_BRAND": 11,
+    "CROSS_BRAND": 5
+  },
+  "EXACT_DUPLICATE_sample": [],
+  "SAME_ENTERPRISE_MULTI_NAME": [
+    {
+      "model": "CA5180X",
+      "count": 2,
+      "enterprise": [
+        "中国第一汽车集团有限公司"
+      ],
+      "product_names": [
+        "换电式纯电动厢式运输车底盘",
+        "换电式纯电动翼开启厢式货车"
+      ],
+      "brands": [
+        "解放牌"
+      ]
+    },
+    {
+      "model": "DFH5180X",
+      "count": 3,
+      "enterprise": [
+        "东风商用车有限公司"
+      ],
+      "product_names": [
+        "厢式货车",
+        "厢式运输车底盘",
+        "纯电动翼开启厢式货车"
+      ],
+      "brands": [
+        "东风牌"
+      ]
+    },
+    {
+      "model": "DFH3250",
+      "count": 2,
+      "enterprise": [
+        "东风商用车有限公司"
+      ],
+      "product_names": [
+        "纯电动自卸式货车",
+        "纯电动自卸汽车底盘"
+      ],
+      "brands": [
+        "东风牌"
+      ]
+    },
+    {
+      "model": "EQ5040X",
+      "count": 2,
+      "enterprise": [
+        "东风汽车股份有限公司"
+      ],
+      "product_names": [
+        "厢式货车",
+        "后勤保障服务车"
+      ],
+      "brands": [
+        "东风牌"
+      ]
+    },
+    {
+      "model": "EQ6530",
+      "count": 2,
+      "enterprise": [
+        "东风汽车股份有限公司"
+      ],
+      "product_names": [
+        "多用途乘用车",
+        "纯电动多用途乘用车"
+      ],
+      "brands": [
+        "东风牌"
+      ]
+    },
+    {
+      "model": "DFA5040X",
+      "count": 3,
+      "enterprise": [
+        "东风汽车股份有限公司"
+      ],
+      "product_names": [
+        "换电式纯电动厢式货车",
+        "纯电动厢式货车",
+        "纯电动文化生活服务车"
+      ],
+      "brands": [
+        "东风牌"
+      ]
+    },
+    {
+      "model": "EQ1040",
+      "count": 3,
+      "enterprise": [
+        "东风汽车股份有限公司"
+      ],
+      "product_names": [
+        "栏板式货车",
+        "纯电动载货汽车底盘",
+        "载货汽车底盘"
+      ],
+      "brands": [
+        "东风牌"
+      ]
+    },
+    {
+      "model": "EQ3041",
+      "count": 2,
+      "enterprise": [
+        "东风汽车股份有限公司"
+      ],
+      "product_names": [
+        "自卸式货车",
+        "自卸汽车底盘"
+      ],
+      "brands": [
+        "东风牌"
+      ]
+    },
+    {
+      "model": "BJ5044X",
+      "count": 2,
+      "enterprise": [
+        "北汽福田汽车股份有限公司"
+      ],
+      "product_names": [
+        "冷藏车",
+        "厢式货车"
+      ],
+      "brands": [
+        "福田牌"
+      ]
+    },
+    {
+      "model": "BJ5048X",
+      "count": 2,
+      "enterprise": [
+        "北汽福田汽车股份有限公司"
+      ],
+      "product_names": [
+        "商务车",
+        "电力工程车"
+      ],
+      "brands": [
+        "福田牌"
+      ]
+    },
+    {
+      "model": "BJ1038",
+      "count": 2,
+      "enterprise": [
+        "北汽福田汽车股份有限公司"
+      ],
+      "product_names": [
+        "多用途货车",
+        "多用途货车底盘"
+      ],
+      "brands": [
+        "福田牌"
+      ]
+    },
+    {
+      "model": "BJ1037",
+      "count": 2,
+      "enterprise": [
+        "北汽福田汽车股份有限公司"
+      ],
+      "product_names": [
+        "多用途货车",
+        "多用途货车底盘"
+      ],
+      "brands": [
+        "福田牌"
+      ]
+    },
+    {
+      "model": "BJ5030X",
+      "count": 2,
+      "enterprise": [
+        "北汽福田汽车股份有限公司"
+      ],
+      "product_names": [
+        "插电式增程混合动力后勤保障服务车",
+        "插电式增程混合动力旅居车"
+      ],
+      "brands": [
+        "福田牌"
+      ]
+    },
+    {
+      "model": "BJ1096",
+      "count": 2,
+      "enterprise": [
+        "北汽福田汽车股份有限公司"
+      ],
+      "product_names": [
+        "栏板式货车",
+        "载货汽车底盘"
+      ],
+      "brands": [
+        "福田牌"
+      ]
+    },
+    {
+      "model": "BJ6540",
+      "count": 2,
+      "enterprise": [
+        "北京新能源汽车股份有限公司"
+      ],
+      "product_names": [
+        "插电式增程混合动力运动型乘用车",
+        "纯电动运动型乘用车"
+      ],
+      "brands": [
+        "享界牌"
+      ]
+    },
+    {
+      "model": "BJ6530",
+      "count": 2,
+      "enterprise": [
+        "北京新能源汽车股份有限公司"
+      ],
+      "product_names": [
+        "插电式增程混合动力多用途乘用车",
+        "纯电动多用途乘用车"
+      ],
+      "brands": [
+        "极狐牌"
+      ]
+    },
+    {
+      "model": "BJ5259X",
+      "count": 4,
+      "enterprise": [
+        "北京福田戴姆勒汽车有限公司"
+      ],
+      "product_names": [
+        "冷藏车",
+        "厢式货车",
+        "纯电动冷藏车",
+        "纯电动翼开启厢式货车"
+      ],
+      "brands": [
+        "欧曼牌"
+      ]
+    },
+    {
+      "model": "BJ1259",
+      "count": 4,
+      "enterprise": [
+        "北京福田戴姆勒汽车有限公司"
+      ],
+      "product_names": [
+        "栏板式货车",
+        "纯电动栏板式货车",
+        "纯电动载货汽车底盘",
+        "载货汽车底盘"
+      ],
+      "brands": [
+        "欧曼牌"
+      ]
+    },
+    {
+      "model": "SC5038X",
+      "count": 2,
+      "enterprise": [
+        "河北长安汽车有限公司"
+      ],
+      "product_names": [
+        "纯电动厢式货车",
+        "纯电动封闭式货车"
+      ],
+      "brands": [
+        "长安牌"
+      ]
+    },
+    {
+      "model": "SC1038",
+      "count": 2,
+      "enterprise": [
+        "河北长安汽车有限公司"
+      ],
+      "product_names": [
+        "纯电动栏板式货车",
+        "纯电动载货汽车底盘"
+      ],
+      "brands": [
+        "长安牌"
+      ]
+    },
+    {
+      "model": "BJ6500",
+      "count": 2,
+      "enterprise": [
+        "北汽蓝谷麦格纳汽车有限公司"
+      ],
+      "product_names": [
+        "插电式增程混合动力多用途乘用车",
+        "纯电动多用途乘用车"
+      ],
+      "brands": [
+        "极狐(ARCFOX)牌"
+      ]
+    },
+    {
+      "model": "XGA3316",
+      "count": 2,
+      "enterprise": [
+        "徐州徐工汽车制造有限公司"
+      ],
+      "product_names": [
+        "纯电动自卸式货车",
+        "纯电动自卸汽车底盘"
+      ],
+      "brands": [
+        "徐工牌"
+      ]
+    },
+    {
+      "model": "FD1045",
+      "count": 2,
+      "enterprise": [
+        "浙江飞碟汽车制造有限公司"
+      ],
+      "product_names": [
+        "栏板式货车",
+        "载货汽车底盘"
+      ],
+      "brands": [
+        "飞碟牌"
+      ]
+    },
+    {
+      "model": "FD1091",
+      "count": 2,
+      "enterprise": [
+        "浙江飞碟汽车制造有限公司"
+      ],
+      "product_names": [
+        "栏板式货车",
+        "载货汽车底盘"
+      ],
+      "brands": [
+        "飞碟牌"
+      ]
+    },
+    {
+      "model": "FD3043",
+      "count": 4,
+      "enterprise": [
+        "浙江飞碟汽车制造有限公司"
+      ],
+      "product_names": [
+        "纯电动自卸式货车",
+        "纯电动自卸汽车底盘",
+        "自卸式货车",
+        "自卸汽车底盘"
+      ],
+      "brands": [
+        "飞碟牌"
+      ]
+    },
+    {
+      "model": "MR7151",
+      "count": 2,
+      "enterprise": [
+        "浙江吉利汽车有限公司"
+      ],
+      "product_names": [
+        "混合动力轿车",
+        "轿车"
+      ],
+      "brands": [
+        "吉利牌"
+      ]
+    },
+    {
+      "model": "HFC5043X",
+      "count": 2,
+      "enterprise": [
+        "安徽江淮汽车集团股份有限公司"
+      ],
+      "product_names": [
+        "纯电动冷藏车",
+        "纯电动厢式货车"
+      ],
+      "brands": [
+        "江淮牌"
+      ]
+    },
+    {
+      "model": "JX1037",
+      "count": 2,
+      "enterprise": [
+        "江铃汽车股份有限公司"
+      ],
+      "product_names": [
+        "多用途货车",
+        "多用途货车底盘"
+      ],
+      "brands": [
+        "江铃牌"
+      ]
+    },
+    {
+      "model": "JX1041",
+      "count": 2,
+      "enterprise": [
+        "江铃汽车股份有限公司"
+      ],
+      "product_names": [
+        "纯电动栏板式货车",
+        "纯电动载货汽车底盘"
+      ],
+      "brands": [
+        "江铃牌"
+      ]
+    },
+    {
+      "model": "ZZ5186X",
+      "count": 2,
+      "enterprise": [
+        "中国重汽集团济南商用车有限公司"
+      ],
+      "product_names": [
+        "换电式纯电动厢式货车",
+        "换电式纯电动厢式运输车底盘"
+      ],
+      "brands": [
+        "汕德卡牌"
+      ]
+    },
+    {
+      "model": "ZZ5047X",
+      "count": 2,
+      "enterprise": [
+        "中国重汽集团济南商用车有限公司"
+      ],
+      "product_names": [
+        "冷藏车",
+        "厢式货车"
+      ],
+      "brands": [
+        "豪沃牌"
+      ]
+    },
+    {
+      "model": "ZZ3127",
+      "count": 2,
+      "enterprise": [
+        "中国重汽集团济南商用车有限公司"
+      ],
+      "product_names": [
+        "纯电动自卸式货车",
+        "纯电动自卸汽车底盘"
+      ],
+      "brands": [
+        "豪沃牌"
+      ]
+    },
+    {
+      "model": "ZZ5048X",
+      "count": 2,
+      "enterprise": [
+        "中国重汽集团福建海西汽车有限公司"
+      ],
+      "product_names": [
+        "纯电动冷藏车",
+        "纯电动厢式货车"
+      ],
+      "brands": [
+        "豪曼牌"
+      ]
+    },
+    {
+      "model": "ZZ1048",
+      "count": 2,
+      "enterprise": [
+        "中国重汽集团福建海西汽车有限公司"
+      ],
+      "product_names": [
+        "纯电动栏板式货车",
+        "纯电动载货汽车底盘"
+      ],
+      "brands": [
+        "豪曼牌"
+      ]
+    },
+    {
+      "model": "YTQ1042",
+      "count": 3,
+      "enterprise": [
+        "潍柴新能源商用车有限公司"
+      ],
+      "product_names": [
+        "换电式纯电动栏板式货车",
+        "纯电动栏板式货车",
+        "纯电动载货汽车底盘"
+      ],
+      "brands": [
+        "蓝擎牌"
+      ]
+    },
+    {
+      "model": "YTQ5042X",
+      "count": 2,
+      "enterprise": [
+        "潍柴新能源商用车有限公司"
+      ],
+      "product_names": [
+        "纯电动冷藏车",
+        "纯电动厢式货车"
+      ],
+      "brands": [
+        "蓝擎牌"
+      ]
+    },
+    {
+      "model": "ZK5038X",
+      "count": 2,
+      "enterprise": [
+        "宇通客车股份有限公司"
+      ],
+      "product_names": [
+        "指挥车",
+        "文化生活服务车"
+      ],
+      "brands": [
+        "宇通牌"
+      ]
+    },
+    {
+      "model": "STQ2251",
+      "count": 2,
+      "enterprise": [
+        "湖北三环汽车有限公司"
+      ],
+      "product_names": [
+        "越野汽车底盘",
+        "越野自卸式货车"
+      ],
+      "brands": [
+        "十通牌"
+      ]
+    },
+    {
+      "model": "BYD5040X",
+      "count": 2,
+      "enterprise": [
+        "比亚迪汽车工业有限公司"
+      ],
+      "product_names": [
+        "纯电动冷藏车",
+        "纯电动厢式货车"
+      ],
+      "brands": [
+        "比亚迪牌"
+      ]
+    },
+    {
+      "model": "BYD1040",
+      "count": 2,
+      "enterprise": [
+        "比亚迪汽车工业有限公司"
+      ],
+      "product_names": [
+        "纯电动栏板式货车",
+        "纯电动载货汽车底盘"
+      ],
+      "brands": [
+        "比亚迪牌"
+      ]
+    },
+    {
+      "model": "QCJ6520",
+      "count": 2,
+      "enterprise": [
+        "比亚迪汽车工业有限公司"
+      ],
+      "product_names": [
+        "插电式混合动力多用途乘用车",
+        "纯电动多用途乘用车"
+      ],
+      "brands": [
+        "腾势牌",
+        "领汇牌"
+      ]
+    },
+    {
+      "model": "HN3310",
+      "count": 2,
+      "enterprise": [
+        "安徽华菱汽车有限公司"
+      ],
+      "product_names": [
+        "甲醇插电式增程混合动力自卸式货车",
+        "甲醇插电式增程混合动力自卸汽车底盘"
+      ],
+      "brands": [
+        "远程牌"
+      ]
+    },
+    {
+      "model": "HNQ1161",
+      "count": 2,
+      "enterprise": [
+        "湖南中联重科车桥有限公司"
+      ],
+      "product_names": [
+        "纯电动栏板式货车",
+        "纯电动载货汽车底盘"
+      ],
+      "brands": [
+        "中联牌"
+      ]
+    },
+    {
+      "model": "YC5180X",
+      "count": 2,
+      "enterprise": [
+        "广汽领程新能源商用车有限公司"
+      ],
+      "product_names": [
+        "燃料电池厢式货车",
+        "燃料电池翼开启厢式货车"
+      ],
+      "brands": [
+        "广汽牌"
+      ]
+    },
+    {
+      "model": "YC3312",
+      "count": 2,
+      "enterprise": [
+        "广汽领程新能源商用车有限公司"
+      ],
+      "product_names": [
+        "燃料电池自卸式货车",
+        "燃料电池自卸汽车底盘"
+      ],
+      "brands": [
+        "广汽牌"
+      ]
+    },
+    {
+      "model": "YC3311",
+      "count": 2,
+      "enterprise": [
+        "广汽领程新能源商用车有限公司"
+      ],
+      "product_names": [
+        "燃料电池自卸式货车",
+        "燃料电池自卸汽车底盘"
+      ],
+      "brands": [
+        "广汽牌"
+      ]
+    },
+    {
+      "model": "LZ3181",
+      "count": 2,
+      "enterprise": [
+        "东风柳州汽车有限公司"
+      ],
+      "product_names": [
+        "纯电动自卸式货车",
+        "纯电动自卸汽车底盘"
+      ],
+      "brands": [
+        "乘龙牌"
+      ]
+    },
+    {
+      "model": "LZ3182",
+      "count": 2,
+      "enterprise": [
+        "东风柳州汽车有限公司"
+      ],
+      "product_names": [
+        "自卸式货车",
+        "自卸汽车底盘"
+      ],
+      "brands": [
+        "乘龙牌"
+      ]
+    },
+    {
+      "model": "LZ3121",
+      "count": 2,
+      "enterprise": [
+        "东风柳州汽车有限公司"
+      ],
+      "product_names": [
+        "自卸式货车",
+        "自卸汽车底盘"
+      ],
+      "brands": [
+        "乘龙牌"
+      ]
+    },
+    {
+      "model": "LZW1035",
+      "count": 4,
+      "enterprise": [
+        "上汽通用五菱汽车股份有限公司"
+      ],
+      "product_names": [
+        "栏板式货车",
+        "纯电动栏板式货车",
+        "纯电动载货汽车底盘",
+        "载货汽车底盘"
+      ],
+      "brands": [
+        "五菱牌"
+      ]
+    },
+    {
+      "model": "CQ3310",
+      "count": 2,
+      "enterprise": [
+        "上汽红岩汽车有限公司"
+      ],
+      "product_names": [
+        "换电式纯电动自卸式货车",
+        "换电式纯电动自卸汽车底盘"
+      ],
+      "brands": [
+        "红岩牌"
+      ]
+    },
+    {
+      "model": "QL3040",
+      "count": 2,
+      "enterprise": [
+        "庆铃汽车股份有限公司"
+      ],
+      "product_names": [
+        "纯电动自卸式货车",
+        "纯电动自卸汽车底盘"
+      ],
+      "brands": [
+        "庆铃牌(繁体)牌"
+      ]
+    },
+    {
+      "model": "DYQ3042",
+      "count": 2,
+      "enterprise": [
+        "成都大运汽车集团有限公司"
+      ],
+      "product_names": [
+        "自卸式货车",
+        "自卸汽车底盘"
+      ],
+      "brands": [
+        "大运牌"
+      ]
+    },
+    {
+      "model": "SX3257",
+      "count": 2,
+      "enterprise": [
+        "陕西汽车集团股份有限公司"
+      ],
+      "product_names": [
+        "纯电动自卸式货车",
+        "纯电动自卸汽车底盘"
+      ],
+      "brands": [
+        "陕汽牌"
+      ]
+    },
+    {
+      "model": "SX3317",
+      "count": 2,
+      "enterprise": [
+        "陕西汽车集团股份有限公司"
+      ],
+      "product_names": [
+        "纯电动自卸式货车",
+        "纯电动自卸汽车底盘"
+      ],
+      "brands": [
+        "陕汽牌"
+      ]
+    },
+    {
+      "model": "KLQ6116",
+      "count": 2,
+      "enterprise": [
+        "金龙联合汽车工业(苏州)有限公司"
+      ],
+      "product_names": [
+        "纯电动城市客车",
+        "纯电动客车"
+      ],
+      "brands": [
+        "海格牌"
+      ]
+    },
+    {
+      "model": "KLQ6826",
+      "count": 2,
+      "enterprise": [
+        "金龙联合汽车工业(苏州)有限公司"
+      ],
+      "product_names": [
+        "纯电动城市客车",
+        "纯电动客车"
+      ],
+      "brands": [
+        "海格牌"
+      ]
+    },
+    {
+      "model": "KLQ3317",
+      "count": 2,
+      "enterprise": [
+        "金龙联合汽车工业(苏州)有限公司"
+      ],
+      "product_names": [
+        "纯电动自卸式货车",
+        "纯电动自卸汽车底盘"
+      ],
+      "brands": [
+        "海格牌"
+      ]
+    },
+    {
+      "model": "XMQ6900",
+      "count": 2,
+      "enterprise": [
+        "厦门金龙联合汽车工业有限公司"
+      ],
+      "product_names": [
+        "纯电动低地板城市客车",
+        "纯电动城市客车"
+      ],
+      "brands": [
+        "金龙牌"
+      ]
+    },
+    {
+      "model": "LCK5046X",
+      "count": 2,
+      "enterprise": [
+        "中通客车股份有限公司"
+      ],
+      "product_names": [
+        "商务车",
+        "纯电动商务车"
+      ],
+      "brands": [
+        "中通牌"
+      ]
+    },
+    {
+      "model": "LCK6119",
+      "count": 2,
+      "enterprise": [
+        "中通客车股份有限公司"
+      ],
+      "product_names": [
+        "客车",
+        "纯电动城市客车"
+      ],
+      "brands": [
+        "中通牌"
+      ]
+    },
+    {
+      "model": "WHJ5020X",
+      "count": 2,
+      "enterprise": [
+        "宜宾凯翼汽车有限公司"
+      ],
+      "product_names": [
+        "教练车",
+        "纯电动教练车"
+      ],
+      "brands": [
+        "凯翼牌"
+      ]
+    },
+    {
+      "model": "DNC5041CCY",
+      "count": 2,
+      "enterprise": [
+        "吉利四川商用车有限公司"
+      ],
+      "product_names": [
+        "甲醇插电式增程混合动力仓栅式货车",
+        "纯电动仓栅式货车"
+      ],
+      "brands": [
+        "远程牌"
+      ]
+    },
+    {
+      "model": "DNC5041X",
+      "count": 4,
+      "enterprise": [
+        "吉利四川商用车有限公司"
+      ],
+      "product_names": [
+        "甲醇插电式增程混合动力冷藏车",
+        "甲醇插电式增程混合动力厢式货车",
+        "纯电动冷藏车",
+        "纯电动厢式货车"
+      ],
+      "brands": [
+        "远程牌"
+      ]
+    },
+    {
+      "model": "DNC1041",
+      "count": 2,
+      "enterprise": [
+        "吉利四川商用车有限公司"
+      ],
+      "product_names": [
+        "甲醇插电式增程混合动力载货汽车底盘",
+        "纯电动载货汽车底盘"
+      ],
+      "brands": [
+        "远程牌"
+      ]
+    },
+    {
+      "model": "DNC5047X",
+      "count": 2,
+      "enterprise": [
+        "吉利四川商用车有限公司"
+      ],
+      "product_names": [
+        "纯电动冷藏车",
+        "纯电动厢式货车"
+      ],
+      "brands": [
+        "远程牌"
+      ]
+    },
+    {
+      "model": "DNC5031X",
+      "count": 2,
+      "enterprise": [
+        "吉利四川商用车有限公司"
+      ],
+      "product_names": [
+        "纯电动厢式货车",
+        "纯电动封闭式货车"
+      ],
+      "brands": [
+        "远程牌"
+      ]
+    },
+    {
+      "model": "DNC1031",
+      "count": 2,
+      "enterprise": [
+        "吉利四川商用车有限公司"
+      ],
+      "product_names": [
+        "纯电动栏板式货车",
+        "纯电动载货汽车底盘"
+      ],
+      "brands": [
+        "远程牌"
+      ]
+    },
+    {
+      "model": "DNC1037",
+      "count": 2,
+      "enterprise": [
+        "吉利四川商用车有限公司"
+      ],
+      "product_names": [
+        "纯电动栏板式货车",
+        "纯电动载货汽车底盘"
+      ],
+      "brands": [
+        "远程牌"
+      ]
+    },
+    {
+      "model": "NJL5181X",
+      "count": 2,
+      "enterprise": [
+        "南京金龙客车制造有限公司"
+      ],
+      "product_names": [
+        "纯电动厢式货车",
+        "纯电动翼开启厢式货车"
+      ],
+      "brands": [
+        "创维牌"
+      ]
+    },
+    {
+      "model": "NJL6600",
+      "count": 2,
+      "enterprise": [
+        "南京金龙客车制造有限公司"
+      ],
+      "product_names": [
+        "纯电动城市客车",
+        "纯电动客车"
+      ],
+      "brands": [
+        "创维牌"
+      ]
+    },
+    {
+      "model": "JKC6470",
+      "count": 2,
+      "enterprise": [
+        "鑫源汽车有限公司"
+      ],
+      "product_names": [
+        "多用途乘用车",
+        "换电式纯电动多用途乘用车"
+      ],
+      "brands": [
+        "鑫源牌"
+      ]
+    },
+    {
+      "model": "JKC1030",
+      "count": 2,
+      "enterprise": [
+        "鑫源汽车有限公司"
+      ],
+      "product_names": [
+        "纯电动栏板式货车",
+        "纯电动载货汽车底盘"
+      ],
+      "brands": [
+        "鑫源牌"
+      ]
+    },
+    {
+      "model": "SKE6540",
+      "count": 2,
+      "enterprise": [
+        "赛力斯汽车有限公司"
+      ],
+      "product_names": [
+        "插电式增程混合动力多用途乘用车",
+        "纯电动多用途乘用车"
+      ],
+      "brands": [
+        "问界牌"
+      ]
+    },
+    {
+      "model": "GXA1030",
+      "count": 2,
+      "enterprise": [
+        "广西汽车集团有限公司"
+      ],
+      "product_names": [
+        "纯电动栏板式货车",
+        "纯电动载货汽车底盘"
+      ],
+      "brands": [
+        "菱势牌"
+      ]
+    },
+    {
+      "model": "GXA1040",
+      "count": 2,
+      "enterprise": [
+        "广西汽车集团有限公司"
+      ],
+      "product_names": [
+        "纯电动栏板式货车",
+        "纯电动载货汽车底盘"
+      ],
+      "brands": [
+        "菱势牌"
+      ]
+    },
+    {
+      "model": "CRC1032",
+      "count": 2,
+      "enterprise": [
+        "重庆瑞驰汽车实业有限公司"
+      ],
+      "product_names": [
+        "纯电动栏板式货车",
+        "纯电动载货汽车底盘"
+      ],
+      "brands": [
+        "瑞驰牌"
+      ]
+    },
+    {
+      "model": "CRC1031",
+      "count": 2,
+      "enterprise": [
+        "重庆瑞驰汽车实业有限公司"
+      ],
+      "product_names": [
+        "纯电动栏板式货车",
+        "纯电动载货汽车底盘"
+      ],
+      "brands": [
+        "瑞驰牌"
+      ]
+    },
+    {
+      "model": "ZYP5041X",
+      "count": 3,
+      "enterprise": [
+        "湖北世纪中远车辆有限公司"
+      ],
+      "product_names": [
+        "换电式纯电动厢式货车",
+        "纯电动冷藏车",
+        "纯电动厢式货车"
+      ],
+      "brands": [
+        "中悦牌"
+      ]
+    },
+    {
+      "model": "ZYP1041",
+      "count": 2,
+      "enterprise": [
+        "湖北世纪中远车辆有限公司"
+      ],
+      "product_names": [
+        "换电式纯电动载货汽车底盘",
+        "纯电动载货汽车底盘"
+      ],
+      "brands": [
+        "中悦牌"
+      ]
+    },
+    {
+      "model": "HDY1020",
+      "count": 2,
+      "enterprise": [
+        "山东豪驰智能汽车有限公司"
+      ],
+      "product_names": [
+        "纯电动栏板式货车",
+        "纯电动载货汽车底盘"
+      ],
+      "brands": [
+        "橙仕牌"
+      ]
+    },
+    {
+      "model": "BJ5040X",
+      "count": 2,
+      "enterprise": [
+        "河南福田智蓝新能源汽车有限公司"
+      ],
+      "product_names": [
+        "换电式纯电动厢式货车",
+        "纯电动邮政车"
+      ],
+      "brands": [
+        "福田牌"
+      ]
+    },
+    {
+      "model": "BJ5049X",
+      "count": 2,
+      "enterprise": [
+        "河南福田智蓝新能源汽车有限公司"
+      ],
+      "product_names": [
+        "纯电动冷藏车",
+        "纯电动厢式货车"
+      ],
+      "brands": [
+        "福田牌"
+      ]
+    },
+    {
+      "model": "BJ1049",
+      "count": 2,
+      "enterprise": [
+        "河南福田智蓝新能源汽车有限公司"
+      ],
+      "product_names": [
+        "纯电动栏板式货车",
+        "纯电动载货汽车底盘"
+      ],
+      "brands": [
+        "福田牌"
+      ]
+    },
+    {
+      "model": "CHP5021X",
+      "count": 2,
+      "enterprise": [
+        "河北洪春专用车制造有限公司"
+      ],
+      "product_names": [
+        "巡逻车",
+        "纯电动巡逻车"
+      ],
+      "brands": [
+        "春洪牌"
+      ]
+    },
+    {
+      "model": "CHP5022X",
+      "count": 2,
+      "enterprise": [
+        "河北洪春专用车制造有限公司"
+      ],
+      "product_names": [
+        "巡逻车",
+        "插电式混合动力巡逻车"
+      ],
+      "brands": [
+        "春洪牌"
+      ]
+    },
+    {
+      "model": "TZH5191GXF",
+      "count": 2,
+      "enterprise": [
+        "太原重工股份有限公司"
+      ],
+      "product_names": [
+        "水罐消防车",
+        "泡沫消防车"
+      ],
+      "brands": [
+        "太原重工牌"
+      ]
+    },
+    {
+      "model": "FHA5030X",
+      "count": 4,
+      "enterprise": [
+        "上海辅恒汽车技术有限公司"
+      ],
+      "product_names": [
+        "插电式增程混合动力巡逻车",
+        "插电式混合动力商务车",
+        "插电式混合动力巡逻车",
+        "纯电动巡逻车"
+      ],
+      "brands": [
+        "景飞牌"
+      ]
+    },
+    {
+      "model": "HYD5041X",
+      "count": 2,
+      "enterprise": [
+        "鸿运汽车有限公司"
+      ],
+      "product_names": [
+        "医疗车",
+        "宿营车"
+      ],
+      "brands": [
+        "宏运牌"
+      ]
+    },
+    {
+      "model": "TLH5020X",
+      "count": 3,
+      "enterprise": [
+        "杭州蓝海特种车辆有限公司"
+      ],
+      "product_names": [
+        "公共服务车",
+        "巡逻车",
+        "插电式混合动力巡逻车"
+      ],
+      "brands": [
+        "大公牌"
+      ]
+    },
+    {
+      "model": "ZQZ5032X",
+      "count": 2,
+      "enterprise": [
+        "中汽商用汽车有限公司(杭州)"
+      ],
+      "product_names": [
+        "囚车",
+        "巡逻车"
+      ],
+      "brands": [
+        "中汽牌"
+      ]
+    },
+    {
+      "model": "NBK5021X",
+      "count": 2,
+      "enterprise": [
+        "宁波耐克萨斯专用车有限公司"
+      ],
+      "product_names": [
+        "巡逻车",
+        "插电式混合动力巡逻车"
+      ],
+      "brands": [
+        "耐克萨斯牌"
+      ]
+    },
+    {
+      "model": "ZSC5030X",
+      "count": 2,
+      "enterprise": [
+        "浙江亚太智能网联汽车创新中心有限公司"
+      ],
+      "product_names": [
+        "巡逻车",
+        "插电式混合动力巡逻车"
+      ],
+      "brands": [
+        "派耐特牌"
+      ]
+    },
+    {
+      "model": "ELT5040X",
+      "count": 2,
+      "enterprise": [
+        "福建省一禄通特种车有限公司"
+      ],
+      "product_names": [
+        "医疗车",
+        "宿营车"
+      ],
+      "brands": [
+        "闽特牌"
+      ]
+    },
+    {
+      "model": "JX5037X",
+      "count": 2,
+      "enterprise": [
+        "江西江铃汽车集团改装车股份有限公司"
+      ],
+      "product_names": [
+        "检测车",
+        "警犬输送车"
+      ],
+      "brands": [
+        "江改牌"
+      ]
+    },
+    {
+      "model": "JKF5030X",
+      "count": 7,
+      "enterprise": [
+        "江西钧天机械有限公司"
+      ],
+      "product_names": [
+        "商务车",
+        "巡逻车",
+        "插电式增程混合动力指挥车",
+        "插电式混合动力商务车",
+        "旅居车",
+        "纯电动巡逻车",
+        "通信车"
+      ],
+      "brands": [
+        "钧天牌"
+      ]
+    },
+    {
+      "model": "QFA5020X",
+      "count": 2,
+      "enterprise": [
+        "江西趣蜂专用车装备有限公司"
+      ],
+      "product_names": [
+        "插电式增程混合动力教练车",
+        "教练车"
+      ],
+      "brands": [
+        "趣蜂牌"
+      ]
+    },
+    {
+      "model": "WSJ5020X",
+      "count": 2,
+      "enterprise": [
+        "山东威士捷房车制造有限公司"
+      ],
+      "product_names": [
+        "纯电动售货车",
+        "纯电动旅居车"
+      ],
+      "brands": [
+        "威士捷牌"
+      ]
+    },
+    {
+      "model": "GXC5021X",
+      "count": 2,
+      "enterprise": [
+        "河南星辰汽车装备有限公司"
+      ],
+      "product_names": [
+        "巡逻车",
+        "纯电动警犬输送车"
+      ],
+      "brands": [
+        "歌睿途牌"
+      ]
+    },
+    {
+      "model": "GXC5020X",
+      "count": 2,
+      "enterprise": [
+        "河南星辰汽车装备有限公司"
+      ],
+      "product_names": [
+        "巡逻车",
+        "纯电动警犬输送车"
+      ],
+      "brands": [
+        "歌睿途牌"
+      ]
+    },
+    {
+      "model": "HCQ5030X",
+      "count": 2,
+      "enterprise": [
+        "湖北五环专用汽车有限公司"
+      ],
+      "product_names": [
+        "巡逻车",
+        "纯电动宿营车"
+      ],
+      "brands": [
+        "华通牌"
+      ]
+    },
+    {
+      "model": "CLW5043X",
+      "count": 2,
+      "enterprise": [
+        "程力专用汽车股份有限公司"
+      ],
+      "product_names": [
+        "救护车",
+        "电源车"
+      ],
+      "brands": [
+        "程力威牌"
+      ]
+    },
+    {
+      "model": "SYC5310TSW",
+      "count": 2,
+      "enterprise": [
+        "襄阳腾龙汽车有限公司"
+      ],
+      "product_names": [
+        "散装物料运输车",
+        "纯电动散装物料运输车"
+      ],
+      "brands": [
+        "九州牌"
+      ]
+    },
+    {
+      "model": "HLF5030X",
+      "count": 2,
+      "enterprise": [
+        "湖北宏磊专用汽车有限公司"
+      ],
+      "product_names": [
+        "插电式增程混合动力宿营车",
+        "纯电动宿营车"
+      ],
+      "brands": [
+        "宏磊风牌"
+      ]
+    },
+    {
+      "model": "YHA5187ZYS",
+      "count": 2,
+      "enterprise": [
+        "湖北永航专用汽车有限公司"
+      ],
+      "product_names": [
+        "压缩式垃圾车",
+        "纯电动压缩式垃圾车"
+      ],
+      "brands": [
+        "永航星牌"
+      ]
+    },
+    {
+      "model": "LMC5040X",
+      "count": 2,
+      "enterprise": [
+        "广东利民人防工程科技有限公司"
+      ],
+      "product_names": [
+        "检测车",
+        "监测车"
+      ],
+      "brands": [
+        "享呗牌"
+      ]
+    },
+    {
+      "model": "ZLJ5602JQZ",
+      "count": 2,
+      "enterprise": [
+        "中联重科股份有限公司"
+      ],
+      "product_names": [
+        "全地面起重机",
+        "汽车起重机"
+      ],
+      "brands": [
+        "中联牌"
+      ]
+    }
+  ],
+  "CROSS_ENTERPRISE_COLLISION": [
+    {
+      "model": "ZZ5187X",
+      "count": 3,
+      "enterprises": [
+        "中国重汽集团济南卡车股份有限公司",
+        "中国重汽集团济南商用车有限公司"
+      ],
+      "brands": [
+        "豪沃牌"
+      ],
+      "product_names": [
+        "厢式运输车底盘",
+        "换电式纯电动翼开启厢式货车",
+        "纯电动翼开启厢式货车"
+      ],
+      "catalog_nos": [
+        "63"
+      ]
+    },
+    {
+      "model": "ZZ3317",
+      "count": 3,
+      "enterprises": [
+        "中国重汽集团成都王牌商用车有限公司",
+        "中国重汽集团济南卡车股份有限公司"
+      ],
+      "brands": [
+        "豪沃牌"
+      ],
+      "product_names": [
+        "换电式纯电动自卸式货车",
+        "换电式纯电动自卸汽车底盘",
+        "纯电动自卸式货车"
+      ],
+      "catalog_nos": [
+        "101",
+        "63"
+      ]
+    },
+    {
+      "model": "ZZ4257",
+      "count": 3,
+      "enterprises": [
+        "中国重汽集团成都王牌商用车有限公司",
+        "中国重汽集团济南商用车有限公司",
+        "中国重汽集团济宁商用车有限公司"
+      ],
+      "brands": [
+        "豪沃牌"
+      ],
+      "product_names": [
+        "牵引汽车"
+      ],
+      "catalog_nos": [
+        "101",
+        "63"
+      ]
+    },
+    {
+      "model": "LY1000DZK",
+      "count": 2,
+      "enterprises": [
+        "绿源电动车(山东)有限公司",
+        "绿源电动车（天津）有限公司"
+      ],
+      "brands": [
+        "绿源牌"
+      ],
+      "product_names": [
+        "电动正三轮摩托车"
+      ],
+      "catalog_nos": [
+        "35",
+        "560"
+      ]
+    },
+    {
+      "model": "SHP1500DZK",
+      "count": 2,
+      "enterprises": [
+        "山东易航新能源车业有限公司",
+        "山东雷迈新能源车业有限公司"
+      ],
+      "brands": [
+        "盛昊篷车牌"
+      ],
+      "product_names": [
+        "电动正三轮摩托车"
+      ],
+      "catalog_nos": [
+        "166"
+      ]
+    },
+    {
+      "model": "TL1000DT",
+      "count": 3,
+      "enterprises": [
+        "台铃科技股份有限公司",
+        "台铃科技（广东）有限公司",
+        "台铃科技（重庆）有限公司"
+      ],
+      "brands": [
+        "台铃牌"
+      ],
+      "product_names": [
+        "电动两轮摩托车"
+      ],
+      "catalog_nos": [
+        "435",
+        "443"
+      ]
+    },
+    {
+      "model": "TL1200DT",
+      "count": 4,
+      "enterprises": [
+        "台铃电动科技（天津）有限公司",
+        "台铃科技股份有限公司",
+        "台铃科技（广东）有限公司",
+        "台铃科技（重庆）有限公司"
+      ],
+      "brands": [
+        "台铃牌"
+      ],
+      "product_names": [
+        "电动两轮摩托车"
+      ],
+      "catalog_nos": [
+        "435",
+        "439",
+        "443"
+      ]
+    },
+    {
+      "model": "TL3000DT",
+      "count": 3,
+      "enterprises": [
+        "台铃科技股份有限公司",
+        "台铃科技（广东）有限公司",
+        "台铃科技（重庆）有限公司"
+      ],
+      "brands": [
+        "台铃牌"
+      ],
+      "product_names": [
+        "电动两轮摩托车"
+      ],
+      "catalog_nos": [
+        "435",
+        "443"
+      ]
+    },
+    {
+      "model": "TL1000DQT",
+      "count": 2,
+      "enterprises": [
+        "台铃科技（广东）有限公司",
+        "台铃科技（重庆）有限公司"
+      ],
+      "brands": [
+        "台铃牌"
+      ],
+      "product_names": [
+        "电动两轮轻便摩托车"
+      ],
+      "catalog_nos": [
+        "435",
+        "443"
+      ]
+    },
+    {
+      "model": "BJ5042X",
+      "count": 2,
+      "enterprises": [
+        "北汽福田汽车股份有限公司",
+        "河南福田智蓝新能源汽车有限公司"
+      ],
+      "brands": [
+        "福田牌"
+      ],
+      "product_names": [
+        "纯电动厢式货车"
+      ],
+      "catalog_nos": [
+        "211",
+        "9"
+      ]
+    },
+    {
+      "model": "BJ5031X",
+      "count": 2,
+      "enterprises": [
+        "北汽福田汽车股份有限公司",
+        "河南福田智蓝新能源汽车有限公司"
+      ],
+      "brands": [
+        "福田牌"
+      ],
+      "product_names": [
+        "纯电动宿营车",
+        "纯电动邮政车"
+      ],
+      "catalog_nos": [
+        "211",
+        "9"
+      ]
+    },
+    {
+      "model": "HFC1043",
+      "count": 3,
+      "enterprises": [
+        "四川江淮汽车有限公司",
+        "安徽江淮汽车集团股份有限公司"
+      ],
+      "brands": [
+        "江淮牌"
+      ],
+      "product_names": [
+        "纯电动栏板式货车",
+        "纯电动载货汽车底盘"
+      ],
+      "catalog_nos": [
+        "56"
+      ]
+    },
+    {
+      "model": "LY1000DT",
+      "count": 2,
+      "enterprises": [
+        "广西绿源电动车有限公司",
+        "浙江绿源电动车有限公司"
+      ],
+      "brands": [
+        "绿源牌"
+      ],
+      "product_names": [
+        "电动两轮摩托车"
+      ],
+      "catalog_nos": [
+        "35",
+        "389"
+      ]
+    },
+    {
+      "model": "DY1200DZK",
+      "count": 2,
+      "enterprises": [
+        "洛阳北方易初摩托车有限公司",
+        "重庆北易车业有限公司"
+      ],
+      "brands": [
+        "大阳牌"
+      ],
+      "product_names": [
+        "电动正三轮摩托车"
+      ],
+      "catalog_nos": [
+        "275",
+        "76"
+      ]
+    },
+    {
+      "model": "YD1200DT",
+      "count": 2,
+      "enterprises": [
+        "重庆雅迪科技有限公司",
+        "雅迪科技集团有限公司"
+      ],
+      "brands": [
+        "雅迪牌"
+      ],
+      "product_names": [
+        "电动两轮摩托车"
+      ],
+      "catalog_nos": [
+        "376",
+        "80"
+      ]
+    },
+    {
+      "model": "XD1500DT",
+      "count": 2,
+      "enterprises": [
+        "小刀新能源科技股份有限公司",
+        "重庆小刀新能源科技有限公司"
+      ],
+      "brands": [
+        "小刀牌"
+      ],
+      "product_names": [
+        "电动两轮摩托车"
+      ],
+      "catalog_nos": [
+        "83"
+      ]
+    },
+    {
+      "model": "ZS1500DZH",
+      "count": 2,
+      "enterprises": [
+        "江苏宗申车业有限公司",
+        "重庆宗申车辆有限公司"
+      ],
+      "brands": [
+        "宗申牌"
+      ],
+      "product_names": [
+        "电动正三轮摩托车"
+      ],
+      "catalog_nos": [
+        "118"
+      ]
+    },
+    {
+      "model": "JP1500DZK",
+      "count": 2,
+      "enterprises": [
+        "天津金美尚科技有限责任公司",
+        "山东金彭新能源科技有限公司"
+      ],
+      "brands": [
+        "金彭牌"
+      ],
+      "product_names": [
+        "电动正三轮摩托车"
+      ],
+      "catalog_nos": [
+        "140"
+      ]
+    },
+    {
+      "model": "AM1000DZK",
+      "count": 3,
+      "enterprises": [
+        "天津爱玛车业科技有限公司",
+        "格瓴新能源科技（山东）有限公司",
+        "河南爱玛车业有限公司"
+      ],
+      "brands": [
+        "爱玛牌"
+      ],
+      "product_names": [
+        "电动正三轮摩托车"
+      ],
+      "catalog_nos": [
+        "373",
+        "430",
+        "431"
+      ]
+    },
+    {
+      "model": "AM1200DT",
+      "count": 3,
+      "enterprises": [
+        "丽水爱玛车业科技有限公司",
+        "台州爱玛机车制造有限公司",
+        "重庆爱玛车业科技有限公司"
+      ],
+      "brands": [
+        "爱玛牌"
+      ],
+      "product_names": [
+        "电动两轮摩托车"
+      ],
+      "catalog_nos": [
+        "405",
+        "507",
+        "532"
+      ]
+    },
+    {
+      "model": "QCJ7000",
+      "count": 2,
+      "enterprises": [
+        "比亚迪汽车工业有限公司",
+        "比亚迪汽车有限公司"
+      ],
+      "brands": [
+        "方程豹牌",
+        "腾势牌"
+      ],
+      "product_names": [
+        "纯电动轿车"
+      ],
+      "catalog_nos": [
+        "108",
+        "79"
+      ]
+    },
+    {
+      "model": "HH1200DZK",
+      "count": 2,
+      "enterprises": [
+        "徐州智博机车有限公司",
+        "江苏淮海新能源车辆有限公司"
+      ],
+      "brands": [
+        "淮河牌",
+        "淮海牌"
+      ],
+      "product_names": [
+        "电动正三轮摩托车"
+      ],
+      "catalog_nos": [
+        "106",
+        "194"
+      ]
+    },
+    {
+      "model": "LM1200DZK",
+      "count": 2,
+      "enterprises": [
+        "河北立马车业科技有限公司",
+        "菱猫益程（天津）电动车有限公司"
+      ],
+      "brands": [
+        "立马牌",
+        "菱猫电动牌"
+      ],
+      "product_names": [
+        "电动正三轮摩托车"
+      ],
+      "catalog_nos": [
+        "152",
+        "533"
+      ]
+    },
+    {
+      "model": "XN1200DT",
+      "count": 2,
+      "enterprises": [
+        "小鸟车业有限公司",
+        "江苏小牛电动科技有限公司"
+      ],
+      "brands": [
+        "小牛牌",
+        "小鸟牌"
+      ],
+      "product_names": [
+        "电动两轮摩托车"
+      ],
+      "catalog_nos": [
+        "159",
+        "206"
+      ]
+    },
+    {
+      "model": "PY1200DZH",
+      "count": 2,
+      "enterprises": [
+        "山东圣祺新能源车业有限公司",
+        "徐州双驼机车有限公司"
+      ],
+      "brands": [
+        "彭友牌",
+        "彭源牌"
+      ],
+      "product_names": [
+        "电动正三轮摩托车"
+      ],
+      "catalog_nos": [
+        "298",
+        "314"
+      ]
+    }
+  ],
+  "OTHER": [
+    {
+      "model": "SQR6483",
+      "count": 2,
+      "enterprises": [
+        "奇瑞汽车股份有限公司"
+      ],
+      "brands": [
+        "捷途牌",
+        "星途牌"
+      ],
+      "product_names": [
+        "插电式混合动力多用途乘用车"
+      ],
+      "catalog_nos": [
+        "119"
+      ]
+    }
+  ],
+  "notes": [
+    "EXACT_DUPLICATE = 完全相同(model+enterprise+product_name+brand+catalog_no),安全去重",
+    "SAME_ENTERPRISE_MULTI_NAME = 同一企业同一型号多个产品名(底盘 vs 整车,纯电 vs 燃油同一型号 etc.)",
+    "CROSS_ENTERPRISE_COLLISION.MULTI_SITE_SAME_BRAND = 同品牌同集团多地子公司(台铃广东/重庆/天津),合并到 {batch}:{model_code} 合理",
+    "CROSS_ENTERPRISE_COLLISION.CROSS_ENT_SAME_BRAND = 跨企业同品牌(非明显同集团),需审视",
+    "CROSS_ENTERPRISE_COLLISION.CROSS_BRAND = 跨品牌共用同一 model_code,这是 EIDC 真实身份冲突",
+    "OTHER = 不属于上述类别(奇瑞 SQR6483:同企业同 pname 不同 brand 捷途/星途)"
+  ]
+}

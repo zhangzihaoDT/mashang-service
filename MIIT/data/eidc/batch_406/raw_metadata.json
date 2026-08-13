@@ -1,0 +1,31 @@
+{
+  "source_url": "https://www.miit-eidc.org.cn/art/2026/5/9/art_1691_12292.html",
+  "article_id": "12292",
+  "guid": "20260012292",
+  "title": "《道路机动车辆生产企业及产品》（第406批）、《享受车船税减免优惠的节约能源 使用新能源汽车车型目录》（第八十五批）、《减免车辆购置税的新能源汽车车型目录》（第三十批）",
+  "batch_no": "406",
+  "vehicle_tax_batch": "85",
+  "purchase_tax_batch": "30",
+  "publish_date": "2026-05-09 20:57",
+  "announcement_no": "2026年第10号",
+  "attachments": [
+    {
+      "title": "1.道路机动车辆生产企业及产品（第406批）.doc",
+      "url": "https://www.miit.gov.cn/cms_files/filemanager/1226211233/attach/20264/f66eea329f224580a312ab5b26b09f75.doc",
+      "filename": "f66eea329f224580a312ab5b26b09f75.doc"
+    },
+    {
+      "title": "2.享受车船税减免优惠的节约能源 使用新能源汽车车型目录（第八十五批）.doc",
+      "url": "https://www.miit.gov.cn/cms_files/filemanager/1226211233/attach/20264/de417ae61c604655ac6d30e4c60411c9.doc",
+      "filename": "de417ae61c604655ac6d30e4c60411c9.doc"
+    },
+    {
+      "title": "3.减免车辆购置税的新能源汽车车型目录（第三十批）.doc",
+      "url": "https://www.miit.gov.cn/cms_files/filemanager/1226211233/attach/20264/7ef7905198e642c7bc2e12755c54d11e.doc",
+      "filename": "7ef7905198e642c7bc2e12755c54d11e.doc"
+    }
+  ],
+  "source": "eidc",
+  "stage": "confirmed",
+  "fetch_mode": "fresh_rebuild"
+}

@@ -41,7 +41,7 @@ Workspace 业务监测配置目录。存放各类可复用的分析配置和关�
 - 无 brand 级 keywords 的子品牌继承 catalog 级 keywords
 - 同一品牌跨 catalog 出现时，models 合并，keywords 取独立条目
 
-**加载方式**: `research_scripts/miit_new_car/diff_watchlist.py::_load_watchlist()`
+**加载方式**: 原 `research_scripts/miit_new_car/diff_watchlist.py` 已随重构移除；当前 MIIT 模块使用 `MIIT/workflow/brand_watchlist.yaml`。
 
 **品牌一览**（24 个）:
 

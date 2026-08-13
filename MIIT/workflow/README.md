@@ -20,6 +20,7 @@ MIIT.gov.cn
   → P2 归档   → data/vehicle_details/ + data/vehicle_photos/ + data/fetch_status/
   → P3 补充   → data/vehicle_tax/车型清单_第XX批车船税.json
   → P4 Dataset→ data/wide_tables/wide_table_{batch}.csv
+  → P4.5 统一Dataset → data/vehicle_parameters/（product_master / vehicle_parameter）
   → P5 报告   → reports/batch_{batch}/
 ```
 
@@ -29,6 +30,7 @@ MIIT.gov.cn
 make -C MIIT miit-scan BATCH=410     # P1 搜索 + 简报
 make -C MIIT miit-archive BATCH=410  # P2 归档全部缺失车型
 make -C MIIT miit-build BATCH=410    # P4 宽表
+make -C MIIT miit-dataset            # P4.5 统一 Dataset
 make -C MIIT miit-report BATCH=410   # P5 分类报告
 make -C MIIT miit-run BATCH=410      # 一键 P1→P5（P3 车船税需手动，见 commands.md）
 ```
