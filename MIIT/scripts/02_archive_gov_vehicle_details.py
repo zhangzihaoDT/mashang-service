@@ -16,10 +16,10 @@ MIIT Pipeline P2: 车型详情归档（可恢复的数据任务）
   - data/vehicle_photos/{batch}_{型号}/              公告照片
 
 用法:
-  python3 scripts/02_archive_vehicle_details.py --batch 410 --all-missing   # 归档所有未归档品牌
-  python3 scripts/02_archive_vehicle_details.py --batch 410 --retry-failed  # 只补抓失败车型
-  python3 scripts/02_archive_vehicle_details.py --brand 零跑 --batch 410
-  python3 scripts/02_archive_vehicle_details.py --brand 零跑 --dry-run      # 预览
+  python3 scripts/02_archive_gov_vehicle_details.py --batch 410 --all-missing   # 归档所有未归档品牌
+  python3 scripts/02_archive_gov_vehicle_details.py --batch 410 --retry-failed  # 只补抓失败车型
+  python3 scripts/02_archive_gov_vehicle_details.py --brand 零跑 --batch 410
+  python3 scripts/02_archive_gov_vehicle_details.py --brand 零跑 --dry-run      # 预览
 """
 
 import argparse

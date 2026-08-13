@@ -11,7 +11,7 @@ MIIT 公告品牌搜索工具
   python scripts/miit_gov_search.py --brand 智己       # 只搜索指定品牌
   python scripts/miit_gov_search.py --format json      # JSON 输出
 
-（由 01_scan_batch.py 调用，也可独立使用）
+（由 01_scan_gov_batch.py 调用，也可独立使用）
 """
 
 import argparse

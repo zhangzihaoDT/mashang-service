@@ -7,7 +7,7 @@ MIIT EIDC Parser 层（只理解 EIDC 自己的数据结构）
 当前支持：
   parse_road_products(text)      —— 道路机动车辆生产企业及产品（附件1）
   parse_vehicle_tax(text)        —— 车船税目录（附件2，委托给 03 parser 的 schema 逻辑）
-  parse_purchase_tax(text)       —— 购置税目录（附件3，见 10_parse_purchase_tax.py）
+  parse_purchase_tax(text)       —— 购置税目录（附件3，见 05_parse_purchase_tax.py）
 
 road 附件真实列结构（textutil 导出，\x07 分隔）：
   每行 = [序号, 商标, 产品名称, 产品型号]（表头 4 列）

@@ -6,7 +6,7 @@
 - **结果**：401-410 十批 canonical 统一为乘用车业务事实层，831 行，0 非乘用车
   - eidc/confirmed：401-408 全 fresh，765 行（legacy passenger 121 → fresh 536，+415）
   - miit_gov/proposed：409:49 + 410:17
-- **关键产物**：`09_fetch_eidc_batch.py` / `eidc_doc_extract.py` / `eidc_summary_fresh.py` / `07` scope gate
+- **关键产物**：`03_fetch_eidc_batch.py` / `eidc_doc_extract.py` / `validate_eidc_batch.py` / `06` scope gate
 - **迁移后清理**：legacy 已删除（`legacy/` 目录 + `08_archive_eidc_legacy.py` + `08_import_eidc_history.py` + `eidc_record_adapter.py`），
   迁移记录见 `data/eidc/migration_eidc_fresh_rebuild.json`。原则：迁移成功后删除迁移态。
 - **完整技术文档**：[data/eidc/README.md](../data/eidc/README.md)
@@ -26,12 +26,11 @@
    - 关键认识：完整版目录可达 849/777 页、解析出 12163 条（购置税26批），是常规精简版的百倍
 
 2. **Benchmark 本身可能比 pipeline 更容易错**
-   - `eidc_benchmark_408.py` 原版用 `glob('*.txt')[0]`，排序后取到购置税而非 road 附件 → 全红 0 valid
    - 教训：附件定位必须用 manifest 的 `title` 关键词（`道路机动车辆` / `车船税` / `购置税`），不靠 glob 排序
 
 3. **单批多购置税批次**
    - 402 购置税为"第二十五、二十六批"两批，manifest `purchase_tax_batch="25,26"` 逗号分隔
-   - 07 的 index loader 需支持多批次合并（`_load_eidc_tax_purchase_index` 拆逗号遍历）
+   - 06 的 index loader 需支持多批次合并（`_load_eidc_tax_purchase_index` 拆逗号遍历）
 
 ### 架构 / 流程
 
@@ -56,14 +55,14 @@
 
 8. **schema_status 判断语义**
    - diff > 0（fresh 发现更多）是预期现象；只有 **legacy_only（legacy 有 fresh 没有）才算异常**，不能简单用 abs(diff)
-   - `eidc_summary_fresh.py` 落地此判断，8 批全 OK / 0 REVIEW
+   - `validate_eidc_batch.py` 落地此判断，8 批全 OK / 0 REVIEW
 
 9. **Migration safety check**
    - 改 canonical 前备份 observation_id 集（old 5219 / old passenger 411），rebuild 后对比 new_only / missing_after_scope_change，先定位原因再接受数据变化
    - 本工程：0 missing，5 new_only（均为同 chassis 多车型的乘用变体重分类），无静默数据损失
 
 10. **幂等是硬验收**
-    - 07 连续重建必须 byte-identical，否则视为 bug
+    - 06 连续重建必须 byte-identical，否则视为 bug
     - Source fetch：相同文件 + 相同 sha256 可跳过下载
 
 ## 下一轮改进

@@ -1,6 +1,6 @@
 # vehicle_parameters/ —— 乘用车业务 Canonical Fact Layer
 
-**定位**：MIIT 的**乘用车业务 canonical fact layer**（不是全量道路机动车辆镜像）。由 `scripts/07_build_vehicle_dataset.py` 从已归档批次构建，一车型一行，reports/ 与 Agent 默认消费这一层。
+**定位**：MIIT 的**乘用车业务 canonical fact layer**（不是全量道路机动车辆镜像）。由 `scripts/06_build_vehicle_dataset.py` 从已归档批次构建，一车型一行，reports/ 与 Agent 默认消费这一层。
 
 > **Canonical Eligibility** = `model_code valid` **AND** `vehicle_category == passenger_vehicle`
 
@@ -14,7 +14,7 @@ Source / Parser 层仍保留并解析全量道路机动车辆（商用车/摩托
 非乘用变体仍留在 source evidence。
 ```
 
-gate 在 07 build 时**逐 source record 执行、先于 by model_code 聚合**（`classify_source_record` → `is_canonical_in_scope` → enrichment）。禁止改为聚合后按首条记录分类判定。
+gate 在 06 build 时**逐 source record 执行、先于 by model_code 聚合**（`classify_source_record` → `is_canonical_in_scope` → enrichment）。禁止改为聚合后按首条记录分类判定。
 
 ## 两张核心表
 
@@ -44,8 +44,8 @@ gate 在 07 build 时**逐 source record 执行、先于 by model_code 聚合**�
 ## 重建
 
 ```bash
-python3 scripts/07_build_vehicle_dataset.py             # canonical（passenger only，Gov + EIDC）
-python3 scripts/eidc_summary_fresh.py                    # 每批 fresh summary（轻量验收）
+python3 scripts/06_build_vehicle_dataset.py             # canonical（passenger only，Gov + EIDC）
+python3 scripts/validate_eidc_batch.py                    # 每批 fresh summary（轻量验收）
 ```
 
 当前：831 车型，全部 `vehicle_category == passenger_vehicle`（eidc/confirmed 401-408 fresh + miit_gov/proposed 409-410）。

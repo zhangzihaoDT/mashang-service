@@ -13,22 +13,25 @@ make -C MIIT miit-run BATCH=410   # P1 搜索 → P2 归档 → P4 宽表 → P4
 | 步骤 | 命令 |
 |------|------|
 | 0. 登记批次 | 编辑 `workflow/batches.yaml` |
-| 1. 搜索 + 简报 | `python3 MIIT/scripts/01_scan_batch.py --batch 410` |
-| 1b. 只生成简报（已有 scan） | `python3 MIIT/scripts/01_scan_batch.py --from-scan --batch 410` |
-| 2. 归档全量缺失 | `python3 MIIT/scripts/02_archive_vehicle_details.py --batch 410 --all-missing` |
-| 2b. 归档单品牌 | `python3 MIIT/scripts/02_archive_vehicle_details.py --brand 零跑 --batch 410` |
-| 2c. 断点续抓失败车型 | `python3 MIIT/scripts/02_archive_vehicle_details.py --batch 410 --retry-failed` |
-| 2d. 预览 | `python3 MIIT/scripts/02_archive_vehicle_details.py --batch 410 --all-missing --dry-run` |
+| 1. 搜索 + 简报 | `python3 MIIT/scripts/01_scan_gov_batch.py --batch 410` |
+| 1b. 只生成简报（已有 scan） | `python3 MIIT/scripts/01_scan_gov_batch.py --from-scan --batch 410` |
+| 2. 归档全量缺失 | `python3 MIIT/scripts/02_archive_gov_vehicle_details.py --batch 410 --all-missing` |
+| 2b. 归档单品牌 | `python3 MIIT/scripts/02_archive_gov_vehicle_details.py --brand 零跑 --batch 410` |
+| 2c. 断点续抓失败车型 | `python3 MIIT/scripts/02_archive_gov_vehicle_details.py --batch 410 --retry-failed` |
+| 2d. 预览 | `python3 MIIT/scripts/02_archive_gov_vehicle_details.py --batch 410 --all-missing --dry-run` |
 | 3. 车船税解析（手动） | 见下方"车船税补充" |
-| 4. 参数宽表 | `python3 MIIT/scripts/04_build_wide_table.py --batch 410` |
-| 4.5. 统一Dataset | `python3 MIIT/scripts/07_build_vehicle_dataset.py`（Gov proposed + EIDC confirmed，passenger scope） |
-| EIDC fresh 抓取 | `python3 MIIT/scripts/09_fetch_eidc_batch.py --batch 408` |
-| EIDC fresh 验收 | `python3 MIIT/scripts/eidc_summary_fresh.py` |
+| 4. 参数宽表 | `python3 MIIT/scripts/07_build_wide_table.py --batch 410` |
+| 4.5. 统一Dataset | `python3 MIIT/scripts/06_build_vehicle_dataset.py`（Gov proposed + EIDC confirmed，passenger scope） |
+| EIDC fresh 抓取 | `python3 MIIT/scripts/03_fetch_eidc_batch.py --batch 408` |
+| EIDC fresh 验收 | `python3 MIIT/scripts/validate_eidc_batch.py` |
 | EIDC 超大doc提取 | `python3 MIIT/scripts/eidc_doc_extract.py --input a.doc --output a.txt` |
-| 5. 分类报告 | `python3 MIIT/scripts/06_generate_category_report.py --batch 410 --all --output-dir batch_410/category_report` |
-| 5b. 单品牌报告 | `python3 MIIT/scripts/05_generate_brand_report.py --batch 409 --brand 小米 --output-dir batch_409/brand_report --batch-label "第409批"` |
+| 5. 分类报告 | `python3 MIIT/scripts/09_generate_category_report.py --batch 410 --all --output-dir batch_410/category_report` |
+| 5b. 单品牌报告 | `python3 MIIT/scripts/08_generate_brand_report.py --batch 409 --brand 小米 --output-dir batch_409/brand_report --batch-label "第409批"` |
 
-## 车船税补充（P3，手动）
+> 编号 = pipeline topology：01-03 SOURCE / 04-05 ENRICHMENT / 06 CANONICAL / 07 DERIVED / 08-09 REPORT。
+> 步骤序号与脚本编号一致（如"4.5 统一Dataset"已并入 06）。
+
+## 车船税/购置税补充（04/05，手动）
 
 附件通常比公告晚 3-5 天发布。
 
@@ -43,7 +46,7 @@ curl -L -o 车型清单.doc \
 textutil -convert txt -output 车型清单.txt 车型清单.doc
 
 # 3. 解析（相对 --output 落在 data/vehicle_tax/ 下）
-python3 MIIT/scripts/03_parse_vehicle_tax.py \
+python3 MIIT/scripts/04_parse_vehicle_tax.py \
   --input data/vehicle_tax/车型清单_第89批车船税.txt \
   --output 车型清单_第89批车船税 \
   --batch "第八十九批" \

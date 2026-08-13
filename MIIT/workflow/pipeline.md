@@ -1,25 +1,36 @@
-# MIIT Gov Proposed Vehicle Intelligence Pipeline
+# MIIT Pipeline
 
-工信部拟公告新车情报管线：发现拟公告 → 找到关注车型 → 归档车型事实 → 结构化参数 → 补充监管附件 → 生成分析数据与报告。
+工信部新车情报管线：Source → Enrichment → Canonical → Derived → Report。
 
 ```
-MIIT.gov.cn
-   ↓
-P1 品牌/车型搜索（01_scan_batch + miit_gov_search）
+SOURCE
+01 Gov scan（01_scan_gov_batch + miit_gov_search）
    ↓  data/search_results/scan_batch_{batch}.md + reports/batch_{batch}/scan_report.html
-P2 车型详情归档（02_archive_vehicle_details）
+02 Gov archive（02_archive_gov_vehicle_details）
    ↓  data/vehicle_details/ + data/vehicle_photos/ + data/raw_html/ + data/fetch_status/
-P3 车船税解析（03_parse_vehicle_tax）
-   ↓  data/vehicle_tax/车型清单_第XX批车船税.json
-P4 参数宽表（04_build_wide_table）
+03 EIDC fetch（03_fetch_eidc_batch → eidc_parser）
+   ↓  data/eidc/batch_{401..408}/
+
+ENRICHMENT
+04 vehicle tax（04_parse_vehicle_tax）
+05 purchase tax（05_parse_purchase_tax）
+   ↓  data/vehicle_tax/车型清单_第XX批{车船税|购置税}.json
+
+CANONICAL
+06 vehicle dataset（06_build_vehicle_dataset）← canonical 唯一入口
+   ↓  data/vehicle_parameters/product_master + vehicle_parameter（passenger scope）
+
+DERIVED
+07 wide table（07_build_wide_table）
    ↓  data/wide_tables/wide_table_{batch}.csv
-P4.5 统一 Dataset（07_build_vehicle_dataset）
-   ↓  data/vehicle_parameters/product_master + vehicle_parameter（Gov proposed + EIDC confirmed，passenger scope）
-P5 报告（05_generate_brand_report / 06_generate_category_report）
+
+REPORT
+08 brand report（08_generate_brand_report）
+09 category report（09_generate_category_report）
    ↓  reports/batch_{batch}/
 ```
 
-EIDC confirmed（09_fetch_eidc_batch → eidc_parser → 07 build_eidc_rows）与 Gov proposed 共用同一 canonical 出口；401-408 全 fresh rebuild，legacy 导入已删除。
+Gov proposed（01→02→04→06→07→09）与 EIDC confirmed（03→04/05→06）共用同一 canonical 出口（06）；401-408 全 fresh rebuild，legacy 导入已删除。编号 = pipeline topology，非开发顺序。
 
 ## 5 类资产（顶层认知入口）
 
@@ -44,23 +55,27 @@ MIIT/
 
 ## 脚本一览（scripts/ 平铺）
 
+> **01–09 = 可执行 pipeline entrypoint（编号 = pipeline topology）；未编号 = 内部实现 / validation。**
+
 | 脚本 | 管线 | 说明 |
 |------|------|------|
-| `01_scan_batch.py` | P1 | 品牌搜索 + 简报（scan 快照 + scan_report.html） |
-| `02_archive_vehicle_details.py` | P2 | 车型详情归档（可恢复：失败分类 + checkpoint + retry） |
-| `03_parse_vehicle_tax.py` | P3 | 车船税 doc/txt → json/md |
-| `04_build_wide_table.py` | P4 | 参数宽表 csv/md |
-| `07_build_vehicle_dataset.py` | P4.5 | 统一 Dataset（product_master / vehicle_parameter，canonical 事实层，passenger scope） |
-| `05_generate_brand_report.py` | P5 | 单品牌车型对比 HTML |
-| `06_generate_category_report.py` | P5 | 按分类多品牌对比 HTML |
-| `miit_gov_search.py` | sources | MIIT 搜索底层（HTTP/反爬/API），供 01 调用 |
-| `miit_paths.py` | utils | 统一路径/批次配置入口（唯一 I/O 基座） |
-| `vehicle_record_builder.py` | utils | **公共领域逻辑**：原始资料→标准字段（parse_detail/merge_tax/resolve_name/build_record/build_eidc_record/classify/derive_metrics/explode_variants），04/07 共用 |
-| `09_fetch_eidc_batch.py` | EIDC source | EIDC 公告抓取/解析/归档（fresh，401-408） |
+| `01_scan_gov_batch.py` | SOURCE | Gov 品牌搜索 + 简报（scan 快照 + scan_report.html） |
+| `02_archive_gov_vehicle_details.py` | SOURCE | Gov 车型详情归档（可恢复：失败分类 + checkpoint + retry） |
+| `03_fetch_eidc_batch.py` | SOURCE | EIDC 公告抓取/解析/归档（fresh，401-408） |
+| `04_parse_vehicle_tax.py` | ENRICHMENT | 车船税 doc/txt → json/md |
+| `05_parse_purchase_tax.py` | ENRICHMENT | 购置税 doc/txt → json/md |
+| `06_build_vehicle_dataset.py` | CANONICAL | **canonical 唯一入口**（product_master / vehicle_parameter，passenger scope） |
+| `07_build_wide_table.py` | DERIVED | 参数宽表 csv/md |
+| `08_generate_brand_report.py` | REPORT | 单品牌车型对比 HTML |
+| `09_generate_category_report.py` | REPORT | 按分类多品牌对比 HTML |
+| `validate_eidc_batch.py` | validation | 每批 EIDC 批次验收（schema_status） |
 | `eidc_parser.py` | EIDC source | EIDC 附件 source record 解析（road/tax/purchase） |
+| `eidc_source.py` | EIDC source | EIDC 网络抓取/附件下载/doc→txt |
 | `eidc_doc_extract.py` | EIDC source | 超大 .doc 备用提取（olefile FIB 文本区） |
-| `eidc_summary_fresh.py` | EIDC 验收 | 每批 fresh summary（schema_status） |
-| `report_common.py` | utils | P5 公共逻辑（参数提取/车型分组/对比渲染），05/06 共用 |
+| `miit_gov_search.py` | Gov source | MIIT 搜索底层（HTTP/反爬/API），供 01 调用 |
+| `vehicle_record_builder.py` | 公共领域 | 原始资料→标准字段（build_record/build_eidc_record/classify/is_canonical_in_scope/derive_metrics/explode_variants），06/07 共用 |
+| `miit_paths.py` | utils | 统一路径/批次配置入口（唯一 I/O 基座） |
+| `report_common.py` | utils | 报告公共逻辑（参数提取/车型分组/对比渲染），08/09 共用 |
 
 ## 车型身份（canonical key）
 
@@ -94,38 +109,39 @@ product_master/parameter   wide_table
 
 | 目录 | 内容 | 对应管线 |
 |------|------|----------|
-| `search_results/` | P1 品牌/车型搜索结果（scan 快照，可重放） | P1 |
-| `vehicle_details/` | P2 车型完整参数归档（{batch}_{型号}-{产品名}.md） | P2 |
-| `vehicle_photos/` | P2 公告照片（{batch}_{型号}/ 下） | P2 |
-| `raw_html/` | 原始详情页缓存（{batch}_{型号}.html） | P2 |
-| `vehicle_tax/` | 车船税 doc/txt/json/md | P3 |
-| `vehicle_parameters/` | 结构化车型参数（canonical 事实层：product_master / vehicle_parameter） | P4.5 |
-| `wide_tables/` | P4 参数宽表 csv/md | P4 |
-| `fetch_status/` | checkpoint / 抓取状态 | P2 |
+| `search_results/` | Gov 品牌/车型搜索结果（scan 快照，可重放） | 01 |
+| `vehicle_details/` | Gov 车型完整参数归档（{batch}_{型号}-{产品名}.md） | 02 |
+| `vehicle_photos/` | Gov 公告照片（{batch}_{型号}/ 下） | 02 |
+| `raw_html/` | Gov 原始详情页缓存（{batch}_{型号}.html） | 02 |
+| `eidc/` | EIDC source archive（batch_401..408 + 迁移记录） | 03 |
+| `vehicle_tax/` | 车船税/购置税 doc/txt/json/md | 04 / 05 |
+| `vehicle_parameters/` | **canonical 事实层**（product_master / vehicle_parameter，passenger scope） | 06 |
+| `wide_tables/` | 参数宽表 csv/md | 07 |
+| `fetch_status/` | checkpoint / 抓取状态 | 02 |
 
 ## 批次处理流程
 
 | 步骤 | 命令 | 前置条件 | 产出 |
 |------|------|----------|------|
 | 0. 登记批次 | 编辑 `workflow/batches.yaml` | 公告页发布 | page_id / index / 车船税批次 / 文件名 |
-| 1. 搜索 | `python3 MIIT/scripts/01_scan_batch.py --batch 410` | `batches.yaml` + `brand_watchlist.yaml` | `data/search_results/scan_batch_410.md` + `reports/batch_410/scan_report.html` |
-| 2. 归档 | `python3 MIIT/scripts/02_archive_vehicle_details.py --batch 410 --all-missing` | scan 中有 `detail_url` | `data/vehicle_details/*.md` + `data/vehicle_photos/` |
-| 3. 补充 | `python3 MIIT/scripts/03_parse_vehicle_tax.py`（+ 前置 doc 下载/转换） | 批次页附件 `.doc` | `data/vehicle_tax/车型清单_第89批车船税.json` |
-| 4. 宽表 | `python3 MIIT/scripts/04_build_wide_table.py --batch 410` | 归档目录 + 车船税 JSON | `data/wide_tables/wide_table_410.csv` |
-| 4.5. 统一Dataset | `python3 MIIT/scripts/07_build_vehicle_dataset.py` | 全部批次归档 + 车船税 | `data/vehicle_parameters/product_master.{csv,json}` + `vehicle_parameter.{csv,json}` |
-| 5. 报告 | `python3 MIIT/scripts/06_generate_category_report.py --batch 410 --all --output-dir batch_410/category_report` | 归档目录 + 车船税 JSON | `reports/batch_410/category_report/` |
+| 1. 搜索 | `python3 MIIT/scripts/01_scan_gov_batch.py --batch 410` | `batches.yaml` + `brand_watchlist.yaml` | `data/search_results/scan_batch_410.md` + `reports/batch_410/scan_report.html` |
+| 2. 归档 | `python3 MIIT/scripts/02_archive_gov_vehicle_details.py --batch 410 --all-missing` | scan 中有 `detail_url` | `data/vehicle_details/*.md` + `data/vehicle_photos/` |
+| 3. 补充 | `python3 MIIT/scripts/04_parse_vehicle_tax.py`（+ 前置 doc 下载/转换） | 批次页附件 `.doc` | `data/vehicle_tax/车型清单_第89批车船税.json` |
+| 4. 宽表 | `python3 MIIT/scripts/07_build_wide_table.py --batch 410` | 归档目录 + 车船税 JSON | `data/wide_tables/wide_table_410.csv` |
+| 4.5. 统一Dataset | `python3 MIIT/scripts/06_build_vehicle_dataset.py` | 全部批次归档 + 车船税 | `data/vehicle_parameters/product_master.{csv,json}` + `vehicle_parameter.{csv,json}` |
+| 5. 报告 | `python3 MIIT/scripts/09_generate_category_report.py --batch 410 --all --output-dir batch_410/category_report` | 归档目录 + 车船税 JSON | `reports/batch_410/category_report/` |
 
 > Step 1 和 Step 2 可跨越执行——搜索后先用 `--brand` 归档特定品牌，不需要等全量搜索完毕。Step 3 依赖批次附件发布（通常比公告晚 3-5 天），可以滞后执行；报告在 Step 3 之前可生成，但不含电池容量/续航/通用名称等车船税字段。
 
 > **批次配置唯一来源是 `workflow/batches.yaml`**（页面 page_id / index、公示与归档日期、车船税批次、scan/tax 文件名），
 > 脚本通过 `miit_paths.get_batch_config(batch)` 读取，不再各自写死。新批次只需在 `batches.yaml` 登记一行。
 
-## 管线 P1：品牌搜索 + 简报
+## 管线 01：Gov 品牌搜索 + 简报
 
 ```bash
-python3 MIIT/scripts/01_scan_batch.py --batch 410               # 搜索 + 生成简报 + 保存扫描
-python3 MIIT/scripts/01_scan_batch.py --from-scan               # 从已有扫描 MD 生成简报（跳过搜索）
-python3 MIIT/scripts/01_scan_batch.py --open                    # 生成后自动打开浏览器
+python3 MIIT/scripts/01_scan_gov_batch.py --batch 410               # 搜索 + 生成简报 + 保存扫描
+python3 MIIT/scripts/01_scan_gov_batch.py --from-scan               # 从已有扫描 MD 生成简报（跳过搜索）
+python3 MIIT/scripts/01_scan_gov_batch.py --open                    # 生成后自动打开浏览器
 ```
 
 ### 产出物
@@ -144,13 +160,13 @@ python3 MIIT/scripts/01_scan_batch.py --open                    # 生成后自�
 - `detail_url` 从第一栏 `<a href>` 中提取
 - 批次 pageId / iframe index 登记在 `workflow/batches.yaml`
 
-## 管线 P2：车型详情归档
+## 管线 02：Gov 车型详情归档
 
 ```bash
-python3 MIIT/scripts/02_archive_vehicle_details.py --brand 小鹏 --batch 410
-python3 MIIT/scripts/02_archive_vehicle_details.py --batch 410 --all-missing
-python3 MIIT/scripts/02_archive_vehicle_details.py --batch 410 --all-missing --dry-run
-python3 MIIT/scripts/02_archive_vehicle_details.py --batch 410 --retry-failed
+python3 MIIT/scripts/02_archive_gov_vehicle_details.py --brand 小鹏 --batch 410
+python3 MIIT/scripts/02_archive_gov_vehicle_details.py --batch 410 --all-missing
+python3 MIIT/scripts/02_archive_gov_vehicle_details.py --batch 410 --all-missing --dry-run
+python3 MIIT/scripts/02_archive_gov_vehicle_details.py --batch 410 --retry-failed
 ```
 
 ### 归档产出
@@ -233,7 +249,7 @@ data/fetch_status/fetch_status_{batch}.json ← checkpoint
 
 **`--all-missing` 判定**：按车型 `.md` 是否存在判定（`data/vehicle_details/`）。
 
-## 管线 P3：车船税目录解析
+## 管线 04/05：车船税 / 购置税目录解析
 
 ```bash
 # 下载附件（批次公示页第4个附件：车船税第XX批车型清单）
@@ -241,7 +257,7 @@ curl -L -o 车型清单.doc -H "User-Agent: ..." -H "Referer: https://www.miit.g
 # 转纯文本
 textutil -convert txt -output 车型清单.txt 车型清单.doc
 # 解析（相对 --output 落在 data/vehicle_tax/ 下）
-python3 MIIT/scripts/03_parse_vehicle_tax.py \
+python3 MIIT/scripts/04_parse_vehicle_tax.py \
   --input data/vehicle_tax/车型清单_第89批车船税.txt \
   --output 车型清单_第89批车船税 --batch "第八十九批" --date "2026-08-07"
 ```
@@ -276,47 +292,47 @@ python3 MIIT/scripts/03_parse_vehicle_tax.py \
 
 ### 关键字段映射
 
-通用名称、电池容量（`动力蓄电池总能量_kWh`）、纯电续航（`纯电动续驶里程_km`）、整备质量（`整车整备质量_kg`）等字段供 P4 / P5 使用。
+通用名称、电池容量（`动力蓄电池总能量_kWh`）、纯电续航（`纯电动续驶里程_km`）、整备质量（`整车整备质量_kg`）等字段供 06/07 使用。
 
-## 管线 P4：参数宽表
+## 管线 07：参数宽表（derived）
 
 ```bash
-python3 MIIT/scripts/04_build_wide_table.py --batch 410   # → data/wide_tables/wide_table_410.{csv,md}
-python3 MIIT/scripts/04_build_wide_table.py --batch 410 --output-dir 自定义目录
+python3 MIIT/scripts/07_build_wide_table.py --batch 410   # → data/wide_tables/wide_table_410.{csv,md}
+python3 MIIT/scripts/07_build_wide_table.py --batch 410 --output-dir 自定义目录
 ```
 
 - 输出：`data/wide_tables/wide_table_{batch}.csv` + `.md`（含衍生指标汇总、供应商覆盖结构、垂直整合分类）
 - 新批次只需在 `workflow/batches.yaml` 登记 scan / 车船税文件名
 - 字段口径与衍生指标说明见 `data/wide_tables/README.md`
 
-## 管线 P4.5：统一 Dataset（canonical 事实层）
+## 管线 06：统一 Dataset（canonical 事实层）
 
 ```bash
-python3 MIIT/scripts/07_build_vehicle_dataset.py             # → data/vehicle_parameters/
-python3 MIIT/scripts/07_build_vehicle_dataset.py --batch 410 --output-dir /tmp/x   # 单批隔离输出
+python3 MIIT/scripts/06_build_vehicle_dataset.py             # → data/vehicle_parameters/
+python3 MIIT/scripts/06_build_vehicle_dataset.py --batch 410 --output-dir /tmp/x   # 单批隔离输出
 make -C MIIT miit-dataset
 ```
 
 - 从 `workflow/batches.yaml` 登记的全部批次构建两张规范表，**一车型一行**，身份 `vehicle_record_id = {batch_no}:{model_code}`
   - `product_master`：车型身份主表（batch_no/model_code/brand/manufacturer/product_name/common_name/detail_url/publish_date/source）
   - `vehicle_parameter`：车型参数事实表（尺寸/轴距/整备/电池/电芯·总成供应商/电机/容量·续航/增程器/衍生指标/质量标记）
-- 与 P4 宽表的区别：宽表按配置展开（一配置一行），统一 Dataset 一车型一行，多配置保留原始串 + `variant_count` 标记
+- 与 07 宽表的区别：宽表按配置展开（一配置一行），统一 Dataset 一车型一行，多配置保留原始串 + `variant_count` 标记
 - 字段契约见 `workflow/schemas/product_master.schema.json` / `vehicle_parameter.schema.json`
 - 口径说明见 `data/vehicle_parameters/README.md`
 
-## 管线 P4.5b：EIDC confirmed（fresh rebuild）
+## 管线 03+04/05+06：EIDC confirmed
 
 ```bash
-python3 MIIT/scripts/09_fetch_eidc_batch.py --batch 408     # source 抓取/解析/归档
-python3 MIIT/scripts/07_build_vehicle_dataset.py             # canonical（Gov + EIDC 统一）
-python3 MIIT/scripts/eidc_summary_fresh.py                   # 每批 fresh 验收
+python3 MIIT/scripts/03_fetch_eidc_batch.py --batch 408     # source 抓取/解析/归档
+python3 MIIT/scripts/06_build_vehicle_dataset.py             # canonical（Gov + EIDC 统一）
+python3 MIIT/scripts/validate_eidc_batch.py                   # 每批 fresh 验收
 ```
 
 - 输入：`data/eidc/batch_{401..408}/product_list.json`（fresh，eidc_parser 全量解析，含 `source_section`）
 - 流程：`normalize model_code → classify source record → passenger scope gate → tax/purchase enrichment → build_eidc_record → canonical`
 - 写入：`product_master` / `vehicle_parameter`，`source=eidc, stage=confirmed`，`observation_id={batch}:{model_code}:confirmed`
 - **canonical scope**：仅 `vehicle_category == passenger_vehicle`（`model_code valid AND passenger`）进入；非乘用车完整保留在 `data/eidc/` source archive
-- 超大附件（32MB 完整版目录）：`eidc_doc_extract.py`（olefile FIB 文本区提取）→ 03/10 parser
+- 超大附件（32MB 完整版目录）：`eidc_doc_extract.py`（olefile FIB 文本区提取）→ 04/05 parser
 - legacy 导入已随迁移删除（见 `data/eidc/migration_eidc_fresh_rebuild.json`）
 
 ### 观测时间轴（401–410）
@@ -327,12 +343,12 @@ python3 MIIT/scripts/eidc_summary_fresh.py                   # 每批 fresh 验�
 | 409–410 | miit_gov | proposed | 当前 Gov 公示 |
 | 409–410 未来 | eidc | confirmed | EIDC 同批正式发布后形成双观测 |
 
-## 管线 P5：报告
+## 管线 08/09：报告
 
 ### 单品牌车型对比（05）
 
 ```bash
-python3 MIIT/scripts/05_generate_brand_report.py \
+python3 MIIT/scripts/08_generate_brand_report.py \
   --batch 409 --brand 小米 \
   --output-dir batch_409/brand_report \
   --batch-label "第409批"
@@ -341,8 +357,8 @@ python3 MIIT/scripts/05_generate_brand_report.py \
 ### 分类车型对比（06）
 
 ```bash
-python3 MIIT/scripts/06_generate_category_report.py --batch 410 --category 一线新能源
-python3 MIIT/scripts/06_generate_category_report.py --batch 410 --all --output-dir batch_410/category_report
+python3 MIIT/scripts/09_generate_category_report.py --batch 410 --category 一线新能源
+python3 MIIT/scripts/09_generate_category_report.py --batch 410 --all --output-dir batch_410/category_report
 ```
 
 > 相对路径的 `--tax-json` / `--output-dir` 自动落在 `data/vehicle_tax` / `reports` 下。

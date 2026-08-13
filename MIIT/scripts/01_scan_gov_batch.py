@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-MIIT Pipeline P1: 品牌搜索 + 简报
+MIIT Pipeline P1: Gov 品牌搜索 + 简报
 
 用法:
-  python3 scripts/01_scan_batch.py              # 搜索 + 生成简报 + 保存扫描
-  python3 scripts/01_scan_batch.py --batch 410  # 指定批次
-  python3 scripts/01_scan_batch.py --from-scan  # 从已有扫描 MD 生成简报（跳过搜索）
-  python3 scripts/01_scan_batch.py --open       # 生成后自动打开浏览器
+  python3 scripts/01_scan_gov_batch.py              # 搜索 + 生成简报 + 保存扫描
+  python3 scripts/01_scan_gov_batch.py --batch 410  # 指定批次
+  python3 scripts/01_scan_gov_batch.py --from-scan  # 从已有扫描 MD 生成简报（跳过搜索）
+  python3 scripts/01_scan_gov_batch.py --open       # 生成后自动打开浏览器
 """
 
 import argparse

@@ -18,7 +18,7 @@ import olefile
 
 
 def doc_to_txt_ole(doc_path: Path) -> str:
-    """从 .doc 提取纯文本（含 \x07 表格分隔），供 03/10 parser 消费。"""
+    """从 .doc 提取纯文本（含 \x07 表格分隔），供 04/05 parser 消费。"""
     ole = olefile.OleFileIO(str(doc_path))
     try:
         data = ole.openstream("WordDocument").read()

@@ -10,9 +10,9 @@ MIIT Pipeline P4.7: EIDC 正式公告抓取 + 解析 + 归档（source 层编排
   - 不继承 legacy product_list 字段位置假设
 
 用法:
-  python3 scripts/09_fetch_eidc_batch.py --batch 408
-  python3 scripts/09_fetch_eidc_batch.py --batch 408 --discovery-only
-  python3 scripts/09_fetch_eidc_batch.py --batch 408 --no-download
+  python3 scripts/03_fetch_eidc_batch.py --batch 408
+  python3 scripts/03_fetch_eidc_batch.py --batch 408 --discovery-only
+  python3 scripts/03_fetch_eidc_batch.py --batch 408 --no-download
 
 产出（沿用 Source Archive Contract）：
   data/eidc/batch_408/

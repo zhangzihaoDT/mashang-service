@@ -22,13 +22,13 @@ EIDC 正式公告（miit-eidc.org.cn）作为 confirmed source，与 Gov propose
 
 ```
 EIDC 官方公告页
-  → 09_fetch_eidc_batch.py（source 抓取/解析/归档）
+  → 03_fetch_eidc_batch.py（source 抓取/解析/归档）
   → data/eidc/batch_{N}/（product_list.json + import_manifest + 附件 evidence）
-  → 07_build_vehicle_dataset.py（canonical 唯一入口，与 Gov 共用）
+  → 06_build_vehicle_dataset.py（canonical 唯一入口，与 Gov 共用）
   → data/vehicle_parameters/（source=eidc, stage=confirmed）
 ```
 
-- **source 层**（`eidc_source.py` / `eidc_parser.py`）只回答"官方页面提供了什么"；**领域解释**在 `vehicle_record_builder.py`；**canonical writer** 只有 `07`。
+- **source 层**（`eidc_source.py` / `eidc_parser.py`）只回答"官方页面提供了什么"；**领域解释**在 `vehicle_record_builder.py`；**canonical writer** 只有 `06`。
 - 当前 **401-408 全部为 fresh rebuild**（官方公告 → 全量解析 → passenger scope gate），legacy 导入已删除。
 - 分类维度 `vehicle_category` / `analysis_scope` 为派生，不参与 identity。
 - **canonical scope**：Source archive 保留全量道路机动车辆；`vehicle_parameters/` 只落乘用车（`model_code valid AND vehicle_category==passenger_vehicle`）。Gov/EIDC 共用同一 `is_canonical_in_scope()` gate。
@@ -50,9 +50,9 @@ MIIT/
 ├── README.md
 ├── Makefile
 ├── reports/       ① 最终报告（batch_409/ batch_410/）
-├── data/          ② 事实数据（search_results/ vehicle_details/ vehicle_photos/ raw_html/ vehicle_tax/ vehicle_parameters/ wide_tables/ fetch_status/）
-├── scripts/       ③ 执行脚本（01~07 按管线编号平铺 + miit_gov_search / miit_paths / vehicle_record_builder / report_common / tests）
-├── runs/          ④ 运行记录（batch_409.md batch_410.md）
+├── data/          ② 事实数据（eidc/ search_results/ vehicle_details/ vehicle_photos/ raw_html/ vehicle_tax/ vehicle_parameters/ wide_tables/ fetch_status/）
+├── scripts/       ③ 执行脚本（01~09 管线 entrypoint 平铺；未编号 = 内部实现/validation）
+├── runs/          ④ 运行记录（batch_409.md batch_410.md eidc_fresh_rebuild.md）
 └── workflow/      ⑤ 规则与配置（pipeline.md commands.md batches.yaml brand_watchlist.yaml model_name_map.json schemas/ docs/）
 ```
 

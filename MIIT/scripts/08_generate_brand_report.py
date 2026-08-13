@@ -8,7 +8,7 @@ MIIT Pipeline P5: 单品牌车型对比报告
   3. 每组生成一个对比报告：公共参数 + 差异分列
 
 用法:
-  python3 scripts/05_generate_brand_report.py \
+  python3 scripts/08_generate_brand_report.py \
     --batch 409 --brand 小米 \
     --tax-json 车型清单_第88批车船税.json \
     --output-dir batch_409/brand_report \

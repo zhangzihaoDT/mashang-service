@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "MIIT Product Master Row",
-  "description": "车型身份主表：一车型一行（canonical 层，由 07_build_vehicle_dataset / 08_import_eidc_history 产出）。身份 vehicle_record_id = \"{batch_no}:{model_code}\"，同一 model_code 跨批次再次申报视为不同版本记录。观测维度 observation_id = \"{batch_no}:{model_code}:{stage}\"。",
+  "description": "车型身份主表：一车型一行（canonical 层，由 06_build_vehicle_dataset 产出）。身份 vehicle_record_id = \"{batch_no}:{model_code}\"，同一 model_code 跨批次再次申报视为不同版本记录。观测维度 observation_id = \"{batch_no}:{model_code}:{stage}\"。",
   "type": "object",
   "required": ["vehicle_record_id", "batch_no", "model_code", "brand", "manufacturer", "product_name"],
   "properties": {

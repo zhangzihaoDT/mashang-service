@@ -1,6 +1,6 @@
 # wide_tables/ —— 参数宽表
 
-P4 参数宽表（`04_build_wide_table.py` 产出），从 附件1 详情页 + 附件2 车船税 合并生成。
+P4 参数宽表（`07_build_wide_table.py` 产出），从 附件1 详情页 + 附件2 车船税 合并生成。
 
 ```
 wide_tables/
@@ -59,7 +59,7 @@ wide_tables/
 ## 生成
 
 ```bash
-python3 MIIT/scripts/04_build_wide_table.py --batch 410
+python3 MIIT/scripts/07_build_wide_table.py --batch 410
 ```
 
 新批次只需在 `workflow/batches.yaml` 登记 scan / 车船税文件名即可复用。

@@ -12,8 +12,8 @@ MIIT 车船税目录解析器（Pipeline P3）
 - 尾部空列：每个表格右侧有一列空单元格（Word 导出残余）
 
 用法:
-  python3 scripts/03_parse_vehicle_tax.py --input 车型清单.txt --output 车型清单_第89批车船税
-  python3 scripts/03_parse_vehicle_tax.py --input 车型清单.txt --output 车型清单_第89批车船税 --batch "第八十九批"
+  python3 scripts/04_parse_vehicle_tax.py --input 车型清单.txt --output 车型清单_第89批车船税
+  python3 scripts/04_parse_vehicle_tax.py --input 车型清单.txt --output 车型清单_第89批车船税 --batch "第八十九批"
 
 相对路径的 --output 前缀将落在 data/vehicle_tax/ 下。
 """

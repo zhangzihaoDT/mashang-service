@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-MIIT 报告公共逻辑（P5 共享）—— 05_generate_brand_report 与 06_generate_category_report 共用。
+MIIT 报告公共逻辑（08/09 共享）—— 08_generate_brand_report 与 09_generate_category_report 共用。
 
 包含：详情 .md 读取、车船税索引、名称映射、参数提取、车型分组、对比表格渲染、车型发现。
 """

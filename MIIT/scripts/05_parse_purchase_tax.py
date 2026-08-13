@@ -3,7 +3,7 @@
 MIIT 购置税目录解析器（Pipeline P3 同族的 regulatory source parser）
 
 解析《减免车辆购置税的新能源汽车车型目录》附件（.doc → .txt）。
-与 03_parse_vehicle_tax.py 同属 regulatory source parser。
+与 04_parse_vehicle_tax.py 同属 regulatory source parser。
 
 实际结构（textutil 导出，\x07 扁平表格）：
   每行 = 表头（序号/汽车生产企业名称/车辆型号/通用名称/产品名称/续航/整备/电池...）
@@ -19,8 +19,8 @@ MIIT 购置税目录解析器（Pipeline P3 同族的 regulatory source parser�
   纯电动续驶里程 / 整车整备质量 / 动力蓄电池组总质量 / 动力蓄电池组总能量
 
 用法:
-  python3 scripts/10_parse_purchase_tax.py --input 购置税.txt --output 车型清单_第32批购置税
-  python3 scripts/10_parse_purchase_tax.py --input ... --output ... --batch "第三十二批" --date 2026-07-17
+  python3 scripts/05_parse_purchase_tax.py --input 购置税.txt --output 车型清单_第32批购置税
+  python3 scripts/05_parse_purchase_tax.py --input ... --output ... --batch "第三十二批" --date 2026-07-17
 """
 
 import argparse

@@ -43,7 +43,7 @@ WATCHLIST_PATH = WORKFLOW_DIR / "brand_watchlist.yaml"
 NAME_MAP_PATH = WORKFLOW_DIR / "model_name_map.json"
 BATCHES_PATH = WORKFLOW_DIR / "batches.yaml"
 
-# 批次索引文档（01_scan_batch 管线会更新它）
+# 批次索引文档（01_scan_gov_batch 管线会更新它）
 BATCH_INDEX_DOC = WORKFLOW_DOCS_DIR / "公告批次.md"
 
 DEFAULT_BATCH = "409"

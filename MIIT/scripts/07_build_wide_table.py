@@ -19,8 +19,8 @@ Derived metrics:
   - 电池供应商装机结构: supplier count per brand (summary output)
 
 用法:
-  python3 scripts/04_build_wide_table.py --batch 410
-  python3 scripts/04_build_wide_table.py --batch 410 --output-dir 自定义目录
+  python3 scripts/07_build_wide_table.py --batch 410
+  python3 scripts/07_build_wide_table.py --batch 410 --output-dir 自定义目录
 """
 
 import csv

@@ -24,8 +24,8 @@ records。Gov（miit_gov/proposed）与 EIDC（eidc/confirmed）两条 branch �
 领域逻辑统一来自 vehicle_record_builder（与 04 宽表共用）。
 
 用法:
-  python3 scripts/07_build_vehicle_dataset.py                      # 构建全部批次（默认输出 canonical 层）
-  python3 scripts/07_build_vehicle_dataset.py --batch 410 --output-dir 自定义目录   # 只构建单批（隔离输出，避免覆盖全量）
+  python3 scripts/06_build_vehicle_dataset.py                      # 构建全部批次（默认输出 canonical 层）
+  python3 scripts/06_build_vehicle_dataset.py --batch 410 --output-dir 自定义目录   # 只构建单批（隔离输出，避免覆盖全量）
 """
 
 import json

@@ -1,4 +1,8 @@
-"""MIIT 模块 CLI 冒烟测试：验证所有旧入口可用（--help 可执行）。"""
+"""MIIT 模块 CLI 冒烟测试：验证所有可执行 pipeline entrypoint 可用（--help 可执行）。
+
+01–09 = pipeline stages（编号表达 pipeline topology，非开发顺序）；
+未编号模块（eidc_source / eidc_parser / vehicle_record_builder / ...）是内部实现，不在此列。
+"""
 import subprocess
 import sys
 from pathlib import Path
@@ -6,18 +10,17 @@ from pathlib import Path
 MIIT = Path(__file__).resolve().parents[2]
 
 ENTRY_POINTS = [
-    "scripts/miit_gov_search.py",
-    "scripts/01_scan_batch.py",
-    "scripts/02_archive_vehicle_details.py",
-    "scripts/03_parse_vehicle_tax.py",
-    "scripts/04_build_wide_table.py",
-    "scripts/05_generate_brand_report.py",
-    "scripts/06_generate_category_report.py",
-    "scripts/07_build_vehicle_dataset.py",
-    "scripts/09_fetch_eidc_batch.py",
-    "scripts/10_parse_purchase_tax.py",
+    "scripts/01_scan_gov_batch.py",
+    "scripts/02_archive_gov_vehicle_details.py",
+    "scripts/03_fetch_eidc_batch.py",
+    "scripts/04_parse_vehicle_tax.py",
+    "scripts/05_parse_purchase_tax.py",
+    "scripts/06_build_vehicle_dataset.py",
+    "scripts/07_build_wide_table.py",
+    "scripts/08_generate_brand_report.py",
+    "scripts/09_generate_category_report.py",
     "scripts/eidc_doc_extract.py",
-    "scripts/eidc_summary_fresh.py",
+    "scripts/validate_eidc_batch.py",
 ]
 
 

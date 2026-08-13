@@ -5,7 +5,7 @@
 **进入 canonical 时**：`source=eidc, stage=confirmed`，且 **仅 `vehicle_category == passenger_vehicle`** 进入 `data/vehicle_parameters/`。
 
 > **Source Archive = full regulatory universe；Canonical Dataset = passenger vehicle business scope。**
-> 本层（data/eidc/）保留全部商用车/摩托车/挂车/专用车 source evidence；canonical 收敛只发生在 07 build 的 passenger scope gate。
+> 本层（data/eidc/）保留全部商用车/摩托车/挂车/专用车 source evidence；canonical 收敛只发生在 06 build 的 passenger scope gate。
 
 ### ⚠ 架构约束：Passenger eligibility = source-record 级 existential
 
@@ -17,7 +17,7 @@
 
 - **gate 必须逐 source record 执行、在 by model_code 聚合之前**（`classify_source_record` 先于 `match_eidc_enrichment`）。
 - **禁止**把 gate 移到聚合之后按"首条记录分类"判定——会漏掉同 chassis 多车型（旅居车/商务车 + 救护车/巡逻车等）的乘用变体（如 407:KLF5040X、408:JKF5030X）。
-- 该语义已落档：`scripts/vehicle_record_builder.py`（gate 常量区）+ `scripts/07_build_vehicle_dataset.py:build_eidc_rows`。
+- 该语义已落档：`scripts/vehicle_record_builder.py`（gate 常量区）+ `scripts/06_build_vehicle_dataset.py:build_eidc_rows`。
 
 ---
 
@@ -25,7 +25,7 @@
 
 ```
 官方公告页 (miit-eidc.org.cn)
-   ↓ 09_fetch_eidc_batch.py（source orchestration）
+   ↓ 03_fetch_eidc_batch.py（source orchestration）
    ↓   [1] fetch announcement page + parse metadata
    ↓   [2] download attachments (.doc)   → attachments/
    ↓   [3] doc → txt (textutil)          → attachment_text_src/
@@ -34,7 +34,7 @@
    ↓
 data/eidc/batch_{N}/
    ↓
-07_build_vehicle_dataset.py（canonical 唯一入口）
+06_build_vehicle_dataset.py（canonical 唯一入口）
    ├─ Gov proposed（batches.yaml 409/410）→ build_rows
    └─ EIDC confirmed（自动遍历 data/eidc/ 401-408）→ build_eidc_rows
         ├─ normalize model_code → classify source record（classify_source_record）
@@ -53,10 +53,10 @@ data/vehicle_parameters/product_master + vehicle_parameter
 |---|---|---|---|
 | Source 层 | `scripts/eidc_source.py` | 网络抓取 / 附件下载 / doc→txt / sha256 | canonical 字段推断 |
 | Parser 层 | `scripts/eidc_parser.py` | 解析 EIDC 数据结构 → source record（`*_raw` + `source_section`） | 领域语义解释 |
-| Parser 层 | `scripts/03_parse_vehicle_tax.py` | 车船税目录（附件2）解析 | — |
-| Parser 层 | `scripts/10_parse_purchase_tax.py` | 购置税目录（附件3）解析 | — |
+| Parser 层 | `scripts/04_parse_vehicle_tax.py` | 车船税目录（附件2）解析 | — |
+| Parser 层 | `scripts/05_parse_purchase_tax.py` | 购置税目录（附件3）解析 | — |
 | 公共领域层 | `scripts/vehicle_record_builder.py` | `build_eidc_record` / `normalize_model_code` / `classify_vehicle_type` / 衍生指标 | parse_eidc_html/xml |
-| Canonical 层 | `scripts/07_build_vehicle_dataset.py` | 唯一 Dataset writer | 第二个 builder |
+| Canonical 层 | `scripts/06_build_vehicle_dataset.py` | 唯一 Dataset writer | 第二个 builder |
 
 > 边界原则：**EIDC source 层回答"官方页面提供了什么"；vehicle_record_builder 回答"这些字段在统一车型模型里意味着什么"。** 不分叉、不建第二套 canonical writer。
 
@@ -154,26 +154,24 @@ eidc/
 
 ```bash
 # fresh 抓取 + 解析（source 层）
-python3 MIIT/scripts/09_fetch_eidc_batch.py --batch 408
-python3 MIIT/scripts/09_fetch_eidc_batch.py --batch 408 --discovery-only   # 只抓公告页元数据
-python3 MIIT/scripts/09_fetch_eidc_batch.py --batch 407 --offline          # 网络不可用时复用缓存 raw_metadata
+python3 MIIT/scripts/03_fetch_eidc_batch.py --batch 408
+python3 MIIT/scripts/03_fetch_eidc_batch.py --batch 408 --discovery-only   # 只抓公告页元数据
+python3 MIIT/scripts/03_fetch_eidc_batch.py --batch 407 --offline          # 网络不可用时复用缓存 raw_metadata
 
 # 超大附件（textutil 失败）备用提取
 python3 MIIT/scripts/eidc_doc_extract.py --input a.doc --output a.txt       # olefile FIB 文本区提取
 
-# regulatory 附件解析（03/10 输出落 data/vehicle_tax/）
-python3 MIIT/scripts/03_parse_vehicle_tax.py --input 附件2.txt --output 车型清单_第87批车船税 --batch 第八十七批 --date 2026-07-17
-python3 MIIT/scripts/10_parse_purchase_tax.py --input 附件3.txt --output 车型清单_第32批购置税 --batch 第三十二批 --date 2026-07-17
+# regulatory 附件解析（04/05 输出落 data/vehicle_tax/）
+python3 MIIT/scripts/04_parse_vehicle_tax.py --input 附件2.txt --output 车型清单_第87批车船税 --batch 第八十七批 --date 2026-07-17
+python3 MIIT/scripts/05_parse_purchase_tax.py --input 附件3.txt --output 车型清单_第32批购置税 --batch 第三十二批 --date 2026-07-17
 
 # canonical 构建（唯一入口）
-python3 MIIT/scripts/07_build_vehicle_dataset.py
+python3 MIIT/scripts/06_build_vehicle_dataset.py
 
 # 每批 fresh summary（轻量验收）
-python3 MIIT/scripts/eidc_summary_fresh.py
+python3 MIIT/scripts/validate_eidc_batch.py
 
 # benchmark（验证 source → canonical 全链路）
-python3 MIIT/scripts/eidc_benchmark_408.py
-python3 MIIT/scripts/eidc_benchmark_407.py
 
 # 测试
 python3 -m pytest MIIT/scripts/tests -q
@@ -197,6 +195,6 @@ python3 -m pytest MIIT/scripts/tests -q
 - **401-408 全部为 fresh rebuild / confirmed**（2026-08 fresh 重建完成；legacy 导入已删除，见 `migration_eidc_fresh_rebuild.json`）。
 - canonical 收敛为乘用车：`data/vehicle_parameters/` 只落 `vehicle_category==passenger_vehicle`（`model_code valid AND passenger`）。
 - source raw valid 列显示**全量**道路机动车辆（含商用车/摩托车/挂车），证明 parser 未漏官方数据；canonical 只保留乘用车业务对象。
-- **超大附件**（如 402 购置税26批、403 车船税82批，完整版 32MB 目录）：textutil 无法转换，用 `eidc_doc_extract.py`（olefile FIB 文本区提取）处理后走 03/10 parser。
+- **超大附件**（如 402 购置税26批、403 车船税82批，完整版 32MB 目录）：textutil 无法转换，用 `eidc_doc_extract.py`（olefile FIB 文本区提取）处理后走 04/05 parser。
 - 402 的购置税为两批（第二十五、二十六批），manifest `purchase_tax_batch="25,26"` 逗号分隔。
-- 每批验收：`eidc_summary_fresh.py`（batch/announcement/raw/valid/passenger/multi_brand/tax hit/schema_status）。
+- 每批验收：`validate_eidc_batch.py`（batch/announcement/raw/valid/passenger/multi_brand/tax hit/schema_status）。

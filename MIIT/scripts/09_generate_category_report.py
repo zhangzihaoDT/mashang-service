@@ -5,15 +5,15 @@ MIIT Pipeline P5: 分类车型对比报告
 按 watchlist 分类生成单一 HTML，包含该分类下所有品牌的车型对比。
 
 用法:
-  python3 scripts/06_generate_category_report.py --category 一线新能源
-  python3 scripts/06_generate_category_report.py --category 一线新能源 --tax-json 车型清单_第88批车船税.json
-  python3 scripts/06_generate_category_report.py --all
+  python3 scripts/09_generate_category_report.py --category 一线新能源
+  python3 scripts/09_generate_category_report.py --category 一线新能源 --tax-json 车型清单_第88批车船税.json
+  python3 scripts/09_generate_category_report.py --all
 
 输入：workflow/brand_watchlist.yaml + data/vehicle_details/ + data/vehicle_tax/。
 输出：reports/batch_{batch}/（相对 --output-dir 落在 reports 下）。
 
 命令示例：
-  python3 scripts/06_generate_category_report.py --batch 410 --all --output-dir batch_410/category_report
+  python3 scripts/09_generate_category_report.py --batch 410 --all --output-dir batch_410/category_report
 """
 
 import argparse

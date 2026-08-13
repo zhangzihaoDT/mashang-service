@@ -54,9 +54,9 @@ python mashang_workspace/research_scripts/release_curve_analysis.py
 python mashang_workspace/research_scripts/cohort_forecast.py
 
 # MIIT 公告情报（MIIT/ 模块，workspace 旧实现已迁移移除）
-python3 MIIT/scripts/04_build_wide_table.py --batch 410
-python3 MIIT/scripts/07_build_vehicle_dataset.py
-python3 MIIT/scripts/08_import_eidc_history.py
+python3 MIIT/scripts/07_build_wide_table.py --batch 410
+python3 MIIT/scripts/06_build_vehicle_dataset.py
+python3 MIIT/scripts/validate_eidc_batch.py
 
 # VOC 分析（utility）
 python mashang_workspace/utility_scripts/voc_theme_analysis.py

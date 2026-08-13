@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-EIDC 401-408 fresh rebuild summary — 每批一张验收表（轻量）
+EIDC 批次验收 — 每批一张验收表（通用，非 fresh/legacy 迁移期专用）
 
 每批输出：
   batch / announcement / raw_rows / valid_rate / passenger_source_rows / passenger_canonical_rows
@@ -9,8 +9,8 @@ EIDC 401-408 fresh rebuild summary — 每批一张验收表（轻量）
 schema_status=REVIEW 才需深入附件。
 
 用法:
-  python3 scripts/eidc_summary_fresh.py
-  python3 scripts/eidc_summary_fresh.py --batch 403
+  python3 scripts/validate_eidc_batch.py
+  python3 scripts/validate_eidc_batch.py --batch 403
 """
 import argparse
 import csv
