@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEV-APEAL 2024 要点数据验证报告</title>
+<style>
+  :root {
+    --blue:#174A7C; --deep:#06213D; --cyan:#7ECDEB; --light:#DDEFF8;
+    --cream:#FFF9EF; --gold:#D79A36; --text:#1F2D3D; --muted:#6B7C8F; --card:#fff;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+         background:var(--cream); color:var(--text); line-height:1.7; padding:32px 16px; }
+  .container { max-width:1000px; margin:0 auto; }
+  header { background:var(--deep); color:#fff; border-radius:16px; padding:36px 42px; margin-bottom:24px; }
+  header h1 { font-size:24px; }
+  header .sub { color:var(--cyan); font-size:13px; margin-top:8px; }
+  header .meta { margin-top:16px; font-size:12.5px; color:#B9CFE0; display:flex; flex-wrap:wrap; gap:6px 22px; }
+  header .meta b { color:#fff; }
+  .summary { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px; }
+  .stat { border-radius:12px; padding:18px; text-align:center; }
+  .stat .n { font-size:30px; font-weight:700; }
+  .stat .l { font-size:13px; color:var(--muted); margin-top:2px; }
+  .card { background:var(--card); border-radius:12px; padding:22px 26px; margin-bottom:16px;
+          box-shadow:0 1px 4px rgba(23,74,124,.08); border-left:4px solid var(--blue); }
+  .card-head { display:flex; align-items:flex-start; gap:12px; margin-bottom:8px; }
+  .card-head .num { font-size:20px; font-weight:700; color:var(--blue); min-width:34px; }
+  .card-head h3 { font-size:15px; color:var(--deep); flex:1; }
+  .badge { font-size:12px; font-weight:600; border-radius:8px; padding:3px 10px; white-space:nowrap; }
+  .method { font-size:12px; color:var(--muted); margin-bottom:8px; }
+  .evidence { padding-left:20px; margin:8px 0; }
+  .evidence li { font-size:13px; margin-bottom:3px; }
+  .conclusion { background:var(--light); border-radius:8px; padding:10px 14px; font-size:13px; }
+  .conclusion b { color:var(--deep); }
+  footer { text-align:center; color:var(--muted); font-size:12px; padding:20px 0 8px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>NEV-APEAL 2024 要点 · 数据验证报告</h1>
+    <div class="sub">用 24 NEV-APEAL数据片段.sav 逐条验证要点文档</div>
+    <div class="meta">
+      <span>数据源: <b>dataset/24 NEV-APEAL数据片段.sav</b></span>
+      <span>样本: <b>9,937 行</b>（2023 交付 9402 · 2024 交付 535）</span>
+      <span>脚本: <b>scripts/verify_nev_apeal_2024.py</b></span>
+      <span>要点: <b>24 条</b></span>
+    </div>
+  </header>
+
+  <div class="summary">
+        <div class="stat" style="background:#E4F4EC">
+          <div class="n" style="color:#1B7F4B">4</div>
+          <div class="l">支持</div>
+        </div>
+        <div class="stat" style="background:#FBF0E3">
+          <div class="n" style="color:#B0692A">12</div>
+          <div class="l">部分支持</div>
+        </div>
+        <div class="stat" style="background:#FBE7E8">
+          <div class="n" style="color:#B0262A">1</div>
+          <div class="l">数据不支持</div>
+        </div>
+        <div class="stat" style="background:#EFF3F7">
+          <div class="n" style="color:#6B7C8F">7</div>
+          <div class="l">数据不足</div>
+        </div></div>
+
+  
+        <div class="card">
+          <div class="card-head">
+            <span class="num">01</span>
+            <h3>中国 NEV-APEAL 持续增长，2024 年达到 789 分，增速放缓；焦虑由燃油经济性/续航转向安全性</h3>
+            <span class="badge" style="background:#FBF0E3;color:#B0692A">部分支持</span>
+          </div>
+          <div class="method">验证方法：APEAL_Index 加权均值；按交付年份分组</div>
+          <ul class="evidence"><li>APEAL_Index 加权均值 = 789.2（要点称 789）</li><li>2023 交付 9402 加权 789.5；2024 交付 535 加权 783.4（2024 样本少，仅参考）</li><li>能耗续航 AFUEL=795.6 vs 安全 ASFTY=779.6（横截面水平，无法测焦虑变化）</li></ul>
+          <div class="conclusion"><b>结论：</b>得分 789 得到数据支持（实测 789.2）；增速放缓与焦虑转向为跨年趋势，单年数据无法直接验证，仅能给出横截面水平参考。</div>
+        </div>
+        
+
+        <div class="card">
+          <div class="card-head">
+            <span class="num">02</span>
+            <h3>增换购用户比例持续攀升，各购买群体偏好不同</h3>
+            <span class="badge" style="background:#FBF0E3;color:#B0692A">部分支持</span>
+          </div>
+          <div class="method">验证方法：YPV_01 分布 + 各群体指数加权均值</div>
+          <ul class="evidence"><li>购买类型分布（当前样本）：{&#x27;It replaces another vehicle&#x27;: &#x27;12.9%&#x27;, &#x27;It is an additional vehicle to my household&#x27;: &#x27;25.0%&#x27;, &#x27;It is the first ever vehicle for my household&#x27;: &#x27;62.2%&#x27;}</li><li>换购（n=1279）：能耗/续航 AFUEL=780.2，外观 AEXT=812.5，内饰 AINT=774.5</li><li>增购（n=2481）：能耗/续航 AFUEL=798.6，外观 AEXT=832.4，内饰 AINT=789.0</li><li>首购（n=6177）：能耗/续航 AFUEL=797.4，外观 AEXT=813.1，内饰 AINT=776.5</li></ul>
+          <div class="conclusion"><b>结论：</b>当前样本中首购占比最高；各群体指数水平差异可见（见证据），但&#x27;比例攀升&#x27;与&#x27;增幅&#x27;为跨年趋势，需多年数据验证。</div>
+        </div>
+        
+
+        <div class="card">
+          <div class="card-head">
+            <span class="num">03</span>
+            <h3>国际品牌和自主新势力形成产品力整体领先，传统自主和自主新创品牌快速提升</h3>
+            <span class="badge" style="background:#FBF0E3;color:#B0692A">部分支持</span>
+          </div>
+          <div class="method">验证方法：品牌阵营分组 × APEAL_Index 加权均值</div>
+          <ul class="evidence"><li>国际品牌：APEAL=799.6（n=1829）</li><li>自主新势力：APEAL=799.0（n=1840）</li><li>自主新创品牌：APEAL=788.8（n=1762）</li><li>传统自主品牌：APEAL=782.7（n=4506）</li></ul>
+          <div class="conclusion"><b>结论：</b>当前横截面看各阵营产品力排序（见证据）；&#x27;快速提升&#x27;为跨年趋势，单年数据无法验证。</div>
+        </div>
+        
+
+        <div class="card">
+          <div class="card-head">
+            <span class="num">04</span>
+            <h3>女性 NEV-APEAL 增长高于男性，外观造型更容易打动女性</h3>
+            <span class="badge" style="background:#FBF0E3;color:#B0692A">部分支持</span>
+          </div>
+          <div class="method">验证方法：GENDER × APEAL_Index 加权均值</div>
+          <ul class="evidence"><li>Female（n=3339）：APEAL=792.0</li><li>Male（n=6506）：APEAL=787.2</li></ul>
+          <div class="conclusion"><b>结论：</b>当前横截面可比较男女得分水平（见证据）；&#x27;增长更高&#x27;为跨年趋势，单年数据无法验证。</div>
+        </div>
+        
+
+        <div class="card">
+          <div class="card-head">
+            <span class="num">05</span>
+            <h3>车型 NEV-APEAL 得分及销量集中度逐年提升，差距逐步减小</h3>
+            <span class="badge" style="background:#EFF3F7;color:#6B7C8F">数据不足</span>
+          </div>
+          <div class="method">验证方法：阵营间 APEAL 极差（无销量数据）</div>
+          <ul class="evidence"><li>品牌阵营间 APEAL 极差 = 16.8（最高 国际品牌 799.6 / 最低 传统自主品牌 782.7）</li><li>数据片段无销量字段，无法验证销量集中度</li></ul>
+          <div class="conclusion"><b>结论：</b>无销量数据，无法验证销量集中度；阵营得分差距可见当前横截面水平，但&#x27;逐年提升/差距减小&#x27;为趋势，无法验证。</div>
+        </div>
+        
+
+        <div class="card">
+          <div class="card-head">
+            <span class="num">06</span>
+            <h3>自主新势力通过产品力进步提升份额，国际品牌份额止跌，自主新创品牌成熟</h3>
+            <span class="badge" style="background:#EFF3F7;color:#6B7C8F">数据不足</span>
+          </div>
+          <div class="method">验证方法：阵营样本占比（非市场份额）</div>
+          <ul class="evidence"><li>当前样本品牌阵营占比：{&#x27;传统自主品牌&#x27;: &#x27;45.3%&#x27;, &#x27;自主新势力&#x27;: &#x27;18.5%&#x27;, &#x27;国际品牌&#x27;: &#x27;18.4%&#x27;, &#x27;自主新创品牌&#x27;: &#x27;17.7%&#x27;}</li><li>注：样本占比 ≠ 市场份额，无销量数据</li></ul>
+          <div class="conclusion"><b>结论：</b>无销量/市场份额数据，无法验证份额变化；仅能给出样本结构参考。</div>
+        </div>
+        
+
+        <div class="card">
+          <div class="card-head">
+            <span class="num">07</span>
+            <h3>国际品牌向下兼容，自主新势力向上扩展，传统自主在 10 万以上全面下降但靠自主新创高端化</h3>
+            <span class="badge" style="background:#EFF3F7;color:#6B7C8F">数据不足</span>
+          </div>
+          <div class="method">验证方法：价格段 × 阵营占比（样本结构，非市场份额）</div>
+          <ul class="evidence"><li>10万以下：传统自主品牌 76.6%, 国际品牌 0.6%, 自主新创品牌 9.7%, 自主新势力 13.1%</li><li>10-20万：传统自主品牌 58.4%, 国际品牌 15.2%, 自主新创品牌 14.6%, 自主新势力 11.8%</li><li>20-40万：传统自主品牌 25.4%, 国际品牌 25.3%, 自主新创品牌 23.7%, 自主新势力 25.7%</li><li>40万以上：传统自主品牌 0.2%, 国际品牌 40.1%, 自主新创品牌 24.2%, 自主新势力 35.6%</li></ul>
+          <div class="conclusion"><b>结论：</b>可看到各价位段内阵营的样本结构（见证据），但这是抽样占比而非市场份额，且无跨年数据验证&#x27;份额变化&#x27;。</div>
+        </div>
+        
+
+        <div class="card">
+          <div class="card-head">
+            <span class="num">08</span>
+            <h3>配置下放大幅提升低价位车型满意度；40 万以上豪华车主期待更高但产品力无法满足</h3>
+            <span class="badge" style="background:#FBF0E3;color:#B0692A">部分支持</span>
+          </div>
+          <div class="method">验证方法：价格段 × APEAL_Index 加权均值</div>
+          <ul class="evidence"><li>10万以下：APEAL=781.4（n=1386）</li><li>10-20万：APEAL=784.9（n=4053）</li><li>20-40万：APEAL=800.5（n=3357）</li><li>40万以上：APEAL=791.3（n=654）</li></ul>
+          <div class="conclusion"><b>结论：</b>当前横截面各价位段满意度水平可见（见证据）；&#x27;配置下放提升&#x27;与&#x27;期待更高&#x27;需配置-满意度关联及多年数据，仅部分验证。</div>
+        </div>
+        
+
+        <div class="card">
+          <div class="card-head">
+            <span class="num">09</span>
+            <h3>国际品牌在占主流的四门 SUV 及轿车市场 2024 年来到各品牌阵营中最高</h3>
+            <span class="badge" style="background:#FBF0E3;color:#B0692A">部分支持</span>
+          </div>
+          <div class="method">验证方法：阵营 × 车身类型 × APEAL_Index</div>
+          <ul class="evidence"><li>轿车：最高=国际品牌 799.1 | 国际品牌 799.1, 自主新势力 797.6, 自主新创品牌 794.4, 传统自主品牌 778.6</li><li>SUV：最高=国际品牌 799.8 | 国际品牌 799.8, 自主新势力 799.3, 传统自主品牌 790.1, 自主新创品牌 790.0</li></ul>
+          <div class="conclusion"><b>结论：</b>横截面可看各阵营在轿车/SUV 市场的得分排名（见证据）；&#x27;2024 年来到最高&#x27;为趋势表述，单年数据部分支持。</div>
+        </div>
+        
+
+        <div class="card">
+          <div class="card-head">
+            <span class="num">10</span>
+            <h3>国际品牌在安全感因子显著领先，体现在车辆坚固性与事故保护性</h3>
+            <span class="badge" style="background:#E4F4EC;color:#1B7F4B">支持</span>
+          </div>
+          <div class="method">验证方法：阵营 × ASFTY_Index / ASFTY_R_02</div>
+          <ul class="evidence"><li>国际品牌：ASFTY 安全=791.8</li><li>自主新势力：ASFTY 安全=789.5</li><li>自主新创品牌：ASFTY 安全=778.3</li><li>传统自主品牌：ASFTY 安全=772.5</li><li>保护性感受（ASFTY_R_02，1-10 加权均值）：国际品牌 7.96, 自主新势力 7.90, 自主新创品牌 7.82, 传统自主品牌 7.71</li></ul>
+          <div class="conclusion"><b>结论：</b>横截面数据支持：国际品牌安全指数领先（见证据），保护性感受亦领先。</div>
+        </div>
+        
+
+        <div class="card">
+          <div class="card-head">
+            <span class="num">11</span>
+            <h3>非传统颜色更能提升新车魅力；个性色车主对颜色喜好度更高</h3>
+            <span class="badge" style="background:#FBE7E8;color:#B0262A">数据不支持</span>
+          </div>
+          <div class="method">验证方法：SCR_G_1 传统色/非传统色 × AEXT_Index / APEAL_Index / AEXT_R_01 / 外观要素提及</div>
+          <ul class="evidence"><li>传统色（白/灰/黑/银，n=8383）：AEXT 外观=818.3，APEAL=789.6</li><li>非传统色（蓝/红/其他，n=1554）：AEXT 外观=815.3，APEAL=786.8</li><li>外观造型评分 AEXT_R_01：传统色 8.18 vs 非传统色 8.15</li><li>&#x27;颜色&#x27;作为最爱外观要素提及率：传统色 3.4% vs 非传统色 2.3%</li></ul>
+          <div class="conclusion"><b>结论：</b>横截面数据显示方向与要点相反：传统色车主外观指数与整体 APEAL 反而更高，&#x27;颜色作为最爱外观要素&#x27;提及率也更低（见证据）。数据不支持该要点。</div>
+        </div>
+        
+
+        <div class="card">
+          <div class="card-head">
+            <span class="num">12</span>
+            <h3>白色、黑色为总体最受欢迎颜色；黑银随车价升高递增；个性色集中低价及非一线</h3>
+            <span class="badge" style="background:#E4F4EC;color:#1B7F4B">支持</span>
+          </div>
+          <div class="method">验证方法：SCR_G_1 × 价格段 × 城市层级</div>
+          <ul class="evidence"><li>颜色分布：White 3980（40.1%）, Black 2426（24.4%）, Grey 1421（14.3%）, Other 774（7.8%）</li><li>10万以下：黑 8.9% / 银 2.5% / 其他色 22.9%</li><li>10-20万：黑 19.0% / 银 5.7% / 其他色 5.7%</li><li>20-40万：黑 31.3% / 银 6.3% / 其他色 5.7%</li><li>40万以上：黑 44.1% / 银 6.4% / 其他色 3.4%</li><li>一线城市：其他个性色占比 5.7%</li><li>二线城市：其他个性色占比 7.6%</li><li>三线城市：其他个性色占比 9.7%</li><li>四线城市：其他个性色占比 13.1%</li></ul>
+          <div class="conclusion"><b>结论：</b>横截面数据支持：白黑占主导；黑色随价格上升；个性色在低价段与非一线城市占比更高（见证据）。</div>
+        </div>
+        
+
+        <div class="card">
+          <div class="card-head">
+            <span class="num">13</span>
+            <h3>隐藏外拉式门把手最受欢迎，传统外拉式及无门把手设计喜好度较低</h3>
+            <span class="badge" style="background:#EFF3F7;color:#6B7C8F">数据不足</span>
+          </div>
+          <div class="method">验证方法：数据片段无门把手类型变量</div>
+          <ul class="evidence"><li>数据片段中无门把手类型（隐藏外拉/传统外拉/无把手）字段，仅有 &#x27;AEXT_D_01 外观要素&#x27; 中 Door handle 作为外观喜好选项</li></ul>
+          <div class="conclusion"><b>结论：</b>数据不足：无法验证门把手类型偏好。</div>
+        </div>
+        
+
+        <div class="card">
+          <div class="card-head">
+            <span class="num">14</span>
+            <h3>座椅颜色选择一致性高，黑色最受欢迎，灰米次之</h3>
+            <span class="badge" style="background:#EFF3F7;color:#6B7C8F">数据不足</span>
+          </div>
+          <div class="method">验证方法：数据片段无座椅颜色变量</div>
+          <ul class="evidence"><li>数据片段中无座椅颜色字段（仅有座椅功能配置，如加热/通风/记忆）</li></ul>
+          <div class="conclusion"><b>结论：</b>数据不足：无法验证座椅颜色偏好。</div>
+        </div>
+        
+
+        <div class="card">
+          <div class="card-head">
+            <span class="num">15</span>
+            <h3>2023 年头部喜欢率屏幕设计以独立屏为主，副驾屏较少，大部分车型带仪表屏</h3>
+            <span class="badge" style="background:#EFF3F7;color:#6B7C8F">数据不足</span>
+          </div>
+          <div class="method">验证方法：数据片段无屏幕布局变量</div>
+          <ul class="evidence"><li>数据片段仅有屏幕数量 AINT_D_03，无独立屏/副驾屏/仪表屏布局字段</li></ul>
+          <div class="conclusion"><b>结论：</b>数据不足：无法验证屏幕布局设计。</div>
+        </div>
+        
+
+        <div class="card">
+          <div class="card-head">
+            <span class="num">16</span>
+            <h3>2024 年副驾专属屏幕比例大幅提升，仪表屏仍为主流</h3>
+            <span class="badge" style="background:#EFF3F7;color:#6B7C8F">数据不足</span>
+          </div>
+          <div class="method">验证方法：数据片段无屏幕布局变量</div>
+          <ul class="evidence"><li>同要点 15：无屏幕布局字段，无法对比 2023/2024 副驾屏比例</li></ul>
+          <div class="conclusion"><b>结论：</b>数据不足：无法验证屏幕布局趋势。</div>
+        </div>
+        
+
+        <div class="card">
+          <div class="card-head">
+            <span class="num">17</span>
+            <h3>车内屏幕数量增长放缓；用户更注重屏幕清晰度和界面设计</h3>
+            <span class="badge" style="background:#FBF0E3;color:#B0692A">部分支持</span>
+          </div>
+          <div class="method">验证方法：AINT_D_03 数量分布 + AINT_D_04/05 屏幕改进与喜爱项</div>
+          <ul class="evidence"><li>车内屏幕数量分布：1 屏 3086（31.1%）, 2 屏 5508（55.4%）, 3 屏 1235（12.4%）, 4 or above 屏 108（1.1%）</li><li>屏幕方面 · 最需改进：The sizes of screens and displays 1375（27.4%）, Color matching 957（19.1%）, The design of the interface 836（16.7%）, Number of screens and displays 586（11.7%）</li><li>屏幕方面 · 最喜欢：Picture clarity 1557（18.1%）, The feel of touch screen operation 1391（16.1%）, The design of the interface 1351（15.7%）, Screen response speed 1350（15.7%）</li></ul>
+          <div class="conclusion"><b>结论：</b>横截面可见屏幕数量分布与用户关注点（清晰度/界面为高频项）；&#x27;增长放缓&#x27;为跨年趋势，无法验证。</div>
+        </div>
+        
+
+        <div class="card">
+          <div class="card-head">
+            <span class="num">18</span>
+            <h3>2024 年皮革、翻毛皮使用比例显著上升；塑料/橡胶及碳素纤维比例下降；碳纤喜好度减弱</h3>
+            <span class="badge" style="background:#FBF0E3;color:#B0692A">部分支持</span>
+          </div>
+          <div class="method">验证方法：AINT_D_02 内装材料多选分布 + 材料 × 指数</div>
+          <ul class="evidence"><li>有效回答 n=9937</li><li>皮革：61.5%</li><li>翻毛皮：20.6%</li><li>塑料/橡胶：39.0%</li><li>碳素纤维：23.6%</li><li>木质：14.2%</li><li>镀铬/金属：26.5%</li><li>钢琴漆面板：18.2%</li><li>织物：31.9%</li><li>有皮革 vs 无：AINT 内饰 790.2 vs 762.7；APEAL 798.4 vs 775.0</li><li>有碳素纤维 vs 无：AINT 内饰 784.8 vs 777.7；APEAL 791.3 vs 788.5</li><li>有翻毛皮 vs 无：AINT 内饰 793.1 vs 775.8；APEAL 801.4 vs 786.0</li></ul>
+          <div class="conclusion"><b>结论：</b>横截面可验证当前各材料占比与材料-满意度关系（见证据）；&#x27;比例上升/下降&#x27;为跨年趋势，单年数据无法验证。</div>
+        </div>
+        
+
+        <div class="card">
+          <div class="card-head">
+            <span class="num">19</span>
+            <h3>有手机系统背景的车机设置/启动因子得分更高；增购换购更愿选此类车机</h3>
+            <span class="badge" style="background:#E4F4EC;color:#1B7F4B">支持</span>
+          </div>
+          <div class="method">验证方法：SMTPHONE_OPSYSTEM / CONNECT_SMTPHONE × ASET_Index；YPV_01 × 连接占比</div>
+          <ul class="evidence"><li>手机系统 iOS（n=936）：ASET 设置启动=796.2</li><li>手机系统 Android（n=1973）：ASET 设置启动=799.4</li><li>连接手机（n=2983）：ASET 设置启动=798.3</li><li>未连接（n=6954）：ASET 设置启动=782.2</li><li>换购中连接手机占比：36.7%</li><li>增购中连接手机占比：35.6%</li><li>首购中连接手机占比：26.4%</li></ul>
+          <div class="conclusion"><b>结论：</b>横截面数据支持：连接手机用户 ASET 得分更高（见证据）；增购/换购连接手机占比略高。</div>
+        </div>
+        
+
+        <div class="card">
+          <div class="card-head">
+            <span class="num">20</span>
+            <h3>插混车型性能较纯电由整体领先转为全面落后，发动机/电机声音影响最明显</h3>
+            <span class="badge" style="background:#FBF0E3;color:#B0692A">部分支持</span>
+          </div>
+          <div class="method">验证方法：SUPER_SEGMENT_DP × APERF_Index / APERF_R_*</div>
+          <ul class="evidence"><li>性能整体：BEV=788.84 vs PHEV=781.62</li><li>发动机/电机声音：BEV=7.84 vs PHEV=7.73</li><li>平顺性：BEV=7.91 vs PHEV=7.84</li><li>动力：BEV=7.92 vs PHEV=7.88</li></ul>
+          <div class="conclusion"><b>结论：</b>横截面可见 BEV vs PHEV 各性能要素水平（见证据）；&#x27;由领先转落后&#x27;为跨年趋势，单年数据部分支持。</div>
+        </div>
+        
+
+        <div class="card">
+          <div class="card-head">
+            <span class="num">21</span>
+            <h3>插混车型驾驶感受由领先转为落后，主要落后场景为郊区/高架中低速行驶</h3>
+            <span class="badge" style="background:#FBF0E3;color:#B0692A">部分支持</span>
+          </div>
+          <div class="method">验证方法：SUPER_SEGMENT_DP × ADRV_Index / ADRV_R_*</div>
+          <ul class="evidence"><li>驾驶感受整体：BEV=785.15 vs PHEV=781.22</li><li>ADRV01: Comfort of your vehicl：BEV=7.88 vs PHEV=7.91</li><li>ADRV02: How well your vehicle ：BEV=7.90 vs PHEV=7.84</li><li>ADRV03: How well your vehicle ：BEV=7.75 vs PHEV=7.69</li><li>最常遇道路（ADRV_D_02）：{1.0: &#x27;Asphalt road&#x27;, 2.0: &#x27;cement road&#x27;, 3.0: &#x27;Gravel road&#x27;, 4.0: &#x27;Unsurfaced road&#x27;, 97.0: &#x27;Others&#x27;}</li></ul>
+          <div class="conclusion"><b>结论：</b>横截面可见 BEV vs PHEV 驾驶感受差异（见证据）；&#x27;由领先转落后&#x27;与特定场景归因为趋势/机制判断，单年数据部分支持。</div>
+        </div>
+        
+
+        <div class="card">
+          <div class="card-head">
+            <span class="num">22</span>
+            <h3>高阶座椅功能对驾驶感受有显著影响；主驾电动记忆、后排通风影响最明显；后排记忆对舒适度提升轻微</h3>
+            <span class="badge" style="background:#E4F4EC;color:#1B7F4B">支持</span>
+          </div>
+          <div class="method">验证方法：座椅功能字段 × ADRV_Index / ACMFT_Index</div>
+          <ul class="evidence"><li>主驾电动记忆座椅：有 vs 无 → 驾驶感受 803.1 vs 776.3（n 有=3177）</li><li>后排通风/冷却：有 vs 无 → 驾驶感受 807.5 vs 782.4（n 有=574）</li><li>后排电动记忆：有 vs 无 → 舒适度 781.5 vs 779.6（n 有=91）</li></ul>
+          <div class="conclusion"><b>结论：</b>横截面数据支持：主驾记忆座椅、后排通风显著影响驾驶感受；后排记忆对舒适度提升幅度较小（见证据）。</div>
+        </div>
+        
+
+        <div class="card">
+          <div class="card-head">
+            <span class="num">23</span>
+            <h3>纯电续航期望仍在增加，里程焦虑下降；快充需求持续增长</h3>
+            <span class="badge" style="background:#FBF0E3;color:#B0692A">部分支持</span>
+          </div>
+          <div class="method">验证方法：NEV_14 期望续航 / AFUEL_D_06 期望对比 / NEV_08 快充频率</div>
+          <ul class="evidence"><li>期望续航 NEV_14 均值 = 605 km（n=8846）</li><li>实际续航 K_AFUEL_D_05 均值 = 353 km（n=9043）</li><li>续航与期望比较：Worse than I expected 6.0%, About the same as I expected 78.5%, Better than I expected 15.5%</li><li>快充频率：Everyday 2.5%, Twice a week or more 20.3%, Once a week 24.9%, 2-3 times per month 20.8%</li></ul>
+          <div class="conclusion"><b>结论：</b>横截面可见期望续航水平、续航与期望差距、快充使用结构（见证据）；&#x27;增加/下降/增长&#x27;为跨年趋势，需多年数据。</div>
+        </div>
+        
+
+        <div class="card">
+          <div class="card-head">
+            <span class="num">24</span>
+            <h3>慢充时长较 2023 减少 0.5 小时；慢充速度仍为充电体验得分最低要素</h3>
+            <span class="badge" style="background:#FBF0E3;color:#B0692A">部分支持</span>
+          </div>
+          <div class="method">验证方法：ACHAR_D_01/D_03 时长 + ACHAR_R_* 充电要素得分</div>
+          <ul class="evidence"><li>慢充时长（小时）均值 = 7.19（n=7834）</li><li>快充时长（分钟）均值 = 45.3（n=7735）</li><li>充电体验各要素（1-10 加权均值）：</li><li>  整体充电体验：7.91</li><li>  充电状态易读：7.88</li><li>  充电口设计：7.81</li><li>  充电线长度：7.80</li><li>  充电便利性：7.79</li><li>  快充速度：7.79</li><li>  慢充速度：7.58 ← 最低</li></ul>
+          <div class="conclusion"><b>结论：</b>横截面可验证慢充速度确为各充电要素中得分最低（见证据）；&#x27;较 2023 减少 0.5 小时&#x27;为跨年对比，单年数据无法验证。</div>
+        </div>
+        
+  <div class="card" style="border-left-color:var(--gold)">
+    <div class="card-head"><span class="num" style="color:var(--gold)">※</span><h3>验证说明</h3></div>
+    <ul class="evidence">
+      <li><b>支持</b>：横截面数据直接支撑该要点的当前状态。</li>
+      <li><b>部分支持</b>：可验证当前水平，但要点含"增长/上升/放缓/增幅"等跨年趋势表述，单年数据（2024 交付仅 535）无法验证趋势本身，仅给出水平参考。</li>
+      <li><b>数据不支持</b>：数据可计算，但结果方向与要点表述相反（如要点 11 颜色魅力）。</li>
+      <li><b>数据不足</b>：数据片段缺少对应变量（门把手类型、座椅颜色、屏幕布局、销量/市场份额）。</li>
+      <li>品牌阵营划分依据：国际品牌 / 独立造车新势力 / 传统车企新能源子品牌 / 传统自主（详见脚本 BRAND_CAMP，为分析假设）。</li>
+      <li>所有指数类指标均以 APEAL_WT 加权计算。</li>
+    </ul>
+  </div>
+
+  <footer>mashang-service · verify_nev_apeal_2024.py · 基于数据片段 9937 行</footer>
+</div>
+</body>
+</html>

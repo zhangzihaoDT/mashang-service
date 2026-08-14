@@ -1,0 +1,108 @@
+{
+  "checks": [
+    {
+      "name": "high_missing",
+      "detail": "61 个变量缺失率>20%",
+      "items": [
+        "SCR_G_6",
+        "SCR_G_5",
+        "SCR_COMMERCIAL_USE",
+        "SCR_BAT000_01",
+        "SCR_INFO00_04",
+        "SCR_INFO00_04_01_R1",
+        "SCR_INFO00_04_01_R2",
+        "SCR_INFO00_04_01_R3",
+        "SCR_INFO00_04_01_R4",
+        "SCR_INFO00_04_01_R97",
+        "SCR_INFO00_06B",
+        "SCR_INFO00_06G",
+        "SCR_INFO00_06H",
+        "SCR_INFO00_06E",
+        "SCR_INFO00_06F",
+        "NEV_06_R1",
+        "NEV_06_R2",
+        "NEV_06_R3",
+        "NEV_06_R97",
+        "NEV_07",
+        "ASET_R_01",
+        "AENT_R_04",
+        "AINFO_R_04",
+        "AEXT_D_01",
+        "AEXT_D_02",
+        "ASET_D_01",
+        "ASET_D_02",
+        "ASFTY_D_01",
+        "ASFTY_D_02",
+        "AFUEL_D_09_R1",
+        "AFUEL_D_09_R2",
+        "AFUEL_D_09_R3",
+        "AFUEL_D_09_R4",
+        "AFUEL_D_09_R5",
+        "AFUEL_D_09_R6",
+        "AFUEL_D_09_R7",
+        "AFUEL_D_09_R8",
+        "AFUEL_D_09_R9",
+        "AFUEL_D_09_R10",
+        "AFUEL_D_09_R11",
+        "AFUEL_D_09_R97",
+        "KM_AFUEL",
+        "ACHAR_D_01",
+        "ACHAR_D_03",
+        "ACHAR_D_08",
+        "ACHAR_D_09_R1",
+        "ACHAR_D_09_R2",
+        "ACHAR_D_09_R3",
+        "ACHAR_D_09_R4",
+        "ACHAR_D_09_R5",
+        "ACHAR_D_09_R6",
+        "ACHAR_D_09_R97",
+        "YPV_02_MAKE",
+        "YPV_02_SERIES",
+        "YPV_03_MAKE",
+        "YPV_03_SERIES",
+        "SMTPHONE_OPSYSTEM",
+        "YNV_01",
+        "YNV_02",
+        "HEIGHT",
+        "KB_HWGT_1C"
+      ]
+    }
+  ],
+  "warnings": [
+    {
+      "variable": "SCR_DRIVESIDE",
+      "issue": "仅 1 个取值"
+    },
+    {
+      "variable": "SCR_G_3",
+      "issue": "仅 1 个取值"
+    },
+    {
+      "variable": "SCR_SEAT00_01_R12",
+      "issue": "仅 1 个取值"
+    },
+    {
+      "variable": "SCR_SEAT00_04B_R4",
+      "issue": "仅 1 个取值"
+    },
+    {
+      "variable": "SCR_SEAT00_04C_R4",
+      "issue": "仅 1 个取值"
+    },
+    {
+      "variable": "SCR_SEAT00_04D_R4",
+      "issue": "仅 1 个取值"
+    },
+    {
+      "variable": "CLMT_SCR00_01",
+      "issue": "仅 1 个取值"
+    },
+    {
+      "variable": "NEV_07",
+      "issue": "存在未映射取值 [np.float64(2.0)]"
+    }
+  ],
+  "n_rows": 9937,
+  "n_cols": 370,
+  "n_warnings": 8
+}

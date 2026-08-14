@@ -1,0 +1,32 @@
+{
+  "group_by": "CONNECT_SMTPHONE",
+  "group_label": "CONNECT_SMTPHONE: Connect Smartphone",
+  "metric": "AINFO_Index",
+  "n_rows": 9937,
+  "detail": [
+    {
+      "value": 1.0,
+      "label": "Yes",
+      "n": 2983,
+      "weighted_mean": 791.14,
+      "mean": 794.73,
+      "std": 103.5
+    },
+    {
+      "value": 0.0,
+      "label": "No",
+      "n": 6954,
+      "weighted_mean": 774.36,
+      "mean": 773.43,
+      "std": 119.67
+    }
+  ],
+  "test": {
+    "method": "Welch t-test",
+    "stat": 8.959,
+    "p": 4.2322865182326636e-19,
+    "cohens_d": 0.19
+  },
+  "pairwise": [],
+  "conclusion": "Yes 加权均值 791.14，No 加权均值 774.36，差异 显著（p=4.23e-19，效应量=0.19）。"
+}

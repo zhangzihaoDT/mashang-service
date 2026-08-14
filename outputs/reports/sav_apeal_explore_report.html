@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEV-APEAL 数据集探索性分析报告</title>
+<style>
+  :root {
+    --zh-blue: #174A7C;
+    --zh-deep-blue: #06213D;
+    --zh-cyan: #7ECDEB;
+    --zh-light-blue: #DDEFF8;
+    --zh-cream: #FFF9EF;
+    --zh-raccoon-gold: #D79A36;
+    --zh-brown: #7A4A24;
+    --zh-text: #1F2D3D;
+    --zh-muted: #6B7C8F;
+    --zh-card: #FFFFFF;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: var(--zh-cream);
+    color: var(--zh-text);
+    line-height: 1.7;
+    padding: 32px 16px;
+  }
+  .container { max-width: 1000px; margin: 0 auto; }
+  header {
+    background: var(--zh-deep-blue);
+    color: #fff;
+    border-radius: 16px;
+    padding: 40px 44px;
+    margin-bottom: 28px;
+  }
+  header h1 { font-size: 26px; font-weight: 700; letter-spacing: 0.5px; }
+  header .sub { color: var(--zh-cyan); font-size: 14px; margin-top: 8px; }
+  header .meta { margin-top: 20px; font-size: 12.5px; color: #B9CFE0; display: flex; flex-wrap: wrap; gap: 8px 24px; }
+  header .meta b { color: #fff; font-weight: 600; }
+  .pipeline {
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    background: #fff; border-radius: 12px; padding: 16px 20px; margin-bottom: 28px;
+    box-shadow: 0 1px 4px rgba(23,74,124,.08);
+  }
+  .pipeline span.step {
+    background: var(--zh-light-blue); color: var(--zh-blue);
+    border-radius: 8px; padding: 5px 12px; font-size: 12.5px; font-weight: 600;
+  }
+  .pipeline span.step.done { background: var(--zh-blue); color: #fff; }
+  .pipeline .arrow { color: var(--zh-muted); font-size: 13px; }
+  .pipeline .todo { opacity: .45; }
+
+  .step-card {
+    background: var(--zh-card); border-radius: 14px; padding: 28px 34px;
+    margin-bottom: 22px; box-shadow: 0 1px 4px rgba(23,74,124,.08);
+    border-top: 4px solid var(--zh-blue);
+  }
+  .step-card h2 { font-size: 19px; color: var(--zh-blue); margin-bottom: 6px; }
+  .step-card .tag { font-size: 12px; color: var(--zh-brown); font-weight: 600; }
+  .step-card h3 { font-size: 14.5px; color: var(--zh-deep-blue); margin: 18px 0 8px; }
+  .step-card p, .step-card li { font-size: 13.5px; color: var(--zh-text); }
+  .step-card ul, .step-card ol { padding-left: 20px; margin: 8px 0; }
+  .step-card li { margin-bottom: 4px; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 14px 0; }
+  .kpi { background: var(--zh-light-blue); border-radius: 10px; padding: 14px 18px; }
+  .kpi .n { font-size: 24px; font-weight: 700; color: var(--zh-blue); }
+  .kpi .l { font-size: 12px; color: var(--zh-muted); }
+
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 12.8px; }
+  th { background: var(--zh-light-blue); color: var(--zh-blue); text-align: left; padding: 8px 10px; font-weight: 600; }
+  td { padding: 7px 10px; border-bottom: 1px solid #E8EEF4; }
+  tr:hover td { background: #F6FAFD; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .sig { color: var(--zh-blue); font-weight: 600; }
+
+  .bar-row { display: flex; align-items: center; gap: 10px; margin: 6px 0; font-size: 12.8px; }
+  .bar-row .lbl { width: 150px; color: var(--zh-text); }
+  .bar-track { flex: 1; height: 16px; background: #EEF3F8; border-radius: 8px; overflow: hidden; }
+  .bar-fill { height: 100%; background: linear-gradient(90deg, var(--zh-cyan), var(--zh-blue)); border-radius: 8px; }
+  .bar-row .val { width: 70px; text-align: right; font-variant-numeric: tabular-nums; color: var(--zh-blue); font-weight: 600; }
+
+  .callout { background: var(--zh-light-blue); border-left: 4px solid var(--zh-raccoon-gold); border-radius: 8px; padding: 14px 18px; margin: 14px 0; font-size: 13.5px; }
+  .callout b { color: var(--zh-deep-blue); }
+  .warn { background: #FDF3E7; border-left: 4px solid var(--zh-raccoon-gold); border-radius: 8px; padding: 12px 16px; margin: 8px 0; font-size: 12.8px; }
+  .warn .v { font-family: "SF Mono", Menlo, monospace; font-size: 12px; color: var(--zh-brown); }
+
+  .concl { background: var(--zh-deep-blue); color: #EAF3FB; border-radius: 14px; padding: 28px 34px; margin-bottom: 22px; }
+  .concl h2 { color: var(--zh-cyan); font-size: 20px; margin-bottom: 14px; }
+  .concl ol { padding-left: 22px; }
+  .concl li { margin-bottom: 12px; font-size: 13.8px; }
+  .concl li b { color: #fff; }
+
+  footer { text-align: center; color: var(--zh-muted); font-size: 12px; padding: 20px 0 8px; }
+  .mono { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 12px; background: #F1F5F9; padding: 1px 6px; border-radius: 4px; color: var(--zh-deep-blue); }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>NEV-APEAL 数据集探索性分析报告</h1>
+  <div class="sub">SPSS (.sav) 文件探索性分析流水线 · 步骤 1-12（不含 PPT）</div>
+  <div class="meta">
+    <span>数据源: <b>dataset/24 NEV-APEAL数据片段.sav</b></span>
+    <span>样本: <b>9,937 行 × 370 列</b></span>
+    <span>研究: <b>新能源车新车魅力指数 (APEAL)</b></span>
+    <span>脚本: <b>scripts/explore_sav.py</b></span>
+    <span>产出目录: <b>outputs/sav_apeal/</b></span>
+  </div>
+</header>
+
+<div class="pipeline">
+  <span class="step done">读取</span><span class="arrow">→</span>
+  <span class="step done">变量字典</span><span class="arrow">→</span>
+  <span class="step done">题型识别</span><span class="arrow">→</span>
+  <span class="step done">Data QC</span><span class="arrow">→</span>
+  <span class="step done">描述统计</span><span class="arrow">→</span>
+  <span class="step done">配置归因</span><span class="arrow">→</span>
+  <span class="step done">偏好题识别</span><span class="arrow">→</span>
+  <span class="step done">品牌/价位映射</span><span class="arrow">→</span>
+  <span class="step done">差异扫描</span><span class="arrow">→</span>
+  <span class="step done">Topic 选取</span><span class="arrow">→</span>
+  <span class="step done">Topic 深挖</span><span class="arrow">→</span>
+  <span class="step done">统计验证</span><span class="arrow">→</span>
+  <span class="step todo">用户/产品解释</span><span class="arrow">→</span>
+  <span class="step todo">PPT</span>
+</div>
+
+<!-- ===================== 步骤 1 ===================== -->
+<div class="step-card">
+  <h2>步骤 1 · 数据读取（pyreadstat）</h2>
+  <div class="tag">done · scripts/explore_sav.py → load_sav()</div>
+  <p>通过 <span class="mono">pyreadstat.read_sav(path, user_missing=True)</span> 读取 `.sav` 文件，同时拿到数据框 <b>df</b> 与 SPSS 元数据 <b>meta</b>。元数据完整保留了问卷的原始定义（变量标签、值标签、缺失定义），是后续所有步骤的查表基础。</p>
+  <h3>本步做了什么</h3>
+  <ul>
+    <li>读取 9937 行 × 370 列数据，含加权变量 <span class="mono">APEAL_WT</span>（用于所有加权统计）。</li>
+    <li>从 <span class="mono">meta</span> 提取变量标签（<span class="mono">column_labels</span>，list 与列名对齐）与值标签（<span class="mono">variable_value_labels</span>，dict 按变量查询）。</li>
+    <li>开启 <span class="mono">user_missing=True</span>，将 SPSS 定义的用户缺失值统一转为 NaN，保证后续缺失统计口径一致。</li>
+  </ul>
+  <h3>产出</h3>
+  <div class="grid-2">
+    <div class="kpi"><div class="n">9937</div><div class="l">样本量（有效加权样本）</div></div>
+    <div class="kpi"><div class="n">370</div><div class="l">变量数（含权重列）</div></div>
+  </div>
+  <div class="callout"><b>技术要点：</b>pyreadstat 的 <span class="mono">column_labels</span> 是与 <span class="mono">column_names</span> 对齐的 list，不是 dict；脚本用 <span class="mono">col_label()</span> 按列名反查标签，避免标签错位。</div>
+</div>
+
+<!-- ===================== 步骤 2 ===================== -->
+<div class="step-card">
+  <h2>步骤 2 · 变量字典</h2>
+  <div class="tag">done · explore_sav.py dict</div>
+  <p>从元数据构建全量变量字典，把 370 个变量归纳为可检索的元信息表：变量名、变量标签、题型、值标签数、唯一值数、缺失量与缺失率。字典是后续题型识别、QC、描述统计共同使用的查表。</p>
+  <h3>本步做了什么</h3>
+  <ul>
+    <li>对 370 列逐列生成字典记录，并按缺失率降序排列（便于先看到缺失严重的变量）。</li>
+    <li>同时识别出 22 组多选结构（列名 `*_R\d+` 且取值为 {0,1}，如 <span class="mono">NEV_04_R1..R97</span> 充电场景、<span class="mono">AINT_D_01_R1..R97</span> 车内收纳物品）。</li>
+  </ul>
+  <h3>产出</h3>
+  <div class="grid-2">
+    <div class="kpi"><div class="n">370</div><div class="l">字典覆盖变量</div></div>
+    <div class="kpi"><div class="n">22</div><div class="l">识别出的多选组</div></div>
+  </div>
+  <table>
+    <tr><th>产出文件</th><th>说明</th></tr>
+    <tr><td><span class="mono">outputs/sav_apeal/variable_dictionary.json</span></td><td>全量变量字典（json/csv 双格式）</td></tr>
+  </table>
+  <div class="callout"><b>关键发现：</b>缺失率最高的变量集中在低频功能使用题（如 <span class="mono">SCR_INFO00_06*</span> 各手机互联频率使用、<span class="mono">AENT_R_04</span> 第三排进出便利性，缺失率 &gt;90%），这类题仅对有该配置/坐席的用户追问，属正常跳题缺失，不影响主结论。</div>
+</div>
+
+<!-- ===================== 步骤 3 ===================== -->
+<div class="step-card">
+  <h2>步骤 3 · 问卷题型识别</h2>
+  <div class="tag">done · explore_sav.py types</div>
+  <p>根据值标签结构自动判别每题题型，题型决定后续统计口径：评分题算均值与 Top-2 Box，多选算提及率，分类算占比。</p>
+  <h3>本步做了什么</h3>
+  <ul>
+    <li><b>rating（11 分量表）</b>：值标签含 <span class="mono">1=Unacceptable…10=Truly Exceptional</span>，共 55 题（各维度满意度明细）。</li>
+    <li><b>scale7（语义差异量表）</b>：1-7 打分，如 <span class="mono">YNV_CN_6_1..6_14</span> 品牌形象（传统↔创新等），共 16 题。</li>
+    <li><b>categorical（单选）</b>：值标签为互斥分类，如城市层级、品牌、细分市场，共 111 题。</li>
+    <li><b>multi（多选）</b>：158 个二分选项，归为 22 组多选题。</li>
+    <li><b>numeric（连续数值）</b>：无值标签或数值型标签（如 APEAL 指数、续航期望、年龄），共 30 题。</li>
+    <li>将评分题中的 99=N/A 统一替换为 NaN，保证均值计算不被 "未答" 污染。</li>
+  </ul>
+  <h3>产出</h3>
+  <table>
+    <tr><th>题型</th><th class="num">变量数</th><th>典型变量</th></tr>
+    <tr><td>rating · 11 分量表</td><td class="num">55</td><td>APEAL_OSAT、AEXT_R_01…ACHAR_R_09 各维度明细</td></tr>
+    <tr><td>scale7 · 语义差异</td><td class="num">16</td><td>YNV_CN_6_1…6_14 品牌形象</td></tr>
+    <tr><td>categorical · 单选</td><td class="num">111</td><td>SUPER_SEGMENT_DP、CITY_TIER_DP、CN_INCOME</td></tr>
+    <tr><td>multi · 多选</td><td class="num">158（22 组）</td><td>NEV_04 充电场景、AINT_D_01 收纳物品、座椅配置矩阵</td></tr>
+    <tr><td>numeric · 连续</td><td class="num">30</td><td>APEAL_Index、各子指数、NEV_14 续航期望、AGE</td></tr>
+  </table>
+  <div class="callout"><b>技术要点：</b>区分"纯数字标签量表"（YNV 的 1-7）与"数值型标签"（HEIGHT 的 140CM），避免把语义差异量表误判为连续变量、或把城市层级误判为数值。</div>
+</div>
+
+<!-- ===================== 步骤 4 ===================== -->
+<div class="step-card">
+  <h2>步骤 4 · Data QC</h2>
+  <div class="tag">done · explore_sav.py qc</div>
+  <p>在深挖结论前先做质量把关，覆盖缺失、单值、未映射取值、评分越界、多选逻辑矛盾五类检查。</p>
+  <h3>本步做了什么</h3>
+  <ul>
+    <li><b>高缺失</b>：标注缺失率 &gt;20% 的变量（多为跳题结构，正常）。</li>
+    <li><b>单值变量</b>：识别仅 1 个取值的常量列（下游应剔除或降权）。</li>
+    <li><b>未映射取值</b>：检查数据取值是否都在值标签内，发现 <span class="mono">NEV_07</span> 存在标签未覆盖的取值 2.0。</li>
+    <li><b>评分越界</b>：11 分量表是否超出 1-10 范围。</li>
+    <li><b>多选逻辑</b>：检测"纯否定选项"（No / None of above / Do not have）与其他选项同时选中的矛盾（按列标签判断，避免矩阵型多选误报）。</li>
+  </ul>
+  <h3>产出</h3>
+  <table>
+    <tr><th>检查项</th><th class="num">告警数</th><th>明细</th></tr>
+    <tr><td>单值变量</td><td class="num">7</td><td>SCR_DRIVESIDE、SCR_G_3、座椅矩阵第三排等（本片段几乎无该配置）</td></tr>
+    <tr><td>未映射取值</td><td class="num">1</td><td><span class="mono">NEV_07</span> 取值 2.0 无标签（需向数据方确认）</td></tr>
+  </table>
+  <div class="warn"><b>QC 结论：</b>无致命问题。7 个单值变量（左舵、自动挡等）在本数据片段中无区分度，分析时注意解释边界；NEV_07（停车位共享）的取值 2.0 建议与问卷核对口径。</div>
+</div>
+
+<!-- ===================== 步骤 5 ===================== -->
+<div class="step-card">
+  <h2>步骤 5 · Descriptive Statistics（描述统计）</h2>
+  <div class="tag">done · explore_sav.py describe</div>
+  <p>全部使用加权口径（<span class="mono">APEAL_WT</span>）输出描述统计：指数类给加权均值，分类给加权占比，多选给加权提及率。</p>
+  <h3>本步做了什么</h3>
+  <ul>
+    <li>APEAL 指数族（总体 + 10 个子维度 + 总体满意度）加权均值。</li>
+    <li>核心人口/车辆结构变量加权占比（动力形式、品牌定位、城市层级、车身类型）。</li>
+    <li>22 组多选题的加权提及率（分母为有效回答人数）。</li>
+  </ul>
+  <h3>产出 · APEAL 指数族（加权均值）</h3>
+  <div class="bar-row"><div class="lbl">APEAL_Index 综合</div><div class="bar-track"><div class="bar-fill" style="width:78.9%"></div></div><div class="val">789.2</div></div>
+  <div class="bar-row"><div class="lbl">AEXT 外观</div><div class="bar-track"><div class="bar-fill" style="width:81.8%"></div></div><div class="val">817.8</div></div>
+  <div class="bar-row"><div class="lbl">AFUEL 能耗续航</div><div class="bar-track"><div class="bar-fill" style="width:79.6%"></div></div><div class="val">795.6</div></div>
+  <div class="bar-row"><div class="lbl">ASET 启动设置</div><div class="bar-track"><div class="bar-fill" style="width:78.6%"></div></div><div class="val">785.8</div></div>
+  <div class="bar-row"><div class="lbl">APERF 动力性能</div><div class="bar-track"><div class="bar-fill" style="width:78.7%"></div></div><div class="val">786.5</div></div>
+  <div class="bar-row"><div class="lbl">ADRV 驾驶感受</div><div class="bar-track"><div class="bar-fill" style="width:78.4%"></div></div><div class="val">783.9</div></div>
+  <div class="bar-row"><div class="lbl">ACMFT 驾乘舒适</div><div class="bar-track"><div class="bar-fill" style="width:78.0%"></div></div><div class="val">779.7</div></div>
+  <div class="bar-row"><div class="lbl">AINT 内饰</div><div class="bar-track"><div class="bar-fill" style="width:77.9%"></div></div><div class="val">779.4</div></div>
+  <div class="bar-row"><div class="lbl">ASFTY 安全</div><div class="bar-track"><div class="bar-fill" style="width:78.0%"></div></div><div class="val">779.6</div></div>
+  <div class="bar-row"><div class="lbl">AENT 进出便利</div><div class="bar-track"><div class="bar-fill" style="width:78.2%"></div></div><div class="val">781.9</div></div>
+  <div class="bar-row"><div class="lbl">AINFO 信息娱乐</div><div class="bar-track"><div class="bar-fill" style="width:77.8%"></div></div><div class="val">778.1</div></div>
+  <div class="callout"><b>读数：</b>综合 APEAL 加权均值 789，<b>外观 (AEXT 818) 是最强项，信息娱乐 (AINFO 778) 与内饰 (AINT 779) 是最弱项</b>——新能源车的吸引力仍以外观设计驱动，而座舱科技体验是短板。</div>
+  <h3>产出 · 样本结构与多选提及率</h3>
+  <table>
+    <tr><th>维度</th><th>加权结构</th></tr>
+    <tr><td>动力形式 SUPER_SEGMENT_DP</td><td>BEV 67.6% / PHEV 32.4%</td></tr>
+    <tr><td>品牌定位 PREMMAKE_DP</td><td>大众市场 92.9% / 豪华 7.1%</td></tr>
+    <tr><td>城市层级 CITY_TIER_DP</td><td>Tier1 17.6% / Tier2 61.0% / Tier3 18.5% / Tier4 2.9%</td></tr>
+    <tr><td>车身类型 BODYTYPE_DP</td><td>SUV 50.4% / 轿车 46.7% / MPV 2.9%</td></tr>
+    <tr><td>外部颜色（多选提及）</td><td>黑色 56.4% / 灰色 19.8% / 米色 18.2%</td></tr>
+    <tr><td>座椅加热（多选提及）</td><td>完全没有该配置 49.9% / 主驾有 42.7%</td></tr>
+  </table>
+</div>
+
+<!-- ===================== 步骤 6 ===================== -->
+<div class="step-card">
+  <h2>步骤 6 · 配置归因（config-scan）</h2>
+  <div class="tag">done · explore_sav.py config-scan</div>
+  <p>对满意度研究最值钱的发现常来自"配置有/无"的对比。把多选组（配置清单）逐选项当作二分分组，比较<b>拥有该配置 vs 未拥有</b>的指标差异，按效应量排序输出。</p>
+  <h3>本步做了什么</h3>
+  <ul>
+    <li>分组：多选组每个选项（如「主驾电动记忆座椅」「后排通风」「皮革内装」）有/无。</li>
+    <li>指标：APEAL 指数族（可 --metric 指定）；输出加权均值、差值 Δ、Welch t-test、Cohen's d。</li>
+    <li>过滤：--min-has 默认 50，剔除小样本；自动排除 Other / Don't know / Do not have 等非业务选项。</li>
+  </ul>
+  <h3>产出 · 配置归因 Top 示例</h3>
+  <table>
+    <tr><th>配置（有 vs 无）</th><th class="num">n 有</th><th class="num">指标</th><th class="num">有</th><th class="num">无</th><th class="num">Δ</th><th class="num">d</th></tr>
+    <tr><td>后排通风/冷却</td><td class="num">574</td><td class="num">ACMFT 舒适</td><td class="num sig">813.1</td><td class="num">777.6</td><td class="num sig">+35.5</td><td class="num">0.294</td></tr>
+    <tr><td>主驾电动记忆座椅</td><td class="num">3,177</td><td class="num">ACMFT 舒适</td><td class="num sig">800.0</td><td class="num">771.6</td><td class="num sig">+28.4</td><td class="num">0.220</td></tr>
+    <tr><td>皮革内装</td><td class="num">6,108</td><td class="num">ACMFT 舒适</td><td class="num sig">791.5</td><td class="num">761.4</td><td class="num sig">+30.1</td><td class="num">0.270</td></tr>
+    <tr><td>仅在公共停车场快充</td><td class="num">4,126</td><td class="num">AFUEL 能耗</td><td class="num">765.9</td><td class="num sig">815.5</td><td class="num">-49.6</td><td class="num">0.381</td></tr>
+  </table>
+  <div class="callout"><b>读数：</b>高阶座舱配置（座椅通风/记忆、皮革）显著推高舒适度；而<b>依赖公共快充的用户能耗满意度明显更低</b>（Δ=-49.6）——充电便利性体验仍是短板。共扫描 1210 组配置×指标组合。</div>
+</div>
+
+<!-- ===================== 步骤 7 ===================== -->
+<div class="step-card">
+  <h2>步骤 7 · 偏好题识别（preference）</h2>
+  <div class="tag">done · explore_sav.py preference</div>
+  <p>识别问卷中的「Most Improved / Love Most」（最需改进 / 最喜欢）类题型，输出各题选项提及率排序，用于改进优先级洞察。</p>
+  <h3>本步做了什么</h3>
+  <ul>
+    <li>识别规则：列标签含 <span class="mono">Most Improved</span> / <span class="mono">Love Most</span>，且非多选二分选项，共识别 13 道偏好题。</li>
+    <li>每道题输出 Top 选项提及率（有效回答为分母），按有效回答数排序。</li>
+  </ul>
+  <h3>产出 · 偏好题 Top 项（提及率）</h3>
+  <table>
+    <tr><th>偏好题</th><th class="num">有效 n</th><th>Top 3 选项</th></tr>
+    <tr><td>AINT_D_05 屏幕 · 最喜欢</td><td class="num">9,937</td><td>Picture clarity 15.7% / Touch screen feel 14.0% / Interface design 13.6%</td></tr>
+    <tr><td>AINT_D_04 屏幕 · 最需改进</td><td class="num">9,937</td><td>Screen sizes 13.8% / Color matching 9.6% / Number of screens 5.9%</td></tr>
+    <tr><td>AEXT_D_02 外观 · 最爱</td><td class="num">4,509</td><td>Exterior color 12.1% / Roofline shape 11.9% / Nothing 10.3%</td></tr>
+    <tr><td>APERF_D_01 动力 · 最需改进</td><td class="num">9,937</td><td>Acceleration 21.7% / Other 12.7% / Nothing 54.4%</td></tr>
+  </table>
+  <div class="callout"><b>读数：</b>屏幕偏好上"清晰度、触感、界面设计"是被最喜欢的前三；外观偏好中"颜色"是最高频最爱项（12.1%）。偏好题直接定位改进优先级。</div>
+</div>
+
+<!-- ===================== 步骤 8 ===================== -->
+<div class="step-card">
+  <h2>步骤 8 · 品牌/价位映射（camp）</h2>
+  <div class="tag">done · explore_sav.py camp</div>
+  <p>对含品牌与价格字段的问卷，内置<b>品牌阵营映射 + 价位段分箱</b>做竞品结构分析。</p>
+  <h3>本步做了什么</h3>
+  <ul>
+    <li>品牌阵营：国际品牌 / 自主新势力 / 自主新创品牌 / 传统自主（BRAND_CAMP 假设，报告中注明）。</li>
+    <li>价位段：价格（元）按 10万以下 / 10-20万 / 20-40万 / 40万以上 分箱。</li>
+    <li>输出阵营样本占比、价位段 × 阵营结构、各阵营指标加权均值。</li>
+  </ul>
+  <h3>产出 · 价位段 × 阵营结构（样本占比）</h3>
+  <table>
+    <tr><th>价位段</th><th>传统自主</th><th>国际品牌</th><th>自主新创</th><th>自主新势力</th></tr>
+    <tr><td>10万以下</td><td class="num sig">76.6%</td><td class="num">0.6%</td><td class="num">9.7%</td><td class="num">13.1%</td></tr>
+    <tr><td>10-20万</td><td class="num sig">58.4%</td><td class="num">15.2%</td><td class="num">14.6%</td><td class="num">11.8%</td></tr>
+    <tr><td>20-40万</td><td class="num">25.4%</td><td class="num">25.3%</td><td class="num">23.7%</td><td class="num sig">25.7%</td></tr>
+    <tr><td>40万以上</td><td class="num">0.2%</td><td class="num sig">40.1%</td><td class="num">24.2%</td><td class="num">35.6%</td></tr>
+  </table>
+  <h3>产出 · 各阵营 APEAL 加权均值</h3>
+  <div class="bar-row"><div class="lbl">国际品牌（n=1829）</div><div class="bar-track"><div class="bar-fill" style="width:80%"></div></div><div class="val">799.6</div></div>
+  <div class="bar-row"><div class="lbl">自主新势力（n=1840）</div><div class="bar-track"><div class="bar-fill" style="width:79.9%"></div></div><div class="val">799.0</div></div>
+  <div class="bar-row"><div class="lbl">自主新创品牌（n=1762）</div><div class="bar-track"><div class="bar-fill" style="width:78.9%"></div></div><div class="val">788.8</div></div>
+  <div class="bar-row"><div class="lbl">传统自主品牌（n=4506）</div><div class="bar-track"><div class="bar-fill" style="width:78.3%"></div></div><div class="val">782.7</div></div>
+  <div class="callout"><b>读数：</b>10万以下几乎全是传统自主（76.6%），40万以上国际品牌占 40.1%——国际品牌向上、传统自主向下兼容中低价位；国际品牌 APEAL 最高（799.6）。样本结构为抽样占比，非市场份额。</div>
+</div>
+
+<!-- ===================== 步骤 9 ===================== -->
+<div class="step-card">
+  <h2>步骤 9 · 自动扫描差异</h2>
+  <div class="tag">done · explore_sav.py scan</div>
+  <p>对全量"主分类变量 × APEAL 指数族"做两两扫描，机器优先找出"哪里值得看"：每个组合计算组间差异（t-test / ANOVA）+ 效应量，按效应量排序输出候选清单。</p>
+  <h3>本步做了什么</h3>
+  <ul>
+    <li>分组变量：111 个分类变量中类别数 2-12 的主分类（自动剔除多选成员与占比 &gt;95% 的失衡变量，避免效应量虚高）。</li>
+    <li>指标变量：APEAL_Index + 10 个子指数 + 总体满意度。</li>
+    <li>每个组合：两分类用 Welch t-test + Cohen's d，多分类用 ANOVA + η²，并输出各分组加权均值。</li>
+  </ul>
+  <h3>产出</h3>
+  <table>
+    <tr><th>分组 × 指标</th><th class="num">p 值</th><th class="num">效应量</th><th>分组加权均值</th></tr>
+    <tr><td>SCR_REAR_DOOR 后车门 × ACMFT 舒适</td><td class="num">4.4e-07</td><td class="num">0.213</td><td>有 781 / 无 758</td></tr>
+    <tr><td>CONNECT_SMTPHONE 手机互联 × AINFO 信息娱乐</td><td class="num">4.2e-19</td><td class="num">0.190</td><td>连 791 / 未连 774</td></tr>
+    <tr><td>PREMMAKE_DP 品牌定位 × ACMFT 舒适</td><td class="num">2.1e-11</td><td class="num">0.187</td><td>豪华 802 / 大众 778</td></tr>
+    <tr><td>CONNECT_SMTPHONE × AINT 内饰</td><td class="num">4.9e-20</td><td class="num">0.195</td><td>连 793 / 未连 776</td></tr>
+    <tr><td>CONNECT_SMTPHONE × AINFO 等 7 个子维度</td><td class="num">&lt;1e-15</td><td class="num">0.16-0.19</td><td>系统性高于未连接用户</td></tr>
+    <tr><td>GENERATION2 代际 × AFUEL 能耗</td><td class="num">7.8e-113</td><td class="num">0.053</td><td>95-99 最高 822</td></tr>
+  </table>
+  <div class="callout"><b>扫描结论：</b>差异最大的两个信号是 <b>① 手机互联（CONNECT_SMTPHONE）</b>与 <b>② 品牌定位（Premium vs Mass）</b>——二者驱动多个指数维度系统性差异；此外 <b>代际</b> 对整体满意度的组间差异极显著（η²=0.052，在分组变量中最强）。</div>
+</div>
+
+<!-- ===================== 步骤 10 ===================== -->
+<div class="step-card">
+  <h2>步骤 10 · 找到值得研究的 Topic</h2>
+  <div class="tag">done · 基于 scan 候选清单人工甄选</div>
+  <p>从扫描候选清单中挑出"差异大 + 业务可解释 + 可落到行动"的 Topic，避免一次摊开所有差异。本数据集共甄选出 5 个候选 Topic：</p>
+  <table>
+    <tr><th>#</th><th>Topic</th><th>选择理由</th></tr>
+    <tr><td>T1</td><td>手机互联用户 vs 未互联用户的信息娱乐满意度差异</td><td>效应量全表最高（d=0.19），跨 AINFO/AINT/ASET 多维度，直指座舱产品短板</td></tr>
+    <tr><td>T2</td><td>豪华品牌 vs 大众品牌的整体魅力差异</td><td>APEAL d=0.153，10 个子维度全面显著，可验证品牌价值假设</td></tr>
+    <tr><td>T3</td><td>代际（GENERATION2）之间的整体满意度差异</td><td>η²=0.052 为分组变量中最强，95-99 世代显著高于其他代际</td></tr>
+    <tr><td>T4</td><td>城市层级（Tier）之间的整体满意度差异</td><td>Tier3 显著高于 Tier2，效应量小但 p 极显著，值得核实是否真实</td></tr>
+    <tr><td>T5</td><td>BEV vs PHEV 的充电体验差异</td><td>负向验证：预期差异但不显著，用于排除假设</td></tr>
+  </table>
+  <h3>产出</h3>
+  <div class="grid-2">
+    <div class="kpi"><div class="n">5</div><div class="l">候选 Topic（含 1 个负向验证）</div></div>
+    <div class="kpi"><div class="n">990</div><div class="l">扫描组合数 → 收敛为 5 个</div></div>
+  </div>
+</div>
+
+<!-- ===================== 步骤 11 ===================== -->
+<div class="step-card">
+  <h2>步骤 11 · 针对 Topic 深挖</h2>
+  <div class="tag">done · explore_sav.py topic</div>
+  <p>对每个候选 Topic 做单变量深挖：输出各组样本量、加权均值、标准差，并补充统计验证（详见步骤 12）。深挖不是只看一个交叉表，而是为每个 Topic 建立可追溯的证据链。</p>
+  <h3>产出 · T2 品牌定位 × APEAL（示例）</h3>
+  <table>
+    <tr><th>品牌定位</th><th class="num">样本量</th><th class="num">加权均值</th><th class="num">简单均值</th><th class="num">标准差</th></tr>
+    <tr><td>Premium 豪华</td><td class="num">1,342</td><td class="num sig">805.82</td><td class="num">803.92</td><td class="num">93.75</td></tr>
+    <tr><td>Mass Market 大众</td><td class="num">8,595</td><td class="num">787.93</td><td class="num">788.74</td><td class="num">104.45</td></tr>
+  </table>
+  <h3>产出 · T1 手机互联 × AINFO（示例）</h3>
+  <table>
+    <tr><th>连接智能手机</th><th class="num">样本量</th><th class="num">加权均值</th><th class="num">简单均值</th><th class="num">标准差</th></tr>
+    <tr><td>Yes</td><td class="num">2,983</td><td class="num sig">791.14</td><td class="num">794.73</td><td class="num">103.50</td></tr>
+    <tr><td>No</td><td class="num">6,954</td><td class="num">774.36</td><td class="num">773.43</td><td class="num">119.67</td></tr>
+  </table>
+  <table>
+    <tr><th>Topic 深挖产出文件（json）</th></tr>
+    <tr><td><span class="mono">topic_PREMMAKE_DP_APEAL_Index.json</span></td></tr>
+    <tr><td><span class="mono">topic_CONNECT_SMTPHONE_AINFO_Index.json</span></td></tr>
+    <tr><td><span class="mono">topic_GENERATION2_APEAL_Index.json</span></td></tr>
+    <tr><td><span class="mono">topic_CITY_TIER_DP_APEAL_Index.json</span></td></tr>
+    <tr><td><span class="mono">topic_SUPER_SEGMENT_DP_ACHAR_index.json</span></td></tr>
+  </table>
+</div>
+
+<!-- ===================== 步骤 12 ===================== -->
+<div class="step-card">
+  <h2>步骤 12 · 统计验证</h2>
+  <div class="tag">done · explore_sav.py topic --pairwise</div>
+  <p>对深挖结论做正式检验，避免凭直觉下结论。两分类用 Welch t-test + Cohen's d，多分类用 ANOVA + η²（辅以 Kruskal-Wallis 非参稳健性），多分类还提供 Tukey HSD 两两对比并做多重比较校正。</p>
+  <h3>本步做了什么</h3>
+  <ul>
+    <li>每个 Topic 输出检验方法、统计量、p 值、效应量。</li>
+    <li>对 &gt;2 类的分组（代际、城市层级、收入）补充 Tukey 两两对比，标记显著对。</li>
+  </ul>
+  <h3>验证结果汇总</h3>
+  <table>
+    <tr><th>Topic</th><th>检验</th><th class="num">p 值</th><th class="num">效应量</th><th>结论</th></tr>
+    <tr><td>T1 手机互联 × 信息娱乐</td><td>Welch t-test</td><td class="num">4.2e-19</td><td class="num">d=0.190</td><td class="sig">显著，差异真实</td></tr>
+    <tr><td>T2 豪华 vs 大众 × APEAL</td><td>Welch t-test</td><td class="num">6.4e-08</td><td class="num">d=0.153</td><td class="sig">显著，差异真实</td></tr>
+    <tr><td>T3 代际 × APEAL</td><td>ANOVA + Kruskal</td><td class="num">1.0e-110</td><td class="num">η²=0.052</td><td class="sig">显著，95-99 世代最高（811）</td></tr>
+    <tr><td>T4 城市层级 × APEAL</td><td>ANOVA + Kruskal</td><td class="num">6.6e-14</td><td class="num">η²=0.007</td><td>显著但效应极小，谨慎解释</td></tr>
+    <tr><td>T5 BEV vs PHEV × 充电</td><td>Welch t-test</td><td class="num">0.303</td><td class="num">d=0.022</td><td>不显著，排除该假设</td></tr>
+  </table>
+  <div class="warn"><b>解释注意：</b>T4 城市层级虽然 p 极小（样本量大所致），但 η² 仅 0.007，实际差异很小，不应作为主要结论；T5 负向验证排除了"动力形式决定充电体验"的直觉假设。</div>
+</div>
+
+<!-- ===================== 结论 ===================== -->
+<div class="concl">
+  <h2>结论</h2>
+  <ol>
+    <li><b>手机互联是信息娱乐满意度的最强区分变量。</b>连接智能手机的用户在 AINFO（d=0.19）、AINT、ASET 等 7 个维度上系统性高于未连接用户（p&lt;1e-15），且全样本仅 30% 用户连接手机——车机互联体验既是短板也是提升机会点。</li>
+    <li><b>品牌定位系统性地驱动魅力差异。</b>豪华品牌整体 APEAL 显著高于大众市场（d=0.153，p=6.4e-08），其中舒适性差异最大（d=0.187），符合品牌价值传导预期。</li>
+    <li><b>代际差异是最强分组解释。</b>95-99 世代 APEAL 最高（811），Pre-80s 世代最低（774），组间差异极显著（η²=0.052）——年轻用户对新能源车产品力的认可度更高。</li>
+    <li><b>充电体验与动力形式无关。</b>BEV 与 PHEV 的充电体验指数无显著差异（p=0.303），排除"增程/插混充电体验更好"的直觉假设。</li>
+    <li><b>高阶座舱配置显著提升舒适度，公共快充是能耗满意度短板。</b>后排通风（Δ=+35.5）、主驾记忆座椅（Δ=+28.4）、皮革内装（Δ=+30.1）显著推高舒适指数；而依赖公共快充的用户能耗满意度明显更低（Δ=-49.6）。</li>
+    <li><b>偏好题直接定位改进优先级。</b>屏幕"清晰度/触感/界面设计"是最喜欢前三，外观"颜色"是最爱高频项（12.1%）——座舱显示与外观色彩是产品投入方向。</li>
+    <li><b>品牌阵营与价位段结构清晰分化。</b>10万以下传统自主占 76.6%，40万以上国际品牌占 40.1%；国际品牌 APEAL 最高（799.6）。</li>
+    <li><b>产品短板落在座舱科技。</b>APEAL 指数中信息娱乐（778）与内饰（779）垫底、外观（818）领先，结合 50% 车辆无座椅加热、手机互联率仅 30%，座舱科技配置是当前最值得投入的方向。</li>
+  </ol>
+</div>
+
+<footer>
+  mashang-service · scripts/explore_sav.py · 步骤 1-12 已完成，步骤 13（用户/产品解释）与步骤 14（PPT）待续
+</footer>
+
+</div>
+</body>
+</html>

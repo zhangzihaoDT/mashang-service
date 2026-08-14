@@ -1,0 +1,50 @@
+{
+  "group_by": "CITY_TIER_DP",
+  "group_label": "CITY_TIER_DP",
+  "metric": "APEAL_Index",
+  "n_rows": 9937,
+  "detail": [
+    {
+      "value": 3.0,
+      "label": "Tier 3",
+      "n": 1727,
+      "weighted_mean": 803.03,
+      "mean": 806.69,
+      "std": 98.17
+    },
+    {
+      "value": 2.0,
+      "label": "Tier 2",
+      "n": 6126,
+      "weighted_mean": 784.22,
+      "mean": 784.94,
+      "std": 103.77
+    },
+    {
+      "value": 1.0,
+      "label": "Tier 1",
+      "n": 1816,
+      "weighted_mean": 791.09,
+      "mean": 795.36,
+      "std": 101.8
+    },
+    {
+      "value": 4.0,
+      "label": "Tier 4",
+      "n": 268,
+      "weighted_mean": 793.88,
+      "mean": 791.04,
+      "std": 118.0
+    }
+  ],
+  "test": {
+    "method": "ANOVA",
+    "F": 21.553,
+    "p": 6.572165305541111e-14,
+    "eta2": 0.0065,
+    "kruskal_H": 74.319,
+    "kruskal_p": 5.06994782207676e-16
+  },
+  "pairwise": [],
+  "conclusion": "Tier 3 加权均值 803.03，Tier 2 加权均值 784.22，差异 显著（p=6.57e-14，效应量=0.0065）。"
+}

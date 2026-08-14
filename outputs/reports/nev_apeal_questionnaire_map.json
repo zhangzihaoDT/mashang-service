@@ -1,0 +1,1770 @@
+{
+  "questions": [
+    {
+      "qid": "NPS3",
+      "question": "您有多大可能会向您的朋友、亲戚或同事推荐[插入品牌车型]这个车型？ 单选",
+      "type": "单选",
+      "page": 1
+    },
+    {
+      "qid": "NPS4",
+      "question": "您这么说的主要原因是什么？ 填写",
+      "type": "填写",
+      "page": 1
+    },
+    {
+      "qid": "SCR_BODYTYPE",
+      "question": "您的这辆[插入品牌车型]是什么车身类型？ 单选",
+      "type": "单选",
+      "page": 1
+    },
+    {
+      "qid": "SCR_CONVERTIBLE",
+      "question": "您的这辆[插入品牌车型]有活动车顶吗？(不是天窗，是指可开启的折叠车顶，使车辆变成敞篷车) 单选",
+      "type": "单选",
+      "page": 1
+    },
+    {
+      "qid": "SCR_TWO_SEATER",
+      "question": "您的这辆[插入品牌车型]是两座的吗（只有两个座位）？ 单选",
+      "type": "单选",
+      "page": 1
+    },
+    {
+      "qid": "SCR_SLIDING_DOOR",
+      "question": "您的这辆[插入品牌车型]有滑门吗？ 单选",
+      "type": "单选",
+      "page": 1
+    },
+    {
+      "qid": "SCR_REAR_DOOR",
+      "question": "您的这辆[插入品牌车型]有后座门吗？ 单选",
+      "type": "单选",
+      "page": 1
+    },
+    {
+      "qid": "SCR_REAR_SEAT",
+      "question": "您的这辆[插入品牌车型]有第二排座椅吗？ 单选",
+      "type": "单选",
+      "page": 1
+    },
+    {
+      "qid": "SCR_THIRD_ROW",
+      "question": "您的这辆[插入品牌车型]有第三排座椅吗？ 单选",
+      "type": "单选",
+      "page": 1
+    },
+    {
+      "qid": "SCR_DRIVESIDE",
+      "question": "驾驶员座位/方向盘在左边还是右边?[插入品牌车型] 单选",
+      "type": "单选",
+      "page": 1
+    },
+    {
+      "qid": "SCR_FUEL_TYPE",
+      "question": "您的这辆[插入品牌车型]使用什么类型的能源？ 单选",
+      "type": "单选",
+      "page": 2
+    },
+    {
+      "qid": "SCR_G_1",
+      "question": "您的这辆[插入品牌车型]的车身是什么颜色？ 单选",
+      "type": "单选",
+      "page": 2
+    },
+    {
+      "qid": "SCR_G_2",
+      "question": "您的这辆[插入品牌车型]的座椅是什么颜色？ 可多选",
+      "type": "可多选",
+      "page": 2
+    },
+    {
+      "qid": "SCR_G_3",
+      "question": "您的这辆[插入品牌车型]是手动档还是自动档？ 单选",
+      "type": "单选",
+      "page": 2
+    },
+    {
+      "qid": "SCR_G_4",
+      "question": "下列哪种说法最贴近您的这辆[插入品牌车型]的自动变速系统？ 单选",
+      "type": "单选",
+      "page": 2
+    },
+    {
+      "qid": "SCR_G_5",
+      "question": "您的这辆[插入品牌车型]的发动机排量是多少升？ 单选",
+      "type": "单选",
+      "page": 3
+    },
+    {
+      "qid": "SCR_G_6",
+      "question": "您的这辆[插入品牌车型]的发动机是涡轮增压的吗？ 单选",
+      "type": "单选",
+      "page": 3
+    },
+    {
+      "qid": "SCR_G_7",
+      "question": "您的这辆[插入品牌车型]的是四轮驱动的吗？ 单选",
+      "type": "单选",
+      "page": 3
+    },
+    {
+      "qid": "SCR_G_8",
+      "question": "您的这辆[插入品牌车型]的原装轮胎是什么品牌？",
+      "type": "单选",
+      "page": 4
+    },
+    {
+      "qid": "NEV_INTRO",
+      "question": "以下是关于您的新能源车使用习惯的问题。",
+      "type": "单选",
+      "page": 5
+    },
+    {
+      "qid": "NEV_01",
+      "question": "您使用慢充方式充电的频率是怎样的？ 单选",
+      "type": "单选",
+      "page": 5
+    },
+    {
+      "qid": "NEV_02",
+      "question": "在慢充时，您通常选择的充电方式为 可多选",
+      "type": "可多选",
+      "page": 5
+    },
+    {
+      "qid": "NEV_03",
+      "question": "您慢充时最经常使用的充电设施是： 每列单选",
+      "type": "每列单选",
+      "page": 5
+    },
+    {
+      "qid": "NEV_04",
+      "question": "您经常在哪里为您的[品牌车型]进行慢充？ 可多选",
+      "type": "可多选",
+      "page": 5
+    },
+    {
+      "qid": "NEV_05",
+      "question": "您是否有固定的停车位充电？ 可多选",
+      "type": "可多选",
+      "page": 5
+    },
+    {
+      "qid": "NEV_06",
+      "question": "那么这个停车位的充电设施是哪种呢？ 可多选",
+      "type": "可多选",
+      "page": 5
+    },
+    {
+      "qid": "NEV_07",
+      "question": "这个停车位是否有其他人与您共用？ 单选",
+      "type": "单选",
+      "page": 5
+    },
+    {
+      "qid": "NEV_08",
+      "question": "您使用快充方式充电的频率是怎样的？ 单选",
+      "type": "单选",
+      "page": 5
+    },
+    {
+      "qid": "NEV_09",
+      "question": "您经常在哪里为您的[品牌车型]进行快充？ 可多选",
+      "type": "可多选",
+      "page": 5
+    },
+    {
+      "qid": "NEV_11",
+      "question": "那么，您在下列各项用途方面使用这辆车的频率如何？ 单选",
+      "type": "单选",
+      "page": 6
+    },
+    {
+      "qid": "NEV_11A",
+      "question": "日常通勤（如上下班或往返学校）",
+      "type": "单选",
+      "page": 6
+    },
+    {
+      "qid": "NEV_11B",
+      "question": "非通勤：与商务/工作相关的用途（如开会、拜访客户）",
+      "type": "单选",
+      "page": 6
+    },
+    {
+      "qid": "NEV_11C",
+      "question": "非通勤：个人/家庭用途（例如：购物、办事、访友）",
+      "type": "单选",
+      "page": 6
+    },
+    {
+      "qid": "NEV_11D",
+      "question": "户外活动（例如：郊游、骑车、滑雪）",
+      "type": "单选",
+      "page": 6
+    },
+    {
+      "qid": "NEV_11E",
+      "question": "越野用途",
+      "type": "单选",
+      "page": 6
+    },
+    {
+      "qid": "NEV_11F",
+      "question": "牵引/运输",
+      "type": "单选",
+      "page": 6
+    },
+    {
+      "qid": "NEV_11G",
+      "question": "驾驶乐趣（兜风）",
+      "type": "单选",
+      "page": 6
+    },
+    {
+      "qid": "NEV_12",
+      "question": "你的新[品牌车型]目前总共行驶了多少公里？ 填写",
+      "type": "填写",
+      "page": 6
+    },
+    {
+      "qid": "NEV_14",
+      "question": "未来，您希望新能源车的纯电续航里程达到多少？ 填写",
+      "type": "填写",
+      "page": 6
+    },
+    {
+      "qid": "NEV_15",
+      "question": "未来，您希望慢充多长时间充满电？（单位：小时） 填写",
+      "type": "填写",
+      "page": 6
+    },
+    {
+      "qid": "NEV_16",
+      "question": "未来，您希望快充多长时间充满电？（单位：分钟） 填写",
+      "type": "填写",
+      "page": 6
+    },
+    {
+      "qid": "NEV_17",
+      "question": "您最近一次升级车辆OTA是什么时候？ 填写",
+      "type": "填写",
+      "page": 6
+    },
+    {
+      "qid": "AEXT_INTRO",
+      "question": "请评价您这辆新车…",
+      "type": "单选",
+      "page": 7
+    },
+    {
+      "qid": "AEXT_R_01",
+      "question": "车辆的外观造型 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 7
+    },
+    {
+      "qid": "AEXT_D_01",
+      "question": "对于您这辆新车的外观造型，您认为哪个方面最需要改进？ 单选",
+      "type": "单选",
+      "page": 7
+    },
+    {
+      "qid": "AEXT_D_02",
+      "question": "对于您这辆新车的外观造型，您最喜欢哪个方面？ 单选",
+      "type": "单选",
+      "page": 7
+    },
+    {
+      "qid": "AEXT_V_01",
+      "question": "对于您这辆新车的外观造型，您认为该如何改进？ 填写",
+      "type": "填写",
+      "page": 7
+    },
+    {
+      "qid": "AEXT_V_02",
+      "question": "对于您这辆新车的外观造型，请描述您最喜欢的造型细节？ 填写",
+      "type": "填写",
+      "page": 7
+    },
+    {
+      "qid": "ASET_INTRO",
+      "question": "请评价设置和启动您的车辆时的体验感受 无法接受 一般 非常好 超乎想象的体验",
+      "type": "单选",
+      "page": 8
+    },
+    {
+      "qid": "ASET_R_01",
+      "question": "使用手机、智能手表或其它智能设备远程操控车辆的体验（如，上锁/",
+      "type": "单选",
+      "page": 8
+    },
+    {
+      "qid": "ASET_R_02",
+      "question": "启动车辆带给您的感受 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 8
+    },
+    {
+      "qid": "ASET_R_03",
+      "question": "按照您想要的方式设置车辆的体验（如，座椅位置、驾驶员设定） 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 8
+    },
+    {
+      "qid": "ASET_R_04",
+      "question": "设置车辆和启动车辆的总体体验 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 8
+    },
+    {
+      "qid": "ASET_D_01",
+      "question": "对于您这辆新车的设置和启动，您认为哪个方面最需要改进？ 单选",
+      "type": "单选",
+      "page": 8
+    },
+    {
+      "qid": "ASET_D_02",
+      "question": "对于您这辆新车的设置和启动，您最喜欢哪个方面？ 单选",
+      "type": "单选",
+      "page": 8
+    },
+    {
+      "qid": "ASET_V_01",
+      "question": "对于您这辆新车的设置和启动，您认为该如何改进？ 填写",
+      "type": "填写",
+      "page": 8
+    },
+    {
+      "qid": "ASET_V_02",
+      "question": "对于您这辆新车的设置和启动，请描述您最喜欢的细节？ 填写",
+      "type": "填写",
+      "page": 8
+    },
+    {
+      "qid": "AENT_INTRO",
+      "question": "请评价您在上/下您这辆新车过程中的体验 无法接受 一般 非常好 超乎想象的体验",
+      "type": "单选",
+      "page": 9
+    },
+    {
+      "qid": "AENT_R_01",
+      "question": "往车内放置物品和取出物品的容易程度 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 9
+    },
+    {
+      "qid": "AENT_R_02",
+      "question": "从前排上下车的容易程度 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 9
+    },
+    {
+      "qid": "AENT_R_03",
+      "question": "从第二排上下车的容易程度 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 9
+    },
+    {
+      "qid": "AENT_R_04",
+      "question": "从第三排上下车的容易程度 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 9
+    },
+    {
+      "qid": "AENT_R_05",
+      "question": "关车门的声音 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 9
+    },
+    {
+      "qid": "AENT_R_06",
+      "question": "驾驶员和乘客上下车时的总体体验 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 9
+    },
+    {
+      "qid": "AENT_V_01",
+      "question": "对于您这辆新车上下车时的体验，您认为该如何改进？ 填写",
+      "type": "填写",
+      "page": 9
+    },
+    {
+      "qid": "AINT_INTRO",
+      "question": "请评价您这辆新车的车身内装 无法接受 一般 非常好 超乎想象的体验",
+      "type": "单选",
+      "page": 10
+    },
+    {
+      "qid": "AINT_R_01",
+      "question": "车辆装载您所需物品的能力 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 10
+    },
+    {
+      "qid": "AINT_R_02",
+      "question": "车内空间设计满足您放置个人物品（例如，电话、饮料、钱包）需求的能力 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 10
+    },
+    {
+      "qid": "AINT_R_03",
+      "question": "车辆内装的风格（例如，造型、颜色、照明、饰品等） 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 10
+    },
+    {
+      "qid": "AINT_R_04",
+      "question": "车辆内装材料的质量 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 10
+    },
+    {
+      "qid": "AINT_R_05",
+      "question": "车内屏幕和显示屏的吸引力 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 10
+    },
+    {
+      "qid": "AINT_R_06",
+      "question": "车身内装的总体感觉 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 10
+    },
+    {
+      "qid": "AINT_V_01",
+      "question": "对于您这辆新车的车身内装，您认为哪个方面最需要改进？ 填写",
+      "type": "填写",
+      "page": 10
+    },
+    {
+      "qid": "AINT_V_02",
+      "question": "对于您这辆新车的车身内装，您最喜欢哪个方面？ 填写",
+      "type": "填写",
+      "page": 10
+    },
+    {
+      "qid": "AINT_D_01",
+      "question": "您在车内最常放置的物品有哪些？ 可多选",
+      "type": "可多选",
+      "page": 10
+    },
+    {
+      "qid": "AINT_D_02",
+      "question": "您的车身内装（除座椅外）使用了哪些材料？ 可多选",
+      "type": "可多选",
+      "page": 10
+    },
+    {
+      "qid": "AINT_D_03",
+      "question": "您的车内一共有几块屏幕/显示器（包括仪表盘在内）？ 单选",
+      "type": "单选",
+      "page": 10
+    },
+    {
+      "qid": "AINT_D_04",
+      "question": "对于您车内的屏幕/显示器，您认为哪个方面最需要改进？ 单选",
+      "type": "单选",
+      "page": 10
+    },
+    {
+      "qid": "AINT_D_05",
+      "question": "对于您车内的屏幕/显示器，您最喜欢哪个方面？ 单选",
+      "type": "单选",
+      "page": 11
+    },
+    {
+      "qid": "AINT_D_06",
+      "question": "对于您车内的空调系统操作界面，您认为哪个方面最需要改进？ 单选",
+      "type": "单选",
+      "page": 11
+    },
+    {
+      "qid": "AINT_D_07",
+      "question": "对于您车内的空调系统操作界面，您最喜欢哪个方面？ 单选",
+      "type": "单选",
+      "page": 11
+    },
+    {
+      "qid": "APERF_INTRO",
+      "question": "无法接受 一般 非常好 超乎想象的体验",
+      "type": "单选",
+      "page": 12
+    },
+    {
+      "qid": "APERF_R_01",
+      "question": "发动机/电机的平稳顺畅程度 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 12
+    },
+    {
+      "qid": "APERF_R_02",
+      "question": "发动机/电机的动力 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 12
+    },
+    {
+      "qid": "APERF_R_03",
+      "question": "发动机/电机的声音 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 12
+    },
+    {
+      "qid": "APERF_R_04",
+      "question": "发动机/电机的总体表现 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 12
+    },
+    {
+      "qid": "APERF_V_01",
+      "question": "对于您这辆新车的发动机/电机，您认为哪个方面最需要改进？ 填写",
+      "type": "填写",
+      "page": 12
+    },
+    {
+      "qid": "APERF_V_02",
+      "question": "对于您这辆新车的发动机/电机，您最喜欢哪个方面？ 填写",
+      "type": "填写",
+      "page": 12
+    },
+    {
+      "qid": "APERF_D_01",
+      "question": "对于您这辆车发动机/电机的动力，您认为哪种情况最需要改进？ 单选",
+      "type": "单选",
+      "page": 12
+    },
+    {
+      "qid": "ADRV_INTRO",
+      "question": "无法接受 一般 非常好 超乎想象的体验",
+      "type": "单选",
+      "page": 13
+    },
+    {
+      "qid": "ADRV_R_01",
+      "question": "车辆的乘坐舒适度 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 13
+    },
+    {
+      "qid": "ADRV_R_02",
+      "question": "常规路况时，车辆的转向/操控感受 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 13
+    },
+    {
+      "qid": "ADRV_R_03",
+      "question": "湿滑路况时，车辆的转向/操控感受 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 13
+    },
+    {
+      "qid": "ADRV_R_04",
+      "question": "车辆的制动性能（包括刹车力，平稳性） 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 13
+    },
+    {
+      "qid": "ADRV_R_05",
+      "question": "车辆的总体驾驶感受 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 13
+    },
+    {
+      "qid": "ADRV_D_01",
+      "question": "以下哪种说法最符合您平时驾驶这辆车最经常发生的情况？ 单选",
+      "type": "单选",
+      "page": 13
+    },
+    {
+      "qid": "ADRV_D_02",
+      "question": "以下哪种说法符合您日常行驶最常碰到的路况？ 单选",
+      "type": "单选",
+      "page": 13
+    },
+    {
+      "qid": "ASFTY_INTRO_01",
+      "question": "无法接受 一般 非常好 超乎想象的体验",
+      "type": "单选",
+      "page": 14
+    },
+    {
+      "qid": "ASFTY_R_01",
+      "question": "操控车辆安全进出狭小空间（例如：堵车时，停车时）的容易程度 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 14
+    },
+    {
+      "qid": "ASFTY_R_02",
+      "question": "如果发生事故，车辆保护您免受伤害的能力 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 14
+    },
+    {
+      "qid": "ASFTY_R_03",
+      "question": "车载辅助驾驶系统的使用体验（例如：定速巡航、车道保持辅助等） 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 14
+    },
+    {
+      "qid": "ASFTY_R_04",
+      "question": "车载安全配置的使用体验（例如：盲区监测，碰撞警告等） 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 14
+    },
+    {
+      "qid": "ASFTY_R_05",
+      "question": "前大灯的有效性 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 14
+    },
+    {
+      "qid": "ASFTY_R_06",
+      "question": "车辆的总体安全感受 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 14
+    },
+    {
+      "qid": "ASFTY_D_01",
+      "question": "就驾驶您这辆新车所带给您的安全感而言，您认为哪个方面最需要改进？ 单选",
+      "type": "单选",
+      "page": 14
+    },
+    {
+      "qid": "ASFTY_D_02",
+      "question": "就驾驶您这辆新车所带给您的安全感而言，您最喜欢哪个方面？ 单选",
+      "type": "单选",
+      "page": 14
+    },
+    {
+      "qid": "ASFTY_V_01",
+      "question": "对于安全/辅助驾驶配置，您认为最重要的三项配置是什么？ 填写",
+      "type": "填写",
+      "page": 14
+    },
+    {
+      "qid": "AINFO_SCR00_01",
+      "question": "您的这辆[品牌车型]在出厂时是否安装了虚拟助手？ 单选",
+      "type": "单选",
+      "page": 15
+    },
+    {
+      "qid": "AINFO_INTRO",
+      "question": "无法接受 一般 非常好 超乎想象的体验",
+      "type": "单选",
+      "page": 15
+    },
+    {
+      "qid": "AINFO_R_01",
+      "question": "在车上播放音频的体验 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 15
+    },
+    {
+      "qid": "AINFO_R_02",
+      "question": "在车内接/打电话的体验 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 15
+    },
+    {
+      "qid": "AINFO_R_03",
+      "question": "车载智能语音助手的使用体验 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 15
+    },
+    {
+      "qid": "AINFO_R_04",
+      "question": "车载导航的使用体验 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 15
+    },
+    {
+      "qid": "AINFO_R_05",
+      "question": "车载音响系统的音质 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 15
+    },
+    {
+      "qid": "AINFO_R_06",
+      "question": "车载信息娱乐系统其他功能的实用性（例如：APP、用户手册等） 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 15
+    },
+    {
+      "qid": "AINFO_R_07",
+      "question": "车载信息娱乐系统的总体体验 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 15
+    },
+    {
+      "qid": "AINFO_D_01",
+      "question": "对于以下使用场景，您希望用车上的哪个系统来实现？ 单选",
+      "type": "单选",
+      "page": 15
+    },
+    {
+      "qid": "AINFO_D_01A",
+      "question": "播放音频 1 2 97 99",
+      "type": "单选",
+      "page": 15
+    },
+    {
+      "qid": "AINFO_D_01B",
+      "question": "接/打电话 1 2 97 99",
+      "type": "单选",
+      "page": 15
+    },
+    {
+      "qid": "AINFO_D_01C",
+      "question": "使用语音助手 1 2 4 97 99",
+      "type": "单选",
+      "page": 15
+    },
+    {
+      "qid": "AINFO_D_01D",
+      "question": "使用导航 1 2 97 99",
+      "type": "单选",
+      "page": 15
+    },
+    {
+      "qid": "AINFO_V_01",
+      "question": "对于您这辆新车的车载信息娱乐系统，您认为哪个方面最需要改进？ 填写",
+      "type": "填写",
+      "page": 15
+    },
+    {
+      "qid": "AINFO_V_02",
+      "question": "对于您这辆新车的车载信息娱乐系统，您最喜欢哪个方面？ 填写",
+      "type": "填写",
+      "page": 15
+    },
+    {
+      "qid": "ACMFT_INTRO",
+      "question": "请回想您在驾驶您这辆新车时的感受,仍然请回想您在驾驶您这辆新车 无法接受 一般 非常好 超乎想象的体验",
+      "type": "单选",
+      "page": 16
+    },
+    {
+      "qid": "ACMFT_R_01",
+      "question": "驾驶座的舒适度 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 16
+    },
+    {
+      "qid": "ACMFT_R_02",
+      "question": "后排座椅的舒适度（第二排和第三排） 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 16
+    },
+    {
+      "qid": "ACMFT_R_03",
+      "question": "行驶时车内的安静程度 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 16
+    },
+    {
+      "qid": "ACMFT_R_04",
+      "question": "您的车辆保持车内理想温度的能力 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 16
+    },
+    {
+      "qid": "ACMFT_R_05",
+      "question": "车辆的驾乘舒适性的整体表现 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 16
+    },
+    {
+      "qid": "ACMFT_D_01",
+      "question": "对于您车内的空调系统性能，您认为哪个方面最需要改进？ 单选",
+      "type": "单选",
+      "page": 16
+    },
+    {
+      "qid": "ACMFT_D_02",
+      "question": "对于您车内的空调系统性能，您最喜欢哪个方面？ 单选",
+      "type": "单选",
+      "page": 16
+    },
+    {
+      "qid": "AFUEL_INTRO",
+      "question": "请评价您的这辆新车 无法接受 一般 非常好 超乎想象的体验",
+      "type": "单选",
+      "page": 17
+    },
+    {
+      "qid": "AFUEL_R_01",
+      "question": "燃油经济性和行驶里程; 纯电续航里程的总体表现 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 17
+    },
+    {
+      "qid": "K_AFUEL_D_05",
+      "question": "您的这辆车充满电后（纯电模式下）能跑多少公里？ 填写",
+      "type": "填写",
+      "page": 17
+    },
+    {
+      "qid": "K_AFUEL_D_05_999",
+      "question": "999不知道",
+      "type": "单选",
+      "page": 17
+    },
+    {
+      "qid": "AFUEL_D_06",
+      "question": "这个续航里程和您购车时预期的行驶里程相比，是怎样的？ 单选",
+      "type": "单选",
+      "page": 17
+    },
+    {
+      "qid": "AFUEL_D_09",
+      "question": "续航里程比预期差是在什么状况下发生的？ 可多选",
+      "type": "可多选",
+      "page": 17
+    },
+    {
+      "qid": "AFUEL_D_07",
+      "question": "您通常使用哪种电源给您这辆车充电？ 单选",
+      "type": "单选",
+      "page": 17
+    },
+    {
+      "qid": "KM_AFUEL",
+      "question": "您的这辆新车的平均耗油量是多少？（升/100公里） 填写",
+      "type": "填写",
+      "page": 17
+    },
+    {
+      "qid": "KM_AFUEL_99",
+      "question": "99不知道",
+      "type": "单选",
+      "page": 17
+    },
+    {
+      "qid": "ACHAR_R_01",
+      "question": "充电口的设计（在车身的位置及操作便利性） 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 18
+    },
+    {
+      "qid": "ACHAR_R_02",
+      "question": "充电线的长度 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 18
+    },
+    {
+      "qid": "ACHAR_R_03",
+      "question": "充电设备的设计（充电桩或壁挂式充电盒的位置及操作便利性） 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 18
+    },
+    {
+      "qid": "ACHAR_R_04",
+      "question": "快充充电速度 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 18
+    },
+    {
+      "qid": "ACHAR_R_05",
+      "question": "慢充充电速度 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 18
+    },
+    {
+      "qid": "ACHAR_R_06",
+      "question": "充电便利性（需要补电时找到充电设备的方便性） 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 18
+    },
+    {
+      "qid": "ACHAR_R_07",
+      "question": "充电状态显示的易读程度 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 18
+    },
+    {
+      "qid": "ACHAR_R_08",
+      "question": "充电线的收纳整理和取用 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 18
+    },
+    {
+      "qid": "ACHAR_R_09",
+      "question": "充电体验的总体评价 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 18
+    },
+    {
+      "qid": "ACHAR_D_01",
+      "question": "慢充时，您的[品牌车型]需要多长时间充满电？（单位：小时） 填写",
+      "type": "填写",
+      "page": 18
+    },
+    {
+      "qid": "ACHAR_D_02",
+      "question": "为您的[品牌车型]慢充时，您一般剩余多少电量开始充电？充到多少结束？ 单选",
+      "type": "单选",
+      "page": 18
+    },
+    {
+      "qid": "ACHAR_D_02_START",
+      "question": "剩余多少电量开始慢充：",
+      "type": "单选",
+      "page": 18
+    },
+    {
+      "qid": "ACHAR_D_02_END",
+      "question": "到多少电量结束慢充：",
+      "type": "单选",
+      "page": 18
+    },
+    {
+      "qid": "ACHAR_D_03",
+      "question": "快充时，您的[品牌车型]需要多长时间充满电？（单位：分钟） 填写",
+      "type": "填写",
+      "page": 19
+    },
+    {
+      "qid": "ACHAR_D_04",
+      "question": "为您的[品牌车型]快充时，您一般剩余多少电量开始充电？充到多少结束？ 单选",
+      "type": "单选",
+      "page": 19
+    },
+    {
+      "qid": "ACHAR_D_04_START",
+      "question": "剩余多少电量开始快充：",
+      "type": "单选",
+      "page": 19
+    },
+    {
+      "qid": "ACHAR_D_04_END",
+      "question": "到多少电量结束快充：",
+      "type": "单选",
+      "page": 19
+    },
+    {
+      "qid": "ACHAR_D_05",
+      "question": "当前这辆车的充电时间与您购车时的预期相比，是怎样的？ 单选",
+      "type": "单选",
+      "page": 19
+    },
+    {
+      "qid": "ACHAR_D_06",
+      "question": "您通常如何打开充电口？ 可多选",
+      "type": "可多选",
+      "page": 19
+    },
+    {
+      "qid": "ACHAR_D_07",
+      "question": "您通常怎样寻找充电站？ 可多选",
+      "type": "可多选",
+      "page": 19
+    },
+    {
+      "qid": "ACHAR_D_08",
+      "question": "您最常使用哪家第三方手机APP来寻找充电站？ 单选",
+      "type": "单选",
+      "page": 20
+    },
+    {
+      "qid": "ACHAR_D_09",
+      "question": "您为什么最常使用这个第三方手机APP来寻找充电站？ 可多选",
+      "type": "可多选",
+      "page": 20
+    },
+    {
+      "qid": "APEAL_OSAT",
+      "question": "您的总体拥车和驾驶体验 1 2 3 4 5 6 7 8 9 10",
+      "type": "单选",
+      "page": 21
+    },
+    {
+      "qid": "YNV_01",
+      "question": "您用于连接到这辆车的车载信息系统的手机是哪家服务运营商？ 单选",
+      "type": "单选",
+      "page": 22
+    },
+    {
+      "qid": "YNV_02",
+      "question": "您用于连接到这辆车的车载信息系统的手机是什么品牌？ 单选",
+      "type": "单选",
+      "page": 22
+    },
+    {
+      "qid": "YNV_CN_6",
+      "question": "请根据您对[INSERT QJ_MAKE]的了解，评价以下每一对描述和它的符合程度，分数越靠近某一端，表示您越认同这个品牌符合这个描述。",
+      "type": "单选",
+      "page": 23
+    },
+    {
+      "qid": "CN_YNV_07",
+      "question": "加上税款和自选配置/装潢后,您为您的这辆新车付的总款项是多少？(不包括旧车折现，牌照费和保险费) 填写",
+      "type": "填写",
+      "page": 23
+    },
+    {
+      "qid": "YNV_CN_7X_99",
+      "question": "1,0不知道",
+      "type": "单选",
+      "page": 23
+    },
+    {
+      "qid": "YPV_01",
+      "question": "以下哪一个选项最适合描述您的这辆[品牌车型]？ 单选",
+      "type": "单选",
+      "page": 24
+    },
+    {
+      "qid": "YPV_02",
+      "question": "请问您上一辆车（被替换的车）是什么品牌和车型？",
+      "type": "单选",
+      "page": 24
+    },
+    {
+      "qid": "YPV_02_MAKE",
+      "question": "包含品牌的下拉选项",
+      "type": "单选",
+      "page": 24
+    },
+    {
+      "qid": "YPV_02_SERIES",
+      "question": "包含车型的下拉选项",
+      "type": "单选",
+      "page": 24
+    },
+    {
+      "qid": "YPV_03",
+      "question": "请问，您在购买这辆[品牌/车型]前，您的那辆车是什么品牌，什么车型？.",
+      "type": "单选",
+      "page": 24
+    },
+    {
+      "qid": "YPV_03_MAKE",
+      "question": "包含品牌的下拉选项",
+      "type": "单选",
+      "page": 24
+    },
+    {
+      "qid": "YPV_03_SERIES",
+      "question": "包含车型的下拉选项",
+      "type": "单选",
+      "page": 24
+    },
+    {
+      "qid": "YPV_05",
+      "question": "您家里有多少辆车？ 填写",
+      "type": "填写",
+      "page": 24
+    },
+    {
+      "qid": "GENDER",
+      "question": "您的性别： 单选",
+      "type": "单选",
+      "page": 25
+    },
+    {
+      "qid": "GENDER_98",
+      "question": "98不愿回答",
+      "type": "单选",
+      "page": 25
+    },
+    {
+      "qid": "CN_MARITAL_STATUS",
+      "question": "婚姻状况 单选",
+      "type": "单选",
+      "page": 25
+    },
+    {
+      "qid": "BIRTHYEAR",
+      "question": "您的出生年份？ 填写",
+      "type": "填写",
+      "page": 25
+    },
+    {
+      "qid": "BIRTHYEAR_98",
+      "question": "98不愿回答",
+      "type": "单选",
+      "page": 25
+    },
+    {
+      "qid": "CN_NUMBER_HOUSEHOLD",
+      "question": "包括您在内, 您家里有几口人和您住在一起？ 填写",
+      "type": "填写",
+      "page": 25
+    },
+    {
+      "qid": "CN_OCCUPATION",
+      "question": "您的职业是： 单选",
+      "type": "单选",
+      "page": 25
+    },
+    {
+      "qid": "CN_OCCUPATION_98",
+      "question": "98不愿回答",
+      "type": "单选",
+      "page": 25
+    },
+    {
+      "qid": "CN_EDUCATION",
+      "question": "您目前的最高学历是？ 单选",
+      "type": "单选",
+      "page": 25
+    },
+    {
+      "qid": "CN_EDUCATION_98",
+      "question": "98不愿回答",
+      "type": "单选",
+      "page": 25
+    },
+    {
+      "qid": "CN_INCOME",
+      "question": "以下哪一项最吻合您家庭每月税前总收入？ 单选",
+      "type": "单选",
+      "page": 25
+    },
+    {
+      "qid": "CN_INCOME_98",
+      "question": "98不愿回答",
+      "type": "单选",
+      "page": 25
+    },
+    {
+      "qid": "HWGT",
+      "question": "为了帮助汽车生产厂商设计出更舒适的车辆，请提供您的身高和体重",
+      "type": "单选",
+      "page": 25
+    },
+    {
+      "qid": "M_HWGT_1A",
+      "question": "[下拉菜单输入] 米 填写",
+      "type": "填写",
+      "page": 25
+    },
+    {
+      "qid": "CM_HWGT_1B",
+      "question": "[下拉菜单输入] CM 填写",
+      "type": "填写",
+      "page": 25
+    },
+    {
+      "qid": "KB_HWGT_1C",
+      "question": "[输入答案___] 公斤",
+      "type": "单选",
+      "page": 25
+    },
+    {
+      "qid": "HWGT_98",
+      "question": "98不愿回答",
+      "type": "单选",
+      "page": 25
+    }
+  ],
+  "qid2cols": {
+    "NPS3": [],
+    "NPS4": [],
+    "SCR_BODYTYPE": [
+      "SCR_BODYTYPE"
+    ],
+    "SCR_CONVERTIBLE": [
+      "SCR_CONVERTIBLE"
+    ],
+    "SCR_TWO_SEATER": [
+      "SCR_TWO_SEATER"
+    ],
+    "SCR_SLIDING_DOOR": [
+      "SCR_SLIDING_DOOR"
+    ],
+    "SCR_REAR_DOOR": [
+      "SCR_REAR_DOOR"
+    ],
+    "SCR_REAR_SEAT": [],
+    "SCR_THIRD_ROW": [
+      "SCR_THIRD_ROW"
+    ],
+    "SCR_DRIVESIDE": [
+      "SCR_DRIVESIDE"
+    ],
+    "SCR_FUEL_TYPE": [
+      "SCR_FUEL_TYPE"
+    ],
+    "SCR_G_1": [
+      "SCR_G_1"
+    ],
+    "SCR_G_2": [
+      "SCR_G_2_R1",
+      "SCR_G_2_R2",
+      "SCR_G_2_R3",
+      "SCR_G_2_R4",
+      "SCR_G_2_R97"
+    ],
+    "SCR_G_3": [
+      "SCR_G_3"
+    ],
+    "SCR_G_4": [
+      "SCR_G_4"
+    ],
+    "SCR_G_5": [
+      "SCR_G_5"
+    ],
+    "SCR_G_6": [
+      "SCR_G_6"
+    ],
+    "SCR_G_7": [
+      "SCR_G_7"
+    ],
+    "SCR_G_8": [],
+    "NEV_INTRO": [],
+    "NEV_01": [
+      "NEV_01"
+    ],
+    "NEV_02": [
+      "NEV_02_R1",
+      "NEV_02_R2",
+      "NEV_02_R3"
+    ],
+    "NEV_03": [
+      "NEV_03_R1",
+      "NEV_03_R2",
+      "NEV_03_R3"
+    ],
+    "NEV_04": [
+      "NEV_04_R1",
+      "NEV_04_R2",
+      "NEV_04_R3",
+      "NEV_04_R4",
+      "NEV_04_R97"
+    ],
+    "NEV_05": [
+      "NEV_05_R1",
+      "NEV_05_R2",
+      "NEV_05_R3",
+      "NEV_05_R99"
+    ],
+    "NEV_06": [
+      "NEV_06_R1",
+      "NEV_06_R2",
+      "NEV_06_R3",
+      "NEV_06_R97"
+    ],
+    "NEV_07": [
+      "NEV_07"
+    ],
+    "NEV_08": [
+      "NEV_08"
+    ],
+    "NEV_09": [
+      "NEV_09_R1",
+      "NEV_09_R2",
+      "NEV_09_R3",
+      "NEV_09_R4",
+      "NEV_09_R97"
+    ],
+    "NEV_11": [
+      "NEV_11A",
+      "NEV_11B",
+      "NEV_11C",
+      "NEV_11D",
+      "NEV_11E",
+      "NEV_11F",
+      "NEV_11G"
+    ],
+    "NEV_11A": [
+      "NEV_11A"
+    ],
+    "NEV_11B": [
+      "NEV_11B"
+    ],
+    "NEV_11C": [
+      "NEV_11C"
+    ],
+    "NEV_11D": [
+      "NEV_11D"
+    ],
+    "NEV_11E": [
+      "NEV_11E"
+    ],
+    "NEV_11F": [
+      "NEV_11F"
+    ],
+    "NEV_11G": [
+      "NEV_11G"
+    ],
+    "NEV_12": [
+      "NEV_12"
+    ],
+    "NEV_14": [
+      "NEV_14"
+    ],
+    "NEV_15": [
+      "NEV_15"
+    ],
+    "NEV_16": [
+      "NEV_16"
+    ],
+    "NEV_17": [],
+    "AEXT_INTRO": [],
+    "AEXT_R_01": [
+      "AEXT_R_01"
+    ],
+    "AEXT_D_01": [
+      "AEXT_D_01"
+    ],
+    "AEXT_D_02": [
+      "AEXT_D_02"
+    ],
+    "AEXT_V_01": [],
+    "AEXT_V_02": [],
+    "ASET_INTRO": [],
+    "ASET_R_01": [
+      "ASET_R_01"
+    ],
+    "ASET_R_02": [
+      "ASET_R_02"
+    ],
+    "ASET_R_03": [
+      "ASET_R_03"
+    ],
+    "ASET_R_04": [
+      "ASET_R_04"
+    ],
+    "ASET_D_01": [
+      "ASET_D_01"
+    ],
+    "ASET_D_02": [
+      "ASET_D_02"
+    ],
+    "ASET_V_01": [],
+    "ASET_V_02": [],
+    "AENT_INTRO": [],
+    "AENT_R_01": [
+      "AENT_R_01"
+    ],
+    "AENT_R_02": [
+      "AENT_R_02"
+    ],
+    "AENT_R_03": [
+      "AENT_R_03"
+    ],
+    "AENT_R_04": [
+      "AENT_R_04"
+    ],
+    "AENT_R_05": [
+      "AENT_R_05"
+    ],
+    "AENT_R_06": [
+      "AENT_R_06"
+    ],
+    "AENT_V_01": [],
+    "AINT_INTRO": [],
+    "AINT_R_01": [
+      "AINT_R_01"
+    ],
+    "AINT_R_02": [
+      "AINT_R_02"
+    ],
+    "AINT_R_03": [
+      "AINT_R_03"
+    ],
+    "AINT_R_04": [
+      "AINT_R_04"
+    ],
+    "AINT_R_05": [
+      "AINT_R_05"
+    ],
+    "AINT_R_06": [
+      "AINT_R_06"
+    ],
+    "AINT_V_01": [],
+    "AINT_V_02": [],
+    "AINT_D_01": [
+      "AINT_D_01_R1",
+      "AINT_D_01_R2",
+      "AINT_D_01_R3",
+      "AINT_D_01_R4",
+      "AINT_D_01_R5",
+      "AINT_D_01_R6",
+      "AINT_D_01_R7",
+      "AINT_D_01_R8",
+      "AINT_D_01_R97",
+      "AINT_D_01a_R1",
+      "AINT_D_01a_R2",
+      "AINT_D_01a_R3",
+      "AINT_D_01a_R4",
+      "AINT_D_01a_R5",
+      "AINT_D_01a_R6",
+      "AINT_D_01a_R7",
+      "AINT_D_01a_R8",
+      "AINT_D_01a_R97",
+      "AINT_D_01a_R98"
+    ],
+    "AINT_D_02": [
+      "AINT_D_02_R1",
+      "AINT_D_02_R2",
+      "AINT_D_02_R3",
+      "AINT_D_02_R4",
+      "AINT_D_02_R5",
+      "AINT_D_02_R6",
+      "AINT_D_02_R7",
+      "AINT_D_02_R8",
+      "AINT_D_02_R97"
+    ],
+    "AINT_D_03": [
+      "AINT_D_03"
+    ],
+    "AINT_D_04": [
+      "AINT_D_04"
+    ],
+    "AINT_D_05": [
+      "AINT_D_05"
+    ],
+    "AINT_D_06": [
+      "AINT_D_06"
+    ],
+    "AINT_D_07": [
+      "AINT_D_07"
+    ],
+    "APERF_INTRO": [],
+    "APERF_R_01": [
+      "APERF_R_01"
+    ],
+    "APERF_R_02": [
+      "APERF_R_02"
+    ],
+    "APERF_R_03": [
+      "APERF_R_03"
+    ],
+    "APERF_R_04": [
+      "APERF_R_04"
+    ],
+    "APERF_V_01": [],
+    "APERF_V_02": [],
+    "APERF_D_01": [
+      "APERF_D_01"
+    ],
+    "ADRV_INTRO": [],
+    "ADRV_R_01": [
+      "ADRV_R_01"
+    ],
+    "ADRV_R_02": [
+      "ADRV_R_02"
+    ],
+    "ADRV_R_03": [
+      "ADRV_R_03"
+    ],
+    "ADRV_R_04": [
+      "ADRV_R_04"
+    ],
+    "ADRV_R_05": [
+      "ADRV_R_05"
+    ],
+    "ADRV_D_01": [
+      "ADRV_D_01"
+    ],
+    "ADRV_D_02": [
+      "ADRV_D_02"
+    ],
+    "ASFTY_INTRO_01": [],
+    "ASFTY_R_01": [
+      "ASFTY_R_01"
+    ],
+    "ASFTY_R_02": [
+      "ASFTY_R_02"
+    ],
+    "ASFTY_R_03": [
+      "ASFTY_R_03"
+    ],
+    "ASFTY_R_04": [
+      "ASFTY_R_04"
+    ],
+    "ASFTY_R_05": [
+      "ASFTY_R_05"
+    ],
+    "ASFTY_R_06": [
+      "ASFTY_R_06"
+    ],
+    "ASFTY_D_01": [
+      "ASFTY_D_01"
+    ],
+    "ASFTY_D_02": [
+      "ASFTY_D_02"
+    ],
+    "ASFTY_V_01": [],
+    "AINFO_SCR00_01": [],
+    "AINFO_INTRO": [],
+    "AINFO_R_01": [
+      "AINFO_R_01"
+    ],
+    "AINFO_R_02": [
+      "AINFO_R_02"
+    ],
+    "AINFO_R_03": [
+      "AINFO_R_03"
+    ],
+    "AINFO_R_04": [
+      "AINFO_R_04"
+    ],
+    "AINFO_R_05": [
+      "AINFO_R_05"
+    ],
+    "AINFO_R_06": [
+      "AINFO_R_06"
+    ],
+    "AINFO_R_07": [
+      "AINFO_R_07"
+    ],
+    "AINFO_D_01": [
+      "AINFO_D_01A",
+      "AINFO_D_01B",
+      "AINFO_D_01C",
+      "AINFO_D_01D"
+    ],
+    "AINFO_D_01A": [
+      "AINFO_D_01A"
+    ],
+    "AINFO_D_01B": [
+      "AINFO_D_01B"
+    ],
+    "AINFO_D_01C": [
+      "AINFO_D_01C"
+    ],
+    "AINFO_D_01D": [
+      "AINFO_D_01D"
+    ],
+    "AINFO_V_01": [],
+    "AINFO_V_02": [],
+    "ACMFT_INTRO": [],
+    "ACMFT_R_01": [
+      "ACMFT_R_01"
+    ],
+    "ACMFT_R_02": [
+      "ACMFT_R_02"
+    ],
+    "ACMFT_R_03": [
+      "ACMFT_R_03"
+    ],
+    "ACMFT_R_04": [
+      "ACMFT_R_04"
+    ],
+    "ACMFT_R_05": [
+      "ACMFT_R_05"
+    ],
+    "ACMFT_D_01": [
+      "ACMFT_D_01"
+    ],
+    "ACMFT_D_02": [
+      "ACMFT_D_02"
+    ],
+    "AFUEL_INTRO": [],
+    "AFUEL_R_01": [
+      "AFUEL_R_01"
+    ],
+    "K_AFUEL_D_05": [
+      "K_AFUEL_D_05"
+    ],
+    "K_AFUEL_D_05_999": [
+      "K_AFUEL_D_05"
+    ],
+    "AFUEL_D_06": [
+      "AFUEL_D_06"
+    ],
+    "AFUEL_D_09": [
+      "AFUEL_D_09_R1",
+      "AFUEL_D_09_R2",
+      "AFUEL_D_09_R3",
+      "AFUEL_D_09_R4",
+      "AFUEL_D_09_R5",
+      "AFUEL_D_09_R6",
+      "AFUEL_D_09_R7",
+      "AFUEL_D_09_R8",
+      "AFUEL_D_09_R9",
+      "AFUEL_D_09_R10",
+      "AFUEL_D_09_R11",
+      "AFUEL_D_09_R97"
+    ],
+    "AFUEL_D_07": [
+      "AFUEL_D_07"
+    ],
+    "KM_AFUEL": [
+      "KM_AFUEL"
+    ],
+    "KM_AFUEL_99": [
+      "KM_AFUEL"
+    ],
+    "ACHAR_R_01": [
+      "ACHAR_R_01"
+    ],
+    "ACHAR_R_02": [
+      "ACHAR_R_02"
+    ],
+    "ACHAR_R_03": [
+      "ACHAR_R_03"
+    ],
+    "ACHAR_R_04": [
+      "ACHAR_R_04"
+    ],
+    "ACHAR_R_05": [
+      "ACHAR_R_05"
+    ],
+    "ACHAR_R_06": [
+      "ACHAR_R_06"
+    ],
+    "ACHAR_R_07": [
+      "ACHAR_R_07"
+    ],
+    "ACHAR_R_08": [
+      "ACHAR_R_08"
+    ],
+    "ACHAR_R_09": [
+      "ACHAR_R_09"
+    ],
+    "ACHAR_D_01": [
+      "ACHAR_D_01"
+    ],
+    "ACHAR_D_02": [
+      "ACHAR_D_02_START",
+      "ACHAR_D_02_END"
+    ],
+    "ACHAR_D_02_START": [
+      "ACHAR_D_02_START"
+    ],
+    "ACHAR_D_02_END": [
+      "ACHAR_D_02_END"
+    ],
+    "ACHAR_D_03": [
+      "ACHAR_D_03"
+    ],
+    "ACHAR_D_04": [
+      "ACHAR_D_04_START",
+      "ACHAR_D_04_END"
+    ],
+    "ACHAR_D_04_START": [
+      "ACHAR_D_04_START"
+    ],
+    "ACHAR_D_04_END": [
+      "ACHAR_D_04_END"
+    ],
+    "ACHAR_D_05": [
+      "ACHAR_D_05"
+    ],
+    "ACHAR_D_06": [
+      "ACHAR_D_06_R1",
+      "ACHAR_D_06_R2",
+      "ACHAR_D_06_R3",
+      "ACHAR_D_06_R97"
+    ],
+    "ACHAR_D_07": [
+      "ACHAR_D_07_R1",
+      "ACHAR_D_07_R2",
+      "ACHAR_D_07_R3",
+      "ACHAR_D_07_R6",
+      "ACHAR_D_07_R97"
+    ],
+    "ACHAR_D_08": [
+      "ACHAR_D_08"
+    ],
+    "ACHAR_D_09": [
+      "ACHAR_D_09_R1",
+      "ACHAR_D_09_R2",
+      "ACHAR_D_09_R3",
+      "ACHAR_D_09_R4",
+      "ACHAR_D_09_R5",
+      "ACHAR_D_09_R6",
+      "ACHAR_D_09_R97"
+    ],
+    "APEAL_OSAT": [
+      "APEAL_OSAT"
+    ],
+    "YNV_01": [
+      "YNV_01"
+    ],
+    "YNV_02": [
+      "YNV_02"
+    ],
+    "YNV_CN_6": [
+      "YNV_CN_6_1",
+      "YNV_CN_6_2",
+      "YNV_CN_6_3",
+      "YNV_CN_6_4",
+      "YNV_CN_6_5",
+      "YNV_CN_6_6",
+      "YNV_CN_6_7",
+      "YNV_CN_6_8",
+      "YNV_CN_6_9",
+      "YNV_CN_6_10",
+      "YNV_CN_6_11",
+      "YNV_CN_6_12",
+      "YNV_CN_6_13",
+      "YNV_CN_6_14"
+    ],
+    "CN_YNV_07": [
+      "CN_YNV_07"
+    ],
+    "YNV_CN_7X_99": [],
+    "YPV_01": [
+      "YPV_01"
+    ],
+    "YPV_02": [
+      "YPV_02_MAKE",
+      "YPV_02_SERIES"
+    ],
+    "YPV_02_MAKE": [
+      "YPV_02_MAKE"
+    ],
+    "YPV_02_SERIES": [
+      "YPV_02_SERIES"
+    ],
+    "YPV_03": [
+      "YPV_03_MAKE",
+      "YPV_03_SERIES"
+    ],
+    "YPV_03_MAKE": [
+      "YPV_03_MAKE"
+    ],
+    "YPV_03_SERIES": [
+      "YPV_03_SERIES"
+    ],
+    "YPV_05": [
+      "YPV_05"
+    ],
+    "GENDER": [
+      "GENDER"
+    ],
+    "GENDER_98": [
+      "GENDER"
+    ],
+    "CN_MARITAL_STATUS": [
+      "CN_MARITAL_STATUS"
+    ],
+    "BIRTHYEAR": [],
+    "BIRTHYEAR_98": [],
+    "CN_NUMBER_HOUSEHOLD": [
+      "CN_NUMBER_HOUSEHOLD"
+    ],
+    "CN_OCCUPATION": [
+      "CN_OCCUPATION"
+    ],
+    "CN_OCCUPATION_98": [
+      "CN_OCCUPATION"
+    ],
+    "CN_EDUCATION": [
+      "CN_EDUCATION"
+    ],
+    "CN_EDUCATION_98": [
+      "CN_EDUCATION"
+    ],
+    "CN_INCOME": [
+      "CN_INCOME"
+    ],
+    "CN_INCOME_98": [
+      "CN_INCOME"
+    ],
+    "HWGT": [],
+    "M_HWGT_1A": [],
+    "CM_HWGT_1B": [],
+    "KB_HWGT_1C": [
+      "KB_HWGT_1C"
+    ],
+    "HWGT_98": []
+  },
+  "n_sav_vars": 370
+}

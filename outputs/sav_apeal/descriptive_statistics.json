@@ -1,0 +1,4147 @@
+{
+  "variables": [
+    {
+      "variable": "Region_DP",
+      "label": "Region_DP",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "2.0": 42.32,
+        "1.0": 16.28,
+        "3.0": 19.01,
+        "4.0": 22.39
+      }
+    },
+    {
+      "variable": "CITY_TIER_DP",
+      "label": "CITY_TIER_DP",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "3.0": 18.48,
+        "2.0": 60.99,
+        "1.0": 17.62,
+        "4.0": 2.91
+      }
+    },
+    {
+      "variable": "MAKE_DP",
+      "label": "Make of Vehicle",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "15011.0": 1.89,
+        "18016.0": 0.99,
+        "54811.0": 10.67,
+        "14011.0": 31.18,
+        "28018.0": 1.36,
+        "42511.0": 0.77,
+        "57013.0": 1.96,
+        "58011.0": 4.42,
+        "57012.0": 0.76,
+        "16013.0": 0.46,
+        "63521.0": 6.43,
+        "28011.0": 1.38,
+        "28017.0": 0.83,
+        "81011.0": 2.53,
+        "68511.0": 2.96,
+        "13011.0": 1.68,
+        "15012.0": 0.23,
+        "42751.0": 0.58,
+        "16014.0": 1.08,
+        "85011.0": 2.37,
+        "69911.0": 2.01,
+        "82011.0": 7.11,
+        "16012.0": 0.62,
+        "15014.0": 1.93,
+        "42513.0": 1.6,
+        "28016.0": 0.69,
+        "69211.0": 0.32,
+        "76011.0": 0.67,
+        "11511.0": 0.36,
+        "69512.0": 2.02,
+        "58012.0": 0.54,
+        "12515.0": 0.67,
+        "13511.0": 1.01,
+        "16015.0": 0.38,
+        "72011.0": 0.82,
+        "22014.0": 0.53,
+        "57511.0": 0.1,
+        "69811.0": 0.13,
+        "56512.0": 0.49,
+        "44514.0": 0.27,
+        "63511.0": 0.31,
+        "43751.0": 0.16,
+        "88011.0": 0.6,
+        "23012.0": 1.41,
+        "22018.0": 0.22,
+        "47011.0": 0.17,
+        "40011.0": 0.09,
+        "23011.0": 0.26
+      }
+    },
+    {
+      "variable": "PREMMAKE_DP",
+      "label": "Make - Premium/Non-Premium",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "2.0": 92.93,
+        "1.0": 7.07
+      }
+    },
+    {
+      "variable": "BODYTYPE_DP",
+      "label": "Vehicle Body Type",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "1.0": 46.73,
+        "2.0": 50.4,
+        "3.0": 2.87
+      }
+    },
+    {
+      "variable": "ORIGIN_DP",
+      "label": "Origin - Domestic/International",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "1.0": 81.55,
+        "2.0": 18.45
+      }
+    },
+    {
+      "variable": "ORIGIN_CN_DP",
+      "label": "Origin - Premium/Mass International/Mass Domestic",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "4.0": 77.47,
+        "3.0": 15.46,
+        "1.0": 2.99,
+        "2.0": 4.08
+      }
+    },
+    {
+      "variable": "SUB_ORIGIN_DP",
+      "label": "Origin Region",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "1.0": 82.12,
+        "3.0": 11.68,
+        "2.0": 6.2
+      }
+    },
+    {
+      "variable": "SUB_SUB_ORIGIN_DP",
+      "label": "Orign Country",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "1.0": 81.55,
+        "9.0": 11.68,
+        "3.0": 6.1,
+        "7.0": 0.1,
+        "5.0": 0.58
+      }
+    },
+    {
+      "variable": "ORIGIN2_DP",
+      "label": "Domestic Traditional",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "1.0": 63.61,
+        "2.0": 18.45,
+        "3.0": 17.93
+      }
+    },
+    {
+      "variable": "ORIGIN3_DP",
+      "label": "OEM TYPE",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "1.0": 46.56,
+        "2.0": 18.45,
+        "4.0": 17.05,
+        "3.0": 17.93
+      }
+    },
+    {
+      "variable": "PREMMODEL_DP",
+      "label": "Model - Premium/Non-Premium",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "2.0": 92.51,
+        "1.0": 7.49
+      }
+    },
+    {
+      "variable": "SUPER_SEGMENT_DP",
+      "label": "Super Segment - BEV/PHEV",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "1.0": 67.56,
+        "2.0": 32.44
+      }
+    },
+    {
+      "variable": "SEGMENT_DP",
+      "label": "Segment",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "11.0": 12.56,
+        "16.0": 14.88,
+        "21.0": 20.13,
+        "15.0": 7.82,
+        "18.0": 4.56,
+        "13.0": 16.01,
+        "14.0": 7.55,
+        "20.0": 7.47,
+        "12.0": 1.44,
+        "17.0": 2.49,
+        "22.0": 1.91,
+        "19.0": 2.93,
+        "23.0": 0.26
+      }
+    },
+    {
+      "variable": "SCR_BODYTYPE",
+      "label": "Vehicle Body Type",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "5.0": 5.62,
+        "4.0": 50.11,
+        "6.0": 16.43,
+        "9.0": 23.97,
+        "10.0": 2.87,
+        "3.0": 0.3,
+        "1.0": 0.36,
+        "11.0": 0.35
+      }
+    },
+    {
+      "variable": "SCR_CONVERTIBLE",
+      "label": "Convertible",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "0.0": 99.64,
+        "1.0": 0.36
+      }
+    },
+    {
+      "variable": "SCR_TWO_SEATER",
+      "label": "Two-Seater",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "0.0": 99.64,
+        "1.0": 0.36
+      }
+    },
+    {
+      "variable": "SCR_SLIDING_DOOR",
+      "label": "Sliding Door(s)",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "0.0": 97.13,
+        "1.0": 2.87
+      }
+    },
+    {
+      "variable": "SCR_REAR_DOOR",
+      "label": "Rear Door(s)",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "0.0": 6.28,
+        "1.0": 93.72
+      }
+    },
+    {
+      "variable": "SCR_THIRD_ROW",
+      "label": "Third Row Seat(s)",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "0.0": 90.45,
+        "1.0": 9.55
+      }
+    },
+    {
+      "variable": "SCR_DRIVESIDE",
+      "label": "Driveside",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "1.0": 100.0
+      }
+    },
+    {
+      "variable": "SCR_G_7",
+      "label": "Drive Type",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "1.0": 82.37,
+        "2.0": 17.63
+      }
+    },
+    {
+      "variable": "SCR_G_6",
+      "label": "Turbocharging System",
+      "type": "categorical",
+      "n": 3185,
+      "weighted_share": {
+        "1.0": 59.52,
+        "0.0": 40.48
+      }
+    },
+    {
+      "variable": "SCR_FUEL_TYPE",
+      "label": "Fuel Type",
+      "type": "scale7",
+      "n": 9937,
+      "weighted_mean": 5.68,
+      "mean": 5.68,
+      "median": 6.0,
+      "std": 0.47,
+      "min": 5.0,
+      "max": 6.0
+    },
+    {
+      "variable": "SCR_G_5",
+      "label": "Vehicle Displacement",
+      "type": "categorical",
+      "n": 3185,
+      "weighted_share": {
+        "7.0": 95.83,
+        "4.0": 0.58,
+        "10.0": 3.59
+      }
+    },
+    {
+      "variable": "SCR_G_3",
+      "label": "Transmission Type",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "2.0": 100.0
+      }
+    },
+    {
+      "variable": "SCR_G_4",
+      "label": "Automatic Transmission Type",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "1.0": 84.01,
+        "2.0": 15.53,
+        "97.0": 0.46
+      }
+    },
+    {
+      "variable": "SCR_G_1",
+      "label": "Vehicle Exterior Color",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "97.0": 8.18,
+        "1.0": 37.87,
+        "3.0": 25.97,
+        "4.0": 5.42,
+        "6.0": 1.73,
+        "5.0": 5.88,
+        "2.0": 14.95
+      }
+    },
+    {
+      "variable": "SCR_USE_TYPE",
+      "label": "Commercial or Private Use",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "1.0": 99.29,
+        "2.0": 0.71
+      }
+    },
+    {
+      "variable": "SCR_COMMERCIAL_USE",
+      "label": "Proportion of commercial use",
+      "type": "numeric",
+      "n": 47,
+      "weighted_mean": 28.93,
+      "mean": 32.02,
+      "median": 30.0,
+      "std": 18.11,
+      "min": 5.0,
+      "max": 95.0
+    },
+    {
+      "variable": "SCR_BAT000_01",
+      "label": "Battery Capacity",
+      "type": "numeric",
+      "n": 6146,
+      "weighted_mean": 47.69,
+      "mean": 49.15,
+      "median": 49.0,
+      "std": 22.89,
+      "min": 10.0,
+      "max": 99.0
+    },
+    {
+      "variable": "SCR_DEL_Y",
+      "label": "Delivery Date-Year",
+      "type": "scale7",
+      "n": 9937,
+      "weighted_mean": 2023.05,
+      "mean": 2023.05,
+      "median": 2023.0,
+      "std": 0.23,
+      "min": 2023.0,
+      "max": 2024.0
+    },
+    {
+      "variable": "SCR_DEL_M",
+      "label": "Delivery Date-Month",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "6.0": 0.15,
+        "7.0": 1.27,
+        "8.0": 3.75,
+        "9.0": 12.1,
+        "10.0": 23.12,
+        "11.0": 30.69,
+        "12.0": 24.11,
+        "1.0": 4.81
+      }
+    },
+    {
+      "variable": "SCR_FCD00_01",
+      "label": "Head-up display",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "0.0": 84.23,
+        "1.0": 11.31,
+        "99.0": 4.46
+      }
+    },
+    {
+      "variable": "SCR_FCD00_02",
+      "label": "Smartphone app installed",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "1.0": 61.45,
+        "0.0": 36.15,
+        "99.0": 2.39
+      }
+    },
+    {
+      "variable": "SCR_DRA00_01",
+      "label": "Adaptive cruise control",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "0.0": 40.87,
+        "1.0": 56.21,
+        "99.0": 2.93
+      }
+    },
+    {
+      "variable": "SCR_DRA00_02",
+      "label": "Cruise control",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "0.0": 33.92,
+        "1.0": 63.21,
+        "99.0": 2.87
+      }
+    },
+    {
+      "variable": "SCR_DRA00_03",
+      "label": "Forward collision warning",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "0.0": 42.62,
+        "1.0": 53.27,
+        "99.0": 4.11
+      }
+    },
+    {
+      "variable": "SCR_DRA00_04",
+      "label": "Automatic emergency braking",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "0.0": 39.7,
+        "99.0": 4.61,
+        "1.0": 55.68
+      }
+    },
+    {
+      "variable": "SCR_DRA00_05",
+      "label": "Parking cameras",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "1.0": 90.8,
+        "0.0": 8.35,
+        "99.0": 0.84
+      }
+    },
+    {
+      "variable": "SCR_DRA00_06",
+      "label": "Parking sensors",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "1.0": 82.2,
+        "0.0": 15.83,
+        "99.0": 1.97
+      }
+    },
+    {
+      "variable": "SCR_DRA00_07",
+      "label": "Active parking assistance",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "0.0": 70.67,
+        "1.0": 26.59,
+        "99.0": 2.73
+      }
+    },
+    {
+      "variable": "SCR_DRA00_08",
+      "label": "Blind spot warning",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "0.0": 61.87,
+        "99.0": 6.84,
+        "1.0": 31.29
+      }
+    },
+    {
+      "variable": "SCR_DRA00_09",
+      "label": "Lane departure warning",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "0.0": 43.26,
+        "1.0": 51.63,
+        "99.0": 5.11
+      }
+    },
+    {
+      "variable": "SCR_DRA00_10",
+      "label": "Lane keeping assistance",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "0.0": 41.96,
+        "1.0": 53.31,
+        "99.0": 4.73
+      }
+    },
+    {
+      "variable": "SCR_INFO00_01",
+      "label": "Built-in rear seat entertainment system",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "0.0": 87.66,
+        "99.0": 5.37,
+        "1.0": 6.97
+      }
+    },
+    {
+      "variable": "SCR_INFO00_02",
+      "label": "Built-in navigation system",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "0.0": 15.84,
+        "99.0": 1.9,
+        "1.0": 82.26
+      }
+    },
+    {
+      "variable": "SCR_INFO00_03",
+      "label": "Built-in Wi-Fi",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "0.0": 38.07,
+        "1.0": 57.27,
+        "99.0": 4.66
+      }
+    },
+    {
+      "variable": "SCR_INFO00_04",
+      "label": "Smartphone mirroring system",
+      "type": "categorical",
+      "n": 2964,
+      "weighted_share": {
+        "0.0": 31.03,
+        "1.0": 60.33,
+        "99.0": 8.64
+      }
+    },
+    {
+      "variable": "SCR_INFO00_07",
+      "label": "Built-in Voice Recognition",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "99.0": 2.41,
+        "0.0": 17.95,
+        "1.0": 79.65
+      }
+    },
+    {
+      "variable": "CLMT_SCR00_01",
+      "label": "Air Conditioning",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "1.0": 100.0
+      }
+    },
+    {
+      "variable": "SCR_INFO00_05",
+      "label": "Frequency of use: Built-in navigation system",
+      "type": "categorical",
+      "n": 8141,
+      "weighted_share": {
+        "1.0": 4.94,
+        "2.0": 9.57,
+        "3.0": 30.14,
+        "5.0": 19.56,
+        "4.0": 35.78
+      }
+    },
+    {
+      "variable": "SCR_INFO00_06B",
+      "label": "Frequency of Use: Apple CarPlay",
+      "type": "categorical",
+      "n": 633,
+      "weighted_share": {
+        "4.0": 28.42,
+        "5.0": 22.39,
+        "3.0": 33.41,
+        "1.0": 4.54,
+        "2.0": 11.23
+      }
+    },
+    {
+      "variable": "SCR_INFO00_06G",
+      "label": "Frequency of Use: HUAWEI HiCar",
+      "type": "categorical",
+      "n": 504,
+      "weighted_share": {
+        "3.0": 33.26,
+        "1.0": 9.54,
+        "4.0": 21.05,
+        "2.0": 20.27,
+        "5.0": 15.88
+      }
+    },
+    {
+      "variable": "SCR_INFO00_06H",
+      "label": "Frequency of Use: Vivo Jovi InCar",
+      "type": "categorical",
+      "n": 271,
+      "weighted_share": {
+        "3.0": 33.71,
+        "1.0": 12.5,
+        "2.0": 11.89,
+        "5.0": 18.04,
+        "4.0": 23.86
+      }
+    },
+    {
+      "variable": "SCR_INFO00_06E",
+      "label": "Frequency of Use: Carlife",
+      "type": "categorical",
+      "n": 703,
+      "weighted_share": {
+        "3.0": 32.63,
+        "1.0": 11.8,
+        "5.0": 18.97,
+        "2.0": 12.24,
+        "4.0": 24.36
+      }
+    },
+    {
+      "variable": "SCR_INFO00_06F",
+      "label": "Frequency of Use: Other smartphone mirroring system",
+      "type": "categorical",
+      "n": 2,
+      "weighted_share": {
+        "5.0": 55.79,
+        "2.0": 44.21
+      }
+    },
+    {
+      "variable": "NEV_01",
+      "label": "NEV_01: Frequency of Normal Charging",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "2.0": 34.8,
+        "1.0": 3.21,
+        "3.0": 30.99,
+        "5.0": 4.8,
+        "99.0": 10.63,
+        "4.0": 15.57
+      }
+    },
+    {
+      "variable": "NEV_03_R1",
+      "label": "NEV_03: Most often Used Normal Charging Equipment_Charge station",
+      "type": "categorical",
+      "n": 8784,
+      "weighted_share": {
+        "2.0": 30.2,
+        "1.0": 68.47,
+        "99.0": 1.34
+      }
+    },
+    {
+      "variable": "NEV_03_R2",
+      "label": "NEV_03: Most often Used Normal Charging Equipment_Charge cable",
+      "type": "categorical",
+      "n": 8784,
+      "weighted_share": {
+        "1.0": 72.71,
+        "2.0": 25.6,
+        "99.0": 1.69
+      }
+    },
+    {
+      "variable": "NEV_03_R3",
+      "label": "NEV_03: Most often Used Normal Charging Equipment_Adaptor",
+      "type": "categorical",
+      "n": 8784,
+      "weighted_share": {
+        "1.0": 75.29,
+        "2.0": 22.72,
+        "99.0": 1.99
+      }
+    },
+    {
+      "variable": "NEV_07",
+      "label": "NEV_07: Do you share this parking space with others",
+      "type": "categorical",
+      "n": 6005,
+      "weighted_share": {
+        "2.0": 76.61,
+        "1.0": 22.53,
+        "99.0": 0.86
+      }
+    },
+    {
+      "variable": "NEV_08",
+      "label": "NEV_08: Frequency of Fast Charging",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "99.0": 14.38,
+        "5.0": 16.62,
+        "3.0": 25.17,
+        "2.0": 20.43,
+        "4.0": 20.81,
+        "1.0": 2.59
+      }
+    },
+    {
+      "variable": "NEV_11A",
+      "label": "NEV_11: Usage Frequency - Commuting to work/school",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "6.0": 51.46,
+        "5.0": 41.8,
+        "4.0": 3.09,
+        "2.0": 0.84,
+        "3.0": 2.16,
+        "1.0": 0.64
+      }
+    },
+    {
+      "variable": "NEV_11B",
+      "label": "NEV_11: Usage Frequency - Business/work-related uses (non-commuting)",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "5.0": 11.61,
+        "1.0": 26.85,
+        "4.0": 14.96,
+        "3.0": 26.19,
+        "2.0": 19.35,
+        "6.0": 1.05
+      }
+    },
+    {
+      "variable": "NEV_11C",
+      "label": "NEV_11: Usage Frequency - Personal/family uses (e.g., shopping, errands, visiting friends)",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "5.0": 29.03,
+        "1.0": 3.71,
+        "4.0": 26.72,
+        "3.0": 26.67,
+        "2.0": 10.76,
+        "6.0": 3.1
+      }
+    },
+    {
+      "variable": "NEV_11D",
+      "label": "NEV_11: Usage Frequency - Outdoor activities (e.g., camping, biking, skiing, hunting)",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "3.0": 25.41,
+        "1.0": 24.51,
+        "4.0": 9.67,
+        "2.0": 35.97,
+        "5.0": 4.05,
+        "6.0": 0.4
+      }
+    },
+    {
+      "variable": "NEV_11E",
+      "label": "NEV_11: Usage Frequency - Off-road uses",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "1.0": 73.3,
+        "6.0": 0.15,
+        "2.0": 15.33,
+        "3.0": 7.08,
+        "4.0": 3.01,
+        "5.0": 1.12
+      }
+    },
+    {
+      "variable": "NEV_11F",
+      "label": "NEV_11: Usage Frequency - Towing",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "1.0": 81.09,
+        "2.0": 9.25,
+        "3.0": 5.52,
+        "5.0": 1.15,
+        "4.0": 2.8,
+        "6.0": 0.2
+      }
+    },
+    {
+      "variable": "NEV_11G",
+      "label": "NEV_11: Usage Frequency - Driving for fun",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "5.0": 10.3,
+        "4.0": 17.33,
+        "3.0": 28.94,
+        "6.0": 0.78,
+        "2.0": 27.4,
+        "1.0": 15.25
+      }
+    },
+    {
+      "variable": "NEV_13a",
+      "label": "NEV_13a: Average Driving Hours per day",
+      "type": "numeric",
+      "n": 8417,
+      "weighted_mean": 2.23,
+      "mean": 2.25,
+      "median": 2.0,
+      "std": 1.26,
+      "min": 1.0,
+      "max": 23.0
+    },
+    {
+      "variable": "NEV_14",
+      "label": "NEV_14: Expectation of Electric Driving Range",
+      "type": "numeric",
+      "n": 8846,
+      "weighted_mean": 603.32,
+      "mean": 604.9,
+      "median": 600.0,
+      "std": 218.31,
+      "min": 43.0,
+      "max": 999.0
+    },
+    {
+      "variable": "NEV_15",
+      "label": "NEV_15: Expectation of Normal Charging Time (Hours)",
+      "type": "numeric",
+      "n": 8551,
+      "weighted_mean": 4.29,
+      "mean": 4.29,
+      "median": 4.0,
+      "std": 2.53,
+      "min": 1.0,
+      "max": 24.0
+    },
+    {
+      "variable": "NEV_16",
+      "label": "NEV_16: Expectation of Fast Charging Time (Minutes)",
+      "type": "numeric",
+      "n": 8662,
+      "weighted_mean": 28.55,
+      "mean": 28.3,
+      "median": 25.0,
+      "std": 21.73,
+      "min": 10.0,
+      "max": 240.0
+    },
+    {
+      "variable": "APEAL_Index",
+      "label": "APEAL Index",
+      "type": "numeric",
+      "n": 9937,
+      "weighted_mean": 789.19,
+      "mean": 790.79,
+      "median": 810.3,
+      "std": 103.19,
+      "min": 206.2,
+      "max": 1000.0
+    },
+    {
+      "variable": "AEXT_Index",
+      "label": "Exterior Index",
+      "type": "numeric",
+      "n": 9937,
+      "weighted_mean": 817.81,
+      "mean": 819.05,
+      "median": 800.0,
+      "std": 116.44,
+      "min": 100.0,
+      "max": 1000.0
+    },
+    {
+      "variable": "ASET_Index",
+      "label": "Setting Up and Starting Index",
+      "type": "numeric",
+      "n": 9937,
+      "weighted_mean": 785.79,
+      "mean": 785.8,
+      "median": 800.0,
+      "std": 113.71,
+      "min": 100.0,
+      "max": 1000.0
+    },
+    {
+      "variable": "AENT_Index",
+      "label": "Getting In and Out Index",
+      "type": "numeric",
+      "n": 9937,
+      "weighted_mean": 781.9,
+      "mean": 782.85,
+      "median": 800.5,
+      "std": 114.64,
+      "min": 100.0,
+      "max": 1000.0
+    },
+    {
+      "variable": "AINT_Index",
+      "label": "Interior Index",
+      "type": "numeric",
+      "n": 9937,
+      "weighted_mean": 779.38,
+      "mean": 780.97,
+      "median": 800.6,
+      "std": 115.51,
+      "min": 100.0,
+      "max": 1000.0
+    },
+    {
+      "variable": "APERF_Index",
+      "label": "Performance Index",
+      "type": "numeric",
+      "n": 9937,
+      "weighted_mean": 786.5,
+      "mean": 786.63,
+      "median": 800.5,
+      "std": 113.92,
+      "min": 134.2,
+      "max": 1000.0
+    },
+    {
+      "variable": "ADRV_Index",
+      "label": "Driving Feel index",
+      "type": "numeric",
+      "n": 9937,
+      "weighted_mean": 783.87,
+      "mean": 785.33,
+      "median": 800.2,
+      "std": 110.08,
+      "min": 169.6,
+      "max": 1000.0
+    },
+    {
+      "variable": "ASFTY_Index",
+      "label": "Keeping You Safe index",
+      "type": "numeric",
+      "n": 9937,
+      "weighted_mean": 779.56,
+      "mean": 781.44,
+      "median": 799.9,
+      "std": 111.53,
+      "min": 181.8,
+      "max": 1000.0
+    },
+    {
+      "variable": "AINFO_Index",
+      "label": "Infotainment Index",
+      "type": "numeric",
+      "n": 9937,
+      "weighted_mean": 778.09,
+      "mean": 779.82,
+      "median": 799.8,
+      "std": 115.46,
+      "min": 160.6,
+      "max": 1000.0
+    },
+    {
+      "variable": "ACMFT_Index",
+      "label": "Driving Comfort Index",
+      "type": "numeric",
+      "n": 9937,
+      "weighted_mean": 779.65,
+      "mean": 782.26,
+      "median": 799.8,
+      "std": 112.06,
+      "min": 100.0,
+      "max": 1000.0
+    },
+    {
+      "variable": "AFUEL_Index",
+      "label": "Fuel Economy Index",
+      "type": "numeric",
+      "n": 9937,
+      "weighted_mean": 795.56,
+      "mean": 798.48,
+      "median": 800.0,
+      "std": 126.84,
+      "min": 100.0,
+      "max": 1000.0
+    },
+    {
+      "variable": "ACHAR_index",
+      "label": "Charging Experience Index",
+      "type": "numeric",
+      "n": 9937,
+      "weighted_mean": 778.37,
+      "mean": 780.52,
+      "median": 798.5,
+      "std": 103.94,
+      "min": 294.7,
+      "max": 1000.0
+    },
+    {
+      "variable": "AEXT_R_01",
+      "label": "AEXT01: Exterior styling of your vehicle",
+      "type": "rating",
+      "n": 9937,
+      "weighted_mean": 8.18,
+      "mean": 8.19,
+      "median": 8.0,
+      "std": 1.16,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 45.4
+    },
+    {
+      "variable": "ASET_R_01",
+      "label": "ASET01: Operating vehicle remotely using a phone/watch/smart home device",
+      "type": "rating",
+      "n": 6010,
+      "weighted_mean": 7.94,
+      "mean": 7.96,
+      "median": 8.0,
+      "std": 1.29,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 35.7
+    },
+    {
+      "variable": "ASET_R_02",
+      "label": "ASET02: How your vehicle makes you feel when you start it up",
+      "type": "rating",
+      "n": 9936,
+      "weighted_mean": 7.91,
+      "mean": 7.9,
+      "median": 8.0,
+      "std": 1.3,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 34.7
+    },
+    {
+      "variable": "ASET_R_03",
+      "label": "ASET03: Experience of getting your vehicle set up just the way you want",
+      "type": "rating",
+      "n": 9933,
+      "weighted_mean": 7.82,
+      "mean": 7.82,
+      "median": 8.0,
+      "std": 1.33,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 32.1
+    },
+    {
+      "variable": "ASET_R_04",
+      "label": "ASET04: Overall experience of setting up and starting your vehicle",
+      "type": "rating",
+      "n": 9937,
+      "weighted_mean": 7.99,
+      "mean": 8.01,
+      "median": 8.0,
+      "std": 1.3,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 40.4
+    },
+    {
+      "variable": "AENT_R_01",
+      "label": "AENT01: Ease of loading and unloading your vehicle",
+      "type": "rating",
+      "n": 9937,
+      "weighted_mean": 7.83,
+      "mean": 7.84,
+      "median": 8.0,
+      "std": 1.39,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 34.3
+    },
+    {
+      "variable": "AENT_R_02",
+      "label": "AENT02: Ease of getting in/out of the front seats",
+      "type": "rating",
+      "n": 9937,
+      "weighted_mean": 7.9,
+      "mean": 7.91,
+      "median": 8.0,
+      "std": 1.35,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 35.6
+    },
+    {
+      "variable": "AENT_R_03",
+      "label": "AENT03: Ease of getting in/out of the [rear/second row] seats",
+      "type": "rating",
+      "n": 9909,
+      "weighted_mean": 7.8,
+      "mean": 7.8,
+      "median": 8.0,
+      "std": 1.4,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 33.4
+    },
+    {
+      "variable": "AENT_R_04",
+      "label": "AENT04: Ease of getting in/out of the third row seats",
+      "type": "rating",
+      "n": 890,
+      "weighted_mean": 7.52,
+      "mean": 7.55,
+      "median": 8.0,
+      "std": 1.53,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 28.5
+    },
+    {
+      "variable": "AENT_R_05",
+      "label": "AENT05: Sound the doors make when you close them",
+      "type": "rating",
+      "n": 9937,
+      "weighted_mean": 7.8,
+      "mean": 7.82,
+      "median": 8.0,
+      "std": 1.38,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 33.6
+    },
+    {
+      "variable": "AENT_R_06",
+      "label": "AENT06: Overall experience of getting yourself and your passengers in and out of the vehicle",
+      "type": "rating",
+      "n": 9937,
+      "weighted_mean": 7.95,
+      "mean": 7.97,
+      "median": 8.0,
+      "std": 1.37,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 40.7
+    },
+    {
+      "variable": "AINT_R_01",
+      "label": "AINT01: Vehicle's ability to carry everything you want",
+      "type": "rating",
+      "n": 9934,
+      "weighted_mean": 7.8,
+      "mean": 7.81,
+      "median": 8.0,
+      "std": 1.42,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 34.1
+    },
+    {
+      "variable": "AINT_R_02",
+      "label": "AINT02: Vehicle's ability to hold personal items exactly where you want them",
+      "type": "rating",
+      "n": 9937,
+      "weighted_mean": 7.77,
+      "mean": 7.79,
+      "median": 8.0,
+      "std": 1.41,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 33.2
+    },
+    {
+      "variable": "AINT_R_03",
+      "label": "AINT03: Interior styling of your vehicle",
+      "type": "rating",
+      "n": 9937,
+      "weighted_mean": 7.83,
+      "mean": 7.86,
+      "median": 8.0,
+      "std": 1.36,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 34.7
+    },
+    {
+      "variable": "AINT_R_04",
+      "label": "AINT04: Quality of the materials used inside your vehicle",
+      "type": "rating",
+      "n": 9937,
+      "weighted_mean": 7.76,
+      "mean": 7.77,
+      "median": 8.0,
+      "std": 1.43,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 33.5
+    },
+    {
+      "variable": "AINT_R_05",
+      "label": "AINT05: Attractiveness of your vehicle's screens and displays",
+      "type": "rating",
+      "n": 9935,
+      "weighted_mean": 7.81,
+      "mean": 7.83,
+      "median": 8.0,
+      "std": 1.37,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 33.7
+    },
+    {
+      "variable": "AINT_R_06",
+      "label": "AINT06: Overall feelings about the interior of your vehicle",
+      "type": "rating",
+      "n": 9937,
+      "weighted_mean": 7.93,
+      "mean": 7.96,
+      "median": 8.0,
+      "std": 1.37,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 39.4
+    },
+    {
+      "variable": "APERF_R_01",
+      "label": "APERF01: Smoothness of your vehicle's engine/motor",
+      "type": "rating",
+      "n": 9935,
+      "weighted_mean": 7.88,
+      "mean": 7.89,
+      "median": 8.0,
+      "std": 1.32,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 34.4
+    },
+    {
+      "variable": "APERF_R_02",
+      "label": "APERF02: Power of your vehicle's engine/motor",
+      "type": "rating",
+      "n": 9936,
+      "weighted_mean": 7.91,
+      "mean": 7.9,
+      "median": 8.0,
+      "std": 1.34,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 36.0
+    },
+    {
+      "variable": "APERF_R_03",
+      "label": "APERF03: Sound of your vehicle's engine/motor",
+      "type": "rating",
+      "n": 9935,
+      "weighted_mean": 7.81,
+      "mean": 7.81,
+      "median": 8.0,
+      "std": 1.38,
+      "min": 2.0,
+      "max": 10.0,
+      "top2_box_pct": 32.9
+    },
+    {
+      "variable": "APERF_R_04",
+      "label": "APERF04: Vehicle's engine/motor overall",
+      "type": "rating",
+      "n": 9937,
+      "weighted_mean": 7.96,
+      "mean": 7.98,
+      "median": 8.0,
+      "std": 1.32,
+      "min": 2.0,
+      "max": 10.0,
+      "top2_box_pct": 39.5
+    },
+    {
+      "variable": "ADRV_R_01",
+      "label": "ADRV01: Comfort of your vehicle's ride",
+      "type": "rating",
+      "n": 9937,
+      "weighted_mean": 7.89,
+      "mean": 7.91,
+      "median": 8.0,
+      "std": 1.33,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 35.5
+    },
+    {
+      "variable": "ADRV_R_02",
+      "label": "ADRV02: How well your vehicle steers/handles in normal conditions",
+      "type": "rating",
+      "n": 9936,
+      "weighted_mean": 7.88,
+      "mean": 7.88,
+      "median": 8.0,
+      "std": 1.33,
+      "min": 2.0,
+      "max": 10.0,
+      "top2_box_pct": 34.2
+    },
+    {
+      "variable": "ADRV_R_03",
+      "label": "ADRV03: How well your vehicle steers/handles in slippery conditions",
+      "type": "rating",
+      "n": 9933,
+      "weighted_mean": 7.73,
+      "mean": 7.76,
+      "median": 8.0,
+      "std": 1.38,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 31.2
+    },
+    {
+      "variable": "ADRV_R_04",
+      "label": "ADRV04: Performance of your vehicle's brakes (including stopping power, smoothness)",
+      "type": "rating",
+      "n": 9937,
+      "weighted_mean": 7.87,
+      "mean": 7.87,
+      "median": 8.0,
+      "std": 1.33,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 33.9
+    },
+    {
+      "variable": "ADRV_R_05",
+      "label": "ADRV05: Overall driving feel of your vehicle",
+      "type": "rating",
+      "n": 9937,
+      "weighted_mean": 7.99,
+      "mean": 8.01,
+      "median": 8.0,
+      "std": 1.31,
+      "min": 2.0,
+      "max": 10.0,
+      "top2_box_pct": 40.9
+    },
+    {
+      "variable": "ASFTY_R_01",
+      "label": "ASFTY01: How easy it is to safely maneuver your vehicle in and out of traffic and tight parking spaces",
+      "type": "rating",
+      "n": 9933,
+      "weighted_mean": 7.75,
+      "mean": 7.75,
+      "median": 8.0,
+      "std": 1.4,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 32.5
+    },
+    {
+      "variable": "ASFTY_R_02",
+      "label": "ASFTY02: How well you feel your vehicle would protect you in an accident",
+      "type": "rating",
+      "n": 9814,
+      "weighted_mean": 7.8,
+      "mean": 7.82,
+      "median": 8.0,
+      "std": 1.39,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 33.3
+    },
+    {
+      "variable": "ASFTY_R_03",
+      "label": "ASFTY03: Experience of using your vehicle's driver assistance systems",
+      "type": "rating",
+      "n": 9826,
+      "weighted_mean": 7.76,
+      "mean": 7.78,
+      "median": 8.0,
+      "std": 1.37,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 32.4
+    },
+    {
+      "variable": "ASFTY_R_04",
+      "label": "ASFTY04: Experience of using your vehicle's safety systems",
+      "type": "rating",
+      "n": 9781,
+      "weighted_mean": 7.79,
+      "mean": 7.81,
+      "median": 8.0,
+      "std": 1.36,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 32.9
+    },
+    {
+      "variable": "ASFTY_R_05",
+      "label": "ASFTY05: Effectiveness of your vehicle's headlights",
+      "type": "rating",
+      "n": 9937,
+      "weighted_mean": 7.88,
+      "mean": 7.91,
+      "median": 8.0,
+      "std": 1.35,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 35.5
+    },
+    {
+      "variable": "ASFTY_R_06",
+      "label": "ASFTY06: Overall how safe your vehicle makes you feel",
+      "type": "rating",
+      "n": 9937,
+      "weighted_mean": 7.97,
+      "mean": 8.0,
+      "median": 8.0,
+      "std": 1.32,
+      "min": 3.0,
+      "max": 10.0,
+      "top2_box_pct": 39.9
+    },
+    {
+      "variable": "AINFO_R_01",
+      "label": "AINFO01: Experience of playing audio in your vehicle",
+      "type": "rating",
+      "n": 9923,
+      "weighted_mean": 7.83,
+      "mean": 7.83,
+      "median": 8.0,
+      "std": 1.4,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 34.3
+    },
+    {
+      "variable": "AINFO_R_02",
+      "label": "AINFO02: Experience of making and receiving phone calls in your vehicle",
+      "type": "rating",
+      "n": 9904,
+      "weighted_mean": 7.78,
+      "mean": 7.8,
+      "median": 8.0,
+      "std": 1.39,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 33.2
+    },
+    {
+      "variable": "AINFO_R_03",
+      "label": "AINFO03: Experience of using voice assistance in your vehicle",
+      "type": "rating",
+      "n": 9808,
+      "weighted_mean": 7.75,
+      "mean": 7.77,
+      "median": 8.0,
+      "std": 1.42,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 33.2
+    },
+    {
+      "variable": "AINFO_R_04",
+      "label": "AINFO04: Experience of using navigation in your vehicle",
+      "type": "rating",
+      "n": 7752,
+      "weighted_mean": 7.82,
+      "mean": 7.85,
+      "median": 8.0,
+      "std": 1.37,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 34.2
+    },
+    {
+      "variable": "AINFO_R_05",
+      "label": "AINFO05: Sound quality of your vehicle's audio system",
+      "type": "rating",
+      "n": 9933,
+      "weighted_mean": 7.82,
+      "mean": 7.83,
+      "median": 8.0,
+      "std": 1.4,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 34.6
+    },
+    {
+      "variable": "AINFO_R_06",
+      "label": "AINFO06: Usefulness of all other functions of the infotainment system",
+      "type": "rating",
+      "n": 9904,
+      "weighted_mean": 7.73,
+      "mean": 7.75,
+      "median": 8.0,
+      "std": 1.41,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 32.3
+    },
+    {
+      "variable": "AINFO_R_07",
+      "label": "AINFO07: Overall infotainment experience in your vehicle",
+      "type": "rating",
+      "n": 9937,
+      "weighted_mean": 7.89,
+      "mean": 7.92,
+      "median": 8.0,
+      "std": 1.39,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 38.4
+    },
+    {
+      "variable": "ACMFT_R_01",
+      "label": "ACMFT01: Comfort of the driver's seat",
+      "type": "rating",
+      "n": 9936,
+      "weighted_mean": 7.9,
+      "mean": 7.92,
+      "median": 8.0,
+      "std": 1.33,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 35.6
+    },
+    {
+      "variable": "ACMFT_R_02",
+      "label": "ACMFT02: Comfort of the rear seats",
+      "type": "rating",
+      "n": 9898,
+      "weighted_mean": 7.71,
+      "mean": 7.75,
+      "median": 8.0,
+      "std": 1.39,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 31.0
+    },
+    {
+      "variable": "ACMFT_R_03",
+      "label": "ACMFT03: Quietness of your vehicle's cabin while driving",
+      "type": "rating",
+      "n": 9937,
+      "weighted_mean": 7.77,
+      "mean": 7.81,
+      "median": 8.0,
+      "std": 1.37,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 33.0
+    },
+    {
+      "variable": "ACMFT_R_04",
+      "label": "ACMFT04: How well your vehicle's interior stays at the desired temperature",
+      "type": "rating",
+      "n": 9936,
+      "weighted_mean": 7.82,
+      "mean": 7.82,
+      "median": 8.0,
+      "std": 1.36,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 33.1
+    },
+    {
+      "variable": "ACMFT_R_05",
+      "label": "ACMFT05: Overall how comfortable your vehicle is to be in",
+      "type": "rating",
+      "n": 9937,
+      "weighted_mean": 7.94,
+      "mean": 7.99,
+      "median": 8.0,
+      "std": 1.33,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 40.1
+    },
+    {
+      "variable": "AFUEL_R_01",
+      "label": "AFUEL01: Overall fuel economy and driving range of your vehicle/driving range and speed of charging your vehicle",
+      "type": "rating",
+      "n": 9937,
+      "weighted_mean": 7.96,
+      "mean": 7.98,
+      "median": 8.0,
+      "std": 1.27,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 40.4
+    },
+    {
+      "variable": "ACHAR_R_01",
+      "label": "ACHAR01: Charging inlet design (position and ease of use)",
+      "type": "rating",
+      "n": 9934,
+      "weighted_mean": 7.81,
+      "mean": 7.85,
+      "median": 8.0,
+      "std": 1.36,
+      "min": 2.0,
+      "max": 10.0,
+      "top2_box_pct": 34.5
+    },
+    {
+      "variable": "ACHAR_R_02",
+      "label": "ACHAR02: Length of the charging cable",
+      "type": "rating",
+      "n": 9912,
+      "weighted_mean": 7.8,
+      "mean": 7.82,
+      "median": 8.0,
+      "std": 1.36,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 33.1
+    },
+    {
+      "variable": "ACHAR_R_03",
+      "label": "ACHAR03: Charging facility designing (position and ease of use of charging ports or wallbox)",
+      "type": "rating",
+      "n": 9909,
+      "weighted_mean": 7.8,
+      "mean": 7.82,
+      "median": 8.0,
+      "std": 1.35,
+      "min": 2.0,
+      "max": 10.0,
+      "top2_box_pct": 33.0
+    },
+    {
+      "variable": "ACHAR_R_04",
+      "label": "ACHAR04: Fast charging speed",
+      "type": "rating",
+      "n": 9532,
+      "weighted_mean": 7.79,
+      "mean": 7.8,
+      "median": 8.0,
+      "std": 1.43,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 34.2
+    },
+    {
+      "variable": "ACHAR_R_05",
+      "label": "ACHAR05: Normal charging speed",
+      "type": "rating",
+      "n": 9775,
+      "weighted_mean": 7.58,
+      "mean": 7.62,
+      "median": 8.0,
+      "std": 1.54,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 31.2
+    },
+    {
+      "variable": "ACHAR_R_06",
+      "label": "ACHAR06: Convenience of charging (convenience to find charging facilities when needed)",
+      "type": "rating",
+      "n": 9931,
+      "weighted_mean": 7.79,
+      "mean": 7.81,
+      "median": 8.0,
+      "std": 1.37,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 33.4
+    },
+    {
+      "variable": "ACHAR_R_07",
+      "label": "ACHAR07: Ease of reading charging status",
+      "type": "rating",
+      "n": 9936,
+      "weighted_mean": 7.88,
+      "mean": 7.89,
+      "median": 8.0,
+      "std": 1.35,
+      "min": 2.0,
+      "max": 10.0,
+      "top2_box_pct": 35.5
+    },
+    {
+      "variable": "ACHAR_R_08",
+      "label": "ACHAR08: Storing and taking out of your vehicle's charging cable",
+      "type": "rating",
+      "n": 9911,
+      "weighted_mean": 7.74,
+      "mean": 7.78,
+      "median": 8.0,
+      "std": 1.42,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 33.7
+    },
+    {
+      "variable": "ACHAR_R_09",
+      "label": "ACHAR09: Overall, the experience of charging your vehicle",
+      "type": "rating",
+      "n": 9937,
+      "weighted_mean": 7.91,
+      "mean": 7.94,
+      "median": 8.0,
+      "std": 1.38,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 39.0
+    },
+    {
+      "variable": "AEXT_D_01",
+      "label": "Exterior: Most Improved: Exterior styling",
+      "type": "categorical",
+      "n": 5428,
+      "weighted_share": {
+        "0.0": 63.16,
+        "13.0": 2.22,
+        "26.0": 2.48,
+        "8.0": 2.66,
+        "4.0": 2.74,
+        "6.0": 3.65,
+        "5.0": 2.31,
+        "12.0": 2.21,
+        "10.0": 3.09,
+        "7.0": 2.81,
+        "11.0": 1.42,
+        "2.0": 2.16,
+        "9.0": 3.17,
+        "30.0": 2.95,
+        "97.0": 0.14,
+        "3.0": 2.42,
+        "1.0": 0.4
+      }
+    },
+    {
+      "variable": "AEXT_D_02",
+      "label": "Exterior: Love Most: Exterior styling",
+      "type": "categorical",
+      "n": 4509,
+      "weighted_share": {
+        "6.0": 6.99,
+        "4.0": 12.2,
+        "0.0": 9.99,
+        "5.0": 5.9,
+        "30.0": 3.52,
+        "9.0": 13.19,
+        "12.0": 4.73,
+        "2.0": 6.24,
+        "97.0": 0.13,
+        "26.0": 6.41,
+        "7.0": 5.69,
+        "3.0": 4.67,
+        "10.0": 4.96,
+        "8.0": 7.32,
+        "13.0": 3.06,
+        "11.0": 3.91,
+        "1.0": 1.1
+      }
+    },
+    {
+      "variable": "ASET_D_01",
+      "label": "Setting Up/Starting: Most Improved: Process of starting vehicle",
+      "type": "categorical",
+      "n": 5920,
+      "weighted_share": {
+        "6.0": 3.62,
+        "4.0": 3.99,
+        "0.0": 66.79,
+        "2.0": 4.19,
+        "7.0": 2.97,
+        "8.0": 3.02,
+        "1.0": 3.43,
+        "10.0": 3.38,
+        "5.0": 2.74,
+        "9.0": 3.33,
+        "3.0": 2.49,
+        "97.0": 0.05
+      }
+    },
+    {
+      "variable": "ASET_D_02",
+      "label": "Setting Up/Starting: Love Most: Process of starting vehicle",
+      "type": "categorical",
+      "n": 4017,
+      "weighted_share": {
+        "1.0": 9.4,
+        "6.0": 9.18,
+        "3.0": 4.18,
+        "0.0": 14.66,
+        "5.0": 10.12,
+        "7.0": 11.58,
+        "10.0": 7.96,
+        "9.0": 8.09,
+        "97.0": 0.1,
+        "8.0": 7.28,
+        "4.0": 5.28,
+        "2.0": 12.17
+      }
+    },
+    {
+      "variable": "AINT_D_03",
+      "label": "Number of screens/displays (including the dashboard) in vehicle",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "2.0": 56.61,
+        "1.0": 32.18,
+        "3.0": 10.0,
+        "4.0": 1.22
+      }
+    },
+    {
+      "variable": "AINT_D_04",
+      "label": "Most Improved - Screens/displays",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "0.0": 49.6,
+        "3.0": 13.95,
+        "1.0": 7.95,
+        "4.0": 6.02,
+        "5.0": 5.95,
+        "7.0": 3.35,
+        "2.0": 9.46,
+        "6.0": 3.73
+      }
+    },
+    {
+      "variable": "AINT_D_05",
+      "label": "Love Most - Screens/displays",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "5.0": 15.13,
+        "3.0": 13.35,
+        "6.0": 13.91,
+        "1.0": 13.98,
+        "7.0": 13.48,
+        "0.0": 14.04,
+        "4.0": 6.75,
+        "2.0": 9.36
+      }
+    },
+    {
+      "variable": "AINT_D_06",
+      "label": "Most Improved - Operating interface of the air conditioning system",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "0.0": 59.44,
+        "3.0": 11.3,
+        "4.0": 9.63,
+        "2.0": 9.03,
+        "1.0": 10.59
+      }
+    },
+    {
+      "variable": "AINT_D_07",
+      "label": "Love Most - Operating interface of the air conditioning system",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "1.0": 22.37,
+        "3.0": 20.82,
+        "2.0": 17.76,
+        "4.0": 19.84,
+        "0.0": 19.21
+      }
+    },
+    {
+      "variable": "APERF_D_01",
+      "label": "Most Improved - Power of vehicle's engine/motor",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "0.0": 55.29,
+        "3.0": 10.51,
+        "2.0": 21.2,
+        "1.0": 12.99
+      }
+    },
+    {
+      "variable": "ADRV_D_01",
+      "label": "Type of Driving",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "2.0": 43.74,
+        "1.0": 49.63,
+        "3.0": 6.62
+      }
+    },
+    {
+      "variable": "ADRV_D_02",
+      "label": "Road condition encountered most often",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "1.0": 77.05,
+        "2.0": 19.52,
+        "3.0": 3.0,
+        "4.0": 0.43
+      }
+    },
+    {
+      "variable": "ASFTY_D_01",
+      "label": "Safety: Most Improved",
+      "type": "categorical",
+      "n": 5968,
+      "weighted_share": {
+        "0.0": 59.18,
+        "9.0": 2.43,
+        "11.0": 3.39,
+        "10.0": 3.08,
+        "7.0": 2.78,
+        "5.0": 4.22,
+        "8.0": 3.39,
+        "1.0": 3.48,
+        "3.0": 5.01,
+        "4.0": 3.4,
+        "6.0": 4.86,
+        "2.0": 4.76,
+        "97.0": 0.01
+      }
+    },
+    {
+      "variable": "ASFTY_D_02",
+      "label": "Safety: Love Most",
+      "type": "categorical",
+      "n": 3969,
+      "weighted_share": {
+        "8.0": 14.51,
+        "2.0": 8.72,
+        "4.0": 6.78,
+        "0.0": 9.65,
+        "7.0": 8.53,
+        "5.0": 9.31,
+        "10.0": 5.69,
+        "3.0": 9.26,
+        "9.0": 7.29,
+        "6.0": 8.76,
+        "1.0": 5.79,
+        "11.0": 5.71
+      }
+    },
+    {
+      "variable": "AINFO_D_01A",
+      "label": "Infotainment: System Preference: Playing audio",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "1.0": 76.38,
+        "99.0": 13.4,
+        "97.0": 5.08,
+        "2.0": 5.14
+      }
+    },
+    {
+      "variable": "AINFO_D_01B",
+      "label": "Infotainment: System Preference: Making and receiving phone calls",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "1.0": 65.73,
+        "2.0": 5.02,
+        "99.0": 24.2,
+        "97.0": 5.05
+      }
+    },
+    {
+      "variable": "AINFO_D_01C",
+      "label": "Infotainment: System Preference: Using voice assistance",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "1.0": 73.43,
+        "99.0": 14.6,
+        "2.0": 4.05,
+        "97.0": 3.84,
+        "4.0": 4.07
+      }
+    },
+    {
+      "variable": "AINFO_D_01D",
+      "label": "Infotainment: System Preference: Using navigation",
+      "type": "categorical",
+      "n": 8141,
+      "weighted_share": {
+        "97.0": 5.86,
+        "1.0": 77.38,
+        "99.0": 11.66,
+        "2.0": 5.09
+      }
+    },
+    {
+      "variable": "ACMFT_D_01",
+      "label": "Most Improved - Air conditioning system",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "0.0": 58.68,
+        "3.0": 6.02,
+        "6.0": 6.83,
+        "2.0": 6.29,
+        "1.0": 5.1,
+        "7.0": 6.15,
+        "4.0": 5.13,
+        "5.0": 5.81
+      }
+    },
+    {
+      "variable": "ACMFT_D_02",
+      "label": "Love Most - Air conditioning system",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "1.0": 8.98,
+        "2.0": 8.25,
+        "0.0": 29.21,
+        "6.0": 7.8,
+        "4.0": 8.74,
+        "5.0": 8.31,
+        "7.0": 15.67,
+        "3.0": 13.05
+      }
+    },
+    {
+      "variable": "K_AFUEL_D_05",
+      "label": "Average pure-electric range with full charge - Kilometers",
+      "type": "numeric",
+      "n": 9043,
+      "weighted_mean": 346.37,
+      "mean": 352.94,
+      "median": 390.0,
+      "std": 183.09,
+      "min": 10.0,
+      "max": 800.0
+    },
+    {
+      "variable": "AFUEL_D_06",
+      "label": "Pure-electric range compared to expectations with full charge",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "3.0": 14.65,
+        "2.0": 79.57,
+        "1.0": 5.77
+      }
+    },
+    {
+      "variable": "AFUEL_D_07",
+      "label": "What type of charger do you normally use to charge your vehicle?",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "2.0": 71.95,
+        "3.0": 13.01,
+        "4.0": 13.94,
+        "99.0": 1.1
+      }
+    },
+    {
+      "variable": "KM_AFUEL",
+      "label": "Average fuel consumption(L/100km)",
+      "type": "numeric",
+      "n": 2446,
+      "weighted_mean": 6.04,
+      "mean": 6.07,
+      "median": 6.0,
+      "std": 2.97,
+      "min": 1.0,
+      "max": 35.0
+    },
+    {
+      "variable": "ACHAR_D_01",
+      "label": "How many hours does it take to fully charge your vehicle when using normal charge?",
+      "type": "numeric",
+      "n": 7834,
+      "weighted_mean": 7.11,
+      "mean": 7.19,
+      "median": 7.0,
+      "std": 3.63,
+      "min": 1.0,
+      "max": 80.0
+    },
+    {
+      "variable": "ACHAR_D_02_START",
+      "label": "What is the SOC (state of charge) when you usually start normal charging your vehicle",
+      "type": "categorical",
+      "n": 8784,
+      "weighted_share": {
+        "4.0": 27.68,
+        "8.0": 0.26,
+        "3.0": 40.56,
+        "6.0": 1.71,
+        "2.0": 20.7,
+        "5.0": 3.76,
+        "7.0": 0.86,
+        "10.0": 0.08,
+        "1.0": 3.69,
+        "99.0": 0.44,
+        "9.0": 0.26
+      }
+    },
+    {
+      "variable": "ACHAR_D_02_END",
+      "label": "What is the SOC (state of charge) when you usually stop normal charging your vehicle",
+      "type": "categorical",
+      "n": 8784,
+      "weighted_share": {
+        "10.0": 60.03,
+        "9.0": 21.56,
+        "8.0": 13.74,
+        "3.0": 0.17,
+        "6.0": 1.0,
+        "99.0": 0.88,
+        "7.0": 1.9,
+        "5.0": 0.41,
+        "4.0": 0.28,
+        "2.0": 0.03
+      }
+    },
+    {
+      "variable": "ACHAR_D_03",
+      "label": "How many minutes does it take to fully charge your vehicle when using fast charge?",
+      "type": "numeric",
+      "n": 7735,
+      "weighted_mean": 46.15,
+      "mean": 45.28,
+      "median": 40.0,
+      "std": 34.59,
+      "min": 1.0,
+      "max": 780.0
+    },
+    {
+      "variable": "ACHAR_D_04_START",
+      "label": "What is the SOC (state of charge) when you usually start fast charging your vehicle",
+      "type": "categorical",
+      "n": 8448,
+      "weighted_share": {
+        "3.0": 39.98,
+        "4.0": 28.93,
+        "2.0": 20.85,
+        "5.0": 5.05,
+        "6.0": 1.38,
+        "99.0": 0.53,
+        "1.0": 1.14,
+        "9.0": 0.38,
+        "8.0": 0.53,
+        "7.0": 1.23,
+        "10.0": 0.02
+      }
+    },
+    {
+      "variable": "ACHAR_D_04_END",
+      "label": "What is the SOC (state of charge) when you usually stop fast charging your vehicle",
+      "type": "categorical",
+      "n": 8448,
+      "weighted_share": {
+        "9.0": 22.41,
+        "10.0": 37.42,
+        "8.0": 35.44,
+        "7.0": 2.17,
+        "99.0": 0.76,
+        "3.0": 0.08,
+        "5.0": 0.51,
+        "6.0": 0.99,
+        "4.0": 0.19,
+        "2.0": 0.04
+      }
+    },
+    {
+      "variable": "ACHAR_D_05",
+      "label": "How does the time required to charge your vehicle compare with your expectations?",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "2.0": 71.64,
+        "3.0": 24.0,
+        "1.0": 3.65,
+        "99.0": 0.72
+      }
+    },
+    {
+      "variable": "ACHAR_D_08",
+      "label": "Which third-party smartphone apps do you most often use to looking for charging stations?",
+      "type": "categorical",
+      "n": 4334,
+      "weighted_share": {
+        "1.0": 26.71,
+        "3.0": 15.36,
+        "5.0": 2.16,
+        "9.0": 4.66,
+        "6.0": 30.9,
+        "2.0": 10.7,
+        "8.0": 3.31,
+        "4.0": 3.77,
+        "7.0": 2.37,
+        "97.0": 0.06
+      }
+    },
+    {
+      "variable": "APEAL_OSAT",
+      "label": "APEAL_OSAT: Your New Vehicle Overall Owning and Driving Experience",
+      "type": "rating",
+      "n": 9937,
+      "weighted_mean": 8.1,
+      "mean": 8.11,
+      "median": 8.0,
+      "std": 1.18,
+      "min": 1.0,
+      "max": 10.0,
+      "top2_box_pct": 43.3
+    },
+    {
+      "variable": "YNV_CN_6_1",
+      "label": "Traditional <-> Innovative",
+      "type": "scale7",
+      "n": 9937,
+      "weighted_mean": 5.58,
+      "mean": 5.57,
+      "median": 6.0,
+      "std": 1.09,
+      "min": 1.0,
+      "max": 7.0
+    },
+    {
+      "variable": "YNV_CN_6_2",
+      "label": "No Frills <-> Luxurious",
+      "type": "scale7",
+      "n": 9937,
+      "weighted_mean": 4.9,
+      "mean": 4.93,
+      "median": 5.0,
+      "std": 1.4,
+      "min": 1.0,
+      "max": 7.0
+    },
+    {
+      "variable": "YNV_CN_6_3",
+      "label": "Unreliable <-> Reliable",
+      "type": "scale7",
+      "n": 9937,
+      "weighted_mean": 5.6,
+      "mean": 5.61,
+      "median": 6.0,
+      "std": 1.05,
+      "min": 1.0,
+      "max": 7.0
+    },
+    {
+      "variable": "YNV_CN_6_4",
+      "label": "Mature <-> Young/energetic",
+      "type": "scale7",
+      "n": 9937,
+      "weighted_mean": 5.2,
+      "mean": 5.18,
+      "median": 5.0,
+      "std": 1.45,
+      "min": 1.0,
+      "max": 7.0
+    },
+    {
+      "variable": "YNV_CN_6_5",
+      "label": "Ordinary to Drive <-> Fun to Drive",
+      "type": "scale7",
+      "n": 9937,
+      "weighted_mean": 5.45,
+      "mean": 5.45,
+      "median": 6.0,
+      "std": 1.18,
+      "min": 1.0,
+      "max": 7.0
+    },
+    {
+      "variable": "YNV_CN_6_6",
+      "label": "Classic <-> Modern/Trendy",
+      "type": "scale7",
+      "n": 9937,
+      "weighted_mean": 5.33,
+      "mean": 5.34,
+      "median": 6.0,
+      "std": 1.29,
+      "min": 1.0,
+      "max": 7.0
+    },
+    {
+      "variable": "YNV_CN_6_7",
+      "label": "Customer orientation <-> Deal orientation",
+      "type": "scale7",
+      "n": 9937,
+      "weighted_mean": 3.91,
+      "mean": 3.97,
+      "median": 4.0,
+      "std": 1.79,
+      "min": 1.0,
+      "max": 7.0
+    },
+    {
+      "variable": "YNV_CN_6_8",
+      "label": "Independent <-> Cooperative",
+      "type": "scale7",
+      "n": 9937,
+      "weighted_mean": 4.85,
+      "mean": 4.89,
+      "median": 5.0,
+      "std": 1.55,
+      "min": 1.0,
+      "max": 7.0
+    },
+    {
+      "variable": "YNV_CN_6_9",
+      "label": "Affordable <-> High price",
+      "type": "scale7",
+      "n": 9937,
+      "weighted_mean": 4.13,
+      "mean": 4.16,
+      "median": 4.0,
+      "std": 1.64,
+      "min": 1.0,
+      "max": 7.0
+    },
+    {
+      "variable": "YNV_CN_6_10",
+      "label": "Conservative <-> Ambitious",
+      "type": "scale7",
+      "n": 9937,
+      "weighted_mean": 5.35,
+      "mean": 5.37,
+      "median": 6.0,
+      "std": 1.18,
+      "min": 1.0,
+      "max": 7.0
+    },
+    {
+      "variable": "YNV_CN_6_11",
+      "label": "Copycat <-> Industry pioneer",
+      "type": "scale7",
+      "n": 9937,
+      "weighted_mean": 5.48,
+      "mean": 5.47,
+      "median": 6.0,
+      "std": 1.12,
+      "min": 1.0,
+      "max": 7.0
+    },
+    {
+      "variable": "YNV_CN_6_12",
+      "label": "Environmentally Ordinary <-> Environmentally Friendly",
+      "type": "scale7",
+      "n": 9937,
+      "weighted_mean": 5.62,
+      "mean": 5.61,
+      "median": 6.0,
+      "std": 1.08,
+      "min": 1.0,
+      "max": 7.0
+    },
+    {
+      "variable": "YNV_CN_6_13",
+      "label": "Traditional technology <-> cutting-edge technology",
+      "type": "scale7",
+      "n": 9937,
+      "weighted_mean": 5.44,
+      "mean": 5.43,
+      "median": 6.0,
+      "std": 1.2,
+      "min": 1.0,
+      "max": 7.0
+    },
+    {
+      "variable": "YNV_CN_6_14",
+      "label": "Bad Reputation <-> Good Reputation",
+      "type": "scale7",
+      "n": 9937,
+      "weighted_mean": 5.66,
+      "mean": 5.67,
+      "median": 6.0,
+      "std": 1.03,
+      "min": 1.0,
+      "max": 7.0
+    },
+    {
+      "variable": "YPV_01",
+      "label": "YPV_01: First, Additional or Replacement Vehicle",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "2.0": 24.94,
+        "3.0": 62.77,
+        "1.0": 12.29
+      }
+    },
+    {
+      "variable": "CN_YNV_07",
+      "label": "CN_YNV_07: Vehicle Price",
+      "type": "numeric",
+      "n": 9450,
+      "weighted_mean": 201203.96,
+      "mean": 211271.48,
+      "median": 179000.0,
+      "std": 113657.09,
+      "min": 22650.0,
+      "max": 685000.0
+    },
+    {
+      "variable": "NEV_12",
+      "label": "NEV_12: Current Kilometers",
+      "type": "numeric",
+      "n": 9451,
+      "weighted_mean": 4447.1,
+      "mean": 4422.09,
+      "median": 3698.0,
+      "std": 6620.65,
+      "min": 10.0,
+      "max": 500000.0
+    },
+    {
+      "variable": "YPV_02_MAKE",
+      "label": "YPV_02_MAKE: Vehicle Replaced - Make",
+      "type": "categorical",
+      "n": 1279,
+      "weighted_share": {
+        "13011.0": 3.02,
+        "63511.0": 1.78,
+        "22017.0": 0.55,
+        "99999.0": 0.67,
+        "56513.0": 3.21,
+        "57012.0": 8.1,
+        "33012.0": 4.88,
+        "42012.0": 1.19,
+        "14011.0": 5.84,
+        "44512.0": 1.4,
+        "28011.0": 1.31,
+        "13511.0": 11.93,
+        "31513.0": 7.0,
+        "16012.0": 1.81,
+        "12516.0": 0.72,
+        "52011.0": 0.31,
+        "38512.0": 0.36,
+        "12515.0": 1.66,
+        "11511.0": 3.48,
+        "14511.0": 0.46,
+        "26012.0": 2.75,
+        "15011.0": 3.83,
+        "31512.0": 7.84,
+        "42511.0": 1.03,
+        "35011.0": 0.48,
+        "57013.0": 5.94,
+        "22012.0": 0.44,
+        "56512.0": 2.41,
+        "18513.0": 0.51,
+        "58011.0": 0.78,
+        "40011.0": 0.07,
+        "38015.0": 0.04,
+        "18011.0": 0.98,
+        "81011.0": 0.04,
+        "58012.0": 2.87,
+        "47011.0": 0.31,
+        "57011.0": 0.03,
+        "68511.0": 0.09,
+        "45512.0": 1.57,
+        "16013.0": 0.15,
+        "12512.0": 0.09,
+        "43751.0": 0.53,
+        "57015.0": 0.61,
+        "69512.0": 0.14,
+        "11512.0": 0.45,
+        "15012.0": 0.19,
+        "19512.0": 0.56,
+        "35511.0": 0.16,
+        "42013.0": 0.37,
+        "43011.0": 0.33,
+        "16014.0": 0.2,
+        "23011.0": 0.1,
+        "69011.0": 0.3,
+        "46011.0": 0.13,
+        "82011.0": 0.1,
+        "66011.0": 0.41,
+        "22011.0": 0.18,
+        "28016.0": 0.2,
+        "47013.0": 0.21,
+        "85011.0": 0.48,
+        "28017.0": 0.02,
+        "63521.0": 0.29,
+        "43513.0": 0.14,
+        "65511.0": 1.15,
+        "16015.0": 0.03,
+        "39511.0": 0.04,
+        "23012.0": 0.19,
+        "69811.0": 0.19,
+        "22014.0": 0.1,
+        "33511.0": 0.15,
+        "36015.0": 0.06,
+        "42751.0": 0.03,
+        "18017.0": 0.01
+      }
+    },
+    {
+      "variable": "YPV_02_SERIES",
+      "label": "YPV_02_SERIES: Vehicle Replaced - Series",
+      "type": "categorical",
+      "n": 1279,
+      "weighted_share": {
+        "13011501.0": 0.08,
+        "63511061.0": 0.16,
+        "22017151.0": 0.15,
+        "99999999.0": 0.67,
+        "56513151.0": 0.59,
+        "57012301.0": 2.37,
+        "33012801.0": 0.06,
+        "42012171.0": 0.56,
+        "14011751.0": 0.34,
+        "44512251.0": 0.5,
+        "28011331.0": 0.06,
+        "13511051.0": 2.08,
+        "31513061.0": 2.63,
+        "16012151.0": 1.18,
+        "12516999.0": 0.5,
+        "13511901.0": 1.15,
+        "52011151.0": 0.19,
+        "38512651.0": 0.24,
+        "12515103.0": 0.38,
+        "11511276.0": 0.14,
+        "14511461.0": 0.2,
+        "57012051.0": 3.15,
+        "57012251.0": 0.83,
+        "31513451.0": 0.48,
+        "12515022.0": 0.76,
+        "13511851.0": 1.08,
+        "26012101.0": 0.58,
+        "13511351.0": 2.78,
+        "15011851.0": 1.38,
+        "13011101.0": 1.58,
+        "13011151.0": 0.16,
+        "44512401.0": 0.34,
+        "16012071.0": 0.08,
+        "31512121.0": 0.61,
+        "42511101.0": 0.22,
+        "13511451.0": 2.15,
+        "35011999.0": 0.03,
+        "57013161.0": 1.63,
+        "22012121.0": 0.13,
+        "56512051.0": 1.33,
+        "18513501.0": 0.03,
+        "11511275.0": 1.36,
+        "33012311.0": 1.19,
+        "13511902.0": 0.13,
+        "58011472.0": 0.41,
+        "31512101.0": 1.65,
+        "40011051.0": 0.04,
+        "11511501.0": 0.22,
+        "26012301.0": 1.29,
+        "56513351.0": 0.69,
+        "15011921.0": 0.32,
+        "33012491.0": 0.68,
+        "13511701.0": 1.03,
+        "57013662.0": 0.1,
+        "33012251.0": 0.06,
+        "57012252.0": 0.02,
+        "14011702.0": 0.72,
+        "11511351.0": 0.11,
+        "38015452.0": 0.04,
+        "13511612.0": 0.11,
+        "18011155.0": 0.31,
+        "16012999.0": 0.11,
+        "81011202.0": 0.04,
+        "63511075.0": 0.29,
+        "58012023.0": 0.52,
+        "31512051.0": 2.42,
+        "13011251.0": 0.04,
+        "47011331.0": 0.19,
+        "31513201.0": 1.54,
+        "58012016.0": 1.04,
+        "57013352.0": 0.21,
+        "11511201.0": 1.18,
+        "14011051.0": 1.39,
+        "57012181.0": 0.12,
+        "22012151.0": 0.18,
+        "33012571.0": 0.33,
+        "14011161.0": 0.53,
+        "57011251.0": 0.03,
+        "31512251.0": 0.53,
+        "57013162.0": 0.1,
+        "18513999.0": 0.08,
+        "15011999.0": 0.24,
+        "26012351.0": 0.17,
+        "56513999.0": 0.38,
+        "68511301.0": 0.05,
+        "45512251.0": 0.7,
+        "15011944.0": 0.36,
+        "28011071.0": 0.06,
+        "57013661.0": 0.74,
+        "14011706.0": 0.12,
+        "14011701.0": 0.45,
+        "16013301.0": 0.15,
+        "31513501.0": 1.57,
+        "56513301.0": 0.51,
+        "13511853.0": 0.02,
+        "31512999.0": 0.14,
+        "57013561.0": 0.21,
+        "12512331.0": 0.04,
+        "12515302.0": 0.12,
+        "33012603.0": 0.46,
+        "58012011.0": 0.07,
+        "52011051.0": 0.04,
+        "43751201.0": 0.03,
+        "13511181.0": 0.18,
+        "44512351.0": 0.25,
+        "18011999.0": 0.23,
+        "38512551.0": 0.02,
+        "57015101.0": 0.31,
+        "57013701.0": 0.8,
+        "57013301.0": 0.35,
+        "33012501.0": 0.9,
+        "33012851.0": 0.17,
+        "33012657.0": 0.06,
+        "69512102.0": 0.14,
+        "11512301.0": 0.08,
+        "15012832.0": 0.04,
+        "12512311.0": 0.05,
+        "26012451.0": 0.3,
+        "19512451.0": 0.18,
+        "13011081.0": 0.47,
+        "33012751.0": 0.58,
+        "31513301.0": 0.29,
+        "57012161.0": 0.76,
+        "12516151.0": 0.16,
+        "57013203.0": 0.16,
+        "35011381.0": 0.36,
+        "56512061.0": 0.09,
+        "35511131.0": 0.16,
+        "58011502.0": 0.31,
+        "56513302.0": 0.15,
+        "14511401.0": 0.19,
+        "56513152.0": 0.16,
+        "14011163.0": 0.4,
+        "14011781.0": 0.07,
+        "14011421.0": 0.3,
+        "15011801.0": 0.06,
+        "57013651.0": 0.48,
+        "18513401.0": 0.3,
+        "13511611.0": 0.1,
+        "42013121.0": 0.09,
+        "22017201.0": 0.28,
+        "63511302.0": 0.19,
+        "33012611.0": 0.19,
+        "13511613.0": 0.19,
+        "31512131.0": 1.51,
+        "57012351.0": 0.07,
+        "63511041.0": 0.2,
+        "31512431.0": 0.29,
+        "28011238.0": 0.05,
+        "58011602.0": 0.06,
+        "18011605.0": 0.13,
+        "43011101.0": 0.33,
+        "11511202.0": 0.27,
+        "16014101.0": 0.12,
+        "28011078.0": 0.07,
+        "13511801.0": 0.21,
+        "42012201.0": 0.26,
+        "42511861.0": 0.11,
+        "14011703.0": 0.16,
+        "15011922.0": 0.16,
+        "28011219.0": 0.06,
+        "31513601.0": 0.17,
+        "31513999.0": 0.05,
+        "13511711.0": 0.21,
+        "11512999.0": 0.16,
+        "57015102.0": 0.07,
+        "45512351.0": 0.18,
+        "11511653.0": 0.02,
+        "56512999.0": 0.14,
+        "28011561.0": 0.21,
+        "23011051.0": 0.1,
+        "57013751.0": 0.3,
+        "22012401.0": 0.06,
+        "15011872.0": 0.02,
+        "58012015.0": 0.17,
+        "11512201.0": 0.19,
+        "42012999.0": 0.28,
+        "45512301.0": 0.16,
+        "19512161.0": 0.07,
+        "26012311.0": 0.08,
+        "19512061.0": 0.24,
+        "69011101.0": 0.17,
+        "16012155.0": 0.03,
+        "15012861.0": 0.04,
+        "13011052.0": 0.35,
+        "42511301.0": 0.12,
+        "46011281.0": 0.13,
+        "31512102.0": 0.04,
+        "15011603.0": 0.15,
+        "57012501.0": 0.21,
+        "56512331.0": 0.03,
+        "56512551.0": 0.32,
+        "15012838.0": 0.1,
+        "18011621.0": 0.18,
+        "14011999.0": 0.14,
+        "44512361.0": 0.25,
+        "58012020.0": 0.47,
+        "56512501.0": 0.12,
+        "11511901.0": 0.06,
+        "22017211.0": 0.08,
+        "58012030.0": 0.13,
+        "57015201.0": 0.22,
+        "57013999.0": 0.52,
+        "82011999.0": 0.1,
+        "26012211.0": 0.29,
+        "40011151.0": 0.03,
+        "63511081.0": 0.94,
+        "28011228.0": 0.16,
+        "66011031.0": 0.3,
+        "15011901.0": 0.29,
+        "56511851.0": 0.13,
+        "12516101.0": 0.05,
+        "14011433.0": 0.06,
+        "43751301.0": 0.09,
+        "16014301.0": 0.03,
+        "15011631.0": 0.09,
+        "14011773.0": 0.61,
+        "13011302.0": 0.1,
+        "31512461.0": 0.61,
+        "14011792.0": 0.06,
+        "56512601.0": 0.12,
+        "16012152.0": 0.03,
+        "58012027.0": 0.11,
+        "43751999.0": 0.03,
+        "56513451.0": 0.03,
+        "57012999.0": 0.2,
+        "43751302.0": 0.07,
+        "42511821.0": 0.15,
+        "28011247.0": 0.11,
+        "31513552.0": 0.24,
+        "56512341.0": 0.07,
+        "42511161.0": 0.14,
+        "16012301.0": 0.1,
+        "31513251.0": 0.03,
+        "16012156.0": 0.09,
+        "69011102.0": 0.13,
+        "13511651.0": 0.17,
+        "15011941.0": 0.23,
+        "15011853.0": 0.18,
+        "18011162.0": 0.1,
+        "13011505.0": 0.02,
+        "58012026.0": 0.16,
+        "13011201.0": 0.02,
+        "13511999.0": 0.16,
+        "11512101.0": 0.02,
+        "28011212.0": 0.3,
+        "68511151.0": 0.04,
+        "58012151.0": 0.15,
+        "14011771.0": 0.1,
+        "14011791.0": 0.16,
+        "16012171.0": 0.19,
+        "38512601.0": 0.01,
+        "22011331.0": 0.05,
+        "14511441.0": 0.03,
+        "31513551.0": 0.02,
+        "13511755.0": 0.16,
+        "13011301.0": 0.08,
+        "18513651.0": 0.09,
+        "52011251.0": 0.08,
+        "28016115.0": 0.1,
+        "33012999.0": 0.12,
+        "28011321.0": 0.02,
+        "45512401.0": 0.19,
+        "14011441.0": 0.03,
+        "45512201.0": 0.21,
+        "47013101.0": 0.07,
+        "57012502.0": 0.31,
+        "38512552.0": 0.04,
+        "33012655.0": 0.07,
+        "43751202.0": 0.03,
+        "28011213.0": 0.12,
+        "58012999.0": 0.05,
+        "47011351.0": 0.12,
+        "13011102.0": 0.09,
+        "28016106.0": 0.02,
+        "22011999.0": 0.13,
+        "85011122.0": 0.48,
+        "28011217.0": 0.06,
+        "45512371.0": 0.05,
+        "26012602.0": 0.01,
+        "42012121.0": 0.08,
+        "43751101.0": 0.09,
+        "22012052.0": 0.06,
+        "28017052.0": 0.02,
+        "26012601.0": 0.02,
+        "12515023.0": 0.19,
+        "28011854.0": 0.03,
+        "57013671.0": 0.09,
+        "63521021.0": 0.16,
+        "43513201.0": 0.14,
+        "65511053.0": 0.72,
+        "16015321.0": 0.03,
+        "14011705.0": 0.03,
+        "57013663.0": 0.09,
+        "18011631.0": 0.02,
+        "39511471.0": 0.04,
+        "22017221.0": 0.04,
+        "11511651.0": 0.05,
+        "23012251.0": 0.19,
+        "56512151.0": 0.11,
+        "12515999.0": 0.19,
+        "12515104.0": 0.03,
+        "13011051.0": 0.03,
+        "43751401.0": 0.2,
+        "45512332.0": 0.03,
+        "11511353.0": 0.08,
+        "15012831.0": 0.02,
+        "42511052.0": 0.11,
+        "57013801.0": 0.13,
+        "16014211.0": 0.05,
+        "63521022.0": 0.11,
+        "31512421.0": 0.05,
+        "69811101.0": 0.19,
+        "63521011.0": 0.02,
+        "28016101.0": 0.04,
+        "57012052.0": 0.02,
+        "44512651.0": 0.02,
+        "57012504.0": 0.04,
+        "65511054.0": 0.41,
+        "56513111.0": 0.08,
+        "66011052.0": 0.11,
+        "42013271.0": 0.28,
+        "22014151.0": 0.1,
+        "56513154.0": 0.49,
+        "42511841.0": 0.14,
+        "14011704.0": 0.13,
+        "35011361.0": 0.06,
+        "18513552.0": 0.02,
+        "33511061.0": 0.15,
+        "15011902.0": 0.03,
+        "38512451.0": 0.03,
+        "35011501.0": 0.03,
+        "15011874.0": 0.15,
+        "36015201.0": 0.06,
+        "19512381.0": 0.06,
+        "45512372.0": 0.06,
+        "28016053.0": 0.04,
+        "47013999.0": 0.14,
+        "42751051.0": 0.03,
+        "13511852.0": 0.02,
+        "15011983.0": 0.17,
+        "14011431.0": 0.04,
+        "14511431.0": 0.06,
+        "56512651.0": 0.08,
+        "18017102.0": 0.01,
+        "26012502.0": 0.01,
+        "44512451.0": 0.05,
+        "42511051.0": 0.04,
+        "65511101.0": 0.02
+      }
+    },
+    {
+      "variable": "YPV_03_MAKE",
+      "label": "YPV_03_MAKE: Last Vehicle Acquired - Make",
+      "type": "categorical",
+      "n": 2481,
+      "weighted_share": {
+        "26012.0": 2.05,
+        "18016.0": 0.04,
+        "38512.0": 0.29,
+        "42012.0": 0.95,
+        "22014.0": 0.07,
+        "57013.0": 6.14,
+        "13511.0": 9.51,
+        "31512.0": 10.91,
+        "16012.0": 1.91,
+        "31513.0": 7.69,
+        "33511.0": 0.2,
+        "43751.0": 0.19,
+        "11511.0": 7.57,
+        "57012.0": 7.56,
+        "58012.0": 1.0,
+        "81011.0": 0.51,
+        "56513.0": 3.15,
+        "13011.0": 7.01,
+        "18513.0": 0.4,
+        "44512.0": 1.99,
+        "47011.0": 0.36,
+        "22012.0": 0.32,
+        "99999.0": 0.46,
+        "14511.0": 0.6,
+        "46011.0": 0.37,
+        "42511.0": 1.56,
+        "58011.0": 0.67,
+        "18011.0": 0.38,
+        "33012.0": 4.39,
+        "15011.0": 1.86,
+        "23011.0": 0.26,
+        "57511.0": 0.25,
+        "45512.0": 1.89,
+        "54811.0": 0.03,
+        "56512.0": 2.1,
+        "57011.0": 0.2,
+        "63511.0": 0.95,
+        "14011.0": 6.65,
+        "40011.0": 0.13,
+        "43513.0": 0.08,
+        "52011.0": 0.12,
+        "16014.0": 0.15,
+        "22011.0": 0.3,
+        "12516.0": 0.46,
+        "12515.0": 0.57,
+        "38015.0": 0.14,
+        "42013.0": 0.26,
+        "35011.0": 0.17,
+        "69512.0": 0.15,
+        "39511.0": 0.09,
+        "28011.0": 1.5,
+        "63521.0": 0.24,
+        "11512.0": 0.33,
+        "23012.0": 0.63,
+        "28016.0": 0.52,
+        "44514.0": 0.05,
+        "82011.0": 0.07,
+        "72011.0": 0.04,
+        "57015.0": 0.33,
+        "19512.0": 0.05,
+        "68511.0": 0.21,
+        "69811.0": 0.02,
+        "16015.0": 0.03,
+        "15014.0": 0.09,
+        "10511.0": 0.02,
+        "88011.0": 0.02,
+        "66011.0": 0.06,
+        "52511.0": 0.05,
+        "16013.0": 0.02,
+        "12512.0": 0.02,
+        "47013.0": 0.02,
+        "85011.0": 0.07,
+        "22017.0": 0.11,
+        "41011.0": 0.08,
+        "69011.0": 0.14,
+        "35511.0": 0.02,
+        "15012.0": 0.05,
+        "18015.0": 0.06,
+        "65511.0": 0.06,
+        "42512.0": 0.04,
+        "69211.0": 0.01,
+        "36015.0": 0.02
+      }
+    },
+    {
+      "variable": "YPV_03_SERIES",
+      "label": "YPV_03_SERIES: Last Vehicle Acquired - Series",
+      "type": "categorical",
+      "n": 2481,
+      "weighted_share": {
+        "26012601.0": 0.08,
+        "18016301.0": 0.02,
+        "38512351.0": 0.2,
+        "42012271.0": 0.23,
+        "22014151.0": 0.07,
+        "57013999.0": 0.11,
+        "13511755.0": 0.92,
+        "31512051.0": 4.8,
+        "13511901.0": 0.44,
+        "16012451.0": 0.01,
+        "31513061.0": 3.24,
+        "33511999.0": 0.09,
+        "43751301.0": 0.03,
+        "11511275.0": 2.41,
+        "57012251.0": 1.5,
+        "13511451.0": 2.0,
+        "58012151.0": 0.31,
+        "57012301.0": 1.73,
+        "13511351.0": 2.39,
+        "81011201.0": 0.41,
+        "56513151.0": 0.46,
+        "13011302.0": 0.18,
+        "18513501.0": 0.15,
+        "13011151.0": 1.39,
+        "44512351.0": 0.15,
+        "11511652.0": 0.16,
+        "56513999.0": 0.14,
+        "11511351.0": 1.74,
+        "18513999.0": 0.11,
+        "47011999.0": 0.08,
+        "22012051.0": 0.08,
+        "99999999.0": 0.46,
+        "57012999.0": 0.41,
+        "14511501.0": 0.04,
+        "46011281.0": 0.07,
+        "42511831.0": 0.12,
+        "56513302.0": 0.15,
+        "57012161.0": 1.11,
+        "13511613.0": 0.18,
+        "57013352.0": 0.22,
+        "58011472.0": 0.24,
+        "18011162.0": 0.04,
+        "31512121.0": 0.8,
+        "33012491.0": 0.66,
+        "42511821.0": 0.29,
+        "57013161.0": 1.56,
+        "13011101.0": 2.53,
+        "42511501.0": 0.05,
+        "31513451.0": 0.59,
+        "44512401.0": 0.57,
+        "11511651.0": 0.35,
+        "15011902.0": 0.07,
+        "31513251.0": 0.14,
+        "13011501.0": 0.48,
+        "26012101.0": 0.48,
+        "23011302.0": 0.07,
+        "14511505.0": 0.12,
+        "57511221.0": 0.14,
+        "16012151.0": 1.28,
+        "45512251.0": 0.69,
+        "58011999.0": 0.07,
+        "11511201.0": 1.09,
+        "57012502.0": 0.29,
+        "54811201.0": 0.03,
+        "22012152.0": 0.03,
+        "56512051.0": 0.62,
+        "57011601.0": 0.07,
+        "31512101.0": 2.06,
+        "44512251.0": 0.23,
+        "63511081.0": 0.42,
+        "14011051.0": 1.9,
+        "57012501.0": 0.55,
+        "18513651.0": 0.04,
+        "42012999.0": 0.06,
+        "31513201.0": 1.66,
+        "63511101.0": 0.04,
+        "40011301.0": 0.08,
+        "57012051.0": 1.1,
+        "33511201.0": 0.04,
+        "14011792.0": 0.15,
+        "13511851.0": 0.59,
+        "43513999.0": 0.02,
+        "56512301.0": 0.18,
+        "14011164.0": 0.18,
+        "15011853.0": 0.06,
+        "57013651.0": 0.88,
+        "52011999.0": 0.11,
+        "14011161.0": 0.87,
+        "16014301.0": 0.15,
+        "26012301.0": 0.39,
+        "22011999.0": 0.19,
+        "44512362.0": 0.02,
+        "11511202.0": 0.24,
+        "13511801.0": 0.3,
+        "33012851.0": 0.18,
+        "16012071.0": 0.16,
+        "56512052.0": 0.02,
+        "31512351.0": 0.76,
+        "14011702.0": 0.37,
+        "15011901.0": 0.17,
+        "57013661.0": 1.48,
+        "46011101.0": 0.2,
+        "31513552.0": 0.26,
+        "12516101.0": 0.12,
+        "56513351.0": 0.87,
+        "63511071.0": 0.27,
+        "11511352.0": 0.16,
+        "56513152.0": 0.22,
+        "42511052.0": 0.15,
+        "13511051.0": 0.83,
+        "12515104.0": 0.09,
+        "14011701.0": 0.37,
+        "44512361.0": 0.53,
+        "38015501.0": 0.04,
+        "14011999.0": 0.2,
+        "15011941.0": 0.18,
+        "31512999.0": 0.06,
+        "13011102.0": 0.26,
+        "42013121.0": 0.16,
+        "63511501.0": 0.01,
+        "57013751.0": 0.19,
+        "35011501.0": 0.03,
+        "57013701.0": 0.87,
+        "57013301.0": 0.19,
+        "14011433.0": 0.01,
+        "33511161.0": 0.07,
+        "13511701.0": 0.74,
+        "56512341.0": 0.11,
+        "14011791.0": 0.13,
+        "56513111.0": 0.39,
+        "12515022.0": 0.24,
+        "45512201.0": 0.31,
+        "57012602.0": 0.06,
+        "42511101.0": 0.45,
+        "58012026.0": 0.13,
+        "26012451.0": 0.07,
+        "33012251.0": 0.39,
+        "13011051.0": 0.19,
+        "13511181.0": 0.15,
+        "13011131.0": 0.47,
+        "42511131.0": 0.03,
+        "69512102.0": 0.11,
+        "11511276.0": 0.13,
+        "14511431.0": 0.16,
+        "39511251.0": 0.07,
+        "14511151.0": 0.06,
+        "35011999.0": 0.03,
+        "14511401.0": 0.04,
+        "42511999.0": 0.04,
+        "14011781.0": 0.03,
+        "28011075.0": 0.07,
+        "63521022.0": 0.08,
+        "11512101.0": 0.05,
+        "15011851.0": 0.18,
+        "33012657.0": 0.21,
+        "23012209.0": 0.19,
+        "11511301.0": 0.51,
+        "57013801.0": 0.17,
+        "63521011.0": 0.15,
+        "56512601.0": 0.02,
+        "14011751.0": 0.25,
+        "58012020.0": 0.15,
+        "18011999.0": 0.09,
+        "56512551.0": 0.37,
+        "31513551.0": 0.41,
+        "13011301.0": 0.07,
+        "57012351.0": 0.45,
+        "45512401.0": 0.15,
+        "57011251.0": 0.06,
+        "22012401.0": 0.2,
+        "42511811.0": 0.07,
+        "42511251.0": 0.09,
+        "33012701.0": 0.08,
+        "45512351.0": 0.12,
+        "31512431.0": 0.23,
+        "14511441.0": 0.13,
+        "16012101.0": 0.16,
+        "33012861.0": 0.13,
+        "31512131.0": 0.89,
+        "47011513.0": 0.07,
+        "15011999.0": 0.09,
+        "33012751.0": 0.37,
+        "31512462.0": 0.48,
+        "28011078.0": 0.08,
+        "44512451.0": 0.28,
+        "28016052.0": 0.16,
+        "45512332.0": 0.13,
+        "15011801.0": 0.07,
+        "56513301.0": 0.47,
+        "14011421.0": 0.1,
+        "14011754.0": 0.06,
+        "33012501.0": 0.48,
+        "33012311.0": 1.29,
+        "42511822.0": 0.08,
+        "56513154.0": 0.35,
+        "44514072.0": 0.03,
+        "13511611.0": 0.12,
+        "63511082.0": 0.02,
+        "14011151.0": 0.12,
+        "58012029.0": 0.06,
+        "13511999.0": 0.03,
+        "58012016.0": 0.06,
+        "13511711.0": 0.18,
+        "81011101.0": 0.06,
+        "14011704.0": 0.07,
+        "14011705.0": 0.07,
+        "15011942.0": 0.03,
+        "15011921.0": 0.07,
+        "58012028.0": 0.02,
+        "38512999.0": 0.03,
+        "11511451.0": 0.15,
+        "31513501.0": 0.77,
+        "82011101.0": 0.06,
+        "57511355.0": 0.01,
+        "56513411.0": 0.01,
+        "57012505.0": 0.12,
+        "33012571.0": 0.16,
+        "23011051.0": 0.05,
+        "18513431.0": 0.01,
+        "13011081.0": 0.22,
+        "31513301.0": 0.19,
+        "26012502.0": 0.02,
+        "69512101.0": 0.03,
+        "56512651.0": 0.26,
+        "57013681.0": 0.07,
+        "28011071.0": 0.15,
+        "72011052.0": 0.03,
+        "26012211.0": 0.53,
+        "28016051.0": 0.16,
+        "47011351.0": 0.04,
+        "43751101.0": 0.1,
+        "56512151.0": 0.15,
+        "45512301.0": 0.12,
+        "13011353.0": 0.04,
+        "57015101.0": 0.14,
+        "13511852.0": 0.05,
+        "45512999.0": 0.1,
+        "15011603.0": 0.04,
+        "18513552.0": 0.03,
+        "33012603.0": 0.13,
+        "63521013.0": 0.01,
+        "35011115.0": 0.02,
+        "58011454.0": 0.02,
+        "19512511.0": 0.01,
+        "58011621.0": 0.05,
+        "28011801.0": 0.03,
+        "14011162.0": 0.14,
+        "15011922.0": 0.23,
+        "33012801.0": 0.28,
+        "68511101.0": 0.16,
+        "14011753.0": 0.22,
+        "13511651.0": 0.12,
+        "46011201.0": 0.05,
+        "46011301.0": 0.02,
+        "69811101.0": 0.02,
+        "58011481.0": 0.04,
+        "13011052.0": 0.27,
+        "14011163.0": 0.12,
+        "11511453.0": 0.06,
+        "42511302.0": 0.01,
+        "31512102.0": 0.14,
+        "16015321.0": 0.03,
+        "15011944.0": 0.07,
+        "52011351.0": 0.01,
+        "15011986.0": 0.07,
+        "13011153.0": 0.4,
+        "14511999.0": 0.06,
+        "14011755.0": 0.13,
+        "26012351.0": 0.27,
+        "42013271.0": 0.09,
+        "16012156.0": 0.11,
+        "14011706.0": 0.15,
+        "26012999.0": 0.08,
+        "35011521.0": 0.04,
+        "15011871.0": 0.36,
+        "26012602.0": 0.05,
+        "15014001.0": 0.03,
+        "11511901.0": 0.36,
+        "10511301.0": 0.02,
+        "56512999.0": 0.05,
+        "57511451.0": 0.04,
+        "42511331.0": 0.05,
+        "15011891.0": 0.08,
+        "13511902.0": 0.17,
+        "22011331.0": 0.11,
+        "13011451.0": 0.04,
+        "12516152.0": 0.09,
+        "14011761.0": 0.02,
+        "31512421.0": 0.2,
+        "42511301.0": 0.04,
+        "16012461.0": 0.01,
+        "18016101.0": 0.02,
+        "14011766.0": 0.1,
+        "38512551.0": 0.06,
+        "57013671.0": 0.06,
+        "15011987.0": 0.01,
+        "14011703.0": 0.18,
+        "14011722.0": 0.15,
+        "18011631.0": 0.01,
+        "42012171.0": 0.39,
+        "44512999.0": 0.04,
+        "18011155.0": 0.11,
+        "11511663.0": 0.01,
+        "58011505.0": 0.19,
+        "40011503.0": 0.01,
+        "57511222.0": 0.06,
+        "28016106.0": 0.06,
+        "11512301.0": 0.07,
+        "44512651.0": 0.06,
+        "58012011.0": 0.24,
+        "88011201.0": 0.02,
+        "28011331.0": 0.06,
+        "58011453.0": 0.01,
+        "23012205.0": 0.4,
+        "57013663.0": 0.06,
+        "43513201.0": 0.04,
+        "31512251.0": 0.35,
+        "14011721.0": 0.06,
+        "13011999.0": 0.08,
+        "66011031.0": 0.06,
+        "52511471.0": 0.03,
+        "63511075.0": 0.07,
+        "16013201.0": 0.02,
+        "15014102.0": 0.05,
+        "31513601.0": 0.06,
+        "12512311.0": 0.02,
+        "47013201.0": 0.02,
+        "63511201.0": 0.08,
+        "14011757.0": 0.01,
+        "56512061.0": 0.21,
+        "56512331.0": 0.08,
+        "13011152.0": 0.07,
+        "14011772.0": 0.09,
+        "14011165.0": 0.16,
+        "12516151.0": 0.19,
+        "58011502.0": 0.01,
+        "57012162.0": 0.04,
+        "35011381.0": 0.01,
+        "28011332.0": 0.03,
+        "85011051.0": 0.06,
+        "23012252.0": 0.03,
+        "31513611.0": 0.17,
+        "23011101.0": 0.04,
+        "28011217.0": 0.06,
+        "19512161.0": 0.03,
+        "15011984.0": 0.06,
+        "18011618.0": 0.07,
+        "47011331.0": 0.08,
+        "57013561.0": 0.03,
+        "58011601.0": 0.01,
+        "28011237.0": 0.47,
+        "40011051.0": 0.01,
+        "28011076.0": 0.03,
+        "16012171.0": 0.16,
+        "58012023.0": 0.02,
+        "57013201.0": 0.16,
+        "28016101.0": 0.1,
+        "26012501.0": 0.07,
+        "11511999.0": 0.05,
+        "23011251.0": 0.06,
+        "22017201.0": 0.02,
+        "31513562.0": 0.17,
+        "57011201.0": 0.06,
+        "41011351.0": 0.04,
+        "13511853.0": 0.2,
+        "57015102.0": 0.11,
+        "13511612.0": 0.03,
+        "11512999.0": 0.11,
+        "57012181.0": 0.11,
+        "57012506.0": 0.01,
+        "57015201.0": 0.06,
+        "33012655.0": 0.04,
+        "13011252.0": 0.14,
+        "57012522.0": 0.01,
+        "47011372.0": 0.09,
+        "28011752.0": 0.15,
+        "14011431.0": 0.18,
+        "13011502.0": 0.08,
+        "44512551.0": 0.05,
+        "69011101.0": 0.09,
+        "12515103.0": 0.03,
+        "14011756.0": 0.02,
+        "72011055.0": 0.01,
+        "35511131.0": 0.02,
+        "31512461.0": 0.1,
+        "52511999.0": 0.02,
+        "12516999.0": 0.06,
+        "11511353.0": 0.09,
+        "63511301.0": 0.03,
+        "12515023.0": 0.11,
+        "11512201.0": 0.1,
+        "22012151.0": 0.01,
+        "28011999.0": 0.04,
+        "14011767.0": 0.02,
+        "40011501.0": 0.01,
+        "42012201.0": 0.26,
+        "28011212.0": 0.07,
+        "23012251.0": 0.01,
+        "22017221.0": 0.02,
+        "58011476.0": 0.02,
+        "23011999.0": 0.03,
+        "18011158.0": 0.03,
+        "22017251.0": 0.08,
+        "41011161.0": 0.04,
+        "15012832.0": 0.01,
+        "11511653.0": 0.06,
+        "43513251.0": 0.01,
+        "31512451.0": 0.04,
+        "18011325.0": 0.01,
+        "56513401.0": 0.08,
+        "45512371.0": 0.26,
+        "28011561.0": 0.03,
+        "19512061.0": 0.01,
+        "13511614.0": 0.02,
+        "28011079.0": 0.01,
+        "13011321.0": 0.02,
+        "28011216.0": 0.14,
+        "18015051.0": 0.06,
+        "18011611.0": 0.01,
+        "69011102.0": 0.01,
+        "56512501.0": 0.01,
+        "68511301.0": 0.05,
+        "15011957.0": 0.02,
+        "28011855.0": 0.06,
+        "57015999.0": 0.02,
+        "28011502.0": 0.02,
+        "18513401.0": 0.07,
+        "65511053.0": 0.06,
+        "28011227.0": 0.01,
+        "63511041.0": 0.01,
+        "15012861.0": 0.03,
+        "82011112.0": 0.01,
+        "12515302.0": 0.1,
+        "42511051.0": 0.03,
+        "11511661.0": 0.01,
+        "81011152.0": 0.03,
+        "69011111.0": 0.03,
+        "35011111.0": 0.03,
+        "13511854.0": 0.01,
+        "44514251.0": 0.02,
+        "42512999.0": 0.04,
+        "13011351.0": 0.01,
+        "15012838.0": 0.01,
+        "46011051.0": 0.03,
+        "81011202.0": 0.01,
+        "42511502.0": 0.07,
+        "31513999.0": 0.02,
+        "14011773.0": 0.03,
+        "69211012.0": 0.01,
+        "28016102.0": 0.03,
+        "57012504.0": 0.07,
+        "13011071.0": 0.06,
+        "57011999.0": 0.01,
+        "44512231.0": 0.01,
+        "43751202.0": 0.05,
+        "57013203.0": 0.09,
+        "13011313.0": 0.01,
+        "40011101.0": 0.01,
+        "36015151.0": 0.02,
+        "44512201.0": 0.06,
+        "56512352.0": 0.01,
+        "38015502.0": 0.1,
+        "57013202.0": 0.01,
+        "13511855.0": 0.01,
+        "39511521.0": 0.02,
+        "85011121.0": 0.01,
+        "16012201.0": 0.02
+      }
+    },
+    {
+      "variable": "YPV_05",
+      "label": "YPV_05: No. of vehicles in your household",
+      "type": "numeric",
+      "n": 9937,
+      "weighted_mean": 1.29,
+      "mean": 1.29,
+      "median": 1.0,
+      "std": 0.49,
+      "min": 1.0,
+      "max": 8.0
+    },
+    {
+      "variable": "CONNECT_SMTPHONE",
+      "label": "CONNECT_SMTPHONE: Connect Smartphone",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "1.0": 22.22,
+        "0.0": 77.78
+      }
+    },
+    {
+      "variable": "SMTPHONE_OPSYSTEM",
+      "label": "SMTPHONE_OPSYSTEM: Operating System Connected Smartphone",
+      "type": "categorical",
+      "n": 2983,
+      "weighted_share": {
+        "1.0": 31.26,
+        "2.0": 66.14,
+        "97.0": 1.96,
+        "99.0": 0.64
+      }
+    },
+    {
+      "variable": "YNV_01",
+      "label": "YNV_01: Wireless Phone Service Provider",
+      "type": "categorical",
+      "n": 2983,
+      "weighted_share": {
+        "7.0": 53.92,
+        "8.0": 24.26,
+        "9.0": 20.8,
+        "99.0": 1.01
+      }
+    },
+    {
+      "variable": "YNV_02",
+      "label": "YNV_02: Wireless Phone Manufacturer",
+      "type": "categorical",
+      "n": 2983,
+      "weighted_share": {
+        "3.0": 33.58,
+        "43.0": 8.3,
+        "29.0": 11.54,
+        "23.0": 10.29,
+        "15.0": 28.94,
+        "35.0": 2.21,
+        "22.0": 1.19,
+        "99.0": 0.15,
+        "19.0": 1.72,
+        "20.0": 0.41,
+        "97.0": 0.53,
+        "39.0": 0.26,
+        "13.0": 0.44,
+        "42.0": 0.19,
+        "27.0": 0.02,
+        "40.0": 0.07,
+        "25.0": 0.14,
+        "6.0": 0.01
+      }
+    },
+    {
+      "variable": "GENDER",
+      "label": "Gender",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "1.0": 64.88,
+        "0.0": 34.2,
+        "98.0": 0.92
+      }
+    },
+    {
+      "variable": "CN_MARITAL_STATUS",
+      "label": "Marital status",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "1.0": 81.43,
+        "97.0": 0.28,
+        "2.0": 17.02,
+        "98.0": 1.27
+      }
+    },
+    {
+      "variable": "AGE",
+      "label": "Age",
+      "type": "numeric",
+      "n": 8785,
+      "weighted_mean": 34.06,
+      "mean": 34.2,
+      "median": 34.0,
+      "std": 6.24,
+      "min": 19.0,
+      "max": 66.0
+    },
+    {
+      "variable": "AGE_BUCKETS",
+      "label": "AGE BUCKETS",
+      "type": "categorical",
+      "n": 8785,
+      "weighted_share": {
+        "5.0": 25.78,
+        "3.0": 23.26,
+        "4.0": 29.33,
+        "6.0": 12.88,
+        "9.0": 0.23,
+        "11.0": 0.03,
+        "7.0": 4.46,
+        "2.0": 3.1,
+        "8.0": 0.88,
+        "1.0": 0.02,
+        "10.0": 0.04
+      }
+    },
+    {
+      "variable": "GENERATION",
+      "label": "GENERATION",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "2.0": 34.24,
+        "3.0": 46.46,
+        "98.0": 11.57,
+        "1.0": 4.98,
+        "4.0": 2.75
+      }
+    },
+    {
+      "variable": "GENERATION2",
+      "label": "GENERATION2",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "3.0": 22.79,
+        "5.0": 20.43,
+        "2.0": 11.45,
+        "4.0": 26.03,
+        "98.0": 11.57,
+        "1.0": 4.98,
+        "6.0": 2.75
+      }
+    },
+    {
+      "variable": "CN_NUMBER_HOUSEHOLD",
+      "label": "Number in Household (including yourself)",
+      "type": "numeric",
+      "n": 9225,
+      "weighted_mean": 3.38,
+      "mean": 3.41,
+      "median": 3.0,
+      "std": 0.89,
+      "min": 1.0,
+      "max": 11.0
+    },
+    {
+      "variable": "CN_EDUCATION",
+      "label": "Highest Education Degree",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "6.0": 81.33,
+        "98.0": 1.51,
+        "7.0": 7.06,
+        "5.0": 7.64,
+        "4.0": 2.17,
+        "3.0": 0.29,
+        "2.0": 0.01
+      }
+    },
+    {
+      "variable": "CN_INCOME",
+      "label": "Monthly household income Buckets",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "5.0": 3.53,
+        "98.0": 1.98,
+        "9.0": 22.1,
+        "6.0": 11.31,
+        "8.0": 24.67,
+        "10.0": 18.16,
+        "12.0": 4.07,
+        "11.0": 14.19
+      }
+    },
+    {
+      "variable": "CN_OCCUPATION",
+      "label": "Occupation",
+      "type": "categorical",
+      "n": 9937,
+      "weighted_share": {
+        "16.0": 6.21,
+        "18.0": 0.31,
+        "7.0": 24.53,
+        "9.0": 7.53,
+        "5.0": 31.64,
+        "10.0": 2.66,
+        "1.0": 9.94,
+        "98.0": 2.13,
+        "11.0": 2.95,
+        "6.0": 6.3,
+        "97.0": 1.08,
+        "20.0": 0.13,
+        "4.0": 2.41,
+        "12.0": 2.04,
+        "19.0": 0.12
+      }
+    },
+    {
+      "variable": "HEIGHT",
+      "label": "Height (centimeters)",
+      "type": "numeric",
+      "n": 6577,
+      "weighted_mean": 171.07,
+      "mean": 171.27,
+      "median": 173.0,
+      "std": 7.77,
+      "min": 150.0,
+      "max": 195.0
+    },
+    {
+      "variable": "KB_HWGT_1C",
+      "label": "Weight (kilograms)",
+      "type": "numeric",
+      "n": 6557,
+      "weighted_mean": 68.05,
+      "mean": 68.29,
+      "median": 68.0,
+      "std": 14.07,
+      "min": 38.0,
+      "max": 190.0
+    }
+  ],
+  "multi_mention": [
+    {
+      "group": "SCR_G_2",
+      "base": 9937,
+      "options": {
+        "SCR_G_2_R1": {
+          "option": "Black",
+          "n": 5618,
+          "weighted_pct": 56.39
+        },
+        "SCR_G_2_R2": {
+          "option": "Grey",
+          "n": 2002,
+          "weighted_pct": 19.83
+        },
+        "SCR_G_2_R3": {
+          "option": "Beige/Tan",
+          "n": 1827,
+          "weighted_pct": 18.15
+        },
+        "SCR_G_2_R4": {
+          "option": "Brown",
+          "n": 1133,
+          "weighted_pct": 11.34
+        },
+        "SCR_G_2_R97": {
+          "option": "Other",
+          "n": 587,
+          "weighted_pct": 6.17
+        }
+      }
+    },
+    {
+      "group": "SCR_INFO00_04_01",
+      "base": 1814,
+      "options": {
+        "SCR_INFO00_04_01_R1": {
+          "option": "Apple CarPlay",
+          "n": 633,
+          "weighted_pct": 33.42
+        },
+        "SCR_INFO00_04_01_R2": {
+          "option": "HUAWEI HiCar",
+          "n": 504,
+          "weighted_pct": 28.24
+        },
+        "SCR_INFO00_04_01_R3": {
+          "option": "Vivo Jovi InCar",
+          "n": 271,
+          "weighted_pct": 15.54
+        },
+        "SCR_INFO00_04_01_R4": {
+          "option": "Carlife",
+          "n": 703,
+          "weighted_pct": 40.16
+        },
+        "SCR_INFO00_04_01_R97": {
+          "option": "Others",
+          "n": 2,
+          "weighted_pct": 0.12
+        }
+      }
+    },
+    {
+      "group": "SCR_SEAT00_01",
+      "base": 9937,
+      "options": {
+        "SCR_SEAT00_01_R1": {
+          "option": "Sliding Adjustment: Driver seat - Manually operated",
+          "n": 2272,
+          "weighted_pct": 20.89
+        },
+        "SCR_SEAT00_01_R2": {
+          "option": "Sliding Adjustment: Driver seat - Power operated",
+          "n": 7627,
+          "weighted_pct": 78.73
+        },
+        "SCR_SEAT00_01_R3": {
+          "option": "Sliding Adjustment: Driver seat - Don't know",
+          "n": 38,
+          "weighted_pct": 0.38
+        },
+        "SCR_SEAT00_01_R4": {
+          "option": "Sliding Adjustment: Front passenger seat - Manually operated",
+          "n": 3208,
+          "weighted_pct": 34.62
+        },
+        "SCR_SEAT00_01_R5": {
+          "option": "Sliding Adjustment: Front passenger seat - Power operated",
+          "n": 6545,
+          "weighted_pct": 64.23
+        },
+        "SCR_SEAT00_01_R6": {
+          "option": "Sliding Adjustment: Front passenger seat - Don't know",
+          "n": 184,
+          "weighted_pct": 1.15
+        },
+        "SCR_SEAT00_01_R7": {
+          "option": "Sliding Adjustment: Rear (2nd row) seats - Manually operated",
+          "n": 880,
+          "weighted_pct": 7.87
+        },
+        "SCR_SEAT00_01_R8": {
+          "option": "Sliding Adjustment: Rear (2nd row) seats - Power operated",
+          "n": 175,
+          "weighted_pct": 1.4
+        },
+        "SCR_SEAT00_01_R9": {
+          "option": "Sliding Adjustment: Rear (2nd row) seats - No adjustment",
+          "n": 8341,
+          "weighted_pct": 85.21
+        },
+        "SCR_SEAT00_01_R10": {
+          "option": "Sliding Adjustment: Rear (2nd row) seats - Don't know",
+          "n": 518,
+          "weighted_pct": 5.15
+        },
+        "SCR_SEAT00_01_R11": {
+          "option": "Sliding Adjustment: Third row seats - Manually operated",
+          "n": 118,
+          "weighted_pct": 1.05
+        },
+        "SCR_SEAT00_01_R12": {
+          "option": "Sliding Adjustment: Third row seats - Power operated",
+          "n": 0,
+          "weighted_pct": 0.0
+        },
+        "SCR_SEAT00_01_R13": {
+          "option": "Sliding Adjustment: Third row seats - No adjustment",
+          "n": 724,
+          "weighted_pct": 6.57
+        },
+        "SCR_SEAT00_01_R14": {
+          "option": "Sliding Adjustment: Third row seats - Don't know",
+          "n": 220,
+          "weighted_pct": 1.92
+        }
+      }
+    },
+    {
+      "group": "SCR_SEAT00_02",
+      "base": 9937,
+      "options": {
+        "SCR_SEAT00_02_R1": {
+          "option": "Reclining Adjustment: Driver seat - Manually operated",
+          "n": 2267,
+          "weighted_pct": 20.91
+        },
+        "SCR_SEAT00_02_R2": {
+          "option": "Reclining Adjustment: Driver seat - Power operated",
+          "n": 7556,
+          "weighted_pct": 77.93
+        },
+        "SCR_SEAT00_02_R3": {
+          "option": "Reclining Adjustment: Driver seat - Don't know",
+          "n": 114,
+          "weighted_pct": 1.17
+        },
+        "SCR_SEAT00_02_R4": {
+          "option": "Reclining Adjustment: Front passenger seat - Manually operated",
+          "n": 3213,
+          "weighted_pct": 34.89
+        },
+        "SCR_SEAT00_02_R5": {
+          "option": "Reclining Adjustment: Front passenger seat - Power operated",
+          "n": 6535,
+          "weighted_pct": 63.12
+        },
+        "SCR_SEAT00_02_R6": {
+          "option": "Reclining Adjustment: Front passenger seat - Don't know",
+          "n": 189,
+          "weighted_pct": 1.98
+        },
+        "SCR_SEAT00_02_R7": {
+          "option": "Reclining Adjustment: Rear (2nd row) seats - Manually operated",
+          "n": 2488,
+          "weighted_pct": 28.51
+        },
+        "SCR_SEAT00_02_R8": {
+          "option": "Reclining Adjustment: Rear (2nd row) seats - Power operated",
+          "n": 220,
+          "weighted_pct": 0.82
+        },
+        "SCR_SEAT00_02_R9": {
+          "option": "Reclining Adjustment: Rear (2nd row) seats - No adjustment",
+          "n": 6628,
+          "weighted_pct": 64.69
+        },
+        "SCR_SEAT00_02_R10": {
+          "option": "Reclining Adjustment: Rear (2nd row) seats - Don't know",
+          "n": 578,
+          "weighted_pct": 5.62
+        },
+        "SCR_SEAT00_02_R11": {
+          "option": "Reclining Adjustment: Third row seats - Manually operated",
+          "n": 273,
+          "weighted_pct": 1.78
+        },
+        "SCR_SEAT00_02_R12": {
+          "option": "Reclining Adjustment: Third row seats - Power operated",
+          "n": 145,
+          "weighted_pct": 2.42
+        },
+        "SCR_SEAT00_02_R13": {
+          "option": "Reclining Adjustment: Third row seats - No adjustment",
+          "n": 416,
+          "weighted_pct": 3.36
+        },
+        "SCR_SEAT00_02_R14": {
+          "option": "Reclining Adjustment: Third row seats - Don't know",
+          "n": 228,
+          "weighted_pct": 1.98
+        }
+      }
+    },
+    {
+      "group": "SCR_SEAT00_03",
+      "base": 9937,
+      "options": {
+        "SCR_SEAT00_03_R1": {
+          "option": "Height Adjustment: Driver seat - Manually operated",
+          "n": 1432,
+          "weighted_pct": 11.85
+        },
+        "SCR_SEAT00_03_R2": {
+          "option": "Height Adjustment: Driver seat - Power operated",
+          "n": 7278,
+          "weighted_pct": 75.78
+        },
+        "SCR_SEAT00_03_R3": {
+          "option": "Height Adjustment: Driver seat - No adjustment",
+          "n": 1123,
+          "weighted_pct": 11.29
+        },
+        "SCR_SEAT00_03_R4": {
+          "option": "Height Adjustment: Driver seat - Don't know",
+          "n": 104,
+          "weighted_pct": 1.08
+        },
+        "SCR_SEAT00_03_R5": {
+          "option": "Height Adjustment: Front passenger seat - Manually operated",
+          "n": 59,
+          "weighted_pct": 0.58
+        },
+        "SCR_SEAT00_03_R6": {
+          "option": "Height Adjustment: Front passenger seat - Power operated",
+          "n": 3774,
+          "weighted_pct": 35.4
+        },
+        "SCR_SEAT00_03_R7": {
+          "option": "Height Adjustment: Front passenger seat - No adjustment",
+          "n": 5936,
+          "weighted_pct": 62.42
+        },
+        "SCR_SEAT00_03_R8": {
+          "option": "Height Adjustment: Front passenger seat - Don't know",
+          "n": 168,
+          "weighted_pct": 1.6
+        }
+      }
+    },
+    {
+      "group": "SCR_SEAT00_04A",
+      "base": 9937,
+      "options": {
+        "SCR_SEAT00_04A_R1": {
+          "option": "Heated seat - Driver seat",
+          "n": 4410,
+          "weighted_pct": 42.67
+        },
+        "SCR_SEAT00_04A_R2": {
+          "option": "Heated seat - Front passenger seat",
+          "n": 3539,
+          "weighted_pct": 34.22
+        },
+        "SCR_SEAT00_04A_R3": {
+          "option": "Heated seat - Rear (2nd row) seats",
+          "n": 890,
+          "weighted_pct": 10.72
+        },
+        "SCR_SEAT00_04A_R4": {
+          "option": "Heated seat - Third row seats",
+          "n": 138,
+          "weighted_pct": 1.61
+        },
+        "SCR_SEAT00_04A_R5": {
+          "option": "Heated seat - Do not have feature at all",
+          "n": 4747,
+          "weighted_pct": 49.92
+        },
+        "SCR_SEAT00_04A_R6": {
+          "option": "Heated seat - Don't know",
+          "n": 695,
+          "weighted_pct": 6.64
+        }
+      }
+    },
+    {
+      "group": "SCR_SEAT00_04B",
+      "base": 9937,
+      "options": {
+        "SCR_SEAT00_04B_R1": {
+          "option": "Ventilated/cooled seat - Driver seat",
+          "n": 3271,
+          "weighted_pct": 28.71
+        },
+        "SCR_SEAT00_04B_R2": {
+          "option": "Ventilated/cooled seat - Front passenger seat",
+          "n": 2447,
+          "weighted_pct": 21.05
+        },
+        "SCR_SEAT00_04B_R3": {
+          "option": "Ventilated/cooled seat - Rear (2nd row) seats",
+          "n": 574,
+          "weighted_pct": 5.93
+        },
+        "SCR_SEAT00_04B_R4": {
+          "option": "Ventilated/cooled seat - Third row seats",
+          "n": 0,
+          "weighted_pct": 0.0
+        },
+        "SCR_SEAT00_04B_R5": {
+          "option": "Ventilated/cooled seat - Do not have feature at all",
+          "n": 5433,
+          "weighted_pct": 56.98
+        },
+        "SCR_SEAT00_04B_R6": {
+          "option": "Ventilated/cooled seat - Don't know",
+          "n": 1157,
+          "weighted_pct": 13.71
+        }
+      }
+    },
+    {
+      "group": "SCR_SEAT00_04C",
+      "base": 9937,
+      "options": {
+        "SCR_SEAT00_04C_R1": {
+          "option": "Memory seat - Driver seat",
+          "n": 3177,
+          "weighted_pct": 28.39
+        },
+        "SCR_SEAT00_04C_R2": {
+          "option": "Memory seat - Front passenger seat",
+          "n": 742,
+          "weighted_pct": 6.37
+        },
+        "SCR_SEAT00_04C_R3": {
+          "option": "Memory seat - Rear (2nd row) seats",
+          "n": 91,
+          "weighted_pct": 0.35
+        },
+        "SCR_SEAT00_04C_R4": {
+          "option": "Memory seat - Third row seats",
+          "n": 0,
+          "weighted_pct": 0.0
+        },
+        "SCR_SEAT00_04C_R5": {
+          "option": "Memory seat - Do not have feature at all",
+          "n": 5640,
+          "weighted_pct": 59.41
+        },
+        "SCR_SEAT00_04C_R6": {
+          "option": "Memory seat - Don't know",
+          "n": 1091,
+          "weighted_pct": 11.96
+        }
+      }
+    },
+    {
+      "group": "SCR_SEAT00_04D",
+      "base": 9937,
+      "options": {
+        "SCR_SEAT00_04D_R1": {
+          "option": "Massaging seat - Driver seat",
+          "n": 1344,
+          "weighted_pct": 11.68
+        },
+        "SCR_SEAT00_04D_R2": {
+          "option": "Massaging seat - Front passenger seat",
+          "n": 1046,
+          "weighted_pct": 9.23
+        },
+        "SCR_SEAT00_04D_R3": {
+          "option": "Massaging seat - Rear (2nd row) seats",
+          "n": 495,
+          "weighted_pct": 5.19
+        },
+        "SCR_SEAT00_04D_R4": {
+          "option": "Massaging seat - Third row seats",
+          "n": 0,
+          "weighted_pct": 0.0
+        },
+        "SCR_SEAT00_04D_R5": {
+          "option": "Massaging seat - Do not have feature at all",
+          "n": 7222,
+          "weighted_pct": 74.68
+        },
+        "SCR_SEAT00_04D_R6": {
+          "option": "Massaging seat - Don't know",
+          "n": 1247,
+          "weighted_pct": 12.74
+        }
+      }
+    },
+    {
+      "group": "NEV_02",
+      "base": 8784,
+      "options": {
+        "NEV_02_R1": {
+          "option": "Using wire connected to sockets on the wall",
+          "n": 1578,
+          "weighted_pct": 17.89
+        },
+        "NEV_02_R2": {
+          "option": "Using charging station",
+          "n": 4559,
+          "weighted_pct": 52.9
+        },
+        "NEV_02_R3": {
+          "option": "Using charging wallbox",
+          "n": 4149,
+          "weighted_pct": 46.58
+        }
+      }
+    }
+  ]
+}

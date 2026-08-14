@@ -1,0 +1,477 @@
+[
+  {
+    "variable": "AINT_D_04",
+    "label": "Most Improved - Screens/displays",
+    "n_valid": 9937,
+    "top_options": [
+      {
+        "value": 0.0,
+        "label": "Nothing",
+        "n": 4925,
+        "pct": 49.6
+      },
+      {
+        "value": 3.0,
+        "label": "The sizes of screens and displays",
+        "n": 1375,
+        "pct": 13.8
+      },
+      {
+        "value": 2.0,
+        "label": "Color matching",
+        "n": 957,
+        "pct": 9.6
+      },
+      {
+        "value": 1.0,
+        "label": "The design of the interface",
+        "n": 836,
+        "pct": 8.4
+      },
+      {
+        "value": 4.0,
+        "label": "Number of screens and displays",
+        "n": 586,
+        "pct": 5.9
+      }
+    ]
+  },
+  {
+    "variable": "AINT_D_05",
+    "label": "Love Most - Screens/displays",
+    "n_valid": 9937,
+    "top_options": [
+      {
+        "value": 5.0,
+        "label": "Picture clarity",
+        "n": 1557,
+        "pct": 15.7
+      },
+      {
+        "value": 6.0,
+        "label": "The feel of touch screen operation",
+        "n": 1391,
+        "pct": 14.0
+      },
+      {
+        "value": 1.0,
+        "label": "The design of the interface",
+        "n": 1351,
+        "pct": 13.6
+      },
+      {
+        "value": 7.0,
+        "label": "Screen response speed",
+        "n": 1350,
+        "pct": 13.6
+      },
+      {
+        "value": 0.0,
+        "label": "Nothing",
+        "n": 1323,
+        "pct": 13.3
+      }
+    ]
+  },
+  {
+    "variable": "AINT_D_06",
+    "label": "Most Improved - Operating interface of the air conditioning system",
+    "n_valid": 9937,
+    "top_options": [
+      {
+        "value": 0.0,
+        "label": "Nothing",
+        "n": 5869,
+        "pct": 59.1
+      },
+      {
+        "value": 3.0,
+        "label": "Ease of air outlet adjustment",
+        "n": 1146,
+        "pct": 11.5
+      },
+      {
+        "value": 1.0,
+        "label": "Ease of operation",
+        "n": 1015,
+        "pct": 10.2
+      },
+      {
+        "value": 2.0,
+        "label": "Ease of reading information",
+        "n": 956,
+        "pct": 9.6
+      },
+      {
+        "value": 4.0,
+        "label": "Attractiveness of appearance",
+        "n": 951,
+        "pct": 9.6
+      }
+    ]
+  },
+  {
+    "variable": "AINT_D_07",
+    "label": "Love Most - Operating interface of the air conditioning system",
+    "n_valid": 9937,
+    "top_options": [
+      {
+        "value": 1.0,
+        "label": "Ease of operation",
+        "n": 2244,
+        "pct": 22.6
+      },
+      {
+        "value": 4.0,
+        "label": "Attractiveness of appearance",
+        "n": 2034,
+        "pct": 20.5
+      },
+      {
+        "value": 3.0,
+        "label": "Ease of air outlet adjustment",
+        "n": 2029,
+        "pct": 20.4
+      },
+      {
+        "value": 0.0,
+        "label": "Nothing",
+        "n": 1841,
+        "pct": 18.5
+      },
+      {
+        "value": 2.0,
+        "label": "Ease of reading information",
+        "n": 1789,
+        "pct": 18.0
+      }
+    ]
+  },
+  {
+    "variable": "APERF_D_01",
+    "label": "Most Improved - Power of vehicle's engine/motor",
+    "n_valid": 9937,
+    "top_options": [
+      {
+        "value": 0.0,
+        "label": "Nothing",
+        "n": 5409,
+        "pct": 54.4
+      },
+      {
+        "value": 2.0,
+        "label": "Vehicle acceleration at suburban (25 to 49 miles per hour)",
+        "n": 2157,
+        "pct": 21.7
+      },
+      {
+        "value": 1.0,
+        "label": "Vehicle acceleration from a stop (less than 25 miles per hour)",
+        "n": 1258,
+        "pct": 12.7
+      },
+      {
+        "value": 3.0,
+        "label": "Vehicle acceleration at high speed/Freeway (50 miles per hour and higher)",
+        "n": 1113,
+        "pct": 11.2
+      }
+    ]
+  },
+  {
+    "variable": "ACMFT_D_01",
+    "label": "Most Improved - Air conditioning system",
+    "n_valid": 9937,
+    "top_options": [
+      {
+        "value": 0.0,
+        "label": "Nothing",
+        "n": 5866,
+        "pct": 59.0
+      },
+      {
+        "value": 6.0,
+        "label": "Quickly defrosts/defogs the interior glass",
+        "n": 666,
+        "pct": 6.7
+      },
+      {
+        "value": 3.0,
+        "label": "Maintains the desired temperature",
+        "n": 610,
+        "pct": 6.1
+      },
+      {
+        "value": 2.0,
+        "label": "Gets warm quickly when needed",
+        "n": 607,
+        "pct": 6.1
+      },
+      {
+        "value": 7.0,
+        "label": "Quietness of the system",
+        "n": 589,
+        "pct": 5.9
+      }
+    ]
+  },
+  {
+    "variable": "ACMFT_D_02",
+    "label": "Love Most - Air conditioning system",
+    "n_valid": 9937,
+    "top_options": [
+      {
+        "value": 0.0,
+        "label": "Nothing",
+        "n": 2840,
+        "pct": 28.6
+      },
+      {
+        "value": 7.0,
+        "label": "Quietness of the system",
+        "n": 1533,
+        "pct": 15.4
+      },
+      {
+        "value": 3.0,
+        "label": "Maintains the desired temperature",
+        "n": 1308,
+        "pct": 13.2
+      },
+      {
+        "value": 1.0,
+        "label": "Gets cold quickly when needed",
+        "n": 909,
+        "pct": 9.1
+      },
+      {
+        "value": 4.0,
+        "label": "Provides different temperatures for driver/front passenger",
+        "n": 872,
+        "pct": 8.8
+      }
+    ]
+  },
+  {
+    "variable": "ASFTY_D_01",
+    "label": "Safety: Most Improved",
+    "n_valid": 5968,
+    "top_options": [
+      {
+        "value": 0.0,
+        "label": "Nothing",
+        "n": 3469,
+        "pct": 58.1
+      },
+      {
+        "value": 3.0,
+        "label": "The effectiveness of the safety systems (e.g., blind spot warning, collision warning)",
+        "n": 340,
+        "pct": 5.7
+      },
+      {
+        "value": 2.0,
+        "label": "The number of safety systems (e.g., blind spot warning, collision warning)",
+        "n": 295,
+        "pct": 4.9
+      },
+      {
+        "value": 6.0,
+        "label": "The feeling of solidity of the vehicle",
+        "n": 276,
+        "pct": 4.6
+      },
+      {
+        "value": 5.0,
+        "label": "The effectiveness of the driver assistance systems (e.g., cruise control, lane keep assist)",
+        "n": 230,
+        "pct": 3.9
+      }
+    ]
+  },
+  {
+    "variable": "ASET_D_01",
+    "label": "Setting Up/Starting: Most Improved: Process of starting vehicle",
+    "n_valid": 5920,
+    "top_options": [
+      {
+        "value": 0.0,
+        "label": "Nothing",
+        "n": 3903,
+        "pct": 65.9
+      },
+      {
+        "value": 2.0,
+        "label": "How welcoming the whole process is",
+        "n": 250,
+        "pct": 4.2
+      },
+      {
+        "value": 4.0,
+        "label": "Reduce the number of warnings/level of information provided",
+        "n": 230,
+        "pct": 3.9
+      },
+      {
+        "value": 9.0,
+        "label": "The time required for the vehicle systems to start up",
+        "n": 217,
+        "pct": 3.7
+      },
+      {
+        "value": 6.0,
+        "label": "The process of operating the vehicle remotely via your phone, etc.",
+        "n": 214,
+        "pct": 3.6
+      }
+    ]
+  },
+  {
+    "variable": "AEXT_D_01",
+    "label": "Exterior: Most Improved: Exterior styling",
+    "n_valid": 5428,
+    "top_options": [
+      {
+        "value": 0.0,
+        "label": "Nothing",
+        "n": 3374,
+        "pct": 62.2
+      },
+      {
+        "value": 6.0,
+        "label": "Headlights",
+        "n": 183,
+        "pct": 3.4
+      },
+      {
+        "value": 10.0,
+        "label": "Shape of the trunk/tailgate",
+        "n": 181,
+        "pct": 3.3
+      },
+      {
+        "value": 4.0,
+        "label": "Exterior color",
+        "n": 174,
+        "pct": 3.2
+      },
+      {
+        "value": 9.0,
+        "label": "Shape of the roofline",
+        "n": 173,
+        "pct": 3.2
+      }
+    ]
+  },
+  {
+    "variable": "AEXT_D_02",
+    "label": "Exterior: Love Most: Exterior styling",
+    "n_valid": 4509,
+    "top_options": [
+      {
+        "value": 4.0,
+        "label": "Exterior color",
+        "n": 547,
+        "pct": 12.1
+      },
+      {
+        "value": 9.0,
+        "label": "Shape of the roofline",
+        "n": 538,
+        "pct": 11.9
+      },
+      {
+        "value": 0.0,
+        "label": "Nothing",
+        "n": 464,
+        "pct": 10.3
+      },
+      {
+        "value": 6.0,
+        "label": "Headlights",
+        "n": 334,
+        "pct": 7.4
+      },
+      {
+        "value": 8.0,
+        "label": "Shape of the hood",
+        "n": 319,
+        "pct": 7.1
+      }
+    ]
+  },
+  {
+    "variable": "ASET_D_02",
+    "label": "Setting Up/Starting: Love Most: Process of starting vehicle",
+    "n_valid": 4017,
+    "top_options": [
+      {
+        "value": 0.0,
+        "label": "Nothing",
+        "n": 611,
+        "pct": 15.2
+      },
+      {
+        "value": 2.0,
+        "label": "How welcoming the whole process is",
+        "n": 450,
+        "pct": 11.2
+      },
+      {
+        "value": 7.0,
+        "label": "The start-up screen on the center console",
+        "n": 436,
+        "pct": 10.9
+      },
+      {
+        "value": 5.0,
+        "label": "The operation of the start button",
+        "n": 381,
+        "pct": 9.5
+      },
+      {
+        "value": 1.0,
+        "label": "How exciting the whole process is",
+        "n": 377,
+        "pct": 9.4
+      }
+    ]
+  },
+  {
+    "variable": "ASFTY_D_02",
+    "label": "Safety: Love Most",
+    "n_valid": 3969,
+    "top_options": [
+      {
+        "value": 8.0,
+        "label": "The vehicle's maneuverability",
+        "n": 561,
+        "pct": 14.1
+      },
+      {
+        "value": 0.0,
+        "label": "Nothing",
+        "n": 389,
+        "pct": 9.8
+      },
+      {
+        "value": 3.0,
+        "label": "The effectiveness of the safety systems (e.g., blind spot warning, collision warning)",
+        "n": 386,
+        "pct": 9.7
+      },
+      {
+        "value": 5.0,
+        "label": "The effectiveness of the driver assistance systems (e.g., cruise control, lane keep assist)",
+        "n": 363,
+        "pct": 9.1
+      },
+      {
+        "value": 7.0,
+        "label": "The size of the vehicle",
+        "n": 359,
+        "pct": 9.0
+      }
+    ]
+  }
+]

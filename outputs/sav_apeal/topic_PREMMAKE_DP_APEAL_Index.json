@@ -1,0 +1,32 @@
+{
+  "group_by": "PREMMAKE_DP",
+  "group_label": "Make - Premium/Non-Premium",
+  "metric": "APEAL_Index",
+  "n_rows": 9937,
+  "detail": [
+    {
+      "value": 2.0,
+      "label": "Mass Market",
+      "n": 8595,
+      "weighted_mean": 787.93,
+      "mean": 788.74,
+      "std": 104.45
+    },
+    {
+      "value": 1.0,
+      "label": "Premium",
+      "n": 1342,
+      "weighted_mean": 805.82,
+      "mean": 803.92,
+      "std": 93.75
+    }
+  ],
+  "test": {
+    "method": "Welch t-test",
+    "stat": -5.43,
+    "p": 6.353321184160831e-08,
+    "cohens_d": 0.153
+  },
+  "pairwise": [],
+  "conclusion": "Premium 加权均值 805.82，Mass Market 加权均值 787.93，差异 显著（p=6.35e-08，效应量=0.153）。"
+}

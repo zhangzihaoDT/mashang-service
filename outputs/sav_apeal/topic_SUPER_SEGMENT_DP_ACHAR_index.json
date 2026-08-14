@@ -1,0 +1,32 @@
+{
+  "group_by": "SUPER_SEGMENT_DP",
+  "group_label": "Super Segment - BEV/PHEV",
+  "metric": "ACHAR_index",
+  "n_rows": 9937,
+  "detail": [
+    {
+      "value": 1.0,
+      "label": "BEV",
+      "n": 6752,
+      "weighted_mean": 780.53,
+      "mean": 781.25,
+      "std": 104.71
+    },
+    {
+      "value": 2.0,
+      "label": "PHEV",
+      "n": 3185,
+      "weighted_mean": 773.87,
+      "mean": 778.97,
+      "std": 102.3
+    }
+  ],
+  "test": {
+    "method": "Welch t-test",
+    "stat": 1.029,
+    "p": 0.30333317429123924,
+    "cohens_d": 0.022
+  },
+  "pairwise": [],
+  "conclusion": "BEV 加权均值 780.53，PHEV 加权均值 773.87，差异 不显著（p=0.303，效应量=0.022）。"
+}

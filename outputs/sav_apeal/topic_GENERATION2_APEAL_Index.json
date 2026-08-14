@@ -1,0 +1,74 @@
+{
+  "group_by": "GENERATION2",
+  "group_label": "GENERATION2",
+  "metric": "APEAL_Index",
+  "n_rows": 9937,
+  "detail": [
+    {
+      "value": 3.0,
+      "label": "85~89",
+      "n": 2292,
+      "weighted_mean": 787.91,
+      "mean": 789.4,
+      "std": 103.2
+    },
+    {
+      "value": 5.0,
+      "label": "95~99",
+      "n": 2039,
+      "weighted_mean": 811.34,
+      "mean": 814.44,
+      "std": 88.63
+    },
+    {
+      "value": 2.0,
+      "label": "80~84",
+      "n": 1155,
+      "weighted_mean": 803.56,
+      "mean": 805.47,
+      "std": 92.95
+    },
+    {
+      "value": 4.0,
+      "label": "90~94",
+      "n": 2510,
+      "weighted_mean": 794.26,
+      "mean": 794.4,
+      "std": 104.41
+    },
+    {
+      "value": 98.0,
+      "label": "Prefer not to answer",
+      "n": 1152,
+      "weighted_mean": 732.32,
+      "mean": 731.92,
+      "std": 108.76
+    },
+    {
+      "value": 1.0,
+      "label": "Pre 80s",
+      "n": 537,
+      "weighted_mean": 774.38,
+      "mean": 781.79,
+      "std": 108.31
+    },
+    {
+      "value": 6.0,
+      "label": "Post 00s",
+      "n": 252,
+      "weighted_mean": 793.56,
+      "mean": 797.07,
+      "std": 103.65
+    }
+  ],
+  "test": {
+    "method": "ANOVA",
+    "F": 90.265,
+    "p": 1.0265034768245842e-110,
+    "eta2": 0.0517,
+    "kruskal_H": 487.765,
+    "kruskal_p": 3.6306052702423255e-102
+  },
+  "pairwise": [],
+  "conclusion": "95~99 加权均值 811.34，Prefer not to answer 加权均值 732.32，差异 显著（p=1.03e-110，效应量=0.0517）。"
+}

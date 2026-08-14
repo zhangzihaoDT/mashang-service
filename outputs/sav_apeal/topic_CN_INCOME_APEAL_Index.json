@@ -1,0 +1,279 @@
+{
+  "group_by": "CN_INCOME",
+  "group_label": "Monthly household income Buckets",
+  "metric": "APEAL_Index",
+  "n_rows": 9937,
+  "detail": [
+    {
+      "value": 5.0,
+      "label": "Below RMB 10,000",
+      "n": 326,
+      "weighted_mean": 748.07,
+      "mean": 754.01,
+      "std": 111.83
+    },
+    {
+      "value": 98.0,
+      "label": "Prefer not to answer",
+      "n": 207,
+      "weighted_mean": 758.77,
+      "mean": 754.49,
+      "std": 126.51
+    },
+    {
+      "value": 9.0,
+      "label": "RMB 20,000 - 24,999",
+      "n": 2186,
+      "weighted_mean": 794.3,
+      "mean": 795.68,
+      "std": 103.56
+    },
+    {
+      "value": 6.0,
+      "label": "RMB 10,000 - 14,999",
+      "n": 1086,
+      "weighted_mean": 776.68,
+      "mean": 779.42,
+      "std": 98.63
+    },
+    {
+      "value": 8.0,
+      "label": "RMB 15,000 - 19,999",
+      "n": 2324,
+      "weighted_mean": 793.39,
+      "mean": 793.13,
+      "std": 100.34
+    },
+    {
+      "value": 10.0,
+      "label": "RMB 25,000 - 29,999",
+      "n": 1882,
+      "weighted_mean": 783.15,
+      "mean": 787.16,
+      "std": 107.6
+    },
+    {
+      "value": 12.0,
+      "label": "RMB 40,000 and above",
+      "n": 440,
+      "weighted_mean": 795.28,
+      "mean": 801.54,
+      "std": 93.77
+    },
+    {
+      "value": 11.0,
+      "label": "RMB 30,000 - 39,999",
+      "n": 1486,
+      "weighted_mean": 804.38,
+      "mean": 802.78,
+      "std": 97.85
+    }
+  ],
+  "test": {
+    "method": "ANOVA",
+    "F": 16.388,
+    "p": 1.3006750360147512e-21,
+    "eta2": 0.0114,
+    "kruskal_H": 117.89,
+    "kruskal_p": 2.1064732904722125e-22
+  },
+  "pairwise": [
+    {
+      "group1": "10.0",
+      "group2": "11.0",
+      "diff": 15.625,
+      "p_adj": 0.0003,
+      "reject": true
+    },
+    {
+      "group1": "10.0",
+      "group2": "12.0",
+      "diff": 14.388,
+      "p_adj": 0.1393,
+      "reject": false
+    },
+    {
+      "group1": "10.0",
+      "group2": "5.0",
+      "diff": -33.143,
+      "p_adj": 0.0,
+      "reject": true
+    },
+    {
+      "group1": "10.0",
+      "group2": "6.0",
+      "diff": -7.738,
+      "p_adj": 0.4967,
+      "reject": false
+    },
+    {
+      "group1": "10.0",
+      "group2": "8.0",
+      "diff": 5.974,
+      "p_adj": 0.5669,
+      "reject": false
+    },
+    {
+      "group1": "10.0",
+      "group2": "9.0",
+      "diff": 8.521,
+      "p_adj": 0.1417,
+      "reject": false
+    },
+    {
+      "group1": "10.0",
+      "group2": "98.0",
+      "diff": -32.666,
+      "p_adj": 0.0004,
+      "reject": true
+    },
+    {
+      "group1": "11.0",
+      "group2": "12.0",
+      "diff": -1.237,
+      "p_adj": 1.0,
+      "reject": false
+    },
+    {
+      "group1": "11.0",
+      "group2": "5.0",
+      "diff": -48.768,
+      "p_adj": 0.0,
+      "reject": true
+    },
+    {
+      "group1": "11.0",
+      "group2": "6.0",
+      "diff": -23.363,
+      "p_adj": 0.0,
+      "reject": true
+    },
+    {
+      "group1": "11.0",
+      "group2": "8.0",
+      "diff": -9.651,
+      "p_adj": 0.0876,
+      "reject": false
+    },
+    {
+      "group1": "11.0",
+      "group2": "9.0",
+      "diff": -7.104,
+      "p_adj": 0.4421,
+      "reject": false
+    },
+    {
+      "group1": "11.0",
+      "group2": "98.0",
+      "diff": -48.291,
+      "p_adj": 0.0,
+      "reject": true
+    },
+    {
+      "group1": "12.0",
+      "group2": "5.0",
+      "diff": -47.531,
+      "p_adj": 0.0,
+      "reject": true
+    },
+    {
+      "group1": "12.0",
+      "group2": "6.0",
+      "diff": -22.126,
+      "p_adj": 0.0034,
+      "reject": true
+    },
+    {
+      "group1": "12.0",
+      "group2": "8.0",
+      "diff": -8.414,
+      "p_adj": 0.7644,
+      "reject": false
+    },
+    {
+      "group1": "12.0",
+      "group2": "9.0",
+      "diff": -5.868,
+      "p_adj": 0.9582,
+      "reject": false
+    },
+    {
+      "group1": "12.0",
+      "group2": "98.0",
+      "diff": -47.054,
+      "p_adj": 0.0,
+      "reject": true
+    },
+    {
+      "group1": "5.0",
+      "group2": "6.0",
+      "diff": 25.405,
+      "p_adj": 0.0023,
+      "reject": true
+    },
+    {
+      "group1": "5.0",
+      "group2": "8.0",
+      "diff": 39.117,
+      "p_adj": 0.0,
+      "reject": true
+    },
+    {
+      "group1": "5.0",
+      "group2": "9.0",
+      "diff": 41.664,
+      "p_adj": 0.0,
+      "reject": true
+    },
+    {
+      "group1": "5.0",
+      "group2": "98.0",
+      "diff": 0.477,
+      "p_adj": 1.0,
+      "reject": false
+    },
+    {
+      "group1": "6.0",
+      "group2": "8.0",
+      "diff": 13.712,
+      "p_adj": 0.0068,
+      "reject": true
+    },
+    {
+      "group1": "6.0",
+      "group2": "9.0",
+      "diff": 16.259,
+      "p_adj": 0.0005,
+      "reject": true
+    },
+    {
+      "group1": "6.0",
+      "group2": "98.0",
+      "diff": -24.928,
+      "p_adj": 0.0297,
+      "reject": true
+    },
+    {
+      "group1": "8.0",
+      "group2": "9.0",
+      "diff": 2.547,
+      "p_adj": 0.9913,
+      "reject": false
+    },
+    {
+      "group1": "8.0",
+      "group2": "98.0",
+      "diff": -38.64,
+      "p_adj": 0.0,
+      "reject": true
+    },
+    {
+      "group1": "9.0",
+      "group2": "98.0",
+      "diff": -41.186,
+      "p_adj": 0.0,
+      "reject": true
+    }
+  ],
+  "conclusion": "RMB 30,000 - 39,999 加权均值 804.38，Below RMB 10,000 加权均值 748.07，差异 显著（p=1.3e-21，效应量=0.0114）。"
+}
