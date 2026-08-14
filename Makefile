@@ -1,5 +1,5 @@
 PYTHON ?= .venv/bin/python
-.PHONY: eval full-eval core-eval research-eval capability-audit test ci data-dict lock-demo parser-demo followup-demo numeric-eval reference-eval atp-demo backtest-demo clean-outputs dataset-update dataset-validate daily-observation-dry-run daily-observation-sync daily-data-pipeline-dry-run daily-data-pipeline render-official-doc render-official-doc-smoke build-workspace-skills-catalog build-workspace-capability-inventory inventory-status inventory-trend inventory-report
+.PHONY: eval full-eval core-eval research-eval capability-audit test ci data-dict lock-demo parser-demo followup-demo numeric-eval reference-eval atp-demo backtest-demo clean-outputs dataset-update dataset-validate daily-observation-dry-run daily-observation-sync daily-data-pipeline-dry-run daily-data-pipeline render-official-doc render-official-doc-smoke build-workspace-skills-catalog build-workspace-capability-inventory inventory-status inventory-trend inventory-report lock-attribution lock-attribution-compare
 
 ## 生成 Eval 结果（显式产物 unified_eval_result.json）
 ## 用法: make eval [SUITE=default|ci|all|research|core]
@@ -87,6 +87,37 @@ invoice-forecast:
 		--target-month $(or $(TARGET_MONTH),$(shell date +%Y-%m)) \
 		$(if $(LOCK_REGIME),--lock-regime $(LOCK_REGIME)) \
 		$(if $(PRIOR_STRENGTH),--prior-strength $(PRIOR_STRENGTH))
+
+## ─── Lock Attribution ───────────────────────────────────────────
+
+## 锁单归因分析（单样本；默认 2023 全年）
+## 用法: make lock-attribution START=2024-01-01 END=2024-12-31 SERIES=LS6 CHANNEL="新媒体-抖音" HTML=1
+lock-attribution:
+	$(PYTHON) mashang_workspace/research_scripts/lock_attribution_analysis.py \
+		--start-date $(or $(START),2023-01-01) \
+		--end-date $(or $(END),2023-12-31) \
+		$(if $(SERIES),--series $(SERIES)) \
+		$(if $(CHANNEL),--channel "$(CHANNEL)") \
+		$(if $(HTML),--html)
+
+## 锁单归因对比分析（两个任意锁单样本；默认 2024 vs 2026 同期 01-01~08-01）
+## 用法: make lock-attribution-compare START=2024-01-01 END=2024-08-01 START_B=2026-01-01 END_B=2026-08-01 \
+##        LABEL="2024年01-08月" LABEL_B="2026年01-08月" HTML=1 \
+##        [SERIES/SERIES_B/CHANNEL/CHANNEL_B 按样本过滤] [FORMAT=terminal|json]
+lock-attribution-compare:
+	$(PYTHON) mashang_workspace/research_scripts/lock_attribution_analysis.py \
+		--start-date $(or $(START),2024-01-01) \
+		--end-date $(or $(END),2024-08-01) \
+		--compare-start-date $(or $(START_B),2026-01-01) \
+		--compare-end-date $(or $(END_B),2026-08-01) \
+		$(if $(LABEL),--label "$(LABEL)") \
+		$(if $(LABEL_B),--compare-label "$(LABEL_B)") \
+		$(if $(SERIES),--series $(SERIES)) \
+		$(if $(CHANNEL),--channel "$(CHANNEL)") \
+		$(if $(SERIES_B),--compare-series $(SERIES_B)) \
+		$(if $(CHANNEL_B),--compare-channel "$(CHANNEL_B)") \
+		$(if $(HTML),--html) \
+		$(if $(FORMAT),--format $(FORMAT))
 
 ## 库存核心指标查询
 inventory-status:
@@ -273,6 +304,10 @@ help:
 	@echo "=== Forecast ==="
 	@echo "make lock-forecast         锁单月度预估（结构化预测）"
 	@echo "make invoice-forecast      开票月度预估（条件概率模型）"
+	@echo "=== Lock Attribution ==="
+	@echo "make lock-attribution       锁单归因分析（单样本）START/END/SERIES/CHANNEL/HTML"
+	@echo "make lock-attribution-compare  锁单归因对比分析（两样本，差异高亮）START/END/START_B/END_B/LABEL/LABEL_B/HTML"
+	@echo "  示例: make lock-attribution-compare START=2024-01-01 END=2024-08-01 START_B=2026-01-01 END_B=2026-08-01 HTML=1"
 	@echo "=== Auto Launch (独立 service: auto_launch/) ==="
 	@echo "make auto-launch-owned-brand-daily         本品品牌日报（从 facts 生成，报告层）BRAND=im BRAND_NAME=智己"
 	@echo "make auto-launch-owned-brand-daily-dry-run 本品品牌日报（dry-run，同上）"

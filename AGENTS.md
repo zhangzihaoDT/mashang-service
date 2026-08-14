@@ -341,6 +341,8 @@ mashang-service/
 | 同比分析 | `python mashang_workspace/research_scripts/quick_lock_ratio.py` | research |
 | 锁单月度预估 | `make lock-forecast` 或 `python mashang_workspace/research_scripts/structured_business_forecast.py --as-of YYYY-MM-DD --target-month YYYY-MM [--prior-strength N]` | research |
 | 开票月度预估 | `make invoice-forecast` 或 `python mashang_workspace/research_scripts/invoice_monthly_forecast.py --as-of YYYY-MM-DD --target-month YYYY-MM --lock-regime mode` | research |
+| 锁单归因分析 | `make lock-attribution START=2026-01-01 END=2026-08-31 HTML=1`(单样本;可选 `SERIES/CHANNEL`) | make |
+| 锁单归因对比 | `make lock-attribution-compare START=2024-01-01 END=2024-08-01 START_B=2026-01-01 END_B=2026-08-01 HTML=1`(两任意样本对比,差异高亮报告;可选 `LABEL/LABEL_B/SERIES_B/CHANNEL_B`) | make |
 | Auto Launch 搜索 | `python -m auto_launch.cli search --request "看看极氪最近 7 天都有什么动作"` | service |
 | Auto Launch Daily 摄入 | `python -m auto_launch.cli daily --input <file>` | service |
 | Auto Launch 品牌日报 | `python -m auto_launch.cli report --type brand-daily --brand 智己` | service |

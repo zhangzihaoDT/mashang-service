@@ -130,6 +130,9 @@ python mashang_workspace/eval/run_eval.py --suite parser  # 单套件
 | `python runtime_scripts/lock_city_distribution.py` | 城市分布 | runtime |
 | `python research_scripts/release_curve_analysis.py` | 释放曲线 | research |
 | `python research_scripts/cohort_forecast.py` | 预测锁单 | research |
+| `make lock-attribution START=2026-01-01 END=2026-08-31 HTML=1` | 锁单归因分析（单样本；`--series/--channel` 过滤） | make |
+| `make lock-attribution-compare START=2024-01-01 END=2024-08-01 START_B=2026-01-01 END_B=2026-08-01 HTML=1` | 锁单归因**对比**分析（两任意样本，差异高亮报告；`LABEL/LABEL_B` 自定义标签，`SERIES_B/CHANNEL_B` 按样本过滤） | make |
+| `python research_scripts/lock_attribution_analysis.py --start-date … --end-date … --compare-start-date … --compare-end-date … --html` | 锁单归因对比脚本（底层，Result Contract） | research |
 | `python research_scripts/dc_showroom_age_report.py --as-of YYYY-MM-DD --html` | 待销现车库龄/下线距今分布报告（固定库存分析工作流，`--html` 品牌化报告，`--format json` Result Contract） | research |
 | `auto_launch/prompts/` | 竞品上市事件 Prompt 工作流资产 — 已迁移至 `auto_launch/` | prompt asset |
 | `python research_scripts/cpca_weekly_early_signal.py --week 2026-W26` | 乘联分会周度数据早源监控（WEEK=数据归属周） | research |

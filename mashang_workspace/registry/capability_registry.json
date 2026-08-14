@@ -254,6 +254,34 @@
     "notes": "基于 lock_release_curve.py（704 行），交互式 Plotly 报告。"
   },
   {
+    "capability_id": "lock_attribution_analysis",
+    "name": "锁单归因分析 / 对比分析",
+    "tier": "research",
+    "status": "active",
+    "script": "mashang_workspace/research_scripts/lock_attribution_analysis.py",
+    "auto_schedulable": false,
+    "result_contract": true,
+    "numeric_eval_case": null,
+    "contract_gate": true,
+    "followup_supported": false,
+    "docs": [
+      "mashang_workspace/docs/script_tiers.md"
+    ],
+    "promotion": {
+      "current_stage": "research_script",
+      "eligible_for_runtime_productization": false,
+      "eligible_for_runtime_script": true,
+      "blocked_reasons": [
+        "归因口径（观察分类）跨维度重叠，需业务确认口径",
+        "research script; requires manual interpretation"
+      ],
+      "eligible_for_runtime_v2": false,
+      "runtime_v2_candidate": false,
+      "candidate_stage": "not_eligible"
+    },
+    "notes": "锁单来源归因指标（渠道 TopN / 触达行为分类 / 助攻渠道），支持两任意样本对比，差异高亮 HTML 报告。归因计算参考 index_summary.py:_calc_attribution_metrics。"
+  },
+  {
     "capability_id": "data_dictionary",
     "name": "数据字典生成",
     "tier": "utility",
