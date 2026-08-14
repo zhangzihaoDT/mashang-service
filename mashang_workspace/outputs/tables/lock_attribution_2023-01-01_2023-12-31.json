@@ -1,0 +1,170 @@
+{
+  "status": "success",
+  "script": "mashang_workspace/research_scripts/lock_attribution_analysis.py",
+  "command": "python mashang_workspace/research_scripts/lock_attribution_analysis.py --format json",
+  "generated_at": "2026-08-14T09:15:01",
+  "scope": {
+    "data_source": "/Users/zihao_/Documents/github/mashang-service/dataset/lock_attribution_data.parquet",
+    "time_window": {
+      "start_date": "2023-01-01",
+      "end_date": "2023-12-31"
+    },
+    "filters": {
+      "channel": null,
+      "series": null
+    },
+    "metric_definition": "锁单用户数 = COUNTD(user_phone_md5 WHERE lock_time in range)；数据完整度 = 归因锁单用户数 / order_data 去重锁单人数(非试驾车)；平均触达次数 = 首条归因记录 touch_index 均值；平均转化时长 = lock_time - create_time 均值"
+  },
+  "result": {
+    "summary": "2023-01-01 ~ 2023-12-31 锁单用户数: 36487",
+    "metrics": {
+      "锁单用户数": 36487,
+      "数据完整度": "111.6%",
+      "平均触达次数": 1.42,
+      "平均转化时长(天)": 37.32,
+      "锁单用户主要渠道Top5": [
+        {
+          "channel": "自然客流",
+          "locked_users": 14276,
+          "pct": "39.1%"
+        },
+        {
+          "channel": "意向金",
+          "locked_users": 3769,
+          "pct": "10.3%"
+        },
+        {
+          "channel": "Popup（门店）",
+          "locked_users": 2958,
+          "pct": "8.1%"
+        },
+        {
+          "channel": "APP",
+          "locked_users": 1560,
+          "pct": "4.3%"
+        },
+        {
+          "channel": "直接大定",
+          "locked_users": 1387,
+          "pct": "3.8%"
+        },
+        {
+          "channel": "其他",
+          "locked_users": 12537,
+          "pct": "34.4%"
+        }
+      ],
+      "锁单用户分类占比（观察口径）": [
+        {
+          "category": "One-Touch (Decisive)",
+          "users": 26981,
+          "pct": "73.9%"
+        },
+        {
+          "category": "Hesitant (Same Channel, Multiple Touches)",
+          "users": 748,
+          "pct": "2.1%"
+        },
+        {
+          "category": "Cross-Channel (Comparison Shopper)",
+          "users": 8758,
+          "pct": "24.0%"
+        },
+        {
+          "category": "Long Consideration (>14 Days)",
+          "users": 17383,
+          "pct": "47.6%"
+        },
+        {
+          "category": "Long Consideration (>14 Days & <60 Days)",
+          "users": 10688,
+          "pct": "29.3%"
+        },
+        {
+          "category": "Repeat Lockers (Had Prior Locks)",
+          "users": 558,
+          "pct": "1.5%"
+        }
+      ],
+      "跨渠道锁单用户主要助攻渠道Top5": [
+        {
+          "assist_channel": "APP",
+          "assist_touches": 2904,
+          "pct": "21.1%"
+        },
+        {
+          "assist_channel": "心愿单",
+          "assist_touches": 2672,
+          "pct": "19.4%"
+        },
+        {
+          "assist_channel": "自然客流",
+          "assist_touches": 896,
+          "pct": "6.5%"
+        },
+        {
+          "assist_channel": "APP行为激活",
+          "assist_touches": 853,
+          "pct": "6.2%"
+        },
+        {
+          "assist_channel": "战败激活",
+          "assist_touches": 726,
+          "pct": "5.3%"
+        }
+      ]
+    },
+    "dimensions": [
+      {
+        "name": "锁单用户主要渠道Top5",
+        "items": [
+          {
+            "channel": "自然客流",
+            "locked_users": 14276,
+            "pct": "39.1%"
+          },
+          {
+            "channel": "意向金",
+            "locked_users": 3769,
+            "pct": "10.3%"
+          },
+          {
+            "channel": "Popup（门店）",
+            "locked_users": 2958,
+            "pct": "8.1%"
+          },
+          {
+            "channel": "APP",
+            "locked_users": 1560,
+            "pct": "4.3%"
+          },
+          {
+            "channel": "直接大定",
+            "locked_users": 1387,
+            "pct": "3.8%"
+          },
+          {
+            "channel": "其他",
+            "locked_users": 12537,
+            "pct": "34.4%"
+          }
+        ]
+      }
+    ]
+  },
+  "artifacts": {},
+  "followup_context": {
+    "metric": "lock_attribution",
+    "available_dimensions": [
+      "channel",
+      "series",
+      "touch_category"
+    ],
+    "start_date": "2023-01-01",
+    "end_date": "2023-12-31"
+  },
+  "warnings": [
+    "数据完整度 > 100%：归因表锁单用户数多于 order_data 去重锁单人数，说明 lock_attribution_data.parquet 覆盖范围大于 order_data 主表，请按业务口径解释"
+  ],
+  "errors": []
+}
