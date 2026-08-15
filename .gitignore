@@ -6,6 +6,9 @@
 /dataset/
 /daemon/
 
+# NEV-APEAL workspace: raw SAV is a local copy (root /dataset/ is also not committed)
+nev_apeal/data/source.sav
+
 __pycache__/
 *.py[cod]
 *$py.class

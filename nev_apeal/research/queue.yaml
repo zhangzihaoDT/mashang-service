@@ -1,0 +1,38 @@
+research_id: purchase_mission_001
+items:
+  - id: Q001
+    priority: 100
+    question: 差异来自哪些子指数？
+    reason: 决定 Topic 是否存在体验结构，而不是整体平移。
+    action: compare --group YPV_01 --metrics AEXT_Index AINT_Index AFUEL_Index ADRV_Index ASFTY_Index
+    status: open
+  - id: Q002
+    priority: 90
+    question: 控制能源类型后差异是否仍存在？
+    reason: 排除 BEV/PHEV 组合效应。
+    action: robustness
+    status: open
+  - id: Q003
+    priority: 85
+    question: 控制价格、品牌和车型后差异是否仍存在？
+    reason: 排除主要混淆因素。
+    action: control
+    status: open
+  - id: Q004
+    priority: 60
+    question: 城市层级是否调节购买任务关系？
+    reason: secondary segmentation。
+    action: segment --by CITY_TIER_DP --within YPV_01
+    status: open
+  - id: Q005
+    priority: 20
+    question: 性别是否调节购买任务关系？
+    reason: 当前业务价值较低。
+    action: segment --by GENDER --within YPV_01
+    status: open
+stop_conditions:
+  min_core_signals: 1
+  min_supporting_evidence: 2
+  required_confounders: [SUPER_SEGMENT_DP, PRICE, BRAND]
+  max_no_information_rounds: 3
+  terminal_statuses: [ready, rejected, inconclusive, insufficient_coverage]

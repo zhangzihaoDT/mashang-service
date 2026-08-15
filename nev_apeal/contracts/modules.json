@@ -1,0 +1,54 @@
+{
+  "coverage_rule": {
+    "FULL": ">=0.90",
+    "PARTIAL": "0.75-0.89",
+    "LIMITED": "<0.75"
+  },
+  "modules": [
+    {
+      "id": "M1",
+      "name": "车辆属性",
+      "prefixes": [
+        "SCR_"
+      ]
+    },
+    {
+      "id": "M4",
+      "name": "座舱内装",
+      "prefixes": [
+        "AINT_",
+        "ACMFT_"
+      ]
+    },
+    {
+      "id": "M7",
+      "name": "驾驶感受",
+      "prefixes": [
+        "ADRV_",
+        "APERF_"
+      ]
+    },
+    {
+      "id": "M8",
+      "name": "安全感知",
+      "prefixes": [
+        "ASFTY_"
+      ]
+    },
+    {
+      "id": "M10",
+      "name": "补能续航",
+      "prefixes": [
+        "AFUEL_",
+        "ACHAR_"
+      ]
+    },
+    {
+      "id": "M11",
+      "name": "品牌感知",
+      "prefixes": [
+        "ABRAND_"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,6957 @@
+[
+  {
+    "name": "APEAL_WT",
+    "label": "",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {}
+  },
+  {
+    "name": "Region_DP",
+    "label": "Region_DP",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "North",
+      "2.0": "East",
+      "3.0": "South",
+      "4.0": "West"
+    }
+  },
+  {
+    "name": "CITY_TIER_DP",
+    "label": "CITY_TIER_DP",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "Tier 1",
+      "2.0": "Tier 2",
+      "3.0": "Tier 3",
+      "4.0": "Tier 4"
+    }
+  },
+  {
+    "name": "MAKE_DP",
+    "label": "Make of Vehicle",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "11511.0": "Audi",
+      "12515.0": "BAIC BJEV",
+      "13011.0": "BMW",
+      "13511.0": "Buick",
+      "14011.0": "BYD",
+      "15011.0": "CHANGAN",
+      "15012.0": "OSHAN",
+      "15014.0": "DEEPAL",
+      "16012.0": "Haval",
+      "16013.0": "WEY",
+      "16014.0": "ORA",
+      "16015.0": "TANK",
+      "18016.0": "Chery New Energy",
+      "22014.0": "Dongfeng Fengshen",
+      "22018.0": "Dongfeng Nammi",
+      "23011.0": "FAW Besturn",
+      "23012.0": "FAW Hongqi",
+      "28011.0": "Geely",
+      "28016.0": "Lynk & Co",
+      "28017.0": "Geometry",
+      "28018.0": "Galaxy",
+      "40011.0": "Lexus",
+      "42511.0": "Mercedes-Benz",
+      "42513.0": "Denza",
+      "42751.0": "smart",
+      "43751.0": "MG",
+      "44514.0": "Venucia",
+      "47011.0": "Roewe",
+      "54811.0": "Tesla",
+      "56512.0": "FAW Toyota",
+      "57012.0": "FAW-Volkswagen",
+      "57013.0": "SAIC Volkswagen",
+      "57511.0": "Volvo",
+      "58011.0": "Wuling",
+      "58012.0": "Baojun",
+      "63511.0": "GAC Trumpchi",
+      "63521.0": "GAC AION",
+      "68511.0": "NIO",
+      "69211.0": "AVATR",
+      "69512.0": "AITO",
+      "69811.0": "HiPhi",
+      "69911.0": "ZEEKR",
+      "72011.0": "NETA",
+      "76011.0": "IM",
+      "81011.0": "Xpeng",
+      "82011.0": "Li Auto",
+      "85011.0": "Leap Motor",
+      "88011.0": "Voyah"
+    }
+  },
+  {
+    "name": "PREMMAKE_DP",
+    "label": "Make - Premium/Non-Premium",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "Premium",
+      "2.0": "Mass Market"
+    }
+  },
+  {
+    "name": "BODYTYPE_DP",
+    "label": "Vehicle Body Type",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "Sedan",
+      "2.0": "SUV",
+      "3.0": "MPV"
+    }
+  },
+  {
+    "name": "ORIGIN_DP",
+    "label": "Origin - Domestic/International",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "Domestic",
+      "2.0": "International"
+    }
+  },
+  {
+    "name": "ORIGIN_CN_DP",
+    "label": "Origin - Premium/Mass International/Mass Domestic",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "Premium International",
+      "2.0": "Premium Domestic",
+      "3.0": "Mass International",
+      "4.0": "Mass Domestic"
+    }
+  },
+  {
+    "name": "SUB_ORIGIN_DP",
+    "label": "Origin Region",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "Asia",
+      "2.0": "Europe",
+      "3.0": "North America"
+    }
+  },
+  {
+    "name": "SUB_SUB_ORIGIN_DP",
+    "label": "Orign Country",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "China",
+      "2.0": "France",
+      "3.0": "Germany",
+      "4.0": "Italian",
+      "5.0": "Japan",
+      "6.0": "Korea",
+      "7.0": "Sweden",
+      "8.0": "United Kingdom",
+      "9.0": "US"
+    }
+  },
+  {
+    "name": "ORIGIN2_DP",
+    "label": "Domestic Traditional",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "Domestic Traditional Brands",
+      "2.0": "International Brands",
+      "3.0": "Domestic Startup Brands"
+    }
+  },
+  {
+    "name": "ORIGIN3_DP",
+    "label": "OEM TYPE",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "Domestic Traditional Brands",
+      "2.0": "International Brands",
+      "3.0": "Domestic Startup Brands",
+      "4.0": "Domestic Affiliated Brands"
+    }
+  },
+  {
+    "name": "PREMMODEL_DP",
+    "label": "Model - Premium/Non-Premium",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "Premium",
+      "2.0": "Mass Market"
+    }
+  },
+  {
+    "name": "SUPER_SEGMENT_DP",
+    "label": "Super Segment - BEV/PHEV",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "BEV",
+      "2.0": "PHEV"
+    }
+  },
+  {
+    "name": "SEGMENT_DP",
+    "label": "Segment",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "Small BEV",
+      "2.0": "Compact BEV",
+      "4.0": "Midsize/Large BEV SUV",
+      "7.0": "Mass Market PHEV",
+      "11.0": "Small BEV Car",
+      "12.0": "Small BEV SUV",
+      "13.0": "Compact BEV Car",
+      "14.0": "Compact BEV SUV",
+      "15.0": "Midsize BEV Car",
+      "16.0": "Midsize BEV SUV",
+      "17.0": "Large BEV",
+      "18.0": "Premium BEV",
+      "19.0": "Premium PHEV",
+      "20.0": "Mass Market PHEV Car",
+      "21.0": "Mass Market PHEV SUV",
+      "22.0": "Mass Market PHEV MPV",
+      "23.0": "Mass Market BEV MPV"
+    }
+  },
+  {
+    "name": "SCR_BODYTYPE",
+    "label": "Vehicle Body Type",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "Convertible",
+      "2.0": "2-door coupe",
+      "3.0": "2-door SUV",
+      "4.0": "4-door SUV",
+      "5.0": "2-door hatchback",
+      "6.0": "4-door hatchback",
+      "7.0": "2-door pickup",
+      "8.0": "4-door pickup",
+      "9.0": "4-door sedan",
+      "10.0": "Van/MPV",
+      "11.0": "Wagon"
+    }
+  },
+  {
+    "name": "SCR_CONVERTIBLE",
+    "label": "Convertible",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_TWO_SEATER",
+    "label": "Two-Seater",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SLIDING_DOOR",
+    "label": "Sliding Door(s)",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_REAR_DOOR",
+    "label": "Rear Door(s)",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_THIRD_ROW",
+    "label": "Third Row Seat(s)",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_DRIVESIDE",
+    "label": "Driveside",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "Left-hand drive",
+      "2.0": "Right-hand drive"
+    }
+  },
+  {
+    "name": "SCR_G_7",
+    "label": "Drive Type",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "2WD",
+      "2.0": "4WD",
+      "99.0": "Don't know"
+    }
+  },
+  {
+    "name": "SCR_G_6",
+    "label": "Turbocharging System",
+    "dtype": "float64",
+    "missing_rate": 0.6794807285901178,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_FUEL_TYPE",
+    "label": "Fuel Type",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "Gasoline",
+      "2.0": "Diesel",
+      "3.0": "Flex Fuel",
+      "4.0": "Hybrid",
+      "5.0": "Plug-in Hybrid/Range Extender",
+      "6.0": "All Electric",
+      "7.0": "Fuel Cell"
+    }
+  },
+  {
+    "name": "SCR_G_5",
+    "label": "Vehicle Displacement",
+    "dtype": "float64",
+    "missing_rate": 0.6794807285901178,
+    "value_labels": {
+      "1.0": "0.66L (Mini-car)",
+      "2.0": "0.9L",
+      "3.0": "1.0L",
+      "4.0": "1.2L",
+      "5.0": "1.3L",
+      "6.0": "1.4L",
+      "7.0": "1.5L",
+      "8.0": "1.6L",
+      "9.0": "1.8L",
+      "10.0": "2.0L",
+      "11.0": "2.2L",
+      "12.0": "2.3L",
+      "13.0": "2.4L",
+      "14.0": "2.5L",
+      "15.0": "2.7L",
+      "16.0": "3.0L",
+      "17.0": "3.2L",
+      "18.0": "3.3L",
+      "19.0": "3.5L",
+      "20.0": "3.6L",
+      "21.0": "4.0L",
+      "22.0": "4.2L",
+      "23.0": "4.4L",
+      "24.0": "4.7L",
+      "25.0": "5.5L",
+      "26.0": "6.2L",
+      "28.0": "2.1L",
+      "29.0": "2.8L",
+      "30.0": "3.8L",
+      "31.0": "4.6L",
+      "32.0": "5.0L",
+      "33.0": "5.2L",
+      "34.0": "5.7L",
+      "35.0": "6.0L",
+      "36.0": "6.3L",
+      "40.0": "2.9L",
+      "45.0": "6.6L",
+      "97.0": "Other",
+      "99.0": "Don't know"
+    }
+  },
+  {
+    "name": "SCR_G_3",
+    "label": "Transmission Type",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "Manual",
+      "2.0": "Automatic"
+    }
+  },
+  {
+    "name": "SCR_G_4",
+    "label": "Automatic Transmission Type",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "Traditional Automatic",
+      "2.0": "Continuously Variable Transmission (CVT)",
+      "3.0": "Dual Clutch Transmission (DCT)",
+      "97.0": "Other",
+      "99.0": "Don't know"
+    }
+  },
+  {
+    "name": "SCR_G_1",
+    "label": "Vehicle Exterior Color",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "White",
+      "2.0": "Grey",
+      "3.0": "Black",
+      "4.0": "Silver",
+      "5.0": "Blue",
+      "6.0": "Red",
+      "97.0": "Other"
+    }
+  },
+  {
+    "name": "SCR_G_2_R1",
+    "label": "Black",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_G_2_R2",
+    "label": "Grey",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_G_2_R3",
+    "label": "Beige/Tan",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_G_2_R4",
+    "label": "Brown",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_G_2_R97",
+    "label": "Other",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_USE_TYPE",
+    "label": "Commercial or Private Use",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "Only personal use",
+      "2.0": "Personal and commercial use (dual)"
+    }
+  },
+  {
+    "name": "SCR_COMMERCIAL_USE",
+    "label": "Proportion of commercial use",
+    "dtype": "float64",
+    "missing_rate": 0.9952702022743283,
+    "value_labels": {}
+  },
+  {
+    "name": "SCR_BAT000_01",
+    "label": "Battery Capacity",
+    "dtype": "float64",
+    "missing_rate": 0.38150347187279865,
+    "value_labels": {}
+  },
+  {
+    "name": "SCR_DEL_Y",
+    "label": "Delivery Date-Year",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "2021.0": "2021",
+      "2022.0": "2022",
+      "2023.0": "2023",
+      "2024.0": "2024",
+      "2025.0": "2025",
+      "2026.0": "2026"
+    }
+  },
+  {
+    "name": "SCR_DEL_M",
+    "label": "Delivery Date-Month",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "January",
+      "2.0": "February",
+      "3.0": "March",
+      "4.0": "April",
+      "5.0": "May",
+      "6.0": "June",
+      "7.0": "July",
+      "8.0": "August",
+      "9.0": "September",
+      "10.0": "October",
+      "11.0": "November",
+      "12.0": "December"
+    }
+  },
+  {
+    "name": "SCR_FCD00_01",
+    "label": "Head-up display",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes",
+      "99.0": "Don't know"
+    }
+  },
+  {
+    "name": "SCR_FCD00_02",
+    "label": "Smartphone app installed",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes",
+      "99.0": "Don't know"
+    }
+  },
+  {
+    "name": "SCR_DRA00_01",
+    "label": "Adaptive cruise control",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes",
+      "99.0": "Don't know"
+    }
+  },
+  {
+    "name": "SCR_DRA00_02",
+    "label": "Cruise control",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes",
+      "99.0": "Don't know"
+    }
+  },
+  {
+    "name": "SCR_DRA00_03",
+    "label": "Forward collision warning",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes",
+      "99.0": "Don't know"
+    }
+  },
+  {
+    "name": "SCR_DRA00_04",
+    "label": "Automatic emergency braking",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes",
+      "99.0": "Don't know"
+    }
+  },
+  {
+    "name": "SCR_DRA00_05",
+    "label": "Parking cameras",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes",
+      "99.0": "Don't know"
+    }
+  },
+  {
+    "name": "SCR_DRA00_06",
+    "label": "Parking sensors",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes",
+      "99.0": "Don't know"
+    }
+  },
+  {
+    "name": "SCR_DRA00_07",
+    "label": "Active parking assistance",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes",
+      "99.0": "Don't know"
+    }
+  },
+  {
+    "name": "SCR_DRA00_08",
+    "label": "Blind spot warning",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes",
+      "99.0": "Don't know"
+    }
+  },
+  {
+    "name": "SCR_DRA00_09",
+    "label": "Lane departure warning",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes",
+      "99.0": "Don't know"
+    }
+  },
+  {
+    "name": "SCR_DRA00_10",
+    "label": "Lane keeping assistance",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes",
+      "99.0": "Don't know"
+    }
+  },
+  {
+    "name": "SCR_INFO00_01",
+    "label": "Built-in rear seat entertainment system",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes",
+      "99.0": "Don't know"
+    }
+  },
+  {
+    "name": "SCR_INFO00_02",
+    "label": "Built-in navigation system",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes",
+      "99.0": "Don't know"
+    }
+  },
+  {
+    "name": "SCR_INFO00_03",
+    "label": "Built-in Wi-Fi",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes",
+      "99.0": "Don't know"
+    }
+  },
+  {
+    "name": "SCR_INFO00_04",
+    "label": "Smartphone mirroring system",
+    "dtype": "float64",
+    "missing_rate": 0.7017208413001912,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes",
+      "99.0": "Don't know"
+    }
+  },
+  {
+    "name": "SCR_INFO00_04_01_R1",
+    "label": "Apple CarPlay",
+    "dtype": "float64",
+    "missing_rate": 0.8174499345879038,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_INFO00_04_01_R2",
+    "label": "HUAWEI HiCar",
+    "dtype": "float64",
+    "missing_rate": 0.8174499345879038,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_INFO00_04_01_R3",
+    "label": "Vivo Jovi InCar",
+    "dtype": "float64",
+    "missing_rate": 0.8174499345879038,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_INFO00_04_01_R4",
+    "label": "Carlife",
+    "dtype": "float64",
+    "missing_rate": 0.8174499345879038,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_INFO00_04_01_R97",
+    "label": "Others",
+    "dtype": "float64",
+    "missing_rate": 0.8174499345879038,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_INFO00_07",
+    "label": "Built-in Voice Recognition",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes",
+      "99.0": "Don't know"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_01_R1",
+    "label": "Sliding Adjustment: Driver seat - Manually operated",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_01_R2",
+    "label": "Sliding Adjustment: Driver seat - Power operated",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_01_R3",
+    "label": "Sliding Adjustment: Driver seat - Don't know",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_01_R4",
+    "label": "Sliding Adjustment: Front passenger seat - Manually operated",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_01_R5",
+    "label": "Sliding Adjustment: Front passenger seat - Power operated",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_01_R6",
+    "label": "Sliding Adjustment: Front passenger seat - Don't know",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_01_R7",
+    "label": "Sliding Adjustment: Rear (2nd row) seats - Manually operated",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_01_R8",
+    "label": "Sliding Adjustment: Rear (2nd row) seats - Power operated",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_01_R9",
+    "label": "Sliding Adjustment: Rear (2nd row) seats - No adjustment",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_01_R10",
+    "label": "Sliding Adjustment: Rear (2nd row) seats - Don't know",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_01_R11",
+    "label": "Sliding Adjustment: Third row seats - Manually operated",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_01_R12",
+    "label": "Sliding Adjustment: Third row seats - Power operated",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_01_R13",
+    "label": "Sliding Adjustment: Third row seats - No adjustment",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_01_R14",
+    "label": "Sliding Adjustment: Third row seats - Don't know",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_02_R1",
+    "label": "Reclining Adjustment: Driver seat - Manually operated",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_02_R2",
+    "label": "Reclining Adjustment: Driver seat - Power operated",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_02_R3",
+    "label": "Reclining Adjustment: Driver seat - Don't know",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_02_R4",
+    "label": "Reclining Adjustment: Front passenger seat - Manually operated",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_02_R5",
+    "label": "Reclining Adjustment: Front passenger seat - Power operated",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_02_R6",
+    "label": "Reclining Adjustment: Front passenger seat - Don't know",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_02_R7",
+    "label": "Reclining Adjustment: Rear (2nd row) seats - Manually operated",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_02_R8",
+    "label": "Reclining Adjustment: Rear (2nd row) seats - Power operated",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_02_R9",
+    "label": "Reclining Adjustment: Rear (2nd row) seats - No adjustment",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_02_R10",
+    "label": "Reclining Adjustment: Rear (2nd row) seats - Don't know",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_02_R11",
+    "label": "Reclining Adjustment: Third row seats - Manually operated",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_02_R12",
+    "label": "Reclining Adjustment: Third row seats - Power operated",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_02_R13",
+    "label": "Reclining Adjustment: Third row seats - No adjustment",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_02_R14",
+    "label": "Reclining Adjustment: Third row seats - Don't know",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_03_R1",
+    "label": "Height Adjustment: Driver seat - Manually operated",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_03_R2",
+    "label": "Height Adjustment: Driver seat - Power operated",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_03_R3",
+    "label": "Height Adjustment: Driver seat - No adjustment",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_03_R4",
+    "label": "Height Adjustment: Driver seat - Don't know",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_03_R5",
+    "label": "Height Adjustment: Front passenger seat - Manually operated",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_03_R6",
+    "label": "Height Adjustment: Front passenger seat - Power operated",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_03_R7",
+    "label": "Height Adjustment: Front passenger seat - No adjustment",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_03_R8",
+    "label": "Height Adjustment: Front passenger seat - Don't know",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_04A_R1",
+    "label": "Heated seat - Driver seat",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_04A_R2",
+    "label": "Heated seat - Front passenger seat",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_04A_R3",
+    "label": "Heated seat - Rear (2nd row) seats",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_04A_R4",
+    "label": "Heated seat - Third row seats",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_04A_R5",
+    "label": "Heated seat - Do not have feature at all",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_04A_R6",
+    "label": "Heated seat - Don't know",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_04B_R1",
+    "label": "Ventilated/cooled seat - Driver seat",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_04B_R2",
+    "label": "Ventilated/cooled seat - Front passenger seat",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_04B_R3",
+    "label": "Ventilated/cooled seat - Rear (2nd row) seats",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_04B_R4",
+    "label": "Ventilated/cooled seat - Third row seats",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_04B_R5",
+    "label": "Ventilated/cooled seat - Do not have feature at all",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_04B_R6",
+    "label": "Ventilated/cooled seat - Don't know",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_04C_R1",
+    "label": "Memory seat - Driver seat",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_04C_R2",
+    "label": "Memory seat - Front passenger seat",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_04C_R3",
+    "label": "Memory seat - Rear (2nd row) seats",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_04C_R4",
+    "label": "Memory seat - Third row seats",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_04C_R5",
+    "label": "Memory seat - Do not have feature at all",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_04C_R6",
+    "label": "Memory seat - Don't know",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_04D_R1",
+    "label": "Massaging seat - Driver seat",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_04D_R2",
+    "label": "Massaging seat - Front passenger seat",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_04D_R3",
+    "label": "Massaging seat - Rear (2nd row) seats",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_04D_R4",
+    "label": "Massaging seat - Third row seats",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_04D_R5",
+    "label": "Massaging seat - Do not have feature at all",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_SEAT00_04D_R6",
+    "label": "Massaging seat - Don't know",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "CLMT_SCR00_01",
+    "label": "Air Conditioning",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes",
+      "99.0": "Don't know"
+    }
+  },
+  {
+    "name": "SCR_INFO00_05",
+    "label": "Frequency of use: Built-in navigation system",
+    "dtype": "float64",
+    "missing_rate": 0.1807386535171581,
+    "value_labels": {
+      "1.0": "I have never tried to use this",
+      "2.0": "I tried using this, but no longer use it",
+      "3.0": "Less than half of the time I drive",
+      "4.0": "More than half of the time I drive",
+      "5.0": "I use this every time I drive"
+    }
+  },
+  {
+    "name": "SCR_INFO00_06B",
+    "label": "Frequency of Use: Apple CarPlay",
+    "dtype": "float64",
+    "missing_rate": 0.9362986816946764,
+    "value_labels": {
+      "1.0": "I have never tried to use this",
+      "2.0": "I tried using this, but no longer use it",
+      "3.0": "Less than half of the time I drive",
+      "4.0": "More than half of the time I drive",
+      "5.0": "I use this every time I drive"
+    }
+  },
+  {
+    "name": "SCR_INFO00_06G",
+    "label": "Frequency of Use: HUAWEI HiCar",
+    "dtype": "float64",
+    "missing_rate": 0.949280466941733,
+    "value_labels": {
+      "1.0": "I have never tried to use this",
+      "2.0": "I tried using this, but no longer use it",
+      "3.0": "Less than half of the time I drive",
+      "4.0": "More than half of the time I drive",
+      "5.0": "I use this every time I drive"
+    }
+  },
+  {
+    "name": "SCR_INFO00_06H",
+    "label": "Frequency of Use: Vivo Jovi InCar",
+    "dtype": "float64",
+    "missing_rate": 0.9727281875817652,
+    "value_labels": {
+      "1.0": "I have never tried to use this",
+      "2.0": "I tried using this, but no longer use it",
+      "3.0": "Less than half of the time I drive",
+      "4.0": "More than half of the time I drive",
+      "5.0": "I use this every time I drive"
+    }
+  },
+  {
+    "name": "SCR_INFO00_06E",
+    "label": "Frequency of Use: Carlife",
+    "dtype": "float64",
+    "missing_rate": 0.9292543021032504,
+    "value_labels": {
+      "1.0": "I have never tried to use this",
+      "2.0": "I tried using this, but no longer use it",
+      "3.0": "Less than half of the time I drive",
+      "4.0": "More than half of the time I drive",
+      "5.0": "I use this every time I drive"
+    }
+  },
+  {
+    "name": "SCR_INFO00_06F",
+    "label": "Frequency of Use: Other smartphone mirroring system",
+    "dtype": "float64",
+    "missing_rate": 0.9997987320116736,
+    "value_labels": {
+      "1.0": "I have never tried to use this",
+      "2.0": "I tried using this, but no longer use it",
+      "3.0": "Less than half of the time I drive",
+      "4.0": "More than half of the time I drive",
+      "5.0": "I use this every time I drive"
+    }
+  },
+  {
+    "name": "NEV_01",
+    "label": "NEV_01: Frequency of Normal Charging",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "Everyday",
+      "2.0": "Twice a week or more",
+      "3.0": "Once a week",
+      "4.0": "2-3 times per month",
+      "5.0": "Once a month or less",
+      "99.0": "Never used normal charging"
+    }
+  },
+  {
+    "name": "NEV_02_R1",
+    "label": "Using wire connected to sockets on the wall",
+    "dtype": "float64",
+    "missing_rate": 0.11603099527020228,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "NEV_02_R2",
+    "label": "Using charging station",
+    "dtype": "float64",
+    "missing_rate": 0.11603099527020228,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "NEV_02_R3",
+    "label": "Using charging wallbox",
+    "dtype": "float64",
+    "missing_rate": 0.11603099527020228,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "NEV_03_R1",
+    "label": "NEV_03: Most often Used Normal Charging Equipment_Charge station",
+    "dtype": "float64",
+    "missing_rate": 0.11603099527020228,
+    "value_labels": {
+      "1.0": "OEM's original equipment",
+      "2.0": "Self-purchased or public equipment",
+      "99.0": "Don't know"
+    }
+  },
+  {
+    "name": "NEV_03_R2",
+    "label": "NEV_03: Most often Used Normal Charging Equipment_Charge cable",
+    "dtype": "float64",
+    "missing_rate": 0.11603099527020228,
+    "value_labels": {
+      "1.0": "OEM's original equipment",
+      "2.0": "Self-purchased or public equipment",
+      "99.0": "Don't know"
+    }
+  },
+  {
+    "name": "NEV_03_R3",
+    "label": "NEV_03: Most often Used Normal Charging Equipment_Adaptor",
+    "dtype": "float64",
+    "missing_rate": 0.11603099527020228,
+    "value_labels": {
+      "1.0": "OEM's original equipment",
+      "2.0": "Self-purchased or public equipment",
+      "99.0": "Don't know"
+    }
+  },
+  {
+    "name": "NEV_04_R1",
+    "label": "At home",
+    "dtype": "float64",
+    "missing_rate": 0.11603099527020228,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "NEV_04_R2",
+    "label": "At work",
+    "dtype": "float64",
+    "missing_rate": 0.11603099527020228,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "NEV_04_R3",
+    "label": "Public parking lots (e.g. in malls/hotels)",
+    "dtype": "float64",
+    "missing_rate": 0.11603099527020228,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "NEV_04_R4",
+    "label": "Charging ports by the road or in gas station",
+    "dtype": "float64",
+    "missing_rate": 0.11603099527020228,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "NEV_04_R97",
+    "label": "Others",
+    "dtype": "float64",
+    "missing_rate": 0.11603099527020228,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "NEV_05_R1",
+    "label": "Yes, at home",
+    "dtype": "float64",
+    "missing_rate": 0.11603099527020228,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "NEV_05_R2",
+    "label": "Yes, at work",
+    "dtype": "float64",
+    "missing_rate": 0.11603099527020228,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "NEV_05_R3",
+    "label": "Yes, in public parking lots",
+    "dtype": "float64",
+    "missing_rate": 0.11603099527020228,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "NEV_05_R99",
+    "label": "No",
+    "dtype": "float64",
+    "missing_rate": 0.11603099527020228,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "NEV_06_R1",
+    "label": "Wallbox",
+    "dtype": "float64",
+    "missing_rate": 0.3956928650498138,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "NEV_06_R2",
+    "label": "Charging port",
+    "dtype": "float64",
+    "missing_rate": 0.3956928650498138,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "NEV_06_R3",
+    "label": "Using wire connected to sockets on the wall",
+    "dtype": "float64",
+    "missing_rate": 0.3956928650498138,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "NEV_06_R97",
+    "label": "Others",
+    "dtype": "float64",
+    "missing_rate": 0.3956928650498138,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "NEV_07",
+    "label": "NEV_07: Do you share this parking space with others",
+    "dtype": "float64",
+    "missing_rate": 0.3956928650498138,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes",
+      "99.0": "Don't know"
+    }
+  },
+  {
+    "name": "NEV_08",
+    "label": "NEV_08: Frequency of Fast Charging",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "Everyday",
+      "2.0": "Twice a week or more",
+      "3.0": "Once a week",
+      "4.0": "2-3 times per month",
+      "5.0": "Once a month or less",
+      "99.0": "Never used fast charging"
+    }
+  },
+  {
+    "name": "NEV_09_R1",
+    "label": "At home",
+    "dtype": "float64",
+    "missing_rate": 0.149844017309047,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "NEV_09_R2",
+    "label": "At work",
+    "dtype": "float64",
+    "missing_rate": 0.149844017309047,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "NEV_09_R3",
+    "label": "Public parking lots (e.g. in malls/hotels)",
+    "dtype": "float64",
+    "missing_rate": 0.149844017309047,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "NEV_09_R4",
+    "label": "Charging ports by the road or in gas station",
+    "dtype": "float64",
+    "missing_rate": 0.149844017309047,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "NEV_09_R97",
+    "label": "Others",
+    "dtype": "float64",
+    "missing_rate": 0.149844017309047,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_BAT000_02_R1",
+    "label": "State Grid Corporation",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_BAT000_02_R2",
+    "label": "TELD",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_BAT000_02_R3",
+    "label": "ATCPOWER",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_BAT000_02_R4",
+    "label": "EVPOWER",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_BAT000_02_R5",
+    "label": "XJ",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_BAT000_02_R6",
+    "label": "Potevio",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_BAT000_02_R7",
+    "label": "NARI",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_BAT000_02_R8",
+    "label": "TITANS",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_BAT000_02_R9",
+    "label": "Star Charge",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_BAT000_02_R97",
+    "label": "Other",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SCR_BAT000_02_R99",
+    "label": "Don't know",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "NEV_11A",
+    "label": "NEV_11: Usage Frequency - Commuting to work/school",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "Never/less than once a month",
+      "2.0": "Once a month",
+      "3.0": "2-3 times per month",
+      "4.0": "Once a week",
+      "5.0": "Multiple times per week",
+      "6.0": "Daily"
+    }
+  },
+  {
+    "name": "NEV_11B",
+    "label": "NEV_11: Usage Frequency - Business/work-related uses (non-commuting)",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "Never/less than once a month",
+      "2.0": "Once a month",
+      "3.0": "2-3 times per month",
+      "4.0": "Once a week",
+      "5.0": "Multiple times per week",
+      "6.0": "Daily"
+    }
+  },
+  {
+    "name": "NEV_11C",
+    "label": "NEV_11: Usage Frequency - Personal/family uses (e.g., shopping, errands, visiting friends)",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "Never/less than once a month",
+      "2.0": "Once a month",
+      "3.0": "2-3 times per month",
+      "4.0": "Once a week",
+      "5.0": "Multiple times per week",
+      "6.0": "Daily"
+    }
+  },
+  {
+    "name": "NEV_11D",
+    "label": "NEV_11: Usage Frequency - Outdoor activities (e.g., camping, biking, skiing, hunting)",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "Never/less than once a month",
+      "2.0": "Once a month",
+      "3.0": "2-3 times per month",
+      "4.0": "Once a week",
+      "5.0": "Multiple times per week",
+      "6.0": "Daily"
+    }
+  },
+  {
+    "name": "NEV_11E",
+    "label": "NEV_11: Usage Frequency - Off-road uses",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "Never/less than once a month",
+      "2.0": "Once a month",
+      "3.0": "2-3 times per month",
+      "4.0": "Once a week",
+      "5.0": "Multiple times per week",
+      "6.0": "Daily"
+    }
+  },
+  {
+    "name": "NEV_11F",
+    "label": "NEV_11: Usage Frequency - Towing",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "Never/less than once a month",
+      "2.0": "Once a month",
+      "3.0": "2-3 times per month",
+      "4.0": "Once a week",
+      "5.0": "Multiple times per week",
+      "6.0": "Daily"
+    }
+  },
+  {
+    "name": "NEV_11G",
+    "label": "NEV_11: Usage Frequency - Driving for fun",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "Never/less than once a month",
+      "2.0": "Once a month",
+      "3.0": "2-3 times per month",
+      "4.0": "Once a week",
+      "5.0": "Multiple times per week",
+      "6.0": "Daily"
+    }
+  },
+  {
+    "name": "NEV_13a",
+    "label": "NEV_13a: Average Driving Hours per day",
+    "dtype": "float64",
+    "missing_rate": 0.15296367112810708,
+    "value_labels": {}
+  },
+  {
+    "name": "NEV_14",
+    "label": "NEV_14: Expectation of Electric Driving Range",
+    "dtype": "float64",
+    "missing_rate": 0.10979168763208212,
+    "value_labels": {}
+  },
+  {
+    "name": "NEV_15",
+    "label": "NEV_15: Expectation of Normal Charging Time (Hours)",
+    "dtype": "float64",
+    "missing_rate": 0.13947871591023447,
+    "value_labels": {}
+  },
+  {
+    "name": "NEV_16",
+    "label": "NEV_16: Expectation of Fast Charging Time (Minutes)",
+    "dtype": "float64",
+    "missing_rate": 0.12830834255811613,
+    "value_labels": {}
+  },
+  {
+    "name": "APEAL_Index",
+    "label": "APEAL Index",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {}
+  },
+  {
+    "name": "AEXT_Index",
+    "label": "Exterior Index",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {}
+  },
+  {
+    "name": "ASET_Index",
+    "label": "Setting Up and Starting Index",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {}
+  },
+  {
+    "name": "AENT_Index",
+    "label": "Getting In and Out Index",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {}
+  },
+  {
+    "name": "AINT_Index",
+    "label": "Interior Index",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {}
+  },
+  {
+    "name": "APERF_Index",
+    "label": "Performance Index",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {}
+  },
+  {
+    "name": "ADRV_Index",
+    "label": "Driving Feel index",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {}
+  },
+  {
+    "name": "ASFTY_Index",
+    "label": "Keeping You Safe index",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {}
+  },
+  {
+    "name": "AINFO_Index",
+    "label": "Infotainment Index",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {}
+  },
+  {
+    "name": "ACMFT_Index",
+    "label": "Driving Comfort Index",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {}
+  },
+  {
+    "name": "AFUEL_Index",
+    "label": "Fuel Economy Index",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {}
+  },
+  {
+    "name": "ACHAR_index",
+    "label": "Charging Experience Index",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {}
+  },
+  {
+    "name": "AEXT_R_01",
+    "label": "AEXT01: Exterior styling of your vehicle",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "ASET_R_01",
+    "label": "ASET01: Operating vehicle remotely using a phone/watch/smart home device",
+    "dtype": "float64",
+    "missing_rate": 0.3937808191607125,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "ASET_R_02",
+    "label": "ASET02: How your vehicle makes you feel when you start it up",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "ASET_R_03",
+    "label": "ASET03: Experience of getting your vehicle set up just the way you want",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "ASET_R_04",
+    "label": "ASET04: Overall experience of setting up and starting your vehicle",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "AENT_R_01",
+    "label": "AENT01: Ease of loading and unloading your vehicle",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "AENT_R_02",
+    "label": "AENT02: Ease of getting in/out of the front seats",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "AENT_R_03",
+    "label": "AENT03: Ease of getting in/out of the [rear/second row] seats",
+    "dtype": "float64",
+    "missing_rate": 0.0023145818657542517,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "AENT_R_04",
+    "label": "AENT04: Ease of getting in/out of the third row seats",
+    "dtype": "float64",
+    "missing_rate": 0.8931266981986515,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "AENT_R_05",
+    "label": "AENT05: Sound the doors make when you close them",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "AENT_R_06",
+    "label": "AENT06: Overall experience of getting yourself and your passengers in and out of the vehicle",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "AINT_R_01",
+    "label": "AINT01: Vehicle's ability to carry everything you want",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "AINT_R_02",
+    "label": "AINT02: Vehicle's ability to hold personal items exactly where you want them",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "AINT_R_03",
+    "label": "AINT03: Interior styling of your vehicle",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "AINT_R_04",
+    "label": "AINT04: Quality of the materials used inside your vehicle",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "AINT_R_05",
+    "label": "AINT05: Attractiveness of your vehicle's screens and displays",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "AINT_R_06",
+    "label": "AINT06: Overall feelings about the interior of your vehicle",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "APERF_R_01",
+    "label": "APERF01: Smoothness of your vehicle's engine/motor",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "APERF_R_02",
+    "label": "APERF02: Power of your vehicle's engine/motor",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "APERF_R_03",
+    "label": "APERF03: Sound of your vehicle's engine/motor",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "APERF_R_04",
+    "label": "APERF04: Vehicle's engine/motor overall",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "ADRV_R_01",
+    "label": "ADRV01: Comfort of your vehicle's ride",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "ADRV_R_02",
+    "label": "ADRV02: How well your vehicle steers/handles in normal conditions",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "ADRV_R_03",
+    "label": "ADRV03: How well your vehicle steers/handles in slippery conditions",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "ADRV_R_04",
+    "label": "ADRV04: Performance of your vehicle's brakes (including stopping power, smoothness)",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "ADRV_R_05",
+    "label": "ADRV05: Overall driving feel of your vehicle",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "ASFTY_R_01",
+    "label": "ASFTY01: How easy it is to safely maneuver your vehicle in and out of traffic and tight parking spaces",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "ASFTY_R_02",
+    "label": "ASFTY02: How well you feel your vehicle would protect you in an accident",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "ASFTY_R_03",
+    "label": "ASFTY03: Experience of using your vehicle's driver assistance systems",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "ASFTY_R_04",
+    "label": "ASFTY04: Experience of using your vehicle's safety systems",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "ASFTY_R_05",
+    "label": "ASFTY05: Effectiveness of your vehicle's headlights",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "ASFTY_R_06",
+    "label": "ASFTY06: Overall how safe your vehicle makes you feel",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "AINFO_R_01",
+    "label": "AINFO01: Experience of playing audio in your vehicle",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "AINFO_R_02",
+    "label": "AINFO02: Experience of making and receiving phone calls in your vehicle",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "AINFO_R_03",
+    "label": "AINFO03: Experience of using voice assistance in your vehicle",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "AINFO_R_04",
+    "label": "AINFO04: Experience of using navigation in your vehicle",
+    "dtype": "float64",
+    "missing_rate": 0.21968400925832746,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "AINFO_R_05",
+    "label": "AINFO05: Sound quality of your vehicle's audio system",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "AINFO_R_06",
+    "label": "AINFO06: Usefulness of all other functions of the infotainment system",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "AINFO_R_07",
+    "label": "AINFO07: Overall infotainment experience in your vehicle",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "ACMFT_R_01",
+    "label": "ACMFT01: Comfort of the driver's seat",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "ACMFT_R_02",
+    "label": "ACMFT02: Comfort of the rear seats",
+    "dtype": "float64",
+    "missing_rate": 0.0023145818657542517,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "ACMFT_R_03",
+    "label": "ACMFT03: Quietness of your vehicle's cabin while driving",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "ACMFT_R_04",
+    "label": "ACMFT04: How well your vehicle's interior stays at the desired temperature",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "ACMFT_R_05",
+    "label": "ACMFT05: Overall how comfortable your vehicle is to be in",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "AFUEL_R_01",
+    "label": "AFUEL01: Overall fuel economy and driving range of your vehicle/driving range and speed of charging your vehicle",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "ACHAR_R_01",
+    "label": "ACHAR01: Charging inlet design (position and ease of use)",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "ACHAR_R_02",
+    "label": "ACHAR02: Length of the charging cable",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "ACHAR_R_03",
+    "label": "ACHAR03: Charging facility designing (position and ease of use of charging ports or wallbox)",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "ACHAR_R_04",
+    "label": "ACHAR04: Fast charging speed",
+    "dtype": "float64",
+    "missing_rate": 0.024051524605011573,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "ACHAR_R_05",
+    "label": "ACHAR05: Normal charging speed",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "ACHAR_R_06",
+    "label": "ACHAR06: Convenience of charging (convenience to find charging facilities when needed)",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "ACHAR_R_07",
+    "label": "ACHAR07: Ease of reading charging status",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "ACHAR_R_08",
+    "label": "ACHAR08: Storing and taking out of your vehicle's charging cable",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "ACHAR_R_09",
+    "label": "ACHAR09: Overall, the experience of charging your vehicle",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "AEXT_D_01",
+    "label": "Exterior: Most Improved: Exterior styling",
+    "dtype": "float64",
+    "missing_rate": 0.45375867968199657,
+    "value_labels": {
+      "0.0": "Nothing",
+      "1.0": "Design of the exhaust tailpipes",
+      "2.0": "Design of the logos and emblems",
+      "3.0": "Design of the wheels/tires",
+      "4.0": "Exterior color",
+      "5.0": "Front grille",
+      "6.0": "Headlights",
+      "7.0": "Rear lights",
+      "8.0": "Shape of the hood",
+      "9.0": "Shape of the roofline",
+      "10.0": "Shape of the trunk/tailgate",
+      "11.0": "Side door mirrors",
+      "12.0": "Size and shape of the side windows",
+      "13.0": "Use of chrome and other accents",
+      "26.0": "Glassroof",
+      "30.0": "Door handle",
+      "97.0": "Other"
+    }
+  },
+  {
+    "name": "AEXT_D_02",
+    "label": "Exterior: Love Most: Exterior styling",
+    "dtype": "float64",
+    "missing_rate": 0.5462413203180034,
+    "value_labels": {
+      "0.0": "Nothing",
+      "1.0": "Design of the exhaust tailpipes",
+      "2.0": "Design of the logos and emblems",
+      "3.0": "Design of the wheels/tires",
+      "4.0": "Exterior color",
+      "5.0": "Front grille",
+      "6.0": "Headlights",
+      "7.0": "Rear lights",
+      "8.0": "Shape of the hood",
+      "9.0": "Shape of the roofline",
+      "10.0": "Shape of the trunk/tailgate",
+      "11.0": "Side door mirrors",
+      "12.0": "Size and shape of the side windows",
+      "13.0": "Use of chrome and other accents",
+      "26.0": "Glassroof",
+      "30.0": "Door handle",
+      "97.0": "Other"
+    }
+  },
+  {
+    "name": "ASET_D_01",
+    "label": "Setting Up/Starting: Most Improved: Process of starting vehicle",
+    "dtype": "float64",
+    "missing_rate": 0.40424675455368825,
+    "value_labels": {
+      "0.0": "Nothing",
+      "1.0": "How exciting the whole process is",
+      "2.0": "How welcoming the whole process is",
+      "3.0": "Increase the number of warnings/level of information provided",
+      "4.0": "Reduce the number of warnings/level of information provided",
+      "5.0": "The operation of the start button",
+      "6.0": "The process of operating the vehicle remotely via your phone, etc.",
+      "7.0": "The start-up screen on the center console",
+      "8.0": "The start-up screen on the instrument panel",
+      "9.0": "The time required for the vehicle systems to start up",
+      "10.0": "The vehicle remembering all of your settings",
+      "97.0": "Other"
+    }
+  },
+  {
+    "name": "ASET_D_02",
+    "label": "Setting Up/Starting: Love Most: Process of starting vehicle",
+    "dtype": "float64",
+    "missing_rate": 0.5957532454463118,
+    "value_labels": {
+      "0.0": "Nothing",
+      "1.0": "How exciting the whole process is",
+      "2.0": "How welcoming the whole process is",
+      "3.0": "Increase the number of warnings/level of information provided",
+      "4.0": "Reduce the number of warnings/level of information provided",
+      "5.0": "The operation of the start button",
+      "6.0": "The process of operating the vehicle remotely via your phone, etc.",
+      "7.0": "The start-up screen on the center console",
+      "8.0": "The start-up screen on the instrument panel",
+      "9.0": "The time required for the vehicle systems to start up",
+      "10.0": "The vehicle remembering all of your settings",
+      "97.0": "Other"
+    }
+  },
+  {
+    "name": "AINT_D_01_R1",
+    "label": "Cellphone",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "AINT_D_01_R2",
+    "label": "Satchels/Bags",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "AINT_D_01_R3",
+    "label": "Keychain/Keybag",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "AINT_D_01_R4",
+    "label": "Cups/Drink containers",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "AINT_D_01_R5",
+    "label": "Glasses/Sunglasses",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "AINT_D_01_R6",
+    "label": "Data cable/U disk",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "AINT_D_01_R7",
+    "label": "Cards/Bills",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "AINT_D_01_R8",
+    "label": "Umbrellas",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "AINT_D_01_R97",
+    "label": "Others",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "AINT_D_01a_R1",
+    "label": "Cellphone",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "AINT_D_01a_R2",
+    "label": "Satchels/Bags",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "AINT_D_01a_R3",
+    "label": "Keychain/Keybag",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "AINT_D_01a_R4",
+    "label": "Cups/Drink containers",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "AINT_D_01a_R5",
+    "label": "Glasses/Sunglasses",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "AINT_D_01a_R6",
+    "label": "Data cable/U disk",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "AINT_D_01a_R7",
+    "label": "Cards/Bills",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "AINT_D_01a_R8",
+    "label": "Umbrellas",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "AINT_D_01a_R97",
+    "label": "Other",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "AINT_D_01a_R98",
+    "label": "None of above",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "AINT_D_02_R1",
+    "label": "Wood",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "AINT_D_02_R2",
+    "label": "Chrome/other metal",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "AINT_D_02_R3",
+    "label": "Leather",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "AINT_D_02_R4",
+    "label": "Suede",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "AINT_D_02_R5",
+    "label": "Carbon fiber",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "AINT_D_02_R6",
+    "label": "Plastic/Rubber",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "AINT_D_02_R7",
+    "label": "Piano paint panel",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "AINT_D_02_R8",
+    "label": "Fabric",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "AINT_D_02_R97",
+    "label": "Others",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "AINT_D_03",
+    "label": "Number of screens/displays (including the dashboard) in vehicle",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 or above"
+    }
+  },
+  {
+    "name": "AINT_D_04",
+    "label": "Most Improved - Screens/displays",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "Nothing",
+      "1.0": "The design of the interface",
+      "2.0": "Color matching",
+      "3.0": "The sizes of screens and displays",
+      "4.0": "Number of screens and displays",
+      "5.0": "Picture clarity",
+      "6.0": "The feel of touch screen operation",
+      "7.0": "Screen response speed"
+    }
+  },
+  {
+    "name": "AINT_D_05",
+    "label": "Love Most - Screens/displays",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "Nothing",
+      "1.0": "The design of the interface",
+      "2.0": "Color matching",
+      "3.0": "The sizes of screens and displays",
+      "4.0": "Number of screens and displays",
+      "5.0": "Picture clarity",
+      "6.0": "The feel of touch screen operation",
+      "7.0": "Screen response speed"
+    }
+  },
+  {
+    "name": "AINT_D_06",
+    "label": "Most Improved - Operating interface of the air conditioning system",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "Nothing",
+      "1.0": "Ease of operation",
+      "2.0": "Ease of reading information",
+      "3.0": "Ease of air outlet adjustment",
+      "4.0": "Attractiveness of appearance"
+    }
+  },
+  {
+    "name": "AINT_D_07",
+    "label": "Love Most - Operating interface of the air conditioning system",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "Nothing",
+      "1.0": "Ease of operation",
+      "2.0": "Ease of reading information",
+      "3.0": "Ease of air outlet adjustment",
+      "4.0": "Attractiveness of appearance"
+    }
+  },
+  {
+    "name": "APERF_D_01",
+    "label": "Most Improved - Power of vehicle's engine/motor",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "Nothing",
+      "1.0": "Vehicle acceleration from a stop (less than 25 miles per hour)",
+      "2.0": "Vehicle acceleration at suburban (25 to 49 miles per hour)",
+      "3.0": "Vehicle acceleration at high speed/Freeway (50 miles per hour and higher)"
+    }
+  },
+  {
+    "name": "ADRV_D_01",
+    "label": "Type of Driving",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "Stop and go (less than 25 miles per hour)",
+      "2.0": "Suburban (25 to 49 miles per hour)",
+      "3.0": "High speed/Freeway (50 miles per hour and higher)"
+    }
+  },
+  {
+    "name": "ADRV_D_02",
+    "label": "Road condition encountered most often",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "Asphalt road",
+      "2.0": "cement road",
+      "3.0": "Gravel road",
+      "4.0": "Unsurfaced road",
+      "97.0": "Others"
+    }
+  },
+  {
+    "name": "ASFTY_D_01",
+    "label": "Safety: Most Improved",
+    "dtype": "float64",
+    "missing_rate": 0.39941632283385325,
+    "value_labels": {
+      "0.0": "Nothing",
+      "1.0": "The effectiveness of the headlights",
+      "2.0": "The number of safety systems (e.g., blind spot warning, collision warning)",
+      "3.0": "The effectiveness of the safety systems (e.g., blind spot warning, collision warning)",
+      "4.0": "The number of driver assistance systems (e.g., cruise control, lane keep assist)",
+      "5.0": "The effectiveness of the driver assistance systems (e.g., cruise control, lane keep assist)",
+      "6.0": "The feeling of solidity of the vehicle",
+      "7.0": "The size of the vehicle",
+      "8.0": "The vehicle's maneuverability",
+      "9.0": "Visibility out of the front",
+      "10.0": "Visibility out of the rear",
+      "11.0": "Visibility out of the side",
+      "97.0": "Other"
+    }
+  },
+  {
+    "name": "ASFTY_D_02",
+    "label": "Safety: Love Most",
+    "dtype": "float64",
+    "missing_rate": 0.6005836771661467,
+    "value_labels": {
+      "0.0": "Nothing",
+      "1.0": "The effectiveness of the headlights",
+      "2.0": "The number of safety systems (e.g., blind spot warning, collision warning)",
+      "3.0": "The effectiveness of the safety systems (e.g., blind spot warning, collision warning)",
+      "4.0": "The number of driver assistance systems (e.g., cruise control, lane keep assist)",
+      "5.0": "The effectiveness of the driver assistance systems (e.g., cruise control, lane keep assist)",
+      "6.0": "The feeling of solidity of the vehicle",
+      "7.0": "The size of the vehicle",
+      "8.0": "The vehicle's maneuverability",
+      "9.0": "Visibility out of the front",
+      "10.0": "Visibility out of the rear",
+      "11.0": "Visibility out of the side",
+      "97.0": "Other"
+    }
+  },
+  {
+    "name": "AINFO_D_01A",
+    "label": "Infotainment: System Preference: Playing audio",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "The vehicle's built-in system",
+      "2.0": "Apple CarPlay",
+      "3.0": "Android Auto",
+      "4.0": "Virtual Assistant",
+      "97.0": "Other",
+      "99.0": "Not sure"
+    }
+  },
+  {
+    "name": "AINFO_D_01B",
+    "label": "Infotainment: System Preference: Making and receiving phone calls",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "The vehicle's built-in system",
+      "2.0": "Apple CarPlay",
+      "3.0": "Android Auto",
+      "4.0": "Virtual Assistant",
+      "97.0": "Other",
+      "99.0": "Not sure"
+    }
+  },
+  {
+    "name": "AINFO_D_01C",
+    "label": "Infotainment: System Preference: Using voice assistance",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "The vehicle's built-in system",
+      "2.0": "Apple CarPlay",
+      "3.0": "Android Auto",
+      "4.0": "Virtual Assistant",
+      "97.0": "Other",
+      "99.0": "Not sure"
+    }
+  },
+  {
+    "name": "AINFO_D_01D",
+    "label": "Infotainment: System Preference: Using navigation",
+    "dtype": "float64",
+    "missing_rate": 0.1807386535171581,
+    "value_labels": {
+      "1.0": "The vehicle's built-in system",
+      "2.0": "Apple CarPlay",
+      "3.0": "Android Auto",
+      "4.0": "Virtual Assistant",
+      "97.0": "Other",
+      "99.0": "Not sure"
+    }
+  },
+  {
+    "name": "ACMFT_D_01",
+    "label": "Most Improved - Air conditioning system",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "Nothing",
+      "1.0": "Gets cold quickly when needed",
+      "2.0": "Gets warm quickly when needed",
+      "3.0": "Maintains the desired temperature",
+      "4.0": "Provides different temperatures for driver/front passenger",
+      "5.0": "Provides different temperatures for front/rear occupants",
+      "6.0": "Quickly defrosts/defogs the interior glass",
+      "7.0": "Quietness of the system"
+    }
+  },
+  {
+    "name": "ACMFT_D_02",
+    "label": "Love Most - Air conditioning system",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "Nothing",
+      "1.0": "Gets cold quickly when needed",
+      "2.0": "Gets warm quickly when needed",
+      "3.0": "Maintains the desired temperature",
+      "4.0": "Provides different temperatures for driver/front passenger",
+      "5.0": "Provides different temperatures for front/rear occupants",
+      "6.0": "Quickly defrosts/defogs the interior glass",
+      "7.0": "Quietness of the system"
+    }
+  },
+  {
+    "name": "K_AFUEL_D_05",
+    "label": "Average pure-electric range with full charge - Kilometers",
+    "dtype": "float64",
+    "missing_rate": 0.08996679078192614,
+    "value_labels": {}
+  },
+  {
+    "name": "AFUEL_D_06",
+    "label": "Pure-electric range compared to expectations with full charge",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "Worse than I expected",
+      "2.0": "About the same as I expected",
+      "3.0": "Better than I expected"
+    }
+  },
+  {
+    "name": "AFUEL_D_09_R1",
+    "label": "Under all driving conditions/at all times",
+    "dtype": "float64",
+    "missing_rate": 0.9402234074670424,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "AFUEL_D_09_R2",
+    "label": "At low speeds (less than 25 miles per hour)",
+    "dtype": "float64",
+    "missing_rate": 0.9402234074670424,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "AFUEL_D_09_R3",
+    "label": "At moderate speeds (25 to 49 miles per hour)",
+    "dtype": "float64",
+    "missing_rate": 0.9402234074670424,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "AFUEL_D_09_R4",
+    "label": "At high speeds (50 miles per hour and higher)",
+    "dtype": "float64",
+    "missing_rate": 0.9402234074670424,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "AFUEL_D_09_R5",
+    "label": "In cold weather",
+    "dtype": "float64",
+    "missing_rate": 0.9402234074670424,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "AFUEL_D_09_R6",
+    "label": "When AC is on",
+    "dtype": "float64",
+    "missing_rate": 0.9402234074670424,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "AFUEL_D_09_R7",
+    "label": "On smooth pavement",
+    "dtype": "float64",
+    "missing_rate": 0.9402234074670424,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "AFUEL_D_09_R8",
+    "label": "On rough pavement/bumpy roads",
+    "dtype": "float64",
+    "missing_rate": 0.9402234074670424,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "AFUEL_D_09_R9",
+    "label": "When going over a bump",
+    "dtype": "float64",
+    "missing_rate": 0.9402234074670424,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "AFUEL_D_09_R10",
+    "label": "With a full load (passenger/cargo)",
+    "dtype": "float64",
+    "missing_rate": 0.9402234074670424,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "AFUEL_D_09_R11",
+    "label": "With a light load (driver only)",
+    "dtype": "float64",
+    "missing_rate": 0.9402234074670424,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "AFUEL_D_09_R97",
+    "label": "Other",
+    "dtype": "float64",
+    "missing_rate": 0.9402234074670424,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "AFUEL_D_07",
+    "label": "What type of charger do you normally use to charge your vehicle?",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "2.0": "220/240V",
+      "3.0": "More than 240V",
+      "4.0": "Not sure",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "KM_AFUEL",
+    "label": "Average fuel consumption(L/100km)",
+    "dtype": "float64",
+    "missing_rate": 0.7538492502767434,
+    "value_labels": {}
+  },
+  {
+    "name": "ACHAR_D_01",
+    "label": "How many hours does it take to fully charge your vehicle when using normal charge?",
+    "dtype": "float64",
+    "missing_rate": 0.2116332897252692,
+    "value_labels": {}
+  },
+  {
+    "name": "ACHAR_D_02_START",
+    "label": "What is the SOC (state of charge) when you usually start normal charging your vehicle",
+    "dtype": "float64",
+    "missing_rate": 0.11603099527020228,
+    "value_labels": {
+      "1.0": "0%",
+      "2.0": "10%",
+      "3.0": "20%",
+      "4.0": "30%",
+      "5.0": "40%",
+      "6.0": "50%",
+      "7.0": "60%",
+      "8.0": "70%",
+      "9.0": "80%",
+      "10.0": "90%",
+      "99.0": "Don't know"
+    }
+  },
+  {
+    "name": "ACHAR_D_02_END",
+    "label": "What is the SOC (state of charge) when you usually stop normal charging your vehicle",
+    "dtype": "float64",
+    "missing_rate": 0.11603099527020228,
+    "value_labels": {
+      "1.0": "10%",
+      "2.0": "20%",
+      "3.0": "30%",
+      "4.0": "40%",
+      "5.0": "50%",
+      "6.0": "60%",
+      "7.0": "70%",
+      "8.0": "80%",
+      "9.0": "90%",
+      "10.0": "100%",
+      "99.0": "Don't know"
+    }
+  },
+  {
+    "name": "ACHAR_D_03",
+    "label": "How many minutes does it take to fully charge your vehicle when using fast charge?",
+    "dtype": "float64",
+    "missing_rate": 0.2215960551474288,
+    "value_labels": {}
+  },
+  {
+    "name": "ACHAR_D_04_START",
+    "label": "What is the SOC (state of charge) when you usually start fast charging your vehicle",
+    "dtype": "float64",
+    "missing_rate": 0.149844017309047,
+    "value_labels": {
+      "1.0": "0%",
+      "2.0": "10%",
+      "3.0": "20%",
+      "4.0": "30%",
+      "5.0": "40%",
+      "6.0": "50%",
+      "7.0": "60%",
+      "8.0": "70%",
+      "9.0": "80%",
+      "10.0": "90%",
+      "99.0": "Don't know"
+    }
+  },
+  {
+    "name": "ACHAR_D_04_END",
+    "label": "What is the SOC (state of charge) when you usually stop fast charging your vehicle",
+    "dtype": "float64",
+    "missing_rate": 0.149844017309047,
+    "value_labels": {
+      "1.0": "10%",
+      "2.0": "20%",
+      "3.0": "30%",
+      "4.0": "40%",
+      "5.0": "50%",
+      "6.0": "60%",
+      "7.0": "70%",
+      "8.0": "80%",
+      "9.0": "90%",
+      "10.0": "100%",
+      "99.0": "Don't know"
+    }
+  },
+  {
+    "name": "ACHAR_D_05",
+    "label": "How does the time required to charge your vehicle compare with your expectations?",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "Worse than I expected",
+      "2.0": "About the same as I expected",
+      "3.0": "Better than I expected",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "ACHAR_D_06_R1",
+    "label": "Manually open the charging door/cap",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "ACHAR_D_06_R2",
+    "label": "Remote control key",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "ACHAR_D_06_R3",
+    "label": "Using a smartphone app",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "ACHAR_D_06_R97",
+    "label": "Other",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "ACHAR_D_07_R1",
+    "label": "On built-in navigation system",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "ACHAR_D_07_R2",
+    "label": "Using OEM's smartphone apps",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "ACHAR_D_07_R3",
+    "label": "Using third-party smartphone apps",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "ACHAR_D_07_R6",
+    "label": "Only charge at home",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "ACHAR_D_07_R97",
+    "label": "Other",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "ACHAR_D_08",
+    "label": "Which third-party smartphone apps do you most often use to looking for charging stations?",
+    "dtype": "float64",
+    "missing_rate": 0.5638522692965684,
+    "value_labels": {
+      "1.0": "Guowang",
+      "2.0": "Xingxing",
+      "3.0": "Telaidian",
+      "4.0": "Xiaogu",
+      "5.0": "Other OEM's charging APP",
+      "6.0": "Map navigation APP",
+      "7.0": "Xingluo",
+      "8.0": "Xindiantu",
+      "9.0": "Kuaidian",
+      "97.0": "Other"
+    }
+  },
+  {
+    "name": "ACHAR_D_09_R1",
+    "label": "There are many charging piles",
+    "dtype": "float64",
+    "missing_rate": 0.5638522692965684,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "ACHAR_D_09_R2",
+    "label": "The information is accurate",
+    "dtype": "float64",
+    "missing_rate": 0.5638522692965684,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "ACHAR_D_09_R3",
+    "label": "Easy to find",
+    "dtype": "float64",
+    "missing_rate": 0.5638522692965684,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "ACHAR_D_09_R4",
+    "label": "Low service charge",
+    "dtype": "float64",
+    "missing_rate": 0.5638522692965684,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "ACHAR_D_09_R5",
+    "label": "Easy to pay",
+    "dtype": "float64",
+    "missing_rate": 0.5638522692965684,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "ACHAR_D_09_R6",
+    "label": "Price list is clear",
+    "dtype": "float64",
+    "missing_rate": 0.5638522692965684,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "ACHAR_D_09_R97",
+    "label": "Other",
+    "dtype": "float64",
+    "missing_rate": 0.5638522692965684,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "APEAL_OSAT",
+    "label": "APEAL_OSAT: Your New Vehicle Overall Owning and Driving Experience",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1 = Unacceptable",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4 = Average",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7 = Outstanding",
+      "8.0": "8",
+      "9.0": "9",
+      "10.0": "10 = Truly Exceptional",
+      "99.0": "N/A"
+    }
+  },
+  {
+    "name": "YNV_CN_6_1",
+    "label": "Traditional <-> Innovative",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7"
+    }
+  },
+  {
+    "name": "YNV_CN_6_2",
+    "label": "No Frills <-> Luxurious",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7"
+    }
+  },
+  {
+    "name": "YNV_CN_6_3",
+    "label": "Unreliable <-> Reliable",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7"
+    }
+  },
+  {
+    "name": "YNV_CN_6_4",
+    "label": "Mature <-> Young/energetic",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7"
+    }
+  },
+  {
+    "name": "YNV_CN_6_5",
+    "label": "Ordinary to Drive <-> Fun to Drive",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7"
+    }
+  },
+  {
+    "name": "YNV_CN_6_6",
+    "label": "Classic <-> Modern/Trendy",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7"
+    }
+  },
+  {
+    "name": "YNV_CN_6_7",
+    "label": "Customer orientation <-> Deal orientation",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7"
+    }
+  },
+  {
+    "name": "YNV_CN_6_8",
+    "label": "Independent <-> Cooperative",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7"
+    }
+  },
+  {
+    "name": "YNV_CN_6_9",
+    "label": "Affordable <-> High price",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7"
+    }
+  },
+  {
+    "name": "YNV_CN_6_10",
+    "label": "Conservative <-> Ambitious",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7"
+    }
+  },
+  {
+    "name": "YNV_CN_6_11",
+    "label": "Copycat <-> Industry pioneer",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7"
+    }
+  },
+  {
+    "name": "YNV_CN_6_12",
+    "label": "Environmentally Ordinary <-> Environmentally Friendly",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7"
+    }
+  },
+  {
+    "name": "YNV_CN_6_13",
+    "label": "Traditional technology <-> cutting-edge technology",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7"
+    }
+  },
+  {
+    "name": "YNV_CN_6_14",
+    "label": "Bad Reputation <-> Good Reputation",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "1",
+      "2.0": "2",
+      "3.0": "3",
+      "4.0": "4",
+      "5.0": "5",
+      "6.0": "6",
+      "7.0": "7"
+    }
+  },
+  {
+    "name": "YPV_01",
+    "label": "YPV_01: First, Additional or Replacement Vehicle",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "It replaces another vehicle",
+      "2.0": "It is an additional vehicle to my household",
+      "3.0": "It is the first ever vehicle for my household"
+    }
+  },
+  {
+    "name": "CN_YNV_07",
+    "label": "CN_YNV_07: Vehicle Price",
+    "dtype": "float64",
+    "missing_rate": 0.0490087551574922,
+    "value_labels": {}
+  },
+  {
+    "name": "NEV_12",
+    "label": "NEV_12: Current Kilometers",
+    "dtype": "float64",
+    "missing_rate": 0.048908121163328974,
+    "value_labels": {}
+  },
+  {
+    "name": "YPV_02_MAKE",
+    "label": "YPV_02_MAKE: Vehicle Replaced - Make",
+    "dtype": "float64",
+    "missing_rate": 0.871289121465231,
+    "value_labels": {
+      "10511.0": "Acura",
+      "11511.0": "Audi",
+      "11512.0": "SAIC Audi",
+      "12512.0": "BEIJING",
+      "12515.0": "BAIC BJEV",
+      "12516.0": "BAICORV",
+      "13011.0": "BMW",
+      "13511.0": "Buick",
+      "14011.0": "BYD",
+      "14511.0": "Cadillac",
+      "15011.0": "CHANGAN",
+      "15012.0": "OSHAN",
+      "15013.0": "KAICENE",
+      "15014.0": "DEEPAL",
+      "16012.0": "Haval",
+      "16013.0": "WEY",
+      "16014.0": "ORA",
+      "16015.0": "TANK",
+      "18011.0": "Chery",
+      "18015.0": "Qoros",
+      "18016.0": "Chery New Energy",
+      "18017.0": "EXEED",
+      "18513.0": "Chevrolet",
+      "19512.0": "Dongfeng Citroen",
+      "19611.0": "Cowin Ruto",
+      "22011.0": "Dongfeng",
+      "22012.0": "Dongfeng Forthing",
+      "22014.0": "Dongfeng Fengshen",
+      "22017.0": "Dongfeng Fengon",
+      "23011.0": "FAW Besturn",
+      "23012.0": "FAW Hongqi",
+      "26011.0": "Ford",
+      "26012.0": "Changan Ford",
+      "28011.0": "Geely",
+      "28016.0": "Lynk & Co",
+      "28017.0": "Geometry",
+      "31512.0": "Dongfeng Honda",
+      "31513.0": "GAC Honda",
+      "33012.0": "Beijing Hyundai",
+      "33511.0": "Infiniti",
+      "35011.0": "JAC",
+      "35511.0": "Jaguar",
+      "36015.0": "GAC FCA Jeep",
+      "38015.0": "JMC Ford",
+      "38512.0": "Dongfeng Yueda Kia",
+      "39511.0": "Land Rover",
+      "40011.0": "Lexus",
+      "41011.0": "Lincoln",
+      "42012.0": "Changan Mazda",
+      "42013.0": "FAW-Mazda",
+      "42511.0": "Mercedes-Benz",
+      "42512.0": "Fujian Benz",
+      "42513.0": "Denza",
+      "42751.0": "smart",
+      "43011.0": "MINI",
+      "43513.0": "GAC Mitsubishi",
+      "43751.0": "MG",
+      "44512.0": "Dongfeng Nissan",
+      "44514.0": "Venucia",
+      "45512.0": "Dongfeng Peugeot",
+      "46011.0": "Porsche",
+      "47011.0": "Roewe",
+      "47013.0": "R Auto",
+      "52011.0": "Skoda",
+      "52511.0": "Soueast",
+      "54011.0": "Subaru",
+      "54811.0": "Tesla",
+      "56512.0": "FAW Toyota",
+      "56513.0": "GAC Toyota",
+      "57011.0": "Volkswagen",
+      "57012.0": "FAW-Volkswagen",
+      "57013.0": "SAIC Volkswagen",
+      "57015.0": "Jetta",
+      "57511.0": "Volvo",
+      "58011.0": "Wuling",
+      "58012.0": "Baojun",
+      "63511.0": "GAC Trumpchi",
+      "63521.0": "GAC AION",
+      "65511.0": "Maxus",
+      "66011.0": "Borgward",
+      "68511.0": "NIO",
+      "69011.0": "Jetour",
+      "69211.0": "AVATR",
+      "69512.0": "AITO",
+      "69611.0": "Letin",
+      "69711.0": "Livan Auto",
+      "69811.0": "Hiphi",
+      "69911.0": "ZEEKR",
+      "71011.0": "Weltmeister",
+      "72011.0": "NETA",
+      "73011.0": "HYCAN",
+      "75011.0": "Enovate",
+      "76011.0": "IM",
+      "81011.0": "XPeng",
+      "82011.0": "Li Auto",
+      "83011.0": "SOL",
+      "85011.0": "Leap Motor",
+      "86011.0": "Linbox",
+      "88011.0": "Voyah",
+      "99999.0": "Other"
+    }
+  },
+  {
+    "name": "YPV_02_SERIES",
+    "label": "YPV_02_SERIES: Vehicle Replaced - Series",
+    "dtype": "float64",
+    "missing_rate": 0.871289121465231,
+    "value_labels": {
+      "10511301.0": "Acura RDX",
+      "10511401.0": "Acura CDX",
+      "10511999.0": "Acura Other",
+      "11511201.0": "Audi A3",
+      "11511202.0": "Audi A3 (Import)",
+      "11511275.0": "Audi A4L",
+      "11511276.0": "Audi A4 (Import)",
+      "11511301.0": "Audi A5",
+      "11511351.0": "Audi A6L",
+      "11511352.0": "Audi A6 (Import)",
+      "11511353.0": "Audi A6L PHEV",
+      "11511451.0": "Audi Q7",
+      "11511452.0": "Audi Q7 PHEV",
+      "11511453.0": "Audi Q8",
+      "11511501.0": "Audi R8",
+      "11511551.0": "Audi TT",
+      "11511601.0": "Audi A8",
+      "11511651.0": "Audi Q5",
+      "11511652.0": "Audi Q5L",
+      "11511653.0": "Audi Q2L",
+      "11511654.0": "Audi Q2L e-tron",
+      "11511661.0": "Audi e-tron (Import)",
+      "11511663.0": "Audi Q4 e-tron",
+      "11511701.0": "Audi S5",
+      "11511711.0": "Audi S6",
+      "11511721.0": "Audi S7",
+      "11511801.0": "Audi A7",
+      "11511901.0": "Audi Q3",
+      "11511999.0": "Audi Other",
+      "11512101.0": "Audi A7L",
+      "11512201.0": "Audi Q5 e-tron",
+      "11512301.0": "Audi Q6",
+      "11512999.0": "SAIC Audi Other",
+      "12512121.0": "BEIJING-U5",
+      "12512301.0": "BEIJING-X5",
+      "12512311.0": "BEIJING-U7",
+      "12512321.0": "BEIJING-X3",
+      "12512331.0": "BEIJING-X7",
+      "12512332.0": "BEIJING-X7 PHEV",
+      "12512999.0": "BEIJING Other",
+      "12515022.0": "BAIC BJEV EC3",
+      "12515023.0": "BAIC BJEV EC5",
+      "12515103.0": "BAIC BJEV EU5/EU5 Plus",
+      "12515104.0": "BAIC BJEV EU7",
+      "12515302.0": "BAIC BJEV EX3",
+      "12515999.0": "BAIC BJEV Other",
+      "12516101.0": "BAICORV BJ20",
+      "12516151.0": "BAICORV BJ40",
+      "12516152.0": "BAICORV BJ60",
+      "12516201.0": "BAICORV BJ80",
+      "12516999.0": "BAICORV Other",
+      "13011051.0": "BMW 1 Series (Import)",
+      "13011052.0": "BMW 1 Series",
+      "13011071.0": "BMW 2 Series (Import)",
+      "13011081.0": "BMW 2 Series",
+      "13011101.0": "BMW 3 Series",
+      "13011102.0": "BMW 3 Series (Import)",
+      "13011131.0": "BMW 4 Series",
+      "13011151.0": "BMW 5 Series",
+      "13011152.0": "BMW 5 Series (Import)",
+      "13011153.0": "BMW 5 Series PHEV",
+      "13011201.0": "BMW 6 Series",
+      "13011202.0": "BMW 6 Series GT",
+      "13011251.0": "BMW 7 Series",
+      "13011252.0": "BMW 7 Series PHEV",
+      "13011253.0": "BMW 8 Series",
+      "13011301.0": "BMW X3 (Import)",
+      "13011302.0": "BMW X3",
+      "13011303.0": "BMW iX3",
+      "13011313.0": "BMW iX3 (Import)",
+      "13011321.0": "BMW X4",
+      "13011351.0": "BMW X5 (Import)",
+      "13011352.0": "BMW X5 PHEV",
+      "13011353.0": "BMW X5",
+      "13011371.0": "BMW X7",
+      "13011401.0": "BMW Z4",
+      "13011451.0": "BMW X6",
+      "13011501.0": "BMW X1",
+      "13011502.0": "BMW X1 (Import)",
+      "13011503.0": "BMW X1 PHEV",
+      "13011504.0": "BMW X2 (Import)",
+      "13011505.0": "BMW X2",
+      "13011551.0": "BMW M3",
+      "13011552.0": "BMW M2",
+      "13011561.0": "BMW M4",
+      "13011571.0": "BMW M5",
+      "13011641.0": "BMW 3 Series GT",
+      "13011651.0": "BMW 5 Series GT",
+      "13011701.0": "BMW i3 (Import)",
+      "13011702.0": "BMW i4",
+      "13011721.0": "BMW i3",
+      "13011731.0": "BMW i8",
+      "13011999.0": "BMW Other",
+      "13511051.0": "Buick Excelle",
+      "13511181.0": "Buick GL6",
+      "13511351.0": "Buick LaCROSSE",
+      "13511451.0": "Buick Regal",
+      "13511611.0": "Buick Velite 6 BEV",
+      "13511612.0": "Buick Velite 6 PHEV",
+      "13511613.0": "Buick Velite 7",
+      "13511614.0": "Buick Century",
+      "13511651.0": "Buick Enclave (Import)",
+      "13511701.0": "Buick Excelle GT",
+      "13511711.0": "Buick Excelle GX",
+      "13511755.0": "Buick All New GL8",
+      "13511801.0": "Buick Encore",
+      "13511802.0": "Buick Encore GX",
+      "13511851.0": "Buick Envision",
+      "13511852.0": "Buick Enclave",
+      "13511853.0": "Buick Envision S",
+      "13511854.0": "Buick Envision Plus",
+      "13511855.0": "Buick Envista",
+      "13511901.0": "Buick Verano",
+      "13511902.0": "Buick Verano Pro/Pro GS",
+      "13511999.0": "Buick Other",
+      "14011051.0": "BYD F3",
+      "14011151.0": "BYD D1",
+      "14011161.0": "BYD Dolphin",
+      "14011162.0": "BYD Destroyer05",
+      "14011163.0": "BYD Seal",
+      "14011164.0": "BYD Frigate 07",
+      "14011165.0": "BYD Seagull",
+      "14011421.0": "BYD e1",
+      "14011431.0": "BYD e2",
+      "14011433.0": "BYD e3",
+      "14011441.0": "BYD e5",
+      "14011701.0": "BYD Qin PHEV",
+      "14011702.0": "BYD Qin BEV",
+      "14011703.0": "BYD Qin Pro",
+      "14011704.0": "BYD Qin Pro PHEV",
+      "14011705.0": "BYD Qin Pro BEV",
+      "14011706.0": "BYD Qin",
+      "14011721.0": "BYD Qin Plus PHEV",
+      "14011722.0": "BYD Qin Plus BEV",
+      "14011751.0": "BYD Song",
+      "14011753.0": "BYD Song PHEV",
+      "14011754.0": "BYD Song BEV",
+      "14011755.0": "BYD Song Pro",
+      "14011756.0": "BYD Song Pro PHEV",
+      "14011757.0": "BYD Song Pro BEV",
+      "14011761.0": "BYD Song MAX",
+      "14011762.0": "BYD Song MAX PHEV",
+      "14011763.0": "BYD Song MAX BEV",
+      "14011765.0": "BYD Song Plus",
+      "14011766.0": "BYD Song Plus PHEV",
+      "14011767.0": "BYD Song Plus BEV",
+      "14011771.0": "BYD Tang PHEV",
+      "14011772.0": "BYD Tang",
+      "14011773.0": "BYD Tang BEV",
+      "14011781.0": "BYD Yuan",
+      "14011782.0": "BYD Yuan BEV",
+      "14011783.0": "BYD Yuan Pro",
+      "14011784.0": "BYD Yuan Plus",
+      "14011791.0": "BYD Han BEV",
+      "14011792.0": "BYD Han PHEV",
+      "14011999.0": "BYD Other",
+      "14511151.0": "Cadillac Escalade",
+      "14511401.0": "Cadillac XTS",
+      "14511431.0": "Cadillac XT5",
+      "14511432.0": "Cadillac XT6",
+      "14511441.0": "Cadillac XT4",
+      "14511461.0": "Cadillac ATS-L",
+      "14511501.0": "Cadillac CT6",
+      "14511502.0": "Cadillac CT6 PHEV",
+      "14511504.0": "Cadillac CT4",
+      "14511505.0": "Cadillac CT5",
+      "14511601.0": "Cadillac LYRIQ",
+      "14511999.0": "Cadillac Other",
+      "15011251.0": "Changan Benni",
+      "15011253.0": "Changan Benni EV",
+      "15011254.0": "Changan Benni E-Star",
+      "15011603.0": "Changan Alsvin 3",
+      "15011631.0": "Changan Alsvin V7",
+      "15011801.0": "Changan CX20",
+      "15011851.0": "Changan Eado",
+      "15011853.0": "Changan Eado Plus",
+      "15011871.0": "Changan Eado XT",
+      "15011872.0": "Changan Eado DT",
+      "15011873.0": "Changan Eado EV",
+      "15011874.0": "Changan Eado ET",
+      "15011891.0": "Changan CS15",
+      "15011892.0": "Changan CS15 BEV",
+      "15011901.0": "Changan CS35",
+      "15011902.0": "Changan CS35 Plus",
+      "15011921.0": "Changan CS55",
+      "15011922.0": "Changan CS55 Plus",
+      "15011941.0": "Changan CS75",
+      "15011942.0": "Changan CS75 PHEV",
+      "15011943.0": "Changan CS85 Coupe",
+      "15011944.0": "Changan CS75 Plus",
+      "15011946.0": "Changan CS95",
+      "15011951.0": "Changan Raeton",
+      "15011953.0": "Changan Raeton CC",
+      "15011954.0": "Changan CS15 E-Pro",
+      "15011955.0": "Changan CS55 E-Rock",
+      "15011956.0": "Changan Lumin",
+      "15011957.0": "Changan Raeton Plus",
+      "15011981.0": "Changan Linmax",
+      "15011982.0": "Changan UNI-T",
+      "15011983.0": "Changan UNI-K",
+      "15011984.0": "Changan Yida",
+      "15011986.0": "Changan UNI-K PHEV",
+      "15011987.0": "Changan UNI-V",
+      "15011988.0": "Changan UNI-V iDD",
+      "15011999.0": "Changan Car Other",
+      "15012786.0": "Oshan A600",
+      "15012787.0": "Oshan X70A",
+      "15012788.0": "Oshan A800",
+      "15012789.0": "Oshan A600 BEV",
+      "15012831.0": "Oshan CX70",
+      "15012832.0": "Oshan COSMOS",
+      "15012833.0": "Oshan COSMOS BEV",
+      "15012834.0": "Oshan Kesai 3",
+      "15012835.0": "Oshan Kesai 5",
+      "15012836.0": "Oshan Kesai Pro",
+      "15012837.0": "Oshan Kesai Pro GT",
+      "15012838.0": "Oshan Z6",
+      "15012839.0": "Oshan Z6 PHEV",
+      "15012861.0": "Oshan X7",
+      "15012862.0": "Oshan X5",
+      "15012863.0": "Oshan X7 Plus",
+      "15012864.0": "Oshan X5 Plus",
+      "15012999.0": "Oshan Other",
+      "15013702.0": "Kaicene Honor S",
+      "15013999.0": "Changan Kaicheng Other",
+      "15014001.0": "DEEPAL SL03 BEV",
+      "15014002.0": "DEEPAL SL03 (REEV)",
+      "15014102.0": "DEEPAL S7 (REEV)",
+      "15014999.0": "DEEPAL Other",
+      "16012071.0": "Haval H4",
+      "16012101.0": "Haval H5",
+      "16012151.0": "Haval H6",
+      "16012152.0": "Haval H6 PHEV",
+      "16012155.0": "Haval H6 Coupe",
+      "16012156.0": "Haval H6s",
+      "16012171.0": "Haval H7",
+      "16012201.0": "Haval H8",
+      "16012251.0": "Haval H9",
+      "16012301.0": "Haval F5",
+      "16012302.0": "Haval F7",
+      "16012312.0": "Haval F7x",
+      "16012401.0": "Haval M6 Plus",
+      "16012451.0": "Haval Big Dog",
+      "16012452.0": "Haval Chitu",
+      "16012453.0": "Haval Kugou",
+      "16012461.0": "Haval First Love",
+      "16012471.0": "Haval XY",
+      "16012472.0": "Haval Xiaolong Max PHEV",
+      "16012999.0": "Haval Other",
+      "16013201.0": "WEY VV5",
+      "16013301.0": "WEY VV7",
+      "16013302.0": "WEY VV7 PHEV",
+      "16013311.0": "WEY VV7 GT",
+      "16013331.0": "WEY Mocha",
+      "16013351.0": "WEY Latte DHT",
+      "16013352.0": "WEY Latte DHT PHEV",
+      "16013353.0": "WEY Lanshan DHT PHEV",
+      "16013401.0": "WEY VV6",
+      "16013999.0": "WEY Other",
+      "16014101.0": "ORA iQ",
+      "16014201.0": "ORA R1",
+      "16014211.0": "ORA R2",
+      "16014301.0": "ORA Haomao",
+      "16014401.0": "ORA Ballet Cat",
+      "16014501.0": "ORA Lightning Cat",
+      "16014999.0": "ORA Other",
+      "16015321.0": "TANK 300",
+      "16015322.0": "TANK 500",
+      "16015999.0": "TANK Other",
+      "18011155.0": "Chery Arrizo 3",
+      "18011158.0": "Chery Arrizo 5",
+      "18011159.0": "Chery Arrizo GX",
+      "18011161.0": "Chery Arrizo 7",
+      "18011162.0": "Chery Arrizo 8",
+      "18011181.0": "Chery Arrizo M7",
+      "18011258.0": "Chery Arrizo 5 Plus",
+      "18011325.0": "Chery Fulwin2",
+      "18011501.0": "Chery Omdda 5",
+      "18011502.0": "CheryExploration 06",
+      "18011605.0": "Chery Tiggo 3",
+      "18011608.0": "Chery Tiggo 3x",
+      "18011609.0": "Chery Tiggo 3x Plus",
+      "18011611.0": "Chery Tiggo 5",
+      "18011618.0": "Chery Tiggo 5x",
+      "18011621.0": "Chery Tiggo 7",
+      "18011622.0": "Chery Tiggo 7 Plus",
+      "18011631.0": "Chery Tiggo 8",
+      "18011632.0": "Chery Tiggo 8 Plus",
+      "18011641.0": "Chery Tiggo 8 Plus PHEV",
+      "18011651.0": "Chery Tiggo 8 Pro",
+      "18011661.0": "Chery Tiggo 9",
+      "18011845.0": "Chery E3",
+      "18011999.0": "Chery Other",
+      "18015051.0": "Qoros 3",
+      "18015201.0": "Qoros 3 SUV",
+      "18015251.0": "Qoros 5",
+      "18015252.0": "Qoros 7",
+      "18015999.0": "Qoros Other",
+      "18016101.0": "Chery eQ1",
+      "18016201.0": "Chery Tiggo 3xe",
+      "18016251.0": "Chery Arrizo 5e",
+      "18016301.0": "Chery QQ Ice cream",
+      "18016999.0": "Chery New Energy Other",
+      "18017051.0": "EXEED LX",
+      "18017052.0": "EXEED LX PHEV",
+      "18017101.0": "EXEED TX",
+      "18017102.0": "EXEED TXL",
+      "18017151.0": "EXEED VX",
+      "18017152.0": "EXEED Yaoguang",
+      "18017999.0": "EXEED Other",
+      "18513401.0": "Chevrolet Malibu",
+      "18513431.0": "Chevrolet Malibu XL",
+      "18513451.0": "Chevrolet Trax",
+      "18513501.0": "Chevrolet Equinox",
+      "18513552.0": "Chevrolet Onix",
+      "18513601.0": "Chevrolet Orlando",
+      "18513651.0": "Chevrolet Monza",
+      "18513701.0": "Chevrolet Menlo",
+      "18513751.0": "Chevrolet Seeker",
+      "18513999.0": "Chevrolet Other",
+      "19512061.0": "Citroen C4",
+      "19512161.0": "Citroen C-Elysee",
+      "19512162.0": "Citroen e C-Elysee",
+      "19512381.0": "Citroen C4 L",
+      "19512401.0": "Citroen C5",
+      "19512431.0": "Citroen C6",
+      "19512451.0": "Citroen C3-XR",
+      "19512501.0": "Citroen C5 Aircross",
+      "19512502.0": "Citroen C4 Aircross",
+      "19512511.0": "Citroen C5 X",
+      "19512999.0": "Dongfeng Citroen Other",
+      "19611051.0": "Cowin C3",
+      "19611101.0": "Cowin X3",
+      "19611151.0": "Cowin V3",
+      "19611161.0": "Cowin Showjet",
+      "19611162.0": "Cowin Ruto Showjet Pro BEV",
+      "19611171.0": "Cowin Ruto Xuandu",
+      "19611999.0": "Cowin Ruto Other",
+      "22011331.0": "Dongfeng Junfeng EX1",
+      "22011999.0": "Dongfeng Other",
+      "22012051.0": "Dongfeng Forthing Lingzhi",
+      "22012052.0": "Dongfeng Forthing Lingzhi M5EV",
+      "22012053.0": "Dongfeng Forthing Lingzhi Plus",
+      "22012121.0": "Dongfeng Forthing Joyear X3",
+      "22012131.0": "Dongfeng Forthing Joyear X5",
+      "22012151.0": "Dongfeng Forthing Joyear S50",
+      "22012152.0": "Dongfeng Forthing Joyear S50 BEV",
+      "22012201.0": "Dongfeng Forthing CM7",
+      "22012251.0": "Dongfeng Forthing S500",
+      "22012301.0": "Dongfeng Forthing SX6",
+      "22012401.0": "Dongfeng Forthing T5",
+      "22012411.0": "Dongfeng Forthing T5L",
+      "22012421.0": "Dongfeng Forthing T5 EVO",
+      "22012431.0": "Dongfeng Forthing U-Tour",
+      "22012999.0": "Dongfeng Forthing Other",
+      "22014081.0": "Dongfeng Fengshen A30",
+      "22014101.0": "Dongfeng Fengshen A60",
+      "22014131.0": "Dongfeng Fengshen AX3",
+      "22014141.0": "Dongfeng Fengshen AX5",
+      "22014151.0": "Dongfeng Fengshen AX7",
+      "22014351.0": "Dongfeng Fengshen E70/E70 Pro",
+      "22014451.0": "Dongfeng Fengshen Yixuan",
+      "22014452.0": "Dongfeng Fengshen Yixuan GS",
+      "22014453.0": "Dongfeng Fengshen Yixuan MAX",
+      "22014501.0": "Dongfeng Fengshen Haoji",
+      "22014502.0": "Dongfeng Fengshen Haohan",
+      "22014999.0": "Dongfeng Fengshen Other",
+      "22017051.0": "Dongfeng Fengon 330",
+      "22017151.0": "Dongfeng Fengon 370",
+      "22017181.0": "Dongfeng Fengon S560",
+      "22017201.0": "Dongfeng Fengon 580",
+      "22017211.0": "Dongfeng Fengon 580 Pro",
+      "22017221.0": "Dongfeng Fengon 500",
+      "22017251.0": "Dongfeng Fengon ix5",
+      "22017252.0": "Dongfeng Fengon ix7",
+      "22017261.0": "Dongfeng Fengon E1",
+      "22017262.0": "Dongfeng Fengon E3 BEV",
+      "22017263.0": "Dongfeng Fengon E3 (REEV)",
+      "22017264.0": "Dongfeng Fengon MINI",
+      "22017999.0": "Dongfeng Fengon Other",
+      "23011051.0": "FAW Besturn B70",
+      "23011101.0": "FAW Besturn B50",
+      "23011151.0": "FAW Besturn B30",
+      "23011152.0": "FAW Besturn B30 BEV",
+      "23011201.0": "FAW Besturn B90",
+      "23011221.0": "FAW Besturn X40",
+      "23011222.0": "FAW Besturn X40 BEV",
+      "23011251.0": "FAW Besturn X80",
+      "23011301.0": "FAW Besturn T77",
+      "23011302.0": "FAW Besturn T99",
+      "23011303.0": "FAW Besturn T33",
+      "23011304.0": "FAW Besturn T55",
+      "23011312.0": "FAW Besturn T90",
+      "23011401.0": "FAW Besturn NAT",
+      "23011999.0": "FAW Besturn Other",
+      "23012201.0": "Hongqi H7",
+      "23012205.0": "Hongqi H5",
+      "23012209.0": "Hongqi H9",
+      "23012251.0": "Hongqi HS5",
+      "23012252.0": "Hongqi HS3",
+      "23012271.0": "Hongqi HS7",
+      "23012301.0": "Hongqi E-HS3",
+      "23012351.0": "Hongqi E-HS9",
+      "23012361.0": "Hongqi E-QM5",
+      "23012999.0": "Hongqi Other",
+      "26011252.0": "Ford Mustang Mach-E",
+      "26011999.0": "Ford Other",
+      "26012101.0": "Ford Focus Classic",
+      "26012211.0": "Ford Mondeo",
+      "26012212.0": "Ford Mondeo PHEV",
+      "26012301.0": "Ford Focus",
+      "26012311.0": "Ford Focus Active",
+      "26012351.0": "Ford Kuga",
+      "26012401.0": "Ford Ecosport",
+      "26012451.0": "Ford Escort",
+      "26012501.0": "Ford Edge/Edge L",
+      "26012502.0": "Ford Escape",
+      "26012601.0": "Ford Taurus",
+      "26012602.0": "Ford Explorer",
+      "26012603.0": "Ford EVOS",
+      "26012999.0": "Changan Ford Other",
+      "28011071.0": "Geely Vision",
+      "28011075.0": "Geely Vision X6/X6 Pro",
+      "28011076.0": "Geely Vision S1",
+      "28011078.0": "Geely Vision X1",
+      "28011079.0": "Geely Vision X3",
+      "28011212.0": "Geely Emgrand",
+      "28011213.0": "Geely Emgrand S",
+      "28011216.0": "Geely Emgrand GS",
+      "28011217.0": "Geely Emgrand GL",
+      "28011219.0": "Geely Emgrand Gse",
+      "28011227.0": "Geely Emgrand GL PHEV",
+      "28011228.0": "Geely Emgrand PHEV",
+      "28011237.0": "Geely Emgrand L",
+      "28011238.0": "Geely Emgrand BEV",
+      "28011247.0": "Geely Emgrand L PHEV",
+      "28011321.0": "Geely Borui",
+      "28011331.0": "Geely Boyue/BoyueX/Boyyue COOL",
+      "28011332.0": "Geely Boyue L",
+      "28011342.0": "Geely Borui ePro",
+      "28011502.0": "Geely Galaxy L7 PHEV",
+      "28011561.0": "Geely ICON",
+      "28011751.0": "Geely Binrui/Binrui COOL",
+      "28011752.0": "Geely Binyue/Binyue COOL",
+      "28011753.0": "Geely Binyue PHEV",
+      "28011801.0": "Geely Jiaji",
+      "28011802.0": "Geely Jiaji PHEV",
+      "28011851.0": "Geely Xingyue",
+      "28011852.0": "Geely Xingyue PHEV",
+      "28011853.0": "Geely Haoyue",
+      "28011854.0": "Geely Preface",
+      "28011855.0": "Geely Panda mini",
+      "28011856.0": "Geely Xingyue L",
+      "28011863.0": "Geely Haoyue L",
+      "28011999.0": "Geely Other",
+      "28016051.0": "Lynk & Co 01",
+      "28016052.0": "Lynk & Co 02",
+      "28016053.0": "Lynk & Co 01 PHEV",
+      "28016054.0": "Lynk & Co 02 PHEV",
+      "28016101.0": "Lynk & Co 03",
+      "28016102.0": "Lynk & Co 03 PHEV",
+      "28016105.0": "Lynk & Co 05",
+      "28016106.0": "Lynk & Co 06",
+      "28016115.0": "Lynk & Co 05 PHEV",
+      "28016116.0": "Lynk & Co 06 PHEV",
+      "28016999.0": "Lynk & Co Other",
+      "28017051.0": "Geometry A/A Pro",
+      "28017052.0": "Geometry C",
+      "28017053.0": "Geometry T",
+      "28017055.0": "Geometry E",
+      "28017999.0": "Geometry Other",
+      "31512051.0": "Honda Civic",
+      "31512101.0": "Honda CR-V",
+      "31512102.0": "Honda CR-V PHEV",
+      "31512121.0": "Honda UR-V",
+      "31512131.0": "Honda XR-V",
+      "31512251.0": "Honda Elysion",
+      "31512351.0": "Honda Jade",
+      "31512421.0": "Honda Inspire",
+      "31512431.0": "Honda ENVIX",
+      "31512451.0": "Honda X-NV",
+      "31512452.0": "Honda M-NV",
+      "31512461.0": "Honda LIFE",
+      "31512462.0": "Honda HR-V",
+      "31512601.0": "Honda e:NS1",
+      "31512999.0": "Dongfeng Honda Other",
+      "31513061.0": "Honda Accord",
+      "31513201.0": "Honda Fit",
+      "31513251.0": "Honda Odyssey",
+      "31513301.0": "Honda City Fengfan",
+      "31513451.0": "Honda Crider",
+      "31513501.0": "Honda Vezel",
+      "31513551.0": "Honda Avancier",
+      "31513552.0": "Honda Breeze",
+      "31513562.0": "Honda INTEGRA",
+      "31513601.0": "Honda e:NP1",
+      "31513611.0": "Honda ZR-V",
+      "31513999.0": "GAC Honda Other",
+      "33012251.0": "Hyundai Tucson L",
+      "33012311.0": "Hyundai Celesta",
+      "33012491.0": "Hyundai ix25",
+      "33012501.0": "Hyundai ix35",
+      "33012502.0": "Hyundai Mufasa",
+      "33012571.0": "Hyundai Reina",
+      "33012603.0": "Hyundai Sonata Ten",
+      "33012611.0": "Hyundai Sonata PHEV",
+      "33012655.0": "Hyundai Lingdong Elantra",
+      "33012657.0": "Hyundai Elantra Seven",
+      "33012701.0": "Hyundai Santa Fe",
+      "33012751.0": "Hyundai Mistra",
+      "33012801.0": "Hyundai Yuena Verna",
+      "33012851.0": "Hyundai Lafesta",
+      "33012861.0": "Hyundai Custo",
+      "33012999.0": "Beijing Hyundai Other",
+      "33511061.0": "Infiniti QX50",
+      "33511161.0": "Infiniti Q50L",
+      "33511171.0": "Infiniti QX60 (Import)",
+      "33511201.0": "Infiniti M/Q70",
+      "33511999.0": "Infiniti Other",
+      "35011111.0": "JAC Refine M3",
+      "35011113.0": "JAC Refine M4",
+      "35011115.0": "JAC Refine M5",
+      "35011361.0": "JAC Jiayue A5",
+      "35011381.0": "JAC Refine S3",
+      "35011391.0": "JAC Refine S4",
+      "35011421.0": "JAC Refine S7",
+      "35011501.0": "JAC iEV6E",
+      "35011521.0": "JAC iEV7S",
+      "35011531.0": "JAC iEVS4",
+      "35011541.0": "JAC iEVA50",
+      "35011999.0": "JAC Other",
+      "35511031.0": "Jaguar F-TYPE",
+      "35511121.0": "Jaguar XFL",
+      "35511131.0": "Jaguar XEL",
+      "35511251.0": "Jaguar F-Pace",
+      "35511301.0": "Jaguar E-Pace",
+      "35511999.0": "Jaguar Other",
+      "36015051.0": "Jeep Cherokee",
+      "36015151.0": "Jeep Renegade",
+      "36015201.0": "Jeep Compass",
+      "36015252.0": "Jeep Grand Commander",
+      "36015261.0": "Jeep Grand Commander PHEV",
+      "36015999.0": "Jeep Other",
+      "38015401.0": "Ford Everest",
+      "38015451.0": "Ford Tourneo",
+      "38015452.0": "Ford Territory",
+      "38015501.0": "Ford Equator",
+      "38015502.0": "Ford Equator Sport",
+      "38015999.0": "JMC Ford Other",
+      "38512351.0": "Kia Forte",
+      "38512451.0": "Kia Sportage R",
+      "38512551.0": "Kia K5",
+      "38512552.0": "Kia K5 PHEV",
+      "38512601.0": "Kia K2",
+      "38512651.0": "Kia K3",
+      "38512701.0": "Kia K4",
+      "38512711.0": "Kia K4 Cachet",
+      "38512721.0": "Kia Pegas",
+      "38512801.0": "Kia KX3",
+      "38512821.0": "Kia KX1",
+      "38512851.0": "Kia KX5",
+      "38512871.0": "Kia KX7",
+      "38512881.0": "Kia KX Cross",
+      "38512999.0": "Dongfeng Yueda Kia Other",
+      "39511251.0": "Land Rover Range Rover",
+      "39511252.0": "Land Rover Range Rover PHEV",
+      "39511301.0": "Land Rover Range Rover Sport",
+      "39511302.0": "Land Rover Range Rover Sport PHEV",
+      "39511351.0": "Land Rover Discovery 4",
+      "39511355.0": "Land Rover Discovery 5",
+      "39511401.0": "Land Rover Defender",
+      "39511451.0": "Land Rover Range Rover Evoque (Import)",
+      "39511471.0": "Land Rover Range Rover Evoque L",
+      "39511481.0": "Land Rover Range Rover Velar",
+      "39511501.0": "Land Rover Discovery Sport",
+      "39511521.0": "Land Rover Discovery Sport (Import)",
+      "39511999.0": "Land Rover Other",
+      "40011051.0": "Lexus ES",
+      "40011101.0": "Lexus GS",
+      "40011151.0": "Lexus IS",
+      "40011201.0": "Lexus LS",
+      "40011251.0": "Lexus LX",
+      "40011252.0": "Lexus LM",
+      "40011301.0": "Lexus RX",
+      "40011401.0": "Lexus GX",
+      "40011451.0": "Lexus CT",
+      "40011501.0": "Lexus NX",
+      "40011502.0": "Lexus UX",
+      "40011503.0": "Lexus UX BEV",
+      "40011999.0": "Lexus Other",
+      "41011101.0": "Lincoln Navigator",
+      "41011161.0": "Lincoln MKC",
+      "41011301.0": "Lincoln MKX",
+      "41011351.0": "Lincoln MKZ",
+      "41011401.0": "Lincoln Continental",
+      "41011451.0": "Lincoln Nautilus (Import)",
+      "41011452.0": "Lincoln Corsair",
+      "41011453.0": "Lincoln Aviator",
+      "41011455.0": "Lincoln Z",
+      "41011461.0": "Lincoln Nautilus",
+      "41011999.0": "Lincoln Other",
+      "42012121.0": "Mazda 6 Atenza",
+      "42012171.0": "Mazda 3 Axela",
+      "42012201.0": "Mazda CX-5",
+      "42012202.0": "Mazda CX-30",
+      "42012271.0": "Mazda CX-4",
+      "42012999.0": "Changan Mazda Other",
+      "42013121.0": "Mazda 6 Atenza",
+      "42013271.0": "Mazda CX-4",
+      "42013999.0": "FAW-Mazda Other",
+      "42511051.0": "Mercedes-Benz A-Class (Import)",
+      "42511052.0": "Mercedes-Benz A-Class",
+      "42511101.0": "Mercedes-Benz C-Class",
+      "42511131.0": "Mercedes-Benz C-Class (Import)",
+      "42511161.0": "Mercedes-Benz CLA-Class",
+      "42511251.0": "Mercedes-Benz CLS-Class",
+      "42511301.0": "Mercedes-Benz E-Class",
+      "42511302.0": "Mercedes-Benz E-Class PHEV",
+      "42511331.0": "Mercedes-Benz E-Class (Import)",
+      "42511351.0": "Mercedes-Benz G-Class",
+      "42511501.0": "Mercedes-Benz S-Class",
+      "42511502.0": "Mercedes-Benz S-Class PHEV",
+      "42511503.0": "Mercedes-Benz Maybach S-Class",
+      "42511651.0": "Mercedes-Benz A-Class AMG (Import)",
+      "42511652.0": "Mercedes-Benz A-Class AMG",
+      "42511751.0": "Mercedes-Benz B-Class",
+      "42511811.0": "Mercedes-Benz GLA-Class (Import)",
+      "42511821.0": "Mercedes-Benz GLC-Class",
+      "42511822.0": "Mercedes-Benz GLC-Class (Import)",
+      "42511831.0": "Mercedes-Benz GLE-Class",
+      "42511832.0": "Mercedes-Benz GLE-Class PHEV",
+      "42511841.0": "Mercedes-Benz GLA-Class",
+      "42511861.0": "Mercedes-Benz GLB-Class",
+      "42511871.0": "Mercedes-Benz GLS-Class",
+      "42511911.0": "Mercedes-Benz C63 AMG",
+      "42511951.0": "Mercedes-Benz EQC",
+      "42511952.0": "Mercedes-Benz EQB",
+      "42511953.0": "Mercedes-Benz EQS",
+      "42511954.0": "Mercedes-Benz EQE",
+      "42511955.0": "Mercedes-Benz EQA",
+      "42511999.0": "Mercedes-Benz Other",
+      "42512101.0": "Mercedes-Benz Vito",
+      "42512201.0": "Mercedes-Benz V-Class",
+      "42512999.0": "Fujian Benz Other",
+      "42513052.0": "Denza X BEV",
+      "42513053.0": "Denza X PHEV",
+      "42513055.0": "Denza D9 PHEV",
+      "42513999.0": "Denza Other",
+      "42751051.0": "smart fortwo",
+      "42751101.0": "smart #1",
+      "42751999.0": "smart Other",
+      "43011101.0": "MINI",
+      "43011151.0": "MINI Clubman",
+      "43011201.0": "MINI Countryman",
+      "43011251.0": "MINI JCW",
+      "43011999.0": "MINI Other",
+      "43513051.0": "Mitsubishi ASX",
+      "43513201.0": "Mitsubishi Outlander",
+      "43513251.0": "Mitsubishi ECLIPSE Cross",
+      "43513999.0": "GAC Mitsubishi Other",
+      "43751101.0": "MG 7",
+      "43751201.0": "MG 6",
+      "43751202.0": "MG 6 PHEV",
+      "43751301.0": "MG 5",
+      "43751302.0": "MG 5 Scorpio",
+      "43751401.0": "MG ZS",
+      "43751402.0": "MG HS",
+      "43751403.0": "MG Linghang",
+      "43751404.0": "MG One",
+      "43751413.0": "MG Linghang PHEV",
+      "43751999.0": "MG Other",
+      "44512201.0": "Nissan Lannia",
+      "44512231.0": "Nissan Kicks",
+      "44512251.0": "Nissan Qashqai",
+      "44512351.0": "Nissan Sylphy Classic",
+      "44512361.0": "Nissan Sylphy",
+      "44512362.0": "Nissan Sylphy BEV",
+      "44512401.0": "Nissan Teana",
+      "44512451.0": "Nissan Tiida",
+      "44512551.0": "Nissan X-Trail",
+      "44512651.0": "Nissan Murano",
+      "44512999.0": "Dongfeng Nissan Other",
+      "44514071.0": "Venucia D60/D60 Plus",
+      "44514072.0": "Venucia D60/D60 Plus BEV",
+      "44514151.0": "Venucia E30",
+      "44514251.0": "Venucia T70",
+      "44514261.0": "Venucia T60",
+      "44514262.0": "Venucia T60 BEV",
+      "44514301.0": "Venucia T90",
+      "44514351.0": "Venucia M50V",
+      "44514361.0": "Venucia Star",
+      "44514371.0": "Venucia V-online",
+      "44514999.0": "Venucia Other",
+      "45512201.0": "Peugeot 408",
+      "45512251.0": "Peugeot 308",
+      "45512301.0": "Peugeot 508/508L",
+      "45512332.0": "Peugeot New 2008",
+      "45512333.0": "Peugeot e2008",
+      "45512351.0": "Peugeot 3008",
+      "45512371.0": "Peugeot 4008",
+      "45512372.0": "Peugeot 4008 PHEV",
+      "45512401.0": "Peugeot 5008",
+      "45512999.0": "Dongfeng Peugeot Other",
+      "46011051.0": "Porsche 911",
+      "46011101.0": "Porsche 911 GT",
+      "46011201.0": "Porsche Cayenne",
+      "46011202.0": "Porsche Cayenne PHEV",
+      "46011251.0": "Porsche Cayman",
+      "46011281.0": "Porsche Macan",
+      "46011301.0": "Porsche Panamera",
+      "46011302.0": "Porsche Panamera PHEV",
+      "46011351.0": "Porsche 718",
+      "46011401.0": "Porsche Taycan",
+      "46011999.0": "Porsche Other",
+      "47011001.0": "Roewe Clever EV360",
+      "47011331.0": "Roewe RX3",
+      "47011351.0": "Roewe RX5",
+      "47011352.0": "Roewe RX5 MAX",
+      "47011372.0": "Roewe eRX5 PHEV",
+      "47011373.0": "Roewe eRX5 BEV",
+      "47011374.0": "Roewe eRX5 MAX PHEV",
+      "47011381.0": "Roewe RX8",
+      "47011501.0": "Roewe i6",
+      "47011502.0": "Roewe ei6",
+      "47011512.0": "Roewe ei6 MAX PHEV",
+      "47011513.0": "Roewe iMAX8",
+      "47011521.0": "Roewe i6 MAX",
+      "47011523.0": "Roewe iMAX8 BEV",
+      "47011551.0": "Roewe ei6 MAX BEV",
+      "47011601.0": "Roewe Ei5",
+      "47011602.0": "Roewe Marvel X",
+      "47011603.0": "Roewe i5",
+      "47011999.0": "Roewe Other",
+      "47013051.0": "R Auto ER6",
+      "47013101.0": "R Auto Marvel R",
+      "47013201.0": "R Auto F7",
+      "47013999.0": "R Auto Other",
+      "52011051.0": "Skoda Fabia",
+      "52011151.0": "Skoda Octavia",
+      "52011221.0": "Skoda Superb",
+      "52011251.0": "Skoda Rapid",
+      "52011351.0": "Skoda Kodiaq",
+      "52011352.0": "Skoda Kodiaq GT",
+      "52011361.0": "Skoda Karoq",
+      "52011371.0": "Skoda Kamiq",
+      "52011999.0": "Skoda Other",
+      "52511471.0": "Soueast DX3",
+      "52511472.0": "Soueast DX3 BEV",
+      "52511501.0": "Soueast DX7",
+      "52511511.0": "Soueast DX5",
+      "52511999.0": "Soueast Other",
+      "54011051.0": "Subaru Forester",
+      "54011151.0": "Subaru Legacy",
+      "54011201.0": "Subaru Outback",
+      "54011401.0": "Subaru XV",
+      "54011999.0": "Subaru Other",
+      "54811051.0": "Tesla Model S",
+      "54811101.0": "Tesla Model X",
+      "54811102.0": "Tesla Model Y",
+      "54811201.0": "Tesla Model 3 (Import)",
+      "54811202.0": "Tesla Model 3",
+      "54811999.0": "Tesla Other",
+      "56511851.0": "Toyota Alphard",
+      "56512051.0": "Toyota Corolla",
+      "56512052.0": "Toyota Corolla PHEV",
+      "56512061.0": "Toyota Corolla Cross",
+      "56512151.0": "Toyota Crown",
+      "56512261.0": "Toyota Land Cruiser 200 (Import)",
+      "56512301.0": "Toyota Land Cruiser Prado",
+      "56512321.0": "Toyota Land Cruiser Prado (Import)",
+      "56512331.0": "Toyota Crown Kluger",
+      "56512341.0": "Toyota Harrier",
+      "56512352.0": "Toyota bZ3x",
+      "56512361.0": "Toyota Granvia",
+      "56512501.0": "Toyota Vios/Vios FS",
+      "56512551.0": "Toyota RAV4",
+      "56512561.0": "Toyota RAV4 PHEV",
+      "56512601.0": "Toyota IZOA",
+      "56512651.0": "Toyota Avalon",
+      "56512652.0": "Toyota Allion",
+      "56512701.0": "Toyota Vellfire",
+      "56512999.0": "FAW Toyota Other",
+      "56513111.0": "Toyota Yaris L",
+      "56513151.0": "Toyota Highlander",
+      "56513152.0": "Toyota Wildlander",
+      "56513153.0": "Toyota Wildlander PHEV",
+      "56513154.0": "Toyota Frontlander",
+      "56513161.0": "Toyota Venza",
+      "56513211.0": "Toyota Sienna",
+      "56513301.0": "Toyota Levin",
+      "56513302.0": "Toyota Levin PHEV",
+      "56513351.0": "Toyota Camry 8",
+      "56513401.0": "Toyota C-HR",
+      "56513411.0": "Toyota C-HR BEV",
+      "56513451.0": "Toyota Levin GT",
+      "56513501.0": "Toyota iA5",
+      "56513999.0": "GAC Toyota Other",
+      "57011201.0": "Volkswagen Sharan",
+      "57011251.0": "Volkswagen Touareg",
+      "57011551.0": "Volkswagen Multivan",
+      "57011601.0": "Volkswagen Tiguan (Import)",
+      "57011651.0": "Volkswagen Golf (Import)",
+      "57011751.0": "Volkswagen Caravelle",
+      "57011999.0": "Volkswagen Other",
+      "57012051.0": "Volkswagen Bora",
+      "57012052.0": "Volkswagen Bora BEV",
+      "57012161.0": "Volkswagen Golf",
+      "57012162.0": "Volkswagen Golf BEV",
+      "57012181.0": "Volkswagen Golf Sportsvan",
+      "57012251.0": "Volkswagen Magotan",
+      "57012252.0": "Volkswagen Magotan GTE",
+      "57012301.0": "Volkswagen Sagitar",
+      "57012351.0": "Volkswagen CC",
+      "57012401.0": "Volkswagen C-TREK",
+      "57012501.0": "Volkswagen T-ROC",
+      "57012502.0": "Volkswagen Tayron",
+      "57012503.0": "Volkswagen Tayron GTE",
+      "57012504.0": "Volkswagen Tacqua",
+      "57012505.0": "Volkswagen Talagon",
+      "57012506.0": "Volkswagen Tavendor",
+      "57012522.0": "Volkswagen Tayron X",
+      "57012601.0": "Volkswagen ID.4 Crozz",
+      "57012602.0": "Volkswagen ID.6 Crozz",
+      "57012999.0": "FAW-Volkswagen Other",
+      "57013161.0": "Volkswagen Lavida",
+      "57013162.0": "Volkswagen Lavida BEV",
+      "57013163.0": "Volkswagen Lavida XR",
+      "57013201.0": "Volkswagen ID.4 X",
+      "57013202.0": "Volkswagen ID.6 X",
+      "57013203.0": "Volkswagen ID.3",
+      "57013301.0": "Volkswagen Polo",
+      "57013352.0": "Volkswagen Santana",
+      "57013561.0": "Volkswagen Touran L",
+      "57013651.0": "Volkswagen Tiguan",
+      "57013661.0": "Volkswagen Tiguan L",
+      "57013662.0": "Volkswagen Tiguan L PHEV",
+      "57013663.0": "Volkswagen Tiguan X",
+      "57013671.0": "Volkswagen Tharu",
+      "57013672.0": "Volkswagen T-CROSS",
+      "57013681.0": "Volkswagen Viloran",
+      "57013701.0": "Volkswagen Passat",
+      "57013702.0": "Volkswagen Passat PHEV",
+      "57013751.0": "Volkswagen Lamando/Lamando L",
+      "57013801.0": "Volkswagen Teramont",
+      "57013811.0": "Volkswagen Teramont X",
+      "57013851.0": "Volkswagen Phideon",
+      "57013999.0": "SAIC Volkswagen Other",
+      "57015101.0": "Jetta VS5",
+      "57015102.0": "Jetta VS7",
+      "57015201.0": "Jetta VA3",
+      "57015999.0": "Jetta Other",
+      "57511221.0": "Volvo S60",
+      "57511222.0": "Volvo S60 PHEV",
+      "57511351.0": "Volvo S90 (Import)",
+      "57511355.0": "Volvo S90",
+      "57511356.0": "Volvo S90 PHEV",
+      "57511381.0": "Volvo V60",
+      "57511401.0": "Volvo XC90 (Import)",
+      "57511402.0": "Volvo XC90 PHEV (Import)",
+      "57511451.0": "Volvo XC60",
+      "57511452.0": "Volvo XC60 PHEV",
+      "57511461.0": "Volvo XC60 (Import)",
+      "57511481.0": "Volvo XC40",
+      "57511483.0": "Volvo C40",
+      "57511999.0": "Volvo Other",
+      "58011351.0": "Wuling Sunshine",
+      "58011452.0": "Wuling Hongguang Plus",
+      "58011453.0": "Wuling Victory",
+      "58011454.0": "Wuling Hongguang V",
+      "58011472.0": "Wuling Hongguang S",
+      "58011476.0": "Wuling Hongguang S3",
+      "58011481.0": "Wuling Rongguang V",
+      "58011501.0": "Wuling Zhengcheng",
+      "58011502.0": "Wuling Hongguang MINI",
+      "58011505.0": "Wuling Bingo",
+      "58011601.0": "Wuling Xingchen",
+      "58011602.0": "Wuling Jiachen",
+      "58011621.0": "Wuling Xingchi",
+      "58011999.0": "Wuling Other",
+      "58012011.0": "Baojun 310",
+      "58012015.0": "Baojun 310W",
+      "58012016.0": "Baojun 360",
+      "58012020.0": "Baojun 510",
+      "58012023.0": "Baojun 530",
+      "58012026.0": "Baojun 560",
+      "58012027.0": "Baojun RM-5",
+      "58012028.0": "Baojun RS-5",
+      "58012029.0": "Baojun RS-3",
+      "58012030.0": "Baojun RS-7",
+      "58012151.0": "Baojun 730",
+      "58012201.0": "Baojun RC-5",
+      "58012202.0": "Baojun RC-6",
+      "58012301.0": "Baojun E100",
+      "58012302.0": "Baojun E200",
+      "58012303.0": "Baojun E300",
+      "58012304.0": "Baojun KiWi",
+      "58012306.0": "Baojun Yep",
+      "58012999.0": "Baojun Other",
+      "63511041.0": "GAC Trumpchi GA4",
+      "63511061.0": "GAC Trumpchi GA6",
+      "63511065.0": "GAC Trumpchi GA8",
+      "63511071.0": "GAC Trumpchi Empow",
+      "63511075.0": "GAC Trumpchi GS3",
+      "63511076.0": "GAC Trumpchi GS3 Yingsu",
+      "63511081.0": "GAC Trumpchi GS4",
+      "63511082.0": "GAC Trumpchi GS4 PHEV",
+      "63511083.0": "GAC Trumpchi GS4 Plus",
+      "63511101.0": "GAC Trumpchi GS5",
+      "63511191.0": "GAC Trumpchi GS7",
+      "63511201.0": "GAC Trumpchi GS8",
+      "63511251.0": "GAC Trumpchi Emkoo",
+      "63511301.0": "GAC Trumpchi M8",
+      "63511302.0": "GAC Trumpchi M6/M6 Pro",
+      "63511311.0": "GAC Trumpchi All New M8",
+      "63511501.0": "GAC Trumpchi E9 PHEV",
+      "63511999.0": "GAC Trumpchi Other",
+      "63521011.0": "Aion S",
+      "63521012.0": "Aion LX",
+      "63521013.0": "Aion V/V Plus",
+      "63521014.0": "Aion Y/Y Plus",
+      "63521021.0": "Trumpchi GE3",
+      "63521022.0": "Aion S Plus",
+      "63521999.0": "Aion Other",
+      "65511051.0": "Maxus G10",
+      "65511052.0": "Maxus G10 BEV",
+      "65511053.0": "Maxus G20",
+      "65511054.0": "Maxus G50",
+      "65511101.0": "Maxus D90",
+      "65511102.0": "Maxus D60",
+      "65511999.0": "Maxus Other",
+      "66011031.0": "Borgward BX5",
+      "66011051.0": "Borgward BX7",
+      "66011052.0": "Borgward BXi7",
+      "66011999.0": "Borgward Other",
+      "68511101.0": "NIO ES8",
+      "68511151.0": "NIO ES6",
+      "68511161.0": "NIO ES7",
+      "68511201.0": "NIO EVE",
+      "68511202.0": "NIO EP9",
+      "68511301.0": "NIO EC6",
+      "68511401.0": "NIO ET7",
+      "68511402.0": "NIO ET5/ET5T",
+      "68511999.0": "NIO Other",
+      "69011101.0": "Jetour X70",
+      "69011102.0": "Jetour X90",
+      "69011111.0": "Jetour X70S",
+      "69011112.0": "Jetour X90 Plus",
+      "69011121.0": "Jetour X70M",
+      "69011131.0": "Jetour X70 Coupe",
+      "69011141.0": "Jetour X70 Plus",
+      "69011142.0": "Jetour X70 Pro",
+      "69011151.0": "Jetour Traveller",
+      "69011201.0": "Jetour Angola",
+      "69011999.0": "Jetour Other",
+      "69211011.0": "AVATR 11",
+      "69211012.0": "AVATR 12",
+      "69211999.0": "AVATR Other",
+      "69512101.0": "AITO M5 (REEV)",
+      "69512102.0": "AITO M7 (REEV)",
+      "69512121.0": "AITO M5 BEV",
+      "69512999.0": "AITO Other",
+      "69611101.0": "Letin Mengo",
+      "69611999.0": "Letin Other",
+      "69711101.0": "Maple 80V",
+      "69711999.0": "Livan Auto Other",
+      "69811101.0": "HiPhi X",
+      "69811102.0": "HiPhi Z",
+      "69811999.0": "HiPhi Other",
+      "69911101.0": "ZEEKR 001",
+      "69911102.0": "ZEEKR 009",
+      "69911103.0": "ZEEKR X",
+      "69911999.0": "ZEEKR Other",
+      "71011101.0": "Weltmeister EX5",
+      "71011102.0": "Weltmeister EX6",
+      "71011151.0": "Weltmeister E.5",
+      "71011201.0": "Weltmeister W6",
+      "71011999.0": "Weltmeister Other",
+      "72011051.0": "NETA N01",
+      "72011052.0": "NETA U",
+      "72011053.0": "NETA V",
+      "72011055.0": "NETA S (REEV)",
+      "72011999.0": "NETA Other",
+      "73011101.0": "HYCAN Z03",
+      "73011201.0": "HYCAN A06",
+      "73011999.0": "HYCAN Other",
+      "75011101.0": "Enovate ME5 (REEV)",
+      "75011999.0": "Enovate Other",
+      "76011101.0": "IM L7",
+      "76011103.0": "IM LS7",
+      "76011999.0": "IM Other",
+      "81011101.0": "Xpeng G3/G3i",
+      "81011151.0": "Xpeng G9",
+      "81011152.0": "Xpeng G6",
+      "81011201.0": "Xpeng P7",
+      "81011202.0": "Xpeng P5",
+      "81011999.0": "Xpeng Other",
+      "82011101.0": "Li ONE (REEV)",
+      "82011102.0": "Li L9 (REEV)",
+      "82011112.0": "Li L8 (REEV)",
+      "82011121.0": "Li L7 (REEV)",
+      "82011999.0": "Li Other",
+      "83011101.0": "SOL E20X",
+      "83011102.0": "SOL E10X",
+      "83011103.0": "SOL E50A",
+      "83011121.0": "SOL A5",
+      "83011131.0": "SOL X8",
+      "83011151.0": "SOL QX",
+      "83011999.0": "SOL Other",
+      "85011051.0": "Leap Motor T03",
+      "85011101.0": "Leap Motor S01",
+      "85011121.0": "Leap Motor C11 BEV",
+      "85011122.0": "Leap Motor C01 BEV",
+      "85011999.0": "Leap Motor Other",
+      "86011101.0": "Linbox BOX",
+      "86011999.0": "Linbox Other",
+      "88011101.0": "Voyah Free (REEV)",
+      "88011102.0": "Voyah Free BEV",
+      "88011201.0": "Voyah Dreamer PHEV",
+      "88011202.0": "Voyah Dreamer BEV",
+      "88011999.0": "Voyah Other",
+      "99999999.0": "Other"
+    }
+  },
+  {
+    "name": "YPV_03_MAKE",
+    "label": "YPV_03_MAKE: Last Vehicle Acquired - Make",
+    "dtype": "float64",
+    "missing_rate": 0.7503270604810305,
+    "value_labels": {
+      "10511.0": "Acura",
+      "11511.0": "Audi",
+      "11512.0": "SAIC Audi",
+      "12512.0": "BEIJING",
+      "12515.0": "BAIC BJEV",
+      "12516.0": "BAICORV",
+      "13011.0": "BMW",
+      "13511.0": "Buick",
+      "14011.0": "BYD",
+      "14511.0": "Cadillac",
+      "15011.0": "CHANGAN",
+      "15012.0": "OSHAN",
+      "15013.0": "KAICENE",
+      "15014.0": "DEEPAL",
+      "16012.0": "Haval",
+      "16013.0": "WEY",
+      "16014.0": "ORA",
+      "16015.0": "TANK",
+      "18011.0": "Chery",
+      "18015.0": "Qoros",
+      "18016.0": "Chery New Energy",
+      "18017.0": "EXEED",
+      "18513.0": "Chevrolet",
+      "19512.0": "Dongfeng Citroen",
+      "19611.0": "Cowin Ruto",
+      "22011.0": "Dongfeng",
+      "22012.0": "Dongfeng Forthing",
+      "22014.0": "Dongfeng Fengshen",
+      "22017.0": "Dongfeng Fengon",
+      "23011.0": "FAW Besturn",
+      "23012.0": "FAW Hongqi",
+      "26011.0": "Ford",
+      "26012.0": "Changan Ford",
+      "28011.0": "Geely",
+      "28016.0": "Lynk & Co",
+      "28017.0": "Geometry",
+      "31512.0": "Dongfeng Honda",
+      "31513.0": "GAC Honda",
+      "33012.0": "Beijing Hyundai",
+      "33511.0": "Infiniti",
+      "35011.0": "JAC",
+      "35511.0": "Jaguar",
+      "36015.0": "GAC FCA Jeep",
+      "38015.0": "JMC Ford",
+      "38512.0": "Dongfeng Yueda Kia",
+      "39511.0": "Land Rover",
+      "40011.0": "Lexus",
+      "41011.0": "Lincoln",
+      "42012.0": "Changan Mazda",
+      "42013.0": "FAW-Mazda",
+      "42511.0": "Mercedes-Benz",
+      "42512.0": "Fujian Benz",
+      "42513.0": "Denza",
+      "42751.0": "smart",
+      "43011.0": "MINI",
+      "43513.0": "GAC Mitsubishi",
+      "43751.0": "MG",
+      "44512.0": "Dongfeng Nissan",
+      "44514.0": "Venucia",
+      "45512.0": "Dongfeng Peugeot",
+      "46011.0": "Porsche",
+      "47011.0": "Roewe",
+      "47013.0": "R Auto",
+      "52011.0": "Skoda",
+      "52511.0": "Soueast",
+      "54011.0": "Subaru",
+      "54811.0": "Tesla",
+      "56512.0": "FAW Toyota",
+      "56513.0": "GAC Toyota",
+      "57011.0": "Volkswagen",
+      "57012.0": "FAW-Volkswagen",
+      "57013.0": "SAIC Volkswagen",
+      "57015.0": "Jetta",
+      "57511.0": "Volvo",
+      "58011.0": "Wuling",
+      "58012.0": "Baojun",
+      "63511.0": "GAC Trumpchi",
+      "63521.0": "GAC AION",
+      "65511.0": "Maxus",
+      "66011.0": "Borgward",
+      "68511.0": "NIO",
+      "69011.0": "Jetour",
+      "69211.0": "AVATR",
+      "69512.0": "AITO",
+      "69611.0": "Letin",
+      "69711.0": "Livan Auto",
+      "69811.0": "Hiphi",
+      "69911.0": "ZEEKR",
+      "71011.0": "Weltmeister",
+      "72011.0": "NETA",
+      "73011.0": "HYCAN",
+      "75011.0": "Enovate",
+      "76011.0": "IM",
+      "81011.0": "XPeng",
+      "82011.0": "Li Auto",
+      "83011.0": "SOL",
+      "85011.0": "Leap Motor",
+      "86011.0": "Linbox",
+      "88011.0": "Voyah",
+      "99999.0": "Other"
+    }
+  },
+  {
+    "name": "YPV_03_SERIES",
+    "label": "YPV_03_SERIES: Last Vehicle Acquired - Series",
+    "dtype": "float64",
+    "missing_rate": 0.7503270604810305,
+    "value_labels": {
+      "10511301.0": "Acura RDX",
+      "10511401.0": "Acura CDX",
+      "10511999.0": "Acura Other",
+      "11511201.0": "Audi A3",
+      "11511202.0": "Audi A3 (Import)",
+      "11511275.0": "Audi A4L",
+      "11511276.0": "Audi A4 (Import)",
+      "11511301.0": "Audi A5",
+      "11511351.0": "Audi A6L",
+      "11511352.0": "Audi A6 (Import)",
+      "11511353.0": "Audi A6L PHEV",
+      "11511451.0": "Audi Q7",
+      "11511452.0": "Audi Q7 PHEV",
+      "11511453.0": "Audi Q8",
+      "11511501.0": "Audi R8",
+      "11511551.0": "Audi TT",
+      "11511601.0": "Audi A8",
+      "11511651.0": "Audi Q5",
+      "11511652.0": "Audi Q5L",
+      "11511653.0": "Audi Q2L",
+      "11511654.0": "Audi Q2L e-tron",
+      "11511661.0": "Audi e-tron (Import)",
+      "11511663.0": "Audi Q4 e-tron",
+      "11511701.0": "Audi S5",
+      "11511711.0": "Audi S6",
+      "11511721.0": "Audi S7",
+      "11511801.0": "Audi A7",
+      "11511901.0": "Audi Q3",
+      "11511999.0": "Audi Other",
+      "11512101.0": "Audi A7L",
+      "11512201.0": "Audi Q5 e-tron",
+      "11512301.0": "Audi Q6",
+      "11512999.0": "SAIC Audi Other",
+      "12512121.0": "BEIJING-U5",
+      "12512301.0": "BEIJING-X5",
+      "12512311.0": "BEIJING-U7",
+      "12512321.0": "BEIJING-X3",
+      "12512331.0": "BEIJING-X7",
+      "12512332.0": "BEIJING-X7 PHEV",
+      "12512999.0": "BEIJING Other",
+      "12515022.0": "BAIC BJEV EC3",
+      "12515023.0": "BAIC BJEV EC5",
+      "12515103.0": "BAIC BJEV EU5/EU5 Plus",
+      "12515104.0": "BAIC BJEV EU7",
+      "12515302.0": "BAIC BJEV EX3",
+      "12515999.0": "BAIC BJEV Other",
+      "12516101.0": "BAICORV BJ20",
+      "12516151.0": "BAICORV BJ40",
+      "12516152.0": "BAICORV BJ60",
+      "12516201.0": "BAICORV BJ80",
+      "12516999.0": "BAICORV Other",
+      "13011051.0": "BMW 1 Series (Import)",
+      "13011052.0": "BMW 1 Series",
+      "13011071.0": "BMW 2 Series (Import)",
+      "13011081.0": "BMW 2 Series",
+      "13011101.0": "BMW 3 Series",
+      "13011102.0": "BMW 3 Series (Import)",
+      "13011131.0": "BMW 4 Series",
+      "13011151.0": "BMW 5 Series",
+      "13011152.0": "BMW 5 Series (Import)",
+      "13011153.0": "BMW 5 Series PHEV",
+      "13011201.0": "BMW 6 Series",
+      "13011202.0": "BMW 6 Series GT",
+      "13011251.0": "BMW 7 Series",
+      "13011252.0": "BMW 7 Series PHEV",
+      "13011253.0": "BMW 8 Series",
+      "13011301.0": "BMW X3 (Import)",
+      "13011302.0": "BMW X3",
+      "13011303.0": "BMW iX3",
+      "13011313.0": "BMW iX3 (Import)",
+      "13011321.0": "BMW X4",
+      "13011351.0": "BMW X5 (Import)",
+      "13011352.0": "BMW X5 PHEV",
+      "13011353.0": "BMW X5",
+      "13011371.0": "BMW X7",
+      "13011401.0": "BMW Z4",
+      "13011451.0": "BMW X6",
+      "13011501.0": "BMW X1",
+      "13011502.0": "BMW X1 (Import)",
+      "13011503.0": "BMW X1 PHEV",
+      "13011504.0": "BMW X2 (Import)",
+      "13011505.0": "BMW X2",
+      "13011551.0": "BMW M3",
+      "13011552.0": "BMW M2",
+      "13011561.0": "BMW M4",
+      "13011571.0": "BMW M5",
+      "13011641.0": "BMW 3 Series GT",
+      "13011651.0": "BMW 5 Series GT",
+      "13011701.0": "BMW i3 (Import)",
+      "13011702.0": "BMW i4",
+      "13011721.0": "BMW i3",
+      "13011731.0": "BMW i8",
+      "13011999.0": "BMW Other",
+      "13511051.0": "Buick Excelle",
+      "13511181.0": "Buick GL6",
+      "13511351.0": "Buick LaCROSSE",
+      "13511451.0": "Buick Regal",
+      "13511611.0": "Buick Velite 6 BEV",
+      "13511612.0": "Buick Velite 6 PHEV",
+      "13511613.0": "Buick Velite 7",
+      "13511614.0": "Buick Century",
+      "13511651.0": "Buick Enclave (Import)",
+      "13511701.0": "Buick Excelle GT",
+      "13511711.0": "Buick Excelle GX",
+      "13511755.0": "Buick All New GL8",
+      "13511801.0": "Buick Encore",
+      "13511802.0": "Buick Encore GX",
+      "13511851.0": "Buick Envision",
+      "13511852.0": "Buick Enclave",
+      "13511853.0": "Buick Envision S",
+      "13511854.0": "Buick Envision Plus",
+      "13511855.0": "Buick Envista",
+      "13511901.0": "Buick Verano",
+      "13511902.0": "Buick Verano Pro/Pro GS",
+      "13511999.0": "Buick Other",
+      "14011051.0": "BYD F3",
+      "14011151.0": "BYD D1",
+      "14011161.0": "BYD Dolphin",
+      "14011162.0": "BYD Destroyer05",
+      "14011163.0": "BYD Seal",
+      "14011164.0": "BYD Frigate 07",
+      "14011165.0": "BYD Seagull",
+      "14011421.0": "BYD e1",
+      "14011431.0": "BYD e2",
+      "14011433.0": "BYD e3",
+      "14011441.0": "BYD e5",
+      "14011701.0": "BYD Qin PHEV",
+      "14011702.0": "BYD Qin BEV",
+      "14011703.0": "BYD Qin Pro",
+      "14011704.0": "BYD Qin Pro PHEV",
+      "14011705.0": "BYD Qin Pro BEV",
+      "14011706.0": "BYD Qin",
+      "14011721.0": "BYD Qin Plus PHEV",
+      "14011722.0": "BYD Qin Plus BEV",
+      "14011751.0": "BYD Song",
+      "14011753.0": "BYD Song PHEV",
+      "14011754.0": "BYD Song BEV",
+      "14011755.0": "BYD Song Pro",
+      "14011756.0": "BYD Song Pro PHEV",
+      "14011757.0": "BYD Song Pro BEV",
+      "14011761.0": "BYD Song MAX",
+      "14011762.0": "BYD Song MAX PHEV",
+      "14011763.0": "BYD Song MAX BEV",
+      "14011765.0": "BYD Song Plus",
+      "14011766.0": "BYD Song Plus PHEV",
+      "14011767.0": "BYD Song Plus BEV",
+      "14011771.0": "BYD Tang PHEV",
+      "14011772.0": "BYD Tang",
+      "14011773.0": "BYD Tang BEV",
+      "14011781.0": "BYD Yuan",
+      "14011782.0": "BYD Yuan BEV",
+      "14011783.0": "BYD Yuan Pro",
+      "14011784.0": "BYD Yuan Plus",
+      "14011791.0": "BYD Han BEV",
+      "14011792.0": "BYD Han PHEV",
+      "14011999.0": "BYD Other",
+      "14511151.0": "Cadillac Escalade",
+      "14511401.0": "Cadillac XTS",
+      "14511431.0": "Cadillac XT5",
+      "14511432.0": "Cadillac XT6",
+      "14511441.0": "Cadillac XT4",
+      "14511461.0": "Cadillac ATS-L",
+      "14511501.0": "Cadillac CT6",
+      "14511502.0": "Cadillac CT6 PHEV",
+      "14511504.0": "Cadillac CT4",
+      "14511505.0": "Cadillac CT5",
+      "14511601.0": "Cadillac LYRIQ",
+      "14511999.0": "Cadillac Other",
+      "15011251.0": "Changan Benni",
+      "15011253.0": "Changan Benni EV",
+      "15011254.0": "Changan Benni E-Star",
+      "15011603.0": "Changan Alsvin 3",
+      "15011631.0": "Changan Alsvin V7",
+      "15011801.0": "Changan CX20",
+      "15011851.0": "Changan Eado",
+      "15011853.0": "Changan Eado Plus",
+      "15011871.0": "Changan Eado XT",
+      "15011872.0": "Changan Eado DT",
+      "15011873.0": "Changan Eado EV",
+      "15011874.0": "Changan Eado ET",
+      "15011891.0": "Changan CS15",
+      "15011892.0": "Changan CS15 BEV",
+      "15011901.0": "Changan CS35",
+      "15011902.0": "Changan CS35 Plus",
+      "15011921.0": "Changan CS55",
+      "15011922.0": "Changan CS55 Plus",
+      "15011941.0": "Changan CS75",
+      "15011942.0": "Changan CS75 PHEV",
+      "15011943.0": "Changan CS85 Coupe",
+      "15011944.0": "Changan CS75 Plus",
+      "15011946.0": "Changan CS95",
+      "15011951.0": "Changan Raeton",
+      "15011953.0": "Changan Raeton CC",
+      "15011954.0": "Changan CS15 E-Pro",
+      "15011955.0": "Changan CS55 E-Rock",
+      "15011956.0": "Changan Lumin",
+      "15011957.0": "Changan Raeton Plus",
+      "15011981.0": "Changan Linmax",
+      "15011982.0": "Changan UNI-T",
+      "15011983.0": "Changan UNI-K",
+      "15011984.0": "Changan Yida",
+      "15011986.0": "Changan UNI-K PHEV",
+      "15011987.0": "Changan UNI-V",
+      "15011988.0": "Changan UNI-V iDD",
+      "15011999.0": "Changan Car Other",
+      "15012786.0": "Oshan A600",
+      "15012787.0": "Oshan X70A",
+      "15012788.0": "Oshan A800",
+      "15012789.0": "Oshan A600 BEV",
+      "15012831.0": "Oshan CX70",
+      "15012832.0": "Oshan COSMOS",
+      "15012833.0": "Oshan COSMOS BEV",
+      "15012834.0": "Oshan Kesai 3",
+      "15012835.0": "Oshan Kesai 5",
+      "15012836.0": "Oshan Kesai Pro",
+      "15012837.0": "Oshan Kesai Pro GT",
+      "15012838.0": "Oshan Z6",
+      "15012839.0": "Oshan Z6 PHEV",
+      "15012861.0": "Oshan X7",
+      "15012862.0": "Oshan X5",
+      "15012863.0": "Oshan X7 Plus",
+      "15012864.0": "Oshan X5 Plus",
+      "15012999.0": "Oshan Other",
+      "15013702.0": "Kaicene Honor S",
+      "15013999.0": "Changan Kaicheng Other",
+      "15014001.0": "DEEPAL SL03 BEV",
+      "15014002.0": "DEEPAL SL03 (REEV)",
+      "15014102.0": "DEEPAL S7 (REEV)",
+      "15014999.0": "DEEPAL Other",
+      "16012071.0": "Haval H4",
+      "16012101.0": "Haval H5",
+      "16012151.0": "Haval H6",
+      "16012152.0": "Haval H6 PHEV",
+      "16012155.0": "Haval H6 Coupe",
+      "16012156.0": "Haval H6s",
+      "16012171.0": "Haval H7",
+      "16012201.0": "Haval H8",
+      "16012251.0": "Haval H9",
+      "16012301.0": "Haval F5",
+      "16012302.0": "Haval F7",
+      "16012312.0": "Haval F7x",
+      "16012401.0": "Haval M6 Plus",
+      "16012451.0": "Haval Big Dog",
+      "16012452.0": "Haval Chitu",
+      "16012453.0": "Haval Kugou",
+      "16012461.0": "Haval First Love",
+      "16012471.0": "Haval XY",
+      "16012472.0": "Haval Xiaolong Max PHEV",
+      "16012999.0": "Haval Other",
+      "16013201.0": "WEY VV5",
+      "16013301.0": "WEY VV7",
+      "16013302.0": "WEY VV7 PHEV",
+      "16013311.0": "WEY VV7 GT",
+      "16013331.0": "WEY Mocha",
+      "16013351.0": "WEY Latte DHT",
+      "16013352.0": "WEY Latte DHT PHEV",
+      "16013353.0": "WEY Lanshan DHT PHEV",
+      "16013401.0": "WEY VV6",
+      "16013999.0": "WEY Other",
+      "16014101.0": "ORA iQ",
+      "16014201.0": "ORA R1",
+      "16014211.0": "ORA R2",
+      "16014301.0": "ORA Haomao",
+      "16014401.0": "ORA Ballet Cat",
+      "16014501.0": "ORA Lightning Cat",
+      "16014999.0": "ORA Other",
+      "16015321.0": "TANK 300",
+      "16015322.0": "TANK 500",
+      "16015999.0": "TANK Other",
+      "18011155.0": "Chery Arrizo 3",
+      "18011158.0": "Chery Arrizo 5",
+      "18011159.0": "Chery Arrizo GX",
+      "18011161.0": "Chery Arrizo 7",
+      "18011162.0": "Chery Arrizo 8",
+      "18011181.0": "Chery Arrizo M7",
+      "18011258.0": "Chery Arrizo 5 Plus",
+      "18011325.0": "Chery Fulwin2",
+      "18011501.0": "Chery Omdda 5",
+      "18011502.0": "CheryExploration 06",
+      "18011605.0": "Chery Tiggo 3",
+      "18011608.0": "Chery Tiggo 3x",
+      "18011609.0": "Chery Tiggo 3x Plus",
+      "18011611.0": "Chery Tiggo 5",
+      "18011618.0": "Chery Tiggo 5x",
+      "18011621.0": "Chery Tiggo 7",
+      "18011622.0": "Chery Tiggo 7 Plus",
+      "18011631.0": "Chery Tiggo 8",
+      "18011632.0": "Chery Tiggo 8 Plus",
+      "18011641.0": "Chery Tiggo 8 Plus PHEV",
+      "18011651.0": "Chery Tiggo 8 Pro",
+      "18011661.0": "Chery Tiggo 9",
+      "18011845.0": "Chery E3",
+      "18011999.0": "Chery Other",
+      "18015051.0": "Qoros 3",
+      "18015201.0": "Qoros 3 SUV",
+      "18015251.0": "Qoros 5",
+      "18015252.0": "Qoros 7",
+      "18015999.0": "Qoros Other",
+      "18016101.0": "Chery eQ1",
+      "18016201.0": "Chery Tiggo 3xe",
+      "18016251.0": "Chery Arrizo 5e",
+      "18016301.0": "Chery QQ Ice cream",
+      "18016999.0": "Chery New Energy Other",
+      "18017051.0": "EXEED LX",
+      "18017052.0": "EXEED LX PHEV",
+      "18017101.0": "EXEED TX",
+      "18017102.0": "EXEED TXL",
+      "18017151.0": "EXEED VX",
+      "18017152.0": "EXEED Yaoguang",
+      "18017999.0": "EXEED Other",
+      "18513401.0": "Chevrolet Malibu",
+      "18513431.0": "Chevrolet Malibu XL",
+      "18513451.0": "Chevrolet Trax",
+      "18513501.0": "Chevrolet Equinox",
+      "18513552.0": "Chevrolet Onix",
+      "18513601.0": "Chevrolet Orlando",
+      "18513651.0": "Chevrolet Monza",
+      "18513701.0": "Chevrolet Menlo",
+      "18513751.0": "Chevrolet Seeker",
+      "18513999.0": "Chevrolet Other",
+      "19512061.0": "Citroen C4",
+      "19512161.0": "Citroen C-Elysee",
+      "19512162.0": "Citroen e C-Elysee",
+      "19512381.0": "Citroen C4 L",
+      "19512401.0": "Citroen C5",
+      "19512431.0": "Citroen C6",
+      "19512451.0": "Citroen C3-XR",
+      "19512501.0": "Citroen C5 Aircross",
+      "19512502.0": "Citroen C4 Aircross",
+      "19512511.0": "Citroen C5 X",
+      "19512999.0": "Dongfeng Citroen Other",
+      "19611051.0": "Cowin C3",
+      "19611101.0": "Cowin X3",
+      "19611151.0": "Cowin V3",
+      "19611161.0": "Cowin Showjet",
+      "19611162.0": "Cowin Ruto Showjet Pro BEV",
+      "19611171.0": "Cowin Ruto Xuandu",
+      "19611999.0": "Cowin Ruto Other",
+      "22011331.0": "Dongfeng Junfeng EX1",
+      "22011999.0": "Dongfeng Other",
+      "22012051.0": "Dongfeng Forthing Lingzhi",
+      "22012052.0": "Dongfeng Forthing Lingzhi M5EV",
+      "22012053.0": "Dongfeng Forthing Lingzhi Plus",
+      "22012121.0": "Dongfeng Forthing Joyear X3",
+      "22012131.0": "Dongfeng Forthing Joyear X5",
+      "22012151.0": "Dongfeng Forthing Joyear S50",
+      "22012152.0": "Dongfeng Forthing Joyear S50 BEV",
+      "22012201.0": "Dongfeng Forthing CM7",
+      "22012251.0": "Dongfeng Forthing S500",
+      "22012301.0": "Dongfeng Forthing SX6",
+      "22012401.0": "Dongfeng Forthing T5",
+      "22012411.0": "Dongfeng Forthing T5L",
+      "22012421.0": "Dongfeng Forthing T5 EVO",
+      "22012431.0": "Dongfeng Forthing U-Tour",
+      "22012999.0": "Dongfeng Forthing Other",
+      "22014081.0": "Dongfeng Fengshen A30",
+      "22014101.0": "Dongfeng Fengshen A60",
+      "22014131.0": "Dongfeng Fengshen AX3",
+      "22014141.0": "Dongfeng Fengshen AX5",
+      "22014151.0": "Dongfeng Fengshen AX7",
+      "22014351.0": "Dongfeng Fengshen E70/E70 Pro",
+      "22014451.0": "Dongfeng Fengshen Yixuan",
+      "22014452.0": "Dongfeng Fengshen Yixuan GS",
+      "22014453.0": "Dongfeng Fengshen Yixuan MAX",
+      "22014501.0": "Dongfeng Fengshen Haoji",
+      "22014502.0": "Dongfeng Fengshen Haohan",
+      "22014999.0": "Dongfeng Fengshen Other",
+      "22017051.0": "Dongfeng Fengon 330",
+      "22017151.0": "Dongfeng Fengon 370",
+      "22017181.0": "Dongfeng Fengon S560",
+      "22017201.0": "Dongfeng Fengon 580",
+      "22017211.0": "Dongfeng Fengon 580 Pro",
+      "22017221.0": "Dongfeng Fengon 500",
+      "22017251.0": "Dongfeng Fengon ix5",
+      "22017252.0": "Dongfeng Fengon ix7",
+      "22017261.0": "Dongfeng Fengon E1",
+      "22017262.0": "Dongfeng Fengon E3 BEV",
+      "22017263.0": "Dongfeng Fengon E3 (REEV)",
+      "22017264.0": "Dongfeng Fengon MINI",
+      "22017999.0": "Dongfeng Fengon Other",
+      "23011051.0": "FAW Besturn B70",
+      "23011101.0": "FAW Besturn B50",
+      "23011151.0": "FAW Besturn B30",
+      "23011152.0": "FAW Besturn B30 BEV",
+      "23011201.0": "FAW Besturn B90",
+      "23011221.0": "FAW Besturn X40",
+      "23011222.0": "FAW Besturn X40 BEV",
+      "23011251.0": "FAW Besturn X80",
+      "23011301.0": "FAW Besturn T77",
+      "23011302.0": "FAW Besturn T99",
+      "23011303.0": "FAW Besturn T33",
+      "23011304.0": "FAW Besturn T55",
+      "23011312.0": "FAW Besturn T90",
+      "23011401.0": "FAW Besturn NAT",
+      "23011999.0": "FAW Besturn Other",
+      "23012201.0": "Hongqi H7",
+      "23012205.0": "Hongqi H5",
+      "23012209.0": "Hongqi H9",
+      "23012251.0": "Hongqi HS5",
+      "23012252.0": "Hongqi HS3",
+      "23012271.0": "Hongqi HS7",
+      "23012301.0": "Hongqi E-HS3",
+      "23012351.0": "Hongqi E-HS9",
+      "23012361.0": "Hongqi E-QM5",
+      "23012999.0": "Hongqi Other",
+      "26011252.0": "Ford Mustang Mach-E",
+      "26011999.0": "Ford Other",
+      "26012101.0": "Ford Focus Classic",
+      "26012211.0": "Ford Mondeo",
+      "26012212.0": "Ford Mondeo PHEV",
+      "26012301.0": "Ford Focus",
+      "26012311.0": "Ford Focus Active",
+      "26012351.0": "Ford Kuga",
+      "26012401.0": "Ford Ecosport",
+      "26012451.0": "Ford Escort",
+      "26012501.0": "Ford Edge/Edge L",
+      "26012502.0": "Ford Escape",
+      "26012601.0": "Ford Taurus",
+      "26012602.0": "Ford Explorer",
+      "26012603.0": "Ford EVOS",
+      "26012999.0": "Changan Ford Other",
+      "28011071.0": "Geely Vision",
+      "28011075.0": "Geely Vision X6/X6 Pro",
+      "28011076.0": "Geely Vision S1",
+      "28011078.0": "Geely Vision X1",
+      "28011079.0": "Geely Vision X3",
+      "28011212.0": "Geely Emgrand",
+      "28011213.0": "Geely Emgrand S",
+      "28011216.0": "Geely Emgrand GS",
+      "28011217.0": "Geely Emgrand GL",
+      "28011219.0": "Geely Emgrand Gse",
+      "28011227.0": "Geely Emgrand GL PHEV",
+      "28011228.0": "Geely Emgrand PHEV",
+      "28011237.0": "Geely Emgrand L",
+      "28011238.0": "Geely Emgrand BEV",
+      "28011247.0": "Geely Emgrand L PHEV",
+      "28011321.0": "Geely Borui",
+      "28011331.0": "Geely Boyue/BoyueX/Boyyue COOL",
+      "28011332.0": "Geely Boyue L",
+      "28011342.0": "Geely Borui ePro",
+      "28011502.0": "Geely Galaxy L7 PHEV",
+      "28011561.0": "Geely ICON",
+      "28011751.0": "Geely Binrui/Binrui COOL",
+      "28011752.0": "Geely Binyue/Binyue COOL",
+      "28011753.0": "Geely Binyue PHEV",
+      "28011801.0": "Geely Jiaji",
+      "28011802.0": "Geely Jiaji PHEV",
+      "28011851.0": "Geely Xingyue",
+      "28011852.0": "Geely Xingyue PHEV",
+      "28011853.0": "Geely Haoyue",
+      "28011854.0": "Geely Preface",
+      "28011855.0": "Geely Panda mini",
+      "28011856.0": "Geely Xingyue L",
+      "28011863.0": "Geely Haoyue L",
+      "28011999.0": "Geely Other",
+      "28016051.0": "Lynk & Co 01",
+      "28016052.0": "Lynk & Co 02",
+      "28016053.0": "Lynk & Co 01 PHEV",
+      "28016054.0": "Lynk & Co 02 PHEV",
+      "28016101.0": "Lynk & Co 03",
+      "28016102.0": "Lynk & Co 03 PHEV",
+      "28016105.0": "Lynk & Co 05",
+      "28016106.0": "Lynk & Co 06",
+      "28016115.0": "Lynk & Co 05 PHEV",
+      "28016116.0": "Lynk & Co 06 PHEV",
+      "28016999.0": "Lynk & Co Other",
+      "28017051.0": "Geometry A/A Pro",
+      "28017052.0": "Geometry C",
+      "28017053.0": "Geometry T",
+      "28017055.0": "Geometry E",
+      "28017999.0": "Geometry Other",
+      "31512051.0": "Honda Civic",
+      "31512101.0": "Honda CR-V",
+      "31512102.0": "Honda CR-V PHEV",
+      "31512121.0": "Honda UR-V",
+      "31512131.0": "Honda XR-V",
+      "31512251.0": "Honda Elysion",
+      "31512351.0": "Honda Jade",
+      "31512421.0": "Honda Inspire",
+      "31512431.0": "Honda ENVIX",
+      "31512451.0": "Honda X-NV",
+      "31512452.0": "Honda M-NV",
+      "31512461.0": "Honda LIFE",
+      "31512462.0": "Honda HR-V",
+      "31512601.0": "Honda e:NS1",
+      "31512999.0": "Dongfeng Honda Other",
+      "31513061.0": "Honda Accord",
+      "31513201.0": "Honda Fit",
+      "31513251.0": "Honda Odyssey",
+      "31513301.0": "Honda City Fengfan",
+      "31513451.0": "Honda Crider",
+      "31513501.0": "Honda Vezel",
+      "31513551.0": "Honda Avancier",
+      "31513552.0": "Honda Breeze",
+      "31513562.0": "Honda INTEGRA",
+      "31513601.0": "Honda e:NP1",
+      "31513611.0": "Honda ZR-V",
+      "31513999.0": "GAC Honda Other",
+      "33012251.0": "Hyundai Tucson L",
+      "33012311.0": "Hyundai Celesta",
+      "33012491.0": "Hyundai ix25",
+      "33012501.0": "Hyundai ix35",
+      "33012502.0": "Hyundai Mufasa",
+      "33012571.0": "Hyundai Reina",
+      "33012603.0": "Hyundai Sonata Ten",
+      "33012611.0": "Hyundai Sonata PHEV",
+      "33012655.0": "Hyundai Lingdong Elantra",
+      "33012657.0": "Hyundai Elantra Seven",
+      "33012701.0": "Hyundai Santa Fe",
+      "33012751.0": "Hyundai Mistra",
+      "33012801.0": "Hyundai Yuena Verna",
+      "33012851.0": "Hyundai Lafesta",
+      "33012861.0": "Hyundai Custo",
+      "33012999.0": "Beijing Hyundai Other",
+      "33511061.0": "Infiniti QX50",
+      "33511161.0": "Infiniti Q50L",
+      "33511171.0": "Infiniti QX60 (Import)",
+      "33511201.0": "Infiniti M/Q70",
+      "33511999.0": "Infiniti Other",
+      "35011111.0": "JAC Refine M3",
+      "35011113.0": "JAC Refine M4",
+      "35011115.0": "JAC Refine M5",
+      "35011361.0": "JAC Jiayue A5",
+      "35011381.0": "JAC Refine S3",
+      "35011391.0": "JAC Refine S4",
+      "35011421.0": "JAC Refine S7",
+      "35011501.0": "JAC iEV6E",
+      "35011521.0": "JAC iEV7S",
+      "35011531.0": "JAC iEVS4",
+      "35011541.0": "JAC iEVA50",
+      "35011999.0": "JAC Other",
+      "35511031.0": "Jaguar F-TYPE",
+      "35511121.0": "Jaguar XFL",
+      "35511131.0": "Jaguar XEL",
+      "35511251.0": "Jaguar F-Pace",
+      "35511301.0": "Jaguar E-Pace",
+      "35511999.0": "Jaguar Other",
+      "36015051.0": "Jeep Cherokee",
+      "36015151.0": "Jeep Renegade",
+      "36015201.0": "Jeep Compass",
+      "36015252.0": "Jeep Grand Commander",
+      "36015261.0": "Jeep Grand Commander PHEV",
+      "36015999.0": "Jeep Other",
+      "38015401.0": "Ford Everest",
+      "38015451.0": "Ford Tourneo",
+      "38015452.0": "Ford Territory",
+      "38015501.0": "Ford Equator",
+      "38015502.0": "Ford Equator Sport",
+      "38015999.0": "JMC Ford Other",
+      "38512351.0": "Kia Forte",
+      "38512451.0": "Kia Sportage R",
+      "38512551.0": "Kia K5",
+      "38512552.0": "Kia K5 PHEV",
+      "38512601.0": "Kia K2",
+      "38512651.0": "Kia K3",
+      "38512701.0": "Kia K4",
+      "38512711.0": "Kia K4 Cachet",
+      "38512721.0": "Kia Pegas",
+      "38512801.0": "Kia KX3",
+      "38512821.0": "Kia KX1",
+      "38512851.0": "Kia KX5",
+      "38512871.0": "Kia KX7",
+      "38512881.0": "Kia KX Cross",
+      "38512999.0": "Dongfeng Yueda Kia Other",
+      "39511251.0": "Land Rover Range Rover",
+      "39511252.0": "Land Rover Range Rover PHEV",
+      "39511301.0": "Land Rover Range Rover Sport",
+      "39511302.0": "Land Rover Range Rover Sport PHEV",
+      "39511351.0": "Land Rover Discovery 4",
+      "39511355.0": "Land Rover Discovery 5",
+      "39511401.0": "Land Rover Defender",
+      "39511451.0": "Land Rover Range Rover Evoque (Import)",
+      "39511471.0": "Land Rover Range Rover Evoque L",
+      "39511481.0": "Land Rover Range Rover Velar",
+      "39511501.0": "Land Rover Discovery Sport",
+      "39511521.0": "Land Rover Discovery Sport (Import)",
+      "39511999.0": "Land Rover Other",
+      "40011051.0": "Lexus ES",
+      "40011101.0": "Lexus GS",
+      "40011151.0": "Lexus IS",
+      "40011201.0": "Lexus LS",
+      "40011251.0": "Lexus LX",
+      "40011252.0": "Lexus LM",
+      "40011301.0": "Lexus RX",
+      "40011401.0": "Lexus GX",
+      "40011451.0": "Lexus CT",
+      "40011501.0": "Lexus NX",
+      "40011502.0": "Lexus UX",
+      "40011503.0": "Lexus UX BEV",
+      "40011999.0": "Lexus Other",
+      "41011101.0": "Lincoln Navigator",
+      "41011161.0": "Lincoln MKC",
+      "41011301.0": "Lincoln MKX",
+      "41011351.0": "Lincoln MKZ",
+      "41011401.0": "Lincoln Continental",
+      "41011451.0": "Lincoln Nautilus (Import)",
+      "41011452.0": "Lincoln Corsair",
+      "41011453.0": "Lincoln Aviator",
+      "41011455.0": "Lincoln Z",
+      "41011461.0": "Lincoln Nautilus",
+      "41011999.0": "Lincoln Other",
+      "42012121.0": "Mazda 6 Atenza",
+      "42012171.0": "Mazda 3 Axela",
+      "42012201.0": "Mazda CX-5",
+      "42012202.0": "Mazda CX-30",
+      "42012271.0": "Mazda CX-4",
+      "42012999.0": "Changan Mazda Other",
+      "42013121.0": "Mazda 6 Atenza",
+      "42013271.0": "Mazda CX-4",
+      "42013999.0": "FAW-Mazda Other",
+      "42511051.0": "Mercedes-Benz A-Class (Import)",
+      "42511052.0": "Mercedes-Benz A-Class",
+      "42511101.0": "Mercedes-Benz C-Class",
+      "42511131.0": "Mercedes-Benz C-Class (Import)",
+      "42511161.0": "Mercedes-Benz CLA-Class",
+      "42511251.0": "Mercedes-Benz CLS-Class",
+      "42511301.0": "Mercedes-Benz E-Class",
+      "42511302.0": "Mercedes-Benz E-Class PHEV",
+      "42511331.0": "Mercedes-Benz E-Class (Import)",
+      "42511351.0": "Mercedes-Benz G-Class",
+      "42511501.0": "Mercedes-Benz S-Class",
+      "42511502.0": "Mercedes-Benz S-Class PHEV",
+      "42511503.0": "Mercedes-Benz Maybach S-Class",
+      "42511651.0": "Mercedes-Benz A-Class AMG (Import)",
+      "42511652.0": "Mercedes-Benz A-Class AMG",
+      "42511751.0": "Mercedes-Benz B-Class",
+      "42511811.0": "Mercedes-Benz GLA-Class (Import)",
+      "42511821.0": "Mercedes-Benz GLC-Class",
+      "42511822.0": "Mercedes-Benz GLC-Class (Import)",
+      "42511831.0": "Mercedes-Benz GLE-Class",
+      "42511832.0": "Mercedes-Benz GLE-Class PHEV",
+      "42511841.0": "Mercedes-Benz GLA-Class",
+      "42511861.0": "Mercedes-Benz GLB-Class",
+      "42511871.0": "Mercedes-Benz GLS-Class",
+      "42511911.0": "Mercedes-Benz C63 AMG",
+      "42511951.0": "Mercedes-Benz EQC",
+      "42511952.0": "Mercedes-Benz EQB",
+      "42511953.0": "Mercedes-Benz EQS",
+      "42511954.0": "Mercedes-Benz EQE",
+      "42511955.0": "Mercedes-Benz EQA",
+      "42511999.0": "Mercedes-Benz Other",
+      "42512101.0": "Mercedes-Benz Vito",
+      "42512201.0": "Mercedes-Benz V-Class",
+      "42512999.0": "Fujian Benz Other",
+      "42513052.0": "Denza X BEV",
+      "42513053.0": "Denza X PHEV",
+      "42513055.0": "Denza D9 PHEV",
+      "42513999.0": "Denza Other",
+      "42751051.0": "smart fortwo",
+      "42751101.0": "smart #1",
+      "42751999.0": "smart Other",
+      "43011101.0": "MINI",
+      "43011151.0": "MINI Clubman",
+      "43011201.0": "MINI Countryman",
+      "43011251.0": "MINI JCW",
+      "43011999.0": "MINI Other",
+      "43513051.0": "Mitsubishi ASX",
+      "43513201.0": "Mitsubishi Outlander",
+      "43513251.0": "Mitsubishi ECLIPSE Cross",
+      "43513999.0": "GAC Mitsubishi Other",
+      "43751101.0": "MG 7",
+      "43751201.0": "MG 6",
+      "43751202.0": "MG 6 PHEV",
+      "43751301.0": "MG 5",
+      "43751302.0": "MG 5 Scorpio",
+      "43751401.0": "MG ZS",
+      "43751402.0": "MG HS",
+      "43751403.0": "MG Linghang",
+      "43751404.0": "MG One",
+      "43751413.0": "MG Linghang PHEV",
+      "43751999.0": "MG Other",
+      "44512201.0": "Nissan Lannia",
+      "44512231.0": "Nissan Kicks",
+      "44512251.0": "Nissan Qashqai",
+      "44512351.0": "Nissan Sylphy Classic",
+      "44512361.0": "Nissan Sylphy",
+      "44512362.0": "Nissan Sylphy BEV",
+      "44512401.0": "Nissan Teana",
+      "44512451.0": "Nissan Tiida",
+      "44512551.0": "Nissan X-Trail",
+      "44512651.0": "Nissan Murano",
+      "44512999.0": "Dongfeng Nissan Other",
+      "44514071.0": "Venucia D60/D60 Plus",
+      "44514072.0": "Venucia D60/D60 Plus BEV",
+      "44514151.0": "Venucia E30",
+      "44514251.0": "Venucia T70",
+      "44514261.0": "Venucia T60",
+      "44514262.0": "Venucia T60 BEV",
+      "44514301.0": "Venucia T90",
+      "44514351.0": "Venucia M50V",
+      "44514361.0": "Venucia Star",
+      "44514371.0": "Venucia V-online",
+      "44514999.0": "Venucia Other",
+      "45512201.0": "Peugeot 408",
+      "45512251.0": "Peugeot 308",
+      "45512301.0": "Peugeot 508/508L",
+      "45512332.0": "Peugeot New 2008",
+      "45512333.0": "Peugeot e2008",
+      "45512351.0": "Peugeot 3008",
+      "45512371.0": "Peugeot 4008",
+      "45512372.0": "Peugeot 4008 PHEV",
+      "45512401.0": "Peugeot 5008",
+      "45512999.0": "Dongfeng Peugeot Other",
+      "46011051.0": "Porsche 911",
+      "46011101.0": "Porsche 911 GT",
+      "46011201.0": "Porsche Cayenne",
+      "46011202.0": "Porsche Cayenne PHEV",
+      "46011251.0": "Porsche Cayman",
+      "46011281.0": "Porsche Macan",
+      "46011301.0": "Porsche Panamera",
+      "46011302.0": "Porsche Panamera PHEV",
+      "46011351.0": "Porsche 718",
+      "46011401.0": "Porsche Taycan",
+      "46011999.0": "Porsche Other",
+      "47011001.0": "Roewe Clever EV360",
+      "47011331.0": "Roewe RX3",
+      "47011351.0": "Roewe RX5",
+      "47011352.0": "Roewe RX5 MAX",
+      "47011372.0": "Roewe eRX5 PHEV",
+      "47011373.0": "Roewe eRX5 BEV",
+      "47011374.0": "Roewe eRX5 MAX PHEV",
+      "47011381.0": "Roewe RX8",
+      "47011501.0": "Roewe i6",
+      "47011502.0": "Roewe ei6",
+      "47011512.0": "Roewe ei6 MAX PHEV",
+      "47011513.0": "Roewe iMAX8",
+      "47011521.0": "Roewe i6 MAX",
+      "47011523.0": "Roewe iMAX8 BEV",
+      "47011551.0": "Roewe ei6 MAX BEV",
+      "47011601.0": "Roewe Ei5",
+      "47011602.0": "Roewe Marvel X",
+      "47011603.0": "Roewe i5",
+      "47011999.0": "Roewe Other",
+      "47013051.0": "R Auto ER6",
+      "47013101.0": "R Auto Marvel R",
+      "47013201.0": "R Auto F7",
+      "47013999.0": "R Auto Other",
+      "52011051.0": "Skoda Fabia",
+      "52011151.0": "Skoda Octavia",
+      "52011221.0": "Skoda Superb",
+      "52011251.0": "Skoda Rapid",
+      "52011351.0": "Skoda Kodiaq",
+      "52011352.0": "Skoda Kodiaq GT",
+      "52011361.0": "Skoda Karoq",
+      "52011371.0": "Skoda Kamiq",
+      "52011999.0": "Skoda Other",
+      "52511471.0": "Soueast DX3",
+      "52511472.0": "Soueast DX3 BEV",
+      "52511501.0": "Soueast DX7",
+      "52511511.0": "Soueast DX5",
+      "52511999.0": "Soueast Other",
+      "54011051.0": "Subaru Forester",
+      "54011151.0": "Subaru Legacy",
+      "54011201.0": "Subaru Outback",
+      "54011401.0": "Subaru XV",
+      "54011999.0": "Subaru Other",
+      "54811051.0": "Tesla Model S",
+      "54811101.0": "Tesla Model X",
+      "54811102.0": "Tesla Model Y",
+      "54811201.0": "Tesla Model 3 (Import)",
+      "54811202.0": "Tesla Model 3",
+      "54811999.0": "Tesla Other",
+      "56511851.0": "Toyota Alphard",
+      "56512051.0": "Toyota Corolla",
+      "56512052.0": "Toyota Corolla PHEV",
+      "56512061.0": "Toyota Corolla Cross",
+      "56512151.0": "Toyota Crown",
+      "56512261.0": "Toyota Land Cruiser 200 (Import)",
+      "56512301.0": "Toyota Land Cruiser Prado",
+      "56512321.0": "Toyota Land Cruiser Prado (Import)",
+      "56512331.0": "Toyota Crown Kluger",
+      "56512341.0": "Toyota Harrier",
+      "56512352.0": "Toyota bZ3x",
+      "56512361.0": "Toyota Granvia",
+      "56512501.0": "Toyota Vios/Vios FS",
+      "56512551.0": "Toyota RAV4",
+      "56512561.0": "Toyota RAV4 PHEV",
+      "56512601.0": "Toyota IZOA",
+      "56512651.0": "Toyota Avalon",
+      "56512652.0": "Toyota Allion",
+      "56512701.0": "Toyota Vellfire",
+      "56512999.0": "FAW Toyota Other",
+      "56513111.0": "Toyota Yaris L",
+      "56513151.0": "Toyota Highlander",
+      "56513152.0": "Toyota Wildlander",
+      "56513153.0": "Toyota Wildlander PHEV",
+      "56513154.0": "Toyota Frontlander",
+      "56513161.0": "Toyota Venza",
+      "56513211.0": "Toyota Sienna",
+      "56513301.0": "Toyota Levin",
+      "56513302.0": "Toyota Levin PHEV",
+      "56513351.0": "Toyota Camry 8",
+      "56513401.0": "Toyota C-HR",
+      "56513411.0": "Toyota C-HR BEV",
+      "56513451.0": "Toyota Levin GT",
+      "56513501.0": "Toyota iA5",
+      "56513999.0": "GAC Toyota Other",
+      "57011201.0": "Volkswagen Sharan",
+      "57011251.0": "Volkswagen Touareg",
+      "57011551.0": "Volkswagen Multivan",
+      "57011601.0": "Volkswagen Tiguan (Import)",
+      "57011651.0": "Volkswagen Golf (Import)",
+      "57011751.0": "Volkswagen Caravelle",
+      "57011999.0": "Volkswagen Other",
+      "57012051.0": "Volkswagen Bora",
+      "57012052.0": "Volkswagen Bora BEV",
+      "57012161.0": "Volkswagen Golf",
+      "57012162.0": "Volkswagen Golf BEV",
+      "57012181.0": "Volkswagen Golf Sportsvan",
+      "57012251.0": "Volkswagen Magotan",
+      "57012252.0": "Volkswagen Magotan GTE",
+      "57012301.0": "Volkswagen Sagitar",
+      "57012351.0": "Volkswagen CC",
+      "57012401.0": "Volkswagen C-TREK",
+      "57012501.0": "Volkswagen T-ROC",
+      "57012502.0": "Volkswagen Tayron",
+      "57012503.0": "Volkswagen Tayron GTE",
+      "57012504.0": "Volkswagen Tacqua",
+      "57012505.0": "Volkswagen Talagon",
+      "57012506.0": "Volkswagen Tavendor",
+      "57012522.0": "Volkswagen Tayron X",
+      "57012601.0": "Volkswagen ID.4 Crozz",
+      "57012602.0": "Volkswagen ID.6 Crozz",
+      "57012999.0": "FAW-Volkswagen Other",
+      "57013161.0": "Volkswagen Lavida",
+      "57013162.0": "Volkswagen Lavida BEV",
+      "57013163.0": "Volkswagen Lavida XR",
+      "57013201.0": "Volkswagen ID.4 X",
+      "57013202.0": "Volkswagen ID.6 X",
+      "57013203.0": "Volkswagen ID.3",
+      "57013301.0": "Volkswagen Polo",
+      "57013352.0": "Volkswagen Santana",
+      "57013561.0": "Volkswagen Touran L",
+      "57013651.0": "Volkswagen Tiguan",
+      "57013661.0": "Volkswagen Tiguan L",
+      "57013662.0": "Volkswagen Tiguan L PHEV",
+      "57013663.0": "Volkswagen Tiguan X",
+      "57013671.0": "Volkswagen Tharu",
+      "57013672.0": "Volkswagen T-CROSS",
+      "57013681.0": "Volkswagen Viloran",
+      "57013701.0": "Volkswagen Passat",
+      "57013702.0": "Volkswagen Passat PHEV",
+      "57013751.0": "Volkswagen Lamando/Lamando L",
+      "57013801.0": "Volkswagen Teramont",
+      "57013811.0": "Volkswagen Teramont X",
+      "57013851.0": "Volkswagen Phideon",
+      "57013999.0": "SAIC Volkswagen Other",
+      "57015101.0": "Jetta VS5",
+      "57015102.0": "Jetta VS7",
+      "57015201.0": "Jetta VA3",
+      "57015999.0": "Jetta Other",
+      "57511221.0": "Volvo S60",
+      "57511222.0": "Volvo S60 PHEV",
+      "57511351.0": "Volvo S90 (Import)",
+      "57511355.0": "Volvo S90",
+      "57511356.0": "Volvo S90 PHEV",
+      "57511381.0": "Volvo V60",
+      "57511401.0": "Volvo XC90 (Import)",
+      "57511402.0": "Volvo XC90 PHEV (Import)",
+      "57511451.0": "Volvo XC60",
+      "57511452.0": "Volvo XC60 PHEV",
+      "57511461.0": "Volvo XC60 (Import)",
+      "57511481.0": "Volvo XC40",
+      "57511483.0": "Volvo C40",
+      "57511999.0": "Volvo Other",
+      "58011351.0": "Wuling Sunshine",
+      "58011452.0": "Wuling Hongguang Plus",
+      "58011453.0": "Wuling Victory",
+      "58011454.0": "Wuling Hongguang V",
+      "58011472.0": "Wuling Hongguang S",
+      "58011476.0": "Wuling Hongguang S3",
+      "58011481.0": "Wuling Rongguang V",
+      "58011501.0": "Wuling Zhengcheng",
+      "58011502.0": "Wuling Hongguang MINI",
+      "58011505.0": "Wuling Bingo",
+      "58011601.0": "Wuling Xingchen",
+      "58011602.0": "Wuling Jiachen",
+      "58011621.0": "Wuling Xingchi",
+      "58011999.0": "Wuling Other",
+      "58012011.0": "Baojun 310",
+      "58012015.0": "Baojun 310W",
+      "58012016.0": "Baojun 360",
+      "58012020.0": "Baojun 510",
+      "58012023.0": "Baojun 530",
+      "58012026.0": "Baojun 560",
+      "58012027.0": "Baojun RM-5",
+      "58012028.0": "Baojun RS-5",
+      "58012029.0": "Baojun RS-3",
+      "58012030.0": "Baojun RS-7",
+      "58012151.0": "Baojun 730",
+      "58012201.0": "Baojun RC-5",
+      "58012202.0": "Baojun RC-6",
+      "58012301.0": "Baojun E100",
+      "58012302.0": "Baojun E200",
+      "58012303.0": "Baojun E300",
+      "58012304.0": "Baojun KiWi",
+      "58012306.0": "Baojun Yep",
+      "58012999.0": "Baojun Other",
+      "63511041.0": "GAC Trumpchi GA4",
+      "63511061.0": "GAC Trumpchi GA6",
+      "63511065.0": "GAC Trumpchi GA8",
+      "63511071.0": "GAC Trumpchi Empow",
+      "63511075.0": "GAC Trumpchi GS3",
+      "63511076.0": "GAC Trumpchi GS3 Yingsu",
+      "63511081.0": "GAC Trumpchi GS4",
+      "63511082.0": "GAC Trumpchi GS4 PHEV",
+      "63511083.0": "GAC Trumpchi GS4 Plus",
+      "63511101.0": "GAC Trumpchi GS5",
+      "63511191.0": "GAC Trumpchi GS7",
+      "63511201.0": "GAC Trumpchi GS8",
+      "63511251.0": "GAC Trumpchi Emkoo",
+      "63511301.0": "GAC Trumpchi M8",
+      "63511302.0": "GAC Trumpchi M6/M6 Pro",
+      "63511311.0": "GAC Trumpchi All New M8",
+      "63511501.0": "GAC Trumpchi E9 PHEV",
+      "63511999.0": "GAC Trumpchi Other",
+      "63521011.0": "Aion S",
+      "63521012.0": "Aion LX",
+      "63521013.0": "Aion V/V Plus",
+      "63521014.0": "Aion Y/Y Plus",
+      "63521021.0": "Trumpchi GE3",
+      "63521022.0": "Aion S Plus",
+      "63521999.0": "Aion Other",
+      "65511051.0": "Maxus G10",
+      "65511052.0": "Maxus G10 BEV",
+      "65511053.0": "Maxus G20",
+      "65511054.0": "Maxus G50",
+      "65511101.0": "Maxus D90",
+      "65511102.0": "Maxus D60",
+      "65511999.0": "Maxus Other",
+      "66011031.0": "Borgward BX5",
+      "66011051.0": "Borgward BX7",
+      "66011052.0": "Borgward BXi7",
+      "66011999.0": "Borgward Other",
+      "68511101.0": "NIO ES8",
+      "68511151.0": "NIO ES6",
+      "68511161.0": "NIO ES7",
+      "68511201.0": "NIO EVE",
+      "68511202.0": "NIO EP9",
+      "68511301.0": "NIO EC6",
+      "68511401.0": "NIO ET7",
+      "68511402.0": "NIO ET5/ET5T",
+      "68511999.0": "NIO Other",
+      "69011101.0": "Jetour X70",
+      "69011102.0": "Jetour X90",
+      "69011111.0": "Jetour X70S",
+      "69011112.0": "Jetour X90 Plus",
+      "69011121.0": "Jetour X70M",
+      "69011131.0": "Jetour X70 Coupe",
+      "69011141.0": "Jetour X70 Plus",
+      "69011142.0": "Jetour X70 Pro",
+      "69011151.0": "Jetour Traveller",
+      "69011201.0": "Jetour Angola",
+      "69011999.0": "Jetour Other",
+      "69211011.0": "AVATR 11",
+      "69211012.0": "AVATR 12",
+      "69211999.0": "AVATR Other",
+      "69512101.0": "AITO M5 (REEV)",
+      "69512102.0": "AITO M7 (REEV)",
+      "69512121.0": "AITO M5 BEV",
+      "69512999.0": "AITO Other",
+      "69611101.0": "Letin Mengo",
+      "69611999.0": "Letin Other",
+      "69711101.0": "Maple 80V",
+      "69711999.0": "Livan Auto Other",
+      "69811101.0": "HiPhi X",
+      "69811102.0": "HiPhi Z",
+      "69811999.0": "HiPhi Other",
+      "69911101.0": "ZEEKR 001",
+      "69911102.0": "ZEEKR 009",
+      "69911103.0": "ZEEKR X",
+      "69911999.0": "ZEEKR Other",
+      "71011101.0": "Weltmeister EX5",
+      "71011102.0": "Weltmeister EX6",
+      "71011151.0": "Weltmeister E.5",
+      "71011201.0": "Weltmeister W6",
+      "71011999.0": "Weltmeister Other",
+      "72011051.0": "NETA N01",
+      "72011052.0": "NETA U",
+      "72011053.0": "NETA V",
+      "72011055.0": "NETA S (REEV)",
+      "72011999.0": "NETA Other",
+      "73011101.0": "HYCAN Z03",
+      "73011201.0": "HYCAN A06",
+      "73011999.0": "HYCAN Other",
+      "75011101.0": "Enovate ME5 (REEV)",
+      "75011999.0": "Enovate Other",
+      "76011101.0": "IM L7",
+      "76011103.0": "IM LS7",
+      "76011999.0": "IM Other",
+      "81011101.0": "Xpeng G3/G3i",
+      "81011151.0": "Xpeng G9",
+      "81011152.0": "Xpeng G6",
+      "81011201.0": "Xpeng P7",
+      "81011202.0": "Xpeng P5",
+      "81011999.0": "Xpeng Other",
+      "82011101.0": "Li ONE (REEV)",
+      "82011102.0": "Li L9 (REEV)",
+      "82011112.0": "Li L8 (REEV)",
+      "82011121.0": "Li L7 (REEV)",
+      "82011999.0": "Li Other",
+      "83011101.0": "SOL E20X",
+      "83011102.0": "SOL E10X",
+      "83011103.0": "SOL E50A",
+      "83011121.0": "SOL A5",
+      "83011131.0": "SOL X8",
+      "83011151.0": "SOL QX",
+      "83011999.0": "SOL Other",
+      "85011051.0": "Leap Motor T03",
+      "85011101.0": "Leap Motor S01",
+      "85011121.0": "Leap Motor C11 BEV",
+      "85011122.0": "Leap Motor C01 BEV",
+      "85011999.0": "Leap Motor Other",
+      "86011101.0": "Linbox BOX",
+      "86011999.0": "Linbox Other",
+      "88011101.0": "Voyah Free (REEV)",
+      "88011102.0": "Voyah Free BEV",
+      "88011201.0": "Voyah Dreamer PHEV",
+      "88011202.0": "Voyah Dreamer BEV",
+      "88011999.0": "Voyah Other",
+      "99999999.0": "Other"
+    }
+  },
+  {
+    "name": "YPV_05",
+    "label": "YPV_05: No. of vehicles in your household",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {}
+  },
+  {
+    "name": "CONNECT_SMTPHONE",
+    "label": "CONNECT_SMTPHONE: Connect Smartphone",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "No",
+      "1.0": "Yes"
+    }
+  },
+  {
+    "name": "SMTPHONE_OPSYSTEM",
+    "label": "SMTPHONE_OPSYSTEM: Operating System Connected Smartphone",
+    "dtype": "float64",
+    "missing_rate": 0.6998087954110899,
+    "value_labels": {
+      "1.0": "iOS",
+      "2.0": "Android",
+      "97.0": "Other",
+      "99.0": "Don't know"
+    }
+  },
+  {
+    "name": "YNV_01",
+    "label": "YNV_01: Wireless Phone Service Provider",
+    "dtype": "float64",
+    "missing_rate": 0.6998087954110899,
+    "value_labels": {
+      "7.0": "China Mobile",
+      "8.0": "China Telecom",
+      "9.0": "China Unicom",
+      "99.0": "Don't know"
+    }
+  },
+  {
+    "name": "YNV_02",
+    "label": "YNV_02: Wireless Phone Manufacturer",
+    "dtype": "float64",
+    "missing_rate": 0.6998087954110899,
+    "value_labels": {
+      "3.0": "Apple",
+      "6.0": "BlackBerry",
+      "13.0": "HTC",
+      "15.0": "Huawei",
+      "19.0": "Lenovo",
+      "20.0": "LG",
+      "22.0": "Meizu",
+      "23.0": "Mi",
+      "25.0": "Motorola",
+      "27.0": "Nokia",
+      "29.0": "OPPO",
+      "35.0": "Samsung",
+      "39.0": "Sony",
+      "40.0": "TCL (Alcatel Mobile Phones)",
+      "42.0": "ZTE",
+      "43.0": "Vivo",
+      "97.0": "Other",
+      "99.0": "Don't know"
+    }
+  },
+  {
+    "name": "GENDER",
+    "label": "Gender",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "0.0": "Female",
+      "1.0": "Male",
+      "98.0": "Prefer not to answer"
+    }
+  },
+  {
+    "name": "CN_MARITAL_STATUS",
+    "label": "Marital status",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "Married",
+      "2.0": "Single (never married)",
+      "3.0": "Widowed",
+      "4.0": "Divorced/separated",
+      "97.0": "Other",
+      "98.0": "Prefer not to answer"
+    }
+  },
+  {
+    "name": "AGE",
+    "label": "Age",
+    "dtype": "float64",
+    "missing_rate": 0.11593036127603905,
+    "value_labels": {}
+  },
+  {
+    "name": "AGE_BUCKETS",
+    "label": "AGE BUCKETS",
+    "dtype": "float64",
+    "missing_rate": 0.11593036127603905,
+    "value_labels": {
+      "1.0": "AGE<20",
+      "2.0": "BETWEEN 20 AND 24",
+      "3.0": "BETWEEN 25 AND 29",
+      "4.0": "BETWEEN 30 AND 34",
+      "5.0": "BETWEEN 35 AND 39",
+      "6.0": "BETWEEN 40 AND 44",
+      "7.0": "BETWEEN 45 AND 49",
+      "8.0": "BETWEEN 50 AND 54",
+      "9.0": "BETWEEN 55 AND 59",
+      "10.0": "BETWEEN 60 AND 64",
+      "11.0": "BETWEEN 65 AND 69",
+      "12.0": "> =70"
+    }
+  },
+  {
+    "name": "GENERATION",
+    "label": "GENERATION",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "Pre 80s",
+      "2.0": "80~89",
+      "3.0": "90~99",
+      "4.0": "Post 00s",
+      "98.0": "Prefer not to answer"
+    }
+  },
+  {
+    "name": "GENERATION2",
+    "label": "GENERATION2",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "Pre 80s",
+      "2.0": "80~84",
+      "3.0": "85~89",
+      "4.0": "90~94",
+      "5.0": "95~99",
+      "6.0": "Post 00s",
+      "98.0": "Prefer not to answer"
+    }
+  },
+  {
+    "name": "CN_NUMBER_HOUSEHOLD",
+    "label": "Number in Household (including yourself)",
+    "dtype": "float64",
+    "missing_rate": 0.07165140384421857,
+    "value_labels": {}
+  },
+  {
+    "name": "CN_EDUCATION",
+    "label": "Highest Education Degree",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "No formal education",
+      "2.0": "Primary school",
+      "3.0": "Middle school",
+      "4.0": "High school",
+      "5.0": "Technical/vocational college",
+      "6.0": "University",
+      "7.0": "Post graduate",
+      "98.0": "Prefer not to answer"
+    }
+  },
+  {
+    "name": "CN_INCOME",
+    "label": "Monthly household income Buckets",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "5.0": "Below RMB 10,000",
+      "6.0": "RMB 10,000 - 14,999",
+      "8.0": "RMB 15,000 - 19,999",
+      "9.0": "RMB 20,000 - 24,999",
+      "10.0": "RMB 25,000 - 29,999",
+      "11.0": "RMB 30,000 - 39,999",
+      "12.0": "RMB 40,000 and above",
+      "98.0": "Prefer not to answer"
+    }
+  },
+  {
+    "name": "CN_OCCUPATION",
+    "label": "Occupation",
+    "dtype": "float64",
+    "missing_rate": 0.0,
+    "value_labels": {
+      "1.0": "Professional",
+      "4.0": "Government worker",
+      "5.0": "General white-collar worker",
+      "6.0": "Senior management",
+      "7.0": "Middle management",
+      "9.0": "Technical worker",
+      "10.0": "General blue-collar worker",
+      "11.0": "Teaching",
+      "12.0": "Clerical",
+      "15.0": "Agriculture/Forestry/Fisheries",
+      "16.0": "Self-employed",
+      "18.0": "Housewife",
+      "19.0": "Student",
+      "20.0": "Unemployed/not working/retired",
+      "97.0": "Other",
+      "98.0": "Prefer not to answer"
+    }
+  },
+  {
+    "name": "HEIGHT",
+    "label": "Height (centimeters)",
+    "dtype": "float64",
+    "missing_rate": 0.3381302203884472,
+    "value_labels": {
+      "140.0": "140CM",
+      "141.0": "141CM",
+      "142.0": "142CM",
+      "143.0": "143CM",
+      "144.0": "144CM",
+      "145.0": "145CM",
+      "146.0": "146CM",
+      "147.0": "147CM",
+      "148.0": "148CM",
+      "149.0": "149CM",
+      "150.0": "150CM",
+      "151.0": "151CM",
+      "152.0": "152CM",
+      "153.0": "153CM",
+      "154.0": "154CM",
+      "155.0": "155CM",
+      "156.0": "156CM",
+      "157.0": "157CM",
+      "158.0": "158CM",
+      "159.0": "159CM",
+      "160.0": "160CM",
+      "161.0": "161CM",
+      "162.0": "162CM",
+      "163.0": "163CM",
+      "164.0": "164CM",
+      "165.0": "165CM",
+      "166.0": "166CM",
+      "167.0": "167CM",
+      "168.0": "168CM",
+      "169.0": "169CM",
+      "170.0": "170CM",
+      "171.0": "171CM",
+      "172.0": "172CM",
+      "173.0": "173CM",
+      "174.0": "174CM",
+      "175.0": "175CM",
+      "176.0": "176CM",
+      "177.0": "177CM",
+      "178.0": "178CM",
+      "179.0": "179CM",
+      "180.0": "180CM",
+      "181.0": "181CM",
+      "182.0": "182CM",
+      "183.0": "183CM",
+      "184.0": "184CM",
+      "185.0": "185CM",
+      "186.0": "186CM",
+      "187.0": "187CM",
+      "188.0": "188CM",
+      "189.0": "189CM",
+      "190.0": "190CM",
+      "191.0": "191CM",
+      "192.0": "192CM",
+      "193.0": "193CM",
+      "194.0": "194CM",
+      "195.0": "195CM",
+      "196.0": "196CM",
+      "197.0": "197CM",
+      "198.0": "198CM",
+      "199.0": "199CM",
+      "200.0": "200CM",
+      "201.0": "201CM",
+      "202.0": "202CM",
+      "203.0": "203CM",
+      "204.0": "204CM",
+      "205.0": "205CM",
+      "206.0": "206CM",
+      "207.0": "207CM",
+      "208.0": "208CM",
+      "209.0": "209CM",
+      "210.0": "210CM"
+    }
+  },
+  {
+    "name": "KB_HWGT_1C",
+    "label": "Weight (kilograms)",
+    "dtype": "float64",
+    "missing_rate": 0.3401429002717118,
+    "value_labels": {}
+  }
+]

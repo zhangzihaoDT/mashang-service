@@ -1,0 +1,8 @@
+hypotheses:
+  - id: H-001
+    statement: 增购用户的整体产品魅力评价高于换购和首购用户。
+    status: refined
+    evidence_plan:
+      - compare YPV_01 against APEAL_Index and sub-indices
+      - stratify by SUPER_SEGMENT_DP
+      - control for price, brand and model structure before causal interpretation

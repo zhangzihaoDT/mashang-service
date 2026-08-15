@@ -396,18 +396,6 @@
     "cohens_d": 0.305
   },
   {
-    "config": "Height Adjustment: Front passenger seat - Manually operated",
-    "group": "SCR_SEAT00_03",
-    "metric": "AINT_Index",
-    "n_has": 59,
-    "n_not": 9878,
-    "wmean_has": 753.4,
-    "wmean_not": 779.53,
-    "diff": -26.13,
-    "p": 0.03339626552822455,
-    "cohens_d": 0.305
-  },
-  {
     "config": "Umbrellas",
     "group": "AINT_D_01a",
     "metric": "AENT_Index",
@@ -514,18 +502,6 @@
     "diff": -33.84,
     "p": 5.192844325519206e-06,
     "cohens_d": 0.282
-  },
-  {
-    "config": "With a full load (passenger/cargo)",
-    "group": "AFUEL_D_09",
-    "metric": "ASET_Index",
-    "n_has": 52,
-    "n_not": 542,
-    "wmean_has": 781.15,
-    "wmean_not": 745.78,
-    "diff": 35.36,
-    "p": 0.030790530203275754,
-    "cohens_d": 0.279
   },
   {
     "config": "Vivo Jovi InCar",
@@ -792,18 +768,6 @@
     "cohens_d": 0.255
   },
   {
-    "config": "Height Adjustment: Front passenger seat - Manually operated",
-    "group": "SCR_SEAT00_03",
-    "metric": "ACMFT_Index",
-    "n_has": 59,
-    "n_not": 9878,
-    "wmean_has": 751.72,
-    "wmean_not": 779.82,
-    "diff": -28.09,
-    "p": 0.08667199103230823,
-    "cohens_d": 0.255
-  },
-  {
     "config": "Cellphone",
     "group": "AINT_D_01",
     "metric": "ASFTY_Index",
@@ -984,18 +948,6 @@
     "cohens_d": 0.245
   },
   {
-    "config": "With a full load (passenger/cargo)",
-    "group": "AFUEL_D_09",
-    "metric": "ASFTY_Index",
-    "n_has": 52,
-    "n_not": 542,
-    "wmean_has": 747.46,
-    "wmean_not": 728.68,
-    "diff": 18.78,
-    "p": 0.07253047638072589,
-    "cohens_d": 0.245
-  },
-  {
     "config": "Only charge at home",
     "group": "ACHAR_D_07",
     "metric": "AEXT_Index",
@@ -1017,18 +969,6 @@
     "wmean_not": 777.71,
     "diff": 30.59,
     "p": 1.2469369862361022e-11,
-    "cohens_d": 0.244
-  },
-  {
-    "config": "With a full load (passenger/cargo)",
-    "group": "AFUEL_D_09",
-    "metric": "AINFO_Index",
-    "n_has": 52,
-    "n_not": 542,
-    "wmean_has": 748.3,
-    "wmean_not": 725.28,
-    "diff": 23.02,
-    "p": 0.0581653355562491,
     "cohens_d": 0.244
   },
   {
@@ -1054,30 +994,6 @@
     "diff": -25.61,
     "p": 3.6157914501694985e-05,
     "cohens_d": 0.243
-  },
-  {
-    "config": "With a full load (passenger/cargo)",
-    "group": "AFUEL_D_09",
-    "metric": "AINT_Index",
-    "n_has": 52,
-    "n_not": 542,
-    "wmean_has": 768.29,
-    "wmean_not": 736.57,
-    "diff": 31.72,
-    "p": 0.06859296779201271,
-    "cohens_d": 0.242
-  },
-  {
-    "config": "At low speeds (less than 25 miles per hour)",
-    "group": "AFUEL_D_09",
-    "metric": "AEXT_Index",
-    "n_has": 56,
-    "n_not": 538,
-    "wmean_has": 756.94,
-    "wmean_not": 796.4,
-    "diff": -39.45,
-    "p": 0.11154583664923885,
-    "cohens_d": 0.242
   },
   {
     "config": "Heated seat - Third row seats",
@@ -1296,30 +1212,6 @@
     "cohens_d": 0.23
   },
   {
-    "config": "With a full load (passenger/cargo)",
-    "group": "AFUEL_D_09",
-    "metric": "APEAL_Index",
-    "n_has": 52,
-    "n_not": 542,
-    "wmean_has": 752.17,
-    "wmean_not": 739.34,
-    "diff": 12.83,
-    "p": 0.08678654899343274,
-    "cohens_d": 0.23
-  },
-  {
-    "config": "With a full load (passenger/cargo)",
-    "group": "AFUEL_D_09",
-    "metric": "AENT_Index",
-    "n_has": 52,
-    "n_not": 542,
-    "wmean_has": 755.16,
-    "wmean_not": 736.91,
-    "diff": 18.25,
-    "p": 0.07204995674577593,
-    "cohens_d": 0.229
-  },
-  {
     "config": "Public parking lots (e.g. in malls/hotels)",
     "group": "NEV_09",
     "metric": "AINFO_Index",
@@ -1356,18 +1248,6 @@
     "cohens_d": 0.228
   },
   {
-    "config": "Height Adjustment: Front passenger seat - Manually operated",
-    "group": "SCR_SEAT00_03",
-    "metric": "APEAL_Index",
-    "n_has": 59,
-    "n_not": 9878,
-    "wmean_has": 776.72,
-    "wmean_not": 789.26,
-    "diff": -12.55,
-    "p": 0.10027379984092138,
-    "cohens_d": 0.228
-  },
-  {
     "config": "Public parking lots (e.g. in malls/hotels)",
     "group": "NEV_04",
     "metric": "AENT_Index",
@@ -1389,18 +1269,6 @@
     "wmean_not": 777.39,
     "diff": 31.17,
     "p": 7.172017680528885e-10,
-    "cohens_d": 0.227
-  },
-  {
-    "config": "Height Adjustment: Front passenger seat - Manually operated",
-    "group": "SCR_SEAT00_03",
-    "metric": "AINFO_Index",
-    "n_has": 59,
-    "n_not": 9878,
-    "wmean_has": 752.69,
-    "wmean_not": 778.24,
-    "diff": -25.55,
-    "p": 0.11979943813643541,
     "cohens_d": 0.227
   },
   {
@@ -1524,18 +1392,6 @@
     "cohens_d": 0.222
   },
   {
-    "config": "Height Adjustment: Front passenger seat - Manually operated",
-    "group": "SCR_SEAT00_03",
-    "metric": "ADRV_Index",
-    "n_has": 59,
-    "n_not": 9878,
-    "wmean_has": 769.7,
-    "wmean_not": 783.95,
-    "diff": -14.26,
-    "p": 0.11072213371070226,
-    "cohens_d": 0.222
-  },
-  {
     "config": "At home",
     "group": "NEV_04",
     "metric": "ADRV_Index",
@@ -1632,18 +1488,6 @@
     "cohens_d": 0.218
   },
   {
-    "config": "With a full load (passenger/cargo)",
-    "group": "AFUEL_D_09",
-    "metric": "APERF_Index",
-    "n_has": 52,
-    "n_not": 542,
-    "wmean_has": 765.71,
-    "wmean_not": 748.18,
-    "diff": 17.53,
-    "p": 0.10166196319098149,
-    "cohens_d": 0.218
-  },
-  {
     "config": "At home",
     "group": "NEV_04",
     "metric": "APEAL_Index",
@@ -1653,18 +1497,6 @@
     "wmean_not": 771.73,
     "diff": 25.47,
     "p": 8.750895996904374e-21,
-    "cohens_d": 0.217
-  },
-  {
-    "config": "Height Adjustment: Front passenger seat - Manually operated",
-    "group": "SCR_SEAT00_03",
-    "metric": "AFUEL_Index",
-    "n_has": 59,
-    "n_not": 9878,
-    "wmean_has": 777.43,
-    "wmean_not": 795.67,
-    "diff": -18.24,
-    "p": 0.12335146088612692,
     "cohens_d": 0.217
   },
   {
@@ -1752,18 +1584,6 @@
     "cohens_d": 0.214
   },
   {
-    "config": "Height Adjustment: Front passenger seat - Manually operated",
-    "group": "SCR_SEAT00_03",
-    "metric": "ASET_Index",
-    "n_has": 59,
-    "n_not": 9878,
-    "wmean_has": 769.95,
-    "wmean_not": 785.88,
-    "diff": -15.93,
-    "p": 0.1416701270721557,
-    "cohens_d": 0.214
-  },
-  {
     "config": "Heated seat - Driver seat",
     "group": "SCR_SEAT00_04A",
     "metric": "ASET_Index",
@@ -1812,18 +1632,6 @@
     "cohens_d": 0.211
   },
   {
-    "config": "Memory seat - Rear (2nd row) seats",
-    "group": "SCR_SEAT00_04C",
-    "metric": "AINT_Index",
-    "n_has": 91,
-    "n_not": 9846,
-    "wmean_has": 784.07,
-    "wmean_not": 779.36,
-    "diff": 4.71,
-    "p": 0.037427010501667815,
-    "cohens_d": 0.211
-  },
-  {
     "config": "Memory seat - Front passenger seat",
     "group": "SCR_SEAT00_04C",
     "metric": "AEXT_Index",
@@ -1845,18 +1653,6 @@
     "wmean_not": 780.02,
     "diff": -23.18,
     "p": 0.00028622897568086013,
-    "cohens_d": 0.209
-  },
-  {
-    "config": "Memory seat - Rear (2nd row) seats",
-    "group": "SCR_SEAT00_04C",
-    "metric": "ACMFT_Index",
-    "n_has": 91,
-    "n_not": 9846,
-    "wmean_has": 781.54,
-    "wmean_not": 779.65,
-    "diff": 1.89,
-    "p": 0.030583306195844623,
     "cohens_d": 0.209
   },
   {
@@ -2172,18 +1968,6 @@
     "cohens_d": 0.195
   },
   {
-    "config": "With a full load (passenger/cargo)",
-    "group": "AFUEL_D_09",
-    "metric": "ADRV_Index",
-    "n_has": 52,
-    "n_not": 542,
-    "wmean_has": 760.19,
-    "wmean_not": 738.85,
-    "diff": 21.34,
-    "p": 0.13584450571922824,
-    "cohens_d": 0.195
-  },
-  {
     "config": "Fabric",
     "group": "AINT_D_02",
     "metric": "ASET_Index",
@@ -2469,18 +2253,6 @@
     "wmean_not": 787.01,
     "diff": -18.64,
     "p": 0.0015266251098927839,
-    "cohens_d": 0.186
-  },
-  {
-    "config": "Memory seat - Rear (2nd row) seats",
-    "group": "SCR_SEAT00_04C",
-    "metric": "APERF_Index",
-    "n_has": 91,
-    "n_not": 9846,
-    "wmean_has": 790.07,
-    "wmean_not": 786.49,
-    "diff": 3.59,
-    "p": 0.05848709273738721,
     "cohens_d": 0.186
   },
   {
@@ -2784,18 +2556,6 @@
     "cohens_d": 0.182
   },
   {
-    "config": "At moderate speeds (25 to 49 miles per hour)",
-    "group": "AFUEL_D_09",
-    "metric": "ASET_Index",
-    "n_has": 95,
-    "n_not": 499,
-    "wmean_has": 737.83,
-    "wmean_not": 751.44,
-    "diff": -13.6,
-    "p": 0.09981767232357175,
-    "cohens_d": 0.182
-  },
-  {
     "config": "Using charging station",
     "group": "NEV_02",
     "metric": "APERF_Index",
@@ -2988,18 +2748,6 @@
     "cohens_d": 0.176
   },
   {
-    "config": "With a full load (passenger/cargo)",
-    "group": "AFUEL_D_09",
-    "metric": "ACMFT_Index",
-    "n_has": 52,
-    "n_not": 542,
-    "wmean_has": 732.1,
-    "wmean_not": 722.86,
-    "diff": 9.23,
-    "p": 0.2147229479630269,
-    "cohens_d": 0.176
-  },
-  {
     "config": "Public parking lots (e.g. in malls/hotels)",
     "group": "NEV_09",
     "metric": "AENT_Index",
@@ -3021,42 +2769,6 @@
     "wmean_not": 795.42,
     "diff": 16.69,
     "p": 0.008835577252832304,
-    "cohens_d": 0.175
-  },
-  {
-    "config": "Memory seat - Rear (2nd row) seats",
-    "group": "SCR_SEAT00_04C",
-    "metric": "ASFTY_Index",
-    "n_has": 91,
-    "n_not": 9846,
-    "wmean_has": 784.39,
-    "wmean_not": 779.54,
-    "diff": 4.84,
-    "p": 0.06610355374977779,
-    "cohens_d": 0.175
-  },
-  {
-    "config": "Memory seat - Rear (2nd row) seats",
-    "group": "SCR_SEAT00_04C",
-    "metric": "AINFO_Index",
-    "n_has": 91,
-    "n_not": 9846,
-    "wmean_has": 780.9,
-    "wmean_not": 778.08,
-    "diff": 2.82,
-    "p": 0.07298979390419086,
-    "cohens_d": 0.175
-  },
-  {
-    "config": "At moderate speeds (25 to 49 miles per hour)",
-    "group": "AFUEL_D_09",
-    "metric": "ADRV_Index",
-    "n_has": 95,
-    "n_not": 499,
-    "wmean_has": 720.46,
-    "wmean_not": 744.64,
-    "diff": -24.19,
-    "p": 0.12836669871995862,
     "cohens_d": 0.175
   },
   {
@@ -3336,18 +3048,6 @@
     "cohens_d": 0.169
   },
   {
-    "config": "Memory seat - Rear (2nd row) seats",
-    "group": "SCR_SEAT00_04C",
-    "metric": "ASET_Index",
-    "n_has": 91,
-    "n_not": 9846,
-    "wmean_has": 790.7,
-    "wmean_not": 785.77,
-    "diff": 4.92,
-    "p": 0.08382576209671648,
-    "cohens_d": 0.169
-  },
-  {
     "config": "Height Adjustment: Driver seat - Power operated",
     "group": "SCR_SEAT00_03",
     "metric": "APERF_Index",
@@ -3516,18 +3216,6 @@
     "cohens_d": 0.166
   },
   {
-    "config": "With a full load (passenger/cargo)",
-    "group": "AFUEL_D_09",
-    "metric": "AEXT_Index",
-    "n_has": 52,
-    "n_not": 542,
-    "wmean_has": 778.17,
-    "wmean_not": 794.17,
-    "diff": -16.0,
-    "p": 0.28772729801394337,
-    "cohens_d": 0.166
-  },
-  {
     "config": "Using charging station",
     "group": "NEV_02",
     "metric": "ASET_Index",
@@ -3636,18 +3324,6 @@
     "cohens_d": 0.163
   },
   {
-    "config": "At moderate speeds (25 to 49 miles per hour)",
-    "group": "AFUEL_D_09",
-    "metric": "AEXT_Index",
-    "n_has": 95,
-    "n_not": 499,
-    "wmean_has": 780.35,
-    "wmean_not": 794.67,
-    "diff": -14.32,
-    "p": 0.14030788533618704,
-    "cohens_d": 0.163
-  },
-  {
     "config": "Memory seat - Driver seat",
     "group": "SCR_SEAT00_04C",
     "metric": "AENT_Index",
@@ -3705,18 +3381,6 @@
     "wmean_not": 734.51,
     "diff": 16.31,
     "p": 0.07189860201853304,
-    "cohens_d": 0.162
-  },
-  {
-    "config": "At moderate speeds (25 to 49 miles per hour)",
-    "group": "AFUEL_D_09",
-    "metric": "APERF_Index",
-    "n_has": 95,
-    "n_not": 499,
-    "wmean_has": 741.88,
-    "wmean_not": 751.39,
-    "diff": -9.51,
-    "p": 0.15242996581082582,
     "cohens_d": 0.162
   },
   {
@@ -3897,18 +3561,6 @@
     "wmean_not": 725.66,
     "diff": 18.9,
     "p": 0.08789179165536798,
-    "cohens_d": 0.158
-  },
-  {
-    "config": "Height Adjustment: Front passenger seat - Manually operated",
-    "group": "SCR_SEAT00_03",
-    "metric": "AEXT_Index",
-    "n_has": 59,
-    "n_not": 9878,
-    "wmean_has": 819.15,
-    "wmean_not": 817.8,
-    "diff": 1.35,
-    "p": 0.25343429606382456,
     "cohens_d": 0.158
   },
   {
@@ -4320,30 +3972,6 @@
     "cohens_d": 0.151
   },
   {
-    "config": "Memory seat - Rear (2nd row) seats",
-    "group": "SCR_SEAT00_04C",
-    "metric": "AFUEL_Index",
-    "n_has": 91,
-    "n_not": 9846,
-    "wmean_has": 800.17,
-    "wmean_not": 795.54,
-    "diff": 4.63,
-    "p": 0.10160988846440601,
-    "cohens_d": 0.151
-  },
-  {
-    "config": "Memory seat - Rear (2nd row) seats",
-    "group": "SCR_SEAT00_04C",
-    "metric": "APEAL_Index",
-    "n_has": 91,
-    "n_not": 9846,
-    "wmean_has": 789.6,
-    "wmean_not": 789.19,
-    "diff": 0.41,
-    "p": 0.11480778075123779,
-    "cohens_d": 0.151
-  },
-  {
     "config": "Height Adjustment: Front passenger seat - Power operated",
     "group": "SCR_SEAT00_03",
     "metric": "AEXT_Index",
@@ -4641,18 +4269,6 @@
     "wmean_not": 734.18,
     "diff": 20.43,
     "p": 0.0943387852449859,
-    "cohens_d": 0.147
-  },
-  {
-    "config": "Height Adjustment: Front passenger seat - Manually operated",
-    "group": "SCR_SEAT00_03",
-    "metric": "APERF_Index",
-    "n_has": 59,
-    "n_not": 9878,
-    "wmean_has": 777.63,
-    "wmean_not": 786.55,
-    "diff": -8.92,
-    "p": 0.26834952228157827,
     "cohens_d": 0.147
   },
   {
@@ -5736,30 +5352,6 @@
     "cohens_d": 0.128
   },
   {
-    "config": "At moderate speeds (25 to 49 miles per hour)",
-    "group": "AFUEL_D_09",
-    "metric": "AINFO_Index",
-    "n_has": 95,
-    "n_not": 499,
-    "wmean_has": 719.88,
-    "wmean_not": 729.0,
-    "diff": -9.12,
-    "p": 0.24568161729389243,
-    "cohens_d": 0.128
-  },
-  {
-    "config": "Height Adjustment: Front passenger seat - Manually operated",
-    "group": "SCR_SEAT00_03",
-    "metric": "ASFTY_Index",
-    "n_has": 59,
-    "n_not": 9878,
-    "wmean_has": 781.22,
-    "wmean_not": 779.55,
-    "diff": 1.66,
-    "p": 0.33019348834164125,
-    "cohens_d": 0.128
-  },
-  {
     "config": "At work",
     "group": "NEV_04",
     "metric": "ASET_Index",
@@ -5916,18 +5508,6 @@
     "cohens_d": 0.124
   },
   {
-    "config": "At moderate speeds (25 to 49 miles per hour)",
-    "group": "AFUEL_D_09",
-    "metric": "ASFTY_Index",
-    "n_has": 95,
-    "n_not": 499,
-    "wmean_has": 723.32,
-    "wmean_not": 731.89,
-    "diff": -8.57,
-    "p": 0.2764180561243199,
-    "cohens_d": 0.124
-  },
-  {
     "config": "Low service charge",
     "group": "ACHAR_D_09",
     "metric": "AFUEL_Index",
@@ -5961,18 +5541,6 @@
     "wmean_not": 772.39,
     "diff": 14.05,
     "p": 1.3523725260354793e-09,
-    "cohens_d": 0.122
-  },
-  {
-    "config": "At low speeds (less than 25 miles per hour)",
-    "group": "AFUEL_D_09",
-    "metric": "ASFTY_Index",
-    "n_has": 56,
-    "n_not": 538,
-    "wmean_has": 739.5,
-    "wmean_not": 729.64,
-    "diff": 9.86,
-    "p": 0.3993253471212584,
     "cohens_d": 0.122
   },
   {
@@ -6045,18 +5613,6 @@
     "wmean_not": 786.4,
     "diff": 11.95,
     "p": 0.061280926534769437,
-    "cohens_d": 0.121
-  },
-  {
-    "config": "At low speeds (less than 25 miles per hour)",
-    "group": "AFUEL_D_09",
-    "metric": "ASET_Index",
-    "n_has": 56,
-    "n_not": 538,
-    "wmean_has": 749.59,
-    "wmean_not": 749.38,
-    "diff": 0.21,
-    "p": 0.3993267759145441,
     "cohens_d": 0.121
   },
   {
@@ -6225,18 +5781,6 @@
     "wmean_not": 800.52,
     "diff": -15.12,
     "p": 5.998005145737541e-08,
-    "cohens_d": 0.118
-  },
-  {
-    "config": "With a full load (passenger/cargo)",
-    "group": "AFUEL_D_09",
-    "metric": "AFUEL_Index",
-    "n_has": 52,
-    "n_not": 542,
-    "wmean_has": 716.75,
-    "wmean_not": 702.54,
-    "diff": 14.22,
-    "p": 0.3886657509600156,
     "cohens_d": 0.118
   },
   {
@@ -6972,18 +6516,6 @@
     "cohens_d": 0.107
   },
   {
-    "config": "At low speeds (less than 25 miles per hour)",
-    "group": "AFUEL_D_09",
-    "metric": "ACMFT_Index",
-    "n_has": 56,
-    "n_not": 538,
-    "wmean_has": 722.06,
-    "wmean_not": 724.0,
-    "diff": -1.94,
-    "p": 0.43857999240970763,
-    "cohens_d": 0.107
-  },
-  {
     "config": "Using charging station",
     "group": "NEV_02",
     "metric": "AEXT_Index",
@@ -7260,18 +6792,6 @@
     "cohens_d": 0.102
   },
   {
-    "config": "Memory seat - Rear (2nd row) seats",
-    "group": "SCR_SEAT00_04C",
-    "metric": "ADRV_Index",
-    "n_has": 91,
-    "n_not": 9846,
-    "wmean_has": 779.94,
-    "wmean_not": 783.89,
-    "diff": -3.95,
-    "p": 0.29755088691904125,
-    "cohens_d": 0.102
-  },
-  {
     "config": "Star Charge",
     "group": "SCR_BAT000_02",
     "metric": "APERF_Index",
@@ -7464,30 +6984,6 @@
     "cohens_d": 0.099
   },
   {
-    "config": "At moderate speeds (25 to 49 miles per hour)",
-    "group": "AFUEL_D_09",
-    "metric": "APEAL_Index",
-    "n_has": 95,
-    "n_not": 499,
-    "wmean_has": 740.36,
-    "wmean_not": 740.71,
-    "diff": -0.34,
-    "p": 0.38526987221241016,
-    "cohens_d": 0.099
-  },
-  {
-    "config": "Height Adjustment: Front passenger seat - Manually operated",
-    "group": "SCR_SEAT00_03",
-    "metric": "AENT_Index",
-    "n_has": 59,
-    "n_not": 9878,
-    "wmean_has": 781.3,
-    "wmean_not": 781.91,
-    "diff": -0.61,
-    "p": 0.47729944522781176,
-    "cohens_d": 0.099
-  },
-  {
     "config": "Wallbox",
     "group": "NEV_06",
     "metric": "ACMFT_Index",
@@ -7521,18 +7017,6 @@
     "wmean_not": 779.49,
     "diff": 8.98,
     "p": 0.1375210945157562,
-    "cohens_d": 0.098
-  },
-  {
-    "config": "At moderate speeds (25 to 49 miles per hour)",
-    "group": "AFUEL_D_09",
-    "metric": "AFUEL_Index",
-    "n_has": 95,
-    "n_not": 499,
-    "wmean_has": 731.98,
-    "wmean_not": 699.08,
-    "diff": 32.89,
-    "p": 0.3920549831985972,
     "cohens_d": 0.098
   },
   {
@@ -7917,18 +7401,6 @@
     "wmean_not": 778.38,
     "diff": 12.7,
     "p": 0.00749043444872446,
-    "cohens_d": 0.091
-  },
-  {
-    "config": "At low speeds (less than 25 miles per hour)",
-    "group": "AFUEL_D_09",
-    "metric": "APERF_Index",
-    "n_has": 56,
-    "n_not": 538,
-    "wmean_has": 758.5,
-    "wmean_not": 749.04,
-    "diff": 9.46,
-    "p": 0.5250845669942344,
     "cohens_d": 0.091
   },
   {
@@ -8781,18 +8253,6 @@
     "wmean_not": 818.23,
     "diff": -10.47,
     "p": 0.14328797871555796,
-    "cohens_d": 0.077
-  },
-  {
-    "config": "At moderate speeds (25 to 49 miles per hour)",
-    "group": "AFUEL_D_09",
-    "metric": "AENT_Index",
-    "n_has": 95,
-    "n_not": 499,
-    "wmean_has": 737.19,
-    "wmean_not": 739.06,
-    "diff": -1.87,
-    "p": 0.4804330964991795,
     "cohens_d": 0.077
   },
   {
@@ -10128,18 +9588,6 @@
     "cohens_d": 0.058
   },
   {
-    "config": "At moderate speeds (25 to 49 miles per hour)",
-    "group": "AFUEL_D_09",
-    "metric": "AINT_Index",
-    "n_has": 95,
-    "n_not": 499,
-    "wmean_has": 752.86,
-    "wmean_not": 737.53,
-    "diff": 15.34,
-    "p": 0.603242175182815,
-    "cohens_d": 0.058
-  },
-  {
     "config": "Sliding Adjustment: Front passenger seat - Manually operated",
     "group": "SCR_SEAT00_01",
     "metric": "APEAL_Index",
@@ -10197,18 +9645,6 @@
     "wmean_not": 780.33,
     "diff": -9.13,
     "p": 0.14149425189201126,
-    "cohens_d": 0.057
-  },
-  {
-    "config": "Memory seat - Rear (2nd row) seats",
-    "group": "SCR_SEAT00_04C",
-    "metric": "AENT_Index",
-    "n_has": 91,
-    "n_not": 9846,
-    "wmean_has": 770.62,
-    "wmean_not": 781.94,
-    "diff": -11.33,
-    "p": 0.5597388296620182,
     "cohens_d": 0.057
   },
   {
@@ -10737,18 +10173,6 @@
     "wmean_not": 789.37,
     "diff": -17.53,
     "p": 0.5941106790543735,
-    "cohens_d": 0.048
-  },
-  {
-    "config": "At low speeds (less than 25 miles per hour)",
-    "group": "AFUEL_D_09",
-    "metric": "AFUEL_Index",
-    "n_has": 56,
-    "n_not": 538,
-    "wmean_has": 714.95,
-    "wmean_not": 702.8,
-    "diff": 12.15,
-    "p": 0.7426052958544863,
     "cohens_d": 0.048
   },
   {
@@ -12360,18 +11784,6 @@
     "cohens_d": 0.027
   },
   {
-    "config": "Memory seat - Rear (2nd row) seats",
-    "group": "SCR_SEAT00_04C",
-    "metric": "AEXT_Index",
-    "n_has": 91,
-    "n_not": 9846,
-    "wmean_has": 815.12,
-    "wmean_not": 817.82,
-    "diff": -2.7,
-    "p": 0.7841148252830015,
-    "cohens_d": 0.027
-  },
-  {
     "config": "Glasses/Sunglasses",
     "group": "AINT_D_01",
     "metric": "ASFTY_Index",
@@ -12477,18 +11889,6 @@
     "wmean_not": 783.91,
     "diff": -2.26,
     "p": 0.6653612122746966,
-    "cohens_d": 0.026
-  },
-  {
-    "config": "At low speeds (less than 25 miles per hour)",
-    "group": "AFUEL_D_09",
-    "metric": "AENT_Index",
-    "n_has": 56,
-    "n_not": 538,
-    "wmean_has": 720.25,
-    "wmean_not": 740.79,
-    "diff": -20.54,
-    "p": 0.8624975735069073,
     "cohens_d": 0.026
   },
   {
@@ -12705,18 +12105,6 @@
     "wmean_not": 783.53,
     "diff": 4.45,
     "p": 0.6525390531570527,
-    "cohens_d": 0.023
-  },
-  {
-    "config": "At low speeds (less than 25 miles per hour)",
-    "group": "AFUEL_D_09",
-    "metric": "AINFO_Index",
-    "n_has": 56,
-    "n_not": 538,
-    "wmean_has": 715.88,
-    "wmean_not": 728.91,
-    "diff": -13.03,
-    "p": 0.867182675105465,
     "cohens_d": 0.023
   },
   {
@@ -13200,18 +12588,6 @@
     "cohens_d": 0.016
   },
   {
-    "config": "At low speeds (less than 25 miles per hour)",
-    "group": "AFUEL_D_09",
-    "metric": "ADRV_Index",
-    "n_has": 56,
-    "n_not": 538,
-    "wmean_has": 734.88,
-    "wmean_not": 741.7,
-    "diff": -6.82,
-    "p": 0.9130453727498866,
-    "cohens_d": 0.016
-  },
-  {
     "config": "Glasses/Sunglasses",
     "group": "AINT_D_01",
     "metric": "ACMFT_Index",
@@ -13560,30 +12936,6 @@
     "cohens_d": 0.011
   },
   {
-    "config": "At moderate speeds (25 to 49 miles per hour)",
-    "group": "AFUEL_D_09",
-    "metric": "ACMFT_Index",
-    "n_has": 95,
-    "n_not": 499,
-    "wmean_has": 734.26,
-    "wmean_not": 721.97,
-    "diff": 12.29,
-    "p": 0.9192625168857375,
-    "cohens_d": 0.011
-  },
-  {
-    "config": "At low speeds (less than 25 miles per hour)",
-    "group": "AFUEL_D_09",
-    "metric": "AINT_Index",
-    "n_has": 56,
-    "n_not": 538,
-    "wmean_has": 721.44,
-    "wmean_not": 741.82,
-    "diff": -20.37,
-    "p": 0.9391250240254151,
-    "cohens_d": 0.011
-  },
-  {
     "config": "Cups/Drink containers",
     "group": "AINT_D_01",
     "metric": "ADRV_Index",
@@ -13821,18 +13173,6 @@
     "wmean_not": 737.08,
     "diff": 14.84,
     "p": 0.9419949559384166,
-    "cohens_d": 0.008
-  },
-  {
-    "config": "At low speeds (less than 25 miles per hour)",
-    "group": "AFUEL_D_09",
-    "metric": "APEAL_Index",
-    "n_has": 56,
-    "n_not": 538,
-    "wmean_has": 733.65,
-    "wmean_not": 741.42,
-    "diff": -7.77,
-    "p": 0.9572158252338718,
     "cohens_d": 0.008
   },
   {

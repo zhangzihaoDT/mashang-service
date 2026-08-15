@@ -1,0 +1,9 @@
+{
+  "dataset": "data/source.sav",
+  "questionnaire_map": "data/questionnaire_map.json",
+  "rows": 9937,
+  "columns": 370,
+  "weight": "APEAL_WT",
+  "missing_value_policy": "SPSS user-defined missing values are treated as missing",
+  "scope": "cross-sectional sample; no year-over-year or market-share claims"
+}

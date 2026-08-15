@@ -1,0 +1,16 @@
+{
+  "status": "success | error | partial",
+  "analysis_id": "string",
+  "generated_at": "ISO-8601",
+  "scope": {
+    "data_source": "data/source.sav",
+    "question": "string",
+    "filters": {},
+    "weight": "APEAL_WT",
+    "coverage": "FULL | PARTIAL | LIMITED | UNKNOWN"
+  },
+  "result": {},
+  "evidence": [],
+  "warnings": [],
+  "errors": []
+}

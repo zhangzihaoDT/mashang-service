@@ -1,0 +1,20 @@
+research_id: purchase_mission_001
+topic_id: topic_x
+round: 0
+status: exploring
+question: 购买任务是否对应不同的产品魅力结构？
+current_hypothesis: 增购用户拥有更高的产品魅力评价，且差异可能集中在感性体验而非基础功能。
+confidence: low
+evidence_ids:
+- E-001
+- E-002
+open_questions:
+- 差异来自哪些子指数？
+- 是否由价格结构造成？
+- 是否由品牌结构造成？
+- 是否由车型结构造成？
+next_action: Q001
+rejected_hypotheses: []
+last_analysis: null
+information_gain_rounds: 0
+stop_reason: null

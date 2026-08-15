@@ -1,14 +1,23 @@
-# .sav 问卷探索性分析研究思路 v2.0
+# .sav 问卷探索性分析研究思路 v2.1
 
-本文档沉淀针对 `.sav`（SPSS 处理后的调查数据集）的探索性分析研究范式。  
-新版流程不再把 SAV 视为研究世界的全部，而是以 **Questionnaire × SAV 联合建模** 为起点，先回答“问卷测量了什么、数据实际覆盖了多少”，再进入统计发现与业务解释。
+本文档沉淀针对 `.sav`（SPSS 处理后的调查数据集）的探索性研究范式。
+
+新版流程不再把任务理解为“先把数据分析完，再总结洞察”，而是区分 **Discovery** 与 **Analysis** 两个阶段：先从数据中发现值得追踪的 Signal，形成可检验的 Hypothesis；再围绕少数高价值 Hypothesis 展开分析、验证和业务解释，最终形成 Insight 与 Topic。
+
+> **核心链路**
+>
+> **Data → Signal → Hypothesis → Analysis → Insight → Topic**
+>
+> 在 J.D. Power 这类联合研究 / 咨询型任务中，“根据数据找出 insights，再针对一个 insight 展开分析”中的前一个 insight，更准确地理解为 **insight seed / candidate finding / hypothesis**，而不是最终结论。
 
 > **当前实现**
 >
 > - `scripts/parse_nev_apeal_questionnaire.py`：解析问卷 PDF，建立 Question ↔ SAV Variable 映射，并输出模块覆盖率。
 > - `scripts/explore_sav.py`：完成 SAV 数据字典、题型识别、QC、描述统计、配置归因、偏好识别、品牌/价位映射、差异扫描、Topic 深挖与统计验证。
 >
-> 两个脚本共同组成完整分析链路：**Measurement Contract → Data Contract → Statistical Discovery → Business Interpretation**。
+> 两个脚本共同组成完整分析链路：
+>
+> **Measurement Contract → Data Contract → Signal Discovery → Hypothesis Framing → Topic Analysis → Business Insight**。
 
 ---
 
@@ -17,41 +26,50 @@
 ```text
 Questionnaire PDF + SAV
         ↓
-问卷解析
+Measurement Contract
+问卷解析 / Question ↔ Variable Mapping / Coverage
         ↓
-Question ↔ Variable Mapping
+Data Contract
+变量字典 / 题型 / Missing / Weight / QC
         ↓
-模块划分 + 数据覆盖率
+──────────────── Discovery ────────────────
         ↓
-Analysis Scope Gate
+Descriptive Scan + Module-aware Scan
         ↓
-变量字典 / 题型识别
+Signal
+异常 / 差异 / 反常识 / 结构变化 / Gap
         ↓
-Data QC
+Hypothesis
+“这里可能存在什么值得解释的现象？”
         ↓
-Descriptive Statistics
+Topic Candidate Ranking
         ↓
-配置归因 / 偏好 / 品牌价位
+──────────────── Analysis ─────────────────
         ↓
-Module-aware 差异扫描
+针对一个 Hypothesis 深挖
         ↓
-Topic Candidates
+统计验证 + 分层验证 + 替代解释排除
         ↓
-Topic 深挖
+Insight
+“现象是什么 + 为什么重要 + 对谁成立”
         ↓
-统计验证
+Business Interpretation
+用户机制 / 产品机制 / 产品机会
         ↓
-用户 / 产品解释
-        ↓
-PPT
+Topic PPT
 ```
 
-整个流程分为四层：
+整个流程分为五层：
 
 1. **Measurement Contract**：问卷设计了什么、题目如何组织、哪些题进入数据。
 2. **Data Contract**：SAV 中有哪些变量、题型、权重、缺失和派生字段。
-3. **Statistical Discovery**：用结构化统计方法找差异、关系和候选 Topic。
-4. **Business Interpretation**：把统计证据翻译成用户洞察、产品定义和改进建议。
+3. **Signal Discovery**：快速扫描数据，找到异常、差异、Gap 和反常识现象，不急于解释。
+4. **Topic Analysis**：针对少数 Hypothesis 做有方向的深挖、验证和排除替代解释。
+5. **Business Insight**：把验证后的统计事实翻译成用户洞察、产品定义和可行动的 Topic。
+
+关键原则：
+
+> **探索阶段的目标不是“得出结论”，而是“提出一个值得分析的问题”。**
 
 ---
 
@@ -59,7 +77,7 @@ PPT
 
 ## 2. 问卷解析
 
-分析不再从 SAV 列开始，而是先解析原始问卷。
+分析不从 SAV 列开始，而是先解析原始问卷。
 
 目标：
 
@@ -181,9 +199,9 @@ Module
 
 ## 5. Analysis Scope Gate
 
-在统计扫描前先确定“哪些问题值得被分析”。
+Scope Gate 的目的不是提前决定“分析什么结论”，而是决定 **哪些区域有资格进入 Signal Discovery**。
 
-每个 Topic / Module 至少记录：
+每个 Module 至少记录：
 
 ```text
 module
@@ -193,17 +211,18 @@ question_count
 sav_covered_count
 missing_questions
 open_text_count
-analysis_allowed
+scan_allowed
+strong_conclusion_allowed
 caveat
 ```
 
 建议规则：
 
 1. `FULL` 模块默认进入自动扫描。
-2. `PARTIAL` 模块进入扫描，但候选 Topic 自动带 coverage caveat。
-3. `LIMITED` 模块默认不生成强模块级结论。
-4. 如果缺失题正好是该 Topic 的核心测量项，则直接降级。
-5. “没有发现差异”不能自动解释成“用户不在乎”，必须先检查 measurement coverage。
+2. `PARTIAL` 模块进入扫描，但任何 Signal 自动携带 coverage caveat。
+3. `LIMITED` 模块可以出现局部 Signal，但默认不升级为完整模块级 Insight。
+4. 如果缺失题正好是某个 Hypothesis 的核心测量项，则该 Hypothesis 直接降级。
+5. “没有发现差异”不能自动解释为“用户不在乎”，必须先检查 Measurement Coverage。
 
 ---
 
@@ -262,19 +281,17 @@ missing_rate
 valid_n
 ```
 
-变量字典是后续统计的查表基础。
+变量字典是后续扫描和验证的查表基础。
 
 原则：
 
-> **先问卷，再字典，后分析。**
+> **先问卷，再字典，再扫描；不是拿到变量就直接建模。**
 
 ---
 
 ## 8. 问卷题型识别
 
-根据值标签、列结构和 Question Mapping 联合判断题型。
-
-当前题型体系：
+根据值标签、列结构和 Question Mapping 联合判断题型。题型决定后续的扫描方式与验证方法。
 
 ### rating
 11 分量表，如：
@@ -374,7 +391,7 @@ Data QC 分为两层：
 - 哪些模块覆盖不足？
 - 是否缺失核心测量项？
 - 是否存在开放题但当前无法量化？
-- 当前数据是否足够回答某个 Topic？
+- 当前数据是否足够验证某个 Hypothesis？
 
 ### B. Dataset QC
 
@@ -397,9 +414,19 @@ Data QC 分为两层：
 
 ---
 
-# Layer 3｜Statistical Discovery
+# Layer 3｜Signal Discovery
 
-## 10. Descriptive Statistics
+这一层只回答：
+
+> **“数据里哪里出现了值得继续追的问题？”**
+
+它不要求一开始就解释为什么，也不要求直接形成最终 Insight。
+
+---
+
+## 10. Descriptive Scan
+
+描述统计在这里的作用不是“完成分析”，而是建立基线并暴露 Signal。
 
 ### 分类题
 
@@ -427,9 +454,7 @@ Data QC 分为两层：
 - Bottom-2 Box
 - Distribution
 
-### 切片
-
-核心分组包括：
+### 核心切片
 
 - 年龄 / 世代；
 - 城市；
@@ -439,24 +464,43 @@ Data QC 分为两层：
 - 细分市场；
 - BEV / PHEV 等产品结构。
 
+### 重点寻找四类 Signal
+
+1. **差异（Difference）**
+   - 某群体明显高 / 低于另一群体。
+2. **异常（Anomaly）**
+   - 某结果明显偏离整体规律。
+3. **Gap / Mismatch**
+   - 价格、配置、品牌定位与实际体验不一致。
+4. **Counter-intuitive Pattern**
+   - 与常识或行业预期相反的结果。
+
+例如：
+
+```text
+价格更高
+   ≠
+某项设计魅力更高
+```
+
+此时只记录为 **Signal**，不要立刻写成“高端用户不在乎设计”等强结论。
+
 ---
 
-## 11. 配置归因（config-scan）
+## 11. 配置扫描（config-scan）
 
-对 APEAL 类满意度研究，配置“有 / 无”的体验差异往往比单纯人口属性差异更接近产品定义。
+对 APEAL 类满意度研究，配置“有 / 无”的体验差异往往是高价值 Signal 来源。
 
-逻辑：
+Discovery 阶段逻辑：
 
 ```text
 配置是否拥有
       ↓
 APEAL / 子指数差异
       ↓
-Effect Size
+Δ + Effect Size + N
       ↓
-人群 / 车型 / 价格混淆检查
-      ↓
-产品含义
+Signal
 ```
 
 输出：
@@ -477,11 +521,13 @@ Effect Size
 
 注意：
 
-> 配置有 / 无的满意度差异属于 observational association，不能直接解释为因果。
+> Discovery 阶段看到的“配置有 / 无差异”只是 observational signal，不是配置效果的因果证明。
+
+是否由价格、品牌、人群结构驱动，要留到 Topic Analysis 阶段验证。
 
 ---
 
-## 12. 偏好题识别（preference）
+## 12. 偏好题扫描（preference）
 
 识别：
 
@@ -496,15 +542,16 @@ Effect Size
 - 用户优先级；
 - 模块归属。
 
-作用：
+Discovery 作用：
 
-- 解释“为什么某项体验得分低 / 高”；
-- 为产品改进排序；
-- 帮助 Topic 从统计差异转向真实需求。
+- 找到“高分但仍想改进”的矛盾；
+- 找到“得分一般但用户特别在意”的机会；
+- 识别满意度指标与显性偏好之间的 Gap；
+- 为 Hypothesis 提供解释方向。
 
 ---
 
-## 13. 品牌 / 价位映射（camp）
+## 13. 品牌 / 价位 / 产品结构扫描（camp）
 
 可按业务需要建立：
 
@@ -521,23 +568,34 @@ Effect Size
 - 样本结构 ≠ 市场份额；
 - 没有外部销量数据时，不做“市场份额变化”结论。
 
+这一层尤其适合寻找：
+
+```text
+定位 / 价格 / 配置
+       ↓
+预期体验
+       ↕ Gap
+实际 APEAL 体验
+```
+
 ---
 
-## 14. Module-aware 自动扫描差异
+## 14. Module-aware Signal Scan
 
 自动扫描不再直接对 370 列“平铺捕鱼”，而是保留问卷层级。
 
 推荐输出结构：
 
 ```text
-M7 驾驶感受
-└─ ACHAR_R 驾驶体验
-   └─ Item 04
-      ├─ Group: 30万+ vs 20-30万
-      ├─ Δ = +X
-      ├─ effect_size = ...
-      ├─ p_adj = ...
-      └─ coverage = FULL
+Signal ID: S-017
+Module: M7 驾驶感受
+Question: ACHAR_R 驾驶体验 / Item 04
+Pattern: 30万+ vs 20-30万存在明显差异
+Δ: +X
+Effect Size: ...
+N: ...
+Coverage: FULL
+Signal Type: difference
 ```
 
 扫描内容：
@@ -557,90 +615,154 @@ M7 驾驶感受
 ```text
 Business Relevance
 × Effect Size
+× Pattern Novelty
 × Sample Reliability
 × Coverage Confidence
 ```
 
----
-
-## 15. Topic Candidates
-
-自动扫描的任务只是找到“值得看哪里”，不是直接生成结论。
-
-每个 Topic 候选至少回答：
-
-1. **What**
-   - 发现了什么差异？
-
-2. **Where**
-   - 出现在哪个 Module / Question？
-
-3. **Who**
-   - 哪类用户 / 产品最明显？
-
-4. **How large**
-   - effect size 多大？
-
-5. **Reliable?**
-   - 样本量、显著性、coverage 是否足够？
-
-6. **So what**
-   - 是否能转成产品行动？
-
-Topic 筛选标准：
-
-- 差异大；
-- 可解释；
-- 可行动；
-- 与研究问题相关；
-- 证据链完整；
-- 数据覆盖足够。
-
-每轮输出 3–5 个 Topic 候选，而不是一次展开全部变量。
+其中 **Pattern Novelty** 用于提高“反常识 / Gap / 新鲜结构”的优先级，避免扫描结果被大量正确但平庸的相关性淹没。
 
 ---
 
-## 16. Topic 深挖
+## 15. Signal → Hypothesis → Topic Candidate
 
-对候选 Topic 做多角度验证。
+这是 v2.1 的关键变化。
 
-### 换一个维度看
+自动扫描的输出不直接叫 Insight，而先经过三层：
+
+```text
+Signal
+数据里看到了什么？
+        ↓
+Hypothesis
+这个现象可能意味着什么？
+        ↓
+Topic Candidate
+它是否值得投入进一步分析？
+```
+
+### A. Signal
+
+必须是数据可直接描述的事实，例如：
+
+> 40 万+车型在部分座舱设计评价上没有明显高于 30–40 万车型。
+
+### B. Hypothesis
+
+是对 Signal 的 **待验证解释**，例如：
+
+> 新能源高端化可能存在“价格升级快于用户可感知设计价值升级”的现象。
+
+此时不能写成最终结论。
+
+### C. Topic Candidate
+
+把 Hypothesis 转成一个值得回答的商业问题：
+
+> 高端新能源如何把价格溢价真正转化为用户可感知的设计魅力？
+
+每个候选至少记录：
+
+```text
+signal_id
+signal_statement
+signal_type
+module
+question
+segment
+hypothesis
+business_question
+business_relevance
+novelty
+coverage
+sample_reliability
+analysis_plan
+candidate_score
+```
+
+### 候选评分
+
+建议综合：
+
+```text
+Topic Potential
+= Business Relevance
+× Evidence Strength
+× Novelty
+× Explainability
+× Actionability
+```
+
+每轮只保留 **3–5 个 Topic Candidates**。
+
+这里的目标不是“证明所有候选都成立”，而是决定：
+
+> **哪一个值得花最多分析资源去打穿。**
+
+---
+
+# Layer 4｜Topic Analysis
+
+从这一层开始，才真正进入“针对一个 insight 展开分析”。
+
+这里的分析不是漫无目的继续切数据，而是围绕一个明确 Hypothesis 建立证据链。
+
+---
+
+## 16. Hypothesis-driven Topic 深挖
+
+每个 Topic 必须先写一句 Hypothesis：
+
+```text
+我们观察到 ________（Signal），
+怀疑背后存在 ________（Hypothesis），
+因此需要验证 ________（Research Question）。
+```
+
+然后再决定分析动作。
+
+### Who：对谁成立？
+
+- 年龄 / 世代；
+- 收入；
+- 城市；
+- 品牌；
+- 价格带；
+- 细分市场；
+- 动力形式。
+
+### Where：出现在哪些体验上？
+
+- 哪个 Module？
+- 是一个 Item，还是多个 Question 同方向？
+- 是总体魅力，还是具体体验？
+
+### How robust：是否稳定？
 
 例如：
 
 - 年龄差异是否在不同价格带都成立？
 - 品牌差异是否其实由价格驱动？
 - 配置差异是否只存在于高端车型？
+- 换一种统计口径后是否还存在？
 
-### 看内部结构
-
-例如：
-
-```text
-年轻用户
-├─ 高收入
-├─ 低收入
-├─ 一线城市
-└─ 非一线城市
-```
-
-### 找解释变量
+### Why：可能的机制是什么？
 
 尝试建立：
 
 ```text
 用户特征
     ↓
-需求 / 场景
+需求 / 使用场景
     ↓
-配置 / 产品形态
+产品设计 / 配置
     ↓
-实际体验
+实际感知体验
     ↓
-APEAL
+APEAL / Overall Appeal
 ```
 
-### 排除替代解释
+### What else：排除替代解释
 
 检查：
 
@@ -650,14 +772,18 @@ APEAL
 - 车型；
 - 城市；
 - 动力形式；
-- measurement coverage；
-- missing bias。
+- Measurement Coverage；
+- Missing Bias。
+
+Topic 深挖的核心不是增加图表数量，而是不断回答：
+
+> **“这个 Hypothesis 还站得住吗？”**
 
 ---
 
-## 17. 统计验证
+## 17. Statistical Validation
 
-正式输出前进行统计检验。
+统计验证服务于 Hypothesis，不反过来由统计方法定义 Topic。
 
 ### 分类 × 分类
 
@@ -683,7 +809,7 @@ APEAL
 
 ### 多重比较
 
-自动扫描大量变量时必须做：
+Discovery 阶段自动扫描大量变量时必须做：
 
 - Benjamini-Hochberg FDR
 
@@ -695,25 +821,79 @@ APEAL
 - 给置信区间；
 - 必要时降级为 directional signal。
 
+### 最终状态
+
+每个 Hypothesis 最终只能进入以下状态之一：
+
+- **SUPPORTED**：多组证据支持，可升级为 Insight。
+- **REFINED**：原假设过宽，收敛为更具体结论。
+- **DIRECTIONAL**：方向存在，但样本 / Coverage 不足。
+- **REJECTED**：进一步分析后不成立。
+
+> **REJECTED 不是失败。**  
+> Discovery 本来就允许大量 Signal 在验证阶段被淘汰。
+
 ---
 
-# Layer 4｜Business Interpretation
+# Layer 5｜Business Insight
 
-## 18. 用户 / 产品解释
+## 18. Analysis → Insight
+
+只有经过 Topic Analysis 后，Hypothesis 才有资格升级为 Insight。
+
+一个完整 Insight 至少包含三部分：
+
+```text
+What happened
+数据证明了什么？
+        +
+Why it matters
+为什么这是值得关注的用户 / 产品问题？
+        +
+For whom / where
+这个结论对谁、在哪些场景下成立？
+```
+
+例如：
+
+```text
+Signal
+高价车型在若干设计维度并未同步获得更高评价
+        ↓
+Hypothesis
+价格升级可能快于用户可感知设计价值升级
+        ↓
+Analysis
+价格带 × 模块 × 品牌 × 用户分层验证
+        ↓
+Insight
+高端用户并非简单追求更多配置；
+真正拉开魅力差距的是能被持续感知的设计体验
+```
+
+因此：
+
+> **Insight 不是一个显著性结果，而是经过验证的、具有商业意义的数据解释。**
+
+---
+
+## 19. Insight → Product Interpretation
 
 统计结果必须被翻译成业务语言。
 
-每个 Topic 建议使用：
+推荐证据链：
 
 ```text
-数据事实
-   ↓
-用户 / 场景解释
-   ↓
+Validated Insight
+       ↓
+用户 / 使用场景
+       ↓
 产品机制
-   ↓
+       ↓
+当前产品 Gap
+       ↓
 产品机会
-   ↓
+       ↓
 设计建议
 ```
 
@@ -723,7 +903,7 @@ APEAL
 
 - 是谁？
 - 在什么场景下？
-- 为什么有这个需求？
+- 为什么对这个体验敏感？
 - 与其他用户有什么不同？
 
 ### 产品侧
@@ -732,125 +912,154 @@ APEAL
 
 - 哪项产品设计 / 配置相关？
 - 是“有没有”的问题，还是“做得好不好”的问题？
+- 是配置数量，还是体验整合？
 - 是否存在价格 / 配置层级的 trade-off？
-- 车企应该提供什么？
+- 车企到底应该提供什么样的设计？
 
 ### 事实与推断分离
 
 明确标注：
 
 - **Fact**：数据直接支持；
-- **Inference**：业务机制解释；
+- **Inference**：对用户 / 产品机制的解释；
 - **Recommendation**：产品建议。
 
 没有数据支撑的推断不得写成事实。
 
 ---
 
-## 19. 面向产品定义的推荐分析结构
+## 20. Topic PPT
 
-对于类似 NEV-APEAL、产品满意度或魅力研究，建议优先使用：
-
-```text
-用户是谁
-  ↓
-开什么 / 买什么
-  ↓
-有什么配置 / 设计
-  ↓
-实际体验如何
-  ↓
-哪些体验最影响整体魅力
-  ↓
-哪个群体最敏感
-  ↓
-车企应该提供什么设计
-```
-
-这比单纯寻找“哪个变量和 APEAL_Index 相关最高”更接近 Product Insights。
-
----
-
-## 20. PPT
+Topic PPT 不是“分析过程汇报”，而是围绕一个 Insight 建立完整论证。
 
 建议结构：
 
-1. 研究问题
-2. 数据与方法说明
-3. Measurement Coverage
-4. 核心发现
-5. Topic 1
-6. Topic 1 深挖
-7. Topic 1 用户 / 产品机制
-8. 产品建议
-9. 其他候选发现
-10. 方法附录
+1. **Topic / Executive Insight**
+   - 一句话说明真正发现了什么。
+2. **Why this matters**
+   - 为什么这个问题值得 OEM 关注。
+3. **Signal**
+   - 最初观察到了什么反常 / Gap。
+4. **Evidence 1｜核心差异**
+   - 证明现象确实存在。
+5. **Evidence 2｜Who / Where**
+   - 对谁、在哪些产品 / 场景最明显。
+6. **Evidence 3｜Mechanism / Robustness**
+   - 排除主要替代解释，解释背后的产品机制。
+7. **Refined Insight**
+   - 把最初 Hypothesis 收敛成最终结论。
+8. **What OEM should do**
+   - 对产品定义 / 设计 / 配置提出建议。
+9. **Other Signals**
+   - 其余 2–4 个候选 insight seeds，体现探索广度。
+10. **Method / Data Appendix**
+   - Measurement Coverage、N、Weight、检验方法等。
 
 原则：
 
-- 结论先行；
+- **先讲 Topic，再讲证据，不从方法页开始。**
 - 每页一个观点；
 - 图表只承担证据作用；
 - 每个数字可溯源；
 - 标注 N、权重、检验方法；
-- 低覆盖模块标注“数据受限”。
+- 低覆盖模块标注“数据受限”；
+- 不展示为了“显得分析很多”而存在的图表。
 
 ---
 
 # 通用原则
 
-## 1. 先建立 Measurement Contract
+## 1. Data Contract 先于 Insight Discovery
 
-在开始统计之前，必须知道：
+在开始扫描之前，必须知道：
 
 - 问卷测了什么；
 - 哪些题进入 SAV；
 - 哪些题没进入；
-- 每个模块覆盖多少。
+- 每个模块覆盖多少；
+- 每个变量对应什么业务问题。
 
-## 2. 再建立 Data Contract
+## 2. Discovery 先于 Analysis
 
-明确：
+不要一开始就对所有变量做深度分析。
 
-- 每个变量是什么；
-- 属于哪道题；
-- 题型是什么；
-- 是否派生；
-- 是否权重；
-- 缺失值如何处理。
+正确顺序：
 
-## 3. QC 不过不下钻
+```text
+先广度扫描
+→ 找 Signal
+→ 提 Hypothesis
+→ 选 Topic
+→ 再投入深度分析
+```
 
-Measurement Coverage、Missing、异常、逻辑问题未澄清前，不做强结论。
+这比：
 
-## 4. Question 是业务单位，Variable 是统计单位
+```text
+把所有数据分析一遍
+→ 最后从结果里挑几个结论
+```
+
+更适合开放式商业研究任务。
+
+## 3. Signal ≠ Insight
+
+Signal 是“数据里发生了什么”。
+
+Insight 是：
+
+> **经过验证后，对现象形成了什么具有业务意义的解释。**
+
+## 4. Hypothesis 必须写在 Analysis 前面
+
+任何深挖动作都应该能回答：
+
+> “这一步是在验证什么？”
+
+如果回答不出来，往往是在进行无方向的数据切片。
+
+## 5. Question 是业务单位，Variable 是统计单位
 
 多选和矩阵在 SAV 中可能展开成几十列，但不能把每一列当成独立业务问题。
 
-## 5. Module 是洞察组织单位
+## 6. Module 是证据组织单位，Topic 是最终叙事单位
 
-最终 Topic 应优先形成模块内一致的 evidence，而不是依赖一个孤立显著变量。
+Module 帮助形成一致 evidence；Topic 可以跨 Module，只要服务于同一个 Hypothesis。
 
-## 6. 扫描是辅助，判断是核心
+例如一个“高端化设计价值错位”的 Topic，可以同时使用：
+
+- 座舱内装；
+- 座椅；
+- 智能化；
+- 品牌感知；
+- 价格带。
+
+## 7. 自动化负责发现，研究者负责判断
 
 自动化负责：
 
-> “哪里值得看”
+> “哪里值得看？”
 
 研究者负责：
 
-> “为什么值得讲，以及应该怎么做”
+> “这意味着什么？”
 
-## 7. Effect Size 优先于单纯显著性
+以及：
+
+> “为什么值得讲？应该怎么做？”
+
+## 8. Effect Size 优先于单纯显著性
 
 样本量大时 p 值很容易显著，必须同时关注：
 
 - 差异大小；
 - 效应量；
 - 样本规模；
-- Coverage。
+- Coverage；
+- Business Relevance；
+- Pattern Novelty。
 
-## 8. 关联不等于因果
+## 9. 关联不等于因果
 
 尤其是：
 
@@ -859,13 +1068,15 @@ Measurement Coverage、Missing、异常、逻辑问题未澄清前，不做强�
 - 价格差异；
 - 高低配差异。
 
-必须检查第三变量。
+必须检查第三变量和替代解释。
 
-## 9. 每个数字必须可溯源
+## 10. 每个数字必须可溯源
 
 至少保留：
 
 ```text
+Signal ID
+Hypothesis ID
 Question
 Variable
 Module
@@ -878,13 +1089,18 @@ Effect Size
 Coverage
 ```
 
-## 10. 没有数据支撑的观点不写成结论
+## 11. 允许 Hypothesis 被推翻
+
+探索性分析不是为了证明第一个想法。
 
 证据不足时使用：
 
 - “方向性发现”
 - “数据受限”
 - “待进一步验证”
+- “原假设不成立”
+
+比为了完成 PPT 强行包装成 Insight 更可靠。
 
 ---
 
@@ -918,35 +1134,37 @@ outputs/reports/nev_apeal_questionnaire_map.json
 ## B. SAV 探索分析
 
 ```bash
-# 变量字典
+# Data Contract
 python scripts/explore_sav.py dict
-
-# 题型识别
 python scripts/explore_sav.py types
-
-# Dataset QC
 python scripts/explore_sav.py qc
 
-# 描述统计
+# Discovery baseline
 python scripts/explore_sav.py describe
 
-# 配置归因
+# Signal sources
 python scripts/explore_sav.py config-scan
 python scripts/explore_sav.py config-scan --min-has 100
-
-# 偏好题
 python scripts/explore_sav.py preference
-
-# 品牌 / 价位
 python scripts/explore_sav.py camp
 
-# 差异扫描
+# Module-aware Signal Discovery
 python scripts/explore_sav.py scan
 python scripts/explore_sav.py scan --group-by SUPER_SEGMENT_DP CITY_TIER_DP
 
-# Topic 深挖
+# Hypothesis-driven Topic Analysis
 python scripts/explore_sav.py topic --group-by GENERATION2 --metric APEAL_Index
 python scripts/explore_sav.py topic --group-by CN_INCOME --metric APEAL_Index --pairwise
+```
+
+现有 `scan` / `topic` 命令可以继续使用，但语义建议明确为：
+
+```text
+scan
+= 广度扫描 → Signal → Hypothesis Candidates
+
+topic
+= 输入一个 Hypothesis → 深挖 / 验证 → Insight
 ```
 
 ---
@@ -961,7 +1179,9 @@ Questionnaire Parser
 SAV Explorer
 ```
 
-下一步建议增加一个统一的 analysis manifest，例如：
+下一步最重要的工程化方向，不是继续增加更多统计命令，而是显式增加 **Signal / Hypothesis 中间层**。
+
+建议增加统一 analysis manifest：
 
 ```json
 {
@@ -974,18 +1194,73 @@ SAV Explorer
   "coverage_gate": {
     "full": 0.90,
     "partial": 0.75
+  },
+  "discovery": {
+    "max_topic_candidates": 5,
+    "rank_by": [
+      "business_relevance",
+      "effect_size",
+      "novelty",
+      "sample_reliability",
+      "coverage"
+    ]
   }
 }
 ```
 
-让后续 `scan` / `topic` 自动读取：
+建议新增标准化中间产物：
 
-- Question Mapping；
-- Module；
-- Coverage；
-- Raw / Derived；
-- Weight；
-- Metric。
+```text
+outputs/analysis/signals.json
+outputs/analysis/hypotheses.json
+outputs/analysis/topic_candidates.md
+outputs/analysis/topics/{topic_id}/evidence.json
+```
+
+其中：
+
+### `signals.json`
+
+只记录数据事实：
+
+```text
+signal_id
+module
+question
+segment
+pattern
+magnitude
+sample
+coverage
+```
+
+### `hypotheses.json`
+
+记录研究判断：
+
+```text
+hypothesis_id
+source_signal_ids
+hypothesis
+business_question
+why_interesting
+analysis_plan
+status
+```
+
+### Topic evidence
+
+记录验证链：
+
+```text
+hypothesis
+supporting_evidence
+contradicting_evidence
+alternative_explanations
+statistical_validation
+refined_insight
+business_implication
+```
 
 最终形成：
 
@@ -994,13 +1269,19 @@ Measurement Contract
         ↓
 Data Contract
         ↓
-Automated Discovery
+Automated Signal Discovery
         ↓
-Research Judgment
+Research Hypothesis
         ↓
-Product Insight
+Hypothesis-driven Analysis
+        ↓
+Validated / Refined Insight
+        ↓
+Business Topic
+        ↓
+Topic PPT
 ```
 
 这套流程的目标不是“把 370 个变量都分析一遍”，而是把一个大型调查数据集压缩成：
 
-> **少数几个证据完整、统计可靠、可以真正指导产品定义的 Topic。**
+> **少数几个值得追踪的 Signal → 3–5 个可检验 Hypothesis → 1 个被真正打穿、能够指导产品定义的 Topic。**
