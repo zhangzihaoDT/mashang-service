@@ -6,8 +6,18 @@
     "command": "python mashang_workspace/runtime_scripts/lock_by_model.py --date 2026-06-10 --format json",
     "expected": {
       "status": "success",
-      "metrics": {"total_lock_count": {"operator": ">=", "value": 0}},
-      "required_fields": ["scope", "result", "followup_context", "followup_context.top_entities"]
+      "metrics": {
+        "total_lock_count": {
+          "operator": ">=",
+          "value": 0
+        }
+      },
+      "required_fields": [
+        "scope",
+        "result",
+        "followup_context",
+        "followup_context.top_entities"
+      ]
     }
   },
   {
@@ -17,8 +27,15 @@
     "command": "python mashang_workspace/runtime_scripts/lock_city_distribution.py --date 2026-06-10 --format json",
     "expected": {
       "status": "success",
-      "metrics": {"total_lock_count": {"operator": ">=", "value": 0}},
-      "required_fields": ["result.dimensions"]
+      "metrics": {
+        "total_lock_count": {
+          "operator": ">=",
+          "value": 0
+        }
+      },
+      "required_fields": [
+        "result.dimensions"
+      ]
     }
   },
   {
@@ -28,8 +45,17 @@
     "command": "python mashang_workspace/runtime_scripts/daily_lock_count.py --date 2026-06-10 --format json",
     "expected": {
       "status": "success",
-      "metrics": {"total_lock_count": {"operator": ">=", "value": 0}},
-      "required_fields": ["scope", "result", "followup_context"]
+      "metrics": {
+        "total_lock_count": {
+          "operator": ">=",
+          "value": 0
+        }
+      },
+      "required_fields": [
+        "scope",
+        "result",
+        "followup_context"
+      ]
     }
   },
   {
@@ -39,8 +65,16 @@
     "command": "python mashang_workspace/runtime_scripts/assign_conversion_analysis.py --start-date 2026-06-01 --end-date 2026-06-10 --format json",
     "expected": {
       "status": "success",
-      "metrics": {"total_leads": {"operator": ">=", "value": 0}},
-      "required_fields": ["scope", "result"]
+      "metrics": {
+        "total_leads": {
+          "operator": ">=",
+          "value": 0
+        }
+      },
+      "required_fields": [
+        "scope",
+        "result"
+      ]
     }
   },
   {
@@ -50,8 +84,16 @@
     "command": "python mashang_workspace/runtime_scripts/attribute_penetration_report.py --series LS6 --attribute 激光雷达 --limit 5 --format json",
     "expected": {
       "status": "success",
-      "metrics": {"total_orders": {"operator": ">=", "value": 0}},
-      "required_fields": ["result.dimensions", "scope"]
+      "metrics": {
+        "total_orders": {
+          "operator": ">=",
+          "value": 0
+        }
+      },
+      "required_fields": [
+        "result.dimensions",
+        "scope"
+      ]
     }
   },
   {
@@ -60,11 +102,24 @@
     "description": "atp_price_report.py ATP 月报基本校验",
     "command": "python mashang_workspace/runtime_scripts/atp_price_report.py --month 2026-05 --format json",
     "expected": {
-      "status": ["success", "partial_success"],
-      "required_fields": ["scope", "result", "followup_context"],
+      "status": [
+        "success",
+        "partial_success"
+      ],
+      "required_fields": [
+        "scope",
+        "result",
+        "followup_context"
+      ],
       "metrics": {
-        "avg_atp": {"operator": ">=", "value": 0},
-        "vehicle_count": {"operator": ">=", "value": 0}
+        "avg_atp": {
+          "operator": ">=",
+          "value": 0
+        },
+        "vehicle_count": {
+          "operator": ">=",
+          "value": 0
+        }
       }
     }
   },
@@ -74,13 +129,65 @@
     "description": "lock_predict_backtest.py 回测基本校验 (rolling-origin, 双基线, 分层评估)",
     "command": "python mashang_workspace/research_scripts/lock_predict_backtest.py --format json",
     "expected": {
-      "status": ["success", "partial_success"],
-      "required_fields": ["scope", "result", "followup_context", "result.metrics.mae", "result.metrics.wape", "result.metrics.n"],
+      "status": [
+        "success",
+        "partial_success"
+      ],
+      "required_fields": [
+        "scope",
+        "result",
+        "followup_context",
+        "result.metrics.mae",
+        "result.metrics.wape",
+        "result.metrics.n"
+      ],
       "metrics": {
-        "n": {"operator": ">=", "value": 100},
-        "mae": {"operator": ">=", "value": 0},
-        "wape": {"operator": ">=", "value": 0}
+        "n": {
+          "operator": ">=",
+          "value": 100
+        },
+        "mae": {
+          "operator": ">=",
+          "value": 0
+        },
+        "wape": {
+          "operator": ">=",
+          "value": 0
+        }
       }
+    }
+  },
+  {
+    "case_id": "numeric_current_state_diagnosis_001",
+    "tier": "core",
+    "description": "current_state_diagnosis.py 基本结构和非负校验",
+    "command": "python mashang_workspace/runtime_scripts/current_state_diagnosis.py --format json",
+    "expected": {
+      "status": "success",
+      "metrics": {
+        "inventory_total": {
+          "operator": ">=",
+          "value": 0
+        },
+        "pending_total": {
+          "operator": ">=",
+          "value": 0
+        },
+        "at_risk_total": {
+          "operator": ">=",
+          "value": 0
+        },
+        "at_risk_ytd": {
+          "operator": ">=",
+          "value": 0
+        }
+      },
+      "required_fields": [
+        "scope",
+        "result",
+        "followup_context",
+        "followup_context.top_entities"
+      ]
     }
   }
 ]

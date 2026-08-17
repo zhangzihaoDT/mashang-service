@@ -97,6 +97,40 @@
 - **业务含义**：留存小订中最终锁单/交付的比例
 - **计算口径**：留存小订中 lock_time 非空的比例
 
+### 待开票未退订锁单数（状态指标）
+
+- **业务含义**：系统当前处于"锁单 & 未开票 & 未退订"状态的订单数，纯事实状态计数（open_locked_orders）
+- **计算口径**：`count(distinct order_number) WHERE lock_time IS NOT NULL AND invoice_upload_time IS NULL AND apply_refund_time IS NULL AND actual_refund_time IS NULL`
+- **数据集**：`order_data.parquet`
+- **时间字段**：`lock_time`
+- **常用别名**：open_locked_orders, 待开票有效锁单数（历史名，已停用）
+- **退订判定**：`apply_refund_time` 或 `actual_refund_time` 任一非空即视为已退订（与 `business_glossary.md` 一致）
+- **注意事项**：这是**纯状态指标**，只描述"账面上还有多少单处于该状态"，不含对兑现概率的任何判断。它不直接代表可交付量。
+
+### 有效锁单率（质量指标）
+
+- **业务含义**：当前 Backlog 预计最终兑现（开票）的比例，即"这些状态订单还有多少会真正成交"
+- **计算口径**：`有效锁单当量 ÷ 待开票未退订锁单数`（Backlog realization rate）
+- **数据集**：`order_data.parquet`
+- **参考脚本**：`research_scripts/stalled_order_forecast.py`
+- **常用别名**：Backlog 有效率, 有效待交付率, backlog_realization_rate
+- **注意事项**：质量指标描述兑现概率，与状态指标的计数含义不同，二者不可混用。
+
+### 有效锁单当量（预测指标）— Effective Locked Order Equivalent (ELOE)
+
+- **业务含义**：当前 Backlog 预计能贡献多少未来开票。基于每个悬置订单的兑现概率累加：
+  `ELOE = Σ P_i(最终开票 | 当前仍悬置)`，即把"账面订单数"折算为"概率化开票预期"
+- **计算口径**：对每个待开票未退订订单估计 `P(最终开票 | Lock Age)`（v1 单变量），按 v2 扩展为 `P(最终开票 | Lock Age, Series)` 并做 sample-size shrinkage，逐单累加
+- **数据集**：`order_data.parquet`
+- **共享算子**：`shared/operators/effective_locked_orders.py`（metrics.json 中 `有效锁单当量` 的 `operator` 即指向它；生产核心在此）
+- **参考脚本**：`research_scripts/stalled_order_forecast.py`（研究层消费者：验证 / 图表 / CLI）
+- **派生指标**：Backlog 有效率 = ELOE ÷ 悬置池；风险暴露量 = 悬置池 − ELOE
+- **常用别名**：ELOE, effective_locked_orders, 有效待交付当量, 有效Backlog当量
+- **模型方法**：基于历史锁单的 **conditional outcome curve / landmark probability**——在 Lock Age=t 时仍有效（未开票未退订）的历史订单中，最终开票的比例。注意：v1 的经验比例尚不等同于完整的竞争风险生存模型（cause-specific hazard / CIF），后者需按时间动态估计开票与退订两个 competing events 后才可正式命名，文档与代码注释应保持这一严谨性。
+- **注意事项**：这是预测指标，对账龄越久的订单打折越狠（如 >90 天开票概率仅个位数）。它与前端锁单预测（`structured_business_forecast`）衔接，构成 Demand → Order → Invoice/Delivery 预测链。
+
+
+
 ### 预测锁单数
 
 - **业务含义**：基于成熟度曲线修正右删失后预测的最终30日锁单数
@@ -133,6 +167,7 @@
 | 下发线索7日锁单率 | 下发线索7日锁单数 | 下发线索数 | 七日锁单率, 7日锁单率 |
 | 下发线索30日锁单率 | 下发线索30日锁单数 | 下发线索数 | 三十日锁单率, 30日锁单率 |
 | 门店当日锁单率 | 下发线索当日锁单数（门店） | 下发线索数（门店） | 门店锁单率 |
+| 有效锁单率 | 有效锁单当量 | 待开票未退订锁单数 | Backlog有效率, 有效待交付率 |
 
 ## 数据筛选口径
 

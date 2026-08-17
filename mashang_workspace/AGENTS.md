@@ -126,6 +126,7 @@ python mashang_workspace/eval/run_eval.py --suite parser  # 单套件
 |------|------|------|
 | `python runtime_scripts/daily_lock_count.py` | 每日锁单 | runtime |
 | `python runtime_scripts/daily_dc_inventory_change.py --date YYYY-MM-DD` | 单日 DC 库存变动分析 — 库存变化 × 开票流水交叉分析 | runtime |
+| `make state-diagnosis [AS_OF=YYYY-MM-DD]` 或 `python runtime_scripts/current_state_diagnosis.py [--as-of YYYY-MM-DD]` | 业务状态排查 — 库存 × 待开票未退订 × 风险暴露（滚动365d + 当年累计双口径，分车系 + 合计；`--as-of` 支持任意历史时点 point-in-time 重建，`--format json` Result Contract） | runtime |
 | `python runtime_scripts/lock_by_model.py --limit 5` | 车型拆分 | runtime |
 | `python runtime_scripts/lock_city_distribution.py` | 城市分布 | runtime |
 | `python research_scripts/release_curve_analysis.py` | 释放曲线 | research |

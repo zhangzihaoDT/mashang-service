@@ -84,12 +84,16 @@ def ensure_runtime_on_path() -> None:
 
 
 def ensure_shared_on_path() -> None:
-    """确保 SHARED_DIR 在 sys.path 中（优先于 runtime），以便 import operators/schema 使用共享版本。"""
+    """确保 SHARED_DIR 在 sys.path 中（优先于 runtime），以便 import operators/schema 使用共享版本。
+
+    无论 shared 是否已在 sys.path 中，都会把它提到最前，避免被 pytest 等其他 sys.path 修改
+    压到 runtime 之后，导致 import operators 解析到旧 mashang_runtime/operators。
+    """
     sh = str(SHARED_DIR)
-    # Insert shared before runtime so it takes priority
     rt = str(RUNTIME_DIR)
-    if sh not in sys.path:
-        sys.path.insert(0, sh)
+    if sh in sys.path:
+        sys.path.remove(sh)
+    sys.path.insert(0, sh)
     if rt in sys.path:
         sys.path.remove(rt)
         sys.path.insert(1, rt)

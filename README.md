@@ -384,6 +384,38 @@ mashang_runtime
 
 ---
 
+## Backlog 分析原则
+
+预测链中的一条核心原则（也是 `research_scripts/stalled_order_forecast.py` 存在的理由）：
+
+```text
+Nominal Backlog is a system state; Effective Backlog is a forecast.
+```
+
+账面上的"待开票未退订锁单数"只是系统状态，不直接代表可交付量。
+
+锁单账龄越久，最终开票概率越低。`stalled_order_forecast.py` 用历史条件开票曲线把每个悬置订单折算为兑现概率，得到 **有效锁单当量（Effective Locked Order Equivalent, ELOE）**：
+
+```text
+ELOE = Σ P(最终开票 | 当前仍悬置)
+```
+
+它把 Backlog 从静态库存概念变成概率资产概念，并形成预测闭环：
+
+```text
+未来新增锁单预测 → 锁单兑现模型 → Effective Backlog → 未来开票/交付预测
+```
+
+对应指标（`shared/schema/metrics.json`）：
+
+| 层级 | 指标 | 含义 |
+|------|------|------|
+| 状态 | 待开票未退订锁单数 | 系统还有多少单处于该状态，纯事实 |
+| 质量 | 有效锁单率 | 这些订单预计还有多少比例会兑现 |
+| 预测 | 有效锁单当量 (ELOE) | 当前 Backlog 预计贡献多少未来开票 |
+
+---
+
 # 1. Architecture Overview
 
 当前项目采用四层架构：

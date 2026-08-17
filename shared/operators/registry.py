@@ -13,6 +13,7 @@ from operators.assign_conversion import run_assign_conversion_operator
 from operators.weighted_lead_conversion import run_weighted_lead_conversion_operator
 from operators.mature_lock_prediction import run_mature_lock_prediction_operator
 from operators.atp_analysis import run_atp_operator
+from operators.effective_locked_orders import run_effective_locked_orders_operator
 from operators.series_group_logic import apply_series_group_logic
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -167,6 +168,12 @@ def _resolve_operator_params(intent: str, plan: dict, user_query: str, query_too
 
     if intent == "atp":
         return run_atp_operator(df=df, start=str(start), end=str(end))
+
+    if intent == "effective_locked_orders":
+        return run_effective_locked_orders_operator(
+            df=df, as_of=str(end),
+            series=str(series) if series is not None else None,
+        )
 
     return None
 

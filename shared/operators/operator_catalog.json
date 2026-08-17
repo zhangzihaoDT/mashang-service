@@ -42,5 +42,9 @@
   {
     "title": "开票均价 (ATP – Average Transaction Price)",
     "summary": "对指定时间窗口内 lock_time 非空、order_type='用户车' 的订单，按 invoice_amount 计算全局平均开票价格及总金额，并按 series_derived / series_group_logic / product_type / product_name 分组建明细（含订单数和均价）。要求数据集包含 invoice_amount、invoice_upload_time、lock_time、order_number、product_name 列。"
+  },
+  {
+    "title": "有效锁单当量 (ELOE – Effective Locked Order Equivalent)",
+    "summary": "对当前悬置池（待开票未退订锁单）逐单估计条件开票概率 P(最终开票 | Lock Age)（v1）或 P(最终开票 | Lock Age, Series)（v2 带 sample-size shrinkage，向全局曲线回缩），累加为有效锁单当量 ELOE，并派生 Backlog 有效率 = ELOE ÷ 悬置池、风险暴露量 = 悬置池 − ELOE。支持按车系过滤。方法为 conditional outcome curve / landmark probability。"
   }
 ]

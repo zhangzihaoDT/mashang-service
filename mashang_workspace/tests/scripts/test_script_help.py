@@ -51,6 +51,7 @@ CORE_SCRIPTS = [
     "voc_theme_analysis.py",
     "data_dictionary.py",
     "dc_showroom_age_report.py",
+    "current_state_diagnosis.py",
 ]
 
 

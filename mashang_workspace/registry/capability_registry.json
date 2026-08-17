@@ -395,5 +395,30 @@
       "candidate_stage": "not_eligible"
     },
     "notes": "已退役：原 promptbuilders/miit_new_car 实现于 2026-08 移除，能力在 MIIT/scripts 重新实现。"
+  },
+  {
+    "capability_id": "current_state_diagnosis",
+    "name": "当前业务状态排查（库存 × Backlog × 风险暴露）",
+    "tier": "runtime",
+    "status": "active",
+    "script": "mashang_workspace/runtime_scripts/current_state_diagnosis.py",
+    "auto_schedulable": true,
+    "result_contract": true,
+    "numeric_eval_case": "numeric_current_state_diagnosis_001",
+    "contract_gate": true,
+    "followup_supported": true,
+    "docs": [
+      "mashang_workspace/docs/metric_definitions.md"
+    ],
+    "promotion": {
+      "current_stage": "runtime_script",
+      "eligible_for_runtime_productization": false,
+      "eligible_for_runtime_script": false,
+      "blocked_reasons": [],
+      "eligible_for_runtime_v2": true,
+      "runtime_v2_candidate": true,
+      "candidate_stage": "v2_candidate"
+    },
+    "notes": "当前库存/待开票未退订/风险暴露三水位快照，消费 dealer_unsold_inventory + effective_locked_orders 共享算子。"
   }
 ]

@@ -16,6 +16,7 @@ shared/
 │   ├── atp_analysis.py
 │   ├── assign_conversion.py
 │   ├── mature_lock_prediction.py
+│   ├── effective_locked_orders.py   ELOE / Backlog 有效率 / 风险暴露量
 │   └── ...
 └── schema/          Shared business schema/config
     ├── business_definition.json   Vehicle/energy/seat mapping rules

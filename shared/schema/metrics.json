@@ -102,6 +102,31 @@
       "type": "operator",
       "operator": "retained_intention_conversion"
     },
+    "待开票未退订锁单数": {
+      "dataset": "order_data",
+      "field": "order_number",
+      "agg": "count",
+      "time_field": "lock_time",
+      "aliases": ["待开票有效锁单数", "open_locked_orders", "锁单未开票未退订", "锁单留存"],
+      "group": "留存分析",
+      "type": "business",
+      "extra_filters": [
+        {"field": "lock_time", "op": "!=", "value": null},
+        {"field": "invoice_upload_time", "op": "==", "value": null},
+        {"field": "apply_refund_time", "op": "==", "value": null},
+        {"field": "actual_refund_time", "op": "==", "value": null}
+      ]
+    },
+    "有效锁单当量": {
+      "dataset": "order_data",
+      "field": "order_number",
+      "agg": "count",
+      "time_field": "lock_time",
+      "aliases": ["ELOE", "effective_locked_orders", "有效待交付当量", "有效Backlog当量"],
+      "group": "留存分析",
+      "type": "operator",
+      "operator": "effective_locked_orders"
+    },
     "下发线索数": {
       "dataset": "assign_data",
       "field": "下发线索数",
@@ -288,7 +313,7 @@
     },
     "留存分析": {
       "description": "留存与转化指标",
-      "metrics": ["留存小订数", "留存小订转化率"]
+      "metrics": ["留存小订数", "留存小订转化率", "待开票未退订锁单数", "有效锁单当量"]
     },
     "用户画像": {
       "description": "用户特征指标",
@@ -329,6 +354,12 @@
       "numerator": "下发线索当日锁单数（门店）",
       "denominator": "下发线索数（门店）",
       "aliases": ["门店锁单率", "门店线索当日锁单率"]
+    },
+    "有效锁单率": {
+      "type": "ratio",
+      "numerator": "有效锁单当量",
+      "denominator": "待开票未退订锁单数",
+      "aliases": ["Backlog有效率", "有效待交付率", "backlog_realization_rate"]
     }
   }
 }

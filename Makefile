@@ -225,6 +225,16 @@ dc-inventory-change:
 dc-inventory-change-date:
 	$(PYTHON) mashang_workspace/runtime_scripts/daily_dc_inventory_change.py --date $(DATE)
 
+## 业务状态排查（库存 × 待开票未退订 × 风险暴露；滚动365d + 当年累计双口径）
+## 用法: make state-diagnosis [AS_OF=2025-04-17] [SERIES=LS8] [FORMAT=json] [OUTPUT=outputs/tables/]
+## AS_OF 支持任意历史时点（point-in-time 重建）；缺省 = 最新数据日
+state-diagnosis:
+	$(PYTHON) mashang_workspace/runtime_scripts/current_state_diagnosis.py \
+		$(if $(AS_OF),--as-of $(AS_OF)) \
+		$(if $(SERIES),--series $(SERIES)) \
+		$(if $(FORMAT),--format $(FORMAT)) \
+		$(if $(OUTPUT),--output $(OUTPUT))
+
 ## [废弃] 请使用 daily-observation-dry-run 替代
 daily-sync-dry-run:
 	@echo "[DEPRECATED] Use 'make daily-observation-dry-run' instead."

@@ -109,6 +109,16 @@
         "required": ["df", "start", "end"],
         "optional": []
       }
+    },
+    "effective_locked_orders": {
+      "name": "有效锁单当量 (ELOE)",
+      "intent": "effective_locked_orders",
+      "dataset": "order_data",
+      "description": "对当前悬置池（待开票未退订锁单）逐单估计条件开票概率 P(最终开票|Lock Age, Series) 并累加，得到有效锁单当量 ELOE、Backlog 有效率与风险暴露量",
+      "parameters": {
+        "required": ["df", "as_of"],
+        "optional": ["train_window_days", "maturity_days", "current_start", "series", "model", "shrinkage"]
+      }
     }
   },
   "intent_map": {
@@ -177,6 +187,12 @@
       "metric_names": ["开票均价", "ATP", "平均开票价格", "平均售价"],
       "dataset": "order_data",
       "query_hints": ["开票均价", "ATP", "平均开票", "平均售价", "invoice_amount"]
+    },
+    "effective_locked_orders": {
+      "operator": "effective_locked_orders",
+      "metric_names": ["有效锁单当量", "ELOE", "effective_locked_orders", "有效待交付当量"],
+      "dataset": "order_data",
+      "query_hints": ["ELOE", "有效锁单当量", "有效待交付当量", "悬置", "backlog"]
     }
   }
 }

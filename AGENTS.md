@@ -335,6 +335,7 @@ mashang-service/
 | 线索转化 | `python mashang_workspace/runtime_scripts/assign_conversion_analysis.py` | runtime |
 | 配置渗透率 | `python mashang_workspace/runtime_scripts/attribute_penetration_report.py` | runtime |
 | ATP 月报 | `python mashang_workspace/runtime_scripts/atp_price_report.py 2026-05` | runtime |
+| 业务状态排查 | `make state-diagnosis` 或 `python mashang_workspace/runtime_scripts/current_state_diagnosis.py [--as-of YYYY-MM-DD]`(库存×待开票未退订×风险暴露;`AS_OF` 支持历史时点 PIT 重建,可选 `SERIES/FORMAT/OUTPUT`) | runtime |
 | 释放曲线 | `python mashang_workspace/research_scripts/release_curve_analysis.py` | research |
 | 预测锁单 | `python mashang_workspace/research_scripts/cohort_forecast.py` | research |
 | 回测 | `python mashang_workspace/research_scripts/lock_predict_backtest.py` | research |
