@@ -1,0 +1,9 @@
+hypotheses:
+  - id: H-001
+    statement: 手机互联（是否连接手机 / CarPlay / 手机互联映射）是信息娱乐满意度的最强区分变量。
+    question: 手机互联相关变量是否为 AINFO 满意度的最强区分变量？
+    status: rejected
+    evidence_plan:
+      - item 级：R_02(通话) vs 其余 5 个 AINFO rating 题项对 R_07(总体体验) 的区分力
+      - feature 级：CONNECT_SMTPHONE / SCR_INFO00_04 / AINFO_D_01* 对高 vs 低满意度的判别力
+      - confounder：控制价格/品牌/能源后 connectivity 效应是否稳健

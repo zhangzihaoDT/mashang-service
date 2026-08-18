@@ -1,0 +1,20 @@
+topic_id: phone_connectivity_ainfo
+round: 4
+status: rejected
+question: 手机互联是信息娱乐满意度的最强区分变量？
+current_hypothesis: 手机互联（是否连接手机 / CarPlay / 手机互联映射）是信息娱乐满意度的最强区分变量。
+confidence: high
+evidence_ids:
+- E-001
+- E-002
+- E-003
+- E-004
+open_questions: []
+mechanism_depth: 3
+effect_interpreted: true
+next_action: null
+rejected_hypotheses:
+- 'H-001: 手机互联是最强区分变量 → REJECTED（E-001~E-004）'
+last_analysis: drilldown
+information_gain_rounds: 4
+stop_reason: 'REJECTED: 手机互联题项/feature 判别力均低于车内信息娱乐体验题项（R_02 是最弱而非最强），且受控后仍如此（E-001~E-004）'
