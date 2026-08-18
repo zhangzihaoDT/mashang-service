@@ -20,9 +20,9 @@
 跨车系、互不重叠的规则可共用同一档（纯 precedence，不是车型排名）。
 
 ```
-DM2 (precedence=3): product_name LIKE '%L6%' AND product_name LIKE '%M2%' OR product_name LIKE '%Jimmy Choo%' OR product_name LIKE '%JimmyChoo%'
+DM2 (precedence=3): product_name LIKE '%一代%' AND product_name LIKE '%L6%' OR product_name LIKE '%L6%' AND product_name LIKE '%M2%' OR product_name LIKE '%Jimmy Choo%' OR product_name LIKE '%JimmyChoo%'
 CM2 (precedence=3): product_name LIKE '%新一代%' AND product_name LIKE '%LS6%' OR product_name LIKE '%上汽一亿台限定版%' AND product_name LIKE '%LS6%'
-DM1 (precedence=2): product_name LIKE '%全新%' AND product_name LIKE '%L6%'
+DM1 (precedence=2): product_name LIKE '%全新%' AND product_name LIKE '%L6%' AND NOT 一代
 CM1 (precedence=2): product_name LIKE '%全新%' AND product_name LIKE '%LS6%'
 DM0 (precedence=1): product_name LIKE '%L6%' AND NOT 全新
 CM0 (precedence=1): product_name LIKE '%LS6%' AND NOT (全新/新一代)
@@ -35,7 +35,9 @@ L7  (precedence=1): product_name LIKE '%L7%'
 
 **注意**：
 - DM2 必须高于 DM1/DM0（否则 L6 M2 / Jimmy Choo 订单会被 DM1/DM0 宽泛规则抢先归入旧代际）。
-- DM2 的 `M2` 分支已收紧为 `%L6% AND %M2%`，非 L6 家族的 "M2" 产品不会落入 DM2。
+- **DM2 的核心锚点是「一代」**：M2 代产品在订单数据里的正式命名是「全新一代智己L6 [Max/Pro Max/Ultra]」，
+  不含 "M2" 字样；"L6 M2 Pro Max/Max/Ultra" 是试驾车/内部命名。故 DM2 = 一代 L6 家族 + M2 token + Jimmy Choo，
+  且 DM1 必须排除「一代」以免把 M2 代基础版抢归旧代际。
 - 旧字符串格式（直接写 `product_name LIKE ...`）仍被执行器兼容，视为 `{priority: 0, condition: <字符串>}`。
 - 规则治理：`mashang_workspace/utility_scripts/audit_series_group_overlap.py` 可审计重叠；
   重叠应只发生在族内（LS6/L6 家族），跨车系重叠应视为规则 bug。

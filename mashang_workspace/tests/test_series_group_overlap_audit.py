@@ -38,12 +38,12 @@ def test_audit_reports_intended_within_family_overlaps_only():
     bdef = _bdef()
     names = [
         "L6 M2 Pro Max",          # DM0 ∩ DM2（L6 族内）
-        "全新一代 智己  L6 Prof. JimmyChoo 高定限量版（93kWh）",  # DM1 ∩ DM2
+        "全新一代智己L6 Max",      # 仅 DM2（一代锚点，不再与 DM1 重叠）
         "LS6 76 Max 上汽一亿台限定版",  # CM2 ∩ CM0（LS6 族内）
         "智己LS9",                # 单规则
     ]
     res = _audit()(bdef, names)
-    assert res["overlap_count"] == 3
+    assert res["overlap_count"] == 2
     assert res["cross_family_overlap_count"] == 0
     assert set(res["overlaps"]["L6 M2 Pro Max"]) == {"DM0", "DM2"}
 

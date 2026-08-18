@@ -241,3 +241,107 @@ def test_dataset_validate_script_works():
     assert "status" in data
     assert "files" in data
     assert len(data["files"]) == 5
+
+
+def _load_merge_order_data():
+    """加载 dataset/updater/order_data_to_parquet.py 的 merge_order_data 函数。"""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("odp_merge", UPDATER_DIR / "order_data_to_parquet.py")
+    if spec is None or spec.loader is None:
+        raise ImportError(f"无法加载 {UPDATER_DIR / 'order_data_to_parquet.py'}")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod.merge_order_data
+
+
+def test_merge_backfills_intention_for_existing_no_lock_order():
+    """底座已存在订单（仅 order_create_date，意向金为空），CSV 后补意向金 → 字段级回填不丢单。
+
+    回归：此前 upsert 对"无锁单且已在底座"的订单整行丢弃 CSV 更新，
+    导致已有订单的 intention_payment_time 更新丢失（L6 M2 预售 47 单漏计）。
+    """
+    import pandas as pd
+    merge = _load_merge_order_data()
+    base = pd.DataFrame({
+        "order_number": ["O1", "O2"],
+        "product_name": ["全新一代智己L6", "智己L6"],
+        "intention_payment_time": [pd.NaT, pd.NaT],
+        "lock_time": [pd.NaT, pd.NaT],
+        "order_create_date": [pd.Timestamp("2026-08-10"), pd.Timestamp("2026-08-10")],
+    })
+    new = pd.DataFrame({
+        "order_number": ["O1"],
+        "product_name": ["全新一代智己L6"],
+        "intention_payment_time": [pd.Timestamp("2026-08-18 20:30:00")],
+        "lock_time": [pd.NaT],
+        "order_create_date": [pd.Timestamp("2026-08-10")],
+    })
+    out = merge(base, new)
+    row = out[out["order_number"] == "O1"]
+    assert row["intention_payment_time"].iloc[0] == pd.Timestamp("2026-08-18 20:30:00")
+    assert len(out) == 2  # O2 保留
+
+
+def test_merge_preserves_historical_lock_time_for_no_lock_csv():
+    """底座订单已有历史 lock_time，CSV 无锁单 → 底座锁单时间不得被覆盖。"""
+    import pandas as pd
+    merge = _load_merge_order_data()
+    base = pd.DataFrame({
+        "order_number": ["O1"],
+        "product_name": ["智己L6"],
+        "intention_payment_time": [pd.Timestamp("2026-05-01 10:00:00")],
+        "lock_time": [pd.Timestamp("2026-06-01 09:00:00")],
+    })
+    new = pd.DataFrame({
+        "order_number": ["O1"],
+        "product_name": ["智己L6"],
+        "intention_payment_time": [pd.Timestamp("2026-05-01 10:00:00")],
+        "lock_time": [pd.NaT],
+    })
+    out = merge(base, new)
+    row = out[out["order_number"] == "O1"]
+    assert row["lock_time"].iloc[0] == pd.Timestamp("2026-06-01 09:00:00")
+    assert row["intention_payment_time"].iloc[0] == pd.Timestamp("2026-05-01 10:00:00")
+
+
+def test_merge_locked_csv_row_overrides_base():
+    """CSV 有锁单时间 → 整行覆盖底座（含更新的意向金时间）。"""
+    import pandas as pd
+    merge = _load_merge_order_data()
+    base = pd.DataFrame({
+        "order_number": ["O1"],
+        "product_name": ["智己L6"],
+        "intention_payment_time": [pd.NaT],
+        "lock_time": [pd.NaT],
+    })
+    new = pd.DataFrame({
+        "order_number": ["O1"],
+        "product_name": ["智己L6"],
+        "intention_payment_time": [pd.Timestamp("2026-08-18 21:00:00")],
+        "lock_time": [pd.Timestamp("2026-08-18 22:00:00")],
+    })
+    out = merge(base, new)
+    row = out[out["order_number"] == "O1"]
+    assert row["lock_time"].iloc[0] == pd.Timestamp("2026-08-18 22:00:00")
+    assert row["intention_payment_time"].iloc[0] == pd.Timestamp("2026-08-18 21:00:00")
+
+
+def test_merge_appends_brand_new_no_lock_order():
+    """CSV 无锁单且底座无此单 → 追加为新订单。"""
+    import pandas as pd
+    merge = _load_merge_order_data()
+    base = pd.DataFrame({
+        "order_number": ["O1"],
+        "product_name": ["智己L6"],
+        "intention_payment_time": [pd.NaT],
+        "lock_time": [pd.NaT],
+    })
+    new = pd.DataFrame({
+        "order_number": ["O2"],
+        "product_name": ["全新一代智己L6"],
+        "intention_payment_time": [pd.Timestamp("2026-08-18 21:00:00")],
+        "lock_time": [pd.NaT],
+    })
+    out = merge(base, new)
+    assert len(out) == 2
+    assert out[out["order_number"] == "O2"]["intention_payment_time"].iloc[0] == pd.Timestamp("2026-08-18 21:00:00")

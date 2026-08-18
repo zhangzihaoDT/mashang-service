@@ -49,16 +49,22 @@ def _bdef() -> dict:
 
 # (product_name, 期望分组)
 CASES = [
-    # —— L6 M2 / Jimmy Choo → 必须归 DM2 ——
+    # —— L6 M2 / Jimmy Choo / 全新一代 → 必须归 DM2 ——
     ("L6 M2 Pro Max", "DM2"),
     ("L6 M2 Max", "DM2"),
     ("L6 M2 Ultra", "DM2"),
     ("智己L6 M2", "DM2"),
+    ("全新一代智己L6", "DM2"),
+    ("全新一代智己L6 Max", "DM2"),
+    ("全新一代智己L6 Pro Max", "DM2"),
+    ("全新一代 智己  L6 Pro Max", "DM2"),
+    ("全新一代智己L6 Ultra", "DM2"),
     ("全新一代 智己  L6 Prof. JimmyChoo 高定限量版（93kWh）", "DM2"),
     ("全新一代 智己  L6 Prof. JimmyChoo 高定限量版（76kWh）", "DM2"),
     ("全新一代智己L6 Prof.Jimmy Choo 高定限量版 超长续航版", "DM2"),
     ("Prof.Jimmy Choo 高定限量版 标准续航版", "DM2"),
     # —— 旧 L6 代际不回退 ——
+    ("全新智己L6", "DM1"),
     ("全新智己L6 Ultra", "DM1"),
     ("智己L6 Max", "DM0"),
     # —— LS6 代际 ——

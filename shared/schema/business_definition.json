@@ -137,7 +137,7 @@
     },
     "DM1": {
       "priority": 2,
-      "condition": "product_name LIKE '%全新%' AND product_name LIKE '%L6%'"
+      "condition": "product_name LIKE '%全新%' AND product_name LIKE '%L6%' AND product_name NOT LIKE '%一代%'"
     },
     "DM0": {
       "priority": 1,
@@ -145,7 +145,7 @@
     },
     "DM2": {
       "priority": 3,
-      "condition": "product_name LIKE '%L6%' AND product_name LIKE '%M2%' OR product_name LIKE '%Jimmy Choo%' OR product_name LIKE '%JimmyChoo%'"
+      "condition": "product_name LIKE '%一代%' AND product_name LIKE '%L6%' OR product_name LIKE '%L6%' AND product_name LIKE '%M2%' OR product_name LIKE '%Jimmy Choo%' OR product_name LIKE '%JimmyChoo%'"
     },
     "LS8": {
       "priority": 1,
