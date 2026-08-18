@@ -7,6 +7,11 @@
     2. 待开票未退订  = 锁单 & 未开票 & 未退订
     3. 风险暴露      = (1 − 有效率) × 待开票未退订 = 悬置池 − ELOE
 
+另补充三项经营水位指标:
+    4. 30 日日均下发线索 = 过去 30 日下发线索数 / 30（assign_data，整体口径）
+    5. 有效门店数 × 单店日均 = 近 30 日日均下发门店数 × 日均线索/门店（assign_data，整体口径）
+    6. 库存覆盖天数 MOS = 库存数 / 近 30 日日均开票销量（零售开票剔除对公）
+
 point-in-time 口径（重要）:
     --as-of 支持任意历史时点；Backlog/风险暴露按 as-of 状态重建（与 backlog_rate_trend_report
     同口径）：观察点之后才开票/退订的订单仍计入当时池子；PIT ELOE 对已知结局取确定值
@@ -44,8 +49,12 @@ from operators.dealer_unsold_inventory import compute as compute_inventory  # no
 from operators.effective_locked_orders import (  # noqa: E402
     build_outcome_frame, estimate_curve_global, estimate_curve_by_series, predict_p,
 )
+from operators.assign_conversion import _parse_cn_date  # noqa: E402
+from utils.business import is_corporate_owner  # noqa: E402
 
 INVENTORY_PARQUET = REPO_ROOT / "dataset" / "delivery_inventory.parquet"
+ASSIGN_CSV = REPO_ROOT / "dataset" / "assign_data.csv"
+LEAD_WINDOW_DAYS = 30
 OVERSEAS = {"上汽国际", "海外"}
 SERIES_MAP = {"LSJEL": "LS8", "LSJEH": "LS9", "LSJWL": "LS7",
               "LSJWR": "LS6", "LSJWT": "L6", "LSJE3": "L7"}
@@ -157,6 +166,57 @@ def compute_inventory_snapshot(df_inv: pd.DataFrame, odf: pd.DataFrame,
     return {"total": int(len(cur)), "by_series": by_series}
 
 
+def compute_leads_metrics(assign_df: pd.DataFrame, as_of: pd.Timestamp) -> dict | None:
+    """30 日日均下发线索 + 有效门店数 + 单店日均（assign_data，整体口径）。
+
+    30 日日均下发线索 = 过去 30 日下发线索数 / 30；
+    有效门店数 = 近 30 日下发门店数日均（日均接收线索的门店规模）；
+    单店日均 = 30 日日均下发线索 / 有效门店数。
+    """
+    as_of = pd.Timestamp(as_of).normalize()
+    start = as_of - pd.Timedelta(days=LEAD_WINDOW_DAYS)
+    w = assign_df[(assign_df["_date"] > start) & (assign_df["_date"] <= as_of)]
+    if w.empty:
+        return None
+    leads_sum = float(w["下发线索数"].sum())
+    stores_avg = float(w["下发门店数"].mean())
+    leads_avg = leads_sum / LEAD_WINDOW_DAYS
+    return {
+        "window_start": (start + pd.Timedelta(days=1)).strftime("%Y-%m-%d"),
+        "window_end": as_of.strftime("%Y-%m-%d"),
+        "days": LEAD_WINDOW_DAYS,
+        "leads_30d_sum": int(round(leads_sum)),
+        "leads_30d_avg": round(leads_avg, 1),
+        "effective_stores_avg": round(stores_avg, 1),
+        "leads_per_store_daily": round(leads_avg / stores_avg, 1) if stores_avg > 0 else None,
+    }
+
+
+def compute_sales_30d(odf: pd.DataFrame, as_of: pd.Timestamp,
+                      series: str | None) -> dict:
+    """近 30 日开票销量（零售开票剔除对公），用于库存覆盖天数分母。"""
+    as_of = pd.Timestamp(as_of).normalize()
+    start = as_of - pd.Timedelta(days=LEAD_WINDOW_DAYS)
+    inv = odf[pd.to_datetime(odf["invoice_upload_time"]).between(start, as_of)]
+    inv = inv[inv["lock_time"].notna()]
+    if "owner_identity_no" in inv.columns:
+        corp = inv["owner_identity_no"].apply(
+            lambda x: is_corporate_owner(x) if pd.notna(x) else False)
+        inv = inv[~corp]
+    if series:
+        inv = inv[inv["series"] == series]
+    out = {m: int((inv["series"] == m).sum()) for m in SERIES_ORDER}
+    out["total"] = int(len(inv))
+    return out
+
+
+def coverage_days(inventory: int, sales_30d: int) -> float | None:
+    """库存覆盖天数 MOS = 库存数 / 近 30 日日均开票销量。"""
+    if not sales_30d:
+        return None
+    return round(inventory * LEAD_WINDOW_DAYS / sales_30d, 1)
+
+
 def main():
     args = parse_args()
     cmd = "python " + " ".join(sys.argv)
@@ -168,6 +228,17 @@ def main():
     # ── 库存 ──
     df_inv = pd.read_parquet(INVENTORY_PARQUET)
     inventory = compute_inventory_snapshot(df_inv, odf, as_of, args.series)
+
+    # ── 下发线索 / 有效门店 / 库存覆盖天数（经营水位指标）──
+    assign_df = None
+    try:
+        _a = pd.read_csv(ASSIGN_CSV)
+        _a["_date"] = _parse_cn_date(_a["Assign Time 年/月/日"])
+        assign_df = _a[_a["_date"].notna()]
+    except Exception:
+        assign_df = None
+    leads = compute_leads_metrics(assign_df, as_of) if assign_df is not None else None
+    sales_30d = compute_sales_30d(odf, as_of, args.series)
 
     # ── Backlog（待开票未退订）+ ELOE / 风险暴露：point-in-time 重建（任意观察日）──
     roll = compute_pit_backlog(odf, as_of, pool_window="rolling", model="series",
@@ -194,9 +265,12 @@ def main():
         eff = eff_by_series.get(m, 0.0)
         rate = round(eff / pend, 4) if pend else None
         at_risk = round(pend - eff, 1) if pend else None
+        sales_c = int(sales_30d.get(m, 0))
         rows.append({
             "series": m,
             "inventory": inv_c,
+            "sales_30d": sales_c,
+            "coverage_days": coverage_days(inv_c, sales_c),
             "pending": int(pend),
             "effective_rate": rate,
             "at_risk": at_risk,
@@ -207,6 +281,8 @@ def main():
     total_pending = sum(r["pending"] for r in rows)
     total_at_risk = round(sum(r["at_risk"] or 0 for r in rows), 1)
     total_rate = round((total_pending - total_at_risk) / total_pending, 4) if total_pending else None
+    total_sales_30d = sum(r["sales_30d"] for r in rows)
+    total_coverage = coverage_days(total_inventory, total_sales_30d)
 
     summary = (f"库存 {total_inventory:,} 台 · 待开票未退订 {total_pending:,} 单 · "
                f"有效率 {total_rate:.1%} · 风险暴露(滚动365d) {total_at_risk:,.0f} 单 · "
@@ -214,27 +290,35 @@ def main():
                if at_risk_ytd is not None else
                f"库存 {total_inventory:,} 台 · 待开票未退订 {total_pending:,} 单 · "
                f"有效率 {total_rate:.1%} · 风险暴露(滚动365d) {total_at_risk:,.0f} 单")
+    if leads:
+        summary += (f"\n下发线索(近30日) 日均 {leads['leads_30d_avg']:,.1f} 条 · "
+                    f"有效门店日均 {leads['effective_stores_avg']:,.1f} 家 · "
+                    f"单店日均 {leads['leads_per_store_daily']:,.1f} 条")
+    if total_coverage is not None:
+        summary += f"\n库存覆盖天数(近30日开票口径) {total_coverage:,.1f} 天"
 
     # ── 输出 ──
     if args.format == "terminal":
         print(f"当前业务状态排查（截至 {as_of.date()}）")
         print(f"  {summary}")
         print()
-        hdr = (f"{'车型':<5}{'库存数':>8}{'待开票未退订':>12}{'有效率':>9}"
-               f"{'风险暴露(滚动)':>12}{'风险暴露(当年)':>12}")
+        hdr = (f"{'车型':<5}{'库存数':>8}{'近30日销量':>10}{'覆盖天数':>8}"
+               f"{'待开票未退订':>12}{'有效率':>9}{'风险暴露(滚动)':>12}{'风险暴露(当年)':>12}")
         print(hdr)
         print("-" * len(hdr))
         for r in rows:
             rate_s = f"{r['effective_rate']:.1%}" if r["effective_rate"] is not None else "—"
             atr_s = f"{r['at_risk']:,.0f}" if r["at_risk"] is not None else "—"
             atr_ytd_s = f"{r['at_risk_ytd']:,.0f}" if r["at_risk_ytd"] is not None else "—"
-            print(f"{r['series']:<5}{r['inventory']:>8,}{r['pending']:>12,}{rate_s:>9}"
-                  f"{atr_s:>12}{atr_ytd_s:>12}")
+            cov_s = f"{r['coverage_days']:,.1f}" if r["coverage_days"] is not None else "—"
+            print(f"{r['series']:<5}{r['inventory']:>8,}{r['sales_30d']:>10,}{cov_s:>8}"
+                  f"{r['pending']:>12,}{rate_s:>9}{atr_s:>12}{atr_ytd_s:>12}")
         print("-" * len(hdr))
         total_rate_s = f"{total_rate:.1%}" if total_rate is not None else "—"
         total_at_risk_ytd_s = f"{at_risk_ytd:,.0f}" if at_risk_ytd is not None else "—"
-        print(f"{'合计':<5}{total_inventory:>8,}{total_pending:>12,}{total_rate_s:>9}"
-              f"{total_at_risk:>12,.0f}{total_at_risk_ytd_s:>12}")
+        total_cov_s = f"{total_coverage:,.1f}" if total_coverage is not None else "—"
+        print(f"{'合计':<5}{total_inventory:>8,}{total_sales_30d:>10,}{total_cov_s:>8}"
+              f"{total_pending:>12,}{total_rate_s:>9}{total_at_risk:>12,.0f}{total_at_risk_ytd_s:>12}")
         if at_risk_ytd is not None:
             print(f"\n风险暴露（{as_of.year} 当年累计，Age-only，与 backlog_rate_trend_report 同口径）"
                   f"：{at_risk_ytd:,.0f} 单（待开票未退订 {pending_ytd:,} 单，有效率 {rate_ytd:.1%}）")
@@ -249,6 +333,11 @@ def main():
             "effective_rate": total_rate,
             "at_risk_total": total_at_risk,
             "at_risk_ytd": at_risk_ytd,
+            "leads_30d_avg": leads["leads_30d_avg"] if leads else None,
+            "effective_stores_avg": leads["effective_stores_avg"] if leads else None,
+            "leads_per_store_daily": leads["leads_per_store_daily"] if leads else None,
+            "sales_30d_total": total_sales_30d,
+            "inventory_coverage_days": total_coverage,
         },
         "inventory": {"total": total_inventory, "by_series": inventory["by_series"]},
         "backlog": {
@@ -263,20 +352,29 @@ def main():
                 "model": "age",
             },
         },
+        "leads": leads,
+        "mos": {
+            "window_days": LEAD_WINDOW_DAYS,
+            "sales_30d_total": total_sales_30d,
+            "inventory_coverage_days": total_coverage,
+        },
         "rows": rows,
     }
     contract = build_success_contract(
         script="runtime_scripts/current_state_diagnosis.py",
         command=cmd,
         scope={
-            "data_source": f"{INVENTORY_PARQUET}; dataset/order_data.parquet",
+            "data_source": f"{INVENTORY_PARQUET}; dataset/order_data.parquet; {ASSIGN_CSV}",
             "time_window": {"as_of": str(as_of.date())},
             "filters": {"series": args.series},
             "metric_definition": (
                 "库存=国内DC在库_未开票快照(按观察日时间戳重建); "
                 "待开票未退订=锁单&未开票&未退订(point-in-time as-of重建); "
                 "风险暴露=(1−有效率)×待开票未退订=悬置池−ELOE; "
-                "滚动365d=Age×Series; 当年累计=当年1月1日起+Age-only(与backlog_rate_trend_report同口径)"
+                "滚动365d=Age×Series; 当年累计=当年1月1日起+Age-only(与backlog_rate_trend_report同口径); "
+                "30日日均下发线索=过去30日下发线索数/30(assign_data整体口径,窗口不跨as-of); "
+                "有效门店数=近30日下发门店数日均; 单店日均=30日日均下发线索/有效门店数; "
+                "库存覆盖天数=库存数/近30日日均开票销量(零售开票剔除对公)"
             ),
         },
         result=result_data,

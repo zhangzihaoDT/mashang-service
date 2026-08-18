@@ -28,6 +28,15 @@ def test_current_state_diagnosis_json_contract():
     assert 0 <= at_risk <= total_pending
     # 库存为正
     assert data["result"]["inventory"]["total"] > 0
+    # 新增经营水位指标
+    m = data["result"]["metrics"]
+    assert m["leads_30d_avg"] > 0
+    assert m["effective_stores_avg"] > 0
+    assert m["leads_per_store_daily"] > 0
+    assert m["sales_30d_total"] > 0
+    assert m["inventory_coverage_days"] > 0
+    assert data["result"]["leads"]["window_end"] == data["result"]["as_of"]
+    assert data["result"]["mos"]["window_days"] == 30
 
 
 def test_current_state_diagnosis_historical_as_of():
