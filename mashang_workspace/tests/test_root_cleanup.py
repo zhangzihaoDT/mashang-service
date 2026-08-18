@@ -20,18 +20,27 @@ def _visible_items(directory: Path):
     )
 
 
-DOCS_ALLOWLIST = frozenset({"passenger_insurance_dataset.md", "cpca_market_research.md"})
+DOCS_ALLOWLIST = frozenset({
+    "tp_and_mix_ways_dataset.md",
+    "cpca_market_research.md",
+    "sav_exploratory_analysis.md",
+    "sav_exploratory_analysis_v2.md",
+})
 SCRIPTS_ALLOWLIST = frozenset({
     "__init__.py",
-    "build_passenger_insurance_dataset.py",
+    "build_tp_and_mix_ways_dataset.py",
     "render_official_document.py",
     "smoke_test_official_document_render.py",
+    "analyze_nev_apeal_topic.py",
+    "explore_sav.py",
+    "parse_nev_apeal_questionnaire.py",
+    "verify_nev_apeal_2024.py",
 })
-TESTS_ALLOWLIST = frozenset({"test_passenger_insurance_dataset_build.py"})
+TESTS_ALLOWLIST = frozenset({"test_tp_and_mix_ways_dataset_build.py"})
 
 
 def test_root_docs_not_exists():
-    """根目录 docs/ 仅含 service 级共享文档（如 passenger_insurance_dataset.md），非 workspace 文档。"""
+    """根目录 docs/ 仅含 service 级共享文档（如 tp_and_mix_ways_dataset.md），非 workspace 文档。"""
     docs_dir = PROJECT_ROOT / "docs"
     if docs_dir.exists():
         items = _visible_items(docs_dir)
@@ -57,7 +66,7 @@ def test_root_eval_not_exists():
 
 
 def test_root_tests_not_exists():
-    """根目录 tests/ 仅含 service 级测试（如 test_passenger_insurance_dataset_build.py），非 workspace 测试。"""
+    """根目录 tests/ 仅含 service 级测试（如 test_tp_and_mix_ways_dataset_build.py），非 workspace 测试。"""
     tests_dir = PROJECT_ROOT / "tests"
     if tests_dir.exists():
         items = _visible_items(tests_dir)
