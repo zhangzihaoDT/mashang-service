@@ -1,0 +1,22 @@
+hypotheses:
+  - id: H-001
+    statement: 用户对未来纯电续航里程期望仍在增加（趋势）。
+    question: 未来续航里程期望是否存在上升趋势？
+    status: rejected
+    evidence_plan:
+      - 确认数据是否存在真时间维度（跨年/跨期）
+      - 若无时间维度，检查伪时间代理（交付期）内的期望方向
+  - id: H-002
+    statement: 里程焦虑有下降趋势（趋势）。
+    question: 里程焦虑代理是否随时间下降？
+    status: rejected
+    evidence_plan:
+      - 查找直接焦虑变量；无则用 AFUEL_D_06 代理
+      - 检查下降是否由实际续航提升（车辆构成变化）混淆
+  - id: H-003
+    statement: 市场对快充需求持续增长（趋势）。
+    question: 快充需求是否存在增长趋势？
+    status: rejected
+    evidence_plan:
+      - 快照：快充使用率、期望 vs 实际快充时间
+      - 伪时间维度内方向检查

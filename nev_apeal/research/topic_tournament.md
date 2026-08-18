@@ -12,9 +12,9 @@
 
 | 层级                 | 数量  | 口径                                              |
 | -------------------- | ---: | ------------------------------------------------- |
-| **Evidence**         | **54** | `evidence.jsonl` 实际落盘证据总数                  |
-| **Research Run**     | **14** | `research/runs/` 实际运行目录；含 `_it3` 复跑       |
-| **Research Topic**   | **10** | 合并同主题迭代后的独立研究问题（含 `oem_traditional_gap` 暂存 Signal 与 `phone_connectivity_ainfo` 已拒绝验证）|
+| **Evidence**         | **58** | `evidence.jsonl` 实际落盘证据总数                  |
+| **Research Run**     | **15** | `research/runs/` 实际运行目录；含 `_it3` 复跑       |
+| **Research Topic**   | **11** | 合并同主题迭代后的独立研究问题（含 `oem_traditional_gap` 暂存 Signal 与 `phone_connectivity_ainfo` / `range_fastcharge_trends` 已拒绝验证）|
 | **Tournament Finalist** | **6**  | T1–T6，进入 Topic Tournament 的成熟候选             |
 | **Champion**         | **1**  | T1 Purchase Mission                              |
 | **Production Topic** | **1**  | T1 经 Production Research（P1~P3）深挖后的最终交付主题 |
@@ -31,8 +31,9 @@
 | Driver Analysis  | `holdout_h3_driver`                                 | Holdout only                 |
 | OEM Experience Gap（暂存 Signal）| `oem_traditional_gap`                     | Signal Scan · 未入锦标赛      |
 | Phone Connectivity（已拒绝验证）| `phone_connectivity_ainfo`                 | Topic 验证 · REJECTED        |
+| EV 续航焦虑/快充趋势（已拒绝验证）| `range_fastcharge_trends`                 | Topic 验证 · REJECTED        |
 
-**一句话漏斗**：54 Evidence → 14 Research Runs → 10 Research Topics → 6 Tournament Finalists → 1 Champion → 1 Production Topic
+**一句话漏斗**：58 Evidence → 15 Research Runs → 11 Research Topics → 6 Tournament Finalists → 1 Champion → 1 Production Topic
 
 ---
 

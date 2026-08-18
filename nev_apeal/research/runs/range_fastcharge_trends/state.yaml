@@ -1,0 +1,22 @@
+topic_id: range_fastcharge_trends
+round: 4
+status: rejected
+question: 用户对未来纯电续航里程期望仍在增加、里程焦虑有下降趋势、市场对快充需求持续增长？
+current_hypothesis: 三个趋势命题均成立。
+confidence: high
+evidence_ids:
+- E-001
+- E-002
+- E-003
+- E-004
+open_questions: []
+mechanism_depth: 2
+effect_interpreted: true
+next_action: null
+rejected_hypotheses:
+- 'H-001: 续航期望仍在增加 → REJECTED（E-002 伪时间方向为负）'
+- 'H-002: 里程焦虑下降趋势 → REJECTED（E-003 下降由实际续航提升混淆，非心态趋势）'
+- 'H-003: 快充需求持续增长 → REJECTED（E-004 伪时间方向为负/持平）'
+last_analysis: compare
+information_gain_rounds: 4
+stop_reason: 'REJECTED: 单期横截面无时间维度；伪时间代理方向为负或持平，且焦虑下降被车辆构成混淆 —— 趋势命题全部不可验证'
