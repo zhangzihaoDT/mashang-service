@@ -40,7 +40,9 @@
       "finish": "2026-08-31"
     },
     "DM2": {
-      "start": "2026-08-18"
+      "start": "2026-08-18",
+      "end": "2026-09-18",
+      "finish": "2026-10-31"
     }
   },
   "presale_periods": {
@@ -126,6 +128,7 @@
     "CM0": "product_name LIKE '%LS6%' AND product_name NOT LIKE '%全新%' AND product_name NOT LIKE '%新一代%'",
     "DM1": "product_name LIKE '%全新%' AND product_name LIKE '%L6%'",
     "DM0": "product_name LIKE '%L6%' AND product_name NOT LIKE '%全新%'",
+    "DM2": "product_name LIKE '%M2%' OR product_name LIKE '%Jimmy Choo%' OR product_name LIKE '%JimmyChoo%'",
     "LS8": "product_name LIKE '%LS8%'",
     "LS9": "product_name LIKE '%LS9%'",
     "LS7": "product_name LIKE '%LS7%'",
@@ -140,7 +143,8 @@
     ],
     "L6": [
       "DM0",
-      "DM1"
+      "DM1",
+      "DM2"
     ]
   },
   "ls9_variant_logic": {
