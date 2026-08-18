@@ -257,6 +257,16 @@ build-tp-and-mix-ways-dataset:
 watchlist-brand-monthly-report:
 	$(PYTHON) mashang_workspace/research_scripts/watchlist_brand_monthly_report.py $(if $(MONTH),--month $(MONTH),)
 
+## watchlist 品牌 12 个月销量趋势（含大盘与重点品牌折线图）
+## 用法: make watchlist-brand-trend MONTH=2026-07 BRANDS=智界,方程豹
+watchlist-brand-trend:
+	$(PYTHON) mashang_workspace/research_scripts/watchlist_brand_trend.py $(if $(MONTH),--month $(MONTH),) $(if $(BRANDS),--brands $(BRANDS),)
+
+## watchlist 异常品牌车型贡献拆解（归因分析）
+## 用法: make watchlist-brand-driver MONTH=2026-07 THRESHOLD=0.20 BRANDS=智界,特斯拉
+watchlist-brand-driver:
+	$(PYTHON) mashang_workspace/research_scripts/watchlist_brand_driver_decomposition.py $(if $(MONTH),--month $(MONTH),) $(if $(THRESHOLD),--threshold $(THRESHOLD),) $(if $(BRANDS),--brands $(BRANDS),)
+
 ## ─── ──────────────────────────────────────────────────────────────
 
 ## 清理输出文件

@@ -1,0 +1,129 @@
+{
+  "generated_at": "2026-08-18T13:24:56",
+  "month": "2026-07",
+  "threshold": 0.2,
+  "own_brand": "智己",
+  "attributions": {
+    "特斯拉": {
+      "brand": "特斯拉",
+      "month": "2026-07",
+      "mom": -0.4642,
+      "direction": "decline",
+      "top_driver_model": "MODEL 3",
+      "top_driver_delta": -11829,
+      "top_driver_contribution_pct": -0.4891,
+      "driver_pattern": "multi_driver",
+      "summary": "多车型共同下滑（MODEL 3拖累 48.9% 居首）"
+    },
+    "小鹏": {
+      "brand": "小鹏",
+      "month": "2026-07",
+      "mom": -0.2014,
+      "direction": "decline",
+      "top_driver_model": "MONA M03",
+      "top_driver_delta": -6275,
+      "top_driver_contribution_pct": -0.9673,
+      "driver_pattern": "single_model_dominant",
+      "summary": "MONA M03拖累 96.7%，为下滑主因"
+    },
+    "AITO": {
+      "brand": "AITO",
+      "month": "2026-07",
+      "mom": -0.2025,
+      "direction": "decline",
+      "top_driver_model": "问界M6",
+      "top_driver_delta": -5711,
+      "top_driver_contribution_pct": -0.9539,
+      "driver_pattern": "single_model_dominant",
+      "summary": "问界M6拖累 95.4%，为下滑主因"
+    },
+    "智界": {
+      "brand": "智界",
+      "month": "2026-07",
+      "mom": 1.0949,
+      "direction": "growth",
+      "top_driver_model": "智界V9",
+      "top_driver_delta": 5341,
+      "top_driver_contribution_pct": 0.9852,
+      "driver_pattern": "single_model_dominant",
+      "summary": "智界V9贡献 +98.5%，为增长主因"
+    },
+    "猛士": {
+      "brand": "猛士",
+      "month": "2026-07",
+      "mom": 2.6915,
+      "direction": "growth",
+      "top_driver_model": "猛士M817",
+      "top_driver_delta": 1781,
+      "top_driver_contribution_pct": 1.0056,
+      "driver_pattern": "single_model_dominant",
+      "summary": "猛士M817贡献 +100.6%，为增长主因"
+    },
+    "华境": {
+      "brand": "华境",
+      "month": "2026-07",
+      "mom": 0.265,
+      "direction": "growth",
+      "top_driver_model": "华境S",
+      "top_driver_delta": 1500,
+      "top_driver_contribution_pct": 1.0,
+      "driver_pattern": "single_model_dominant",
+      "summary": "华境S贡献 +100.0%，为增长主因"
+    },
+    "享界": {
+      "brand": "享界",
+      "month": "2026-07",
+      "mom": -0.4428,
+      "direction": "decline",
+      "top_driver_model": "享界S9T",
+      "top_driver_delta": -982,
+      "top_driver_contribution_pct": -0.7862,
+      "driver_pattern": "single_model_dominant",
+      "summary": "享界S9T拖累 78.6%，为下滑主因"
+    },
+    "智己": {
+      "brand": "智己",
+      "month": "2026-07",
+      "mom": -0.176,
+      "direction": "decline",
+      "top_driver_model": "智己LS8",
+      "top_driver_delta": -513,
+      "top_driver_contribution_pct": -0.4961,
+      "driver_pattern": "multi_driver",
+      "summary": "多车型共同下滑（智己LS8拖累 49.6% 居首）"
+    },
+    "阿维塔": {
+      "brand": "阿维塔",
+      "month": "2026-07",
+      "mom": -0.205,
+      "direction": "decline",
+      "top_driver_model": "阿维塔07",
+      "top_driver_delta": -462,
+      "top_driver_contribution_pct": -0.4989,
+      "driver_pattern": "multi_driver",
+      "summary": "多车型共同下滑（阿维塔07拖累 49.9% 居首）"
+    },
+    "启境": {
+      "brand": "启境",
+      "month": "2026-07",
+      "mom": 0.9183,
+      "direction": "growth",
+      "top_driver_model": "启境GT7",
+      "top_driver_delta": 371,
+      "top_driver_contribution_pct": 1.0,
+      "driver_pattern": "single_model_dominant",
+      "summary": "启境GT7贡献 +100.0%，为增长主因"
+    },
+    "尊界": {
+      "brand": "尊界",
+      "month": "2026-07",
+      "mom": -0.3201,
+      "direction": "decline",
+      "top_driver_model": "尊界S800",
+      "top_driver_delta": -196,
+      "top_driver_contribution_pct": -1.0595,
+      "driver_pattern": "single_model_dominant",
+      "summary": "尊界S800拖累 105.9%，为下滑主因"
+    }
+  }
+}

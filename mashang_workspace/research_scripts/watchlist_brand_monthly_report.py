@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import json
 import sys
 from datetime import datetime, date, timedelta
 from pathlib import Path
@@ -86,7 +87,21 @@ def load_market(months: dict) -> dict:
     return {k: int(m.get(v, 0)) for k, v in months.items()}
 
 
-def build_rows(brand_df: pd.DataFrame, months: dict, own_brand: str = DEFAULT_OWN_BRAND) -> tuple[list[dict], dict]:
+def note_for(r: dict, attribution_map: dict) -> str:
+    """备注规则：月报层不感知归因逻辑，只读 attribution contract 的 summary。
+
+    本品由 driver 无条件归因；其他品牌仅 |环比|≥阈值 时 driver 会生成归因。
+    无数据 / 新品牌 走固定文案。
+    """
+    if r["cur"] is None:
+        return "数据集无此品牌"
+    if r["yoy"] == 0:
+        return "新品牌爬坡"
+    return attribution_map.get(r["brand"], {}).get("summary", "")
+
+
+def build_rows(brand_df: pd.DataFrame, months: dict, attribution_map: dict,
+               own_brand: str = DEFAULT_OWN_BRAND) -> tuple[list[dict], dict]:
     watchlist = yaml.safe_load(WATCHLIST_PATH.read_text(encoding="utf-8"))
     norm = normalize_watchlist_brands(watchlist)
     sub = brand_df[brand_df.date_month.isin(set(months.values()))]
@@ -114,16 +129,12 @@ def build_rows(brand_df: pd.DataFrame, months: dict, own_brand: str = DEFAULT_OW
         for b in brands:
             r = calc(b)
             r["group"] = group
-            r["note"] = ""
-            if r["cur"] is None:
-                r["note"] = "数据集无此品牌"
-            elif r["yoy"] == 0:
-                r["note"] = "新品牌（去年同期无数据）"
+            r["note"] = note_for(r, attribution_map)
             rows.append(r)
 
     own = calc(own_brand)
     own["group"] = f"本品 · {own_brand}"
-    own["note"] = "本品"
+    own["note"] = attribution_map.get(own_brand, {}).get("summary", "")
     return rows, own
 
 
@@ -153,7 +164,7 @@ def vs_cell(mom, yoy_pct, bench_mom, bench_yoy) -> str:
     return "<br>".join(parts)
 
 
-def group_rows(items, bench_mom, bench_yoy) -> str:
+def group_rows(items, bench_mom, bench_yoy, own_brand: str) -> str:
     body = []
     for r in items:
         if r["cur"] is None:
@@ -165,9 +176,14 @@ def group_rows(items, bench_mom, bench_yoy) -> str:
                 f'<td style="color:var(--zh-muted)">—</td>'
                 f'<td><span class="badge badge-muted">{r["note"]}</span></td></tr>')
             continue
-        own = '<span class="badge badge-key">本品</span> ' if r.get("note") == "本品" else ""
-        note = (f'<span class="badge badge-gold">{r["note"]}</span>'
-                if r["note"] and r["note"] != "本品" else "")
+        own = ('<span class="badge badge-key">本品</span> '
+               if r["brand"] == own_brand else "")
+        if r["note"] == "新品牌爬坡":
+            note = f'<span class="badge badge-gold">{r["note"]}</span>'
+        elif r["note"]:
+            note = f'<span style="color:var(--zh-muted);font-size:12px">{r["note"]}</span>'
+        else:
+            note = ""
         mom_cls = "delta-positive" if (r["mom"] or 0) >= 0 else "delta-negative"
         yoy_cls = "delta-positive" if (r["yoy_pct"] or 0) >= 0 else "delta-negative"
         body.append(
@@ -193,19 +209,26 @@ def build_html(rows, own, market, bench_mom, bench_yoy, month_label: str) -> str
     n_yoy = sum(1 for r in rows if r["yoy_pct"] is not None)
     n_neg = sum(1 for r in rows if r["mom"] is not None and r["mom"] < 0)
 
-    own_verdict = ("双指标均跑输行业"
-                   if own["mom"] is not None and own["yoy_pct"] is not None
-                   and own["mom"] <= bench_mom and own["yoy_pct"] <= bench_yoy
-                   else "相对行业表现待查")
+    if own["mom"] is None or own["yoy_pct"] is None:
+        own_tag = "本品销量待查"
+    elif own["mom"] <= bench_mom and own["yoy_pct"] <= bench_yoy:
+        own_tag = "双指标跑输行业"
+    elif own["mom"] > bench_mom and own["yoy_pct"] > bench_yoy:
+        own_tag = "双指标跑赢行业"
+    else:
+        own_tag = (f"环比{'跑赢' if own['mom'] > bench_mom else '跑输'} · "
+                   f"同比{'跑赢' if own['yoy_pct'] > bench_yoy else '跑输'}")
 
     summary = [
-        (f"{market['cur']:,}", f"{month_label} 乘用车总销量（benchmark）",
+        (f"{market['cur']:,}", f"{month_label} 乘用车总销量（行业整体）",
          f"环比 {fmt_pct(bench_mom)} · 同比 {fmt_pct(bench_yoy)}"),
-        (f"{own['cur']:,}", f"本品 {own['brand']} 销量",
-         f"环比 {fmt_pct(own['mom'])} · 同比 {fmt_pct(own['yoy_pct'])} · {own_verdict}"),
-        (f"{wl_total:,}", "watchlist 品牌合计", f"{wl_count}/{len(rows)} 个品牌"),
-        (f"{up_mom} / {up_yoy}", "跑赢行业（环比/同比）",
-         f"环比口径 {up_mom}/{wl_count}，同比口径 {up_yoy}/{n_yoy}"),
+        (f"{own['cur']:,}", f"本品 {own['brand']} · {own_tag}",
+         f"环比 {fmt_pct(own['mom'])}（行业 {fmt_pct(bench_mom)}）· "
+         f"同比 {fmt_pct(own['yoy_pct'])}（行业 {fmt_pct(bench_yoy)}）"),
+        (f"{n_neg}/{wl_count}", "watchlist 品牌环比负增长",
+         f"{wl_count} 个有数据品牌中 {n_neg} 个环比下滑"),
+        (f"{up_mom}/{wl_count}", "环比跑赢行业",
+         f"跑赢 = 环比优于行业（{fmt_pct(bench_mom)}）· 同比跑赢 {up_yoy}/{n_yoy}"),
     ]
     summary_cards = "".join(
         f'<div class="summary-card"><div class="summary-value">{v}</div>'
@@ -233,7 +256,7 @@ def build_html(rows, own, market, bench_mom, bench_yoy, month_label: str) -> str
     <thead><tr><th>品牌</th><th>{month_label} 销量</th><th>环比上月</th><th>同比去年</th><th>vs 行业整体</th><th>备注</th></tr></thead>
     <tbody>
 {bench_row}
-{group_rows(items, bench_mom, bench_yoy)}
+{group_rows(items, bench_mom, bench_yoy, own["brand"])}
     </tbody>
   </table></div>
 </div>""")
@@ -243,7 +266,7 @@ def build_html(rows, own, market, bench_mom, bench_yoy, month_label: str) -> str
   <h2 class="section-title">洞察</h2>
   <div class="scope-box"><ul style="margin:0;padding-left:18px;color:var(--zh-text);font-size:13.5px;line-height:2.0;">
     <li><b>本品 {own['brand']}</b>：{month_label} {own['cur']:,} 台，环比 {fmt_pct(own['mom'])}、同比 {fmt_pct(own['yoy_pct'])}，
-      相对行业（环比 {fmt_pct(bench_mom)} / 同比 {fmt_pct(bench_yoy)}）<b>{own_verdict}</b>。</li>
+      相对行业（环比 {fmt_pct(bench_mom)} / 同比 {fmt_pct(bench_yoy)}）<b>{own_tag}</b>。</li>
     <li><b>大盘与整体走势</b>：{month_label} 全市场 {market['cur']:,} 台，环比 {fmt_pct(bench_mom)}、同比 {fmt_pct(bench_yoy)}；
       watchlist {wl_count} 个有数据品牌中 <span class="delta-negative">{n_neg} 个环比负增长</span>，
       环比跑赢行业 {up_mom}/{wl_count}、同比跑赢行业 {up_yoy}/{n_yoy}。</li>
@@ -292,7 +315,8 @@ def build_html(rows, own, market, bench_mom, bench_yoy, month_label: str) -> str
     <li>时间窗口：报告月 / 上月 / 去年同期（如 2026-07 → 2026-06 / 2025-07）</li>
     <li>指标口径：品牌维度销量合计（sales，含全燃料类型）；benchmark = 行业整体环比/同比；跑赢 = 品牌指标优于行业整体</li>
     <li>品牌映射：utils/brand_mapping.py + configs/brand_alias_map.yaml（问界→AITO、爱咖→iCAR）</li>
-    <li>"新品牌" = 去年同期无上险数据，同比不可比；"数据集无此品牌" = 数据集中无对应值</li>
+    <li>"新品牌" = 去年同期无上险数据，备注显示"新品牌爬坡"；"数据集无此品牌" = 数据集中无对应值</li>
+    <li>归因备注：消费 driver 输出的 attribution contract（outputs/tables/watchlist_brand_attribution_&lt;报告月&gt;.json）的 summary 字段；本品始终归因，其他品牌 |环比| ≥ 20% 归因</li>
   </ul></div>
 </div>
 
@@ -306,6 +330,15 @@ def default_month() -> str:
     first = date(now.year, now.month, 1)
     prev = first - timedelta(days=1)
     return f"{prev.year}-{prev.month:02d}"
+
+
+def load_attribution_map(tables_dir: Path, month: str) -> dict:
+    """读取 driver 输出的 attribution contract（品牌 -> summary）。缺失则空。"""
+    p = tables_dir / f"watchlist_brand_attribution_{month}.json"
+    if not p.exists():
+        return {}
+    data = json.loads(p.read_text(encoding="utf-8"))
+    return data.get("attributions", {})
 
 
 def main(argv=None) -> int:
@@ -322,13 +355,16 @@ def main(argv=None) -> int:
     market = load_market(months)
     bench_mom = (market["cur"] - market["prev"]) / market["prev"] * 100 if market["prev"] else 0.0
     bench_yoy = (market["cur"] - market["yoy"]) / market["yoy"] * 100 if market["yoy"] else 0.0
-    rows, own = build_rows(brand_df, months, args.own_brand)
 
     month_label = f"{int(args.month[:4])}年{int(args.month[5:7])}月"
     reports_dir = WS_ROOT / args.output / "reports"
     tables_dir = WS_ROOT / args.output / "tables"
     reports_dir.mkdir(parents=True, exist_ok=True)
     tables_dir.mkdir(parents=True, exist_ok=True)
+
+    # 备注消费层：只读 attribution contract 的 summary，不感知归因逻辑
+    attribution_map = load_attribution_map(tables_dir, args.month)
+    rows, own = build_rows(brand_df, months, attribution_map, args.own_brand)
 
     if args.format in ("html", "all"):
         out_html = reports_dir / f"watchlist_brand_sales_{args.month}.html"
