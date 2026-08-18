@@ -1,20 +1,31 @@
 research_id: purchase_mission_001
 topic_id: topic_x
-round: 0
-status: exploring
+round: 7
+status: ready
 question: 购买任务是否对应不同的产品魅力结构？
-current_hypothesis: 增购用户拥有更高的产品魅力评价，且差异可能集中在感性体验而非基础功能。
-confidence: low
+current_hypothesis: 增购用户产品魅力优势在控制价格、品牌、能源后依然显著（+18.3, p<0.001），且集中在感性体验维度，非基础补能功能。
+confidence: high
 evidence_ids:
 - E-001
 - E-002
+- E-003
+- E-004
+- E-005
+- E-006
+- E-007
+- E-008
+- E-009
+- E-010
 open_questions:
-- 差异来自哪些子指数？
-- 是否由价格结构造成？
-- 是否由品牌结构造成？
-- 是否由车型结构造成？
-next_action: Q001
-rejected_hypotheses: []
-last_analysis: null
-information_gain_rounds: 0
-stop_reason: null
+- 外观差异由哪些具体题项驱动？
+- 为什么外观差异显著高于补能差异？
+- 哪个控制变量产生 suppression 效应？
+mechanism_depth: 4
+effect_interpreted: true
+next_action: null
+rejected_hypotheses:
+- suppression假设：控制变量放大效应 → 参照组混淆，非suppression（E-007）
+last_analysis: synthesis
+information_gain_rounds: 7
+stop_reason: 'READY: evidence + confidence + mechanism_depth + no high-priority open
+  question'

@@ -1,0 +1,19 @@
+topic_id: age_generation
+round: 3
+status: ready
+question: 年龄/世代是否对应不同的产品魅力结构？
+current_hypothesis: 年轻世代（95~99）产品魅力评价更高，且差异集中在感性体验。
+confidence: high
+evidence_ids:
+- E-001
+- E-002
+open_questions: []
+mechanism_depth: 3
+effect_interpreted: true
+next_action: null
+rejected_hypotheses:
+- 世代差异由价格驱动（控制价格后+37.3仍显著，H-002排除）
+last_analysis: regress
+information_gain_rounds: 3
+stop_reason: 'READY: evidence + confidence + mechanism_depth + no high-priority open
+  question'

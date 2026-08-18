@@ -1,0 +1,18 @@
+topic_id: config_attribution
+round: 2
+status: inconclusive
+question: 配置有无是否影响满意度？
+current_hypothesis: 配置拥有与满意度正相关（配置归因成立）。
+confidence: medium
+evidence_ids:
+- E-001
+- E-002
+open_questions: []
+mechanism_depth: 1
+effect_interpreted: true
+next_action: null
+rejected_hypotheses:
+- 单一配置因果提升满意度（存在配置包内生性，无法归因）
+last_analysis: regress
+information_gain_rounds: 2
+stop_reason: 配置效应被价格/品牌部分吸收且存在配置包内生性，需车型内匹配或实验设计；不宣布READY

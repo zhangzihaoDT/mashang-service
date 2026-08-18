@@ -1,0 +1,18 @@
+topic_id: price_band
+round: 2
+status: rejected
+question: 价格带是否对应不同的产品体验？
+current_hypothesis: 价格带与产品魅力存在非线性关系（中价位性价比带）。
+confidence: medium
+evidence_ids:
+- E-001
+- E-002
+open_questions: []
+mechanism_depth: 1
+effect_interpreted: true
+next_action: null
+rejected_hypotheses:
+- 价格驱动体验假设：控制品牌后不显著（E-002）
+last_analysis: regress
+information_gain_rounds: 2
+stop_reason: hypothesis rejected; price absorbed by brand; nonlinearity beyond tooling
