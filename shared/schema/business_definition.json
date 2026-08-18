@@ -123,18 +123,52 @@
     "六座": "product_name LIKE '%六座%'"
   },
   "series_group_logic": {
-    "CM2": "product_name LIKE '%新一代%' AND product_name LIKE '%LS6%' OR product_name LIKE '%上汽一亿台限定版%' AND product_name LIKE '%LS6%'",
-    "CM1": "product_name LIKE '%全新%' AND product_name LIKE '%LS6%'",
-    "CM0": "product_name LIKE '%LS6%' AND product_name NOT LIKE '%全新%' AND product_name NOT LIKE '%新一代%'",
-    "DM1": "product_name LIKE '%全新%' AND product_name LIKE '%L6%'",
-    "DM0": "product_name LIKE '%L6%' AND product_name NOT LIKE '%全新%'",
-    "DM2": "product_name LIKE '%M2%' OR product_name LIKE '%Jimmy Choo%' OR product_name LIKE '%JimmyChoo%'",
-    "LS8": "product_name LIKE '%LS8%'",
-    "LS9": "product_name LIKE '%LS9%'",
-    "LS7": "product_name LIKE '%LS7%'",
-    "L7": "product_name LIKE '%L7%'",
-    "其他": "ELSE"
+    "CM2": {
+      "priority": 3,
+      "condition": "product_name LIKE '%新一代%' AND product_name LIKE '%LS6%' OR product_name LIKE '%上汽一亿台限定版%' AND product_name LIKE '%LS6%'"
+    },
+    "CM1": {
+      "priority": 2,
+      "condition": "product_name LIKE '%全新%' AND product_name LIKE '%LS6%'"
+    },
+    "CM0": {
+      "priority": 1,
+      "condition": "product_name LIKE '%LS6%' AND product_name NOT LIKE '%全新%' AND product_name NOT LIKE '%新一代%'"
+    },
+    "DM1": {
+      "priority": 2,
+      "condition": "product_name LIKE '%全新%' AND product_name LIKE '%L6%'"
+    },
+    "DM0": {
+      "priority": 1,
+      "condition": "product_name LIKE '%L6%' AND product_name NOT LIKE '%全新%'"
+    },
+    "DM2": {
+      "priority": 3,
+      "condition": "product_name LIKE '%L6%' AND product_name LIKE '%M2%' OR product_name LIKE '%Jimmy Choo%' OR product_name LIKE '%JimmyChoo%'"
+    },
+    "LS8": {
+      "priority": 1,
+      "condition": "product_name LIKE '%LS8%'"
+    },
+    "LS9": {
+      "priority": 1,
+      "condition": "product_name LIKE '%LS9%'"
+    },
+    "LS7": {
+      "priority": 1,
+      "condition": "product_name LIKE '%LS7%'"
+    },
+    "L7": {
+      "priority": 1,
+      "condition": "product_name LIKE '%L7%'"
+    },
+    "其他": {
+      "priority": 0,
+      "condition": "ELSE"
+    }
   },
+  "series_group_logic_priority_semantics": "series_group_logic 每条规则为 {priority, condition}。priority 是纯优先级（precedence），仅用于重叠规则裁决：数值大的规则优先命中，同分按书写顺序（first-match-wins）；跨车系、互不重叠的规则可共用同一档（LS6 家族 3>2>1，L6 家族 3>2>1，独立车系 LS8/LS9/LS7/L7 均为 1）。执行器按 priority 降序、同分按书写顺序取首个命中。兼容旧格式：值为字符串时视为 {priority: 0, condition: 字符串}。",
   "model_series_mapping": {
     "LS6": [
       "CM0",

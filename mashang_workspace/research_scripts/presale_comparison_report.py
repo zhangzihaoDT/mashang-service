@@ -168,10 +168,17 @@ def _eval_ast(ast, pname):
     return False
 
 
+def _sg_condition(rule) -> str:
+    """series_group_logic 规则解包：兼容旧字符串格式与新的 {priority, condition} 对象格式。"""
+    if isinstance(rule, dict):
+        return str(rule.get("condition", ""))
+    return str(rule)
+
+
 def compute_zhiji_curves(order_data: pd.DataFrame, business_def: dict, n_days: int) -> dict:
     sg = business_def["series_group_logic"]
     tp = business_def["time_periods"]
-    asts = {g: _parse_logic(sg[g]) for g in GROUP_KEYS}
+    asts = {g: _parse_logic(_sg_condition(sg[g])) for g in GROUP_KEYS}
 
     df = order_data.copy()
     df["intention_payment_time"] = pd.to_datetime(df["intention_payment_time"], errors="coerce")

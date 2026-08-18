@@ -351,6 +351,7 @@ mashang-service/
 | Auto Launch 测试 | `pytest auto_launch/tests/ -q` | service |
 | VOC 分析 | `python mashang_workspace/utility_scripts/voc_theme_analysis.py` | utility |
 | 数据字典 | `python mashang_workspace/utility_scripts/data_dictionary.py` | utility |
+| 分组重叠审计 | `python mashang_workspace/utility_scripts/audit_series_group_overlap.py [--json] [--strict]` | utility |
 | 每日观察 | `python mashang_workspace/utility_scripts/skills_order_observation_daily.py` | utility |
 | 达成率预警 | `python mashang_workspace/utility_scripts/skills_attainment_rate_alert.py --days 10` | utility |
 | 生成 Eval | `python mashang_workspace/utility_scripts/generate_eval_cases.py` | utility |

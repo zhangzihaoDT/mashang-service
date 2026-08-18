@@ -28,6 +28,23 @@ def _eval_series_group_logic_expr(product_name: pd.Series, expr: str) -> pd.Seri
     return out
 
 
+def _rule_condition(rule) -> str:
+    """提取规则表达式字符串，兼容旧字符串格式与新的 {priority, condition} 对象格式。"""
+    if isinstance(rule, dict):
+        return str(rule.get("condition", ""))
+    return str(rule)
+
+
+def _rule_priority(rule, default: int = 0) -> int:
+    """提取规则优先级；旧字符串格式视为 priority=0。"""
+    if isinstance(rule, dict):
+        try:
+            return int(rule.get("priority", default))
+        except (TypeError, ValueError):
+            return default
+    return default
+
+
 def apply_series_group_logic(df: pd.DataFrame, business_definition: dict) -> pd.DataFrame:
     if df is None or df.empty:
         return df
@@ -42,14 +59,20 @@ def apply_series_group_logic(df: pd.DataFrame, business_definition: dict) -> pd.
         df["series_group_logic"] = pd.NA
         return df
 
-    out = pd.Series(["其他"] * len(df), index=df.index, dtype="string")
-    product_name = df["product_name"]
-    for key, expr in logic.items():
+    rules = []
+    for i, (key, rule) in enumerate(logic.items()):
         if str(key) == "其他":
             continue
-        mask = _eval_series_group_logic_expr(product_name, str(expr))
+        rules.append((_rule_priority(rule), i, str(key), _rule_condition(rule)))
+    rules.sort(key=lambda r: (-r[0], r[1]))
+
+    out = pd.Series(["其他"] * len(df), index=df.index, dtype="string")
+    product_name = df["product_name"]
+    for _, _, key, condition in rules:
+        mask = _eval_series_group_logic_expr(product_name, condition)
         if mask.any():
-            out = out.where(~mask, other=str(key))
+            assign = mask & out.eq("其他")
+            out = out.where(~assign, other=key)
     df["series_group_logic"] = out
     return df
 

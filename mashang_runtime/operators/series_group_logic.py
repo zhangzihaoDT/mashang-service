@@ -28,6 +28,16 @@ def _eval_series_group_logic_expr(product_name: pd.Series, expr: str) -> pd.Seri
     return out
 
 
+def _rule_condition(rule) -> str:
+    """提取规则表达式字符串，兼容旧字符串格式与新的 {priority, condition} 对象格式。
+
+    legacy 层冻结，不消费 priority 语义；仅做格式解包避免共享 schema 升级后 str(dict) 失效。
+    """
+    if isinstance(rule, dict):
+        return str(rule.get("condition", ""))
+    return str(rule)
+
+
 def apply_series_group_logic(df: pd.DataFrame, business_definition: dict) -> pd.DataFrame:
     if df is None or df.empty:
         return df
@@ -47,7 +57,7 @@ def apply_series_group_logic(df: pd.DataFrame, business_definition: dict) -> pd.
     for key, expr in logic.items():
         if str(key) == "其他":
             continue
-        mask = _eval_series_group_logic_expr(product_name, str(expr))
+        mask = _eval_series_group_logic_expr(product_name, _rule_condition(expr))
         if mask.any():
             out = out.where(~mask, other=str(key))
     df["series_group_logic"] = out

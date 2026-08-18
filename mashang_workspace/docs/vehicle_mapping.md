@@ -7,7 +7,7 @@
 | 车系 | 系列分组 | 说明 |
 |------|----------|------|
 | LS6 | CM0 / CM1 / CM2 | 智己 LS6 (含全新/新一代) |
-| L6 | DM0 / DM1 | 智己 L6 (含全新) |
+| L6 | DM0 / DM1 / DM2 | 智己 L6 (含全新 / M2、Jimmy Choo) |
 | LS8 | — | 智己 LS8 (单独模型) |
 | LS9 | — | 智己 LS9 (单独模型) |
 | LS7 | — | 智己 LS7 |
@@ -15,24 +15,36 @@
 
 ## 系列分组匹配规则 (series_group_logic)
 
+每条规则为 `{priority, condition}`：**priority 是纯优先级（precedence），仅用于重叠规则裁决**，
+数值大的规则优先命中，同分按书写顺序，取首个命中（first-match-wins）。
+跨车系、互不重叠的规则可共用同一档（纯 precedence，不是车型排名）。
+
 ```
-CM2: (product_name LIKE '%新一代%' AND product_name LIKE '%LS6%') OR (product_name LIKE '%上汽一亿台限定版%' AND product_name LIKE '%LS6%')
-CM1: product_name LIKE '%全新%' AND product_name LIKE '%LS6%'
-CM0: product_name LIKE '%LS6%' AND NOT (全新/新一代)
-DM1: product_name LIKE '%全新%' AND product_name LIKE '%L6%'
-DM0: product_name LIKE '%L6%' AND NOT 全新
-LS8: product_name LIKE '%LS8%'
-LS9: product_name LIKE '%LS9%'
-LS7: product_name LIKE '%LS7%'
-L7:  product_name LIKE '%L7%'
-其他: ELSE
+DM2 (precedence=3): product_name LIKE '%L6%' AND product_name LIKE '%M2%' OR product_name LIKE '%Jimmy Choo%' OR product_name LIKE '%JimmyChoo%'
+CM2 (precedence=3): product_name LIKE '%新一代%' AND product_name LIKE '%LS6%' OR product_name LIKE '%上汽一亿台限定版%' AND product_name LIKE '%LS6%'
+DM1 (precedence=2): product_name LIKE '%全新%' AND product_name LIKE '%L6%'
+CM1 (precedence=2): product_name LIKE '%全新%' AND product_name LIKE '%LS6%'
+DM0 (precedence=1): product_name LIKE '%L6%' AND NOT 全新
+CM0 (precedence=1): product_name LIKE '%LS6%' AND NOT (全新/新一代)
+LS8 (precedence=1): product_name LIKE '%LS8%'
+LS9 (precedence=1): product_name LIKE '%LS9%'
+LS7 (precedence=1): product_name LIKE '%LS7%'
+L7  (precedence=1): product_name LIKE '%L7%'
+其他 (precedence=0): ELSE
 ```
+
+**注意**：
+- DM2 必须高于 DM1/DM0（否则 L6 M2 / Jimmy Choo 订单会被 DM1/DM0 宽泛规则抢先归入旧代际）。
+- DM2 的 `M2` 分支已收紧为 `%L6% AND %M2%`，非 L6 家族的 "M2" 产品不会落入 DM2。
+- 旧字符串格式（直接写 `product_name LIKE ...`）仍被执行器兼容，视为 `{priority: 0, condition: <字符串>}`。
+- 规则治理：`mashang_workspace/utility_scripts/audit_series_group_overlap.py` 可审计重叠；
+  重叠应只发生在族内（LS6/L6 家族），跨车系重叠应视为规则 bug。
 
 ## 车系-系列分组关系 (model_series_mapping)
 
 ```
 LS6 → [CM0, CM1, CM2]
-L6  → [DM0, DM1]
+L6  → [DM0, DM1, DM2]
 ```
 
 ## 能源类型 (product_type_logic)

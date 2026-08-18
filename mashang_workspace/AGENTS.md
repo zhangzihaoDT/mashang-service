@@ -143,6 +143,7 @@ python mashang_workspace/eval/run_eval.py --suite parser  # 单套件
 | — | Dataset Contract: `docs/datasets/cpca_weekly_data_capture.md` | doc |
 | `python utility_scripts/voc_theme_analysis.py` | VOC 分析 | utility |
 | `python utility_scripts/data_dictionary.py` | 数据字典 | utility |
+| `python utility_scripts/audit_series_group_overlap.py` | series_group_logic 规则重叠审计（`--json`/`--strict`） | utility |
 | `python utility_scripts/skills_order_observation_daily.py` | 每日数据观察(DataOps) | utility |
 | `python utility_scripts/build_workspace_capability_inventory.py` | 能力总览 | utility |
 | `python eval/parse_context_cli.py "..."` | 自然语言解析 | eval |

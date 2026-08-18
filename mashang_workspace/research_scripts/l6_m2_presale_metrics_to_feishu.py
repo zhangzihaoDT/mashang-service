@@ -171,18 +171,41 @@ def _eval_ast(ast, pname):
     return False
 
 
+def _rule_condition(rule) -> str:
+    """提取规则表达式字符串，兼容旧字符串格式与新的 {priority, condition} 对象格式。"""
+    if isinstance(rule, dict):
+        return str(rule.get("condition", ""))
+    return str(rule)
+
+
+def _rule_priority(rule, default: int = 0) -> int:
+    """提取规则优先级；旧字符串格式视为 priority=0。"""
+    if isinstance(rule, dict):
+        try:
+            return int(rule.get("priority", default))
+        except (TypeError, ValueError):
+            return default
+    return default
+
+
 def _apply_series_group_logic(df: pd.DataFrame, business_def: dict, asts: dict) -> pd.DataFrame:
     logic: dict = business_def.get("series_group_logic", {})
     if "product_name" not in df.columns:
         df["series_group_logic"] = pd.NA
         return df
 
-    group_col = pd.Series(pd.NA, index=df.index, dtype="string")
     default_group = DEFAULT_GROUP
-    for group, cond in logic.items():
-        if str(cond).strip().upper() == "ELSE":
+    rules = []
+    for i, (group, cond) in enumerate(logic.items()):
+        expr = _rule_condition(cond)
+        if str(expr).strip().upper() == "ELSE":
             default_group = group
             continue
+        rules.append((_rule_priority(cond), i, group))
+    rules.sort(key=lambda r: (-r[0], r[1]))
+
+    group_col = pd.Series(pd.NA, index=df.index, dtype="string")
+    for _, _, group in rules:
         mask = df["product_name"].map(lambda p: _eval_ast(asts[group], p)).fillna(False)
         assignable = group_col.isna() & mask
         if assignable.any():
@@ -417,7 +440,7 @@ def main() -> int:
         return 1
 
     business_def = load_business_definition(_BUSINESS_DEF)
-    asts = {g: _parse_logic(cond) for g, cond in business_def.get("series_group_logic", {}).items()}
+    asts = {g: _parse_logic(_rule_condition(cond)) for g, cond in business_def.get("series_group_logic", {}).items()}
 
     print(f"📖 Loading: {_ORDER_DATA}")
     df = pd.read_parquet(_ORDER_DATA)
