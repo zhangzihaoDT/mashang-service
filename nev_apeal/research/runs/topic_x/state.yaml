@@ -16,6 +16,9 @@ evidence_ids:
 - E-008
 - E-009
 - E-010
+- E-011
+- E-012
+- E-013
 open_questions:
 - 外观差异由哪些具体题项驱动？
 - 为什么外观差异显著高于补能差异？
@@ -25,7 +28,7 @@ effect_interpreted: true
 next_action: null
 rejected_hypotheses:
 - suppression假设：控制变量放大效应 → 参照组混淆，非suppression（E-007）
-last_analysis: synthesis
+last_analysis: segment
 information_gain_rounds: 7
 stop_reason: 'READY: evidence + confidence + mechanism_depth + no high-priority open
   question'

@@ -26,6 +26,45 @@ def read_state(topic: str) -> dict[str, Any]:
     return yaml.safe_load(path.read_text(encoding="utf-8")) or {}
 
 
+def read_hypotheses(topic: str) -> list[dict[str, Any]]:
+    path = run_dir(topic) / "hypotheses.yaml"
+    if not path.exists():
+        return []
+    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    return list(data.get("hypotheses", []))
+
+
+def write_hypotheses(topic: str, hypotheses: list[dict[str, Any]]) -> None:
+    path = run_dir(topic) / "hypotheses.yaml"
+    path.write_text(
+        yaml.safe_dump({"hypotheses": hypotheses}, allow_unicode=True, sort_keys=False),
+        encoding="utf-8",
+    )
+
+
+def register_hypothesis(topic: str, hypothesis_id: str, from_evidence: dict[str, Any]) -> bool:
+    """Auto-create a hypothesis entry in hypotheses.yaml if it does not exist.
+
+    Dynamic hypotheses are introduced while appending evidence; this keeps the
+    registry in sync so hypotheses.yaml reflects every referenced hypothesis.
+    """
+    if not hypothesis_id:
+        return False
+    existing = {h.get("id") for h in read_hypotheses(topic)}
+    if hypothesis_id in existing:
+        return False
+    hypotheses = read_hypotheses(topic)
+    hypotheses.append({
+        "id": hypothesis_id,
+        "statement": from_evidence.get("hypothesis_statement", ""),
+        "question": from_evidence.get("question", ""),
+        "status": "active",
+        "created_from": from_evidence.get("id", ""),
+    })
+    write_hypotheses(topic, hypotheses)
+    return True
+
+
 def write_state(topic: str, state: dict[str, Any]) -> None:
     path = run_dir(topic) / "state.yaml"
     path.write_text(yaml.safe_dump(state, allow_unicode=True, sort_keys=False), encoding="utf-8")
@@ -43,6 +82,11 @@ def append_evidence(topic: str, evidence: dict[str, Any]) -> str:
     evidence.setdefault("hypothesis_id", None)
     with path.open("a", encoding="utf-8") as stream:
         stream.write(json.dumps(evidence, ensure_ascii=False, default=str) + "\n")
+    if evidence.get("hypothesis_id"):
+        register_hypothesis(topic, evidence["hypothesis_id"], evidence)
+    if evidence.get("targets"):
+        for hid in evidence["targets"]:
+            register_hypothesis(topic, hid, evidence)
     state = read_state(topic)
     state.setdefault("evidence_ids", []).append(evidence["id"])
     state["last_analysis"] = evidence.get("analysis")

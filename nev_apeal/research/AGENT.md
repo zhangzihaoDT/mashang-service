@@ -4,6 +4,10 @@
 
 遵循 `research_loop.md`：先建立 Measurement/Data Contract，再记录 Signal，形成可检验 Hypothesis，最后进行 Topic Analysis。
 
+## Statistical Source of Truth
+
+`topic_tournament.md` 顶部的 **Research Funnel / Topic Mapping** 是研究过程的唯一统计事实源。新增、复跑、晋级或淘汰 Topic 时，必须同步更新映射与计数（Evidence / Run / Topic / Finalist / Champion / Production 各层），不得从目录或 evidence 临时反推。
+
 ## Evidence Rules
 
 - 所有数字必须能追溯到 `data/source.sav`、变量、筛选条件、权重与样本量。
