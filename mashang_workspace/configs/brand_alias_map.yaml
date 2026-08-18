@@ -1,0 +1,16 @@
+# brand_watchlist 品牌名 → TP&MIX-ways 数据集品牌值 映射
+#
+# 背景：MIIT/workflow/brand_watchlist.yaml 中的品牌名为业务显示名（如"问界"/"爱咖"），
+# 与数据集品牌维度（shared/loaders/tp_and_mix_ways_loader 读取的 brand 列）实际取值
+# 不一致。在数据集上按 watchlist 品牌做销量/份额匹配时，应先用本映射归一化。
+#
+# 使用方式：utils/brand_mapping.py 的 resolve_dataset_brand() / normalize_watchlist_brands()
+# 注意：不要修改 brand_watchlist.yaml —— MIIT 公告搜索仍使用其中的显示名做关键词。
+
+# 数据集品牌为 AITO（"问界"为产品线名，数据集中品牌维度取值 AITO）
+问界: AITO
+# 数据集品牌为 iCAR（"爱咖"为音译）
+爱咖: iCAR
+
+# 以下品牌数据集中当前无对应值，未建立映射（消费方命中时按"无数据"处理）：
+#   奕境  — 未见上险数据，可能为新品牌或尚未上市

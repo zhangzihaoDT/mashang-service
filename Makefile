@@ -252,6 +252,11 @@ rebuild-tp-and-mix-ways-dataset:
 build-tp-and-mix-ways-dataset:
 	$(PYTHON) scripts/build_tp_and_mix_ways_dataset.py
 
+## watchlist 品牌销量月报（本品智己对标 + 行业 benchmark；默认报告月=上月）
+## 用法: make watchlist-brand-monthly-report MONTH=2026-07
+watchlist-brand-monthly-report:
+	$(PYTHON) mashang_workspace/research_scripts/watchlist_brand_monthly_report.py $(if $(MONTH),--month $(MONTH),)
+
 ## ─── ──────────────────────────────────────────────────────────────
 
 ## 清理输出文件
