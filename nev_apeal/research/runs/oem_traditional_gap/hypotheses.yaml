@@ -1,0 +1,12 @@
+hypotheses:
+- id: H-001
+  statement: 传统国产全维度系统性低 7-10 分，其原始差异表层由前排驾驶/NVH 承载，但控制结构后为品牌级残余效应（国际 +5.3~5.5 不可归因，新势力差距可被结构+形象吸收）
+  question: 传统国产 vs 国际/新势力是否存在 APEAL 差异？控制价格、豪华/大众、车型、品牌形象后是否仍在？
+  status: refined
+  created_from: E-001
+  refined_by: E-005, E-006, E-007
+- id: H-002
+  statement: 国际残余溢价并非均匀分布，而是集中于高端细分（Premium BEV/PHEV、Midsize BEV SUV）与 30 万+ 价格带；15-20 万与中端 BEV Car 无溢价（可能是特定市场机制而非广泛品牌溢价）
+  question: 国际相对传统国产的残余溢价是否在细分/价格带内均匀分布？
+  status: active
+  created_from: E-007
