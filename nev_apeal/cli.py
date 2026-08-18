@@ -96,7 +96,7 @@ def research_command(action: str, topic: str, payload: str = "", apply: bool = F
     elif action == "derive-questions":
         result = _load_json(payload)
         state = read_state(topic)
-        queue = load_queue()
+        queue = load_queue(topic)
         questions = derive_questions(result, state, queue.get("items", []))
         if apply and questions:
             added = enqueue(topic, questions)

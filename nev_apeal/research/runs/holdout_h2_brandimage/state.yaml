@@ -1,0 +1,19 @@
+topic_id: holdout_h2_brandimage
+round: 3
+status: rejected
+question: 品牌感知形象(scale7)与产品魅力是什么关系？
+current_hypothesis: 创新/豪华/可靠/口碑等品牌形象维度与APEAL正相关。
+confidence: medium
+evidence_ids:
+- E-001
+- E-002
+- E-003
+open_questions: []
+mechanism_depth: 1
+effect_interpreted: true
+next_action: null
+rejected_hypotheses:
+- 品牌形象驱动产品魅力(控制品牌后不显著,相关为身份内生化)
+last_analysis: regress
+information_gain_rounds: 3
+stop_reason: correlation被品牌身份吸收，机制不成立

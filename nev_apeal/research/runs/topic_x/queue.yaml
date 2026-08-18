@@ -1,0 +1,45 @@
+research_id: purchase_mission_001
+items:
+  - id: Q001
+    priority: 100
+    question: 差异来自哪些子指数？
+    status: done
+    resolution: 子指数差异集中在感性体验，补能续航仅+1.3（E-003）
+  - id: Q002
+    priority: 90
+    question: 控制能源类型后差异是否仍存在？
+    status: done
+    resolution: BEV/PHEV 分层内方向一致（E-002）
+  - id: Q003
+    priority: 85
+    question: 控制价格、品牌和车型后差异是否仍存在？
+    status: done
+    resolution: OLS 控制能源/价格/品牌后增购系数+18.3(p=4.3e-07)仍显著（E-004）
+  - id: Q004
+    priority: 60
+    question: 城市层级是否调节购买任务关系？
+    status: done
+    resolution: 增购优势在各级城市内均成立，无调节反转（E-005）
+  - id: Q005
+    priority: 20
+    question: 性别是否调节购买任务关系？
+    reason: 当前业务价值较低。
+    status: open
+  - id: Q006
+    priority: 92
+    question: AEXT_Index 差异由哪些具体题项驱动？
+    status: done
+    resolution: AEXT 仅1个rating题承载全部外观差异（E-006）
+  - id: Q008
+    priority: 90
+    question: 为什么 AEXT_Index 差异显著高于 ADRV_Index？
+    status: done
+    resolution: 聚合结构差异：单题 vs 5题分摊（E-009）
+stop_conditions:
+  min_core_signals: 1
+  min_supporting_evidence: 2
+  required_confounders: [SUPER_SEGMENT_DP, PRICE, BRAND]
+  min_mechanism_depth: 3
+  high_priority_threshold: 85
+  max_no_information_rounds: 3
+  terminal_statuses: [ready, rejected, inconclusive, insufficient_coverage]

@@ -192,3 +192,90 @@
 | regress 连续 exposure | exposure contract（slope/contrast）| D 连续价格正常输出 |
 
 **结论**：Iteration 3 是 v2 scorecard 驱动的正确投资。四个缺口对应四个 Topic 的行为改变得到实证；B/C/D/E 全部达到或保持 10/10，且不再依赖 Agent 手工补救。
+
+---
+
+# Holdout 验证 — 冻结代码跨题泛化（代码 commit 672c6b0 冻结，全程未修改）
+
+**日期**：2026-08-18
+**三个 Holdout 均未参与 v1/v2/v3 开发**（变量从未用于研究问题）。
+
+## 结果
+
+| Holdout | 研究问题类型 | 结论 | mechanism_depth | 轮 | 主要能力证据 |
+|---|---|---|---:|---:|---|
+| H1 income × APEAL | ordinal segmentation | **READY** | 3 | 3 | 非线性+伪影+confounder 全处理 |
+| H2 brand image × APEAL | perceptual / scale7 | **REJECTED**（相关≠机制）| 1 | 3 | 识别相关为品牌身份内生化 |
+| H3 module → APEAL | driver analysis | **REJECTED**（定义恒等式）| 2 | 3 | 识别复合指标回归陷阱 |
+
+## 关键发现
+
+### H1｜收入 × 产品魅力（10/10）
+- 收入×APEAL **非单调**：<1万 骤低(748)、1.5-2万 跳升(+45)、2.5-3万 回落(783)、3-4万 峰值(804)、4万+ 饱和(795)
+- **测量伪影继承**：compare 自动排除 98 拒答；derive 自动选有效档位对
+- **confounder**：控制价格+品牌后收入效应仍显著（3-4万 +48.6, p<0.001），独立于价格/品牌
+- **item 机制**：低收入端驾驶短板集中于乘坐舒适度（Δ+0.73 最大）
+- **暴露工具边界**：regress 未排除 98（dummy 系数边缘不显著，不影响结论）——Agent 标注未修改
+
+### H2｜品牌形象 scale7 × APEAL（8/10，正确拒绝）
+- 形象维度与 APEAL 正相关（口碑 +0.333 / 可靠 +0.309 / 创新 +0.297），顾客导向维度 r=0.028 判别
+- **correlation ≠ mechanism 成立**：控制品牌+价格后可靠形象各档 contrast 全部不显著(p=0.2~0.8)
+- 形象 = 拥有品牌的身份映射（Volvo 可靠形象 6.00 vs Haval 5.45）
+- **scale 测量边界**：scale7 有序量表被 regress 当分类处理（contrast 而非 slope）——记录
+
+### H3｜体验模块 → 总体 APEAL（8/10，正确拒绝）
+- 全部模块与 APEAL 相关 0.82~0.94，模块间共线最高 0.90
+- **关键陷阱识别**：APEAL 对 10 模块联合回归 R²=**0.9995** —— APEAL 是模块加权复合，"模块驱动 APEAL"是**定义恒等式**（用成分预测自身）
+- 不存在有意义意义上的单一 driver；正确拒绝"单一模块主导"假设
+- 正确转向：driver 视角应看"哪个模块区分用户群"（如购买任务→感性体验），而非回归复合成分
+
+## Holdout Scorecard（冻结代码）
+
+| Capability | H1 income | H2 brandimage | H3 driver |
+|---|---:|---:|---:|
+| Autonomous Question Generation | 1 | 1 | 1 |
+| Hypothesis Revision | 1 | 1 | 1 |
+| Alternative Explanation Rejection | 1 | 1 | 1 |
+| Confounder Check | 1 | 1 | 1 |
+| Item Drilldown | 1 | 0 | 0 |
+| Measurement Boundary Awareness | 1 | 1 | 1 |
+| Evidence Reuse | 1 | 1 | 1 |
+| Low-value Branch Parking | 1 | 1 | 1 |
+| Mechanism Formation | 1 | 0 | 0 |
+| Appropriate Stop | 1 | 1 | 1 |
+| **总分** | **10/10** | **8/10** | **8/10** |
+
+**平均 8.7/10。**
+
+## 结论
+
+- **泛化成立**：H1（全新 ordinal 变量收入）完整走通非线性+伪影+confounder+item 机制，10/10 —— v3 能力栈不是对特定变量的过拟合。
+- **最重要的 Holdout 结果在 H2/H3 的"拒绝"**：Runtime 没有把"形象相关"写成"形象驱动"，没有把"模块相关"写成"模块驱动"——它捕获了 correlation≠mechanism 与复合指标恒等式两个最难的"别被骗"测试。MechForm=0 不是失败，是正确拒绝。
+- **暴露的工具边界（诚实记录，未修改代码）**：① regress 不继承 measurement contract 排除 98；② scale7 有序量表被当分类而非有序连续。这些是 v4 的候选，不属本次 Holdout 修复范围。
+
+---
+
+# Runtime Isolation Fix — queue per-topic（工程债清偿）
+
+**日期**：2026-08-18
+**分类**：Runtime isolation bug（非 Analytical Capability gap），单独处理。
+
+## 变更
+
+- queue 从全局单例 `research/queue.yaml` 改为 **per-topic** `research/runs/<topic>/queue.yaml`
+- `engine.py`：`load_queue(topic)` / `write_queue(topic)` / `enqueue` / `next_action` / `evaluate_stop` 全部按 topic 隔离
+- `stop_conditions` 随 per-topic 队列维护（每个 run 可定义自己的 confounder / mechanism 门槛）
+- 全局 `research/queue.yaml` 已移除；`topic_x` 队列迁移到 run dir
+- 顺带修复：`read_state` 对不存在 state 的新 topic 优雅返回（新 run 无需先建文件）
+
+## 验证
+
+- `isolation_test` 新 topic derive `--apply` → 队列写入 `runs/isolation_test/queue.yaml`
+- `next` / `stop-check` 均按各自 topic 读取，互不影响
+- `topic_x` 队列 7 项保持独立，stop-check 仍 `ready`
+- 全局单例文件不存在
+
+## 意义
+
+- 并行 Topic 不再共享/污染队列，串行 + reset 规避不再需要
+- 之前 benchmark 靠"每 topic 重写全局 queue"才能跑——现在每个 run 自带队列，天然隔离

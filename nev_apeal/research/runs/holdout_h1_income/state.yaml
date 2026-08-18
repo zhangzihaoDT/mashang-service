@@ -1,0 +1,19 @@
+topic_id: holdout_h1_income
+round: 3
+status: ready
+question: 家庭收入是否对应不同的产品魅力评价？
+current_hypothesis: 收入与APEAL存在非线性关系（中高收入带爬升/饱和）。
+confidence: high
+evidence_ids:
+- E-001
+- E-002
+- E-003
+open_questions: []
+mechanism_depth: 3
+effect_interpreted: true
+next_action: null
+rejected_hypotheses: []
+last_analysis: drilldown
+information_gain_rounds: 3
+stop_reason: 'READY: evidence + confidence + mechanism_depth + no high-priority open
+  question'

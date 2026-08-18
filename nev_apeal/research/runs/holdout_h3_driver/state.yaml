@@ -1,0 +1,19 @@
+topic_id: holdout_h3_driver
+round: 3
+status: rejected
+question: 哪个体验模块对总体APEAL贡献最大？
+current_hypothesis: 存在少数模块主导APEAL(driver)。
+confidence: high
+evidence_ids:
+- E-001
+- E-002
+- E-003
+open_questions: []
+mechanism_depth: 2
+effect_interpreted: true
+next_action: null
+rejected_hypotheses:
+- 存在单一体验模块主导APEAL(定义恒等式R²=0.9995+共线,无单一driver)
+last_analysis: regress
+information_gain_rounds: 3
+stop_reason: driver回归是定义恒等式，单一driver假设不成立

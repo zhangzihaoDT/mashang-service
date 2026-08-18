@@ -21,6 +21,8 @@ def run_dir(topic: str) -> Path:
 
 def read_state(topic: str) -> dict[str, Any]:
     path = run_dir(topic) / "state.yaml"
+    if not path.exists():
+        return {}
     return yaml.safe_load(path.read_text(encoding="utf-8")) or {}
 
 
@@ -48,12 +50,40 @@ def append_evidence(topic: str, evidence: dict[str, Any]) -> str:
     return evidence["id"]
 
 
-def load_queue() -> dict[str, Any]:
+DEFAULT_STOP_CONDITIONS = {
+    "min_core_signals": 1,
+    "min_supporting_evidence": 2,
+    "required_confounders": ["PRICE", "BRAND"],
+    "min_mechanism_depth": 3,
+    "high_priority_threshold": 85,
+    "max_no_information_rounds": 3,
+    "terminal_statuses": ["ready", "rejected", "inconclusive", "insufficient_coverage"],
+}
+
+
+def _queue_path(topic: str | None) -> Path:
+    """Per-topic queue lives in the run dir; None -> legacy global (not for new runs)."""
+    if topic:
+        return run_dir(topic) / "queue.yaml"
+    return ROOT / "queue.yaml"
+
+
+def load_queue(topic: str | None = None) -> dict[str, Any]:
+    """Read the topic-scoped queue; fall back to legacy global, then to defaults.
+
+    Per-topic isolation: parallel topics no longer share/pollute one queue.
+    """
+    path = _queue_path(topic)
+    if path.exists():
+        return yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    if topic is None or not (ROOT / "queue.yaml").exists():
+        return {"research_id": topic or "default", "items": [], "stop_conditions": dict(DEFAULT_STOP_CONDITIONS)}
     return yaml.safe_load((ROOT / "queue.yaml").read_text(encoding="utf-8")) or {}
 
 
-def write_queue(queue: dict[str, Any]) -> None:
-    (ROOT / "queue.yaml").write_text(
+def write_queue(queue: dict[str, Any], topic: str | None = None) -> None:
+    path = _queue_path(topic)
+    path.write_text(
         yaml.safe_dump(queue, allow_unicode=True, sort_keys=False), encoding="utf-8")
 
 
@@ -123,8 +153,8 @@ def derive_questions(result: dict[str, Any], state: dict[str, Any],
 
 
 def enqueue(topic: str, questions: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Append derived questions to queue.yaml (dedup by question text)."""
-    queue = load_queue()
+    """Append derived questions to the topic's queue.yaml (dedup by question text)."""
+    queue = load_queue(topic)
     existing_q = {item.get("question") for item in queue.get("items", [])}
     added = []
     for q in questions:
@@ -141,12 +171,12 @@ def enqueue(topic: str, questions: list[dict[str, Any]]) -> list[dict[str, Any]]
         queue.setdefault("items", []).append(item)
         existing_q.add(q["question"])
         added.append(item)
-    write_queue(queue)
+    write_queue(queue, topic)
     return added
 
 
 def next_action(topic: str) -> dict[str, Any]:
-    queue = load_queue()
+    queue = load_queue(topic)
     state = read_state(topic)
     if state.get("status") in set(queue.get("stop_conditions", {}).get("terminal_statuses", [])):
         return {"status": "stopped", "reason": state.get("stop_reason"), "state": state}
@@ -156,7 +186,7 @@ def next_action(topic: str) -> dict[str, Any]:
 
 
 def evaluate_stop(topic: str) -> dict[str, Any]:
-    queue = load_queue()
+    queue = load_queue(topic)
     state = read_state(topic)
     evidence_path = run_dir(topic) / "evidence.jsonl"
     count = len(evidence_path.read_text(encoding="utf-8").splitlines()) if evidence_path.exists() else 0
