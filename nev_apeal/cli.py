@@ -14,11 +14,17 @@ ROOT = Path(__file__).resolve().parent
 
 
 def write_contracts() -> None:
-    from analysis._common import load
+    from analysis._common import detect_artifact_values, load
 
     df, meta = load()
     contracts = ROOT / "contracts"
     contracts.mkdir(exist_ok=True)
+    # 测量伪影自动检测：值标签命中拒答/不知道/不适用/Other 语义的取值
+    excluded_values = []
+    for name in df.columns:
+        artifacts = detect_artifact_values(meta, name)
+        if artifacts:
+            excluded_values.append({"variable": name, "values": artifacts})
     measurement = {
         "dataset": "data/source.sav",
         "questionnaire_map": "data/questionnaire_map.json",
@@ -27,6 +33,7 @@ def write_contracts() -> None:
         "weight": "APEAL_WT",
         "missing_value_policy": "SPSS user-defined missing values are treated as missing",
         "scope": "cross-sectional sample; no year-over-year or market-share claims",
+        "excluded_values": excluded_values,
     }
     variables = []
     for name in df.columns:
@@ -108,10 +115,10 @@ def main() -> None:
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("contracts", help="rebuild contract JSON from source.sav")
     run = sub.add_parser("run", help="run an analysis module")
-    run.add_argument("script", choices=["describe", "compare", "segment", "regress", "control", "drilldown", "robustness", "correlate", "profile", "diagnostics"])
+    run.add_argument("script", choices=["describe", "compare", "segment", "regress", "control", "drilldown", "robustness", "correlate", "profile", "diagnostics", "nonlinear", "config_compare", "config_match"])
     run.add_argument("args", nargs=argparse.REMAINDER)
     research = sub.add_parser("research", help="inspect and advance research state")
-    research.add_argument("action", choices=["next", "state", "stop-check", "add-evidence", "update", "derive-questions", "describe", "compare", "segment", "regress", "control", "drilldown", "robustness", "correlate", "profile", "diagnostics"])
+    research.add_argument("action", choices=["next", "state", "stop-check", "add-evidence", "update", "derive-questions", "describe", "compare", "segment", "regress", "control", "drilldown", "robustness", "correlate", "profile", "diagnostics", "nonlinear", "config_compare", "config_match"])
     research.add_argument("--topic", default="topic_x")
     research.add_argument("--input", default="")
     research.add_argument("--apply", action="store_true")

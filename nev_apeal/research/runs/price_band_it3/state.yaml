@@ -1,0 +1,20 @@
+topic_id: price_band_it3
+round: 3
+status: ready
+question: 价格带是否对应不同的产品体验？（Iteration3 复跑）
+current_hypothesis: 价格带存在非线性体验断层（20万+跳升）。
+confidence: high
+evidence_ids:
+- E-001
+- E-002
+- E-003
+open_questions: []
+mechanism_depth: 3
+effect_interpreted: true
+next_action: null
+rejected_hypotheses:
+- 价格效应被品牌完全吸收(控制品牌后20万+仍+10.8,推翻)
+last_analysis: nonlinear
+information_gain_rounds: 3
+stop_reason: 'READY: evidence + confidence + mechanism_depth + no high-priority open
+  question'

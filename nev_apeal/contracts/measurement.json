@@ -5,5 +5,1863 @@
   "columns": 370,
   "weight": "APEAL_WT",
   "missing_value_policy": "SPSS user-defined missing values are treated as missing",
-  "scope": "cross-sectional sample; no year-over-year or market-share claims"
+  "scope": "cross-sectional sample; no year-over-year or market-share claims",
+  "excluded_values": [
+    {
+      "variable": "SCR_G_7",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "SCR_G_5",
+      "values": [
+        {
+          "value": 97.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "SCR_G_4",
+      "values": [
+        {
+          "value": 97.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "SCR_G_1",
+      "values": [
+        {
+          "value": 97.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "SCR_FCD00_01",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "SCR_FCD00_02",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "SCR_DRA00_01",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "SCR_DRA00_02",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "SCR_DRA00_03",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "SCR_DRA00_04",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "SCR_DRA00_05",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "SCR_DRA00_06",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "SCR_DRA00_07",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "SCR_DRA00_08",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "SCR_DRA00_09",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "SCR_DRA00_10",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "SCR_INFO00_01",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "SCR_INFO00_02",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "SCR_INFO00_03",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "SCR_INFO00_04",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "SCR_INFO00_07",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "CLMT_SCR00_01",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "NEV_03_R1",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "NEV_03_R2",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "NEV_03_R3",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "NEV_07",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "AEXT_R_01",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "ASET_R_01",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "ASET_R_02",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "ASET_R_03",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "ASET_R_04",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "AENT_R_01",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "AENT_R_02",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "AENT_R_03",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "AENT_R_04",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "AENT_R_05",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "AENT_R_06",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "AINT_R_01",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "AINT_R_02",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "AINT_R_03",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "AINT_R_04",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "AINT_R_05",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "AINT_R_06",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "APERF_R_01",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "APERF_R_02",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "APERF_R_03",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "APERF_R_04",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "ADRV_R_01",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "ADRV_R_02",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "ADRV_R_03",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "ADRV_R_04",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "ADRV_R_05",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "ASFTY_R_01",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "ASFTY_R_02",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "ASFTY_R_03",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "ASFTY_R_04",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "ASFTY_R_05",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "ASFTY_R_06",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "AINFO_R_01",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "AINFO_R_02",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "AINFO_R_03",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "AINFO_R_04",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "AINFO_R_05",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "AINFO_R_06",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "AINFO_R_07",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "ACMFT_R_01",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "ACMFT_R_02",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "ACMFT_R_03",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "ACMFT_R_04",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "ACMFT_R_05",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "AFUEL_R_01",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "ACHAR_R_01",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "ACHAR_R_02",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "ACHAR_R_03",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "ACHAR_R_04",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "ACHAR_R_05",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "ACHAR_R_06",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "ACHAR_R_07",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "ACHAR_R_08",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "ACHAR_R_09",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "AEXT_D_01",
+      "values": [
+        {
+          "value": 13.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 97.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "AEXT_D_02",
+      "values": [
+        {
+          "value": 13.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 97.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "ASET_D_01",
+      "values": [
+        {
+          "value": 97.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "ASET_D_02",
+      "values": [
+        {
+          "value": 97.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "ASFTY_D_01",
+      "values": [
+        {
+          "value": 97.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "ASFTY_D_02",
+      "values": [
+        {
+          "value": 97.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "AINFO_D_01A",
+      "values": [
+        {
+          "value": 97.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "AINFO_D_01B",
+      "values": [
+        {
+          "value": 97.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "AINFO_D_01C",
+      "values": [
+        {
+          "value": 97.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "AINFO_D_01D",
+      "values": [
+        {
+          "value": 97.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "AFUEL_D_07",
+      "values": [
+        {
+          "value": 4.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "ACHAR_D_02_START",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "ACHAR_D_02_END",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "ACHAR_D_04_START",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "ACHAR_D_04_END",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "ACHAR_D_05",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "ACHAR_D_08",
+      "values": [
+        {
+          "value": 5.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 97.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "APEAL_OSAT",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "YPV_02_MAKE",
+      "values": [
+        {
+          "value": 99999.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "YPV_02_SERIES",
+      "values": [
+        {
+          "value": 10511999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 11511999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 11512999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 12512999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 12515999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 12516999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 13011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 13511999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 14011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 14511999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 15011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 15012999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 15013999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 15014999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 16012999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 16013999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 16014999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 16015999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 18011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 18015999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 18016999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 18017999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 18513999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 19512999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 19611999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 22011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 22012999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 22014999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 22017999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 23011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 23012999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 26011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 26012999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 28011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 28016999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 28017999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 31512999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 31513999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 33012999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 33511999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 35011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 35511999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 36015999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 38015999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 38512999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 39511999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 40011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 41011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 42012999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 42013999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 42511999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 42512999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 42513999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 42751999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 43011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 43513999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 43751999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 44512999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 44514999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 45512999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 46011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 47011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 47013999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 52011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 52511999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 54011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 54811999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 56512999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 56513999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 57011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 57012999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 57013999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 57015999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 57511999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 58011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 58012999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 63511999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 63521999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 65511999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 66011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 68511999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 69011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 69211999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 69512999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 69611999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 69711999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 69811999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 69911999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 71011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 72011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 73011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 75011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 76011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 81011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 82011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 83011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 85011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 86011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 88011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 99999999.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "YPV_03_MAKE",
+      "values": [
+        {
+          "value": 99999.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "YPV_03_SERIES",
+      "values": [
+        {
+          "value": 10511999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 11511999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 11512999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 12512999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 12515999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 12516999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 13011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 13511999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 14011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 14511999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 15011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 15012999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 15013999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 15014999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 16012999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 16013999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 16014999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 16015999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 18011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 18015999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 18016999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 18017999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 18513999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 19512999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 19611999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 22011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 22012999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 22014999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 22017999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 23011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 23012999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 26011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 26012999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 28011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 28016999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 28017999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 31512999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 31513999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 33012999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 33511999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 35011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 35511999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 36015999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 38015999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 38512999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 39511999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 40011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 41011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 42012999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 42013999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 42511999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 42512999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 42513999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 42751999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 43011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 43513999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 43751999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 44512999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 44514999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 45512999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 46011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 47011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 47013999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 52011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 52511999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 54011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 54811999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 56512999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 56513999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 57011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 57012999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 57013999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 57015999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 57511999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 58011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 58012999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 63511999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 63521999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 65511999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 66011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 68511999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 69011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 69211999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 69512999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 69611999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 69711999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 69811999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 69911999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 71011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 72011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 73011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 75011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 76011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 81011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 82011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 83011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 85011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 86011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 88011999.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 99999999.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "SMTPHONE_OPSYSTEM",
+      "values": [
+        {
+          "value": 97.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "YNV_01",
+      "values": [
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "YNV_02",
+      "values": [
+        {
+          "value": 97.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 99.0,
+          "reason": "artifact_label"
+        }
+      ]
+    },
+    {
+      "variable": "GENDER",
+      "values": [
+        {
+          "value": 98.0,
+          "reason": "refusal"
+        }
+      ]
+    },
+    {
+      "variable": "CN_MARITAL_STATUS",
+      "values": [
+        {
+          "value": 97.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 98.0,
+          "reason": "refusal"
+        }
+      ]
+    },
+    {
+      "variable": "GENERATION",
+      "values": [
+        {
+          "value": 98.0,
+          "reason": "refusal"
+        }
+      ]
+    },
+    {
+      "variable": "GENERATION2",
+      "values": [
+        {
+          "value": 98.0,
+          "reason": "refusal"
+        }
+      ]
+    },
+    {
+      "variable": "CN_EDUCATION",
+      "values": [
+        {
+          "value": 98.0,
+          "reason": "refusal"
+        }
+      ]
+    },
+    {
+      "variable": "CN_INCOME",
+      "values": [
+        {
+          "value": 98.0,
+          "reason": "refusal"
+        }
+      ]
+    },
+    {
+      "variable": "CN_OCCUPATION",
+      "values": [
+        {
+          "value": 97.0,
+          "reason": "artifact_label"
+        },
+        {
+          "value": 98.0,
+          "reason": "refusal"
+        }
+      ]
+    }
+  ]
 }

@@ -14,7 +14,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from ._common import PROJECT_ROOT, emit, load, weighted_mean
+from ._common import PROJECT_ROOT, emit, load, valid_groups, weighted_mean
 
 try:
     from scipy import stats
@@ -50,9 +50,10 @@ def _question_text(metric: str, item: str) -> str:
     return ""
 
 
-def _item_stats(df: pd.DataFrame, item: str, group: str, a, b) -> dict:
-    ga = df[df[group] == a]
-    gb = df[df[group] == b]
+def _item_stats(df: pd.DataFrame, meta, item: str, group: str, a, b) -> dict:
+    clean = valid_groups(df, meta, group)
+    ga = df[clean == a]
+    gb = df[clean == b]
     ya = ga[item].dropna()
     yb = gb[item].dropna()
     row = {
@@ -94,9 +95,9 @@ def main() -> None:
     rows = []
     if args.level in ("question", "item"):
         for item in items:
-            rows.append(_item_stats(df, item, args.group, args.compare[0], args.compare[1]))
+            rows.append(_item_stats(df, meta, item, args.group, args.compare[0], args.compare[1]))
     else:
-        row = _item_stats(df, args.metric, args.group, args.compare[0], args.compare[1])
+        row = _item_stats(df, meta, args.metric, args.group, args.compare[0], args.compare[1])
         row["item"] = args.metric
         row["question_text"] = f"{args.metric}（模块整体）"
         rows.append(row)

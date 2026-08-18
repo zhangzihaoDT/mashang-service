@@ -146,3 +146,49 @@
 - **泛化成立**：Runtime 在 4 个全新 Topic 上稳定表现出 7/10 以上能力；segmentation（B）与技术路线（D）达到 10/10，能自主生成问题、下钻 item、识别测量边界并**在机制被 confounder 削弱时拒绝过早 READY**。
 - **核心分水岭**：跨 Topic 依然稳健的 4 项——Alternative Explanation Rejection、Confounder Check、Measurement Boundary Awareness、Appropriate Stop。这是 Iteration 2 的 P0 成果，不是单一 Topic 的偶然。
 - **下一阶段应开发的不是"更多统计"，而是三个工具型缺口**：① 连续/非线性分析（binned panel + 非线性回归）；② 配置归因的匹配/车型内比较；③ derive/regress 对测量伪影组与连续暴露的工具级支持。scorecard 已经告诉我们答案，而不是凭想象。
+
+---
+
+# Iteration 3 复跑 — 原 Topic B/C/D/E（工具缺口闭环验证）
+
+**日期**：2026-08-18
+**工具新增**：nonlinear / config_compare / config_match / Measurement Artifact Detector / regress 连续 exposure
+
+## 复跑结果对比（v2 → v3）
+
+| Topic | v2 结论 | v2 分 | v3 结论 | v3 分 | 变化 |
+|---|---|---:|---|---:|---|
+| B age_generation | READY，derive 误选拒答组靠人工排除 | 10 | READY，**derive 自动选有效世代**，无需人工纠错 | 10 | 伪影工具化，行为更干净 |
+| C price_band | REJECTED「价格被品牌吸收」| 7 | **READY**「20万+ 真实体验断层，控制品牌后仍+10.8(p=0.003)，性能/驾驶最强」 | **10** | nonlinear 打穿原结论 |
+| D bev_phev | INCONCLUSIVE（NVH 机制被 confounder 削弱）| 10 | INCONCLUSIVE（同，但连续 exposure contract 正常）| 10 | 稳定不夸大 |
+| E config_attribution | INCONCLUSIVE「内生性无法归因」| 7 | **READY**「三层证据：raw+24.9→控制+14.3→匹配+17.5(71.9%一致)，舒适度传导机制」| **10** | config_match 建立匹配证据链 |
+
+**v3 平均 10/10**（v2 平均 8.8/10）。
+
+## v3 关键行为证据
+
+### Topic C — 非线性工具改变结论方向
+- v2 结论：线性回归 slope 不显著 → 误判「价格被品牌吸收」
+- v3：nonlinear nested F=611(p<0.001) 显著非线性 → 控制品牌后 20万+ bin 仍 +10.83(p=0.003) → 性能(+16.0) 与驾驶(+11.2) 承载断层
+- **教训**：线性 slope 掩盖了集中在尾部的非线性跳升；scorecard 暴露的缺口确实导致 v2 对 Topic C 误判
+
+### Topic E — 三层证据替代「无法归因」
+- v2：只有 raw + confounder 回归 → 配置包内生性 → inconclusive
+- v3：L3 品牌×价格带 cell 匹配（32 cells，71.9% 一致）+ 舒适度传导机制 → READY
+- **层级设计成立**：raw gap → controlled → matched，解释力逐层增强
+
+### Topic B — 测量伪影工具化
+- v2：derive 把拒答组选作基线，依赖 Agent 手工排除
+- v3：Measurement Contract 自动排除 98，compare/derive 从一开始就是有效问题
+- **意义**：Question Generation 不再在测量伪影上生长问题
+
+## scorecard 缺口 → 开发闭环
+
+| v2 scorecard 缺口 | Iteration 3 交付 | 复跑证据 |
+|---|---|---|
+| 连续/非线性工具缺失 | nonlinear.py | C 从 REJECTED → READY |
+| 配置归因匹配缺失 | config_compare.py + config_match.py | E 从 INCONCLUSIVE → READY |
+| derive 测量伪影识别 | Measurement Artifact Detector（入契约+全工具继承）| B derive 自动选有效世代 |
+| regress 连续 exposure | exposure contract（slope/contrast）| D 连续价格正常输出 |
+
+**结论**：Iteration 3 是 v2 scorecard 驱动的正确投资。四个缺口对应四个 Topic 的行为改变得到实证；B/C/D/E 全部达到或保持 10/10，且不再依赖 Agent 手工补救。

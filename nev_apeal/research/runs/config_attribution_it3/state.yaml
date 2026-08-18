@@ -1,0 +1,19 @@
+topic_id: config_attribution_it3
+round: 3
+status: ready
+question: 配置有无是否影响满意度？（Iteration3 复跑）
+current_hypothesis: 记忆座椅配置与满意度正相关，需三层证据链验证。
+confidence: high
+evidence_ids:
+- E-001
+- E-002
+- E-003
+open_questions: []
+mechanism_depth: 3
+effect_interpreted: true
+next_action: null
+rejected_hypotheses: []
+last_analysis: config_match
+information_gain_rounds: 3
+stop_reason: 'READY: evidence + confidence + mechanism_depth + no high-priority open
+  question'

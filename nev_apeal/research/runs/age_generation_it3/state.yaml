@@ -1,0 +1,20 @@
+topic_id: age_generation_it3
+round: 3
+status: ready
+question: 年龄/世代是否对应不同的产品魅力结构？（Iteration3 复跑）
+current_hypothesis: 年轻世代（95~99）产品魅力评价更高。
+confidence: high
+evidence_ids:
+- E-001
+- E-002
+- E-003
+open_questions: []
+mechanism_depth: 3
+effect_interpreted: true
+next_action: null
+rejected_hypotheses:
+- 世代差异由价格驱动(控制价格后仍显著,排除)
+last_analysis: regress
+information_gain_rounds: 3
+stop_reason: 'READY: evidence + confidence + mechanism_depth + no high-priority open
+  question'

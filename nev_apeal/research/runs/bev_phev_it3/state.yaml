@@ -1,0 +1,18 @@
+topic_id: bev_phev_it3
+round: 3
+status: inconclusive
+question: BEV 与 PHEV 的产品魅力差异在哪里？（Iteration3 复跑）
+current_hypothesis: PHEV 在动力性能/驾驶感受上落后 BEV，且由发动机相关题项驱动。
+confidence: medium
+evidence_ids:
+- E-001
+- E-002
+- E-003
+open_questions: []
+mechanism_depth: 3
+effect_interpreted: true
+next_action: null
+rejected_hypotheses: []
+last_analysis: regress
+information_gain_rounds: 3
+stop_reason: NVH机制触达item但confounder削弱(p=0.138)，需匹配样本验证

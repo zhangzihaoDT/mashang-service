@@ -1,4 +1,4 @@
-research_id: benchmark_config_attribution
+research_id: benchmark_config_attribution_it3
 items: []
 stop_conditions:
   min_core_signals: 1
