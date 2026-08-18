@@ -17,7 +17,7 @@ mashang-service/                   # 总项目根目录
 ├── .env                           # 共享环境变量
 ├── .venv/                         # 共享虚拟环境
 ├── dataset/                       # 共享原始数据
-│   └── passenger_insurance/       #   └── 乘用车上险数据（6 张 Parquet + registry + quality）
+│   └── TP&MIX-ways/       #   └── 乘用车上险数据（6 张 Parquet + registry + quality）
 ├── requirements.txt               # 共享依赖
 ├── mashang_shared/               # shared operators / schema 层，谨慎修改
 │
@@ -161,12 +161,12 @@ make -C MIIT miit-dataset            # 重建统一 Dataset（product_master / v
 make -C MIIT test                    # MIIT 冒烟测试
 ```
 
-## Passenger Insurance Data Asset / 乘用车上险数据资产
+## TP&MIX-ways Data Asset / 乘用车上险数据资产
 
 ### 资产定位
 
-passenger_insurance 是 **service 级共享数据资产**，不属于 workspace 私有数据。
-数据资产本体位于 `../dataset/passenger_insurance/`（项目根目录）。
+TP&MIX-ways 是 **service 级共享数据资产**，不属于 workspace 私有数据。
+数据资产本体位于 `../dataset/TP&MIX-ways/`（项目根目录）。
 
 ### 使用规则
 
@@ -176,10 +176,10 @@ passenger_insurance 是 **service 级共享数据资产**，不属于 workspace 
 - workspace 仅通过 shared loader 读取：
 
 ```python
-from shared.loaders.passenger_insurance_loader import (
-    load_passenger_insurance_table,
-    load_passenger_insurance_registry,
-    list_passenger_insurance_tables,
+from shared.loaders.tp_and_mix_ways_loader import (
+    load_tp_and_mix_ways_table,
+    load_tp_and_mix_ways_registry,
+    list_tp_and_mix_ways_tables,
 )
 ```
 
@@ -209,7 +209,7 @@ from shared.loaders.passenger_insurance_loader import (
 - 维护另一份 loader
 - 生成一张大宽表
 
-详见 `docs/passenger_insurance_usage.md`。
+详见 `docs/tp_and_mix_ways_usage.md`。
 
 ## 自然语言指令
 

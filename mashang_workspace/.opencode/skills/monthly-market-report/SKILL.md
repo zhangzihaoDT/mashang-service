@@ -2,18 +2,18 @@
 name: monthly-market-report
 version: "0.1"
 scope: single_table_monthly_market_report
-description: workspace 层的月度汽车市场报告生成 Skill。基于 passenger_insurance 现有 6 张预聚合单表，按月运行 24 个固定月报查询问题，输出结构化数据底稿和报告草稿。
+description: workspace 层的月度汽车市场报告生成 Skill。基于 TP&MIX-ways 现有 6 张预聚合单表，按月运行 24 个固定月报查询问题，输出结构化数据底稿和报告草稿。
 ---
 
 # monthly-market-report v0.1
 
 ## 能力定位
 
-monthly-market-report v0.1 是基于 `passenger_insurance` 现有 6 张预聚合单表的月度汽车市场固定主查询能力。
+monthly-market-report v0.1 是基于 `TP&MIX-ways` 现有 6 张预聚合单表的月度汽车市场固定主查询能力。
 
 按照固定的 24 个查询问题，按月生成市场月报数据底稿和结构化报告草稿。
 
-数据来源：`shared.loaders.passenger_insurance_loader`（6 张 Parquet 表）
+数据来源：`shared.loaders.tp_and_mix_ways_loader`（6 张 Parquet 表）
 
 ### v0.1 支持范围
 
@@ -161,9 +161,9 @@ python .../run_monthly_market_report.py --month 2026-05 --execute
 |------|------|
 | `configs/monthly_market_report_queries.yaml` | 24 个固定查询问题规范 |
 | `research_scripts/market_report/run_monthly_market_report.py` | 查询执行入口脚本 |
-| `shared/loaders/passenger_insurance_loader.py` | 数据加载器 |
-| `shared/schema/passenger_insurance_schema.py` | 数据表结构定义 |
-| `docs/passenger_insurance_usage.md` | 数据资产使用指南 |
+| `shared/loaders/tp_and_mix_ways_loader.py` | 数据加载器 |
+| `shared/schema/tp_and_mix_ways_schema.py` | 数据表结构定义 |
+| `docs/tp_and_mix_ways_usage.md` | 数据资产使用指南 |
 | `utils/paths.py` | 路径工具 |
 | `utils/result_contract.py` | Result Contract 构建工具 |
 | `outputs/monthly_market_report/` | 月报输出目录 |
@@ -171,7 +171,7 @@ python .../run_monthly_market_report.py --month 2026-05 --execute
 ## 不涉及的行为
 
 - 不承载指标计算逻辑（由 runner 脚本实现）
-- 不修改 passenger_insurance 数据资产
+- 不修改 TP&MIX-ways 数据资产
 - 不复制或移动 dataset/ 下的原始数据
 - 不修改 mashang_runtime/ 中的任何文件
 - 不引用具体历史报告名称

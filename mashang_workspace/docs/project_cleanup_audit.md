@@ -27,13 +27,13 @@ mashang-service/                          # Project root (service layer)
 ├── dataset/                              # Shared data assets (gitignored)
 │   ├── order_data.parquet                #   Core order data
 │   ├── assign_data.csv                   #   Lead assignment data
-│   ├── passenger_insurance/              #   Passenger insurance (parquet/registry/quality)
+│   ├── TP&MIX-ways/              #   TP&MIX-ways (parquet/registry/quality)
 │   └── ...                               #   Other CSVs + parquets
 │
 ├── shared/                               # Shared business logic (canonical)
 │   ├── operators/                        #   14 canonical business operators
 │   ├── schema/                           #   Metric registry, business definitions
-│   └── loaders/                          #   Dataset loaders (passenger_insurance)
+│   └── loaders/                          #   Dataset loaders (TP&MIX-ways)
 │
 ├── mashang_workspace/                    # AI-native analysis workspace (active dev)
 │   ├── runtime_scripts/                  #   Core stable analysis scripts (6)
@@ -59,15 +59,15 @@ mashang-service/                          # Project root (service layer)
 │   └── tests/                            #   Runtime V2 tests
 │
 ├── scripts/                              # Service-level build/render scripts
-│   ├── build_passenger_insurance_dataset.py
+│   ├── build_tp_and_mix_ways_dataset.py
 │   ├── render_official_document.py
 │   └── smoke_test_official_document_render.py
 │
 ├── docs/                                 # Service-level docs
-│   └── passenger_insurance_dataset.md
+│   └── tp_and_mix_ways_dataset.md
 │
 ├── tests/                                # Service-level tests
-│   └── test_passenger_insurance_dataset_build.py
+│   └── test_tp_and_mix_ways_dataset_build.py
 │
 ├── outputs/                              # Service-level outputs
 │   ├── assets/brand/                     #   Brand assets
@@ -111,15 +111,15 @@ mashang-service/                          # Project root (service layer)
 | Path | Files | Status | Notes |
 |------|-------|--------|-------|
 | `shared/operators/` | 14 .py + 2 json | ✅ Canonical | `shared/README.md` marks these as canonical |
-| `shared/schema/` | 10 files | ✅ Canonical | Includes `passenger_insurance_schema.py` |
-| `shared/loaders/` | 2 files | ✅ Current | Only `passenger_insurance_loader.py` |
+| `shared/schema/` | 10 files | ✅ Canonical | Includes `TP&MIX-ways_schema.py` |
+| `shared/loaders/` | 2 files | ✅ Current | Only `TP&MIX-ways_loader.py` |
 
 ### 2.3 Data Layer
 
 | Path | Status | Notes |
 |------|--------|-------|
 | `dataset/` | ✅ Shared | Gitignored (should not commit raw data) |
-| `dataset/passenger_insurance/` | ✅ Shared | Parquet + registry + quality — rebuilt by `make build-passenger-insurance-dataset` |
+| `dataset/TP&MIX-ways/` | ✅ Shared | Parquet + registry + quality — rebuilt by `make build-tp-and-mix-ways-dataset` |
 | `dataset/updater/` | ✅ Shared | Pipeline scripts for data refresh |
 | `dataset/wechat/` | 🤔 Specialized | WeChat sync pipeline |
 
@@ -162,12 +162,12 @@ mashang_workspace/                        # Primary development area — retain 
 
 mashang_runtime_v2/                       # Active development — retain
 
-scripts/build_passenger_insurance_dataset.py   # Active build
+scripts/build_tp_and_mix_ways_dataset.py   # Active build
 scripts/render_official_document.py            # Active render
 
-docs/passenger_insurance_dataset.md            # Active doc
+docs/tp_and_mix_ways_dataset.md            # Active doc
 
-tests/test_passenger_insurance_dataset_build.py  # Active test
+tests/test_tp_and_mix_ways_dataset_build.py  # Active test
 
 .outputs/                                       # Root brand assets
 ```
@@ -243,7 +243,7 @@ bot_main()
 
 ### 6.4 Doc Confusion: root docs/ vs mashang_workspace/docs/
 
-**Finding**: `docs/passenger_insurance_dataset.md` exists at root level. `mashang_workspace/docs/passenger_insurance_usage.md` duplicates some content.
+**Finding**: `docs/tp_and_mix_ways_dataset.md` exists at root level. `mashang_workspace/docs/tp_and_mix_ways_usage.md` duplicates some content.
 
 **Verdict**: The root doc describes the dataset build process (service responsibility). The workspace doc describes consumption patterns. They serve different audiences but should cross-reference each other to avoid confusion.
 
@@ -256,21 +256,21 @@ bot_main()
 | Issue | Detail |
 |-------|--------|
 | Cluster illusion | Root `README.md` (11 KB) describes `mashang_runtime/` architecture in detail, but this runtime is now frozen |
-| Missing passenger_insurance | No mention of the passenger_insurance dataset asset |
+| Missing TP&MIX-ways | No mention of the TP&MIX-ways dataset asset |
 | Script list out of date | References `scripts/` directory layout that has changed |
 
 ### 7.2 AGENTS.md (root) — Needs Minor Update
 
 | Issue | Detail |
 |-------|--------|
-| Missing passenger_insurance section | Only `mashang_workspace/AGENTS.md` has this section; root AGENTS.md should also reference it as a service-level asset |
+| Missing TP&MIX-ways section | Only `mashang_workspace/AGENTS.md` has this section; root AGENTS.md should also reference it as a service-level asset |
 | Runtime references | References `mashang_runtime` as if actively co-developed; should note it's frozen |
 
 ### 7.3 mashang_workspace/AGENTS.md — Generally Current
 
 | Issue | Detail |
 |-------|--------|
-| ✅ Has passenger_insurance section | Added in recent update |
+| ✅ Has TP&MIX-ways section | Added in recent update |
 | ✅ Has MCP/Playwright info | Not yet added — could add a brief section |
 
 ### 7.4 mashang_workspace/docs/project_inventory.md — Stale
@@ -279,7 +279,7 @@ bot_main()
 |-------|--------|
 | Directory structure out of date | Shows `agent/`, `eval/`, `operators/` at root level — these have been moved/restructured |
 | Script list incomplete | Lists scripts from `scripts/` and `test/` directories that no longer follow current layout |
-| Missing passenger_insurance data | Should list passenger_insurance as a data asset |
+| Missing TP&MIX-ways data | Should list TP&MIX-ways as a data asset |
 
 ### 7.5 Missing .gitattributes
 
@@ -306,7 +306,7 @@ mashang-service/
 │
 ├── dataset/                      # Shared data (gitignored)
 │   ├── order_data.parquet
-│   ├── passenger_insurance/
+│   ├── TP&MIX-ways/
 │   └── ...
 │
 ├── shared/                       # Canonical business logic
@@ -374,8 +374,8 @@ mashang-service/
 |------|--------|------|
 | 2.1 | Update root `README.md` to mark `mashang_runtime` as frozen | 🟢 Doc only |
 | 2.2 | Update `project_inventory.md` with current directory structure | 🟢 Doc only |
-| 2.3 | Add passenger_insurance to root `README.md` and `AGENTS.md` | 🟢 Doc only |
-| 2.4 | Cross-reference root `docs/passenger_insurance_dataset.md` from `mashang_workspace/docs/passenger_insurance_usage.md` | 🟢 Doc only |
+| 2.3 | Add TP&MIX-ways to root `README.md` and `AGENTS.md` | 🟢 Doc only |
+| 2.4 | Cross-reference root `docs/tp_and_mix_ways_dataset.md` from `mashang_workspace/docs/tp_and_mix_ways_usage.md` | 🟢 Doc only |
 
 ### Phase 3 — Archive Frozen Components (Needs Confirmation)
 
@@ -418,7 +418,7 @@ The following operations carry elevated risk and should only be done after thoro
 |-------|--------|--------|
 | Service config (root) | 🟢 90% | Minor: node_modules not gitignored |
 | Shared logic | 🟢 100% | Clean separation |
-| Data assets | 🟢 95% | passenger_insurance well-structured |
+| Data assets | 🟢 95% | TP&MIX-ways well-structured |
 | Workspace | 🟢 90% | scratch/ not gitignored; schema/ and registry/ duplicate shared/ |
 | Runtime legacy | 🟡 70% | Duplicates operators/schema; no active consumers; rename overdue |
 | Runtime v2 | 🟢 95% | Clean, minimal |
@@ -432,7 +432,7 @@ The following operations carry elevated risk and should only be done after thoro
 ### 11.3 Short-Term Actions (Phase 2 — Next Week)
 
 3. Update root `README.md` and `project_inventory.md`
-4. Cross-reference passenger_insurance docs
+4. Cross-reference TP&MIX-ways docs
 
 ### 11.4 Medium-Term Actions (Phase 3-4 — Next Month)
 
@@ -455,7 +455,7 @@ The following operations carry elevated risk and should only be done after thoro
 # Phase 2: Update docs
 # Update root README.md to mark mashang_runtime as frozen
 # Update mashang_workspace/docs/project_inventory.md
-# Cross-reference passenger_insurance docs between root and workspace
+# Cross-reference TP&MIX-ways docs between root and workspace
 
 # Phase 3: Archive runtime
 # git mv mashang_runtime mashang_runtime.legacy
@@ -469,5 +469,5 @@ The following operations carry elevated risk and should only be done after thoro
 # make test
 # make eval
 # pytest mashang_workspace/tests -q
-# pytest tests/test_passenger_insurance_dataset_build.py -q
+# pytest tests/test_tp_and_mix_ways_dataset_build.py -q
 ```

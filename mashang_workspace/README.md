@@ -42,7 +42,7 @@ mashang_workspace/
 python mashang_workspace/utility_scripts/data_dictionary.py --input dataset
 
 # 上险数据 smoke check（research）
-python mashang_workspace/research_scripts/passenger_insurance/check_passenger_insurance_asset.py
+python mashang_workspace/research_scripts/tp_and_mix_ways/check_tp_and_mix_ways_asset.py
 
 # 锁单分析（runtime）
 python mashang_workspace/runtime_scripts/daily_lock_count.py --date 2026-06-10
@@ -85,10 +85,10 @@ pytest mashang_workspace/tests -q
 
 ## 数据路径
 
-- 原始数据：`../dataset/`（项目根目录，含 `passenger_insurance/` 共享资产）
+- 原始数据：`../dataset/`（项目根目录，含 `TP&MIX-ways/` 共享资产）
 - 输出文件：`outputs/tables/` `outputs/reports/` `outputs/charts/`
 - 业务文档：`docs/`
-- 上险数据使用指南：`docs/passenger_insurance_usage.md`
+- 上险数据使用指南：`docs/tp_and_mix_ways_usage.md`
 
 ## CLI 规范
 

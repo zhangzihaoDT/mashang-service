@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 """
-Passenger Insurance — workspace 侧 smoke check。
+TP&MIX-ways — workspace 侧 smoke check。
 
 仅做 workspace 验证和熟悉数据资产，不负责构建数据集。
 使用 shared.loaders，不直接拼 parquet 路径，不读 raw_csv。
 
 用法：
-    python mashang_workspace/research_scripts/passenger_insurance/check_passenger_insurance_asset.py
+    python mashang_workspace/research_scripts/tp_and_mix_ways/check_tp_and_mix_ways_asset.py
 
 输出：
-    mashang_workspace/outputs/reports/passenger_insurance_workspace_smoke.md
+    mashang_workspace/outputs/reports/tp_and_mix_ways_workspace_smoke.md
 """
 
 from __future__ import annotations
@@ -20,24 +20,24 @@ from pathlib import Path
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(_REPO_ROOT))
 
-from shared.loaders.passenger_insurance_loader import (
-    get_passenger_insurance_dataset_root,
-    list_passenger_insurance_tables,
-    load_passenger_insurance_registry,
-    load_passenger_insurance_table,
+from shared.loaders.tp_and_mix_ways_loader import (
+    get_tp_and_mix_ways_dataset_root,
+    list_tp_and_mix_ways_tables,
+    load_tp_and_mix_ways_registry,
+    load_tp_and_mix_ways_table,
 )
-from shared.schema.passenger_insurance_schema import PASSENGER_INSURANCE_TABLES
+from shared.schema.tp_and_mix_ways_schema import TP_AND_MIX_WAYS_TABLES
 
 _WS_ROOT = _REPO_ROOT / "mashang_workspace"
 REPORTS_DIR = _WS_ROOT / "outputs" / "reports"
-SMOKE_REPORT_PATH = REPORTS_DIR / "passenger_insurance_workspace_smoke.md"
+SMOKE_REPORT_PATH = REPORTS_DIR / "tp_and_mix_ways_workspace_smoke.md"
 
 
 def check_all_tables():
-    registry = load_passenger_insurance_registry()
+    registry = load_tp_and_mix_ways_registry()
     tables_from_registry = [t["table_name"] for t in registry.get("tables", [])]
-    tables_from_loader = list_passenger_insurance_tables()
-    tables_from_schema = [t.table_name for t in PASSENGER_INSURANCE_TABLES]
+    tables_from_loader = list_tp_and_mix_ways_tables()
+    tables_from_schema = [t.table_name for t in TP_AND_MIX_WAYS_TABLES]
 
     print(f"[check] Registry tables: {len(tables_from_registry)}")
     print(f"[check] Loader tables:   {len(tables_from_loader)}")
@@ -52,7 +52,7 @@ def check_all_tables():
     rows = []
     for table_name in tables_from_registry:
         print(f"\n[check] Loading: {table_name} ...")
-        df = load_passenger_insurance_table(table_name)
+        df = load_tp_and_mix_ways_table(table_name)
         if df is None:
             print(f"  [FAIL] {table_name}: could not load")
             rows.append((table_name, "error", 0, 0, "N/A", "N/A", 0))
@@ -83,12 +83,12 @@ def generate_smoke_report(rows):
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 
     lines = [
-        "# Passenger Insurance — Workspace Smoke Report",
+        "# TP&MIX-ways — Workspace Smoke Report",
         "",
         f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
-        f"Loader: `shared.loaders.passenger_insurance_loader`",
-        f"Schema: `shared.schema.passenger_insurance_schema`",
-        f"Registry: `dataset/passenger_insurance/registry/passenger_insurance_tables.json`",
+        f"Loader: `shared.loaders.tp_and_mix_ways_loader`",
+        f"Schema: `shared.schema.tp_and_mix_ways_schema`",
+        f"Registry: `dataset/TP&MIX-ways/registry/tp_and_mix_ways_tables.json`",
         "",
         "---",
         "",
@@ -133,10 +133,10 @@ def generate_smoke_report(rows):
 
 def main():
     print("=" * 60)
-    print("Passenger Insurance — Workspace Smoke Check")
+    print("TP&MIX-ways — Workspace Smoke Check")
     print("=" * 60)
 
-    dset_root = get_passenger_insurance_dataset_root()
+    dset_root = get_tp_and_mix_ways_dataset_root()
     print(f"Dataset root: {dset_root}")
     assert dset_root.exists(), f"Dataset root not found: {dset_root}"
 

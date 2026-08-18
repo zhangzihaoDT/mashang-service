@@ -877,7 +877,7 @@ ocr/                 # 调火山 OCR / 其他 OCR provider
 shared/
 ├── operators/     # 14 个 canonical 业务算子
 ├── schema/        # metric registry, business definitions
-└── loaders/       # dataset loaders (passenger_insurance 等)
+└── loaders/       # dataset loaders (TP&MIX-ways 等)
 ```
 
 `shared/` 中的 operators 是 canonical 版本。

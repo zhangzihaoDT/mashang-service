@@ -1,21 +1,21 @@
-# Passenger Insurance Dataset — 乘用车上险数据
+# TP&MIX-ways Dataset — 乘用车上险数据
 
 ## 数据集定位
 
 **Service 级共享数据资产。**
 
-本数据集由 6 张 Tableau 导出的窄视图 CSV 构建而成，面向 mashang_workspace 和 mashang_runtime_v2 提供标准化的乘用车上险数据（Passenger Insurance Registration Data）查询能力。
+本数据集由 6 张 Tableau 导出的窄视图 CSV 构建而成，面向 mashang_workspace 和 mashang_runtime_v2 提供标准化的乘用车上险数据（TP&MIX-ways Registration Data）查询能力。
 
 ### 分层
 
 | 层 | 路径 | 说明 |
 |----|------|------|
-| Raw Input | `dataset/passenger_insurance/raw_csv/` | Tableau 导出的 6 张 CSV（UTF-16 LE, tab-delimited, pivot 格式） |
-| Parquet | `dataset/passenger_insurance/parquet/` | 6 张独立 grain 的 Parquet，由构建脚本生成 |
-| Registry | `dataset/passenger_insurance/registry/passenger_insurance_tables.json` | 表清单、grain、行数、日期范围 |
-| Quality | `dataset/passenger_insurance/quality/` | 质量报告（Markdown + JSON） |
-| Schema | `shared/schema/passenger_insurance_schema.py` | 表定义（grain / dimensions / metrics / purpose） |
-| Loader | `shared/loaders/passenger_insurance_loader.py` | pandas / DuckDB 数据加载器 |
+| Raw Input | `dataset/TP&MIX-ways/raw_csv/` | Tableau 导出的 6 张 CSV（UTF-16 LE, tab-delimited, pivot 格式） |
+| Parquet | `dataset/TP&MIX-ways/parquet/` | 6 张独立 grain 的 Parquet，由构建脚本生成 |
+| Registry | `dataset/TP&MIX-ways/registry/tp_and_mix_ways_tables.json` | 表清单、grain、行数、日期范围 |
+| Quality | `dataset/TP&MIX-ways/quality/` | 质量报告（Markdown + JSON） |
+| Schema | `shared/schema/tp_and_mix_ways_schema.py` | 表定义（grain / dimensions / metrics / purpose） |
+| Loader | `shared/loaders/tp_and_mix_ways_loader.py` | pandas / DuckDB 数据加载器 |
 
 ### 设计原则
 
@@ -38,7 +38,7 @@
 
 所有 CSV 均为 **UTF-16 LE、Tab 分隔、Pivot 格式**（度量名称 + 度量值两列）。
 
-构建脚本 `scripts/build_passenger_insurance_dataset.py` 自动完成 pivot widen、字段清洗、类型转换。
+构建脚本 `scripts/build_tp_and_mix_ways_dataset.py` 自动完成 pivot widen、字段清洗、类型转换。
 
 ---
 
@@ -112,24 +112,24 @@
 ## workspace 如何读取
 
 ```python
-from shared.loaders.passenger_insurance_loader import (
-    load_passenger_insurance_registry,
-    list_passenger_insurance_tables,
-    load_passenger_insurance_table,
-    load_passenger_insurance_table_duckdb,
+from shared.loaders.tp_and_mix_ways_loader import (
+    load_tp_and_mix_ways_registry,
+    list_tp_and_mix_ways_tables,
+    load_tp_and_mix_ways_table,
+    load_tp_and_mix_ways_table_duckdb,
 )
 
 # 查看注册表
-registry = load_passenger_insurance_registry()
+registry = load_tp_and_mix_ways_registry()
 
 # 列出可用表
-tables = list_passenger_insurance_tables()
+tables = list_tp_and_mix_ways_tables()
 
 # 加载为 pandas DataFrame
-df = load_passenger_insurance_table("market_energy_monthly")
+df = load_tp_and_mix_ways_table("market_energy_monthly")
 
 # 加载为 DuckDB DataFrame
-df = load_passenger_insurance_table_duckdb("brand_monthly")
+df = load_tp_and_mix_ways_table_duckdb("brand_monthly")
 ```
 
 无需 `sys.path.insert`，`pyproject.toml` 已配置 `pythonpath = ["."]`，`shared/__init__.py` 确保包可正常导入。
@@ -141,16 +141,16 @@ df = load_passenger_insurance_table_duckdb("brand_monthly")
 与 workspace 导入方式一致：
 
 ```python
-from shared.loaders.passenger_insurance_loader import (
-    load_passenger_insurance_table,
-    load_passenger_insurance_table_duckdb,
+from shared.loaders.tp_and_mix_ways_loader import (
+    load_tp_and_mix_ways_table,
+    load_tp_and_mix_ways_table_duckdb,
 )
 
 # 按需加载对应 Parquet 表
-df = load_passenger_insurance_table("geo_monthly")
+df = load_tp_and_mix_ways_table("geo_monthly")
 ```
 
-runtimeV2 **不应直接引用** `dataset/passenger_insurance/raw_csv/` 下的原始 CSV，也不应自行维护另一份副本。
+runtimeV2 **不应直接引用** `dataset/TP&MIX-ways/raw_csv/` 下的原始 CSV，也不应自行维护另一份副本。
 
 ---
 
@@ -166,29 +166,29 @@ runtimeV2 **不应直接引用** `dataset/passenger_insurance/raw_csv/` 下的�
 ## 重新构建
 
 ```bash
-make build-passenger-insurance-dataset
+make build-tp-and-mix-ways-dataset
 ```
 
 等价于：
 
 ```bash
-.venv/bin/python scripts/build_passenger_insurance_dataset.py
+.venv/bin/python scripts/build_tp_and_mix_ways_dataset.py
 ```
 
 构建流程：
-1. 从 `dataset/passenger_insurance/raw_csv/` 读取 6 张 CSV
+1. 从 `dataset/TP&MIX-ways/raw_csv/` 读取 6 张 CSV
 2. pivot widen（度量名称 → 独立列）
 3. 字段清洗、类型转换
-4. 输出 Parquet → `dataset/passenger_insurance/parquet/`
-5. 输出 Registry → `dataset/passenger_insurance/registry/passenger_insurance_tables.json`
-6. 输出质量报告 → `dataset/passenger_insurance/quality/`
+4. 输出 Parquet → `dataset/TP&MIX-ways/parquet/`
+5. 输出 Registry → `dataset/TP&MIX-ways/registry/tp_and_mix_ways_tables.json`
+6. 输出质量报告 → `dataset/TP&MIX-ways/quality/`
 
 ---
 
 ## 测试
 
 ```bash
-pytest tests/test_passenger_insurance_dataset_build.py -q
+pytest tests/test_tp_and_mix_ways_dataset_build.py -q
 ```
 
 测试覆盖：
@@ -204,7 +204,7 @@ pytest tests/test_passenger_insurance_dataset_build.py -q
 
 ## 相关文档
 
-- **workspace 使用指南**: `mashang_workspace/docs/passenger_insurance_usage.md` — 6 张表的适用场景、字段速查、workspace 消费规范
-- **数据集构建**: `scripts/build_passenger_insurance_dataset.py` — service 级构建脚本
-- **schema 定义**: `shared/schema/passenger_insurance_schema.py` — grain / dimensions / metrics
-- **loader**: `shared/loaders/passenger_insurance_loader.py` — pandas / DuckDB 读取入口
+- **workspace 使用指南**: `mashang_workspace/docs/tp_and_mix_ways_usage.md` — 6 张表的适用场景、字段速查、workspace 消费规范
+- **数据集构建**: `scripts/build_tp_and_mix_ways_dataset.py` — service 级构建脚本
+- **schema 定义**: `shared/schema/tp_and_mix_ways_schema.py` — grain / dimensions / metrics
+- **loader**: `shared/loaders/tp_and_mix_ways_loader.py` — pandas / DuckDB 读取入口

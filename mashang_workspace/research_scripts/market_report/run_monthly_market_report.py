@@ -2,7 +2,7 @@
 """
 月度汽车市场报告 — 固定 24 个查询执行脚本
 
-读取 Query Spec YAML，按指定月份执行 passenger_insurance 数据查询，
+读取 Query Spec YAML，按指定月份执行 TP&MIX-ways 数据查询，
 输出结构化数据底稿（JSON / XLSX / MD）。
 
 Usage:
@@ -56,7 +56,7 @@ ensure_shared_on_path()
 # Imports after path setup
 # ---------------------------------------------------------------------------
 from utils.result_contract import build_success_contract, build_error_contract, save_contract_json
-from shared.loaders.passenger_insurance_loader import load_passenger_insurance_table, list_passenger_insurance_tables
+from shared.loaders.tp_and_mix_ways_loader import load_tp_and_mix_ways_table, list_tp_and_mix_ways_tables
 
 
 # ---------------------------------------------------------------------------
@@ -189,7 +189,7 @@ TABLE_LABELS: dict[str, str] = {
 def execute_query(query: dict, time_params: dict[str, str], available_tables: list[str]) -> dict:
     """执行单个查询。
 
-    在 dry-run 模式下只返回查询计划；在 execute 模式下尝试从 passenger_insurance 加载数据。
+    在 dry-run 模式下只返回查询计划；在 execute 模式下尝试从 TP&MIX-ways 加载数据。
 
     Args:
         query: 查询定义
@@ -247,11 +247,11 @@ def execute_query(query: dict, time_params: dict[str, str], available_tables: li
 
     if table not in available_tables:
         result["status"] = "skipped"
-        result["error"] = f"表 '{table}' 不在可用 passenger_insurance 表中。可用表: {available_tables}"
+        result["error"] = f"表 '{table}' 不在可用 TP&MIX-ways 表中。可用表: {available_tables}"
         return result
 
     try:
-        df = load_passenger_insurance_table(table)
+        df = load_tp_and_mix_ways_table(table)
         if df is None or df.empty:
             result["status"] = "skipped"
             result["error"] = f"表 '{table}' 返回空数据"
@@ -398,7 +398,7 @@ def _execute_price_band_brand(result: dict, time_params: dict[str, str], availab
         result["error"] = "需要 model_monthly 表进行价位段品牌排名分析"
         return
 
-    df = load_passenger_insurance_table("model_monthly")
+    df = load_tp_and_mix_ways_table("model_monthly")
     if df is None or df.empty:
         result["status"] = "skipped"
         result["error"] = "model_monthly 表返回空数据"
@@ -489,7 +489,7 @@ def _execute_city_competition(result: dict, time_params: dict[str, str], availab
         result["error"] = f"需要 geo_monthly 表进行 {target_tier} 新能源市场结构分析"
         return
 
-    df = load_passenger_insurance_table("geo_monthly")
+    df = load_tp_and_mix_ways_table("geo_monthly")
     if df is None or df.empty:
         result["status"] = "skipped"
         result["error"] = "geo_monthly 表返回空数据"
@@ -559,7 +559,7 @@ def write_json_output(results: list[dict], output_path: Path, time_params: dict,
         script="research_scripts/market_report/run_monthly_market_report.py",
         command=f"--month {time_params['report_month']} --execute",
         scope={
-            "data_source": "passenger_insurance",
+            "data_source": "tp_and_mix_ways",
             "time_window": {
                 "report_month": time_params["report_month"],
                 "month_start": time_params["month_start"],
@@ -650,7 +650,7 @@ def write_md_draft(results: list[dict], output_path: Path, time_params: dict) ->
 
     lines: list[str] = []
     lines.append(f"# 月度汽车市场报告 — {time_params['report_month']}\n")
-    lines.append(f"> 基于 passenger_insurance 乘用车上险数据\n")
+    lines.append(f"> 基于 TP&MIX-ways 乘用车上险数据\n")
     lines.append(f"> 生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
     lines.append("---\n")
 
@@ -798,7 +798,7 @@ def main():
     )
     parser.add_argument(
         "--execute", action="store_true",
-        help="执行模式：实际查询 passenger_insurance 数据。默认 dry-run 只解析查询规范",
+        help="执行模式：实际查询 TP&MIX-ways 数据。默认 dry-run 只解析查询规范",
     )
     parser.add_argument(
         "--dry-run", action="store_true",
@@ -854,7 +854,7 @@ def main():
     available_tables = []
     if not _GLOBAL_DRY_RUN:
         try:
-            available_tables = list_passenger_insurance_tables()
+            available_tables = list_tp_and_mix_ways_tables()
         except Exception as e:
             print(f"[WARN] 无法获取可用表列表: {e}", file=sys.stderr)
 
@@ -916,7 +916,7 @@ def main():
             script="research_scripts/market_report/run_monthly_market_report.py",
             command=f"--month {args.month}",
             scope={
-                "data_source": "passenger_insurance",
+                "data_source": "tp_and_mix_ways",
                 "time_window": {"report_month": args.month},
             },
             result={"summary": f"月报 {args.month}: {succeeded} success, {failed} failed, {skipped} skipped/planned"},

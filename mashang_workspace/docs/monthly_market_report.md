@@ -5,7 +5,7 @@
 
 ## 能力定位
 
-monthly-market-report v0.1 是基于 `passenger_insurance` 现有 6 张预聚合单表的月度汽车市场固定主查询能力。
+monthly-market-report v0.1 是基于 `TP&MIX-ways` 现有 6 张预聚合单表的月度汽车市场固定主查询能力。
 
 按月执行 24 个页级主查询问题，输出结构化数据底稿和报告草稿。
 
@@ -25,7 +25,7 @@ monthly-market-report v0.1 是基于 `passenger_insurance` 现有 6 张预聚合
 
 ### 数据资产
 
-所有查询基于 `shared.loaders.passenger_insurance_loader` 的 6 张 Parquet 表：
+所有查询基于 `shared.loaders.tp_and_mix_ways_loader` 的 6 张 Parquet 表：
 
 | 表 | 覆盖的 query |
 |----|-------------|
@@ -54,7 +54,7 @@ python mashang_workspace/research_scripts/market_report/run_monthly_market_repor
 
 ### execute 模式
 
-实际加载 passenger_insurance Parquet 数据并执行查询聚合：
+实际加载 TP&MIX-ways Parquet 数据并执行查询聚合：
 
 ```bash
 python mashang_workspace/research_scripts/market_report/run_monthly_market_report.py \
@@ -62,7 +62,7 @@ python mashang_workspace/research_scripts/market_report/run_monthly_market_repor
   --execute
 ```
 
-需要 `passenger_insurance` 数据资产已构建（`make build-passenger-insurance-dataset`）。
+需要 `TP&MIX-ways` 数据资产已构建（`make build-tp-and-mix-ways-dataset`）。
 
 ## 输出文件
 
@@ -79,7 +79,7 @@ python mashang_workspace/research_scripts/market_report/run_monthly_market_repor
 
 ### 直接接入（19 queries）
 
-以下 query 可直接映射到单张 passenger_insurance 表：
+以下 query 可直接映射到单张 TP&MIX-ways 表：
 
 | query id | 表 |
 |----------|-----|

@@ -2,16 +2,16 @@
 # Monthly Market Report — Query Specification
 # 24 fixed queries for monthly passenger vehicle market report generation.
 #
-# Dataset: passenger_insurance (乘用车上险数据)
-# Loader:  shared.loaders.passenger_insurance_loader
-# Schema:  shared.schema.passenger_insurance_schema
+# Dataset: tp_and_mix_ways (乘用车上险数据)
+# Loader:  shared.loaders.tp_and_mix_ways_loader
+# Schema:  shared.schema.tp_and_mix_ways_schema
 # =============================================================================
 
 report_name: "月度汽车市场标准查询"
 version: "0.1"
 scope: single_table_monthly_market_report
-description: "24 个固定月报查询问题，基于 passenger_insurance 现有 6 张预聚合单表，覆盖整体市场、新能源、中高端、价格带、品牌排名、城市市场结构等维度"
-default_dataset: "passenger_insurance"
+description: "24 个固定月报查询问题，基于 tp_and_mix_ways 现有 6 张预聚合单表，覆盖整体市场、新能源、中高端、价格带、品牌排名、城市市场结构等维度"
+default_dataset: "tp_and_mix_ways"
 
 time_params:
   report_month:         # YYYY-MM, e.g. "2026-05"
@@ -35,7 +35,7 @@ queries:
     section: "整体市场概览"
     title: "整体乘用车市场销量表现"
     question: "整体乘用车市场当月销量、同比、环比；年累计销量、同比变化。"
-    dataset: passenger_insurance
+    dataset: tp_and_mix_ways
     table: market_energy_monthly
     grain: [date_month]
     metrics: [sales]
@@ -50,7 +50,7 @@ queries:
     section: "整体市场概览"
     title: "新能源车市场销量表现"
     question: "新能源车市场当月销量、同比、环比、渗透率；年累计销量、同比、累计渗透率。"
-    dataset: passenger_insurance
+    dataset: tp_and_mix_ways
     table: market_energy_monthly
     grain: [date_month, fuel_type_group]
     metrics: [sales]
@@ -66,7 +66,7 @@ queries:
     section: "整体市场概览"
     title: "新能源分能源形式表现"
     question: "BEV、PHEV、REEV 的销量、同比、份额、渗透率。"
-    dataset: passenger_insurance
+    dataset: tp_and_mix_ways
     table: market_energy_monthly
     grain: [date_month, fuel_type]
     metrics: [sales]
@@ -82,7 +82,7 @@ queries:
     section: "整体市场概览"
     title: "新能源分细分市场表现"
     question: "各细分市场销量、市占率及结构变化。"
-    dataset: passenger_insurance
+    dataset: tp_and_mix_ways
     table: product_segment_monthly
     grain: [date_month, saic_segment, fuel_type_group]
     metrics: [sales]
@@ -98,7 +98,7 @@ queries:
     section: "整体市场概览"
     title: "新能源分线级城市表现"
     question: "各线级城市新能源渗透率、销量份额、纯电/混动渗透率。"
-    dataset: passenger_insurance
+    dataset: tp_and_mix_ways
     table: geo_monthly
     grain: [date_month, city_tier_group, fuel_type_group]
     metrics: [sales]
@@ -113,7 +113,7 @@ queries:
     section: "整体市场概览"
     title: "新能源分区域市场表现"
     question: "各区域新能源销量份额、渗透率、纯电/混动渗透率。"
-    dataset: passenger_insurance
+    dataset: tp_and_mix_ways
     table: geo_monthly
     grain: [date_month, region_group, fuel_type_group]
     metrics: [sales]
@@ -131,7 +131,7 @@ queries:
     section: "中高端市场"
     title: "中高端乘用车市场销量表现"
     question: "中高端乘用车当月销量、同比；年累计销量、同比。"
-    dataset: passenger_insurance
+    dataset: tp_and_mix_ways
     table: brand_monthly
     grain: [date_month]
     metrics: [sales]
@@ -147,7 +147,7 @@ queries:
     section: "中高端市场"
     title: "中高端新能源车市场表现"
     question: "中高端新能源车当月销量、同比、渗透率；年累计销量、同比、累计渗透率。"
-    dataset: passenger_insurance
+    dataset: tp_and_mix_ways
     table: brand_monthly
     grain: [date_month]
     metrics: [sales]
@@ -164,7 +164,7 @@ queries:
     section: "中高端市场"
     title: "中高端新能源分能源形式表现"
     question: "中高端新能源 BEV、PHEV、REEV 的销量、同比、份额。"
-    dataset: passenger_insurance
+    dataset: tp_and_mix_ways
     table: market_energy_monthly
     grain: [date_month, fuel_type]
     metrics: [sales]
@@ -181,7 +181,7 @@ queries:
     section: "中高端市场"
     title: "中高端新能源分细分市场表现"
     question: "中高端新能源各细分市场销量、市占率及结构变化。"
-    dataset: passenger_insurance
+    dataset: tp_and_mix_ways
     table: product_segment_monthly
     grain: [date_month, saic_segment, fuel_type_group]
     metrics: [sales]
@@ -201,7 +201,7 @@ queries:
     section: "成交价结构"
     title: "市场成交价分价位段结构"
     question: "整体乘用车、新能源车、燃油车在各价位段的销量占比变化。"
-    dataset: passenger_insurance
+    dataset: tp_and_mix_ways
     table: price_segment_monthly
     grain: [date_month, tp_bucket_5w, fuel_type_group]
     metrics: [sales]
@@ -216,7 +216,7 @@ queries:
     section: "成交价结构"
     title: "整体乘用车市场成交价走势"
     question: "整体、燃油、新能源的月度成交价及同比变化。"
-    dataset: passenger_insurance
+    dataset: tp_and_mix_ways
     table: market_energy_monthly
     grain: [date_month, fuel_type_group]
     metrics: [sales, weighted_tp]
@@ -231,7 +231,7 @@ queries:
     section: "成交价结构"
     title: "新能源车分能源形式成交价走势"
     question: "BEV、PHEV、REEV 月度成交价变化。"
-    dataset: passenger_insurance
+    dataset: tp_and_mix_ways
     table: market_energy_monthly
     grain: [date_month, fuel_type]
     metrics: [sales, weighted_tp]
@@ -247,7 +247,7 @@ queries:
     section: "成交价结构"
     title: "新能源车分车身形式成交价走势"
     question: "不同车身形式的月度成交价变化。"
-    dataset: passenger_insurance
+    dataset: tp_and_mix_ways
     table: product_segment_monthly
     grain: [date_month, body_type, fuel_type_group]
     metrics: [sales, weighted_tp]
@@ -263,7 +263,7 @@ queries:
     section: "成交价结构"
     title: "各价位段市场容量与领先新能源品牌"
     question: "各价位段销量规模、领先品牌及份额。"
-    dataset: passenger_insurance
+    dataset: tp_and_mix_ways
     table: price_segment_monthly
     grain: [date_month, tp_bucket_5w, fuel_type_group]
     metrics: [sales]
@@ -282,7 +282,7 @@ queries:
     section: "车型排名"
     title: "纯电车型分价位段销量排名"
     question: "不同成交价格重心下的纯电车型销量排名。"
-    dataset: passenger_insurance
+    dataset: tp_and_mix_ways
     table: model_monthly
     grain: [date_month, brand, model]
     metrics: [sales]
@@ -298,7 +298,7 @@ queries:
     section: "车型排名"
     title: "混动车型分价位段销量排名"
     question: "不同成交价格重心下的混动车型销量排名。"
-    dataset: passenger_insurance
+    dataset: tp_and_mix_ways
     table: model_monthly
     grain: [date_month, brand, model]
     metrics: [sales]
@@ -315,7 +315,7 @@ queries:
     section: "车型排名"
     title: "20万元以上纯电车型分车身形式销量排名"
     question: "20万元以上纯电车型分车身形式销量排名。"
-    dataset: passenger_insurance
+    dataset: tp_and_mix_ways
     table: model_monthly
     grain: [date_month, brand, model, body_type]
     metrics: [sales]
@@ -331,7 +331,7 @@ queries:
     section: "车型排名"
     title: "20万元以上混动车型分车身形式销量排名"
     question: "20万元以上混动车型分车身形式销量排名。"
-    dataset: passenger_insurance
+    dataset: tp_and_mix_ways
     table: model_monthly
     grain: [date_month, brand, model, body_type]
     metrics: [sales]
@@ -351,7 +351,7 @@ queries:
     section: "品牌竞争"
     title: "重点新能源品牌表现"
     question: "重点新能源品牌当月销量、年累计销量、累计同比变化。"
-    dataset: passenger_insurance
+    dataset: tp_and_mix_ways
     table: brand_monthly
     grain: [date_month, brand]
     metrics: [sales]
@@ -370,7 +370,7 @@ queries:
     section: "城市市场结构"
     title: "一线城市新能源市场结构"
     question: "各线级城市新能源销量、销量份额、新能源渗透率、纯电/混动渗透率。"
-    dataset: passenger_insurance
+    dataset: tp_and_mix_ways
     table: geo_monthly
     grain: [date_month, city, city_tier_group, fuel_type_group]
     metrics: [sales]
@@ -386,7 +386,7 @@ queries:
     section: "城市市场结构"
     title: "新一线城市新能源市场结构"
     question: "各线级城市新能源销量、销量份额、新能源渗透率、纯电/混动渗透率。"
-    dataset: passenger_insurance
+    dataset: tp_and_mix_ways
     table: geo_monthly
     grain: [date_month, city, city_tier_group, fuel_type_group]
     metrics: [sales]
@@ -402,7 +402,7 @@ queries:
     section: "城市市场结构"
     title: "二线城市新能源市场结构"
     question: "各线级城市新能源销量、销量份额、新能源渗透率、纯电/混动渗透率。"
-    dataset: passenger_insurance
+    dataset: tp_and_mix_ways
     table: geo_monthly
     grain: [date_month, city, city_tier_group, fuel_type_group]
     metrics: [sales]
@@ -418,7 +418,7 @@ queries:
     section: "城市市场结构"
     title: "三线及以下城市新能源市场结构"
     question: "各线级城市新能源销量、销量份额、新能源渗透率、纯电/混动渗透率。"
-    dataset: passenger_insurance
+    dataset: tp_and_mix_ways
     table: geo_monthly
     grain: [date_month, city, city_tier_group, fuel_type_group]
     metrics: [sales]

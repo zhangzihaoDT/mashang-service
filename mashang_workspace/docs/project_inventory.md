@@ -60,9 +60,9 @@ mashang-service/
 | `dataset/LS8A3流出T+30_0525.csv` | CSV | LS8 A3 流出 (30d) |
 | `dataset/云图人群资产结构.csv` | CSV | 云图人群资产 |
 | `dataset/wechat/销售全员群.parquet` | Parquet | 微信群消息 |
-| `dataset/passenger_insurance/` | 目录 | 乘用车上险数据资产（6 张 Parquet + registry + quality） |
-| `dataset/passenger_insurance/registry/passenger_insurance_tables.json` | JSON | 上险数据注册表 |
-| `dataset/passenger_insurance/raw_csv/` | 目录 | 6 张 Tableau 导出 CSV（UTF-16 LE, tab-delimited, pivot） |
+| `dataset/TP&MIX-ways/` | 目录 | 乘用车上险数据资产（6 张 Parquet + registry + quality） |
+| `dataset/TP&MIX-ways/registry/tp_and_mix_ways_tables.json` | JSON | 上险数据注册表 |
+| `dataset/TP&MIX-ways/raw_csv/` | 目录 | 6 张 Tableau 导出 CSV（UTF-16 LE, tab-delimited, pivot） |
 | `logs/last_result.parquet` | Parquet | 上次查询结果缓存 |
 | `logs/query_log.jsonl` | JSONL | 查询日志 |
 | `agent/.query_agent_memory.json` | JSON | Agent 对话记忆 |
@@ -164,7 +164,7 @@ workspace 只消费 `dataset/incoming/feishu/` 中的文件。
 
 - `shared/operators/` — canonical 业务算子（14 个）
 - `shared/schema/` — metric registry、business definitions
-- `shared/loaders/` — dataset loaders（passenger_insurance 等）
+- `shared/loaders/` — dataset loaders（TP&MIX-ways 等）
 
 `mashang_runtime/operators/` 和 `mashang_runtime/schema/` 保留 legacy 副本，
 但 **不再作为 canonical 来源**。

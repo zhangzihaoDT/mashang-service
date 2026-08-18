@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Generate Passenger Insurance Monthly Brief Report.
+Generate TP&MIX-ways Monthly Brief Report.
 
-Reads all 6 passenger_insurance parquet tables, computes metrics
+Reads all 6 TP&MIX-ways parquet tables, computes metrics
 per the analysis framework, outputs a structured Markdown report
 with JSON data file.
 
@@ -32,7 +32,7 @@ if str(_WORKSPACE_ROOT) not in sys.path:
 from utils.paths import WORKSPACE_ROOT, PROJECT_ROOT, ensure_shared_on_path
 ensure_shared_on_path()
 
-from shared.loaders.passenger_insurance_loader import load_passenger_insurance_table
+from shared.loaders.tp_and_mix_ways_loader import load_tp_and_mix_ways_table
 
 
 # ---------------------------------------------------------------------------
@@ -112,7 +112,7 @@ class ReportData:
             "market_energy_monthly", "brand_monthly", "model_monthly",
             "geo_monthly", "price_segment_monthly", "product_segment_monthly",
         ]:
-            df = load_passenger_insurance_table(tbl)
+            df = load_tp_and_mix_ways_table(tbl)
             if df is not None and not df.empty:
                 df["date_month"] = pd.to_datetime(df["date_month"])
                 self.dfs[tbl] = df
@@ -985,7 +985,7 @@ def render_markdown(report: dict) -> str:
     lines = []
     es = report.get("executive_summary", {})
     month = report.get("report_month", "")
-    lines.append(f"# Passenger Insurance Monthly Brief — {month}")
+    lines.append(f"# TP&MIX-ways Monthly Brief — {month}")
     lines.append(f"")
     lines.append("---")
     lines.append("")
@@ -1319,7 +1319,7 @@ def render_markdown(report: dict) -> str:
 
     lines.append("---")
     lines.append("")
-    lines.append(f"*报告由 Passenger Insurance Monthly Brief 自动生成 · {datetime.now().strftime('%Y-%m-%d %H:%M')}*")
+    lines.append(f"*报告由 TP&MIX-ways Monthly Brief 自动生成 · {datetime.now().strftime('%Y-%m-%d %H:%M')}*")
     lines.append("")
 
     return "\n".join(lines)
@@ -1657,7 +1657,7 @@ def render_html(report: dict, css: str, brand_assets_prefix: str = ".") -> str:
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Passenger Insurance Monthly Brief — {month}</title>
+<title>TP&MIX-ways Monthly Brief — {month}</title>
 <style>{css}</style>
 </head>
 <body>
@@ -1672,8 +1672,8 @@ def render_html(report: dict, css: str, brand_assets_prefix: str = ".") -> str:
 </header>
 <main class="container">
 <section class="hero">
-<h1>Passenger Insurance Monthly Brief</h1>
-<p>{month} · 基于 passenger_insurance 乘用车上险数据</p>
+<h1>TP&MIX-ways Monthly Brief</h1>
+<p>{month} · 基于 TP&MIX-ways 乘用车上险数据</p>
 </section>
 {body}
 </main>
@@ -1696,7 +1696,7 @@ def main():
 
     rd = ReportData(args.month)
     out_dir = Path(args.output) if args.output else (
-        WORKSPACE_ROOT / "outputs" / "reports" / f"passenger_insurance_monthly_brief_{args.month}"
+        WORKSPACE_ROOT / "outputs" / "reports" / f"tp_and_mix_ways_monthly_brief_{args.month}"
     )
     out_dir.mkdir(parents=True, exist_ok=True)
 

@@ -1,4 +1,4 @@
-# Passenger Insurance Monthly Brief
+# TP&MIX-ways Monthly Brief
 
 目标：每月更新一次，**5~10 分钟读完**，回答三个问题：
 

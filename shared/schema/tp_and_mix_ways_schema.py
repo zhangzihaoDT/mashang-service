@@ -4,7 +4,7 @@ from typing import List
 
 
 @dataclass
-class PassengerInsuranceTableDef:
+class TpAndMixWaysTableDef:
     table_name: str
     source_csv: str
     parquet_path: str
@@ -15,8 +15,8 @@ class PassengerInsuranceTableDef:
     recommended_questions: List[str] = field(default_factory=list)
 
 
-PASSENGER_INSURANCE_TABLES: List[PassengerInsuranceTableDef] = [
-    PassengerInsuranceTableDef(
+TP_AND_MIX_WAYS_TABLES: List[TpAndMixWaysTableDef] = [
+    TpAndMixWaysTableDef(
         table_name="market_energy_monthly",
         source_csv="way1_market_energy_monthly_data.csv",
         parquet_path="market_energy_monthly.parquet",
@@ -31,7 +31,7 @@ PASSENGER_INSURANCE_TABLES: List[PassengerInsuranceTableDef] = [
             "各燃料类型价格重心变化",
         ],
     ),
-    PassengerInsuranceTableDef(
+    TpAndMixWaysTableDef(
         table_name="brand_monthly",
         source_csv="way2_brand_monthly_data.csv",
         parquet_path="brand_monthly.parquet",
@@ -49,7 +49,7 @@ PASSENGER_INSURANCE_TABLES: List[PassengerInsuranceTableDef] = [
             "自主/合资/豪华品牌分组对比",
         ],
     ),
-    PassengerInsuranceTableDef(
+    TpAndMixWaysTableDef(
         table_name="model_monthly",
         source_csv="way3_model_monthly_data.csv",
         parquet_path="model_monthly.parquet",
@@ -69,7 +69,7 @@ PASSENGER_INSURANCE_TABLES: List[PassengerInsuranceTableDef] = [
             "车型级别 × 燃料类型的销量分布",
         ],
     ),
-    PassengerInsuranceTableDef(
+    TpAndMixWaysTableDef(
         table_name="geo_monthly",
         source_csv="way4_geo_monthly_data.csv",
         parquet_path="geo_monthly.parquet",
@@ -87,7 +87,7 @@ PASSENGER_INSURANCE_TABLES: List[PassengerInsuranceTableDef] = [
             "各城市价格重心差异",
         ],
     ),
-    PassengerInsuranceTableDef(
+    TpAndMixWaysTableDef(
         table_name="price_segment_monthly",
         source_csv="way5_price_segment_monthly_data.csv",
         parquet_path="price_segment_monthly.parquet",
@@ -105,7 +105,7 @@ PASSENGER_INSURANCE_TABLES: List[PassengerInsuranceTableDef] = [
             "价格重心在价格带间的差异",
         ],
     ),
-    PassengerInsuranceTableDef(
+    TpAndMixWaysTableDef(
         table_name="product_segment_monthly",
         source_csv="way6_product_segment_monthly_data.csv",
         parquet_path="product_segment_monthly.parquet",
@@ -129,12 +129,12 @@ PASSENGER_INSURANCE_TABLES: List[PassengerInsuranceTableDef] = [
 ]
 
 
-def get_table_def(table_name: str) -> PassengerInsuranceTableDef | None:
-    for t in PASSENGER_INSURANCE_TABLES:
+def get_table_def(table_name: str) -> TpAndMixWaysTableDef | None:
+    for t in TP_AND_MIX_WAYS_TABLES:
         if t.table_name == table_name:
             return t
     return None
 
 
 def list_table_names() -> List[str]:
-    return [t.table_name for t in PASSENGER_INSURANCE_TABLES]
+    return [t.table_name for t in TP_AND_MIX_WAYS_TABLES]

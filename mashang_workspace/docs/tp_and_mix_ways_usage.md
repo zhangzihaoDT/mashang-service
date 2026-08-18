@@ -1,12 +1,12 @@
-# Passenger Insurance — workspace 使用指南
+# TP&MIX-ways — workspace 使用指南
 
 ## 数据资产定位
 
-`passenger_insurance` 是 **service 级共享数据资产**，不属于 workspace 私有数据。
+`TP&MIX-ways` 是 **service 级共享数据资产**，不属于 workspace 私有数据。
 
-- 数据资产本体：`../dataset/passenger_insurance/`（项目根目录）
-- 资产构建：`make build-passenger-insurance-dataset`
-- 所有 raw CSV 位于 `dataset/passenger_insurance/raw_csv/`
+- 数据资产本体：`../dataset/TP&MIX-ways/`（项目根目录）
+- 资产构建：`make build-tp-and-mix-ways-dataset`
+- 所有 raw CSV 位于 `dataset/TP&MIX-ways/raw_csv/`
 - workspace 只消费 Parquet / registry，不直接接触 raw CSV
 
 ## workspace 如何读取
@@ -14,24 +14,24 @@
 通过 shared loader 统一读取，无需关心底层存储路径：
 
 ```python
-from shared.loaders.passenger_insurance_loader import (
-    list_passenger_insurance_tables,
-    load_passenger_insurance_registry,
-    load_passenger_insurance_table,
-    load_passenger_insurance_table_duckdb,
+from shared.loaders.tp_and_mix_ways_loader import (
+    list_tp_and_mix_ways_tables,
+    load_tp_and_mix_ways_registry,
+    load_tp_and_mix_ways_table,
+    load_tp_and_mix_ways_table_duckdb,
 )
 
 # 列出可用表
-tables = list_passenger_insurance_tables()
+tables = list_tp_and_mix_ways_tables()
 
 # 读取 registry
-registry = load_passenger_insurance_registry()
+registry = load_tp_and_mix_ways_registry()
 
 # 加载为 pandas DataFrame
-df = load_passenger_insurance_table("brand_monthly")
+df = load_tp_and_mix_ways_table("brand_monthly")
 
 # 加载为 DuckDB DataFrame
-df = load_passenger_insurance_table_duckdb("market_energy_monthly")
+df = load_tp_and_mix_ways_table_duckdb("market_energy_monthly")
 ```
 
 无需 `sys.path.insert`，`pyproject.toml` 已配置 `pythonpath = ["."]`，`shared/__init__.py` 确保包可正常导入。
@@ -159,26 +159,26 @@ df = load_passenger_insurance_table_duckdb("market_energy_monthly")
 1. workspace 中探索 → `research_scripts/`
 2. 验证稳定、口径明确 → `runtime_scripts/`
 3. runtimeV2 消费 → 注册为 tool / operator
-4. passenger_insurance 的数据构建始终在 service 级（`scripts/build_passenger_insurance_dataset.py`）
+4. TP&MIX-ways 的数据构建始终在 service 级（`scripts/build_tp_and_mix_ways_dataset.py`）
 
 ## 构建与测试
 
 ```bash
 # 由 service 级 Makefile target 构建
-make build-passenger-insurance-dataset
+make build-tp-and-mix-ways-dataset
 
 # service 级测试
-pytest tests/test_passenger_insurance_dataset_build.py -q
+pytest tests/test_tp_and_mix_ways_dataset_build.py -q
 
 # workspace 侧 smoke test
-python mashang_workspace/research_scripts/passenger_insurance/check_passenger_insurance_asset.py
+python mashang_workspace/research_scripts/tp_and_mix_ways/check_tp_and_mix_ways_asset.py
 ```
 
 ---
 
 ## 相关文档
 
-- **service 数据集说明**: `docs/passenger_insurance_dataset.md` — 数据构建流程、6 张 Parquet 的 grain/metrics 定义
-- **shared schema**: `shared/schema/passenger_insurance_schema.py` — grain / dimensions / metrics 的 Python 定义
-- **shared loader**: `shared/loaders/passenger_insurance_loader.py` — pandas / DuckDB 统一读取入口
+- **service 数据集说明**: `docs/tp_and_mix_ways_dataset.md` — 数据构建流程、6 张 Parquet 的 grain/metrics 定义
+- **shared schema**: `shared/schema/tp_and_mix_ways_schema.py` — grain / dimensions / metrics 的 Python 定义
+- **shared loader**: `shared/loaders/tp_and_mix_ways_loader.py` — pandas / DuckDB 统一读取入口
 - **project cleanup audit**: `docs/project_cleanup_audit.md` — 项目结构边界与清理计划

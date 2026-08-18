@@ -240,17 +240,17 @@ daily-sync-dry-run:
 	@echo "[DEPRECATED] Use 'make daily-observation-dry-run' instead."
 	$(MAKE) daily-observation-dry-run
 
-## 增量更新乘用车上险数据集（从 Tableau 拉取 → CSV → parquet）
-update-passenger-insurance-dataset:
-	$(PYTHON) dataset/updater/update_passenger_insurance_tableau.py
+## 增量更新 TP&MIX-ways 数据集（从 Tableau 拉取 → CSV → parquet）
+update-tp-and-mix-ways-dataset:
+	$(PYTHON) dataset/updater/update_tp_and_mix_ways_tableau.py
 
 ## 仅重新构建（不上 Tableau 下载，使用已有 CSV）
-rebuild-passenger-insurance-dataset:
-	$(PYTHON) dataset/updater/update_passenger_insurance_tableau.py --skip-export
+rebuild-tp-and-mix-ways-dataset:
+	$(PYTHON) dataset/updater/update_tp_and_mix_ways_tableau.py --skip-export
 
 ## 完整重建（从 raw_csv 全量重建 parquet，build 脚本模式）
-build-passenger-insurance-dataset:
-	$(PYTHON) scripts/build_passenger_insurance_dataset.py
+build-tp-and-mix-ways-dataset:
+	$(PYTHON) scripts/build_tp_and_mix_ways_dataset.py
 
 ## ─── ──────────────────────────────────────────────────────────────
 

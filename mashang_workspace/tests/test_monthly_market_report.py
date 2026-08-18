@@ -93,7 +93,7 @@ class TestQuerySpecStructure:
         """顶层字段完整，yaml 可解析。"""
         assert query_spec is not None
         assert query_spec.get("report_name") == "月度汽车市场标准查询"
-        assert query_spec.get("default_dataset") == "passenger_insurance"
+        assert query_spec.get("default_dataset") == "tp_and_mix_ways"
 
     def test_spec_version_0_1(self, query_spec):
         """Query Spec 标记为 version 0.1。"""
@@ -431,7 +431,7 @@ class TestAdapterQueries:
             [sys.executable, str(RUNNER_PATH), "--month", "2026-03", "--execute", "--output-dir", str(out_dir)],
             capture_output=True, text=True, timeout=120,
         )
-        # May fail if passenger_insurance data not available — acceptable
+        # May fail if tp_and_mix_ways data not available — acceptable
         if result.returncode != 0:
             return
         with open(out_dir / "query_results.json", "r", encoding="utf-8") as f:
@@ -614,7 +614,7 @@ class TestVersionAndScope:
         )
         json_path = out_dir / "query_results.json"
         if not json_path.exists():
-            return  # skip if passenger_insurance not available
+            return  # skip if tp_and_mix_ways not available
         with open(json_path, "r", encoding="utf-8") as f:
             data = json.load(f)
         # Root level

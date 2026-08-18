@@ -258,22 +258,22 @@ def scan_data_assets() -> list[dict]:
     """Scan for known data assets from docs, configs, and shared references."""
     assets = []
 
-    # passenger_insurance (shared data asset)
+    # tp_and_mix_ways (shared data asset)
     assets.append(
         {
-            "name": "passenger_insurance",
-            "path": "dataset/passenger_insurance/",
+            "name": "tp_and_mix_ways",
+            "path": "dataset/TP&MIX-ways/",
             "type": "shared_service_data",
             "description": "service 级共享乘用车上险数据资产。6 张 Parquet 表（market_energy_monthly, brand_monthly, model_monthly, geo_monthly, price_segment_monthly, product_segment_monthly）。workspace 仅通过 shared loader 消费聚合结果，不直接读取 raw_csv。",
             "short_description": "乘用车上险数据（6 张 Parquet 表），workspace 通过 shared loaders 消费。",
             "tables_or_files": [
                 "market_energy_monthly", "brand_monthly", "model_monthly",
                 "geo_monthly", "price_segment_monthly", "product_segment_monthly",
-                "registry/passenger_insurance_tables.json",
+                "registry/tp_and_mix_ways_tables.json",
                 "quality/data_quality_report.json",
             ],
             "grain": "date_month × fuel_type / brand / model / geo / price_segment / product_segment",
-            "allowed_usage": "通过 shared.loaders.passenger_insurance_loader 读取；用于市场总量、品牌排名、车型结构、区域分布、价格带、细分市场分析",
+            "allowed_usage": "通过 shared.loaders.tp_and_mix_ways_loader 读取；用于市场总量、品牌排名、车型结构、区域分布、价格带、细分市场分析",
             "forbidden_usage": "workspace 不直接读取 raw_csv；不修改 registry；不复制 parquet 到 workspace 内；不维护另一份 loader",
             "related_scripts": [
                 "research_scripts/market_report/run_monthly_market_report.py",
@@ -486,7 +486,7 @@ def _infer_capability(filename: str) -> str:
         return "competitive_analysis"
     if "daily_msg" in low or "voc" in low:
         return "voc_analysis"
-    if "passenger_insurance" in low or "smoke" in low:
+    if "tp_and_mix_ways" in low or "smoke" in low:
         return "data_quality"
     if "agent_execution" in low or "followup" in low:
         return "agent_trace"

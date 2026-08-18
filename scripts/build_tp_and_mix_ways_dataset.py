@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-Build passenger_insurance dataset from raw Tableau CSV exports.
+Build TP&MIX-ways dataset from raw Tableau CSV exports.
 
-Reads 6 tab-delimited UTF-16 LE CSVs from dataset/passenger_insurance/raw_csv/,
+Reads 6 tab-delimited UTF-16 LE CSVs from dataset/TP&MIX-ways/raw_csv/,
 widens pivot format (度量名称/度量值 → columns), cleans & validates,
 then outputs Parquet, registry JSON, and quality reports.
 
 Usage:
-    python scripts/build_passenger_insurance_dataset.py
+    python scripts/build_tp_and_mix_ways_dataset.py
 """
 
 from __future__ import annotations
@@ -23,14 +23,14 @@ import pandas as pd
 
 # ---- paths ----
 SERVICE_ROOT = Path(__file__).resolve().parent.parent
-RAW_CSV_DIR = SERVICE_ROOT / "dataset" / "passenger_insurance" / "raw_csv"
-PARQUET_DIR = SERVICE_ROOT / "dataset" / "passenger_insurance" / "parquet"
-REGISTRY_DIR = SERVICE_ROOT / "dataset" / "passenger_insurance" / "registry"
-QUALITY_DIR = SERVICE_ROOT / "dataset" / "passenger_insurance" / "quality"
+RAW_CSV_DIR = SERVICE_ROOT / "dataset" / "TP&MIX-ways" / "raw_csv"
+PARQUET_DIR = SERVICE_ROOT / "dataset" / "TP&MIX-ways" / "parquet"
+REGISTRY_DIR = SERVICE_ROOT / "dataset" / "TP&MIX-ways" / "registry"
+QUALITY_DIR = SERVICE_ROOT / "dataset" / "TP&MIX-ways" / "quality"
 
-REGISTRY_PATH = REGISTRY_DIR / "passenger_insurance_tables.json"
-QUALITY_MD_PATH = QUALITY_DIR / "passenger_insurance_dataset_quality.md"
-QUALITY_JSON_PATH = QUALITY_DIR / "passenger_insurance_dataset_quality.json"
+REGISTRY_PATH = REGISTRY_DIR / "tp_and_mix_ways_tables.json"
+QUALITY_MD_PATH = QUALITY_DIR / "tp_and_mix_ways_dataset_quality.md"
+QUALITY_JSON_PATH = QUALITY_DIR / "tp_and_mix_ways_dataset_quality.json"
 
 
 # ---- source mapping (actual filename → internal table name) ----
@@ -173,8 +173,16 @@ def read_and_widen_csv(csv_path: Path, table_name: str) -> pd.DataFrame:
     measure_name_col = "_measure_name"
     measure_value_col = "_measure_value"
 
-    with open(csv_path, encoding="utf-16-le", newline="") as f:
-        reader = csv.reader(f, delimiter="\t")
+    raw = csv_path.read_bytes()
+    if raw[:2] in (b"\xff\xfe", b"\xfe\xff"):
+        encoding = "utf-16-le"
+        delimiter = "\t"
+    else:
+        encoding = "utf-8"
+        delimiter = ","
+
+    with open(csv_path, encoding=encoding, newline="") as f:
+        reader = csv.reader(f, delimiter=delimiter)
         raw_header = next(reader)
         raw_header = [h.lstrip("\ufeff") for h in raw_header]
 
@@ -189,8 +197,8 @@ def read_and_widen_csv(csv_path: Path, table_name: str) -> pd.DataFrame:
             print(f"  [warn] unmapped column [{i}] '{raw_col}' in {csv_path.name}")
 
     rows = []
-    with open(csv_path, encoding="utf-16-le", newline="") as f:
-        reader = csv.reader(f, delimiter="\t")
+    with open(csv_path, encoding=encoding, newline="") as f:
+        reader = csv.reader(f, delimiter=delimiter)
         next(reader)
         for row in reader:
             if len(row) < len(raw_header):
@@ -321,7 +329,7 @@ def _build_quality_report(
 
 def _format_quality_markdown(all_reports: List[Dict[str, Any]]) -> str:
     lines = [
-        "# Passenger Insurance Dataset — Quality Report",
+        "# TP&MIX-ways Dataset — Quality Report",
         f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
         "",
         "---",
@@ -361,7 +369,7 @@ def _format_quality_markdown(all_reports: List[Dict[str, Any]]) -> str:
     return "\n".join(lines)
 
 
-def build_passenger_insurance_dataset() -> List[Dict[str, Any]]:
+def build_tp_and_mix_ways_dataset() -> List[Dict[str, Any]]:
     os.makedirs(PARQUET_DIR, exist_ok=True)
     os.makedirs(REGISTRY_DIR, exist_ok=True)
     os.makedirs(QUALITY_DIR, exist_ok=True)
@@ -435,8 +443,8 @@ def build_passenger_insurance_dataset() -> List[Dict[str, Any]]:
         })
 
     registry = {
-        "dataset_name": "passenger_insurance",
-        "description": "乘用车上险数据 Passenger Insurance Dataset",
+        "dataset_name": "tp_and_mix_ways",
+        "description": "乘用车上险数据 TP&MIX-ways Dataset",
         "build_timestamp": datetime.now().isoformat(),
         "source": "Tableau 导出 CSV (UTF-16 LE, tab-delimited, pivot format)",
         "tables": registry_tables,
@@ -449,7 +457,7 @@ def build_passenger_insurance_dataset() -> List[Dict[str, Any]]:
     print(f"Quality MD written: {QUALITY_MD_PATH}")
 
     quality_json = {
-        "dataset_name": "passenger_insurance",
+        "dataset_name": "tp_and_mix_ways",
         "build_timestamp": datetime.now().isoformat(),
         "tables": all_reports,
     }
@@ -461,9 +469,9 @@ def build_passenger_insurance_dataset() -> List[Dict[str, Any]]:
 
 def main():
     print("=" * 60)
-    print("Passenger Insurance Dataset Builder")
+    print("TP&MIX-ways Dataset Builder")
     print("=" * 60)
-    reports = build_passenger_insurance_dataset()
+    reports = build_tp_and_mix_ways_dataset()
 
     success = sum(1 for r in reports if r.get("build_status") == "success")
     errors = sum(1 for r in reports if r.get("build_status") == "error")

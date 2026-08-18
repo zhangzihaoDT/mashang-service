@@ -13,9 +13,9 @@
 |------|------|
 | `shared/` 成为 canonical | 共享算子、Schema、Loader 的**唯一可信来源**，新增 `loaders/` 子目录 |
 | `mashang_runtime/` 标记 frozen | 不再新增依赖，operators/schema 的 canonical 版本已迁移到 `shared/` |
-| 根目录 `docs/` | Phase 1 调整为 service 级白名单管理，仅允许 `passenger_insurance_dataset.md` |
+| 根目录 `docs/` | Phase 1 调整为 service 级白名单管理，仅允许 `tp_and_mix_ways_dataset.md` |
 | 根目录 `scripts/` | 调整为 service 级构建脚本，仅允许 build/render 相关脚本 |
-| 根目录 `tests/` | 调整为 service 级测试，仅允许 `test_passenger_insurance_dataset_build.py` |
+| 根目录 `tests/` | 调整为 service 级测试，仅允许 `test_tp_and_mix_ways_dataset_build.py` |
 | `dataset/incoming/` | 新增为 service 级外部原始数据入口（浏览器/飞书下载） |
 | Playwright MCP | 配置在 `opencode.jsonc`，定位为 service 级 browser ingestion 能力 |
 | `.local/` | 浏览器 profile / 登录态，已加入 `.gitignore` |
@@ -47,11 +47,11 @@
 
 | 路径 | 分类 | 说明 |
 |------|------|------|
-| `dataset/` | ✅ service 共享 | 共享数据底座（含 `passenger_insurance/` `incoming/` `wechat/`） |
+| `dataset/` | ✅ service 共享 | 共享数据底座（含 `TP&MIX-ways/` `incoming/` `wechat/`） |
 | `shared/` | ✅ service 共享 | canonical operators / schema / loaders |
 | `scripts/` | ✅ service 构建 | 构建/渲染脚本（白名单管理） |
-| `docs/` | ✅ service 文档 | 仅 `passenger_insurance_dataset.md`（白名单管理） |
-| `tests/` | ✅ service 测试 | 仅 `test_passenger_insurance_dataset_build.py`（白名单管理） |
+| `docs/` | ✅ service 文档 | 仅 `tp_and_mix_ways_dataset.md`（白名单管理） |
+| `tests/` | ✅ service 测试 | 仅 `test_tp_and_mix_ways_dataset_build.py`（白名单管理） |
 | `mashang_workspace/` | ✅ workspace | 日常主工作区 |
 | `mashang_runtime_v2/` | ✅ service | 新 Runtime 架构实验 |
 | `opencode.jsonc` | ✅ service 配置 | OpenCode + MCP Playwright 配置 |

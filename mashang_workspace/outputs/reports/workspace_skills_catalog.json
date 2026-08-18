@@ -1,6 +1,6 @@
 {
   "workspace": "mashang_workspace",
-  "generated_at": "2026-07-09",
+  "generated_at": "2026-08-18",
   "skills": [
     {
       "name": "branded-html-report",
@@ -35,7 +35,7 @@
       "constraints": [
         "不生成 Word/PDF 正式材料",
         "不生成政府公文风",
-        "不引入 repo root 的 `official_document_render` 逻辑",
+        "不引入 repo-level `official_document_render` 逻辑",
         "不删除已有 outputs/reports 下的任何报告",
         "不改写现有模板或品牌资产"
       ],
@@ -76,8 +76,8 @@
     {
       "name": "monthly-market-report",
       "directory": ".opencode/skills/monthly-market-report/",
-      "description": "workspace 层的月度汽车市场报告生成 Skill。基于 passenger_insurance 现有 6 张预聚合单表，按月运行 24 个固定月报查询问题，输出结构化数据底稿和报告草稿。",
-      "positioning": "monthly-market-report v0.1 是基于 `passenger_insurance` 现有 6 张预聚合单表的月度汽车市场固定主查询能力。",
+      "description": "workspace 层的月度汽车市场报告生成 Skill。基于 TP&MIX-ways 现有 6 张预聚合单表，按月运行 24 个固定月报查询问题，输出结构化数据底稿和报告草稿。",
+      "positioning": "monthly-market-report v0.1 是基于 `TP&MIX-ways` 现有 6 张预聚合单表的月度汽车市场固定主查询能力。",
       "scenarios": [],
       "not_for": [
         "city×brand 城市内品牌排名",
@@ -100,7 +100,7 @@
       ],
       "constraints": [
         "不承载指标计算逻辑（由 runner 脚本实现）",
-        "不修改 passenger_insurance 数据资产",
+        "不修改 TP&MIX-ways 数据资产",
         "不复制或移动 dataset/ 下的原始数据",
         "不修改 mashang_runtime/ 中的任何文件",
         "不引用具体历史报告名称"
@@ -125,71 +125,6 @@
         "Prefer smallest possible fix."
       ],
       "level": "workspace"
-    },
-    {
-      "name": "auto_launch",
-      "type": "Standalone Service (auto_launch/)",
-      "directory": "auto_launch/",
-      "description": "汽车上市/营销事件独立监控服务；搜索意图编译 → query plan → Volc Search API → 信源分级 → URL 去重 → 事件聚类 → candidate gate → Markdown 简报。",
-      "entrypoints": [
-        "python -m auto_launch.cli daily --brand im --brand-name 智己",
-        "python -m auto_launch.cli search --request '看看极氪最近 7 天都有什么动作'",
-        "make auto-launch-owned-brand-daily"
-      ],
-      "outputs": [
-        "auto_launch/outputs/search/{date}/{mode}/",
-        "auto_launch/outputs/owned_brand_daily/{date}/"
-      ],
-      "docs": [
-        "auto_launch/README.md",
-        "auto_launch/docs/workflow.md"
-      ],
-      "scenarios": [
-        "本品品牌每日营销事件监控",
-        "竞品车型动态追踪",
-        "搜索意图编译 → Volc Search 执行",
-        "搜索结果标准化 + 信源分级",
-        "事件聚类 + candidate gate 分桶"
-      ],
-      "not_for": [
-        "生成长篇竞品分析报告",
-        "替代完整爬虫/ETL 系统",
-        "非汽车行业的通用事件监测"
-      ]
-    },
-    {
-      "name": "miit_new_car",
-      "type": "Promptbuilder / MIIT Workflow",
-      "directory": "promptbuilders/miit_new_car/",
-      "description": "MIIT 新车公告全链路情报分析：批次管理、图片 OCR、结构化解析、6 信号双车对比。",
-      "scenarios": [
-        "MIIT 批次发现/抓取/附件文本抽取/产品清单解析",
-        "公告详情页截图 OCR（document_parse + general_ocr）",
-        "OCR 结果 → 结构化车辆 records JSON（43 字段）",
-        "双车对比 → 6 个关键信号框架 HTML 报告"
-      ],
-      "not_for": [
-        "非 MIIT 公告来源的图片 OCR",
-        "批次粒度的跨厂家汇总分析",
-        "带市场威胁强度的竞争分析"
-      ],
-      "entrypoints": [
-        "python mashang_workspace/promptbuilders/miit_new_car/miit_vehicle_publicity_image_parser.py --ocr-result <path> --fallback-ocr-result <path> --force",
-        "python mashang_workspace/promptbuilders/miit_new_car/vehicle_compare.py --record-a <path> --record-b <path> --output <path>",
-        "make miit-fetch-batch BATCH=N"
-      ],
-      "outputs": [
-        "mashang_workspace/outputs/miit_new_car/promptbuilder_runs/",
-        "mashang_workspace/outputs/miit_new_car/vehicle_publicity_detail/records/",
-        "mashang_workspace/outputs/reports/",
-        "mashang_workspace/outputs/ocr/results/"
-      ],
-      "depends_on": [
-        "ocr/（火山引擎 OCR service）",
-        "miit_vehicle_publicity_image_parser.py（OCR → records）",
-        "vehicle_compare.py（records → 6 信号报告）",
-        "docs/miit_product_param_key_signals_framework.md"
-      ]
     }
   ]
 }

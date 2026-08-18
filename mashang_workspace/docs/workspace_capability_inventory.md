@@ -50,7 +50,7 @@ Workspace Capability Inventory（能力总览）是 mashang_workspace 的**完�
 
 从 docs / configs / shared 引用中提取已知数据资产。
 
-- passenger_insurance（6 张 Parquet 表 · shared 数据资产）
+- TP&MIX-ways（6 张 Parquet 表 · shared 数据资产）
 - order_data（订单主表）
 - assign_data（下发线索表）
 - config_attribute（选配属性表）
