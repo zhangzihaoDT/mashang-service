@@ -1,0 +1,36 @@
+research_id: expectation_calibration_001
+items:
+- id: H1
+  priority: 95
+  question: 两类预期 exposure 同时控制后是否仍独立？
+  action: WLS APEAL/AFUEL/ACHAR ~ AFUEL_D_06 + ACHAR_D_05 + FULL controls
+  status: done
+  resolution: H-001 supported by E-001
+- id: H2
+  priority: 92
+  question: 预期差异是否能落到具体补能 item？
+  action: item-level WLS across ACHAR_R_01-09 and AFUEL_R_01
+  status: done
+  resolution: H-002 supported by E-002
+- id: H3
+  priority: 88
+  question: 结论的因果与外推边界是什么？
+  action: record cross-sectional/self-report limitation
+  status: done
+  resolution: H-003 boundary retained by E-003
+stop_conditions:
+  min_core_signals: 1
+  min_supporting_evidence: 2
+  required_confounders:
+  - ENERGY
+  - PRICE
+  - BRAND
+  - DEMOGRAPHICS
+  min_mechanism_depth: 3
+  high_priority_threshold: 85
+  max_no_information_rounds: 3
+  terminal_statuses:
+  - ready
+  - rejected
+  - inconclusive
+  - insufficient_coverage

@@ -1,0 +1,416 @@
+[
+  {
+    "signal_id": "interaction_nev_08_apeal_index_by_segment_dp",
+    "analysis_type": "interaction",
+    "parent_topic": "T7",
+    "exposure": "NEV_08",
+    "moderator": "SEGMENT_DP",
+    "outcome": "APEAL_Index",
+    "effect_size": {
+      "interaction_block_p": null,
+      "descriptive_contrast_spread": null,
+      "business_threshold": 10.0,
+      "unit": "outcome points"
+    },
+    "sample_support": {
+      "n": 0,
+      "segments": 0,
+      "min_cell_n": 0,
+      "coverage": "INSUFFICIENT_CELLS"
+    },
+    "stability": "fragile",
+    "novelty": 3,
+    "controls": [
+      "SUPER_SEGMENT_DP",
+      "CN_YNV_07",
+      "PREMMAKE_DP",
+      "AGE_BUCKETS",
+      "CN_INCOME",
+      "CN_EDUCATION"
+    ],
+    "inference": {
+      "covariance": "HC1",
+      "test": "joint interaction block Wald test",
+      "raw_p": null,
+      "q_value": null
+    },
+    "interpretation": "No interaction model was qualified because fewer than three segments met the pre-registered cell-size threshold.",
+    "caveats": "Segment spread is not interaction evidence; do not relax the cell-size gate post hoc.",
+    "qualification": {
+      "fdr_pass": false,
+      "cell_support_pass": false,
+      "business_spread_pass": false,
+      "default_action": "insufficient_coverage",
+      "new_candidate_allowed": false
+    },
+    "segment_contrasts": []
+  },
+  {
+    "signal_id": "interaction_nev_08_afuel_index_by_segment_dp",
+    "analysis_type": "interaction",
+    "parent_topic": "T7",
+    "exposure": "NEV_08",
+    "moderator": "SEGMENT_DP",
+    "outcome": "AFUEL_Index",
+    "effect_size": {
+      "interaction_block_p": null,
+      "descriptive_contrast_spread": null,
+      "business_threshold": 10.0,
+      "unit": "outcome points"
+    },
+    "sample_support": {
+      "n": 0,
+      "segments": 0,
+      "min_cell_n": 0,
+      "coverage": "INSUFFICIENT_CELLS"
+    },
+    "stability": "fragile",
+    "novelty": 3,
+    "controls": [
+      "SUPER_SEGMENT_DP",
+      "CN_YNV_07",
+      "PREMMAKE_DP",
+      "AGE_BUCKETS",
+      "CN_INCOME",
+      "CN_EDUCATION"
+    ],
+    "inference": {
+      "covariance": "HC1",
+      "test": "joint interaction block Wald test",
+      "raw_p": null,
+      "q_value": null
+    },
+    "interpretation": "No interaction model was qualified because fewer than three segments met the pre-registered cell-size threshold.",
+    "caveats": "Segment spread is not interaction evidence; do not relax the cell-size gate post hoc.",
+    "qualification": {
+      "fdr_pass": false,
+      "cell_support_pass": false,
+      "business_spread_pass": false,
+      "default_action": "insufficient_coverage",
+      "new_candidate_allowed": false
+    },
+    "segment_contrasts": []
+  },
+  {
+    "signal_id": "interaction_nev_08_achar_index_by_segment_dp",
+    "analysis_type": "interaction",
+    "parent_topic": "T7",
+    "exposure": "NEV_08",
+    "moderator": "SEGMENT_DP",
+    "outcome": "ACHAR_index",
+    "effect_size": {
+      "interaction_block_p": null,
+      "descriptive_contrast_spread": null,
+      "business_threshold": 10.0,
+      "unit": "outcome points"
+    },
+    "sample_support": {
+      "n": 0,
+      "segments": 0,
+      "min_cell_n": 0,
+      "coverage": "INSUFFICIENT_CELLS"
+    },
+    "stability": "fragile",
+    "novelty": 3,
+    "controls": [
+      "SUPER_SEGMENT_DP",
+      "CN_YNV_07",
+      "PREMMAKE_DP",
+      "AGE_BUCKETS",
+      "CN_INCOME",
+      "CN_EDUCATION"
+    ],
+    "inference": {
+      "covariance": "HC1",
+      "test": "joint interaction block Wald test",
+      "raw_p": null,
+      "q_value": null
+    },
+    "interpretation": "No interaction model was qualified because fewer than three segments met the pre-registered cell-size threshold.",
+    "caveats": "Segment spread is not interaction evidence; do not relax the cell-size gate post hoc.",
+    "qualification": {
+      "fdr_pass": false,
+      "cell_support_pass": false,
+      "business_spread_pass": false,
+      "default_action": "insufficient_coverage",
+      "new_candidate_allowed": false
+    },
+    "segment_contrasts": []
+  },
+  {
+    "signal_id": "interaction_afuel_d_06_apeal_index_by_segment_dp",
+    "analysis_type": "interaction",
+    "parent_topic": "T9",
+    "exposure": "AFUEL_D_06",
+    "moderator": "SEGMENT_DP",
+    "outcome": "APEAL_Index",
+    "effect_size": {
+      "interaction_block_p": null,
+      "descriptive_contrast_spread": null,
+      "business_threshold": 10.0,
+      "unit": "outcome points"
+    },
+    "sample_support": {
+      "n": 0,
+      "segments": 0,
+      "min_cell_n": 0,
+      "coverage": "INSUFFICIENT_CELLS"
+    },
+    "stability": "fragile",
+    "novelty": 3,
+    "controls": [
+      "SUPER_SEGMENT_DP",
+      "CN_YNV_07",
+      "PREMMAKE_DP",
+      "AGE_BUCKETS",
+      "CN_INCOME",
+      "CN_EDUCATION"
+    ],
+    "inference": {
+      "covariance": "HC1",
+      "test": "joint interaction block Wald test",
+      "raw_p": null,
+      "q_value": null
+    },
+    "interpretation": "No interaction model was qualified because fewer than three segments met the pre-registered cell-size threshold.",
+    "caveats": "Segment spread is not interaction evidence; do not relax the cell-size gate post hoc.",
+    "qualification": {
+      "fdr_pass": false,
+      "cell_support_pass": false,
+      "business_spread_pass": false,
+      "default_action": "insufficient_coverage",
+      "new_candidate_allowed": false
+    },
+    "segment_contrasts": []
+  },
+  {
+    "signal_id": "interaction_afuel_d_06_afuel_index_by_segment_dp",
+    "analysis_type": "interaction",
+    "parent_topic": "T9",
+    "exposure": "AFUEL_D_06",
+    "moderator": "SEGMENT_DP",
+    "outcome": "AFUEL_Index",
+    "effect_size": {
+      "interaction_block_p": null,
+      "descriptive_contrast_spread": null,
+      "business_threshold": 10.0,
+      "unit": "outcome points"
+    },
+    "sample_support": {
+      "n": 0,
+      "segments": 0,
+      "min_cell_n": 0,
+      "coverage": "INSUFFICIENT_CELLS"
+    },
+    "stability": "fragile",
+    "novelty": 3,
+    "controls": [
+      "SUPER_SEGMENT_DP",
+      "CN_YNV_07",
+      "PREMMAKE_DP",
+      "AGE_BUCKETS",
+      "CN_INCOME",
+      "CN_EDUCATION"
+    ],
+    "inference": {
+      "covariance": "HC1",
+      "test": "joint interaction block Wald test",
+      "raw_p": null,
+      "q_value": null
+    },
+    "interpretation": "No interaction model was qualified because fewer than three segments met the pre-registered cell-size threshold.",
+    "caveats": "Segment spread is not interaction evidence; do not relax the cell-size gate post hoc.",
+    "qualification": {
+      "fdr_pass": false,
+      "cell_support_pass": false,
+      "business_spread_pass": false,
+      "default_action": "insufficient_coverage",
+      "new_candidate_allowed": false
+    },
+    "segment_contrasts": []
+  },
+  {
+    "signal_id": "interaction_achar_d_05_apeal_index_by_segment_dp",
+    "analysis_type": "interaction",
+    "parent_topic": "T9",
+    "exposure": "ACHAR_D_05",
+    "moderator": "SEGMENT_DP",
+    "outcome": "APEAL_Index",
+    "effect_size": {
+      "interaction_block_p": null,
+      "descriptive_contrast_spread": null,
+      "business_threshold": 10.0,
+      "unit": "outcome points"
+    },
+    "sample_support": {
+      "n": 0,
+      "segments": 0,
+      "min_cell_n": 0,
+      "coverage": "INSUFFICIENT_CELLS"
+    },
+    "stability": "fragile",
+    "novelty": 3,
+    "controls": [
+      "SUPER_SEGMENT_DP",
+      "CN_YNV_07",
+      "PREMMAKE_DP",
+      "AGE_BUCKETS",
+      "CN_INCOME",
+      "CN_EDUCATION"
+    ],
+    "inference": {
+      "covariance": "HC1",
+      "test": "joint interaction block Wald test",
+      "raw_p": null,
+      "q_value": null
+    },
+    "interpretation": "No interaction model was qualified because fewer than three segments met the pre-registered cell-size threshold.",
+    "caveats": "Segment spread is not interaction evidence; do not relax the cell-size gate post hoc.",
+    "qualification": {
+      "fdr_pass": false,
+      "cell_support_pass": false,
+      "business_spread_pass": false,
+      "default_action": "insufficient_coverage",
+      "new_candidate_allowed": false
+    },
+    "segment_contrasts": []
+  },
+  {
+    "signal_id": "interaction_achar_d_05_achar_index_by_segment_dp",
+    "analysis_type": "interaction",
+    "parent_topic": "T9",
+    "exposure": "ACHAR_D_05",
+    "moderator": "SEGMENT_DP",
+    "outcome": "ACHAR_index",
+    "effect_size": {
+      "interaction_block_p": null,
+      "descriptive_contrast_spread": null,
+      "business_threshold": 10.0,
+      "unit": "outcome points"
+    },
+    "sample_support": {
+      "n": 0,
+      "segments": 0,
+      "min_cell_n": 0,
+      "coverage": "INSUFFICIENT_CELLS"
+    },
+    "stability": "fragile",
+    "novelty": 3,
+    "controls": [
+      "SUPER_SEGMENT_DP",
+      "CN_YNV_07",
+      "PREMMAKE_DP",
+      "AGE_BUCKETS",
+      "CN_INCOME",
+      "CN_EDUCATION"
+    ],
+    "inference": {
+      "covariance": "HC1",
+      "test": "joint interaction block Wald test",
+      "raw_p": null,
+      "q_value": null
+    },
+    "interpretation": "No interaction model was qualified because fewer than three segments met the pre-registered cell-size threshold.",
+    "caveats": "Segment spread is not interaction evidence; do not relax the cell-size gate post hoc.",
+    "qualification": {
+      "fdr_pass": false,
+      "cell_support_pass": false,
+      "business_spread_pass": false,
+      "default_action": "insufficient_coverage",
+      "new_candidate_allowed": false
+    },
+    "segment_contrasts": []
+  },
+  {
+    "signal_id": "interaction_nev_12_apeal_index_by_segment_dp",
+    "analysis_type": "interaction",
+    "parent_topic": "T10",
+    "exposure": "NEV_12",
+    "moderator": "SEGMENT_DP",
+    "outcome": "APEAL_Index",
+    "effect_size": {
+      "interaction_block_p": null,
+      "descriptive_contrast_spread": null,
+      "business_threshold": 10.0,
+      "unit": "outcome points"
+    },
+    "sample_support": {
+      "n": 0,
+      "segments": 0,
+      "min_cell_n": 0,
+      "coverage": "INSUFFICIENT_CELLS"
+    },
+    "stability": "fragile",
+    "novelty": 3,
+    "controls": [
+      "SUPER_SEGMENT_DP",
+      "CN_YNV_07",
+      "PREMMAKE_DP",
+      "AGE_BUCKETS",
+      "CN_INCOME",
+      "CN_EDUCATION"
+    ],
+    "inference": {
+      "covariance": "HC1",
+      "test": "joint interaction block Wald test",
+      "raw_p": null,
+      "q_value": null
+    },
+    "interpretation": "No interaction model was qualified because fewer than three segments met the pre-registered cell-size threshold.",
+    "caveats": "Segment spread is not interaction evidence; do not relax the cell-size gate post hoc.",
+    "qualification": {
+      "fdr_pass": false,
+      "cell_support_pass": false,
+      "business_spread_pass": false,
+      "default_action": "insufficient_coverage",
+      "new_candidate_allowed": false
+    },
+    "segment_contrasts": []
+  },
+  {
+    "signal_id": "interaction_nev_12_afuel_index_by_segment_dp",
+    "analysis_type": "interaction",
+    "parent_topic": "T10",
+    "exposure": "NEV_12",
+    "moderator": "SEGMENT_DP",
+    "outcome": "AFUEL_Index",
+    "effect_size": {
+      "interaction_block_p": null,
+      "descriptive_contrast_spread": null,
+      "business_threshold": 10.0,
+      "unit": "outcome points"
+    },
+    "sample_support": {
+      "n": 0,
+      "segments": 0,
+      "min_cell_n": 0,
+      "coverage": "INSUFFICIENT_CELLS"
+    },
+    "stability": "fragile",
+    "novelty": 3,
+    "controls": [
+      "SUPER_SEGMENT_DP",
+      "CN_YNV_07",
+      "PREMMAKE_DP",
+      "AGE_BUCKETS",
+      "CN_INCOME",
+      "CN_EDUCATION"
+    ],
+    "inference": {
+      "covariance": "HC1",
+      "test": "joint interaction block Wald test",
+      "raw_p": null,
+      "q_value": null
+    },
+    "interpretation": "No interaction model was qualified because fewer than three segments met the pre-registered cell-size threshold.",
+    "caveats": "Segment spread is not interaction evidence; do not relax the cell-size gate post hoc.",
+    "qualification": {
+      "fdr_pass": false,
+      "cell_support_pass": false,
+      "business_spread_pass": false,
+      "default_action": "insufficient_coverage",
+      "new_candidate_allowed": false
+    },
+    "segment_contrasts": []
+  }
+]

@@ -1,7 +1,7 @@
 # Topic Tournament — Production Research 候选竞争
 
 **日期**：2026-08-19
-**评分维度**（非统计显著性）：新颖性 × 证据强度 × 机制深度 × OEM Actionability × JDP 风格匹配 × PPT 张力（每维 1–5，满分 30）
+**历史 Round 2 评分维度**（非统计显著性）：新颖性 × 证据强度 × 机制深度 × OEM Actionability × JDP 风格匹配 × PPT 张力（每维 1–5，满分 30）。Final Tournament 改用五个报告价值维度，见文档末尾。
 **证据锚定**：各 Topic 在 v2/v3/Holdout run 中的实际证据链（evidence.jsonl / state.yaml）
 
 ---
@@ -38,10 +38,15 @@
 
 **候选池扩展（2026-08-19，Signal Board 驱动）**：
 
+> **Round 2 起，Tournament 比较单位为 Signal 而非变量**：同一变量可贡献多个不同结构的 Signal（main effect / expectation_wow / discriminator / interaction），各自独立候选。Signal 统一以 `contracts/signal_contract.json` 的 Signal Contract 落盘。
+
 | 候选 | 状态 | 说明 |
-|---|---|---:|
+|---|---:|---|
 | **T7 Charging Lifestyle**（NEV_08） | **Finalist · READY** · `runs/charging_lifestyle/` | raw 45.1 → 控制后 +47.9（WLS +26.7）；H1-Robustness ✔ / H2-三梯度台阶 ✔ / H3-补能最大承载 ✔ / H4-差异全面（非补能特异）✘ / H5-残差仍显著 ✔。报告 `reports/charging_lifestyle.md` |
 | **T8 OEM Experience Gap**（ORIGIN3_DP） | **Finalist · READY** · `runs/oem_traditional_gap/` | raw +14.3 → 完整控制（结构+人口学+形象+使用强度）归零（WLS +2.7 p=0.53）；无品牌级残余，gap=多因素综合。E-001~E-012 |
+| **C5 · 补能预期校准（AFUEL_D_06 + ACHAR_D_05）** | **CANDIDATE · merged expectation_wow** · `expectation_wow_01/02/04/05` | 两暴露中度相关（Spearman ρ=0.455），但同时纳入 FULL 控制后仍各自显著：续航 Better +53.4 APEAL / +112.7 AFUEL，充电时长 Better +71.1 / +80.7（WLS, p<0.001）。合并为一个主题下的两个独立 Signal，作为 T7 的补充机制层。 |
+| **T9 · Expectation Calibration** | **READY · terminal** | C5 已验证为“预期兑现”机制：两类 exposure 同时控制后独立显著，并落到充电便利、状态可读、整体充电体验和续航 item。Run `expectation_calibration/`。 |
+| **T10 · Mileage Experience Lifecycle** | **INCONCLUSIVE · terminal** | `nonlinear_pattern_01` 与 AFUEL/item 回落成立，但 APEAL 总体及多数模块不够稳定，不能命名为产品质量衰减。Run `mileage_experience_lifecycle/`。 |
 
 > 原则：Signal Board 只做筛选与优先级排序，Topic 通过竞争获得研究预算（详见 `reports/signal_board.md`）。不是发现统计差异就建 run。
 
@@ -124,6 +129,29 @@
 **替补顺序**：T4 Price Band（20万+ 断层）→ T5 Configuration（T1 的证据方法）≈ T3 Income → T2 Age >>> T6 BEV/PHEV。
 
 > **最终排序**：T1 > T4 > T5 ≈ T3 > T2 >>> T6。其中 T5 上升是因为它作为 T1 之后的证据方法（回答"哪些具体配置真的能制造升级体验"），不是独立 Topic。
+
+---
+
+# Final Tournament｜10 Terminal Topics（2026-08-19）
+
+最终 Tournament 改用五个“报告价值”维度，而非 Discovery 阶段的统计筛选分数：**Evidence strength / Mechanism depth / Novelty / Business actionability / Narrative power**，每维 1–5 分，满分 25。Champion 不按最小 p-value 或最大 effect size 决定。
+
+完整评分与终局证据见 `reports/final_tournament_10_topics.md`。
+
+| Rank | ID | Topic | Evidence | Mechanism | Novelty | Actionability | Narrative | Total | 状态 |
+|---:|---|---|---:|---:|---:|---:|---:|---:|---|
+| **1** | **T1** | **Purchase Mission｜可感知升级价值** | 5 | 5 | 4 | 5 | 5 | **24** | **Champion / Production Topic** |
+| 2 | T9 | Expectation Calibration｜补能预期兑现 | 5 | 4 | 5 | 4 | 5 | **23** | Finalist |
+| 3 | T5 | Configuration｜配置是载体，不是价值 | 4 | 4 | 4 | 5 | 4 | **21** | T1 supporting method |
+| 4 | T4 | Price Band｜中端体验断层 | 4 | 3 | 4 | 4 | 4 | **19** | Alternate |
+| 4 | T7 | Charging Lifestyle｜补能生活方式分群 | 4 | 3 | 4 | 4 | 4 | **19** | Alternate |
+| 4 | T8 | OEM Experience Gap｜品牌差距被结构吸收 | 5 | 3 | 4 | 3 | 4 | **19** | Boundary Topic |
+| 7 | T3 | Income｜收入非线性与舒适短板 | 4 | 3 | 4 | 4 | 3 | **18** | Supporting |
+| 8 | T2 | Age / Generation｜世代体验谱系 | 4 | 3 | 3 | 3 | 3 | **16** | Supporting |
+| 8 | T10 | Mileage Experience Lifecycle｜里程非线性 | 3 | 2 | 4 | 3 | 4 | **16** | Inconclusive |
+| 10 | T6 | BEV / PHEV｜技术路线差异 | 2 | 3 | 3 | 3 | 3 | **14** | Inconclusive |
+
+**Final Champion：T1 Purchase Mission。** 它的优势是最完整的“用户任务 → 体验结构 → item 机制 → 产品定义”链条，而不是某个单独统计量最高。T9 是最强挑战者，但仍缺少从预期自报到具体产品承诺/设计杠杆的完整闭环。
 
 ---
 

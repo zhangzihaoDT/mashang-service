@@ -1,0 +1,87 @@
+[
+  {
+    "signal_id": "nonlinear_pattern_01",
+    "analysis_type": "nonlinear_pattern",
+    "exposure": "NEV_12",
+    "moderator": null,
+    "outcome": "APEAL_Index",
+    "effect_size": {
+      "range": 34.47,
+      "nested_f": 10.51,
+      "p": 0.0,
+      "unit": "APEAL points"
+    },
+    "sample_support": {
+      "n": 8380,
+      "coverage": "FULL"
+    },
+    "stability": "moderate",
+    "novelty": 4,
+    "interpretation": "累计里程呈非单调分段结构；控制主要结构与人口变量后，分箱相对线性模型的增量检验 p=4.498e-10。",
+    "controls": [
+      "SUPER_SEGMENT_DP",
+      "CN_YNV_07",
+      "PREMMAKE_DP",
+      "AGE_BUCKETS",
+      "CN_INCOME",
+      "CN_EDUCATION"
+    ],
+    "direction": "weighted range=34.5; direction_changes=2",
+    "coverage": "FULL",
+    "caveats": "横截面观察性分析；分箱边界为业务预注册边界，不代表因果剂量反应。",
+    "bins": [
+      {
+        "bin": "[0.0, 1000.0)",
+        "n": 566,
+        "weighted_mean": 783.83
+      },
+      {
+        "bin": "[1000.0, 5000.0)",
+        "n": 5543,
+        "weighted_mean": 801.72
+      },
+      {
+        "bin": "[5000.0, 10000.0)",
+        "n": 1921,
+        "weighted_mean": 789.32
+      },
+      {
+        "bin": "[10000.0, 20000.0)",
+        "n": 246,
+        "weighted_mean": 776.41
+      },
+      {
+        "bin": "[20000.0, 50000.0)",
+        "n": 91,
+        "weighted_mean": 767.25
+      },
+      {
+        "bin": "[50000.0, inf)",
+        "n": 13,
+        "weighted_mean": 794.69
+      }
+    ],
+    "adjusted_bin_coefs": {
+      "C(BIN)[T.Interval(1000.0, 5000.0, closed='left')]": {
+        "coef": 20.34,
+        "p": 7.4e-05
+      },
+      "C(BIN)[T.Interval(5000.0, 10000.0, closed='left')]": {
+        "coef": 7.85,
+        "p": 0.186944
+      },
+      "C(BIN)[T.Interval(10000.0, 20000.0, closed='left')]": {
+        "coef": -6.91,
+        "p": 0.46608
+      },
+      "C(BIN)[T.Interval(20000.0, 50000.0, closed='left')]": {
+        "coef": -14.07,
+        "p": 0.342183
+      },
+      "C(BIN)[T.Interval(50000.0, inf, closed='left')]": {
+        "coef": 12.68,
+        "p": 0.560354
+      }
+    }
+  }
+]

@@ -1,0 +1,18 @@
+research_id: expectation_calibration_001
+topic_id: T9_expectation_calibration
+round: 3
+status: ready
+question: 补能预期兑现是否是独立且可落到产品 item 的体验机制？
+current_hypothesis: T9 支持——续航与充电时长预期同时控制后仍分别显著，且映射到充电便利、状态可读、整体充电体验和续航 item。
+confidence: high
+evidence_ids:
+- E-001
+- E-002
+- E-003
+open_questions: []
+mechanism_depth: 4
+next_action: null
+last_analysis: terminal_item_drilldown
+information_gain_rounds: 3
+rejected_hypotheses: []
+stop_reason: 'READY: independent exposure effects + item mechanism + confounder controls + boundary recorded'

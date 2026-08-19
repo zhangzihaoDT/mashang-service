@@ -316,7 +316,7 @@
 
 ## Discovery Layer Retrospective（2026-08-19）
 
-**Trigger**：26 轴扫描 → 4 Candidate → T7+T8 两轮正式研究 → 2 READY。评估 Signal→Topic 漏斗有效性。
+**Trigger**：25 轴扫描 → 4 Candidate → T7+T8 两轮正式研究 → 2 READY。评估 Signal→Topic 漏斗有效性。
 
 ### Q1. Signal Board 排名是否有效？—— ✅ 有效
 
@@ -327,12 +327,12 @@
 
 | 层级 | 数量 | 存活率 |
 |---|---:|---:|
-| 扫描轴 | 26 | 100% |
+| 扫描轴 | 25 | 100% |
 | Candidate（confounder 初筛后入池） | 4 | 15% |
 | 激活为主研究 | 2 | 50%（T7/T8） |
 | READY Finalist | 2 | 100%（激活后） |
 
-- 26→4：初筛截断 85% 浅层候选（教育/职业重叠 T3、年龄=T2、地理机制弱），**未浪费深度研究预算**。
+- 25→4：初筛截断 84% 浅层候选（教育/职业重叠 T3、年龄=T2、地理机制弱），**未浪费深度研究预算**。
 - 4→2→2：激活即 READY，无中途流产；浅层候选转 C3/C4 或观察位，未消失。
 
 ### Q3. 剩余 Candidate 怎么处理？—— 重新判据，不机械升级
@@ -347,4 +347,109 @@
 - **NEV_12 未吸收**：T7 H5 中作为控制变量消费（suppression 结构：里程高→快充依赖者体验低），但其独立于 NEV08 的非单调衰减方向（10k-20k 低谷）是 T7 不覆盖的独立问题。
 - **NEV_11C 边界**：仅在"每日使用"小格有独立效应，且"熟悉度 vs 车型结构"机制未拆——不足独立成题，保留观察。
 
-**漏斗闭环**：26 Signals → 4 Candidates → 2 Activated → 2 READY，另 2 Candidate 按独立残差判据分流（1 保留 / 1 观察），无 ABSORBED 标记。下一轮扫描（新数据批次）再决定 C3 是否升级。
+**漏斗闭环**：25 axes → 4 Candidates → 2 Activated → 2 READY，另 2 Candidate 按独立残差判据分流（1 保留 / 1 观察），无 ABSORBED 标记。下一轮扫描（新数据批次）再决定 C3 是否升级。
+
+---
+
+## Round 2：多 Analysis Type 扫描（2026-08-19）
+
+**架构升级**：从"单变量 main-effect 扫描"扩展为 **多 Scanner → 统一 Signal Contract → Signal Board → Candidate Allocation → Validation Queue**。Tournament 比较单位从**变量**改为 **Signal**（同一变量可贡献多个不同结构的 Signal，各自独立候选）。
+
+**Scanner 目录**（`scratch/discovery/`，执行顺序按用户指定，interaction 第四避免 O(p²) 淘金）：
+
+| 顺序 | Scanner | 分析类型 | 状态 |
+|---|---|---|---|
+| 1 | `expectation_wow_scan.py` | `expectation_wow` | ✅ 已执行（本轮） |
+| 2 | `nonlinear_pattern_scan.py` | `nonlinear_pattern` | ✅ 已执行（承接 C3 NEV_12） |
+| 3 | `segment_discriminator_scan.py` | `segment_discriminator` | ✅ 已执行（受控 queue） |
+| 4 | `interaction_scan` | `interaction` | ✅ Controlled Pilot executed · `SEGMENT_DP` insufficient coverage |
+
+**Signal Contract**：`contracts/signal_contract.json`（schema v1.0）。字段：`analysis_type / exposure / moderator / outcome / effect_size / sample_support / stability / novelty / interpretation`（+`controls/direction/caveats/wow_structure/coverage`）。
+
+### expectation_wow 扫描结果
+
+**设计**：预期违背（expectation disconfirmation）三档序数 1=Worse / 2=About / 3=Better 为 exposure，Outcome = APEAL_Index + 模块指数（AFUEL_Index，补能续航模块）。FULL 控制组 = [SUPER_SEGMENT_DP, CN_YNV_07, PREMMAKE_DP, AGE_BUCKETS, CN_INCOME, CN_EDUCATION]，OLS+WLS(APEAL_WT)。产出 `scratch/discovery/_signals_expectation_wow.json`（6 条 Signal）。
+
+| Signal | exposure | outcome | 三档加权均值 | wow_gap (Better−About) | penalty (About−Worse) | WLS Better (p) | WLS Worse (p) | n_reg |
+|---|---|---|---|---|---|---|---:|---:|---:|---:|
+| expectation_wow_01 | **AFUEL_D_06 续航 vs 预期** | APEAL_Index | 740.7 / 784.4 / 834.2 | +49.8 | 43.8 | +42.8 (p<0.001) | −43.4 (p<0.001) | 8572 |
+| expectation_wow_02 | **AFUEL_D_06 续航 vs 预期** | AFUEL_Index | 704.0 / 789.9 / 862.6 | +72.7 | 85.9 | +65.3 (p<0.001) | −85.3 (p<0.001) | 8572 |
+| expectation_wow_04 | **ACHAR_D_05 充电时长 vs 预期** | APEAL_Index | 730.5 / 778.3 / 829.3 | +51.0 | 47.8 | +48.7 (p<0.001) | −41.2 (p<0.001) | 8572 |
+| expectation_wow_05 | **ACHAR_D_05 充电时长 vs 预期** | AFUEL_Index | 707.5 / 781.3 / 850.3 | +68.9 | 73.8 | +65.6 (p<0.001) | −54.6 (p<0.001) | 8572 |
+
+**解读**：
+
+- **效应强度高**：两个补能预期违背变量在 FULL 控制后仍产生 ±40~85 点 APEAL/模块指数差异，远超第一轮 25 轴中多数 main-effect gap（多数 10~30 点）。
+- **结构近对称**：wow_gap（Better−About）≈ penalty（About−Worse），即"超预期→加分 / 未达预期→扣分"幅度接近——更接近**预期校准（expectation calibration）**，而非纯 delight 不对称。这提示：补能体验的 APEAL 溢价主要来自"兑现承诺"而非"制造惊喜"。
+- **模块指数放大**：效应在 AFUEL_Index（本模块）上约为总 APEAL 的 1.4~1.6 倍——预期违背主要作用于补能模块自身评价，跨模块外溢较小（与 T7 H-004"补能特异"一致）。
+
+**delight 交叉（Better 亚组，缺失 40~60% 仅描述）**：
+
+| exposure | 最常宣称的 delight 项 |
+|---|---|
+| AFUEL_D_06 续航超预期 | 加速(郊区/高速)、启动按钮、驾驶辅助有效性 |
+| ACHAR_D_05 充电超预期 | 启动界面、驾驶辅助、静谧性、加速 |
+
+**候选判定（Signal 级）**：
+
+| Signal | 状态 | 理由 |
+|---|---|---|
+| expectation_wow_01/02 + 04/05（AFUEL_D_06 + ACHAR_D_05） | **C5 · 合并候选** | 两暴露中度相关（Spearman ρ=0.455, pairwise n=9,882），但同时纳入 FULL 控制后仍各自显著：续航 Better +53.4 APEAL / +112.7 AFUEL，充电时长 Better +71.1 / +80.7（WLS, p<0.001）。合并为一个主题下的两个独立 Signal，是 T7 的机制补充维度。 |
+| expectation_wow_03/06（delight 交叉） | **观察位** | 缺失率高、仅 Better 亚组描述，不作独立候选 |
+
+**下一步**：将合并后的“补能预期校准”作为 T7 的补充机制层进入验证队列（同一 owner 可同主题多 Signal）；后续验证两类预期违背是否对应不同产品/沟通杠杆。
+
+### 受控 nonlinear / segment 扫描
+
+- `nonlinear_pattern_01`（NEV_12 累计里程）：业务分箱范围 34.5 点，线性模型 vs 分箱模型增量检验 F=10.51，p<0.001；1k–5k 为峰值，10k–50k 回落，支持 C3 保留为独立候选。
+- `segment_discriminator_nev_08_segment_dp`：快充频率在 10 个车型结构段中筛选，组内对比 spread=84.5 点；进入 **validation queue**，不直接宣称 interaction。
+- `segment_discriminator_afuel_d_06_segment_dp` / `segment_discriminator_achar_d_05_segment_dp`：预期违背在车型结构段内仍有 76.0 / 118.1 点幅度 spread；作为 C5 主题的分层验证信号，不新增独立 Topic。
+
+本轮合并产物：`scratch/discovery/_signals_round2.json`。Interaction Pilot 已执行 9 个预注册 tests，但因 `SEGMENT_DP` coverage 不足未产生正式 interaction evidence。
+
+### Signal → Candidate → Topic Qualification
+
+Round 2 qualification 已落盘：`reports/signal_to_topic_qualification_round2.md`。
+
+- **T9 Expectation Calibration**：**READY · terminal**；补能预期兑现已落到具体 item，是 T7 行为分群之外的独立机制。
+- **T10 Mileage Experience Lifecycle**：**INCONCLUSIVE · terminal**；NEV_12 非线性及 AFUEL/item 回落成立，但不足以支持总体质量衰减叙事。
+- 车型结构段 discriminator：进入 T7/T9 validation queue，不新增 Topic。
+
+### Interaction Gate
+
+第四类 `interaction` 已通过 Gate Review，并完成首轮 9 个预注册 tests；但 `SEGMENT_DP` 在 exposure 两侧各自 `n≥100` 的严格门槛下覆盖不足，未产生正式 interaction evidence。没有降低门槛，也没有新增 Candidate/Topic。详见 `reports/interaction_discovery_gate_review.md` 与 `reports/interaction_pilot_round1.md`。
+
+---
+
+## Round 1 + Round 2 Discovery Engine Retrospective
+
+完整复盘已落盘：`reports/discovery_engine_retrospective_round1_round2.md`。
+
+### Analysis Type Role
+
+| Analysis Type | 最终角色 | 默认产出 |
+|---|---|---|
+| `main_effect` | Round 1 宽扫描，建立 Signal Board 优先级 | Signal，不直接建 Topic |
+| `expectation_wow` | 预期兑现/失望机制 scanner | Candidate，需 item qualification |
+| `nonlinear_pattern` | 台阶、阈值、生命周期结构 scanner | Candidate，需稳健性与归因 qualification |
+| `segment_discriminator` | heterogeneity / moderator 线索 scanner | Validation Queue，不是 interaction evidence |
+| `interaction` | 已有 parent Signal 的 confirmatory moderator pilot | 默认 refinement，极少数情况下才 Candidate |
+
+### Gate Decision
+
+所有新 Signal 必须依次通过：`Registration → Coverage → Interaction block/HC1/FDR → Business effect → Mechanism → Incremental explanation → Tournament`。Interaction 的 `SEGMENT_DP` 首轮因 exposure 两侧各自 `n≥100` 的 cell gate 未通过，不能降门槛或把 spread 当作正式证据。
+
+### Budget Decision
+
+- 保留 Multi Scanner → Signal Contract → Signal Board → Candidate Allocation → Qualification。
+- Round 1 main effect 保持宽覆盖，但不无边界扩展变量池。
+- Round 2 scanner 继续按机制簇分配预算；T9 `READY`，T10 `INCONCLUSIVE`，segment discriminator 留在 validation queue。
+- 当前 `SEGMENT_DP` Interaction queue 暂停；全量 O(p²) 不开放。
+- 只有预先定义 segment 聚合、切换到 coverage 更充分的 moderator，或新数据使 cells 达标后，才重新过 Gate。
+
+### Discovery Engine v1 Freeze / Replay
+
+- v1 已冻结：`reports/discovery_engine_v1_freeze.md`。
+- 当前 snapshot replay 已完成：`reports/discovery_engine_v1_replay.md`。
+- Replay 复现 25 个 Round 1 axes、10 个 Round 2 Signals 和 9 个 Interaction Pilot tests；T9/T10 的既有终局分流保持不变，Interaction 仍为 `INSUFFICIENT_COVERAGE`。
+- 该 replay 证明的是同一 snapshot 的可复现性，不是跨数据 wave 的泛化验证；新数据批次到来后应原样重跑，不在 v1 内调参追随结果。

@@ -1,0 +1,36 @@
+research_id: mileage_experience_lifecycle_001
+items:
+- id: H1
+  priority: 95
+  question: 里程非线性是否在控制车型结构、能源、价格、品牌和人口后仍存在？
+  action: WLS module ~ mileage bins + FULL + SEGMENT_DP
+  status: done
+  resolution: H-001 supported by E-001 and H-002 partially supported by E-002
+- id: H2
+  priority: 92
+  question: 非线性是否形成跨模块、可执行的 item 机制？
+  action: module and pre-registered item weighted means by mileage bin
+  status: done
+  resolution: AFUEL and selected items show decline, but broad cross-module stability is incomplete; E-002/E-003
+- id: H3
+  priority: 90
+  question: 是否可以把长里程回落命名为产品质量衰减？
+  action: terminal boundary check
+  status: done
+  resolution: not established; cross-sectional mileage is compatible with age/cohort/vehicle-mix explanations
+stop_conditions:
+  min_core_signals: 1
+  min_supporting_evidence: 2
+  required_confounders:
+  - ENERGY
+  - PRICE
+  - BRAND
+  - SEGMENT
+  min_mechanism_depth: 3
+  high_priority_threshold: 85
+  max_no_information_rounds: 3
+  terminal_statuses:
+  - ready
+  - rejected
+  - inconclusive
+  - insufficient_coverage

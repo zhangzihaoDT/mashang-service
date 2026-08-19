@@ -1,0 +1,16 @@
+hypotheses:
+- id: H-001
+  statement: 续航与充电时长的预期兑现独立关联整体拥有体验，而非单一补能指标重复。
+  question: 两类预期违背同时进入完整控制模型后是否仍各自显著？
+  status: supported
+  created_from: E-001
+- id: H-002
+  statement: 预期校准可以落到具体补能体验 item，形成 OEM 可执行的产品杠杆。
+  question: 预期 Better/Worse 是否对应充电便利、速度、状态可读等具体 item？
+  status: supported
+  created_from: E-002
+- id: H-003
+  statement: 预期校准机制是观察性相关，不构成宣传承诺导致体验变化的因果证据。
+  question: 横截面设计是否限制因果解释？
+  status: boundary
+  created_from: E-003

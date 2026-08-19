@@ -1,0 +1,296 @@
+[
+  {
+    "signal_id": "segment_discriminator_nev_08_segment_dp",
+    "analysis_type": "segment_discriminator",
+    "exposure": "NEV_08",
+    "moderator": "SEGMENT_DP",
+    "outcome": "APEAL_Index",
+    "effect_size": {
+      "within_segment_spread": 84.54,
+      "unit": "APEAL points"
+    },
+    "sample_support": {
+      "n": 1480,
+      "segments": 10,
+      "coverage": "SEGMENT_QUEUE"
+    },
+    "stability": "moderate",
+    "novelty": 3,
+    "interpretation": "快充频率在不同车型结构段内的效应幅度存在候选差异，需后续正式 interaction 验证。",
+    "controls": [
+      "SUPER_SEGMENT_DP",
+      "CN_YNV_07",
+      "PREMMAKE_DP",
+      "AGE_BUCKETS",
+      "CN_INCOME",
+      "CN_EDUCATION"
+    ],
+    "direction": "within-segment 99 vs 1 contrast",
+    "coverage": "SEGMENT_QUEUE",
+    "caveats": "分段筛选使用预注册组合；小段剔除；本轮不将筛选结果解释为正式交互因果效应。",
+    "segments": [
+      {
+        "moderator_value": "11.0",
+        "n": 250,
+        "coef_better_vs_worse": 59.38,
+        "p": 0.021009
+      },
+      {
+        "moderator_value": "12.0",
+        "n": 64,
+        "coef_better_vs_worse": 15.24,
+        "p": 0.607152
+      },
+      {
+        "moderator_value": "13.0",
+        "n": 202,
+        "coef_better_vs_worse": 4.54,
+        "p": 0.861392
+      },
+      {
+        "moderator_value": "14.0",
+        "n": 85,
+        "coef_better_vs_worse": 88.69,
+        "p": 0.005231
+      },
+      {
+        "moderator_value": "15.0",
+        "n": 107,
+        "coef_better_vs_worse": 75.62,
+        "p": 0.000485
+      },
+      {
+        "moderator_value": "16.0",
+        "n": 219,
+        "coef_better_vs_worse": 34.55,
+        "p": 0.476051
+      },
+      {
+        "moderator_value": "18.0",
+        "n": 65,
+        "coef_better_vs_worse": 17.01,
+        "p": 0.470036
+      },
+      {
+        "moderator_value": "19.0",
+        "n": 123,
+        "coef_better_vs_worse": 55.47,
+        "p": 0.109279
+      },
+      {
+        "moderator_value": "20.0",
+        "n": 119,
+        "coef_better_vs_worse": 4.15,
+        "p": 0.906695
+      },
+      {
+        "moderator_value": "21.0",
+        "n": 246,
+        "coef_better_vs_worse": 67.79,
+        "p": 0.002503
+      }
+    ]
+  },
+  {
+    "signal_id": "segment_discriminator_afuel_d_06_segment_dp",
+    "analysis_type": "segment_discriminator",
+    "exposure": "AFUEL_D_06",
+    "moderator": "SEGMENT_DP",
+    "outcome": "APEAL_Index",
+    "effect_size": {
+      "within_segment_spread": 76.03,
+      "unit": "APEAL points"
+    },
+    "sample_support": {
+      "n": 1881,
+      "segments": 11,
+      "coverage": "SEGMENT_QUEUE"
+    },
+    "stability": "moderate",
+    "novelty": 3,
+    "interpretation": "续航预期违背在不同车型结构段内的效应幅度存在候选差异，需后续正式 interaction 验证。",
+    "controls": [
+      "SUPER_SEGMENT_DP",
+      "CN_YNV_07",
+      "PREMMAKE_DP",
+      "AGE_BUCKETS",
+      "CN_INCOME",
+      "CN_EDUCATION"
+    ],
+    "direction": "within-segment 3 vs 1 contrast",
+    "coverage": "SEGMENT_QUEUE",
+    "caveats": "分段筛选使用预注册组合；小段剔除；本轮不将筛选结果解释为正式交互因果效应。",
+    "segments": [
+      {
+        "moderator_value": "11.0",
+        "n": 193,
+        "coef_better_vs_worse": 104.86,
+        "p": 0.0
+      },
+      {
+        "moderator_value": "12.0",
+        "n": 80,
+        "coef_better_vs_worse": 98.03,
+        "p": 2e-06
+      },
+      {
+        "moderator_value": "13.0",
+        "n": 316,
+        "coef_better_vs_worse": 105.94,
+        "p": 0.0
+      },
+      {
+        "moderator_value": "14.0",
+        "n": 99,
+        "coef_better_vs_worse": 74.99,
+        "p": 0.005785
+      },
+      {
+        "moderator_value": "15.0",
+        "n": 181,
+        "coef_better_vs_worse": 85.14,
+        "p": 1e-06
+      },
+      {
+        "moderator_value": "16.0",
+        "n": 260,
+        "coef_better_vs_worse": 76.36,
+        "p": 3e-06
+      },
+      {
+        "moderator_value": "17.0",
+        "n": 75,
+        "coef_better_vs_worse": 29.91,
+        "p": 0.109853
+      },
+      {
+        "moderator_value": "18.0",
+        "n": 144,
+        "coef_better_vs_worse": 38.94,
+        "p": 0.028508
+      },
+      {
+        "moderator_value": "19.0",
+        "n": 68,
+        "coef_better_vs_worse": 66.45,
+        "p": 0.002401
+      },
+      {
+        "moderator_value": "20.0",
+        "n": 134,
+        "coef_better_vs_worse": 87.99,
+        "p": 2e-06
+      },
+      {
+        "moderator_value": "21.0",
+        "n": 331,
+        "coef_better_vs_worse": 76.14,
+        "p": 0.0
+      }
+    ]
+  },
+  {
+    "signal_id": "segment_discriminator_achar_d_05_segment_dp",
+    "analysis_type": "segment_discriminator",
+    "exposure": "ACHAR_D_05",
+    "moderator": "SEGMENT_DP",
+    "outcome": "APEAL_Index",
+    "effect_size": {
+      "within_segment_spread": 118.05,
+      "unit": "APEAL points"
+    },
+    "sample_support": {
+      "n": 2576,
+      "segments": 12,
+      "coverage": "SEGMENT_QUEUE"
+    },
+    "stability": "moderate",
+    "novelty": 3,
+    "interpretation": "充电时长预期违背在不同车型结构段内的效应幅度存在候选差异，需后续正式 interaction 验证。",
+    "controls": [
+      "SUPER_SEGMENT_DP",
+      "CN_YNV_07",
+      "PREMMAKE_DP",
+      "AGE_BUCKETS",
+      "CN_INCOME",
+      "CN_EDUCATION"
+    ],
+    "direction": "within-segment 3 vs 1 contrast",
+    "coverage": "SEGMENT_QUEUE",
+    "caveats": "分段筛选使用预注册组合；小段剔除；本轮不将筛选结果解释为正式交互因果效应。",
+    "segments": [
+      {
+        "moderator_value": "11.0",
+        "n": 235,
+        "coef_better_vs_worse": 121.27,
+        "p": 2e-06
+      },
+      {
+        "moderator_value": "12.0",
+        "n": 108,
+        "coef_better_vs_worse": 95.59,
+        "p": 0.001195
+      },
+      {
+        "moderator_value": "13.0",
+        "n": 419,
+        "coef_better_vs_worse": 82.28,
+        "p": 5.9e-05
+      },
+      {
+        "moderator_value": "14.0",
+        "n": 127,
+        "coef_better_vs_worse": 33.11,
+        "p": 0.115495
+      },
+      {
+        "moderator_value": "15.0",
+        "n": 204,
+        "coef_better_vs_worse": 111.74,
+        "p": 0.000116
+      },
+      {
+        "moderator_value": "16.0",
+        "n": 333,
+        "coef_better_vs_worse": 85.73,
+        "p": 0.000851
+      },
+      {
+        "moderator_value": "17.0",
+        "n": 107,
+        "coef_better_vs_worse": 36.08,
+        "p": 0.170971
+      },
+      {
+        "moderator_value": "18.0",
+        "n": 205,
+        "coef_better_vs_worse": 151.16,
+        "p": 0.0
+      },
+      {
+        "moderator_value": "19.0",
+        "n": 117,
+        "coef_better_vs_worse": 70.03,
+        "p": 0.004606
+      },
+      {
+        "moderator_value": "20.0",
+        "n": 186,
+        "coef_better_vs_worse": 46.29,
+        "p": 0.012373
+      },
+      {
+        "moderator_value": "21.0",
+        "n": 482,
+        "coef_better_vs_worse": 102.09,
+        "p": 0.0
+      },
+      {
+        "moderator_value": "22.0",
+        "n": 53,
+        "coef_better_vs_worse": 132.13,
+        "p": 0.000107
+      }
+    ]
+  }
+]

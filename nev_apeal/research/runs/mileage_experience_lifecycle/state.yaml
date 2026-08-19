@@ -1,0 +1,19 @@
+research_id: mileage_experience_lifecycle_001
+topic_id: T10_mileage_experience_lifecycle
+round: 3
+status: inconclusive
+question: 累计里程是否揭示可归因的体验生命周期？
+current_hypothesis: T10 部分支持——里程存在稳定非线性，AFUEL_Index 与续航 item 在长里程段回落；但 APEAL 总体及多数模块未形成足够稳定的跨模块机制，不能升级为产品质量衰减。
+confidence: medium
+evidence_ids:
+- E-001
+- E-002
+- E-003
+open_questions: []
+mechanism_depth: 2
+next_action: null
+last_analysis: terminal_module_item_drilldown
+information_gain_rounds: 3
+rejected_hypotheses:
+- H-003 产品质量衰减叙事：横截面里程梯度无法排除车龄、车型 cohort 和 mix 解释（E-003）
+stop_reason: 'INCONCLUSIVE: nonlinear signal survives controls, but terminal mechanism and attribution gates are not met'

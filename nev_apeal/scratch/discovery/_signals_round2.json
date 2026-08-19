@@ -1,0 +1,613 @@
+[
+  {
+    "signal_id": "expectation_wow_01",
+    "analysis_type": "expectation_wow",
+    "exposure": "AFUEL_D_06",
+    "outcome": "APEAL_Index",
+    "effect_size": {
+      "better_coef": 42.78,
+      "better_p": 0.0,
+      "worse_coef": -43.37,
+      "worse_p": 0.0,
+      "unit": "APEAL points (WLS, FULL controls)",
+      "n_reg": 8572
+    },
+    "sample_support": {
+      "n": 9937,
+      "coverage": "FULL"
+    },
+    "stability": "moderate",
+    "novelty": 3,
+    "wow_structure": {
+      "worse": 740.65,
+      "about": 784.42,
+      "better": 834.22,
+      "wow_gap_better_minus_about": 49.8,
+      "penalty_about_minus_worse": 43.8
+    },
+    "direction": "",
+    "controls": [
+      "SUPER_SEGMENT_DP",
+      "CN_YNV_07",
+      "PREMMAKE_DP",
+      "AGE_BUCKETS",
+      "CN_INCOME",
+      "CN_EDUCATION"
+    ],
+    "interpretation": "纯电续航 vs 预期：`Better than expected` 相对 `About as expected` 的 APEAL_Index 增量 = 49.8（WLS better=42.78, p=0.0）。若 wow_gap 显著大于 0 且大于 penalty，说明该模块存在非对称预期惊喜结构。",
+    "caveats": "横截面；预期违背为车主自报主观口径，不宣示因果"
+  },
+  {
+    "signal_id": "expectation_wow_02",
+    "analysis_type": "expectation_wow",
+    "exposure": "AFUEL_D_06",
+    "outcome": "AFUEL_Index",
+    "effect_size": {
+      "better_coef": 65.26,
+      "better_p": 0.0,
+      "worse_coef": -85.33,
+      "worse_p": 0.0,
+      "unit": "APEAL points (WLS, FULL controls)",
+      "n_reg": 8572
+    },
+    "sample_support": {
+      "n": 9937,
+      "coverage": "FULL"
+    },
+    "stability": "moderate",
+    "novelty": 3,
+    "wow_structure": {
+      "worse": 703.99,
+      "about": 789.87,
+      "better": 862.57,
+      "wow_gap_better_minus_about": 72.7,
+      "penalty_about_minus_worse": 85.9
+    },
+    "direction": "",
+    "controls": [
+      "SUPER_SEGMENT_DP",
+      "CN_YNV_07",
+      "PREMMAKE_DP",
+      "AGE_BUCKETS",
+      "CN_INCOME",
+      "CN_EDUCATION"
+    ],
+    "interpretation": "纯电续航 vs 预期：`Better than expected` 相对 `About as expected` 的 AFUEL_Index 增量 = 72.7（WLS better=65.26, p=0.0）。若 wow_gap 显著大于 0 且大于 penalty，说明该模块存在非对称预期惊喜结构。",
+    "caveats": "横截面；预期违背为车主自报主观口径，不宣示因果"
+  },
+  {
+    "signal_id": "expectation_wow_03",
+    "analysis_type": "expectation_wow",
+    "exposure": "AFUEL_D_06",
+    "outcome": "AFUEL_Index (delight top picks)",
+    "effect_size": {},
+    "sample_support": {
+      "n": 1544,
+      "coverage": "PARTIAL"
+    },
+    "stability": "moderate",
+    "novelty": 4,
+    "wow_structure": {},
+    "direction": "",
+    "controls": [],
+    "interpretation": "纯电续航 vs 预期：`Better than expected` 车主(delight 项)最常宣称的内容",
+    "caveats": "缺失率 40-60%（ASET_D_02 等），仅为 Better 亚组描述",
+    "delight_top": {
+      "ASET_D_02": {
+        "The operation of the start button": 102,
+        "How exciting the whole process is": 99,
+        "The start-up screen on the center console": 99
+      },
+      "ACMFT_D_02": {
+        "Nothing": 306,
+        "Quietness of the system": 245,
+        "Maintains the desired temperature": 194
+      },
+      "APERF_D_01": {
+        "Nothing": 939,
+        "Vehicle acceleration at suburban (25 to 49 miles per hour)": 263,
+        "Vehicle acceleration at high speed/Freeway (50 miles per hour and higher)": 183
+      },
+      "ASFTY_D_02": {
+        "The number of safety systems (e.g., blind spot warning, collision warning)": 97,
+        "The effectiveness of the driver assistance systems (e.g., cruise control, lane keep assist)": 96,
+        "The effectiveness of the safety systems (e.g., blind spot warning, collision warning)": 86
+      }
+    }
+  },
+  {
+    "signal_id": "expectation_wow_04",
+    "analysis_type": "expectation_wow",
+    "exposure": "ACHAR_D_05",
+    "outcome": "APEAL_Index",
+    "effect_size": {
+      "better_coef": 48.7,
+      "better_p": 0.0,
+      "worse_coef": -41.17,
+      "worse_p": 0.0,
+      "unit": "APEAL points (WLS, FULL controls)",
+      "n_reg": 8524
+    },
+    "sample_support": {
+      "n": 9882,
+      "coverage": "FULL"
+    },
+    "stability": "moderate",
+    "novelty": 3,
+    "wow_structure": {
+      "worse": 730.47,
+      "about": 778.28,
+      "better": 829.29,
+      "wow_gap_better_minus_about": 51.0,
+      "penalty_about_minus_worse": 47.8
+    },
+    "direction": "",
+    "controls": [
+      "SUPER_SEGMENT_DP",
+      "CN_YNV_07",
+      "PREMMAKE_DP",
+      "AGE_BUCKETS",
+      "CN_INCOME",
+      "CN_EDUCATION"
+    ],
+    "interpretation": "充电时长 vs 预期：`Better than expected` 相对 `About as expected` 的 APEAL_Index 增量 = 51.0（WLS better=48.7, p=0.0）。若 wow_gap 显著大于 0 且大于 penalty，说明该模块存在非对称预期惊喜结构。",
+    "caveats": "横截面；预期违背为车主自报主观口径，不宣示因果"
+  },
+  {
+    "signal_id": "expectation_wow_05",
+    "analysis_type": "expectation_wow",
+    "exposure": "ACHAR_D_05",
+    "outcome": "AFUEL_Index",
+    "effect_size": {
+      "better_coef": 65.59,
+      "better_p": 0.0,
+      "worse_coef": -54.56,
+      "worse_p": 0.0,
+      "unit": "APEAL points (WLS, FULL controls)",
+      "n_reg": 8524
+    },
+    "sample_support": {
+      "n": 9882,
+      "coverage": "FULL"
+    },
+    "stability": "moderate",
+    "novelty": 3,
+    "wow_structure": {
+      "worse": 707.52,
+      "about": 781.32,
+      "better": 850.25,
+      "wow_gap_better_minus_about": 68.9,
+      "penalty_about_minus_worse": 73.8
+    },
+    "direction": "",
+    "controls": [
+      "SUPER_SEGMENT_DP",
+      "CN_YNV_07",
+      "PREMMAKE_DP",
+      "AGE_BUCKETS",
+      "CN_INCOME",
+      "CN_EDUCATION"
+    ],
+    "interpretation": "充电时长 vs 预期：`Better than expected` 相对 `About as expected` 的 AFUEL_Index 增量 = 68.9（WLS better=65.59, p=0.0）。若 wow_gap 显著大于 0 且大于 penalty，说明该模块存在非对称预期惊喜结构。",
+    "caveats": "横截面；预期违背为车主自报主观口径，不宣示因果"
+  },
+  {
+    "signal_id": "expectation_wow_06",
+    "analysis_type": "expectation_wow",
+    "exposure": "ACHAR_D_05",
+    "outcome": "AFUEL_Index (delight top picks)",
+    "effect_size": {},
+    "sample_support": {
+      "n": 2530,
+      "coverage": "PARTIAL"
+    },
+    "stability": "moderate",
+    "novelty": 4,
+    "wow_structure": {},
+    "direction": "",
+    "controls": [],
+    "interpretation": "充电时长 vs 预期：`Better than expected` 车主(delight 项)最常宣称的内容",
+    "caveats": "缺失率 40-60%（ASET_D_02 等），仅为 Better 亚组描述",
+    "delight_top": {
+      "ASET_D_02": {
+        "The start-up screen on the center console": 160,
+        "How exciting the whole process is": 153,
+        "Nothing": 153
+      },
+      "ACMFT_D_02": {
+        "Nothing": 539,
+        "Quietness of the system": 366,
+        "Maintains the desired temperature": 343
+      },
+      "APERF_D_01": {
+        "Nothing": 1356,
+        "Vehicle acceleration at suburban (25 to 49 miles per hour)": 506,
+        "Vehicle acceleration from a stop (less than 25 miles per hour)": 358
+      },
+      "ASFTY_D_02": {
+        "The effectiveness of the driver assistance systems (e.g., cruise control, lane keep assist)": 160,
+        "The vehicle's maneuverability": 148,
+        "The effectiveness of the safety systems (e.g., blind spot warning, collision warning)": 143
+      }
+    }
+  },
+  {
+    "signal_id": "nonlinear_pattern_01",
+    "analysis_type": "nonlinear_pattern",
+    "exposure": "NEV_12",
+    "moderator": null,
+    "outcome": "APEAL_Index",
+    "effect_size": {
+      "range": 34.47,
+      "nested_f": 10.51,
+      "p": 0.0,
+      "unit": "APEAL points"
+    },
+    "sample_support": {
+      "n": 8380,
+      "coverage": "FULL"
+    },
+    "stability": "moderate",
+    "novelty": 4,
+    "interpretation": "累计里程呈非单调分段结构；控制主要结构与人口变量后，分箱相对线性模型的增量检验 p=4.498e-10。",
+    "controls": [
+      "SUPER_SEGMENT_DP",
+      "CN_YNV_07",
+      "PREMMAKE_DP",
+      "AGE_BUCKETS",
+      "CN_INCOME",
+      "CN_EDUCATION"
+    ],
+    "direction": "weighted range=34.5; direction_changes=2",
+    "coverage": "FULL",
+    "caveats": "横截面观察性分析；分箱边界为业务预注册边界，不代表因果剂量反应。",
+    "bins": [
+      {
+        "bin": "[0.0, 1000.0)",
+        "n": 566,
+        "weighted_mean": 783.83
+      },
+      {
+        "bin": "[1000.0, 5000.0)",
+        "n": 5543,
+        "weighted_mean": 801.72
+      },
+      {
+        "bin": "[5000.0, 10000.0)",
+        "n": 1921,
+        "weighted_mean": 789.32
+      },
+      {
+        "bin": "[10000.0, 20000.0)",
+        "n": 246,
+        "weighted_mean": 776.41
+      },
+      {
+        "bin": "[20000.0, 50000.0)",
+        "n": 91,
+        "weighted_mean": 767.25
+      },
+      {
+        "bin": "[50000.0, inf)",
+        "n": 13,
+        "weighted_mean": 794.69
+      }
+    ],
+    "adjusted_bin_coefs": {
+      "C(BIN)[T.Interval(1000.0, 5000.0, closed='left')]": {
+        "coef": 20.34,
+        "p": 7.4e-05
+      },
+      "C(BIN)[T.Interval(5000.0, 10000.0, closed='left')]": {
+        "coef": 7.85,
+        "p": 0.186944
+      },
+      "C(BIN)[T.Interval(10000.0, 20000.0, closed='left')]": {
+        "coef": -6.91,
+        "p": 0.46608
+      },
+      "C(BIN)[T.Interval(20000.0, 50000.0, closed='left')]": {
+        "coef": -14.07,
+        "p": 0.342183
+      },
+      "C(BIN)[T.Interval(50000.0, inf, closed='left')]": {
+        "coef": 12.68,
+        "p": 0.560354
+      }
+    }
+  },
+  {
+    "signal_id": "segment_discriminator_nev_08_segment_dp",
+    "analysis_type": "segment_discriminator",
+    "exposure": "NEV_08",
+    "moderator": "SEGMENT_DP",
+    "outcome": "APEAL_Index",
+    "effect_size": {
+      "within_segment_spread": 84.54,
+      "unit": "APEAL points"
+    },
+    "sample_support": {
+      "n": 1480,
+      "segments": 10,
+      "coverage": "SEGMENT_QUEUE"
+    },
+    "stability": "moderate",
+    "novelty": 3,
+    "interpretation": "快充频率在不同车型结构段内的效应幅度存在候选差异，需后续正式 interaction 验证。",
+    "controls": [
+      "SUPER_SEGMENT_DP",
+      "CN_YNV_07",
+      "PREMMAKE_DP",
+      "AGE_BUCKETS",
+      "CN_INCOME",
+      "CN_EDUCATION"
+    ],
+    "direction": "within-segment 99 vs 1 contrast",
+    "coverage": "SEGMENT_QUEUE",
+    "caveats": "分段筛选使用预注册组合；小段剔除；本轮不将筛选结果解释为正式交互因果效应。",
+    "segments": [
+      {
+        "moderator_value": "11.0",
+        "n": 250,
+        "coef_better_vs_worse": 59.38,
+        "p": 0.021009
+      },
+      {
+        "moderator_value": "12.0",
+        "n": 64,
+        "coef_better_vs_worse": 15.24,
+        "p": 0.607152
+      },
+      {
+        "moderator_value": "13.0",
+        "n": 202,
+        "coef_better_vs_worse": 4.54,
+        "p": 0.861392
+      },
+      {
+        "moderator_value": "14.0",
+        "n": 85,
+        "coef_better_vs_worse": 88.69,
+        "p": 0.005231
+      },
+      {
+        "moderator_value": "15.0",
+        "n": 107,
+        "coef_better_vs_worse": 75.62,
+        "p": 0.000485
+      },
+      {
+        "moderator_value": "16.0",
+        "n": 219,
+        "coef_better_vs_worse": 34.55,
+        "p": 0.476051
+      },
+      {
+        "moderator_value": "18.0",
+        "n": 65,
+        "coef_better_vs_worse": 17.01,
+        "p": 0.470036
+      },
+      {
+        "moderator_value": "19.0",
+        "n": 123,
+        "coef_better_vs_worse": 55.47,
+        "p": 0.109279
+      },
+      {
+        "moderator_value": "20.0",
+        "n": 119,
+        "coef_better_vs_worse": 4.15,
+        "p": 0.906695
+      },
+      {
+        "moderator_value": "21.0",
+        "n": 246,
+        "coef_better_vs_worse": 67.79,
+        "p": 0.002503
+      }
+    ]
+  },
+  {
+    "signal_id": "segment_discriminator_afuel_d_06_segment_dp",
+    "analysis_type": "segment_discriminator",
+    "exposure": "AFUEL_D_06",
+    "moderator": "SEGMENT_DP",
+    "outcome": "APEAL_Index",
+    "effect_size": {
+      "within_segment_spread": 76.03,
+      "unit": "APEAL points"
+    },
+    "sample_support": {
+      "n": 1881,
+      "segments": 11,
+      "coverage": "SEGMENT_QUEUE"
+    },
+    "stability": "moderate",
+    "novelty": 3,
+    "interpretation": "续航预期违背在不同车型结构段内的效应幅度存在候选差异，需后续正式 interaction 验证。",
+    "controls": [
+      "SUPER_SEGMENT_DP",
+      "CN_YNV_07",
+      "PREMMAKE_DP",
+      "AGE_BUCKETS",
+      "CN_INCOME",
+      "CN_EDUCATION"
+    ],
+    "direction": "within-segment 3 vs 1 contrast",
+    "coverage": "SEGMENT_QUEUE",
+    "caveats": "分段筛选使用预注册组合；小段剔除；本轮不将筛选结果解释为正式交互因果效应。",
+    "segments": [
+      {
+        "moderator_value": "11.0",
+        "n": 193,
+        "coef_better_vs_worse": 104.86,
+        "p": 0.0
+      },
+      {
+        "moderator_value": "12.0",
+        "n": 80,
+        "coef_better_vs_worse": 98.03,
+        "p": 2e-06
+      },
+      {
+        "moderator_value": "13.0",
+        "n": 316,
+        "coef_better_vs_worse": 105.94,
+        "p": 0.0
+      },
+      {
+        "moderator_value": "14.0",
+        "n": 99,
+        "coef_better_vs_worse": 74.99,
+        "p": 0.005785
+      },
+      {
+        "moderator_value": "15.0",
+        "n": 181,
+        "coef_better_vs_worse": 85.14,
+        "p": 1e-06
+      },
+      {
+        "moderator_value": "16.0",
+        "n": 260,
+        "coef_better_vs_worse": 76.36,
+        "p": 3e-06
+      },
+      {
+        "moderator_value": "17.0",
+        "n": 75,
+        "coef_better_vs_worse": 29.91,
+        "p": 0.109853
+      },
+      {
+        "moderator_value": "18.0",
+        "n": 144,
+        "coef_better_vs_worse": 38.94,
+        "p": 0.028508
+      },
+      {
+        "moderator_value": "19.0",
+        "n": 68,
+        "coef_better_vs_worse": 66.45,
+        "p": 0.002401
+      },
+      {
+        "moderator_value": "20.0",
+        "n": 134,
+        "coef_better_vs_worse": 87.99,
+        "p": 2e-06
+      },
+      {
+        "moderator_value": "21.0",
+        "n": 331,
+        "coef_better_vs_worse": 76.14,
+        "p": 0.0
+      }
+    ]
+  },
+  {
+    "signal_id": "segment_discriminator_achar_d_05_segment_dp",
+    "analysis_type": "segment_discriminator",
+    "exposure": "ACHAR_D_05",
+    "moderator": "SEGMENT_DP",
+    "outcome": "APEAL_Index",
+    "effect_size": {
+      "within_segment_spread": 118.05,
+      "unit": "APEAL points"
+    },
+    "sample_support": {
+      "n": 2576,
+      "segments": 12,
+      "coverage": "SEGMENT_QUEUE"
+    },
+    "stability": "moderate",
+    "novelty": 3,
+    "interpretation": "充电时长预期违背在不同车型结构段内的效应幅度存在候选差异，需后续正式 interaction 验证。",
+    "controls": [
+      "SUPER_SEGMENT_DP",
+      "CN_YNV_07",
+      "PREMMAKE_DP",
+      "AGE_BUCKETS",
+      "CN_INCOME",
+      "CN_EDUCATION"
+    ],
+    "direction": "within-segment 3 vs 1 contrast",
+    "coverage": "SEGMENT_QUEUE",
+    "caveats": "分段筛选使用预注册组合；小段剔除；本轮不将筛选结果解释为正式交互因果效应。",
+    "segments": [
+      {
+        "moderator_value": "11.0",
+        "n": 235,
+        "coef_better_vs_worse": 121.27,
+        "p": 2e-06
+      },
+      {
+        "moderator_value": "12.0",
+        "n": 108,
+        "coef_better_vs_worse": 95.59,
+        "p": 0.001195
+      },
+      {
+        "moderator_value": "13.0",
+        "n": 419,
+        "coef_better_vs_worse": 82.28,
+        "p": 5.9e-05
+      },
+      {
+        "moderator_value": "14.0",
+        "n": 127,
+        "coef_better_vs_worse": 33.11,
+        "p": 0.115495
+      },
+      {
+        "moderator_value": "15.0",
+        "n": 204,
+        "coef_better_vs_worse": 111.74,
+        "p": 0.000116
+      },
+      {
+        "moderator_value": "16.0",
+        "n": 333,
+        "coef_better_vs_worse": 85.73,
+        "p": 0.000851
+      },
+      {
+        "moderator_value": "17.0",
+        "n": 107,
+        "coef_better_vs_worse": 36.08,
+        "p": 0.170971
+      },
+      {
+        "moderator_value": "18.0",
+        "n": 205,
+        "coef_better_vs_worse": 151.16,
+        "p": 0.0
+      },
+      {
+        "moderator_value": "19.0",
+        "n": 117,
+        "coef_better_vs_worse": 70.03,
+        "p": 0.004606
+      },
+      {
+        "moderator_value": "20.0",
+        "n": 186,
+        "coef_better_vs_worse": 46.29,
+        "p": 0.012373
+      },
+      {
+        "moderator_value": "21.0",
+        "n": 482,
+        "coef_better_vs_worse": 102.09,
+        "p": 0.0
+      },
+      {
+        "moderator_value": "22.0",
+        "n": 53,
+        "coef_better_vs_worse": 132.13,
+        "p": 0.000107
+      }
+    ]
+  }
+]

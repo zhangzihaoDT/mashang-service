@@ -1,0 +1,47 @@
+{
+  "schema_version": "1.0",
+  "description": "统一 Signal Contract：Discovery 层所有 scanner 产出的 Signal 共用此 schema。Signal 是候选分配与 Tournament 的最小比较单位——一个变量可产生多个不同结构的 Signal（main effect / interaction / discriminator / nonlinear / wow），它们各自独立候选。",
+  "required_fields": [
+    "signal_id",
+    "analysis_type",
+    "exposure",
+    "outcome",
+    "effect_size",
+    "sample_support",
+    "stability",
+    "novelty",
+    "interpretation"
+  ],
+  "optional_fields": [
+    "moderator",
+    "direction",
+    "controls",
+    "coverage",
+    "caveats",
+    "wow_structure"
+  ],
+  "field_definitions": {
+    "signal_id": "唯一标识，格式 <analysis_type>_<n>，如 expectation_wow_01",
+    "analysis_type": "扫描类型：main_effect | expectation_wow | segment_discriminator | interaction | nonlinear_pattern",
+    "exposure": "暴露变量（轴）。一个变量可出现在多个 signal 中（不同结构）",
+    "moderator": "调节变量（interaction/discriminator 用），无则 null",
+    "outcome": "结果指标，通常 APEAL_Index 或模块指数",
+    "effect_size": "控制后的效应量（数值 + 单位），如 {'coef': 27.8, 'p': 0.001, 'unit': 'APEAL points'}",
+    "stability": "稳健性分级：stable | moderate | fragile（基于控制集/加权敏感/子样本）",
+    "novelty": "新颖性 1-5：相对既有 Finalist 的信息增量",
+    "sample_support": "支持该信号的样本量 / 覆盖率，如 {'n': 9937, 'coverage': 'FULL'}",
+    "interpretation": "业务可读的一句话机制解读",
+    "controls": "已应用的 confounder 控制集（E-001 起的 PRICE/BRAND/能源等）",
+    "direction": "效应方向文本（谁高谁低）",
+    "caveats": "观察性/横截面/样本缺失等边界说明",
+    "wow_structure": "expectation_wow 专用：{worse, about, better} 三档效应结构",
+    "coverage": "样本覆盖层级（FULL / 子群体）"
+  },
+  "analysis_types": {
+    "main_effect": "单变量主效应：X → APEAL，加权均值差 + confounder 回归",
+    "expectation_wow": "预期 vs 体验落差：预期违背项（AFUEL_D_06 / ACHAR_D_05）→ 模块/总体 wow 结构，含更惊喜/相符/更差三档梯度与 delight 项",
+    "segment_discriminator": "跨细分判别：同一变量在不同 segment 内的效应差异（可识别细分内 vs 无对照细分）",
+    "interaction": "X × Y 联合效应：两变量交互，判别独立 vs 调节结构（O(p^2)，最后执行）",
+    "nonlinear_pattern": "非线性/台阶结构：分档非单调、剂量-反应偏离线性（三梯度台阶等）"
+  }
+}

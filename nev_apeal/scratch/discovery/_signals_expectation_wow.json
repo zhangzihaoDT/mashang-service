@@ -1,0 +1,234 @@
+[
+  {
+    "signal_id": "expectation_wow_01",
+    "analysis_type": "expectation_wow",
+    "exposure": "AFUEL_D_06",
+    "outcome": "APEAL_Index",
+    "effect_size": {
+      "better_coef": 42.78,
+      "better_p": 0.0,
+      "worse_coef": -43.37,
+      "worse_p": 0.0,
+      "unit": "APEAL points (WLS, FULL controls)",
+      "n_reg": 8572
+    },
+    "sample_support": {
+      "n": 9937,
+      "coverage": "FULL"
+    },
+    "stability": "moderate",
+    "novelty": 3,
+    "wow_structure": {
+      "worse": 740.65,
+      "about": 784.42,
+      "better": 834.22,
+      "wow_gap_better_minus_about": 49.8,
+      "penalty_about_minus_worse": 43.8
+    },
+    "direction": "",
+    "controls": [
+      "SUPER_SEGMENT_DP",
+      "CN_YNV_07",
+      "PREMMAKE_DP",
+      "AGE_BUCKETS",
+      "CN_INCOME",
+      "CN_EDUCATION"
+    ],
+    "interpretation": "纯电续航 vs 预期：`Better than expected` 相对 `About as expected` 的 APEAL_Index 增量 = 49.8（WLS better=42.78, p=0.0）。若 wow_gap 显著大于 0 且大于 penalty，说明该模块存在非对称预期惊喜结构。",
+    "caveats": "横截面；预期违背为车主自报主观口径，不宣示因果"
+  },
+  {
+    "signal_id": "expectation_wow_02",
+    "analysis_type": "expectation_wow",
+    "exposure": "AFUEL_D_06",
+    "outcome": "AFUEL_Index",
+    "effect_size": {
+      "better_coef": 65.26,
+      "better_p": 0.0,
+      "worse_coef": -85.33,
+      "worse_p": 0.0,
+      "unit": "APEAL points (WLS, FULL controls)",
+      "n_reg": 8572
+    },
+    "sample_support": {
+      "n": 9937,
+      "coverage": "FULL"
+    },
+    "stability": "moderate",
+    "novelty": 3,
+    "wow_structure": {
+      "worse": 703.99,
+      "about": 789.87,
+      "better": 862.57,
+      "wow_gap_better_minus_about": 72.7,
+      "penalty_about_minus_worse": 85.9
+    },
+    "direction": "",
+    "controls": [
+      "SUPER_SEGMENT_DP",
+      "CN_YNV_07",
+      "PREMMAKE_DP",
+      "AGE_BUCKETS",
+      "CN_INCOME",
+      "CN_EDUCATION"
+    ],
+    "interpretation": "纯电续航 vs 预期：`Better than expected` 相对 `About as expected` 的 AFUEL_Index 增量 = 72.7（WLS better=65.26, p=0.0）。若 wow_gap 显著大于 0 且大于 penalty，说明该模块存在非对称预期惊喜结构。",
+    "caveats": "横截面；预期违背为车主自报主观口径，不宣示因果"
+  },
+  {
+    "signal_id": "expectation_wow_03",
+    "analysis_type": "expectation_wow",
+    "exposure": "AFUEL_D_06",
+    "outcome": "AFUEL_Index (delight top picks)",
+    "effect_size": {},
+    "sample_support": {
+      "n": 1544,
+      "coverage": "PARTIAL"
+    },
+    "stability": "moderate",
+    "novelty": 4,
+    "wow_structure": {},
+    "direction": "",
+    "controls": [],
+    "interpretation": "纯电续航 vs 预期：`Better than expected` 车主(delight 项)最常宣称的内容",
+    "caveats": "缺失率 40-60%（ASET_D_02 等），仅为 Better 亚组描述",
+    "delight_top": {
+      "ASET_D_02": {
+        "The operation of the start button": 102,
+        "How exciting the whole process is": 99,
+        "The start-up screen on the center console": 99
+      },
+      "ACMFT_D_02": {
+        "Nothing": 306,
+        "Quietness of the system": 245,
+        "Maintains the desired temperature": 194
+      },
+      "APERF_D_01": {
+        "Nothing": 939,
+        "Vehicle acceleration at suburban (25 to 49 miles per hour)": 263,
+        "Vehicle acceleration at high speed/Freeway (50 miles per hour and higher)": 183
+      },
+      "ASFTY_D_02": {
+        "The number of safety systems (e.g., blind spot warning, collision warning)": 97,
+        "The effectiveness of the driver assistance systems (e.g., cruise control, lane keep assist)": 96,
+        "The effectiveness of the safety systems (e.g., blind spot warning, collision warning)": 86
+      }
+    }
+  },
+  {
+    "signal_id": "expectation_wow_04",
+    "analysis_type": "expectation_wow",
+    "exposure": "ACHAR_D_05",
+    "outcome": "APEAL_Index",
+    "effect_size": {
+      "better_coef": 48.7,
+      "better_p": 0.0,
+      "worse_coef": -41.17,
+      "worse_p": 0.0,
+      "unit": "APEAL points (WLS, FULL controls)",
+      "n_reg": 8524
+    },
+    "sample_support": {
+      "n": 9882,
+      "coverage": "FULL"
+    },
+    "stability": "moderate",
+    "novelty": 3,
+    "wow_structure": {
+      "worse": 730.47,
+      "about": 778.28,
+      "better": 829.29,
+      "wow_gap_better_minus_about": 51.0,
+      "penalty_about_minus_worse": 47.8
+    },
+    "direction": "",
+    "controls": [
+      "SUPER_SEGMENT_DP",
+      "CN_YNV_07",
+      "PREMMAKE_DP",
+      "AGE_BUCKETS",
+      "CN_INCOME",
+      "CN_EDUCATION"
+    ],
+    "interpretation": "充电时长 vs 预期：`Better than expected` 相对 `About as expected` 的 APEAL_Index 增量 = 51.0（WLS better=48.7, p=0.0）。若 wow_gap 显著大于 0 且大于 penalty，说明该模块存在非对称预期惊喜结构。",
+    "caveats": "横截面；预期违背为车主自报主观口径，不宣示因果"
+  },
+  {
+    "signal_id": "expectation_wow_05",
+    "analysis_type": "expectation_wow",
+    "exposure": "ACHAR_D_05",
+    "outcome": "AFUEL_Index",
+    "effect_size": {
+      "better_coef": 65.59,
+      "better_p": 0.0,
+      "worse_coef": -54.56,
+      "worse_p": 0.0,
+      "unit": "APEAL points (WLS, FULL controls)",
+      "n_reg": 8524
+    },
+    "sample_support": {
+      "n": 9882,
+      "coverage": "FULL"
+    },
+    "stability": "moderate",
+    "novelty": 3,
+    "wow_structure": {
+      "worse": 707.52,
+      "about": 781.32,
+      "better": 850.25,
+      "wow_gap_better_minus_about": 68.9,
+      "penalty_about_minus_worse": 73.8
+    },
+    "direction": "",
+    "controls": [
+      "SUPER_SEGMENT_DP",
+      "CN_YNV_07",
+      "PREMMAKE_DP",
+      "AGE_BUCKETS",
+      "CN_INCOME",
+      "CN_EDUCATION"
+    ],
+    "interpretation": "充电时长 vs 预期：`Better than expected` 相对 `About as expected` 的 AFUEL_Index 增量 = 68.9（WLS better=65.59, p=0.0）。若 wow_gap 显著大于 0 且大于 penalty，说明该模块存在非对称预期惊喜结构。",
+    "caveats": "横截面；预期违背为车主自报主观口径，不宣示因果"
+  },
+  {
+    "signal_id": "expectation_wow_06",
+    "analysis_type": "expectation_wow",
+    "exposure": "ACHAR_D_05",
+    "outcome": "AFUEL_Index (delight top picks)",
+    "effect_size": {},
+    "sample_support": {
+      "n": 2530,
+      "coverage": "PARTIAL"
+    },
+    "stability": "moderate",
+    "novelty": 4,
+    "wow_structure": {},
+    "direction": "",
+    "controls": [],
+    "interpretation": "充电时长 vs 预期：`Better than expected` 车主(delight 项)最常宣称的内容",
+    "caveats": "缺失率 40-60%（ASET_D_02 等），仅为 Better 亚组描述",
+    "delight_top": {
+      "ASET_D_02": {
+        "The start-up screen on the center console": 160,
+        "How exciting the whole process is": 153,
+        "Nothing": 153
+      },
+      "ACMFT_D_02": {
+        "Nothing": 539,
+        "Quietness of the system": 366,
+        "Maintains the desired temperature": 343
+      },
+      "APERF_D_01": {
+        "Nothing": 1356,
+        "Vehicle acceleration at suburban (25 to 49 miles per hour)": 506,
+        "Vehicle acceleration from a stop (less than 25 miles per hour)": 358
+      },
+      "ASFTY_D_02": {
+        "The effectiveness of the driver assistance systems (e.g., cruise control, lane keep assist)": 160,
+        "The vehicle's maneuverability": 148,
+        "The effectiveness of the safety systems (e.g., blind spot warning, collision warning)": 143
+      }
+    }
+  }
+]

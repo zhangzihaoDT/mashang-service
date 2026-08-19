@@ -1,0 +1,16 @@
+hypotheses:
+- id: H-001
+  statement: 累计里程与 APEAL 存在非线性而非简单线性关系。
+  question: 里程分箱相对线性模型是否有稳定增量解释？
+  status: supported
+  created_from: E-001
+- id: H-002
+  statement: 里程非线性是跨模块的体验生命周期信号，而非单一补能模块结果。
+  question: 加入车型结构与人口控制后，哪些模块仍保留里程梯度？
+  status: partially_supported
+  created_from: E-002
+- id: H-003
+  statement: 长里程段的体验回落可以解释为产品质量衰减。
+  question: 10k-50k 回落是否足以支持质量衰减叙事？
+  status: not_established
+  created_from: E-003
