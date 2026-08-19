@@ -1,0 +1,26 @@
+hypotheses:
+  - id: H-001
+    statement: 快充频率对 APEAL 的效应在完整控制（能源/价格/品牌 + 必要人口学）后仍稳定（初筛 +52.4, p<0.001）。
+    status: refined
+    confirmed_by: E-002
+    reserved_note: 完整控制后 +47.89(p<0.001)；仅收入吸收 ~4.2 分；≤1次/月 vs 2-3次/月 轻微非单调
+  - id: H-002
+    statement: 快充频率档位对 APEAL 呈单调 dose-response（Everyday → Never used fast charging 体验逐级上升），效应量需量化。
+    status: refined
+    refined_by: E-003
+    reserved_note: 总趋势单调（ordinal slope +9.08, p<0.001）成立但非线性显著（三梯度台阶 770/790-796/814）；dose4→5 反转显著(-7.74, p=0.025)
+  - id: H-003
+    statement: 补能体验（ACHAR / AFUEL 及其 item）承载 NEV08 差异的显著部分，45–52 分差距中补能模块贡献最大。
+    status: refined
+    confirmed_by: E-004
+    reserved_note: ACHAR 控制后 +66.4(p<0.001) 超 APEAL +47.9；AFUEL +38.6；快/慢充速度 item 最大(+0.98)；续航项 +0.38 最小
+  - id: H-004
+    statement: NEV08 差异集中于补能模块，而非跨模块（外观/座舱/驾驶/安全）普遍存在。
+    status: rejected
+    rejected_by: E-005
+    reserved_note: 11/12 模块 gap 全显著（+38~+67），设置启动 +67.5 最大、充电 +66.4 第二 → 差异全面，NEV08 为生活方式/使用强度 proxy，非补能特异
+  - id: H-005
+    statement: 加入 NEV_12 累积里程、NEV_11 使用场景、NEV_05 家充条件后，NEV08 残差效应仍存在（独立于使用强度/场景/家充条件）。
+    status: refined
+    confirmed_by: E-006
+    reserved_note: 残差全控制仍显著（+46.4, WLS +26.7）；加入使用强度/场景后反放大（suppression）；NEV08 为独立"补能生活方式"分群

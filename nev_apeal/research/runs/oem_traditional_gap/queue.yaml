@@ -1,0 +1,53 @@
+research_id: oem_traditional_gap_001
+items:
+- id: H1
+  priority: 95
+  question: H1 Robustness — 传统国产 vs 国际/新势力 gap 在完整控制（ENERGY/PRICE/BRAND + 人口学）后是否稳定？
+  reason: 已证控制价格+豪华+车型后 +7.5~8.6（E-001/E-005），需补年龄/收入/教育等人口学，确认非人口结构混淆
+  action: regress APEAL_Index ~ ORIGIN3_DP + SUPER_SEGMENT_DP + CN_YNV_07 + PREMMAKE_DP + AGE_BUCKETS + CN_INCOME + CN_EDUCATION (sequential)
+  status: done
+  resolution: E-008：国际 raw +14.28 → 结构控制 +8.87(p=0.030) → 加收入 +6.85(p=0.092) → 加教育 +6.23(p=0.126) 边缘化。人口学吸收过半且 p 跨 0.05——H-001 不可归因声明降级为"有限残余 +6~8（边缘显著）"。新势力 +5.79(p=0.075) 同边缘。交 H4/H5 判别残余性质
+- id: H2
+  priority: 92
+  question: H2 Segmentation — 国际相对传统国产残余溢价是否集中于高端细分与 30 万+ 价格带？
+  reason: E-007 分层功效不足（0/10 显著、CI 跨零 100%），需用交互模型提升功效，判别"广泛残余 vs 特定细分集中"
+  action: regress ORIGIN3_DP × SEGMENT_DP 交互 + ORIGIN3_DP × 价格带交互
+  status: done
+  resolution: E-009：Premium 段几乎全国际、大众段几乎全传统国产 → SEGMENT×ORIGIN 交互不可识别。可测共存3段受控 gap 全不显著（-3.30/-2.88/+9.02，n=1040/497/841）；价格带交互 F=1.71 p=0.057 边缘。H-002 改为"高端无对照不可测，可测范围内无溢价"。国际高分主要来自产品组合（高端细分），非细分内品牌溢价
+- id: H3
+  priority: 88
+  question: H3 Mechanism decomposition — 控制结构后 gap 的 item 层承载结构（brand halo vs 工程短板判别）
+  reason: E-002/003/004 原始差异集中前排/NVH，E-005 控制后全维度均匀 → item 层是否也均匀？判别 halo vs 工程短板
+  action: 全模块 item 下钻（ADRV/APERF/ACMFT/AINT/ASFTY/AEXT/AFUEL/ACHAR/ABRAND）
+  status: done
+  resolution: E-010：非均匀 halo——AEXT +11.87(p=0.009) 最大、ADRV +10.93 + ASFTY +9.93 + AINT +9.61 + AENT +9.32 显著；APERF/ACHAR/ACMFT/ASET 不显著。item 层 ADRV_R_03(转向/NVH) +0.305(p<0.001) 独大，APERF 全灭。机制=感知质量（外观+驾驶调校），非纯 halo 亦非纯工程短板
+- id: H4
+  priority: 85
+  question: H4 Discriminator — 国际 vs 新势力残余差异是否同质（都是品牌级残余）？
+  reason: E-006 显示新势力差距可被结构+形象吸收、国际不可 → 判别两类 OEM 残余的性质差异
+  action: 逐步控制对比国际/新势力系数路径
+  status: done
+  resolution: E-011：两类残余同质——结构+人口学控制后 国际+7.70(p=0.073)/新势力+6.75(p=0.048)，WLS 后 +7.89/+6.33 均边缘。新势力未被吸收（与 E-006 用形象变量的结论相左）。差异=功效非性质，H-004 改"两类来源同质边缘残余"
+- id: H5
+  priority: 80
+  question: H5 Alternative explanation — 加入品牌形象/人口学/使用强度后，国际残余是否仍不可归因？
+  reason: E-006 形象仅控已测；需确认人口学+使用强度下残余是否仍在，排除其他替代解释
+  action: regress 逐步加入 YNV_CN_6 形象 / 人口学 / 使用强度，追踪 ORIGIN3 系数路径
+  status: done
+  resolution: E-012（refutes）：完整控制(结构+人口学)后 国际+9.17/新势力+8.72 → 加品牌形象 国际+5.07(p=0.223)/新势力+3.57(p=0.282) 双双失效 → WLS 终模 +2.74(p=0.530)/+0.21(p=0.956) 近零。不存在品牌级不可归因残余，OEM gap 全由结构+人口学+形象+使用强度/场景解释
+stop_conditions:
+  min_core_signals: 1
+  min_supporting_evidence: 3
+  required_confounders:
+  - ENERGY
+  - PRICE
+  - BRAND
+  - DEMOGRAPHICS
+  min_mechanism_depth: 3
+  high_priority_threshold: 85
+  max_no_information_rounds: 3
+  terminal_statuses:
+  - ready
+  - rejected
+  - inconclusive
+  - insufficient_coverage

@@ -1,6 +1,6 @@
 # Topic Tournament — Production Research 候选竞争
 
-**日期**：2026-08-18
+**日期**：2026-08-19
 **评分维度**（非统计显著性）：新颖性 × 证据强度 × 机制深度 × OEM Actionability × JDP 风格匹配 × PPT 张力（每维 1–5，满分 30）
 **证据锚定**：各 Topic 在 v2/v3/Holdout run 中的实际证据链（evidence.jsonl / state.yaml）
 
@@ -12,10 +12,10 @@
 
 | 层级                 | 数量  | 口径                                              |
 | -------------------- | ---: | ------------------------------------------------- |
-| **Evidence**         | **58** | `evidence.jsonl` 实际落盘证据总数                  |
-| **Research Run**     | **15** | `research/runs/` 实际运行目录；含 `_it3` 复跑       |
-| **Research Topic**   | **11** | 合并同主题迭代后的独立研究问题（含 `oem_traditional_gap` 暂存 Signal 与 `phone_connectivity_ainfo` / `range_fastcharge_trends` 已拒绝验证）|
-| **Tournament Finalist** | **6**  | T1–T6，进入 Topic Tournament 的成熟候选             |
+| **Evidence**         | **70** | `evidence.jsonl` 实际落盘证据总数                  |
+| **Research Run**     | **16** | `research/runs/` 实际运行目录；含 `_it3` 复跑       |
+| **Research Topic**   | **12** | 合并同主题迭代后的独立研究问题（含 `oem_traditional_gap` 已 READY、`charging_lifestyle` 已 READY、`phone_connectivity_ainfo` / `range_fastcharge_trends` 已拒绝验证）|
+| **Tournament Finalist** | **8**  | T1–T8，进入 Topic Tournament 的成熟候选             |
 | **Champion**         | **1**  | T1 Purchase Mission                              |
 | **Production Topic** | **1**  | T1 经 Production Research（P1~P3）深挖后的最终交付主题 |
 
@@ -29,15 +29,25 @@
 | BEV / PHEV       | `bev_phev` + `_it3`                                 | T6                           |
 | Brand Image      | `holdout_h2_brandimage`                             | Holdout only                 |
 | Driver Analysis  | `holdout_h3_driver`                                 | Holdout only                 |
-| OEM Experience Gap（暂存 Signal）| `oem_traditional_gap`                     | Signal Scan · 未入锦标赛      |
+| OEM Experience Gap | `oem_traditional_gap`                            | T8 · Finalist · READY（无品牌级残余，gap=多因素综合） |
+| Charging Lifestyle | `charging_lifestyle`                      | T7 · Finalist · READY（机制=补能生活方式分群，观察性） |
 | Phone Connectivity（已拒绝验证）| `phone_connectivity_ainfo`                 | Topic 验证 · REJECTED        |
 | EV 续航焦虑/快充趋势（已拒绝验证）| `range_fastcharge_trends`                 | Topic 验证 · REJECTED        |
 
-**一句话漏斗**：58 Evidence → 15 Research Runs → 11 Research Topics → 6 Tournament Finalists → 1 Champion → 1 Production Topic
+**一句话漏斗**：70 Evidence → 16 Research Runs → 12 Research Topics → 8 Tournament Finalists → 1 Champion → 1 Production Topic
+
+**候选池扩展（2026-08-19，Signal Board 驱动）**：
+
+| 候选 | 状态 | 说明 |
+|---|---|---:|
+| **T7 Charging Lifestyle**（NEV_08） | **Finalist · READY** · `runs/charging_lifestyle/` | raw 45.1 → 控制后 +47.9（WLS +26.7）；H1-Robustness ✔ / H2-三梯度台阶 ✔ / H3-补能最大承载 ✔ / H4-差异全面（非补能特异）✘ / H5-残差仍显著 ✔。报告 `reports/charging_lifestyle.md` |
+| **T8 OEM Experience Gap**（ORIGIN3_DP） | **Finalist · READY** · `runs/oem_traditional_gap/` | raw +14.3 → 完整控制（结构+人口学+形象+使用强度）归零（WLS +2.7 p=0.53）；无品牌级残余，gap=多因素综合。E-001~E-012 |
+
+> 原则：Signal Board 只做筛选与优先级排序，Topic 通过竞争获得研究预算（详见 `reports/signal_board.md`）。不是发现统计差异就建 run。
 
 ---
 
-## 1. 候选池（6 个已研究 Topic）
+## 1. 候选池（8 个已研究 Topic）
 
 | ID | 候选 | 研究结论 | 状态 | mechanism_depth |
 |---|---|---|---|---|
@@ -47,20 +57,22 @@
 | T4 | Price Band｜20万+ 产品魅力断层 | 20万+ 跳升 +11.9，控制品牌后 +10.8(p=0.003)，性能(+16)/驾驶(+11)承载 | READY | 3 |
 | T5 | Configuration｜记忆座椅等配置的真实体验传导 | 三层证据：raw+24.9→控制+14.3→匹配+17.5(71.9%一致)；舒适度传导 +17.4 | READY | 3 |
 | T6 | BEV/PHEV｜技术路线差异 | BEV 领先 3.4，性能差 +7.2 且 item 指向发动机 NVH；但控制品牌后 p=0.138 不显著 | INCONCLUSIVE | 3 |
+| T7 | Charging Lifestyle｜充电生活方式分群 | 从不快充组体验全面领先 +27~46（控制能源/价格/品牌/人口/强度/场景/家充/慢充后残差仍显著）；差异全方位非补能特异；快慢充速度 item 最大 | READY | 3 |
+| T8 | OEM Experience Gap｜来源结构差距 | raw +14.3 被完整控制（结构+人口学+品牌形象+使用强度/场景）完全吸收归零（WLS +2.7 p=0.53）；无品牌级不可归因残余，非独立机制 | READY | 3 |
 
 ---
 
 ## 2. 六维评分
 
-| 维度 | T1 Purchase | T2 Age | T3 Income | T4 Price | T5 Config | T6 BEV/PHEV |
-|---|---:|---:|---:|---:|---:|---:|
-| 新颖性 | 4 | 3 | 4 | 4 | 4 | 3 |
-| 证据强度 | 5 | 4 | 4 | 4 | 4 | 2 |
-| 机制深度 | 5 | 3 | 3 | 3 | 3 | 3 |
-| OEM Actionability | 4 | 3 | 4 | 4 | 4 | 3 |
-| JDP 风格匹配 | **5** | 3 | 4 | 4 | 3 | 3 |
-| PPT 张力 | 4 | 3 | 3 | 4 | 3 | 3 |
-| **总分** | **27** | **19** | **22** | **23** | **21** | **17** |
+| 维度 | T1 Purchase | T2 Age | T3 Income | T4 Price | T5 Config | T6 BEV/PHEV | T7 Charging | T8 OEM |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| 新颖性 | 4 | 3 | 4 | 4 | 4 | 3 | 4 | 3 |
+| 证据强度 | 5 | 4 | 4 | 4 | 4 | 2 | 4 | 4 |
+| 机制深度 | 5 | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
+| OEM Actionability | 4 | 3 | 4 | 4 | 4 | 3 | 4 | 3 |
+| JDP 风格匹配 | **5** | 3 | 4 | 4 | 3 | 3 | 3 | 2 |
+| PPT 张力 | 4 | 3 | 3 | 4 | 3 | 3 | 4 | 2 |
+| **总分** | **27** | **19** | **22** | **23** | **21** | **17** | **22** | **17** |
 
 > **评分调整说明**：T1 的 JDP fit 从 4 提到 5。理由——T1 已形成完整的「用户任务 → 魅力结构 → Item 体验 → 产品定义」价值链，这正是产品研究公司（J.D. Power 式）的典型价值链；相比之下 T4 的"20 万以上体验跳升"只覆盖价位带层面，未闭环到产品定义。
 

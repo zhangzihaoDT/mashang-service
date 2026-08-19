@@ -1,0 +1,53 @@
+research_id: charging_lifestyle_001
+items:
+- id: H1
+  priority: 95
+  question: H1 Robustness — 完整控制 ENERGY/PRICE/BRAND + 人口学后，+52.4 是否稳定？
+  reason: 初筛已控制能源/价格/豪华（+52.4, p<0.001）；需补年龄/收入/教育等人口学，确认非人口结构混淆
+  action: regress APEAL_Index ~ NEV_08 + SUPER_SEGMENT_DP + CN_YNV_07 + PREMMAKE_DP + AGE_BUCKETS + CN_INCOME + CN_EDUCATION
+  status: done
+  resolution: H-001 通过（E-002）：系数路径 +52.37→+47.89 全步 p<0.001；仅收入吸收 ~4.2 分，方向显著性不变。注：≤1次/月(+19.0) 低于 2-3次/月(+26.7)，轻微非单调交 H2
+- id: H2
+  priority: 92
+  question: H2 Dose-response — NEV08 各频率档是否真单调？effect size 量化。
+  reason: 初筛梯度 Everyday0→每周≥2次+1.2→每周1次+17.8→每月2-3次+25.1→每月≤1次+18.0→从未+52.4；需正式检验单调性与各档显著性
+  action: nonlinear/binned panel 分档效应 + 单调性检验
+  status: done
+  resolution: H-002 refined（E-003）：总单调趋势成立(slope +9.08/dose, p<0.001)，但显著非线性（台阶结构：快充依赖770 / 偶尔790-796 / 从不814）；dose4→5 反转 -7.74(p=0.025) 显著；最大台阶在从不(+24.9)。叙事改"三梯度台阶"而非严格单调
+- id: H3
+  priority: 88
+  question: H3 Mechanism decomposition — ACHAR/AFUEL item 下钻，补能体验贡献多少分？
+  reason: 45–52 分差异中补能模块占比，决定"补能本身 vs 其他"叙事
+  action: drilldown ACHAR_Index / AFUEL_Index 及 item
+  status: done
+  resolution: H-003 支持（E-004）：ACHAR gap +66.4 控制后 p<0.001（超 APEAL +47.9），AFUEL +38.6；补能模块最大单一承载。item 最大为快慢充速度(+0.98/+0.98)与整体充电体验(+0.77)；续航 AFUEL +0.38 最小。交 H4 判别是否模块特异
+- id: H4
+  priority: 85
+  question: H4 Cross-module discriminator — 差异是否仅集中于补能模块？
+  reason: 若外观/座舱/驾驶/安全全模块都差 → 公共快充依赖是生活方式/使用强度 proxy（吸收 NEV11C/NEV_12 候选）
+  action: 模块指数 compare（AEXT/AINT/ACMFT/ADRV/APERF/ASFTY/AFUEL/ACHAR/ABRAND）× NEV08
+  status: done
+  resolution: H-004 拒绝（E-005）：11/12 模块控制后 gap +38~+67 全部 p<0.001（设置启动+67.5最大，充电+66.4第二），差异全面非补能特异 → NEV08 是生活方式/使用强度 proxy。机制方向转向，交 H5 检验独立性
+- id: H5
+  priority: 80
+  question: H5 Alternative explanation — 加入 NEV_12/NEV_11/家充后，NEV08 残差是否仍在？
+  reason: 排除里程、使用场景、家充条件等替代解释；若残差消失 → 机制重写，NEV08 为 proxy
+  action: regress 逐步加入 NEV_12 / NEV_11A-G / NEV_05，追踪 NEV08 系数路径
+  status: done
+  resolution: H-005 支持（E-006）：残差全控制仍显著 +46.4（WLS +26.7, p=0.0034）；加入使用强度/场景后反放大(suppression)。NEV08 独立于里程/场景/家充/慢充 → 独立"补能生活方式"分群，非 proxy
+stop_conditions:
+  min_core_signals: 1
+  min_supporting_evidence: 3
+  required_confounders:
+  - ENERGY
+  - PRICE
+  - BRAND
+  - DEMOGRAPHICS
+  min_mechanism_depth: 3
+  high_priority_threshold: 85
+  max_no_information_rounds: 3
+  terminal_statuses:
+  - ready
+  - rejected
+  - inconclusive
+  - insufficient_coverage

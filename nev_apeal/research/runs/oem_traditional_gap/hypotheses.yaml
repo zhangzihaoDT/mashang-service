@@ -4,9 +4,33 @@ hypotheses:
   question: 传统国产 vs 国际/新势力是否存在 APEAL 差异？控制价格、豪华/大众、车型、品牌形象后是否仍在？
   status: refined
   created_from: E-001
-  refined_by: E-005, E-006, E-007
+  refined_by: E-005, E-006, E-007, E-008
+  reserved_note: E-008 加收入/教育后国际 +6.23(p=0.126)/新势力 +5.79(p=0.075) 边缘化——不可归因声明降级为"有限残余（边缘显著）"，人口学吸收过半
 - id: H-002
-  statement: 国际残余溢价并非均匀分布，而是集中于高端细分（Premium BEV/PHEV、Midsize BEV SUV）与 30 万+ 价格带；15-20 万与中端 BEV Car 无溢价（可能是特定市场机制而非广泛品牌溢价）
+  statement: 国际相对传统国产的残余溢价并非均匀分布，而是集中于高端细分（Premium BEV/PHEV、Midsize BEV SUV）与 30 万+ 价格带；15-20 万与中端 BEV Car 无溢价（可能是特定市场机制而非广泛品牌溢价）
   question: 国际相对传统国产的残余溢价是否在细分/价格带内均匀分布？
-  status: active
+  status: refined
   created_from: E-007
+  refined_by: E-009
+  reserved_note: E-009 高端细分无传统国产对照（Premium 几乎全国际）→ 原『集中于高端』不可验证；可测共存3细分受控 gap 全不显著（-3.3/-2.9/+9.0）。改判：国际高分来自产品组合（高端细分）而非细分内品牌溢价
+- id: H-003
+  statement: 控制结构后 gap 的 item 层承载也是均匀分布（brand halo）而非集中于前排/NVH 工程项
+  question: 控制价格+豪华+车型后，item 层差异是否仍集中于驾驶/NVH？还是全 item 均匀（halo）？
+  status: refined
+  created_from: queue H3
+  refined_by: E-010
+  reserved_note: E-010 修正 E-005 的均匀 halo 主张——模块分层：AEXT 外观 +11.9 最大、ADRV 驾驶 +10.9、APERF 不显著；item 层 ADRV_R_03 +0.305 独大。机制=感知质量（外观+驾驶调校），非纯 halo 亦非纯工程短板
+- id: H-004
+  statement: 国际与新势力的残余性质不同：国际为不可归因的品牌级溢价，新势力为可被结构+形象吸收的差距
+  question: 国际 vs 新势力相对传统国产的残余差异是否同质？
+  status: refined
+  created_from: queue H4
+  refined_by: E-011
+  reserved_note: E-011 结构+人口学控制后两类残余同质（国际+7.70 p=0.073 / 新势力+6.75 p=0.048，WLS 后均边缘）；与 E-006 形象吸收结论相左，差异源于控制变量选择
+- id: H-005
+  statement: 完整控制（人口学+使用强度+品牌形象）后国际残余溢价仍不可归因，为稳定品牌级效应
+  question: 加入人口学/使用强度/品牌形象后，国际残余是否仍存在？
+  status: rejected
+  created_from: queue H5
+  rejected_by: E-012
+  reserved_note: E-012 品牌形象加入后残余 国际+5.07(p=0.223)/新势力+3.57(p=0.282) 双双失效；WLS 近零。OEM gap 无品牌级不可归因残余，为多因素综合效应

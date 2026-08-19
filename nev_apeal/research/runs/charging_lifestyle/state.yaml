@@ -1,0 +1,26 @@
+research_id: charging_lifestyle_001
+topic_id: charging_lifestyle
+round: 5
+status: ready
+question: 公共补能依赖度（NEV_08 快充频率）是否对应不同的整车拥有体验？NEV08 仅作 segmentation 变量。
+current_hypothesis: H-005 支持——NEV08 残差全控制仍显著（+46.4 / WLS +26.7），独立于里程/场景/家充/慢充。主题结论：补能生活方式是独立强韧的体验分群；差异全方位（H-004
+  拒绝补能特异），item 最大承载为快慢充速度（H-003）。
+confidence: high
+evidence_ids:
+- E-001
+- E-002
+- E-003
+- E-004
+- E-005
+- E-006
+open_questions: []
+mechanism_depth: 3
+effect_interpreted: true
+next_action: null
+last_analysis: sequential_regress
+information_gain_rounds: 5
+rejected_hypotheses:
+- H-004 补能特异机制：11/12 模块全显著，差异全面 → 拒绝（E-005）
+- 补能因果机制：不成立，为生活方式分群（观察性）
+stop_reason: 'READY: evidence + confidence + mechanism_depth + no high-priority open
+  question'

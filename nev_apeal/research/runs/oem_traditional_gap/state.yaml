@@ -1,3 +1,10 @@
+research_id: oem_traditional_gap_001
+topic_id: oem_traditional_gap
+round: 6
+status: ready
+question: 传统国产 OEM 相对国际/新势力是否存在不可归因的 APEAL 差距？差距的承载结构与机制是什么？
+current_hypothesis: OEM gap 无品牌级不可归因残余——完整控制（结构+人口学+形象+使用强度/场景）后归零；机制=多因素综合（含品牌形象）
+confidence: high
 evidence_ids:
 - E-001
 - E-002
@@ -6,4 +13,19 @@ evidence_ids:
 - E-005
 - E-006
 - E-007
-last_analysis: stratified_stability
+- E-008
+- E-009
+- E-010
+- E-011
+- E-012
+open_questions: []
+mechanism_depth: 3
+effect_interpreted: true
+next_action: null
+last_analysis: regress
+information_gain_rounds: 6
+rejected_hypotheses:
+- H-005 品牌级不可归因残余：加形象后归零 → 拒绝（E-012）
+- H-004 国际/新势力残余异质：同类边缘残余 → refined（E-011）
+stop_reason: 'READY: evidence + confidence + mechanism_depth + no high-priority open
+  question'
