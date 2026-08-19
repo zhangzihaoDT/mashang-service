@@ -1,0 +1,654 @@
+{
+  "status": "success",
+  "script": "runtime_scripts/current_state_diagnosis.py",
+  "generated_at": "2026-08-19",
+  "scope": {
+    "data_source": "/Users/zihao_/Documents/github/mashang-service/dataset/delivery_inventory.parquet; dataset/order_data.parquet; /Users/zihao_/Documents/github/mashang-service/dataset/assign_data.csv",
+    "time_window": {
+      "as_of": "2025-04-17"
+    },
+    "filters": {
+      "series": null
+    },
+    "metric_definition": "库存=国内DC在库_未开票快照(按观察日时间戳重建); 待开票未退订=锁单&未开票&未退订(point-in-time as-of重建); 风险暴露=(1−有效率)×待开票未退订=悬置池−ELOE; 滚动365d=Age×Series; 当年累计=当年1月1日起+Age-only(与backlog_rate_trend_report同口径); 30日日均下发线索=过去30日下发线索数/30(assign_data整体口径,窗口不跨as-of); 有效门店数=近30日下发门店数日均; 单店日均=30日日均下发线索/有效门店数; 库存覆盖天数=库存数/近30日日均开票销量(零售开票剔除对公)"
+  },
+  "observations": [
+    {
+      "as_of": "2025-04-17",
+      "summary": "库存 5,917 台 · 待开票未退订 4,156 单 · 有效率 25.0% · 风险暴露(滚动365d) 3,118 单 · 风险暴露(2025当年累计) 711 单\n下发线索(近30日) 日均 7,568.6 条 · 有效门店日均 309.8 家 · 单店日均 24.4 条\n库存覆盖天数(近30日开票口径) 43.2 天",
+      "metrics": {
+        "inventory_total": 5917,
+        "pending_total": 4156,
+        "effective_rate": 0.2498,
+        "at_risk_total": 3117.8,
+        "at_risk_ytd": 710.9,
+        "leads_30d_avg": 7568.6,
+        "effective_stores_avg": 309.8,
+        "leads_per_store_daily": 24.4,
+        "sales_30d_total": 4110,
+        "inventory_coverage_days": 43.2
+      },
+      "inventory": {
+        "total": 5917,
+        "by_series": {
+          "LS6": 4387,
+          "LS8": 0,
+          "LS9": 0,
+          "L6": 601,
+          "LS7": 711,
+          "L7": 218
+        }
+      },
+      "backlog": {
+        "pending_total": 4156,
+        "effective_rate": 0.2498,
+        "at_risk_total": 3117.8,
+        "ytd": {
+          "start": "2025-01-01",
+          "pending": 1688,
+          "effective_rate": 0.5789,
+          "at_risk": 710.9,
+          "model": "age"
+        }
+      },
+      "leads": {
+        "window_start": "2025-03-19",
+        "window_end": "2025-04-17",
+        "days": 30,
+        "leads_30d_sum": 227059,
+        "leads_30d_avg": 7568.6,
+        "effective_stores_avg": 309.8,
+        "leads_per_store_daily": 24.4
+      },
+      "mos": {
+        "window_days": 30,
+        "sales_30d_total": 4110,
+        "inventory_coverage_days": 43.2
+      },
+      "rows": [
+        {
+          "series": "LS6",
+          "inventory": 4387,
+          "sales_30d": 3092,
+          "coverage_days": 42.6,
+          "pending": 2246,
+          "effective_rate": 0.3649,
+          "at_risk": 1426.4,
+          "at_risk_ytd": 461.3
+        },
+        {
+          "series": "LS8",
+          "inventory": 0,
+          "sales_30d": 0,
+          "coverage_days": null,
+          "pending": 0,
+          "effective_rate": null,
+          "at_risk": null,
+          "at_risk_ytd": null
+        },
+        {
+          "series": "LS9",
+          "inventory": 0,
+          "sales_30d": 0,
+          "coverage_days": null,
+          "pending": 0,
+          "effective_rate": null,
+          "at_risk": null,
+          "at_risk_ytd": null
+        },
+        {
+          "series": "L6",
+          "inventory": 601,
+          "sales_30d": 972,
+          "coverage_days": 18.5,
+          "pending": 1794,
+          "effective_rate": 0.1045,
+          "at_risk": 1606.6,
+          "at_risk_ytd": 222.4
+        },
+        {
+          "series": "LS7",
+          "inventory": 711,
+          "sales_30d": 36,
+          "coverage_days": 592.5,
+          "pending": 92,
+          "effective_rate": 0.2576,
+          "at_risk": 68.3,
+          "at_risk_ytd": 24.7
+        },
+        {
+          "series": "L7",
+          "inventory": 218,
+          "sales_30d": 10,
+          "coverage_days": 654.0,
+          "pending": 24,
+          "effective_rate": 0.3125,
+          "at_risk": 16.5,
+          "at_risk_ytd": 2.6
+        }
+      ]
+    },
+    {
+      "as_of": "2025-08-14",
+      "summary": "库存 5,895 台 · 待开票未退订 3,867 单 · 有效率 29.1% · 风险暴露(滚动365d) 2,740 单 · 风险暴露(2025当年累计) 1,454 单\n下发线索(近30日) 日均 10,867.3 条 · 有效门店日均 355.5 家 · 单店日均 30.6 条\n库存覆盖天数(近30日开票口径) 35.9 天",
+      "metrics": {
+        "inventory_total": 5895,
+        "pending_total": 3867,
+        "effective_rate": 0.2914,
+        "at_risk_total": 2740.0,
+        "at_risk_ytd": 1453.5,
+        "leads_30d_avg": 10867.3,
+        "effective_stores_avg": 355.5,
+        "leads_per_store_daily": 30.6,
+        "sales_30d_total": 4927,
+        "inventory_coverage_days": 35.9
+      },
+      "inventory": {
+        "total": 5895,
+        "by_series": {
+          "LS6": 1940,
+          "LS8": 0,
+          "LS9": 0,
+          "L6": 3015,
+          "LS7": 757,
+          "L7": 183
+        }
+      },
+      "backlog": {
+        "pending_total": 3867,
+        "effective_rate": 0.2914,
+        "at_risk_total": 2740.0,
+        "ytd": {
+          "start": "2025-01-01",
+          "pending": 2568,
+          "effective_rate": 0.434,
+          "at_risk": 1453.5,
+          "model": "age"
+        }
+      },
+      "leads": {
+        "window_start": "2025-07-16",
+        "window_end": "2025-08-14",
+        "days": 30,
+        "leads_30d_sum": 326019,
+        "leads_30d_avg": 10867.3,
+        "effective_stores_avg": 355.5,
+        "leads_per_store_daily": 30.6
+      },
+      "mos": {
+        "window_days": 30,
+        "sales_30d_total": 4927,
+        "inventory_coverage_days": 35.9
+      },
+      "rows": [
+        {
+          "series": "LS6",
+          "inventory": 1940,
+          "sales_30d": 2712,
+          "coverage_days": 21.5,
+          "pending": 1650,
+          "effective_rate": 0.3302,
+          "at_risk": 1105.2,
+          "at_risk_ytd": 485.6
+        },
+        {
+          "series": "LS8",
+          "inventory": 0,
+          "sales_30d": 0,
+          "coverage_days": null,
+          "pending": 0,
+          "effective_rate": null,
+          "at_risk": null,
+          "at_risk_ytd": null
+        },
+        {
+          "series": "LS9",
+          "inventory": 0,
+          "sales_30d": 0,
+          "coverage_days": null,
+          "pending": 0,
+          "effective_rate": null,
+          "at_risk": null,
+          "at_risk_ytd": null
+        },
+        {
+          "series": "L6",
+          "inventory": 3015,
+          "sales_30d": 2145,
+          "coverage_days": 42.2,
+          "pending": 2090,
+          "effective_rate": 0.2593,
+          "at_risk": 1548.0,
+          "at_risk_ytd": 902.8
+        },
+        {
+          "series": "LS7",
+          "inventory": 757,
+          "sales_30d": 62,
+          "coverage_days": 366.3,
+          "pending": 118,
+          "effective_rate": 0.3314,
+          "at_risk": 78.9,
+          "at_risk_ytd": 62.1
+        },
+        {
+          "series": "L7",
+          "inventory": 183,
+          "sales_30d": 8,
+          "coverage_days": 686.2,
+          "pending": 9,
+          "effective_rate": 0.1222,
+          "at_risk": 7.9,
+          "at_risk_ytd": 3.0
+        }
+      ]
+    },
+    {
+      "as_of": "2025-11-03",
+      "summary": "库存 9,728 台 · 待开票未退订 13,189 单 · 有效率 52.1% · 风险暴露(滚动365d) 6,315 单 · 风险暴露(2025当年累计) 5,949 单\n下发线索(近30日) 日均 14,926.7 条 · 有效门店日均 377.5 家 · 单店日均 39.5 条\n库存覆盖天数(近30日开票口径) 29.5 天",
+      "metrics": {
+        "inventory_total": 9728,
+        "pending_total": 13189,
+        "effective_rate": 0.5212,
+        "at_risk_total": 6315.2,
+        "at_risk_ytd": 5948.8,
+        "leads_30d_avg": 14926.7,
+        "effective_stores_avg": 377.5,
+        "leads_per_store_daily": 39.5,
+        "sales_30d_total": 9881,
+        "inventory_coverage_days": 29.5
+      },
+      "inventory": {
+        "total": 9728,
+        "by_series": {
+          "LS6": 6783,
+          "LS8": 0,
+          "LS9": 104,
+          "L6": 2021,
+          "LS7": 579,
+          "L7": 241
+        }
+      },
+      "backlog": {
+        "pending_total": 13189,
+        "effective_rate": 0.5212,
+        "at_risk_total": 6315.2,
+        "ytd": {
+          "start": "2025-01-01",
+          "pending": 12882,
+          "effective_rate": 0.5382,
+          "at_risk": 5948.8,
+          "model": "age"
+        }
+      },
+      "leads": {
+        "window_start": "2025-10-05",
+        "window_end": "2025-11-03",
+        "days": 30,
+        "leads_30d_sum": 447802,
+        "leads_30d_avg": 14926.7,
+        "effective_stores_avg": 377.5,
+        "leads_per_store_daily": 39.5
+      },
+      "mos": {
+        "window_days": 30,
+        "sales_30d_total": 9881,
+        "inventory_coverage_days": 29.5
+      },
+      "rows": [
+        {
+          "series": "LS6",
+          "inventory": 6783,
+          "sales_30d": 8369,
+          "coverage_days": 24.3,
+          "pending": 11913,
+          "effective_rate": 0.5369,
+          "at_risk": 5516.8,
+          "at_risk_ytd": 5314.6
+        },
+        {
+          "series": "LS8",
+          "inventory": 0,
+          "sales_30d": 0,
+          "coverage_days": null,
+          "pending": 0,
+          "effective_rate": null,
+          "at_risk": null,
+          "at_risk_ytd": null
+        },
+        {
+          "series": "LS9",
+          "inventory": 104,
+          "sales_30d": 0,
+          "coverage_days": null,
+          "pending": 7,
+          "effective_rate": 1.0,
+          "at_risk": 0.0,
+          "at_risk_ytd": 0.0
+        },
+        {
+          "series": "L6",
+          "inventory": 2021,
+          "sales_30d": 1465,
+          "coverage_days": 41.4,
+          "pending": 1181,
+          "effective_rate": 0.3821,
+          "at_risk": 729.7,
+          "at_risk_ytd": 572.4
+        },
+        {
+          "series": "LS7",
+          "inventory": 579,
+          "sales_30d": 38,
+          "coverage_days": 457.1,
+          "pending": 81,
+          "effective_rate": 0.2049,
+          "at_risk": 64.4,
+          "at_risk_ytd": 58.5
+        },
+        {
+          "series": "L7",
+          "inventory": 241,
+          "sales_30d": 9,
+          "coverage_days": 803.3,
+          "pending": 7,
+          "effective_rate": 0.3857,
+          "at_risk": 4.3,
+          "at_risk_ytd": 3.4
+        }
+      ]
+    },
+    {
+      "as_of": "2026-03-25",
+      "summary": "库存 10,683 台 · 待开票未退订 4,499 单 · 有效率 37.2% · 风险暴露(滚动365d) 2,826 单 · 风险暴露(2026当年累计) 762 单\n下发线索(近30日) 日均 12,590.4 条 · 有效门店日均 394.6 家 · 单店日均 31.9 条\n库存覆盖天数(近30日开票口径) 87.9 天",
+      "metrics": {
+        "inventory_total": 10683,
+        "pending_total": 4499,
+        "effective_rate": 0.3718,
+        "at_risk_total": 2826.2,
+        "at_risk_ytd": 762.0,
+        "leads_30d_avg": 12590.4,
+        "effective_stores_avg": 394.6,
+        "leads_per_store_daily": 31.9,
+        "sales_30d_total": 3646,
+        "inventory_coverage_days": 87.9
+      },
+      "inventory": {
+        "total": 10683,
+        "by_series": {
+          "LS6": 6632,
+          "LS8": 704,
+          "LS9": 1632,
+          "L6": 983,
+          "LS7": 547,
+          "L7": 185
+        }
+      },
+      "backlog": {
+        "pending_total": 4499,
+        "effective_rate": 0.3718,
+        "at_risk_total": 2826.2,
+        "ytd": {
+          "start": "2026-01-01",
+          "pending": 2354,
+          "effective_rate": 0.6763,
+          "at_risk": 762.0,
+          "model": "age"
+        }
+      },
+      "leads": {
+        "window_start": "2026-02-24",
+        "window_end": "2026-03-25",
+        "days": 30,
+        "leads_30d_sum": 377711,
+        "leads_30d_avg": 12590.4,
+        "effective_stores_avg": 394.6,
+        "leads_per_store_daily": 31.9
+      },
+      "mos": {
+        "window_days": 30,
+        "sales_30d_total": 3646,
+        "inventory_coverage_days": 87.9
+      },
+      "rows": [
+        {
+          "series": "LS6",
+          "inventory": 6632,
+          "sales_30d": 2129,
+          "coverage_days": 93.5,
+          "pending": 2397,
+          "effective_rate": 0.3499,
+          "at_risk": 1558.3,
+          "at_risk_ytd": 346.1
+        },
+        {
+          "series": "LS8",
+          "inventory": 704,
+          "sales_30d": 32,
+          "coverage_days": 660.0,
+          "pending": 272,
+          "effective_rate": 0.989,
+          "at_risk": 3.0,
+          "at_risk_ytd": 3.0
+        },
+        {
+          "series": "LS9",
+          "inventory": 1632,
+          "sales_30d": 973,
+          "coverage_days": 50.3,
+          "pending": 1202,
+          "effective_rate": 0.3215,
+          "at_risk": 815.5,
+          "at_risk_ytd": 310.0
+        },
+        {
+          "series": "L6",
+          "inventory": 983,
+          "sales_30d": 493,
+          "coverage_days": 59.8,
+          "pending": 572,
+          "effective_rate": 0.2955,
+          "at_risk": 403.0,
+          "at_risk_ytd": 98.3
+        },
+        {
+          "series": "LS7",
+          "inventory": 547,
+          "sales_30d": 13,
+          "coverage_days": 1262.3,
+          "pending": 52,
+          "effective_rate": 0.1654,
+          "at_risk": 43.4,
+          "at_risk_ytd": 4.3
+        },
+        {
+          "series": "L7",
+          "inventory": 185,
+          "sales_30d": 6,
+          "coverage_days": 925.0,
+          "pending": 4,
+          "effective_rate": 0.25,
+          "at_risk": 3.0,
+          "at_risk_ytd": 0.2
+        }
+      ]
+    },
+    {
+      "as_of": "2026-08-17",
+      "summary": "库存 8,588 台 · 待开票未退订 4,722 单 · 有效率 36.4% · 风险暴露(滚动365d) 3,001 单 · 风险暴露(2026当年累计) 1,706 单\n下发线索(近30日) 日均 11,664.2 条 · 有效门店日均 420.8 家 · 单店日均 27.7 条\n库存覆盖天数(近30日开票口径) 65.3 天",
+      "metrics": {
+        "inventory_total": 8588,
+        "pending_total": 4722,
+        "effective_rate": 0.3644,
+        "at_risk_total": 3001.3,
+        "at_risk_ytd": 1705.9,
+        "leads_30d_avg": 11664.2,
+        "effective_stores_avg": 420.8,
+        "leads_per_store_daily": 27.7,
+        "sales_30d_total": 3947,
+        "inventory_coverage_days": 65.3
+      },
+      "inventory": {
+        "total": 8588,
+        "by_series": {
+          "LS6": 3322,
+          "LS8": 2574,
+          "LS9": 1261,
+          "L6": 867,
+          "LS7": 447,
+          "L7": 117
+        }
+      },
+      "backlog": {
+        "pending_total": 4722,
+        "effective_rate": 0.3644,
+        "at_risk_total": 3001.3,
+        "ytd": {
+          "start": "2026-01-01",
+          "pending": 3466,
+          "effective_rate": 0.5078,
+          "at_risk": 1705.9,
+          "model": "age"
+        }
+      },
+      "leads": {
+        "window_start": "2026-07-19",
+        "window_end": "2026-08-17",
+        "days": 30,
+        "leads_30d_sum": 349927,
+        "leads_30d_avg": 11664.2,
+        "effective_stores_avg": 420.8,
+        "leads_per_store_daily": 27.7
+      },
+      "mos": {
+        "window_days": 30,
+        "sales_30d_total": 3947,
+        "inventory_coverage_days": 65.3
+      },
+      "rows": [
+        {
+          "series": "LS6",
+          "inventory": 3322,
+          "sales_30d": 2284,
+          "coverage_days": 43.6,
+          "pending": 2287,
+          "effective_rate": 0.3767,
+          "at_risk": 1425.5,
+          "at_risk_ytd": 565.6
+        },
+        {
+          "series": "LS8",
+          "inventory": 2574,
+          "sales_30d": 693,
+          "coverage_days": 111.4,
+          "pending": 978,
+          "effective_rate": 0.2649,
+          "at_risk": 718.9,
+          "at_risk_ytd": 633.3
+        },
+        {
+          "series": "LS9",
+          "inventory": 1261,
+          "sales_30d": 548,
+          "coverage_days": 69.0,
+          "pending": 1031,
+          "effective_rate": 0.3661,
+          "at_risk": 653.6,
+          "at_risk_ytd": 357.7
+        },
+        {
+          "series": "L6",
+          "inventory": 867,
+          "sales_30d": 412,
+          "coverage_days": 63.1,
+          "pending": 403,
+          "effective_rate": 0.5342,
+          "at_risk": 187.7,
+          "at_risk_ytd": 137.6
+        },
+        {
+          "series": "LS7",
+          "inventory": 447,
+          "sales_30d": 6,
+          "coverage_days": 2235.0,
+          "pending": 18,
+          "effective_rate": 0.3722,
+          "at_risk": 11.3,
+          "at_risk_ytd": 10.2
+        },
+        {
+          "series": "L7",
+          "inventory": 117,
+          "sales_30d": 4,
+          "coverage_days": 877.5,
+          "pending": 5,
+          "effective_rate": 0.14,
+          "at_risk": 4.3,
+          "at_risk_ytd": 1.4
+        }
+      ]
+    }
+  ],
+  "summary_table": [
+    {
+      "as_of": "2025-04-17",
+      "inventory_total": 5917,
+      "pending_total": 4156,
+      "effective_rate": 0.2498,
+      "at_risk_total": 3117.8,
+      "at_risk_ytd": 710.9,
+      "leads_30d_avg": 7568.6,
+      "effective_stores_avg": 309.8,
+      "leads_per_store_daily": 24.4,
+      "inventory_coverage_days": 43.2
+    },
+    {
+      "as_of": "2025-08-14",
+      "inventory_total": 5895,
+      "pending_total": 3867,
+      "effective_rate": 0.2914,
+      "at_risk_total": 2740.0,
+      "at_risk_ytd": 1453.5,
+      "leads_30d_avg": 10867.3,
+      "effective_stores_avg": 355.5,
+      "leads_per_store_daily": 30.6,
+      "inventory_coverage_days": 35.9
+    },
+    {
+      "as_of": "2025-11-03",
+      "inventory_total": 9728,
+      "pending_total": 13189,
+      "effective_rate": 0.5212,
+      "at_risk_total": 6315.2,
+      "at_risk_ytd": 5948.8,
+      "leads_30d_avg": 14926.7,
+      "effective_stores_avg": 377.5,
+      "leads_per_store_daily": 39.5,
+      "inventory_coverage_days": 29.5
+    },
+    {
+      "as_of": "2026-03-25",
+      "inventory_total": 10683,
+      "pending_total": 4499,
+      "effective_rate": 0.3718,
+      "at_risk_total": 2826.2,
+      "at_risk_ytd": 762.0,
+      "leads_30d_avg": 12590.4,
+      "effective_stores_avg": 394.6,
+      "leads_per_store_daily": 31.9,
+      "inventory_coverage_days": 87.9
+    },
+    {
+      "as_of": "2026-08-17",
+      "inventory_total": 8588,
+      "pending_total": 4722,
+      "effective_rate": 0.3644,
+      "at_risk_total": 3001.3,
+      "at_risk_ytd": 1705.9,
+      "leads_30d_avg": 11664.2,
+      "effective_stores_avg": 420.8,
+      "leads_per_store_daily": 27.7,
+      "inventory_coverage_days": 65.3
+    }
+  ]
+}

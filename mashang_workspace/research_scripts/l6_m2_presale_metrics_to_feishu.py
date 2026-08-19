@@ -5,11 +5,11 @@
 并通过飞书自定义机器人 Webhook 发送交互式卡片。
 
 卡片内容：
-  - 核心指标：L6 M2（DM2）当前累计小订数
-  - 峰值分析：预售首日峰值小时小订数、峰值后 1h、预售当日累计
+  - 核心指标：L6 M2（DM2）当前累计小订数（自预售开放时刻 20:00 起算，不含白天零星订单）
+  - 峰值分析：预售首日峰值小时小订数、峰值后 1h、开放后 24h 累计、N=0 发布会当日留存（20:00-24:00）
   - 累计：预售至今累计留存（未退意向金）、累计留存唯一订单用户数
   - 对标：DM1 / CM2 / LS9 / LS8 在相同 N 日窗口的留存（N = 当前日期 - DM2 start + 1）
-  - 细分：累计留存分 product_name、分 parent_region_name（含门店 CR5）
+  - 细分：累计留存分 product_name（限量版 / 非限量版两组）、分 parent_region_name（含门店 CR5，另列无大区归属）
   - 附注：预售期起止、N（日）定义、统计时间
 
 口径依据：shared/schema/business_definition.json
@@ -40,6 +40,7 @@ SERIES = "DM2"
 SERIES_LABEL = "L6 M2"
 COMPARE_KEYS = ["DM1", "CM2", "LS9", "LS8"]
 DEFAULT_GROUP = "其他"
+OPEN_HOUR = 20  # 预售统一开放时刻（20:00），累计/峰值/对标均从此刻起算
 
 
 def load_business_definition(file_path: Path) -> dict:
@@ -253,18 +254,23 @@ def compute_presale_metrics(df: pd.DataFrame, business_def: dict, today: pd.Time
         "peak_count": 0,
         "next_hour_count": 0,
         "start_day_total": 0,
+        "launch_day_total": 0,
+        "launch_day_retention": 0,
         "n_day_cum": 0,
         "retention_by_product": [],
         "retention_by_region": [],
+        "retention_no_region": 0,
         "compare": {},
     }
 
     if start is None:
         return metrics
 
+    open_t = start + pd.Timedelta(hours=OPEN_HOUR)
+
     current_mask = (
         base["series_group_logic"].eq(SERIES)
-        & (base["intention_payment_time"] >= start)
+        & (base["intention_payment_time"] >= open_t)
         & (base["intention_payment_time"] < (today + pd.Timedelta(days=1)))
     )
 
@@ -283,7 +289,12 @@ def compute_presale_metrics(df: pd.DataFrame, business_def: dict, today: pd.Time
         product_counts = retention_slice.groupby("product_name")["order_number"].nunique()
         metrics["retention_by_product"] = sorted(
             [
-                {"product_name": p, "count": int(c), "share": round(c / metrics["retention"] * 100, 1)}
+                {
+                    "product_name": p,
+                    "count": int(c),
+                    "share": round(c / metrics["retention"] * 100, 1),
+                    "limited": "限量版" in (p or ""),
+                }
                 for p, c in product_counts.items()
             ],
             key=lambda x: x["count"],
@@ -307,12 +318,14 @@ def compute_presale_metrics(df: pd.DataFrame, business_def: dict, today: pd.Time
                 }
             )
         metrics["retention_by_region"] = sorted(region_rows, key=lambda x: x["count"], reverse=True)
+        metrics["retention_no_region"] = int(
+            retention_slice.loc[retention_slice["parent_region_name"].isna(), "order_number"].nunique()
+        )
 
-    start_excl = start + pd.Timedelta(days=1)
     day_slice = base.loc[
         base["series_group_logic"].eq(SERIES)
-        & (base["intention_payment_time"] >= start)
-        & (base["intention_payment_time"] < start_excl),
+        & (base["intention_payment_time"] >= open_t)
+        & (base["intention_payment_time"] < (open_t + pd.Timedelta(hours=24))),
         ["order_number", "intention_payment_time"],
     ].copy()
     if not day_slice.empty:
@@ -324,14 +337,30 @@ def compute_presale_metrics(df: pd.DataFrame, business_def: dict, today: pd.Time
         metrics["next_hour_count"] = int(hourly.iloc[peak_hour + 1]) if peak_hour < 23 else 0
         metrics["start_day_total"] = int(hourly.sum())
 
+    # N=0 发布会当日（开放 20:00 → 当日 24:00）小订与留存
+    launch_day_end = start + pd.Timedelta(days=1)
+    launch_slice = base.loc[
+        base["series_group_logic"].eq(SERIES)
+        & (base["intention_payment_time"] >= open_t)
+        & (base["intention_payment_time"] < launch_day_end),
+        ["order_number", "intention_refund_time"],
+    ]
+    metrics["launch_day_total"] = int(launch_slice["order_number"].nunique())
+    metrics["launch_day_retention"] = int(
+        launch_slice.loc[
+            launch_slice["intention_refund_time"].isna() | (launch_slice["intention_refund_time"] > launch_day_end),
+            "order_number",
+        ].nunique()
+    )
+
     if end is not None:
-        window_end_excl = min(start + pd.Timedelta(days=n), end + pd.Timedelta(days=1))
+        window_end_excl = min(open_t + pd.Timedelta(days=n), end + pd.Timedelta(days=1))
     else:
-        window_end_excl = start + pd.Timedelta(days=n)
+        window_end_excl = open_t + pd.Timedelta(days=n)
     metrics["n_day_cum"] = int(
         base.loc[
             base["series_group_logic"].eq(SERIES)
-            & (base["intention_payment_time"] >= start)
+            & (base["intention_payment_time"] >= open_t)
             & (base["intention_payment_time"] < window_end_excl),
             "order_number",
         ].nunique()
@@ -343,10 +372,11 @@ def compute_presale_metrics(df: pd.DataFrame, business_def: dict, today: pd.Time
             metrics["compare"][cmp_key] = None
             continue
         cmp_start = pd.to_datetime(cmp_tp["start"])
-        cmp_window_end = cmp_start + pd.Timedelta(days=n)
+        cmp_open = cmp_start + pd.Timedelta(hours=OPEN_HOUR)
+        cmp_window_end = cmp_open + pd.Timedelta(days=n)
         cmp_slice = base.loc[
             base["series_group_logic"].eq(cmp_key)
-            & (base["intention_payment_time"] >= cmp_start)
+            & (base["intention_payment_time"] >= cmp_open)
             & (base["intention_payment_time"] < cmp_window_end)
             & ((base["intention_refund_time"] > cmp_window_end) | base["intention_refund_time"].isna()),
             "order_number",
@@ -375,7 +405,8 @@ def build_feishu_card(metrics: dict) -> dict:
     lines += _section("② 峰值分析")
     lines.append(f"峰值小时小订数：{metrics['peak_count']}（{peak_hour_str}）")
     lines.append(f"峰值后 1h：{metrics['next_hour_count']}")
-    lines.append(f"预售当日累计：{metrics['start_day_total']}")
+    lines.append(f"开放后 24h 累计：{metrics['start_day_total']}")
+    lines.append(f"N=0 发布会当日留存（20:00-24:00）：{metrics['launch_day_retention']}（小订 {metrics['launch_day_total']}）")
 
     lines += _section("③ 累计")
     lines.append(f"预售至今累计留存：{metrics['retention']}")
@@ -389,9 +420,17 @@ def build_feishu_card(metrics: dict) -> dict:
 
     lines += _section("⑤ 细分")
     if metrics.get("retention_by_product"):
-        lines.append("**分 product_name：**")
-        for item in metrics["retention_by_product"]:
-            lines.append(f"  - {item['product_name']}：{item['count']}（{item['share']}%）")
+        lines.append("**分 product_name（限量版 / 非限量版）：**")
+        limited_items = [i for i in metrics["retention_by_product"] if i.get("limited")]
+        normal_items = [i for i in metrics["retention_by_product"] if not i.get("limited")]
+        limited_total = sum(i["count"] for i in limited_items)
+        normal_total = sum(i["count"] for i in normal_items)
+        lines.append(f"  · 限量版（{limited_total}）")
+        for item in limited_items:
+            lines.append(f"    - {item['product_name']}：{item['count']}（{item['share']}%）")
+        lines.append(f"  · 非限量版（{normal_total}）")
+        for item in normal_items:
+            lines.append(f"    - {item['product_name']}：{item['count']}（{item['share']}%）")
     else:
         lines.append("分 product_name：暂无留存订单")
 
@@ -400,14 +439,20 @@ def build_feishu_card(metrics: dict) -> dict:
         for item in metrics["retention_by_region"]:
             cr5_str = f"｜CR5（{item['cr5']}%）" if item.get("cr5") is not None else ""
             lines.append(f"  - {item['region_name']}：{item['count']}（{item['share']}%）{cr5_str}")
+        no_region = metrics.get("retention_no_region") or 0
+        if no_region > 0:
+            no_region_share = round(no_region / metrics["retention"] * 100, 1) if metrics["retention"] else 0
+            lines.append(f"  - 无大区归属：{no_region}（{no_region_share}%）")
     else:
         lines.append("分 parent_region_name：暂无留存订单")
 
     lines += _section("⑥ 附注")
     if metrics.get("series_start") and metrics.get("series_end"):
         lines.append(f"预售期：{metrics['series_start']} ~ {metrics['series_end']}")
+    lines.append(f"口径：从预售开放时刻（{OPEN_HOUR}:00）起算，不含预售日白天零星订单；小订含当日未退意向金订单")
+    lines.append(f"N=0 发布会当日留存：开放 {OPEN_HOUR}:00 至当日 24:00 内支付意向金且未退（退订晚于当日 24:00 视为留存）的唯一订单数")
     lines.append(f"N（日）= 当前日期 - {SERIES} startday + 1 = {metrics['n']}")
-    lines.append("对标口径：历史代际预售起同样 N 日窗口内，意向金未退的唯一订单数（退订晚于窗口末视为留存）")
+    lines.append("对标口径：历史代际开放时刻（20:00）起同样 N 日窗口内，意向金未退的唯一订单数（退订晚于窗口末视为留存）")
     lines.append("数据源：dataset/order_data.parquet + shared/schema/business_definition.json")
 
     body_md = "\n".join(lines)
