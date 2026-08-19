@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>从参数升级到体验升级 · Champion Topic Deck</title>
+<style>
+  :root {
+    --zh-blue: #174A7C;
+    --zh-deep-blue: #06213D;
+    --zh-cyan: #7ECDEB;
+    --zh-light-blue: #DDEFF8;
+    --zh-cream: #FFF9EF;
+    --zh-raccoon-gold: #D79A36;
+    --zh-brown: #7A4A24;
+    --zh-text: #1F2D3D;
+    --zh-muted: #6B7C8F;
+    --zh-card: #FFFFFF;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    background: var(--zh-cream);
+    color: var(--zh-text);
+    line-height: 1.7;
+  }
+  .shell { max-width: 960px; margin: 0 auto; padding: 0 28px 80px; }
+
+  /* ---------- Cover ---------- */
+  .cover {
+    background: linear-gradient(160deg, var(--zh-deep-blue) 0%, var(--zh-blue) 70%, #1f6ea8 100%);
+    color: #fff;
+    border-radius: 0 0 28px 28px;
+    padding: 84px 40px 60px;
+    margin: 0 0 48px;
+    position: relative;
+    overflow: hidden;
+  }
+  .cover::after {
+    content: "";
+    position: absolute;
+    right: -60px; top: -60px;
+    width: 240px; height: 240px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(220,220,220,.10) 0%, rgba(220,220,220,.02) 60%, transparent 70%);
+  }
+  .cover .brand {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px; letter-spacing: 2px; color: rgba(255,255,255,.72);
+    margin-bottom: 40px; text-transform: uppercase;
+  }
+  .cover .brand .dot {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--zh-raccoon-gold);
+    display: inline-block; position: relative;
+  }
+  .cover .brand .dot::after {
+    content: ""; position: absolute; left: 5px; top: 5px;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--zh-deep-blue);
+  }
+  .cover h1 { font-size: 44px; line-height: 1.25; font-weight: 700; letter-spacing: 1px; margin-bottom: 14px; }
+  .cover .subtitle { font-size: 19px; color: rgba(255,255,255,.9); margin-bottom: 30px; }
+  .cover .kicker { font-size: 14px; color: var(--zh-cyan); letter-spacing: 2px; margin-bottom: 16px; }
+  .cover .stat { display: inline-block; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2);
+    border-radius: 14px; padding: 16px 22px; margin-top: 6px; }
+  .cover .stat .big { font-size: 34px; font-weight: 700; color: #fff; }
+  .cover .stat .lbl { font-size: 13px; color: rgba(255,255,255,.75); }
+  .cover .question { margin-top: 36px; padding: 18px 22px; border-left: 4px solid var(--zh-raccoon-gold);
+    background: rgba(255,255,255,.08); border-radius: 0 12px 12px 0; font-size: 15px; color: rgba(255,255,255,.9); }
+
+  /* ---------- Sections ---------- */
+  section.page { margin: 56px 0; }
+  .page-header { display: flex; align-items: baseline; gap: 14px; margin-bottom: 10px; }
+  .page-num {
+    font-size: 12px; font-weight: 700; letter-spacing: 1px; color: var(--zh-raccoon-gold);
+    background: rgba(215,154,54,.12); border: 1px solid rgba(215,154,54,.35);
+    padding: 3px 10px; border-radius: 999px; white-space: nowrap;
+  }
+  .page-title { font-size: 26px; font-weight: 700; color: var(--zh-blue); }
+  .page-sub { font-size: 15px; color: var(--zh-muted); margin-bottom: 26px; padding-left: 0; }
+  .rule { border: none; border-top: 1px solid rgba(23,74,124,.14); margin: 56px 0; }
+
+  .card {
+    background: var(--zh-card);
+    border: 1px solid rgba(23,74,124,.10);
+    border-radius: 16px;
+    padding: 24px 28px;
+    margin: 18px 0;
+    box-shadow: 0 2px 10px rgba(6,33,61,.05);
+  }
+  .card h3 { font-size: 15px; color: var(--zh-blue); margin-bottom: 14px; letter-spacing: .5px; }
+  .card .tag { display: inline-block; font-size: 11px; color: var(--zh-muted); background: var(--zh-light-blue);
+    border-radius: 6px; padding: 2px 8px; margin-left: 8px; vertical-align: middle; }
+
+  .big-quote {
+    background: linear-gradient(135deg, var(--zh-light-blue), #eef7fb);
+    border-left: 5px solid var(--zh-raccoon-gold);
+    border-radius: 0 14px 14px 0;
+    padding: 20px 24px;
+    font-size: 17px; font-weight: 600; color: var(--zh-deep-blue);
+    margin: 20px 0;
+  }
+  .evidence-note { font-size: 12px; color: var(--zh-muted); margin-top: 12px; }
+  .evidence-note code { background: var(--zh-light-blue); color: var(--zh-blue); padding: 1px 6px; border-radius: 4px; font-size: 11px; }
+
+  /* ---------- Tables ---------- */
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid rgba(23,74,124,.10); }
+  th { background: var(--zh-light-blue); color: var(--zh-blue); font-weight: 600; font-size: 13px; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  tr:last-child td { border-bottom: none; }
+  td.hl { color: var(--zh-blue); font-weight: 700; }
+  td.gold { color: var(--zh-raccoon-gold); font-weight: 700; }
+  tr.row-em { background: rgba(126,205,235,.07); }
+
+  /* ---------- Bars ---------- */
+  .bars { margin: 12px 0; }
+  .bar-row { display: flex; align-items: center; gap: 10px; margin: 7px 0; font-size: 13px; }
+  .bar-row .lbl { width: 52px; color: var(--zh-text); flex: 0 0 auto; }
+  .bar-row .track { flex: 1; background: rgba(23,74,124,.07); border-radius: 6px; height: 20px; overflow: hidden; }
+  .bar-row .fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, var(--zh-blue), var(--zh-cyan)); }
+  .bar-row .fill.gold { background: linear-gradient(90deg, var(--zh-raccoon-gold), #edc27c); }
+  .bar-row .val { width: 52px; text-align: right; font-variant-numeric: tabular-nums; color: var(--zh-blue); font-weight: 600; flex: 0 0 auto; }
+
+  /* ---------- Flow ---------- */
+  .flow { display: flex; flex-wrap: wrap; gap: 0; margin: 16px 0; align-items: stretch; }
+  .flow .node { flex: 1 1 180px; background: var(--zh-card); border: 1px solid rgba(23,74,124,.14);
+    border-radius: 12px; padding: 16px; position: relative; }
+  .flow .node .n { font-size: 11px; color: var(--zh-raccoon-gold); font-weight: 700; letter-spacing: 1px; }
+  .flow .node .t { font-size: 14px; font-weight: 600; color: var(--zh-deep-blue); margin: 6px 0 4px; }
+  .flow .node .d { font-size: 12px; color: var(--zh-muted); }
+  .flow .arrow { align-self: center; color: var(--zh-cyan); font-size: 20px; padding: 0 4px; }
+
+  /* ---------- Two col ---------- */
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 720px) { .split { grid-template-columns: 1fr; } }
+  .panel { background: var(--zh-card); border-radius: 16px; padding: 20px 22px; border: 1px solid rgba(23,74,124,.10); }
+  .panel .pl { color: var(--zh-blue); font-weight: 700; font-size: 14px; margin-bottom: 10px; }
+  .panel .cnt { font-size: 13.5px; color: var(--zh-text); }
+  .panel .cnt ul { list-style: none; }
+  .panel .cnt li { padding: 7px 0; border-bottom: 1px dashed rgba(23,74,124,.10); }
+  .panel .cnt li:last-child { border-bottom: none; }
+  .panel .big { font-size: 26px; font-weight: 700; color: var(--zh-blue); font-variant-numeric: tabular-nums; }
+  .panel .lbl { font-size: 12px; color: var(--zh-muted); }
+
+  /* ---------- Boundary ---------- */
+  .boundary { border-radius: 16px; padding: 18px 22px; margin: 14px 0; border: 1px solid rgba(122,74,36,.25); background: #fff6ea; }
+  .boundary .bt { font-weight: 700; color: var(--zh-brown); margin-bottom: 6px; font-size: 14px; }
+  .boundary .bd { font-size: 13px; color: var(--zh-text); }
+
+  /* ---------- Footer ---------- */
+  footer { margin-top: 72px; padding-top: 28px; border-top: 1px solid rgba(23,74,124,.14); }
+  .sign { display: flex; align-items: center; gap: 14px; }
+  .sign .zh {
+    width: 44px; height: 44px; border-radius: 50%; background: var(--zh-deep-blue); color: #fff;
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; letter-spacing: 1px;
+  }
+  .sign .brandline { font-size: 13px; color: var(--zh-muted); }
+  .sign .slogan { font-size: 12px; color: var(--zh-muted); margin-top: 2px; }
+
+  .meta-line { font-size: 12.5px; color: var(--zh-muted); margin: 4px 0; }
+  .meta-line b { color: var(--zh-blue); font-weight: 600; }
+  .kbd { background: var(--zh-light-blue); border-radius: 5px; padding: 1px 7px; font-size: 12px; color: var(--zh-blue); font-family: "SF Mono", Menlo, Consolas, monospace; }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="brand"><span class="dot"></span> RACCOON RESEARCH · NEV-APEAL</div>
+  <div class="kicker">Champion Topic Deck · T1 Purchase Mission</div>
+  <h1>从参数升级到体验升级</h1>
+  <div class="subtitle">已有车辆经验的用户，用不同的标准定义新能源车的“升级感”</div>
+  <div class="stat">
+    <span class="big">798.4</span>
+    <span class="lbl">&nbsp;· 增购用户 APEAL（高于首购 +11.8）</span>
+  </div>
+  <div class="question"><b>封面只保留一个问题：</b>用户第一次开、坐、转向和使用这些配置时，能不能立即感觉这辆车升级了？</div>
+</div>
+
+<div class="shell">
+
+  <!-- P2 Executive Thesis -->
+  <section class="page" id="p2">
+    <div class="page-header"><span class="page-num">P2</span><h1 class="page-title">增购用户要的不是更多参数，而是更明确的体验跃迁</h1></div>
+    <div class="page-sub">Executive Thesis</div>
+    <div class="card">
+      <h3>主证据 <span class="tag">E-001 · E-011</span></h3>
+      <table>
+        <tr><th>组别</th><th class="num">APEAL</th></tr>
+        <tr class="row-em"><td>增购</td><td class="num hl">798.4</td></tr>
+        <tr><td>首购</td><td class="num">增购低 11.8</td></tr>
+        <tr><td>控制能源 / 价格 / 品牌 / 细分市场后</td><td class="num hl">增购优势 +18.17</td></tr>
+      </table>
+      <div class="big-quote">对已有车辆经验的用户，参数是门槛；能立即感觉到的驾驶、外观和座舱体验，才是升级感。</div>
+      <div class="evidence-note">Supporting：T2/T3 表明年龄与收入会改变体验标准，但不能替代 T1 主机制；作为分层背景，而非另起主线。</div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- P3 Hero Finding -->
+  <section class="page" id="p3">
+    <div class="page-header"><span class="page-num">P3</span><h1 class="page-title">增购用户的升级感，几乎不是被补能拉开的</h1></div>
+    <div class="page-sub">Hero Finding · 真正拉开差距的是外观、驾驶、动力与座舱</div>
+    <div class="card">
+      <h3>增购 vs 首购的体验结构 · 全篇 Hero Chart <span class="tag">E-003</span></h3>
+      <div class="bars">
+        <div class="bar-row"><span class="lbl">外观</span><div class="track"><div class="fill" style="width:93%"></div></div><span class="val">+19.3</span></div>
+        <div class="bar-row"><span class="lbl">驾驶</span><div class="track"><div class="fill" style="width:79%"></div></div><span class="val">+15.2</span></div>
+        <div class="bar-row"><span class="lbl">动力</span><div class="track"><div class="fill" style="width:78%"></div></div><span class="val">+15.1</span></div>
+        <div class="bar-row"><span class="lbl">座舱</span><div class="track"><div class="fill" style="width:65%"></div></div><span class="val">+12.5</span></div>
+        <div class="bar-row"><span class="lbl">安全</span><div class="track"><div class="fill" style="width:57%"></div></div><span class="val">+10.9</span></div>
+        <div class="bar-row"><span class="lbl">舒适</span><div class="track"><div class="fill" style="width:46%"></div></div><span class="val">+8.8</span></div>
+        <div class="bar-row"><span class="lbl">补能</span><div class="track"><div class="fill gold" style="width:7%"></div></div><span class="val">+1.3</span></div>
+      </div>
+      <div class="big-quote">这不是全面更好，而是体验结构发生了偏斜：升级感集中在感性、动态和座舱。</div>
+      <div class="evidence-note">Supporting：T7 说明补能行为本身仍是强分群变量，但其跨模块差异更像生活方式画像，不应被写成“快充导致体验变差”。</div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- P4 Why Driving / Item -->
+  <section class="page" id="p4">
+    <div class="page-header"><span class="page-num">P4</span><h1 class="page-title">驾驶差异不是抽象指数，而是落实到用户能感觉到的 item</h1></div>
+    <div class="page-sub">Why · 驾驶 / Item 下钻</div>
+    <div class="card">
+      <h3>Item 下钻 · 增购 vs 首购，WLS <span class="kbd">APEAL_WT</span> <span class="tag">E-008</span></h3>
+      <table>
+        <tr><th>体验层级</th><th class="num">Δ</th><th class="num">d</th><th class="num">p</th><th>研究指向</th></tr>
+        <tr class="row-em"><td><b>总体驾驶感受</b></td><td class="num hl">+0.23</td><td class="num hl">+0.215</td><td class="num">6.2e-20</td><td>主要承载项</td></tr>
+        <tr><td>湿滑路况转向/操控</td><td class="num">+0.18</td><td class="num">+0.094</td><td class="num">8.7e-05</td><td>复杂路况控制感</td></tr>
+        <tr><td>常规路况转向/操控</td><td class="num">+0.17</td><td class="num">+0.123</td><td class="num">3.3e-08</td><td>日常动态反馈</td></tr>
+        <tr><td>制动性能</td><td class="num">+0.13</td><td class="num">+0.112</td><td class="num">2.5e-06</td><td>相对较弱，不做主叙事</td></tr>
+      </table>
+      <div class="meta-line">驾驶差异由 5 个 rating 题下钻得到：差异最集中在整体驾驶质感与转向/操控手感，而非制动或单项功能。</div>
+      <div class="big-quote">升级感的产品语言，应从“多了什么”翻译成“开起来哪里不一样”。</div>
+      <div class="evidence-note">Why：用户并不会先感知一个“ADRV 指数”，而是在第一次转向、加速和处理路况时，判断整车是否更有质感。</div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- P5 Feature ≠ Value -->
+  <section class="page" id="p5">
+    <div class="page-header"><span class="page-num">P5</span><h1 class="page-title">高感知配置与体验关联，但配置数量本身不能制造魅力</h1></div>
+    <div class="page-sub">Feature ≠ Value · 机制链 1：Feature → Experienced Difference</div>
+    <div class="card">
+      <h3>T5 Configuration · 左证据 / 右反证 <span class="tag">E-012</span></h3>
+      <div class="split">
+        <div class="panel">
+          <div class="pl">左 · 配置 × 体验</div>
+          <div class="cnt">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;border-bottom:1px dashed rgba(23,74,124,.10)">
+              <span>记忆座椅 · 驾驶体验关联</span><span class="big">+19.3</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline;padding:7px 0">
+              <span>主驾通风 · 体验关联</span><span class="big">+13.3</span>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="pl">右 · 反证</div>
+          <div class="cnt">
+            <ul>
+              <li>换购组记忆座椅拥有率最高：<b>49%</b></li>
+              <li>但换购组 APEAL 最低</li>
+            </ul>
+            <div class="meta-line" style="margin-top:12px">配置存在 ≠ 产生感知价值</div>
+          </div>
+        </div>
+      </div>
+      <div class="big-quote">Feature ownership is not perceived value.</div>
+      <div class="evidence-note">配置是载体，体验才是价值。OEM 的验收必须检查用户能否感觉配置改变了驾驶、舒适或座舱体验。<br>口径边界：T5 是品牌 × 价格带匹配后的 observational association，不是配置的因果估值。</div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- P6 Expectation Calibration -->
+  <section class="page" id="p6">
+    <div class="page-header"><span class="page-num">P6</span><h1 class="page-title">用户不只比较参数高不高，还比较产品是否兑现了预期</h1></div>
+    <div class="page-sub">Expectation Calibration · 机制链 2：Expectation → Reward / Penalty</div>
+    <div class="card">
+      <h3>T9 · 两类补能预期的近对称奖惩 <span class="tag">expectation_wow_01 / 04</span></h3>
+      <table>
+        <tr><th>预期 exposure</th><th class="num">Better − About APEAL</th><th class="num">About − Worse APEAL</th></tr>
+        <tr class="row-em"><td>续航 vs 预期</td><td class="num hl">+49.8</td><td class="num">43.8</td></tr>
+        <tr><td>充电时长 vs 预期</td><td class="num hl">+51.0</td><td class="num">47.8</td></tr>
+      </table>
+      <div class="meta-line">同时进入 FULL 控制后仍独立显著（WLS，<span class="kbd">p &lt; 0.001</span>）：</div>
+      <ul style="margin:8px 0 8px 22px;font-size:13.5px">
+        <li>续航 Better：APEAL <b>+53.4</b>，AFUEL <b>+112.7</b></li>
+        <li>充电时长 Better：APEAL <b>+71.1</b>，AFUEL <b>+80.7</b></li>
+      </ul>
+      <div class="big-quote">体验升级不仅要把参数做高，还要把用户心里的预期兑现。</div>
+      <div class="evidence-note">T9 已落到充电便利、状态可读、整体充电体验和续航 item；但仍是横截面、自报预期的观察性关联，不宣称宣传承诺的因果效果。</div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- P7 Price Boundary -->
+  <section class="page" id="p7">
+    <div class="page-header"><span class="page-num">P7</span><h1 class="page-title">升级感不会随价格线性放大</h1></div>
+    <div class="page-sub">Price Boundary · T4 增购 vs 首购的价格带边界</div>
+    <div class="card">
+      <h3>价格带 × 增购优势 <span class="tag">E-013</span></h3>
+      <table>
+        <tr><th>价格带</th><th class="num">增购 − 首购</th></tr>
+        <tr><td>10–15 万</td><td class="num">+3.1</td></tr>
+        <tr class="row-em"><td><b>15–20 万</b></td><td class="num gold">+20.4</td></tr>
+        <tr><td>20–30 万</td><td class="num">+3.3</td></tr>
+        <tr><td>30 万+</td><td class="num">+1.4</td></tr>
+      </table>
+      <div class="big-quote">中端靠升级感拉开用户，高端靠全民体验基准留在牌桌。</div>
+      <div class="evidence-note">不能把 T1 写成“越贵，增购优势越强”。15–20 万是体验升级最容易被拉开的区间；30 万+ 则是首购用户也已进入高体验基准。</div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- P8 OEM Design Framework -->
+  <section class="page" id="p8">
+    <div class="page-header"><span class="page-num">P8</span><h1 class="page-title">从 Feature Checklist 转向 Perceived Upgrade Design</h1></div>
+    <div class="page-sub">OEM Design Framework</div>
+    <div class="card">
+      <h3>机制模型 · Feature → Expectation → Experienced Difference → Perceived Upgrade <span class="tag">T5 · T9 · T1</span></h3>
+      <div class="flow">
+        <div class="node"><div class="n">T5</div><div class="t">Feature ≠ Value</div><div class="d">配置存在，不等于用户感知到价值</div></div>
+        <div class="arrow">↓</div>
+        <div class="node"><div class="n">T9</div><div class="t">Expectation → Reward / Penalty</div><div class="d">体验超过或低于预期，形成奖惩结构</div></div>
+        <div class="arrow">↓</div>
+        <div class="node"><div class="n">T1</div><div class="t">Experienced Difference → Perceived Upgrade</div><div class="d">驾驶、外观、座舱的变化被用户立即感觉到</div></div>
+        <div class="arrow">↓</div>
+        <div class="node"><div class="n">OEM</div><div class="t">Perceived Upgrade Design</div><div class="d">从“多了什么”转向“用户能否感觉不一样”</div></div>
+      </div>
+      <div class="meta-line" style="margin-top:10px">P8 不是四条孤立建议，而是由 T5、T9 和 T1 的证据共同推导出的产品设计框架。</div>
+    </div>
+    <div class="card">
+      <h3>四步产品框架</h3>
+      <ol style="margin-left:22px;font-size:14px">
+        <li><b>Identify the user task</b> ｜ T1 —— 增购用户要确认“这次真的升级了吗？”</li>
+        <li><b>Design the felt difference</b> ｜ T1 —— 外观、驾驶、动力、座舱优先于参数堆叠</li>
+        <li><b>Attach features to experience</b> ｜ T5 —— 高感知配置必须在第一次使用时被感觉到</li>
+        <li><b>Validate expectation delivery</b> ｜ T9 —— 续航、充电和便利性承诺必须兑现</li>
+      </ol>
+      <h3 style="margin-top:22px">OEM 应该改变的验收问题</h3>
+      <table>
+        <tr><th>旧问题</th><th>新问题</th></tr>
+        <tr><td>多了什么配置？</td><td>用户能否立即感觉不一样？</td></tr>
+        <tr><td>参数是否领先？</td><td>参数是否转化为可感知体验？</td></tr>
+        <tr><td>功能是否上线？</td><td>用户第一次使用时是否觉得升级？</td></tr>
+      </table>
+      <div class="evidence-note">Supporting：T2/T3 用于定义不同用户的体验门槛；T7 用于识别补能生活方式；它们为设计分层提供 context，不改变 T1 主框架。</div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- P9 Evidence Boundaries -->
+  <section class="page" id="p9">
+    <div class="page-header"><span class="page-num">P9</span><h1 class="page-title">研究纪律：知道哪些结论不能讲</h1></div>
+    <div class="page-sub">Evidence Boundaries</div>
+    <div class="boundary">
+      <div class="bt">T8 · 品牌来源不是独立机制</div>
+      <div class="bd">OEM 来源结构的 raw gap 在完整控制后归零，WLS 约 <b>+2.7, p=0.53</b>。不能把体验差异归因给“某类 OEM 天生更会做升级感”。</div>
+    </div>
+    <div class="boundary">
+      <div class="bt">T6 · BEV / PHEV 不能成为技术路线主张</div>
+      <div class="bd">技术路线存在部分 item 差异，但控制品牌后不显著（<b>p=0.138</b>）。不能强行写成“BEV/PHEV 决定体验”。</div>
+    </div>
+    <div class="boundary">
+      <div class="bt">T10 · 里程非线性不等于产品质量衰减</div>
+      <div class="bd">里程峰值与回落成立，但总体机制和归因不够稳定，terminal 为 <b>INCONCLUSIVE</b>。不能把横截面里程梯度直接写成纵向质量衰减。</div>
+    </div>
+    <div class="card">
+      <div class="big-quote">READY Topic 用来支撑主张；INCONCLUSIVE Topic 用来保护主张边界。</div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- P10 Takeaway -->
+  <section class="page" id="p10">
+    <div class="page-header"><span class="page-num">P10</span><h1 class="page-title">用户第一次使用时，能不能感觉这辆车升级了？</h1></div>
+    <div class="page-sub">Takeaway</div>
+    <div class="card">
+      <div class="big-quote">新能源车的下一轮升级，不是把参数表做得更长，而是让用户在第一次开、坐、转向和使用配置时，立即感觉这辆车真的变得更好。</div>
+      <h3>三个记忆点</h3>
+      <ol style="margin-left:22px;font-size:14px">
+        <li><b>用户任务变了</b>：已有车辆经验的用户要的是可感知的体验跃迁。</li>
+        <li><b>产品定义要变</b>：驾驶、外观、座舱和高感知配置要形成真实体验，而不是 feature count。</li>
+        <li><b>验收标准要变</b>：参数必须兑现预期，体验必须在正确的价格区间里被看见。</li>
+      </ol>
+      <h3 style="margin-top:22px">Final report architecture</h3>
+      <div class="flow">
+        <div class="node"><div class="n">T1</div><div class="t">Champion</div><div class="d">提出主论点</div></div>
+        <div class="node"><div class="n">T5 / T9 / T4</div><div class="t">机制与边界</div><div class="d">解释机制</div></div>
+        <div class="node"><div class="n">T2 / T3 / T7</div><div class="t">Supporting context</div><div class="d">分层背景</div></div>
+        <div class="node"><div class="n">T8 / T6 / T10</div><div class="t">Boundary</div><div class="d">保护研究边界</div></div>
+      </div>
+    </div>
+    <div class="big-quote" style="font-size:19px">从参数升级到体验升级：当用户已经拥有过一辆车，真正的产品竞争就不再是“多了什么”，而是“他能不能马上感觉到不一样”。</div>
+  </section>
+
+  <footer>
+    <div class="sign">
+      <div class="zh">ZH</div>
+      <div>
+        <div class="brandline"><b>Raccoon Research</b> · NEV-APEAL Champion Topic Deck</div>
+        <div class="slogan">用数据、AI 和一点点常识，研究复杂世界。</div>
+      </div>
+    </div>
+    <div class="meta-line" style="margin-top:14px">
+      数据：<span class="kbd">nev_apeal/data/source.sav</span> · 9,937 行 · 权重 <span class="kbd">APEAL_WT</span><br>
+      证据：E-001 / E-003 / E-008 / E-011 / E-012 / E-013 / T9 terminal / T4 · T6 · T10 qualification
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

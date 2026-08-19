@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>从参数升级到体验升级 · 证据来源解读</title>
+<style>
+  :root {
+    --zh-blue: #174A7C;
+    --zh-deep-blue: #06213D;
+    --zh-cyan: #7ECDEB;
+    --zh-light-blue: #DDEFF8;
+    --zh-cream: #FFF9EF;
+    --zh-raccoon-gold: #D79A36;
+    --zh-brown: #7A4A24;
+    --zh-text: #1F2D3D;
+    --zh-muted: #6B7C8F;
+    --zh-card: #FFFFFF;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    background: var(--zh-cream);
+    color: var(--zh-text);
+    line-height: 1.7;
+  }
+  .shell { max-width: 980px; margin: 0 auto; padding: 0 28px 80px; }
+
+  /* Cover */
+  .cover {
+    background: linear-gradient(160deg, var(--zh-deep-blue) 0%, var(--zh-blue) 70%, #1f6ea8 100%);
+    color: #fff;
+    border-radius: 0 0 28px 28px;
+    padding: 72px 40px 52px;
+    margin: 0 0 44px;
+    position: relative;
+    overflow: hidden;
+  }
+  .cover::after {
+    content: ""; position: absolute; right: -60px; top: -60px;
+    width: 240px; height: 240px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(220,220,220,.10) 0%, rgba(220,220,220,.02) 60%, transparent 70%);
+  }
+  .cover .brand { display: flex; align-items: center; gap: 10px; font-size: 13px;
+    letter-spacing: 2px; color: rgba(255,255,255,.72); margin-bottom: 32px; text-transform: uppercase; }
+  .cover .brand .dot { width: 26px; height: 26px; border-radius: 50%;
+    background: var(--zh-raccoon-gold); display: inline-block; position: relative; }
+  .cover .brand .dot::after { content: ""; position: absolute; left: 5px; top: 5px;
+    width: 8px; height: 8px; border-radius: 50%; background: var(--zh-deep-blue); }
+  .cover .kicker { font-size: 14px; color: var(--zh-cyan); letter-spacing: 2px; margin-bottom: 14px; }
+  .cover h1 { font-size: 40px; line-height: 1.25; font-weight: 700; letter-spacing: 1px; margin-bottom: 12px; }
+  .cover .subtitle { font-size: 17px; color: rgba(255,255,255,.9); margin-bottom: 6px; }
+  .cover .desc { font-size: 13.5px; color: rgba(255,255,255,.66); margin-top: 18px;
+    border-top: 1px solid rgba(255,255,255,.16); padding-top: 18px; max-width: 640px; }
+
+  /* Sections */
+  section { margin: 52px 0; }
+  .sec-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 8px; }
+  .sec-num { font-size: 12px; font-weight: 700; letter-spacing: 1px; color: var(--zh-raccoon-gold);
+    background: rgba(215,154,54,.12); border: 1px solid rgba(215,154,54,.35);
+    padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
+  .sec-title { font-size: 26px; font-weight: 700; color: var(--zh-blue); }
+  .sec-sub { font-size: 14px; color: var(--zh-muted); margin-bottom: 22px; }
+
+  .card { background: var(--zh-card); border: 1px solid rgba(23,74,124,.10);
+    border-radius: 16px; padding: 24px 28px; margin: 18px 0;
+    box-shadow: 0 2px 10px rgba(6,33,61,.05); }
+  .card h3 { font-size: 15px; color: var(--zh-blue); margin-bottom: 14px; letter-spacing: .5px; }
+
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 13.5px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid rgba(23,74,124,.10);
+    vertical-align: top; }
+  th { background: var(--zh-light-blue); color: var(--zh-blue); font-weight: 600; font-size: 13px; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  tr:last-child td { border-bottom: none; }
+  tr.row-em { background: rgba(126,205,235,.07); }
+  td.hl { color: var(--zh-blue); font-weight: 700; }
+  td.gold { color: var(--zh-raccoon-gold); font-weight: 700; }
+
+  .kbd { background: var(--zh-light-blue); border-radius: 5px; padding: 1px 7px;
+    font-size: 12px; color: var(--zh-blue); font-family: "SF Mono", Menlo, Consolas, monospace; }
+  .mono { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 12.5px; }
+
+  /* Three-layer pipeline */
+  .pipeline { display: flex; flex-direction: column; gap: 16px; margin: 16px 0; }
+  .pl-step { display: flex; gap: 16px; background: var(--zh-card); border: 1px solid rgba(23,74,124,.10);
+    border-radius: 16px; padding: 20px 24px; }
+  .pl-badge { flex: 0 0 auto; min-width: 58px; height: 58px; border-radius: 14px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: var(--zh-light-blue); color: var(--zh-blue); }
+  .pl-badge .n { font-size: 20px; font-weight: 700; line-height: 1.1; }
+  .pl-badge .l { font-size: 10px; letter-spacing: .5px; }
+  .pl-step .q { font-size: 11px; color: var(--zh-muted); letter-spacing: 1.5px; margin-bottom: 4px; }
+  .pl-step .t { font-size: 17px; font-weight: 700; color: var(--zh-deep-blue); margin-bottom: 6px; }
+  .pl-step .d { font-size: 13.5px; color: var(--zh-text); }
+  .pl-step .d .ev { color: var(--zh-blue); font-weight: 600; }
+
+  .arrow-down { text-align: center; color: var(--zh-cyan); font-size: 20px; line-height: 1; }
+
+  .big-quote { background: linear-gradient(135deg, var(--zh-light-blue), #eef7fb);
+    border-left: 5px solid var(--zh-raccoon-gold); border-radius: 0 14px 14px 0;
+    padding: 18px 22px; font-size: 15.5px; font-weight: 600; color: var(--zh-deep-blue); margin: 18px 0; }
+  .note { font-size: 12.5px; color: var(--zh-muted); }
+
+  /* Footer */
+  footer { margin-top: 64px; padding-top: 28px; border-top: 1px solid rgba(23,74,124,.14); }
+  .sign { display: flex; align-items: center; gap: 14px; }
+  .sign .zh { width: 44px; height: 44px; border-radius: 50%; background: var(--zh-deep-blue);
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 16px; letter-spacing: 1px; }
+  .sign .brandline { font-size: 13px; color: var(--zh-muted); }
+  .sign .slogan { font-size: 12px; color: var(--zh-muted); margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="brand"><span class="dot"></span> RACCOON RESEARCH · NEV-APEAL</div>
+  <div class="kicker">Evidence Trace · 证据来源解读</div>
+  <h1>从参数升级到体验升级</h1>
+  <div class="subtitle">Deck 每一页结论的来源追溯：原始数据 → 问卷题目 → 证据 ID</div>
+  <div class="desc">本解读把 Production Deck 的 10 页结论逐一映射到 <span style="font-family:Menlo,monospace">data/source.sav</span> 的具体变量、问卷题目和证据记录，并还原页面之间的逻辑串联方式。所有结论均可复核，非编造叙事。</div>
+</div>
+
+<div class="shell">
+
+  <!-- 1. 核心变量映射 -->
+  <section id="variables">
+    <div class="sec-head"><span class="sec-num">01</span><h1 class="sec-title">核心变量映射 · 先建立坐标系</h1></div>
+    <div class="sec-sub">解读报告的地图；后续所有页面的结论都基于这些变量展开</div>
+    <div class="card">
+      <h3>问卷变量 → 题目 → 用途</h3>
+      <table>
+        <tr><th>问卷变量</th><th>题目</th><th>用途</th></tr>
+        <tr class="row-em"><td class="mono">YPV_01</td><td>"这辆车是…"：1=换购，2=<b>增购</b>，3=首购</td><td>全报告分组变量（增购 = 已有车辆家庭的追加车辆）</td></tr>
+        <tr><td class="mono">APEAL_Index / APEAL_OSAT</td><td>总体拥车和驾驶体验评分</td><td>主结果指标</td></tr>
+        <tr><td class="mono">AEXT / ADRV / APERF / AINT / ASFTY / ACMFT / AFUEL / ACHAR</td><td>各模块 10 分题组</td><td>体验结构拆解</td></tr>
+        <tr><td class="mono">CN_YNV_07</td><td>购车总花费</td><td>价格控制</td></tr>
+        <tr><td class="mono">MAKE_DP / SEGMENT_DP / SUPER_SEGMENT_DP</td><td>品牌 / 细分市场 / BEV·PHEV</td><td>结构控制</td></tr>
+        <tr><td class="mono">AGE / CN_INCOME / CN_EDUCATION</td><td>年龄 / 家庭月收入 / 教育</td><td>T2/T3 分层</td></tr>
+      </table>
+      <div class="note">权重 <span class="kbd">APEAL_WT</span>；核心证据链存放在 <span class="kbd">research/runs/topic_x/evidence.jsonl</span></div>
+    </div>
+  </section>
+
+  <!-- 2. 逐页结论来源 -->
+  <section id="pages">
+    <div class="sec-head"><span class="sec-num">02</span><h1 class="sec-title">逐页结论来源</h1></div>
+    <div class="sec-sub">Deck 结论 &nbsp;→&nbsp; 原始数据 &nbsp;→&nbsp; 证据 ID，一一对应</div>
+    <div class="card">
+      <table>
+        <tr><th>页</th><th>Deck 结论</th><th>原始数据</th><th>证据</th></tr>
+        <tr><td class="num">P1</td><td>增购 APEAL <b>798.4</b>，高于首购 <b>+11.8</b></td><td class="mono">APEAL_Index</td><td colspan="2">E-001（compare, p=6e-12, d=0.162）</td></tr>
+        <tr><td class="num">P2</td><td>控制能源/价格/品牌/细分后 <b>+18.17</b></td><td class="mono">OLS APEAL_Index ~ YPV_01 + SUPER_SEGMENT_DP + CN_YNV_07 + MAKE_DP + SEGMENT_DP</td><td colspan="2">E-011（p=5.4e-07）</td></tr>
+        <tr><td class="num">P3</td><td>外观 +19.3 驾驶 +15.2 动力 +15.1 座舱 +12.5 安全 +10.9 舒适 +8.8 补能 +1.3</td><td>7 个模块指数增购 vs 首购加权差</td><td colspan="2">E-003（compare）</td></tr>
+        <tr><td class="num">P4</td><td>总体驾驶感受承载 <b>+0.23</b>，制动最弱 <b>+0.13</b></td><td class="mono">ADRV_R_01~05</td><td colspan="2">E-008（drilldown）+ 本次复算</td></tr>
+        <tr><td class="num">P5</td><td>记忆座椅/通风 与驾驶关联 <b>+19.3 / +13.3</b>；<br>换购拥有率最高但 APEAL 最低</td><td class="mono">SCR_SEAT00_04C_R1</td><td colspan="2">E-012</td></tr>
+        <tr><td class="num">P6</td><td>续航 Better−About <b>+49.8</b> / penalty 43.8；<br>充电 +51.0 / 47.8；全控制后独立显著</td><td class="mono">AFUEL_D_06、ACHAR_D_05 → APEAL/AFUEL/ACHAR</td><td colspan="2">expectation_wow_01/04 + terminal_t9_t10.json（FULL 控制 +53.4/+71.1）</td></tr>
+        <tr><td class="num">P7</td><td><b>15–20 万</b> 增购优势 <b>+20.4</b>，30 万+ 收窄 +1.4</td><td class="mono">CN_YNV_07</td><td colspan="2">E-013（segment）</td></tr>
+        <tr><td class="num">P9</td><td>T8 OEM +2.7 p=0.53；T6 BEV/PHEV p=0.138；T10 里程 INCONCLUSIVE</td><td class="mono">MAKE_DP → SUPER_SEGMENT_DP → NEV_12</td><td colspan="2">各自 terminal / qualification 记录</td></tr>
+      </table>
+      <div class="note">P4 数值在最终 Deck 压缩时曾被剥掉，已补回 Δ/d/p 并标注 E-008，保持"每页都有可复核数字"。</div>
+    </div>
+  </section>
+
+  <!-- 3. 逻辑串联 -->
+  <section id="logic">
+    <div class="sec-head"><span class="sec-num">03</span><h1 class="sec-title">逻辑串联 · 一条主线 + 三层展开</h1></div>
+    <div class="sec-sub">Deck 不是十页孤立的结论，而是三个递进的问题</div>
+
+    <div class="pipeline">
+      <div class="pl-step">
+        <div class="pl-badge"><div class="n">1</div><div class="l">定义差异</div></div>
+        <div><div class="q">P1–P3 · 有没有差异、差异在哪</div>
+          <div class="t"><span class="ev">YPV_01</span> 分出增购人群 → APEAL 显著更高（E-001）→ 结构控制后不消失（E-011）→ 差异集中在感性模块（P3），补能几乎无差</div>
+          <div class="d">把"增购用户"定义出来，再证明差异真实且集中在体验结构上。</div></div>
+      </div>
+      <div class="arrow-down">↓</div>
+      <div class="pl-step">
+        <div class="pl-badge"><div class="n">2</div><div class="l">下钻机制</div></div>
+        <div><div class="q">P4–P6 · 为什么</div>
+          <div class="t">驾驶从指数打进 <span class="ev">item</span>（P4，总体驾驶感受承载）→ 反证配置不是价值（P5，拥有率高 ≠ 感知好）→ 用预期校准解释补能为何少加分（P6，兑现承诺才有奖惩）</div>
+          <div class="d">从"差异在哪个模块"下沉到"差异在哪个题、由什么机制产生"。</div></div>
+      </div>
+      <div class="arrow-down">↓</div>
+      <div class="pl-step">
+        <div class="pl-badge"><div class="n">3</div><div class="l">定边界</div></div>
+        <div><div class="q">P7–P9 · 什么不能讲</div>
+          <div class="t">价格带非单调（P7，中端最强）→ 品牌 / BEV·PHEV / 里程都不能当独立叙事（P9）</div>
+          <div class="d">防止结论被过度外推：什么主张成立，什么主张被边界规则保护。</div></div>
+      </div>
+    </div>
+
+    <div class="big-quote">每一页都回答前一个问题，同时给后一个问题留下入口——这是 Deck 的叙事骨架，不是装饰。</div>
+  </section>
+
+  <!-- 4. 可验证性 -->
+  <section id="verify">
+    <div class="sec-head"><span class="sec-num">04</span><h1 class="sec-title">证据链可验证</h1></div>
+    <div class="sec-sub">source 数据 + 存档证据 ID：任何一页都可以被复核</div>
+    <div class="card">
+      <h3>复核方式</h3>
+      <ol style="margin-left:22px;font-size:14px">
+        <li><b>变量层面</b>：每页结论对应的问卷题目，来自 <span class="kbd">nev_apeal/data/questionnaire_map.json</span></li>
+        <li><b>证据层面</b>：每个数字都有存档的 evidence / signal ID，存放于 <span class="kbd">research/runs/*/evidence.jsonl</span></li>
+        <li><b>复算层面</b>：用 <span class="kbd">analysis/*.py</span>（drilldown / regress / compare …）可从 <span class="kbd">source.sav</span> 复现同一批 Δ、p、d</li>
+      </ol>
+      <div class="note" style="margin-top:12px">P4 即为一例：E-008 数值已用项目脚本重新跑通（总体驾驶感受 Δ+0.23 / d+0.215 / p=6.2e-20）。</div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="sign">
+      <div class="zh">ZH</div>
+      <div>
+        <div class="brandline"><b>Raccoon Research</b> · NEV-APEAL Evidence Trace</div>
+        <div class="slogan">用数据、AI 和一点点常识，研究复杂世界。</div>
+      </div>
+    </div>
+    <div class="note" style="margin-top:12px">
+      数据：<span class="kbd">nev_apeal/data/source.sav</span> · 9,937 行 · 权重 <span class="kbd">APEAL_WT</span><br>
+      解读对象：<span class="kbd">nev_apeal/reports/from_parameters_to_experience_topic_deck.md</span>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>
