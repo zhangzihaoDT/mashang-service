@@ -190,7 +190,7 @@ Deck 每页标题下携带一个 YAML **metadata block**，作为 Research → P
 
 - `slide_role`：OPENING / THESIS / EVIDENCE / MECHANISM / CONCEPTUAL_BRIDGE / BOUNDARY / FRAMEWORK / CLOSING
 - `claim_level`：OBSERVATION / CONTROLLED_FINDING / MECHANISM_EVIDENCE / MECHANISM_INTERPRETATION / CONCEPTUAL_BRIDGE / BOUNDARY / MANAGERIAL_SYNTHESIS / RESEARCH_BOUNDARY
-- `appendix_ref`：指向文件尾 Appendix Registry（A1–A7），用于追问层取证
+- `appendix_ref`：指向文件尾 Evidence Explainer Registry（A1–A7 及 A3a/A3b/A3c、A4a/A4b、A5a/A5b/A5c），用于业务读者追问取证
 
 ### Production 链路（Semantic Lint → Render QA）
 
@@ -226,8 +226,9 @@ PASS → deliver ｜ FAIL → regenerate
 | 边界页不高亮为正向发现 | BOUNDARY / RESEARCH_BOUNDARY 的 highlight 不得暗示"主要正向发现" |
 | visual × role 兼容矩阵 | `framework_map` 只能用于 FRAMEWORK / MANAGERIAL_SYNTHESIS 等 |
 | before_after 需声明语义 | 必须写 `comparison_semantics`（raw_vs_adjusted / group_a_vs_b），防止画成时间变化 |
+| Appendix Evidence Anatomy | 每个解释页（A3a–A6）必须覆盖六层（① 用户被问了什么？→ ⑥ 能讲到哪一步？）并带 证据/来源 回溯锚点 |
 
-规则定义在 `contracts/slide_contract.json` 的 `semantic_rules` / `visual_role_compatibility` / `causal_language`。
+规则定义在 `contracts/slide_contract.json` 的 `semantic_rules` / `visual_role_compatibility` / `causal_language` / `appendix_anatomy`。
 
 ```bash
 PYTHONPATH=. ../.venv/bin/python scratch/validate_slide_contract.py \
@@ -236,6 +237,8 @@ PYTHONPATH=. ../.venv/bin/python scratch/validate_slide_contract.py --format jso
 ```
 
 新 Deck 或修改后必须通过（0 error）才能进入渲染。
+
+**Evidence Explainer 门禁**：附录不再是自由文本。`contracts/slide_contract.json` 的 `appendix_anatomy` 定义六层固定模板，`validate_slide_contract.py` 强制每个解释页（A3a–A6）覆盖六层并带 `证据/来源` 锚点；基础设施页（A1/A2/A7）不强制六层。缺失为 warn，须人工复核后显式放行。这样保证每条证据都沿同一条路径解释：**原始问题 → 数据编码 → 比较对象 → 结果指标 → 计算方法 → 能讲/不能讲**。
 
 #### 第 2 层：Render QA（`scratch/render_qa.py`）
 

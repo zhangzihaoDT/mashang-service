@@ -127,6 +127,7 @@ def validate(deck_text: str, contract: dict) -> dict:
     required = set(contract.get("required_fields", []))
     enums = contract.get("enums", {})
     registry = contract.get("appendix_registry", {})
+    anatomy = contract.get("appendix_anatomy", {})
     governance = contract.get("governance_rules", [])
     compat = contract.get("visual_role_compatibility", {})
     causal = _load_causal_patterns(contract)
@@ -232,6 +233,47 @@ def validate(deck_text: str, contract: dict) -> dict:
                                "msg": "visual.type=before_after must declare comparison_semantics (raw_vs_adjusted / group_a_vs_b / temporal_trend)"})
 
         pages[page] = errors
+
+    # ---------- Appendix Evidence Explainer anatomy ----------
+    # Every registered appendix section (### A#) must be present in the deck;
+    # each explainer section must cover the six explainer layers + carry an
+    # evidence/source anchor. Missing pieces are surfaced as warnings so a
+    # human can explicitly review them before sign-off (per blocking_rule).
+    anatomy_layers = anatomy.get("layers", {})
+    explainer_tokens = set(anatomy.get("explainers", []))
+    header_re = re.compile(anatomy.get("header_re", r"^###\s+(A\d+[a-c]?)\s*｜"))
+    source_re = re.compile(anatomy.get("evidence_source_re", r"^证据\s*[:：]\s*|^来源\s*[:：]\s*"), re.M)
+    appendix_pages = {token: [] for token in registry}
+
+    sections = re.split(r"(?m)^###\s+", deck_text)
+    found = set()
+    for sec in sections[1:]:
+        m = header_re.match("### " + sec)
+        if not m:
+            continue
+        token = m.group(1)
+        found.add(token)
+        if token not in appendix_pages:
+            appendix_pages[token] = ["appendix token in deck not in registry"]
+            continue
+        if token not in explainer_tokens:
+            continue
+        body = sec
+        missing = [label for label in anatomy_layers.values() if label not in body]
+        if missing:
+            appendix_pages[token].append(f"missing explainer layer(s): {', '.join(missing)}")
+        if not source_re.search(body):
+            appendix_pages[token].append("missing 证据/来源 回溯锚点")
+    for token in appendix_pages:
+        if token not in found:
+            appendix_pages[token].append("registered appendix section not present in deck")
+    for token, issues in appendix_pages.items():
+        if issues:
+            pages[f"appendix:{token}"] = [{
+                "level": "warn",
+                "rule": "semantic.appendix_anatomy",
+                "msg": "; ".join(issues),
+            }]
 
     n_pages = len(pages)
     n_err = sum(1 for v in pages.values() if any(e["level"] == "error" for e in v))

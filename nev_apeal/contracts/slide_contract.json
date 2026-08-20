@@ -60,7 +60,8 @@
     "claim_level=MANAGERIAL_SYNTHESIS / CONCEPTUAL_BRIDGE 不得在 hero_message/annotation 中出现 p-value 或显著性表述（如 p<0.001, d=, 显著）",
     "claim_level=BOUNDARY / RESEARCH_BOUNDARY 不得被 visual.highlight 标注为'主要正向发现'（highlight 仅允许标注边界区间本身）",
     "visual.type 必须与 slide_role 匹配 visual_role_compatibility；framework_map 只能用于 FRAMEWORK / MANAGERIAL_SYNTHESIS / THESIS",
-    "visual.type=before_after 时必须声明 comparison_semantics；值为 temporal_trend 需额外证据支持，否则应为 raw_vs_adjusted 或 group_a_vs_b"
+    "visual.type=before_after 时必须声明 comparison_semantics；值为 temporal_trend 需额外证据支持，否则应为 raw_vs_adjusted 或 group_a_vs_b",
+    "每个 Evidence Explainer 附录 section（### A#）必须覆盖六层（appendix_anatomy.layers）并带 证据/来源 回溯锚点；缺层或缺失来源为 warn，供人工复核后显式放行"
   ],
   "signal_sources": [
     "scratch/discovery/_signals_expectation_wow.json",
@@ -81,14 +82,32 @@
     "evidence.derived_from 用于联合推导页（如 P9），列明各来源 topic/run/id",
     "boundary 必须显式列出不能讲的表述，防止传播中弱化研究纪律"
   ],
+  "appendix_anatomy": {
+    "header_re": "^###\\s+(A\\d+[a-c]?)\\s*｜",
+    "evidence_source_re": "^证据\\s*[:：]\\s*|^来源\\s*[:：]\\s*",
+    "explainers": ["A3a", "A3b", "A3c", "A4a", "A4b", "A5a", "A5b", "A5c", "A6"],
+    "layers": {
+      "user_question": "① 用户被问了什么？",
+      "coding": "② 回答如何变成分析变量？",
+      "comparison": "③ 我们比较了谁和谁？",
+      "calculation": "④ Δ / β 是怎么算出来的？",
+      "uncertainty": "⑤ 为什么说它不是随机波动？",
+      "boundary": "⑥ 能讲到哪一步，不能讲到哪一步？"
+    },
+    "note": "Evidence Explainer section（### A#）必须覆盖六层并带证据/来源锚点；六层结构保证业务读者沿同一条路径理解证据，而不是只看统计缩写。基础设施页（A1/A2/A7）不强制六层。"
+  },
   "appendix_registry": {
-    "A1": "Methodology｜研究设计、权重、WLS/HC1、观察性边界",
-    "A2": "Variable / measurement definitions｜R/D/V 三档、item 定义、模块指数",
-    "A3": "T1 full regression｜增购优势控制链（+11.8 → +18.17）",
-    "A4": "T5 matched cells｜品牌 × 价格带配置匹配",
-    "A5": "T9 full model｜预期兑现 FULL 控制回归 + item 下钻",
-    "A6": "T4 price segmentation｜价格带边界",
-    "A7": "Topic Tournament｜10 Topic 排序与研究治理"
+    "A1": "How to read this research｜从问卷到 Evidence 的完整流程",
+    "A2": "Measurement｜R/D/V、item、APEAL_Index 与模块指数",
+    "A3a": "T1 原始问题与购买任务分组｜YPV_01 → 首购/换购/增购",
+    "A3b": "T1 Raw Δ｜加权平均 → +11.8",
+    "A3c": "T1 Adjusted Δ｜参照组、OLS controls、稳健不确定性与 +18.17",
+    "A4a": "T5 配置题来自哪里｜配置字段 → 驾驶体验结果",
+    "A4b": "T5 品牌 × 价格带内匹配｜如何比较更像的车",
+    "A5a": "T9 原始预期问题｜AFUEL_D_06 / ACHAR_D_05",
+    "A5b": "T9 Better/Worse → 总体与具体体验",
+    "A5c": "T9 观察性边界｜为什么不是因果",
+    "A6": "T4 价格带｜分组与 Δ 的计算",
+    "A7": "Topic Tournament / Research Governance｜研究治理与证据层级"
   }
 }
-

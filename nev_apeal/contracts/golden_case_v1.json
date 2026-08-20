@@ -7,7 +7,7 @@
   "purpose": "把经验变成系统能力：不再靠人工发现视觉/语义错误后返工，而是每次改动后由回归门自动判定。",
   "pipeline": [
     "deck.md（10 页 Slide Contract metadata）",
-    "validate_slide_contract.py（结构 + semantic lint，期望 0 error / 0 warn）",
+    "validate_slide_contract.py（结构 + semantic lint + Appendix Evidence Anatomy，期望 0 error / 0 warn）",
     "resolve evidence / provenance（evidence.jsonl + signal records 交叉验证）",
     "generate PPT（brand_palette.json + visual_identity.md 约束）",
     "render all slides to HTML / PNG",
