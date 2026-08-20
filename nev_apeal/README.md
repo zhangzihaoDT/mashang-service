@@ -34,7 +34,10 @@ nev_apeal/
 │   ├── source.sav
 │   └── questionnaire_map.json
 ├── contracts/
-│   └── signal_contract.json
+│   ├── signal_contract.json
+│   ├── slide_contract.json
+│   ├── render_qa_contract.json
+│   └── golden_case_v1.json
 ├── analysis/
 │   ├── _common.py
 │   ├── regress.py
@@ -53,6 +56,9 @@ nev_apeal/
 │       └── mileage_experience_lifecycle/
 ├── scratch/
 │   ├── signal_scan.py
+│   ├── validate_slide_contract.py
+│   ├── render_qa.py
+│   ├── replay_golden_case.py
 │   ├── discovery/
 │   └── terminal_t9_t10.py
 └── reports/
@@ -154,7 +160,7 @@ Interaction 规则：
 ### Champion 报告
 
 - `reports/from_parameters_to_experience_v4.md`：完整 Champion-led Topic Report
-- `reports/from_parameters_to_experience_topic_deck.md`：10 页 Topic Deck
+- `reports/from_parameters_to_experience_topic_deck.md`：10 页 Topic Deck（含每页 Slide Contract metadata block）
 
 Deck 结构：
 
@@ -170,6 +176,122 @@ Cover
 → Evidence Boundaries
 → Takeaway
 ```
+
+### Slide Contract（Production 机制）
+
+Deck 每页标题下携带一个 YAML **metadata block**，作为 Research → Production 的 canonical presentation contract，供人读与 PPT Generator 读取。schema 定义在 `contracts/slide_contract.json`，每页包含四层信息：
+
+```text
+① Narrative Layer     slide_role / question / answer / takeaway / next
+② Claim Layer         claim_level / hero_message
+③ Evidence Layer      evidence(topic, run, ids, sample_n, estimator, weight, controls)
+④ Governance Layer    boundary / appendix_ref / provenance
+```
+
+- `slide_role`：OPENING / THESIS / EVIDENCE / MECHANISM / CONCEPTUAL_BRIDGE / BOUNDARY / FRAMEWORK / CLOSING
+- `claim_level`：OBSERVATION / CONTROLLED_FINDING / MECHANISM_EVIDENCE / MECHANISM_INTERPRETATION / CONCEPTUAL_BRIDGE / BOUNDARY / MANAGERIAL_SYNTHESIS / RESEARCH_BOUNDARY
+- `appendix_ref`：指向文件尾 Appendix Registry（A1–A7），用于追问层取证
+
+### Production 链路（Semantic Lint → Render QA）
+
+目标是**第一次就完整输出**，把语义/视觉错误在生成机制内阻止，而不是人工发现后返工。
+
+```text
+deck.md（Slide Contract metadata）
+  ↓
+validate_slide_contract.py      ← 结构 + semantic lint
+  ↓
+resolve evidence / provenance   ← evidence.jsonl 交叉验证
+  ↓
+generate PPT                    ← brand_palette.json + visual_identity.md 约束
+  ↓
+render all slides to PNG/HTML
+  ↓
+render_qa.py                    ← 视觉 QA 门
+  ↓
+PASS → deliver ｜ FAIL → regenerate
+```
+
+#### 第 1 层：Semantic Lint（`scratch/validate_slide_contract.py`）
+
+在结构校验之外做跨字段一致性检查，阻止"YAML 合法但 PPT 语义画错"：
+
+| 规则 | 说明 |
+|---|---|
+| evidence.ids 真实性 | 必须存在于对应 run 的 `evidence.jsonl` |
+| signal_ids 真实性 | 必须存在于 `contract.signal_sources` 指定的 signal 记录（`scratch/discovery/_signals_*.json` / `signal_board.md`） |
+| OBSERVATION 无因果语言 | question/answer/hero 不得出现"导致/造成/causes/leads to" |
+| controlled_anchor 有效 | 必须指向 CONTROLLED_FINDING / MECHANISM_EVIDENCE 页 |
+| 综合页无显著性 hero | MANAGERIAL_SYNTHESIS / CONCEPTUAL_BRIDGE 不得在 hero 出现 p-value / 显著 |
+| 边界页不高亮为正向发现 | BOUNDARY / RESEARCH_BOUNDARY 的 highlight 不得暗示"主要正向发现" |
+| visual × role 兼容矩阵 | `framework_map` 只能用于 FRAMEWORK / MANAGERIAL_SYNTHESIS 等 |
+| before_after 需声明语义 | 必须写 `comparison_semantics`（raw_vs_adjusted / group_a_vs_b），防止画成时间变化 |
+
+规则定义在 `contracts/slide_contract.json` 的 `semantic_rules` / `visual_role_compatibility` / `causal_language`。
+
+```bash
+PYTHONPATH=. ../.venv/bin/python scratch/validate_slide_contract.py \
+    --deck reports/from_parameters_to_experience_topic_deck.md
+PYTHONPATH=. ../.venv/bin/python scratch/validate_slide_contract.py --format json
+```
+
+新 Deck 或修改后必须通过（0 error）才能进入渲染。
+
+#### 第 2 层：Render QA（`scratch/render_qa.py`）
+
+对渲染产物（PPT HTML export 或 deck.html 预览）做浏览器内检查，清单定义在 `contracts/render_qa_contract.json`：
+
+| 检查 | 级别 | 捕获的问题 |
+|---|---|---|
+| 无 console error | error | 脚本错误 |
+| 页数 = contract 页数 | error | 10 页被压成 6 页、T9 挤掉 T5/T4 |
+| 无元素溢出 / 文字截断 | error | 排版越界 |
+| 颜色来自 brand palette | warn | 颜色跑偏 |
+| 标题是结论句 | warn | "Page 2" 式标签 |
+| 数据页有结构化载体（table/bar/pre/split/flow） | error | 全部退化成 metric cards |
+| CONCEPTUAL_BRIDGE 与分析页节奏区分 | warn | 转场页被画成数据页 |
+| footer / source / 权重完整 | warn | 来源缺失 |
+
+```bash
+PYTHONPATH=. ../.venv/bin/python scratch/render_qa.py \
+    --html reports/from_parameters_to_experience_topic_deck.html \
+    --deck reports/from_parameters_to_experience_topic_deck.md
+```
+
+门禁：任何 `error` 阻止交付；`warn` 进入人工复核清单。
+
+### Golden Case（Production Pipeline v1）
+
+把当前状态冻结为**不可回退的系统能力**。定义在 `contracts/golden_case_v1.json`，固定产物与验收结果：
+
+```text
+固定：10 页 deck.md · deck.html · Slide Contract v1.1 · Visual Identity
+      Brand Palette · Semantic Lint 预期 · Render QA 预期
+
+验收只看 5 个数：
+  slides            = 10
+  semantic errors   = 0
+  semantic warnings = 0
+  render errors     = 0
+  render warnings   = 0
+```
+
+回归重放：
+
+```bash
+PYTHONPATH=. ../.venv/bin/python scratch/replay_golden_case.py
+```
+
+**触发规则**：任何修改以下组件后，必须重放本 Golden Case，PASS 才允许合并——
+
+- `contracts/slide_contract.json` / `contracts/render_qa_contract.json`
+- `scratch/validate_slide_contract.py` / `scratch/render_qa.py`
+- `reports/from_parameters_to_experience_topic_deck.md` / `.html`
+- `~/.config/opencode/assets/brand/visual_identity.md` / `brand_palette.json`
+- `.opencode/skills/nev-research/SKILL.md`
+- README 的 Production 链路章节
+
+任何 `error` 阻塞合并；`warn` 人工复核后显式放行。
 
 ### Tournament 与研究治理
 

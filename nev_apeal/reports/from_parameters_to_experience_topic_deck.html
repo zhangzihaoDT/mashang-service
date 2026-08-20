@@ -132,6 +132,21 @@
   .flow .node .d { font-size: 12px; color: var(--zh-muted); }
   .flow .arrow { align-self: center; color: var(--zh-cyan); font-size: 20px; padding: 0 4px; }
 
+  /* ---------- Conceptual bridge (P6 transition) ---------- */
+  .bridge {
+    background: linear-gradient(135deg, var(--zh-deep-blue), var(--zh-blue));
+    color: #fff; border-radius: 18px; padding: 34px 32px; margin: 22px 0;
+  }
+  .bridge .q { font-size: 12px; letter-spacing: 2px; color: var(--zh-cyan); margin-bottom: 10px; }
+  .bridge .t { font-size: 21px; font-weight: 700; margin-bottom: 12px; }
+  .bridge .d { font-size: 14px; color: rgba(255,255,255,.85); }
+  .bridge .flow { margin: 22px 0 6px; }
+  .bridge .node { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.18); }
+  .bridge .node .n { color: var(--zh-cyan); }
+  .bridge .node .t { color: #fff; }
+  .bridge .node .d { color: rgba(255,255,255,.78); }
+  .bridge .arrow { color: var(--zh-cyan); }
+
   /* ---------- Two col ---------- */
   .split { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
   @media (max-width: 720px) { .split { grid-template-columns: 1fr; } }
@@ -180,12 +195,12 @@
 
 <div class="shell">
 
-  <!-- P2 Executive Thesis -->
+  <!-- P2 Executive Finding / Controlled Gap -->
   <section class="page" id="p2">
     <div class="page-header"><span class="page-num">P2</span><h1 class="page-title">增购用户要的不是更多参数，而是更明确的体验跃迁</h1></div>
-    <div class="page-sub">Executive Thesis</div>
+    <div class="page-sub">Executive Finding · 控制前 +11.8 → 控制后 +18.17（raw vs adjusted）</div>
     <div class="card">
-      <h3>主证据 <span class="tag">E-001 · E-011</span></h3>
+      <h3>主证据：控制后增购优势仍然成立 <span class="tag">E-011</span></h3>
       <table>
         <tr><th>组别</th><th class="num">APEAL</th></tr>
         <tr class="row-em"><td>增购</td><td class="num hl">798.4</td></tr>
@@ -199,10 +214,10 @@
 
   <hr class="rule">
 
-  <!-- P3 Hero Finding -->
+  <!-- P3 Experience Structure -->
   <section class="page" id="p3">
     <div class="page-header"><span class="page-num">P3</span><h1 class="page-title">增购用户的升级感，几乎不是被补能拉开的</h1></div>
-    <div class="page-sub">Hero Finding · 真正拉开差距的是外观、驾驶、动力与座舱</div>
+    <div class="page-sub">Experience Structure · 真正拉开差距的是外观、驾驶、动力与座舱</div>
     <div class="card">
       <h3>增购 vs 首购的体验结构 · 全篇 Hero Chart <span class="tag">E-003</span></h3>
       <div class="bars">
@@ -221,10 +236,10 @@
 
   <hr class="rule">
 
-  <!-- P4 Why Driving / Item -->
+  <!-- P4 Driving Mechanism -->
   <section class="page" id="p4">
     <div class="page-header"><span class="page-num">P4</span><h1 class="page-title">驾驶差异不是抽象指数，而是落实到用户能感觉到的 item</h1></div>
-    <div class="page-sub">Why · 驾驶 / Item 下钻</div>
+    <div class="page-sub">Driving Mechanism · Item 下钻</div>
     <div class="card">
       <h3>Item 下钻 · 增购 vs 首购，WLS <span class="kbd">APEAL_WT</span> <span class="tag">E-008</span></h3>
       <table>
@@ -278,42 +293,74 @@
 
   <hr class="rule">
 
-  <!-- P6 Expectation Calibration -->
+  <!-- P6 T9 Expectation Calibration ★  CONCEPTUAL_BRIDGE (transition page) -->
   <section class="page" id="p6">
-    <div class="page-header"><span class="page-num">P6</span><h1 class="page-title">用户不只比较参数高不高，还比较产品是否兑现了预期</h1></div>
-    <div class="page-sub">Expectation Calibration · 机制链 2：Expectation → Reward / Penalty</div>
+    <div class="page-header"><span class="page-num">P6 ★</span><h1 class="page-title">但用户真正评价的并不是参数本身，而是产品是否兑现了原有预期</h1></div>
+    <div class="page-sub">T9 Expectation Calibration · 认知跃迁：从“喜欢什么”到“为什么喜欢”</div>
+    <div class="bridge">
+      <div class="q">认知跃迁 · 从“喜欢什么”到“为什么喜欢”</div>
+      <div class="t">用户不是先看参数表，而是在心里先有一把“预期尺子”</div>
+      <div class="d">参数只定义了“门槛”；预期是否被兑现，才定义了“评价”。</div>
+      <div class="flow">
+        <div class="node"><div class="n">T1</div><div class="t">哪些用户喜欢什么</div><div class="d">Purchase Mission → Experience Structure</div></div>
+        <div class="arrow">↓</div>
+        <div class="node"><div class="n">T9</div><div class="t">为什么这些特征会转化为魅力评价</div><div class="d">预期是否被兑现，才定义“评价”</div></div>
+      </div>
+    </div>
+    <div class="evidence-note">转场页：不含统计数字。T1 负责指出差异在哪里；T9 负责解释差异是怎么被用户加工出来的。证据链见 P7。</div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- P7 T9 Evidence Chain -->
+  <section class="page" id="p7">
+    <div class="page-header"><span class="page-num">P7</span><h1 class="page-title">预期兑现 → 具体补能体验 → Overall APEAL</h1></div>
+    <div class="page-sub">T9 Evidence Chain · n=8,524 · WLS + HC1</div>
     <div class="card">
-      <h3>T9 · 两类补能预期的近对称奖惩 <span class="tag">expectation_wow_01 / 04</span></h3>
+      <h3>证据链条 <span class="tag">expectation_wow_01 / 04 → E-001 · E-002</span></h3>
+      <div class="flow">
+        <div class="node"><div class="n">预期</div><div class="t">体验优于预期 / 差于预期</div><div class="d">AFUEL_D_06 续航 · ACHAR_D_05 充电时长</div></div>
+        <div class="arrow">↓</div>
+        <div class="node"><div class="n">体验</div><div class="t">充电便利 · 充电口操作 · 续航总体 · 总体充电</div><div class="d">AFUEL_R_01 · ACHAR_R_01 · ACHAR_R_09</div></div>
+        <div class="arrow">↓</div>
+        <div class="node"><div class="n">结果</div><div class="t">Overall APEAL</div><div class="d">总体拥车和驾驶体验</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>控制口径下的关联</h3>
+      <div class="big-quote">在控制价格、细分市场、品牌类型和人口特征后，“体验优于预期”的用户仍表现出显著更高的总体魅力评价。</div>
       <table>
-        <tr><th>预期 exposure</th><th class="num">Better − About APEAL</th><th class="num">About − Worse APEAL</th></tr>
-        <tr class="row-em"><td>续航 vs 预期</td><td class="num hl">+49.8</td><td class="num">43.8</td></tr>
-        <tr><td>充电时长 vs 预期</td><td class="num hl">+51.0</td><td class="num">47.8</td></tr>
+        <tr><th>预期 exposure</th><th>总体魅力评价（控制后关联）</th><th class="num">p</th></tr>
+        <tr class="row-em"><td>续航“体验优于预期”</td><td>显著更高</td><td class="num">&lt;0.001</td></tr>
+        <tr><td>充电时长“体验优于预期”</td><td>显著更高</td><td class="num">&lt;0.001</td></tr>
+        <tr><td>任一项“体验差于预期”</td><td>对应反向更低</td><td class="num">同向成立</td></tr>
       </table>
-      <div class="meta-line">同时进入 FULL 控制后仍独立显著（WLS，<span class="kbd">p &lt; 0.001</span>）：</div>
-      <ul style="margin:8px 0 8px 22px;font-size:13.5px">
-        <li>续航 Better：APEAL <b>+53.4</b>，AFUEL <b>+112.7</b></li>
-        <li>充电时长 Better：APEAL <b>+71.1</b>，AFUEL <b>+80.7</b></li>
-      </ul>
-      <div class="big-quote">体验升级不仅要把参数做高，还要把用户心里的预期兑现。</div>
-      <div class="evidence-note">T9 已落到充电便利、状态可读、整体充电体验和续航 item；但仍是横截面、自报预期的观察性关联，不宣称宣传承诺的因果效果。</div>
+      <h3 style="margin-top:22px">Item 层：预期落到了具体体验</h3>
+      <table>
+        <tr><th>具体体验 item</th><th>承接预期</th><th>控制后关联</th></tr>
+        <tr><td>纯电续航总体表现</td><td>续航预期</td><td>正关联，p&lt;0.001</td></tr>
+        <tr><td>充电口设计与操作便利性</td><td>充电时长预期</td><td>正关联，p&lt;0.001</td></tr>
+        <tr class="row-em"><td>总体充电体验</td><td>两类预期最稳定的承接项</td><td>正关联，p&lt;0.001</td></tr>
+      </table>
+      <div class="meta-line">有效预期档位 1/2/3 共同样本 <span class="kbd">n=8,524</span>；WLS + HC1，两类预期同时进入模型；控制 <span class="kbd">SUPER_SEGMENT_DP</span> · <span class="kbd">CN_YNV_07</span> · <span class="kbd">PREMMAKE_DP</span> · <span class="kbd">AGE_BUCKETS</span> · <span class="kbd">CN_INCOME</span> · <span class="kbd">CN_EDUCATION</span>。</div>
+      <div class="evidence-note"><b>边界纪律：</b>横截面、自报预期的观察性关联，不是宣传承诺的因果实验；不能写成“兑现预期可以提升 N 分 APEAL”。可写：控制结构、价格、品牌与人口后，预期被兑现的用户评价系统性地更高。</div>
     </div>
   </section>
 
   <hr class="rule">
 
-  <!-- P7 Price Boundary -->
-  <section class="page" id="p7">
-    <div class="page-header"><span class="page-num">P7</span><h1 class="page-title">升级感不会随价格线性放大</h1></div>
+  <!-- P8 Price Boundary -->
+  <section class="page" id="p8">
+    <div class="page-header"><span class="page-num">P8</span><h1 class="page-title">升级感不会随价格线性放大</h1></div>
     <div class="page-sub">Price Boundary · T4 增购 vs 首购的价格带边界</div>
     <div class="card">
       <h3>价格带 × 增购优势 <span class="tag">E-013</span></h3>
-      <table>
-        <tr><th>价格带</th><th class="num">增购 − 首购</th></tr>
-        <tr><td>10–15 万</td><td class="num">+3.1</td></tr>
-        <tr class="row-em"><td><b>15–20 万</b></td><td class="num gold">+20.4</td></tr>
-        <tr><td>20–30 万</td><td class="num">+3.3</td></tr>
-        <tr><td>30 万+</td><td class="num">+1.4</td></tr>
-      </table>
+      <div class="bars">
+        <div class="bar-row"><span class="lbl">10–15万</span><div class="track"><div class="fill" style="width:15%"></div></div><span class="val">+3.1</span></div>
+        <div class="bar-row"><span class="lbl">15–20万</span><div class="track"><div class="fill gold" style="width:100%"></div></div><span class="val">+20.4</span></div>
+        <div class="bar-row"><span class="lbl">20–30万</span><div class="track"><div class="fill" style="width:16%"></div></div><span class="val">+3.3</span></div>
+        <div class="bar-row"><span class="lbl">30万+</span><div class="track"><div class="fill" style="width:7%"></div></div><span class="val">+1.4</span></div>
+      </div>
       <div class="big-quote">中端靠升级感拉开用户，高端靠全民体验基准留在牌桌。</div>
       <div class="evidence-note">不能把 T1 写成“越贵，增购优势越强”。15–20 万是体验升级最容易被拉开的区间；30 万+ 则是首购用户也已进入高体验基准。</div>
     </div>
@@ -321,10 +368,10 @@
 
   <hr class="rule">
 
-  <!-- P8 OEM Design Framework -->
-  <section class="page" id="p8">
-    <div class="page-header"><span class="page-num">P8</span><h1 class="page-title">从 Feature Checklist 转向 Perceived Upgrade Design</h1></div>
-    <div class="page-sub">OEM Design Framework</div>
+  <!-- P9 OEM Design Framework -->
+  <section class="page" id="p9">
+    <div class="page-header"><span class="page-num">P9</span><h1 class="page-title">从 Feature Checklist 转向 Expectation × Experience Management</h1></div>
+    <div class="page-sub">OEM Design Framework · 管理综合（managerial synthesis，非新统计结果）</div>
     <div class="card">
       <h3>机制模型 · Feature → Expectation → Experienced Difference → Perceived Upgrade <span class="tag">T5 · T9 · T1</span></h3>
       <div class="flow">
@@ -334,9 +381,9 @@
         <div class="arrow">↓</div>
         <div class="node"><div class="n">T1</div><div class="t">Experienced Difference → Perceived Upgrade</div><div class="d">驾驶、外观、座舱的变化被用户立即感觉到</div></div>
         <div class="arrow">↓</div>
-        <div class="node"><div class="n">OEM</div><div class="t">Perceived Upgrade Design</div><div class="d">从“多了什么”转向“用户能否感觉不一样”</div></div>
+        <div class="node"><div class="n">OEM</div><div class="t">Expectation × Experience Management</div><div class="d">参数是门槛，预期兑现才是评价来源</div></div>
       </div>
-      <div class="meta-line" style="margin-top:10px">P8 不是四条孤立建议，而是由 T5、T9 和 T1 的证据共同推导出的产品设计框架。</div>
+      <div class="meta-line" style="margin-top:10px">P9 不是四条孤立建议，而是由 T5、T9 和 T1 的证据共同推导出的产品设计框架。</div>
     </div>
     <div class="card">
       <h3>四步产品框架</h3>
@@ -352,6 +399,7 @@
         <tr><td>多了什么配置？</td><td>用户能否立即感觉不一样？</td></tr>
         <tr><td>参数是否领先？</td><td>参数是否转化为可感知体验？</td></tr>
         <tr><td>功能是否上线？</td><td>用户第一次使用时是否觉得升级？</td></tr>
+        <tr class="row-em"><td>标称续航是否够长？</td><td>用户是否觉得续航“兑现了承诺”？</td></tr>
       </table>
       <div class="evidence-note">Supporting：T2/T3 用于定义不同用户的体验门槛；T7 用于识别补能生活方式；它们为设计分层提供 context，不改变 T1 主框架。</div>
     </div>
@@ -359,10 +407,10 @@
 
   <hr class="rule">
 
-  <!-- P9 Evidence Boundaries -->
-  <section class="page" id="p9">
-    <div class="page-header"><span class="page-num">P9</span><h1 class="page-title">研究纪律：知道哪些结论不能讲</h1></div>
-    <div class="page-sub">Evidence Boundaries</div>
+  <!-- P10 Evidence Boundary + Final Takeaway -->
+  <section class="page" id="p10">
+    <div class="page-header"><span class="page-num">P10</span><h1 class="page-title">研究纪律：知道哪些结论不能讲</h1></div>
+    <div class="page-sub">Evidence Boundary + Final Takeaway</div>
     <div class="boundary">
       <div class="bt">T8 · 品牌来源不是独立机制</div>
       <div class="bd">OEM 来源结构的 raw gap 在完整控制后归零，WLS 约 <b>+2.7, p=0.53</b>。不能把体验差异归因给“某类 OEM 天生更会做升级感”。</div>
@@ -375,19 +423,14 @@
       <div class="bt">T10 · 里程非线性不等于产品质量衰减</div>
       <div class="bd">里程峰值与回落成立，但总体机制和归因不够稳定，terminal 为 <b>INCONCLUSIVE</b>。不能把横截面里程梯度直接写成纵向质量衰减。</div>
     </div>
+    <div class="boundary">
+      <div class="bt">T9 · 预期关联是观察关系</div>
+      <div class="bd">预期关联是横截面、自报预期的观察关系，不是因果实验；只能写“控制后系统性更高”。</div>
+    </div>
     <div class="card">
       <div class="big-quote">READY Topic 用来支撑主张；INCONCLUSIVE Topic 用来保护主张边界。</div>
     </div>
-  </section>
-
-  <hr class="rule">
-
-  <!-- P10 Takeaway -->
-  <section class="page" id="p10">
-    <div class="page-header"><span class="page-num">P10</span><h1 class="page-title">用户第一次使用时，能不能感觉这辆车升级了？</h1></div>
-    <div class="page-sub">Takeaway</div>
     <div class="card">
-      <div class="big-quote">新能源车的下一轮升级，不是把参数表做得更长，而是让用户在第一次开、坐、转向和使用配置时，立即感觉这辆车真的变得更好。</div>
       <h3>三个记忆点</h3>
       <ol style="margin-left:22px;font-size:14px">
         <li><b>用户任务变了</b>：已有车辆经验的用户要的是可感知的体验跃迁。</li>
@@ -401,6 +444,7 @@
         <div class="node"><div class="n">T2 / T3 / T7</div><div class="t">Supporting context</div><div class="d">分层背景</div></div>
         <div class="node"><div class="n">T8 / T6 / T10</div><div class="t">Boundary</div><div class="d">保护研究边界</div></div>
       </div>
+      <div class="meta-line" style="margin-top:10px">新能源车的下一轮升级，不是把参数表做得更长，而是让用户在第一次开、坐、转向和使用配置时，立即感觉这辆车真的变得更好。</div>
     </div>
     <div class="big-quote" style="font-size:19px">从参数升级到体验升级：当用户已经拥有过一辆车，真正的产品竞争就不再是“多了什么”，而是“他能不能马上感觉到不一样”。</div>
   </section>
@@ -415,7 +459,7 @@
     </div>
     <div class="meta-line" style="margin-top:14px">
       数据：<span class="kbd">nev_apeal/data/source.sav</span> · 9,937 行 · 权重 <span class="kbd">APEAL_WT</span><br>
-      证据：E-001 / E-003 / E-008 / E-011 / E-012 / E-013 / T9 terminal / T4 · T6 · T10 qualification
+      证据：E-001 / E-003 / E-008 / E-011 / E-012 / E-013 · T9 terminal（expectation_wow_01/04 → E-001/E-002）· T4 · T6 · T8 · T10 qualification
     </div>
   </footer>
 

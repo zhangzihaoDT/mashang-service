@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.1",
+  "description": "统一 Slide Contract：Production 阶段每页 deck.md 携带的 metadata block 共用此 schema。Slide Contract 是 Research → Production 之间的 canonical presentation contract，供人读与 PPT Generator 读取。v1.1 新增 Semantic Lint 规则（跨字段一致性），与结构校验互补。",
+  "deck_source": "reports/from_parameters_to_experience_topic_deck.md",
+  "required_fields": [
+    "slide_role",
+    "question",
+    "answer",
+    "claim_level",
+    "evidence",
+    "visual",
+    "boundary",
+    "takeaway",
+    "next",
+    "appendix_ref"
+  ],
+  "optional_fields": [
+    "hero_message",
+    "comparison_semantics",
+    "controlled_anchor"
+  ],
+  "field_definitions": {
+    "slide_role": "该页在整套故事中的叙事职能，决定 PPT 排版模板。OPENING 封面 | THESIS 论点 | EVIDENCE 数据页 | MECHANISM 机制页 | CONCEPTUAL_BRIDGE 转场页 | BOUNDARY 边界页 | FRAMEWORK 框架页 | CLOSING 收尾页",
+    "question": "本页要回答的关键问题（一句完整句式）",
+    "answer": "对本页 question 的明确回答（一句）",
+    "claim_level": "结论的证据等级，阻止 PPT 把管理建议画得像统计证明。OBSERVATION | CONTROLLED_FINDING | MECHANISM_EVIDENCE | MECHANISM_INTERPRETATION | CONCEPTUAL_BRIDGE | BOUNDARY | MANAGERIAL_SYNTHESIS | RESEARCH_BOUNDARY",
+    "evidence": "本页引用的研究证据：topic / run / ids / metric / method / sample_n / estimator / weight / controls / derived_from",
+    "visual": "本页证据应呈现的图表契约：type / primary_metric / categories / highlight / annotation / flow / hero_message / old_vs_new",
+    "boundary": "本页结论的适用边界与不能讲的表述（观察性、非因果、非外推）",
+    "takeaway": "本页的一句话收束",
+    "next": "本页向下一页的转场问题",
+    "appendix_ref": "追问层附录引用，如 [A1, A3]",
+    "hero_message": "本页最大的单个可感知信息（可选，用于 opening/framework 页）",
+    "comparison_semantics": "before_after 型 visual 的对比语义。非时间序列时必填，如 raw_vs_adjusted / group_a_vs_b；防止 PPT 把横截面对比画成时间变化。可选值见 comparison_semantics.enum",
+    "controlled_anchor": "OBSERVATION 页可声明的受控锚点引用，格式 'Pn / <run> / <id>'，必须指向 claim_level∈{CONTROLLED_FINDING, MECHANISM_EVIDENCE} 的页面"
+  },
+  "enums": {
+    "slide_role": ["OPENING", "THESIS", "EVIDENCE", "MECHANISM", "CONCEPTUAL_BRIDGE", "BOUNDARY", "FRAMEWORK", "CLOSING"],
+    "claim_level": ["OBSERVATION", "CONTROLLED_FINDING", "MECHANISM_EVIDENCE", "MECHANISM_INTERPRETATION", "CONCEPTUAL_BRIDGE", "BOUNDARY", "MANAGERIAL_SYNTHESIS", "RESEARCH_BOUNDARY"],
+    "visual_type": ["opening_stat", "before_after", "ranked_bar", "item_drilldown", "evidence_vs_counterevidence", "conceptual_flow", "evidence_chain", "band_chart", "framework_map", "boundary_list"],
+    "comparison_semantics": ["raw_vs_adjusted", "group_a_vs_b", "temporal_trend", "not_applicable"]
+  },
+  "visual_role_compatibility": {
+    "opening_stat": ["OPENING", "CLOSING"],
+    "before_after": ["THESIS", "EVIDENCE", "MECHANISM"],
+    "ranked_bar": ["EVIDENCE", "MECHANISM", "THESIS"],
+    "item_drilldown": ["MECHANISM", "EVIDENCE"],
+    "evidence_vs_counterevidence": ["MECHANISM", "EVIDENCE"],
+    "conceptual_flow": ["CONCEPTUAL_BRIDGE", "FRAMEWORK"],
+    "evidence_chain": ["EVIDENCE", "MECHANISM"],
+    "band_chart": ["BOUNDARY", "EVIDENCE"],
+    "framework_map": ["FRAMEWORK", "MANAGERIAL_SYNTHESIS", "THESIS"],
+    "boundary_list": ["CLOSING", "BOUNDARY", "RESEARCH_BOUNDARY"]
+  },
+  "semantic_rules": [
+    "evidence.ids 必须真实存在于对应 evidence.run 目录的 evidence.jsonl",
+    "evidence.signal_ids 必须存在于 contract.signal_sources 指定的 signal 记录中（signal.json / signal_board.md）",
+    "claim_level=OBSERVATION 的 question/answer/hero 不得出现 causal language（见 causal_language.reject）",
+    "claim_level=OBSERVATION 使用 controlled_anchor 时，引用页 claim_level 必须为 CONTROLLED_FINDING 或 MECHANISM_EVIDENCE",
+    "claim_level=MANAGERIAL_SYNTHESIS / CONCEPTUAL_BRIDGE 不得在 hero_message/annotation 中出现 p-value 或显著性表述（如 p<0.001, d=, 显著）",
+    "claim_level=BOUNDARY / RESEARCH_BOUNDARY 不得被 visual.highlight 标注为'主要正向发现'（highlight 仅允许标注边界区间本身）",
+    "visual.type 必须与 slide_role 匹配 visual_role_compatibility；framework_map 只能用于 FRAMEWORK / MANAGERIAL_SYNTHESIS / THESIS",
+    "visual.type=before_after 时必须声明 comparison_semantics；值为 temporal_trend 需额外证据支持，否则应为 raw_vs_adjusted 或 group_a_vs_b"
+  ],
+  "signal_sources": [
+    "scratch/discovery/_signals_expectation_wow.json",
+    "scratch/discovery/_signals_segment_discriminator.json",
+    "scratch/discovery/_signals_nonlinear.json",
+    "scratch/discovery/_signals_interaction.json",
+    "scratch/discovery/_signals_round2.json",
+    "reports/signal_board.md"
+  ],
+  "causal_language": {
+    "reject": ["导致", "造成", "使得", "引发", "归因于", "决定", "因果", "使得…更", "causes", "leads to", "drives", "due to"],
+    "note": "OBSERVATION / CONTROLLED_FINDING 只能表达'差异/关联/相对'，不能表达'X 导致 Y'。表述建议：'关联''相对更高''差异集中在'"
+  },
+  "governance_rules": [
+    "MANAGERIAL_SYNTHESIS 页（如 P9）只能配框架图，不能配显著性标注",
+    "CONCEPTUAL_BRIDGE 页（如 P6）不含独立统计数字，证据链在下一页",
+    "CONTROLLED_FINDING 页必须携带 controls / estimator / sample_n",
+    "evidence.derived_from 用于联合推导页（如 P9），列明各来源 topic/run/id",
+    "boundary 必须显式列出不能讲的表述，防止传播中弱化研究纪律"
+  ],
+  "appendix_registry": {
+    "A1": "Methodology｜研究设计、权重、WLS/HC1、观察性边界",
+    "A2": "Variable / measurement definitions｜R/D/V 三档、item 定义、模块指数",
+    "A3": "T1 full regression｜增购优势控制链（+11.8 → +18.17）",
+    "A4": "T5 matched cells｜品牌 × 价格带配置匹配",
+    "A5": "T9 full model｜预期兑现 FULL 控制回归 + item 下钻",
+    "A6": "T4 price segmentation｜价格带边界",
+    "A7": "Topic Tournament｜10 Topic 排序与研究治理"
+  }
+}
+

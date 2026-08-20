@@ -1,0 +1,79 @@
+{
+  "schema_version": "1.0",
+  "description": "Render QA Contract：Production 链路的最后一道门。deck.md 通过 Semantic Lint 后，渲染产物（PPT / HTML export）必须通过本清单才允许交付。目标是'第一次就完整输出'，把视觉/语义错误在生成机制内阻止，而不是人工发现后返工。",
+  "production_pipeline": [
+    "deck.md（Slide Contract metadata）",
+    "validate_slide_contract.py（结构 + semantic lint）",
+    "resolve evidence / provenance（evidence.jsonl 交叉验证）",
+    "generate PPT（brand_palette.json + visual_identity.md 约束）",
+    "render all slides to PNG / HTML",
+    "render_qa.py（本清单自动检查）",
+    "PASS → deliver ｜ FAIL → regenerate"
+  ],
+  "gate_policy": "任何 level=error 的检查失败都阻止交付；level=warn 作为待人工复核清单，不自动放行也不自动阻断。",
+  "checks": [
+    {
+      "id": "qa01",
+      "name": "console",
+      "level": "error",
+      "desc": "渲染页面无 JS console error"
+    },
+    {
+      "id": "qa02",
+      "name": "page_count",
+      "level": "error",
+      "desc": "渲染页数 = deck.md Slide Contract 页数；P1 cover + P2–P10 section 应逐一对应"
+    },
+    {
+      "id": "qa03",
+      "name": "overflow",
+      "level": "error",
+      "desc": "无元素横向溢出（scrollWidth > clientWidth 且 overflow visible）"
+    },
+    {
+      "id": "qa04",
+      "name": "vertical_clip",
+      "level": "error",
+      "desc": "标题/正文无纵向文字截断（scrollHeight > clientHeight）"
+    },
+    {
+      "id": "qa05",
+      "name": "palette",
+      "level": "warn",
+      "desc": "颜色来自 brand palette（允许白/奶油/浅蓝等安全中性色与表格灰）"
+    },
+    {
+      "id": "qa06",
+      "name": "title",
+      "level": "warn",
+      "desc": "每页标题是结论句（非'Page 2'式标签，长度足够）"
+    },
+    {
+      "id": "qa07",
+      "name": "metric_card_abuse",
+      "level": "error",
+      "desc": "数据页（EVIDENCE/MECHANISM/THESIS/BOUNDARY）必须携带 table/bar/pre/split/flow/boundary 等结构化载体，不得退化成纯数字卡片"
+    },
+    {
+      "id": "qa08",
+      "name": "bridge_rhythm",
+      "level": "warn",
+      "desc": "CONCEPTUAL_BRIDGE 转场页应与分析页有视觉节奏区别——不得渲染 table/bar 数据块"
+    },
+    {
+      "id": "qa09",
+      "name": "footer",
+      "level": "warn",
+      "desc": "footer / 数据来源 / 权重标注完整（Raccoon / source.sav / APEAL_WT）"
+    }
+  ],
+  "typical_failures_prevented": [
+    "10 页被压成 6 页（qa02 page_count）",
+    "T9 加入后 T5/T4 被压掉（qa02 + validate semantic）",
+    "所有数据都做成 metric cards（qa07）",
+    "JDP 风格被误解成极简咨询风（qa07 + visual_identity）",
+    "Observation 被表现得像 Controlled Finding（semantic lint claim_level + qa05/qa06）",
+    "before_after 被画成时间变化（semantic lint comparison_semantics）"
+  ],
+  "execution": "PYTHONPATH=. ../.venv/bin/python scratch/render_qa.py --html <rendered.html> --deck reports/from_parameters_to_experience_topic_deck.md"
+}

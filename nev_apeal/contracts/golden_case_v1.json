@@ -1,0 +1,62 @@
+{
+  "golden_case": "Production Pipeline v1 Golden Case",
+  "version": "1.0",
+  "frozen_at": "2026-08-20",
+  "status": "FROZEN",
+  "description": "从'从参数升级到体验升级'Champion Deck 的多轮打磨中固化的不可回退系统能力。任何对生产链组件的修改都必须重放本 Golden Case；只有通过（全 0 error / 0 warn / 10 页）才允许合并。",
+  "purpose": "把经验变成系统能力：不再靠人工发现视觉/语义错误后返工，而是每次改动后由回归门自动判定。",
+  "pipeline": [
+    "deck.md（10 页 Slide Contract metadata）",
+    "validate_slide_contract.py（结构 + semantic lint，期望 0 error / 0 warn）",
+    "resolve evidence / provenance（evidence.jsonl + signal records 交叉验证）",
+    "generate PPT（brand_palette.json + visual_identity.md 约束）",
+    "render all slides to HTML / PNG",
+    "render_qa.py（期望 0 error / 0 warn / 10 页）",
+    "PASS → deliver ｜ FAIL → 阻塞合并，人工修复后重放"
+  ],
+  "frozen_artifacts": {
+    "deck_md": "reports/from_parameters_to_experience_topic_deck.md",
+    "deck_html": "reports/from_parameters_to_experience_topic_deck.html",
+    "evidence_trace_html": "reports/from_parameters_to_experience_evidence_trace.html",
+    "slide_contract": "contracts/slide_contract.json",
+    "render_qa_contract": "contracts/render_qa_contract.json",
+    "semantic_lint_validator": "scratch/validate_slide_contract.py",
+    "render_qa_validator": "scratch/render_qa.py",
+    "golden_case_replay": "scratch/replay_golden_case.py",
+    "visual_identity": "~/.config/opencode/assets/brand/visual_identity.md",
+    "brand_palette": "~/.config/opencode/assets/brand/brand_palette.json"
+  },
+  "expected": {
+    "slides": 10,
+    "semantic_errors": 0,
+    "semantic_warnings": 0,
+    "render_errors": 0,
+    "render_warnings": 0
+  },
+  "acceptance": {
+    "slides_count": 10,
+    "semantic_error_count": 0,
+    "semantic_warning_count": 0,
+    "render_error_count": 0,
+    "render_warning_count": 0
+  },
+  "regression_trigger": [
+    "contracts/slide_contract.json",
+    "contracts/render_qa_contract.json",
+    "scratch/validate_slide_contract.py",
+    "scratch/render_qa.py",
+    "reports/from_parameters_to_experience_topic_deck.md",
+    "reports/from_parameters_to_experience_topic_deck.html",
+    "~/.config/opencode/assets/brand/visual_identity.md",
+    "~/.config/opencode/assets/brand/brand_palette.json",
+    ".opencode/skills/nev-research/SKILL.md",
+    "nev_apeal/README.md（Production 链路章节）"
+  ],
+  "blocking_rule": "任何 error 阻塞合并；warning 必须人工复核后显式放行，不得静默通过。",
+  "replay_command": "PYTHONPATH=. ../.venv/bin/python scratch/replay_golden_case.py",
+  "notes": [
+    "Golden Case 固定的是'验收契约'，不固定统计数字本身；统计证据以 research/runs/*/evidence.jsonl 为准。",
+    "新增 Deck 或新增页时，slides 预期数量由 golden_case 的 expected.slides 与 deck 实际页数共同判定（两者必须一致）。",
+    "改组件后若统计结论变化，需同步更新 evidence 与 deck，再重放本 Golden Case。"
+  ]
+}
