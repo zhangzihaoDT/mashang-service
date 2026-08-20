@@ -236,6 +236,19 @@ def validate(deck_text: str, contract: dict) -> dict:
     n_pages = len(pages)
     n_err = sum(1 for v in pages.values() if any(e["level"] == "error" for e in v))
     n_warn = sum(1 for v in pages.values() if any(e["level"] == "warn" for e in v))
+
+    # provenance counters: total referenced evidence ids / signal ids across the deck
+    evidence_ids_total = []
+    signal_ids_total = []
+    for meta in meta_by_page.values():
+        ev = meta.get("evidence") or {}
+        evidence_ids_total.extend(str(i) for i in (ev.get("ids") or []))
+        signal_ids_total.extend(str(i) for i in (ev.get("signal_ids") or []))
+        for b in ev.get("boundaries") or []:
+            evidence_ids_total.extend(str(i) for i in (b.get("ids") or []))
+    evidence_refs = len(evidence_ids_total)
+    signal_refs = len(signal_ids_total)
+
     return {
         "status": "pass" if n_err == 0 else "fail",
         "contract_version": contract.get("schema_version"),
@@ -244,6 +257,8 @@ def validate(deck_text: str, contract: dict) -> dict:
         "n_pages_with_warnings": n_warn,
         "governance_rules_checked": len(governance),
         "semantic_rules_checked": len(contract.get("semantic_rules", [])),
+        "evidence_refs": evidence_refs,
+        "signal_refs": signal_refs,
         "pages": pages,
     }
 

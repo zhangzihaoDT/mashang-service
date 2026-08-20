@@ -33,6 +33,11 @@
     "render_errors": 0,
     "render_warnings": 0
   },
+  "provenance": {
+    "evidence_refs_min": 1,
+    "signal_refs_min": 1,
+    "rule": "evidence/signal refs 必须 >0 且全部解析（无 semantic.evidence_id / semantic.signal_id error）"
+  },
   "acceptance": {
     "slides_count": 10,
     "semantic_error_count": 0,

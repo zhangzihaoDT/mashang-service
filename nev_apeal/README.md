@@ -268,18 +268,38 @@ PYTHONPATH=. ../.venv/bin/python scratch/render_qa.py \
 固定：10 页 deck.md · deck.html · Slide Contract v1.1 · Visual Identity
       Brand Palette · Semantic Lint 预期 · Render QA 预期
 
-验收只看 5 个数：
+验收只看 7 个数：
   slides            = 10
   semantic errors   = 0
   semantic warnings = 0
+  evidence refs     > 0 且全部解析
+  signal refs       > 0 且全部解析
   render errors     = 0
   render warnings   = 0
 ```
 
-回归重放：
+回归重放（统一入口）：
 
 ```bash
+make production-golden                       # 仓库根目录
+# 或
 PYTHONPATH=. ../.venv/bin/python scratch/replay_golden_case.py
+```
+
+输出：
+
+```text
+Production Golden Case v1
+──────────────────────────
+Slides               10 / 10   PASS
+Semantic errors           0    PASS
+Semantic warnings         0    PASS
+Evidence refs            13    PASS
+Signal refs               2    PASS
+Render errors             0    PASS
+Render warnings           0    PASS
+
+RESULT: PASS
 ```
 
 **触发规则**：任何修改以下组件后，必须重放本 Golden Case，PASS 才允许合并——

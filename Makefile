@@ -1,5 +1,5 @@
 PYTHON ?= .venv/bin/python
-.PHONY: eval full-eval core-eval research-eval capability-audit test ci data-dict lock-demo parser-demo followup-demo numeric-eval reference-eval atp-demo backtest-demo clean-outputs dataset-update dataset-validate daily-observation-dry-run daily-observation-sync daily-data-pipeline-dry-run daily-data-pipeline render-official-doc render-official-doc-smoke build-workspace-skills-catalog build-workspace-capability-inventory inventory-status inventory-trend inventory-report lock-attribution lock-attribution-compare
+.PHONY: eval full-eval core-eval research-eval capability-audit test ci data-dict lock-demo parser-demo followup-demo numeric-eval reference-eval atp-demo backtest-demo clean-outputs dataset-update dataset-validate daily-observation-dry-run daily-observation-sync daily-data-pipeline-dry-run daily-data-pipeline render-official-doc render-official-doc-smoke production-golden build-workspace-skills-catalog build-workspace-capability-inventory inventory-status inventory-trend inventory-report lock-attribution lock-attribution-compare
 
 ## 生成 Eval 结果（显式产物 unified_eval_result.json）
 ## 用法: make eval [SUITE=default|ci|all|research|core]
@@ -282,6 +282,12 @@ render-official-doc:
 render-official-doc-smoke:
 	$(PYTHON) scripts/smoke_test_official_document_render.py
 
+## Production Golden Case v1（NEV-APEAL 生产链回归门）
+## 固定：10 页 deck / semantic 0·0 / evidence+signal refs 解析 / render 0·0
+## 改 Slide Contract / validator / renderer / visual identity / palette / SKILL / production routing 后必须重放
+production-golden:
+	$(PYTHON) nev_apeal/scratch/replay_golden_case.py
+
 # === CPCA Weekly Early Signal ===
 cpca-weekly-early-signal:  ## 乘联分会周度数据早源监控（终端输出）WEEK=目标数据周（默认自动计算最近周日所在周）
 	$(PYTHON) mashang_workspace/research_scripts/cpca_weekly_early_signal.py $(if $(WEEK),--week $(WEEK)) --format terminal
@@ -370,6 +376,9 @@ help:
 	@echo "=== Render ==="
 	@echo "make render-official-doc       正式材料排版渲染（Markdown→PDF/HTML/DOCX）"
 	@echo "make render-official-doc-smoke 正式材料排版渲染 Smoke Test"
+	@echo ""
+	@echo "=== NEV-APEAL Production ==="
+	@echo "make production-golden         Production Golden Case v1 回归门（slide contract + semantic lint + render QA）"
 	@echo ""
 	@echo ""
 	@echo "=== Catalog ==="
