@@ -1,0 +1,16 @@
+{
+  "id": "E-002",
+  "analysis": "premium_seat_driving",
+  "relation": "contradicts",
+  "targets": ["H-002"],
+  "hypothesis_id": "H-002",
+  "metric": "ADRV_Index 控制后系数排序",
+  "n": 8572,
+  "coverage": "FULL",
+  "weight": "APEAL_WT",
+  "controls": ["CN_YNV_07", "MAKE_DP", "PREMMAKE_DP", "SUPER_SEGMENT_DP", "Region_DP", "CITY_TIER_DP", "AGE_BUCKETS", "CN_INCOME", "CN_EDUCATION"],
+  "question": "驾驶座记忆、后排通风是否在所有高阶座椅配置中驾驶感受关联最大？",
+  "finding": "驾驶感受控制后系数：后排通风 +14.35、驾驶加热 +12.60、后排加热 +11.64、驾驶记忆 +10.09、驾驶通风 +9.80。驾驶记忆/后排通风均显著，但驾驶加热与后排加热系数更高，'最明显'排序不成立。",
+  "caveat": "配置间强共线(同一批高端车常同时配备加热/通风/记忆/按摩)，单配置独立效应被分摊，排序对共线结构敏感。",
+  "parents": ["E-001"]
+}

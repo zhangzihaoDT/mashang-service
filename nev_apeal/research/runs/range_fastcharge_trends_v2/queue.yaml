@@ -1,0 +1,34 @@
+research_id: range_fastcharge_trends_v2
+items:
+- id: H1
+  priority: 95
+  question: 数据是否存在真时间维度支持趋势判断？
+  action: 时间维度诊断（SCR_DEL_Y/M 分布）
+  status: done
+  resolution: 单期横截面，2023 占 94.6%，无跨年重复测量 → 趋势不可直接验证（E-001）
+- id: H2
+  priority: 92
+  question: 续航期望/焦虑/快充需求的现状与伪时间方向？
+  action: NEV_14/AFUEL_D_06/NEV_08/NEV_16 快照 + Spearman
+  status: done
+  resolution: 现状快照强(期望603km/焦虑Worse6%/期望快充28.5min)但伪时间方向为负或持平（E-002/E-003）
+- id: H3
+  priority: 88
+  question: 结论边界是否保持？
+  action: 记录横截面边界
+  status: done
+  resolution: 与 range_fastcharge_trends(REJECTED) 一致（E-003）
+stop_conditions:
+  min_core_signals: 1
+  min_supporting_evidence: 2
+  required_confounders:
+  - TIME
+  - RANGE
+  min_mechanism_depth: 3
+  high_priority_threshold: 85
+  max_no_information_rounds: 3
+  terminal_statuses:
+  - ready
+  - rejected
+  - inconclusive
+  - insufficient_coverage

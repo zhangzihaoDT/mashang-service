@@ -1,0 +1,16 @@
+hypotheses:
+- id: H-001
+  statement: 清洗 99 伪影后，续航与充电时长预期仍分别关联整体拥有体验。
+  question: 两类有效 exposure 同时进入完整控制 WLS 后是否仍独立？
+  status: supported
+  created_from: E-001
+- id: H-002
+  statement: 预期兑现机制可以落到可执行的补能体验 item，但不等同于某个配置的因果效果。
+  question: 哪些 item 在完整控制后仍保留方向一致的预期关联？
+  status: supported
+  created_from: E-001
+- id: H-003
+  statement: 本轮结果支持进入最终报告的 Production supporting module，而非独立 Champion。
+  question: 证据强度、机制深度和边界是否足以支持报告使用？
+  status: supported
+  created_from: E-002

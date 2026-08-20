@@ -1,0 +1,16 @@
+hypotheses:
+- id: H-001
+  statement: 插混车型车辆性能各要素较纯电由整体领先转为全面落后。
+  question: APERF 4 个性能 item 上 PHEV vs BEV 是否全面显著落后，且存在"整体领先→全面落后"的转换？
+  status: rejected
+  created_from: E-001
+- id: H-002
+  statement: 发动机/电机声音是性能差异中影响最明显的要素。
+  question: 声音(APERF_R_03)是否在 raw 与控制后均为最大/最稳定的落后项？
+  status: rejected
+  created_from: E-002
+- id: H-003
+  statement: 声音/NVH 是一个方向一致的弱机制线索，可保留为研究边界。
+  question: 是否存在可复用的弱信号供后续数据验证？
+  status: supported
+  created_from: E-003

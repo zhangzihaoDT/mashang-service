@@ -1,0 +1,17 @@
+{
+  "id": "E-004",
+  "analysis": "premium_seat_driving",
+  "relation": "supports",
+  "targets": ["H-001", "H-002", "H-003"],
+  "hypothesis_id": "H-001",
+  "metric": "ADRV_Index / ACMFT_Index (WLS 复核)",
+  "estimator": "WLS(weights=APEAL_WT, HC1)",
+  "n": 8572,
+  "coverage": "FULL",
+  "weight": "APEAL_WT",
+  "controls": ["CN_YNV_07", "MAKE_DP", "PREMMAKE_DP", "SUPER_SEGMENT_DP", "Region_DP", "CITY_TIER_DP", "AGE_BUCKETS", "CN_INCOME", "CN_EDUCATION"],
+  "question": "统一为 WLS(weights=APEAL_WT) 口径后，三层断言结论是否变化？",
+  "finding": "WLS 控制后：(1) 高阶座椅对驾驶感受显著成立——驾驶记忆+14.55(p<0.001)、后排通风+16.24(p=0.019)、后排加热+18.66(p=0.002)、驾驶按摩+15.30(p=0.002) 均 q<0.05。(2) 驾驶感受系数排序：后排加热+18.66>后排通风+16.24>驾驶按摩+15.30>驾驶记忆+14.55>驾驶加热+11.67>驾驶通风+9.59，驾驶记忆/后排通风显著且居前但非第一第二。(3) 后排记忆对舒适 WLS 控制后 -5.36(p=0.613,q=0.668) 不显著且方向为负，'轻微提升'仍应改写为'未检出显著关联'。",
+  "caveat": "WLS 口径下驾驶记忆系数较 OLS 上升(+10.09→+14.55)，后排记忆由 +3.06 翻负为 -5.36；口径统一为 WLS 后原三层结论方向不变。",
+  "parents": ["E-001", "E-002", "E-003"]
+}

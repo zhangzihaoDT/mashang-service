@@ -1,0 +1,11 @@
+hypotheses:
+- id: H-001
+  statement: 换购用户更倾向选择有手机厂商背景的车企。
+  question: 换购 vs 首购在选择手机背景车企上是否存在独立于价格/品牌的关联？
+  status: rejected
+  created_from: E-001
+- id: H-002
+  statement: 原始差异由换购用户更高的购车价位与高端品牌结构驱动。
+  question: 控制价格、品牌层级、区域、城市、年龄、收入、教育后效应是否消失？
+  status: supported
+  created_from: E-002

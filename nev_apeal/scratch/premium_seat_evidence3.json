@@ -1,0 +1,16 @@
+{
+  "id": "E-003",
+  "analysis": "premium_seat_driving",
+  "relation": "contradicts",
+  "targets": ["H-003"],
+  "hypothesis_id": "H-003",
+  "metric": "ACMFT_Index (驾乘舒适)",
+  "n": 8572,
+  "coverage": "LIMITED",
+  "weight": "APEAL_WT",
+  "controls": ["CN_YNV_07", "MAKE_DP", "PREMMAKE_DP", "SUPER_SEGMENT_DP", "Region_DP", "CITY_TIER_DP", "AGE_BUCKETS", "CN_INCOME", "CN_EDUCATION"],
+  "question": "后排电动记忆座椅是否对舒适度仅有小幅提升？",
+  "finding": "后排记忆(SCR_SEAT00_04C_R3)样本 n=91(0.9%)，控制后对 ACMFT_Index +3.06(p=0.778, q=0.778) 不显著；raw Δ+1.89(d=0.21)；品牌×价格匹配仅 1 个 cell(Δ-7.54)覆盖不足。'轻微提升'应改写为'未检出显著关联'。",
+  "caveat": "后排记忆 n=91 极稀疏，coverage LIMITED，统计功效不足；不能排除真实小幅效应存在但无法在本数据中确认。",
+  "parents": ["E-002"]
+}

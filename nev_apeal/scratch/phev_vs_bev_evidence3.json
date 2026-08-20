@@ -1,0 +1,16 @@
+{
+  "id": "E-003",
+  "analysis": "phev_vs_bev_performance",
+  "relation": "refines",
+  "targets": ["H-003"],
+  "hypothesis_id": "H-003",
+  "metric": "机制边界",
+  "n_phev": 3185,
+  "n_bev": 6752,
+  "coverage": "FULL",
+  "weight": "APEAL_WT",
+  "question": "是否存在可复用的弱机制线索？",
+  "finding": "在 4 个 APERF item 中，声音与总体表现是 PHEV 相对 BEV 最弱的两个方向（raw Δ-0.106 / -0.119，d -0.046 / -0.056），方向一致指向'发动机介入的 NVH 感受'。可保留为弱机制假设（与 T6 的 NVH 机制一致），但需新数据/匹配样本才有升级价值。",
+  "caveat": "作为'声音/NVH 是 PHEV 性能感知的弱短板'的边界信号保留，不作为强主张。",
+  "parents": ["E-002"]
+}

@@ -1,0 +1,20 @@
+topic_id: phev_vs_bev_performance
+round: 1
+status: rejected
+question: 插混车型车辆性能各要素较纯电车型由整体领先转为全面落后，且声音影响最明显？
+current_hypothesis: 声明包含三重断言（整体领先→全面落后 / 声音最明显），需逐层验证。
+confidence: high
+evidence_ids:
+- E-001
+- E-002
+- E-003
+open_questions: []
+mechanism_depth: 2
+effect_interpreted: true
+next_action: null
+information_gain_rounds: 2
+rejected_hypotheses:
+- 'H-001: PHEV 性能各要素由整体领先转为全面落后 → REJECTED：当期 PHEV 在 APERF 各 item 均小幅落后(Δ-0.04~-0.12,d<0.06)，无整体领先痕迹，量级无业务意义'
+- 'H-002: 发动机/电机声音影响最明显 → REJECTED：Cohen d 上总体表现(-0.056)>声音(-0.046)，控制价格+品牌后声音仅边界显著(p=0.079)，完整控制后消失(p=0.427)'
+last_analysis: phev_vs_bev_performance
+stop_reason: 'REJECTED: 声明为三重强断言，数据仅支持"PHEV 性能评价在 raw 上小幅偏弱且方向指向声音/NVH"这一弱机制，不支持"整体领先转为全面落后"与"声音最明显"'

@@ -1,0 +1,9 @@
+{
+  "status": "ready",
+  "confidence": "high",
+  "open_questions": [],
+  "effect_interpreted": true,
+  "next_action": null,
+  "stop_reason": "READY: valid-level joint exposure effects + item mapping + production boundary recorded",
+  "last_analysis": "production_decision"
+}

@@ -1,0 +1,16 @@
+{
+  "id": "E-001",
+  "analysis": "premium_seat_driving",
+  "relation": "supports",
+  "targets": ["H-001"],
+  "hypothesis_id": "H-001",
+  "metric": "ADRV_Index (驾驶感受)",
+  "n": 8572,
+  "coverage": "FULL",
+  "weight": "APEAL_WT",
+  "controls": ["CN_YNV_07", "MAKE_DP", "PREMMAKE_DP", "SUPER_SEGMENT_DP", "Region_DP", "CITY_TIER_DP", "AGE_BUCKETS", "CN_INCOME", "CN_EDUCATION"],
+  "question": "控制价格/品牌/细分/人口后，高阶座椅配置是否仍与驾驶感受显著正相关？",
+  "finding": "控制后对 ADRV_Index 显著的配置(BH-FDR q<0.05)：后排通风 +14.35(q=0.022)、驾驶加热 +12.60(q<0.001)、后排加热 +11.64(q=0.017)、驾驶记忆 +10.09(q=0.005)、驾驶通风 +9.80(q=0.006)。raw 上驾驶记忆 Δ+26.78(d=0.20)、后排通风 Δ+25.13(d=0.20)；品牌×价格匹配后驾驶记忆 mean_cell_delta+22.13(19 cells,79%一致)、后排通风+26.13(7 cells,86%一致)。",
+  "caveat": "横截面观察性关联，非因果；配置与高端车型结构相关，控制后收缩。",
+  "parents": []
+}

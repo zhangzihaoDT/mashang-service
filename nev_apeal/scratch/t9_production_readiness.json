@@ -1,0 +1,164 @@
+{
+  "analysis": "t9_production_readiness",
+  "data_source": "data/source.sav",
+  "weight": "APEAL_WT",
+  "valid_expectation_levels": [
+    1,
+    2,
+    3
+  ],
+  "reference_level": 2,
+  "controls": [
+    "SUPER_SEGMENT_DP",
+    "CN_YNV_07",
+    "PREMMAKE_DP",
+    "AGE_BUCKETS",
+    "CN_INCOME",
+    "CN_EDUCATION"
+  ],
+  "exposures": [
+    "AFUEL_D_06",
+    "ACHAR_D_05"
+  ],
+  "results": [
+    {
+      "outcome": "APEAL_Index",
+      "n": 8524,
+      "r_squared": 0.0764,
+      "effects": {
+        "fuel_worse": {
+          "coef": -33.7996,
+          "p": 4.5452783668139784e-09
+        },
+        "fuel_better": {
+          "coef": 19.6405,
+          "p": 4.1633147693169964e-07
+        },
+        "charge_worse": {
+          "coef": -31.3417,
+          "p": 0.0001925045060826895
+        },
+        "charge_better": {
+          "coef": 39.7603,
+          "p": 5.924695327971697e-32
+        }
+      }
+    },
+    {
+      "outcome": "AFUEL_Index",
+      "n": 8524,
+      "r_squared": 0.1037,
+      "effects": {
+        "fuel_worse": {
+          "coef": -74.8547,
+          "p": 3.576216571722015e-18
+        },
+        "fuel_better": {
+          "coef": 37.8633,
+          "p": 1.1741799460505399e-16
+        },
+        "charge_worse": {
+          "coef": -32.7314,
+          "p": 0.0007096243059221704
+        },
+        "charge_better": {
+          "coef": 47.9957,
+          "p": 2.1823787890114276e-31
+        }
+      }
+    },
+    {
+      "outcome": "ACHAR_index",
+      "n": 8524,
+      "r_squared": 0.078,
+      "effects": {
+        "fuel_worse": {
+          "coef": -30.2776,
+          "p": 1.56093277570693e-06
+        },
+        "fuel_better": {
+          "coef": 13.6007,
+          "p": 0.0006149434024471234
+        },
+        "charge_worse": {
+          "coef": -49.9272,
+          "p": 1.5612012800390643e-06
+        },
+        "charge_better": {
+          "coef": 42.7988,
+          "p": 2.7520181609327105e-37
+        }
+      }
+    },
+    {
+      "outcome": "AFUEL_R_01",
+      "n": 8524,
+      "r_squared": 0.1037,
+      "effects": {
+        "fuel_worse": {
+          "coef": -0.7485,
+          "p": 3.57621657172253e-18
+        },
+        "fuel_better": {
+          "coef": 0.3786,
+          "p": 1.1741799460503367e-16
+        },
+        "charge_worse": {
+          "coef": -0.3273,
+          "p": 0.0007096243059221313
+        },
+        "charge_better": {
+          "coef": 0.48,
+          "p": 2.1823787890107716e-31
+        }
+      }
+    },
+    {
+      "outcome": "ACHAR_R_01",
+      "n": 8524,
+      "r_squared": 0.0115,
+      "effects": {
+        "fuel_worse": {
+          "coef": -0.1185,
+          "p": 0.5084269760210549
+        },
+        "fuel_better": {
+          "coef": 0.0892,
+          "p": 0.18424613458309202
+        },
+        "charge_worse": {
+          "coef": -0.4256,
+          "p": 0.0048738375976434085
+        },
+        "charge_better": {
+          "coef": 0.4325,
+          "p": 2.933098363933007e-09
+        }
+      }
+    },
+    {
+      "outcome": "ACHAR_R_09",
+      "n": 8524,
+      "r_squared": 0.0892,
+      "effects": {
+        "fuel_worse": {
+          "coef": -0.3795,
+          "p": 4.790717931541558e-07
+        },
+        "fuel_better": {
+          "coef": 0.2817,
+          "p": 6.658075138742113e-08
+        },
+        "charge_worse": {
+          "coef": -0.6328,
+          "p": 2.7665414672291853e-08
+        },
+        "charge_better": {
+          "coef": 0.5645,
+          "p": 2.4541312423835087e-36
+        }
+      }
+    }
+  ],
+  "boundary": "横截面、自报预期；结果用于产品 item 映射，不构成因果或传播 ROI 证据。"
+}

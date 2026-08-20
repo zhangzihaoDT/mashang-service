@@ -1,0 +1,16 @@
+hypotheses:
+- id: H-001
+  statement: 高阶座椅功能配备对驾驶感受有显著关联。
+  question: 控制价格/品牌/细分/人口后，座椅配置是否仍与 ADRV_Index 显著正相关？
+  status: supported
+  created_from: E-001
+- id: H-002
+  statement: 驾驶座电动记忆、后排通风/冷却对驾驶感受影响最为明显。
+  question: 在全部高阶座椅配置中，两者是否为效应量最大的驾驶感受关联项？
+  status: rejected
+  created_from: E-002
+- id: H-003
+  statement: 后排座椅电动记忆功能对舒适度提升轻微。
+  question: 后排记忆是否对 ACMFT_Index 仅有小幅正向关联？
+  status: rejected
+  created_from: E-003

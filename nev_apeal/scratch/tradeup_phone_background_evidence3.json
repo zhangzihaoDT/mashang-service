@@ -1,0 +1,15 @@
+{
+  "id": "E-003",
+  "analysis": "tradeup_phone_background",
+  "relation": "supports",
+  "targets": ["H-002"],
+  "hypothesis_id": "H-002",
+  "metric": "price/premium composition",
+  "n": 8572,
+  "coverage": "FULL",
+  "weight": "APEAL_WT",
+  "question": "原始差异的驱动机制是否来自换购用户的价位与高端品牌结构？",
+  "finding": "加权平均购车价：换购 25.4 万 vs 增购 22.6 万 vs 首购 18.0 万；Premium 占比 12.3% / 10.1% / 4.9%。手机背景车企集中于高价位新能源，因此换购用户更高的价位与品牌层级解释了粗 OR=1.772 的消失（逐级控制：+price 1.159 → +premium 1.149 → +region_tier 1.105 → +full 1.065）。敏感性：AITO-only 换购 OR=1.034(p=0.878)、AVATR-only OR=1.103(p=0.754)，均无独立效应。",
+  "caveat": "观察性选择行为；不能推出品牌传播或人群运营的因果建议，仅说明'换购偏好手机背景车企'不是一个独立机制。",
+  "parents": ["E-002"]
+}

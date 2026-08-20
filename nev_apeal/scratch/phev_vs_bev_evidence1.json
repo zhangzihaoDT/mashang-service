@@ -1,0 +1,16 @@
+{
+  "id": "E-001",
+  "analysis": "phev_vs_bev_performance",
+  "relation": "contradicts",
+  "targets": ["H-001"],
+  "hypothesis_id": "H-001",
+  "metric": "APERF_R_01~04 (10分制)",
+  "n_phev": 3185,
+  "n_bev": 6752,
+  "coverage": "FULL",
+  "weight": "APEAL_WT",
+  "question": "PHEV 性能各要素是否较 BEV 全面落后，且存在整体领先→全面落后的转换？",
+  "finding": "raw 加权均值（PHEV−BEV）：平稳 −0.068、动力 −0.043、声音 −0.106、总体表现 −0.119。4 item 全部小幅落后但量级极小，Cohen d 全部在 -0.002~-0.056 之间，无业务意义。当期数据中 PHEV 从未呈现'整体领先'，'由领先转为落后'的时间性断言无法在单期横截面验证。",
+  "caveat": "横截面、自报评价；差值小于 0.12 分且 d<0.06，低于可识别的体验差异阈值。",
+  "parents": []
+}

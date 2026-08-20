@@ -1,0 +1,15 @@
+{
+  "id": "E-003",
+  "analysis": "trend_recheck",
+  "relation": "rules_out",
+  "targets": ["H-002"],
+  "hypothesis_id": "H-002",
+  "metric": "AFUEL_D_06",
+  "n": 9937,
+  "coverage": "FULL",
+  "weight": "APEAL_WT",
+  "question": "里程焦虑代理是否存在可信的下降趋势？",
+  "finding": "无直接焦虑题项，代理 AFUEL_D_06(实际续航 vs 购车预期)：Worse 仅 6.0%、About 78.5%、Better 15.5%，当前焦虑水平整体偏低。伪时间方向 Worse 占比随交付期下降，但该下降可完全由实际续航提升解释(非用户心态趋势)，不能作为「里程焦虑下降趋势」的证据。",
+  "caveat": "代理口径为主观「实际 vs 预期」，非直接焦虑测量；横截面不能支撑趋势因果。",
+  "parents": ["E-002"]
+}

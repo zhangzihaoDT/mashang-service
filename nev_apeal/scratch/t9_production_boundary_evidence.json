@@ -1,0 +1,14 @@
+{
+  "id": "E-002",
+  "analysis": "production_decision",
+  "relation": "refines",
+  "targets": ["H-003"],
+  "hypothesis_id": "H-003",
+  "metric": "production-readiness decision",
+  "n": 8524,
+  "coverage": "FULL",
+  "weight": "APEAL_WT",
+  "finding": "T9 具备进入最终报告的证据强度与机制深度：两类预期 exposure 独立、可映射到具体补能体验 item，并补充 T1 的‘体验升级’主线。但它仍不应独立取代 T1 Champion，也不能写成宣传承诺或配置因果；建议作为 Champion-led Production 报告中的 supporting module。",
+  "caveat": "传播 ROI、产品配置因果和纵向预期变化需要实验或纵向数据。",
+  "parents": ["E-001"]
+}

@@ -1,0 +1,16 @@
+{
+  "id": "E-002",
+  "analysis": "tradeup_phone_background",
+  "relation": "contradicts",
+  "targets": ["H-001"],
+  "hypothesis_id": "H-001",
+  "metric": "phone_backed (AITO+AVATR)",
+  "n": 8572,
+  "coverage": "FULL",
+  "weight": "APEAL_WT",
+  "controls": ["CN_YNV_07", "PREMMAKE_DP", "Region_DP", "CITY_TIER_DP", "AGE_BUCKETS", "CN_INCOME", "CN_EDUCATION"],
+  "question": "完整控制价格/品牌/区域/人口后，换购 vs 首购效应是否仍显著？",
+  "finding": "控制 CN_YNV_07(价格)+PREMMAKE_DP(品牌层级)+Region+CITY_TIER+AGE_BUCKETS+CN_INCOME+CN_EDUCATION 后，换购 vs 首购 OR=1.065(p=0.727)，增购 vs 首购 OR=0.835(p=0.255)。粗关联完全被价格与品牌结构吸收。",
+  "caveat": "手机背景车企总体 n=325（AITO 220 / AVATR 105），换购内仅 62；AVATR 仅 22，敏感性 cell 稀疏。",
+  "parents": ["E-001"]
+}

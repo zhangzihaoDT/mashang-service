@@ -1,0 +1,22 @@
+topic_id: premium_seat_driving
+round: 2
+status: ready
+question: 高阶座椅功能对驾驶感受有显著关联，其中驾驶座记忆/后排通风最明显，后排记忆对舒适提升轻微？（WLS 口径复核）
+current_hypothesis: 声明含三层断言，需逐层验证（显著性 / 最明显排序 / 后排记忆轻微）。
+confidence: medium
+evidence_ids:
+- E-001
+- E-002
+- E-003
+- E-004
+open_questions: []
+mechanism_depth: 3
+effect_interpreted: true
+next_action: null
+information_gain_rounds: 2
+rejected_hypotheses:
+- 'H-002: 驾驶座记忆/后排通风"最为明显" → 部分成立：WLS 下两者均显著(q<0.05)且居前，但驾驶感受系数排序为 后排加热+18.66>后排通风+16.24>驾驶按摩+15.30>驾驶记忆+14.55，"第一第二"排序不成立'
+- 'H-003: 后排记忆对舒适"轻微提升" → 改写为"未检出显著关联"(WLS -5.36, p=0.613, q=0.668; n=91)'
+last_analysis: premium_seat_driving
+stop_reason: 'READY: evidence + confidence + mechanism_depth + no high-priority open
+  question'

@@ -1,0 +1,19 @@
+topic_id: tradeup_phone_background
+round: 1
+status: rejected
+question: 换购用户是否更倾向选择有手机厂商背景的车企？
+current_hypothesis: 换购用户在原始占比上更高，但差异可能由价格/品牌结构驱动。
+confidence: high
+evidence_ids:
+- E-001
+- E-002
+- E-003
+open_questions: []
+mechanism_depth: 2
+effect_interpreted: true
+next_action: null
+information_gain_rounds: 2
+rejected_hypotheses:
+- 'H-001: 换购更倾向手机厂商背景车企 → 粗关联显著(OR=1.772,p<0.001)，完整控制后消失(OR=1.065,p=0.727)，由价格/品牌结构吸收'
+last_analysis: tradeup_phone_background
+stop_reason: 'REJECTED: 完整控制后无独立效应；原始差异来自换购用户更高的价位与高端品牌结构，非购买任务本身'

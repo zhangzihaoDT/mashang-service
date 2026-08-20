@@ -1,0 +1,108 @@
+{
+  "analysis": "phev_vs_bev_performance",
+  "data_source": "data/source.sav",
+  "weight": "APEAL_WT",
+  "definition": "PHEV/REEV = SCR_FUEL_TYPE 5；BEV = 6（参照）。APERF item 剔除 99(N/A)。",
+  "n_phev": 3185,
+  "n_bev": 6752,
+  "raw_gaps_phev_minus_bev": [
+    {
+      "item": "APERF_R_01",
+      "label": "平稳顺畅",
+      "n_phev": 3185,
+      "n_bev": 6750,
+      "wmean_phev": 7.838,
+      "wmean_bev": 7.905,
+      "delta_phev_minus_bev": -0.068
+    },
+    {
+      "item": "APERF_R_02",
+      "label": "动力",
+      "n_phev": 3185,
+      "n_bev": 6751,
+      "wmean_phev": 7.877,
+      "wmean_bev": 7.92,
+      "delta_phev_minus_bev": -0.043
+    },
+    {
+      "item": "APERF_R_03",
+      "label": "声音",
+      "n_phev": 3185,
+      "n_bev": 6750,
+      "wmean_phev": 7.735,
+      "wmean_bev": 7.841,
+      "delta_phev_minus_bev": -0.106
+    },
+    {
+      "item": "APERF_R_04",
+      "label": "总体表现",
+      "n_phev": 3185,
+      "n_bev": 6752,
+      "wmean_phev": 7.885,
+      "wmean_bev": 8.003,
+      "delta_phev_minus_bev": -0.119
+    }
+  ],
+  "controlled_lean_price_brand": [
+    {
+      "item": "APERF_R_01",
+      "n": 9448,
+      "coef_phev": -0.0397,
+      "se": 0.0498,
+      "p": 0.42462499890460337
+    },
+    {
+      "item": "APERF_R_02",
+      "n": 9449,
+      "coef_phev": -0.0547,
+      "se": 0.0504,
+      "p": 0.2773623286964172
+    },
+    {
+      "item": "APERF_R_03",
+      "n": 9448,
+      "coef_phev": -0.0918,
+      "se": 0.0522,
+      "p": 0.07867427261184776
+    },
+    {
+      "item": "APERF_R_04",
+      "n": 9450,
+      "coef_phev": -0.1002,
+      "se": 0.0485,
+      "p": 0.03877266834074953
+    }
+  ],
+  "controlled_full": [
+    {
+      "item": "APERF_R_01",
+      "n": 8570,
+      "coef_phev": 0.03,
+      "se": 0.0514,
+      "p": 0.5598668092882653
+    },
+    {
+      "item": "APERF_R_02",
+      "n": 8571,
+      "coef_phev": 0.0059,
+      "se": 0.0518,
+      "p": 0.9089781143011086
+    },
+    {
+      "item": "APERF_R_03",
+      "n": 8570,
+      "coef_phev": -0.0427,
+      "se": 0.0537,
+      "p": 0.42680154275848703
+    },
+    {
+      "item": "APERF_R_04",
+      "n": 8572,
+      "coef_phev": -0.0143,
+      "se": 0.0491,
+      "p": 0.7712188552190588
+    }
+  ],
+  "sound_item": "APERF_R_03",
+  "boundary": "横截面观察性关联；'由整体领先转为全面落后'的时间/印象变化无法在单期横截面上直接验证，只能验证当期 PHEV vs BEV 的性能评价结构。"
+}

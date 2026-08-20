@@ -1,0 +1,17 @@
+{
+  "id": "E-001",
+  "analysis": "t9_production_readiness",
+  "relation": "supports",
+  "targets": ["H-001", "H-002"],
+  "hypothesis_id": "H-001",
+  "metric": "APEAL_Index / AFUEL_Index / ACHAR_index / AFUEL_R_01 / ACHAR_R_01 / ACHAR_R_09",
+  "n": 8524,
+  "coverage": "FULL",
+  "weight": "APEAL_WT",
+  "valid_levels": [1, 2, 3],
+  "reference_level": 2,
+  "controls": ["SUPER_SEGMENT_DP", "CN_YNV_07", "PREMMAKE_DP", "AGE_BUCKETS", "CN_INCOME", "CN_EDUCATION"],
+  "finding": "剔除 99 伪影并同时纳入 AFUEL_D_06 与 ACHAR_D_05 后，两类 exposure 对 APEAL_Index、AFUEL_Index、ACHAR_index 仍独立显著。item 映射保持方向一致：充电时长预期 Better 对 ACHAR_R_01 +0.4325(p<0.001)、ACHAR_R_09 +0.5645(p<0.001)；续航预期 Better 对 AFUEL_R_01 +0.3786(p<0.001)，且 Worse 方向相反。",
+  "caveat": "横截面、自报预期；item 关联支持产品杠杆定位，不构成某个配置造成体验变化的因果证据。",
+  "parents": []
+}

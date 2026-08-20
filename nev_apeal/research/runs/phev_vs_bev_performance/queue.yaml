@@ -1,0 +1,35 @@
+research_id: phev_vs_bev_performance
+items:
+- id: H1
+  priority: 95
+  question: raw 上 PHEV vs BEV 的 4 个性能 item 是否全面落后？
+  action: raw weighted gap + Cohen d
+  status: done
+  resolution: 4 item 全部小幅落后(Δ-0.04~-0.12, d<0.06)，方向一致但量级极小；无"整体领先"痕迹（E-001）
+- id: H2
+  priority: 95
+  question: 声音是否为最大/最稳定的落后项？
+  action: Cohen d + 逐级控制 OLS
+  status: done
+  resolution: 总体表现(-0.056)>声音(-0.046)；控制后声音 p=0.079→0.427 消失（E-002）
+- id: H3
+  priority: 88
+  question: 是否存在可复用的弱机制线索？
+  action: 机制边界记录
+  status: done
+  resolution: 声音/NVH 方向一致但弱，保留为边界（E-003）
+stop_conditions:
+  min_core_signals: 1
+  min_supporting_evidence: 2
+  required_confounders:
+  - PRICE
+  - BRAND
+  - DEMOGRAPHICS
+  min_mechanism_depth: 3
+  high_priority_threshold: 85
+  max_no_information_rounds: 3
+  terminal_statuses:
+  - ready
+  - rejected
+  - inconclusive
+  - insufficient_coverage

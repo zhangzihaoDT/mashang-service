@@ -1,0 +1,17 @@
+{
+  "id": "E-002",
+  "analysis": "phev_vs_bev_performance",
+  "relation": "contradicts",
+  "targets": ["H-002"],
+  "hypothesis_id": "H-002",
+  "metric": "APERF_R_03 (声音)",
+  "n_phev": 3185,
+  "n_bev": 6752,
+  "coverage": "FULL",
+  "weight": "APEAL_WT",
+  "controls": ["CN_YNV_07", "PREMMAKE_DP", "MAKE_DP", "Region_DP", "CITY_TIER_DP", "AGE_BUCKETS", "CN_INCOME"],
+  "question": "发动机/电机声音是否是最明显且最稳定的落后项？",
+  "finding": "声音 Cohen d=-0.046，低于总体表现的 -0.056，不是最大落后项。控制价格+品牌层级+品牌后声音 coef=-0.092(p=0.079)仅边界显著；加入区域/城市/年龄/收入后 coef=-0.043(p=0.427)消失。同一控制集下总体表现 lean 控制 p=0.039 显著、full 控制 p=0.771 也消失。声音不构成'最明显'且最不稳定的驱动。",
+  "caveat": "与既有 T6(bev_phev_it3) 的 INCONCLUSIVE 一致：NVH 机制触达 item 但被品牌/价格结构吸收。",
+  "parents": ["E-001"]
+}

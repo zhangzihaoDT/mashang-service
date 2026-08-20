@@ -1,0 +1,15 @@
+{
+  "id": "E-001",
+  "analysis": "trend_recheck",
+  "relation": "rules_out",
+  "targets": ["H-001", "H-002", "H-003"],
+  "hypothesis_id": "H-001",
+  "metric": "时间维度",
+  "n": 9937,
+  "coverage": "FULL",
+  "weight": "APEAL_WT",
+  "question": "数据是否存在真时间维度以支持三个趋势命题？",
+  "finding": "单期横截面：SCR_DEL_Y 2023 年占 94.6%(9402/9937)、2024 仅 5.4%；唯一月粒度在 2023 年内。无调查波次、无跨年重复测量。测量契约明确「cross-sectional sample; no year-over-year or market-share claims」。三个命题均为趋势断言，真时间维度不存在 → 方向不可直接验证。",
+  "caveat": "数据源 data/source.sav 未更新（08-15 版本，仍 9937 行）。",
+  "parents": []
+}

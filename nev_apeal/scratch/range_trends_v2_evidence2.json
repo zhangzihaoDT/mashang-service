@@ -1,0 +1,15 @@
+{
+  "id": "E-002",
+  "analysis": "trend_recheck",
+  "relation": "contradicts",
+  "targets": ["H-001", "H-003"],
+  "hypothesis_id": "H-001",
+  "metric": "NEV_14 / NEV_08 / NEV_16 / ACHAR_D_03",
+  "n": 8846,
+  "coverage": "FULL",
+  "weight": "APEAL_WT",
+  "question": "续航期望与快充需求的现状及伪时间方向？",
+  "finding": "续航期望 NEV_14 加权均 603km(中位600)，但交付期伪时间 Spearman rho=-0.029(p=0.006)「仍在增加」不升反微降。快充：期望快充时间 NEV_16 加权均 28.5min vs 实际 ACHAR_D_03 46.2min(77.7% 期望更快)，现状需求强；但快充使用率随交付期下降、期望时间持平，「持续增长」无证据。",
+  "caveat": "伪时间代理 = 交付期(SCR_DEL_Y/M)，混淆新购人群构成与车辆续航提升。",
+  "parents": ["E-001"]
+}

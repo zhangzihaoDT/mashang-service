@@ -1,0 +1,36 @@
+research_id: premium_seat_driving
+items:
+- id: H1
+  priority: 95
+  question: 高阶座椅配置对驾驶感受是否显著？
+  action: 8配置×6结果 raw+控制OLS+BH-FDR+品牌×价格匹配
+  status: done
+  resolution: 多个配置对 ADRV_Index 控制后仍显著(q<0.05)：后排通风+14.35/驾驶加热+12.60/后排加热+11.64/驾驶记忆+10.09/驾驶通风+9.80（E-001）
+- id: H2
+  priority: 92
+  question: 驾驶记忆/后排通风是否"最明显"？
+  action: 控制后系数排序
+  status: done
+  resolution: 两者均显著但非最大；驾驶加热/后排加热系数更高，"最明显"排序不成立（E-002）
+- id: H3
+  priority: 88
+  question: 后排记忆对舒适是否"轻微提升"？
+  action: 后排记忆→ACMFT_Index 三层验证
+  status: done
+  resolution: 控制后 +3.06(p=0.78,q=0.78)不显著；n=91 极稀疏、匹配cell仅1个，"未检出显著关联"更准确（E-003）
+stop_conditions:
+  min_core_signals: 1
+  min_supporting_evidence: 2
+  required_confounders:
+  - PRICE
+  - BRAND
+  - SEGMENT
+  - DEMOGRAPHICS
+  min_mechanism_depth: 3
+  high_priority_threshold: 85
+  max_no_information_rounds: 3
+  terminal_statuses:
+  - ready
+  - rejected
+  - inconclusive
+  - insufficient_coverage

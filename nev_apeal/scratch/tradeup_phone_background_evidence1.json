@@ -1,0 +1,15 @@
+{
+  "id": "E-001",
+  "analysis": "tradeup_phone_background",
+  "relation": "supports",
+  "targets": ["H-001"],
+  "hypothesis_id": "H-001",
+  "metric": "phone_backed (MAKE_DP in {AITO, AVATR})",
+  "n": 8572,
+  "coverage": "FULL",
+  "weight": "APEAL_WT",
+  "question": "换购 vs 首购对手机厂商背景车企的粗关联是否显著？",
+  "finding": "原始加权占比：换购 3.21% > 增购 2.72% > 首购 2.01%（raw 4.85% / 3.55% / 2.83%）；卡方 χ2=14.39(p<0.001)。未控制 logistic OR=1.772(p=0.0005)。方向支持假设，但未经 confounder 控制。",
+  "caveat": "手机背景车企操作定义=AITO(问界,华为)+AVATR(阿维塔,华为生态)；数据无小米品牌，覆盖率受样本限制。",
+  "parents": []
+}

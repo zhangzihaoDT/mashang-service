@@ -1,0 +1,21 @@
+topic_id: range_fastcharge_trends_v2
+round: 1
+status: rejected
+question: 用户对未来纯电续航期望仍在增加、里程焦虑下降趋势、市场对快充需求持续增长（复核）？
+current_hypothesis: 三个趋势命题均成立。
+confidence: high
+evidence_ids:
+- E-001
+- E-002
+- E-003
+open_questions: []
+mechanism_depth: 2
+effect_interpreted: true
+next_action: null
+information_gain_rounds: 2
+rejected_hypotheses:
+- 'H-001: 续航期望"仍在增加" → REJECTED：数据无真时间维度，伪时间(交付期)方向 rho=-0.029(p=0.006)，期望不升反微降'
+- 'H-002: 里程焦虑"下降趋势" → REJECTED：Worse 仅 6.0%，但下降可被实际续航提升解释，非心态趋势'
+- 'H-003: 快充需求"持续增长" → REJECTED：期望快充 28.5min vs 实际 46.2min 现状强，但伪时间方向使用率降/时间持平，无增长证据'
+last_analysis: trend_recheck
+stop_reason: 'REJECTED(复核): 数据仍为单期横截面(2023 占 94.6%)，无跨年重复测量；三个趋势命题在当前数据上不可验证，只能报告现状快照'

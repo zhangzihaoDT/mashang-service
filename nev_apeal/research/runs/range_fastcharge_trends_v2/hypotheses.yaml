@@ -1,0 +1,16 @@
+hypotheses:
+- id: H-001
+  statement: 用户对未来纯电续航里程期望仍在增加（趋势）。
+  question: 未来续航期望是否存在上升趋势？
+  status: rejected
+  created_from: E-001
+- id: H-002
+  statement: 里程焦虑有下降趋势（趋势）。
+  question: 里程焦虑代理是否存在随时间下降？
+  status: rejected
+  created_from: E-002
+- id: H-003
+  statement: 市场对快充需求持续增长（趋势）。
+  question: 快充需求是否存在增长趋势？
+  status: rejected
+  created_from: E-003

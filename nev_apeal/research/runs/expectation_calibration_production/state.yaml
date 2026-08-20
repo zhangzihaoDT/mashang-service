@@ -1,0 +1,19 @@
+research_id: expectation_calibration_production_001
+topic_id: T9_expectation_calibration
+round: 4
+status: ready
+question: 预期兑现机制是否足够具体，值得进入最终 Production 报告？
+current_hypothesis: T9 在清洗有效预期档位并同时控制两类 exposure 后，仍能稳定映射到可执行的补能体验 item。
+confidence: high
+evidence_ids:
+- E-001
+- E-002
+open_questions: []
+mechanism_depth: 4
+effect_interpreted: true
+next_action: null
+information_gain_rounds: 1
+rejected_hypotheses: []
+last_analysis: production_decision
+stop_reason: 'READY: valid-level joint exposure effects + item mapping + production
+  boundary recorded'

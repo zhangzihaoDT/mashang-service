@@ -1,0 +1,35 @@
+research_id: tradeup_phone_background
+items:
+- id: H1
+  priority: 95
+  question: 换购 vs 首购对手机背景车企的粗 OR 是否显著？
+  action: logistic unadjusted
+  status: done
+  resolution: OR=1.772, p=0.0005 → 支持 H-001 原始方向（E-001）
+- id: H2
+  priority: 95
+  question: 完整控制价格/品牌/人口后是否仍显著？
+  action: logistic full controls
+  status: done
+  resolution: OR=1.065, p=0.727 → H-001 被拒绝，H-002 成立（E-002/E-003）
+- id: H3
+  priority: 88
+  question: 敏感性：AITO / AVATR 分开是否不同？
+  action: sensitivity aito_only / avatar_only
+  status: done
+  resolution: 两者换购 OR 均接近 1 且不显著（E-002）
+stop_conditions:
+  min_core_signals: 1
+  min_supporting_evidence: 2
+  required_confounders:
+  - PRICE
+  - BRAND
+  - DEMOGRAPHICS
+  min_mechanism_depth: 3
+  high_priority_threshold: 85
+  max_no_information_rounds: 3
+  terminal_statuses:
+  - ready
+  - rejected
+  - inconclusive
+  - insufficient_coverage
