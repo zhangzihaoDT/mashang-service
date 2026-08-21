@@ -1,6 +1,6 @@
 {
-  "schema_version": "1.1",
-  "description": "统一 Slide Contract：Production 阶段每页 deck.md 携带的 metadata block 共用此 schema。Slide Contract 是 Research → Production 之间的 canonical presentation contract，供人读与 PPT Generator 读取。v1.1 新增 Semantic Lint 规则（跨字段一致性），与结构校验互补。",
+  "schema_version": "1.2",
+  "description": "统一 Slide Contract：Production 阶段每页 deck.md 携带的 metadata block 共用此 schema。Slide Contract 是 Research → Production 之间的 canonical presentation contract，供人读与 PPT Generator 读取。v1.2 新增 Metric Transparency（参照组/尺度显性化）、反证显性化、Production 渲染范围、Appendix Evidence Anatomy 六层门禁，并补充 hero_evidence/footer_stat/evidence.boundaries 字段定义。",
   "deck_source": "reports/from_parameters_to_experience_topic_deck.md",
   "required_fields": [
     "slide_role",
@@ -16,7 +16,6 @@
   ],
   "optional_fields": [
     "hero_message",
-    "comparison_semantics",
     "controlled_anchor"
   ],
   "field_definitions": {
@@ -24,15 +23,17 @@
     "question": "本页要回答的关键问题（一句完整句式）",
     "answer": "对本页 question 的明确回答（一句）",
     "claim_level": "结论的证据等级，阻止 PPT 把管理建议画得像统计证明。OBSERVATION | CONTROLLED_FINDING | MECHANISM_EVIDENCE | MECHANISM_INTERPRETATION | CONCEPTUAL_BRIDGE | BOUNDARY | MANAGERIAL_SYNTHESIS | RESEARCH_BOUNDARY",
-    "evidence": "本页引用的研究证据：topic / run / ids / metric / method / sample_n / estimator / weight / controls / derived_from",
-    "visual": "本页证据应呈现的图表契约：type / primary_metric / categories / highlight / annotation / flow / hero_message / old_vs_new",
+    "evidence": "本页引用的研究证据：topic / run / ids / metric / method / sample_n / estimator / weight / controls / derived_from / boundaries（boundaries 用于边界页，列明各来源 topic/run/id/claim）",
+    "visual": "本页证据应呈现的图表契约：type / primary_metric / categories / highlight / annotation / flow / hero_message / old_vs_new / left / right / comparison_semantics / hero_evidence / footer_stat",
     "boundary": "本页结论的适用边界与不能讲的表述（观察性、非因果、非外推）",
     "takeaway": "本页的一句话收束",
     "next": "本页向下一页的转场问题",
     "appendix_ref": "追问层附录引用，如 [A1, A3]",
     "hero_message": "本页最大的单个可感知信息（可选，用于 opening/framework 页）",
-    "comparison_semantics": "before_after 型 visual 的对比语义。非时间序列时必填，如 raw_vs_adjusted / group_a_vs_b；防止 PPT 把横截面对比画成时间变化。可选值见 comparison_semantics.enum",
-    "controlled_anchor": "OBSERVATION 页可声明的受控锚点引用，格式 'Pn / <run> / <id>'，必须指向 claim_level∈{CONTROLLED_FINDING, MECHANISM_EVIDENCE} 的页面"
+    "controlled_anchor": "OBSERVATION 页可声明的受控锚点引用，格式 'Pn / <run> / <id>'，必须指向 claim_level∈{CONTROLLED_FINDING, MECHANISM_EVIDENCE} 的页面",
+    "visual.comparison_semantics": "before_after 型 visual 的对比语义。非时间序列时必填，如 raw_vs_adjusted / group_a_vs_b；防止 PPT 把横截面对比画成时间变化。可选值见 comparison_semantics.enum",
+    "visual.hero_evidence": "evidence_chain 页最多 2 条 hero 证据（'exposure → outcome 方向'），production 只突出这几条，不画整表（可选）",
+    "visual.footer_stat": "evidence_chain 页底部一行极小口径行，如 'WLS + HC1 · n=8,524 · p<.001'（可选）"
   },
   "enums": {
     "slide_role": ["OPENING", "THESIS", "EVIDENCE", "MECHANISM", "CONCEPTUAL_BRIDGE", "BOUNDARY", "FRAMEWORK", "CLOSING"],
@@ -61,6 +62,7 @@
     "claim_level=BOUNDARY / RESEARCH_BOUNDARY 不得被 visual.highlight 标注为'主要正向发现'（highlight 仅允许标注边界区间本身）",
     "visual.type 必须与 slide_role 匹配 visual_role_compatibility；framework_map 只能用于 FRAMEWORK / MANAGERIAL_SYNTHESIS / THESIS",
     "visual.type=before_after 时必须声明 comparison_semantics；值为 temporal_trend 需额外证据支持，否则应为 raw_vs_adjusted 或 group_a_vs_b",
+    "Metric Transparency：comparison_semantics=raw_vs_adjusted 页必须显式声明参照组对比（如 raw 增购vs首购 与 adjusted 增购vs换购），防止读者把参照组切换读成'同一差距控制后变化'",
     "每个 Evidence Explainer 附录 section（### A#）必须覆盖六层（appendix_anatomy.layers）并带 证据/来源 回溯锚点；缺层或缺失来源为 warn，供人工复核后显式放行"
   ],
   "signal_sources": [
@@ -80,7 +82,11 @@
     "CONCEPTUAL_BRIDGE 页（如 P6）不含独立统计数字，证据链在下一页",
     "CONTROLLED_FINDING 页必须携带 controls / estimator / sample_n",
     "evidence.derived_from 用于联合推导页（如 P9），列明各来源 topic/run/id",
-    "boundary 必须显式列出不能讲的表述，防止传播中弱化研究纪律"
+    "boundary 必须显式列出不能讲的表述，防止传播中弱化研究纪律",
+    "Metric Transparency：每个突出数字必须携带单位/尺度（10分制 item / 0–1000 指数 / 拥有率% / 差值）、对比对象（谁 vs 谁）、来源口径；能直接用可观测对照表（组均值/拥有率）说明的比较优先用对照表，而不是抽象指数差",
+    "参照组切换：同一页面出现不同参照组的数字（如 raw 增购vs首购 +11.8 与受控增购vs换购 +18.17）时，必须显式标注参照组差异，禁止让读者读成'同一差距在控制后变化'",
+    "反证显性化：使用非主线参照组做反证（如 T5 用换购拥有率最高做反证）时，必须一句话说明反证逻辑（排除什么替代解释），不能只抛数字",
+    "Production 渲染范围：PPT 主体只实现每页 visual contract 声明的可视化要素（flow / hero_evidence / footer_stat / annotation 等）；明细表、完整口径、边界纪律不搬进 presentation 主体，去向由 appendix_ref 承接"
   ],
   "appendix_anatomy": {
     "header_re": "^###\\s+(A\\d+[a-c]?)\\s*｜",

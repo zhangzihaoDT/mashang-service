@@ -231,6 +231,16 @@ def validate(deck_text: str, contract: dict) -> dict:
             if not cs:
                 errors.append({"level": "error", "rule": "semantic.comparison_semantics",
                                "msg": "visual.type=before_after must declare comparison_semantics (raw_vs_adjusted / group_a_vs_b / temporal_trend)"})
+        # S8. Metric Transparency: raw_vs_adjusted pages must explicitly flag the
+        #     reference-group contrast (e.g. raw 增购vs首购 vs adjusted 增购vs换购),
+        #     so readers don't read it as "the same gap changed after control".
+        if vtype == "before_after" and vis.get("comparison_semantics") == "raw_vs_adjusted":
+            block = _flatten_text(meta.get("answer"), meta.get("primary_metric"),
+                                  vis.get("primary_metric"), vis.get("annotation"),
+                                  vis.get("hero_message"), meta.get("boundary"))
+            if "参照组" not in block:
+                errors.append({"level": "warn", "rule": "semantic.metric_transparency",
+                               "msg": "raw_vs_adjusted page must state 参照组 (reference-group contrast), e.g. 'raw 增购vs首购 与 adjusted 增购vs换购'"})
 
         pages[page] = errors
 
