@@ -155,14 +155,14 @@ def gen_benchmark(df: pd.DataFrame, bd: dict) -> list[dict]:
     return rows
 
 
-def presale_daily_flows(df: pd.DataFrame, as_of: pd.Timestamp) -> dict:
-    """预售期每日新支付小订 / 每日退订 / 累计留存序列（release DM2 口径）。
+def presale_daily_flows(df: pd.DataFrame, as_of: pd.Timestamp, start: pd.Timestamp, gen: str) -> dict:
+    """预售期每日新支付小订 / 每日退订 / 累计留存序列（release 口径）。
 
     Σ每日新支付 = 累计小订；Σ新支付 − Σ退订 = 留存小订（报告口径，与 retention_pool 一致）。
     """
-    open_t = pd.Timestamp("2026-08-18") + pd.Timedelta(hours=OPEN_HOUR)
+    open_t = start + pd.Timedelta(hours=OPEN_HOUR)
     end_t = as_of + pd.Timedelta(days=1)
-    sel = df[(df["series_group_logic"] == "DM2")
+    sel = df[(df["series_group_logic"] == gen)
              & (df["intention_payment_time"] >= open_t)
              & (df["intention_payment_time"] < end_t)]
     pay = sel.groupby(sel["intention_payment_time"].dt.date)["order_number"].nunique()
@@ -179,8 +179,13 @@ def presale_daily_flows(df: pd.DataFrame, as_of: pd.Timestamp) -> dict:
     return {"dates": [str(d) for d in days], "new": new, "refund": refund, "retained_cum": retained_cum}
 
 
-def render_presale_flow_chart(flow: dict, out_html: Path) -> Path | None:
-    """头部对比柱状图：上方柱=每日新支付小订，下方柱=每日退订，灰线=累计留存小订。"""
+def render_presale_flow_chart(flow: dict, out_html: Path, flow_compare: dict | None = None,
+                              compare_label: str = "") -> Path | None:
+    """头部对比柱状图：上方柱=每日新支付小订，下方柱=每日退订，灰线=累计留存小订。
+
+    flow_compare：可选的同窗口对比序列（如 DM1），以虚线绘制累计留存于右轴；
+    x 轴对齐到主序列相对日序（取主序列前 len(flow_compare.retained_cum) 个日期）。
+    """
     try:
         import plotly.graph_objects as go
         sys.path.insert(0, str(_WS_ROOT))
@@ -198,10 +203,17 @@ def render_presale_flow_chart(flow: dict, out_html: Path) -> Path | None:
                          marker_color=get_series_color("negative")))
     fig.add_trace(go.Scatter(x=flow["dates"], y=flow["retained_cum"], name="累计留存小订（右轴）",
                              yaxis="y2", line=dict(color=get_series_color("ash"), width=2)))
+    if flow_compare and flow_compare.get("retained_cum"):
+        x_cmp = flow["dates"][: len(flow_compare["retained_cum"])]
+        fig.add_trace(go.Scatter(x=x_cmp, y=flow_compare["retained_cum"],
+                                 name=compare_label or "对比代际累计留存（右轴）", yaxis="y2",
+                                 line=dict(color=get_series_color("steel"), width=2, dash="dash")))
     apply_zh_theme(fig)
+    title = (f"预售期每日小订 × 退订（release DM2 口径）：累计 {cum:,} − 退订 {refunded:,} = 留存 {retained:,}")
+    if flow_compare and flow_compare.get("retained_cum"):
+        title += f"；{compare_label or '对比'} = {flow_compare['retained_cum'][-1]:,}"
     fig.update_layout(
-        title=dict(text=f"预售期每日小订 × 退订（release DM2 口径）：累计 {cum:,} − 退订 {refunded:,} = 留存 {retained:,}",
-                   font=dict(size=15)),
+        title=dict(text=title, font=dict(size=15)),
         legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0),
         margin=dict(l=50, r=60, t=80, b=40), height=380, hovermode="x unified",
         barmode="relative",
@@ -934,16 +946,20 @@ def render_html(as_of: pd.Timestamp, output_dir: Path, pk_csv: Path, gx_dir: Pat
     A("</div>")
 
     # ── 头部图表：每日小订 × 退订 ──
-    flow = presale_daily_flows(df, as_of)
+    dm2_start = pd.Timestamp(bd["time_periods"]["DM2"]["start"])
+    flow = presale_daily_flows(df, as_of, dm2_start, "DM2")
+    dm1_start = pd.Timestamp(bd["time_periods"]["DM1"]["start"])
+    flow_dm1 = presale_daily_flows(df, dm1_start + pd.Timedelta(days=N_DAYS - 1), dm1_start, "DM1")
     flow_chart_name = "L6_M2_预售期每日小订退订.html"
-    if render_presale_flow_chart(flow, output_dir.parent / "charts" / flow_chart_name):
-        A(_h_section("预售期每日小订 × 退订（release DM2 口径）",
+    if render_presale_flow_chart(flow, output_dir.parent / "charts" / flow_chart_name,
+                                 flow_compare=flow_dm1, compare_label="DM1 同窗口累计留存（右轴）"):
+        A(_h_section("预售期每日小订 × 退订（release 口径 · DM1 同窗口对比）",
                      f'<div class="chart-box"><iframe src="../charts/{flow_chart_name}" '
                      'style="width:100%;height:410px;border:0;" loading="lazy" '
                      'title="预售期每日小订与退订对比"></iframe></div>',
                      note=f"上方柱 = 每日新支付小订，下方柱 = 每日退订（release DM2：08-18 20:00 后支付意向金口径）；"
                           f"Σ每日新支付 = 累计小订 {_fmt_int(core['cum'])}，Σ新支付 − Σ退订 = 留存小订 {_fmt_int(core['retention'])}（报告口径，与指标卡一致）；"
-                          "灰线为累计留存（右轴）。"))
+                          f"灰线 = DM2 累计留存，蓝色虚线 = DM1 同窗口（2025-04-18 20:00 起 N={N_DAYS} 日）累计留存（右轴）。"))
 
     # ── 一、订单 ──
     rows_bench = []
