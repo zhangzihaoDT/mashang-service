@@ -17,7 +17,7 @@ L6 M2 预售情况汇报 — Markdown 报告生成器
 
 用法:
   .venv/bin/python mashang_workspace/research_scripts/l6_m2_presale_report.py
-  .venv/bin/python mashang_workspace/research_scripts/l6_m2_presale_report.py --as-of 2026-08-24
+  .venv/bin/python mashang_workspace/research_scripts/l6_m2_presale_report.py --as-of 2026-08-25 --n-days 8
   .venv/bin/python mashang_workspace/research_scripts/l6_m2_presale_report.py --output outputs/reports/
 """
 
@@ -153,6 +153,31 @@ def gen_benchmark(df: pd.DataFrame, bd: dict) -> list[dict]:
         rows.append({"gen": gen, "ret_n": ret_n, "peak_h": peak_h, "peak_c": peak_c,
                      "ld_total": ld_total, "ld_ret": ld_ret})
     return rows
+
+
+def lead_booking_gap_compare(df: pd.DataFrame, bd: dict) -> dict[str, dict]:
+    """各代际 线索→预订 间隔结构（预售前线索占比 + 三段 + 间隔中位）。
+
+    口径：各代际同 N 日留存小订（release 口径），
+    间隔 = intention_payment_time − first_assign_time（首次下发线索时间）。
+    before_ratio = 线索下发时间早于预售开放时刻（20:00）的订单占比（存量激活度）。
+    """
+    out: dict[str, dict] = {}
+    for gen in COMPARE_GENS:
+        start = pd.Timestamp(bd["time_periods"][gen]["start"])
+        open_t = start + pd.Timedelta(hours=20)
+        sel = _retention_window(df[df["series_group_logic"] == gen], start)
+        gap = (sel["intention_payment_time"] - sel["first_assign_time"]).dt.total_seconds() / 86400
+        n = int(len(gap))
+        out[gen] = {
+            "n": n,
+            "before": float((sel["first_assign_time"] < open_t).mean()),
+            "med": round(float(gap.median()), 2),
+            "instant": float((gap < 3).mean()),
+            "wait": float(((gap >= 3) & (gap < 30)).mean()),
+            "stock": float((gap >= 30).mean()),
+        }
+    return out
 
 
 def presale_daily_flows(df: pd.DataFrame, as_of: pd.Timestamp, start: pd.Timestamp, gen: str) -> dict:
@@ -640,6 +665,18 @@ def render(as_of: pd.Timestamp, output_dir: Path, pk_csv: Path, gx_dir: Path) ->
     A(f"\n> 华东（江苏/浙江/上海）合计：M2 约 {_fmt_pct(e2 / total_p, 0)} vs DM1 约 {_fmt_pct(e1 / dm1_total, 0)}，M2 华东集中度较 DM1 {'略' if abs(e2 / total_p - e1 / dm1_total) < 0.05 else ''}{trend_txt}，仍为预售第一大区域。")
     A(f"> *DM1 为其预售开放日（2025-04-18 20:00）起 N=7 同窗口留存小订，总量约为 M2 的 {dm1_total / total_p:.0f} 倍，绝对值不可直接比，看结构占比。")
     A("> 大区架构两代间调整（一区/二区/三区 → 东区/西区/北区），已按省份组归一：一区-*→东区-*、二区-川云/贵渝→西区-*、三区-*→北区-*、二区-鄂桂湘→华中区、一区-苏皖→东区-江苏（含安徽，口径略宽）；未映射大区保留原名。\n")
+
+    # 1.5 线索→预订间隔（即时/观望/存量）
+    gapx = lead_booking_gap_compare(df, bd)
+    A("### 1.5 线索→预订间隔（预售前线索占比 + 即时/观望/存量 · 跨代际）\n")
+    A("> 口径：各代际同 N 日留存小订（release 口径）；间隔 = 意向金支付时间 − 首次下发线索时间（`first_assign_time`）。预售前线索占比 = 线索下发早于预售开放时刻（20:00）的订单占比（存量激活度）。三段：即时 0-3 天 / 观望 3-30 天 / 存量 >30 天。\n")
+    A("| 代际 | 样本 | 预售前线索占比 | 间隔中位 | 即时 0-3天 | 观望 3-30天 | 存量 >30天 |")
+    A("|---|---:|---:|---:|---:|---:|---:|")
+    for g in COMPARE_GENS:
+        b_ = gapx[g]
+        bold = "**" if g == "DM2" else ""
+        A(f"| {bold}{g}{bold} | {bold}{_fmt_int(b_['n'])}{bold} | {bold}{_fmt_pct(b_['before'], 1)}{bold} | {b_['med']:.2f}d | {bold}{_fmt_pct(b_['instant'], 1)}{bold} | {bold}{_fmt_pct(b_['wait'], 1)}{bold} | {bold}{_fmt_pct(b_['stock'], 1)}{bold} |")
+    A("> 口径提醒：DM2 预售开放仅 N 日，观望段内线索下发于预售开放之后的订单尚在自然沉淀期，观望占比可能随预售推进小幅上移。\n")
     A("---\n")
 
     # 二、下发线索
@@ -1007,6 +1044,19 @@ def render_html(as_of: pd.Timestamp, output_dir: Path, pk_csv: Path, gx_dir: Pat
                       "大区架构两代间调整（一区/二区/三区 → 东区/西区/北区），已按省份组归一：一区-*→东区-*、二区-川云/贵渝→西区-*、三区-*→北区-*、"
                       "二区-鄂桂湘→华中区、一区-苏皖→东区-江苏（含安徽，口径略宽）；未映射大区保留原名。"))
 
+    # 1.5 线索→预订间隔（即时/观望/存量）
+    gapx = lead_booking_gap_compare(df, bd)
+    rows_gap = []
+    for g in COMPARE_GENS:
+        b_ = gapx[g]
+        rows_gap.append([g, _fmt_int(b_["n"]), _fmt_pct(b_["before"], 1), f"{b_['med']:.2f}d",
+                         _fmt_pct(b_["instant"], 1), _fmt_pct(b_["wait"], 1), _fmt_pct(b_["stock"], 1)])
+    A(_h_section("线索→预订间隔（预售前线索占比 + 即时/观望/存量 · 跨代际）",
+                 _h_table(["代际", "样本", "预售前线索占比", "间隔中位", "即时 0-3天", "观望 3-30天", "存量 >30天"],
+                          rows_gap, num_cols={1, 2, 3, 4, 5, 6}, bold_rows={0}),
+                 note="间隔 = 意向金支付 − 首次下发线索（first_assign_time）；预售前线索占比 = 线索下发早于预售开放时刻（20:00）的订单占比（存量激活度）；"
+                      "各代际同 N 日留存小订，release 口径；DM2 预售开放仅 N 日，观望段内预售开放后下发的线索尚在沉淀期，占比可能随预售推进小幅上移。"))
+
     # ── 二、下发线索 ──
     assign = load_assign()
     win = lead_block(assign, "2026-08-18", "2026-08-24")
@@ -1191,13 +1241,17 @@ def render_html(as_of: pd.Timestamp, output_dir: Path, pk_csv: Path, gx_dir: Pat
 
 
 def main() -> int:
+    global N_DAYS
     p = argparse.ArgumentParser(description="L6 M2 预售情况汇报 — Markdown/HTML 报告生成器")
     p.add_argument("--as-of", type=str, default=None, help="统计基准日 YYYY-MM-DD（默认今天）")
+    p.add_argument("--n-days", type=int, default=N_DAYS, help="同 N 日留存窗口（默认 7）")
     p.add_argument("--output", type=str, default=str(_WS_ROOT / "outputs" / "reports"), help="输出目录")
     p.add_argument("--pk-csv", type=str, default=DEFAULT_PK_CSV, help="竞争 PK 正反向排名 CSV 路径")
     p.add_argument("--guanxingta-dir", type=str, default=DEFAULT_GUANXINGTAI_DIR, help="观星台集团订单日报目录")
     p.add_argument("--html", action="store_true", help="同时输出品牌化 HTML 报告")
     args = p.parse_args()
+
+    N_DAYS = args.n_days
 
     from datetime import datetime
     as_of = pd.Timestamp(args.as_of) if args.as_of else pd.Timestamp(datetime.now().date())
