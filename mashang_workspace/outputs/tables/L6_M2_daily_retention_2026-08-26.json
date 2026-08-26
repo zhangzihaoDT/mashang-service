@@ -1,0 +1,100 @@
+{
+  "status": "success",
+  "script": "research_scripts/l6_m2_daily_retention.py",
+  "scope": {
+    "data_source": "dataset/order_data.parquet（series_group_logic.DM2）",
+    "time_window": {
+      "start": "2026-08-18 20:00",
+      "end": "2026-08-26",
+      "as_of": "2026-08-26"
+    },
+    "filters": {
+      "series": "DM2",
+      "refund": "从未退意向金"
+    },
+    "metric_definition": "小订=支付日新支付；留存=报告口径(20:00起且从未退)；限定=JimmyChoo高定限量版留存"
+  },
+  "result": {
+    "summary": "L6 M2 预售逐日留存（截至 2026-08-26）",
+    "metrics": {
+      "xiaoding": 1749,
+      "retained": 1515,
+      "limited": 154,
+      "non_limited": 1361
+    },
+    "daily": [
+      {
+        "date": "2026-08-18",
+        "xiaoding": 894,
+        "retained": 756,
+        "limited": 77,
+        "non_limited": 679
+      },
+      {
+        "date": "2026-08-19",
+        "xiaoding": 204,
+        "retained": 172,
+        "limited": 12,
+        "non_limited": 160
+      },
+      {
+        "date": "2026-08-20",
+        "xiaoding": 98,
+        "retained": 87,
+        "limited": 6,
+        "non_limited": 81
+      },
+      {
+        "date": "2026-08-21",
+        "xiaoding": 29,
+        "retained": 12,
+        "limited": 3,
+        "non_limited": 9
+      },
+      {
+        "date": "2026-08-22",
+        "xiaoding": 163,
+        "retained": 149,
+        "limited": 32,
+        "non_limited": 117
+      },
+      {
+        "date": "2026-08-23",
+        "xiaoding": 188,
+        "retained": 169,
+        "limited": 7,
+        "non_limited": 162
+      },
+      {
+        "date": "2026-08-24",
+        "xiaoding": 65,
+        "retained": 62,
+        "limited": 11,
+        "non_limited": 51
+      },
+      {
+        "date": "2026-08-25",
+        "xiaoding": 102,
+        "retained": 102,
+        "limited": 6,
+        "non_limited": 96
+      },
+      {
+        "date": "2026-08-26",
+        "xiaoding": 6,
+        "retained": 6,
+        "limited": 0,
+        "non_limited": 6
+      }
+    ]
+  },
+  "artifacts": {},
+  "followup_context": {
+    "metric": "presale_retention_daily",
+    "available_dimensions": [
+      "edition"
+    ]
+  },
+  "warnings": [],
+  "errors": []
+}
