@@ -610,8 +610,8 @@ def render(as_of: pd.Timestamp, output_dir: Path, pk_csv: Path, gx_dir: Path) ->
     A(f"| 峰值后 1 小时 | {_fmt_int(core['next_hour'])} |")
     A(f"| 开放后 24h 累计 | {_fmt_int(core['day24'])} |\n")
 
-    A("### 1.2 预售对标（跨代际 · N=7 同窗口）\n")
-    A("> 对标代际：DM1 / CM2 / LS9 / LS8，统一按各自预售开放时刻（20:00）起算，N=7 日同窗口。\n")
+    A(f"### 1.2 预售对标（跨代际 · N={N_DAYS} 同窗口）\n")
+    A(f"> 对标代际：DM1 / CM2 / LS9 / LS8，统一按各自预售开放时刻（20:00）起算，N={N_DAYS} 日同窗口。\n")
     A("| 代际 | 同 N 日留存 | 首日峰值小时 | 峰值小时小订 | 发布会当日小订（20:00-24:00） | 发布会当日留存（20:00-24:00） |")
     A("|---|---:|---:|---:|---:|---:|")
     for b in bench:
@@ -663,7 +663,7 @@ def render(as_of: pd.Timestamp, output_dir: Path, pk_csv: Path, gx_dir: Path) ->
     e1 = sum(dm1_reg.get(r, 0) for r in east)
     trend_txt = "上升" if e2 / total_p >= e1 / dm1_total else "回落"
     A(f"\n> 华东（江苏/浙江/上海）合计：M2 约 {_fmt_pct(e2 / total_p, 0)} vs DM1 约 {_fmt_pct(e1 / dm1_total, 0)}，M2 华东集中度较 DM1 {'略' if abs(e2 / total_p - e1 / dm1_total) < 0.05 else ''}{trend_txt}，仍为预售第一大区域。")
-    A(f"> *DM1 为其预售开放日（2025-04-18 20:00）起 N=7 同窗口留存小订，总量约为 M2 的 {dm1_total / total_p:.0f} 倍，绝对值不可直接比，看结构占比。")
+    A(f"> *DM1 为其预售开放日（2025-04-18 20:00）起 N={N_DAYS} 同窗口留存小订，总量约为 M2 的 {dm1_total / total_p:.0f} 倍，绝对值不可直接比，看结构占比。")
     A("> 大区架构两代间调整（一区/二区/三区 → 东区/西区/北区），已按省份组归一：一区-*→东区-*、二区-川云/贵渝→西区-*、三区-*→北区-*、二区-鄂桂湘→华中区、一区-苏皖→东区-江苏（含安徽，口径略宽）；未映射大区保留原名。\n")
 
     # 1.5 线索→预订间隔（即时/观望/存量）
@@ -702,7 +702,7 @@ def render(as_of: pd.Timestamp, output_dir: Path, pk_csv: Path, gx_dir: Path) ->
     def _cell_conv(w: float, b_: float) -> str:
         return f"{w * 100:.1f}% → {b_ * 100:.1f}%（{(w - b_) * 100:+.1f}pp）"
 
-    A("**跨代际对标 · ① 预售起始与当日线索（N=7 同窗口）**\n")
+    A(f"**跨代际对标 · ① 预售起始与当日线索（N={N_DAYS} 同窗口）**\n")
     A("| 代际 | 预售起始 | 预售当日线索 |\n|---|---|---:|")
     for r in lcg:
         d0 = _fmt_int(r["d0"]) if r["d0"] is not None else "—"
@@ -1004,7 +1004,7 @@ def render_html(as_of: pd.Timestamp, output_dir: Path, pk_csv: Path, gx_dir: Pat
         rows_bench.append([b["gen"], _fmt_int(b["ret_n"]), b["peak_h"], _fmt_int(b["peak_c"]),
                            _fmt_int(b["ld_total"]), _fmt_int(b["ld_ret"])])
     dm2_idx = next(i for i, b in enumerate(bench) if b["gen"] == "DM2")
-    A(_h_section("一、预售对标（跨代际 · N=7 同窗口）",
+    A(_h_section(f"一、预售对标（跨代际 · N={N_DAYS} 同窗口）",
                  _h_table(["代际", "同 N 日留存", "首日峰值小时", "峰值小时小订", "发布会当日小订", "发布会当日留存"],
                           rows_bench, num_cols={1, 3, 4, 5}, bold_rows={dm2_idx}),
                  note="统一按各自预售开放时刻（20:00）起算；L6 M2 三项指标均低于历届代际（约为 DM1 的 1/4），仅作量级参考；"
@@ -1040,7 +1040,7 @@ def render_html(as_of: pd.Timestamp, output_dir: Path, pk_csv: Path, gx_dir: Pat
                  _h_table(["大区（新架构口径）", "M2 留存订单", "M2 占比", "DM1 留存订单*", "DM1 占比*", "占比差（M2−DM1，pp）"],
                           rows_reg, num_cols={1, 3}),
                  note=f"华东（江苏/浙江/上海）合计：M2 约 {_fmt_pct(e2 / total_p, 0)} vs DM1 约 {_fmt_pct(e1 / dm1_total, 0)}，仍为预售第一大区域。"
-                      f"*DM1 为其预售开放日（2025-04-18 20:00）起 N=7 同窗口留存小订（总量约为 M2 的 {dm1_total / total_p:.0f} 倍），看结构占比。"
+                      f"*DM1 为其预售开放日（2025-04-18 20:00）起 N={N_DAYS} 同窗口留存小订（总量约为 M2 的 {dm1_total / total_p:.0f} 倍），看结构占比。"
                       "大区架构两代间调整（一区/二区/三区 → 东区/西区/北区），已按省份组归一：一区-*→东区-*、二区-川云/贵渝→西区-*、三区-*→北区-*、"
                       "二区-鄂桂湘→华中区、一区-苏皖→东区-江苏（含安徽，口径略宽）；未映射大区保留原名。"))
 
@@ -1082,7 +1082,7 @@ def render_html(as_of: pd.Timestamp, output_dir: Path, pk_csv: Path, gx_dir: Pat
         return f"{w * 100:.1f}% → {b_ * 100:.1f}%（{(w - b_) * 100:+.1f}pp）"
 
     rows_lcg1 = [[r["gen"], r["start"], (_fmt_int(r["d0"]) if r["d0"] is not None else "—")] for r in lcg]
-    A(_h_section("下发线索跨代际 · ① 预售起始与当日线索（N=7 同窗口）",
+    A(_h_section(f"下发线索跨代际 · ① 预售起始与当日线索（N={N_DAYS} 同窗口）",
                  _h_table(["代际", "预售起始", "预售当日线索"], rows_lcg1, num_cols={2}, bold_rows={dm2_l_idx}),
                  note="各代际按各自预售开放日（20:00）当日整体业务线索；整体业务口径，非 DM2 专属。"))
 
