@@ -325,16 +325,12 @@ def analyze_daily_lock_orders(df, start_date, end_date):
             if ls9hyper_count > 0:
                 stats["ls9hyper_count"] = ls9hyper_count
         
-        # 对 LS6 (原CM2) 和 LS9 进行电池容量细分
-        if model in ["LS6", "LS9"]:
+        # LS9 电池容量细分
+        if model == "LS9":
             capacity_counts = {}
             if battery_capacity_logic:
                 capacity_asts = {k: _parse_logic(v) for k, v in battery_capacity_logic.items()}
-                if model == "LS9":
-                    allowed_caps = [k for k in ["52kwh", "66kwh"] if k in battery_capacity_logic]
-                else:
-                    allowed_caps = list(battery_capacity_logic.keys())
-
+                allowed_caps = [k for k in ["52kwh", "66kwh"] if k in battery_capacity_logic]
                 capacity_counts = {k: 0 for k in allowed_caps}
                 unique_orders = model_df[['order_number', 'product_name']].drop_duplicates('order_number')
                 for _, row in unique_orders.iterrows():
@@ -358,6 +354,46 @@ def analyze_daily_lock_orders(df, start_date, end_date):
 
             if capacity_counts:
                 stats["details"] = capacity_counts
+
+        # LS6 代际区隔（CM3/CM2/CM1/CM0，按 series_group_logic 优先级），CM2 再分增程/纯电
+        if model == "LS6":
+            gen_rules = (business_def or {}).get("series_group_logic") or {}
+            gen_asts = {}
+            for g in ["CM3", "CM2", "CM1", "CM0"]:
+                rule = gen_rules.get(g) or {}
+                cond = rule.get("condition") if isinstance(rule, dict) else rule
+                if cond:
+                    gen_asts[g] = _parse_logic(str(cond))
+            pt_logic = (business_def or {}).get("product_type_logic") or {}
+            pt_asts = {}
+            for pt, cond in pt_logic.items():
+                if cond:
+                    pt_asts[pt] = _parse_logic(str(cond))
+
+            gen_counts = {g: 0 for g in gen_asts}
+            cm2_ptype = {"增程": 0, "纯电": 0}
+            unique_orders = model_df[['order_number', 'product_name']].drop_duplicates('order_number')
+            for _, row in unique_orders.iterrows():
+                p_name = row['product_name']
+                if pd.isna(p_name):
+                    continue
+                p_name = str(p_name)
+                matched = None
+                for g in ["CM3", "CM2", "CM1", "CM0"]:
+                    ast = gen_asts.get(g)
+                    if ast and _eval_ast(ast, p_name):
+                        matched = g
+                        break
+                if matched is None:
+                    continue
+                gen_counts[matched] += 1
+                if matched == "CM2":
+                    for pt, ast in pt_asts.items():
+                        if _eval_ast(ast, p_name):
+                            cm2_ptype[pt] += 1
+                            break
+            stats["gen_counts"] = gen_counts
+            stats["cm2_ptype"] = cm2_ptype
 
         # LS9 variant breakdown (Ultra / Hyper)
         if model == "LS9":
@@ -550,6 +586,48 @@ def _format_mom(pct):
     return f"（环比{sign}{pct:.1f}%）"
 
 
+def _format_lock_model_detail(stats) -> str:
+    """
+    构建车型锁单明细文本（含 '｜' 前缀）。
+    LS6 按代际展示：CM3/CM2(增程/纯电)/CM1，CM0>0 时追加。
+    """
+    gen = stats.get("gen_counts")
+    if gen:
+        cm2_ptype = stats.get("cm2_ptype") or {}
+        parts = []
+        if gen.get("CM3"):
+            parts.append(f"CM3：{gen.get('CM3')}")
+        if gen.get("CM2"):
+            parts.append(
+                f"CM2:{gen.get('CM2')}(增程:{cm2_ptype.get('增程', 0)}/纯电:{cm2_ptype.get('纯电', 0)})"
+            )
+        if gen.get("CM1"):
+            parts.append(f"CM1:{gen.get('CM1')}")
+        if gen.get("CM0"):
+            parts.append(f"CM0:{gen.get('CM0')}")
+        detail = ",".join(parts)
+    else:
+        detail_parts = []
+        d = stats.get("details") or {}
+        for cap, cap_count in d.items():
+            cap_label = str(cap).replace("kwh", "kw")
+            detail_parts.append(f"{cap_label}：{cap_count}")
+        sd = stats.get("seat_details") or {}
+        if "五座" in sd:
+            detail_parts.append(f"五座：{sd['五座']}")
+        if "六座" in sd:
+            detail_parts.append(f"六座：{sd['六座']}")
+        vd = stats.get("variant_details") or {}
+        for variant, v_count in vd.items():
+            detail_parts.append(f"{variant}：{v_count}")
+        detail = "，".join(detail_parts)
+    out = "｜" + detail if detail else ""
+    ls9hyper = stats.get("ls9hyper_count")
+    if ls9hyper is not None:
+        out += f"｜LS9Hyper: {ls9hyper}"
+    return out
+
+
 def _get_tenant_access_token() -> str | None:
     if not BITABLE_APP_ID or not BITABLE_APP_SECRET:
         return None
@@ -726,23 +804,7 @@ def upsert_bitable_observation(lock_stats, invoice_stats, pred_lock: float | Non
     lock_model_details = []
     for model, stats in (lock_stats.get("models") or {}).items():
         count = stats.get("count", 0)
-        detail_parts = []
-        d = stats.get("details") or {}
-        for cap, cap_count in d.items():
-            cap_label = str(cap).replace("kwh", "kw")
-            detail_parts.append(f"{cap_label}：{cap_count}")
-        sd = stats.get("seat_details") or {}
-        if "五座" in sd:
-            detail_parts.append(f"五座：{sd['五座']}")
-        if "六座" in sd:
-            detail_parts.append(f"六座：{sd['六座']}")
-        vd = stats.get("variant_details") or {}
-        for variant, v_count in vd.items():
-            detail_parts.append(f"{variant}：{v_count}")
-        detail_str = "｜" + "，".join(detail_parts) if detail_parts else ""
-        ls9hyper = stats.get("ls9hyper_count")
-        if ls9hyper is not None:
-            detail_str += f"｜LS9Hyper: {ls9hyper}"
+        detail_str = _format_lock_model_detail(stats)
         lock_model_details.append(f"- {model}: {count} 单{detail_str}")
     lock_model_text = "\n".join(lock_model_details)
 
@@ -828,23 +890,7 @@ def send_feishu_notification(lock_stats, invoice_stats, pred_lock=None, mom=None
     lock_model_details = []
     for model, stats in lock_stats['models'].items():
         count = stats["count"]
-        detail_parts = []
-        if "details" in stats:
-            d = stats["details"]
-            for cap, cap_count in d.items():
-                cap_label = str(cap).replace("kwh", "kw")
-                detail_parts.append(f"{cap_label}：{cap_count}")
-        if "seat_details" in stats:
-            d = stats["seat_details"]
-            if "五座" in d:
-                detail_parts.append(f"五座：{d['五座']}")
-            if "六座" in d:
-                detail_parts.append(f"六座：{d['六座']}")
-        if "variant_details" in stats:
-            vd = stats["variant_details"]
-            for variant, v_count in vd.items():
-                detail_parts.append(f"{variant}：{v_count}")
-        detail_str = "｜" + "，".join(detail_parts) if detail_parts else ""
+        detail_str = _format_lock_model_detail(stats)
         lock_model_details.append(f"- {model}: {count} 单{detail_str}")
     lock_model_text = "\n".join(lock_model_details)
 
@@ -991,26 +1037,7 @@ def main():
         print("   车型分布:")
         for model, stats in lock_stats['models'].items():
             count = stats["count"]
-            detail_parts = []
-            if "details" in stats:
-                d = stats["details"]
-                for cap, cap_count in d.items():
-                    cap_label = str(cap).replace("kwh", "kw")
-                    detail_parts.append(f"{cap_label}：{cap_count}")
-            if "seat_details" in stats:
-                d = stats["seat_details"]
-                if "五座" in d:
-                    detail_parts.append(f"五座：{d['五座']}")
-                if "六座" in d:
-                    detail_parts.append(f"六座：{d['六座']}")
-            if "variant_details" in stats:
-                vd = stats["variant_details"]
-                for variant, v_count in vd.items():
-                    detail_parts.append(f"{variant}：{v_count}")
-            detail_str = "｜" + "，".join(detail_parts) if detail_parts else ""
-            ls9hyper = stats.get("ls9hyper_count")
-            if ls9hyper is not None:
-                detail_str += f"｜LS9Hyper: {ls9hyper}"
+            detail_str = _format_lock_model_detail(stats)
             print(f"   - {model}: {count}{detail_str}")
         if pred_lock is not None and pred_lock > 0:
             rate = lock_stats['total'] / pred_lock
