@@ -1,0 +1,294 @@
+# =============================================================================
+# StudySpec — price_down_volume_opportunity
+#
+# 机器可读、可校验、可版本化的研究配置（位于 configs/studies/specs/）。
+# 复用实现：
+#   - mashang_workspace/research_scripts/tp_and_mix_ways_market_volume.py
+#   - 数据源与 analyses/classifiers/thresholds/validation 同
+#     tp_and_mix_ways_market_volume 实例，仅改变研究目标与窗口
+#
+# 校验：
+#   python mashang_workspace/utility_scripts/validate_study_spec.py
+#   python mashang_workspace/utility_scripts/validate_study_spec.py --spec <path>
+#
+# 窗口：2023-04-01 ~ 2024-03-31（历史截面，先完整跑旧算法，不调整算法）
+# =============================================================================
+
+spec_version: "0.1"
+id: price_down_volume_opportunity
+name: "价格下去，什么市场能出量"
+version: "0.1.0"
+status: active
+updated_at: "2026-08-27"
+description: "当产品价格下探时，识别哪些乘用车细分市场最具销量释放潜力。复用 TP&MIX-ways 细分市场出量分析的数据源与分析模块，先在 2023-04~2024-03 历史截面上完整跑一遍旧算法，观察旧框架会回答什么。"
+
+objective:
+  summary: "在价格下探场景下识别最具销量释放潜力的细分市场：优先看需求已被验证、但供给尚未充分满足的市场；区分市场规模大与价格下探后存在增量空间；同时观察价格带、车身形式和能源结构。"
+  questions:
+    - id: q1
+      question: "当产品价格下探时，哪些乘用车细分市场最具销量释放潜力？"
+      layer: market_space
+    - id: q2
+      question: "哪些市场需求已被验证、但供给尚未充分满足？"
+      layer: market_opportunity
+    - id: q3
+      question: "市场规模大与价格下探后存在增量空间的市场如何区分？"
+      layer: market_scale_vs_headroom
+  design_principles:
+    - "优先识别需求已经被验证、但供给尚未充分满足的市场"
+    - "区分市场规模大与价格下探后存在增量空间"
+    - "同时观察价格带、车身形式和能源结构"
+    - "复用 tp_and_mix_ways_market_volume 的数据源与分析模块，仅改变研究窗口，不调整现有算法"
+
+data:
+  dataset: tp_and_mix_ways
+  loader: shared.loaders.tp_and_mix_ways_loader
+  description: "乘用车上险量，作为市场销量/注册量观察，不等同于批发量或订单量"
+  tables:
+    - table: price_segment_monthly
+      role: "市场规模与新能源渗透率精确口径"
+      grain: [date_month, tp_bucket_5w, body_type, vehicle_level_group, fuel_type_group]
+      metrics: [sales, weighted_tp]
+    - table: model_monthly
+      role: "车型家族爆款识别与近似价格归属"
+      grain: [date_month, brand, model, sub_model_id]
+      metrics: [sales, weighted_tp]
+      fuel_type_field: fuel_type
+      fuel_type_group_field: fuel_type_group
+  entity:
+    family_keys: [brand, model]
+    price_mapping_field: weighted_tp
+    note: "爆款识别优先使用车型家族 brand+model；具体产品归属保留 sub_model_id；车型表按燃料/驱动/子车型展开，按家族汇总，不对原始行直接去重"
+
+window:
+  default:
+    start: "2023-04-01"
+    end: "2024-03-31"
+  label: "近12个月（历史截面）"
+  current_cutoff_month: "2024-03"
+  comparison:
+    recent_months: 3
+    prior_months: 3
+    note: "最近3个月作为当前状态窗口，前3个月作为比较窗口；前期无销量时不计算增速，不把无限增长误认为可比较增长"
+
+dimensions:
+  # 术语对应：本研究的 primary 概念 = 价格带(price_band) × 车身(body_type) × 能源(energy_type)
+  #   price_band  → price_bucket（5 万价格带）
+  #   energy_type → fuel_type_group
+  segment_keys: [price_bucket, body_type, vehicle_level_group, fuel_type_group]
+  primary_keys: [price_bucket, body_type, fuel_type_group]
+  radar_segment_keys: [price_bucket, body_type, vehicle_level_group, fuel_type_group]
+  market_level_keys: [price_bucket, body_type]
+  price_bucket:
+    source_field: tp_bucket_5w
+    mapping_field: weighted_tp
+    step_yuan: 50000
+    lower_label: "5万以下"
+    upper_label: "60万以上"
+    lower_rule: "value < 50000"
+    upper_rule: "value >= 600000"
+    bucket_label: "X-Y万（X/Y 为步长对齐的万元区间）"
+    invalid_label: "价格缺失/无效"
+    excluded_label: "其他"
+
+analyses:
+  - id: market_space
+    name: "市场空间：哪里有量"
+    script_fn: build_market
+    table: price_segment_monthly
+    description: "按价格段×车身×级别×能源细分市场计算12个月累计销量、份额与排名，只回答市场空间和结构，不直接定义爆款。"
+    group_keys: [price_bucket, body_type, vehicle_level_group, fuel_type_group]
+    metrics: [sales, weighted_tp, active_months]
+    derived_metrics: [share_pct, market_rank]
+    report_topn: 20
+
+  - id: model_candidates
+    name: "车型候选明细"
+    script_fn: build_model_candidates
+    table: model_monthly
+    description: "车型家族按映射价格段与维度汇总，计算销量、加权均价、首末活跃月与有效月份。"
+    group_keys: [price_bucket, body_type, vehicle_level_group, fuel_type_group, brand, model]
+    metrics: [sales, weighted_tp, first_active_month, last_active_month, active_months]
+    filters:
+      sales_gt: 0
+
+  - id: top3_concentration
+    name: "TOP3 集中度（市场结构补充指标）"
+    script_fn: attach_top3
+    description: "每个细分市场挂载销量 TOP3 车型及稳定 TOP3（有效月份≥9个月），计算 TOP3 集中度；不把高集中度直接等同于爆款。"
+    params:
+      top_n: 3
+      stable_active_months: 9
+    derived_metrics:
+      - model_top3
+      - top1_model
+      - top3_sales
+      - top3_concentration_pct
+      - top3_stable
+      - stable_top3_concentration_pct
+      - stable_model_count
+      - mapped_model_sales_pct
+
+  - id: model_breakout_radar
+    name: "车型爆款雷达（车型家族层）"
+    script_fn: build_model_radar
+    table: model_monthly
+    description: "近3个月月均销量衡量当前规模，近3个月相对前3个月衡量增长，所属细分市场近3个月份额衡量竞争地位，有效月份衡量持续性；输出爆款类型与当前状态。"
+    params:
+      recent_months: 3
+      prior_months: 3
+      scale_quantile: 0.8
+      median_scale: per_price_segment
+    metrics:
+      - sales_12m
+      - recent_3m_avg
+      - prior_3m_avg
+      - growth_pct
+      - active_months
+      - recent_segment_share_pct
+      - current_rank
+    derived_metrics: [breakout_type, current_status]
+
+  - id: price_energy_penetration
+    name: "价格段新能源/纯电渗透率"
+    script_fn: build_price_energy_penetration
+    description: "NEV 渗透率来自 price_segment_monthly.fuel_type_group（精确口径）；BEV 渗透率来自 model_monthly.fuel_type=纯电动 车型按 weighted_tp 映射（近似口径）。"
+    table_primary: price_segment_monthly
+    table_secondary: model_monthly
+    derived_metrics:
+      - nev_penetration_pct
+      - bev_penetration_pct
+      - bev_share_of_nev_pct
+    exclusions: [其他]
+
+  - id: segment_growth
+    name: "主分析单元增长"
+    script_fn: build_segment_growth
+    table: price_segment_monthly
+    description: "价格段×车身×能源主分析单元最近3个月相对前3个月的增长，前期无销量时不计算增速。"
+    group_keys: [price_bucket, body_type, fuel_type_group]
+    derived_metrics: [recent_3m_sales, prior_3m_sales, growth_pct]
+
+  - id: market_layers
+    name: "市场层：NEV 渗透率 × BEV 路线"
+    script_fn: build_market_layers
+    description: "价格段×车身市场口径的 NEV 渗透率与 BEV÷NEV 路线（产品规划参考）。"
+    market_level_keys: [price_bucket, body_type]
+    derived_metrics: [nev_penetration_pct, nev_model_sales, bev_model_sales, bev_route_pct]
+
+  - id: three_layer_opportunity
+    name: "三层市场机会（新能源细分市场）"
+    script_fn: build_opportunity_layers
+    description: "市场机会拆三层并列展示不合成单一指数：市场开放度=1−TOP3集中度；NEV替代空间=1−NEV渗透率；BEV路线=BEV÷NEV。仅对12个月规模≥阈值的新能源市场排序。"
+    layers:
+      market_openness: "1 - top3_concentration_pct / 100"
+      nev_substitution_space: "1 - nev_penetration_pct / 100"
+      bev_route: "bev_route_pct（BEV ÷ NEV）"
+      open_convertible_share: "market_openness × nev_substitution_space"
+    filters:
+      fuel_type_group: 新能源
+      min_sales_key: opportunity_min_sales
+    exclusions: [其他]
+
+classifiers:
+  breakout_types:
+    base_label: 普通车型
+    labels: [规模爆款, 增长爆款, 统治型爆款, 持续型爆款]
+    priority: [规模爆款, 增长爆款, 统治型爆款, 持续型爆款]
+    note: "标签按优先级覆盖：规模爆款 > 增长爆款 > 统治型爆款 > 持续型爆款 > 普通车型；阈值用于研究筛选，不代表行业公认标准"
+    rules:
+      规模爆款:
+        condition: "同价格段近3月月均销量处于车型前20%（分位数 0.8），且近期未下滑"
+      增长爆款:
+        condition: "同价格段近3月月均销量不低于中位数，且相对前3个月增长≥25%"
+      统治型爆款:
+        condition: "同价格段近3月月均销量不低于中位数，且所属细分市场近3个月份额≥20%"
+      持续型爆款:
+        condition: "同价格段近3月月均销量不低于中位数，且12个月有效销量月份≥9个月"
+  current_status:
+    labels: [上升, 稳定, 下滑]
+    rules:
+      上升: "growth_pct >= 15"
+      稳定: "-15 < growth_pct < 15"
+      下滑: "growth_pct <= -15"
+  concentration_label:
+    labels: [高集中, 中度集中, 低集中]
+    rules:
+      高集中: "top3_concentration_pct >= 50"
+      中度集中: "top3_concentration_pct >= 30"
+      低集中: "else"
+  opportunity_profile:
+    labels: [开放替代蓝海, 替代空间主导, BEV友好, 混动增程主导, 均衡机会, 头部锁死]
+    rules:
+      头部锁死: "market_openness < 0.35"
+      开放替代蓝海: "nev_substitution_space >= 0.4 AND market_openness >= 0.5"
+      替代空间主导: "nev_substitution_space >= 0.4"
+      BEV友好: "bev_route_pct >= 60"
+      混动增程主导: "bev_route_pct < 40"
+      均衡机会: "else"
+
+thresholds:
+  opportunity_min_sales: 100000
+  top3_top_n: 3
+  stable_active_months: 9
+  breakout_growth_pct_min: 25
+  breakout_segment_share_pct_min: 20
+  breakout_scale_quantile: 0.8
+  current_status_rising_pct: 15
+  current_status_falling_pct: -15
+
+outputs:
+  dir:
+    tables: outputs/tables
+    reports: outputs/reports
+  tables:
+    - id: market_detail
+      file: "market_detail_202304_202403.csv"
+      source: market_space+top3_concentration
+    - id: price_body_summary
+      file: "price_body_summary_202304_202403.csv"
+      source: price_body_summary
+    - id: primary_segments
+      file: "primary_segments_202304_202403.csv"
+      source: primary_market+top3_concentration
+    - id: price_energy_penetration
+      file: "price_energy_penetration_202304_202403.csv"
+      source: price_energy_penetration
+    - id: market_opportunity
+      file: "market_opportunity_202304_202403.csv"
+      source: three_layer_opportunity
+    - id: vehicle_candidates
+      file: "vehicle_candidates_202304_202403.csv"
+      source: model_candidates
+    - id: model_breakout_radar
+      file: "model_breakout_radar_202304_202403.csv"
+      source: model_breakout_radar
+  report:
+    file: "price_down_volume_opportunity_202304_202403.md"
+    title: "价格下探：哪些细分市场能出量"
+    sections:
+      - 核心结论
+      - 各价格段新能源/纯电渗透率
+      - 车型爆款雷达（车型家族层）
+      - 各价格段爆款榜单
+      - 三层市场机会（新能源细分市场）
+      - 主分析单元 TOP15（价格段×车身×能源）
+      - 细分市场 TOP20
+      - 口径与限制
+    coverage_notes:
+      - "报告必须说明数据来源、时间窗口、指标口径、爆款分类、渗透率口径、三层机会与局限性"
+
+validation:
+  rules:
+    - id: month_range_check
+      description: "校验各表月份范围与研究窗口一致"
+    - id: sales_nonnegative
+      description: "校验销量字段非负"
+    - id: market_total_consistency
+      description: "校验市场各月总量与价格段汇总一致"
+    - id: weighted_tp_edge_check
+      description: "检查 weighted_tp 缺失、为0或位于价格段边界"
+    - id: mapping_coverage
+      description: "检查车型映射后细分市场覆盖率与总量一致性（各档比例≈1.0）"
+    - id: growth_protection
+      description: "检查前3个月无销量、单月异常高销量与负增长车型，避免误读增长率"

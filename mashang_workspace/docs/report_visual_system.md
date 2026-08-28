@@ -131,4 +131,5 @@ align_dual_zero(fig, y1=y1_data, y2=y2_data)
 6. 普通背景、斑马纹、表格分栏不得使用浅蓝（`--zh-blue-100`）。
 7. 金色只用于重点、事件、警示、6座标记、关键进度条。
 8. y=0 zeroline 对净流入/净流出/正负变化图表必须显著。
+9. **静态资源路径约定**：报告落在 `mashang_workspace/outputs/reports/`，模板/资产在 `mashang_workspace/templates/` 与 `assets/`，因此 `<link>/<img>` 必须用 **`../../templates/report_style.css`、`../../assets/brand/...`**（`report_base.html` 的 `static_prefix` 传 `../..`）。用 `../` 会指向不存在的 `outputs/templates/`，导致 CSS 不渲染——`market_state_observation` 曾踩此坑。
 9. 超过 6 个系列时，高亮本品/事件车型，其余竞品降为低饱和灰蓝或透明度。

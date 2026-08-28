@@ -41,8 +41,12 @@
     },
     "DM2": {
       "start": "2026-08-18",
-      "end": "2026-09-18",
+      "end": "2026-08-28",
       "finish": "2026-10-31"
+    },
+    "CM3": {
+      "start": "2026-09-10",
+      "end": "2026-09-26"
     }
   },
   "presale_periods": {
@@ -123,6 +127,10 @@
     "六座": "product_name LIKE '%六座%'"
   },
   "series_group_logic": {
+    "CM3": {
+      "priority": 4,
+      "condition": "product_name LIKE '%M3%' AND product_name LIKE '%LS6%'"
+    },
     "CM2": {
       "priority": 3,
       "condition": "product_name LIKE '%新一代%' AND product_name LIKE '%LS6%' OR product_name LIKE '%上汽一亿台限定版%' AND product_name LIKE '%LS6%'"
@@ -173,7 +181,8 @@
     "LS6": [
       "CM0",
       "CM1",
-      "CM2"
+      "CM2",
+      "CM3"
     ],
     "L6": [
       "DM0",

@@ -1,0 +1,186 @@
+# =============================================================================
+# StudySpec — price_band_migration
+#
+# 机器可读、可校验、可版本化的研究配置（位于 configs/studies/specs/）。
+#
+# 研究性质：价格带迁移诊断（不碰模型）
+# 背景：V0.3 成熟期假说（market_state_v0_2_design.md §8.6）发现
+#   "本价格带上沿产品走强 + 扩容"，但存在两种互斥解释：
+#     A) 价格段内部 Premiumization（同带消费者向上选择更贵产品）
+#     B) Price-band migration（更高价格带需求下沉到本带，承接增量的是本带上沿产品）
+#   本研究的任务：通过把连续价格带放一起看，判别到底发生的是哪一种。
+#
+# 校验：
+#   python mashang_workspace/utility_scripts/validate_study_spec.py
+#   python mashang_workspace/utility_scripts/validate_study_spec.py --spec <path>
+# =============================================================================
+
+spec_version: "0.1"
+id: price_band_migration
+name: "产品升级 or 消费降级：价格带迁移研究"
+version: "0.1.0"
+status: active
+updated_at: "2026-08-27"
+description: "判别成熟期增长是本价格段内部消费升级（Premiumization），还是更高价格带需求下沉到本带的结构迁移（Price-band migration）。用连续价格带对比与 Price Gravity 价格重心定位整体成交重心方向。"
+
+objective:
+  summary: "当前成熟期证据显示'本带上沿产品走强 + 扩容'，但这既可能是同带内消费者向上选择（产品升级），也可能是高价需求下沉后由本带上沿产品承接（消费降级中的赢家）。本研究不碰模型，对每个 车身×能源 把连续价格带放一起看，用销量增长、份额变化、Price Gravity、相邻价格带联动与 TOP3 价格位置判别到底发生哪种。"
+  questions:
+    - id: q1
+      question: "本档 TOP3 价格上涨 + 扩容，是价格段内部的产品升级，还是更高价格带需求下沉？"
+      layer: premiumization_vs_migration
+    - id: q2
+      question: "各 车身×能源 的全市场价格重心（Price Gravity）在上升还是下降？"
+      layer: price_gravity
+    - id: q3
+      question: "本档扩容是否伴随上一档萎缩、下一档吸量（连续下沉）？"
+      layer: adjacent_band_linkage
+  design_principles:
+    - "不碰模型，纯价格带迁移诊断"
+    - "对每个 车身×能源，把连续价格带放一起看（10-15/15-20/20-25/25-30/30-35 万等），不做单一价格段孤立判断"
+    - "用 Price Gravity = Σ(价格带中值×销量)/总销量 判断整体成交重心方向"
+    - "判别组合：本带扩容 + 本带TOP3价格升 + 整体价格重心降 + 上一档萎缩 → 高价需求下沉（消费降级），而非消费升级"
+    - "每个 freeze period 分别比较，观察迁移是否随时期变化"
+
+data:
+  dataset: tp_and_mix_ways
+  loader: shared.loaders.tp_and_mix_ways_loader
+  description: "乘用车上险量，作为市场销量/注册量观察，不等同于批发量或订单量"
+  tables:
+    - table: price_segment_monthly
+      role: "价格带销量与加权价（Price Gravity 主体）"
+      grain: [date_month, tp_bucket_5w, body_type, fuel_type_group]
+      metrics: [sales, weighted_tp]
+    - table: model_monthly
+      role: "本档 TOP3 车型价格位置与更替"
+      grain: [date_month, brand, model, sub_model_id]
+      metrics: [sales, weighted_tp]
+      fuel_type_group_field: fuel_type_group
+
+window:
+  default:
+    start: "2022-04-01"
+    end: "2026-03-31"
+  freeze_periods: [2023-03, 2024-03, 2025-03]
+  label: "三期 freeze period 横截面对比（与 historical_opportunity_validation 对齐）"
+  comparison:
+    recent_months: 3
+    prior_months: 3
+    note: "各 freeze period 取观测窗口做横截面；相邻价格带联动看窗口内前后对比"
+
+dimensions:
+  analysis_unit: [body_type, fuel_type_group]
+  price_bands: [5万以下, 5-10万, 10-15万, 15-20万, 20-25万, 25-30万, 30-35万, 35-40万, 40-45万, 45-50万, 50-55万, 55-60万, 60万以上]
+  price_band_midpoint:
+    rule: "5万以下=2.5万，5-10万=7.5万，...，60万以上=65万"
+    note: "Price Gravity 用价格带中值 × 销量"
+  price_bucket:
+    source_field: tp_bucket_5w
+    step_yuan: 50000
+    lower_label: "5万以下"
+    upper_label: "60万以上"
+
+analyses:
+  - id: price_band_growth
+    name: "各价格段销量增长（哪些价格带在吸量）"
+    script_fn: price_band_growth
+    table: price_segment_monthly
+    description: "对每个 车身×能源，各价格带观测窗口销量及相对前期的增长，识别吸量价格带。"
+    params:
+      freeze_periods: window.freeze_periods
+
+  - id: price_band_share_change
+    name: "各价格段份额变化（需求重心上下）"
+    script_fn: price_band_share_change
+    table: price_segment_monthly
+    description: "各价格带占该 车身×能源 总量的份额及其变化，判断需求重心上移还是下移。"
+    derived_metrics: [band_share_pct, share_delta_pp]
+
+  - id: price_gravity
+    name: "价格重心 Price Gravity"
+    script_fn: price_gravity
+    table: price_segment_monthly
+    description: "Gravity = Σ(价格带中值×销量)/总销量。整体成交重心上升=消费升级迹象；下降=高价需求下沉。各 freeze period 分别计算并看趋势。"
+    formula: "sum(midpoint * sales) / sum(sales)"
+    derived_metrics: [price_gravity, gravity_delta]
+
+  - id: adjacent_band_linkage
+    name: "相邻价格带联动（上一档/下一档）"
+    script_fn: adjacent_band_linkage
+    table: price_segment_monthly
+    description: "本档扩容是否伴随上一档萎缩（下沉）或下一档吸量（连续下沉）；判断迁移是否沿价格梯度发生。"
+    derived_metrics: [upper_band_growth, lower_band_growth]
+
+  - id: top3_price_position
+    name: "本档 TOP3 价格位置"
+    script_fn: top3_price_position
+    table: model_monthly
+    description: "本档 TOP3 车型加权均价相对价格带的位置（上沿/下沿/中位），判断扩容是否集中在本带上沿。"
+    derived_metrics: [top3_price_position]
+
+  - id: migration_verdict
+    name: "迁移判别（升级 vs 降级 vs 混合）"
+    script_fn: migration_verdict
+    description: "综合各指标输出判别：消费升级 / 高价需求下沉（消费降级）/ 低段承接+内部高端化 / 无法判别。"
+    inputs: [price_band_growth, price_band_share_change, price_gravity, adjacent_band_linkage, top3_price_position]
+    derived_metrics: [migration_pattern]
+
+classifiers:
+  migration_pattern:
+    labels: [消费升级, 高价需求下沉, 低段承接+内部高端化, 无法判别]
+    note: "判别依赖组合信号而非单一指标；n 小、信号冲突时归为无法判别"
+    rules:
+      消费升级: "本带扩容 + 本带TOP3价格升 + 整体价格重心升 + 上一档不萎缩"
+      高价需求下沉: "本带扩容 + 本带TOP3价格升 + 整体价格重心降 + 上一档萎缩"
+      低段承接+内部高端化: "本带扩容 + 本带TOP3价格升 + 整体价格重心降 + 无上一档萎缩但下一档吸量"
+      无法判别: "信号冲突或样本不足"
+
+thresholds:
+  price_gravity_band_step_yuan: 50000
+  gravity_delta_significant_pp: 0.5
+  share_delta_significant_pp: 1.0
+  band_growth_significant_pct: 10.0
+
+outputs:
+  dir:
+    tables: outputs/tables
+    reports: outputs/reports
+  tables:
+    - id: price_band_growth
+      file: "price_band_growth_{window}.csv"
+      source: price_band_growth
+    - id: price_band_share
+      file: "price_band_share_{window}.csv"
+      source: price_band_share_change
+    - id: price_gravity
+      file: "price_gravity_{window}.csv"
+      source: price_gravity
+    - id: top3_price_position
+      file: "top3_price_position_{window}.csv"
+      source: top3_price_position
+    - id: migration_verdict
+      file: "migration_verdict_{window}.csv"
+      source: migration_verdict
+  report:
+    file: "price_band_migration_{window}.md"
+    title: "产品升级 or 消费降级：价格带迁移判别"
+    sections:
+      - 价格带销量增长与份额变化
+      - Price Gravity 价格重心
+      - 相邻价格带联动
+      - 本档 TOP3 价格位置
+      - 迁移判别结论（每 车身×能源）
+      - 对 V0.3 成熟期假说的含义
+      - 口径与限制
+    coverage_notes:
+      - "报告必须区分 Premiumization（带内升级）与 Price-band migration（带间迁移），明确每类市场归属"
+      - "报告必须说明 Price Gravity 计算口径（价格带中值）与各 freeze period 的横截面"
+
+validation:
+  rules:
+    - id: price_gravity_calculation
+      description: "Price Gravity 使用价格带中值 × 销量，排除价格缺失/无效桶"
+    - id: band_consistency
+      description: "各 freeze period 价格带口径一致（tp_bucket_5w 5万带）"
+    - id: adjacent_linkage_check
+      description: "相邻价格带联动必须同时看上一档与下一档，避免单侧误判"

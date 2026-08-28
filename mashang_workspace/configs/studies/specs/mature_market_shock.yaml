@@ -1,0 +1,167 @@
+# =============================================================================
+# StudySpec — mature_market_shock
+#
+# 机器可读、可校验、可版本化的研究配置（位于 configs/studies/specs/）。
+#
+# 研究性质：成熟市场冲击案例研究（case-based，不拟合模型）
+# 背景：Market State × Shock Detector 架构（market_state_v0_2_design.md §8.7）。
+#   Shock Detector 回答"有没有东西可能打破成熟市场"。
+#   本研究用成功冲击者（SU7 / 问界M7 / 海鸥 / 秦 / 10-15万SUV成功新品）
+#   对照同期失败新品，提炼"什么样的冲击能带来真正扩容"的早期特征。
+#
+# 校验：
+#   python mashang_workspace/utility_scripts/validate_study_spec.py
+# =============================================================================
+
+spec_version: "0.1"
+id: mature_market_shock
+name: "成熟市场冲击研究（Mature Market Shock Study）"
+version: "0.1.0"
+status: active
+updated_at: "2026-08-27"
+description: "成熟市场里，什么样的新产品冲击能带来真正扩容？用成功冲击者对照同期失败新品，从爬坡速度/进入速度/性价比攻击/目标市场状态四个维度提炼冲击者早期特征。"
+
+objective:
+  summary: "成熟期扩容主要由单点冲击（SU7 型）驱动（结构性信号天花板已证实）。本研究用第一批成功冲击者（SU7、问界M7、海鸥、秦PLUS、10-15万SUV成功新品）对照同期失败新品，提炼'什么冲击能真正扩容'的可观测早期特征，为 Shock Detector 提供判定依据。"
+  questions:
+    - id: q1
+      question: "成功冲击者与失败新品的爬坡速度 / 进入 TOP10 速度差异有多大？"
+      layer: ramp_profile
+    - id: q2
+      question: "性价比攻击（新品价格相对在位 TOP3）是否区分成功与失败？"
+      layer: price_attack
+    - id: q3
+      question: "目标市场状态（成熟度 / CES / 在位集中度）是否影响冲击成功率？"
+      layer: target_market_state
+    - id: q4
+      question: "成功冲击是否带来目标市场扩容（把市场做大 vs 仅内部分流）？"
+      layer: market_expansion
+  design_principles:
+    - "案例对照（成功 vs 失败），不拟合模型，不找相关系数"
+    - "冲击起点 = 目标市场月销量首次突破阈值的月（区分'上市'与'冲量'，避免预售/老款干扰）"
+    - "目标市场 = 案例销量最大的 价格带×车身×能源 组合"
+    - "对比用描述统计（均值/中位数/分布），标注样本量"
+
+data:
+  dataset: tp_and_mix_ways
+  loader: shared.loaders.tp_and_mix_ways_loader
+  description: "乘用车上险量，作为市场销量/注册量观察，不等同于批发量或订单量"
+  tables:
+    - table: model_monthly
+      role: "案例车型销量/价格/排名（冲击特征主体）"
+      grain: [date_month, brand, model, sub_model_id]
+      metrics: [sales, weighted_tp]
+      fuel_type_field: fuel_type
+      fuel_type_group_field: fuel_type_group
+
+window:
+  default:
+    start: "2022-04-01"
+    end: "2026-03-31"
+  label: "案例覆盖 2023-2025 上市新品，观察冲击起点与后续 12M"
+  comparison:
+    recent_months: 3
+    prior_months: 3
+    note: "爬坡看冲击起点后前 3 个月；扩容看起点后 12M vs 起点前 12M"
+
+dimensions:
+  analysis_unit: [price_bucket, body_type, fuel_type_group]
+  price_bucket:
+    source_field: tp_bucket_5w
+    mapping_field: weighted_tp
+    step_yuan: 50000
+    lower_label: "5万以下"
+    upper_label: "60万以上"
+    invalid_label: "价格缺失/无效"
+    excluded_label: "其他"
+
+analyses:
+  - id: shock_cases
+    name: "冲击案例集（成功 vs 失败）"
+    script_fn: shock_cases
+    table: model_monthly
+    description: "定义第一批案例：成功冲击者（SU7/问界M7/海鸥/秦/10-15万SUV成功新品）与同期失败新品（哈弗枭龙/e:NS1/蓝电E3等），自动确定各自目标市场。"
+    params:
+      success_cases: [小米SU7, 问界M7, 海鸥, 秦, 宋, 海狮05, 银河E5, 银河L7, 零跑C10, 深蓝S05]
+      fail_cases: [哈弗枭龙, 哈弗枭龙MAX, e:NS1, 蓝电E3, 星途追风, 几何M6, 小鹏G3, CX-30, 捷途大圣, 领航]
+
+  - id: ramp_profile
+    name: "爬坡与进入速度"
+    script_fn: ramp_profile
+    table: model_monthly
+    description: "冲击起点（月销突破阈值首月）、起点后前3月爬坡、进入目标市场 TOP10 的月数。"
+    params:
+      ramp_breakout_monthly_sales: thresholds.ramp_breakout_monthly_sales
+    derived_metrics: [first_active_month, breakout_month, ramp_3m_ratio, months_to_top10]
+
+  - id: price_attack
+    name: "性价比攻击"
+    script_fn: price_attack
+    table: model_monthly
+    description: "新品冲击起点 weighted_tp 相对目标市场在位 TOP3 均价与价格带下沿的位置。"
+    derived_metrics: [entry_price, incumbent_top3_price, price_ratio_vs_incumbent]
+
+  - id: target_market_state
+    name: "目标市场状态"
+    script_fn: target_market_state
+    description: "冲击起点所在观测窗口的目标市场：NEV 渗透率、CES、在位 TOP3 集中度、市场后续 12M 扩容。"
+    params:
+      ces_source: market_state_v0_2_{freeze}.csv
+    derived_metrics: [nev_penetration, ces_score, incumbent_top3_share, market_12m_growth]
+
+  - id: shock_verdict
+    name: "冲击成功/失败对比"
+    script_fn: shock_verdict
+    description: "正例 vs 负例各特征描述统计对比，输出 Shock Detector 的早期判别依据（非规则）。"
+    derived_metrics: [outcome, group_stats]
+
+classifiers:
+  shock_outcome:
+    labels: [成功冲击者, 失败新品]
+    note: "由案例集标注（成功=用户指定的爆款；失败=同期上市未放量）；12M 销量作为客观复核"
+    rules:
+      成功冲击者: "目标市场 12M 销量显著放大（≥爆款阈值）"
+      失败新品: "上市 12M 后仍未放量（长尾）"
+
+thresholds:
+  ramp_breakout_monthly_sales: 2000
+  breakout_12m_sales: 50000
+  top10_rank: 10
+  ramp_3m_ratio_min: 3.0
+
+outputs:
+  dir:
+    tables: outputs/tables
+    reports: outputs/reports
+  tables:
+    - id: shock_cases
+      file: "shock_cases_{window}.csv"
+      source: shock_cases
+    - id: shock_ramp
+      file: "shock_ramp_{window}.csv"
+      source: ramp_profile
+    - id: shock_target_market
+      file: "shock_target_market_{window}.csv"
+      source: target_market_state
+  report:
+    file: "mature_market_shock_{window}.md"
+    title: "成熟市场冲击研究：什么冲击能带来真正扩容"
+    sections:
+      - 案例集（成功 vs 失败）
+      - 爬坡与进入速度对比
+      - 性价比攻击对比
+      - 目标市场状态与扩容
+      - Shock Detector 早期判别依据（非规则）
+      - 口径与限制
+    coverage_notes:
+      - "报告必须区分'把市场做大'（扩容）与'市场内部分流'（无扩容），这是冲击成功的核心判据"
+      - "报告必须说明冲击起点定义（月销阈值）与目标市场确定方式"
+
+validation:
+  rules:
+    - id: breakout_definition
+      description: "冲击起点用月销量阈值而非首见月，避免预售/老款干扰"
+    - id: target_market_consistency
+      description: "目标市场取案例销量最大的 价格带×车身×能源，跨时间稳定"
+    - id: expansion_vs_cannibalization
+      description: "扩容判定必须对比起点前后 12M 目标市场总量，区分做大盘 vs 内部分流"

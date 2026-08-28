@@ -235,6 +235,40 @@ state-diagnosis:
 		$(if $(FORMAT),--format $(FORMAT)) \
 		$(if $(OUTPUT),--output $(OUTPUT))
 
+.PHONY: shock-scan shock-backtest shock-research shock-check market-observe
+
+## 月度市场观察（V0.3 Runtime：市场状态评估 + 品牌化 HTML 报告）
+## 用法: make market-observe [AS_OF=2026-07]   # 缺省 = 当前年月
+market-observe:
+	$(PYTHON) mashang_workspace/research_scripts/market_state_assessment.py \
+		--as-of $(if $(AS_OF),$(AS_OF),$(shell date +%Y-%m)) \
+		--format html
+
+## Shock Detector 滚动扫描（V0.3 research，最近 12 个月崛起冲击者）
+## 用法: make shock-scan [AS_OF=2026-06] [FORMAT=json]   # 默认 FORMAT=json（Result Contract）
+shock-scan: FORMAT ?= json
+shock-scan:
+	$(PYTHON) mashang_workspace/research_scripts/shock_detector_rolling.py \
+		$(if $(AS_OF),--as-of $(AS_OF)) \
+		--format $(FORMAT)
+
+## Shock Detector 滚动回溯验证（历史 as-of → 后续 12M 爆款命中率）
+shock-backtest: FORMAT ?= json
+shock-backtest:
+	$(PYTHON) mashang_workspace/research_scripts/shock_detector_backtest.py \
+		--format $(FORMAT)
+
+## Shock Detector 早期规则研究（三期扫描，含 Market State 2×2 增量检验）
+shock-research: FORMAT ?= json
+shock-research:
+	$(PYTHON) mashang_workspace/research_scripts/shock_detector_scan.py \
+		--format $(FORMAT)
+
+## Shock Detector 全量研究校验（修改 classifier / detector 规则后一次跑完）
+shock-check:
+	$(MAKE) shock-backtest
+	$(MAKE) shock-research
+
 ## [废弃] 请使用 daily-observation-dry-run 替代
 daily-sync-dry-run:
 	@echo "[DEPRECATED] Use 'make daily-observation-dry-run' instead."

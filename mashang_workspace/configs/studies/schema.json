@@ -1,0 +1,405 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://mashang.local/schemas/study_spec.json",
+  "title": "StudySpec",
+  "description": "机器可读、可校验、可版本化的研究配置规范。用于描述一个研究课题的分析意图：目标、数据口径、维度、分析模块、分类规则、阈值与输出。",
+  "type": "object",
+  "required": [
+    "spec_version",
+    "id",
+    "name",
+    "version",
+    "status",
+    "objective",
+    "data",
+    "window",
+    "analyses",
+    "classifiers",
+    "thresholds",
+    "outputs"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "spec_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+$",
+      "description": "StudySpec 规范版本"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]+$",
+      "description": "机器可读的唯一标识，用于版本化与引用"
+    },
+    "name": {
+      "type": "string",
+      "description": "研究课题显示名"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "本 spec 的语义化版本号"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "active", "archived"]
+    },
+    "updated_at": {
+      "type": "string",
+      "description": "最近更新时间 YYYY-MM-DD"
+    },
+    "description": {
+      "type": "string",
+      "description": "一句话研究描述"
+    },
+    "objective": {
+      "type": "object",
+      "required": ["summary", "questions"],
+      "properties": {
+        "summary": { "type": "string" },
+        "questions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id", "question"],
+            "properties": {
+              "id": { "type": "string" },
+              "question": { "type": "string" },
+              "layer": { "type": "string" }
+            }
+          }
+        },
+        "design_principles": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "data": {
+      "type": "object",
+      "required": ["dataset", "tables"],
+      "properties": {
+        "dataset": { "type": "string" },
+        "loader": { "type": "string" },
+        "description": { "type": "string" },
+        "tables": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["table", "role"],
+            "properties": {
+              "table": { "type": "string" },
+              "role": { "type": "string" },
+              "grain": { "type": "array", "items": { "type": "string" } },
+              "metrics": { "type": "array", "items": { "type": "string" } },
+              "entity_keys": { "type": "array", "items": { "type": "string" } },
+              "fuel_type_field": { "type": "string" },
+              "fuel_type_group_field": { "type": "string" }
+            }
+          }
+        },
+        "entity": {
+          "type": "object",
+          "properties": {
+            "family_keys": { "type": "array", "items": { "type": "string" } },
+            "price_mapping_field": { "type": "string" },
+            "note": { "type": "string" }
+          }
+        }
+      }
+    },
+    "window": {
+      "type": "object",
+      "description": "时间形态二选一：(1) 分析研究用 default（单段窗口）；(2) 验证研究用 observation + validation（两段式，避免 hindsight bias）。",
+      "properties": {
+        "default": {
+          "type": "object",
+          "required": ["start", "end"],
+          "properties": {
+            "start": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+            "end": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" }
+          }
+        },
+        "observation": {
+          "type": "object",
+          "required": ["start", "end", "freeze_date"],
+          "properties": {
+            "start": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+            "end": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+            "freeze_date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+            "label": { "type": "string" }
+          }
+        },
+        "validation": {
+          "type": "object",
+          "required": ["start", "end"],
+          "properties": {
+            "start": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+            "end": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+            "duration_months": { "type": "integer", "minimum": 1 },
+            "label": { "type": "string" }
+          }
+        },
+        "label": { "type": "string" },
+        "current_cutoff_month": { "type": "string" },
+        "design_note": { "type": "string" },
+        "comparison": {
+          "type": "object",
+          "properties": {
+            "recent_months": { "type": "integer", "minimum": 1 },
+            "prior_months": { "type": "integer", "minimum": 1 },
+            "note": { "type": "string" }
+          }
+        }
+      }
+    },
+    "dimensions": {
+      "type": "object",
+      "properties": {
+        "segment_keys": { "type": "array", "items": { "type": "string" } },
+        "primary_keys": { "type": "array", "items": { "type": "string" } },
+        "radar_segment_keys": { "type": "array", "items": { "type": "string" } },
+        "market_level_keys": { "type": "array", "items": { "type": "string" } },
+        "price_bucket": {
+          "type": "object",
+          "properties": {
+            "source_field": { "type": "string" },
+            "mapping_field": { "type": "string" },
+            "step_yuan": { "type": "number" },
+            "lower_label": { "type": "string" },
+            "upper_label": { "type": "string" },
+            "invalid_label": { "type": "string" },
+            "excluded_label": { "type": "string" }
+          }
+        }
+      }
+    },
+    "analyses": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "script_fn"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "script_fn": { "type": "string" },
+          "table": { "type": "string" },
+          "table_primary": { "type": "string" },
+          "table_secondary": { "type": "string" },
+          "description": { "type": "string" },
+          "group_keys": { "type": "array", "items": { "type": "string" } },
+          "market_level_keys": { "type": "array", "items": { "type": "string" } },
+          "metrics": { "type": "array", "items": { "type": "string" } },
+          "derived_metrics": { "type": "array", "items": { "type": "string" } },
+          "params": { "type": "object" },
+          "filters": { "type": "object" },
+          "layers": { "type": "object" },
+          "exclusions": { "type": "array", "items": { "type": "string" } },
+          "report_topn": { "type": "integer", "minimum": 1 }
+        }
+      }
+    },
+    "classifiers": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["labels"],
+        "properties": {
+          "labels": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+          "priority": { "type": "array", "items": { "type": "string" } },
+          "base_label": { "type": "string" },
+          "note": { "type": "string" },
+          "rules": { "type": "object" }
+        }
+      }
+    },
+    "thresholds": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "type": ["number", "integer"] }
+    },
+    "outputs": {
+      "type": "object",
+      "required": ["tables", "report"],
+      "properties": {
+        "dir": {
+          "type": "object",
+          "properties": {
+            "tables": { "type": "string" },
+            "reports": { "type": "string" }
+          }
+        },
+        "tables": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "file", "source"],
+            "properties": {
+              "id": { "type": "string" },
+              "file": { "type": "string" },
+              "source": { "type": "string" }
+            }
+          }
+        },
+        "report": {
+          "type": "object",
+          "required": ["file"],
+          "properties": {
+            "file": { "type": "string" },
+            "title": { "type": "string" },
+            "sections": { "type": "array", "items": { "type": "string" } },
+            "coverage_notes": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "matrix": {
+          "type": "object",
+          "required": ["description"],
+          "properties": {
+            "description": { "type": "string" },
+            "quadrants": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["label"],
+                "properties": {
+                  "label": { "type": "string" },
+                  "x": { "type": "string" },
+                  "y": { "type": "string" },
+                  "meaning": { "type": "string" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "validation_design": {
+      "type": "object",
+      "description": "验证研究专属设计（可选）：冻结快照、兑现测量、混淆矩阵、Event Cases、概念拆分与评估问题。",
+      "properties": {
+        "design_note": { "type": "string" },
+        "phases": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "name"],
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "action": { "type": "string" }
+            }
+          }
+        },
+        "opportunity_snapshot": {
+          "type": "object",
+          "required": ["frozen_at", "markets"],
+          "properties": {
+            "source": { "type": "string" },
+            "frozen_at": { "type": "string" },
+            "freeze_rule": { "type": "string" },
+            "markets": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "required": ["rank", "market", "judgment"],
+                "properties": {
+                  "rank": { "type": "integer", "minimum": 1 },
+                  "market": { "type": "string" },
+                  "judgment": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "measurements": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id", "name"],
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "definition": { "type": "string" }
+            }
+          }
+        },
+        "decomposition": { "type": "object" },
+        "confusion_matrix": {
+          "type": "object",
+          "required": ["cells"],
+          "properties": {
+            "expansion_criterion": { "type": "string" },
+            "cells": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "required": ["label", "condition", "meaning"],
+                "properties": {
+                  "label": { "type": "string" },
+                  "condition": { "type": "string" },
+                  "meaning": { "type": "string" }
+                }
+              }
+            },
+            "note": { "type": "string" }
+          }
+        },
+        "event_cases": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id", "model"],
+            "properties": {
+              "id": { "type": "string" },
+              "model": { "type": "string" },
+              "launch_date": { "type": "string" },
+              "launch_price": { "type": "string" },
+              "target_market": { "type": "string" },
+              "target_market_profile_2024_03": { "type": "object" },
+              "hypothesis": { "type": "string" },
+              "implication": { "type": "string" },
+              "note": { "type": "string" }
+            }
+          }
+        },
+        "concepts": { "type": "object" },
+        "evaluation_questions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id", "question"],
+            "properties": {
+              "id": { "type": "string" },
+              "question": { "type": "string" },
+              "focus": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "validation": {
+      "type": "object",
+      "properties": {
+        "rules": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id"],
+            "properties": {
+              "id": { "type": "string" },
+              "description": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,355 @@
+# =============================================================================
+# StudySpec — historical_opportunity_validation
+#
+# 机器可读、可校验、可版本化的研究配置（位于 configs/studies/specs/）。
+#
+# 研究性质：两段式 out-of-time 验证（非新的分析算法）
+#   观测窗口（只允许用这里的数据）→ 冻结 2024-03 机会判断
+#   验证窗口 → 测量机会是否兑现
+#
+# 校验：
+#   python mashang_workspace/utility_scripts/validate_study_spec.py
+#   python mashang_workspace/utility_scripts/validate_study_spec.py --spec <path>
+# =============================================================================
+
+spec_version: "0.1"
+id: historical_opportunity_validation
+name: "历史机会验证：2024-03 冻结机会的 out-of-time 兑现检验"
+version: "0.1.0"
+status: active
+updated_at: "2026-08-27"
+description: "用 2023-04~2024-03 观测窗口冻结 2024-03 的机会市场判断，再用 2024-04~2025-03 验证窗口测量机会是否兑现，避免 hindsight bias，评估当前 Opportunity Runtime 是否真的能比市场早看一年。"
+
+objective:
+  summary: "不修改现有算法、不调阈值，直接拿当前规则做 out-of-time validation：先冻结 2024-03 的机会排名，再测量后续 12 个月每个市场的机会兑现（价格/新品/替代/扩容四步拆解），配 SU7 等 Event Cases，最终输出 2024-03 机会强度 × 后续12M 市场扩容的二维矩阵，回答预测力、指标效力与误判原因三个问题。"
+  questions:
+    - id: q1
+      question: "当前 Opportunity Runtime 有没有预测力？"
+      layer: prediction_power
+    - id: q2
+      question: "哪几个指标最有预测力？开放度、NEV替代空间、BEV/NEV，还是市场规模最重要？"
+      layer: indicator_effectiveness
+    - id: q3
+      question: "哪些市场 Runtime 判断错了，为什么？"
+      layer: misjudgment_diagnosis
+  design_principles:
+    - "时间严格切成观测/验证两段：观测窗口只允许用 2023-04~2024-03 数据冻结判断，验证窗口看 2024-04~2025-03 后来发生什么，避免 hindsight bias"
+    - "不改现有 Market State、不调阈值，直接拿当前规则做 out-of-time validation"
+    - "2024-03 的机会 ranking 从此冻结，不因后续观测调整"
+    - "最重要的不是销量增长本身，而是拆成四步：价格有没有下来 → 有没有新品进入 → 新能源有没有替代 → 市场有没有扩容"
+    - "区分 Market Opportunity（市场本身结构性空间）与 Disruption Opportunity（足够强的新品能否破局）——SU7 案例的核心假设"
+
+data:
+  dataset: tp_and_mix_ways
+  loader: shared.loaders.tp_and_mix_ways_loader
+  description: "乘用车上险量，作为市场销量/注册量观察，不等同于批发量或订单量"
+  tables:
+    - table: price_segment_monthly
+      role: "市场规模与新能源渗透率精确口径（观测窗口 + 验证窗口）"
+      grain: [date_month, tp_bucket_5w, body_type, vehicle_level_group, fuel_type_group]
+      metrics: [sales, weighted_tp]
+    - table: model_monthly
+      role: "车型级兑现测量：新品进入、成功新车型、榜首更替、加权均价变化"
+      grain: [date_month, brand, model, sub_model_id]
+      metrics: [sales, weighted_tp]
+      fuel_type_field: fuel_type
+      fuel_type_group_field: fuel_type_group
+  entity:
+    family_keys: [brand, model]
+    price_mapping_field: weighted_tp
+    note: "市场口径与 price_down_volume_opportunity 一致（price_bucket 由 tp_bucket_5w / weighted_tp 映射），保证冻结快照与验证测量可比"
+
+window:
+  observation:
+    start: "2023-04-01"
+    end: "2024-03-31"
+    freeze_date: "2024-03-31"
+    label: "观测窗口（只允许用这里的数据冻结机会判断）"
+  validation:
+    start: "2024-04-01"
+    end: "2025-03-31"
+    duration_months: 12
+    label: "验证窗口（看后来发生什么）"
+  design_note: "观测窗口 2023-04→2024-03，2024-03-31 冻结机会判断；验证窗口 2024-04→2025-03 测量兑现。两端不重叠，杜绝 hindsight bias。"
+
+dimensions:
+  # 术语对应：market = price_bucket（5 万价格带）× body_type × fuel_type_group
+  segment_keys: [price_bucket, body_type, vehicle_level_group, fuel_type_group]
+  primary_keys: [price_bucket, body_type, fuel_type_group]
+  market_level_keys: [price_bucket, body_type]
+  price_bucket:
+    source_field: tp_bucket_5w
+    mapping_field: weighted_tp
+    step_yuan: 50000
+    lower_label: "5万以下"
+    upper_label: "60万以上"
+    lower_rule: "value < 50000"
+    upper_rule: "value >= 600000"
+    bucket_label: "X-Y万（X/Y 为步长对齐的万元区间）"
+    invalid_label: "价格缺失/无效"
+    excluded_label: "其他"
+
+analyses:
+  - id: opportunity_snapshot
+    name: "冻结 2024-03 的机会判断"
+    script_fn: freeze_opportunity_snapshot
+    description: "用观测窗口（2023-04~2024-03）数据按当前 Runtime 规则输出机会市场 ranking，保存为冻结快照；此 ranking 从此不因后续观测调整。"
+    params:
+      frozen_at: "2024-03-31"
+      source_study: price_down_volume_opportunity
+    derived_metrics: [rank, market, judgment]
+
+  - id: expansion_measurement
+    name: "机会兑现测量"
+    script_fn: measure_market_expansion
+    description: "对每个冻结机会市场，用验证窗口（2024-04~2025-03）计算 10 组兑现指标，并按价格→新品→替代→扩容四步拆解销量增长来源。"
+    params:
+      validation_window: window.validation
+    derived_metrics:
+      - market_volume_growth
+      - nev_volume_growth
+      - bev_volume_growth
+      - nev_penetration_delta
+      - bev_penetration_delta
+      - new_model_count
+      - successful_new_model_count
+      - top3_share_delta
+      - leader_change
+      - weighted_tp_delta
+
+  - id: confusion_classification
+    name: "混淆矩阵分类"
+    script_fn: classify_confusion_matrix
+    description: "按 2024-03 机会判断（有机会/没机会）× 后续12M 是否扩容，把市场归入 TRUE POSITIVE / FALSE POSITIVE / FALSE NEGATIVE / TRUE NEGATIVE。"
+    params:
+      expansion_criterion: validation_design.confusion_matrix.expansion_criterion
+    derived_metrics: [confusion_cell]
+
+  - id: event_case_analysis
+    name: "Event Cases：强新品能否打破头部锁死"
+    script_fn: analyze_event_cases
+    description: "选取 SU7（2024-03-28 上市，21.59万起，冲击 20-25万 新能源轿车）、极氪007、银河E8、宋L、问界M7，检验头部锁死市场能否被强产品力/品牌流量/性价比打破。"
+    params:
+      cases: validation_design.event_cases
+    derived_metrics: [target_market_expansion, disruption_outcome]
+
+classifiers:
+  confusion_cell:
+    labels: [TRUE POSITIVE, FALSE POSITIVE, FALSE NEGATIVE, TRUE NEGATIVE]
+    priority: [TRUE POSITIVE, FALSE POSITIVE, FALSE NEGATIVE, TRUE NEGATIVE]
+    rules:
+      TRUE POSITIVE: "预测有机会 + 后续扩容"
+      FALSE POSITIVE: "预测有机会 + 后续未扩容"
+      FALSE NEGATIVE: "预测没机会 + 后续扩容"
+      TRUE NEGATIVE: "预测没机会 + 后续也未扩容"
+    note: "预测有机会 = 冻结判断为替代空间主导/开放替代蓝海；预测没机会 = 头部锁死；扩容判定见 thresholds.expansion_growth_min"
+  expansion_status:
+    labels: [扩容, 未扩容]
+    rules:
+      扩容: "validation 窗口 12M 销量相对 observation 窗口 12M 扩张 ≥ expansion_growth_min"
+      未扩容: "else"
+
+thresholds:
+  expansion_growth_min: 10
+  successful_new_model_min_sales: 1000
+  new_model_window_months: 12
+  breakout_growth_pct_min: 25
+  breakout_scale_quantile: 0.8
+
+outputs:
+  dir:
+    tables: outputs/tables
+    reports: outputs/reports
+  tables:
+    - id: opportunity_snapshot
+      file: "opportunity_snapshot_202403.csv"
+      source: opportunity_snapshot
+    - id: expansion_measurement
+      file: "expansion_measurement_202404_202503.csv"
+      source: expansion_measurement
+    - id: confusion_matrix
+      file: "confusion_matrix_202403.csv"
+      source: confusion_classification
+    - id: event_cases
+      file: "event_cases_2024.csv"
+      source: event_case_analysis
+  report:
+    file: "historical_opportunity_validation_202403.md"
+    title: "历史机会验证：2024-03 冻结机会的兑现检验"
+    sections:
+      - 冻结机会（2024-03 判断）
+      - 机会兑现测量（2024-04~2025-03）
+      - 混淆矩阵
+      - 二维矩阵（机会强度 × 后续扩容）
+      - Event Cases（SU7 / 极氪007 / 银河E8 / 宋L / 问界M7）
+      - 评估结论（三个核心问题）
+      - 口径与限制
+    coverage_notes:
+      - "报告必须回答三个评估问题：①Runtime 有没有预测力 ②哪几个指标最有预测力 ③哪些市场判断错了、为什么"
+      - "报告必须说明观测/验证两段窗口、冻结日期、扩容判定口径"
+  matrix:
+    description: "二维矩阵：横轴 2024-03 机会强度（Runtime 判断），纵轴 后续12M 市场扩容（实际兑现）；四象限直接对应混淆矩阵四格"
+    quadrants:
+      - label: TRUE POSITIVE
+        x: 高机会强度
+        y: 高扩容
+        meaning: "成功识别"
+      - label: FALSE POSITIVE
+        x: 高机会强度
+        y: 低扩容
+        meaning: "虚假机会"
+      - label: FALSE NEGATIVE
+        x: 低机会强度
+        y: 高扩容
+        meaning: "错失机会"
+      - label: TRUE NEGATIVE
+        x: 低机会强度
+        y: 低扩容
+        meaning: "正确规避"
+
+validation_design:
+  design_note: "两段式 out-of-time 验证：观测窗口只允许用 2023-04~2024-03 数据冻结判断，验证窗口看 2024-04~2025-03 后来发生什么，避免 hindsight bias；不改现有算法、不调阈值。"
+
+  phases:
+    - id: phase1_freeze
+      name: "冻结 2024-03 的机会判断"
+      action: "直接保存当前机会市场 ranking（来源 price_down_volume_opportunity），从此冻结，不因后续观测调整"
+    - id: phase2_measure
+      name: "测量机会兑现"
+      action: "对每个 2024-03 市场计算后续 12 个月 10 组指标，按价格→新品→替代→扩容四步拆解增长来源"
+    - id: phase3_events
+      name: "Event Cases"
+      action: "选取 SU7、极氪007、银河E8、宋L、问界M7 等同期新车，检验头部锁死市场能否被强新品打破"
+
+  opportunity_snapshot:
+    source: "price_down_volume_opportunity 在 2024-03 截面的三层机会排名（观测窗口数据）"
+    frozen_at: "2024-03-31"
+    freeze_rule: "此 ranking 从此冻结，不因后续观测调整"
+    markets:
+      - rank: 1
+        market: "15-20万 新能源轿车"
+        judgment: "替代空间主导"
+      - rank: 2
+        market: "20-25万 新能源SUV"
+        judgment: "开放替代蓝海"
+      - rank: 3
+        market: "10-15万 新能源轿车"
+        judgment: "替代空间主导"
+      - rank: 4
+        market: "15-20万 新能源SUV"
+        judgment: "替代空间主导"
+      - rank: 5
+        market: "25-30万 新能源轿车"
+        judgment: "头部锁死"
+
+  measurements:
+    - id: market_volume_growth
+      name: "市场12个月销量增速"
+      definition: "validation 窗口 12M 总销量相对 observation 窗口 12M 总销量增速"
+    - id: nev_volume_growth
+      name: "新能源销量增速"
+      definition: "同口径新能源（fuel_type_group=新能源）销量增速"
+    - id: bev_volume_growth
+      name: "纯电销量增速"
+      definition: "同口径纯电（fuel_type=纯电动）销量增速"
+    - id: nev_penetration_delta
+      name: "NEV 渗透率变化"
+      definition: "2025-03 NEV 渗透率 − 2024-03 NEV 渗透率（百分点）"
+    - id: bev_penetration_delta
+      name: "BEV 渗透率变化"
+      definition: "2025-03 BEV 渗透率 − 2024-03 BEV 渗透率（百分点）"
+    - id: new_model_count
+      name: "新进入车型数"
+      definition: "validation 窗口内新进入该市场并出量的车型数（前 12M 无销量记录）"
+    - id: successful_new_model_count
+      name: "成功新车型数"
+      definition: "新进入车型中累计销量达到 successful_new_model_min_sales 的数量"
+    - id: top3_share_delta
+      name: "TOP3 集中度变化"
+      definition: "2025-03 TOP3 份额 − 2024-03 TOP3 份额（百分点）"
+    - id: leader_change
+      name: "榜首更替"
+      definition: "validation 窗口期末销量第一是否更换（相对观测窗口期末）"
+    - id: weighted_tp_delta
+      name: "加权均价变化"
+      definition: "2025-03 weighted_tp − 2024-03 weighted_tp（价格有没有下来）"
+  decomposition:
+    note: "销量增长拆成四步：价格有没有下来（weighted_tp_delta）→ 有没有新品进入（new_model_count / successful_new_model_count）→ 新能源有没有替代（NEV/BEV 渗透率变化）→ 市场有没有扩容（volume_growth）"
+
+  confusion_matrix:
+    expansion_criterion: "validation 窗口 12M 销量相对 observation 窗口 12M 扩张 ≥ thresholds.expansion_growth_min（默认 +10%）视为扩容"
+    cells:
+      - label: TRUE POSITIVE
+        condition: "预测有机会 + 后来扩容"
+        meaning: "识别成功"
+      - label: FALSE POSITIVE
+        condition: "预测有机会 + 后来未扩容"
+        meaning: "虚假机会"
+      - label: FALSE NEGATIVE
+        condition: "预测没机会 + 后来扩容"
+        meaning: "错失机会"
+      - label: TRUE NEGATIVE
+        condition: "预测没机会 + 后来也未扩容"
+        meaning: "正确规避"
+    note: "预测有机会 = 冻结判断为替代空间主导/开放替代蓝海；预测没机会 = 头部锁死。这一步开始 Runtime 才真正可以被评价。"
+
+  event_cases:
+    - id: su7
+      model: "小米SU7"
+      launch_date: "2024-03-28"
+      launch_price: "21.59万起"
+      target_market: "20-25万 新能源轿车"
+      target_market_profile_2024_03:
+        rank_in_snapshot: 9
+        scale: "37.7万辆"
+        nev_penetration_pct: 54.6
+        bev_route_pct: 75.2
+        top3_share_pct: 73.9
+        judgment: "头部锁死"
+      hypothesis: "头部锁死 ≠ 没有机会；足够大的产品力跃迁/品牌流量/性价比冲击可以打破原有集中度"
+      implication: "Runtime 需将 Market Opportunity（市场结构性空间）与 Disruption Opportunity（强新品能否破局）分开，作为 V0.2 升级方向"
+    - id: zeekr_007
+      model: "极氪007"
+      target_market: "20-25万 新能源轿车"
+      note: "观测窗口末端已捕捉到快速增长（近3月增速 2349%），作为 SU7 同期对照"
+    - id: galaxy_e8
+      model: "银河E8"
+      target_market: "15-20万 新能源轿车"
+      note: "观测窗口末端已捕捉到快速增长（近3月增速 1927%）"
+    - id: song_l
+      model: "宋L"
+      target_market: "20-25万 新能源SUV"
+      note: "观测窗口末端已捕捉到快速增长（近3月增速 696%）"
+    - id: wenjie_m7
+      model: "问界M7"
+      target_market: "25-30万 新能源SUV"
+      note: "25-30万 新能源SUV 的规模爆款（近3月增速 61%），作为头部市场被挑战的对照"
+
+  concepts:
+    market_opportunity: "市场本身有没有结构性空间（开放度 × NEV 替代空间 × BEV 路线）"
+    disruption_opportunity: "一个足够强的新产品能不能破局（产品力跃迁 / 品牌流量 / 性价比冲击）"
+    key_insight: "头部锁死不等于没有机会；SU7 进入头部锁死的 20-25万新能源轿车市场（TOP3 73.9%）即可能验证此点"
+
+  evaluation_questions:
+    - id: q1
+      question: "当前 Opportunity Runtime 有没有预测力？"
+      focus: "混淆矩阵与二维矩阵散点分布的总体判断（TP/FP 比例、扩容命中率）"
+    - id: q2
+      question: "哪几个指标最有预测力？开放度、NEV替代空间、BEV/NEV，还是市场规模最重要？"
+      focus: "逐指标对比 2024-03 机会强度与后续扩容的相关性"
+    - id: q3
+      question: "哪些市场 Runtime 判断错了，为什么？"
+      focus: "对 FALSE POSITIVE / FALSE NEGATIVE 市场逐一诊断，直接决定 V0.2 应增加什么变量（如 PROVEN_UNDERSERVED 等 Market State）"
+
+validation:
+  rules:
+    - id: observation_validation_no_overlap
+      description: "观测窗口与验证窗口严格不重叠（validation.start > observation.end），杜绝数据泄漏"
+    - id: month_range_check
+      description: "校验各表月份范围覆盖观测与验证两段窗口"
+    - id: sales_nonnegative
+      description: "校验销量字段非负"
+    - id: snapshot_frozen_check
+      description: "冻结快照市场定义与 price_down_volume_opportunity 口径一致，测量阶段不得回改"
+    - id: expansion_threshold_check
+      description: "扩容判定阈值统一取自 thresholds.expansion_growth_min，观测/验证两端同口径"

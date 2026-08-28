@@ -1,0 +1,124 @@
+{% extends "report_base.html" %}
+
+{% macro shocker_table(rows) %}
+<table class="report-table">
+  <thead><tr>
+    <th>车型</th><th>状态</th><th>目标市场</th><th>末段月均</th><th>TOP10</th><th>持续月</th><th>爬坡</th><th>环境</th>
+  </tr></thead>
+  <tbody>
+    {% for s in rows %}
+    <tr>
+      <td><strong>{{ s.model }}</strong></td>
+      <td><span class="badge {{ 'badge-gold' if s.state == 'SHOCK_CONFIRMED' else 'badge-blue' }}">{{ s.state }}</span></td>
+      <td>{{ s.market }}</td>
+      <td class="num">{{ s.tail }}</td>
+      <td class="num">{{ '是' if s.top10 else '否' }}</td>
+      <td class="num">{{ s.sustained }}</td>
+      <td class="num">{{ s.ramp }}</td>
+      <td><span class="badge {{ 'badge-green' if s.vacuum_raw == 'vacuum' else ('badge-gold' if s.vacuum_raw == '红海' else 'badge-blue') }}">{{ s.vacuum }}</span></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endmacro %}
+
+{% block content %}
+{% set kpis = kpis or [] %}
+{% if kpis %}
+<section class="summary-grid">
+  {% for k in kpis %}
+  <div class="summary-card">
+    <div class="summary-value">{{ k.value }}</div>
+    <div class="summary-label">{{ k.label }}</div>
+    <div class="summary-hint">{{ k.hint }}</div>
+  </div>
+  {% endfor %}
+</section>
+{% endif %}
+
+{% if conclusions %}
+<section class="report-section">
+  <h2 class="section-title">本月结论</h2>
+  {% for c in conclusions %}
+  <div class="summary-card conclusion-card">
+    <div class="summary-label">{{ c.title }}</div>
+    <div class="summary-hint">{{ c.text }}</div>
+  </div>
+  {% endfor %}
+</section>
+{% endif %}
+
+{% if regime1_markets %}
+<section class="report-section">
+  <h2 class="section-title">Regime 1 · 替代驱动（未成熟市场 · 先看市场，再看产品）</h2>
+  <h3 class="section-subtitle">市场 · 结构性替代机会</h3>
+  <p class="section-note">NEV &lt; 50%：替代空间越高、规模越大、且未萎缩者优先。</p>
+  <table class="report-table">
+    <thead><tr>
+      <th>市场</th><th>NEV渗透</th><th>替代空间</th><th>12M规模</th><th>增长</th><th>当前状态</th>
+    </tr></thead>
+    <tbody>
+      {% for r in regime1_markets %}
+      <tr>
+        <td><strong>{{ r.market }}</strong></td>
+        <td class="num">{{ r.nev_penetration }}</td>
+        <td class="num">{{ r.substitution_space }}</td>
+        <td class="num">{{ r.sales }}</td>
+        <td class="num {{ r.growth_cls }}">{{ r.growth }}</td>
+        <td><span class="badge {{ 'badge-gold' if r.top else 'badge-muted' }}">{{ r.state }}</span></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% if regime1_shockers %}
+  <h3 class="section-subtitle">产品 · 未成熟市场冲击者（{{ regime1_shockers|length }} 款）</h3>
+  <p class="section-note">结构性机会市场内正在放量的新产品。</p>
+  {{ shocker_table(regime1_shockers) }}
+  {% endif %}
+</section>
+{% endif %}
+
+{% if regime2_markets %}
+<section class="report-section">
+  <h2 class="section-title">Regime 2 · 冲击驱动（成熟市场 · 先看市场，再看产品）</h2>
+  <h3 class="section-subtitle">市场 · 冲击者所在环境</h3>
+  <p class="section-note">只解释冲击者所在市场：真空 = 无竞争、冲击者可独占；竞争/红海 = 混战、冲击靠产品力胜出。</p>
+  <table class="report-table">
+    <thead><tr>
+      <th>市场</th><th>NEV渗透</th><th>12M规模</th><th>增长</th><th>候选冲击者</th><th>已确认</th><th>环境</th>
+    </tr></thead>
+    <tbody>
+      {% for r in regime2_markets %}
+      <tr>
+        <td><strong>{{ r.market }}</strong></td>
+        <td class="num">{{ r.nev_penetration }}</td>
+        <td class="num">{{ r.sales }}</td>
+        <td class="num {{ r.growth_cls }}">{{ r.growth }}</td>
+        <td class="num">{{ r.shock }}</td>
+        <td class="num">{{ r.confirmed }}</td>
+        <td><span class="badge {{ r.env_cls }}">{{ r.env }}</span></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <h3 class="section-subtitle">产品 · 成熟市场冲击者（{{ regime2_shockers|length }} 款）</h3>
+  <p class="section-note">已确认冲击者 = 放量站稳（月均≥1万、进TOP10、持续≥3月）；早期候选 = 量能起步（月均≥2000 且进TOP10 或爬坡≥2）。</p>
+  {{ shocker_table(regime2_shockers) }}
+</section>
+{% endif %}
+
+{% if scope %}
+<section class="report-section">
+  <h2 class="section-title">方法与口径</h2>
+  <table class="report-table scope-table">
+    <tbody>
+      {% if scope.data_source %}<tr><td class="scope-label"><strong>数据源</strong></td><td>{{ scope.data_source }}</td></tr>{% endif %}
+      {% if scope.time_window %}<tr><td class="scope-label"><strong>评估窗口</strong></td><td>{{ scope.time_window }}</td></tr>{% endif %}
+      {% if scope.regime_rule %}<tr><td class="scope-label"><strong>市场状态（Regime）判定</strong></td><td>{{ scope.regime_rule }}</td></tr>{% endif %}
+      {% if scope.threshold %}<tr><td class="scope-label"><strong>阈值</strong></td><td>{{ scope.threshold }}</td></tr>{% endif %}
+      {% if scope.method %}<tr><td class="scope-label"><strong>方法</strong></td><td>{{ scope.method }}</td></tr>{% endif %}
+    </tbody>
+  </table>
+</section>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,88 @@
+# =============================================================================
+# Classifier Spec — market_opportunity_v03_research
+#
+# V0.3 Market Opportunity Runtime（research / experimental 状态，非 production）。
+# 证据链：docs/market_state_v0_2_design.md §8.5（regime dependence）、§8.6（结构性天花板）、
+#   §8.7（Shock Detector 实证与 2×2 增量检验）。
+#
+# 两 regime：
+#   Regime 1 Substitution（NEV<50%）：结构性机会（V0.2 三层漏斗）
+#   Regime 2 Shock（NEV≥50%）：不再预测自然扩容，扫描异常强新产品，判断真空/混战
+# =============================================================================
+
+spec_version: "0.1"
+id: market_opportunity_v03_research
+name: "Market Opportunity Runtime V0.3（research）"
+version: "0.3.0-research"
+status: experimental
+runtime: market_opportunity
+updated_at: "2026-08-27"
+
+regime_switch:
+  variable: nev_penetration
+  unit: "%"
+  threshold: 50
+  low_regime: substitution
+  high_regime: shock
+  evidence: "§8.5 regime dependence：NEV替代空间 vs 后续增速 ρ 随渗透率分档（<30%=0.60, 30-50%=0.63, ≥50%=0.09）"
+
+branches:
+  substitution:
+    name: "替代驱动（未成熟市场，NEV < 50%）"
+    logic: "沿用 V0.2 三层漏斗：需求池 → 控制结构 → 价格杠杆"
+    demand_pool:
+      primary_signal: nev_substitution_space
+      primary_weight: 0.7
+      secondary_signal: bev_route_norm
+      secondary_weight: 0.3
+    control_structure: ces
+    price_lever: price_headroom
+    evidence: "§8.5 两侧解释变量：替代空间 <50% ρ=0.614（唯一强信号）"
+
+  shock:
+    name: "冲击驱动（成熟市场，NEV ≥ 50%）"
+    logic: "不再预测市场自然扩容；扫描有没有异常强的新产品，再判断它处于真空还是混战环境"
+    shock_detector:
+      rise_window_months: 12   # 崛起识别窗口：捕捉上市后 6-12 个月仍在放量的车型（如理想 i6 上市11个月后月销2万+）
+      signal_tail_months: 3    # 信号末段观察月数
+      signals:
+        tail_monthly_sales: "最近3个月月均销量"
+        top10_status: "是否进入所在市场 TOP10"
+        sustained_months: "月销≥2000 的持续月份数"
+        ramp: "末段月均 / 首段月均"
+      output_states:
+        - SHOCK_NONE
+        - SHOCK_CANDIDATE
+        - SHOCK_CONFIRMED
+      thresholds:
+        candidate_tail_sales: 2000
+        confirmed_tail_sales: 10000
+        confirmed_sustained_months: 3
+    vacuum_modulation:
+      role: "调节条件（非增强因子）：真空让冲击者独占，混战让冲击被稀释"
+      vacuum: "CES < 0.20 且 无其他候选冲击者（challenger_presence = 0）"
+      crowded: "否则"
+      evidence: "§8.7 2×2 增量检验：Shock×CES低=64.7%（n=17）vs Shock×CES高=48.9%（n=45）"
+
+evidence_status:
+  validated:
+    - "Shock 早期信号命中率 47.0%（Candidate，baseline 7.9%）"
+    - "CES 低 × Shock 候选 = 64.7%（真空 × 冲击，最高命中率）"
+    - "结构性信号（渗透率/集中度/价格重心/下沉承接）在成熟期预测力到顶（17%~35%）"
+  open:
+    - "CES 低侧 n=17，置信区间宽，需更多 freeze 期验证真空×冲击模式"
+    - "SHOCK_CONFIRMED 阈值（月销1万/持续3月）待滚动运行校准"
+    - "SHOCK_NONE/CANDIDATE/CONFIRMED 到生产规则前需验收"
+  governance: "research/experimental 状态：未经验收前不得进入生产管线；每次变更需同步证据链"
+
+output_contract:
+  rolling_scan:
+    per_new_model:
+      - tail_monthly_sales
+      - top10_status
+      - sustained_months
+      - ramp
+      - market_regime
+      - ces
+      - vacuum_crowded
+      - shock_state
