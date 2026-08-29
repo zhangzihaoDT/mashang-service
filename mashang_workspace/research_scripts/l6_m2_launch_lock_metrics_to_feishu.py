@@ -2,25 +2,26 @@
 # -*- coding: utf-8 -*-
 """
 针对车型（time_periods.{series}.end 为上市日）的上市锁单监控脚本。
-参考 launch_lock_metrics_to_feishu.py 结构，内容结构见下方卡片说明。
+参考 l6_m2_presale_metrics_to_feishu.py 结构，内容结构见下方卡片说明。
 
 卡片内容：
   - 车型：监控目标（series_group_logic 键，默认 DM2）
   - 锁单数：as_of 当日锁单数（含用户车明细）
   - 上市当日累计：上市日（time_periods.end）当日锁单累计 + 峰值小时
   - 上市至今累计留存：自上市日起累计未退订（approve_refund_time 为空）的唯一订单
+  - 留存锁单分类：留存锁单中限定（product_name 含 JimmyChoo/Jimmy Choo，参考 l6_m2_daily_retention.py）/非限定各多少，并列出分 product_name 数量
   - 历史对比：DM1 / CM2 / LS9 / LS8 在相同 N 日窗口的留存
-    （N = as_of − 上市日 + 1，口径与 launch_lock_metrics_to_feishu 一致）
+    （N = as_of − 上市日 + 1，口径与 l6_m2_launch_lock_metrics_to_feishu 一致）
 
 口径依据：shared/schema/business_definition.json
   - time_periods.{series}.end = 上市日
   - series_group_logic 归类（支持 {priority, condition} 对象与旧字符串格式）
 
 用法：
-  python mashang_workspace/research_scripts/launch_lock_metrics_to_feishu.py             # 默认监控 DM2
-  python mashang_workspace/research_scripts/launch_lock_metrics_to_feishu.py --series LS9
-  python mashang_workspace/research_scripts/launch_lock_metrics_to_feishu.py --dry-run   # 只打印卡片
-  python mashang_workspace/research_scripts/launch_lock_metrics_to_feishu.py --as-of 2026-08-28
+  python mashang_workspace/research_scripts/l6_m2_launch_lock_metrics_to_feishu.py             # 默认监控 DM2
+  python mashang_workspace/research_scripts/l6_m2_launch_lock_metrics_to_feishu.py --series LS9
+  python mashang_workspace/research_scripts/l6_m2_launch_lock_metrics_to_feishu.py --dry-run   # 只打印卡片
+  python mashang_workspace/research_scripts/l6_m2_launch_lock_metrics_to_feishu.py --as-of 2026-08-28
 """
 
 from __future__ import annotations
@@ -228,6 +229,19 @@ def resolve_launch_date(time_periods: dict, key: str) -> pd.Timestamp | None:
     return pd.Timestamp(date_str)
 
 
+def _is_limited(pname) -> bool:
+    """限定版（Jimmy Choo 高定限量版）判定，口径同 l6_m2_daily_retention.py。"""
+    p = str(pname).lower() if pname is not None else ""
+    return "jimmychoo" in p or "jimmy choo" in p
+
+
+def _norm_product_name(pname) -> str:
+    """product_name 空格归一化：连续空白合并为单空格并去首尾，用于合并同一产品的空格变体。"""
+    if pname is None or str(pname).strip() == "":
+        return str(pname or "")
+    return re.sub(r"\s+", " ", str(pname)).strip()
+
+
 def _is_real_lock(row) -> bool:
     """真实用户锁单（收紧口径）：锁单前有小订/预售支付记录（小订转大定），
     且排除内部测试单（buyer/owner_identity_no = 9999999）。
@@ -274,6 +288,7 @@ def compute_launch_metrics(df: pd.DataFrame, business_def: dict, today: pd.Times
         "intention_refund_time",
         "deposit_refund_time",
         "deposit_payment_time",
+        "product_name",
     ]
     missing = [c for c in required_cols if c not in df.columns]
     if missing:
@@ -295,7 +310,7 @@ def compute_launch_metrics(df: pd.DataFrame, business_def: dict, today: pd.Times
 
     base = df.loc[
         df["lock_time"].notna(),
-        ["order_number", "lock_time", "approve_refund_time", "owner_identity_no", "buyer_identity_no", "order_type", "series_group_logic", "intention_payment_time", "intention_refund_time", "deposit_refund_time", "deposit_payment_time"],
+        ["order_number", "lock_time", "approve_refund_time", "owner_identity_no", "buyer_identity_no", "order_type", "series_group_logic", "intention_payment_time", "intention_refund_time", "deposit_refund_time", "deposit_payment_time", "product_name"],
     ].copy()
     for col in ["intention_payment_time", "intention_refund_time", "deposit_refund_time", "deposit_payment_time"]:
         if not pd.api.types.is_datetime64_any_dtype(base[col]):
@@ -303,6 +318,9 @@ def compute_launch_metrics(df: pd.DataFrame, business_def: dict, today: pd.Times
 
     retention = 0
     retention_kept = 0
+    retention_kept_limited = 0
+    retention_kept_non_limited = 0
+    retention_kept_by_product: list[dict] = []
     peak_hour = None
     peak_count = 0
     today_lock_count = 0
@@ -320,12 +338,41 @@ def compute_launch_metrics(df: pd.DataFrame, business_def: dict, today: pd.Times
             base["series_group_logic"].eq(series)
             & (base["lock_time"] >= open_t)
             & (base["lock_time"] <= obs),
-            ["order_number", "lock_time", "approve_refund_time"],
+            ["order_number", "lock_time", "approve_refund_time", "product_name"],
         ]
         # 上市至今累计：开放时刻至观察时间，锁单累计（不剔除退订）
         retention = int(obs_slice["order_number"].nunique())
         # 上市至今累计留存：累计中至今未退订（approve_refund_time 为空）
-        retention_kept = int(obs_slice.loc[obs_slice["approve_refund_time"].isna(), "order_number"].nunique())
+        kept_slice = obs_slice.loc[obs_slice["approve_refund_time"].isna()]
+        retention_kept = int(kept_slice["order_number"].nunique())
+        # 留存锁单分类：限定（JimmyChoo 高定限量版）/ 非限定，及分 product_name 明细
+        retention_kept_limited = 0
+        retention_kept_non_limited = 0
+        retention_kept_by_product: list[dict] = []
+        if not kept_slice.empty:
+            kept_slice = kept_slice.assign(
+                limited=kept_slice["product_name"].map(_is_limited),
+                norm_name=kept_slice["product_name"].map(_norm_product_name),
+            )
+            retention_kept_limited = int(kept_slice.loc[kept_slice["limited"], "order_number"].nunique())
+            retention_kept_non_limited = int(
+                kept_slice.loc[~kept_slice["limited"], "order_number"].nunique()
+            )
+            # 按空格归一化后的 product_name 分组，合并同一产品的空格变体
+            product_counts = kept_slice.groupby("norm_name")["order_number"].nunique()
+            retention_kept_by_product = sorted(
+                [
+                    {
+                        "product_name": p,
+                        "count": int(c),
+                        "share": round(c / retention_kept * 100, 1),
+                        "limited": bool(_is_limited(p)),
+                    }
+                    for p, c in product_counts.items()
+                ],
+                key=lambda x: x["count"],
+                reverse=True,
+            )
 
         # 峰值小时：观察窗口内按小时统计
         if not obs_slice.empty:
@@ -399,6 +446,9 @@ def compute_launch_metrics(df: pd.DataFrame, business_def: dict, today: pd.Times
         "run_date": run_date.date().isoformat(),
         "retention": retention,
         "retention_kept": retention_kept,
+        "retention_kept_limited": retention_kept_limited,
+        "retention_kept_non_limited": retention_kept_non_limited,
+        "retention_kept_by_product": retention_kept_by_product,
         "peak_hour": peak_hour,
         "peak_count": peak_count,
         "today_lock_count": today_lock_count,
@@ -426,6 +476,27 @@ def build_feishu_card(metrics: dict, show_notes: bool = True) -> dict:
         f"　小订转大定：**{metrics['today_intention_conv']:,}**/{metrics['presale_retained']:,}（转大定/留存小订）"
     )
     lines.append(f"　直接锁单数：**{metrics['today_direct_lock']:,}**")
+
+    kept_limited = metrics.get("retention_kept_limited") or 0
+    kept_non_limited = metrics.get("retention_kept_non_limited") or 0
+    lines.append(
+        f"留存锁单分类：限定（Jimmy Choo 高定）**{kept_limited:,}** ｜ 非限定 **{kept_non_limited:,}**"
+    )
+    kept_by_product = metrics.get("retention_kept_by_product") or []
+    if kept_by_product:
+        limited_items = [i for i in kept_by_product if i.get("limited")]
+        normal_items = [i for i in kept_by_product if not i.get("limited")]
+        if limited_items:
+            lines.append("　· 限定：")
+            for item in limited_items:
+                lines.append(f"　　  {item['product_name']}：{item['count']:,}（{item['share']}%）")
+        if normal_items:
+            lines.append("　· 非限定：")
+            for item in normal_items:
+                lines.append(f"　　  {item['product_name']}：{item['count']:,}（{item['share']}%）")
+    else:
+        lines.append("　· 暂无留存锁单明细")
+
     lines.append(
         f"上市至今累计：**{metrics['retention']:,}**，峰值小时 **{metrics['peak_count']:,}**（{peak_hour_str}）"
     )
