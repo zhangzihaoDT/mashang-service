@@ -105,6 +105,13 @@ mashang_workspace/outputs/reports/ls8_user_profile_*.html
 outputs/charts/
 mashang_workspace/outputs/charts/
 
+# Workspace outputs governance:
+#   reports/*.md + tables/*.csv 为正式研究报告与研究证据表（Git tracked）
+#   cache/debug/runtime 为可重建缓存与调试产物（不提交）
+mashang_workspace/outputs/cache/
+mashang_workspace/outputs/debug/
+mashang_workspace/outputs/runtime/
+
 # Smoke test runtime outputs (regenerated on every run)
 outputs/smoke/
 

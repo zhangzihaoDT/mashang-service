@@ -1,0 +1,6 @@
+﻿case_id,model,target_market,matched,frozen_judgment,opportunity_flag,market_volume_growth,confusion_cell,val_window_sales,in_new_models
+su7,小米SU7,20-25万 轿车 新能源,True,头部锁死,没机会,29.43689787226735,FALSE NEGATIVE,0.0,False
+zeekr_007,极氪007,20-25万 轿车 新能源,True,头部锁死,没机会,29.43689787226735,FALSE NEGATIVE,13668.0,False
+galaxy_e8,银河E8,15-20万 轿车 新能源,True,开放替代蓝海,有机会,29.231657503317756,TRUE POSITIVE,5696.0,False
+song_l,宋L,20-25万 SUV 新能源,True,替代空间主导,有机会,58.49153925508492,TRUE POSITIVE,18177.0,False
+wenjie_m7,问界M7,25-30万 SUV 新能源,True,头部锁死,没机会,152.55590528367486,FALSE NEGATIVE,125036.0,False
