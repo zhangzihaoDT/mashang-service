@@ -1,0 +1,174 @@
+{
+  "status": "success",
+  "script": "mashang_workspace/research_scripts/launch_rhythm_incremental_analysis.py",
+  "command": "launch_rhythm_incremental_analysis.py ",
+  "generated_at": "2026-08-31T08:59:24",
+  "scope": {
+    "data_source": "dataset/order_data.parquet + shared/schema/business_definition.json",
+    "time_window": {
+      "start_date": "2023-08-25",
+      "end_date": "2026-08-31"
+    },
+    "filters": {
+      "order_type": "用户车/NaN（零售口径）",
+      "series_group_logic": [
+        "CM0",
+        "DM0",
+        "CM1",
+        "DM1",
+        "CM2",
+        "LS9",
+        "LS8"
+      ]
+    },
+    "metric_definition": "上市节奏窗口=[start,finish]锁单/总量窗口=[start,end+12M]锁单；增量=窗口实际−基线日均×窗口天数"
+  },
+  "result": {
+    "summary": "7 个代际上市节奏窗口（预售→上市→权益结束）锁单占总量中位 35.0%；基线差值法估算中位增量 4,304 单",
+    "metrics": {
+      "generations": 7,
+      "rhythm_share_median_12m": "7 个代际上市节奏窗口（预售→上市→权益结束）锁单占总量中位 35.0%"
+    },
+    "dimensions": [
+      {
+        "name": "generation_12m",
+        "items": [
+          {
+            "value": "CM0",
+            "metrics": {
+              "rhythm_lock": 13424,
+              "total_lock": 38341,
+              "share_rhythm": 0.3501,
+              "increment_median": 10963.15
+            }
+          },
+          {
+            "value": "DM0",
+            "metrics": {
+              "rhythm_lock": 6314,
+              "total_lock": 27052,
+              "share_rhythm": 0.2334,
+              "increment_median": 1411.5777777777776
+            }
+          },
+          {
+            "value": "CM1",
+            "metrics": {
+              "rhythm_lock": 7196,
+              "total_lock": 39535,
+              "share_rhythm": 0.182,
+              "increment_median": 4303.716666666667
+            }
+          },
+          {
+            "value": "DM1",
+            "metrics": {
+              "rhythm_lock": 5215,
+              "total_lock": 18998,
+              "share_rhythm": 0.2745,
+              "increment_median": -2617.2555555555555
+            }
+          },
+          {
+            "value": "CM2",
+            "metrics": {
+              "rhythm_lock": 24953,
+              "total_lock": 58038,
+              "share_rhythm": 0.4299,
+              "increment_median": 19689.2
+            }
+          },
+          {
+            "value": "LS9",
+            "metrics": {
+              "rhythm_lock": 7697,
+              "total_lock": 20003,
+              "share_rhythm": 0.3848,
+              "increment_median": 5518.5
+            }
+          },
+          {
+            "value": "LS8",
+            "metrics": {
+              "rhythm_lock": 7106,
+              "total_lock": 10339,
+              "share_rhythm": 0.6873,
+              "increment_median": -1109.5333333333328
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "artifacts": {
+    "12M": "mashang_workspace/outputs/tables/launch_rhythm_12m.csv",
+    "6M": "mashang_workspace/outputs/tables/launch_rhythm_6m.csv",
+    "dm2_current": "mashang_workspace/outputs/tables/launch_rhythm_dm2_current.csv"
+  },
+  "followup_context": {
+    "metric": "lock_count",
+    "available_dimensions": [
+      "generation",
+      "family",
+      "phase"
+    ],
+    "top_entities": [
+      {
+        "field": "generation",
+        "value": "CM0",
+        "metrics": {
+          "share_rhythm": 0.3501212800918077
+        }
+      },
+      {
+        "field": "generation",
+        "value": "DM0",
+        "metrics": {
+          "share_rhythm": 0.233402336241313
+        }
+      },
+      {
+        "field": "generation",
+        "value": "CM1",
+        "metrics": {
+          "share_rhythm": 0.18201593524724927
+        }
+      },
+      {
+        "field": "generation",
+        "value": "DM1",
+        "metrics": {
+          "share_rhythm": 0.2745025792188651
+        }
+      },
+      {
+        "field": "generation",
+        "value": "CM2",
+        "metrics": {
+          "share_rhythm": 0.4299424514972949
+        }
+      },
+      {
+        "field": "generation",
+        "value": "LS9",
+        "metrics": {
+          "share_rhythm": 0.3847922811578263
+        }
+      },
+      {
+        "field": "generation",
+        "value": "LS8",
+        "metrics": {
+          "share_rhythm": 0.6873005126221104
+        }
+      }
+    ]
+  },
+  "warnings": [
+    "CM2 在 12M 窗口未完全观测（as_of 2026-08-31），总量为至今累计",
+    "LS9 在 12M 窗口未完全观测（as_of 2026-08-31），总量为至今累计",
+    "LS8 在 12M 窗口未完全观测（as_of 2026-08-31），总量为至今累计",
+    "LS8 在 6M 窗口未完全观测（as_of 2026-08-31），总量为至今累计"
+  ],
+  "errors": []
+}
