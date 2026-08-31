@@ -1,0 +1,245 @@
+{
+  "status": "success",
+  "script": "runtime_scripts/monthly_sales_order_type_to_feishu.py",
+  "command": "mashang_workspace/runtime_scripts/monthly_sales_order_type_to_feishu.py --month 2026-08 --format json --output mashang_workspace/outputs/tables/",
+  "generated_at": "2026-08-31T09:20:45",
+  "scope": {
+    "data_source": "dataset/order_data.parquet",
+    "time_window": {
+      "start_date": "2026-08-01",
+      "end_date": "2026-08-月末"
+    },
+    "filters": {},
+    "metric_definition": "lock_count = COUNTD(order_number WHERE lock_time IS NOT NULL); invoice_count = COUNTD(order_number WHERE invoice_upload_time IS NOT NULL), 按 order_type 分组(用户车/试驾车/其他) 与 车系 交叉"
+  },
+  "result": {
+    "summary": "2026-08 锁单量 6,100 / 开票量 4,076",
+    "metrics": {
+      "lock_total": 6100,
+      "invoice_total": 4076,
+      "lock_user_car": 5136,
+      "lock_test_drive": 770,
+      "lock_other": 194,
+      "invoice_user_car": 3496,
+      "invoice_test_drive": 426,
+      "invoice_other": 154
+    },
+    "dimensions": [
+      {
+        "name": "order_type",
+        "items": [
+          {
+            "value": "用户车",
+            "metrics": {
+              "lock_count": 5136
+            }
+          },
+          {
+            "value": "试驾车",
+            "metrics": {
+              "lock_count": 770
+            }
+          },
+          {
+            "value": "其他",
+            "metrics": {
+              "lock_count": 194
+            }
+          }
+        ]
+      },
+      {
+        "name": "series",
+        "items": [
+          {
+            "value": "LS6",
+            "metrics": {
+              "用户车": 2879,
+              "试驾车": 363,
+              "其他": 97
+            }
+          },
+          {
+            "value": "L6",
+            "metrics": {
+              "用户车": 856,
+              "试驾车": 388,
+              "其他": 47
+            }
+          },
+          {
+            "value": "LS8",
+            "metrics": {
+              "用户车": 775,
+              "试驾车": 9,
+              "其他": 30
+            }
+          },
+          {
+            "value": "LS9",
+            "metrics": {
+              "用户车": 626,
+              "试驾车": 9,
+              "其他": 12
+            }
+          },
+          {
+            "value": "LS7",
+            "metrics": {
+              "用户车": 0,
+              "试驾车": 1,
+              "其他": 6
+            }
+          },
+          {
+            "value": "L7",
+            "metrics": {
+              "用户车": 0,
+              "试驾车": 0,
+              "其他": 2
+            }
+          }
+        ]
+      }
+    ],
+    "tables": [
+      {
+        "name": "lock_by_series",
+        "rows": [
+          {
+            "series": "LS6",
+            "用户车": 2879,
+            "试驾车": 363,
+            "其他": 97
+          },
+          {
+            "series": "L6",
+            "用户车": 856,
+            "试驾车": 388,
+            "其他": 47
+          },
+          {
+            "series": "LS8",
+            "用户车": 775,
+            "试驾车": 9,
+            "其他": 30
+          },
+          {
+            "series": "LS9",
+            "用户车": 626,
+            "试驾车": 9,
+            "其他": 12
+          },
+          {
+            "series": "LS7",
+            "用户车": 0,
+            "试驾车": 1,
+            "其他": 6
+          },
+          {
+            "series": "L7",
+            "用户车": 0,
+            "试驾车": 0,
+            "其他": 2
+          }
+        ]
+      },
+      {
+        "name": "invoice_by_series",
+        "rows": [
+          {
+            "series": "LS6",
+            "用户车": 2151,
+            "试驾车": 93,
+            "其他": 68
+          },
+          {
+            "series": "L6",
+            "用户车": 348,
+            "试驾车": 311,
+            "其他": 3
+          },
+          {
+            "series": "LS8",
+            "用户车": 515,
+            "试驾车": 8,
+            "其他": 31
+          },
+          {
+            "series": "LS9",
+            "用户车": 481,
+            "试驾车": 13,
+            "其他": 9
+          },
+          {
+            "series": "LS7",
+            "用户车": 1,
+            "试驾车": 1,
+            "其他": 28
+          },
+          {
+            "series": "L7",
+            "用户车": 0,
+            "试驾车": 0,
+            "其他": 15
+          }
+        ]
+      }
+    ]
+  },
+  "artifacts": {},
+  "followup_context": {
+    "metric": "monthly_sales",
+    "time_window": "2026-08",
+    "available_dimensions": [
+      "order_type",
+      "series"
+    ],
+    "top_entities": [
+      {
+        "field": "series",
+        "value": "LS6",
+        "metrics": {
+          "lock_count": 3339
+        }
+      },
+      {
+        "field": "series",
+        "value": "L6",
+        "metrics": {
+          "lock_count": 1291
+        }
+      },
+      {
+        "field": "series",
+        "value": "LS8",
+        "metrics": {
+          "lock_count": 814
+        }
+      },
+      {
+        "field": "series",
+        "value": "LS9",
+        "metrics": {
+          "lock_count": 647
+        }
+      },
+      {
+        "field": "series",
+        "value": "LS7",
+        "metrics": {
+          "lock_count": 7
+        }
+      },
+      {
+        "field": "series",
+        "value": "L7",
+        "metrics": {
+          "lock_count": 2
+        }
+      }
+    ]
+  },
+  "warnings": [],
+  "errors": []
+}
