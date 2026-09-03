@@ -3,7 +3,10 @@
 .env
 .env.*
 
-/dataset/
+/dataset/*
+!/dataset/updater/
+/dataset/updater/*
+!/dataset/updater/*.py
 /daemon/
 
 # NEV-APEAL workspace: raw SAV is a local copy (root /dataset/ is also not committed)
