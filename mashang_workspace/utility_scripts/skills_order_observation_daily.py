@@ -35,6 +35,7 @@ ensure_shared_on_path()
 from operators.mature_lock_prediction import run_mature_lock_prediction_operator
 from operators.assign_conversion import _parse_cn_date
 from utils.business import is_corporate_owner
+from capabilities.notify.notify_service import notify
 load_dotenv(REPO_ROOT / ".env")
 
 # 配置常量
@@ -969,36 +970,12 @@ def send_feishu_notification(lock_stats, invoice_stats, pred_lock=None, mom=None
         }
     }
 
-    max_retries = 3
-    for attempt in range(max_retries):
-        try:
-            response = requests.post(WEBHOOK_URL, json=card_content)
-            response.raise_for_status()
-            result = response.json()
-            
-            # 兼容不同的成功状态码字段 (StatusCode 或 code)
-            # 飞书自定义机器人通常返回 StatusCode, 但开放平台接口可能返回 code
-            code = result.get("StatusCode")
-            if code is None:
-                code = result.get("code")
-            
-            if code == 0:
-                print("✅ 飞书消息发送成功")
-                return
-            elif code == 11232: # Frequency limited
-                wait_time = 2 * (attempt + 1)
-                print(f"⚠️ 飞书消息发送频率限制 (11232)，等待 {wait_time} 秒后重试 ({attempt + 1}/{max_retries})...")
-                time.sleep(wait_time)
-                continue
-            else:
-                print(f"❌ 飞书消息发送异常: {result}")
-                return
-        except Exception as e:
-            print(f"❌ 发送飞书消息失败: {e}")
-            if attempt < max_retries - 1:
-                time.sleep(2)
-            else:
-                print("❌ 重试次数耗尽，发送失败")
+    # 传输收敛至 capabilities.notify（重试/频率限制/错误语义由能力统一处理）
+    result = notify(raw_payload=card_content, provider_name="feishu_webhook")
+    if result.ok:
+        print("✅ 飞书消息发送成功")
+    else:
+        print(f"❌ 飞书消息发送失败: {result.error}")
 
 def main():
     # 0. 解析参数
