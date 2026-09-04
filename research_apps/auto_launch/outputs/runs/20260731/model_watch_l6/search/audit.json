@@ -1,0 +1,118 @@
+{
+  "mode": "model_watch",
+  "monitor_date": "2026-07-31",
+  "user_request": "智己L6 官方指导价 site:immotors.com 2025 2026",
+  "run_mode": "live",
+  "is_mock": false,
+  "query_count": 8,
+  "target_count": 1,
+  "result_count_raw": 80,
+  "result_count_normalized": 75,
+  "zero_result_queries": [],
+  "failed_queries": [],
+  "dedupe": {
+    "raw_item_count": 80,
+    "normalized_item_count": 75,
+    "duplicate_url_count": 5,
+    "dedupe_ratio": 0.062
+  },
+  "time_window_quality": {
+    "in_window_count": 3,
+    "out_of_window_count": 62,
+    "unknown_publish_time_count": 10,
+    "out_of_window_ratio": 0.827
+  },
+  "source_tier_distribution": {
+    "tier_5_unverified": 56,
+    "tier_1_official": 9,
+    "tier_3_industry_media": 9,
+    "tier_4_social_signal": 1
+  },
+  "source_quality": {
+    "unknown_source_count": 56,
+    "tier_1_official_count": 9,
+    "tier_3_industry_media_count": 9,
+    "tier_4_social_signal_count": 1,
+    "tier_5_unverified_count": 56
+  },
+  "source_resolution_quality": {
+    "portal_or_aggregator": 32,
+    "official_website": 7,
+    "vertical_auto_media": 8,
+    "dealer_page": 8,
+    "unknown": 16,
+    "official_product_page": 1,
+    "social_platform": 1,
+    "authoritative_media": 1,
+    "official_social_account": 1
+  },
+  "event_extraction_readiness": {
+    "ready_item_count": 6,
+    "blocked_by_time_window_count": 62,
+    "blocked_by_source_quality_count": 7,
+    "requires_cross_check_count": 0
+  },
+  "routing_stats": {
+    "routing_counts": {
+      "candidate_eligible": 74,
+      "context_only": 1,
+      "needs_review": 0
+    },
+    "official_direct_counts": {
+      "total": 0,
+      "in_window": 0,
+      "out_of_window": 0,
+      "unknown_publish_time": 0,
+      "routed_to_context_only": 0
+    }
+  },
+  "coverage_by_event_type": {
+    "technology_release": 20,
+    "config_release": 10,
+    "launch_event": 20,
+    "brand_campaign": 10,
+    "executive_voice": 10,
+    "delivery_start": 10,
+    "sales_milestone": 10,
+    "order_milestone": 10,
+    "benefit_adjustment": 10,
+    "official_price_change": 10,
+    "channel_campaign": 10,
+    "user_event": 10,
+    "partnership": 10
+  },
+  "coverage_by_target": {
+    "im_l6": {
+      "query_count": 8,
+      "normalized_result_count": 75,
+      "official_source_count": 9,
+      "weak_signal_count": 57
+    }
+  },
+  "budget": {
+    "profile": "deep_scan",
+    "query_budget_per_target": 8,
+    "query_count_planned": 8,
+    "query_count_executed": 8,
+    "result_limit_per_query": 10,
+    "api_call_count": 8,
+    "cache_hit_count": 0,
+    "cache_miss_count": 0,
+    "cache_disabled": true,
+    "refresh": false
+  },
+  "stages": {
+    "scout": {
+      "planned_query_count": 3,
+      "executed_query_count": 3,
+      "normalized_item_count": 7,
+      "ready_item_count": 3
+    },
+    "refine": {
+      "planned_query_count": 5,
+      "executed_query_count": 5,
+      "normalized_item_count": 6,
+      "ready_item_count": 3
+    }
+  }
+}

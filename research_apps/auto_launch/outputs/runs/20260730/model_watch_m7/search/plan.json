@@ -1,0 +1,311 @@
+{
+  "intent": {
+    "user_request": "看看 问界M7 最近 7 天都有什么动作",
+    "monitor_date": "2026-07-30",
+    "intent_type": "open_ended_activity_scan",
+    "mode": "model_watch",
+    "targets": [
+      {
+        "target_id": "aito_m7",
+        "target_type": "model",
+        "brand": "问界",
+        "brand_cn": "问界",
+        "model": "M7",
+        "matched_alias": "问界M7",
+        "confidence": "high",
+        "is_in_watchlist": true,
+        "target_source": "ls8_watchlist"
+      }
+    ],
+    "time_window": {
+      "window_type": "relative_days",
+      "days": 7,
+      "start_date": "2026-07-23",
+      "end_date": "2026-07-30",
+      "start_datetime": "2026-07-23T00:00:00+08:00",
+      "end_datetime": "2026-07-30T23:59:59+08:00",
+      "timezone": "Asia/Shanghai",
+      "date_inclusive": true
+    },
+    "event_scope": {
+      "scope_type": "all_relevant_actions",
+      "event_type_ids": [
+        "launch",
+        "presale",
+        "launch_event",
+        "debut",
+        "config_release",
+        "price_release",
+        "delivery_start",
+        "benefit_adjustment",
+        "official_price_change",
+        "facelift_launch",
+        "brand_campaign",
+        "sales_milestone",
+        "production_milestone",
+        "technology_release",
+        "channel_campaign",
+        "user_event",
+        "partnership",
+        "executive_voice",
+        "public_opinion",
+        "rumor_or_leak"
+      ]
+    },
+    "source_strategy": {
+      "official_first": true,
+      "include_authoritative_media": true,
+      "include_industry_media": true,
+      "include_social_signals": true,
+      "social_signals_as_discovery_only": true,
+      "allow_unverified_as_discovery_only": true
+    },
+    "query_budget": {
+      "query_budget_per_target": 8,
+      "result_limit_per_query": 10
+    },
+    "ambiguities": [],
+    "notes": [
+      "用户问题为开放式动作扫描，自动覆盖车型级全量事件。"
+    ]
+  },
+  "task_config": {
+    "task_name": "auto_launch_search_task",
+    "mode": "model_watch",
+    "monitor_date": "2026-07-30",
+    "target_count": 1,
+    "targets": [
+      {
+        "target_id": "aito_m7",
+        "target_type": "model",
+        "brand": "问界",
+        "aliases": [
+          "问界",
+          "AITO",
+          "赛力斯",
+          "鸿蒙智行"
+        ],
+        "sub_brands": [
+          "智界",
+          "享界",
+          "尊界",
+          "尚界",
+          "智己",
+          "理想",
+          "小米",
+          "蔚来",
+          "乐道",
+          "萤火虫",
+          "小鹏",
+          "MONA",
+          "阿维塔",
+          "深蓝",
+          "零跑",
+          "腾势",
+          "方程豹",
+          "比亚迪",
+          "特斯拉",
+          "极氪",
+          "领克",
+          "吉利银河",
+          "MG",
+          "埃安",
+          "岚图"
+        ],
+        "models": [
+          "M9",
+          "M8",
+          "M7",
+          "M6",
+          "M7"
+        ]
+      }
+    ],
+    "time_window": {
+      "window_type": "relative_days",
+      "days": 7,
+      "start_date": "2026-07-23",
+      "end_date": "2026-07-30",
+      "start_datetime": "2026-07-23T00:00:00+08:00",
+      "end_datetime": "2026-07-30T23:59:59+08:00",
+      "timezone": "Asia/Shanghai",
+      "date_inclusive": true
+    },
+    "source_strategy": {
+      "official_first": true,
+      "include_authoritative_media": true,
+      "include_social_signals": true,
+      "social_signals_as_discovery_only": true,
+      "allow_unverified_as_discovery_only": true,
+      "tier_1_官方一手信息": {
+        "enabled": true,
+        "purpose": "verification — 车型级监控中作为验证锚点"
+      },
+      "tier_2_权威垂直媒体与行业媒体": {
+        "enabled": true,
+        "purpose": "primary — 车型级监控的主力发现源"
+      },
+      "tier_3_科技/财经/商业媒体": {
+        "enabled": true,
+        "purpose": "supplementary — 独家销售动作发现"
+      },
+      "tier_4_社交平台与渠道信号": {
+        "enabled": true,
+        "purpose": "weak_signal — 价格/区域促销发现"
+      },
+      "tier_5_论坛/社区/未经验证": {
+        "enabled": true,
+        "purpose": "weak_signal — 早期线索发现"
+      }
+    },
+    "event_type_ids": [
+      "launch",
+      "presale",
+      "launch_event",
+      "debut",
+      "config_release",
+      "price_release",
+      "delivery_start",
+      "benefit_adjustment",
+      "official_price_change",
+      "facelift_launch",
+      "brand_campaign",
+      "sales_milestone",
+      "production_milestone",
+      "technology_release",
+      "channel_campaign",
+      "user_event",
+      "partnership",
+      "executive_voice",
+      "public_opinion",
+      "rumor_or_leak"
+    ],
+    "query_budget": {
+      "query_budget_per_target": 8,
+      "result_limit_per_query": 10
+    }
+  },
+  "budget_plan": {
+    "task_name": "auto_launch_search_budget_plan",
+    "mode": "model_watch",
+    "monitor_date": "2026-07-30",
+    "user_request": "看看 问界M7 最近 7 天都有什么动作",
+    "profile": "standard_scan",
+    "target_count": 1,
+    "query_budget_per_target": 5,
+    "result_limit_per_query": 8,
+    "allow_refine": true,
+    "scout_query_count": 3,
+    "refine_query_budget": 2,
+    "stage": "all",
+    "cache": {
+      "enabled": true,
+      "ttl_hours": 24,
+      "refresh": false,
+      "root_dir": "/Users/zihao_/Documents/github/mashang-service/auto_launch/outputs/search_cache"
+    },
+    "budget_reason": "open ended model_watch activity scan uses standard_scan by default"
+  },
+  "query_plan": {
+    "task_name": "auto_launch_volc_search",
+    "mode": "model_watch",
+    "monitor_date": "2026-07-30",
+    "profile": "standard_scan",
+    "time_window": {
+      "start_date": "2026-07-23",
+      "end_date": "2026-07-30",
+      "start_datetime": "2026-07-23T00:00:00+08:00",
+      "end_datetime": "2026-07-30T23:59:59+08:00"
+    },
+    "search_api_time_filter": {
+      "enabled": true,
+      "start_date": "2026-07-23",
+      "end_date": "2026-07-30",
+      "fallback_to_post_filter": true
+    },
+    "targets": [
+      {
+        "target_id": "aito_m7",
+        "brand": "问界",
+        "queries": [
+          {
+            "query": "问界 最近7天 官方 动作 交付 权益 OTA",
+            "stage": "scout",
+            "query_role": "overview_discovery",
+            "query_window_role": "discovery",
+            "event_type_ids": [],
+            "source_tier_focus": [
+              "tier_1_official",
+              "tier_3_industry_media"
+            ],
+            "purpose": "scout: []"
+          },
+          {
+            "query": "问界 交付 销量 战报 最近7天",
+            "stage": "scout",
+            "query_role": "specific_discovery",
+            "query_window_role": "discovery",
+            "event_type_ids": [
+              "delivery_start",
+              "sales_milestone",
+              "order_milestone"
+            ],
+            "source_tier_focus": [
+              "tier_1_official",
+              "tier_3_industry_media"
+            ],
+            "purpose": "scout: ['delivery_start', 'sales_milestone', 'order_milestone']"
+          },
+          {
+            "query": "问界 权益 价格 限时 最近7天",
+            "stage": "scout",
+            "query_role": "specific_discovery",
+            "query_window_role": "discovery",
+            "event_type_ids": [
+              "benefit_adjustment",
+              "official_price_change"
+            ],
+            "source_tier_focus": [
+              "tier_1_official",
+              "tier_3_industry_media"
+            ],
+            "purpose": "scout: ['benefit_adjustment', 'official_price_change']"
+          },
+          {
+            "query": "问界 OTA 技术 发布 最近7天",
+            "stage": "refine",
+            "query_role": "specific_discovery",
+            "query_window_role": "discovery",
+            "event_type_ids": [
+              "technology_release",
+              "config_release",
+              "launch_event"
+            ],
+            "source_tier_focus": [
+              "tier_1_official",
+              "tier_3_industry_media"
+            ],
+            "purpose": "refine: ['technology_release', 'config_release', 'launch_event']"
+          },
+          {
+            "query": "问界 门店 试驾 活动 最近7天",
+            "stage": "refine",
+            "query_role": "specific_discovery",
+            "query_window_role": "discovery",
+            "event_type_ids": [
+              "channel_campaign",
+              "user_event"
+            ],
+            "source_tier_focus": [
+              "tier_1_official",
+              "tier_3_industry_media",
+              "tier_4_social_signal",
+              "tier_5_unverified"
+            ],
+            "purpose": "refine: ['channel_campaign', 'user_event']"
+          }
+        ]
+      }
+    ]
+  }
+}

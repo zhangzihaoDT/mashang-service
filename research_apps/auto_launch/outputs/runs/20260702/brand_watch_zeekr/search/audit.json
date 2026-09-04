@@ -1,0 +1,108 @@
+{
+  "mode": "brand_watch",
+  "monitor_date": "2026-07-02",
+  "user_request": "看看极氪最近 7 天都有什么动作",
+  "run_mode": "live",
+  "is_mock": false,
+  "query_count": 8,
+  "target_count": 1,
+  "result_count_raw": 14,
+  "result_count_normalized": 14,
+  "zero_result_queries": [],
+  "failed_queries": [
+    "极氪 高管 直播 最近7天"
+  ],
+  "dedupe": {
+    "raw_item_count": 14,
+    "normalized_item_count": 14,
+    "duplicate_url_count": 0,
+    "dedupe_ratio": 0.0
+  },
+  "time_window_quality": {
+    "in_window_count": 14,
+    "out_of_window_count": 0,
+    "unknown_publish_time_count": 0,
+    "out_of_window_ratio": 0.0
+  },
+  "source_tier_distribution": {
+    "tier_5_unverified": 14
+  },
+  "source_quality": {
+    "unknown_source_count": 14,
+    "tier_1_official_count": 0,
+    "tier_3_industry_media_count": 0,
+    "tier_4_social_signal_count": 0,
+    "tier_5_unverified_count": 14
+  },
+  "source_resolution_quality": {
+    "unknown": 14
+  },
+  "event_extraction_readiness": {
+    "ready_item_count": 0,
+    "blocked_by_time_window_count": 0,
+    "blocked_by_source_quality_count": 14,
+    "requires_cross_check_count": 0
+  },
+  "routing_stats": {
+    "routing_counts": {
+      "candidate_eligible": 14,
+      "context_only": 0,
+      "needs_review": 0
+    },
+    "official_direct_counts": {
+      "total": 0,
+      "in_window": 0,
+      "out_of_window": 0,
+      "unknown_publish_time": 0,
+      "routed_to_context_only": 0
+    }
+  },
+  "coverage_by_event_type": {
+    "delivery_start": 2,
+    "sales_milestone": 2,
+    "order_milestone": 2,
+    "benefit_adjustment": 2,
+    "official_price_change": 2,
+    "technology_release": 4,
+    "config_release": 2,
+    "launch_event": 4,
+    "channel_campaign": 2,
+    "user_event": 2,
+    "brand_campaign": 2,
+    "partnership": 2
+  },
+  "coverage_by_target": {
+    "zeekr": {
+      "query_count": 8,
+      "normalized_result_count": 14,
+      "official_source_count": 0,
+      "weak_signal_count": 14
+    }
+  },
+  "budget": {
+    "profile": "deep_scan",
+    "query_budget_per_target": 8,
+    "query_count_planned": 8,
+    "query_count_executed": 8,
+    "result_limit_per_query": 10,
+    "api_call_count": 0,
+    "cache_hit_count": 8,
+    "cache_miss_count": 0,
+    "cache_disabled": false,
+    "refresh": false
+  },
+  "stages": {
+    "scout": {
+      "planned_query_count": 3,
+      "executed_query_count": 3,
+      "normalized_item_count": 6,
+      "ready_item_count": 0
+    },
+    "refine": {
+      "planned_query_count": 5,
+      "executed_query_count": 5,
+      "normalized_item_count": 8,
+      "ready_item_count": 0
+    }
+  }
+}

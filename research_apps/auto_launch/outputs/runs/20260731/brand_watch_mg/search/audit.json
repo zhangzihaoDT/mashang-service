@@ -1,0 +1,99 @@
+{
+  "mode": "brand_watch",
+  "monitor_date": "2026-07-31",
+  "user_request": "名爵MG新车官方售价 2026",
+  "run_mode": "live",
+  "is_mock": false,
+  "query_count": 3,
+  "target_count": 1,
+  "result_count_raw": 30,
+  "result_count_normalized": 26,
+  "zero_result_queries": [],
+  "failed_queries": [],
+  "dedupe": {
+    "raw_item_count": 30,
+    "normalized_item_count": 26,
+    "duplicate_url_count": 4,
+    "dedupe_ratio": 0.133
+  },
+  "time_window_quality": {
+    "in_window_count": 12,
+    "out_of_window_count": 8,
+    "unknown_publish_time_count": 6,
+    "out_of_window_ratio": 0.308
+  },
+  "source_tier_distribution": {
+    "tier_5_unverified": 20,
+    "tier_3_industry_media": 4,
+    "tier_4_social_signal": 2
+  },
+  "source_quality": {
+    "unknown_source_count": 20,
+    "tier_1_official_count": 0,
+    "tier_3_industry_media_count": 4,
+    "tier_4_social_signal_count": 2,
+    "tier_5_unverified_count": 20
+  },
+  "source_resolution_quality": {
+    "portal_or_aggregator": 9,
+    "dealer_page": 5,
+    "unknown": 6,
+    "vertical_auto_media": 4,
+    "social_platform": 2
+  },
+  "event_extraction_readiness": {
+    "ready_item_count": 3,
+    "blocked_by_time_window_count": 8,
+    "blocked_by_source_quality_count": 13,
+    "requires_cross_check_count": 2
+  },
+  "routing_stats": {
+    "routing_counts": {
+      "candidate_eligible": 26,
+      "context_only": 0,
+      "needs_review": 0
+    },
+    "official_direct_counts": {
+      "total": 0,
+      "in_window": 0,
+      "out_of_window": 0,
+      "unknown_publish_time": 0,
+      "routed_to_context_only": 0
+    }
+  },
+  "coverage_by_event_type": {},
+  "coverage_by_target": {
+    "mg": {
+      "query_count": 3,
+      "normalized_result_count": 26,
+      "official_source_count": 0,
+      "weak_signal_count": 22
+    }
+  },
+  "budget": {
+    "profile": "deep_scan",
+    "query_budget_per_target": 8,
+    "query_count_planned": 3,
+    "query_count_executed": 3,
+    "result_limit_per_query": 10,
+    "api_call_count": 3,
+    "cache_hit_count": 0,
+    "cache_miss_count": 0,
+    "cache_disabled": true,
+    "refresh": false
+  },
+  "stages": {
+    "scout": {
+      "planned_query_count": 3,
+      "executed_query_count": 3,
+      "normalized_item_count": 18,
+      "ready_item_count": 3
+    },
+    "refine": {
+      "planned_query_count": 0,
+      "executed_query_count": 0,
+      "normalized_item_count": 0,
+      "ready_item_count": 0
+    }
+  }
+}

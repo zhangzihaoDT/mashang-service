@@ -1,0 +1,303 @@
+{
+  "query": "智己 OTA 技术 发布 最近7天",
+  "status": "success",
+  "result_count": 8,
+  "results": [
+    {
+      "title": "2.5.8OTA体验报告:智慧躲避更智慧|智己ls7|智己ls6|三元锂电池|后驱车|悬架_手机新浪网",
+      "url": "https://auto.sina.cn/2026-07-08/detail-inihapna8090752.d.html",
+      "snippet": "2.5.8OTA体验报告:智慧躲避更智慧\n07.08 15:30\n然后我就来回行程结合刚刚更新的2.5.8OTA升级分享一下使用经验～\nOTA体验\n1. NOA表现\n正向肯定：首先是NOA和Pilot的限速可以调高至130km/h（开智己的肯定不能是高速路障 是吧）\n另外弯道更丝滑，明显感到车道寻迹更稳定了，之前忽左忽右频繁修正，这给驾驶员的信心就不是很强了。\n智慧躲避更加智慧了，能在更远的距离就介入躲避。\n意见反馈：对于高速施工路段的锥桶反应太大了，车辆刚刚监测到连续锥桶就会立刻往右变道，突兀感较强，体感不好，希望后期能做柔和处理。\n还有就是敏捷模式下的变道体验还是差一口气，可能是没有和悬架进行联动吧，希望后期能在敏捷模式下拉紧地盘降低侧倾感，空气...\n另外误跳出两次行人报警，均是在高速公路上，之前从来没有遇到过，希望智驾团队多多收集数据看看是不是新版本BUG\n可在「设置-智能驾驶-影像辅助-智能后视盲区影像」中开启和关闭该功能。\n3. 雨夜模式\n这个可太赞了！什么叫专业？这就叫专业！\n雨夜模式自动打开条件：雨刮达到最大挡时，将推荐开启雨夜模式。\n也可通过「应用中心-场景模式-雨夜模式」手动进入或者语音打开。\n雨夜模式下，前风挡除雾、外后视镜加热将自动开启，胎压信息也会实时显示在驾驶屏。\n4. DFIE动态融合图像增强\n说说这个AI增强\n建议：希望跟随环境变化进行增强，灯光条件好的情况下可以不必增强，灯光昏暗的情况下增强效果能好，另外能够对后方车辆灯光做柔和处理？有时候增强状态下图像中的车辆仿佛开了远光灯。\n5. 主题\n夸的太多了，我就直接提建议了。\n按下主题后延迟卡顿较久，建议单独给主题加一个二级菜单，可以有更长的时间进行缓存，提升体验感。\n圣诞主题左上角绿色圣诞树会遮挡灯光标志，建议这块去处树木，直接白色雪地。\n",
+      "source": "手机新浪汽车",
+      "source_name": "手机新浪汽车",
+      "publish_time": "2026-07-08T15:30:09+08:00",
+      "rank": 0
+    },
+    {
+      "title": "智己OTA升级真相:老车主痛点终结，新车主玩出花_行车记录仪_什么值得买",
+      "url": "https://post.m.smzdm.com/p/a3mnn0g5/",
+      "snippet": "06-18 08:22\n01 OTA覆盖范围与推送节奏\n截至2026年6月，智己汽车已多次实施大规模OTA升级，覆盖从2023款到2025款的多款车型。根据官方披露，1月启动的OTA为全系推送，但具体功能因芯片平台不同而有所区分。搭载高通8155芯片的23款LS6、LS7及部分L7车型，主要获得四向行车记录仪、语音识别优化等基础体验增强；而采用8295芯片的新一代LS6、L6及LS9则解锁AI Agent点餐、手车互联、无麦K歌等高阶生态功能。值得注意的是，辅助驾驶方面的重大升级——如Momenta R6端到端大模型——虽已在LS9上率先落地，但其他车型因“节前审核压力大”，满血版推送被安排在春节后，体现出品牌对安全验证的谨慎态度。OTA更新过程通常耗时1-2小时，建议车辆保持静止状态以确保系统稳定性。\n新一代智己LS6再进化，OTA上线手车互联新功能\n速度与车 2026-01-15\n新老车主利益同享，智己年度重磅OTA推送方案流出\n大哥爱看车 2026-01-14\n智己汽车车机系统 OTA 更新需要多长时间\n汽车之家 2026-04-13\n手机即车机，新一代智己LS6重磅OTA将上线手车互联\n走进大自然 2026-01-14\n智己L6展示强大OTA能力，IMOS 4.1.0系统细节全面打磨\n车里车外 2026-02-10\n新一代智己LS6最新资讯，无麦K歌与手车互联通过OTA上线\n笑侠 2026-01-20\n亮哥说车 2026-0...\n能力再突破，智己IM AD全新OTA引领辅助驾驶全域进化\n走进大自然 2026-04-23\n无麦K歌正式加入新一代智己LS6，最新OTA升级内容解读\n红枫染秋 2026-01-20\n",
+      "source": "什么值得买社区频道",
+      "source_name": "什么值得买社区频道",
+      "publish_time": "",
+      "rank": 1
+    },
+    {
+      "title": "智己L7的辅助驾驶功能有哪些亮点?|OTA|智己汽车|智己ls8|手势|模型_手机新浪网",
+      "url": "https://auto.sina.cn/2026-07-07/detail-inifyknx1640689.d.html",
+      "snippet": "智己L7的辅助驾驶功能有哪些亮点？\n07.07 16:39\n智己L7的辅助驾驶远非“一次性”技术堆砌，而是通过行业首创的硬件可升级架构与坚持不懈的软件OTA长周期迭代，实现了从最初的基础L2到如今覆盖城区、高速的全场景智驾能力跃迁，其中识别交警手势和“AI底盘”等细节功能，更展现了其从“能用”到“好用”的独特思考。\n一、独步行业的“硬件可升级”架构\n1. 改变游戏规则的硬件OTA\n智己L7在早期车型中便做出了一个极具魄力的决定：允许用户通过物理更换域控制器、激光雷达和摄像头等核心硬件，将计算平台从Xavier升级至Orin，从而获得高阶智驾能力。 这一“硬件OTA”不仅兑现了品牌对天使轮用户的承诺，更让最早一批L7车主拥有了与后续新车几乎同等的智能基座。\n2. 持续的感知硬件与算力供给\n完成硬件升级的智己L7，搭载了激光雷达与高算力芯片，为后续复杂的算法运行提供了充沛的“体力”。 这使得它能够像智己LS8等新车型一样，应用包括520线超视域激光雷达与英伟达Thor芯片在内的先进感知与决策体系方案。\n二、持续进化的软件算法体验\n1. 长周期、覆盖全系车型的OTA支持\n智己为L7提供了汽车行业罕见的OTA更新周期与覆盖广度，不仅为L7这类早期车型持续推送新固件，甚至还优先向等待更久的老车主推送，体现其对用户的尊重与承诺。 每一次版本的更新都带来了实实在在的能力提升。\n 2. 大模型上车后的“质变”\n在成功OTA了最新版大模型智驾后，智己L7在城区复杂路况下的表现有了明显提升，包括更流畅的潮汐车道通过能力与路口通行逻辑。\n3. 真实场景下的惊艳表现\n封闭道路NOA：在升级至IMOS3.7.0版本后，L7在高速公路和城市环路上的NOA表现令人印象深刻。硬件可升级可更换域控、激光雷达，...\n",
+      "source": "手机新浪汽车",
+      "source_name": "手机新浪汽车",
+      "publish_time": "2026-07-07T16:39:33+08:00",
+      "rank": 2
+    },
+    {
+      "title": "智己回应“智驾三年就废”:顶配硬件一步到位，五年不落伍十年都好开_新能源车_什么值得买",
+      "url": "https://post.m.smzdm.com/p/a039gomz/",
+      "snippet": "智己回应“智驾三年就废”：顶配硬件一步到位，五年不落伍十年都好开\n01 智己称“智驾三年就废”系误读\n2026年6月10日，针对网络流传“智己汽车称‘智驾三年就废’”的说法，经核查多方公开素材，该表述并无事实依据。智己汽车首席技术官项娇在近期多次公开场合强调高阶智能驾驶硬件需“一步到位预埋”，以支持未来5至10年通过OTA持续升级，避免用户因硬件落后而面临功能断代。其在5月20日官方直播中明确表示，智己全系主力车型标配520线超视域激光雷达与英伟达Thor或Orin X高算力芯片，构建L3级感知能力底座，并为L4预留冗余空间，实现“五年不落伍，十年都好开”。所谓“三年就废”并非智己官方观点，而是对行业普遍存在的智驾硬件快速迭代焦虑的误传或曲解。\n02 智己主张硬件预埋对抗技术过时\n智己汽车将“高阶智驾硬件预埋”列为“电车新三大件”之一，与全线控数字底盘、全域800V高压平台并列，作为支撑长期用车价值的核心架构。公司明确反对“减配留坑、付费解锁”的行业潜规则，坚持出厂即标配顶格硬件，包括探测距离达300米的520线激光雷达、总算力最高2000+TOPS的Thor芯片或508TOPS的双Orin X组合，以及8颗800万像素摄像头和4D毫米波雷达组成的360°感知矩阵。项娇指出，当前L2+功能仅调用芯片30%-40%算力，剩余能力专为未来L3/L4算法迭代预留。通过与Momenta联合开发的IM AD系统，用户可随法规开放与算法成熟，逐步解锁城市NOA、无图智驾、高阶代客泊车乃至L3开放道路自动驾驶，无需更换车辆或追加硬件投入。\n路漫修远平常心 2026-06-05\n东齐秀色 2026-0...\n路恒 2026-06-09\n",
+      "source": "什么值得买社区频道",
+      "source_name": "什么值得买社区频道",
+      "publish_time": "",
+      "rank": 3
+    },
+    {
+      "title": "智己LS6 OTA，座舱更丝滑__懂车帝",
+      "url": "https://www.dongchedi.com/ugc/article/7564615121504649753",
+      "snippet": "智己LS6 OTA，座舱更丝滑\n2025-10-24发布\n智己LS6近期迎来了IM OS 3.6.1版本OTA升级，这次更新虽没有“颠覆性新功能”，却把日常用车的“痛点”挨个打通，从座舱体验到辅助驾驶，都藏着不少实用细节。\n智能座舱：把“小毛病”修得更顺手\n这次升级先给座舱体验“补短板”。仪表屏终于解决了偶发的短暂重启问题——之前部分车主遇到的车辆模型区域突然黑屏又恢复的情况，这次彻底被修复，通勤路上的显示体验更稳定。\n哨兵模式的远程控制稳定性也做了优化，之前远程查看车辆状态时偶尔卡顿的情况少了；行车记录仪则针对存储空间不足的场景做了优化，不仅读写速度变快，文件存储失败、录制卡顿的概率也降低了，遇到突发状况时不用再担心“录不上”。\n音响爱好者也能找到惊喜：均衡器的“超重低音”模式终于“真生效”了，之前调完参数音效没变化的bug被修复，低音的下沉感能直接听出区别。快控中心的场景模式图标消失问题也得到解决，点一下就能快速切模式，不用再反复退出重进。\n辅助驾驶：城市、高速、泊车全场景“更懂路”\n辅助驾驶是这次升级的重点，IM AD的几个核心功能都做了细化优化。\n全速域车道保持的稳定性增强，之前在弯道或路面标线模糊时偶尔“画龙”的情况变少，跑高速时能更稳地贴线行驶；城市领航辅助则优化了变道时机——之前在拥堵路段变道犹豫、高速路段变道过...\n收尾：实用主义的“体验补丁”\n这次3.6.1版本更像一份“体验补丁”——没有花哨的新功能，却把车主日常吐槽的“小问题”逐个解决。从座舱的稳定性到辅助驾驶的细节优化，每一处调整都落在“实际用车场景”里，升级后无论是通勤、跑高速还是下地库泊车，都能感觉到“更顺手、更安心”。\n对智己LS6车主来说，这次OTA不用熬夜等更新，但升级后的体验，会在每一天的用车里慢慢体现出来。\n",
+      "source": "懂车帝",
+      "source_name": "懂车帝",
+      "publish_time": "2025-10-24T00:00:00+08:00",
+      "rank": 4
+    },
+    {
+      "title": "【智己IM AD全新版本OTA重磅上线_汽车促销】湖北恩施车城体验中心-易车",
+      "url": "https://dealer.m.yiche.com/d100249034/news_1393934406.html",
+      "snippet": "智己IM AD全新版本OTA重磅上线\n类型：企业新闻 2026-04-21\n",
+      "source": "易车",
+      "source_name": "易车",
+      "publish_time": "2026-04-21T00:00:00+08:00",
+      "rank": 5
+    },
+    {
+      "title": "Zhiji LS7 model was upgraded by IMOS 2.2.0 OTA, adding NOA navigation assistance / blind area intelligent image and other functions.",
+      "url": "https://www.shulou.com/a593379",
+      "snippet": "Zhiji LS7 model was upgraded by IMOS 2.2.0 OTA, adding NOA navigation assistance / blind area intelligent image and other functions.\n2026-07-09 Update From: SLTechnology News&Howtos shulou NAV: SLTechnology News&Howtos > IT Information >\nShulou(Shulou.com)11/24 Report--\nCTOnews.com July 31 news, Zhiji announced today that its LS7 model will officially launch the IMOS 2.2.0 version OTA upgrade, which is expected to be completed in batches within a week after the push is started.\nThe specific upgrade contents of CTOnews.com are as follows:\nNavigation assistance (NOA): now in the Beta stage, it is suitable for urban expressways of Shanghai, Suzhou, Hangzhou, Chengdu, Guangzhou, Beijing (fifth ring road and beyond), Ningbo, Nanjing, Wuxi, Wenzhou, Shenzhen, and expressways of Jiangsu, Zhejiang, Shanghai, Guangzhou, Chengdu, Shenzhen and Beijing. At present, it can realize the functions of autonomous lane change, intelligent dodging, cone alarm and braking, automatic speed limit adjustment, automatic convergence into the main road, automatic ramp and so on.\nBlind area intelligent image: when turning signal, the road condition of the blind area behind the turning side will be projected on the screen in real time to reduce the blind area on the side, improve lane change and steering safety; when turning left at low speed, turn on the turn signal and the speed is lower than 20km/h, activate the image of the left front blind area to reduce the impact of A-pillar blind area on driving and ensure driving safety.\nSmart parking: a new display shows the forward / reverse distance during parking, through which the parking position of the vehicle can be conveyed.\nVoice assistant: after the voice function has been upgraded, it supports 48kHz's online timbre model, which sounds \"more natural and vivid\". At the same time, it can express more emotions, support assistant, pleasure, tenderness and other emotions, and can still ensure high-quality voice broadcasting in a non-network or weak network environment. In addition, the voice assistant can also choose the awakable voice area after the upgrade.\nIM PET Digital Pet: after adopting a...\n",
+      "source": "Shulou",
+      "source_name": "Shulou",
+      "publish_time": "2026-07-09T00:00:00+08:00",
+      "rank": 6
+    },
+    {
+      "title": "智己LS8雨天智驾实测:积水超半胎就降级，线控转向如何保安全?_新能源车_什么值得买",
+      "url": "https://post.m.smzdm.com/p/a3m9269k/",
+      "snippet": "智己LS8雨天智驾实测：积水超半胎就降级，线控转向如何保安全？\n06-05 18:09\n01 雨天智驾稳定性获官方确认\n2026年6月5日，智己汽车就LS8车型在雨天使用智能驾驶辅助系统时的稳定性问题作出正式说明：系统在中到大雨工况下可维持车道保持与自适应巡航功能，但在积水深度超过轮胎半高或能见度低于50米的极端场景中，会主动降级并提示驾驶员接管。该说明基于近期用户反馈及内部实测数据，旨在明确线控转向系统在湿滑路面下的安全边界。\n智己LS8全系搭载全线控四轮转向系统，取消了传统机械转向柱，转向指令通过电信号传输至执行电机，响应时间仅2...\n02 雨天工况下的系统行为逻辑\n在降雨环境中，LS8的IM AD ZETA智驾系统会联动全域传感器与底盘控制单元。当摄像头因雨水附着导致车道线识别置信度下降，或激光雷达受雨滴散射干扰时，系统优先依赖毫米波雷达与高精地图进行融合定位。若多源感知一致性低于安全阈值，车道保持功能将退出，仅保留基础ACC，并通过仪表与语音双重提示接管。04 后续OTA与安全建议\n智己汽车表示，将于2026年第三季度推送IM AD 3.1版本OTA更新，重点优化雨雾天气下的多传感器融合算法，提升对非标准障碍物的识别鲁棒性。同时建议用户在降雨期间手动开启“雨夜模式2.0”，该模式会自动增强数字视野补盲、过滤积水反光干扰，并限制智驾系统的横向控制权限，确保纵向跟车为主、横向微调为辅的安全策略。\n新技术验证需经历真实世界复杂场景的反复锤炼。线控转向作为高阶智驾的底层支撑，其在雨天的表现既体现工程冗余设计的有效性，也暴露当前感知系统的物理极限。2026-05-15\n2026-05-18\n2026-04-15\n2026-06-02\n2026-05-20\n2026-06-05\n",
+      "source": "什么值得买社区频道",
+      "source_name": "什么值得买社区频道",
+      "publish_time": "",
+      "rank": 7
+    }
+  ],
+  "raw_response": {
+    "ResponseMetadata": {
+      "RequestId": "202607091453312CDD9FA4D9347A456F36",
+      "Action": "",
+      "Version": "",
+      "Service": "",
+      "Region": ""
+    },
+    "Result": {
+      "TotalDocCount": 20,
+      "Documents": [
+        {
+          "Rank": 0,
+          "Url": "https://auto.sina.cn/2026-07-08/detail-inihapna8090752.d.html",
+          "Title": "2.5.8OTA体验报告:智慧躲避更智慧|智己ls7|智己ls6|三元锂电池|后驱车|悬架_手机新浪网",
+          "Snippet": [
+            {
+              "Type": "text",
+              "Text": "2.5.8OTA体验报告:智慧躲避更智慧\n07.08 15:30\n然后我就来回行程结合刚刚更新的2.5.8OTA升级分享一下使用经验～\nOTA体验\n1. NOA表现\n正向肯定：首先是NOA和Pilot的限速可以调高至130km/h（开智己的肯定不能是高速路障 是吧）\n另外弯道更丝滑，明显感到车道寻迹更稳定了，之前忽左忽右频繁修正，这给驾驶员的信心就不是很强了。\n智慧躲避更加智慧了，能在更远的距离就介入躲避。\n意见反馈：对于高速施工路段的锥桶反应太大了，车辆刚刚监测到连续锥桶就会立刻往右变道，突兀感较强，体感不好，希望后期能做柔和处理。\n还有就是敏捷模式下的变道体验还是差一口气，可能是没有和悬架进行联动吧，希望后期能在敏捷模式下拉紧地盘降低侧倾感，空气...\n另外误跳出两次行人报警，均是在高速公路上，之前从来没有遇到过，希望智驾团队多多收集数据看看是不是新版本BUG\n可在「设置-智能驾驶-影像辅助-智能后视盲区影像」中开启和关闭该功能。\n3. 雨夜模式\n这个可太赞了！什么叫专业？这就叫专业！\n雨夜模式自动打开条件：雨刮达到最大挡时，将推荐开启雨夜模式。\n也可通过「应用中心-场景模式-雨夜模式」手动进入或者语音打开。\n雨夜模式下，前风挡除雾、外后视镜加热将自动开启，胎压信息也会实时显示在驾驶屏。\n4. DFIE动态融合图像增强\n说说这个AI增强\n建议：希望跟随环境变化进行增强，灯光条件好的情况下可以不必增强，灯光昏暗的情况下增强效果能好，另外能够对后方车辆灯光做柔和处理？有时候增强状态下图像中的车辆仿佛开了远光灯。\n5. 主题\n夸的太多了，我就直接提建议了。\n按下主题后延迟卡顿较久，建议单独给主题加一个二级菜单，可以有更长的时间进行缓存，提升体验感。\n圣诞主题左上角绿色圣诞树会遮挡灯光标志，建议这块去处树木，直接白色雪地。\n"
+            }
+          ],
+          "DocumentInfo": {
+            "ContentCharCount": 1364,
+            "ContentTokenCount": 1078,
+            "Filetype": "webpage",
+            "PublishTime": "2026-07-08T15:30:09+08:00"
+          },
+          "HostInfo": {
+            "Hostname": "手机新浪汽车",
+            "IconUrl": "https://p26-volcsearch-d-sign.byteimg.com/isp-i18n-media/img/06029ec5459b532b1711ee58e61df9f9~tplv-be4g95zd3a-224x224.jpeg?lk3s=feb11e32&x-expires=1788764012&x-signature=8U8MqBvZ%2BHRzU%2FO0z%2Fu49zLw%2BQA%3D"
+          }
+        },
+        {
+          "Rank": 1,
+          "Url": "https://post.m.smzdm.com/p/a3mnn0g5/",
+          "Title": "智己OTA升级真相:老车主痛点终结，新车主玩出花_行车记录仪_什么值得买",
+          "Snippet": [
+            {
+              "Type": "text",
+              "Text": "06-18 08:22\n01 OTA覆盖范围与推送节奏\n截至2026年6月，智己汽车已多次实施大规模OTA升级，覆盖从2023款到2025款的多款车型。根据官方披露，1月启动的OTA为全系推送，但具体功能因芯片平台不同而有所区分。搭载高通8155芯片的23款LS6、LS7及部分L7车型，主要获得四向行车记录仪、语音识别优化等基础体验增强；而采用8295芯片的新一代LS6、L6及LS9则解锁AI Agent点餐、手车互联、无麦K歌等高阶生态功能。值得注意的是，辅助驾驶方面的重大升级——如Momenta R6端到端大模型——虽已在LS9上率先落地，但其他车型因“节前审核压力大”，满血版推送被安排在春节后，体现出品牌对安全验证的谨慎态度。OTA更新过程通常耗时1-2小时，建议车辆保持静止状态以确保系统稳定性。\n新一代智己LS6再进化，OTA上线手车互联新功能\n速度与车 2026-01-15\n新老车主利益同享，智己年度重磅OTA推送方案流出\n大哥爱看车 2026-01-14\n智己汽车车机系统 OTA 更新需要多长时间\n汽车之家 2026-04-13\n手机即车机，新一代智己LS6重磅OTA将上线手车互联\n走进大自然 2026-01-14\n智己L6展示强大OTA能力，IMOS 4.1.0系统细节全面打磨\n车里车外 2026-02-10\n新一代智己LS6最新资讯，无麦K歌与手车互联通过OTA上线\n笑侠 2026-01-20\n亮哥说车 2026-0...\n能力再突破，智己IM AD全新OTA引领辅助驾驶全域进化\n走进大自然 2026-04-23\n无麦K歌正式加入新一代智己LS6，最新OTA升级内容解读\n红枫染秋 2026-01-20\n"
+            }
+          ],
+          "DocumentInfo": {
+            "ContentCharCount": 2441,
+            "ContentTokenCount": 1886,
+            "Filetype": "webpage",
+            "PublishTime": ""
+          },
+          "HostInfo": {
+            "Hostname": "什么值得买社区频道",
+            "IconUrl": "https://p11-volcsearch-d-sign.byteimg.com/isp-i18n-media/img/1a44b9ef64d4f823f24d9493b4fe660a~tplv-be4g95zd3a-224x224.jpeg?lk3s=feb11e32&x-expires=1788764012&x-signature=UKRsNsVUPxfuL1XOfrr4ZhxotUY%3D"
+          }
+        },
+        {
+          "Rank": 2,
+          "Url": "https://auto.sina.cn/2026-07-07/detail-inifyknx1640689.d.html",
+          "Title": "智己L7的辅助驾驶功能有哪些亮点?|OTA|智己汽车|智己ls8|手势|模型_手机新浪网",
+          "Snippet": [
+            {
+              "Type": "text",
+              "Text": "智己L7的辅助驾驶功能有哪些亮点？\n07.07 16:39\n智己L7的辅助驾驶远非“一次性”技术堆砌，而是通过行业首创的硬件可升级架构与坚持不懈的软件OTA长周期迭代，实现了从最初的基础L2到如今覆盖城区、高速的全场景智驾能力跃迁，其中识别交警手势和“AI底盘”等细节功能，更展现了其从“能用”到“好用”的独特思考。\n一、独步行业的“硬件可升级”架构\n1. 改变游戏规则的硬件OTA\n智己L7在早期车型中便做出了一个极具魄力的决定：允许用户通过物理更换域控制器、激光雷达和摄像头等核心硬件，将计算平台从Xavier升级至Orin，从而获得高阶智驾能力。 这一“硬件OTA”不仅兑现了品牌对天使轮用户的承诺，更让最早一批L7车主拥有了与后续新车几乎同等的智能基座。\n2. 持续的感知硬件与算力供给\n完成硬件升级的智己L7，搭载了激光雷达与高算力芯片，为后续复杂的算法运行提供了充沛的“体力”。 这使得它能够像智己LS8等新车型一样，应用包括520线超视域激光雷达与英伟达Thor芯片在内的先进感知与决策体系方案。\n二、持续进化的软件算法体验\n1. 长周期、覆盖全系车型的OTA支持\n智己为L7提供了汽车行业罕见的OTA更新周期与覆盖广度，不仅为L7这类早期车型持续推送新固件，甚至还优先向等待更久的老车主推送，体现其对用户的尊重与承诺。 每一次版本的更新都带来了实实在在的能力提升。\n"
+            },
+            {
+              "Type": "image",
+              "Image": {
+                "Width": 256,
+                "Height": 690,
+                "ImageUrl": "https://k.sinaimg.cn/n/sinakd20260707ac/146/w256h690/20260707/53ab-dbc5b69cd495f46ed608bea8e73adf43.jpg/w700d1q75cms.jpg?by=cms_fixed_width"
+              }
+            },
+            {
+              "Type": "text",
+              "Text": "2. 大模型上车后的“质变”\n在成功OTA了最新版大模型智驾后，智己L7在城区复杂路况下的表现有了明显提升，包括更流畅的潮汐车道通过能力与路口通行逻辑。\n3. 真实场景下的惊艳表现\n封闭道路NOA：在升级至IMOS3.7.0版本后，L7在高速公路和城市环路上的NOA表现令人印象深刻。硬件可升级可更换域控、激光雷达，...\n"
+            }
+          ],
+          "DocumentInfo": {
+            "ContentCharCount": 1347,
+            "ContentTokenCount": 925,
+            "Filetype": "webpage",
+            "PublishTime": "2026-07-07T16:39:33+08:00"
+          },
+          "HostInfo": {
+            "Hostname": "手机新浪汽车",
+            "IconUrl": "https://p26-volcsearch-d-sign.byteimg.com/isp-i18n-media/img/06029ec5459b532b1711ee58e61df9f9~tplv-be4g95zd3a-224x224.jpeg?lk3s=feb11e32&x-expires=1788764012&x-signature=8U8MqBvZ%2BHRzU%2FO0z%2Fu49zLw%2BQA%3D"
+          }
+        },
+        {
+          "Rank": 3,
+          "Url": "https://post.m.smzdm.com/p/a039gomz/",
+          "Title": "智己回应“智驾三年就废”:顶配硬件一步到位，五年不落伍十年都好开_新能源车_什么值得买",
+          "Snippet": [
+            {
+              "Type": "text",
+              "Text": "智己回应“智驾三年就废”：顶配硬件一步到位，五年不落伍十年都好开\n01 智己称“智驾三年就废”系误读\n2026年6月10日，针对网络流传“智己汽车称‘智驾三年就废’”的说法，经核查多方公开素材，该表述并无事实依据。智己汽车首席技术官项娇在近期多次公开场合强调高阶智能驾驶硬件需“一步到位预埋”，以支持未来5至10年通过OTA持续升级，避免用户因硬件落后而面临功能断代。其在5月20日官方直播中明确表示，智己全系主力车型标配520线超视域激光雷达与英伟达Thor或Orin X高算力芯片，构建L3级感知能力底座，并为L4预留冗余空间，实现“五年不落伍，十年都好开”。所谓“三年就废”并非智己官方观点，而是对行业普遍存在的智驾硬件快速迭代焦虑的误传或曲解。\n02 智己主张硬件预埋对抗技术过时\n智己汽车将“高阶智驾硬件预埋”列为“电车新三大件”之一，与全线控数字底盘、全域800V高压平台并列，作为支撑长期用车价值的核心架构。公司明确反对“减配留坑、付费解锁”的行业潜规则，坚持出厂即标配顶格硬件，包括探测距离达300米的520线激光雷达、总算力最高2000+TOPS的Thor芯片或508TOPS的双Orin X组合，以及8颗800万像素摄像头和4D毫米波雷达组成的360°感知矩阵。项娇指出，当前L2+功能仅调用芯片30%-40%算力，剩余能力专为未来L3/L4算法迭代预留。通过与Momenta联合开发的IM AD系统，用户可随法规开放与算法成熟，逐步解锁城市NOA、无图智驾、高阶代客泊车乃至L3开放道路自动驾驶，无需更换车辆或追加硬件投入。\n路漫修远平常心 2026-06-05\n东齐秀色 2026-0...\n路恒 2026-06-09\n"
+            }
+          ],
+          "DocumentInfo": {
+            "ContentCharCount": 1455,
+            "ContentTokenCount": 1091,
+            "Filetype": "webpage",
+            "PublishTime": ""
+          },
+          "HostInfo": {
+            "Hostname": "什么值得买社区频道",
+            "IconUrl": "https://p11-volcsearch-d-sign.byteimg.com/isp-i18n-media/img/1a44b9ef64d4f823f24d9493b4fe660a~tplv-be4g95zd3a-224x224.jpeg?lk3s=feb11e32&x-expires=1788764012&x-signature=UKRsNsVUPxfuL1XOfrr4ZhxotUY%3D"
+          }
+        },
+        {
+          "Rank": 4,
+          "Url": "https://www.dongchedi.com/ugc/article/7564615121504649753",
+          "Title": "智己LS6 OTA，座舱更丝滑__懂车帝",
+          "Snippet": [
+            {
+              "Type": "text",
+              "Text": "智己LS6 OTA，座舱更丝滑\n2025-10-24发布\n智己LS6近期迎来了IM OS 3.6.1版本OTA升级，这次更新虽没有“颠覆性新功能”，却把日常用车的“痛点”挨个打通，从座舱体验到辅助驾驶，都藏着不少实用细节。\n智能座舱：把“小毛病”修得更顺手\n这次升级先给座舱体验“补短板”。仪表屏终于解决了偶发的短暂重启问题——之前部分车主遇到的车辆模型区域突然黑屏又恢复的情况，这次彻底被修复，通勤路上的显示体验更稳定。\n哨兵模式的远程控制稳定性也做了优化，之前远程查看车辆状态时偶尔卡顿的情况少了；行车记录仪则针对存储空间不足的场景做了优化，不仅读写速度变快，文件存储失败、录制卡顿的概率也降低了，遇到突发状况时不用再担心“录不上”。\n音响爱好者也能找到惊喜：均衡器的“超重低音”模式终于“真生效”了，之前调完参数音效没变化的bug被修复，低音的下沉感能直接听出区别。快控中心的场景模式图标消失问题也得到解决，点一下就能快速切模式，不用再反复退出重进。\n辅助驾驶：城市、高速、泊车全场景“更懂路”\n辅助驾驶是这次升级的重点，IM AD的几个核心功能都做了细化优化。\n全速域车道保持的稳定性增强，之前在弯道或路面标线模糊时偶尔“画龙”的情况变少，跑高速时能更稳地贴线行驶；城市领航辅助则优化了变道时机——之前在拥堵路段变道犹豫、高速路段变道过...\n收尾：实用主义的“体验补丁”\n这次3.6.1版本更像一份“体验补丁”——没有花哨的新功能，却把车主日常吐槽的“小问题”逐个解决。从座舱的稳定性到辅助驾驶的细节优化，每一处调整都落在“实际用车场景”里，升级后无论是通勤、跑高速还是下地库泊车，都能感觉到“更顺手、更安心”。\n对智己LS6车主来说，这次OTA不用熬夜等更新，但升级后的体验，会在每一天的用车里慢慢体现出来。\n"
+            }
+          ],
+          "DocumentInfo": {
+            "ContentCharCount": 1014,
+            "ContentTokenCount": 897,
+            "Filetype": "webpage",
+            "PublishTime": "2025-10-24T00:00:00+08:00"
+          },
+          "HostInfo": {
+            "Hostname": "懂车帝",
+            "IconUrl": "https://p3-volcsearch-d-sign.byteimg.com/isp-i18n-media/img/d43f2d7c35c733bcae279bff6919c9e4~tplv-be4g95zd3a-224x224.jpeg?lk3s=feb11e32&x-expires=1788764012&x-signature=TRM9sOhOqa5vxiHjb6H9YRZafOY%3D"
+          }
+        },
+        {
+          "Rank": 5,
+          "Url": "https://dealer.m.yiche.com/d100249034/news_1393934406.html",
+          "Title": "【智己IM AD全新版本OTA重磅上线_汽车促销】湖北恩施车城体验中心-易车",
+          "Snippet": [
+            {
+              "Type": "text",
+              "Text": "智己IM AD全新版本OTA重磅上线\n类型：企业新闻 2026-04-21\n"
+            },
+            {
+              "Type": "image",
+              "Image": {
+                "Width": 550,
+                "Height": 1484,
+                "ImageUrl": "https://image.bitauto.com/dealer/news/100249034/20260421/d33006de-d09c-40d2-a7f7-825b17ad7e02.jpg"
+              }
+            },
+            {
+              "Type": "image",
+              "Image": {
+                "Width": 550,
+                "Height": 1276,
+                "ImageUrl": "https://image.bitauto.com/dealer/news/100249034/20260421/c7da50fa-d346-4496-884c-65bb5f5d2798.jpg"
+              }
+            },
+            {
+              "Type": "image",
+              "Image": {
+                "Width": 550,
+                "Height": 1042,
+                "ImageUrl": "https://image.bitauto.com/dealer/news/100249034/20260421/af08f6a5-876f-4dc6-8839-9613f14b861c.jpg"
+              }
+            }
+          ],
+          "DocumentInfo": {
+            "ContentCharCount": 744,
+            "ContentTokenCount": 196,
+            "Filetype": "webpage",
+            "PublishTime": "2026-04-21T00:00:00+08:00"
+          },
+          "HostInfo": {
+            "Hostname": "易车",
+            "IconUrl": "https://p11-volcsearch-d-sign.byteimg.com/isp-i18n-media/img/34c60cef85d99e106a7000a995e705ed~tplv-be4g95zd3a-224x224.jpeg?lk3s=feb11e32&x-expires=1788764012&x-signature=11MKz%2BGfDIevEpH2T8Ys3Dusb5A%3D"
+          }
+        },
+        {
+          "Rank": 6,
+          "Url": "https://www.shulou.com/a593379",
+          "Title": "Zhiji LS7 model was upgraded by IMOS 2.2.0 OTA, adding NOA navigation assistance / blind area intelligent image and other functions.",
+          "Snippet": [
+            {
+              "Type": "text",
+              "Text": "Zhiji LS7 model was upgraded by IMOS 2.2.0 OTA, adding NOA navigation assistance / blind area intelligent image and other functions.\n2026-07-09 Update From: SLTechnology News&Howtos shulou NAV: SLTechnology News&Howtos > IT Information >\nShulou(Shulou.com)11/24 Report--\nCTOnews.com July 31 news, Zhiji announced today that its LS7 model will officially launch the IMOS 2.2.0 version OTA upgrade, which is expected to be completed in batches within a week after the push is started.\nThe specific upgrade contents of CTOnews.com are as follows:\nNavigation assistance (NOA): now in the Beta stage, it is suitable for urban expressways of Shanghai, Suzhou, Hangzhou, Chengdu, Guangzhou, Beijing (fifth ring road and beyond), Ningbo, Nanjing, Wuxi, Wenzhou, Shenzhen, and expressways of Jiangsu, Zhejiang, Shanghai, Guangzhou, Chengdu, Shenzhen and Beijing. At present, it can realize the functions of autonomous lane change, intelligent dodging, cone alarm and braking, automatic speed limit adjustment, automatic convergence into the main road, automatic ramp and so on.\nBlind area intelligent image: when turning signal, the road condition of the blind area behind the turning side will be projected on the screen in real time to reduce the blind area on the side, improve lane change and steering safety; when turning left at low speed, turn on the turn signal and the speed is lower than 20km/h, activate the image of the left front blind area to reduce the impact of A-pillar blind area on driving and ensure driving safety.\nSmart parking: a new display shows the forward / reverse distance during parking, through which the parking position of the vehicle can be conveyed.\nVoice assistant: after the voice function has been upgraded, it supports 48kHz's online timbre model, which sounds \"more natural and vivid\". At the same time, it can express more emotions, support assistant, pleasure, tenderness and other emotions, and can still ensure high-quality voice broadcasting in a non-network or weak network environment. In addition, the voice assistant can also choose the awakable voice area after the upgrade.\nIM PET Digital Pet: after adopting a...\n"
+            }
+          ],
+          "DocumentInfo": {
+            "ContentCharCount": 3276,
+            "ContentTokenCount": 688,
+            "Filetype": "webpage",
+            "PublishTime": "2026-07-09T00:00:00+08:00"
+          },
+          "HostInfo": {
+            "Hostname": "Shulou",
+            "IconUrl": "https://p3-volcsearch-d-sign.byteimg.com/isp-i18n-media/img/a9924e8f9a62a92db74b18496984bb6b~tplv-be4g95zd3a-224x224.jpeg?lk3s=feb11e32&x-expires=1788764012&x-signature=DtSdu8iesgE%2FHvK9uli0ujxn7Yg%3D"
+          }
+        },
+        {
+          "Rank": 7,
+          "Url": "https://post.m.smzdm.com/p/a3m9269k/",
+          "Title": "智己LS8雨天智驾实测:积水超半胎就降级，线控转向如何保安全?_新能源车_什么值得买",
+          "Snippet": [
+            {
+              "Type": "text",
+              "Text": "智己LS8雨天智驾实测：积水超半胎就降级，线控转向如何保安全？\n06-05 18:09\n01 雨天智驾稳定性获官方确认\n2026年6月5日，智己汽车就LS8车型在雨天使用智能驾驶辅助系统时的稳定性问题作出正式说明：系统在中到大雨工况下可维持车道保持与自适应巡航功能，但在积水深度超过轮胎半高或能见度低于50米的极端场景中，会主动降级并提示驾驶员接管。该说明基于近期用户反馈及内部实测数据，旨在明确线控转向系统在湿滑路面下的安全边界。\n智己LS8全系搭载全线控四轮转向系统，取消了传统机械转向柱，转向指令通过电信号传输至执行电机，响应时间仅2...\n02 雨天工况下的系统行为逻辑\n在降雨环境中，LS8的IM AD ZETA智驾系统会联动全域传感器与底盘控制单元。当摄像头因雨水附着导致车道线识别置信度下降，或激光雷达受雨滴散射干扰时，系统优先依赖毫米波雷达与高精地图进行融合定位。若多源感知一致性低于安全阈值，车道保持功能将退出，仅保留基础ACC，并通过仪表与语音双重提示接管。04 后续OTA与安全建议\n智己汽车表示，将于2026年第三季度推送IM AD 3.1版本OTA更新，重点优化雨雾天气下的多传感器融合算法，提升对非标准障碍物的识别鲁棒性。同时建议用户在降雨期间手动开启“雨夜模式2.0”，该模式会自动增强数字视野补盲、过滤积水反光干扰，并限制智驾系统的横向控制权限，确保纵向跟车为主、横向微调为辅的安全策略。\n新技术验证需经历真实世界复杂场景的反复锤炼。线控转向作为高阶智驾的底层支撑，其在雨天的表现既体现工程冗余设计的有效性，也暴露当前感知系统的物理极限。2026-05-15\n2026-05-18\n2026-04-15\n2026-06-02\n2026-05-20\n2026-06-05\n"
+            }
+          ],
+          "DocumentInfo": {
+            "ContentCharCount": 1343,
+            "ContentTokenCount": 1408,
+            "Filetype": "webpage",
+            "PublishTime": ""
+          },
+          "HostInfo": {
+            "Hostname": "什么值得买社区频道",
+            "IconUrl": "https://p11-volcsearch-d-sign.byteimg.com/isp-i18n-media/img/1a44b9ef64d4f823f24d9493b4fe660a~tplv-be4g95zd3a-224x224.jpeg?lk3s=feb11e32&x-expires=1788764012&x-signature=UKRsNsVUPxfuL1XOfrr4ZhxotUY%3D"
+          }
+        }
+      ],
+      "ErrorCode": 0,
+      "ErrorMsg": ""
+    }
+  },
+  "retrieved_at": "2026-07-09T14:53:32.814166",
+  "attempts": 1,
+  "cache_status": "miss",
+  "api_called": true
+}

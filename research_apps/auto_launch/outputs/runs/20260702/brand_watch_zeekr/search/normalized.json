@@ -1,0 +1,799 @@
+{
+  "items": [
+    {
+      "query": "极氪 最近7天 官方 动作 交付 权益 OTA",
+      "target_id": "zeekr",
+      "mode": "brand_watch",
+      "event_type_ids": [],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "overview_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "scout",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "R1 极氪 最近7天 官方 动作 交付 权益 OTA",
+      "url": "https://example.com/101",
+      "canonical_url": "https://example.com/101",
+      "snippet": "S1",
+      "source_name": "汽车之家",
+      "source_type_guess": "unknown",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "no domain match; default unknown",
+      "domain": "example.com",
+      "claim_source_hint": "maybe_official",
+      "claim_source_hint_reason": "keyword heuristic found official keywords in text",
+      "publish_time": "2026-07-01",
+      "time_window_status": "in_window",
+      "is_out_of_window": false,
+      "retrieved_at": "2026-09-04T13:00:31.640549",
+      "raw_rank": 1,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": true,
+      "matched_queries": [
+        "极氪 最近7天 官方 动作 交付 权益 OTA"
+      ],
+      "matched_event_type_ids": [],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        1
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "极氪 交付 销量 战报 最近7天",
+      "target_id": "zeekr",
+      "mode": "brand_watch",
+      "event_type_ids": [
+        "delivery_start",
+        "sales_milestone",
+        "order_milestone"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "scout",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "R1 极氪 交付 销量 战报 最近7天",
+      "url": "https://example.com/201",
+      "canonical_url": "https://example.com/201",
+      "snippet": "S1",
+      "source_name": "汽车之家",
+      "source_type_guess": "unknown",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "no domain match; default unknown",
+      "domain": "example.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-01",
+      "time_window_status": "in_window",
+      "is_out_of_window": false,
+      "retrieved_at": "2026-09-04T13:00:31.640608",
+      "raw_rank": 1,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": true,
+      "matched_queries": [
+        "极氪 交付 销量 战报 最近7天"
+      ],
+      "matched_event_type_ids": [
+        "delivery_start",
+        "sales_milestone",
+        "order_milestone"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        1
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "极氪 权益 价格 限时 最近7天",
+      "target_id": "zeekr",
+      "mode": "brand_watch",
+      "event_type_ids": [
+        "benefit_adjustment",
+        "official_price_change"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "scout",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "R1 极氪 权益 价格 限时 最近7天",
+      "url": "https://example.com/301",
+      "canonical_url": "https://example.com/301",
+      "snippet": "S1",
+      "source_name": "汽车之家",
+      "source_type_guess": "unknown",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "no domain match; default unknown",
+      "domain": "example.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-01",
+      "time_window_status": "in_window",
+      "is_out_of_window": false,
+      "retrieved_at": "2026-09-04T13:00:31.640665",
+      "raw_rank": 1,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": true,
+      "matched_queries": [
+        "极氪 权益 价格 限时 最近7天"
+      ],
+      "matched_event_type_ids": [
+        "benefit_adjustment",
+        "official_price_change"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        1
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "极氪 OTA 技术 发布 最近7天",
+      "target_id": "zeekr",
+      "mode": "brand_watch",
+      "event_type_ids": [
+        "technology_release",
+        "config_release",
+        "launch_event"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "R1 极氪 OTA 技术 发布 最近7天",
+      "url": "https://example.com/401",
+      "canonical_url": "https://example.com/401",
+      "snippet": "S1",
+      "source_name": "汽车之家",
+      "source_type_guess": "unknown",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "no domain match; default unknown",
+      "domain": "example.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-01",
+      "time_window_status": "in_window",
+      "is_out_of_window": false,
+      "retrieved_at": "2026-09-04T13:00:31.640712",
+      "raw_rank": 1,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": true,
+      "matched_queries": [
+        "极氪 OTA 技术 发布 最近7天"
+      ],
+      "matched_event_type_ids": [
+        "technology_release",
+        "config_release",
+        "launch_event"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        1
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "极氪 门店 试驾 活动 最近7天",
+      "target_id": "zeekr",
+      "mode": "brand_watch",
+      "event_type_ids": [
+        "channel_campaign",
+        "user_event"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media",
+        "tier_4_social_signal",
+        "tier_5_unverified"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "R1 极氪 门店 试驾 活动 最近7天",
+      "url": "https://example.com/501",
+      "canonical_url": "https://example.com/501",
+      "snippet": "S1",
+      "source_name": "汽车之家",
+      "source_type_guess": "unknown",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "no domain match; default unknown",
+      "domain": "example.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-01",
+      "time_window_status": "in_window",
+      "is_out_of_window": false,
+      "retrieved_at": "2026-09-04T13:00:31.640759",
+      "raw_rank": 1,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": true,
+      "matched_queries": [
+        "极氪 门店 试驾 活动 最近7天"
+      ],
+      "matched_event_type_ids": [
+        "channel_campaign",
+        "user_event"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media",
+        "tier_4_social_signal",
+        "tier_5_unverified"
+      ],
+      "raw_ranks": [
+        1
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "极氪 发布会 技术 品牌 最近7天",
+      "target_id": "zeekr",
+      "mode": "brand_watch",
+      "event_type_ids": [
+        "launch_event",
+        "technology_release",
+        "brand_campaign"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "R1 极氪 发布会 技术 品牌 最近7天",
+      "url": "https://example.com/601",
+      "canonical_url": "https://example.com/601",
+      "snippet": "S1",
+      "source_name": "汽车之家",
+      "source_type_guess": "unknown",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "no domain match; default unknown",
+      "domain": "example.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-01",
+      "time_window_status": "in_window",
+      "is_out_of_window": false,
+      "retrieved_at": "2026-09-04T13:00:31.640812",
+      "raw_rank": 1,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": true,
+      "matched_queries": [
+        "极氪 发布会 技术 品牌 最近7天"
+      ],
+      "matched_event_type_ids": [
+        "launch_event",
+        "technology_release",
+        "brand_campaign"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        1
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "极氪 联名 合作 代言 最近7天",
+      "target_id": "zeekr",
+      "mode": "brand_watch",
+      "event_type_ids": [
+        "partnership"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "R1 极氪 联名 合作 代言 最近7天",
+      "url": "https://example.com/701",
+      "canonical_url": "https://example.com/701",
+      "snippet": "S1",
+      "source_name": "汽车之家",
+      "source_type_guess": "unknown",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "no domain match; default unknown",
+      "domain": "example.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-01",
+      "time_window_status": "in_window",
+      "is_out_of_window": false,
+      "retrieved_at": "2026-09-04T13:00:31.640864",
+      "raw_rank": 1,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": true,
+      "matched_queries": [
+        "极氪 联名 合作 代言 最近7天"
+      ],
+      "matched_event_type_ids": [
+        "partnership"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        1
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "极氪 最近7天 官方 动作 交付 权益 OTA",
+      "target_id": "zeekr",
+      "mode": "brand_watch",
+      "event_type_ids": [],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "overview_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "scout",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "R2 极氪 最近7天 官方 动作 交付 权益 OTA",
+      "url": "https://example.com/102",
+      "canonical_url": "https://example.com/102",
+      "snippet": "S2",
+      "source_name": "懂车帝",
+      "source_type_guess": "unknown",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "no domain match; default unknown",
+      "domain": "example.com",
+      "claim_source_hint": "maybe_official",
+      "claim_source_hint_reason": "keyword heuristic found official keywords in text",
+      "publish_time": "2026-06-30",
+      "time_window_status": "in_window",
+      "is_out_of_window": false,
+      "retrieved_at": "2026-09-04T13:00:31.640582",
+      "raw_rank": 2,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": true,
+      "matched_queries": [
+        "极氪 最近7天 官方 动作 交付 权益 OTA"
+      ],
+      "matched_event_type_ids": [],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        2
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "极氪 交付 销量 战报 最近7天",
+      "target_id": "zeekr",
+      "mode": "brand_watch",
+      "event_type_ids": [
+        "delivery_start",
+        "sales_milestone",
+        "order_milestone"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "scout",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "R2 极氪 交付 销量 战报 最近7天",
+      "url": "https://example.com/202",
+      "canonical_url": "https://example.com/202",
+      "snippet": "S2",
+      "source_name": "懂车帝",
+      "source_type_guess": "unknown",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "no domain match; default unknown",
+      "domain": "example.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-06-30",
+      "time_window_status": "in_window",
+      "is_out_of_window": false,
+      "retrieved_at": "2026-09-04T13:00:31.640640",
+      "raw_rank": 2,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": true,
+      "matched_queries": [
+        "极氪 交付 销量 战报 最近7天"
+      ],
+      "matched_event_type_ids": [
+        "delivery_start",
+        "sales_milestone",
+        "order_milestone"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        2
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "极氪 权益 价格 限时 最近7天",
+      "target_id": "zeekr",
+      "mode": "brand_watch",
+      "event_type_ids": [
+        "benefit_adjustment",
+        "official_price_change"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "scout",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "R2 极氪 权益 价格 限时 最近7天",
+      "url": "https://example.com/302",
+      "canonical_url": "https://example.com/302",
+      "snippet": "S2",
+      "source_name": "懂车帝",
+      "source_type_guess": "unknown",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "no domain match; default unknown",
+      "domain": "example.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-06-30",
+      "time_window_status": "in_window",
+      "is_out_of_window": false,
+      "retrieved_at": "2026-09-04T13:00:31.640688",
+      "raw_rank": 2,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": true,
+      "matched_queries": [
+        "极氪 权益 价格 限时 最近7天"
+      ],
+      "matched_event_type_ids": [
+        "benefit_adjustment",
+        "official_price_change"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        2
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "极氪 OTA 技术 发布 最近7天",
+      "target_id": "zeekr",
+      "mode": "brand_watch",
+      "event_type_ids": [
+        "technology_release",
+        "config_release",
+        "launch_event"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "R2 极氪 OTA 技术 发布 最近7天",
+      "url": "https://example.com/402",
+      "canonical_url": "https://example.com/402",
+      "snippet": "S2",
+      "source_name": "懂车帝",
+      "source_type_guess": "unknown",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "no domain match; default unknown",
+      "domain": "example.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-06-30",
+      "time_window_status": "in_window",
+      "is_out_of_window": false,
+      "retrieved_at": "2026-09-04T13:00:31.640735",
+      "raw_rank": 2,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": true,
+      "matched_queries": [
+        "极氪 OTA 技术 发布 最近7天"
+      ],
+      "matched_event_type_ids": [
+        "technology_release",
+        "config_release",
+        "launch_event"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        2
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "极氪 门店 试驾 活动 最近7天",
+      "target_id": "zeekr",
+      "mode": "brand_watch",
+      "event_type_ids": [
+        "channel_campaign",
+        "user_event"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media",
+        "tier_4_social_signal",
+        "tier_5_unverified"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "R2 极氪 门店 试驾 活动 最近7天",
+      "url": "https://example.com/502",
+      "canonical_url": "https://example.com/502",
+      "snippet": "S2",
+      "source_name": "懂车帝",
+      "source_type_guess": "unknown",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "no domain match; default unknown",
+      "domain": "example.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-06-30",
+      "time_window_status": "in_window",
+      "is_out_of_window": false,
+      "retrieved_at": "2026-09-04T13:00:31.640782",
+      "raw_rank": 2,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": true,
+      "matched_queries": [
+        "极氪 门店 试驾 活动 最近7天"
+      ],
+      "matched_event_type_ids": [
+        "channel_campaign",
+        "user_event"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media",
+        "tier_4_social_signal",
+        "tier_5_unverified"
+      ],
+      "raw_ranks": [
+        2
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "极氪 发布会 技术 品牌 最近7天",
+      "target_id": "zeekr",
+      "mode": "brand_watch",
+      "event_type_ids": [
+        "launch_event",
+        "technology_release",
+        "brand_campaign"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "R2 极氪 发布会 技术 品牌 最近7天",
+      "url": "https://example.com/602",
+      "canonical_url": "https://example.com/602",
+      "snippet": "S2",
+      "source_name": "懂车帝",
+      "source_type_guess": "unknown",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "no domain match; default unknown",
+      "domain": "example.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-06-30",
+      "time_window_status": "in_window",
+      "is_out_of_window": false,
+      "retrieved_at": "2026-09-04T13:00:31.640838",
+      "raw_rank": 2,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": true,
+      "matched_queries": [
+        "极氪 发布会 技术 品牌 最近7天"
+      ],
+      "matched_event_type_ids": [
+        "launch_event",
+        "technology_release",
+        "brand_campaign"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        2
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "极氪 联名 合作 代言 最近7天",
+      "target_id": "zeekr",
+      "mode": "brand_watch",
+      "event_type_ids": [
+        "partnership"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "R2 极氪 联名 合作 代言 最近7天",
+      "url": "https://example.com/702",
+      "canonical_url": "https://example.com/702",
+      "snippet": "S2",
+      "source_name": "懂车帝",
+      "source_type_guess": "unknown",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "no domain match; default unknown",
+      "domain": "example.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-06-30",
+      "time_window_status": "in_window",
+      "is_out_of_window": false,
+      "retrieved_at": "2026-09-04T13:00:31.640889",
+      "raw_rank": 2,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": true,
+      "matched_queries": [
+        "极氪 联名 合作 代言 最近7天"
+      ],
+      "matched_event_type_ids": [
+        "partnership"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        2
+      ],
+      "dedupe_hit_count": 1
+    }
+  ],
+  "total": 14,
+  "run_mode": "live",
+  "is_mock": false,
+  "dedupe": {
+    "raw_item_count": 14,
+    "normalized_item_count": 14
+  }
+}

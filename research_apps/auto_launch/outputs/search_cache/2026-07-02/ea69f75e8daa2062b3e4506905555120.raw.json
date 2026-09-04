@@ -1,0 +1,26 @@
+{
+  "query": "极氪 最近7天 官方 动作 交付 权益 OTA",
+  "status": "success",
+  "result_count": 2,
+  "results": [
+    {
+      "title": "R1 极氪 最近7天 官方 动作 交付 权益 OTA",
+      "url": "https://example.com/101",
+      "snippet": "S1",
+      "source": "汽车之家",
+      "publish_time": "2026-07-01"
+    },
+    {
+      "title": "R2 极氪 最近7天 官方 动作 交付 权益 OTA",
+      "url": "https://example.com/102",
+      "snippet": "S2",
+      "source": "懂车帝",
+      "publish_time": "2026-06-30"
+    }
+  ],
+  "raw_response": {},
+  "retrieved_at": "2026-07-02T12:00:00",
+  "attempts": 1,
+  "cache_status": "disabled",
+  "api_called": true
+}

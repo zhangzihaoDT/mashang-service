@@ -1,0 +1,340 @@
+{
+  "task_name": "auto_launch_volc_search",
+  "mode": "brand_watch",
+  "monitor_date": "2026-07-02",
+  "user_request": "看看极氪最近 7 天都有什么动作",
+  "run_mode": "live",
+  "is_mock": false,
+  "profile": "deep_scan",
+  "query_count": 8,
+  "api_call_count": 0,
+  "cache_hit_count": 8,
+  "cache_miss_count": 0,
+  "results": [
+    {
+      "query": "极氪 最近7天 官方 动作 交付 权益 OTA",
+      "status": "success",
+      "result_count": 2,
+      "results": [
+        {
+          "title": "R1 极氪 最近7天 官方 动作 交付 权益 OTA",
+          "url": "https://example.com/101",
+          "snippet": "S1",
+          "source": "汽车之家",
+          "publish_time": "2026-07-01"
+        },
+        {
+          "title": "R2 极氪 最近7天 官方 动作 交付 权益 OTA",
+          "url": "https://example.com/102",
+          "snippet": "S2",
+          "source": "懂车帝",
+          "publish_time": "2026-06-30"
+        }
+      ],
+      "raw_response": {},
+      "retrieved_at": "2026-07-02T12:00:00",
+      "attempts": 1,
+      "cache_status": "hit",
+      "api_called": false,
+      "meta": {
+        "query": "极氪 最近7天 官方 动作 交付 权益 OTA",
+        "stage": "scout",
+        "query_role": "overview_discovery",
+        "query_window_role": "discovery",
+        "event_type_ids": [],
+        "source_tier_focus": [
+          "tier_1_official",
+          "tier_3_industry_media"
+        ],
+        "purpose": "scout: []",
+        "target_id": "zeekr"
+      }
+    },
+    {
+      "query": "极氪 交付 销量 战报 最近7天",
+      "status": "success",
+      "result_count": 2,
+      "results": [
+        {
+          "title": "R1 极氪 交付 销量 战报 最近7天",
+          "url": "https://example.com/201",
+          "snippet": "S1",
+          "source": "汽车之家",
+          "publish_time": "2026-07-01"
+        },
+        {
+          "title": "R2 极氪 交付 销量 战报 最近7天",
+          "url": "https://example.com/202",
+          "snippet": "S2",
+          "source": "懂车帝",
+          "publish_time": "2026-06-30"
+        }
+      ],
+      "raw_response": {},
+      "retrieved_at": "2026-07-02T12:00:00",
+      "attempts": 1,
+      "cache_status": "hit",
+      "api_called": false,
+      "meta": {
+        "query": "极氪 交付 销量 战报 最近7天",
+        "stage": "scout",
+        "query_role": "specific_discovery",
+        "query_window_role": "discovery",
+        "event_type_ids": [
+          "delivery_start",
+          "sales_milestone",
+          "order_milestone"
+        ],
+        "source_tier_focus": [
+          "tier_1_official",
+          "tier_3_industry_media"
+        ],
+        "purpose": "scout: ['delivery_start', 'sales_milestone', 'order_milestone']",
+        "target_id": "zeekr"
+      }
+    },
+    {
+      "query": "极氪 权益 价格 限时 最近7天",
+      "status": "success",
+      "result_count": 2,
+      "results": [
+        {
+          "title": "R1 极氪 权益 价格 限时 最近7天",
+          "url": "https://example.com/301",
+          "snippet": "S1",
+          "source": "汽车之家",
+          "publish_time": "2026-07-01"
+        },
+        {
+          "title": "R2 极氪 权益 价格 限时 最近7天",
+          "url": "https://example.com/302",
+          "snippet": "S2",
+          "source": "懂车帝",
+          "publish_time": "2026-06-30"
+        }
+      ],
+      "raw_response": {},
+      "retrieved_at": "2026-07-02T12:00:00",
+      "attempts": 1,
+      "cache_status": "hit",
+      "api_called": false,
+      "meta": {
+        "query": "极氪 权益 价格 限时 最近7天",
+        "stage": "scout",
+        "query_role": "specific_discovery",
+        "query_window_role": "discovery",
+        "event_type_ids": [
+          "benefit_adjustment",
+          "official_price_change"
+        ],
+        "source_tier_focus": [
+          "tier_1_official",
+          "tier_3_industry_media"
+        ],
+        "purpose": "scout: ['benefit_adjustment', 'official_price_change']",
+        "target_id": "zeekr"
+      }
+    },
+    {
+      "query": "极氪 OTA 技术 发布 最近7天",
+      "status": "success",
+      "result_count": 2,
+      "results": [
+        {
+          "title": "R1 极氪 OTA 技术 发布 最近7天",
+          "url": "https://example.com/401",
+          "snippet": "S1",
+          "source": "汽车之家",
+          "publish_time": "2026-07-01"
+        },
+        {
+          "title": "R2 极氪 OTA 技术 发布 最近7天",
+          "url": "https://example.com/402",
+          "snippet": "S2",
+          "source": "懂车帝",
+          "publish_time": "2026-06-30"
+        }
+      ],
+      "raw_response": {},
+      "retrieved_at": "2026-07-02T12:00:00",
+      "attempts": 1,
+      "cache_status": "hit",
+      "api_called": false,
+      "meta": {
+        "query": "极氪 OTA 技术 发布 最近7天",
+        "stage": "refine",
+        "query_role": "specific_discovery",
+        "query_window_role": "discovery",
+        "event_type_ids": [
+          "technology_release",
+          "config_release",
+          "launch_event"
+        ],
+        "source_tier_focus": [
+          "tier_1_official",
+          "tier_3_industry_media"
+        ],
+        "purpose": "refine: ['technology_release', 'config_release', 'launch_event']",
+        "target_id": "zeekr"
+      }
+    },
+    {
+      "query": "极氪 门店 试驾 活动 最近7天",
+      "status": "success",
+      "result_count": 2,
+      "results": [
+        {
+          "title": "R1 极氪 门店 试驾 活动 最近7天",
+          "url": "https://example.com/501",
+          "snippet": "S1",
+          "source": "汽车之家",
+          "publish_time": "2026-07-01"
+        },
+        {
+          "title": "R2 极氪 门店 试驾 活动 最近7天",
+          "url": "https://example.com/502",
+          "snippet": "S2",
+          "source": "懂车帝",
+          "publish_time": "2026-06-30"
+        }
+      ],
+      "raw_response": {},
+      "retrieved_at": "2026-07-02T12:00:00",
+      "attempts": 1,
+      "cache_status": "hit",
+      "api_called": false,
+      "meta": {
+        "query": "极氪 门店 试驾 活动 最近7天",
+        "stage": "refine",
+        "query_role": "specific_discovery",
+        "query_window_role": "discovery",
+        "event_type_ids": [
+          "channel_campaign",
+          "user_event"
+        ],
+        "source_tier_focus": [
+          "tier_1_official",
+          "tier_3_industry_media",
+          "tier_4_social_signal",
+          "tier_5_unverified"
+        ],
+        "purpose": "refine: ['channel_campaign', 'user_event']",
+        "target_id": "zeekr"
+      }
+    },
+    {
+      "query": "极氪 发布会 技术 品牌 最近7天",
+      "status": "success",
+      "result_count": 2,
+      "results": [
+        {
+          "title": "R1 极氪 发布会 技术 品牌 最近7天",
+          "url": "https://example.com/601",
+          "snippet": "S1",
+          "source": "汽车之家",
+          "publish_time": "2026-07-01"
+        },
+        {
+          "title": "R2 极氪 发布会 技术 品牌 最近7天",
+          "url": "https://example.com/602",
+          "snippet": "S2",
+          "source": "懂车帝",
+          "publish_time": "2026-06-30"
+        }
+      ],
+      "raw_response": {},
+      "retrieved_at": "2026-07-02T12:00:00",
+      "attempts": 1,
+      "cache_status": "hit",
+      "api_called": false,
+      "meta": {
+        "query": "极氪 发布会 技术 品牌 最近7天",
+        "stage": "refine",
+        "query_role": "specific_discovery",
+        "query_window_role": "discovery",
+        "event_type_ids": [
+          "launch_event",
+          "technology_release",
+          "brand_campaign"
+        ],
+        "source_tier_focus": [
+          "tier_1_official",
+          "tier_3_industry_media"
+        ],
+        "purpose": "refine: ['launch_event', 'technology_release', 'brand_campaign']",
+        "target_id": "zeekr"
+      }
+    },
+    {
+      "query": "极氪 联名 合作 代言 最近7天",
+      "status": "success",
+      "result_count": 2,
+      "results": [
+        {
+          "title": "R1 极氪 联名 合作 代言 最近7天",
+          "url": "https://example.com/701",
+          "snippet": "S1",
+          "source": "汽车之家",
+          "publish_time": "2026-07-01"
+        },
+        {
+          "title": "R2 极氪 联名 合作 代言 最近7天",
+          "url": "https://example.com/702",
+          "snippet": "S2",
+          "source": "懂车帝",
+          "publish_time": "2026-06-30"
+        }
+      ],
+      "raw_response": {},
+      "retrieved_at": "2026-07-02T12:00:00",
+      "attempts": 1,
+      "cache_status": "hit",
+      "api_called": false,
+      "meta": {
+        "query": "极氪 联名 合作 代言 最近7天",
+        "stage": "refine",
+        "query_role": "specific_discovery",
+        "query_window_role": "discovery",
+        "event_type_ids": [
+          "partnership"
+        ],
+        "source_tier_focus": [
+          "tier_1_official",
+          "tier_3_industry_media"
+        ],
+        "purpose": "refine: ['partnership']",
+        "target_id": "zeekr"
+      }
+    },
+    {
+      "query": "极氪 高管 直播 最近7天",
+      "status": "error",
+      "error": "fail",
+      "result_count": 0,
+      "results": [],
+      "cache_status": "hit",
+      "api_called": false,
+      "meta": {
+        "query": "极氪 高管 直播 最近7天",
+        "stage": "refine",
+        "query_role": "specific_discovery",
+        "query_window_role": "discovery",
+        "event_type_ids": [
+          "executive_voice"
+        ],
+        "source_tier_focus": [
+          "tier_1_official",
+          "tier_3_industry_media"
+        ],
+        "purpose": "refine: ['executive_voice']",
+        "target_id": "zeekr"
+      }
+    }
+  ],
+  "errors": [
+    {
+      "query": "极氪 高管 直播 最近7天",
+      "error": "fail"
+    }
+  ]
+}

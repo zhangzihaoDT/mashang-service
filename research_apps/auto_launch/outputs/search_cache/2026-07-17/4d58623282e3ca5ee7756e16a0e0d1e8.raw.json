@@ -1,0 +1,279 @@
+{
+  "query": "小鹏 OTA 技术 发布 最近1天",
+  "status": "success",
+  "result_count": 8,
+  "results": [
+    {
+      "title": "小鹏这次升级太猛!无导航也能智驾，决策快到80ms，老车主坐不住了__什么值得买",
+      "url": "https://post.m.smzdm.com/p/apq2qqq9/",
+      "snippet": "06-24 10:02\n01 VLA 2.0架构升级：端到端直连决策\n小鹏OTA 6.2.0的核心升级在于第二代VLA全场景辅助驾驶系统的上车。根据多篇素材，小鹏汽车于6月2日宣布推送OTA 6.2.0版本，自5月31日起分批进行，预计在6月15日前完成全部推送。VLA 2.0采用端到端视觉-动作直连架构，取消了传统的\"视觉→语言→动作\"三段式流程，决策延迟从传统方案的200毫秒压缩至80毫秒，降幅达80%。这一架构跳过了感知-规划-控制的串行链路，直接从传感器输入映射到车辆控制指令。\n在识别能力方面，VLA 2.0可精准识别并主动绕行异形车辆（如装载超长货物的卡车）、路边突然打开的车门等特殊障碍物；夜间环境下对深色行人、非机动车、小动物的识别率也有显著提升。部分素材提到夜间深色物体识别率提升72%，路面障碍物识别能力提升124%。系统支持窄路、小路及无导航道路通行，具备复杂场景博弈能力，日常通勤效率接近人类驾驶员水平。\n适配车型方面，VLA 2.0首批适配2026款G6、G9、P7+的Ultra及Ultra SE版本。部分素材指出，Max车型用户关注的VLA 2.0蒸馏版仍在开发中，可能存在与Ultra版本的算力差异。小鹏社区用户反馈显示，80%以上的新大定订单选择了搭载该系统的版本，\"老司机\"般的驾驶风格获得市场认可。\nOTA推送节奏方面，6.2.0版本已于5月31日起分批推送，计划6月15日前完成全部推送。小鹏OTA 6.2.0两个功能让智驾又进了一步：P档也能开NGP了\n2026-06-03\n来自汽车之家\n2026-06-03\n来自ZAKER\n10\n小鹏OTA 6.2.0版本分批推送 解锁P挡直启NGP全新智驾体验\n汽车经纬网 ...\n",
+      "source": "什么值得买社区频道",
+      "source_name": "什么值得买社区频道",
+      "publish_time": "",
+      "rank": 0
+    },
+    {
+      "title": "Xiaopeng OTA 4.3.0 starts full push: a new generation of high-speed NGP is officially launched, and the urban NGP is upgraded.",
+      "url": "https://www.shulou.com/a589184",
+      "snippet": "Xiaopeng OTA 4.3.0 starts full push: a new generation of high-speed NGP is officially launched, and the urban...\ncom July 6 news, a few days ago, Xiaopeng car for its G9 and P7i two models launched a version of the 4.3.0 OTA upgrade. According to the official introduction, this upgrade covers the addition and optimization of multi-plate functions such as intelligent driving, intelligent cockpit, intelligent couplet of things and so on.\nA few days ago, Xiaopeng launched a version 4.3.0 OTA upgrade for its G9 and P7i models. According to the official introduction, this upgrade covers the addition and optimization of multi-plate functions such as intelligent driving, intelligent cockpit, intelligent couplet of things and so on. After this update, the new generation of high-speed NGP has been officially launched, and officials say it is \"close to the L4 experience\". It provides functions such as automatic avoidance of construction scenarios, automatic import of congestion scenarios, and intelligent response to by-car congestion, which can achieve \"zero takeover intention\" throughout the process.\nIn addition, the city NGP will also have \"stronger\" capabilities: two new open cities, Beijing and Foshan, will also be extended to the inner ring road and viaduct for Shanghai, which is already an open city of NGP.\nAfter this update, it can also realize the functions of real-time dynamic control of vehicle distance on congested roads, adaptation of more scenes to avoid detour, highlighting target lanes and side cars before changing lanes, switching overlooking angles at large intersections, and so on. Memory parking has also begun to support learning and the use of routes with ramps and layers within 2 kilometers.\nIn terms of human-car interaction, a new commuter route display function has been added in this update. when you get into the car at a set time, the home page of the map can automatically display the commuting route and intelligently plan the route. Map navigation supports real-time traffic light reading seconds countdown and surveillance cameras capture reminders, parking guidelines to add sectional tick lines and safety stop lines.\nIn terms of IoT, this version of OTA upgrade has supported Apple Watch watch control car, which can view the life span, control the car lock, find the car, switch the charging cover and so on.\nCTOnews.",
+      "source": "Shulou",
+      "source_name": "Shulou",
+      "publish_time": "2026-07-17T00:00:00+08:00",
+      "rank": 1
+    },
+    {
+      "title": "小鹏P7+/G7/G6/G9四款新车同步更新 辅助驾驶与座舱全面升级|小鹏g7|小鹏g6|小鹏g9|小鹏汽车|VLA_手机新浪网",
+      "url": "https://auto.sina.cn/2026-07-16/detail-inihyiyk1211582.d.html",
+      "snippet": "小鹏P7+/G7/G6/G9四款新车同步更新 辅助驾驶与座舱全面升级\n07.1...\n凤凰网科技讯（作者/李治钦）1月8日，小鹏汽车在广州举办发布会，正式推出2026款小鹏P7+、小鹏G7超级增程、2026款小鹏G6及2026款小鹏G9四款新车。全系Ultra版均将搭载小鹏第二代VLA系统。\n发布会伊始，小鹏汽车回顾了2025年成绩：全球累计交付429,445辆，在全球设立9大研发中心，推进3个海外本地化生产项目，自营充电网络已覆盖430个城市，建成3150座充电站。\n小鹏汽车董事长兼CEO何小鹏提出2026年公司两大关键词——“物理AI”与“全球化”，并宣布三大布局：第一季度实现第二代VLA量产上车、启动Robotaxi运营、推进人形机器人与飞行汽车规模量产。\n基于“大模型+大算力+大数据”融合，第二代VLA将具备接近L4的智驾体验。大模型：取消传统VLA中的语言转译环节；\n大算力：车端算力达2250 TOPS，云端算力集群规模达3万卡；\n大数据：训练视频数据规模近1亿段。\n目前，第二代VLA正在训练包括原地启动、靠边停车、多种减速带识别及智驾风格选择等L4级能力。何小鹏强调，该系统可同时支持L4自动驾驶与Robotaxi功能，并具备前装量产、强泛化、无区域限制及覆盖小路园区等优势。智能座舱升级天玑AIOS 6.0，VLM模型实现跨场景交互小鹏同步发布天玑AIOS 6.0系统，采用“驭光”设计语言，升级3D立体车道级SR导航，支持前方道路异常提醒、电子眼提示、前车距离监测及红绿灯变化预告。在交互层面，小鹏VLM（Vision-Language-Model）作为“车辆理解世界的AI大脑”，具备感知、记忆、思考、执行与沟通能力，可实现手机与车机跨智能体沟通，行车中高效总结手机信息。第二代VLA将于今年第一季度首批推送，四款新车上市即搭载天玑AIOS 6.0。\n",
+      "source": "手机新浪汽车",
+      "source_name": "手机新浪汽车",
+      "publish_time": "2026-07-16T11:13:17+08:00",
+      "rank": 2
+    },
+    {
+      "title": "The third major version of OTA upgrade after the launch of Xiaopeng P5: urban NGP is fully open in Guangzhou",
+      "url": "https://www.shulou.com/a545241",
+      "snippet": "com October 21 news, Xiaopeng announced today that Xiaopeng P5 ushered in the third major version of OTA,Xmart OS corresponding version number 3.3.0.\nAfter this upgrade, the Xiaopeng P5 adds urban NGP intelligent navigation-assisted driving (models equipped with lidar and equipped with XPILOT 3.5 software and upgrade services). At the same time, it also brings upgrade and optimization for many functional modules such as high-speed NGP intelligent navigation-assisted driving, LCC lane centering auxiliary enhanced version, intelligent instruments and Bluetooth calls, etc.\nUrban NGP allows Xiaopeng P5 users to use NGP intelligent navigation to assist driving in expressways and expressways (nationwide) and urban ordinary roads (currently limited to Guangzhou). Safe and easy-to-use high-level driving aids can cover nearly 90% of daily travel scenes.\nCTOnews.com learned that the Xiaopeng city NGP is currently only open in Guangzhou, but Xiaopeng said it will make efforts to promote the landing in more cities as soon as possible.\nAccording to reports, the Xiaopeng city NGP is the first mass-produced city scene with high-level intelligent assisted driving in China, indicating that Xiaopeng's strength in the field of self-driving is close to the world's leading level, and has surpassed in some of the subdivided scenes.\nUrban NGP not only satisfies basic driving, but also has the ability to handle complex scenes like \"old drivers\". The traffic efficiency of nearly 90% of the scenes is close to the manual driving time shown by navigation.\nXiaopeng launched the industry's first instrument SR intelligent driving environment simulation display. Compared with the high-speed NGP, the central control and instrument SR simulation display of urban NGP is more abundant, such as side car steering signal, vehicle driveable area guide surface, steering point hint and so on. At the same time, urban NGP is also equipped with timely and intimate voice interaction, and users can also choose a concise broadcast mode as needed.\nWith the mass production and landing of the urban NGP, Xiaopeng also specially launched the \"novice mode\": to allow users to fully experience the capabilities and limitations of the system in suitable conditions, to be familiar with the human-computer co-driving system, and to use the urban NGP to travel more than 100km and reach 7 days from...\n",
+      "source": "Shulou",
+      "source_name": "Shulou",
+      "publish_time": "2026-07-16T00:00:00+08:00",
+      "rank": 3
+    },
+    {
+      "title": "小鹏AIOS 6.2.0推送:园区地库无导航也能跑，反应速度翻倍_新能源车_什么值得买",
+      "url": "https://post.m.smzdm.com/p/a26owwrq/",
+      "snippet": "小鹏AIOS 6.2.0推送：园区地库无导航也能跑，反应速度翻倍\n06-30 09:44\n01 VLA2.0全系推送时间确定\n2026年6月初，小鹏汽车正式面向2026款小鹏X9车主推送全新AIOS 6.2.0版本系统。此次升级以第二代VLA2.0智能驾驶系统为核心，实现了园区、地库等封闭场景的NGP漫游功能突破，标志着小鹏智驾能力向全场景覆盖迈出关键一步。根据官方推送计划，AIOS 6.2.0于6月2日宣布开启分批推送，预计6月15日前完成全量推送。小鹏P7+、G9、G6等车型的Ultra及Ultra SE版本同步纳入推送范围，Max版本用户则需等待后续蒸馏版推送。\n02 园区地库实现无导航漫游\nAIOS 6.2.0版本的核心亮点在于园区地库无导航NGP漫游功能。该功能彻底打破了传统智驾对导航路线的依赖，车辆可在无导航规划的状态下，在园区或地库内自主行驶。行驶过程中，系统默认优先保持当前车道，在分岔路口优先选择直行路线，同时具备完善的障碍物识别与规避能力，可自主绕行低速或静止的行人、车辆及路面杂物。04 VLA2.0技术架构革新\n第二代VLA2.0系统的技术底座基于端到端视觉直连架构，实现了从视觉信号到动作指令的直接生成。与传统智驾系统需要经过视觉转译、语言转译等多层处理不同，VLA2.0取消了中间的「翻译官」环节，决策延迟从原先的200毫秒压缩至80毫秒以内，响应速度提升超过两倍。该系统依托小鹏自研图灵AI芯片，整车最高可搭载三颗芯片，有效算力达到2250 TOPS。云端基座模型参数量达720亿，车端蒸馏模型保留30亿参数，能力保留率超过90%，支撑模型每五天完成一次全链路迭代。全场景无图智驾能力覆盖高速、城区、乡村道路、园区地库等各类场景，完全不依赖高精地图。\n",
+      "source": "什么值得买社区频道",
+      "source_name": "什么值得买社区频道",
+      "publish_time": "",
+      "rank": 4
+    },
+    {
+      "title": "小鹏P5推送全新Xmart OS 3.5.0,佛山开放城市NGP|小鹏汽车|OTA|智驾|智能驾驶|睡眠_手机新浪网",
+      "url": "https://auto.sina.cn/2026-07-07/detail-inifyknx1626348.d.html",
+      "snippet": "小鹏P5推送全新Xmart OS 3.5.0,佛山开放城市NGP\n天天值得买\n07.07 16:11\n今日，小鹏汽车正式向小鹏P5全系车型推送全新版本OTA——Xmart OS 3.5.0，城市NGP新增开放北京、佛山，同时，在智驾体验、人机交互及便利性等方面带来15项新增功能及30余项体验优化，实现了智能驾驶与智能座舱等板块的全面进化，为广大用户带来更便捷舒适的智能出行体验。\n智能驾驶辅助再进化，通行效率进一步提升\n城市NGP是小鹏汽车提供给用户应对日常复杂路况的贴心AI助驾，通过本次升级，小鹏P5的城市NGP可用范围扩大至佛山和北京（北京地区当前主要适用于各环线及主要快速路），这也使得小鹏的智能辅助驾驶成为行业内首个在北京城区内开放的高等级智能辅助驾驶。功能开放后，用户确定导航路径并开启导航后即可在可用路段启用城市NGP，实现A到B点的智能导航辅助驾驶。此前，城市NGP已覆盖广州、深圳、上海三城，未来还将持续开放更多城市，用户在地图管理模块下载和管理城市NGP地图后即可解锁高等级辅助驾驶带来的便捷愉悦的出行体验。\n此次升级还将城市NGP最高车速提升至100km/h，基本覆盖了城区各种快速路的最高限速，并且优化了城区隧道、导流带以及人行横道鬼探头等场景下的限速通行策略，整体限速逻辑更符合人类驾驶行为习惯，让城区驾驶的整体通行效率得到进一步的提升。而在驶出城市NGP路段之前，用户还可以通过大屏、仪表获知功能可用距离，人机共驾衔接更丝滑，增强了用户安心感和掌控感。\n除城市NGP外，小鹏P5的升级覆盖了日常行车场景的更多功能细节。首先是紧跟潮流，新增车道级导航和直行红绿灯的识别与显示，让用户尽享高精地图带来的科技升级。途经高精地图路段时，已购买XPILOT软件包的用户可进入车道级导航，精准识别自车所在车道，在需要变道的场景下给予车道级的清晰指引，同时，根据自车当前所在...\n",
+      "source": "手机新浪汽车",
+      "source_name": "手机新浪汽车",
+      "publish_time": "2026-07-07T16:11:18+08:00",
+      "rank": 5
+    },
+    {
+      "title": "小鹏汽车何小鹏:我坚信未来L4、L5 级自动驾驶将实现商业化落地_未来汽车Daily",
+      "url": "http://m.toutiao.com/group/7663131228350005802/",
+      "snippet": "7月2日晚，北京。小鹏MONA系列首款SUV——MONA L03正式开启预售。\n7月16日，它将在德国慕尼黑举行全球上市发布会，2026年覆盖...\n小鹏首次将1500TOPS车端算力带入15万级SUV市场。Max版搭载单颗图灵芯片，有效算力750TOPS;Ultra SE版搭载双图灵芯片，算力翻倍至1500TOPS。全系标配第二代VLA纯视觉智驾，高速NOA、城市领航、记忆泊车功能完整交付。何小鹏透露，三季度将推送第二代VLA蒸馏优化版本，进一步缩小纯视觉方案与激光雷达方案的差距。\n8月，小鹏将推送6.3.0智驾版本，冲刺行业头部水准。第二代VLA系统从今年8月起加速海外适配，计划2027年分批次覆盖全球多数国家。何小鹏:距离 8 月的时间节点仅剩一个月左右，7 月我们即将推送 6.3.0 版本智驾系统，新版本表现值得期待，欢迎行业与用户持续关注。\n何小鹏:小鹏内部研发逻辑为先打磨完善 VLA 基础基座大模型，夯实底层能力后，再将成熟模型蒸馏下放至各车型。\n评判车企智驾实力不能仅看OTA推送频次，小鹏OTA的更新数量、落地质量在行业内均处于第一梯队。 在模型蒸馏、整车OTA迭代综合能力上，小鹏具备显著优势，这也是我们持续深耕底层自研的核心方向。\n杨光:AI 已经渗透小鹏全业务链条:借助 AI 完成用户数据分析、行车仿真模拟、造型方案设计，大幅节约人力与时间成本，让研发资源更多倾斜到创意打磨。就在本次发布会彩排前一晚，公司刚举办完 AI 创新大赛总决赛，我与何总均到场参与，AI 已经融入企业研发日常。\n小鹏坚持全栈自研物理 AI，覆盖自研芯片、整车操作系统、智驾基座大模型、高阶辅助驾驶全链条。\nAI 赋能整车带来全方位升级:AI 主动降噪、智能 AI 底盘、车载 AI 音乐、AEB/AES 主动安全系统;通过 AI 优化，缩短刹车距离 10%、提升续航 5% 等功能均在持续研发迭代。\n",
+      "source": "今日头条",
+      "source_name": "今日头条",
+      "publish_time": "2026-07-16T22:27:30+08:00",
+      "rank": 6
+    },
+    {
+      "title": "小鹏MONA M03推送XOS 6.2.0 OTA，NGP新增P挡起步与车道级渲染_网通社号",
+      "url": "http://auto.news18a.com/news/storys_266146.html",
+      "snippet": "智驾前沿 2026-06-15 20:30\n小鹏汽车正式向MONA M03全量推送第十三次OTA更新，版本号XOS 6.2.0。此次升级的核心亮点集中在智能辅助驾驶全流程优化，从起步到泊入均有功能迭代，其中NGP新增P挡激活能力与车道级渲染功能最受关注。\n本次OTA在智驾交互层面引入\"辅助驾驶车道级渲染\"，将导航路径与车道级感知融合，结合车道级地图与超视距信息，提前呈现前方道路状况与NGP驾驶意图。这一功能在华为ADS与特斯拉FSD的视觉渲染方案中已有先例，小鹏此次补齐了人机共驾的可视化信任环节。\n 泊车能力方面，新增\"效率泊车风格\"提供效率与标准双模式——效率模式提升泊车速度，标准模式保持稳健策略。同时优化便利下车策略，在偏左/偏右泊入时提供更大幅度的偏离能力，降低\"开门杀\"风险；单侧靠柱车位泊入姿态更居中，避免过度偏向另一侧。\nNGP功能边界进一步扩展：车辆上电后可在任意位置挂P挡直接激活NGP，实现原地起步。无导航状态下新增园区和地库NGP漫游功能，可自主保持车道行驶、分岔口直行，并绕行低速行人车辆及障碍物。这一能力向\"车位到车位\"全场景智驾迈进了一步。\n导航体验层面，\"熟路智能推荐\"功能基于用户驾驶习惯优先推荐常走路线，减少手动设置途径点的频次。地图视角支持\"北向上\"与\"车头向上\"切换，新增路口大图及当前路名显示，辅助信息密度向高阶智驾需求靠拢。\n从行业视角看，小鹏此次OTA集中在智驾交互体验的精细化打磨，而非底层算法架构变革。相比小鹏XNGP 5.4的端到端大模型重构，MONA M03的更新更偏向功能体验的补齐与优化。华为ADS 3.0、特斯拉FSD v12在可视化渲染与无图漫游方面已有较成熟方案，小鹏正加速追赶。\n值得关注的是，MONA M03定位10至20万纯电轿车市场，连续21个月稳居该细分市场...\n",
+      "source": "网通社汽车",
+      "source_name": "网通社汽车",
+      "publish_time": "2026-06-15T20:30:00+08:00",
+      "rank": 7
+    }
+  ],
+  "raw_response": {
+    "ResponseMetadata": {
+      "RequestId": "20260717090748B89DD712511E29029DC8",
+      "Action": "",
+      "Version": "",
+      "Service": "",
+      "Region": ""
+    },
+    "Result": {
+      "TotalDocCount": 20,
+      "Documents": [
+        {
+          "Rank": 0,
+          "Url": "https://post.m.smzdm.com/p/apq2qqq9/",
+          "Title": "小鹏这次升级太猛!无导航也能智驾，决策快到80ms，老车主坐不住了__什么值得买",
+          "Snippet": [
+            {
+              "Type": "text",
+              "Text": "06-24 10:02\n01 VLA 2.0架构升级：端到端直连决策\n小鹏OTA 6.2.0的核心升级在于第二代VLA全场景辅助驾驶系统的上车。根据多篇素材，小鹏汽车于6月2日宣布推送OTA 6.2.0版本，自5月31日起分批进行，预计在6月15日前完成全部推送。VLA 2.0采用端到端视觉-动作直连架构，取消了传统的\"视觉→语言→动作\"三段式流程，决策延迟从传统方案的200毫秒压缩至80毫秒，降幅达80%。这一架构跳过了感知-规划-控制的串行链路，直接从传感器输入映射到车辆控制指令。\n在识别能力方面，VLA 2.0可精准识别并主动绕行异形车辆（如装载超长货物的卡车）、路边突然打开的车门等特殊障碍物；夜间环境下对深色行人、非机动车、小动物的识别率也有显著提升。部分素材提到夜间深色物体识别率提升72%，路面障碍物识别能力提升124%。系统支持窄路、小路及无导航道路通行，具备复杂场景博弈能力，日常通勤效率接近人类驾驶员水平。\n适配车型方面，VLA 2.0首批适配2026款G6、G9、P7+的Ultra及Ultra SE版本。部分素材指出，Max车型用户关注的VLA 2.0蒸馏版仍在开发中，可能存在与Ultra版本的算力差异。小鹏社区用户反馈显示，80%以上的新大定订单选择了搭载该系统的版本，\"老司机\"般的驾驶风格获得市场认可。\nOTA推送节奏方面，6.2.0版本已于5月31日起分批推送，计划6月15日前完成全部推送。小鹏OTA 6.2.0两个功能让智驾又进了一步：P档也能开NGP了\n2026-06-03\n来自汽车之家\n2026-06-03\n来自ZAKER\n10\n小鹏OTA 6.2.0版本分批推送 解锁P挡直启NGP全新智驾体验\n汽车经纬网 ...\n"
+            }
+          ],
+          "DocumentInfo": {
+            "ContentCharCount": 4872,
+            "ContentTokenCount": 3953,
+            "Filetype": "webpage",
+            "PublishTime": ""
+          },
+          "HostInfo": {
+            "Hostname": "什么值得买社区频道",
+            "IconUrl": "https://p3-volcsearch-d-sign.byteimg.com/isp-i18n-media/img/1a44b9ef64d4f823f24d9493b4fe660a~tplv-be4g95zd3a-224x224.jpeg?lk3s=feb11e32&x-expires=1789434469&x-signature=s%2BT9PJdxAjiTAjhzQPxwuasuPwk%3D"
+          }
+        },
+        {
+          "Rank": 1,
+          "Url": "https://www.shulou.com/a589184",
+          "Title": "Xiaopeng OTA 4.3.0 starts full push: a new generation of high-speed NGP is officially launched, and the urban NGP is upgraded.",
+          "Snippet": [
+            {
+              "Type": "text",
+              "Text": "Xiaopeng OTA 4.3.0 starts full push: a new generation of high-speed NGP is officially launched, and the urban...\ncom July 6 news, a few days ago, Xiaopeng car for its G9 and P7i two models launched a version of the 4.3.0 OTA upgrade. According to the official introduction, this upgrade covers the addition and optimization of multi-plate functions such as intelligent driving, intelligent cockpit, intelligent couplet of things and so on.\nA few days ago, Xiaopeng launched a version 4.3.0 OTA upgrade for its G9 and P7i models. According to the official introduction, this upgrade covers the addition and optimization of multi-plate functions such as intelligent driving, intelligent cockpit, intelligent couplet of things and so on. After this update, the new generation of high-speed NGP has been officially launched, and officials say it is \"close to the L4 experience\". It provides functions such as automatic avoidance of construction scenarios, automatic import of congestion scenarios, and intelligent response to by-car congestion, which can achieve \"zero takeover intention\" throughout the process.\nIn addition, the city NGP will also have \"stronger\" capabilities: two new open cities, Beijing and Foshan, will also be extended to the inner ring road and viaduct for Shanghai, which is already an open city of NGP.\nAfter this update, it can also realize the functions of real-time dynamic control of vehicle distance on congested roads, adaptation of more scenes to avoid detour, highlighting target lanes and side cars before changing lanes, switching overlooking angles at large intersections, and so on. Memory parking has also begun to support learning and the use of routes with ramps and layers within 2 kilometers.\nIn terms of human-car interaction, a new commuter route display function has been added in this update. when you get into the car at a set time, the home page of the map can automatically display the commuting route and intelligently plan the route. Map navigation supports real-time traffic light reading seconds countdown and surveillance cameras capture reminders, parking guidelines to add sectional tick lines and safety stop lines.\nIn terms of IoT, this version of OTA upgrade has supported Apple Watch watch control car, which can view the life span, control the car lock, find the car, switch the charging cover and so on.\nCTOnews."
+            }
+          ],
+          "DocumentInfo": {
+            "ContentCharCount": 3011,
+            "ContentTokenCount": 642,
+            "Filetype": "webpage",
+            "PublishTime": "2026-07-17T00:00:00+08:00"
+          },
+          "HostInfo": {
+            "Hostname": "Shulou",
+            "IconUrl": "https://p3-volcsearch-d-sign.byteimg.com/isp-i18n-media/img/a9924e8f9a62a92db74b18496984bb6b~tplv-be4g95zd3a-224x224.jpeg?lk3s=feb11e32&x-expires=1789434469&x-signature=%2BLlhdLjiNpEPf5vIFd%2BZfS66QPk%3D"
+          }
+        },
+        {
+          "Rank": 2,
+          "Url": "https://auto.sina.cn/2026-07-16/detail-inihyiyk1211582.d.html",
+          "Title": "小鹏P7+/G7/G6/G9四款新车同步更新 辅助驾驶与座舱全面升级|小鹏g7|小鹏g6|小鹏g9|小鹏汽车|VLA_手机新浪网",
+          "Snippet": [
+            {
+              "Type": "text",
+              "Text": "小鹏P7+/G7/G6/G9四款新车同步更新 辅助驾驶与座舱全面升级\n07.1...\n凤凰网科技讯（作者/李治钦）1月8日，小鹏汽车在广州举办发布会，正式推出2026款小鹏P7+、小鹏G7超级增程、2026款小鹏G6及2026款小鹏G9四款新车。全系Ultra版均将搭载小鹏第二代VLA系统。\n发布会伊始，小鹏汽车回顾了2025年成绩：全球累计交付429,445辆，在全球设立9大研发中心，推进3个海外本地化生产项目，自营充电网络已覆盖430个城市，建成3150座充电站。\n小鹏汽车董事长兼CEO何小鹏提出2026年公司两大关键词——“物理AI”与“全球化”，并宣布三大布局：第一季度实现第二代VLA量产上车、启动Robotaxi运营、推进人形机器人与飞行汽车规模量产。\n基于“大模型+大算力+大数据”融合，第二代VLA将具备接近L4的智驾体验。大模型：取消传统VLA中的语言转译环节；\n大算力：车端算力达2250 TOPS，云端算力集群规模达3万卡；\n大数据：训练视频数据规模近1亿段。\n目前，第二代VLA正在训练包括原地启动、靠边停车、多种减速带识别及智驾风格选择等L4级能力。何小鹏强调，该系统可同时支持L4自动驾驶与Robotaxi功能，并具备前装量产、强泛化、无区域限制及覆盖小路园区等优势。智能座舱升级天玑AIOS 6.0，VLM模型实现跨场景交互小鹏同步发布天玑AIOS 6.0系统，采用“驭光”设计语言，升级3D立体车道级SR导航，支持前方道路异常提醒、电子眼提示、前车距离监测及红绿灯变化预告。在交互层面，小鹏VLM（Vision-Language-Model）作为“车辆理解世界的AI大脑”，具备感知、记忆、思考、执行与沟通能力，可实现手机与车机跨智能体沟通，行车中高效总结手机信息。第二代VLA将于今年第一季度首批推送，四款新车上市即搭载天玑AIOS 6.0。\n"
+            }
+          ],
+          "DocumentInfo": {
+            "ContentCharCount": 2209,
+            "ContentTokenCount": 1484,
+            "Filetype": "webpage",
+            "PublishTime": "2026-07-16T11:13:17+08:00"
+          },
+          "HostInfo": {
+            "Hostname": "手机新浪汽车",
+            "IconUrl": "https://p11-volcsearch-d-sign.byteimg.com/isp-i18n-media/img/06029ec5459b532b1711ee58e61df9f9~tplv-be4g95zd3a-224x224.jpeg?lk3s=feb11e32&x-expires=1789434469&x-signature=CY14M6tH3WxmgL4RInBwFqJEyyc%3D"
+          }
+        },
+        {
+          "Rank": 3,
+          "Url": "https://www.shulou.com/a545241",
+          "Title": "The third major version of OTA upgrade after the launch of Xiaopeng P5: urban NGP is fully open in Guangzhou",
+          "Snippet": [
+            {
+              "Type": "text",
+              "Text": "com October 21 news, Xiaopeng announced today that Xiaopeng P5 ushered in the third major version of OTA,Xmart OS corresponding version number 3.3.0.\nAfter this upgrade, the Xiaopeng P5 adds urban NGP intelligent navigation-assisted driving (models equipped with lidar and equipped with XPILOT 3.5 software and upgrade services). At the same time, it also brings upgrade and optimization for many functional modules such as high-speed NGP intelligent navigation-assisted driving, LCC lane centering auxiliary enhanced version, intelligent instruments and Bluetooth calls, etc.\nUrban NGP allows Xiaopeng P5 users to use NGP intelligent navigation to assist driving in expressways and expressways (nationwide) and urban ordinary roads (currently limited to Guangzhou). Safe and easy-to-use high-level driving aids can cover nearly 90% of daily travel scenes.\nCTOnews.com learned that the Xiaopeng city NGP is currently only open in Guangzhou, but Xiaopeng said it will make efforts to promote the landing in more cities as soon as possible.\nAccording to reports, the Xiaopeng city NGP is the first mass-produced city scene with high-level intelligent assisted driving in China, indicating that Xiaopeng's strength in the field of self-driving is close to the world's leading level, and has surpassed in some of the subdivided scenes.\nUrban NGP not only satisfies basic driving, but also has the ability to handle complex scenes like \"old drivers\". The traffic efficiency of nearly 90% of the scenes is close to the manual driving time shown by navigation.\nXiaopeng launched the industry's first instrument SR intelligent driving environment simulation display. Compared with the high-speed NGP, the central control and instrument SR simulation display of urban NGP is more abundant, such as side car steering signal, vehicle driveable area guide surface, steering point hint and so on. At the same time, urban NGP is also equipped with timely and intimate voice interaction, and users can also choose a concise broadcast mode as needed.\nWith the mass production and landing of the urban NGP, Xiaopeng also specially launched the \"novice mode\": to allow users to fully experience the capabilities and limitations of the system in suitable conditions, to be familiar with the human-computer co-driving system, and to use the urban NGP to travel more than 100km and reach 7 days from...\n"
+            }
+          ],
+          "DocumentInfo": {
+            "ContentCharCount": 5420,
+            "ContentTokenCount": 1073,
+            "Filetype": "webpage",
+            "PublishTime": "2026-07-16T00:00:00+08:00"
+          },
+          "HostInfo": {
+            "Hostname": "Shulou",
+            "IconUrl": "https://p3-volcsearch-d-sign.byteimg.com/isp-i18n-media/img/a9924e8f9a62a92db74b18496984bb6b~tplv-be4g95zd3a-224x224.jpeg?lk3s=feb11e32&x-expires=1789434469&x-signature=%2BLlhdLjiNpEPf5vIFd%2BZfS66QPk%3D"
+          }
+        },
+        {
+          "Rank": 4,
+          "Url": "https://post.m.smzdm.com/p/a26owwrq/",
+          "Title": "小鹏AIOS 6.2.0推送:园区地库无导航也能跑，反应速度翻倍_新能源车_什么值得买",
+          "Snippet": [
+            {
+              "Type": "text",
+              "Text": "小鹏AIOS 6.2.0推送：园区地库无导航也能跑，反应速度翻倍\n06-30 09:44\n01 VLA2.0全系推送时间确定\n2026年6月初，小鹏汽车正式面向2026款小鹏X9车主推送全新AIOS 6.2.0版本系统。此次升级以第二代VLA2.0智能驾驶系统为核心，实现了园区、地库等封闭场景的NGP漫游功能突破，标志着小鹏智驾能力向全场景覆盖迈出关键一步。根据官方推送计划，AIOS 6.2.0于6月2日宣布开启分批推送，预计6月15日前完成全量推送。小鹏P7+、G9、G6等车型的Ultra及Ultra SE版本同步纳入推送范围，Max版本用户则需等待后续蒸馏版推送。\n02 园区地库实现无导航漫游\nAIOS 6.2.0版本的核心亮点在于园区地库无导航NGP漫游功能。该功能彻底打破了传统智驾对导航路线的依赖，车辆可在无导航规划的状态下，在园区或地库内自主行驶。行驶过程中，系统默认优先保持当前车道，在分岔路口优先选择直行路线，同时具备完善的障碍物识别与规避能力，可自主绕行低速或静止的行人、车辆及路面杂物。04 VLA2.0技术架构革新\n第二代VLA2.0系统的技术底座基于端到端视觉直连架构，实现了从视觉信号到动作指令的直接生成。与传统智驾系统需要经过视觉转译、语言转译等多层处理不同，VLA2.0取消了中间的「翻译官」环节，决策延迟从原先的200毫秒压缩至80毫秒以内，响应速度提升超过两倍。该系统依托小鹏自研图灵AI芯片，整车最高可搭载三颗芯片，有效算力达到2250 TOPS。云端基座模型参数量达720亿，车端蒸馏模型保留30亿参数，能力保留率超过90%，支撑模型每五天完成一次全链路迭代。全场景无图智驾能力覆盖高速、城区、乡村道路、园区地库等各类场景，完全不依赖高精地图。\n"
+            }
+          ],
+          "DocumentInfo": {
+            "ContentCharCount": 2651,
+            "ContentTokenCount": 1820,
+            "Filetype": "webpage",
+            "PublishTime": ""
+          },
+          "HostInfo": {
+            "Hostname": "什么值得买社区频道",
+            "IconUrl": "https://p3-volcsearch-d-sign.byteimg.com/isp-i18n-media/img/1a44b9ef64d4f823f24d9493b4fe660a~tplv-be4g95zd3a-224x224.jpeg?lk3s=feb11e32&x-expires=1789434469&x-signature=s%2BT9PJdxAjiTAjhzQPxwuasuPwk%3D"
+          }
+        },
+        {
+          "Rank": 5,
+          "Url": "https://auto.sina.cn/2026-07-07/detail-inifyknx1626348.d.html",
+          "Title": "小鹏P5推送全新Xmart OS 3.5.0,佛山开放城市NGP|小鹏汽车|OTA|智驾|智能驾驶|睡眠_手机新浪网",
+          "Snippet": [
+            {
+              "Type": "text",
+              "Text": "小鹏P5推送全新Xmart OS 3.5.0,佛山开放城市NGP\n天天值得买\n07.07 16:11\n今日，小鹏汽车正式向小鹏P5全系车型推送全新版本OTA——Xmart OS 3.5.0，城市NGP新增开放北京、佛山，同时，在智驾体验、人机交互及便利性等方面带来15项新增功能及30余项体验优化，实现了智能驾驶与智能座舱等板块的全面进化，为广大用户带来更便捷舒适的智能出行体验。\n智能驾驶辅助再进化，通行效率进一步提升\n城市NGP是小鹏汽车提供给用户应对日常复杂路况的贴心AI助驾，通过本次升级，小鹏P5的城市NGP可用范围扩大至佛山和北京（北京地区当前主要适用于各环线及主要快速路），这也使得小鹏的智能辅助驾驶成为行业内首个在北京城区内开放的高等级智能辅助驾驶。功能开放后，用户确定导航路径并开启导航后即可在可用路段启用城市NGP，实现A到B点的智能导航辅助驾驶。此前，城市NGP已覆盖广州、深圳、上海三城，未来还将持续开放更多城市，用户在地图管理模块下载和管理城市NGP地图后即可解锁高等级辅助驾驶带来的便捷愉悦的出行体验。\n此次升级还将城市NGP最高车速提升至100km/h，基本覆盖了城区各种快速路的最高限速，并且优化了城区隧道、导流带以及人行横道鬼探头等场景下的限速通行策略，整体限速逻辑更符合人类驾驶行为习惯，让城区驾驶的整体通行效率得到进一步的提升。而在驶出城市NGP路段之前，用户还可以通过大屏、仪表获知功能可用距离，人机共驾衔接更丝滑，增强了用户安心感和掌控感。\n除城市NGP外，小鹏P5的升级覆盖了日常行车场景的更多功能细节。首先是紧跟潮流，新增车道级导航和直行红绿灯的识别与显示，让用户尽享高精地图带来的科技升级。途经高精地图路段时，已购买XPILOT软件包的用户可进入车道级导航，精准识别自车所在车道，在需要变道的场景下给予车道级的清晰指引，同时，根据自车当前所在...\n"
+            }
+          ],
+          "DocumentInfo": {
+            "ContentCharCount": 2326,
+            "ContentTokenCount": 1587,
+            "Filetype": "webpage",
+            "PublishTime": "2026-07-07T16:11:18+08:00"
+          },
+          "HostInfo": {
+            "Hostname": "手机新浪汽车",
+            "IconUrl": "https://p11-volcsearch-d-sign.byteimg.com/isp-i18n-media/img/06029ec5459b532b1711ee58e61df9f9~tplv-be4g95zd3a-224x224.jpeg?lk3s=feb11e32&x-expires=1789434469&x-signature=CY14M6tH3WxmgL4RInBwFqJEyyc%3D"
+          }
+        },
+        {
+          "Rank": 6,
+          "Url": "http://m.toutiao.com/group/7663131228350005802/",
+          "Title": "小鹏汽车何小鹏:我坚信未来L4、L5 级自动驾驶将实现商业化落地_未来汽车Daily",
+          "Snippet": [
+            {
+              "Type": "text",
+              "Text": "7月2日晚，北京。小鹏MONA系列首款SUV——MONA L03正式开启预售。\n7月16日，它将在德国慕尼黑举行全球上市发布会，2026年覆盖...\n小鹏首次将1500TOPS车端算力带入15万级SUV市场。Max版搭载单颗图灵芯片，有效算力750TOPS;Ultra SE版搭载双图灵芯片，算力翻倍至1500TOPS。全系标配第二代VLA纯视觉智驾，高速NOA、城市领航、记忆泊车功能完整交付。何小鹏透露，三季度将推送第二代VLA蒸馏优化版本，进一步缩小纯视觉方案与激光雷达方案的差距。\n8月，小鹏将推送6.3.0智驾版本，冲刺行业头部水准。第二代VLA系统从今年8月起加速海外适配，计划2027年分批次覆盖全球多数国家。何小鹏:距离 8 月的时间节点仅剩一个月左右，7 月我们即将推送 6.3.0 版本智驾系统，新版本表现值得期待，欢迎行业与用户持续关注。\n何小鹏:小鹏内部研发逻辑为先打磨完善 VLA 基础基座大模型，夯实底层能力后，再将成熟模型蒸馏下放至各车型。\n评判车企智驾实力不能仅看OTA推送频次，小鹏OTA的更新数量、落地质量在行业内均处于第一梯队。 在模型蒸馏、整车OTA迭代综合能力上，小鹏具备显著优势，这也是我们持续深耕底层自研的核心方向。\n杨光:AI 已经渗透小鹏全业务链条:借助 AI 完成用户数据分析、行车仿真模拟、造型方案设计，大幅节约人力与时间成本，让研发资源更多倾斜到创意打磨。就在本次发布会彩排前一晚，公司刚举办完 AI 创新大赛总决赛，我与何总均到场参与，AI 已经融入企业研发日常。\n小鹏坚持全栈自研物理 AI，覆盖自研芯片、整车操作系统、智驾基座大模型、高阶辅助驾驶全链条。\nAI 赋能整车带来全方位升级:AI 主动降噪、智能 AI 底盘、车载 AI 音乐、AEB/AES 主动安全系统;通过 AI 优化，缩短刹车距离 10%、提升续航 5% 等功能均在持续研发迭代。\n"
+            }
+          ],
+          "DocumentInfo": {
+            "ContentCharCount": 10425,
+            "ContentTokenCount": 6201,
+            "Filetype": "webpage",
+            "PublishTime": "2026-07-16T22:27:30+08:00"
+          },
+          "HostInfo": {
+            "Hostname": "今日头条",
+            "IconUrl": "https://p11-volcsearch-d-sign.byteimg.com/isp-i18n-media/img/118f7a3625ad8ebbbc11d04f118d2e10~tplv-be4g95zd3a-224x224.jpeg?lk3s=feb11e32&x-expires=1789434469&x-signature=8PeaUfBdCpaFztrVx66elq9Qm9g%3D"
+          }
+        },
+        {
+          "Rank": 7,
+          "Url": "http://auto.news18a.com/news/storys_266146.html",
+          "Title": "小鹏MONA M03推送XOS 6.2.0 OTA，NGP新增P挡起步与车道级渲染_网通社号",
+          "Snippet": [
+            {
+              "Type": "text",
+              "Text": "智驾前沿 2026-06-15 20:30\n小鹏汽车正式向MONA M03全量推送第十三次OTA更新，版本号XOS 6.2.0。此次升级的核心亮点集中在智能辅助驾驶全流程优化，从起步到泊入均有功能迭代，其中NGP新增P挡激活能力与车道级渲染功能最受关注。\n本次OTA在智驾交互层面引入\"辅助驾驶车道级渲染\"，将导航路径与车道级感知融合，结合车道级地图与超视距信息，提前呈现前方道路状况与NGP驾驶意图。这一功能在华为ADS与特斯拉FSD的视觉渲染方案中已有先例，小鹏此次补齐了人机共驾的可视化信任环节。\n"
+            },
+            {
+              "Type": "image",
+              "Image": {
+                "Width": 960,
+                "Height": 1304,
+                "ImageUrl": "http://img4.wtsimg.com/flashnews/images/20260615/feishu_PqTCbF4J6oJFK1xlxMFcMTgUnsb.jpg!1200"
+              }
+            },
+            {
+              "Type": "text",
+              "Text": "泊车能力方面，新增\"效率泊车风格\"提供效率与标准双模式——效率模式提升泊车速度，标准模式保持稳健策略。同时优化便利下车策略，在偏左/偏右泊入时提供更大幅度的偏离能力，降低\"开门杀\"风险；单侧靠柱车位泊入姿态更居中，避免过度偏向另一侧。\nNGP功能边界进一步扩展：车辆上电后可在任意位置挂P挡直接激活NGP，实现原地起步。无导航状态下新增园区和地库NGP漫游功能，可自主保持车道行驶、分岔口直行，并绕行低速行人车辆及障碍物。这一能力向\"车位到车位\"全场景智驾迈进了一步。\n导航体验层面，\"熟路智能推荐\"功能基于用户驾驶习惯优先推荐常走路线，减少手动设置途径点的频次。地图视角支持\"北向上\"与\"车头向上\"切换，新增路口大图及当前路名显示，辅助信息密度向高阶智驾需求靠拢。\n从行业视角看，小鹏此次OTA集中在智驾交互体验的精细化打磨，而非底层算法架构变革。相比小鹏XNGP 5.4的端到端大模型重构，MONA M03的更新更偏向功能体验的补齐与优化。华为ADS 3.0、特斯拉FSD v12在可视化渲染与无图漫游方面已有较成熟方案，小鹏正加速追赶。\n值得关注的是，MONA M03定位10至20万纯电轿车市场，连续21个月稳居该细分市场...\n"
+            }
+          ],
+          "DocumentInfo": {
+            "ContentCharCount": 1040,
+            "ContentTokenCount": 825,
+            "Filetype": "webpage",
+            "PublishTime": "2026-06-15T20:30:00+08:00"
+          },
+          "HostInfo": {
+            "Hostname": "网通社汽车",
+            "IconUrl": "https://p3-volcsearch-d-sign.byteimg.com/isp-i18n-media/img/1c774e2e719418c9c0ac3d51bc3c7155~tplv-be4g95zd3a-224x224.jpeg?lk3s=feb11e32&x-expires=1789434469&x-signature=BEruQiYAm6N6XbgG0HQzl%2B0TbYY%3D"
+          }
+        }
+      ],
+      "ErrorCode": 0,
+      "ErrorMsg": ""
+    }
+  },
+  "retrieved_at": "2026-07-17T09:07:49.975985",
+  "attempts": 1,
+  "cache_status": "miss",
+  "api_called": true
+}

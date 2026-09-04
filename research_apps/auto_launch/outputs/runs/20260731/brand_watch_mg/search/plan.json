@@ -1,0 +1,231 @@
+{
+  "intent": {
+    "user_request": "名爵MG新车官方售价 2026",
+    "monitor_date": "2026-07-31",
+    "intent_type": "specific_event_scan",
+    "mode": "brand_watch",
+    "targets": [
+      {
+        "target_id": "mg",
+        "target_type": "brand",
+        "brand": "MG",
+        "brand_cn": "MG",
+        "model": null,
+        "matched_alias": "MG",
+        "confidence": "high",
+        "is_in_watchlist": true,
+        "target_source": "brand_watchlist"
+      }
+    ],
+    "time_window": {
+      "window_type": "default",
+      "days": 1,
+      "fallback_days": 7,
+      "start_date": "2026-07-30",
+      "end_date": "2026-07-31",
+      "start_datetime": "2026-07-30T00:00:00+08:00",
+      "end_datetime": "2026-07-31T23:59:59+08:00",
+      "timezone": "Asia/Shanghai",
+      "date_inclusive": true
+    },
+    "event_scope": {
+      "scope_type": "specific_events",
+      "event_type_ids": [
+        "official_price_change"
+      ]
+    },
+    "source_strategy": {
+      "official_first": true,
+      "include_authoritative_media": true,
+      "include_industry_media": true,
+      "include_social_signals": true,
+      "social_signals_as_discovery_only": true,
+      "allow_unverified_as_discovery_only": true
+    },
+    "query_budget": {
+      "query_budget_per_target": 8,
+      "result_limit_per_query": 10
+    },
+    "ambiguities": [],
+    "notes": []
+  },
+  "task_config": {
+    "task_name": "auto_launch_search_task",
+    "mode": "brand_watch",
+    "monitor_date": "2026-07-31",
+    "target_count": 1,
+    "targets": [
+      {
+        "target_id": "mg",
+        "target_type": "brand",
+        "brand": "MG",
+        "aliases": [
+          "MG",
+          "名爵"
+        ],
+        "sub_brands": [
+          "问界",
+          "智界",
+          "享界",
+          "尊界",
+          "尚界",
+          "智己",
+          "理想",
+          "小米",
+          "蔚来",
+          "乐道",
+          "萤火虫",
+          "小鹏",
+          "MONA",
+          "阿维塔",
+          "深蓝",
+          "零跑",
+          "腾势",
+          "方程豹",
+          "比亚迪",
+          "特斯拉",
+          "极氪",
+          "领克",
+          "吉利银河",
+          "埃安",
+          "岚图"
+        ],
+        "models": [
+          7,
+          4,
+          "Cyberster",
+          "S5",
+          "ES5"
+        ]
+      }
+    ],
+    "time_window": {
+      "window_type": "default",
+      "days": 1,
+      "fallback_days": 7,
+      "start_date": "2026-07-30",
+      "end_date": "2026-07-31",
+      "start_datetime": "2026-07-30T00:00:00+08:00",
+      "end_datetime": "2026-07-31T23:59:59+08:00",
+      "timezone": "Asia/Shanghai",
+      "date_inclusive": true
+    },
+    "source_strategy": {
+      "official_first": true,
+      "include_authoritative_media": true,
+      "include_social_signals": true,
+      "social_signals_as_discovery_only": true,
+      "allow_unverified_as_discovery_only": true,
+      "tier_1_官方一手信息": {
+        "enabled": true,
+        "purpose": "primary — 品牌级监控的主力发现源"
+      },
+      "tier_2_权威垂直媒体与行业媒体": {
+        "enabled": true,
+        "purpose": "secondary — 品牌级监控的辅助发现源"
+      },
+      "tier_3_科技/财经/商业媒体": {
+        "enabled": true,
+        "purpose": "supplementary — 品牌战略/行业分析"
+      },
+      "tier_4_社交平台与渠道信号": {
+        "enabled": true,
+        "purpose": "weak_signal_with_monitoring — 传播评估/舆情监控"
+      },
+      "tier_5_论坛/社区/未经验证": {
+        "enabled": true,
+        "purpose": "weak_signal — 用户口碑"
+      }
+    },
+    "event_type_ids": [
+      "official_price_change"
+    ],
+    "query_budget": {
+      "query_budget_per_target": 8,
+      "result_limit_per_query": 10
+    }
+  },
+  "budget_plan": {
+    "task_name": "auto_launch_search_budget_plan",
+    "mode": "brand_watch",
+    "monitor_date": "2026-07-31",
+    "user_request": "名爵MG新车官方售价 2026",
+    "profile": "deep_scan",
+    "target_count": 1,
+    "query_budget_per_target": 8,
+    "result_limit_per_query": 10,
+    "allow_refine": true,
+    "scout_query_count": 3,
+    "refine_query_budget": 5,
+    "stage": "all",
+    "cache": {
+      "enabled": false,
+      "ttl_hours": 24,
+      "refresh": false,
+      "root_dir": "/Users/zihao_/Documents/github/mashang-service/auto_launch/outputs/search_cache"
+    },
+    "budget_reason": "user requested deep/comprehensive scan"
+  },
+  "query_plan": {
+    "task_name": "auto_launch_volc_search",
+    "mode": "brand_watch",
+    "monitor_date": "2026-07-31",
+    "profile": "deep_scan",
+    "time_window": {
+      "start_date": "2026-07-30",
+      "end_date": "2026-07-31",
+      "start_datetime": "2026-07-30T00:00:00+08:00",
+      "end_datetime": "2026-07-31T23:59:59+08:00"
+    },
+    "search_api_time_filter": {
+      "enabled": true,
+      "start_date": "2026-07-30",
+      "end_date": "2026-07-31",
+      "fallback_to_post_filter": true
+    },
+    "targets": [
+      {
+        "target_id": "mg",
+        "brand": "MG",
+        "queries": [
+          {
+            "query": "MG 权益 价格 限时 最近1天",
+            "stage": "scout",
+            "query_role": "specific_discovery",
+            "query_window_role": "discovery",
+            "event_type_ids": [],
+            "source_tier_focus": [
+              "tier_1_official",
+              "tier_3_industry_media"
+            ],
+            "purpose": "intent-matched: ['general']"
+          },
+          {
+            "query": "MG 官方 权益 限时 价格 最近1天",
+            "stage": "scout",
+            "query_role": "specific_discovery",
+            "query_window_role": "discovery",
+            "event_type_ids": [],
+            "source_tier_focus": [
+              "tier_1_official",
+              "tier_3_industry_media"
+            ],
+            "purpose": "intent-matched: ['general']"
+          },
+          {
+            "query": "MG 经销商 优惠 到店 最近1天",
+            "stage": "scout",
+            "query_role": "specific_discovery",
+            "query_window_role": "discovery",
+            "event_type_ids": [],
+            "source_tier_focus": [
+              "tier_1_official",
+              "tier_3_industry_media"
+            ],
+            "purpose": "intent-matched: ['general']"
+          }
+        ]
+      }
+    ]
+  }
+}

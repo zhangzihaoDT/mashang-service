@@ -1,0 +1,9 @@
+{
+  "query": "极氪 高管 直播 最近7天",
+  "status": "error",
+  "error": "fail",
+  "result_count": 0,
+  "results": [],
+  "cache_status": "miss",
+  "api_called": true
+}

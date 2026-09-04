@@ -1,0 +1,4233 @@
+{
+  "items": [
+    {
+      "query": "智己 最近1天 官方 动作 交付 权益 OTA",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "overview_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "scout",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "8295车主注意!智己OS 4.1升级:手机无缝流转+AI全语音控制+专属音效_新能源车_什么值得买",
+      "url": "https://post.m.smzdm.com/p/a6zo7zwg/",
+      "canonical_url": "https://post.m.smzdm.com/p/a6zo7zwg/",
+      "snippet": "8295车主注意！智己OS 4.1升级：手机无缝流转+AI全语音控制+专属音效\n智己汽车于2026年初启动了IMOS 4.1.0版本的OTA全量推送，此次升级覆盖了搭载高通骁龙8295芯片的焕新版智己LS7、全新智己LS6以及智己L6系列车型。根据官方公布的时间表，推送工作已于2026年2月初完成全量覆盖，全新L6用户也已陆续收到更新推送。\n本次更新的核心升级方向集中在四个维度：生态互联的壁垒打通、AI语音能力的深度进化、个性化交互功能的拓展，以及预约出行的人性化设计。以下将从各维度梳理不同素材中呈现的功能细节与技术特性，供读者了解此次版本更新的全貌。\n01 生态互联：打破手机与车机的边界\nIMOS 4.1.0版本在生态互联层面交出了一份令人满意的答卷，系统正式接入了HUAWEI HiCar与ICCOA CarLink两大主流车机互联协议，这意味着车载终端与移动生态之间的壁垒被彻底打破。\n从功能实现来看，这一举措的核心价值在于实现了真正的“无界流转”。用户无需再为车机生态内应用的丰富度而焦虑，手机中的导航轨迹、音乐列表乃至各类高频应用，都可以通过极简的连接方式无缝流转至车内大屏。预约出行功能\n新版本还带来了更具预判性的预约出行功能，它允许车主根据自己的生活节奏，在APP中设定精细化的出发计划。系统支持设定具体的出发时刻，更支持设定单次、每天甚至每个工作日的循环模式。\n当清晨的闹钟响起，车辆已经提前从深度睡眠中唤醒，默默地启动空调预热，将座椅与方向盘调节至最舒适的...\n整体而言，IMOS 4.1.0的更新围绕生态兼容、AI落地和个性化互动三大核心维度展开。从各素材的表述来看，生态互联的开放性被视为解决“广度”问题的关键，而AI技术的深度下沉则被认为是挖掘交互“深度”的核心路径。个性化功能的上线则为座舱注入了情感价值，让车辆从单纯的交通工具向具备感知力的智能终端演进。\n",
+      "source_name": "什么值得买社区频道",
+      "source_type_guess": "portal_or_aggregator",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "domain matched portal_or_aggregator_domains; original source unknown",
+      "domain": "post.m.smzdm.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "",
+      "time_window_status": "unknown_publish_time",
+      "is_out_of_window": null,
+      "retrieved_at": "2026-07-31T09:02:52.383120",
+      "raw_rank": 1,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 最近1天 官方 动作 交付 权益 OTA",
+        "智己 OTA 技术 发布 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "technology_release",
+        "config_release",
+        "launch_event"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        1
+      ],
+      "dedupe_hit_count": 2
+    },
+    {
+      "query": "智己 最近1天 官方 动作 交付 权益 OTA",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "overview_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "scout",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "智己汽车-智能时代出行的变革者-IM智己汽车官网",
+      "url": "https://www.immotors.com/website/news_detail/234",
+      "canonical_url": "https://www.immotors.com/website/news_detail/234",
+      "snippet": "31.98万元起，智己LS9全系标配线控转向，重构下一代旗舰新标准\n2026年07月17日\n31.98万元起，智己LS9全系标配线控转向，智己LS9 Hyper震撼上市\n唯科技见豪华，重构下一代旗舰标准\n7月16日，上汽集团第一亿台里程碑之作——智己LS9 Hyper正式上市，权益价34.98万元。唯科技见豪华，新车凝聚上汽七十余年巅峰技术，凭借“下一代全线控数字底盘、下一代全域800V高压可油可电平台、下一代高线束激光雷达加高算力芯片”三大核心技术底座，实现全面升维的跨代际体验，树立下一代新能源车的核心科技标尺，引领行业全面迈入“新三大件”时代。\n 发布会同步官宣，智己LS9全系标配线控转向，全系权益价31.98万元起，让用户以30万出头的价格即可享受到百万级全线控转向的颠覆性驾控体验，彻底重塑9系旗舰SUV价值新基准。\n下一代全线控数字底盘：从开创到引领，尽享百万级旗舰豪华SUV驾控质感\n7月1日，由上汽牵头制定的线控转向国家标准正式实施。智己LS9 Hyper作为新国标下的量产先行者，率先标配全线控四轮转向，正式划开中国汽车行业从机械转向向线控转向跃迁的时代分水岭；以科技升维豪华驾控体验，为用户带来更精准的转向、更从容的驾驶和更安全的出行。\n新车搭载与民航客机同源的线控技术，以“全线控转向+智慧四轮转向”黄金组合跨越机械的物理极限，20...\n下一代全域800V平台：可油可电，全程顶级旗舰豪华体验\n以科技定义新奢座舱，以五星标准为安全护航\n全系真线控，唯科技见豪华——上汽一亿台里程碑之上，智己LS9 Hyper以“新三大件”的跨代际硬核科技，重构下一代豪华旗舰SUV标准，为每一位向往科技豪华的品质家庭而来！即日起登录IM智己官方APP或小程序即刻下定，可享上市专属权益礼包，欢迎莅临全国智己体验中心试驾品鉴，感受下一代豪华旗舰SUV的颠覆性科技魅力！\n",
+      "source_name": "智己汽车",
+      "source_type_guess": "official_website",
+      "source_tier_guess": "tier_1_official",
+      "source_resolution_reason": "domain matched official_domains; news page",
+      "domain": "immotors.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-17T00:00:00+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.383753",
+      "raw_rank": 9,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 最近1天 官方 动作 交付 权益 OTA",
+        "智己 发布会 技术 品牌 最近1天",
+        "智己 高管 直播 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "launch_event",
+        "technology_release",
+        "brand_campaign",
+        "executive_voice"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        9,
+        1,
+        7
+      ],
+      "dedupe_hit_count": 3
+    },
+    {
+      "query": "智己 交付 销量 战报 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "delivery_start",
+        "sales_milestone",
+        "order_milestone"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "scout",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "LS6占比降至四成，LS8、LS9齐发力，智己走出单一车型依赖?_车家号_汽车之家",
+      "url": "https://chejiahao.m.autohome.com.cn/info/25876845?isfrom=pc",
+      "canonical_url": "https://chejiahao.m.autohome.com.cn/info/25876845?isfrom=pc",
+      "snippet": "7月1日，智己汽车披露，其在2026年上半年累计交付4.01万辆，同比增长58%。\n据悉，智己汽车将2026全年目标定在11万至13万辆。若下半年保持势头，智己或将打破“连续三年未达预期”的尴尬纪录。\n回顾过往，智己的销量目标完成情况并不理想。2023年目标4.5万辆，最终销量为3.83万辆；2024年目标为12-13万辆，仅实现6.5万辆；2025年，智己定下的销量目标为10万辆，其全年交付8.11万辆。\n智己能否在2026年达成销量目标，进一步扩大其交付规模呢？\n随着改款车型的上市，智己LS6的销量回暖。车主之家数据显示，智己LS6在2025年9月-12月的销量分别为6429辆、8936辆、8026辆、6337辆。相比2025年上半年，销量增长明显。进入2026年，其在1-5月累计销售1.29万辆，占品牌总销量仍超四成，但占比已从去年的六成以上回落，其他车型正在撑起销量。\n2025年11月，智己LS9上市，售价32.28万元-35.28万元。数据显示，2025年12月，智己LS9销量4768辆。凭借此成绩，智己LS9在首个交付月，成为大型增程SUV销量TOP3。2026年前5个月，智己LS9贡献了7203辆的销量，约占智己汽车销量的22.8%。但从单月具体表现来看，智己LS9的销量在2025年12月达到高峰后，便出现下滑，2026年1月为2113辆；随后的几个月里，销量均未突破2000。\n按照占比计算，2026年前5个月，智己LS6和LS9两款车型贡献了智己60...\n",
+      "source_name": "车家号",
+      "source_type_guess": "vertical_auto_media",
+      "source_tier_guess": "tier_3_industry_media",
+      "source_resolution_reason": "domain matched vertical_auto_media_domains",
+      "domain": "chejiahao.m.autohome.com.cn",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "",
+      "time_window_status": "unknown_publish_time",
+      "is_out_of_window": null,
+      "retrieved_at": "2026-07-31T09:02:52.383811",
+      "raw_rank": 1,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 交付 销量 战报 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "delivery_start",
+        "sales_milestone",
+        "order_milestone"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        1
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 权益 价格 限时 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "benefit_adjustment",
+        "official_price_change"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "scout",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "12款主流车型一口价落地 汽车定价规则正在重构_向知平说",
+      "url": "http://m.toutiao.com/group/7668427374836367882/",
+      "canonical_url": "http://m.toutiao.com/group/7668427374836367882/",
+      "snippet": "不少此前想都不敢想的车型，直接把终端门槛拉到了用户心理预期以下。这波全行业普及的一口价玩法，本质不是单纯降价，而是汽车流通体系正在悄悄完成一次换血。一口价的本质是把选择权还给普通用户\n懂行的能磨下来几万优惠，不懂...\n现在推行的一口价模式，直接把所有暗箱操作的空间全部抹平。明码标注的价格就是最终成交的基准线，哪怕你完全没有砍价经验，也能拿到和资深车友一模一样的购车成本。在此基础上叠加的官方统一权益，也避免了不同门店之间的恶性砸价，反而让经销商能把精力放在服务体验上，而不是陪用户玩拉锯游戏。\n一口价的核心价值从来不是便宜，而是消除信息不对称带来的额外成本。\n不少用户之前总觉得买车是件特别累的事，要翻几十篇车友提车帖算落地价，要跑三四家门店对比优惠，现在有了统一一口价的基准线，决策链路直接缩短了大半。哪怕后续叠加区域专属补贴，也都是明明白白标注出来，不存在任何藏在合同里的隐形套路。\n不同品牌的一口价背后藏着各自的生存逻辑\n看似统一的一口价政策，落到不同品牌的不同车型上，其实对应着完全不一样的市场诉求。有的车型是靠一口价直接击穿细分市场的性价比底线，有的车型是靠一口价调整此前的价格波动节奏，稳住基本盘。\n智己LS6限时一口价18.99万的活动延续到7月31日，部分门店叠加优惠最高可达4万，除此之外还包含金融0首付起、5年期首2年0利息、电池包终身质保、IMAD终身免费使用权等专属礼遇。作为20万内5座SUV领域的热门选项，这套组合拳直接把智驾相关的核心权益全部拉满，瞄准的就是看重智能体验的家庭用户群体。\nSmart 精灵#1一口价14.29万，对比指导价下调1万多，还有特定车辆尾款抵扣至高2.4万的叠加优惠，活动截止到7月31日，属于品牌四周年的专属用户权益。这款主打城市出行的智能小车，靠一口价进一步缩小了和同级别国产车型的价格差距。\n",
+      "source_name": "今日头条",
+      "source_type_guess": "portal_or_aggregator",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "domain matched portal_or_aggregator_domains; original source unknown",
+      "domain": "m.toutiao.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-31T04:55:06+08:00",
+      "time_window_status": "in_window",
+      "is_out_of_window": false,
+      "retrieved_at": "2026-07-31T09:02:52.384126",
+      "raw_rank": 1,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": true,
+      "matched_queries": [
+        "智己 权益 价格 限时 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "benefit_adjustment",
+        "official_price_change"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        1
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 门店 试驾 活动 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "channel_campaign",
+        "user_event"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media",
+        "tier_4_social_signal",
+        "tier_5_unverified"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "【智己L7热销中 购车优惠高达8000元_智己汽车|静安大融城体验中心欢迎垂询95013056092】-汽车之家",
+      "url": "http://dealer.autohome.com.cn/2242805/news_1547568430.html",
+      "canonical_url": "http://dealer.autohome.com.cn/2242805/news_1547568430.html",
+      "snippet": "促\n智己L7热销中 购车优惠高达8000元\n智己汽车|静安大融城体验中心 2026-07-27 09:10 · 上海\n近日，本店内有智己L7销售，颜色可选，目前购车部分车型可优惠0.80万元，感兴趣的朋友可以到店咨询购买，详情见下表：\n优惠条件\n促销车型  现金优惠\n<table>\n<tr><th>车型名称</th><th>裸车价</th><th>优惠降幅</th><th>指导价</th><th>...\n<tr><td>2024款 MAX 超长续航版</td><td>29.19万</td><td>0.80万</td><td>29.99万</td><td>询价</td></tr>\n<tr><td>2024款 MAX 长续航旗舰版</td><td>38.19万</td><td>0.80万</td><td>38.99万</td><td>询价</td></tr>\n<tr><td>2024款 MAX 长续航性能版</td><td>34.19万</td><td>0.80万</td><td>34.99万</td><td>询价</td></tr>\n</table>\n注：2026年7月27日行情 车辆价格随时变动，敬请关注当地市场\n本店特色\n以上为车型资料信息，本店提供了多项增值服务，感兴趣的朋友欢迎来电咨询。\n商家信息\n 智己汽车|静安大融城体验中心\n商家地址：上海市静安区沪太路1103号上海静安大融城1层L133-2、L149室\n咨询电话：95013056092\n智己汽车|静安大融城体验中心\n电话接听率：100%\n咨询电话：\n95013056092\n售多地\n24 小时\n上海市静安区沪太路1103号上海静安大融城1层L133-2、L149室\n",
+      "source_name": "汽车之家",
+      "source_type_guess": "dealer_page",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "subdomain/domain matched dealer pattern",
+      "domain": "dealer.autohome.com.cn",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-27T09:10:00+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.384814",
+      "raw_rank": 1,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 门店 试驾 活动 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "channel_campaign",
+        "user_event"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media",
+        "tier_4_social_signal",
+        "tier_5_unverified"
+      ],
+      "raw_ranks": [
+        1
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 联名 合作 代言 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "partnership"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "新势力官宣!刘翔成为代言人_腾讯新闻",
+      "url": "https://view.inews.qq.com/a/20260403A07N1D00",
+      "canonical_url": "https://view.inews.qq.com/a/20260403A07N1D00",
+      "snippet": "新势力官宣！刘翔成为代言人\n汽车行业关注\n2026-04-03 20:46 发布于广东\n4月3日，智己汽车官方发文宣布，奥运冠军、世界级田径传奇刘翔成为品牌代言人。\n对于选择刘翔担任品牌代言人一事，官方称从赛道到人生，刘翔以永不设限、突破自我的冠军精神，一次次诠释“传奇”二字，成为跨越时代的国民符号。这与智己汽车深耕高端智能电动赛道、“不设限、不妥协、不随流”的品牌理念高度契合。刘翔所代表的突破精神与冠军品质，正是智己品牌不断创新、追求极致的最佳诠释。\n 刘翔，中国田径110米栏传奇，被誉为“亚洲飞人”，是中国乃至亚洲田径史上最具突破性的运动员之一。2004雅典奥运上， 以12秒91平世界纪录、破奥运纪录夺冠，夺得中国男子田径首枚奥运金牌。 2006洛桑大奖赛上跑出12秒88，打破保持13年的世界纪录。 2007大阪世锦赛“第九道奇迹”，以12秒95夺冠，成为110米栏大满贯（奥运+世锦赛+世界纪录）。2008北京奥运因跟腱伤退赛，引发巨大争议。2012伦敦奥运再次伤退，跨栏时摔倒，单腿跳完全程致敬。2015年4月7日，刘翔正式宣布退役。\n值得一提的是，早在前几日智己汽车就曾官方发文：“跨时代，成就最好的自己。智己汽车品牌代言人，敬请期待”！彼时也引发了大量网友的关注，更有网友在评论区问了千问这个代言人是谁，千问还在评论区回答是刘翔。\n 此次官方除了公布刘翔作为智己汽车代言人外，还宣布智己LS8将于4月16日上市。新车定位“跨时代科技旗舰 SUV”，已在3月26日开启预售，共推出4款车型，预售价格为25.98-30.98万元。据官方消息，智己LS8自3月26日开启预售以来，仅45分钟小订突破10000台...\n",
+      "source_name": "腾讯网",
+      "source_type_guess": "unknown",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "no domain match; default unknown",
+      "domain": "view.inews.qq.com",
+      "claim_source_hint": "maybe_official",
+      "claim_source_hint_reason": "keyword heuristic found official keywords in text",
+      "publish_time": "2026-04-03T20:46:00+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.385419",
+      "raw_rank": 1,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 联名 合作 代言 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "partnership"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        1
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 高管 直播 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "executive_voice"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "刘涛 - 智己汽车 (IM Motors) Founder | Brandmine",
+      "url": "https://brandmine.ai/zh/founders/liu-tao/",
+      "canonical_url": "https://brandmine.ai/zh/founders/liu-tao/",
+      "snippet": "韧性创始人\n刘涛\n联席CEO\n智己汽车 (IM Motors)\n年终，刘涛仍是联席CEO。65,503辆交付，同比+71%。“Survival”文件夹确实起对了名字。\n刘涛也采用了同样的打法——发微博、做直播、在发布会上发表感性演讲——但契合度始终不够。业界评价智己的营销“小家子气”，这与其说是对刘涛个人能力的判断，不如说是对每一个动作背后可见的体制约束的反应。2022年11月，刘涛在微博上就潮州一起致命事故攻击特斯拉，称其“傲慢而冷血”。法院后来判定特斯拉无责；刘涛直到2025年才公开道歉。2022年12月，一段视频曝出他在试驾智己L7时两分钟内违反五项交通法规。又一次公开道歉。2023年11月，一场刘涛在车内包饺子的直播被网友嘲讽为不着调的产品营销；微博帖子被悄悄删除。每一次事件单独看都不算大事。但合在一起，它们勾勒出一个画像：这位高管的体制型沟通本能——谨慎、合规导向、急于展示个人投入——一次又一次地撞上中国社交媒体那种尖刻不羁的期待。\n2024年4月把十八个月的摩擦压缩进了一个毁灭性的序列。结果，这个月成了刘涛职业生涯的至暗时刻。他在台上动情讲述团队的牺牲——有同事错过了孩子出生，有人四次感染新冠。互联网的回应是“苦难营销”的指控——言下之意，一个国企高管拿辛苦说事，更像是表演而非真诚。一个月内三次公开道歉。\n换帅传闻四起、智己汽车仅交付不到28,000辆远未达成12万目标之际，刘涛押注产品而非营销——2024年9月改款LS6上市，次月即交出10,001辆的成绩单，证明一个职业经理人无需创始人股权也能做出创始人级别的事。\n9月26日，改款LS6搭载灵犀数字底盘2.0和智己AD 3.0智驾系统亮相——形成智己内部所称的“双6系列”战略：改款LS6与L6联手覆盖20万-30...\n",
+      "source_name": "Brandmine",
+      "source_type_guess": "unknown",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "no domain match; default unknown",
+      "domain": "brandmine.ai",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-30T00:00:00+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.385725",
+      "raw_rank": 1,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 高管 直播 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "executive_voice"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        1
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 最近1天 官方 动作 交付 权益 OTA",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "overview_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "scout",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "智己汽车回应“经销商经营异常”:因民间借贷资金链断裂，预计本周末完成车辆交付_九派财经",
+      "url": "http://m.toutiao.com/group/7664985547252810290/",
+      "canonical_url": "http://m.toutiao.com/group/7664985547252810290/",
+      "snippet": "【来源:红星新闻】\n红星资本局7月21日消息，7月上旬，智己汽车在昆明、珠海等地的授权经销商相继出现经营异常，引发车主维权(红星新闻相关报道:智己一昆明经销商“经营异常”:有人付款提不了车，有人提车上不了牌!厂家工作组已抵昆明)。\n7月21日，智己汽车发布官方声明称，个别经销商发生异常情况，截至7月17日，智己汽车已基本完成用户的对接与情况梳理，并已于7月18日起陆续恢复合格证发放与车辆交付。预计到本周末完成所有正常购车用户的订单及车辆交付。\n 智己汽车发布官方声明截图\n经销商经营异常\n准车主对“兜底”短信心存疑虑\n7月上旬，智己在昆明的一授权经销商被曝“经营异常”。有消费者支付了全款但无法提车，有消费者已提车但合格证被抵押无法上牌，还有消费者的钱款无法退还。\n智己汽车珠海香洲用户中心同样出现付款后无法提车的情况。7月14日，该门店贴出了闭店通知，称因经销商运营调整，门店暂停营业。\n一些车主收到了智己汽车官方发布的兜底通知短信。短信称，智己汽车专项工作组已进驻昆明。对于未取得合格证、已付清车款的购车用户，智己将垫资与金融机构协商赎回车辆合格证，全部费用由厂家承担，用户无需参与经销商债务处理，购车权益由智己兜底，后续专项工作组会主动联系;对于已预订订单用户，智己称将保障其预订价格和权益，协调周边的用户中心提供后续服务。对于保有客户，车辆保养、维修等售后服务需求及尚未使用的智己官方服务权益将继续有效。\n不过很多消费者在门店“经营异常”一周后都没有接到厂家的主动联系，也联系不上专项工作组，加上智己汽车一直没有公布事件的进展，消费者对短信内容心存疑虑。\n 智己汽车向用户发送的通知短信 受访者供图\n7月18日，智己汽车方面向红星资本局确认，给用户发送的短信承诺完全有效，用户的合理诉求公司都会积极跟进解决。由于本次涉及的资金总额较大，每位用户的购车情况各不相同，必须...\n",
+      "source_name": "今日头条",
+      "source_type_guess": "portal_or_aggregator",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "domain matched portal_or_aggregator_domains; original source unknown",
+      "domain": "m.toutiao.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-21T22:18:46+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.383459",
+      "raw_rank": 2,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 最近1天 官方 动作 交付 权益 OTA"
+      ],
+      "matched_event_type_ids": [],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        2
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 交付 销量 战报 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "delivery_start",
+        "sales_milestone",
+        "order_milestone"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "scout",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "智己汽车没有暴雷!上半年累计交付40087台，同比增长58%，海外市场也在稳健推进中_车圈观测",
+      "url": "http://m.toutiao.com/group/7665018011035730442/",
+      "canonical_url": "http://m.toutiao.com/group/7665018011035730442/",
+      "snippet": "#优质好文激励计划#\n文 春公子\n7月21日，智己汽车发了一份声明，说“多地经销商暴雷”是网络传言，全国渠道运营稳健，今年6到7月还新开了26家门店。\n销量数据也摆在那里。2026年上半年累计交付40087台，同比增长58%。在上汽集团内部，智己的增速更是达到了107%。\n销量在涨，门店在开，但昆明、珠海的经销商确实出了问题。\n这到底是怎么回事?\n一、销量确实涨了，但还没突破“生死线”\n先看数据。\n2026年1-6月，智己汽车累计交付40087台。1月4647辆，2月受春节影响回落至2017辆，3月回升至7187辆。真正的转折在4月——LS8上市后，4月、5月连续两个月交付量破万，分别达到10016辆、10023辆。6月销量8000辆，上半年累计40087辆。\n增速确实亮眼。同比增长58%。\n但放在整个造车新势力里看，这个体量仍然偏小。6月零跑交付93376辆，鸿蒙智行50624辆。智己的8000辆，在“第三集团”里和阿维塔(7459辆)、岚图(14223辆)处于同一梯队。\n卖了四年车，累计销量不超过25万辆，平均月销量未超过1万辆。作为一个有6款车型、覆盖20万到40万元区间的品牌，这个成绩只能说“还行”，谈不上“出色”。\n销量在涨，但还没突破“生死线” 。月销不过万，渠道就撑不住，这是很多新势力都走过的弯路。\n 7月7日，智己昆明授权经销商“智合悦行”突然关门，三家门店全部停业。紧接着珠海、上海也传出类似消息。\n7月7日当天成立专项工作组，第二天进驻现场，7月18日起陆续恢复交付。2026年5月...\n",
+      "source_name": "今日头条",
+      "source_type_guess": "portal_or_aggregator",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "domain matched portal_or_aggregator_domains; original source unknown",
+      "domain": "m.toutiao.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-22T00:25:17+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.383848",
+      "raw_rank": 2,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 交付 销量 战报 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "delivery_start",
+        "sales_milestone",
+        "order_milestone"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        2
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 权益 价格 限时 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "benefit_adjustment",
+        "official_price_change"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "scout",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "智己汽车 | 我自 由我 IM what I am",
+      "url": "https://www.immotors.com/website/configurator/ls7m2?type=config",
+      "canonical_url": "https://www.immotors.com/website/configurator/ls7m2?type=config",
+      "snippet": "车型\n车款\n颜色\n轮辋\n内饰\n选装\n 智己LS7焕新版限时权益\n2026年1月1日至6月30日(含)锁单并交付的用户可享: 权益1：价值51,400元配置升级礼 权益2：限时特惠金融方案，50%首付起，固定5年期，首两年0息，后三年费率2.99% 权益3：IM AD 智能辅助驾驶功能包终身免费使用权（价值36,800元） 权益4：智己老车主增换购再享15,000元尾款减免 *详情请咨询门店用户主理\n版本\n 价格明细\n版本\nLS7 Ultra\n¥339,900\n外观\n阿瑞斯黑\n价格已包含\n22英寸锋锐撞色运动轮辋\n价格已包含\n座舱\n大地象灰\n价格已包含\nYAT巡航型半幅柔感瞬热方向盘\n限时免费升级 ¥2,000\n购车优惠\nLS7焕新版 增换购补贴礼\n- ¥10,000\n购车总价\n¥329,900\n*购车总价为裸车价格，国家或地方补贴、智己车主增换购权益申领方式详询当地用户主理\n¥329,900 查看明细\n预计锁定配置后3-6周交付\n",
+      "source_name": "智己汽车",
+      "source_type_guess": "official_product_page",
+      "source_tier_guess": "tier_1_official",
+      "source_resolution_reason": "domain matched official_domains; product/config page",
+      "domain": "immotors.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "",
+      "time_window_status": "unknown_publish_time",
+      "is_out_of_window": null,
+      "retrieved_at": "2026-07-31T09:02:52.384143",
+      "raw_rank": 2,
+      "routing_bucket": "context_only",
+      "candidate_gate_status": "rejected",
+      "candidate_gate_reasons": [
+        "official_static_page_without_publish_time"
+      ],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 权益 价格 限时 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "benefit_adjustment",
+        "official_price_change"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        2
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 OTA 技术 发布 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "technology_release",
+        "config_release",
+        "launch_event"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "【智己IM AD全新版本OTA重磅上线_汽车促销】湖北恩施车城体验中心-易车",
+      "url": "https://dealer.m.yiche.com/d100249034/news_1393934406.html",
+      "canonical_url": "https://dealer.m.yiche.com/d100249034/news_1393934406.html",
+      "snippet": "智己IM AD全新版本OTA重磅上线\n类型：企业新闻 2026-04-21\n",
+      "source_name": "易车",
+      "source_type_guess": "dealer_page",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "subdomain/domain matched dealer pattern",
+      "domain": "dealer.m.yiche.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-04-21T00:00:00+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.384495",
+      "raw_rank": 2,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 OTA 技术 发布 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "technology_release",
+        "config_release",
+        "launch_event"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        2
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 门店 试驾 活动 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "channel_campaign",
+        "user_event"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media",
+        "tier_4_social_signal",
+        "tier_5_unverified"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "全国智己体验中心迎来LS9 Hyper品鉴热潮!预约持续升温_车圈郭必婷",
+      "url": "http://m.toutiao.com/group/7664779614271554111/",
+      "canonical_url": "http://m.toutiao.com/group/7664779614271554111/",
+      "snippet": "近期，智己LS9 Hyper登陆全国各大体验中心，线下门店掀起沉浸式品鉴热潮，线上试驾预约量持续暴涨，热门城市试驾排期已延后数日，一跃成为30万级六座旗舰SUV市场顶流车型。\n 走进各地智己展厅，LS9 Hyper稳居C位，游艇式流线车身搭配专属HYPER运动套件，未来感灯组极具辨识度，不少家庭用户、科技爱好者专程到店打卡。展厅内客流络绎不绝，销售顾问讲解、试驾安排连轴转，周末门店客流环比上涨超五成，消费者纷纷上车体验座舱空间与驾控质感。\n 火爆热度源于硬核产品实力。作为线控转向新国标落地首款全系标配该技术的量产SUV，LS9 Hyper搭载民航同源全线控底盘，20毫秒极速转向响应，搭配24°双向后轮转向，5.2米大车仅4.77米转弯半径，市区通勤灵活好开。上汽金标三电机四驱加持，3.9秒零百加速，兼顾性能与家用舒适。\n 动力续航无需焦虑，800V全域增程平台纯电续航390km，综合续航1460km，日常代步、长途出行都适配。车内2+2+2六座布局，全车座椅通风加热按摩配齐，520线激光雷达+英伟达Thor芯片加持高阶智驾，兼顾科技、舒适与安全。\n当前全国门店实车充足，试驾预约通道持续开放，想体验全线控旗舰驾控的消费者，可就近前往智己体验中心预约品鉴。\n",
+      "source_name": "今日头条",
+      "source_type_guess": "portal_or_aggregator",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "domain matched portal_or_aggregator_domains; original source unknown",
+      "domain": "m.toutiao.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-21T09:00:51+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.384847",
+      "raw_rank": 2,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 门店 试驾 活动 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "channel_campaign",
+        "user_event"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media",
+        "tier_4_social_signal",
+        "tier_5_unverified"
+      ],
+      "raw_ranks": [
+        2
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 发布会 技术 品牌 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "launch_event",
+        "technology_release",
+        "brand_campaign"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "智己ls9上市发布会回放|上汽集团|智己汽车|上汽|线控|芯片_手机新浪网",
+      "url": "https://auto.sina.cn/2026-07-18/detail-iniierwk1513650.d.html",
+      "canonical_url": "https://auto.sina.cn/2026-07-18/detail-iniierwk1513650.d.html",
+      "snippet": "二、核心产品力：“新三大件”技术体系\n1. 下一代底盘：全线控数字底盘\n全系标配线控转向：方向盘与转向机无物理机械连接，20ms极速响应，转向比可在4.5:1到14.2:1之间切换。\n双向24°四轮转向：最大后轮转向角度达24°，实现4.77米最小转弯半径，5.3米长的大型SUV在窄路掉头、停车入库时更加灵活。\n三重安全冗余：即使在全部电子系统断电的极端情况下，仍能通过后轮转向与制动力分配实现平稳靠边停车。\n2026年7月1日线控转向国家标准正式落地，智己LS9 Hyper是该新规下率先量产的全线控四轮转向SUV。\n2. 下一代三电：800V恒星超级增程平台\n双能源方案：可油可电，搭载1.5T增程专用发动机与宁德时代超级骁遥电池，提供52kWh与66kWh两种电池容量。\n续航与补能：CLTC纯电续航最高390km，综合续航最高1460km；支持170kW超快充，在-20°C低温环境下充电起步即达170kW。\n高性能动力：Hyper版首搭上汽金标飓风三电机四驱系统，峰值扭矩730N·m，零百加速迈入3秒级。\n极端工况稳定：在海拔3500米的高原亏电工况下，零百加速衰减仅约2%；低电量状态下放电功率仍可达275kW。\n3. 下一代智能：高阶智驾与座舱\n感知硬件：全系标配520线超视域激光雷达，智能凝视等效1040线，最远感知距离300米。\n智驾芯片：搭载NVIDIA DRIVE AGX Thor芯片，基于Blackwell架构，算力支持未来L3/L4级自动驾驶升级。\n智驾方案：联合Momenta打造，Momenta CEO曹旭东正是智己LS9 Hyper的001号车主，双方具备原生技术协同优势。\n座舱配置：丹麦B&O音响、4D机械按摩座椅、全车三个零重力座椅、IM Nappa真皮等豪华配置一应俱全。...\n",
+      "source_name": "手机新浪汽车",
+      "source_type_guess": "unknown",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "no domain match; default unknown",
+      "domain": "auto.sina.cn",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-18T08:34:49+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.385111",
+      "raw_rank": 2,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 发布会 技术 品牌 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "launch_event",
+        "technology_release",
+        "brand_campaign"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        2
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 联名 合作 代言 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "partnership"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "智己汽车-智能时代出行的变革者-IM智己汽车官网",
+      "url": "https://www.immotors.com/website/news_detail/125",
+      "canonical_url": "https://www.immotors.com/website/news_detail/125",
+      "snippet": "智己牵手青年实力女演员金晨，智己LS6全国到店，抢先锁单即享得物限量潮品\n2023年09月22日\n智己牵手青年实力女演员金晨\n智己LS6全国到店，抢先锁单即享得物限量潮品\n• 金晨代言“中大型智能轿跑SUV”智己LS6\n• LS6 今日全国到店 ，覆盖80余城市的200+品牌体验及交付服务中心\n• 智己汽车携手得物，抢先锁单智己LS6，赢取限量定制潮鞋\n（2023年9月22日，上海）日前，智己汽车宣布，青年实力女演员金晨成为“中大型智能轿跑SUV”智己LS6 代言人。目前由金晨主演的 2023暑期档票房冠军《孤注一掷》仍在影院上映中，在取得了38亿票房的好成绩的同时也成为年度观影人数最多的电影。22日，亮相即火爆的LS6 全国到店，覆盖80余座城市的超200家 IM品牌体验及交付服务中心，迎接用户抢先体验#未来驾舱定义者的智能科技和超凡驾趣。同时，智己LS6也已做好正式上市的准备工作。按计划，LS6 将于9月29日开启全国用户动态试驾；10月12日正式上市，上市即交付，无需用户更多等待。\n当日，智己汽车在特别直播节目中公布了“LS6抢先锁单权益”，为提前锁定新锐潮流都市生活的用户，额外加码限量潮品彩蛋。10 月 12日前锁单用户 ，享受优先交付 ，还将额外免费赠送价值超1,400元的品牌充电枪与放电枪 ，在旅行和出游中，轻松应对应急补能，体验露营休憩的从容与乐趣；与此同时，参与智己汽车携手得物的“IM大艺术家”潮流之旅，抢先锁单就有机会赢取xVESSEL 、Heyday 、Rocawear 三大潮流品牌限量定制潮鞋；开高颜值爆款 LS6，穿最IN的“潮鞋”，成为街头巷尾目光锁定...\n",
+      "source_name": "智己汽车",
+      "source_type_guess": "official_website",
+      "source_tier_guess": "tier_1_official",
+      "source_resolution_reason": "domain matched official_domains; news page",
+      "domain": "immotors.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2023-09-22T00:00:00+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.385445",
+      "raw_rank": 2,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 联名 合作 代言 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "partnership"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        2
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 高管 直播 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "executive_voice"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "汽车时代网的微博",
+      "url": "https://m.weibo.cn/detail/5303512532782818",
+      "canonical_url": "https://m.weibo.cn/detail/5303512532782818",
+      "snippet": "直击上汽一亿台高光名场面！\n直播间技术专家深度对话\n新三大件为何是时代必备？\n5月28日15:00 准时围观！\n#智己LS9 #上汽一亿台# ​​\n",
+      "source_name": "微博",
+      "source_type_guess": "social_platform",
+      "source_tier_guess": "tier_4_social_signal",
+      "source_resolution_reason": "domain matched social_platform_domains",
+      "domain": "m.weibo.cn",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-05-28T11:36:25+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.385769",
+      "raw_rank": 2,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 高管 直播 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "executive_voice"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        2
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 最近1天 官方 动作 交付 权益 OTA",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "overview_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "scout",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "智己L7天使轮版权益到底值不值?3个维度拆解+FAQ|上海车展|OTA|后轮转向|智驾|芯片_手机新浪网",
+      "url": "https://auto.sina.cn/2026-07-30/detail-inikphnv1401019.d.html",
+      "canonical_url": "https://auto.sina.cn/2026-07-30/detail-inikphnv1401019.d.html",
+      "snippet": "智己L7天使轮版的权益核心就是“终身承诺+硬件OTA可升级”，40.88万元买到的不仅是一台2021年发布的纯电轿车，更是品牌愿意每车亏损约9万元免费更换域控、激光雷达和Orin芯片，让老车主在2026年依然能用上R6大模型城区智驾——这种硬核兑现，在同期新势力中独此一家。如果你追求用车5年后依然能体验最新智驾，且看重后轮转向带来的灵活操控，天使轮版二手市场的附加价值值得重点考虑；但如果预算有限且只想开3年就换车，普通版可能更合适。\n01 硬件升级权益：全行业唯一的“逆生长”承诺\n智己L7天使轮版于2021年上海车展预售，售价40.88万元。当时官方承诺为车主持续提供硬件升级服务，2025~2026年间，智己确实兑现了承诺：免费为天使轮用户更换了域控制器、激光雷达、高清摄像头及线束，芯片从最初的Xavier升级为Orin，单台车亏损约9万元（数据来自大V@大包子狸）。升级后，老车主成功OTA了智己最新的R6大模型智驾，在广州城区实现城市领航，表现丝滑。根据一位行驶18万公里的车主视频，长途500公里几乎全程使用该功能，路况处理从容。\n这种“整车智能化可成长”的权益，本质是把传统汽车的硬件固定逻辑变成了类似智能手机的持续升级。对用户场景的翻译就是：你2022年提车时的智驾能力可能只算L2+，但5年后依然能通过升级达到行业主流水平，不用换车。目前能做到这点的品牌仅有智己一家。但代价是首批天使轮用户需要承担较高的购车价格（40.88万），且硬件升级需要预约到店，部分城市等待时间较长。\n<tr><td>智驾OTA</td><td>已推送R6大模型城区智驾</td><td>仅支持基础辅助驾驶</td></tr>\n<tr><td>质保与救援</td><td>终身质保、终身免费道路救援</td><...\n",
+      "source_name": "手机新浪汽车",
+      "source_type_guess": "unknown",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "no domain match; default unknown",
+      "domain": "auto.sina.cn",
+      "claim_source_hint": "maybe_dealer",
+      "claim_source_hint_reason": "keyword heuristic found dealer keywords in text",
+      "publish_time": "2026-07-30T03:30:43+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.383532",
+      "raw_rank": 3,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 最近1天 官方 动作 交付 权益 OTA"
+      ],
+      "matched_event_type_ids": [],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        3
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 最近1天 官方 动作 交付 权益 OTA",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "overview_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "scout",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "Momenta+智己智驾生态深度解析:技术协同与安全体验全览_四海新洞察",
+      "url": "http://m.toutiao.com/group/7668295453489889819/",
+      "canonical_url": "http://m.toutiao.com/group/7668295453489889819/",
+      "snippet": "智己汽车与Momenta之间构建了汽车行业中极为独特的深度合作关系，这并非普通的供应商与主机厂之间的供需合作，而是基于双向持股的资本同盟与联合定义的技术原研模式。基于此，目前智己旗下主销车型均深度搭载 Momenta 智驾方案，覆盖智己L7、LS7、L6、LS6、LS9等多款车型，其中新款 LS9 搭载基于 Momenta R6 强化学习大模型的最新 IM AD Max 系统。与此同时，最新的 LS8 车型采用双智驾方案架构——高速合法脱手的 L3 功能由上汽零束提供，而城区 NOA 及全场景基础辅助驾驶仍由 Momenta R6 大模型支撑，展现了技术方案灵活适配的能力\n智己与Momenta之间的合作，其基调被定义为唯一创始伙伴关系，这一定位从两个核心维度确立了其独特性。首先，在资本层面，双方实现了双向持股，这意味着Momenta不仅是智己的智驾技术供应商，更是其深度绑定的产业合伙人。这种资本纽带使得双方的利益高度一致，技术研发的指向性和长期稳定性远非普通的采购合作可以比拟。\n其次，在技术层面，智己汽车担任了Momenta技术原研车的角色。这并非简单的后期技术适配，而是从车辆研发之初便进行联合定义。通过将底盘、算法、算力进行三位一体的调优整合，使得智己车型搭载的Momenta智驾方案体验天生更优。这种从底层架构到上层应用的全面协同，确保了软硬件之间的高度默契，为后续全场景智驾能力的释放奠定了坚实基础。\n依托Momenta量产数据飞轮，海量真实路测数据持续反哺大模型训练，IM AD系统通过OTA持续迭代，单版本即可完成数百项功能优化与体验升级，保持常用常新。同时，Momenta大模型具备高适配性，可高效覆盖从低到高不同级别的芯片平台，其与NVIDIA...\n配合标配激光雷达与Orin X算力平台而无须额外付费订阅的诚意策略，智己与Momenta共同打造的这套IM AD系统，不仅技术上限高，使用门槛也更低，为用户提供了具有长期进化潜力和当下卓越表现的智慧出行选择。\n",
+      "source_name": "今日头条",
+      "source_type_guess": "portal_or_aggregator",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "domain matched portal_or_aggregator_domains; original source unknown",
+      "domain": "m.toutiao.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-30T20:23:08+08:00",
+      "time_window_status": "in_window",
+      "is_out_of_window": false,
+      "retrieved_at": "2026-07-31T09:02:52.383616",
+      "raw_rank": 5,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": true,
+      "matched_queries": [
+        "智己 最近1天 官方 动作 交付 权益 OTA",
+        "智己 OTA 技术 发布 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "technology_release",
+        "config_release",
+        "launch_event"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        5,
+        3
+      ],
+      "dedupe_hit_count": 2
+    },
+    {
+      "query": "智己 交付 销量 战报 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "delivery_start",
+        "sales_milestone",
+        "order_milestone"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "scout",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "智己经销商集中暴雷，官方正式发文:车主损失全部兜底_星哥探世界",
+      "url": "http://m.toutiao.com/group/7664104551863108132/",
+      "canonical_url": "http://m.toutiao.com/group/7664104551863108132/",
+      "snippet": "7月初开始，昆明三家智己体验中心毫无征兆全面关停，紧随其后珠海授权门店张贴停业告示、上海合作网点负责人失联，大批车主付款之后无法正常提车，车辆合格证被经销商抵押给金融机构，上牌流程彻底卡住，数百名车主陷入维权难题。事件发酵后，智己汽车火速发布官方短信公告，组建专项工作组进驻事发地区处理全部车主诉求。\n1、事件真实起因:同源经销商资金链断裂，并非品牌整体暴雷\n本次出事的昆明智合悦行、珠海智合悦行两家经销企业，归属同一投资方运营，属于关联公司，全国其余所有智己线下门店经营状态全部正常，不存在品牌渠道大面积崩盘的情况。\n该经销商为填补资金缺口，对外推出晚提车返还4万~7万元现金的高额福利活动，诱导消费者直接支付全款，长期挪用用户购车资金抵扣门店房租、人员薪资。门店每年固定运营成本近千万，叠加车市价格战之下单车利润微薄，最终资金链彻底断裂，展车被金融机构回收、员工被拖欠数月薪资，多地门店同步停业。\n本次风波共计两百八十余名车主受到影响，超百位用户全款交付后车证两空，维权诉求集中爆发。\n2、智己官方完整官方回复(短信公告+高管公开表态)\n针对已经付清全款、暂时没有拿到车辆合格证的车主，智己厂家直接出资垫资对接金融机构赎回合格证，所有产生的费用由品牌承担，车主不用介入经销商的债务纠纷，所有购车权益由智己全权兜底保障;\n已下定的订单，原先约定的购车价格、赠送福利全部保留，官方调配周边正常营业门店承接车辆交付、保养维修等所有服务;正常提车的车主，全国任意智己门店均可享受原厂质保与售后维保服务，不会受到本次事件影响。\n1、本次只是单一投资人经营不善造成的个体事件，智己整体渠道布局健康稳定，不存在系统性渠道风险;\n2、依靠延迟交付返现下单的车主订单需要逐一核验资料，处理周期会拉长，相关违法线索已经移交公安与监管部门立案追查;\n3、品牌短期内不会转型直营模式，后续将会抬高经销商入驻资质门槛，常态化...\n3、交付车辆当场索要合格证、购车发票原件，绝不默许店家临时抵押合格证，避免门店经营暴雷导致无法上牌;\n",
+      "source_name": "今日头条",
+      "source_type_guess": "portal_or_aggregator",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "domain matched portal_or_aggregator_domains; original source unknown",
+      "domain": "m.toutiao.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-19T13:24:01+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.383881",
+      "raw_rank": 3,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 交付 销量 战报 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "delivery_start",
+        "sales_milestone",
+        "order_milestone"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        3
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 权益 价格 限时 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "benefit_adjustment",
+        "official_price_change"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "scout",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "【娄底促销信息】湖南娄底智己体验中心优惠信息_汽车之家",
+      "url": "http://dealer.autohome.com.cn/2215625/informationList_c2_s0.html",
+      "canonical_url": "http://dealer.autohome.com.cn/2215625/informationList_c2_s0.html",
+      "snippet": "七月购车享限时权益L6限时一口价18.99...\n智己LS8限时优惠 目前24.98万元起售\n发布时间：2026-07-24\n智己LS8跨时代科技旗舰SUV七月限时权益价24.98万元起有效期:2026年7月1日-7月31日(含)止1、七月限时现金立减价值12000元，2、限时配置免费升级价值44400元，3、奢华智选包限时选装价9800元，4、全线控转向系统限时选\n七月购车享限时权益 LS9限时权益价30.88万元起\n发布时间：2026-07-23\n七月购车享限时权益LS9限时权益价30.88万元起有排面真好开大六座七月限时现金立减价值10000元金融礼0首付起5年期首2年0利息至高价值21000元电池包终身质保价值5600元旗舰头等舱尊享礼包限时免费升级至高价值60800元2\n智己LS8售价24.98万起 欢迎到店垂询\n发布时间：2026-07-23\n智己LS8跨时代科技旗舰SUV七月限时权益价24.98万元起有效期:2026年7月1日-7月31日(含)止1、七月限时现金立减价值12000元，2、限时配置免费升级价值44400元，3、奢华智选包限时选装价9800元，4、全线控转向系统限时选\n智己LS9现直降3万 欢迎垂询\n发布时间：2026-07-21\n一图看懂｜31.98万元起！智己LS9全系真线控，智己LS9Hyper震撼上市！7月现金礼5000元预付款兑换35000元现金抵扣券金融礼0首付起固定5年期首2年0息特惠价值5800元旗舰头等舱尊享礼包限时免费高定车色限时免费21英寸星\n",
+      "source_name": "汽车之家",
+      "source_type_guess": "dealer_page",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "subdomain/domain matched dealer pattern",
+      "domain": "dealer.autohome.com.cn",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-29T00:00:00+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.384171",
+      "raw_rank": 3,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 权益 价格 限时 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "benefit_adjustment",
+        "official_price_change"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        3
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 门店 试驾 活动 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "channel_campaign",
+        "user_event"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media",
+        "tier_4_social_signal",
+        "tier_5_unverified"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "智己汽车合伙人招募_高端智能纯电动汽车-IM智己汽车官网",
+      "url": "https://www.immotors.com/website/dealer",
+      "canonical_url": "https://www.immotors.com/website/dealer",
+      "snippet": "智己汽车体验中心\n坐落于各城市核心商场，是人工智能与潮流艺术为一体的线下共创体验空间。体验中心涵盖产品展示区、艺术文化区、个性选配区、用户共创区4大空间。为智己汽车用户提供品牌介绍、产品展示、试乘试驾、体验互动、权益增值等服务。\n智己汽车体验及交付服务中心\n线上+线下一体式互动平台，为用户提供体验试驾、车辆交付、用车关怀、共创空间的全用车周期服务体验。\n合作伙伴招募流程介绍\n1.提交合作申请\n合作伙伴线上下载合作申请表并发送至邮箱\n1.提交合作申请\n合作伙伴线上下载合作申请表并发送至邮箱\n2.候选人初审\n我们将对申请方资质及申请材料进行审核\n2.候选人初审\n我们将对申请方资质及申请材料进行审核\n3.场地考察\n如初审通过，我们将会进行场地考察及确认\n3.场地考察\n如初审通过，我们将会进行场地考察及确认\n4.全面评估\n我们将对申请方进行综合评审\n4.全面评估\n我们将对申请方进行综合评审\n5.签署意向书\n如评审通过，双方签订合作意向书\n5.签署意向书\n如评审通过，双方签订合作意向书\n合作伙伴准入条件\n1\n丰富的运营经验\n具有丰富的汽车流通行业运营经验，与各一线主流车企拥有广泛深入的合作基础\n2\n优秀的管理能力\n经营管理获得主流车企认可，近三年获得主机厂星级评定，资金及人员实力出众\n3\n认可新能源市场\n对电动化、智能化、网联化的发展趋势充分认可，在区域有良好的商超、场地及公共关系资源\n",
+      "source_name": "智己汽车",
+      "source_type_guess": "official_website",
+      "source_tier_guess": "tier_1_official",
+      "source_resolution_reason": "domain matched official_domains",
+      "domain": "immotors.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "",
+      "time_window_status": "unknown_publish_time",
+      "is_out_of_window": null,
+      "retrieved_at": "2026-07-31T09:02:52.384862",
+      "raw_rank": 3,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 门店 试驾 活动 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "channel_campaign",
+        "user_event"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media",
+        "tier_4_social_signal",
+        "tier_5_unverified"
+      ],
+      "raw_ranks": [
+        3
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 发布会 技术 品牌 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "launch_event",
+        "technology_release",
+        "brand_campaign"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "理想提出线控+后转标配观点，智己高管回应自身技术积淀_开宾利吃泡面",
+      "url": "http://m.toutiao.com/group/7664810981914067497/",
+      "canonical_url": "http://m.toutiao.com/group/7664810981914067497/",
+      "snippet": "随着2026年盛夏的一声落槌，智己LS9 Hyper以34.98万元的权益价正式跃入大众视野，这不仅是一款大型六座旗舰SUV的诞生，更是中国底盘技术跨入新纪元的标志。在发布会的深度交流环节中，当理想汽车提出的“旗舰标配论”被摆上台面，智己品牌与用户高级总监焦樵的回答显得既从容又透着深厚的技术底气。他直言，所谓的旗舰门槛，智己早已作为行业先行者铺设了整整四年。这场跨越时空的隔空对话，背后折射出的是中国新能源车企在核心底层架构上的集体觉醒，也意味着全线控转向技术正从实验室的尖端探索，加速转化为每一个家庭日常出行的标配保障，重新定义了豪华与安全的边界。\n 追溯往昔，早在2022年4月，智己推出的首款轿车L7就以全系标配后轮转向系统的姿态，打破了当时全球豪华车市场的某种默契。在那个节点，后轮转向往往是百万级进口豪车的专属，或者是国内旗舰车型的昂贵选装项。智己却选择将这一复杂的机电一体化系统作为全系标配，这种在当时看来略显激进的决定，实际上是为如今的全线控底盘提前布局。此后的LS6、LS8到今天的LS9 Hyper，每一代车型都在这道“技术轨道”上深化，将四轮转向技术磨砺得日益圆润。焦樵在解读这种技术领先性时提到，后轮转向本质上就是通过电信号驱动的线控转向雏形，因为后轮与方向盘之间天然不存在物理连接。四代车型的量产积累，为智己积攒了庞大的真实驾驶数据和工程验证经验，这种时间堆砌出的护城河，是后来者难以通过简单采购零部件来实现跨越的。\n 作为大厂新势力的代表，智己不仅仅是新技术的拥趸，更是行业规则的奠基人。2026年7月1日正式实施的GB 17675-2025《汽车转向系基本要求》强制性国家标准，为全线控转向这项颠覆性技术提供了合法的身份证明和严格的安全界限。这项标准明确了系统在动力源失效或能量传输中断等极端场景下的应对策略，确保了技术应用的万无一失。上汽...\n",
+      "source_name": "今日头条",
+      "source_type_guess": "portal_or_aggregator",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "domain matched portal_or_aggregator_domains; original source unknown",
+      "domain": "m.toutiao.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-21T11:02:22+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.385143",
+      "raw_rank": 3,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 发布会 技术 品牌 最近1天",
+        "智己 高管 直播 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "launch_event",
+        "technology_release",
+        "brand_campaign",
+        "executive_voice"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        3
+      ],
+      "dedupe_hit_count": 2
+    },
+    {
+      "query": "智己 联名 合作 代言 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "partnership"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "智己官宣刘翔成品牌代言人，“跨时代”精神与品牌向上战略握手|雅典奥运会_网易订阅",
+      "url": "https://www.163.com/dy/article/KPR58KR60514TTKN.html",
+      "canonical_url": "https://www.163.com/dy/article/KPR58KR60514TTKN.html",
+      "snippet": "4月3日，智己汽车重磅宣布，奥运冠军、世界级田径传奇刘翔正式成为品牌代言人。海报 上“跨，时代”几个大字格外醒目，而刘翔挺拔的身姿、专注的眼神，也与LS8的俊朗身形相呼应。\n当网友尤其是车主在评论区开始回忆刘翔的传奇经历，一个值得深思的问题浮出水面：在流量明星层出不穷、短期代言屡见不鲜的今天，一个高端智能电动汽车品牌，为什么选择了一位退役多年的体育传奇？\n答案远比“情怀”二字复杂得多。\n跨时代的精神内核：从“12秒91”到“中国智造”\n如果对营销没有太多关注，相信很多人会感觉刘翔“过气”了。看一组他的数据：手握耐克终身合同，身价超10亿，2025年接连拿下伊利、霸王茶姬、平安保险、京东秒送等一线品牌代言。刘翔给出了一个国民IP穿越周期的价值证明。\n时间拨回到2004年8月27日，雅典奥运会男子110米栏决赛。发令枪响，刘翔如离弦之箭，栏间节奏行云流水。冲线那一刻，计时器定格在12秒91——平世界纪录，打破奥运会纪录。\n这串数字的意义，远不止于一块金牌。它意味着：中国男子田径选手，在短距离径赛项目上实现了“零的突破”；意味着黄种人也能在长期被欧美选手统治的赛道上，站上世界之巅。\n那是一次真正的“跨时代”。\n智己汽车在海报中写下的“跨，时代”，是对刘翔职业生涯最精准的注脚，也是对自身目标的重塑。怀揣着“跨时代”的决心，智己诞生于传统汽车工业向智能电动时代转型的浪潮中，在燃油车统治了百余年的赛道上，中国新能源车企完成了一次“换道超车”。\n这种“跨越式”的追求，让智己与刘翔在精神底层形成了共鸣：打破常规、超越极限、成就最好。刘翔跨越的是栏架、是人种偏见、是纪录的边界；智己跨越的是技术的壁垒、是品牌的认知、是时代的鸿沟。\n双向奔赴：品牌精神与专业主义互相成就\n什么样的代言...\n",
+      "source_name": "手机网易网",
+      "source_type_guess": "portal_or_aggregator",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "domain matched portal_or_aggregator_domains; original source unknown",
+      "domain": "163.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-04-06T12:30:08+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.385475",
+      "raw_rank": 3,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 联名 合作 代言 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "partnership"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        3
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 最近1天 官方 动作 交付 权益 OTA",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "overview_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "scout",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "智己“爆雷”虚惊一场?背后真相很现实_车圈维权实录",
+      "url": "http://m.toutiao.com/group/7665638283178672649/",
+      "canonical_url": "http://m.toutiao.com/group/7665638283178672649/",
+      "snippet": "前两天，智己汽车突然冲上热搜，原因是有消息说，多地经销商“爆雷”了，车主收到安慰短信，员工集体讨薪。好多人第一反应都是:完了，又一个新能源品牌要凉?可结果呢?智己官方火速发了一纸“兜底”公告，承诺所有受影响客户的交付和售后，他们全包了。\n这事儿一出，风向马上变了。原来，所谓的“多家经销商爆雷”，本质上只是同一家经销商在两地运营出了问题，根本不是什么系统性风险。说白了，就是一次个案被放大，但市场反应这么激烈，恰好暴露了大家对新能源品牌，尤其是“大厂子品牌”的生存状态，心里其实都在打鼓。\n 智己的应对速度，确实值得点个赞。能把“兜底”两个字写进公告，背后得有真金白银撑腰。它背后站着上汽集团、阿里巴巴、张江高科三大巨头，成熟的研发和制造体系摆在那儿，这不是普通新势力能比的。而且，虽然智己销量规模不算大，但人家已经实现单月全成本口径盈利，B轮融资累计94亿元，短期挡个风险绰绰有余。\n不过话说回来，“兜底”虽然赢了口碑，可代价也不小。这次事件等于给...\n智己必须正视这个问题，否则下次再来个“爆雷”，可就没这么容易收场了。\n 再看看智己现在的处境，销量在涨，但品牌困局也在。今年1到6月，累计交付超4万台，同比增长58%，LS6单月突破3600台，把智界R7、极氪7X都给超了。但整体销量规模离理想、蔚来还有差距，去年全年卖了8.1万台，没达到10万台目标，在市场上依然算小众。\n产品力上，智己确实有硬货。旗舰车型LS9配置拉满，线控底盘、双腔空悬、B&O音响、全系四驱，起步价才31.98万，大厂的性价比优势很明显。但用户吐槽也不少，老车主心里不平衡，觉得被“背刺”，内饰塑料件、车机系统封闭、售后体验不佳，这些口碑暗礁不解决，再好的车也走不远。\n",
+      "source_name": "今日头条",
+      "source_type_guess": "portal_or_aggregator",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "domain matched portal_or_aggregator_domains; original source unknown",
+      "domain": "m.toutiao.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-23T16:32:39+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.383578",
+      "raw_rank": 4,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 最近1天 官方 动作 交付 权益 OTA"
+      ],
+      "matched_event_type_ids": [],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        4
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 交付 销量 战报 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "delivery_start",
+        "sales_milestone",
+        "order_milestone"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "scout",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "智己“成为”MG高端子品牌!并网销售，销量大涨288%_夜空里闪烁的星座",
+      "url": "http://m.toutiao.com/group/7665246451865322047/",
+      "canonical_url": "http://m.toutiao.com/group/7665246451865322047/",
+      "snippet": "智己“摇身一变”成了 MG 的高端子品牌，销量直接蹿到让同行看了都有点脖子发紧:2026 年上半年海外 3.03 万台，同比暴涨 288%。这不是普通涨幅，是那种能把对手气得蹦起来的级别。\n## 智己并入 MG 高端序列，怎么一下跑这么快?\n我先把关键逻辑拆开讲清楚。\n在国内，智己还是那个独立运营的高端新能源品牌，门店、形象、定位都单独走，主攻 25 万以上的高端市场，和理想、问界、极氪、腾势们在一个赛道PK。\n到了海外，上汽直接换了一套打法:\n- 把 IM 智己放进 MG 体系里，命名为 MG IM\n- 进入 MG 已经铺好的经销商网络，用“店中店”模式售卖\n- 海外用户看到的是 MG 品牌下的高端新能源序列，而不是一个完全陌生的新LOGO\n关键数据摆一下:\n- 2026 年上半年，智己国内交付 4.01 万台\n - 海外智己系(MG IM 上牌量 + 少量智己独立出口)累计 3.03 万台\n- 海外销量同比暴涨 288%，已经不是陪跑，而是实打实的增长极\n国内这边，智己靠 LS6、LS7、LS8、LS9 把基本盘守住，月度破万有过，但很难长期稳定冲到头排，处在高端新势力第二梯队。单靠国内，增长空间已经能看到天花板的影子。\n这时候上汽选择了“借力打力”的路线，而不是很多新势力喜欢的“海外再造一个自己”的重资产玩法。\n## MG 百年底子+店中店模式，渠道这步棋很关键\n- 深耕十几年，已经建成 1300 多家经销商网点\n## 定价不打价格战，高端定位真的敢往上站\n-...\n- 国内:智己维持独立高端定位，主打 25 万以上高端新能源，走“新豪华”路线\n既拉高了 MG 的品牌上限，又让智己实现了海外销量快速攀升，是标准的一举两得。\n",
+      "source_name": "今日头条",
+      "source_type_guess": "portal_or_aggregator",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "domain matched portal_or_aggregator_domains; original source unknown",
+      "domain": "m.toutiao.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-22T15:11:13+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.383913",
+      "raw_rank": 4,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 交付 销量 战报 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "delivery_start",
+        "sales_milestone",
+        "order_milestone"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        4
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 权益 价格 限时 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "benefit_adjustment",
+        "official_price_change"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "scout",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "限时权益价34.98万元!智己LS9 Hyper上市:综合续航1460km_皆电",
+      "url": "http://m.toutiao.com/group/7663373847508435510/",
+      "canonical_url": "http://m.toutiao.com/group/7663373847508435510/",
+      "snippet": "7月16日，智己LS9 Hyper正式上市，新车指导价37.98万元，限时权益价34.98万元。作为新增的顶配版车型，该车搭载1.5T增程混动系统，配备三电机矢量四驱和四轮全线控转向，电机总功率550千瓦，还配有闭式双腔空气悬架和CDC智能电控阻尼减振器，转弯半径仅4.95米。\n 车身尺寸方面，智己LS9 Hyper的长宽高分别为5279/2000/1806mm，轴距为3160mm，采用“2+2+2”六座布局。新车延续了现款车型设计，前脸搭载一体式超广域智慧探射灯，车顶配520线激光雷达。提供22英寸“大饼式”轮毂及布雷博制动卡钳，尾部贯穿式灯组带智慧灯语。\n 内饰方面，采用27.1英寸5K MiniLED屏和15.6英寸3K MiniLED副驾娱乐屏组合，搭配三辐式多功能方向盘，运用怀挡式换挡。新车搭载最新的IM AIOS智能座舱，内置有高通骁龙8295P芯片，配有千问大模型。\n 动力方面，智己LS9 Hyper搭载“恒星”超级增程技术，其1.5T增程器最大功率114千瓦，前电机最大功率160千瓦，后双电机最大功率均为195千瓦，电机总功率550千瓦，百公里加速3.9秒，WLTC亏电油耗6.75L/100km。续航方面，新车匹配容量为66千瓦时超级骁遥MAX电池组，CLTC纯电续航390km，综合续航1460km。\n",
+      "source_name": "今日头条",
+      "source_type_guess": "portal_or_aggregator",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "domain matched portal_or_aggregator_domains; original source unknown",
+      "domain": "m.toutiao.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-17T14:04:52+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.384203",
+      "raw_rank": 4,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 权益 价格 限时 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "benefit_adjustment",
+        "official_price_change"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        4
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 OTA 技术 发布 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "technology_release",
+        "config_release",
+        "launch_event"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "智己L7 OTA升级值得升吗?三大维度拆解新版体验+FAQ_手机新浪网",
+      "url": "https://auto.sina.cn/2026-07-29/detail-inikkxfv0212263.d.html",
+      "canonical_url": "https://auto.sina.cn/2026-07-29/detail-inikkxfv0212263.d.html",
+      "snippet": "智己L7 OTA升级值得升吗？三大维度拆解新版体验+FAQ\n07.29 02:30\n智己L7的IMOS 1.3.0（及后续2.1.0）OTA升级，是2026年最值得期待的免费“换车”方案——它不仅把车机界面从“工具感”拉向了“艺术品级”，更让语音助手从“你说一句它答一句”进化到“一句话搞定一连串操作”。本次升级面向所有智己L7车主，分批推送，无需到店，全程约45分钟，建议选择夜间预约升级。\n01 艺术主题与视觉焕新：每天开车像换了一台车\n升级后最直观的变化是两大艺术主题的上线。IMOS 1.3.0新增了「印象主义」与「水墨主义」两种主题风格，前者用莫奈式的光影笔触渲染屏幕背景，后者则用泼墨留白营造东方美学意境——这不是简单的壁纸替换，而是整个UI的色调、动效、图标质感都做了统一风格。实测发现，副驾驶屏幕也迎来了全面盖板更新：原先的纯黑背景现在可以显示实时天气动画（晴天有云层流动，雨天有雨滴涟漪），应用入口从“小图标列表”改为“卡片式展开”，操作区域更大，误触率明显降低。\n更值得一提的是，智己还为本次升级定制了专属字体IMSans，这套字体的字符间距和笔画粗细针对车载场景重新设计——在阳光直射下中控屏反光时，字体依然清晰可辨，比之前系统自带的黑体更容易扫读。Carlog智能车载系统也迎来增强，车外摄像头拍出的视频可以直接通过语音指令“把刚才那段发到手机上...\n问题：2022款老款智己L7能升级IMOS 1.3.0吗？\n全系车型均可免费升级，包括最早的2022款Pro版和2023款Dynamic版。智己汽车采用统一软件架构，OTA推送不区分年份批次，只要车机网络正常即可收到推送。若未收到，可尝试在车机设置-系统更新中手动检查。\n更新日期：2026年07月29日\n",
+      "source_name": "手机新浪汽车",
+      "source_type_guess": "unknown",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "no domain match; default unknown",
+      "domain": "auto.sina.cn",
+      "claim_source_hint": "maybe_dealer",
+      "claim_source_hint_reason": "keyword heuristic found dealer keywords in text",
+      "publish_time": "2026-07-29T02:30:35+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.384571",
+      "raw_rank": 4,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 OTA 技术 发布 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "technology_release",
+        "config_release",
+        "launch_event"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        4
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 门店 试驾 活动 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "channel_campaign",
+        "user_event"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media",
+        "tier_4_social_signal",
+        "tier_5_unverified"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "【智己L7优惠8000元 欢迎莅临赏鉴_智己体验中心 | 郑州大中原店欢迎垂询95013032247】-汽车之家",
+      "url": "http://dealer.autohome.com.cn/2201504/news_1542249947.html",
+      "canonical_url": "http://dealer.autohome.com.cn/2201504/news_1542249947.html",
+      "snippet": "促\n智己L7优惠8000元 欢迎莅临赏鉴\n智己体验中心 | 郑州大中原店 2026-07-12 14:49 · 郑州 · 仅剩1天\n★★★★★【智已汽车 | 大中原体验中心】★★★★★\n全系车型首付可低至0元起，包保险报上牌，即可“贷”回家\n【下单享万元好礼】★汽车之家客户预约到店专享★\n★【进店礼】进店好礼小马公仔喜相送\n★【试驾礼】试驾可享盲盒抽奖好礼一份\n★【金融礼】分期超低首付、7年0息/7年超长低息\n★【锁单礼】砸金蛋赢好礼，基础保养，智己周边，露营套装，家用电器\n★【交车礼】进店提车可获取专属车主礼\n★【置换礼】智己老车主增换购至高享综合10000元置换补贴\n★【介绍礼】老客户介绍新客户成交，双方均可获得1次基础保养+5000智己积分\n【咨询热线：950-1303-2247】\n【咨询热线：950-1303-2247】\n【咨询热线：950-1303-2247】\n店面地址：郑州市中原区中原西路与杭州路向西300米大中原国际汽车城，感兴趣的朋友可以到店咨询购买，详情见下表：\n注：2026年7月12日行情 车辆价格随时变动，敬请关注当地市场\n本店特色...\n以上为车型资料信息，本店提供了多项增值服务，感兴趣的朋友欢迎来电咨询。\n 智己体验中心 | 郑州大中原店\n商家地址：郑州市中原区中原西路与杭州路向西300米大中原国际汽车城\n咨询电话：95013032247\n智己体验中心 | 郑州大中原店\n电话接听率：100%\n95013032247\n24 小时\n郑州市中原区中原西路与杭州路向西300米大中原国际汽车城\n",
+      "source_name": "汽车之家",
+      "source_type_guess": "dealer_page",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "subdomain/domain matched dealer pattern",
+      "domain": "dealer.autohome.com.cn",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-12T14:49:00+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.384888",
+      "raw_rank": 4,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 门店 试驾 活动 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "channel_campaign",
+        "user_event"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media",
+        "tier_4_social_signal",
+        "tier_5_unverified"
+      ],
+      "raw_ranks": [
+        4
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 发布会 技术 品牌 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "launch_event",
+        "technology_release",
+        "brand_campaign"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "智己LS9:全线控底盘+后轮转向，打造35万旗舰SUV技术标杆_类星频道",
+      "url": "http://m.toutiao.com/group/7663389840188113443/",
+      "canonical_url": "http://m.toutiao.com/group/7663389840188113443/",
+      "snippet": "在昨晚举行的智己LS9 Hyper上市发布会后，智己汽车CTO项娇、智己品牌与用户高级总监焦樵接受了媒体专访。\n两位高管深入解读了LS9 Hyper的核心技术——全线控底盘，并阐述了智己如何通过“唯科技见豪华”的理念，在竞争激烈的35万级大六座SUV市场中构建独特的产品力。\n 全线控底盘:从技术普惠到行业共识\n发布会最大的亮点之一，是智己LS9 Hyper将全线控转向系统作为了全系标配，并将价格控制在35万元以内。对此，CTO项娇从技术、底蕴和用户三个层面解释了这一决策的考量。\n1. 技术基石与普惠理念\n项娇指出，2026年是“全线控底盘元年”，线控底盘是承载未来高阶智能驾驶的物理基石。\n智己的判断是“先有线控底盘，再有高阶智能驾驶”。因此，将这一核心技术普惠给所有用户，是顺应技术趋势的必然选择。\n 2. 体系能力打破成本壁垒\n面对线控转向成本高昂的行业难题，智己依托上汽集团70年的造车底蕴和强大的体系能力，通过三大路径有效控制了成本:\n全栈自研:打破海外技术方的“黑盒”溢价，实现本土化研发。\n标准牵头:作为线控转向国家标准的牵头起草单位，智己在技术预研和研发成本上更具优势。\n供应链优势:背靠上汽集团深厚的供应链体系，从芯片到执行机构，有效降低了整车成本。\n3. 安全冗余与用户体验\n针对用户关心的安全问题，项娇特别强调了智己线控转向的三重冗余设计。他透露，即便在时速120公里下，所有前转向冗余系统失效，车辆依然可以依靠后轮转向与制动力分配的协同，实现平稳靠边停车。\n在用户体验上，智己提供了三档可调的转向比(470度、240度、180度)，既照顾了从传统机械转向过渡用户的习惯，也为追求极致操控的驾驶者提供了运动模式。无论何种模式，高速行驶时转向比都会自动调整，确保操控的稳定性。\n “无线控，不旗舰”:定义...\n",
+      "source_name": "今日头条",
+      "source_type_guess": "portal_or_aggregator",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "domain matched portal_or_aggregator_domains; original source unknown",
+      "domain": "m.toutiao.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-17T15:15:18+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.385173",
+      "raw_rank": 4,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 发布会 技术 品牌 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "launch_event",
+        "technology_release",
+        "brand_campaign"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        4
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 联名 合作 代言 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "partnership"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "吴建豪携手智己汽车:都市主理人的时尚出行新篇章 - 七十二行经纪网",
+      "url": "https://www.72.com.cn/news_details.html?newsid=823095&_t=1730279243",
+      "canonical_url": "https://www.72.com.cn/news_details.html?newsid=823095&_t=1730279243",
+      "snippet": "吴建豪携手智己汽车：都市主理人的时尚出行新篇章\n来源：吴建豪成为智己汽车都市主理人 浏览 ：147\n智己汽车宣布，知名艺人吴建豪正式成为其都市主理人，这一跨界合作不仅为智己汽车注入了全新的活力与灵感，更开启了都市出行的新风尚。\n在这个充满无限可能的都市时代，每一个细节都彰显着个性与品味。当潮流与科技碰撞，当艺术融入生活，一场关于未来出行的变革悄然上演。近日，通过国内头部明星代言明星经纪平台七十二行经纪网了解到，智己汽车宣布，知名艺人吴建豪正式成为其都市主理人，这一跨界合作不仅为智己汽车注入了全新的活力与灵感，更开启了都市出行的新风尚。\n都市主理人，引领出行新潮流\n吴建豪，一个集歌手、演员、设计师多重身份于一身的全能艺人，以其独特的时尚触觉和前卫的生活方式，成为了无数年轻人心中的潮流偶像。他不仅在音乐与影视领域取得了卓越成就，更在时尚界留下了深刻的印记。从个人品牌到跨界合作，吴建豪始终走在潮流的前沿，用他的作品和态度诠释着都市生活的无限可能。\n智己汽车，作为新能源汽车领域的佼佼者，致力于打造集智能、舒适、环保于一体的未来出行解决方案。品牌自诞生以来，便以“智能、科技、创新”为核心，不断突破传统汽车行业的界限，引领着新能源汽车行业的潮流。此次携手吴建豪，正是看中了他在都市生活中的影响力与号召力，希望通过他的视角，为智己汽车注入更多都市生活的元素与情感。\n时尚与科技的完美融合\n吴建豪与智己汽车的合作，不仅仅是品牌与代言人 的简单结合，更是一场时尚与科技的深度交融。吴建豪以其独特的时尚品味，为智己汽车带来了全新的设计灵感。从车身线条的流畅与动感，到内饰细节的精致与舒适，每一处都透露着吴建豪对于都市出行的理解与追求。\n而智己汽车则以其先进的科技实力，为吴建豪的时尚理念提供了坚实的支撑。从智能...\n",
+      "source_name": "七十二行经纪网",
+      "source_type_guess": "unknown",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "no domain match; default unknown",
+      "domain": "72.com.cn",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "",
+      "time_window_status": "unknown_publish_time",
+      "is_out_of_window": null,
+      "retrieved_at": "2026-07-31T09:02:52.385511",
+      "raw_rank": 4,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 联名 合作 代言 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "partnership"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        4
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 高管 直播 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "executive_voice"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "对话智己高层:一场关于“新三大件”的深度对话",
+      "url": "https://k.sina.cn/article_6261666819_175397403001034ie6.html",
+      "canonical_url": "https://k.sina.cn/article_6261666819_175397403001034ie6.html",
+      "snippet": "对话智己高层：一场关于“新三大件”的深度对话\n智电商业车刊\n发表于 2026/07/19 13:12\n智己L7\n2026年7月16日的上海，天气炎热，而比天气更热的，是智己汽车媒体群访间的气氛。智己LS9 Hyper上市发布会刚结束，媒体群访间的对话持续升温。\n这款车之所以引发高热度的关注，不仅因为它恰好是上汽集团下线的第一亿台整车，承载着中国汽车工业里程碑式的荣光，更因为它以34.98万元的权益价，把具有划时代意义的“全线控转向”直接做成了这一价位的全系标配。\n 左：智己汽车CTO项娇\n右：品牌及用户高级总监焦樵\n在媒体群访中，问题便接二连三地抛了过来，从定价逻辑到技术安全，从对标竞品到组织变革，1个多小时的对话里，智己汽车CTO项娇与品牌及用户高级总监焦樵面对密集的追问，没有回避任何一个话题。\n这场对话的信息密度与深度，在一定程度上可能比发布会更值得深挖，因为它更深层的展现了智己在技术路线、成本控制与产品打磨多个方面的真实思考。\n智己汽车CTO项娇给出了清晰的技术逻辑。\n所以智己选择全系标配而非高配选装，源于三点考量，一是对技术趋势的判断、二是上汽70年造车底蕴的支撑，三是对待用户的态度。\n对于成本，项娇坦言，“核心在于打破技术黑盒。智己汽车品牌与用户高级总监焦樵则强调，定价背后是“微利”的健康经营逻辑，绝非恶性竞争，而是依托上汽体系力实现的合理下探。\n更值得注意的是，焦樵还透露，“在最早创始阶段...\n作为CTO，项娇还分享了内部如何打破传统部门壁垒。\n他透露，传统“底盘部”已重组为“整车运动与智能化部门”，并设立CTO直属的AI产品线及AI赋能部门，在迎合这样一个时代的变化和开发逻辑的变化，在不断地尝试新的组织模式和方式。\n",
+      "source_name": "新浪",
+      "source_type_guess": "portal_or_aggregator",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "domain matched portal_or_aggregator_domains; original source unknown",
+      "domain": "k.sina.cn",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-19T13:12:00+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.385830",
+      "raw_rank": 4,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 高管 直播 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "executive_voice"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        4
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 交付 销量 战报 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "delivery_start",
+        "sales_milestone",
+        "order_milestone"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "scout",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "智己汽车回应经销商风波:陆续恢复交付，网络传言系恶意夸大_大河报",
+      "url": "http://m.toutiao.com/group/7664821195086283264/",
+      "canonical_url": "http://m.toutiao.com/group/7664821195086283264/",
+      "snippet": "针对近期引发广泛关注的经销商经营异常事件，智己汽车于今日发布官方声明，披露事件处理进展并回应网络传言。\n事件回顾:经销商资金链断裂波及昆明、珠海\n7月7日，智己汽车昆明授权经销商之一——云南昆明智合悦行汽车销售服务有限公司因民间借贷导致资金链断裂，造成部分用户无法从金融机构取得车辆合格证上牌，车辆无法正常交付。据多家媒体报道，该公司在昆明运营的三家门店于当日突然关停，展车及试驾车被金融公司连夜拖走。仅昆明一地就有288名车主卷入维权，其中116人付了全款无法提车，其余提车后拿不到合格证无法上牌。与此同时，...\n涉事经销商法定代表人承认，公司资金链断裂的核心原因是运营成本高企——三家门店年租金合计超360万元，单月员工工资约50万元，销售收益与厂家返利无法覆盖支出，最终陷入用新购车款垫付前期赎证资金的恶性循环。官方回应:已成立专项工作组，陆续恢复交付\n智己汽车在声明中表示，事件发生当日即第一时间成立专项工作组，并于第二天进驻现场，积极配合政府并协调相关方为用户提供后续服务。截至7月17日，已基本完成用户的对接与情况梳理，7月18日起陆续恢复合格证发放与车辆交付，预计到本周末可完成所有正常购车用户的订单及车辆交付。\n智己汽车方面此前表示，对已付款但未取得合格证的用户，由厂家全额垫资赎回合格证;对已订车未交付用户，保留原订购价格与权益，协调周边门店完成交付。\n智己汽车:“多地经销商暴雷”系恶意夸大\n智己汽车表示，目前全国渠道运营稳健，今年6至7月全国陆续新开26家门店。此次事件折射出当前汽车经销商行业面临的普遍压力。中国汽车流通协会数据显示，2026年6月中国汽车经销商库存预警指数为57.2%，持续位于50%荣枯线之上。智己汽车今年上半年累计交付40087台，同比增长58%，其渠道体系已从早期直营基本转为经销商模式。如何在销量增长与渠道风险管控间取得平衡，成为行业共同课题。\n",
+      "source_name": "今日头条",
+      "source_type_guess": "portal_or_aggregator",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "domain matched portal_or_aggregator_domains; original source unknown",
+      "domain": "m.toutiao.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-21T11:41:00+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.383945",
+      "raw_rank": 5,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 交付 销量 战报 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "delivery_start",
+        "sales_milestone",
+        "order_milestone"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        5
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 权益 价格 限时 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "benefit_adjustment",
+        "official_price_change"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "scout",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "智己L7的购车优惠政策会持续多久?|智己汽车|权益|门店|截止日期|终身_手机新浪网",
+      "url": "https://auto.sina.cn/2026-07-20/detail-iniinmvy8169810.d.html",
+      "canonical_url": "https://auto.sina.cn/2026-07-20/detail-iniinmvy8169810.d.html",
+      "snippet": "根据智己汽车官方及各地授权经销商在2026年7月发布的最新信息，智己L7的购车优惠政策并非固定持续期，而是以“限时福利”形式滚动推出，目前可确认的L7相关权益通常以月度为周期更新，具体截止日期需以智己官方APP或门店公示为准。\n一、智己L7当前购车政策的核心内容\n截至2026年7月20日，智己L7并未像同品牌LS6、L6那样推出“7年0首付、3年0息”的大促方案，而是以精选权益包和老车主置换补贴为主。\n金融方案：提供2年0息或5年低息的贷款选择，首付比例最低可至15%。\n置换补贴：智己品牌老车主增换购L7可享受1万元专项补贴，非智己品牌旧车置换可叠加最高2万元政府以旧换新补贴。\n免费智驾权益：IM AD智能驾驶辅助系统终身免费使用权（限7月完成提车的用户）。\n电池质保：全系车型赠送电池终身质保服务。\n上述权益中，电池终身质保和免费智驾往往标注为“限时赠送”，官方通常会在每月月底或季度末更新政策，当前这批权益的截止日期大概率设定在2026年7月31日。\n从历史节奏看，智己L7的优惠政策...\n三、如何确认具体截止日期\n由于智己L7并非当前品牌的走量主力（月销量在30辆左右），其政策往往不会通过全国性广告大规模宣传，而是更多通过官方APP、销售顾问点对点沟通来释放。\n官方渠道：登录智己APP进入“购车”页面，查看L7车型下的“限时权益”标签，通常会有“活动截止至X月X日”的明确提示。\n门店咨询：建议直接联系所在城市的智己授权交付中心（注意确认门店是否为直营，避免经销商套路），销售可以提供最新一期的权益清单及锁单截止时间。\n社交媒体：关注智己官方微博（IM智己汽车）及核心门店账号，如“海口智己美兰体验及交付中心”7月16日发布的LS6政策，就是典型的区域限时信息。\n",
+      "source_name": "手机新浪汽车",
+      "source_type_guess": "unknown",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "no domain match; default unknown",
+      "domain": "auto.sina.cn",
+      "claim_source_hint": "maybe_dealer",
+      "claim_source_hint_reason": "keyword heuristic found dealer keywords in text",
+      "publish_time": "2026-07-20T21:19:38+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.384245",
+      "raw_rank": 5,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 权益 价格 限时 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "benefit_adjustment",
+        "official_price_change"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        5
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 OTA 技术 发布 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "technology_release",
+        "config_release",
+        "launch_event"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "一篇文章让你看懂 智己LS9 Hyper版_iamflying",
+      "url": "http://m.toutiao.com/group/7668139874616115731/",
+      "canonical_url": "http://m.toutiao.com/group/7668139874616115731/",
+      "snippet": "智己汽车7月16日发布了LS9 Hyper版，是LS9车系中主打高性能的旗舰版本。同时推出了LS9 52 Ultra线控版，两款车的定价分别为:\n智己LS9 Hyper版:官方指导价37.98万元，上市权益价34.98万元。\n智己LS9 52 Ultra线控版:官方指导价34.98万元，上市权益价31.98万元。\n 相比同系列的版本，智己LS9 Hyper版在三大核心层面进行了重点升级:\n动力系统(最大升级点):Hyper版首搭上汽量产的金标飓风三电机矢量四驱系统(前一后二布局)。系统峰值功率550kW，峰值扭矩730N·m，零百加速达到3.9秒，进入3秒级俱乐部。作为对比，非Hyper版通常采用双电机或不同调校的动力配置。\n 底盘技术:标配了全线控数字底盘与双向24°智慧四轮转向的组合。这套系统让这台超过5.2米的大型SUV转弯半径仅有4.77米，操控灵活性大幅提升，也是L3级高阶智驾的技术基石。\n 专属配置与细节:在外观和内饰上拥有专属标识，如前翼子板、车尾的“HYPER”字样徽标。内饰则升级了IM Nappa Deluxe全粒面头层真皮、皇家礼赞木纹饰板和巴洛克风格绗缝等高级工艺，营造更强烈的旗舰感。\n",
+      "source_name": "今日头条",
+      "source_type_guess": "portal_or_aggregator",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "domain matched portal_or_aggregator_domains; original source unknown",
+      "domain": "m.toutiao.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-30T10:19:11+08:00",
+      "time_window_status": "in_window",
+      "is_out_of_window": false,
+      "retrieved_at": "2026-07-31T09:02:52.384601",
+      "raw_rank": 5,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": true,
+      "matched_queries": [
+        "智己 OTA 技术 发布 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "technology_release",
+        "config_release",
+        "launch_event"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        5
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 门店 试驾 活动 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "channel_campaign",
+        "user_event"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media",
+        "tier_4_social_signal",
+        "tier_5_unverified"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "【温州4S店】智己汽车|温州万象城体验中心4S店电话_汽车之家",
+      "url": "http://dealer.autohome.com.cn/2204301/pic_6012_3.html",
+      "canonical_url": "http://dealer.autohome.com.cn/2204301/pic_6012_3.html",
+      "snippet": "智己汽车｜温州万象城体验中心\n南白象街道横港头社区瓯越大道1999号温州万象城F4\n智己LS6现直降4万 欢迎垂询\n智己L6让利促销中 目前优惠高达3万\n智己LS9优惠高达1万 欢迎到店赏鉴\n智己LS9欢迎莅临赏鉴 直降1万\n智己L6欢迎到店品鉴 售价18.99万元起\n智己LS6现直降4万 欢迎垂询\n智己L6让利促销中 目前优惠高达3万\n智己LS9优惠高达1万 欢迎到店赏鉴\n智己LS9欢迎莅临赏鉴 直降1万\n智己L6欢迎到店品鉴 售价18.99万元起\n智己LS6现直降4万 欢迎垂询\n智己L6让利促销中 目前优惠高达3万\n2026-06-04\n·[优惠促销] 智己LS9优惠高达1万 欢迎到店赏鉴\n2026-06-04\n·[优惠促销] 智己LS9欢迎莅临赏鉴 直降1万\n·[优惠促销] 智己L6欢迎到店品鉴 售价18.99万元起\n·[优惠促销] 智己LS6现直降4万 欢迎垂询\n·[优惠促销] 智己L6提供试乘试驾 购车优惠3万元\n主推车型\n智己L6\n经销商报价：18.99-24.99万\n指导价：21.99-27.99万\n<tr><...\n<tr><td>2025款 Max+</td><td>23.49万</td><td>20.49万</td><td>查报价单 预约试驾</td></tr>\n智己汽车｜温州万象城体验中心\n电话接听率：100%\n咨询电话：\n95013038034\n售本省\n24 小时\n南白象街道横港头社区瓯越大道1999号温州万象城F4\n主营品牌\n智己汽车\n",
+      "source_name": "汽车之家",
+      "source_type_guess": "dealer_page",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "subdomain/domain matched dealer pattern",
+      "domain": "dealer.autohome.com.cn",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-27T00:00:00+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.384913",
+      "raw_rank": 5,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 门店 试驾 活动 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "channel_campaign",
+        "user_event"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media",
+        "tier_4_social_signal",
+        "tier_5_unverified"
+      ],
+      "raw_ranks": [
+        5
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 发布会 技术 品牌 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "launch_event",
+        "technology_release",
+        "brand_campaign"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "从后轮转向到全线控转向，智己走出一条连续技术路线_说走就走的旅行",
+      "url": "http://m.toutiao.com/group/7664504804361749044/",
+      "canonical_url": "http://m.toutiao.com/group/7664504804361749044/",
+      "snippet": "在汽车行业迈入2026年的盛夏之际，中国新能源市场的竞争已不再局限于屏幕的大小或是座舱的华丽，而是深入到了车辆最原始、也最核心的机械灵魂——底盘技术。2026年7月16日，智己LS9 Hyper正式驶入公众视野，其34.98万元的权益价不仅标志着一款大六座旗舰SUV的诞生，更宣告了全线控底盘、三电机矢量四驱等顶尖技术在主流市场的全面落地。这场发布会不仅是产品的展示，更像是一次技术路线的隔空博弈。就在此前不久，理想汽车针对旗舰标准抛出了一个极具煽动性的命题:“没有线控转向加后轮转向的旗舰不配称为旗舰”。对此，智己汽车品牌与用户高级总监焦樵在群访中表现得颇为从容，他坦言，非常感谢同行能够将这一认知推向台前，因为这确实点出了高端市场的门槛。但他同时也犀利地指出，在这一领域，智己早已不是追随者，而是名副其实的先行者。\n 回溯中国新能源车的发展脉络，这种对底盘技术的共识并非一蹴而就。当其他品牌在2026年才开始集体“内卷”线控与后转配置时，智己的布局早在四年前就已经启动。2022年4月，智己L7作为品牌首款车型，便破天荒地实现了后轮转向系统的全系标配，这一举动在当时普遍将该配置视为顶配选装的市场环境下，无异于一场技术普惠的革命。从L7到LS6，再到如今的LS9 Hyper，每一款智己车型的基因里都刻着四轮转向的印记。焦樵从工程逻辑的角度解释了这种坚持的深层意义:后轮转向本质上就是线控转向的技术雏形，因为后轮与方向盘之间并无物理机械连接，完全依靠电信号驱动。这意味着，在过去四代的量产落地中，智己已经通过海量的市场反馈和工程验证，为今天全线控底盘的爆发式增长铺就了厚实的台阶。\n 如果说先行一步代表的是市场敏锐度，那么作为规则制定者则体现了身为“大厂新势力”的硬实力。2026年7月1日，由上汽集团牵头制定的关于...\n",
+      "source_name": "今日头条",
+      "source_type_guess": "portal_or_aggregator",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "domain matched portal_or_aggregator_domains; original source unknown",
+      "domain": "m.toutiao.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-20T15:13:12+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.385203",
+      "raw_rank": 5,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 发布会 技术 品牌 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "launch_event",
+        "technology_release",
+        "brand_campaign"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        5
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 联名 合作 代言 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "partnership"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "刘翔官宣成为新势力代言人|刘翔_新浪财经_新浪网",
+      "url": "https://finance.sina.com.cn/wm/2026-04-04/doc-inhtiymv7780280.shtml",
+      "canonical_url": "https://finance.sina.com.cn/wm/2026-04-04/doc-inhtiymv7780280.shtml",
+      "snippet": "刘翔官宣成为新势力代言人\n2026年04月04日 17:56 市场资讯\n（来源：电动内参）\n4月3日，智己汽车正式宣布，奥运冠军、田径传奇刘翔成为品牌代言人。官方表示，刘翔在赛场上从不设限、一次次突破自我，用行动诠释了“传奇”二字，是跨越时代的全民偶像。这种精神，与智己汽车“不设限、不妥协、不随流”的高端智能电动赛道理念高度契合。\n 刘翔代言的是全新旗舰SUV智己LS8，定位\"跨时代科技旗舰SUV\"，车长5085mm，轴距3060mm，预售价25.98万元起，4月16日正式上市。\n智己LS8将推出五座和六座两个版本，都是增程车型。电池容量都在50度以上，入门版纯电续航预计能达到300公里，甚至更多。搭载1.5T涡轮增压发动机，最大功率114kW，加92号汽油就行。新车预售开启仅45分钟，小订订单就突破10000台。 小侠认为，智己LS8这辆车很有机会成为2026年六座SUV里的一匹黑马。它各方面都比较均衡。品牌拿得出手，配置也给得足。\n智己汽车3月卖出7187辆，一季度销量同比大涨97%。现在新能源市场胶着，对智己来说，眼下最重要的事是让整个品牌再上一个台阶。\n文章关键词： 刘翔 智己汽车 电动\n",
+      "source_name": "新浪财经",
+      "source_type_guess": "authoritative_media",
+      "source_tier_guess": "tier_3_industry_media",
+      "source_resolution_reason": "domain matched authoritative_media_domains",
+      "domain": "finance.sina.com.cn",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-04-04T17:56:00+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.385542",
+      "raw_rank": 5,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 联名 合作 代言 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "partnership"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        5
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 高管 直播 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "executive_voice"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "智己汽车科技有限公司法律风险 - 企查查",
+      "url": "https://www.qcc.com/csusong/0544e2809761deb17161d9c69670e261.html",
+      "canonical_url": "https://www.qcc.com/csusong/0544e2809761deb17161d9c69670e261.html",
+      "snippet": "智己汽车科技有限公司\n存续\n国有企业 B+轮 高新技术企业 独角兽企业\n更新时间：2026-07-25\n法定代表人： 贾健旭 关联企业 19\n成立日期： 2020-12-25\n021-60593273\n中国（上海）自由贸易试验区祥科路268号3层301室...\n员工人数：1710（2025年）\n简介：\n智己汽车科技有限公司成立于2020年12月，董事长为贾健旭。公司是一家由上汽集团、张江高科和阿里巴巴集团共同打造的汽车科技企业，专注于智能电动汽车的研发与制造。智己汽车科技有限公司荣获2026年国家级独角兽企业、2026年省级创新型企业总部、2025年独角兽企业等荣誉。近期，该品牌在多地出现经销商闭店情况，涉及昆明和珠海等地，导致部分车主提车和上牌受阻，目前已成立专项工作组处理，并承诺垫资赎回车辆合格证。5月交付量达到10023台，展现出一定的市场表现。开庭时间：2026-08-03 新增开庭公告，案由：合同纠纷\n2026-07-21 智己汽车回应经销商闭店风波：因民间借贷导致资金链断裂，预计本周末完成正常购车用户车辆交付\n2026-07-20 智己汽车珠海店又闭店 此前昆明店人去楼空，三家店同时关停 智己：两地属同一投资主体\n开庭时间：2026-08-11 新增开庭公告，案由：买卖合同纠纷\n2026-07-17 智己汽车多地闭店背后：40余家直营分公司已被注销，去年亏损近36亿元\n2026-07-09 昆明一智己汽车经销商“经营异常”？多名用户反映付款后提车、上牌受阻 | 大鱼财经\n被告：</td><td>上海市浦东新区人民法院</td><td>2026-08-11 10:00</td><td>详情</td></tr>\n",
+      "source_name": "企查查",
+      "source_type_guess": "unknown",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "no domain match; default unknown",
+      "domain": "qcc.com",
+      "claim_source_hint": "maybe_dealer",
+      "claim_source_hint_reason": "keyword heuristic found dealer keywords in text",
+      "publish_time": "2026-07-30T00:00:00+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.385872",
+      "raw_rank": 5,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 高管 直播 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "executive_voice"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        5
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 最近1天 官方 动作 交付 权益 OTA",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "overview_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "scout",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "智己昆明经销商爆雷!厂家垫资赎回合格证，智己LS9上市遇渠道考验_车主解忧笺",
+      "url": "http://m.toutiao.com/group/7667404196929192448/",
+      "canonical_url": "http://m.toutiao.com/group/7667404196929192448/",
+      "snippet": "买车本是高兴事，可要是把全款交给了展厅，车子停在面前却拿不到合格证上不了牌，搁谁心里都得打鼓。\n2026年7月7日，云南昆明智合悦行这家智己授权经销商，因为投资人私下的民间借贷纠纷导致资金链直接断裂。买车人交了钱，可原本应该随着车辆一起交付的合格证，却被抵押在金融机构手里拿不出来。紧到7月14日，同一个投资人名下的珠海香洲用户中心也贴出了闭店通知。两地同一套班子爆雷，顿时在车友圈子里炸开了锅。\n其实这次爆雷的昆明和珠海两地门店，背后全都是同一个加盟投资人，属于典型的单一经销商个体经营风险。智己官方也在7月21日澄清了事实，6月到7月期间全国反而还新开了26家门店，整个大盘的经销网络并没有动摇。\n对于那几位被卡在半路上的具体车主来说，遇到这种事就是实打实的麻烦。\n出了问题之后，智己厂家的反应和处理节奏还算迅速。\n事发第二天，也就是7月8日，智己的专项工作组就进驻了现场。到了7月18日，已经开始陆续垫资向金融机构赎回合格证，替那些付清了车款的车主打通上牌渠道，这笔垫付的资金全部由智己厂家承担，不需要车主卷入经销商的债务官司里。对于订了车还没交车的用户，保留原有的订购价格和权益，协调附近的交付中心继续交车;已经提车的车主，售后维修保养和官方权益依然正常生效。\n昆明地区的售后由恒胜致远交付中心接手，珠海那边则由安骅汽车承接。\n这种由厂家站出来兜底的做法，确实给踩坑的车主吃了颗定心丸。\n就在7月16日，上汽旗下的旗舰SUV智己LS9 Hyper刚刚正式上市，权益价定在了34.98万元，而全系标配线控转向的智己LS9，权益价则是31.98万元起，...\n眼下昆明和珠海两地的正常购车订单正在加速恢复交付，工厂车库里新车的发运与各地交付中心的接续上牌进度，就是检验这场渠道风波能否彻底平息的真实风向标。\n",
+      "source_name": "今日头条",
+      "source_type_guess": "portal_or_aggregator",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "domain matched portal_or_aggregator_domains; original source unknown",
+      "domain": "m.toutiao.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-28T10:47:15+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.383651",
+      "raw_rank": 6,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 最近1天 官方 动作 交付 权益 OTA"
+      ],
+      "matched_event_type_ids": [],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        6
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 交付 销量 战报 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "delivery_start",
+        "sales_milestone",
+        "order_milestone"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "scout",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "智己连续两月交付破万，28家新店加速落地全国_新能源车_什么值得买",
+      "url": "https://post.m.smzdm.com/p/aggrmmq7/",
+      "canonical_url": "https://post.m.smzdm.com/p/aggrmmq7/",
+      "snippet": "智己连续两月交付破万，28家新店加速落地全国\n06-14 22:29\n06月07日\n智己汽车公布5月交付10023辆及渠道进展\n06月04日\n盖世汽车报道智己汽车5-6月新开28家门店，其中5月已完成18家开业\n06月04日\n智己汽车公布5月交付10023台，1-5月累计销量同比增长115%\n截至2026年6月14日，智己汽车官方确认，2026年5月单月新车交付量达10,023台，连续两个月站稳万辆关口。今年1至5月，品牌累计销量同比增长115%，市场表现持续强劲。伴随销量攀升，其线下渠道建设同步提速，5月全国新开18家门店，6月计划再新增10家，合计5至6月将完成28家新店布局。此次扩张覆盖一线、新一线及二三线城市，旨在提升终端触达效率与用户服务半径。\n01 5月交付破万，产品矩阵获市场认可\n智己汽车于2026年6月1日正式公布5月交付数据，当月交付新车10,023台，较4月的10,016台保持稳定，连续两个月突破万辆大关。从车型结构看，智己LS8正处于集中交付阶段，而智己LS6“上汽一亿台限定版”持续热销，共同推动整体销量增长。1至5月累计销量同比大幅增长115%，反映出消费者对品牌产品力与智能化体验的高度认可。该增长并非依赖短期促销，而是建立在产品迭代、产能爬坡与渠道完善基础上的健康扩张。\n根据...\n智己汽车5月交付首破万至10023台，1-5月销量同比暴涨115%\n智己汽车月交付首破万辆，前五月销量激增115%\n智己汽车5月交付10023台：前5个月销量同比激增115%\n智己汽车5月交付10023台，销量增长115%\n",
+      "source_name": "什么值得买社区频道",
+      "source_type_guess": "portal_or_aggregator",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "domain matched portal_or_aggregator_domains; original source unknown",
+      "domain": "post.m.smzdm.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "",
+      "time_window_status": "unknown_publish_time",
+      "is_out_of_window": null,
+      "retrieved_at": "2026-07-31T09:02:52.383965",
+      "raw_rank": 6,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 交付 销量 战报 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "delivery_start",
+        "sales_milestone",
+        "order_milestone"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        6
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 权益 价格 限时 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "benefit_adjustment",
+        "official_price_change"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "scout",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "【文章】限时权益价 21.19-23.19 万元 智己 LS6 推出上汽一亿台限定版_车家号_汽车之家",
+      "url": "https://chejiahao.m.autohome.com.cn/pingan/chejiahao/detailinfo/25535956",
+      "canonical_url": "https://chejiahao.m.autohome.com.cn/pingan/chejiahao/detailinfo/25535956",
+      "snippet": "限时权益价 21.19-23.19 万元 智己 LS6 推出上汽一亿台限定版\n 新出行 2026-05-22 00:26\n5 月 20 日，智己 LS6 推出上汽一亿台限定版，包含两款配置，限时权益价分别为 21.19 万元和 23.19 万元。交付时间上，即日起限量发售 5000 台，6 月上旬开启交付。\n 辅助驾驶方面，智己 LS6 上汽一亿台限定版全系标配“520 线超视域激光雷达+英伟达 Thor ™ 芯片”。\n 动力以及续航方面，智己 LS6 上汽一亿台限定版均为纯电版：\n76Max 采用 800V 超快充平台，峰值功率 245kW，峰值扭矩 430N·m，匹配 76kWh 电池组，CLTC 纯电续航 650km。\n103Max 采用 875V 超快充平台，峰值功率 300kW，峰值扭矩 500N·m，匹配 103kWh 电池组，CLTC 纯电续航 802km。\n",
+      "source_name": "车家号",
+      "source_type_guess": "vertical_auto_media",
+      "source_tier_guess": "tier_3_industry_media",
+      "source_resolution_reason": "domain matched vertical_auto_media_domains",
+      "domain": "chejiahao.m.autohome.com.cn",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-05-22T00:26:00+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.384274",
+      "raw_rank": 6,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 权益 价格 限时 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "benefit_adjustment",
+        "official_price_change"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        6
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 OTA 技术 发布 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "technology_release",
+        "config_release",
+        "launch_event"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "智己L7 OTA升级值得升吗?3个维度说清风险与收益+FAQ|饿了么|AI音频生成|智己汽车|卡顿|芯片_手机新浪网",
+      "url": "https://auto.sina.cn/2026-07-26/detail-iniizzuz1214375.d.html",
+      "canonical_url": "https://auto.sina.cn/2026-07-26/detail-iniizzuz1214375.d.html",
+      "snippet": "智己L7 OTA升级值得升吗？3个维度说清风险与收益+FAQ\n07.26 02:24\n智己L7的OTA升级，硬件底子够硬就能闭眼升，但前提是你的车是2025款及以后的高配版本。2026年7月，智己向L7推送了IMOS 2.1.0版本，核心更新包括新增饿了么点餐、AI音乐搜索、NOA变道逻辑优化等。对于搭载8295芯片的车型，这些功能流畅得像换了台新车；但如果你开的是2024款老款（8155芯片），或者刚提车不久还在保修期内，建议先看本文的三个维度再决定——不是所有车主都适合点“立即升级”。\n01 升级收益：8295芯片撑起“真·新功能”，老车升级容易卡成PPT\n智己L7的IMOS 2.1.0版本带来了实打实的新功能：高德地图更新到带红绿灯读秒和AI预警的版本，上车自动续导航，还接入了饿了么点餐和AI音乐搜索，副驾屏幕可以点外卖、找歌。这些功能在8295芯片上跑得行云流水——实测后台同时开导航+音乐+空调界面，切换延迟低于0.3秒。差距的根源在于芯片算力：智己L7的8295算力是8155的2.5倍，是老旧8255的5倍以上。对智己L...\n03 升级操作：预约时间+阅读须知，NOA变道逻辑有优化\n智己L7的IMOS 2.1.0版本升级包约2.8GB，推送后会在车机右上角显示红点。更新完成后，领航辅助（NOA）的变道逻辑做了调整——打另一侧转向灯即可取消变道，系统不再强制等到最后一刻；在NOA状态下，系统会自主选择变道时机，比以前更果断。另外，新增的AI音乐搜索支持模糊语音指令，比如“放一首适合雨天开的歌”，实测识别准确率在90%以上。\n更新日期：2026年07月26日\n",
+      "source_name": "手机新浪汽车",
+      "source_type_guess": "unknown",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "no domain match; default unknown",
+      "domain": "auto.sina.cn",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-26T02:24:04+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.384645",
+      "raw_rank": 6,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 OTA 技术 发布 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "technology_release",
+        "config_release",
+        "launch_event"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        6
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 门店 试驾 活动 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "channel_campaign",
+        "user_event"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media",
+        "tier_4_social_signal",
+        "tier_5_unverified"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "【智己LS9欢迎莅临赏鉴 直降1万_智己汽车武汉销品茂体验中心欢迎垂询95013086016】-汽车之家",
+      "url": "https://dealernew.autohome.com.cn/2233400/news_1538173917.html",
+      "canonical_url": "https://dealernew.autohome.com.cn/2233400/news_1538173917.html",
+      "snippet": "智己汽车武汉销品茂体验中心\n95013086016\n湖北省武汉市武昌区徐东大街18号中商世界里销品茂购物中心1楼\n智己LS9欢迎莅临赏鉴 直降1万\n智己汽车武汉销品茂体验中心 2026-07-01 14:22 · 武汉\n一眼不凡的上汽旗舰大六座 智己LS9。全系标配800V高压平台，采用增程动力系统，CLTC工况下纯电续航达402km，综合续航突破1500km。新车升级至灵蜥数字底盘3.0，集成四轮转向、双腔闭式空气悬架及矢量四驱等硬核配置。\n智己汽车武汉销品茂体验中心诚挚邀请您到店看车赏车，门店主理一对一贴心解答所有购车疑问，免费试乘试驾！到店购车专享多重限时礼遇。\n【到店礼】：在线预算询底价，为您免费定制合适您的购车方案！\n【置换礼】：提供免费二手车评估，任何品牌、年限车型均可进店评估；\n【试驾礼】：有专门试乘试驾路线，可免费预约试乘试驾体验；\n【金融礼】：限时金融方案，5年超长贷，0首付起等多种方案。\n地址：武汉市武昌区徐东大街18号中商世界里销品茂购物中心1楼。\n具体活动详情请咨询门店用户主理，店铺24小时服务热线：950-1308-6016。\n注：2026年7月01日行情 车辆价格随时变动，敬请关注当地市场\n 以上为车型资料信息，本店提供了多项增值服务，感兴趣的朋友欢迎来电咨询。\n商家信息\n 智己汽车武汉销品茂体验中心\n商家地址：湖北省武汉市武昌区徐东大街18号中商世界里销品茂购物中心1楼\n咨询电话：95013086016\n智己汽车武汉销品茂体验中心\n电话接听率：100%\n咨询电话：\n95013086016\n24 小时\n湖北省武汉市武昌区徐东大街18号中商世界里销品茂购物中心1楼\n",
+      "source_name": "汽车之家",
+      "source_type_guess": "dealer_page",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "subdomain/domain matched dealer pattern",
+      "domain": "dealernew.autohome.com.cn",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-01T14:22:00+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.384940",
+      "raw_rank": 6,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 门店 试驾 活动 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "channel_campaign",
+        "user_event"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media",
+        "tier_4_social_signal",
+        "tier_5_unverified"
+      ],
+      "raw_ranks": [
+        6
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 发布会 技术 品牌 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "launch_event",
+        "technology_release",
+        "brand_campaign"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "智己LS9 Hyper上市，三大技术底座开启“新三大件”时代_文汇",
+      "url": "http://m.toutiao.com/group/7663319842067006004/",
+      "canonical_url": "http://m.toutiao.com/group/7663319842067006004/",
+      "snippet": "7月16日，上汽集团第一亿台里程碑之作智己LS9 Hyper正式上市，权益价34.98万元。新车凝聚上汽七十余年巅峰技术，凭借“下一代全线控数字底盘、下一代全域800V高压可油可电平台、下一代高线束激光雷达加高算力芯片”三大核心技术底座，树立下一代新能源车的核心科技标尺，引领行业全面迈入“新三大件”时代。\n发布会同步官宣，智己LS9全系标配线控转向，全系权益价31.98万元起，让用户以30万出头的价格即可享受到百万级全线控转向的颠覆性驾控体验。\n 7月1日，由上汽牵头制定的线控转向国家标准正式实施。智己LS9 Hyper作为新国标下的量产先行者，率先标配全线控四轮转向，引领中国汽车行业从机械转向向线控转向跃迁。\n新车搭载与民航客机同源的线控技术，以“全线控转向+智慧四轮转向”黄金组合跨越机械的物理极限，20ms极速响应，比传统转向快4倍，做到顶级驾控体验。配合双向24°智慧四轮转向，智己LS9 Hyper可实现同级最小4.77m转弯半径，比A0级小车更灵活，优雅更从容。\n安全层面，全线控转向能实现传统机械转向系统无法布置的航空级三重安全冗余。更具长期价值的是，全线控底盘是通往L3甚至L4级高阶智驾的核心技术基石，提前锁定未来十年的智能出行体验。\n作为智己LS9车系的巅峰性能旗舰，智己LS9 Hyper首搭上汽量产的金标飓风三电机四驱系统，峰值扭矩730N·m，零百加速迈入3秒级，动力表现媲美超豪华SUV的大V8双涡轮发动机。\n依托全域800V恒星超级增程与66kWh超级骁遥MAX电池，智己LS9 Hyper告别传统增程顽疾，即便在高原、极寒等极端环境下，性能表现始终如一:低电量状态下放电功率仍可达275kW，亏电满载爬坡动力依旧强劲;北方冬季零下20℃，充电起步即达170kW超快充。续航方面，性能猛兽能实现390km纯电...\n",
+      "source_name": "今日头条",
+      "source_type_guess": "portal_or_aggregator",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "domain matched portal_or_aggregator_domains; original source unknown",
+      "domain": "m.toutiao.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-17T10:34:58+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.385232",
+      "raw_rank": 6,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 发布会 技术 品牌 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "launch_event",
+        "technology_release",
+        "brand_campaign"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        6
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 联名 合作 代言 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "partnership"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "智己官宣刘翔代言:年度最强联动!这波冠军精神共鸣太有牌面_车家号_汽车之家",
+      "url": "http://chejiahao.autohome.com.cn/info/25135624",
+      "canonical_url": "http://chejiahao.autohome.com.cn/info/25135624",
+      "snippet": "04-03\n前言：智己官宣世界级体育冠军传奇刘翔代言！不玩尬炒套路，以大厂硬实力赢得世界级冠军的认可，在车企营销内卷到摆烂的当下，走出了最清醒的一步！\n这不是单纯流量绑定，而是两个“跨时代”突破者的同频共振：刘翔用冠军打破种族偏见，撑起中国体育荣光，智己用技术撕碎国外豪华壁垒，筑牢中国智造底气！而这一切的核心载体，正是45分钟订单破万的 智己LS8(图片 | 参数 | 询价 ) ，既有硬核技术兜底，又有世界级冠军精神buff加持，稳坐同级“既有里子、又有面子”的YYDS！\n拒绝流量内卷！智己×刘翔，是实力对实力的双向奔赴\n当下，不少车企扎堆绑定流量以求快速出圈，最终难逃“官宣即巅峰”的尴尬困局。而智己跳出流量困局，以远见与格局，毅然选择了刘翔：这位无需刻意营业，却早已刻在国人DNA里的体育传奇，堪称顶级跨时代双向奔赴！\n刘翔的价值，从来不是流量能碰瓷的：中国田径首位大满贯得主，第一个打破短跑种族偏见的亚洲人，是刻在国民DNA里的“突破符号”。他历经高峰低谷仍谦逊低调，自带“国民靠谱滤镜”，这份务实与坚守，刚好和智己不玩PPT造车、潜心打磨产品，践行“技术平权”的长期主义理念同频共振。更巧的是二者的海派基因共鸣，刘翔与智己同诞上海，“上海制造”的严谨精致与“上海速度”的突破进取相融共生，让这场代言天生合拍，精准戳中看重靠谱与质感的核心用户。\n能请到刘翔，智己的底气可不是吹的，作为背靠上汽的“一号工程”，上汽、张江高科、阿里三方联手，手握70年造车积淀，主打“大厂严选、技术平权”。从诞生起就不玩流量套路，一门心思沉心搞技术、磨品控，不像部分新势力，只会靠营销讲故事、画大饼。恒星超级增程、全线控灵蜥数字底盘、全栈自研飓风电机、航盾电池、IM Ultra Agent超级智能体这些硬核技术，每一项都经得住市场拷...\n",
+      "source_name": "车家号",
+      "source_type_guess": "vertical_auto_media",
+      "source_tier_guess": "tier_3_industry_media",
+      "source_resolution_reason": "domain matched vertical_auto_media_domains",
+      "domain": "chejiahao.autohome.com.cn",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "",
+      "time_window_status": "unknown_publish_time",
+      "is_out_of_window": null,
+      "retrieved_at": "2026-07-31T09:02:52.385559",
+      "raw_rank": 6,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 联名 合作 代言 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "partnership"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        6
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 高管 直播 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "executive_voice"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "刘翔现身智己LS8发布会直播现场，涛总表示:“我非常擅长选择代言人。”刘翔回应:_汽车杂谈社区_易车社区",
+      "url": "https://baa.yiche.com/qichezatan/thread-53762359.html",
+      "canonical_url": "https://baa.yiche.com/qichezatan/thread-53762359.html",
+      "snippet": "发表于2026-04-16 21:53:26\n刘翔现身智己LS8发布会直播现场，涛总表示：“我非常擅长选择代言人。”刘翔回应：“我的选择眼光也很独到。”刘翔在现场分享了自己长时间驾驶LS8的体验，提到车辆掉头轻松、辅助驾驶技术如同老司机一般，续航里程甚至可 支持长途自驾至疆……“购它，绝对值得。”刘翔说出这番话时，禁让人感 到他与己 强 合。\n 雨灯050627\n网友评论\ntaiancody011114\n04-17\n智己ls8内部空间好大\n竹林船长\n04-17\n见证中国智造，感觉太棒了\n忠诚的薄荷草1505\n04-16\n中国新能源车确实好。\nsheneddie210926\n04-17\n我也觉得太会选代言人了\n",
+      "source_name": "易车社区",
+      "source_type_guess": "vertical_auto_media",
+      "source_tier_guess": "tier_3_industry_media",
+      "source_resolution_reason": "domain matched vertical_auto_media_domains",
+      "domain": "baa.yiche.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-04-16T21:53:26+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.385900",
+      "raw_rank": 6,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 高管 直播 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "executive_voice"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        6
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 最近1天 官方 动作 交付 权益 OTA",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "overview_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "scout",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "SAIC Zhiji new vehicle software IMOS 2.0 released: L7 supports high-speed elevated NOA (Beta)",
+      "url": "https://www.shulou.com/a576529",
+      "canonical_url": "https://www.shulou.com/a576529",
+      "snippet": "SAIC Zhiji new vehicle software IMOS 2.0 released: L7 supports high-speed elevated NOA (Beta)\n2026-07-22 Update From: SLTechnology News&Howtos shulou NAV: SLTechnology News&Howtos > IT Information >\nShulou(Shulou.com)11/24 Report--\nCTOnews.com April 20 news, SAIC Zhiji Automobile announced the introduction of a new vehicle software version IMOS 2.0. This OTA will be distributed today (April 20), and the batch push will last until April 27. The OTA upgrade package is large and the installation time is expected to be about 1 hour.\nThe highlights of IMOS 2.0 are as follows:\nIM AD 2.0 (L7)-added NOA pilotage assistance (Beta) for Shanghai, Suzhou, Hangzhou, Jiaxing, Huzhou) and surrounding viaduct sections to enhance trust\n* the high-speed viaduct NOA function will be launched to LS7 users in June and will be available nationwide this year.\nAdd automatic parking to unlined parking spaces (Beta)\nVisual language upgrade of the whole scene\nMagic color theme\nResidual light interaction perception\nIM Go Fantasy Island team function is online.\nWechat sends the address to the car\nMobile phone real-time information synchronization function (Bluetooth RTI)\n\"near field surround\" sound field mode\nNotes for OTA upgrade:\n1. The download will be carried out without feeling during the use of the vehicle, and the download traffic will be borne by Zhiji.\n2. After the download is completed, both Zhiji App and the car will receive the upgrade notice. Click \"Update system version\". The vehicle will be upgraded immediately and will not be able to use the vehicle within the next hour. And please lock the car and leave after seeing the installation progress bar.\n3. If you need a car at present, you can turn on \"automatic Night Update\", and the vehicle will be updated automatically at night.\nAmong them, NOA high-speed elevated navigation assistance (Beta) function is added: NOA is a high-order intelligent driving assistance function. After the function is activated, the vehicle can drive independently on urban expressways and highway viaducts, including...\n",
+      "source_name": "Shulou",
+      "source_type_guess": "unknown",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "no domain match; default unknown",
+      "domain": "shulou.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-28T00:00:00+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.383691",
+      "raw_rank": 7,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 最近1天 官方 动作 交付 权益 OTA"
+      ],
+      "matched_event_type_ids": [],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        7
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 交付 销量 战报 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "delivery_start",
+        "sales_milestone",
+        "order_milestone"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "scout",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "智己汽车经销商危机背后:单店平均月销17辆、卖一辆亏4万多_经济观察报",
+      "url": "http://m.toutiao.com/group/7665879691810603520/",
+      "canonical_url": "http://m.toutiao.com/group/7665879691810603520/",
+      "snippet": "7月以来，智己汽车在昆明、珠海两地的多家授权经销商门店因资金链断裂突然闭店，导致数百位车主无法取得...\n作为上汽集团旗下高端新能源品牌，智己汽车销量长期不振，单店月均销量不足20辆，经销商盈利空间持续承压。\n7月18日起，合格证发放与车辆交付陆续恢复，预计很快可完成所有正常购车用户的订单及车辆交付。智己汽车成立于2020年12月，由上汽集团、张江高科和阿里巴巴集团共同出资打造，定位高端智能电动汽车。自2022年首款车型智己L7上市以来，在售车型已扩展至6款，涵盖轿车与SUV细分市场。\n销量数据显示，智己汽车2024年全年交付约6.55万辆，未完成8万辆年度目标。2025年销量为8.10万辆，同比增长约23.7%，但仍未完成10万辆的年度销量目标，同期新能源汽车市场整体增长约35%，智己汽车增速落后。上汽集团2025年年报显示，智己汽车当年净亏损约36亿元，由此可推算其单车亏损额约4.4万元。\n2026年上半年，智己汽车累计销售3.97万辆，尽管同比实现翻倍增长，但相比于同行业的其他高端新能源品牌，智己的表现仍不算突出。例如，极氪汽车2026年上半年交付量已接近18万辆;岚图汽车同期销量突破7.6万辆。\n在渠道布局方面，智己汽车采用“直营+经销商”混合模式。据公开报道，截至目前智己汽车全国门店约400家，其中经销商门店占多数。智己汽车2026年上半年月均销量约6600辆，分摊至约400家门店，单店月均销量不足17辆。根据汽车流通行业的统计数据，汽车经销商单店的月度盈亏平衡线通常在30至50辆之间，具体取决于所在城市等级、店面租金及人力成本等因素。按此标准衡量，智己汽车当前单店产出尚处于较低水平，这意味着多数经销商可能依赖厂家返利、售后维修及金融衍生业务来弥补新车销售的亏损。\n",
+      "source_name": "今日头条",
+      "source_type_guess": "portal_or_aggregator",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "domain matched portal_or_aggregator_domains; original source unknown",
+      "domain": "m.toutiao.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-24T08:09:21+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.383996",
+      "raw_rank": 7,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 交付 销量 战报 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "delivery_start",
+        "sales_milestone",
+        "order_milestone"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        7
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 权益 价格 限时 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "benefit_adjustment",
+        "official_price_change"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "scout",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "IM智己汽车的微博",
+      "url": "https://m.weibo.cn/detail/5321393873097109",
+      "canonical_url": "https://m.weibo.cn/detail/5321393873097109",
+      "snippet": "31.98万元起！\n#智己LS9# 全系真线控\n#智己LS9 Hyper#震撼上市！\n唯科技 见豪华 无线控 不旗舰\n一图看懂，即刻抢订！ ​​\n",
+      "source_name": "微博",
+      "source_type_guess": "official_social_account",
+      "source_tier_guess": "tier_1_official",
+      "source_resolution_reason": "account name matched official_social_accounts.im",
+      "domain": "m.weibo.cn",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-16T19:50:29+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.384376",
+      "raw_rank": 7,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 权益 价格 限时 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "benefit_adjustment",
+        "official_price_change"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        7
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 OTA 技术 发布 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "technology_release",
+        "config_release",
+        "launch_event"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "智己L7老款车主能免费升级R6大模型吗?|智己汽车|车型|迭代|激光雷达|芯片_手机新浪网",
+      "url": "https://auto.sina.cn/2026-07-30/detail-inikpaeu9873837.d.html",
+      "canonical_url": "https://auto.sina.cn/2026-07-30/detail-inikpaeu9873837.d.html",
+      "snippet": "智己L7老款车主能免费升级R6大模型吗？\n07.30 01:19\n智己L7老款车主确实可以升级R6大模型，并且这一升级覆盖了当时选择预埋激光雷达硬件的车型，智己汽车兑现了上市初期对天使轮及A轮用户作出的“硬件可升级、软件持续OTA”的承诺。\n一、升级背景：智己对老车主的长期承诺\n智己L7作为品牌首款车型，上市时面向天使轮和A轮用户推出了多项专属权益，其中就包括未来可更换激光雷达、升级智驾芯片及摄像头等硬件承诺。\n智己不惜成本在每台L7上投入超过9万元的硬件预留，确保后续升级能力，这些投入在...\n交付近三年来，智己L7几乎保持每月一次OTA更新的频率，持续为老款车型引入新功能，如哨兵模式、手机投屏、ISC尾灯等，证明智己在软件维护上并非“发布即放弃”。\nR6大模型升级并非单纯的软件推送，而是基于此前已经完成的激光雷达加装、芯片更换等硬件动作，最终实现全国无图NOA和端到端智驾大模型的落地。\n对于已选装激光雷达预埋硬件的L7老款车型，升级完成后可以跑通“全国都能开”的城市智驾功能，智己在2024年内先后完成了去高精地图智驾、全国主要城市无图NOA、全国无图NOA的全量部署。\n三、升级方式：有序推进，分批覆盖\n升级并非一次性全量推送，而是按照“未加装激光雷达版本车型 → 全新L7及加装激光雷达车型”的顺序，通过OTA分批推送至各车型配置。\n车主可通过IM智己APP关注推送通知，下载完成后车机会自动提示安装，每个版本升级总时长约为23小时。\n智己还同步为L7老款车型升级了灵蜥数字底盘相关的OTA能力，让底盘控制、制动平顺性、转弯灵活性等机械素质也随软件迭代持续进化。\n费用：升级包括硬件更换和软件推送，覆盖了智己上市时为天使轮/A轮车主制定的权益范围，属于承诺内的免费升级。\n",
+      "source_name": "手机新浪汽车",
+      "source_type_guess": "unknown",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "no domain match; default unknown",
+      "domain": "auto.sina.cn",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-30T01:19:15+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.384688",
+      "raw_rank": 7,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 OTA 技术 发布 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "technology_release",
+        "config_release",
+        "launch_event"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        7
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 门店 试驾 活动 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "channel_campaign",
+        "user_event"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media",
+        "tier_4_social_signal",
+        "tier_5_unverified"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "智己汽车线下体验中心|门店-IM智己汽车官网",
+      "url": "https://www.immotors.com/website/store/mobile",
+      "canonical_url": "https://www.immotors.com/website/store/mobile",
+      "snippet": "来体验中心，享万般精彩\n每家体验中心都有专业主理人，为你提供服务\n 上海\n天安千树体验中心\n 杭州\n银泰体验中心\n北京\nAPM体验中心\n广州\n太阳新天地体验中心\n",
+      "source_name": "智己汽车",
+      "source_type_guess": "official_website",
+      "source_tier_guess": "tier_1_official",
+      "source_resolution_reason": "domain matched official_domains",
+      "domain": "immotors.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "",
+      "time_window_status": "unknown_publish_time",
+      "is_out_of_window": null,
+      "retrieved_at": "2026-07-31T09:02:52.384953",
+      "raw_rank": 7,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 门店 试驾 活动 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "channel_campaign",
+        "user_event"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media",
+        "tier_4_social_signal",
+        "tier_5_unverified"
+      ],
+      "raw_ranks": [
+        7
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 发布会 技术 品牌 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "launch_event",
+        "technology_release",
+        "brand_campaign"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "智己LS9 Hyper:重新定义30万级旗舰，上市首周末全国门店人气沸腾_mikayu1",
+      "url": "http://m.toutiao.com/group/7664593995795874350/",
+      "canonical_url": "http://m.toutiao.com/group/7664593995795874350/",
+      "snippet": "2026年7月16日，上汽集团智己品牌旗下旗舰SUV——智己LS9 Hyper正式上市。作为上汽集团累计产销突破一亿辆的里程碑之作，这款车型一经亮相便引发市场高度关注。上市后的首个周末，全国智己体验中心迎来品鉴热潮，预约持续升温，展厅人气火爆。\n 价格颇具诚意，全系标配线控转向\n此次智己LS9共推出两款车型:LS9 52 Ultra线控版权益价31.98万元，LS9 Hyper版权益价34.98万元。发布会同步官宣，智己LS9全系标配线控转向，将以往百万级豪华旗舰专属的驾控技术全面下放至30万元级别市场。智己汽车联席首席执行官刘涛表示，线控底盘是通往L3甚至L4级高阶智驾的核心技术基石。\n “新三大件”重构旗舰SUV技术标尺\n智己LS9 Hyper依托上汽七十余年技术积淀，以“下一代全线控数字底盘、下一代全域800V高压可油可电平台、下一代高线束激光雷达加高算力芯片”三大核心技术底座，构建起全方位升维的体验\n首周末门店人气火爆，客流环比提升50%\n上市后的首个周末，全国智己体验中心迎来品鉴热潮。记者在智己汽车上海嘉定用户中心看到，智己LS9 Hyper被置于展厅最醒目的中心位置，成为到店客流的视线焦点。“这款车的空间非常大，后排尤其宽敞，座椅质地柔软，乘坐感受如同置身于棉花舱。”市民倪先生在现场体验后表示，自己已预约试驾。\n 作为上汽集团“第一亿辆车”的同款车型，智己LS9 Hyper以“唯科技，见豪华”的理念，将线控转向、三电机四驱等硬核技术下沉至30万元级别市场。这款车的上市不仅标志着智己品牌在高端新能源SUV市场的又一次发力，更以“新三大件”重新划定了下一代旗舰车型的准入门槛。\n",
+      "source_name": "今日头条",
+      "source_type_guess": "portal_or_aggregator",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "domain matched portal_or_aggregator_domains; original source unknown",
+      "domain": "m.toutiao.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-20T21:25:18+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.385266",
+      "raw_rank": 7,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 发布会 技术 品牌 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "launch_event",
+        "technology_release",
+        "brand_campaign"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        7
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 联名 合作 代言 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "partnership"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "跨越时代的并肩——飞人刘翔代言智己汽车，中国智造冲击新高度_海报新闻",
+      "url": "http://m.toutiao.com/group/7624509947539178025/",
+      "canonical_url": "http://m.toutiao.com/group/7624509947539178025/",
+      "snippet": "前言:北京时间2026年4月3日，智己汽车正式官宣:中国田径传奇、奥运冠军刘翔出任品牌代言人;同时，跨时代科技旗舰SUV智己LS8全国试驾正式开启。\n 承袭上汽七十年造车积淀，定位高端智能新能源的智己汽车，自创立以来坚持“技术平权”与“品质至上”，拒绝短期炒作，专注核心技术研发与用户价值创造。此次牵手刘翔，把“突破自我、跨越时代”的精神内核，转化为可感知、可共鸣的品牌叙事，也向市场传递清晰信号:真正的品牌力，源于经得起时间检验的硬实力与价值观。\n一、官宣刘翔:不选流量选实力，长期主义价值观破圈\n当下汽车营销领域，代言人选择多聚焦短期热度与圈层流量，追求快速曝光与话题效应。智己汽车此番选择刘翔，跳出流量逻辑，锚定地域文化契合、精神内核共鸣、长期主义韧性三大核心，以更沉稳、更具时代分量的选择，彰显品牌格局与价值坚守。\n 刘翔出生于上海，自带海派文化开放、务实、创新的鲜明气质;智己汽车植根上海，由上汽集团、张江高科、阿里巴巴集团联合打造，承载着“中国汽车工业国家队”的使命担当，拥有鲜明的海派科技基因;这份同根同源的地域与文化纽带，让品牌与代言人之间形成天然的亲和力与文化认同，为合作奠定了扎实的情感与信任基础。\n作为110米栏项目史上唯一集奥运冠军、世锦赛冠军、世界纪录保持者于一身的大满贯得主，刘翔在职业生涯48次国际顶级大赛中，斩获36金6银3铜，以无可争议的赛场统治力，打破欧美长期垄断的种族壁垒，书写了中国田径乃至亚洲田径的历史性突破。\n从一战成名到载入史册，从巅峰荣光到历经沉淀，刘翔的职业生涯跨越荣耀与挑战，在时间的洗礼中赢得广泛尊重。这份突破极限、坚韧笃定、经得起时代检验的精神内核，与智己汽车深耕核心技术、坚守长期主义、稳健迈向全球的品牌理念高度契合。\n二、大厂底气加持:世界级代言背后，是体系力与全球化实力\n三、LS8试驾启幕:26万满配8系旗舰，技术平权惠及家庭用户\n正是...\n",
+      "source_name": "今日头条",
+      "source_type_guess": "portal_or_aggregator",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "domain matched portal_or_aggregator_domains; original source unknown",
+      "domain": "m.toutiao.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-04-03T20:42:19+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.385591",
+      "raw_rank": 7,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 联名 合作 代言 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "partnership"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        7
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 最近1天 官方 动作 交付 权益 OTA",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "overview_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "scout",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "【文章】智己澄清经销商经营舆情 落实交付善后及车主保障工作_车家号_汽车之家",
+      "url": "https://chejiahao.m.autohome.com.cn/pingan/chejiahao/detailinfo/26015880",
+      "canonical_url": "https://chejiahao.m.autohome.com.cn/pingan/chejiahao/detailinfo/26015880",
+      "snippet": "智己澄清经销商经营舆情 落实交付善后及车主保障工作\n油城车事 2026-07-21 14:51\n7月21日，智己汽车发布官方声明，针对近期网络流传的经销商经营风波相关舆论作出全面说明，同时公布用户订单善后处理方案与全国渠道运营的真实情况。此次引发舆论热议的交付异常问题，并非行业普遍性的渠道危机，而是单一合作经销商的独立经营风险所致。\n据官方披露信息，2026年7月7日，智己汽车昆明合作经销商之一的智合悦行汽车销售服务有限公司，因自身民间借贷纠纷出现资金链断裂问题。该经营故障直接导致部分购车用户的车辆合格证被质押在金融机构，用户无法正常完成上牌手续，新车交付流程被迫停滞。受该主体关联经营影响，其旗下珠海智合悦行汽车销售服务有限公司的相关业务同步受限，珠海区域部分用户的购车交付工作也出现中断情况。\n专项小组快速介入，有序推进交付恢复工作\n经过多日的逐一核查与多方协调，截至7月17日，工作人员已完成全部受影响用户的信息对接与情况梳理，摸清所有滞留订单的详细状态。从7月18日开始，品牌正式恢复合格证审核发放与新车交付流程，停滞的购车业务逐步回归正轨。根据当前处置进度，本周内可完成所有正常购车用户的订单履约，彻底解决此次交付滞留问题。除了推进新车交付善后工作，智己汽车同步落实存量车主的售后维保保障，规避经销商临时经营问题对用户后续用车的影响。针对昆明、珠海两大受影响区域，品牌专门划定固定服务承接渠道，确保车主的常规用车权益不受波及。\n据官方披露信息，2026年7月7日，智己汽车昆明合作经销商之一的智合悦行汽车销售服务有限公司，因自身民间借贷纠纷出现资金链断裂问题。该经营故障直接导致部分购车用户的车辆合格证被质押在金融机构，用户无法正常完成上牌手续，新车交付流程被迫停滞。受该主体关联经营影响，其旗下珠海智合悦行汽车销售服务有限公司的相关业务同步受限，珠海区域部分用户的购车交付工作也出现中断情况。\n专项小组快速介入，有序推进交付恢复工作\n在经销商经营...\n",
+      "source_name": "车家号",
+      "source_type_guess": "vertical_auto_media",
+      "source_tier_guess": "tier_3_industry_media",
+      "source_resolution_reason": "domain matched vertical_auto_media_domains",
+      "domain": "chejiahao.m.autohome.com.cn",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-21T14:51:00+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.383724",
+      "raw_rank": 8,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 最近1天 官方 动作 交付 权益 OTA"
+      ],
+      "matched_event_type_ids": [],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        8
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 交付 销量 战报 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "delivery_start",
+        "sales_milestone",
+        "order_milestone"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "scout",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "智己经销商卷款跑路，车越好卖，店越容易死?_花朵财经",
+      "url": "http://m.toutiao.com/group/7665265972617413161/",
+      "canonical_url": "http://m.toutiao.com/group/7665265972617413161/",
+      "snippet": "智己最近出了件很尴尬的事。\n上半年刚交了一份同比增长58%、累计40087台的成绩单，转头就传出经销商暴雷的消息。\n事情是这样的。\n7月7日，昆明智合悦行汽车销售服务有限公司，...\n部分用户付了全款却拿不到合格证上牌，车辆无法正常交付。其在珠海的关联公司也同步受到影响。\n7月21日，智己汽车发布了官方声明。品牌在事发当天成立专项工作组，第二天进驻现场，7月17日完成用户对接与情况梳理，7月18日起陆续恢复合格证发放与车辆交付，预计本周末即可处理完所有正常购车用户的订单。昆明和珠海两地的售后服务也已移交到新的交付中心。\n官方同步披露了一组数据，全国渠道运营稳健，6到7月全国新开了26家门店。\n卖得越好，亏得越多?\n智己今年上半年的成绩单其实不差。累计交付40087台，同比增长58%。LS6仍然是销量主力，1到5月售出12900辆，占品牌总销量超四成。LS8作为4月上市的新车，60分钟大定破8000台，5天交付破千，半年累计近11000辆。LS9切入30万级大六座市场，上半年也卖了8000多辆。4月受LS8拉动单月破万，5月峰值10023台，6月依然有8000台。\n 但翻开上汽集团2025年的年报，另一个数字更值得关注。智己全年卖81000辆，净亏损35.98亿。摊下来，每交付一辆车就亏4.4万。\n这就是整件事最反直觉的地方。智己不是卖不动，是卖得越多亏得越多。车越走量，窟窿越大，而亏损的压力最终全部传导到了经销商身上。\n从销量数据来看，智己方向没有错，接下来要做的是LS6、L6纯电换代，10月左右推LS8纯电版，叠加LS9 Hyper的旗舰效应，产品线本身是在向上的。",
+      "source_name": "今日头条",
+      "source_type_guess": "portal_or_aggregator",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "domain matched portal_or_aggregator_domains; original source unknown",
+      "domain": "m.toutiao.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-22T16:27:21+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.384026",
+      "raw_rank": 8,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 交付 销量 战报 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "delivery_start",
+        "sales_milestone",
+        "order_milestone"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        8
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 权益 价格 限时 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "benefit_adjustment",
+        "official_price_change"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "scout",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "智己 LS8 限时权益解析:24.98 万起，花入门价享顶配体验_车家号_汽车之家",
+      "url": "https://chejiahao.m.autohome.com.cn/info/25236810?isfrom=pc",
+      "canonical_url": "https://chejiahao.m.autohome.com.cn/info/25236810?isfrom=pc",
+      "snippet": "4 月 16 日智己 LS8 正式上市，官方指导价 26.18-31.18 万元，上市权益价仅 24.98-29.98 万元，叠加总价值 78400 元的全系限时免费升级礼，相当于用户实际购车成本比官方指导价低了近 9 万元。这一极具诚意的权益政策，让智己 LS8 成为 30 万级市场最具性价比的旗舰 SUV。\n不同于行业普遍存在的 “丐版减配、高配加价” 模式，智己 LS8 从根本上摒弃了配置歧视，真正做到了 “起步即旗舰，标配即满配”。其全系车型无差别标配灵蜥数字底盘 3.0、双向 24° 智慧四轮转向、120mm 行程智能闭式空悬，以及 520 线超视域激光雷达、高通 8295P 座舱芯片、Nappa 真皮座椅、前后排座椅加热通风按摩等核心配置。即便是 24.98 万元的入门版，也能...\n在此基础上，智己还推出了限时专属权益，截止时间为 2026 年 5 月 31 日。现金方面，支付 3000 元预约订单可抵扣 15000 元购车款，智己老车主增购还可额外减 10000 元。升级方面，全系免费升级价值 12800 元的英伟达 Thor 芯片、价值 34000 元的 IM AD 高级辅助驾驶全功能包、价值 24800 元的 B&O 18 扬声器音响以及价值 6800 元的 12.3L 双开门冷暖冰箱，总价值高达 78400 元。\n此外，首任非营运车主还可享受电池包终身质保、辅助驾驶无忧保障等安心权益。对于追求一步到位的品质家庭用户来说，5 月 31 日前是购买智己 LS8 的最佳时机，错过这一窗口期，不仅将恢复官方指导价，还将失去价值近 8 万元的免费升级权益。",
+      "source_name": "车家号",
+      "source_type_guess": "vertical_auto_media",
+      "source_tier_guess": "tier_3_industry_media",
+      "source_resolution_reason": "domain matched vertical_auto_media_domains",
+      "domain": "chejiahao.m.autohome.com.cn",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "",
+      "time_window_status": "unknown_publish_time",
+      "is_out_of_window": null,
+      "retrieved_at": "2026-07-31T09:02:52.384397",
+      "raw_rank": 8,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 权益 价格 限时 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "benefit_adjustment",
+        "official_price_change"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        8
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 OTA 技术 发布 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "technology_release",
+        "config_release",
+        "launch_event"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "智己L7 OTA升级值得升吗?三大升级亮点深度解析+FAQ|语音助手|智能驾驶|智己汽车|城区|续航_手机新浪网",
+      "url": "https://auto.sina.cn/2026-07-23/detail-iniitkru4595091.d.html",
+      "canonical_url": "https://auto.sina.cn/2026-07-23/detail-iniitkru4595091.d.html",
+      "snippet": "智己L7 OTA升级值得升吗？三大升级亮点深度解析+FAQ\n07.23 02:11\n智己L7的这一次OTA升级，直接给出了答案：必须升。核心亮点在于智能驾驶辅助系统的重大迭代，以及座舱交互体验的全面优化。2025年第一季度推送的IM OS 3.0版本，覆盖了NOA城市领航辅助、记忆泊车、全新语音助手等关键功能，且升级后车机流畅度不降反升，这对于老车主来说，等于免费换了一台新车。\n01 智能驾驶：城区NOA终于落地，通勤效率大提升\n此次OTA后，IM AD系统加入了城市NOA功能，实测在上海市区早晚高峰路段，车辆能自主完成红绿灯通行、绕行路边停靠车辆、与行人非机动车博弈等动作。官方公布的数据显示，城区NOA的接管率较上一版本降低了40%，人机共驾体验更顺滑。场景翻译一下：以前你上下班路上要时刻盯着路况随时准备接管，现在可以喝口水、看一眼手机导航，系统自己处理80%的常规场景，通勤压力直接减半。02 座舱交互：语音助手更聪明，界面操作零学习成本\n这次OTA在座舱方面最直观的变化是语音助手升级为“全域可见可说”版本。测试中，通过语音直接说出“打开空调、调到23度、吹风模式改为吹脸”，系统一次性响应并完成所有指令，延迟控制在1秒以内。03 底层优化：续航显示更准，充电速度小升级\n同时BMS（电池管理系统）算法优化后，快充峰值功率维持时间延长了约60秒，最大充电功率仍为105kW，但90%电量阶段的速度明显提升——从20%充到90%的时间减少了约3分钟。总之，这次OTA是L7上市以来最有诚意的一次更新，没有之一。\n05 常见问题FAQ\nIM OS 3.0基于底层安卓内核重构，配合8155芯片的冗余算力，实测应用程序开启速度比老版本快约0.3秒，动画跟手度也有提升。智己L7本次...\n更新日期：2026年07月23日\n",
+      "source_name": "手机新浪汽车",
+      "source_type_guess": "unknown",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "no domain match; default unknown",
+      "domain": "auto.sina.cn",
+      "claim_source_hint": "maybe_official",
+      "claim_source_hint_reason": "keyword heuristic found official keywords in text",
+      "publish_time": "2026-07-23T02:11:53+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.384729",
+      "raw_rank": 8,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 OTA 技术 发布 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "technology_release",
+        "config_release",
+        "launch_event"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        8
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 门店 试驾 活动 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "channel_campaign",
+        "user_event"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media",
+        "tier_4_social_signal",
+        "tier_5_unverified"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "台州智己汽车试驾 - 太平洋AI选车专家",
+      "url": "http://www.pcauto.com.cn/aichat/213393.html",
+      "canonical_url": "http://www.pcauto.com.cn/aichat/213393.html",
+      "snippet": "如果您在...\n📍 推荐试驾门店（台州地区）\n目前台州设有两家官方授权门店，均由太平洋汽车网认证，提供专业试驾服务和丰富现车资源。您可直接联系预约：\n台州图威新能源汽车销售有限公司\n地址：椒江东环大道1688号酷车小镇内\n电话：400-805-2700 转 5914（支持24小时咨询）\n特色：主营智己L6等车型，试驾车辆充足，工作日排队较少。\n台州智行家汽车销售服务有限公司\n地址：浙江省台州市椒江区黄海公路5号\n电话：400-815-0606 转 3063\n特色：提供上门试驾服务（需提前沟通），附带购车咨询。\n其他如台州方林体验中心（路桥区方林汽车城B-823号）和台州温岭用户中心（温岭万泉东路128号）也有试驾资源，但需现场确认车辆配置。\n🔧 试驾预约流程（简单四步）\n线上预约（推荐高效方式）：\n访问太平洋汽车网，搜索“智己L6”或“智己LS6”，点击“免费试驾”填写信息（姓名、电话、意向车型）。\n系统将自动匹配最近门店，专属顾问会在24小时内联系确认时间，并赠送最高168元现金红包（试驾后生效）。\n直接联系门店：\n拨打上述门店电话，说明试驾需求（如车型：L6后驱Max版或LS6长续航版）。\n建议提前1天预约，避免排队（近期试驾高峰，等待可能超2小时）。\n试驾准备：\n必备证件：本人身份证 + 驾驶证原件（需满1年驾龄）。\n最佳时段：工作日10:00-12:00或14:00-16:00（避开周末高峰）。\n体验重点：动态测试加速性能、弯道稳定性（L6转弯半径低至4.69米）、智能泊车系统。\n到店流程：\n顾问引导签署试驾协议，优先体验旗舰配置（如激光雷达或26.3英寸大屏）。\n全程约30分钟，支持自定义路线测试城市/高速场景。\n",
+      "source_name": "太平洋汽车",
+      "source_type_guess": "vertical_auto_media",
+      "source_tier_guess": "tier_3_industry_media",
+      "source_resolution_reason": "domain matched vertical_auto_media_domains",
+      "domain": "pcauto.com.cn",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-03-11T20:13:14+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.384979",
+      "raw_rank": 8,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 门店 试驾 活动 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "channel_campaign",
+        "user_event"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media",
+        "tier_4_social_signal",
+        "tier_5_unverified"
+      ],
+      "raw_ranks": [
+        8
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 发布会 技术 品牌 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "launch_event",
+        "technology_release",
+        "brand_campaign"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "线控转向进入更多车型，智己认为真正差距在整车标定_车行万里",
+      "url": "http://m.toutiao.com/group/7664480104031519268/",
+      "canonical_url": "http://m.toutiao.com/group/7664480104031519268/",
+      "snippet": "汽车工业正经历一场从机械定义到电子定义的深度迁徙，底盘技术的变革正成为这场长跑中最关键的胜负手。2026年7月16日，智己LS9 Hyper正式进入市场，以34.98万元的权益价展现了顶级制造的野心，这款大六座旗舰SUV不仅集成了全线控底盘与三电机矢量四驱，更在行业标准与技术应用上完成了一次重要的主权宣告。在发布会后的深度交流中，智己汽车品牌与用户高级总监焦樵的一席话，揭开了中国汽车品牌在硬核赛道上竞争的新篇章。此前，理想汽车曾公开定义旗舰车型的门槛，认为缺乏线控转向与后轮转向的配置不足以支撑旗舰之名。面对这一论调，焦樵在表达感谢的同时，也清晰地指出，在这一领域智己并非跟随者，而是早已深耕多年的先行者。\n 这种回应并非单纯的口舌之争，而是源于两家顶尖中国企业在核心技术演进路径上的深度共识。当理想将线控转向与后轮转向提升到旗舰必修课的高度时，实际上是肯定了数字底盘在高端市场中的统治地位。智己LS9 Hyper的发布，恰逢线控转向技术从实验室走向大规模量产的临界点。焦樵坦言，行业能形成这种共同认知是好事，但智己早在2022年推出首款车型L7时，就已经在四轮转向技术的轨道上全速奔跑。在那时，多数同级产品仍将此类配置视为昂贵的选装件，甚至是技术盲区，而智己则坚持全线控底盘的技术逻辑。这种时间差积累下的不仅是销量，更是庞大的工程数据与市场验证，为从后轮转向的初级阶段进化到全线控转向的终极形态打下了坚实基础。\n 如果说应用层面的先发优势是时间给出的答案，那么作为规则制定者的深度参与，则彰显了其作为大厂新势力的底蕴。2026年7月1日实施的GB 17675-2025《汽车转向系基本要求》强制性国家标准，为国内线控转向技术划定了明确的合规红线，这一标准的牵头制定者正是上汽集团。作为集团旗下的先锋品牌，智己自然成为了新技术、新标准的最佳实践载体。LS9 Hyper是国内...\n",
+      "source_name": "今日头条",
+      "source_type_guess": "portal_or_aggregator",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "domain matched portal_or_aggregator_domains; original source unknown",
+      "domain": "m.toutiao.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-20T13:37:53+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.385296",
+      "raw_rank": 8,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 发布会 技术 品牌 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "launch_event",
+        "technology_release",
+        "brand_campaign"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        8
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 联名 合作 代言 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "partnership"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "重磅炸弹!智己汽车牵手刘翔，品牌焕新出发_说车王同学",
+      "url": "http://m.toutiao.com/group/7624485494512812554/",
+      "canonical_url": "http://m.toutiao.com/group/7624485494512812554/",
+      "snippet": "当那张熟悉的面孔再次与速度、突破以及这座名为上海的城市产生交集时，我们所谈论的已不仅仅是一次单纯的品牌代言，而是一场关于跨时代基因的深度共振。智己汽车正式官宣刘翔成为其品牌代言人，这一消息在当下的汽车圈与体育界激起了层层涟漪。一个是曾在田径场上改写历史、至今仍是中国体育象征的王者，一个是代表着海派造车巅峰力量、具备深厚底蕴的汽车界大厂新势力。刘翔与智己的联手，不仅仅是名气上的相加，更是一次关于性格、实力与长期主义价值观的“双向奔赴”。\n这种期望本身就是巨大的压力，但智己选择用产品的持续迭代和技术的跨代飞跃来回应这份期望。从智己LS6到如今的智己LS8，每一款车型的推出都在定义何为真正的新能源时代标杆。这种敢于打破行业既定规则、不断实现自我超越的行为，与当年在跨栏架前腾空而起的刘翔如出一辙。\n如果再深入探究这份合作背后的文化底蕴，我们会发现上海这座城市赋予了两者的情感认同。刘翔是土生土长的上海孩子，他身上具备那种精致、务实且不失进取心的海派气质;而智己背后站着的上汽集团，更是中国汽车工业的顶梁柱。从早年的经典轿车到如今的高端新能源产品，上汽引领了数代人的出行习惯。作为上海制造在智能出行时代的新名片，智己流淌着根正苗红的海派基因。这种本土体育精神领袖与本土顶尖造车品牌的结合，无论从情感连接还是产业定位来看，都显得极为契合。\n能请动刘翔复出并深度参与代言，本身就证明了智己在技术积累和品牌调性上的超标实力。刘翔在退役后的职业选择一向极其严谨，他极少出现在商业代言中，更遑论将自己的个人形象与一个复杂的工业产品进行长线绑定。他之所以选择智己，或许是因为两者之间存在着一种对极致性能的共同追求。刘翔曾代言过同属上汽旗下的豪华品牌，如今再次与智己携手，这种延续性不仅体现了他对大厂底蕴的信任，更反映了智己LS8等产品在智能化表现上的硬核底气。\n 以刘翔...\n",
+      "source_name": "今日头条",
+      "source_type_guess": "portal_or_aggregator",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "domain matched portal_or_aggregator_domains; original source unknown",
+      "domain": "m.toutiao.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-04-03T18:58:04+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.385621",
+      "raw_rank": 8,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 联名 合作 代言 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "partnership"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        8
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 高管 直播 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "executive_voice"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "智己CEO李涛于抖音上直播，联合清陶能源初步介绍了智己L6即将搭载的固态电池。1",
+      "url": "https://emcreative.eastmoney.com/app_fortune/article/index.html?artcode=20240330094848210625960&postid=1413339884",
+      "canonical_url": "https://emcreative.eastmoney.com/app_fortune/article/index.html?artcode=20240330094848210625960&postid=1413339884",
+      "snippet": "无畏的钱伟涛\n2024-03-30 09:48 · 江苏\n2024-03-30 09:48  · 江苏\n$恩捷股份(SZ002812)$\n智己CEO李涛于抖音上直播，联合清陶能源初步介绍了智己L6即将搭载的固态电池。\n1、 形态是方形，是半固态电池，保留隔膜，降低电解液用量（降至10wt%）；体系内增加了一种浸润液，是有机溶剂，预计是用于提高分散性；\n2、电解质：白色粉末，预计为无机陶瓷类电解质；在电池里的使用方法为制作成固态电解质薄层，涂膜压延于正极表面，薄层厚度为微米级别（可能采用了聚合物，降低批量生产过程所需的压力）；\n3、快充性能：直播过程有提到充电10分钟，续航达到400km的目标，折算下来预计对应至少2-2.5C以上的快充能力；\n",
+      "source_name": "东方财富网",
+      "source_type_guess": "unknown",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "no domain match; default unknown",
+      "domain": "emcreative.eastmoney.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2024-03-30T09:48:00+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.385966",
+      "raw_rank": 8,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 高管 直播 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "executive_voice"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        8
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 交付 销量 战报 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "delivery_start",
+        "sales_milestone",
+        "order_milestone"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "scout",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "智己汽车:个别经销商资金链断裂造成部分车辆无法正常交付，已陆续恢复合格证发放与车辆交付_新黄河",
+      "url": "http://m.toutiao.com/group/7664812946639389234/",
+      "canonical_url": "http://m.toutiao.com/group/7664812946639389234/",
+      "snippet": "7月21日，针对个别经销商的异常情况引发广泛关注一事，智己汽车发布关于近期网络不实传言的声明:\n2026年7月7日，云南昆明智合悦行汽车销售服务有限公司(智己昆明两家经销商之一)，因民间借贷导致资金链断裂，造成部分用户无法从金融机构取得车辆合格证上牌、车辆无法正常交付。同时， 也影响到了该经销商的关联主体——珠海智合悦行汽车销售服务有限公司在珠海地区的车辆交付。\n事件发生当日，智己汽车第一时间成立专项工作组，并于第二天进驻现场，积极配合政府并协调相关方为用户提供后续服务。截至7月17日，智己汽车已基本完成用户的对接与情况梳理，并已于7月18日起陆续恢复合格证发放与车辆交付。预计到本周末，可完成所有正常购车用户的订单及车辆交付。在此，我们向延迟交付的用户表示诚挚的歉意。对于保有用户，昆明地区可前往昆明恒胜致远汽车销售服务有限公司(智己交付中心)接受售后服务;珠海地区将由安骅汽车(智己交付中心)提供相关售后服务。\n同时，我们关注到某些机构与个人，有组织地攻击抹黑企业，将上述个例恶意夸大为“智己汽车多地经销商暴雷”等负面话题，相关内容被大量转发和评论，对我司的品牌声誉和正常经营秩序造成恶劣影响。目前，我司全国渠道运营稳健，今年6-7月全国陆续新开26家门店，持续推进服务覆盖，为大家带来日益完善的购车服务体验。\n针对上述恶意抹黑并攻击智己品牌的违法行为，我司已固定相关侵权证据，将坚决运用法律武器维护自身的合法权益。请广大网友不信谣、不传谣，以官方信息为准，再次感谢大家的关注与支持。\n昆明一智己汽车经销商“经营异常”?多名用户反映付款后提车、上牌受阻 | 大鱼财经\n智己汽车昆明经销商闭店后，授权门店风险浮出:车款流向、合格证和销售承诺如何兜底?| 大鱼财经\n智己昆明全款未提车用户仍在等方案，珠海又有车主称付清车款未提车，当地一体验中心被曝关闭|大鱼财经\n来源:智己汽车微博...\n",
+      "source_name": "今日头条",
+      "source_type_guess": "portal_or_aggregator",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "domain matched portal_or_aggregator_domains; original source unknown",
+      "domain": "m.toutiao.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-21T11:08:56+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.384056",
+      "raw_rank": 9,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 交付 销量 战报 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "delivery_start",
+        "sales_milestone",
+        "order_milestone"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        9
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 权益 价格 限时 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "benefit_adjustment",
+        "official_price_change"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "scout",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "【上汽旗舰 智己LS9限时权益价32.28万元_汽车促销】湖南娄底娄星车城店-易车",
+      "url": "https://dealer.m.yiche.com/d100253964/news_1430256814.html",
+      "canonical_url": "https://dealer.m.yiche.com/d100253964/news_1430256814.html",
+      "snippet": "上汽旗舰 智己LS9限时权益价32.28万元\n类型：优惠促销 2026-07-01\n2026年07月01日 - 2026年07月01日\n大型增程SUV销量TOP3\n有排面 真好开 大六座\n五月限时现金立减 价值10000元\n金融0首付起 5年期首2年0利息至高价值21000元\n电池包终身质保 价值5600元\n旗舰头等舱尊享礼包限时免费升级 至高价值60800元\n22英寸冕镜面超奢轮毂 限时选装价6000元\nIM AD 终身免费使用权 价值36800元\n有效期: 2026年6月1日至2026年6月30日(含)\n车型促销\n2026款 402km 66 Ultra\n35.28万 36.28万 1.00万\n现车充足\n2026款 320km 52 Ultra\n32.28万 33.28万 1.00万\n现车充足\n联系方式\n拨打400电话\n娄底市娄星区万宝镇芭蕉村中南汽车城内...\n",
+      "source_name": "易车",
+      "source_type_guess": "dealer_page",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "subdomain/domain matched dealer pattern",
+      "domain": "dealer.m.yiche.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-01T00:00:00+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.384424",
+      "raw_rank": 9,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 权益 价格 限时 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "benefit_adjustment",
+        "official_price_change"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        9
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 OTA 技术 发布 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "technology_release",
+        "config_release",
+        "launch_event"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "智己L7 OTA升级会出故障吗?3个维度说清真相+FAQ|智驾|智己汽车|提示音|客服|临时性_手机新浪网",
+      "url": "https://auto.sina.cn/2026-07-29/detail-inikksxz1900631.d.html",
+      "canonical_url": "https://auto.sina.cn/2026-07-29/detail-inikksxz1900631.d.html",
+      "snippet": "智己L7 OTA升级会出故障吗？3个维度说清真相+FAQ\n智己品牌针对2024年1月车机显示优化事件，已承诺为次生问题负责并快速推送修复版本。对于2026年仍在持续进化的智驾版本，车主反馈渠道畅通，升级后智驾能力显著提升。结论：放心升级，但务必在安全环境下按官方指引操作。\n01 技术升级的双重性：机遇与保障\nOTA升级如同手机系统更新，目的是修复漏洞、增加功能、优化性能。智己L7作为软件定义汽车的先行者，升级频率高，技术红利明显。但任何复杂软件都可能伴随临时性波动，关键在于品牌响应速度。2024年1月，部分智己车型在更新版本时出现短暂车机屏幕不显、提示音无声，官方客服确认系更新临时状况，当天即推出新版本修复，并明确“正常更新即可解决”。事件中动力、刹车等底层安全系统完全未受影响，品牌事后承诺为此类次生问题负责。这证明智己已建立快速响应机制，用户无需过度担忧。\n02 三次关键升级事件验证稳定性\n第一次：2024年初车机显示优化事件。少量车主升级后出现屏幕不显示、提示音消失，官方3小时内确认问题并推送修复包，全程未影响行驶安全。第二次：2023-2024年间系统功能升级。智己L7/ LS7经历2.3.0和2.5.8版本，UI更美观，智驾能力显著提升，用户体验流畅。第三次：2026年持续进化。车主仍对3.7版本智驾体验进行分享，反馈渠道畅通，品牌高层明确表示OTA让车持续拥有生命力。这三次事件覆盖了从早期故障修复到功能迭代的全周期，证明智己的OTA体系已成熟。\n03 硬件同步升级保障软件体验\n智己L7为早期天使轮车主提供了硬件OTA服务——将Xavier芯片升级至Orin平台，加装激光雷达。单台成本亏损约9万元，但兑现了品牌承诺，使老款车型能同步最新智驾功能，避免因硬件落后导致兼容...\n更新日期：2026年07月29日\n",
+      "source_name": "手机新浪汽车",
+      "source_type_guess": "unknown",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "no domain match; default unknown",
+      "domain": "auto.sina.cn",
+      "claim_source_hint": "maybe_official",
+      "claim_source_hint_reason": "keyword heuristic found official keywords in text",
+      "publish_time": "2026-07-29T00:57:08+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.384770",
+      "raw_rank": 9,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 OTA 技术 发布 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "technology_release",
+        "config_release",
+        "launch_event"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        9
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 门店 试驾 活动 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "channel_campaign",
+        "user_event"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media",
+        "tier_4_social_signal",
+        "tier_5_unverified"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "【上海市智己汽车汽车4S店促销新闻】智己汽车|前湾体验中心-易车",
+      "url": "https://dealer.yiche.com/100240426/news.html?logId=5",
+      "canonical_url": "https://dealer.yiche.com/100240426/news.html?logId=5",
+      "snippet": "智己汽车|前湾体验中心\n电话： 400-173-5335\n售本市\n地址：上海市闵行区联友路388号印象城1楼L140\n智己L7享受补贴还优惠0.8万元 剩余1天\n 智己汽车中信万达体验中心智己L7享受补贴还优惠0.8万元，感兴趣的朋友可以到店咨询购买，具体优惠信息如下：\n优惠促销 2026-07-25\n智己L6享受补贴还优惠3万元 剩余1天\n 智己汽车|前湾体验中心智己L6享受补贴还优惠3万元，感兴趣的朋友可以到店咨询购买，具体优惠信息如下：\n优惠促销 2026-07-25\n智己LS9享受补贴还优惠3万元 剩余1天\n 智己汽车|前湾体验中心智己LS9享受补贴还优惠3万元，感兴趣的朋友可以到店咨询购买，具体优惠信息如下：\n优惠促销 2026-07-25\n智己LS6享受补贴还优惠4万元 剩余1天\n智己汽车|前湾体验中心智己LS6享受补贴还优惠4万元，感兴趣的朋友可以到店咨询购买，具体优惠信息如下：\n优惠促销 2026-07-25\n智己LS8优惠高达1.2万元 剩余1天\n智己汽车|前湾体验中心智己LS8优惠高达1.2万元，感兴趣的朋友可以到店咨询购买，具体优惠信息如下：\n优惠促销 2026-07-25\n智己LS7享受补贴还优惠1万元 剩余1天\n中信泰富万达广场体验中心智己LS7享受补贴还优惠1万元，感兴趣的朋友可以到店咨询购买，具体优惠信息如下：\n优惠促销 2026-07-25\n智己汽车|前湾体验中心\n主营：\n智己汽车\n执照：\n级别：\n4S店\n电话：\n400-173-5335\n地址： 上海市闵行区联友路388号印象城1楼L140 [地图]\n",
+      "source_name": "易车",
+      "source_type_guess": "dealer_page",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "subdomain/domain matched dealer pattern",
+      "domain": "dealer.yiche.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-26T00:00:00+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.385009",
+      "raw_rank": 9,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 门店 试驾 活动 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "channel_campaign",
+        "user_event"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media",
+        "tier_4_social_signal",
+        "tier_5_unverified"
+      ],
+      "raw_ranks": [
+        9
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 发布会 技术 品牌 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "launch_event",
+        "technology_release",
+        "brand_campaign"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "智己ls9上市发布会全程回放_手机新浪网",
+      "url": "https://auto.sina.cn/2026-07-18/detail-iniierwk1511643.d.html",
+      "canonical_url": "https://auto.sina.cn/2026-07-18/detail-iniierwk1511643.d.html",
+      "snippet": "二、核心产品力：三大跨代技术底座\n1. 下一代底盘：全线控数字底盘\n全系标配线控转向（行业首批量产），转向响应仅20ms，比传统机械转向快4倍。\n转向比覆盖4.5:1至14.2:1，提供470°/240°/180°三档可调，适配不同驾驶偏好。\n搭配双向24°智慧四轮转向，实现4.77m同级最小转弯半径，5.3米车长可在窄路一把掉头。\n采用航空三重冗余安全架构，即使全系统断电仍可通过后轮转向与制动力分配平稳靠边停车。\n2. 下一代三电：800V恒星超级增程\nHyper版搭载金标飓风三电机四驱系统，峰值扭矩730N·m，零百加速进入3秒级。\n低电量放电功率仍达275kW，亏电满载爬坡动力强劲；冬季零下20℃充电起步即达170kW超快充。\n纯电续航390km（CLTC），综合续航1460km（CLTC），一箱油可跑近1000km。\n增程器支持92号汽油，海拔3000米以上功率保持率提升15%~20%，高原工况衰减仅2%。\n 3. 下一代智能：高算力感知与智驾\n搭载520线超视域激光雷达（等效1040线）、英伟达Thor芯片，硬件可升级至L3/L4。\n联合Momenta打造高阶智驾，Momenta CEO曹旭东成为LS9 Hyper 001号车主，体现技术深度绑定。\n搭载IM Ultra Agent智舱交互系统，支持一句话搞定多场景需求。\n三、定价与上市权益\n智己LS9 52 Ultra线控版：官方指导价34.98万元，上市权益价31.98万元。\n智己LS9 Hyper版：官方指导价37.98万元，上市权益价34.98万元。\n限时权益包括：5000元预付款抵35000元现金券、免费升级旗舰头等舱礼包（B&O音响、4D机械按摩座椅、探...\n",
+      "source_name": "手机新浪汽车",
+      "source_type_guess": "unknown",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "no domain match; default unknown",
+      "domain": "auto.sina.cn",
+      "claim_source_hint": "maybe_official",
+      "claim_source_hint_reason": "keyword heuristic found official keywords in text",
+      "publish_time": "2026-07-18T08:33:17+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.385337",
+      "raw_rank": 9,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 发布会 技术 品牌 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "launch_event",
+        "technology_release",
+        "brand_campaign"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        9
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 联名 合作 代言 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "partnership"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "重磅官宣|刘翔成为智己汽车代言人智己LS8跨时代旗舰即将上市|ls_网易订阅",
+      "url": "https://www.163.com/dy/article/KPKGGUSK05564C73.html",
+      "canonical_url": "https://www.163.com/dy/article/KPKGGUSK05564C73.html",
+      "snippet": "重磅官宣｜刘翔成为智己汽车代言人智己LS8跨时代旗舰即将上市\n2026-04-03 22:32:15 来源: 那辆车\n 广东 举报\n4 月 3 日，智己汽车正式官宣：奥运冠军、田径传奇刘翔成为品牌代言人，以 “突破不止、跨越不息” 的冠军精神，与智己汽车并肩开启高端智能电动全新篇章。\n从赛道传奇到时代符号，刘翔以永不设限、不断超越的姿态，成为跨越时代的国民偶像。这份不妥协、不随流、敢突破的精神内核，与智己汽车深耕高端智能电动、坚持技术创新、追求极致品质的品牌理念高度契合。此次携手，是世界级体坛传奇与大厂科技旗舰的双向奔赴，更是对 “跨时代” 精神的同频共鸣。\n作为智己汽车倾力打造的跨时代科技旗舰 SUV，智己 LS8 自 3 月 26 日开启预售以来，凭借一步到位的硬核实力引爆市场，45 分钟小订即破 10000 台，强势登顶 8 系市场爆款席位。\n智己 LS8 以颠覆级配置重新定义旗舰标准：\n搭载全线控四轮转向、全满贯百万级底盘，操控与舒适双在线\n配备英伟达 Thor 芯片 + 520 线超视域激光雷达，智能硬件拉满\n首发AI 超级智能体 IM Ultra Agent 1.0，全场景更聪明更安心\n搭载恒星超级增程系统，续航无忧、动力从容\n超大空间、智能奢华、大厂品质集于一身，智己 LS8 成为中国品质家庭一步到位的理想旗舰之选。\n跨越不止，传奇同行。4 月 16 日，智己 LS8 正式上市，与刘翔一起，见证跨时代旗舰登场，共赴智能出行新未来。\n",
+      "source_name": "手机网易网",
+      "source_type_guess": "portal_or_aggregator",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "domain matched portal_or_aggregator_domains; original source unknown",
+      "domain": "163.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-04-03T22:32:15+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.385652",
+      "raw_rank": 9,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 联名 合作 代言 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "partnership"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        9
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 高管 直播 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "executive_voice"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "新闻中心-智己汽车:智能纯电轿车,智能纯电suv-im智己汽车官网",
+      "url": "https://www.immotors.com/website/news?theme=dark",
+      "canonical_url": "https://www.immotors.com/website/news?theme=dark",
+      "snippet": "31.98万元起，智己LS9全系标配线控转向，重构下一代旗舰新标准\n2026年07月17日\n上汽第一亿台正式交付，智己LS9 Hyper开启中国汽车工业新篇章\n24.98万元起，智己LS8震撼上市！30万内唯一线控转向，旗舰大满配！\n2026年04月17日\n25.98万元起！智己LS8震撼开启预售，30万内即可尊享百万级跨代际体验\n智己LS6累计交付破10万台！十万品质家庭优选\n2...\n智己汽车11月销售13,577台，连续三月创品牌历史新高！\n2025年12月01日\n2025广州车展，9系旗舰，6系爆品，都在智己！ 智己LS9开启全国交付，智己LS6 66度电池新增产线\n2025年11月21日\n32.28万元起！上汽旗舰大六座·智己LS9震撼上市 全系皆Ultra，30万级最强旗舰爆品来了！\n2025年11月13日\n33.69万元起，上汽旗舰·智己LS9正式开启预售 以全球巅峰科技，颠覆30万级大六座SUV格局\n2025年11月04日\n19.79万元起！新一代智己LS6震撼上市 断代领先，诚意拉满，成就20万级大五座智能SUV市场最强爆品\n2025年09月11日\n新一代智己LS6预售惊爆价20.99万起 首搭划时代“恒星”超级增程，撼动大五座SUV市场格局\n智己行业首发“恒星”超级增程，1500公里都是顶级电车体验\n智己LS7焕新版上市，限时权益价32.99万元 树立中大型纯电旗舰SUV新标杆\n智己汽车重磅登陆香港市场，6系双车同步上市\n全新智己L6震撼上市，权益价20.49万~26.49万\n",
+      "source_name": "智己汽车",
+      "source_type_guess": "official_website",
+      "source_tier_guess": "tier_1_official",
+      "source_resolution_reason": "domain matched official_domains",
+      "domain": "immotors.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-17T00:00:00+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.385993",
+      "raw_rank": 9,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 高管 直播 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "executive_voice"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        9
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 最近1天 官方 动作 交付 权益 OTA",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "overview_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "scout",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "智己回应经销商“暴雷”传闻:本周末前完成正常购车用户交付_财视传播",
+      "url": "http://m.toutiao.com/group/7664821617205199423/",
+      "canonical_url": "http://m.toutiao.com/group/7664821617205199423/",
+      "snippet": "近日，智己汽车部分授权经销商经营异常事件持续引发关注。此前，据《新浪科技》消息，网上流传昆明、珠海、上海等地部分智己汽车经销商出现闭店、负责人失联甚至卷款跑路等情况，部分消费者付款后迟迟无法提车，也无法退款，一些门店员工还反映遭遇拖欠工资，引发广泛担忧。\n7月21日，智己汽车发布官方声明，对事件调查结果及后续解决方案作出正式回应。\n 智己汽车表示，此次事件根源在于云南昆明授权经销商——云南昆明智合悦行汽车销售服务有限公司因民间借贷导致资金链断裂，部分已购车用户无法从金融机构取得车辆合格证，影响车辆上牌和正常交付。同时，该经销商关联主体珠海智合悦行汽车销售服务有限公司也受到波及，导致珠海地区部分车辆交付受阻。\n事件发生当天，智己汽车便成立专项工作组，第二天进驻当地，与政府部门及相关机构展开协调。截至7月17日，已基本完成用户信息核对和情况梳理，自7月18日起陆续恢复车辆合格证发放及车辆交付，预计本周末前可完成所有正常购车用户订单交付。\n针对消费者最关心的问题，智己汽车作出兜底承诺:对于已付清车款但尚未取得合格证的用户，公司将垫资与金融机构协商赎回，全部费用由厂家承担，用户无需参与经销商的债务处理，购车权益由厂家负责保障;对于已支付订金但尚未提车的用户，将继续保障原有购车价格及相关权益，并协调周边用户中心提供交付服务;保有车主的售后维修、保养及官方服务权益亦正常提供。\n此前，智己汽车曾向媒体回应称，已向相关车主发送短信通知，将积极跟进合理诉求，但由于涉及用户数量较多、购车情况各异，需逐一核实依法处理，整体解决仍需一定时间。此次声明则明确了具体时间表和保障措施。\n声明最后，智己汽车表示，针对近期网络传播的失实信息和恶意造谣行为，已完成证据固定，将依法追究相关责任。\n在妥善处理此次经销商风波的同时，智己汽车仍需面对经营层面的现实挑战。上汽集团2025年财报显示，智己全年净亏损35.98亿元，平均每卖一辆车单车净亏损约4...\n",
+      "source_name": "今日头条",
+      "source_type_guess": "portal_or_aggregator",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "domain matched portal_or_aggregator_domains; original source unknown",
+      "domain": "m.toutiao.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-21T11:43:26+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.383787",
+      "raw_rank": 10,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 最近1天 官方 动作 交付 权益 OTA"
+      ],
+      "matched_event_type_ids": [],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        10
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 交付 销量 战报 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "delivery_start",
+        "sales_milestone",
+        "order_milestone"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "scout",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "智己汽车-智能时代出行的变革者-IM智己汽车官网",
+      "url": "https://www.immotors.com/website/news_detail/230",
+      "canonical_url": "https://www.immotors.com/website/news_detail/230",
+      "snippet": "智己LS6累计交付破10万台！十万品质家庭优选\n2026年01月22日\n智己LS6累计交付破10万台！十万品质家庭优选\n1月22日，智己汽车宣布，智己LS6累计交付突破10万台。作为20万级新能源SUV市场的超级爆款，智己LS6以跨代际领先的科技实力、一步到位的智能和舒适体验，以及大厂硬核安全保障，不断超越用户对于大五座智能SUV的想象，成为10万品质家庭“油换电”升级的首选。\n 智己LS6自上市以来，始终以持续的技术突破引领行业创新，精准击中家庭用户核心出行需求。从率先将激光雷达全系标配带入20万级市场，打破高端智能配置壁垒，让智能时代的前沿体验人人可享；到成为首个全系配备数字底盘与智慧四轮转向的SUV，完美兼顾宽适空间与灵活好开；再到首搭恒星超级增程，成为首个大电池超级增程大五座，开创“自带超充桩的电车”新品类，秒杀一切能源形式——智己LS6持续以技术创新赋能用户体验，保持热销态势：2024年成功斩获中大型纯电SUV年度销冠；2025年下半年，在竞争更为激烈的20万级新能源中大型SUV市场稳居第一阵营，爆款势能全面释放。\n10万品质家庭的信赖，根植于智己LS6领先一代的产品硬实力。作为同级唯一800V大电池超级增程大五座SUV，它既彻底解决用户的续航与补能焦虑，又带来全程顶级电车的澎湃动力与静谧体验，是当下最好的能源形式，成为北方用户、油车用户和无家充桩用户的“新能源首选”。在家庭用户最关切的舒适、驾控与安全方面，均做到了20万级最强水平。灵蜥数字底盘搭配同级唯一双向18°智慧四轮转向，实现“大车好开”的灵活驾控体验；同级最高90%得房率与独有的“超级右排头等舱”，让全家出行从容惬意；同时，大厂安全更为全家带来顶级守护，真正实现“自己爱开、全家好坐”。依托...\n",
+      "source_name": "智己汽车",
+      "source_type_guess": "official_website",
+      "source_tier_guess": "tier_1_official",
+      "source_resolution_reason": "domain matched official_domains; news page",
+      "domain": "immotors.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-01-22T00:00:00+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.384089",
+      "raw_rank": 10,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 交付 销量 战报 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "delivery_start",
+        "sales_milestone",
+        "order_milestone"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        10
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 权益 价格 限时 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "benefit_adjustment",
+        "official_price_change"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "scout",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "智己汽车-智能时代出行的变革者-IM智己汽车官网",
+      "url": "https://www.immotors.com/website/news_detail/227",
+      "canonical_url": "https://www.immotors.com/website/news_detail/227",
+      "snippet": "32.28万元起！上汽旗舰大六座·智己LS9震撼上市 全系皆Ultra，30万级最强旗舰爆品来了！\n2025年11月13日\n32.28万元起！上汽旗舰大六座·智己LS9震撼上市\n全系皆Ultra，30万级最强旗舰爆品来了！\n11月12日，“上汽旗舰大六座”智己LS9震撼上市。作为凝聚上汽70年造车底蕴和前沿技术的集大成者，智己LS9搭载跨代际领先的灵蜥数字底盘3.0、恒星超级增程，更带来智能时代最强的感知能力和新奢华标杆座舱。同时，全系皆Ultra，以前所未有的价值感和上市礼遇，彻底颠覆用户对30万级大六座SUV的所有想象，宣告“30万级最强旗舰爆品”诞生！\n 每一面，皆旗舰！彻底重塑大六座SUV体验\n全系皆Ultra，一锤定音30万级最强旗舰爆品\n智己LS9全系皆Ultra，将恒星超级增程、灵蜥数字底盘3....\n更震撼的是，智己LS9上市权益诚意爆棚，将奢华B&O音响系统、二排右侧4D机械按摩、一体式超广域智慧探射灯、豪华智能电动踏板等旗舰豪华配置，统统限时免费升级！新车震撼发布两个超级增程版本：智己LS9 52 Ultra版上市权益价32.28万元，入门即巅峰，以30万出头的价格，享受时代最旗舰的满配大六座；智己LS9 66 Ultra版，更搭载66度宁德时代超级骁遥MAX电池，将续航和性能推向极致，上市权益价35.28万元，一锤定音30万级最强旗舰爆品。\n上汽旗舰大六座智己LS9，以最顶格的配置和一步到位的诚意，回应了用户对时代旗舰的所有期待。新车现已到店，不妨亲身体验，一定会感受到颠覆想象的驾控魅力。同时，智己LS9已全面开启大定，即刻登陆“IM智己”APP及小程序下定及锁单，尽情享受这个时代的旗舰智能体验！\n",
+      "source_name": "智己汽车",
+      "source_type_guess": "official_website",
+      "source_tier_guess": "tier_1_official",
+      "source_resolution_reason": "domain matched official_domains; news page",
+      "domain": "immotors.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2025-11-13T00:00:00+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.384451",
+      "raw_rank": 10,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 权益 价格 限时 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "benefit_adjustment",
+        "official_price_change"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        10
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 OTA 技术 发布 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "technology_release",
+        "config_release",
+        "launch_event"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "智己OTA升级真相:老车主痛点终结，新车主玩出花_行车记录仪_什么值得买",
+      "url": "https://post.m.smzdm.com/p/a3mnn0g5/",
+      "canonical_url": "https://post.m.smzdm.com/p/a3mnn0g5/",
+      "snippet": "智己OTA升级真相：老车主痛点终结，新车主玩出花\n06-18 08:22\n01 OTA覆盖范围与推送节奏\n截至2026年6月，智己汽车已多次实施大规模OTA升级，覆盖从2023款到2025款的多款车型。根据官方披露，1月启动的OTA为全系推送，但具体功能因芯片平台不同而有所区分。搭载高通8155芯片的23款LS6、LS7及部分L7车型，主要获得四向行车记录仪、语音识别优化等基础体验增强；而采用8295芯片的新一代LS6、L6及LS9则解锁AI Agent点餐、手车互联、无麦K歌等高阶生态功能。值得注意的是，辅助驾驶方面的重大升级——如Momenta R6端到端大模型——虽已在LS9上率先落地，但其他车型因“节前审核压力大”，满血版推送被安排在春节后，体现出品牌对安全验证的谨慎态度。OTA更新过程通常耗时1-2小时，建议车辆保持静止状态以确保系统稳定性。\n02 智能座舱功能对比\n智能座舱的差异化策略清晰体现于不同硬件平台的功能分配。老车型聚焦实用性补强，如四向行车记录仪解决“取证死角”痛点；新车型则强调生态开放...\n此外，IMOS 4.1.0系统在8295平台上线后，锁车音效可DIY上传家人语音或节日问候，被描述为“赋予冰冷机械有趣的灵魂”。智己IM AD系统在2026年初的OTA中引入Momenta端到端直觉大模型，实现从“规则驱动”向“数据驱动”的底层重构。值得注意的是，所有具备激光雷达硬件的车型（包括23-24款L7）均被纳入R6模型升级计划，体现“不让老用户掉队”的策略。但因安全审核流程，非旗舰车型的满血版推送延至年后，被评价为“好饭不怕晚”的负责任做法。\n04 OTA价值评判维度\n判断智己OTA是否值得期待，关键在于三项核心指标：车机交互是否有实质优化、辅助驾驶是否更稳定好用、日常高频场景是否被真正照顾。",
+      "source_name": "什么值得买社区频道",
+      "source_type_guess": "portal_or_aggregator",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "domain matched portal_or_aggregator_domains; original source unknown",
+      "domain": "post.m.smzdm.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "",
+      "time_window_status": "unknown_publish_time",
+      "is_out_of_window": null,
+      "retrieved_at": "2026-07-31T09:02:52.384787",
+      "raw_rank": 10,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 OTA 技术 发布 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "technology_release",
+        "config_release",
+        "launch_event"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        10
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 门店 试驾 活动 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "channel_campaign",
+        "user_event"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media",
+        "tier_4_social_signal",
+        "tier_5_unverified"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "智己体验中心迎来LS9 Hyper品鉴热潮_名字无法显示",
+      "url": "http://m.toutiao.com/group/7665738759506149924/",
+      "canonical_url": "http://m.toutiao.com/group/7665738759506149924/",
+      "snippet": "全国智己体验中心迎来LS9 Hyper品鉴热潮!预约持续升温，展厅人气火爆\n近期，随着上汽集团里程碑车型智己LS9 Hyper正式上市，全国各大智己体验中心同步迎来了一波品鉴热潮。自上市信息官宣以来，线下到店客流环比大幅攀升，不少门店的预约试驾名额提前数天就被约满，周末时段展厅内更是人头攒动，看车、体验、咨询的用户络绎不绝，成为近期新能源汽车市场中热度突出的现象级事件。\n不少用户专程跨城到店，只为第一时间体验这台“新国标后首款标配全线控转向的旗舰SUV”。在上海、北京、广州等核心城市的体验中心，经常能看到全家结伴到店的场景:长辈们体验二排4D机械按摩座椅与智控地暖的舒适感，年轻用户则专注试驾环节，亲身感受20ms响应的线控转向带来的“车随心动”体验，不少试驾完的用户都对这台5米多长的大车能实现4.77米的A0级小车级转弯半径感到惊喜。\n目前智己LS9 Hyper的线下品鉴预约仍在持续升温，全国体验中心都已增开了周末专属试驾场次，不少门店还为到店用户准备了专属的技术讲解体验环节。越来越多消费者开始形成共识:买下一代豪华新能源车，认准“新三大件”的硬核技术底座，才能真正选到不被时代淘汰的跨代际旗舰产品。\n",
+      "source_name": "今日头条",
+      "source_type_guess": "portal_or_aggregator",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "domain matched portal_or_aggregator_domains; original source unknown",
+      "domain": "m.toutiao.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-23T23:01:46+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.385041",
+      "raw_rank": 10,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 门店 试驾 活动 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "channel_campaign",
+        "user_event"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media",
+        "tier_4_social_signal",
+        "tier_5_unverified"
+      ],
+      "raw_ranks": [
+        10
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 发布会 技术 品牌 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "launch_event",
+        "technology_release",
+        "brand_campaign"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "智己ls9上市发布会_手机新浪网",
+      "url": "https://auto.sina.cn/2026-07-18/detail-iniierwk1511111.d.html",
+      "canonical_url": "https://auto.sina.cn/2026-07-18/detail-iniierwk1511111.d.html",
+      "snippet": "智己ls9上市发布会\n汽车好物志\n07.18 08:32\n2026年7月16日，上汽集团第一亿台里程碑车型——智己LS9 Hyper正式上市，全系标配线控转向，以31.98万元起售价重新定义旗舰SUV标准，标志着中国汽车从机械转向迈入全线控数字底盘时代。\n一、发布会概况：上汽一亿台里程碑之作\n智己LS9上市发布会于2026年7月16日19:00举行，全网316家媒体同步直播，官方宣布两款车型上市权益价分别为31.98万元（LS9 52 Ultra线控版）和34.98万元（LS9 Hyper）。\n该车是上汽集团全球第一亿台整车交付的巅峰之作，凝聚上汽70余年造车底蕴，Momenta CEO曹旭东成为001号车主，体现技术圈层对产品的高度认可。\n上市25分钟内大定突破5000台，市场反响热烈，被视为智己品牌向上突破的关键一战。\n 二、新三大件技术体系：重构旗舰标准\n智己将本次产品的核心竞争力归纳为“下一代汽车新三大件”，以此回应新能源与智能化时代对汽车底层能力的全新要求。\n1. 下一代底盘：全线控数字底盘\n全系标配线控转向，取消方向盘与转向机之间的机械连接，通过数字信号控制，转向响应速度仅20ms，比传统机械转向快4倍。\n线控转向支持4.5:1至14.2:1可变转向比，提供三档转向角度预设（470°、240°、180°），兼顾不同驾驶习惯与从传统转向平滑过渡的需求。\n搭配同级最大的双向24°智慧四轮转向系统，实现4.77米最小转弯半径，低速半圈打满即可掉头，比大众Polo还灵活。\n配备超大行程150mm双腔闭式空气悬架、智能电控阻尼减振器及MKC2线控制动系统，组成“灵蜥数字底盘3.0”，支持单轮制动，兼顾操控稳定性与舒适性。\n底盘采用航空级三重安全冗余设计，即使在时速120...\n",
+      "source_name": "手机新浪汽车",
+      "source_type_guess": "unknown",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "no domain match; default unknown",
+      "domain": "auto.sina.cn",
+      "claim_source_hint": "maybe_official",
+      "claim_source_hint_reason": "keyword heuristic found official keywords in text",
+      "publish_time": "2026-07-18T08:32:49+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.385378",
+      "raw_rank": 10,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 发布会 技术 品牌 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "launch_event",
+        "technology_release",
+        "brand_campaign"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        10
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 联名 合作 代言 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "partnership"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "“跨时代”回归!曝刘翔将代言智己汽车，这波情怀杀稳了?_智己LS8论坛",
+      "url": "https://club.m.autohome.com.cn/bbs/thread/5ad1378480d8f3b9/114748938-1.html",
+      "canonical_url": "https://club.m.autohome.com.cn/bbs/thread/5ad1378480d8f3b9/114748938-1.html",
+      "snippet": "“跨时代”回归！曝刘翔将代言智己汽车，这波情怀杀稳了？\n车轮不歇\n1184浏览 · 2026-04-01 09:56 ·发布于北京\n4月1日，虽然今天是愚人节，但智己汽车这波预热看起来相当认真。智己官方发布了一张代言人剪影海报，配文：“跨时代，成就最好的自己。”\n虽然还没点名道姓，但那标志性的双臂展开、飞人跨栏后的庆祝姿势，网友们一眼就认出来了：这就是咱们的田径传奇——刘翔！\n 史上“最好猜”的代言人？\n名场面复刻： 智己CMO李薇萌亲自下场剧透，称这个剪影是个“世界级名场面”。2004年雅典夺冠、2006年打破世界纪录，刘翔确实是无数中国人心中的“跨时代”记忆。\n品牌寓意： 智己选择刘翔，显然是想致敬他在110米栏项目上的历史性突破，同时也寓意品牌希望在2026年这个智能驾驶的大年，实现“跨越式”的成长。\n 代言背后的“速度与激情”\n智己最近动作频频，尤其是即将推出的LS8备受关注。\n双动力阵营： 据悉LS8将提供纯电和增程两种动力。其中增程版搭载1.5T发动机，纯电续航最高能跑335公里，主打的就是一个“长跑冠军”。\n智驾进阶： 配合近期北京启动的L2-L4全级别智驾保险，智己也想通过刘翔的“快”和“稳”，来强调自家智驾系统的可靠性。\n行业观察：体育明星代言重回巅峰？\n最近车企找代言人的思路在变。\n避开流量坑： 相比容易塌房的娱乐明星，像刘翔、苏炳添（代言小米）这种国民度极高的体育健将，形象更正面、更有拼搏感。\n致敬经典： 舒淇代言SU7主打“优雅乘坐”，刘翔代言智己则更像是在讲“中国速度”的传承。在10元油价时代和芯片成本猛涨5000块的背景下，车企更需要这种有韧性的品牌背书。\n",
+      "source_name": "汽车之家",
+      "source_type_guess": "vertical_auto_media",
+      "source_tier_guess": "tier_3_industry_media",
+      "source_resolution_reason": "domain matched vertical_auto_media_domains",
+      "domain": "club.m.autohome.com.cn",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-04-01T09:56:00+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.385681",
+      "raw_rank": 10,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 联名 合作 代言 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "partnership"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        10
+      ],
+      "dedupe_hit_count": 1
+    },
+    {
+      "query": "智己 高管 直播 最近1天",
+      "target_id": "im_l6",
+      "mode": "model_watch",
+      "event_type_ids": [
+        "executive_voice"
+      ],
+      "source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "query_role": "specific_discovery",
+      "query_window_role": "discovery",
+      "query_window_hours": null,
+      "query_window_days": 7,
+      "stage": "refine",
+      "is_official_direct": false,
+      "official_domain_target": null,
+      "official_account_target": null,
+      "title": "线控转向成为行业焦点，智己高管讲清技术先发逻辑_车上大爷爷",
+      "url": "http://m.toutiao.com/group/7664560281435095602/",
+      "canonical_url": "http://m.toutiao.com/group/7664560281435095602/",
+      "snippet": "当2026年夏日的聚光灯打在智己LS9 Hyper那极具张力的流线车身上时，中国高端新能源汽车市场的一场权力更迭正在底盘深处悄然发生。34.98万元的权益售价背后，并非简单的配置堆砌，而是一场关于线控技术与旗舰门槛的深层对话。在这场发布会的访谈环节，智己汽车品牌与用户高级总监焦樵的一席话，不仅揭开了这款大六座旗舰SUV的技术底牌，更在无形中回应了整个行业对于未来座驾定义的争论。不久前，理想汽车在发布新车型时曾公开抛出一个观点:没有线控转向与后轮转向的旗舰不配被称为旗舰。这种“门槛论”一度在市场激起千层浪，而焦樵对此表现得颇为从容。他坦言感谢友商能将这一认知推向台前，因为这确实点出了高端市场的核心竞争力，但他紧接着强调了一个关键事实:当众人才开始卷入这条赛道时，智己早已在这条轨道上深耕多年。\n 回溯至2022年4月，智己首款车型L7面世时便全系标配了后轮转向系统，这在当时的国产车阵营中无疑是破天荒的举动。那时候，绝大多数品牌仍将此类配置视为顶配专属或昂贵的选装项，甚至根本没有进入研发视野。从L7到后来的LS6、LS8，再到今日的LS9 Hyper，智己坚持在每一款车型上标配四轮转向技术。在焦樵看来，后轮转向本质上就是线控转向的技术雏形，因为后轮与方向盘之间并无物理连接，完全依靠电信号传输指令。这种时间沉淀出的优势，正是品牌立足高端市场的底气所在。\n如果说市场布局体现了先行者的直觉，那么对行业规则的深度参与则彰显了其作为大厂新势力的底蕴。2...\n焦樵直言不讳地指出，LS9 Hyper是国内首款完全符合新国标全项要求的量产车型。然而，在硬件参数已经卷到极致的今天，焦樵认为真正决定用户体验高下的分水岭在于调校。焦樵在群访最后表达了对未来的期许:他希望与更多同行合作，共同推动中国底盘技术的进步。这种开放的姿态，不仅是对自身技术的自信，更是对中国汽车整体竞争力的自豪。",
+      "source_name": "今日头条",
+      "source_type_guess": "portal_or_aggregator",
+      "source_tier_guess": "tier_5_unverified",
+      "source_resolution_reason": "domain matched portal_or_aggregator_domains; original source unknown",
+      "domain": "m.toutiao.com",
+      "claim_source_hint": null,
+      "claim_source_hint_reason": null,
+      "publish_time": "2026-07-20T18:49:24+08:00",
+      "time_window_status": "out_of_window",
+      "is_out_of_window": true,
+      "retrieved_at": "2026-07-31T09:02:52.386023",
+      "raw_rank": 10,
+      "routing_bucket": null,
+      "candidate_gate_status": null,
+      "candidate_gate_reasons": [],
+      "eligible_for_event_cluster": false,
+      "matched_queries": [
+        "智己 高管 直播 最近1天"
+      ],
+      "matched_event_type_ids": [
+        "executive_voice"
+      ],
+      "matched_source_tier_focus": [
+        "tier_1_official",
+        "tier_3_industry_media"
+      ],
+      "raw_ranks": [
+        10
+      ],
+      "dedupe_hit_count": 1
+    }
+  ],
+  "total": 75,
+  "run_mode": "live",
+  "is_mock": false,
+  "dedupe": {
+    "raw_item_count": 80,
+    "normalized_item_count": 75
+  }
+}
