@@ -54,12 +54,12 @@ dataset/ + shared/          Shared Semantic Foundation（数据与业务语义�
 |------|------|-----------|------|
 | OCR | `capabilities/ocr/` | `capabilities.ocr` | 图片 → 文字/markdown/表格（火山 general_ocr + document_parse），缓存 + QPS + retry |
 | Notify | `capabilities/notify/` | `capabilities.notify` | 文本/交互卡片 → 渠道推送（飞书群 Webhook），重试 + dry-run + mock |
+| Search | `capabilities/search/` | `capabilities.search` | 网页搜索原语（豆包 Global Search），重试 + 本地缓存 + multi-query + mock |
 
 ### Candidate（已存在但散落，待按需收敛）
 
 | 候选能力 | 当前真实落点 | 收敛说明 |
 |----------|-------------|----------|
-| Search | `.opencode/skills/doubao-search/`（检索原语）+ `auto_launch/src/volc_search_client.py` | 原语已独立；业务层 intent/query_profile 留在 auto_launch |
 | Browser / Capture | Playwright MCP（根 `opencode.jsonc`）+ `dataset/incoming/` + `source_capture/` | service 级接线能力，尚未包化 |
 | Doc Parse | 部分在 `capabilities/ocr` document_parse；MIIT `eidc_doc_extract.py` 为领域内实现 | 通用文档→结构化契约待抽象 |
 | Render | `.opencode/skills/official_document_render/` + `mashang_workspace/templates/` | 正式文档/报告渲染能力待收敛 |

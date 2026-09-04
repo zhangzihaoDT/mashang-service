@@ -121,6 +121,9 @@ outputs/smoke/
 # OCR base capability: runtime cache (content-addressed, regenerable; historical evidence remains tracked)
 outputs/ocr/
 
+# Search base capability: local cache (regenerable, content-addressed)
+outputs/search/
+
 auto_launch/outputs/runs/
 
 # auto_launch migration backup
