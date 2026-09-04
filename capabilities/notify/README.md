@@ -58,14 +58,15 @@
 
 | 消费方 | 用途 | 状态 |
 |--------|------|------|
-| `mashang_workspace/runtime_scripts/monthly_sales_order_type_to_feishu.py` | 月度销量推送 | 迁移目标（阶段 B） |
-| `mashang_workspace/runtime_scripts/daily_dc_inventory_change.py` | DC 库存变动推送 | 迁移目标（阶段 B） |
-| `mashang_workspace/utility_scripts/skills_order_observation_daily.py` | 每日观察推送（webhook 段；Bitable 段不动） | 迁移目标（阶段 B） |
-| `mashang_workspace/research_scripts/l6_m2_presale_metrics_to_feishu.py` | 预售指标推送 | 迁移目标（阶段 B） |
-| `mashang_workspace/research_scripts/l6_m2_launch_lock_metrics_to_feishu.py` | 上市锁单指标推送 | 迁移目标（阶段 B） |
-| `auto_launch/src/feishu_sender.py` | 竞品营销日报推送 | 迁移目标（阶段 B） |
+| `mashang_workspace/runtime_scripts/monthly_sales_order_type_to_feishu.py` | 月度销量推送 | ✅ 已迁移 |
+| `mashang_workspace/runtime_scripts/daily_dc_inventory_change.py` | DC 库存变动推送 | ✅ 已迁移 |
+| `mashang_workspace/utility_scripts/skills_order_observation_daily.py` | 每日观察推送（webhook 段；Bitable 段不动） | ✅ 已迁移 |
+| `mashang_workspace/research_scripts/l6_m2_presale_metrics_to_feishu.py` | 预售指标推送 | ✅ 已迁移 |
+| `mashang_workspace/research_scripts/l6_m2_launch_lock_metrics_to_feishu.py` | 上市锁单指标推送 | ✅ 已迁移 |
+| `auto_launch/src/feishu_sender.py` | 竞品营销日报推送 | ✅ 已迁移（薄封装） |
 
 ## 历史沿革
 
 - 收敛前：5+ 个 workspace/feature 脚本各自内嵌 `build_feishu_card` + `send_to_feishu`（requests），`auto_launch/src/feishu_sender.py` 为其一（httpx）。
-- 2026-09 按 Base Capabilities 规划新增 `capabilities/notify`（传输 + 通用信封 + mock），消费方迁移按阶段 B 逐脚本进行。
+- 2026-09 按 Base Capabilities 规划新增 `capabilities/notify`（传输 + 通用信封 + mock）。
+- 阶段 B 完成：6 个消费方（4 workspace 脚本 + 2 l6_m2 + auto_launch）全部收敛，本地 POST/重试逻辑移除。
