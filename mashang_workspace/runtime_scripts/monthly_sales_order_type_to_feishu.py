@@ -14,7 +14,6 @@
 import sys
 import json
 import argparse
-import time
 from pathlib import Path
 from datetime import datetime
 
@@ -29,8 +28,8 @@ load_dotenv(REPO_ROOT / ".env")
 
 import os
 import pandas as pd
-import requests
 from utils.result_contract import build_success_contract, save_contract_json, print_contract_summary
+from capabilities.notify.notify_service import notify
 
 ORDER_PARQUET = REPO_ROOT / "dataset" / "order_data.parquet"
 ORDER_GROUPS = ["用户车", "试驾车", "其他"]
@@ -159,27 +158,13 @@ def build_feishu_card(m: dict) -> dict:
 
 
 def send_to_feishu(webhook_url: str, card: dict) -> bool:
-    for attempt in range(3):
-        try:
-            resp = requests.post(webhook_url, json=card, timeout=10)
-            resp.raise_for_status()
-            result = resp.json()
-            code = result.get("StatusCode") or result.get("code")
-            if code == 0:
-                print("✅ 飞书消息发送成功")
-                return True
-            elif code == 11232:
-                time.sleep(2 * (attempt + 1))
-                continue
-            else:
-                print(f"❌ 飞书消息发送异常: {result}")
-                return False
-        except Exception as e:
-            print(f"❌ 发送飞书消息失败: {e}")
-            if attempt < 2:
-                time.sleep(2)
-    print("❌ 重试次数耗尽")
-    return False
+    """发送飞书交互卡片 — 传输收敛至 capabilities.notify（重试/频率限制/错误语义由能力统一处理）。"""
+    result = notify(raw_payload=card, webhook_url=webhook_url, provider_name="feishu_webhook")
+    if result.ok:
+        print("✅ 飞书消息发送成功")
+    else:
+        print(f"❌ 飞书消息发送失败: {result.error}")
+    return result.ok
 
 
 def build_contract(m: dict, command: str, artifacts: dict | None = None) -> dict:
