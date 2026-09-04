@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 from datetime import datetime
@@ -36,8 +37,11 @@ from pathlib import Path
 import pandas as pd
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(_REPO_ROOT))
 _BUSINESS_DEF = _REPO_ROOT / "shared" / "schema" / "business_definition.json"
 _ORDER_DATA = _REPO_ROOT / "dataset" / "order_data.parquet"
+
+from capabilities.notify.notify_service import notify
 
 DEFAULT_SERIES = "DM2"
 COMPARE_KEYS = ["DM1", "CM2", "LS9", "LS8"]
@@ -574,31 +578,22 @@ def main() -> int:
         print(json.dumps(card, ensure_ascii=False, indent=2))
         return 0
 
-    import os
-
     from dotenv import load_dotenv
-    import requests
-
     load_dotenv()
+
     webhook_url = os.getenv("FS_WEBHOOK_URL")
     if not webhook_url:
         print("⚠️ 未设置 FS_WEBHOOK_URL，跳过发送")
         print(json.dumps(card, ensure_ascii=False, indent=2))
         return 0
 
-    try:
-        resp = requests.post(webhook_url, json=card, timeout=10)
-        resp.raise_for_status()
-        result = resp.json()
-        code = result.get("StatusCode", result.get("code"))
-        if code == 0:
-            print("✅ 飞书消息发送成功")
-            return 0
-        print(f"❌ 飞书返回异常: {result}")
-        return 1
-    except Exception as e:
-        print(f"❌ 发送飞书消息失败: {e}")
-        return 1
+    # 传输收敛至 capabilities.notify（重试/频率限制/错误语义由能力统一处理）
+    result = notify(raw_payload=card, webhook_url=webhook_url, provider_name="feishu_webhook")
+    if result.ok:
+        print("✅ 飞书消息发送成功")
+        return 0
+    print(f"❌ 飞书消息发送失败: {result.error}")
+    return 1
 
 
 if __name__ == "__main__":
