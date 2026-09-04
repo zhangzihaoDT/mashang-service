@@ -1,0 +1,136 @@
+{
+  "table": "store_info",
+  "description": "门店/经销商主数据。Tableau store_info_1 视图导出（每行 = 一个门店业务代码 Dealer Code；同一门店名 Dealer Name Fc 可对应多个业务代码）。该表是「门店 → 经销商集团(Bloc)」归属的唯一事实源，order_data 只有门店简称(store_name)，需经归一化映射关联到本表后才能获得经销商名/集团/类型/区域。",
+  "data_path_key": "门店信息",
+  "source_view": "https://tableau-hs.immotors.com/#/views/7/store_info_1",
+  "updater_script": "dataset/updater/store_info_to_csv.py",
+  "grain": {
+    "key": "Dealer Code",
+    "note": "每行 = 一个 Dealer Code（门店业务代码）。同 Dealer Name Fc 可映射 1~8 个 Dealer Code，对应同一门店的不同业务职能代码（销售/交付/体验/售后等）。",
+    "unique_rows": 1747,
+    "unique_store_names": 1073,
+    "unique_blocs": 213
+  },
+  "columns": [
+    {
+      "field": "Bloc Name",
+      "data_type": "string",
+      "semantic": "经销商集团/投资人名称",
+      "note": "门店投资主体或集团。门店级聚合上卷到经销商维度的关键字段（如 安庆天利和 / 上海易茂 / 杭州米家）。同 Dealer Name Fc 理论上同属一个 Bloc，但存在同名跨集团特例（33 家），关联时以 Dealer Name Fc 为准再校验 Bloc。",
+      "unique_count": 213,
+      "usage": "经销商归属、经销商 TopN、集团层聚合",
+      "aliases": ["经销商", "经销商集团", "经销商名", "bloc", "bloc_name"]
+    },
+    {
+      "field": "Dealer Name Fc",
+      "data_type": "string",
+      "semantic": "门店名（完整展示名）",
+      "note": "门店完整名称，如『安庆宜秀用户中心』。与 order_data.store_name（门店简称，如『合肥包河』）不是同名，需清洗归一化后匹配（去括号注释、去 车城店/换铺/迁址/用户中心 等后缀）。",
+      "unique_count": 1073,
+      "usage": "门店主数据行的唯一业务主体；store_name 关联目标",
+      "aliases": ["门店名", "门店", "store_name_master", "dealer_name"]
+    },
+    {
+      "field": "Dealer Code",
+      "data_type": "string",
+      "semantic": "门店业务代码（主键）",
+      "note": "形如 IMA236 / IMD236 / IMS236 / IMH404 等。前缀 IMA/IMD/IMS 以交付店为主、IMH 以体验店为主、IMP 以未分类为主，但前缀并不严格唯一决定业态，业态以 Dealer_type 列为准。",
+      "unique_count": 1747,
+      "usage": "表主键/去重键；跨系统门店代码",
+      "aliases": ["门店代码", "store_code"]
+    },
+    {
+      "field": "Dealer_type",
+      "data_type": "string",
+      "semantic": "门店业态类型",
+      "note": "枚举：交付店 / 体验店 / 售后服务店 / 未分类。另有聚合行 '全部' 与空值行需剔除。",
+      "enum_values": ["交付店", "体验店", "售后服务店", "未分类"],
+      "counts": {"交付店": 588, "体验店": 580, "售后服务店": 170, "未分类": 408},
+      "usage": "门店业态过滤、销售/交付/体验网络结构",
+      "aliases": ["业态", "店型", "store_type"]
+    },
+    {
+      "field": "City Code",
+      "data_type": "string",
+      "semantic": "城市行政区划代码",
+      "note": "如 340800=安庆市。对应 order_data 无直接字段，City Name 更常用。",
+      "usage": "城市代码维度"
+    },
+    {
+      "field": "City Name",
+      "data_type": "string",
+      "semantic": "门店所在城市（含市后缀）",
+      "note": "如『安庆市』。183 个城市。",
+      "unique_count": 183,
+      "usage": "城市维度；order store_city 关联目标（注意本表带『市』后缀，需清洗）",
+      "aliases": ["城市"]
+    },
+    {
+      "field": "Province Name",
+      "data_type": "string",
+      "semantic": "门店所在省份（含省后缀）",
+      "note": "如『安徽省』。31 个省份。",
+      "unique_count": 31,
+      "usage": "省份维度"
+    },
+    {
+      "field": "Region Name",
+      "data_type": "string",
+      "semantic": "大区（销售大区/渠道区）",
+      "note": "如『华中区』『东区-鲁豫』『北区-西北』。23 个大区值。",
+      "unique_count": 23,
+      "usage": "大区聚合/对比；与 order parent_region_name 语义不同需注意",
+      "aliases": ["大区", "region"]
+    },
+    {
+      "field": "Sd Tax No",
+      "data_type": "string",
+      "semantic": "纳税人识别号（税号）",
+      "note": "同一 Bloc 集团内多个 Dealer Code 共享同一税号。",
+      "usage": "集团合并口径辅助（同税号≈同法人主体）"
+    },
+    {
+      "field": "Store Create Status Desc",
+      "data_type": "string",
+      "semantic": "门店状态",
+      "note": "枚举：开业 / 暂停 / 在建 / 停业。另有聚合行 '全部'。在营门店统计应过滤 status=开业（或按口径含暂停）。",
+      "enum_values": ["开业", "暂停", "在建", "停业"],
+      "counts": {"开业": 976, "暂停": 564, "在建": 194, "停业": 12},
+      "usage": "门店是否在营判定",
+      "aliases": ["门店状态", "store_status"]
+    },
+    {
+      "field": "DATE(MIN(DATETRUNC('day', [store_create_time])))",
+      "data_type": "datetime",
+      "semantic": "门店开业时间（日粒度，Tableau 计算列名）",
+      "note": "非易读列名，读取时建议 rename 为 store_create_time / open_date。对应 order_data.store_create_date 的语义。",
+      "aliases": ["store_create_time", "open_date", "开业时间"]
+    },
+    {
+      "field": "日(store_stop_time)",
+      "data_type": "datetime",
+      "semantic": "门店停业时间（日粒度，Tableau 计算列名）",
+      "note": "空值表示未停业/在营。读取时建议 rename 为 store_stop_time / stop_date。",
+      "aliases": ["store_stop_time", "stop_date", "停业时间"]
+    },
+    {
+      "field": "门店数",
+      "data_type": "int",
+      "semantic": "门店计数（Tableau 聚合列，非业务原始字段）",
+      "note": "取值仅 1 或 1072（集团内门店行数聚合），非行级有效字段，业务分析应忽略。",
+      "usage": "忽略"
+    }
+  ],
+  "join_to_order": {
+    "from": "order_data.store_name（门店简称，如 合肥包河）",
+    "to": "store_info.Dealer Name Fc（门店完整名，如 安庆宜秀用户中心）",
+    "method": "归一化 + 子串匹配（去 括号注释/换铺/迁址/车城店/用户中心 等 token），命中后返回 Bloc Name / Dealer_type / Region Name / City Name",
+    "coverage_note": "约 92% 门店可自动命中；popup 快闪店、跨集团同名、作废/新址门店需人工补录",
+    "matched_metric": "CM3 试驾车 412 台中 386 台可归属到 Bloc（26 台为 popup/新址/未登记）"
+  },
+  "consumers": [
+    "mashang_workspace/utility_scripts/skills_store_lock_alert.py（Bloc 级锁单活性）",
+    "门店锁单/试驾车按经销商归属分析",
+    "dealer_unsold_inventory 系列库存口径的集团侧补充"
+  ]
+}

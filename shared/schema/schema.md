@@ -300,6 +300,36 @@
 
 **算子路径：** `shared/operators/dealer_unsold_inventory.py`
 
+### store_info.csv — 门店/经销商主数据（外部 original 目录，非 dataset/）
+
+> 字段级机器可读定义见 `shared/schema/store_info_schema.json`；读取统一走
+> `shared/loaders/store_info_loader.py`（含 store_name 简称 → 经销商归属解析）。
+
+| Column (原始列名)             | Data Type | 语义 |
+| :---------------------------- | :-------- | :--- |
+| Bloc Name                    | string    | **经销商集团/投资人名称**（如 上海易茂、青岛鸿发）——门店上卷到经销商维度的关键字段 |
+| Dealer Name Fc               | string    | **门店完整名**（如 合肥包河用户中心）；与 order_data.store_name（简称）需归一化匹配 |
+| Dealer Code                  | string    | **门店业务代码（主键）**，形如 IMA236/IMD236/IMS236/IMH404；同门店名可对应多个代码 |
+| Dealer_type                  | string    | 业态枚举：交付店/体验店/售后服务店/未分类 |
+| City Code / City Name        | string    | 门店所在城市（Code=行政区划码，Name 带『市』后缀） |
+| Province Name                | string    | 门店所在省份 |
+| Region Name                  | string    | 大区（渠道销售区，如 华中区/东区-鲁豫） |
+| Sd Tax No                    | string    | 税号（同 Bloc 集团共享） |
+| Store Create Status Desc     | string    | 门店状态：开业/暂停/在建/停业 |
+| store_create_time（原始列名为 Tableau 计算式）| datetime | 门店开业时间（读取时经 loader rename） |
+| store_stop_time（原始列名为 Tableau 计算式） | datetime | 门店停业时间（空=在营） |
+
+**规模**：1,747 行 / 1,073 门店名 / 213 经销商集团（Bloc）；Grain = Dealer Code。
+
+**关联口径（order_data → 经销商）**：
+
+- order_data 只有 `store_name` 门店简称；store_info `Dealer Name Fc` 是完整名。
+- 用 `store_info_loader.resolve_dealer_info(store_name)` 做归一化子串匹配，返回
+  `bloc_name / dealer_type / region_name / city_name / dealer_code`。
+- 覆盖约 92% 门店；popup 快闪店、跨集团同名、作废/新址门店可能不命中，需人工补录。
+
+**数据源**：`dataset/updater/store_info_to_csv.py`（Tableau store_info_1 视图 → external original）。
+
 ## 3. 微信群聊消息 (wechat_sync)
 
 由外部工具 `获取微信群聊记录` 定期同步生成，每个群聊一个独立 Parquet 文件。`dataset` 参数为群聊名称（即文件名不含 `.parquet` 的部分）。

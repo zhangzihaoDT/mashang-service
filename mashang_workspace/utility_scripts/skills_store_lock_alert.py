@@ -14,7 +14,7 @@ DEFAULT_EXCLUDE_STORES = [
     "上海张江展厅",
 ]
 
-import sys, argparse, json, re
+import sys, argparse, json
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -25,10 +25,10 @@ sys.path.insert(0, str(REPO_ROOT))
 _WS_ROOT = Path(__file__).resolve().parents[1]
 if str(_WS_ROOT) not in sys.path:
     sys.path.insert(0, str(_WS_ROOT))
-from utils.paths import resolve_data_path
+
+from shared.loaders.store_info_loader import resolve_dealer_info
 
 ORDER_PARQUET = REPO_ROOT / "dataset" / "order_data.parquet"
-STORE_INFO_CSV_PATH = resolve_data_path("门店信息")
 
 BUCKET_LABELS = [
     ("0~3d_active", "0~3 天（活跃）"),
@@ -97,7 +97,7 @@ def main():
     sdf = pd.DataFrame(store_list)
 
     def bucket(d):
-        if d is None:
+        if d is None or (isinstance(d, float) and d != d):  # None / NaN → 从未锁单
             return "never_locked"
         if d <= 3:
             return "0~3d_active"
@@ -141,33 +141,10 @@ def main():
         })
 
     # ── Bloc Name 聚合 ──
-    bloc_info = {}
-    if STORE_INFO_CSV_PATH.exists():
-        info = pd.read_csv(str(STORE_INFO_CSV_PATH))
-        def _clean(name):
-            n = re.sub(r'[（(].*[）)]', '', str(name)).strip()
-            return re.sub(r'\s+', '', n)
-        info["_clean"] = info["Dealer Name Fc"].apply(_clean)
-        for _, r in info.iterrows():
-            cn = r["_clean"]
-            bloc_info.setdefault(cn, []).append((r["Bloc Name"], r["Dealer_type"], r.get("Region Name", "")))
-
-    def _lookup_bloc(store_name):
-        if not bloc_info:
-            return None
-        sn = _clean(store_name)
-        for cn, rows in bloc_info.items():
-            if store_name in cn or sn in cn:
-                return rows[0][0]
-        cn2 = re.sub(r'车城店.*|分销店.*|换铺.*|迁址.*|换址.*', '', sn).strip()
-        if cn2 != sn:
-            for cn, rows in bloc_info.items():
-                if cn2 in cn:
-                    return rows[0][0]
-        # try reverse: remove 体验/用户中心 suffix
-        return None
-
-    sdf["bloc_name"] = sdf["store_name"].apply(_lookup_bloc)
+    # store_name 简称 → 经销商信息 由 shared.loaders.store_info_loader 统一解析
+    sdf["bloc_name"] = sdf["store_name"].apply(
+        lambda s: (resolve_dealer_info(s) or {}).get("bloc_name")
+    )
 
     # ── Bloc 级聚合：不只是看最近锁单，而是看门店活性分布 ──
     def _bloc_stats(group):

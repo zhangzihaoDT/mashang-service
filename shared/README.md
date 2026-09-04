@@ -22,7 +22,13 @@ shared/
     ├── business_definition.json   Vehicle/energy/seat mapping rules
     ├── metrics.json                Metric registry
     ├── schema.md                   Dataset field definitions
+    ├── store_info_schema.json      Store/dealer master field schema
     └── data_path.md                Data path configuration
+
+Loaders under `shared/loaders/` provide canonical access to shared data assets:
+- `model_positioning_loader.py`  Model positioning knowledge (yaml)
+- `tp_and_mix_ways_loader.py`     TP&MIX-ways insurance parquet tables
+- `store_info_loader.py`          Store/dealer master CSV + store_name → dealer resolution
 ```
 
 ## Principles
