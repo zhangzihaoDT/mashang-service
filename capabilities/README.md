@@ -2,20 +2,28 @@
 
 `capabilities/` 是 mashang-service 的 **Base Capabilities（基础能力）层**：一批**领域无关、跨模块可复用**的底层原语。
 
-它们与业务层的关系遵循目标架构：
+它们与业务层的关系遵循目标架构（命名冻结见根 README §1）：
 
 ```text
-dataset/ + shared/          Shared Semantic Foundation（数据与业务语义底座）
+dataset/ + shared/          Semantic Foundation（数据与业务语义底座）
         │
-        ├── capabilities/            Base Capabilities（领域无关原语：OCR / Search / Capture …）
-        └── mashang_workspace/       Business Capabilities（分析能力：research → runtime → Eval/Registry）
-                    │
-                    ▼
-        mashang_runtime_v2           orchestration（编排 + Result Contract）
-                    │
-        ┌───────────┼───────────┐
-        ▼           ▼           ▼
-      MIIT      auto_launch    nev_apeal    Feature 应用（业务 Feature 子项目）
+        ├─────────────────────────────┐
+        │                             │
+        ▼                             ▼
+capabilities/                 mashang_workspace/
+Base Capabilities             Daily Business Analytics Workspace
+OCR / Search / Notify         日常业务分析工具箱
+Browser / Parse / Render      research → runtime → eval
+        │                             │
+        └──────────────┬──────────────┘
+                       ▼
+              mashang_runtime_v2
+           Unified Research Runtime
+                       │
+          ┌────────────┼────────────┬────────────┬───────
+          ▼            ▼            ▼            ▼
+        MIIT       auto_launch    nev_apeal   Project 4 ...
+            Research Applications
 ```
 
 ## 什么是 Base Capability
@@ -24,11 +32,11 @@ dataset/ + shared/          Shared Semantic Foundation（数据与业务语义�
 
 - 接口是领域无关的原语（如 `image → text/markdown/tables`），而不是业务结论。
 - 不依赖 `dataset/` 的业务表结构，不隐含车系/城市/口径。
-- 可被多个上层（workspace scripts、runtime_v2、Feature 应用）通过同一份接口复用。
+- 可被多个上层（Daily Business Analytics workspace scripts、runtime_v2、Research Applications）通过同一份接口复用。
 - 自带真实 provider + mock、自描述契约与测试，可离线验证。
 
-业务 Feature 子项目（MIIT / auto_launch / nev_apeal）与 Business Capabilities（`mashang_workspace/`）
-是**消费者**；Base Capabilities 是**被消费方**。
+`mashang_workspace/`（日常业务分析）与 Research Applications（MIIT / auto_launch / nev_apeal）是**消费者**；
+Base Capabilities 是**被消费方**。
 
 ## Capability 规范（模板）
 
@@ -69,6 +77,6 @@ Candidate 不设迁移截止时间；**在出现真实复用需求时**按本 RE
 
 ## 边界声明（本轮约定）
 
-- **runtime_v2 编排边界**：`mashang_runtime_v2` 未来编排 = Base Capabilities + workspace Business Capabilities → 将 MIIT / auto_launch / nev_apeal 作为编排输出的 Feature 应用。本层只定义此边界，不在本轮改 runtime_v2 代码。
-- **Feature 应用现状**：MIIT / auto_launch / nev_apeal 仍是独立服务（各自 CLI / Makefile / 数据目录），未接入 runtime_v2 编排；后续按产品化路径演进。
-- **不要**在 capabilities/ 里放业务规则、业务脚本或领域解析逻辑——那属于 `mashang_workspace/` 或 Feature 模块。
+- **runtime_v2 编排边界**：`mashang_runtime_v2`（Unified Research Runtime）编排 = Base Capabilities + Daily Business Analytics（workspace 能力）→ 将 MIIT / auto_launch / nev_apeal 作为 **Research Applications** 长期驱动。本层只定义此边界，不在本轮改 runtime_v2 代码。
+- **Research Applications 现状**：MIIT / auto_launch / nev_apeal 仍是独立研究项目（各自 CLI / Makefile / state / 数据目录），未接入 runtime_v2 编排；后续按编排化路径演进。
+- **不要**在 capabilities/ 里放业务规则、业务脚本或领域解析逻辑——那属于 `mashang_workspace/` 或 Research Application 模块。

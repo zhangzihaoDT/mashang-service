@@ -56,7 +56,7 @@
 
 - 适用：MIIT 公告截图、来源页截图、票据/表格类图片 → 文本与表格。
 - 不适用（not for）：
-  - 车型字段/参数的结构化解析（业务层：Feature 模块或 workspace scripts）。
+  - 车型字段/参数的结构化解析（业务层：workspace 日常业务分析 scripts 或 Research Application）。
   - 视频、音频、大文件多页文档识别（document_parse 按单图接口接入，批处理由上层编排）。
   - 非 OCR 的图像理解/多模态问答。
 
