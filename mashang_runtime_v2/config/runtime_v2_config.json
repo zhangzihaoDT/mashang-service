@@ -44,5 +44,29 @@
     "total_leads": "总线索数",
     "vehicle_count": "用户车锁单",
     "avg_atp": "ATP均价"
+  },
+  "feature_jobs": {
+    "nev_apeal_production_golden": {
+      "module": "nev_apeal",
+      "label": "NEV-APEAL Production Golden Gate",
+      "cwd": "{repo_root}/nev_apeal",
+      "add_cwd_to_path": true,
+      "argv_template": ["{python}", "scratch/replay_golden_case.py", "--format", "json"],
+      "params": {},
+      "summary": "json",
+      "timeout_seconds": 300
+    },
+    "nev_apeal_research_state": {
+      "module": "nev_apeal",
+      "label": "NEV-APEAL Research Topic State",
+      "cwd": "{repo_root}/nev_apeal",
+      "add_cwd_to_path": true,
+      "argv_template": ["{python}", "cli.py", "research", "state", "--topic", "{topic}"],
+      "params": {
+        "topic": {"type": "pattern", "required": true, "pattern": "^[A-Za-z0-9_-]+$"}
+      },
+      "summary": "text",
+      "artifacts": ["research/runs/{topic}/state.yaml"]
+    }
   }
 }

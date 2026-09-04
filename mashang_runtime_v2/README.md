@@ -38,8 +38,20 @@ Result Contract → response_renderer → answer（支持多轮 session）
 | `config/runtime_v2_config.json` | 能力开关 / 脚本映射 / dispatch 规则 / 展示标签 |
 | `eval/` `tests/` | 单轮 + 多轮 eval 用例与 pytest |
 
-**Research Application 编排一侧**：尚未实现，为演进目标。neval 的 `nev_apeal` 是第一个成熟候选
-（已有 engine/state/contracts/gate/artifacts），作为优先 pilot。
+**Research Application 编排一侧**：PoC 已落地 —— `app/feature_job_adapter.py` 通过
+`config/feature_jobs` 声明式调用外部 Research Application 的 job（固定 argv 模板 + 白名单参数 +
+cwd/subprocess，无 shell；status/duration/artifact/摘要）。当前已接入 nev_apeal 两个 job：
+
+- `nev_apeal_production_golden`（Golden Gate，--format json → PASS/FAIL + 7 个验收数）
+- `nev_apeal_research_state`（`--job-param topic=<run>` → topic state YAML + state.yaml artifact）
+
+```bash
+make runtime-v2-feature-job-demo JOB=nev_apeal_production_golden
+make runtime-v2-feature-job-demo JOB=nev_apeal_research_state JOB_PARAMS="--job-param topic=topic_x"
+```
+
+nev_apeal 是第一个成熟 Research Application（已有 engine/state/contracts/gate/artifacts），
+作为编排 pilot；验证模式后 MIIT / auto_launch / project_4 等按同一 config 约定接入。
 
 ## 设计原则
 

@@ -23,7 +23,35 @@ from app.capability_dispatcher import dispatch, load_config
 from app.workspace_script_adapter import execute
 from app.result_contract_adapter import load as load_contract
 from app.response_renderer import render
+from app.feature_job_adapter import run_job
 from app.session_store import load as load_session, save as save_session, delete as delete_session, make_entry, cleanup as cleanup_sessions, sanitize
+
+
+def run_feature_job(job_id: str, params: dict | None = None, timeout: int | None = None) -> dict:
+    """运行一个 feature job（Research Application orchestration）。"""
+    return run_job(job_id, params=params, timeout=timeout)
+
+
+def _job_short(result: dict) -> str:
+    """将 feature job 结果渲染为简短文本。"""
+    jid = result.get("job_id")
+    st = result.get("status")
+    if st == "error":
+        return f"[job] {jid} error: {result.get('error')}"
+
+    lines = [f"[job] {jid}: {st} (returncode={result.get('returncode')}, {result.get('duration_s')}s)"]
+    sj = result.get("summary_json")
+    if isinstance(sj, dict):
+        name = sj.get("golden_case") or sj.get("status") or ""
+        verdict = sj.get("status", "")
+        if verdict:
+            lines[0] += f" ｜ {name} {verdict}"
+    out = (result.get("output") or "").strip().splitlines()
+    lines.extend(out[:6])
+    for a in result.get("artifacts", []):
+        marks = "✓" if a.get("exists") else "✗"
+        lines.append(f"  artifact {marks} {a.get('path')}")
+    return "\n".join(lines)
 
 
 def run_pipeline(user_text: str, session_id: str = "", debug: bool = False) -> dict:
@@ -140,7 +168,32 @@ def main():
     parser.add_argument("--reset-session", action="store_true", help="重置 session")
     parser.add_argument("--cleanup-sessions", action="store_true", help="清理过期 session")
     parser.add_argument("--clear-session", type=str, help="清空指定 session")
+    # ── Feature Job（Research Application orchestration）──
+    parser.add_argument("--job", type=str, default=None, help="运行 feature job（如 nev_apeal_production_golden）")
+    parser.add_argument("--job-param", action="append", default=[], metavar="K=V",
+                        help="feature job 参数，可重复（如 topic=expectation_calibration）")
+    parser.add_argument("--job-timeout", type=int, default=None, help="feature job 超时（秒）")
     args = parser.parse_args()
+
+    # ── Feature Job mode ──
+    if args.job:
+        params = {}
+        for kv in args.job_param:
+            if "=" in kv:
+                k, v = kv.split("=", 1)
+                params[k] = v
+            else:
+                params[kv] = ""
+        result = run_feature_job(args.job, params=params, timeout=args.job_timeout)
+        body = json.dumps(result, ensure_ascii=False, indent=2)
+        if args.output:
+            Path(args.output).write_text(body, encoding="utf-8")
+            print(f"[Output] {args.output}")
+        elif args.format == "json":
+            print(body)
+        else:
+            print(_job_short(result))
+        return 0 if result.get("status") == "ok" else 1
 
     # Session cleanup
     if args.cleanup_sessions:
@@ -178,4 +231,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

@@ -21,7 +21,7 @@ research-eval:
 ## 完整测试
 test:
 	$(PYTHON) -m pytest mashang_workspace/tests capabilities/ocr/tests capabilities/notify/tests capabilities/search/tests -q
-	$(PYTHON) -m pytest mashang_runtime_v2/tests/test_core_generic.py -q
+	$(PYTHON) -m pytest mashang_runtime_v2/tests/test_core_generic.py mashang_runtime_v2/tests/test_feature_job_adapter.py -q
 
 ## CI 门禁 = 复用 eval(CI-safe) + 数据无关测试
 ci:
@@ -38,7 +38,7 @@ ci:
 		capabilities/notify/tests \
 		capabilities/search/tests \
 		-q
-	$(PYTHON) -m pytest mashang_runtime_v2/tests/test_core_generic.py -q
+	$(PYTHON) -m pytest mashang_runtime_v2/tests/test_core_generic.py mashang_runtime_v2/tests/test_feature_job_adapter.py -q
 
 ## 数据字典
 data-dict:
@@ -192,6 +192,12 @@ runtime-v2-followup-demo:
 
 runtime-v2-eval:
 	$(PYTHON) mashang_runtime_v2/eval/run_runtime_v2_eval.py
+
+## Runtime V2 Feature Job demo（Research Application orchestration）
+## 用法: make runtime-v2-feature-job-demo JOB=nev_apeal_production_golden
+##       make runtime-v2-feature-job-demo JOB=nev_apeal_research_state JOB_PARAMS="--job-param topic=topic_x"
+runtime-v2-feature-job-demo:
+	$(PYTHON) mashang_runtime_v2/app/runtime_service.py --job $(or $(JOB),nev_apeal_production_golden) $(JOB_PARAMS)
 
 runtime-v2-clean-sessions:
 	$(PYTHON) mashang_runtime_v2/app/runtime_service.py --cleanup-sessions
