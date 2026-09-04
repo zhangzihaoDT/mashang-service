@@ -52,10 +52,10 @@
 
 | 消费方 | 用途 | 状态 |
 |--------|------|------|
-| `.opencode/skills/doubao-search/` | 豆包 Global Search 原语（skill 内置 dumb client） | 迁移目标（阶段 B1） |
-| `auto_launch/src/volc_search_client.py` | Auto Launch 搜索管线底层客户端 | 迁移目标（阶段 B2，兼容薄封装） |
+| `.opencode/skills/doubao-search/` | 豆包 Global Search 检索（skill 薄壳） | ✅ 已迁移 |
+| `auto_launch/src/volc_search_client.py` | Auto Launch 搜索管线客户端（兼容薄封装） | ✅ 已迁移 |
 
 ## 历史沿革
 
 - 收敛前：同一 Global Search 原语在两处重复实现——`doubao-search` skill `scripts/search.py` 与 `auto_launch/src/volc_search_client.py`。
-- 2026-09 按 Base Capabilities 规划新增 `capabilities/search`，两份实现收敛为能力 + 消费方薄封装。
+- 2026-09 按 Base Capabilities 规划新增 `capabilities/search`；两份实现收敛为能力 + 消费方薄封装（skill 薄壳保留历史命令/输出形状；auto_launch 保留对外 envelope，上层缓存与业务编排不动）。
