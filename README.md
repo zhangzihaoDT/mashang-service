@@ -907,10 +907,9 @@ workspace **消费** `dataset/incoming/` 中的文件，但**不作为 Playwrigh
 
 ---
 
-## source_capture / ocr
+## ocr
 
 ```text
-source_capture/      # 抓取/归档原图
 ocr/                 # （历史）→ 已迁移为 capabilities/ocr（Base Capability）
 ```
 
@@ -921,6 +920,8 @@ capabilities/ocr/    # Base Capability：截图 → 文字/markdown/表格（火
 ```
 
 详见 `capabilities/README.md` 与 `capabilities/ocr/README.md`。
+
+> `source_capture/`（一次性抓图/归档原图）已移除。浏览器下载统一写入 `dataset/incoming/`，原始截图不再落仓库。
 
 ---
 

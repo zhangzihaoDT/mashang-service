@@ -68,7 +68,7 @@ Base Capabilities 是**被消费方**。
 
 | 候选能力 | 当前真实落点 | 收敛说明 |
 |----------|-------------|----------|
-| Browser / Capture | Playwright MCP（根 `opencode.jsonc`）+ `dataset/incoming/` + `source_capture/` | service 级接线能力，尚未包化 |
+| Browser / Capture | Playwright MCP（根 `opencode.jsonc`）+ `dataset/incoming/` | service 级接线能力，尚未包化 |
 | Doc Parse | 部分在 `capabilities/ocr` document_parse；MIIT `eidc_doc_extract.py` 为领域内实现 | 通用文档→结构化契约待抽象 |
 | Render | `.opencode/skills/official_document_render/` + `mashang_workspace/templates/` | 正式文档/报告渲染能力待收敛 |
 | Feishu Bitable 写入 | `mashang_workspace/utility_scripts/skills_order_observation_daily.py`（tenant token + bitable REST） | Notify 之外的飞书 app 数据原语，另议 |
