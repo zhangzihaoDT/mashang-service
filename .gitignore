@@ -94,6 +94,8 @@ mashang_workspace/outputs/tables/unified_eval_result.json
 # Data dictionary — regenerated on every make data-dict, not committed
 mashang_workspace/outputs/tables/data_dictionary.csv
 
+# All tables outputs — runtime-generated, not committed
+mashang_workspace/outputs/tables/
 
 # Defensive: promptbuilders should not contain runtime outputs
 mashang_workspace/promptbuilders/outputs/
