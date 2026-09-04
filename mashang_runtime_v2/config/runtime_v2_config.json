@@ -2,8 +2,47 @@
   "enabled_capabilities": ["lock_by_model", "lock_city_distribution"],
   "default_output_dir": "mashang_workspace/outputs/tables",
   "script_timeout_seconds": 60,
-  "runtime_scripts": {
-    "lock_by_model": "mashang_workspace/runtime_scripts/lock_by_model.py",
-    "lock_city_distribution": "mashang_workspace/runtime_scripts/lock_city_distribution.py"
+  "capabilities": {
+    "lock_by_model": {
+      "script": "mashang_workspace/runtime_scripts/lock_by_model.py",
+      "label": "锁单车型结构分析",
+      "followup_suffix": "分车型",
+      "dispatch": {
+        "explicit": {
+          "metric": "lock_count",
+          "group_by": ["model", "series", "energy_type"],
+          "keywords": ["锁单", "分车型", "车型", "车系", "model", "series", "销量", "结构"],
+          "confidence": 0.9
+        },
+        "keyword_fallback": {
+          "keywords": ["分车型", "车型"],
+          "metric_allowed": ["", "lock_count"],
+          "confidence": 0.7
+        }
+      }
+    },
+    "lock_city_distribution": {
+      "script": "mashang_workspace/runtime_scripts/lock_city_distribution.py",
+      "label": "锁单城市分布分析",
+      "followup_suffix": "城市分布",
+      "dispatch": {
+        "explicit": {
+          "group_by": ["city"],
+          "keywords": ["城市", "分布", "city", "区域", "大区"],
+          "confidence": 0.85
+        },
+        "keyword_fallback": {
+          "keywords": ["城市分布", "分城市"],
+          "metric_allowed": ["", "lock_count"],
+          "confidence": 0.7
+        }
+      }
+    }
+  },
+  "metric_labels": {
+    "total_lock_count": "总锁单数",
+    "total_leads": "总线索数",
+    "vehicle_count": "用户车锁单",
+    "avg_atp": "ATP均价"
   }
 }

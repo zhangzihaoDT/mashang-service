@@ -19,7 +19,7 @@ for p in [str(_V2_ROOT), str(_PRJ_ROOT), str(_WS_ROOT)]:
         sys.path.insert(0, p)
 
 from app.context_manager import parse as parse_context
-from app.capability_dispatcher import dispatch
+from app.capability_dispatcher import dispatch, load_config
 from app.workspace_script_adapter import execute
 from app.result_contract_adapter import load as load_contract
 from app.response_renderer import render
@@ -77,8 +77,14 @@ def run_pipeline(user_text: str, session_id: str = "", debug: bool = False) -> d
     # 5. Load contract
     contract_data = load_contract(exec_result.get("contract"), exec_result.get("stdout", ""))
 
-    # 6. Render
-    answer = render(contract_data)
+    # 6. Render（展示配置来自 config：metric 标签 + 追问后缀，不在内核硬编码）
+    _config = load_config()
+    _cap_cfg = (_config.get("capabilities") or {}).get(dispatch_result.get("capability_id"), {})
+    answer = render(
+        contract_data,
+        metric_labels=_config.get("metric_labels", {}),
+        hint_suffix=_cap_cfg.get("followup_suffix", ""),
+    )
 
     result = {
         "user_text": user_text,

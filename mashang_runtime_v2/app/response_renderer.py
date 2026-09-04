@@ -4,11 +4,19 @@ Runtime V2 — Response Renderer
 
 将 Result Contract 渲染为简洁自然语言回答。
 只使用 contract 中已有字段，不编造数据。
+
+展示层配置（metric 中文标签、追问后缀）由调用方经参数注入（来自 config），
+本模块不硬编码任何业务文案。
 """
 
 
-def render(contract_data: dict) -> str:
-    """将 contract data 渲染为自然语言回答。"""
+def render(contract_data: dict, metric_labels=None, hint_suffix: str = "") -> str:
+    """将 contract data 渲染为自然语言回答。
+
+    metric_labels: {英文 metric key: 中文标签}，缺省为空表（按原 key 显示）。
+    hint_suffix:   追问提示的业务后缀（由 config 注入，如能力的分组维度名），缺省无后缀。
+    """
+    labels = metric_labels or {}
     status = contract_data.get("status", "error")
     quality = contract_data.get("contract_quality", "ok")
 
@@ -34,9 +42,7 @@ def render(contract_data: dict) -> str:
     if metrics:
         for k, v in metrics.items():
             if v is not None:
-                # Use Chinese label for common metrics
-                label = {"total_lock_count": "总锁单数", "total_leads": "总线索数",
-                         "vehicle_count": "用户车锁单", "avg_atp": "ATP均价"}.get(k, k)
+                label = labels.get(k, k)
                 lines.append(f"  {label}：{v}")
         lines.append("")
 
@@ -62,6 +68,9 @@ def render(contract_data: dict) -> str:
     if top:
         hints = [t.get("value", "") for t in top[:3] if t.get("value")]
         if hints:
-            lines.append(f"你可以继续追问“{'、'.join(hints)}的城市分布”。")
+            base = f"你可以继续追问“{'、'.join(hints)}”"
+            if hint_suffix:
+                base = base[:-1] + f"的{hint_suffix}”"
+            lines.append(base + "。")
 
     return "\n".join(lines).strip()

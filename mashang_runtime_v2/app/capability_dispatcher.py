@@ -2,7 +2,12 @@
 """
 Runtime V2 — Capability Dispatcher
 
-从 capability_registry.json 读取能力，根据 resolved_context 匹配能力。
+从 runtime_v2_config.json 读取能力（capabilities.<id>.dispatch 规则），
+根据 resolved_context 匹配能力。内核不含任何业务能力硬编码 —— 规则全部声明在 config：
+  - 第一轮：对每个 enabled 能力求值 explicit（metric / group_by / keywords 门）
+  - 第二轮：对每个 enabled 能力求值 keyword_fallback（raw_text 关键词 + metric_allowed）
+匹配顺序 = config 中 capabilities 的插入顺序；首中即返回。
+
 支持 follow-up 场景（继承 previous_context）。
 """
 
@@ -20,10 +25,14 @@ REGISTRY_PATH = _WS_ROOT / "registry" / "capability_registry.json"
 CONFIG_PATH = _V2_ROOT / "config" / "runtime_v2_config.json"
 
 
-def _load_config() -> dict:
+def load_config() -> dict:
     if CONFIG_PATH.exists():
         return json.loads(CONFIG_PATH.read_text())
-    return {"enabled_capabilities": ["lock_by_model", "lock_city_distribution"]}
+    return {}
+
+
+def _load_config() -> dict:
+    return load_config()
 
 
 def _load_registry() -> list:
@@ -32,59 +41,89 @@ def _load_registry() -> list:
     return []
 
 
-def dispatch(context: dict) -> dict:
-    """根据 resolved_context 匹配能力。"""
-    ctx = context.get("resolved_context", context)
-    metric = (ctx.get("metric") or "").lower()
-    group_by = (ctx.get("group_by") or "").lower()
-    user_text = context.get("raw_text", "")
-
-    config = _load_config()
-    enabled = config.get("enabled_capabilities", [])
-    registry = _load_registry()
-    rscripts = config.get("runtime_scripts", {})
-    # Only match by metric+group_by if user text has relevant keywords or metric was explicitly parsed
-    _relevant_keywords = {
-        "lock_by_model": ["锁单", "分车型", "车型", "车系", "model", "series", "销量", "结构"],
-        "lock_city_distribution": ["城市", "分布", "city", "区域", "大区"],
-    }
-
-    if "lock_by_model" in enabled:
-        if metric == "lock_count" and group_by in ("model", "series", "energy_type"):
-            if _has_keyword(user_text, _relevant_keywords["lock_by_model"]):
-                return _build("lock_by_model", rscripts, f"lock_count + {group_by} group", 0.9, registry)
-
-    if "lock_city_distribution" in enabled:
-        if group_by == "city":
-            if _has_keyword(user_text, _relevant_keywords["lock_city_distribution"]):
-                return _build("lock_city_distribution", rscripts,
-                              f"city distribution (metric={metric})", 0.85, registry)
-
-    # Text keyword fallback — only match clear intent keywords
-    if "lock_by_model" in enabled and ("分车型" in user_text or "车型" in user_text):
-        if not ctx.get("metric") or ctx.get("metric") in ("lock_count", ""):
-            return _build("lock_by_model", rscripts, "text keyword match", 0.7, registry)
-
-    if "lock_city_distribution" in enabled and ("城市分布" in user_text or "分城市" in user_text):
-        if not ctx.get("metric") or ctx.get("metric") in ("lock_count", ""):
-            return _build("lock_city_distribution", rscripts, "text keyword match", 0.7, registry)
-
-    return {"capability_id": None, "error": "no_capability_matched",
-            "message": "当前 Runtime V2 仅支持 lock_by_model 与 lock_city_distribution。"}
-
-
-def _has_keyword(text: str, keywords: list[str]) -> bool:
-    """检查文本是否包含任一关键词。"""
+def _has_any(text: str, keywords: list[str]) -> bool:
     t = text.lower()
     return any(k.lower() in t for k in keywords)
 
 
-def _build(cap_id: str, rscripts: dict, reason: str, confidence: float, registry: list) -> dict:
-    script_path = rscripts.get(cap_id, f"mashang_workspace/runtime_scripts/{cap_id}.py")
+def _metric_allowed(metric: str, allowed: list[str]) -> bool:
+    m = metric if metric else ""
+    return m in allowed
+
+
+def _match_explicit(ctx: dict, raw_text: str, rule: dict) -> bool:
+    metric = (ctx.get("metric") or "").lower()
+    group_by = (ctx.get("group_by") or "").lower()
+
+    want_metric = rule.get("metric")
+    if want_metric and metric != want_metric.lower():
+        return False
+
+    group_by_ok = rule.get("group_by") or []
+    if group_by_ok and group_by not in [g.lower() for g in group_by_ok]:
+        return False
+
+    keywords = rule.get("keywords") or []
+    if keywords and not _has_any(raw_text, keywords):
+        return False
+
+    return True
+
+
+def _match_keyword_fallback(ctx: dict, raw_text: str, rule: dict) -> bool:
+    keywords = rule.get("keywords") or []
+    if not keywords or not _has_any(raw_text, keywords):
+        return False
+
+    allowed = rule.get("metric_allowed")
+    if allowed is not None and not _metric_allowed((ctx.get("metric") or "").lower(), allowed):
+        return False
+
+    return True
+
+
+def dispatch(context: dict) -> dict:
+    """根据 resolved_context 匹配能力（config 声明式规则）。"""
+    ctx = context.get("resolved_context", context)
+    raw_text = context.get("raw_text", "")
+
+    config = load_config()
+    enabled = config.get("enabled_capabilities", [])
+    caps = config.get("capabilities", {})
+    registry = _load_registry()
+
+    # Pass 1: explicit metric/group_by/keywords rules, in config order
+    for cap_id in caps:
+        if cap_id not in enabled:
+            continue
+        rule = (caps[cap_id].get("dispatch") or {}).get("explicit")
+        if not rule:
+            continue
+        if _match_explicit(ctx, raw_text, rule):
+            return _build(cap_id, caps[cap_id], "explicit rule", rule.get("confidence", 0.5), registry)
+
+    # Pass 2: keyword fallback rules, in config order
+    for cap_id in caps:
+        if cap_id not in enabled:
+            continue
+        rule = (caps[cap_id].get("dispatch") or {}).get("keyword_fallback")
+        if not rule:
+            continue
+        if _match_keyword_fallback(ctx, raw_text, rule):
+            return _build(cap_id, caps[cap_id], "keyword fallback", rule.get("confidence", 0.5), registry)
+
+    labels = [caps[c].get("label", c) for c in caps if c in enabled]
+    listed = "、".join(labels) if labels else "无"
+    return {"capability_id": None, "error": "no_capability_matched",
+            "message": f"未匹配到已启用的能力：{listed}。"}
+
+
+def _build(cap_id: str, cap_cfg: dict, reason: str, confidence: float, registry: list) -> dict:
+    script = cap_cfg.get("script", f"mashang_workspace/runtime_scripts/{cap_id}.py")
     cap = _find_capability(registry, cap_id)
     return {
         "capability_id": cap_id,
-        "script": str(Path(_V2_ROOT.parent) / script_path),
+        "script": str(Path(_V2_ROOT.parent) / script),
         "reason": reason,
         "confidence": confidence,
         "capability": cap,

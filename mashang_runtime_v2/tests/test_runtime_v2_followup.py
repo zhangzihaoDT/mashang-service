@@ -115,11 +115,11 @@ def test_runtime_script_path_enforced():
     assert "invalid_script_tier" in r.get("error", "")
 
 
-def test_config_uses_runtime_scripts():
-    """config 中 lock_by_model 指向 runtime_scripts/。"""
+def test_config_scripts_in_runtime_scripts():
+    """config capabilities.<id>.script 指向 runtime_scripts/。"""
     cfg = json.loads((_V2_ROOT / "config" / "runtime_v2_config.json").read_text())
     for cap in ["lock_by_model", "lock_city_distribution"]:
-        path = cfg.get("runtime_scripts", {}).get(cap, "")
+        path = cfg.get("capabilities", {}).get(cap, {}).get("script", "")
         assert "runtime_scripts" in path, f"{cap} path not in runtime_scripts: {path}"
 
 

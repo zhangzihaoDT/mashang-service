@@ -128,3 +128,6 @@ auto_launch/outputs/runs/
 
 # auto_launch migration backup
 auto_launch/outputs_backup_*
+
+# Runtime V2 local session data (per-session, regenerable)
+mashang_runtime_v2/data/

@@ -21,6 +21,7 @@ research-eval:
 ## 完整测试
 test:
 	$(PYTHON) -m pytest mashang_workspace/tests capabilities/ocr/tests capabilities/notify/tests capabilities/search/tests -q
+	$(PYTHON) -m pytest mashang_runtime_v2/tests/test_core_generic.py -q
 
 ## CI 门禁 = 复用 eval(CI-safe) + 数据无关测试
 ci:
@@ -37,6 +38,7 @@ ci:
 		capabilities/notify/tests \
 		capabilities/search/tests \
 		-q
+	$(PYTHON) -m pytest mashang_runtime_v2/tests/test_core_generic.py -q
 
 ## 数据字典
 data-dict:
