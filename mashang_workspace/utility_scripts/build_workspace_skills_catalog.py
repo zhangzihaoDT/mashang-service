@@ -218,10 +218,10 @@ PROMPTBUILDER_CAPABILITIES = {
             "mashang_workspace/outputs/miit_new_car/promptbuilder_runs/",
             "mashang_workspace/outputs/miit_new_car/vehicle_publicity_detail/records/",
             "mashang_workspace/outputs/reports/",
-            "mashang_workspace/outputs/ocr/results/",
+            "outputs/ocr/",
         ],
         "depends_on": [
-            "ocr/（火山引擎 OCR service）",
+            "capabilities/ocr/（火山引擎 OCR base capability）",
             "miit_vehicle_publicity_image_parser.py（OCR → records）",
             "vehicle_compare.py（records → 6 信号报告）",
             "MIIT/data/eidc/（历史数据归档）",

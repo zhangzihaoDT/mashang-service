@@ -8,7 +8,7 @@ from unittest.mock import patch, MagicMock
 
 import pytest
 
-from ocr.schemas import (
+from capabilities.ocr.schemas import (
     OcrRequest,
     OcrResult,
     OcrBlock,
@@ -17,9 +17,9 @@ from ocr.schemas import (
     build_ocr_result_id,
     make_ocr_result_id,
 )
-from ocr.providers import get_provider
-from ocr.providers.mock_provider import MockOcrProvider
-from ocr.ocr_service import process_image, _check_cache, _enforce_qps, MAX_CONCURRENCY, MIN_INTERVAL_SECONDS
+from capabilities.ocr.providers import get_provider
+from capabilities.ocr.providers.mock_provider import MockOcrProvider
+from capabilities.ocr.ocr_service import process_image, _check_cache, _enforce_qps, MAX_CONCURRENCY, MIN_INTERVAL_SECONDS
 
 
 # ── Schema Tests ─────────────────────────────────────────────
@@ -167,7 +167,7 @@ class TestOutputPaths:
 class TestProviderFailure:
     def test_provider_failure_returns_failed_status(self, tmp_path):
         """Simulate a provider failure by using a non-existent provider."""
-        from ocr.providers import get_provider as gp
+        from capabilities.ocr.providers import get_provider as gp
         with pytest.raises(ValueError, match="Unknown provider"):
             gp("nonexistent")
 

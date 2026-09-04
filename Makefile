@@ -20,7 +20,7 @@ research-eval:
 
 ## 完整测试
 test:
-	$(PYTHON) -m pytest mashang_workspace/tests -q
+	$(PYTHON) -m pytest mashang_workspace/tests capabilities/ocr/tests -q
 
 ## CI 门禁 = 复用 eval(CI-safe) + 数据无关测试
 ci:
@@ -33,6 +33,7 @@ ci:
 		mashang_workspace/tests/eval/test_numeric_eval.py \
 		mashang_workspace/tests/eval/test_result_reference.py \
 		mashang_workspace/tests/eval/test_unified_eval.py \
+		capabilities/ocr/tests \
 		-q
 
 ## 数据字典

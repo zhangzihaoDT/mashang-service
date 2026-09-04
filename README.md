@@ -7,21 +7,22 @@
 当前项目主线是：
 
 ```text
-shared
+shared + dataset（共享底座）
   ↓
-mashang_workspace
+capabilities（基础能力）  +  mashang_workspace（业务分析能力）
   ↓
-mashang_runtime_v2
+mashang_runtime_v2（orchestration）
   ↓
-mashang_runtime（产品能力沉淀）
+Feature 应用（MIIT / auto_launch / nev_apeal）
 ```
 
 也就是说：
 
-- `shared/` 提供共享业务算子与业务定义；
+- `shared/` + `dataset/` 提供共享业务算子、业务定义与原始数据；
+- `capabilities/` 提供领域无关基础能力（OCR 等），与业务分析能力平级，供上层复用；
 - `mashang_workspace/` 是日常工作的主阵地，负责分析、脚本开发、文档沉淀、Result Contract、Eval 与 Capability Registry；
-- `mashang_runtime_v2/` 用于验证和产品化新的 Runtime 架构；
-- `mashang_runtime/` 承载已经稳定、高频、口径清晰的产品能力。
+- `mashang_runtime_v2/` 用于编排与验证新的 Runtime 架构；
+- MIIT / auto_launch / nev_apeal 是承载具体业务情报/研究的 Feature 应用。
 
 ---
 
@@ -418,36 +419,60 @@ ELOE = Σ P(最终开票 | 当前仍悬置)
 
 # 1. Architecture Overview
 
-当前项目采用四层架构：
+目标架构为五层：
+
+```text
+Shared Semantic Foundation（数据与业务语义底座）
+        │
+        ├── capabilities/             Base Capabilities（领域无关底层原语）
+        │                             OCR / Search / Browser-Capture / Doc Parse / Render / Notify
+        └── mashang_workspace/        Business Capabilities（能力孵化与治理，主工作区）
+                                            research → runtime → Eval / Registry
+                    │
+                    ▼
+              mashang_runtime_v2       orchestration
+                    │
+        ┌───────────┼───────────┐
+        ▼           ▼           ▼
+      MIIT      auto_launch    nev_apeal        Feature 应用（业务 Feature 子项目）
+```
 
 ```text
 mashang-service/
-├── shared/                 # 共享业务语义层
-│   ├── operators/
-│   └── schema/
+├── dataset/               # 共享原始数据（Shared Foundation）
+├── shared/                # 共享业务语义层：operators / schema / loaders
 │
-├── mashang_workspace/      # 能力孵化与治理层（主工作区）
+├── capabilities/          # Base Capabilities（领域无关基础能力）
+│   ├── README.md
+│   └── ocr/               # OCR 原语（火山 general_ocr + document_parse，缓存/QPS/retry）
+│
+├── mashang_workspace/     # Business Capabilities（主工作区）
 │   ├── runtime_scripts/
 │   ├── research_scripts/
 │   ├── utility_scripts/
-│   ├── legacy_scripts/
 │   ├── registry/
 │   ├── eval/
 │   ├── tests/
 │   ├── docs/
 │   └── utils/
 │
-├── mashang_runtime_v2/     # 新 Runtime 架构实验与产品化
+├── mashang_runtime_v2/    # 新 Runtime 架构（orchestration，消费 capabilities + workspace 能力）
+├── mashang_runtime/       # legacy frozen runtime（已冻结，canonical 迁至 shared/）
 │
-├── mashang_runtime/        # 产品能力层
+├── MIIT/                  # Feature：工信部拟公告/EIDC 车辆情报管线
+├── auto_launch/           # Feature：事实驱动竞品营销事件监控
+├── nev_apeal/             # Feature：NEV 用户体验研究
 │
-├── dataset/
+├── ocr/ 已迁移 → capabilities/ocr   （历史路径不再使用）
 ├── main.py
 ├── feishu_bot.py
 ├── Makefile
 ├── pyproject.toml
 └── README.md
 ```
+
+> 分层要点：`capabilities/`（基础能力）与 `mashang_workspace/`（业务分析能力）是两支平级的能力来源；
+> `mashang_runtime_v2` 负责编排并把 MIIT / auto_launch / nev_apeal 作为 Feature 应用输出（边界已定义，代码演进中）。
 
 ---
 
@@ -864,8 +889,16 @@ workspace **消费** `dataset/incoming/` 中的文件，但**不作为 Playwrigh
 
 ```text
 source_capture/      # 抓取/归档原图
-ocr/                 # 调火山 OCR / 其他 OCR provider
+ocr/                 # （历史）→ 已迁移为 capabilities/ocr（Base Capability）
 ```
+
+OCR 作为领域无关基础能力归位于：
+
+```text
+capabilities/ocr/    # Base Capability：截图 → 文字/markdown/表格（火山 OCR），缓存/QPS/retry
+```
+
+详见 `capabilities/README.md` 与 `capabilities/ocr/README.md`。
 
 ---
 

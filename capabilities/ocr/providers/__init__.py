@@ -1,5 +1,5 @@
 from typing import Optional
-from ocr.schemas import OcrResult, OcrRequest
+from capabilities.ocr.schemas import OcrResult, OcrRequest
 
 
 class BaseOcrProvider:
@@ -11,10 +11,10 @@ class BaseOcrProvider:
 
 def get_provider(name: str) -> BaseOcrProvider:
     if name == "volcengine":
-        from ocr.providers.volcengine_ocr_provider import VolcengineOcrProvider
+        from capabilities.ocr.providers.volcengine_ocr_provider import VolcengineOcrProvider
         return VolcengineOcrProvider()
     elif name == "mock":
-        from ocr.providers.mock_provider import MockOcrProvider
+        from capabilities.ocr.providers.mock_provider import MockOcrProvider
         return MockOcrProvider()
     else:
         raise ValueError(f"Unknown provider: {name}")

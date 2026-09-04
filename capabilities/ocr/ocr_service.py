@@ -2,9 +2,9 @@
 OCR Service — CLI interface for OCR processing with caching, QPS limiting, and output archiving.
 
 Usage:
-    python -m ocr.ocr_service --image <path> --provider volcengine --mode general_ocr
-    python -m ocr.ocr_service --image <path> --provider volcengine --mode document_parse
-    python -m ocr.ocr_service --image <path> --provider mock
+    python -m capabilities.ocr.ocr_service --image <path> --provider volcengine --mode general_ocr
+    python -m capabilities.ocr.ocr_service --image <path> --provider volcengine --mode document_parse
+    python -m capabilities.ocr.ocr_service --image <path> --provider mock
 """
 
 from __future__ import annotations
@@ -25,14 +25,14 @@ try:
 except ImportError:
     pass
 
-from ocr.schemas import (
+from capabilities.ocr.schemas import (
     OcrRequest,
     OcrResult,
     compute_image_sha256,
     build_ocr_result_id,
     make_ocr_result_id,
 )
-from ocr.providers import get_provider, BaseOcrProvider
+from capabilities.ocr.providers import get_provider, BaseOcrProvider
 
 
 # ── QPS Limiter ─────────────────────────────────────────────
@@ -59,12 +59,10 @@ def _enforce_qps():
 
 # ── Output Paths ─────────────────────────────────────────────
 
-DEFAULT_OUTPUT_ROOT = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-    "mashang_workspace",
-    "outputs",
-    "ocr",
+_REPO_ROOT = os.path.dirname(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 )
+DEFAULT_OUTPUT_ROOT = os.path.join(_REPO_ROOT, "outputs", "ocr")
 
 
 def _ensure_output_dirs(output_root: str, provider: str) -> dict[str, Path]:
@@ -150,6 +148,7 @@ def process_image(
 
     # QPS-limited + retry
     last_error: Optional[str] = None
+    result: Optional[OcrResult] = None
     for attempt in range(RETRY_MAX_ATTEMPTS):
         if attempt > 0:
             backoff = RETRY_BACKOFF_SECONDS[min(attempt - 1, len(RETRY_BACKOFF_SECONDS) - 1)]
@@ -157,10 +156,13 @@ def process_image(
 
         _enforce_qps()
 
-        result: OcrResult = provider.process(request, image_bytes)
+        result = provider.process(request, image_bytes)
         if result.status == "success":
             break
         last_error = result.error
+
+    # RETRY_MAX_ATTEMPTS >= 1, so the loop body always runs at least once.
+    assert result is not None
 
     # Fill metadata
     result.source_image_path = image_path

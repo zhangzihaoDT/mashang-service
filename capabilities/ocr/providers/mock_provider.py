@@ -1,5 +1,5 @@
-from ocr.schemas import OcrRequest, OcrResult, OcrBlock, OcrQuality
-from ocr.providers import BaseOcrProvider
+from capabilities.ocr.schemas import OcrRequest, OcrResult, OcrBlock, OcrQuality
+from capabilities.ocr.providers import BaseOcrProvider
 
 
 class MockOcrProvider(BaseOcrProvider):

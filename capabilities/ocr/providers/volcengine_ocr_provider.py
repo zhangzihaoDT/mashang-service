@@ -18,8 +18,8 @@ import base64
 import os
 from typing import Optional
 
-from ocr.schemas import OcrRequest, OcrResult, OcrBlock, OcrQuality
-from ocr.providers import BaseOcrProvider
+from capabilities.ocr.schemas import OcrRequest, OcrResult, OcrBlock, OcrQuality
+from capabilities.ocr.providers import BaseOcrProvider
 
 try:
     from volcengine.visual.VisualService import VisualService

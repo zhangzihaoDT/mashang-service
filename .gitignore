@@ -118,6 +118,9 @@ mashang_workspace/outputs/runtime/
 # Smoke test runtime outputs (regenerated on every run)
 outputs/smoke/
 
+# OCR base capability: runtime cache (content-addressed, regenerable; historical evidence remains tracked)
+outputs/ocr/
+
 auto_launch/outputs/runs/
 
 # auto_launch migration backup

@@ -25,6 +25,8 @@ mashang-service 是一个**汽车业务数据分析项目**，包含以下分支
 | **Runtime V2** | `mashang_runtimeV2/` | Runtime V2 / 产品化沉淀层；承接从 `mashang_workspace/` 验证稳定后的能力 |
 | **Workspace** | `mashang_workspace/` | AI-native 数据分析工作区（Scripts/Docs/Eval/Tests） |
 | **Shared** | `mashang_shared/` | 共享 operator/schema 层（非默认工作区） |
+| **Base Capabilities** | `capabilities/` | 领域无关基础能力层（OCR 等），与业务分析能力平级，供 workspace / runtimeV2 / Feature 复用 |
+| **Feature 应用** | `MIIT/` `auto_launch/` `nev_apeal/` | 具体业务情报/研究子项目（独立服务形态；runtimeV2 编排目标） |
 
 **共享底座**：
 - `dataset/` — 原始数据
@@ -53,6 +55,8 @@ mashang-service 是一个**汽车业务数据分析项目**，包含以下分支
 11. **能力产品化路径**：workspace 中验证稳定的能力，经过明确 V2 / packaging / productization 任务后，迁移到 `mashang_runtimeV2/`。不要绕过 workspace 直接在 runtimeV2 中开发探索性能力。
 12. **`mashang_shared/` 边界**：共享 operator/schema 层，不应随意修改。如修改需说明影响范围，并同步相关测试。
 13. **MCP 边界**：MCP 能力由根目录统一提供（`.opencode/` / `opencode.jsonc`），workspace 只消费能力。不得将本地 profile、cookies、API key、incoming 原始数据等提交进仓库。
+14. **`capabilities/` 边界**：Base Capabilities 是领域无关基础能力层。新基础能力先以 `capabilities/ocr/` 为样板归位并自描述（接口 + provider + mock + tests + 消费方记录）；不要在 capabilities/ 中写入业务规则或领域解析逻辑。OCR 已从历史根 `ocr/` 迁移至此（namespace `capabilities.ocr`）。
+15. **能力引用口径**：领域无关原语（OCR/检索/抓取/渲染/通知等）若未来复用于多个上层，优先沉淀到 `capabilities/`，而非内嵌在各 Feature 模块中复制实现。
 
 其余原则详见 `mashang_workspace/AGENTS.md`。
 
