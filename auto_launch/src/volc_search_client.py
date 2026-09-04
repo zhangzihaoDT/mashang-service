@@ -1,28 +1,31 @@
-"""Layer: Search Pipeline — Volc Search API 客户端"""
-"""
-volc_search_client.py — Volc Search API 客户端。
+"""Layer: Search Pipeline — Volc Search API 客户端（兼容薄封装）
+
+底层传输已收敛至 Base Capability `capabilities/search`（provider=doubao_global）。
+本模块保留 `VolcSearchClient` / `VolcSearchError` / `search` / `search_batch` 对外接口与
+返回 envelope（query/status/result_count/results/raw_response/retrieved_at/attempts/meta），
+使 auto_launch 各消费模块与测试无感。auto_launch 自有缓存层（search_cache）保持在上层。
 
 环境变量:
   VOLC_SEARCH_BASE_URL
-   DOUBAO_SEARCH_GLOBAL_API_KEY
+  DOUBAO_SEARCH_GLOBAL_API_KEY
 
 用法:
   python volc_search_client.py --query "极氪 最近7天 权益" --output results.json
 """
 
-import json, os, sys, time
+import json
+import os
+import sys
 from pathlib import Path
 from datetime import datetime
+from typing import Optional
 
-MODULE_DIR = Path(__file__).resolve().parent
-SERVICE_ROOT = MODULE_DIR.parent
-PROJECT_ROOT = SERVICE_ROOT.parent
-sys.path.insert(0, str(PROJECT_ROOT))
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
-try:
-    import requests
-except ImportError:
-    requests = None
+from capabilities.search.search_service import search as capability_search  # noqa: E402
+from capabilities.search.schemas import SearchRequest  # noqa: E402
 
 
 class VolcSearchError(Exception):
@@ -30,9 +33,12 @@ class VolcSearchError(Exception):
 
 
 class VolcSearchClient:
-    """Volc Search API 轻量客户端"""
+    """Volc Search API 轻量客户端（兼容封装，传输在 capabilities/search）。
 
-    def __init__(self, base_url: str = None, api_key: str = None,
+    auto_launch 上层自管缓存，因此默认 use_cache=False；超时/重试次数透传。
+    """
+
+    def __init__(self, base_url: Optional[str] = None, api_key: Optional[str] = None,
                  timeout: int = 30, max_retries: int = 3, retry_delay: int = 2):
         self.base_url = base_url or os.environ.get("VOLC_SEARCH_BASE_URL", "")
         self.api_key = api_key or os.environ.get("DOUBAO_SEARCH_GLOBAL_API_KEY", "")
@@ -46,97 +52,50 @@ class VolcSearchClient:
                 "Please export them before running Volc Search."
             )
 
-    @property
-    def _search_path(self) -> str:
-        """豆包搜索 Global版 API 路径"""
-        return "/search_api/global_search"
-
-    def _transform_request(self, query: str, result_limit: int) -> dict:
-        """将内部查询参数转为豆包搜索 API 请求格式"""
-        return {
-            "Query": query,
-            "DocCount": result_limit,
-            "MaxSnippetLength": 500,
-            "MaxImageCountPerDoc": 0,
-        }
-
-    def _transform_response(self, raw: dict, query: str, attempt: int) -> dict:
-        """将豆包搜索 API 响应转为内部统一格式"""
-        result = raw.get("Result")
-        if not result:
-            docs = []
-        else:
-            docs = result.get("Documents", [])
-        items = []
-        for doc in docs:
-            snippets = doc.get("Snippet", [])
-            snippet_text = " ".join(
-                s.get("Text", "") for s in snippets if s.get("Type") == "text"
-            )
-            host_info = doc.get("HostInfo", {})
-            doc_info = doc.get("DocumentInfo", {})
-            items.append({
-                "title": doc.get("Title", ""),
-                "url": doc.get("Url", ""),
-                "snippet": snippet_text,
-                "source": host_info.get("Hostname", ""),
-                "source_name": host_info.get("Hostname", ""),
-                "publish_time": doc_info.get("PublishTime", ""),
-                "rank": doc.get("Rank", 0),
-            })
-
-        return {
-            "query": query,
-            "status": "success",
-            "result_count": len(items),
-            "results": items,
-            "raw_response": raw,
-            "retrieved_at": datetime.now().isoformat(),
-            "attempts": attempt,
-        }
-
-    def search(self, query: str, result_limit: int = 10) -> dict:
-        """执行单次搜索，返回原始响应"""
-        if requests is None:
-            raise VolcSearchError("requests 库未安装: pip install requests")
-
-        url = f"{self.base_url}{self._search_path}"
-        headers = {
-            "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json",
-        }
-        payload = self._transform_request(query, result_limit)
-
-        last_error = None
-        for attempt in range(1, self.max_retries + 1):
-            try:
-                resp = requests.post(
-                    url, headers=headers, json=payload,
-                    timeout=self.timeout
-                )
-                resp.raise_for_status()
-                data = resp.json()
-                return self._transform_response(data, query, attempt)
-
-            except requests.exceptions.Timeout as e:
-                last_error = f"Timeout: {e}"
-            except requests.exceptions.RequestException as e:
-                last_error = f"HTTP Error: {e}"
-            except json.JSONDecodeError as e:
-                last_error = f"JSON Parse Error: {e}"
-
-            if attempt < self.max_retries:
-                time.sleep(self.retry_delay)
-
+    def _error_envelope(self, query: str, error: str) -> dict:
         return {
             "query": query,
             "status": "error",
-            "error": last_error,
+            "error": error,
             "result_count": 0,
             "results": [],
             "raw_response": None,
             "retrieved_at": datetime.now().isoformat(),
             "attempts": self.max_retries,
+        }
+
+    def search(self, query: str, result_limit: int = 10) -> dict:
+        """执行单次搜索，返回兼容 envelope。失败不抛（status=error）。"""
+        request = SearchRequest(
+            query=query,
+            provider="doubao_global",
+            limit=result_limit,
+            snippet_length=500,
+            use_cache=False,
+            timeout=self.timeout,
+            retries=self.max_retries,
+            api_key=self.api_key,
+            base_url=self.base_url,
+        )
+        resp = capability_search(request)
+
+        if resp.status == "error":
+            return self._error_envelope(query, resp.error or "unknown error")
+
+        results = []
+        for doc in resp.results:
+            item = dict(doc)
+            item.setdefault("source_name", item.get("source", ""))
+            results.append(item)
+
+        return {
+            "query": query,
+            "status": "success",
+            "result_count": len(results),
+            "results": results,
+            "raw_response": None,
+            "retrieved_at": datetime.now().isoformat(),
+            "attempts": 1,
         }
 
     def search_batch(self, queries: list[dict], result_limit: int = 10) -> list[dict]:
@@ -151,7 +110,7 @@ class VolcSearchClient:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Volc Search 客户端")
+    parser = __import__("argparse").ArgumentParser(description="Volc Search 客户端")
     parser.add_argument("--query", required=True, help="搜索查询")
     parser.add_argument("--limit", type=int, default=10, help="每查询结果数")
     parser.add_argument("--output", help="输出路径")
@@ -174,5 +133,4 @@ def main():
 
 
 if __name__ == "__main__":
-    import argparse
     main()
