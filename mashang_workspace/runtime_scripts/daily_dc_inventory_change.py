@@ -16,7 +16,7 @@ DC 库存变动分析 — 解释库存为什么从昨天变成了今天。
     python runtime_scripts/daily_dc_inventory_change.py --date 2026-07-28 --format json --output outputs/tables/
 """
 
-import sys, argparse, json, os, requests, time
+import sys, argparse, json, os
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -33,6 +33,7 @@ import numpy as np
 from datetime import datetime, timedelta
 from utils.result_contract import build_success_contract, save_contract_json
 from utils.business import is_corporate_owner
+from capabilities.notify.notify_service import notify
 
 spec = importlib.util.spec_from_file_location(
     "d", REPO_ROOT / "shared/operators" / "dealer_unsold_inventory.py"
@@ -431,26 +432,12 @@ def build_feishu_card(report: dict, is_range: bool) -> dict:
 
 
 def send_to_feishu(webhook_url: str, card: dict):
-    for attempt in range(3):
-        try:
-            resp = requests.post(webhook_url, json=card, timeout=10)
-            resp.raise_for_status()
-            result = resp.json()
-            code = result.get("StatusCode") or result.get("code")
-            if code == 0:
-                print("✅ 飞书消息发送成功")
-                return
-            elif code == 11232:
-                time.sleep(2 * (attempt + 1))
-                continue
-            else:
-                print(f"❌ 飞书消息发送异常: {result}")
-                return
-        except Exception as e:
-            print(f"❌ 发送飞书消息失败: {e}")
-            if attempt < 2:
-                time.sleep(2)
-    print("❌ 重试次数耗尽")
+    """发送飞书交互卡片 — 传输收敛至 capabilities.notify。"""
+    result = notify(raw_payload=card, webhook_url=webhook_url, provider_name="feishu_webhook")
+    if result.ok:
+        print("✅ 飞书消息发送成功")
+    else:
+        print(f"❌ 飞书消息发送失败: {result.error}")
 
 
 def main():
