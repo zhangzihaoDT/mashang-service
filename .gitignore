@@ -39,9 +39,13 @@ research_apps/MIIT/*_reports/
 research_apps/MIIT/miit_category_reports/
 research_apps/MIIT/miit_category_reports_*/
 research_apps/MIIT/工信部新车-history/
+research_apps/MIIT/**/工信部新车-history/
 # MIIT 抓取 checkpoint / 原始页面缓存（可再生产物）
 research_apps/MIIT/fetch_status_*.json
 research_apps/MIIT/raw/
+# MIIT HTML 运行报告 / 原始页面缓存 — 可再生产物，不进 Git
+research_apps/MIIT/reports/**/*.html
+research_apps/MIIT/data/raw_html/
 /miit_*.log
 
 /.query_agent_memory.json
@@ -86,7 +90,13 @@ mashang_workspace/outputs/auto_launch/
 research_apps/auto_launch/outputs/
 
 # Workspace report HTMLs: runtime-generated, not committed
-mashang_workspace/outputs/reports/*.html
+#   reports/*.md 为正式研究报告（Git tracked），HTML 渲染产物不入库
+mashang_workspace/outputs/reports/**/*.html
+outputs/reports/*.html
+
+# Research apps: HTML 渲染产物不入库（md/json 源与研究报告保留）
+research_apps/nev_apeal/reports/*.html
+research_apps/auto_launch/docs/*.html
 
 # CI eval output — regenerated on every make ci, not committed
 mashang_workspace/outputs/tables/unified_eval_result.json
