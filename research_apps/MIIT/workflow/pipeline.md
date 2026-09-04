@@ -310,7 +310,7 @@ python3 MIIT/scripts/07_build_wide_table.py --batch 410 --output-dir 自定义�
 ```bash
 python3 MIIT/scripts/06_build_vehicle_dataset.py             # → data/vehicle_parameters/
 python3 MIIT/scripts/06_build_vehicle_dataset.py --batch 410 --output-dir /tmp/x   # 单批隔离输出
-make -C MIIT miit-dataset
+make -C research_apps/MIIT miit-dataset
 ```
 
 - 从 `workflow/batches.yaml` 登记的全部批次构建两张规范表，**一车型一行**，身份 `vehicle_record_id = {batch_no}:{model_code}`

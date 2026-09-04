@@ -164,21 +164,21 @@ def scan_workspace_skills() -> list[dict]:
 PROMPTBUILDER_CAPABILITIES = {
     "auto_launch": {
         "name": "auto_launch",
-        "type": "Standalone Service (auto_launch/)",
-        "directory": "auto_launch/",
+        "type": "Standalone Service (research_apps/auto_launch/)",
+        "directory": "research_apps/auto_launch/",
         "description": "汽车上市/营销事件独立监控服务；搜索意图编译 → query plan → Volc Search API → 信源分级 → URL 去重 → 事件聚类 → candidate gate → Markdown 简报。",
         "entrypoints": [
-            "python -m auto_launch.cli report --type brand-daily --brand 智己",
-            "python -m auto_launch.cli search --request '看看极氪最近 7 天都有什么动作'",
+            "PYTHONPATH=research_apps python -m auto_launch.cli report --type brand-daily --brand 智己",
+            "PYTHONPATH=research_apps python -m auto_launch.cli search --request '看看极氪最近 7 天都有什么动作'",
             "make auto-launch-owned-brand-daily",
         ],
         "outputs": [
-            "auto_launch/outputs/search/{date}/{mode}/",
-            "auto_launch/outputs/owned_brand_daily/{date}/",
+            "research_apps/auto_launch/outputs/search/{date}/{mode}/",
+            "research_apps/auto_launch/outputs/owned_brand_daily/{date}/",
         ],
         "docs": [
-            "auto_launch/README.md",
-            "auto_launch/docs/workflow.md",
+            "research_apps/auto_launch/README.md",
+            "research_apps/auto_launch/docs/workflow.md",
         ],
         "scenarios": [
             "本品品牌每日营销事件监控",
@@ -224,10 +224,10 @@ PROMPTBUILDER_CAPABILITIES = {
             "capabilities/ocr/（火山引擎 OCR base capability）",
             "miit_vehicle_publicity_image_parser.py（OCR → records）",
             "vehicle_compare.py（records → 6 信号报告）",
-            "MIIT/data/eidc/（历史数据归档）",
+            "research_apps/MIIT/data/eidc/（历史数据归档）",
         ],
         "status": "deprecated",
-        "status_note": "实现已随 workspace miit_new_car 移除；历史数据成果归档于 MIIT/data/eidc/，能力在 MIIT/scripts 重新实现中",
+        "status_note": "实现已随 workspace miit_new_car 移除；历史数据成果归档于 research_apps/MIIT/data/eidc/，能力在 research_apps/MIIT/scripts 重新实现中",
     },
 }
 

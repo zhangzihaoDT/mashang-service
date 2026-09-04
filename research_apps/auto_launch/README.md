@@ -20,19 +20,19 @@ facts 是共享中间层，search 和 daily 为独立摄入路径。
 
 ```bash
 # daily — 导入 Planner 日报
-python3 -m auto_launch.cli daily --input planner_report.md --date 2026-07-26
+PYTHONPATH=research_apps python3 -m auto_launch.cli daily --input planner_report.md --date 2026-07-26
 
 # report — 生成每日简报 (规则脚本)
-python3 -m auto_launch.cli report --type daily-brief --date 2026-07-26 --days 1 --no-llm
+PYTHONPATH=research_apps python3 -m auto_launch.cli report --type daily-brief --date 2026-07-26 --days 1 --no-llm
 
 # report — 生成每日简报 (LLM)
-python3 -m auto_launch.cli report --type daily-brief --date 2026-07-26 --days 1 --pipeline daily
+PYTHONPATH=research_apps python3 -m auto_launch.cli report --type daily-brief --date 2026-07-26 --days 1 --pipeline daily
 
 # search — 搜索并写入 facts
-python3 -m auto_launch.cli search --request "看看极氪最近 7 天都有什么动作" --live --to-facts
+PYTHONPATH=research_apps python3 -m auto_launch.cli search --request "看看极氪最近 7 天都有什么动作" --live --to-facts
 
 # 交互式入口
-python3 -m auto_launch.cli launch
+PYTHONPATH=research_apps python3 -m auto_launch.cli launch
 ```
 
 ## CLI 命令

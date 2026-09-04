@@ -30,12 +30,15 @@ from pathlib import Path
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
-# Ensure project root is on path
-_PROJECT_ROOT = str(Path(__file__).resolve().parent.parent)
-if _PROJECT_ROOT not in sys.path:
-    sys.path.insert(0, _PROJECT_ROOT)
+# Ensure project root & research_apps (where this app package lives) are on path.
+# cli.py = research_apps/auto_launch/cli.py: parents[1]=research_apps, parents[2]=repo root.
+_PROJECT_ROOT = str(Path(__file__).resolve().parents[2])
+_RESEARCH_APPS = str(Path(__file__).resolve().parents[1])
+for _p in [_RESEARCH_APPS, _PROJECT_ROOT]:
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
 
-# Load .env from project root
+# Load .env from repo root
 load_dotenv(Path(_PROJECT_ROOT) / ".env")
 
 

@@ -138,7 +138,7 @@ inventory-report:
 
 ## Auto Launch — 本品品牌日报（从 facts 库生成，报告层）
 auto-launch-owned-brand-daily:
-	$(PYTHON) -m auto_launch.cli report --type brand-daily \
+	PYTHONPATH=research_apps $(PYTHON) -m auto_launch.cli report --type brand-daily \
 		--brand $(or $(BRAND),im) \
 		$(if $(BRAND_NAME),--brand-name $(BRAND_NAME)) \
 		$(if $(DATE),--date $(DATE)) \
@@ -146,7 +146,7 @@ auto-launch-owned-brand-daily:
 		$(if $(LIMIT),--limit $(LIMIT))
 
 auto-launch-owned-brand-daily-dry-run:
-	$(PYTHON) -m auto_launch.cli report --type brand-daily \
+	PYTHONPATH=research_apps $(PYTHON) -m auto_launch.cli report --type brand-daily \
 		--brand $(or $(BRAND),im) \
 		$(if $(BRAND_NAME),--brand-name $(BRAND_NAME)) \
 		$(if $(DATE),--date $(DATE)) \
@@ -154,7 +154,7 @@ auto-launch-owned-brand-daily-dry-run:
 
 ## Auto Launch — Volc Search 搜索意图转译与执行
 auto-launch-search:
-	$(PYTHON) -m auto_launch.cli search \
+	PYTHONPATH=research_apps $(PYTHON) -m auto_launch.cli search \
 		--request "$(or $(REQUEST),看看极氪最近 7 天都有什么动作)" \
 		$(if $(DATE),--date $(DATE)) \
 		$(if $(LIVE),--live) \
@@ -162,7 +162,7 @@ auto-launch-search:
 
 ## Auto Launch — 标准化搜索结果
 auto-launch-normalize-results:
-	$(PYTHON) -m auto_launch.cli normalize \
+	PYTHONPATH=research_apps $(PYTHON) -m auto_launch.cli normalize \
 		--raw $(RAW) \
 		--query-plan $(QUERY_PLAN) \
 		$(if $(OUTPUT_PREFIX),--output-prefix $(OUTPUT_PREFIX))
@@ -331,7 +331,7 @@ render-official-doc-smoke:
 ## 固定：10 页 deck / semantic 0·0 / evidence+signal refs 解析 / render 0·0
 ## 改 Slide Contract / validator / renderer / visual identity / palette / SKILL / production routing 后必须重放
 production-golden:
-	$(PYTHON) nev_apeal/scratch/replay_golden_case.py
+	$(PYTHON) research_apps/nev_apeal/scratch/replay_golden_case.py
 
 # === CPCA Weekly Early Signal ===
 cpca-weekly-early-signal:  ## 乘联分会周度数据早源监控（终端输出）WEEK=目标数据周（默认自动计算最近周日所在周）
@@ -384,13 +384,13 @@ help:
 	@echo "make lock-attribution       锁单归因分析（单样本）START/END/SERIES/CHANNEL/HTML"
 	@echo "make lock-attribution-compare  锁单归因对比分析（两样本，差异高亮）START/END/START_B/END_B/LABEL/LABEL_B/HTML"
 	@echo "  示例: make lock-attribution-compare START=2024-01-01 END=2024-08-01 START_B=2026-01-01 END_B=2026-08-01 HTML=1"
-	@echo "=== Auto Launch (独立 service: auto_launch/) ==="
+	@echo "=== Auto Launch (独立 service: research_apps/auto_launch/) ==="
 	@echo "make auto-launch-owned-brand-daily         本品品牌日报（从 facts 生成，报告层）BRAND=im BRAND_NAME=智己"
 	@echo "make auto-launch-owned-brand-daily-dry-run 本品品牌日报（dry-run，同上）"
 	@echo "make auto-launch-search                    Volc Search 搜索意图转译 (REQUEST=...) [dry-run]"
 	@echo "make auto-launch-normalize-results         标准化搜索结果 (RAW=... QUERY_PLAN=...)"
-	@echo "  配置目录: auto_launch/configs/"
-	@echo "  文档:      auto_launch/README.md, auto_launch/docs/workflow.md"
+	@echo "  配置目录: research_apps/auto_launch/configs/"
+	@echo "  文档:      research_apps/auto_launch/README.md, research_apps/auto_launch/docs/workflow.md"
 	@echo ""
 	@echo "=== Inventory ==="
 	@echo "make inventory-status     查询核心库存指标（国内DC在库_未开票）"

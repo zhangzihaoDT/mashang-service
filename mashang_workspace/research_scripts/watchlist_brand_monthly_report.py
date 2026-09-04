@@ -3,7 +3,7 @@
 2026 起每月复用的 watchlist 品牌销量月报生成脚本。
 
 基于 dataset/TP&MIX-ways（乘用车上险数据）的 brand_monthly 表，按
-MIIT/workflow/brand_watchlist.yaml 的品牌分类，对齐本品（智己）与行业整体
+research_apps/MIIT/workflow/brand_watchlist.yaml 的品牌分类，对齐本品（智己）与行业整体
 benchmark，输出各品牌销量环比/同比及相对行业的跑赢/跑输标注。
 
 用法:

@@ -1,5 +1,8 @@
 {
-  "enabled_capabilities": ["lock_by_model", "lock_city_distribution"],
+  "enabled_capabilities": [
+    "lock_by_model",
+    "lock_city_distribution"
+  ],
   "default_output_dir": "mashang_workspace/outputs/tables",
   "script_timeout_seconds": 60,
   "capabilities": {
@@ -10,13 +13,32 @@
       "dispatch": {
         "explicit": {
           "metric": "lock_count",
-          "group_by": ["model", "series", "energy_type"],
-          "keywords": ["锁单", "分车型", "车型", "车系", "model", "series", "销量", "结构"],
+          "group_by": [
+            "model",
+            "series",
+            "energy_type"
+          ],
+          "keywords": [
+            "锁单",
+            "分车型",
+            "车型",
+            "车系",
+            "model",
+            "series",
+            "销量",
+            "结构"
+          ],
           "confidence": 0.9
         },
         "keyword_fallback": {
-          "keywords": ["分车型", "车型"],
-          "metric_allowed": ["", "lock_count"],
+          "keywords": [
+            "分车型",
+            "车型"
+          ],
+          "metric_allowed": [
+            "",
+            "lock_count"
+          ],
           "confidence": 0.7
         }
       }
@@ -27,13 +49,27 @@
       "followup_suffix": "城市分布",
       "dispatch": {
         "explicit": {
-          "group_by": ["city"],
-          "keywords": ["城市", "分布", "city", "区域", "大区"],
+          "group_by": [
+            "city"
+          ],
+          "keywords": [
+            "城市",
+            "分布",
+            "city",
+            "区域",
+            "大区"
+          ],
           "confidence": 0.85
         },
         "keyword_fallback": {
-          "keywords": ["城市分布", "分城市"],
-          "metric_allowed": ["", "lock_count"],
+          "keywords": [
+            "城市分布",
+            "分城市"
+          ],
+          "metric_allowed": [
+            "",
+            "lock_count"
+          ],
           "confidence": 0.7
         }
       }
@@ -49,9 +85,14 @@
     "nev_apeal_production_golden": {
       "module": "nev_apeal",
       "label": "NEV-APEAL Production Golden Gate",
-      "cwd": "{repo_root}/nev_apeal",
+      "cwd": "{repo_root}/research_apps/nev_apeal",
       "add_cwd_to_path": true,
-      "argv_template": ["{python}", "scratch/replay_golden_case.py", "--format", "json"],
+      "argv_template": [
+        "{python}",
+        "scratch/replay_golden_case.py",
+        "--format",
+        "json"
+      ],
       "params": {},
       "summary": "json",
       "timeout_seconds": 300
@@ -59,14 +100,27 @@
     "nev_apeal_research_state": {
       "module": "nev_apeal",
       "label": "NEV-APEAL Research Topic State",
-      "cwd": "{repo_root}/nev_apeal",
+      "cwd": "{repo_root}/research_apps/nev_apeal",
       "add_cwd_to_path": true,
-      "argv_template": ["{python}", "cli.py", "research", "state", "--topic", "{topic}"],
+      "argv_template": [
+        "{python}",
+        "cli.py",
+        "research",
+        "state",
+        "--topic",
+        "{topic}"
+      ],
       "params": {
-        "topic": {"type": "pattern", "required": true, "pattern": "^[A-Za-z0-9_-]+$"}
+        "topic": {
+          "type": "pattern",
+          "required": true,
+          "pattern": "^[A-Za-z0-9_-]+$"
+        }
       },
       "summary": "text",
-      "artifacts": ["research/runs/{topic}/state.yaml"]
+      "artifacts": [
+        "research/runs/{topic}/state.yaml"
+      ]
     }
   }
 }

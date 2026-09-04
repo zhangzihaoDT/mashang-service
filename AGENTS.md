@@ -26,7 +26,7 @@ mashang-service 是一个**汽车业务数据分析项目**，包含以下分支
 | **Workspace** | `mashang_workspace/` | **Daily Business Analytics Workspace** —— 日常业务分析工具箱（research → runtime → eval） |
 | **Shared** | `shared/` | Semantic Foundation —— 共享 operator/schema 层（非默认工作区） |
 | **Base Capabilities** | `capabilities/` | 领域无关基础能力层（OCR/Search/Notify 等），与日常业务分析能力平级，供 workspace / runtime_v2 / Research Application 复用 |
-| **Research Applications** | `MIIT/` `auto_launch/` `nev_apeal/` | 独立研究型子项目（研究单元：有自己 state/engine/contracts/gate/artifacts；runtime_v2 编排目标；未来可增 project_4/5） |
+| **Research Applications** | `research_apps/`（MIIT / auto_launch / nev_apeal，未来 p4/5） | 独立研究型子项目（研究单元：有自己 state/engine/contracts/gate/artifacts；仅归类不共享；runtime_v2 编排目标） |
 
 **共享底座**：
 - `dataset/` — 原始数据
@@ -348,11 +348,11 @@ mashang-service/
 | 开票月度预估 | `make invoice-forecast` 或 `python mashang_workspace/research_scripts/invoice_monthly_forecast.py --as-of YYYY-MM-DD --target-month YYYY-MM --lock-regime mode` | research |
 | 锁单归因分析 | `make lock-attribution START=2026-01-01 END=2026-08-31 HTML=1`(单样本;可选 `SERIES/CHANNEL`) | make |
 | 锁单归因对比 | `make lock-attribution-compare START=2024-01-01 END=2024-08-01 START_B=2026-01-01 END_B=2026-08-01 HTML=1`(两任意样本对比,差异高亮报告;可选 `LABEL/LABEL_B/SERIES_B/CHANNEL_B`) | make |
-| Auto Launch 搜索 | `python -m auto_launch.cli search --request "看看极氪最近 7 天都有什么动作"` | service |
-| Auto Launch Daily 摄入 | `python -m auto_launch.cli daily --input <file>` | service |
-| Auto Launch 品牌日报 | `python -m auto_launch.cli report --type brand-daily --brand 智己` | service |
-| Auto Launch 完整日更 | `python -m auto_launch.cli run-day --brand 智己` | service |
-| Auto Launch 测试 | `pytest auto_launch/tests/ -q` | service |
+| Auto Launch 搜索 | `PYTHONPATH=research_apps python -m auto_launch.cli search --request "看看极氪最近 7 天都有什么动作"` | service |
+| Auto Launch Daily 摄入 | `PYTHONPATH=research_apps python -m auto_launch.cli daily --input <file>` | service |
+| Auto Launch 品牌日报 | `PYTHONPATH=research_apps python -m auto_launch.cli report --type brand-daily --brand 智己` | service |
+| Auto Launch 完整日更 | `PYTHONPATH=research_apps python -m auto_launch.cli run-day --brand 智己` | service |
+| Auto Launch 测试 | `pytest research_apps/auto_launch/tests/ -q` | service |
 | VOC 分析 | `python mashang_workspace/utility_scripts/voc_theme_analysis.py` | utility |
 | 数据字典 | `python mashang_workspace/utility_scripts/data_dictionary.py` | utility |
 | 分组重叠审计 | `python mashang_workspace/utility_scripts/audit_series_group_overlap.py [--json] [--strict]` | utility |

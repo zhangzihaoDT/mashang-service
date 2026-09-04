@@ -6,10 +6,16 @@
 
 import os
 import sys
+from pathlib import Path
 from typing import Optional
 
-from capabilities.notify.schemas import build_interactive_card
-from capabilities.notify.notify_service import notify
+# capabilities.* 在仓库根：显式把 repo root 放上 sys.path（不依赖调用 cwd）。
+_REPO_ROOT = Path(__file__).resolve().parents[3]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
+from capabilities.notify.schemas import build_interactive_card  # noqa: E402
+from capabilities.notify.notify_service import notify  # noqa: E402
 
 _WEBHOOK_URL_ENV = "FS_WEBHOOK_URL"
 

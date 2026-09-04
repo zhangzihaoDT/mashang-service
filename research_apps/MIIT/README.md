@@ -62,7 +62,7 @@ MIIT/
 ## 快速跑一轮
 
 ```bash
-make -C MIIT miit-run BATCH=410   # P1 搜索 → P2 归档 → P4 宽表 → P4.5 统一Dataset → P5 报告
+make -C research_apps/MIIT miit-run BATCH=410   # P1 搜索 → P2 归档 → P4 宽表 → P4.5 统一Dataset → P5 报告
 ```
 
 分步见 [workflow/commands.md](workflow/commands.md)；P3 车船税补充为手动步骤。
@@ -83,7 +83,7 @@ make -C MIIT miit-run BATCH=410   # P1 搜索 → P2 归档 → P4 宽表 → P4
 ## 测试
 
 ```bash
-make -C MIIT test       # 冒烟：所有脚本 --help 可用
+make -C research_apps/MIIT test       # 冒烟：所有脚本 --help 可用
 ```
 
 ## 后续方向

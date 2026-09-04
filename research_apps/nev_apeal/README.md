@@ -80,7 +80,7 @@ nev_apeal/
 运行命令默认从仓库根目录执行：
 
 ```bash
-cd /Users/zihao_/Documents/github/mashang-service/nev_apeal
+cd /Users/zihao_/Documents/github/mashang-service/research_apps/nev_apeal
 PYTHONPATH=. ../.venv/bin/python <script.py>
 ```
 

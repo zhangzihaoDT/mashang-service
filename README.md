@@ -467,9 +467,10 @@ mashang-service/
 ├── mashang_runtime_v2/    # 4. Unified Research Runtime（编排层）
 ├── mashang_runtime/       #   legacy frozen runtime（已冻结，canonical 迁至 shared/）
 │
-├── MIIT/                  # 5. Research Application：工信部车型与申报研究
-├── auto_launch/           #    Research Application：新车上市与竞争动态研究
-├── nev_apeal/             #    Research Application：新能源用户体验研究
+├── research_apps/         # 5. Research Applications（研究单元归类层：只归类，不提供共享逻辑）
+│   ├── MIIT/              #    Research Application：工信部车型与申报研究
+│   ├── auto_launch/       #    Research Application：新车上市与竞争动态研究
+│   └── nev_apeal/         #    Research Application：新能源用户体验研究
 │
 ├── ocr/ 已迁移 → capabilities/ocr   （历史路径不再使用）
 ├── main.py

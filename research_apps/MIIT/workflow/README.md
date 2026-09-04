@@ -27,12 +27,12 @@ MIIT.gov.cn
 ## 快速跑一轮（Makefile）
 
 ```bash
-make -C MIIT miit-scan BATCH=410     # P1 搜索 + 简报
-make -C MIIT miit-archive BATCH=410  # P2 归档全部缺失车型
-make -C MIIT miit-build BATCH=410    # P4 宽表
-make -C MIIT miit-dataset            # P4.5 统一 Dataset
-make -C MIIT miit-report BATCH=410   # P5 分类报告
-make -C MIIT miit-run BATCH=410      # 一键 P1→P5（P3 车船税需手动，见 commands.md）
+make -C research_apps/MIIT miit-scan BATCH=410     # P1 搜索 + 简报
+make -C research_apps/MIIT miit-archive BATCH=410  # P2 归档全部缺失车型
+make -C research_apps/MIIT miit-build BATCH=410    # P4 宽表
+make -C research_apps/MIIT miit-dataset            # P4.5 统一 Dataset
+make -C research_apps/MIIT miit-report BATCH=410   # P5 分类报告
+make -C research_apps/MIIT miit-run BATCH=410      # 一键 P1→P5（P3 车船税需手动，见 commands.md）
 ```
 
 ## 配置归属（workflow/ 平铺）

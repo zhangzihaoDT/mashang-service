@@ -36,14 +36,14 @@ READ → ROUTE → INVOKE → VERIFY → PERSIST
 
 优先检查：
 
-1. `nev_apeal/README.md`
-2. `nev_apeal/contracts/measurement.json`
-3. `nev_apeal/contracts/variables.json`
-4. `nev_apeal/contracts/modules.json`
-5. `nev_apeal/contracts/signal_contract.json`
-6. `nev_apeal/research/topic_tournament.md`
-7. `nev_apeal/reports/signal_board.md`
-8. 当前 `nev_apeal/research/runs/<topic>/state.yaml`
+1. `research_apps/nev_apeal/README.md`
+2. `research_apps/nev_apeal/contracts/measurement.json`
+3. `research_apps/nev_apeal/contracts/variables.json`
+4. `research_apps/nev_apeal/contracts/modules.json`
+5. `research_apps/nev_apeal/contracts/signal_contract.json`
+6. `research_apps/nev_apeal/research/topic_tournament.md`
+7. `research_apps/nev_apeal/reports/signal_board.md`
+8. 当前 `research_apps/nev_apeal/research/runs/<topic>/state.yaml`
 9. 当前 Run 的 `hypotheses.yaml`、`queue.yaml` 和 `evidence.jsonl`
 
 读取时区分：
@@ -75,7 +75,7 @@ Terminal 的具体状态、晋级条件和评分规则以 canonical Context、En
 
 ## INVOKE
 
-从 `mashang-service` 根目录进入 `nev_apeal` 后，调用已有入口，不复制其实现：
+进入 `research_apps/nev_apeal/` 后，调用已有入口，不复制其实现：
 
 ```bash
 PYTHONPATH=. ../.venv/bin/python cli.py contracts
@@ -92,7 +92,7 @@ PYTHONPATH=. ../.venv/bin/python cli.py research <research-action> --topic <topi
 - `stop-check`：执行 Engine stop-check
 - `derive-questions`：调用 Engine 派生问题；Skill 不自行推导
 
-分析命令、参数、统计方法和结果解释由 `nev_apeal/analysis/`、Discovery Engine、Qualification Protocol 与 Tournament 定义。Skill 只负责正确路由和调用，不在文本规则中重述这些方法。
+分析命令、参数、统计方法和结果解释由 `research_apps/nev_apeal/analysis/`、Discovery Engine、Qualification Protocol 与 Tournament 定义。Skill 只负责正确路由和调用，不在文本规则中重述这些方法。
 
 调用失败、输入不完整或返回状态不明确时，不跳到下一阶段，不手工伪造结果。
 

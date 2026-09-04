@@ -5,7 +5,7 @@
 ## 一键
 
 ```bash
-make -C MIIT miit-run BATCH=410   # P1 搜索 → P2 归档 → P4 宽表 → P4.5 统一Dataset → P5 报告
+make -C research_apps/MIIT miit-run BATCH=410   # P1 搜索 → P2 归档 → P4 宽表 → P4.5 统一Dataset → P5 报告
 ```
 
 ## 分步（脚本按管线顺序编号，平铺在 scripts/）

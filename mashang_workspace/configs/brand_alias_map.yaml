@@ -1,6 +1,6 @@
 # brand_watchlist 品牌名 → TP&MIX-ways 数据集品牌值 映射
 #
-# 背景：MIIT/workflow/brand_watchlist.yaml 中的品牌名为业务显示名（如"问界"/"爱咖"），
+# 背景：research_apps/MIIT/workflow/brand_watchlist.yaml 中的品牌名为业务显示名（如"问界"/"爱咖"），
 # 与数据集品牌维度（shared/loaders/tp_and_mix_ways_loader 读取的 brand 列）实际取值
 # 不一致。在数据集上按 watchlist 品牌做销量/份额匹配时，应先用本映射归一化。
 #

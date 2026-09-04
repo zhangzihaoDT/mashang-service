@@ -29,7 +29,7 @@ mashang-service/                   # 总项目根目录
 │
 ├── capabilities/                 # Base Capabilities（领域无关原语：OCR/Search/Notify…）
 │
-├── MIIT/ auto_launch/ nev_apeal/ # Research Applications（独立研究型子项目；runtime_v2 编排目标）
+├── research_apps/MIIT|auto_launch|nev_apeal/ # Research Applications（独立研究单元；仅归类，共享走 shared/capabilities/workspace）
 │
 └── mashang_workspace/             # ← Daily Business Analytics Workspace（日常业务分析工具箱；当前所在目录）
 │   ├── AGENTS.md                  # 本文件
@@ -95,7 +95,7 @@ make dataset-validate # 校验 dataset 完整性
 make daily-observation-dry-run  # 每日观察预检
 ```
 
-> MIIT 公告情报已迁移至根 `MIIT/` 模块（`make -C MIIT miit-run`）；workspace 旧 `miit_new_car` 实现已移除。
+> MIIT 公告情报已迁移至 `research_apps/MIIT/` 模块（`make -C research_apps/MIIT miit-run`）；workspace 旧 `miit_new_car` 实现已移除。
 
 ## CI 门禁
 
@@ -139,7 +139,7 @@ python mashang_workspace/eval/run_eval.py --suite parser  # 单套件
 | `make lock-attribution-compare START=2024-01-01 END=2024-08-01 START_B=2026-01-01 END_B=2026-08-01 HTML=1` | 锁单归因**对比**分析（两任意样本，差异高亮报告；`LABEL/LABEL_B` 自定义标签，`SERIES_B/CHANNEL_B` 按样本过滤） | make |
 | `python research_scripts/lock_attribution_analysis.py --start-date … --end-date … --compare-start-date … --compare-end-date … --html` | 锁单归因对比脚本（底层，Result Contract） | research |
 | `python research_scripts/dc_showroom_age_report.py --as-of YYYY-MM-DD --html` | 待销现车库龄/下线距今分布报告（固定库存分析工作流，`--html` 品牌化报告，`--format json` Result Contract） | research |
-| `auto_launch/prompts/` | 竞品上市事件 Prompt 工作流资产 — 已迁移至 `auto_launch/` | prompt asset |
+| `research_apps/auto_launch/prompts/` | 竞品上市事件 Prompt 工作流资产 — 已迁移至 `research_apps/auto_launch/` | prompt asset |
 | `python research_scripts/cpca_weekly_early_signal.py --week 2026-W26` | 乘联分会周度数据早源监控（WEEK=数据归属周） | research |
 | `make cpca-weekly-early-signal WEEK=2026-W26` | 早源监控（终端输出）WEEK=要监控的数据周 | make |
 | `make cpca-weekly-early-signal-html WEEK=2026-W26` | 早源监控（HTML 报告）WEEK=要监控的数据周 | make |
@@ -157,13 +157,13 @@ python mashang_workspace/eval/run_eval.py --suite parser  # 单套件
 
 ## MIIT 公告情报 / 工信部新车公告
 
-> **已迁移**：MIIT 公告情报能力已收敛到根 `MIIT/` 模块（Gov 公示 + EIDC 历史），workspace 不再维护独立实现。
-> 历史批次（401–408）数据成果归档于 `MIIT/data/eidc/`，使用方式见 `MIIT/README.md` 与 `MIIT/workflow/pipeline.md`。
+> **已迁移**：MIIT 公告情报能力已收敛到 `research_apps/MIIT/` 模块（Gov 公示 + EIDC 历史），workspace 不再维护独立实现。
+> 历史批次（401–408）数据成果归档于 `research_apps/MIIT/data/eidc/`，使用方式见 `research_apps/MIIT/README.md` 与 `research_apps/MIIT/workflow/pipeline.md`。
 
 ```bash
-make -C MIIT miit-run BATCH=410      # 一键 P1 搜索 → P2 归档 → P4 宽表 → P4.5 Dataset → P5 报告
-make -C MIIT miit-dataset            # 重建统一 Dataset（product_master / vehicle_parameter）
-make -C MIIT test                    # MIIT 冒烟测试
+make -C research_apps/MIIT miit-run BATCH=410      # 一键 P1 搜索 → P2 归档 → P4 宽表 → P4.5 Dataset → P5 报告
+make -C research_apps/MIIT miit-dataset            # 重建统一 Dataset（product_master / vehicle_parameter）
+make -C research_apps/MIIT test                    # MIIT 冒烟测试
 ```
 
 ## TP&MIX-ways Data Asset / 乘用车上险数据资产

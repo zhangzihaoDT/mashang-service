@@ -343,15 +343,15 @@
     "name": "MIIT 公告图片 OCR 解析器",
     "tier": "research",
     "status": "retired",
-    "script": "MIIT/scripts/06_build_vehicle_dataset.py",
+    "script": "research_apps/MIIT/scripts/06_build_vehicle_dataset.py",
     "auto_schedulable": false,
     "result_contract": false,
     "numeric_eval_case": null,
     "contract_gate": false,
     "followup_supported": false,
     "docs": [
-      "MIIT/workflow/pipeline.md",
-      "MIIT/data/eidc/README.md"
+      "research_apps/MIIT/workflow/pipeline.md",
+      "research_apps/MIIT/data/eidc/README.md"
     ],
     "promotion": {
       "current_stage": "retired",
@@ -365,22 +365,22 @@
       "runtime_v2_candidate": false,
       "candidate_stage": "not_eligible"
     },
-    "notes": "已退役：原 promptbuilders/miit_new_car 实现于 2026-08 移除，能力在 MIIT/scripts 重新实现。"
+    "notes": "已退役：原 promptbuilders/miit_new_car 实现于 2026-08 移除，能力在 research_apps/MIIT/scripts 重新实现。"
   },
   {
     "capability_id": "miit_vehicle_compare",
     "name": "MIIT 双车对比报告",
     "tier": "research",
     "status": "retired",
-    "script": "MIIT/scripts/09_generate_category_report.py",
+    "script": "research_apps/MIIT/scripts/09_generate_category_report.py",
     "auto_schedulable": false,
     "result_contract": false,
     "numeric_eval_case": null,
     "contract_gate": false,
     "followup_supported": false,
     "docs": [
-      "MIIT/workflow/pipeline.md",
-      "MIIT/workflow/docs/公告批次.md"
+      "research_apps/MIIT/workflow/pipeline.md",
+      "research_apps/MIIT/workflow/docs/公告批次.md"
     ],
     "promotion": {
       "current_stage": "retired",
@@ -394,7 +394,7 @@
       "runtime_v2_candidate": false,
       "candidate_stage": "not_eligible"
     },
-    "notes": "已退役：原 promptbuilders/miit_new_car 实现于 2026-08 移除，能力在 MIIT/scripts 重新实现。"
+    "notes": "已退役：原 promptbuilders/miit_new_car 实现于 2026-08 移除，能力在 research_apps/MIIT/scripts 重新实现。"
   },
   {
     "capability_id": "current_state_diagnosis",
