@@ -7,22 +7,22 @@
 当前项目主线是：
 
 ```text
-shared + dataset（共享底座）
+1. Semantic Foundation（dataset + shared）
   ↓
-capabilities（基础能力）  +  mashang_workspace（业务分析能力）
+2. Base Capabilities（capabilities） +  3. Daily Business Analytics（mashang_workspace）
   ↓
-mashang_runtime_v2（orchestration）
+4. Unified Research Runtime（mashang_runtime_v2）
   ↓
-Feature 应用（MIIT / auto_launch / nev_apeal）
+5. Research Applications（MIIT / auto_launch / nev_apeal / …）
 ```
 
 也就是说：
 
-- `shared/` + `dataset/` 提供共享业务算子、业务定义与原始数据；
-- `capabilities/` 提供领域无关基础能力（OCR 等），与业务分析能力平级，供上层复用；
-- `mashang_workspace/` 是日常工作的主阵地，负责分析、脚本开发、文档沉淀、Result Contract、Eval 与 Capability Registry；
-- `mashang_runtime_v2/` 用于编排与验证新的 Runtime 架构；
-- MIIT / auto_launch / nev_apeal 是承载具体业务情报/研究的 Feature 应用。
+- `shared/` + `dataset/` 提供共享业务语义、业务算子、业务定义与原始数据（Semantic Foundation）；
+- `capabilities/` 提供领域无关基础能力（OCR / Search / Notify 等），与日常业务分析能力平级，供上层复用（Base Capabilities）；
+- `mashang_workspace/` 是**日常业务分析工作区（Daily Business Analytics）**：负责分析、脚本开发、文档沉淀、Result Contract、Eval 与 Capability Registry，回答"今天要查什么/算什么"；
+- `mashang_runtime_v2/` 是 **Unified Research Runtime**：一方面调用 workspace 的确定性业务分析能力，另一方面长期编排独立 Research Applications；
+- MIIT / auto_launch / nev_apeal 是承载长期研究对象的 **Research Applications**（研究单元），有自己的状态、流程、contracts、gate 与产物。
 
 ---
 
@@ -419,35 +419,43 @@ ELOE = Σ P(最终开票 | 当前仍悬置)
 
 # 1. Architecture Overview
 
-目标架构为五层：
+冻结的五层命名与分层：
 
 ```text
-Shared Semantic Foundation（数据与业务语义底座）
+1. Semantic Foundation            dataset/ + shared/
         │
-        ├── capabilities/             Base Capabilities（领域无关底层原语）
-        │                             OCR / Search / Browser-Capture / Doc Parse / Render / Notify
-        └── mashang_workspace/        Business Capabilities（能力孵化与治理，主工作区）
-                                            research → runtime → Eval / Registry
-                    │
-                    ▼
-              mashang_runtime_v2       orchestration
-                    │
-        ┌───────────┼───────────┐
-        ▼           ▼           ▼
-      MIIT      auto_launch    nev_apeal        Feature 应用（业务 Feature 子项目）
+        ├─────────────────────────────┐
+        │                             │
+        ▼                             ▼
+2. Base Capabilities          3. Daily Business Analytics Workspace
+   capabilities/                 mashang_workspace/
+   OCR / Search / Notify         日常业务分析工具箱
+   Browser / Parse / Render      research → runtime → eval
+        │                             │
+        └──────────────┬──────────────┘
+                       ▼
+4. Unified Research Runtime      mashang_runtime_v2
+                       │
+          ┌────────────┼────────────┬────────────┬───────
+          ▼            ▼            ▼            ▼
+5. Research Applications
+        MIIT       auto_launch    nev_apeal   Project 4 ...
+   （工信部车型申报研究） （上市与竞争动态研究） （新能源用户体验研究）
 ```
 
 ```text
 mashang-service/
-├── dataset/               # 共享原始数据（Shared Foundation）
-├── shared/                # 共享业务语义层：operators / schema / loaders
+├── dataset/               # 1. Semantic Foundation — 共享原始数据
+├── shared/                #   语义底座：operators / schema / loaders
 │
-├── capabilities/          # Base Capabilities（领域无关基础能力）
+├── capabilities/          # 2. Base Capabilities（领域无关基础能力）
 │   ├── README.md
-│   └── ocr/               # OCR 原语（火山 general_ocr + document_parse，缓存/QPS/retry）
+│   ├── ocr/               # OCR 原语（火山 general_ocr + document_parse，缓存/QPS/retry）
+│   ├── notify/            # 飞书 Webhook 通知推送
+│   └── search/            # 豆包 Global Search 检索原语
 │
-├── mashang_workspace/     # Business Capabilities（主工作区）
-│   ├── runtime_scripts/
+├── mashang_workspace/     # 3. Daily Business Analytics Workspace（日常业务分析工具箱）
+│   ├── runtime_scripts/   #    高频确定业务分析，成熟后被 Runtime V2 调用
 │   ├── research_scripts/
 │   ├── utility_scripts/
 │   ├── registry/
@@ -456,12 +464,12 @@ mashang-service/
 │   ├── docs/
 │   └── utils/
 │
-├── mashang_runtime_v2/    # 新 Runtime 架构（orchestration，消费 capabilities + workspace 能力）
-├── mashang_runtime/       # legacy frozen runtime（已冻结，canonical 迁至 shared/）
+├── mashang_runtime_v2/    # 4. Unified Research Runtime（编排层）
+├── mashang_runtime/       #   legacy frozen runtime（已冻结，canonical 迁至 shared/）
 │
-├── MIIT/                  # Feature：工信部拟公告/EIDC 车辆情报管线
-├── auto_launch/           # Feature：事实驱动竞品营销事件监控
-├── nev_apeal/             # Feature：NEV 用户体验研究
+├── MIIT/                  # 5. Research Application：工信部车型与申报研究
+├── auto_launch/           #    Research Application：新车上市与竞争动态研究
+├── nev_apeal/             #    Research Application：新能源用户体验研究
 │
 ├── ocr/ 已迁移 → capabilities/ocr   （历史路径不再使用）
 ├── main.py
@@ -471,14 +479,33 @@ mashang-service/
 └── README.md
 ```
 
-> 分层要点：`capabilities/`（基础能力）与 `mashang_workspace/`（业务分析能力）是两支平级的能力来源；
-> `mashang_runtime_v2` 负责编排并把 MIIT / auto_launch / nev_apeal 作为 Feature 应用输出（边界已定义，代码演进中）。
+> 分层要点：`capabilities/`（Base Capabilities）与 `mashang_workspace/`（Daily Business Analytics）是两支平级的能力来源；
+> `mashang_runtime_v2`（Unified Research Runtime）负责两类消费——调用 workspace 日常业务分析能力 + 长期编排 Research Applications。
+
+## Research Applications（冻结定义）
+
+`MIIT / auto_launch / nev_apeal`（及未来第 4、5 个项目）不是"Feature 子项目"，而是**独立研究型子项目（Research Applications / Research Programs）**：
+
+- 解决的是一个**长期问题**，不是一次查询；
+- 拥有**自己的状态、流程、研究对象、产物、阶段与演化历史**——有自己的 engine/state 流转、contracts、QA gate 与 artifacts；
+- 是**持续存在的研究对象/研究程序**，可被 Runtime V2 长期驱动，而不只是一个脚本。
+
+| Research Application | 研究对象 |
+|----------------------|----------|
+| `MIIT` | 工信部车型与申报研究 |
+| `auto_launch` | 新车上市与竞争动态研究 |
+| `nev_apeal` | 新能源用户体验研究 |
+| `project_4 / project_5` | 未来项目（应符合上述准则再立项） |
+
+`mashang_workspace/` 与它们**不是同一概念**：workspace 是**日常业务分析工作区**，回答"今天我要查什么、算什么"；Research Applications 回答"我要持续研究的一个长期问题"。当前 `nev_apeal` 是第一个成熟、已具备 engine/state/contracts/gate/artifacts 的 Research Application，作为迁入 Runtime V2 编排的优先候选。
 
 ---
 
-# 2. Four-layer Design
+# 2. Layered Design
 
-## 2.1 Shared Layer
+五层命名与定义见 §1（冻结）。以下为各层实现要点。
+
+## 2.1 Shared Layer（Semantic Foundation）
 
 目录：
 
@@ -520,7 +547,7 @@ shared 只存放稳定业务原语。
 
 ---
 
-## 2.2 Workspace Layer
+## 2.2 Daily Business Analytics Workspace（mashang_workspace）
 
 目录：
 
@@ -528,13 +555,11 @@ shared 只存放稳定业务原语。
 mashang_workspace/
 ```
 
-这是项目最重要的工作区。
+**日常业务分析工作区**：解决"今天我要查什么、算什么、分析什么"（锁单、库存、门店、车型、渠道等高频、相对确定的业务分析）。这是项目最重要的日常工作区，也是 OpenCode 的主要工作区域。
 
-推荐日常所有分析工作都从这里开始。
+推荐日常所有分析工作都从这里开始。负责：
 
-负责：
-
-- 能力孵化；
+- 能力孵化（research_scripts → runtime_scripts）；
 - 数据探索；
 - Runtime Script 管理；
 - Result Contract；
@@ -543,11 +568,11 @@ mashang_workspace/
 - 文档沉淀；
 - 能力治理。
 
-OpenCode 的主要工作区域也应当是 Workspace。
+成熟后的 `runtime_scripts` 会被 Unified Research Runtime（mashang_runtime_v2）以确定性方式调用。
 
 ---
 
-## 2.3 Runtime V2 Layer
+## 2.3 Unified Research Runtime（mashang_runtime_v2）
 
 目录：
 
@@ -555,17 +580,26 @@ OpenCode 的主要工作区域也应当是 Workspace。
 mashang_runtime_v2/
 ```
 
-用于验证新的 Runtime 架构。
+**统一研究 Runtime**。消费两类对象：
+
+```text
+mashang_runtime_v2
+├── Tool / Capability invocation
+│     └── mashang_workspace（确定性业务分析，Result Contract）
+└── Research Application orchestration
+      ├── MIIT / auto_launch / nev_apeal / project_4 / project_5
+      └── 长期驱动、持续产出状态与成果的研究程序
+```
 
 原则：
 
 ```text
 Runtime V2 不重新发明分析能力；
-Runtime V2 优先消费 Workspace 中已经治理完成的能力；
-Runtime V2 统一消费 Result Contract。
+Runtime V2 调用 Workspace 中已经治理完成的能力，统一消费 Result Contract；
+Runtime V2 长期编排独立 Research Applications。
 ```
 
-最小运行链路：
+当前已实现的最小运行链路（确定性分析一侧）：
 
 ```text
 user text
@@ -583,9 +617,11 @@ Result Contract
 response_renderer
 ```
 
+Research Application 编排为演进目标，见 §1「Research Applications（冻结定义）」。
+
 ---
 
-## 2.4 Runtime Layer
+## 2.4 Legacy Runtime Layer（mashang_runtime，frozen）
 
 目录：
 
@@ -593,22 +629,7 @@ response_renderer
 mashang_runtime/
 ```
 
-产品能力层。
-
-这里不承担探索工作，而承担：
-
-- 稳定能力沉淀；
-- 高频能力复用；
-- 产品接口输出；
-- 飞书机器人能力；
-- API 能力。
-
-原则：
-
-```text
-Workspace 负责成长能力；
-Runtime 负责承载成熟能力。
-```
+Legacy / frozen 旧 Runtime（产品化沉淀层的历史形态，已冻结）。operators/schema 的 canonical 版本已迁移至 `shared/`，不再作为活跃开发目录；不作为新能力回流目标。
 
 ---
 
