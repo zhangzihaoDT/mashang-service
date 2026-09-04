@@ -19,15 +19,19 @@ mashang-service/                   # 总项目根目录
 ├── dataset/                       # 共享原始数据
 │   └── TP&MIX-ways/       #   └── 乘用车上险数据（6 张 Parquet + registry + quality）
 ├── requirements.txt               # 共享依赖
-├── mashang_shared/               # shared operators / schema 层，谨慎修改
+├── shared/               # Semantic Foundation — shared operators / schema 层，谨慎修改
 │
 ├── mashang_runtime/             # Legacy runtime (frozen, packaged)
 │   └── README.md
 │
-├── mashang_runtimeV2/           # Runtime V2 / 产品化沉淀层，承接 workspace 验证稳定后的能力
+├── mashang_runtime_v2/           # Unified Research Runtime（编排层）：调用 workspace 确定性能力 + 编排 Research Applications
 │   └── README.md
 │
-└── mashang_workspace/             # ← AI-native 分析工作区（当前所在目录）
+├── capabilities/                 # Base Capabilities（领域无关原语：OCR/Search/Notify…）
+│
+├── MIIT/ auto_launch/ nev_apeal/ # Research Applications（独立研究型子项目；runtime_v2 编排目标）
+│
+└── mashang_workspace/             # ← Daily Business Analytics Workspace（日常业务分析工具箱；当前所在目录）
 │   ├── AGENTS.md                  # 本文件
 │   ├── README.md
 │   ├── docs/
@@ -49,7 +53,7 @@ mashang-service/                   # 总项目根目录
 3. **优先使用已有 runtime_scripts/ / research_scripts/ / utility_scripts/ 脚本**
 4. **临时分析写入 outputs/，稳定后再沉淀到 runtime_scripts/**
 5. **所有分析结果说明数据来源、时间窗口、口径**
-6. **高频能力产品化路径**：先在 workspace 内沉淀（`runtime_scripts/`）；经过明确 V2 任务后迁移至 `mashang_runtimeV2/`。旧 `mashang_runtime/` 不作为回流目标。
+6. **高频能力产品化路径**：先在 workspace 内沉淀（`runtime_scripts/`），供 `mashang_runtime_v2`（Unified Research Runtime）确定性调度；不要绕过 workspace 直接在 runtime_v2 开发，也不把业务代码复制进 runtime_v2 或 legacy `mashang_runtime/`。
 7. **每次改动后运行 `make eval` 或 `make ci`**
 8. **脚本分层规则**：
     - `runtime_scripts/`：可被 Agent 或 Makefile 调用的稳定运行脚本。

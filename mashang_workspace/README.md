@@ -1,9 +1,9 @@
-# mashang_workspace — AI-native 数据分析工作区
+# mashang_workspace — Daily Business Analytics Workspace
 
 ## 定位
 
-mashang_workspace 是面向 OpenCode / Claude Code 等 AI Coding Agent 的**标准化数据分析工作区**。
-与 `mashang_runtime`（产品化 Runtime）共享 `dataset/` `.env` `.venv` 等底座资源。
+`mashang_workspace` 是 **Daily Business Analytics Workspace（日常业务分析工作区）**：面向 OpenCode / Claude Code 等 AI Coding Agent 的标准化业务分析工具箱，解决"今天要查什么、算什么、分析什么"（锁单、库存、门店、车型、渠道等高频、相对确定的业务分析）。
+与 `mashang_runtime_v2`（Unified Research Runtime）共享 `dataset/` `.env` `.venv` 等底座资源；成熟能力以 `runtime_scripts` 形态被 runtime_v2 确定性调度。
 
 ## 目录结构
 
