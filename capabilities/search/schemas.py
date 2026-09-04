@@ -68,7 +68,7 @@ class SearchRequest:
     limit: int = 10
     snippet_length: int = 500
     use_cache: bool = True
-    cache_ttl: int = DEFAULT_TTL
+    cache_ttl: Optional[int] = DEFAULT_TTL
     cache_dir: Optional[str] = None
     refresh: bool = False
     timeout: int = 30

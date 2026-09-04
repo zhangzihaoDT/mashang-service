@@ -42,6 +42,7 @@ def search_multi(
     refresh: bool = False,
     timeout: int = 30,
     retries: int = 3,
+    cache_ttl: Optional[int] = None,
     cache_dir: Optional[str] = None,
 ) -> list[SearchResponse]:
     """Run several queries; one failing query does not interrupt the others."""
@@ -56,6 +57,7 @@ def search_multi(
             refresh=refresh,
             timeout=timeout,
             retries=retries,
+            cache_ttl=cache_ttl,
             cache_dir=cache_dir,
         )
         out.append(search(request))

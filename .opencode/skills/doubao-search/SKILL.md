@@ -12,7 +12,9 @@ metadata:
 
 ## 职责边界
 
-`scripts/search.py` 是一个**底层检索原语**，只负责 API 调用与结果归一化，不负责"怎么研究"。
+**底层检索原语位于 Base Capability `capabilities/search`**（namespace `capabilities.search`，provider `doubao_global`），
+只负责 API 调用、retry、24h 本地缓存与结果归一化，不负责"怎么研究"。
+本 skill 的 `scripts/search.py` 只是调用该原语的**薄壳**，保持历史命令与输出形状不变。
 
 **你（Agent）负责：**
 
@@ -25,12 +27,13 @@ metadata:
 7. 去重并综合证据
 8. 区分事实与推断
 
-**本技能不包含**（这些属于 auto_launch 业务层，不要迁移进来）：
+**本技能不包含**（这些属于 auto_launch 业务层 / capabilities，不要迁移进来）：
 - compile_intent / intent 分类
 - query_profiles / search_templates（预算、模板）
 - 品牌侦察 / 事件映射
 - fact_store / normalize / audit
 - 固定 budget plan
+- 底层传输实现（retry/缓存/归一化 — 在 `capabilities/search`）
 
 ## 搜索
 
