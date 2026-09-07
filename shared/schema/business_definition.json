@@ -46,7 +46,7 @@
     },
     "CM3": {
       "start": "2026-09-10",
-      "end": "2026-09-26"
+      "end": "2026-09-24"
     }
   },
   "presale_periods": {
@@ -178,17 +178,8 @@
   },
   "series_group_logic_priority_semantics": "series_group_logic 每条规则为 {priority, condition}。priority 是纯优先级（precedence），仅用于重叠规则裁决：数值大的规则优先命中，同分按书写顺序（first-match-wins）；跨车系、互不重叠的规则可共用同一档（LS6 家族 3>2>1，L6 家族 3>2>1，独立车系 LS8/LS9/LS7/L7 均为 1）。执行器按 priority 降序、同分按书写顺序取首个命中。兼容旧格式：值为字符串时视为 {priority: 0, condition: 字符串}。",
   "model_series_mapping": {
-    "LS6": [
-      "CM0",
-      "CM1",
-      "CM2",
-      "CM3"
-    ],
-    "L6": [
-      "DM0",
-      "DM1",
-      "DM2"
-    ]
+    "LS6": ["CM0", "CM1", "CM2", "CM3"],
+    "L6": ["DM0", "DM1", "DM2"]
   },
   "ls9_variant_logic": {
     "Hyper": "product_name LIKE '%Hyper%' AND product_name LIKE '%LS9%'",
@@ -196,10 +187,7 @@
     "66 Ultra": "product_name = '智己LS9 66 Ultra'",
     "52 Ultra 线控版": "product_name = '智己LS9 52 Ultra 线控版'"
   },
-  "age_limit": [
-    18,
-    80
-  ],
+  "age_limit": [18, 80],
   "business_knowledge": {
     "main_selling_models_seats_6": {
       "updated_at": "2026-03",
@@ -238,10 +226,7 @@
         "9144030067666689X0",
         "91440101675663750L"
       ],
-      "example_personal": [
-        "110101199001011234",
-        "31010120000101567X"
-      ],
+      "example_personal": ["110101199001011234", "31010120000101567X"],
       "business_meaning": "对公批售订单不具有个人锁单流程（lock_time 为空），order_type 通常也为空。此类订单在计算终端零售开票数时应排除（仅统计用户车口径）。"
     }
   }

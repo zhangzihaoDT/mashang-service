@@ -92,6 +92,7 @@ def parse_arguments():
     
     end_date = datetime.now().date() - timedelta(days=1)
     start_date = end_date
+    is_mtd = False
     
     if args.start and args.end:
         try:
@@ -101,7 +102,8 @@ def parse_arguments():
             print("❌ 日期格式错误，请使用 YYYY-MM-DD")
             sys.exit(1)
     elif args.mtd:
-        # 如果使用了 --mtd 参数
+        # 仅当未显式指定 --start/--end 时，--mtd 决定运行模式语义
+        is_mtd = True
         end_date = datetime.now().date() - timedelta(days=1)
         start_date = end_date.replace(day=1)
     elif args_to_remove:
@@ -109,7 +111,7 @@ def parse_arguments():
         start_date = datetime.now().date() - timedelta(days=days_back)
         end_date = datetime.now().date() - timedelta(days=1)
     
-    return start_date, end_date, args.dry_run
+    return start_date, end_date, args.dry_run, is_mtd
 
 def load_business_definition(file_path):
     """加载业务定义文件"""
@@ -546,16 +548,17 @@ def get_predicted_lock(assign_date_str: str) -> tuple[float | None, float | None
         return None, None, str(e)
 
 
-def compute_mtd_mom(df, lock_stats, invoice_stats):
+def compute_mtd_mom(df, lock_stats, invoice_stats, is_mtd=False):
     """
-    仅 MTD（当月1日累计至今）模式：计算上月同周期累计的锁单/开票环比。
-    返回 dict（含 lock_pct / invoice_pct，均为百分比数值，无基期时为 None）；
+    仅 MTD 模式（用户显式 --mtd）下计算上月同周期累计的锁单/开票环比。
+    返回 dict：lock_pct / invoice_pct（百分比数值，无基期时为 None）、
+    基期 prev_start / prev_end、以及 lock_prev / invoice_prev（供日志/debug 或双值文案）；
     非 MTD 模式返回 None。
     """
+    if not is_mtd:
+        return None
     start_date = lock_stats["start_date"]
     end_date = lock_stats["end_date"]
-    if start_date.day != 1:
-        return None
 
     import calendar
     prev_year = start_date.year if start_date.month > 1 else start_date.year - 1
@@ -577,14 +580,21 @@ def compute_mtd_mom(df, lock_stats, invoice_stats):
     return {
         "lock_pct": _pct(lock_stats["total"], prev_lock["total"]),
         "invoice_pct": _pct(invoice_stats["total"], prev_invoice["total"]),
+        "prev_start": prev_start,
+        "prev_end": prev_end,
+        "lock_prev": prev_lock["total"],
+        "invoice_prev": prev_invoice["total"],
     }
 
 
-def _format_mom(pct):
+def _format_mom(pct, prev_start=None, prev_end=None):
     if pct is None:
         return ""
+    if prev_start is None or prev_end is None:
+        return ""
     sign = "+" if pct >= 0 else ""
-    return f"（环比{sign}{pct:.1f}%）"
+    base = f"{prev_start.month}/{prev_start.day}~{prev_end.month}/{prev_end.day}"
+    return f"（较上月同期 {base} {sign}{pct:.1f}%）"
 
 
 def _format_lock_model_detail(stats) -> str:
@@ -864,19 +874,24 @@ def upsert_bitable_observation(lock_stats, invoice_stats, pred_lock: float | Non
         return False
 
 
-def send_feishu_notification(lock_stats, invoice_stats, pred_lock=None, mom=None):
+def send_feishu_notification(lock_stats, invoice_stats, pred_lock=None, mom=None, is_mtd=False):
     """发送飞书通知"""
     if not WEBHOOK_URL:
         print("❌ 错误: 未设置 FS_WEBHOOK_URL 环境变量，跳过发送消息")
         return
 
-    lock_mom_note = _format_mom((mom or {}).get("lock_pct"))
-    invoice_mom_note = _format_mom((mom or {}).get("invoice_pct"))
+    lock_mom_note = _format_mom((mom or {}).get("lock_pct"), (mom or {}).get("prev_start"), (mom or {}).get("prev_end"))
+    invoice_mom_note = _format_mom((mom or {}).get("invoice_pct"), (mom or {}).get("prev_start"), (mom or {}).get("prev_end"))
 
-    # 构建标题日期字符串
+    # 构建标题日期字符串（语义来源为用户运行的 --mtd 模式，而非日期形状反推）
     start_date = lock_stats['start_date']
     end_date = lock_stats['end_date']
-    if start_date == end_date:
+    if is_mtd:
+        date_str = f"{start_date} ~ {end_date}"
+        title_prefix = "本月累计"
+        lock_label = "本月累计锁单"
+        invoice_label = "本月累计开票"
+    elif start_date == end_date:
         date_str = str(start_date)
         title_prefix = "每日"
         lock_label = "昨日锁单数"
@@ -979,7 +994,7 @@ def send_feishu_notification(lock_stats, invoice_stats, pred_lock=None, mom=None
 
 def main():
     # 0. 解析参数
-    start_date, end_date, dry_run = parse_arguments()
+    start_date, end_date, dry_run, is_mtd = parse_arguments()
     
     # 1. 加载数据
     df = load_data(PARQUET_FILE)
@@ -999,18 +1014,21 @@ def main():
 
     if lock_stats and invoice_stats:
         # MTD 模式下计算上月同周期环比
-        mom = compute_mtd_mom(df, lock_stats, invoice_stats)
-        lock_mom_note = _format_mom((mom or {}).get("lock_pct"))
-        invoice_mom_note = _format_mom((mom or {}).get("invoice_pct"))
+        mom = compute_mtd_mom(df, lock_stats, invoice_stats, is_mtd=is_mtd)
+        lock_mom_note = _format_mom((mom or {}).get("lock_pct"), (mom or {}).get("prev_start"), (mom or {}).get("prev_end"))
+        invoice_mom_note = _format_mom((mom or {}).get("invoice_pct"), (mom or {}).get("prev_start"), (mom or {}).get("prev_end"))
 
         # 打印结果到控制台
         print("\n" + "="*30)
-        if start_date == end_date:
+        if is_mtd:
+            print(f"📅 本月累计: {start_date} ~ {end_date}")
+        elif start_date == end_date:
             print(f"📅 日期: {start_date}")
         else:
             print(f"📅 日期范围: {start_date} ~ {end_date}")
 
-        print(f" 总锁单数: {lock_stats['total']}{lock_mom_note}")
+        lock_print_label = "本月累计锁单" if is_mtd else "总锁单数"
+        print(f" {lock_print_label}: {lock_stats['total']}{lock_mom_note}")
         print("   车型分布:")
         for model, stats in lock_stats['models'].items():
             count = stats["count"]
@@ -1036,7 +1054,8 @@ def main():
             corp_note = f"，不含对公批售 {total_corp} 台" + (f"（{corp_detail}）" if corp_detail else "")
         else:
             corp_note = ""
-        print(f"🚚 总开票数: {invoice_stats['total']} ({invoice_stats['total_user_car']}) 台{invoice_mom_note}{corp_note}")
+        invoice_print_label = "本月累计开票" if is_mtd else "总开票数"
+        print(f"🚚 {invoice_print_label}: {invoice_stats['total']} ({invoice_stats['total_user_car']}) 台{invoice_mom_note}{corp_note}")
         print("   车型分布 (开票):")
         for model, info in invoice_stats['models'].items():
             price_display = f"{info['avg_price']/10000:.1f}w" if info['avg_price'] > 0 else "N/A"
@@ -1052,7 +1071,7 @@ def main():
         elif BITABLE_APP_TOKEN and BITABLE_TABLE_ID:
             msg = str(_LAST_BITABLE_ERROR or "").strip()
             print("⚠️ 多维表格写入失败或未授权，已跳过" + (f"（{msg[:200]}）" if msg else ""))
-        send_feishu_notification(lock_stats, invoice_stats, pred_lock, mom=mom)
+        send_feishu_notification(lock_stats, invoice_stats, pred_lock, mom=mom, is_mtd=is_mtd)
 
 if __name__ == "__main__":
     main()
