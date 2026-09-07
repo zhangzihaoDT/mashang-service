@@ -42,6 +42,7 @@ from research_scripts.l6_m2_presale_metrics_to_feishu import (
     _parse_logic,
     _rule_condition,
 )
+from utils.regions import REGION_MAP_OLD_TO_NEW
 
 OPEN_HOUR = 20
 N_DAYS = 7
@@ -53,24 +54,6 @@ DATASET = REPO_ROOT / "dataset"
 ORDER_PARQUET = DATASET / "order_data.parquet"
 ASSIGN_CSV = DATASET / "assign_data.csv"
 CONFIG_PARQUET = DATASET / "config_attribute.parquet"
-
-# 大区架构归一：DM1 预售期为旧架构（一区/二区/三区-*），DM2 为新架构（东区/西区/北区-*）。
-# 按省份组后缀映射到新架构；未命中时保留原名。
-REGION_MAP_OLD_TO_NEW = {
-    "一区-苏皖": "东区-江苏",
-    "一区-浙江": "东区-浙江",
-    "一区-闽赣": "东区-闽赣",
-    "一区-鲁豫": "东区-鲁豫",
-    "二区-鄂桂湘": "华中区",
-    "二区-川云": "西区-川云",
-    "二区-贵渝": "西区-贵渝",
-    "三区-京津东北": "北区-京津东北",
-    "三区-山河": "北区-山河",
-    "三区-西北": "北区-西北",
-    "上海区": "上海区",
-    "华南特区": "华南特区",
-    "虚拟大区": "虚拟大区",
-}
 
 
 def _fmt_int(v) -> str:
