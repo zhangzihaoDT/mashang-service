@@ -46,5 +46,9 @@
   {
     "title": "有效锁单当量 (ELOE – Effective Locked Order Equivalent)",
     "summary": "对当前悬置池（待开票未退订锁单）逐单估计条件开票概率 P(最终开票 | Lock Age)（v1）或 P(最终开票 | Lock Age, Series)（v2 带 sample-size shrinkage，向全局曲线回缩），累加为有效锁单当量 ELOE，并派生 Backlog 有效率 = ELOE ÷ 悬置池、风险暴露量 = 悬置池 − ELOE。支持按车系过滤。方法为 conditional outcome curve / landmark probability。"
+  },
+  {
+    "title": "复购 / 老车主拆分",
+    "summary": "按 owner_identity_no 将窗口内零售锁单拆为四个互斥桶：prior_fulfilled（窗口前已兑现购车）/ prior_unfulfilled（悬置历史，已锁未兑现）/ no_prior_history（首购）/ unknown_identity（身份无效）。mode=fulfilled_repurchase（默认，canonical）仅计 prior_fulfilled 为复购；mode=prior_locker（宽松对照）计 prior_fulfilled + prior_unfulfilled。兑现判定以交付/开票事件时间早于窗口开始为界，PIT 不穿越。"
   }
 ]

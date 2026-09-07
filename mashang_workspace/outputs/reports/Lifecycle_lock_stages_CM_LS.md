@@ -7,7 +7,7 @@
 > - 无换代车型（LS8/LS9，或 CM2 换代车型尚未上市）：右界 = as-of 前一日（"至今"）
 > as-of = **2026-09-02**，"至今" = **2026-09-01**
 > 方法：7 日周块聚合 → DP 分段常数分割，**统一 k=5**；周段边界映射回日
-> 脚本：`research_scripts/l6_lock_lifecycle_stages.py`
+> 脚本：`research_scripts/lock_lifecycle_stages.py`
 
 ---
 

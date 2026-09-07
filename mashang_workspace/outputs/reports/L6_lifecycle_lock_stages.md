@@ -4,7 +4,7 @@
 > 口径：零售（`order_type ∈ {用户车, NaN}`，排除试驾车）；锁单 = `lock_time` 非空 COUNTD(order_number)；代际归属按 `business_definition.json` 的 `series_group_logic`
 > 生命周期窗口（本代 `end` → 换代车型 `end-1`）：DM0 = **2024-05-13 ~ 2025-05-12**，DM1 = **2025-05-13 ~ 2026-08-27**
 > 方法：7 日周块聚合 → DP 分段常数分割，**统一 k=5**（两代际可比）；周段边界映射回日
-> 脚本：`research_scripts/l6_lock_lifecycle_stages.py`
+> 脚本：`research_scripts/lock_lifecycle_stages.py`
 
 ---
 
@@ -75,7 +75,7 @@
 
 | 类型 | 路径 |
 |---|---|
-| JSON（Result Contract） | `outputs/tables/l6_lock_lifecycle_stages.json` |
+| JSON（Result Contract） | `outputs/tables/lifecycle_lock_stages_DM0_DM1.json` |
 | DM0 图表 | `outputs/charts/L6_DM0_lifecycle_lock_stages.png` |
 | DM1 图表 | `outputs/charts/L6_DM1_lifecycle_lock_stages.png` |
 | 本报告 | `outputs/reports/L6_lifecycle_lock_stages.md` |

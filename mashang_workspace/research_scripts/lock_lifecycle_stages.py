@@ -23,10 +23,10 @@ LS8/LS9/LS9Hyper 等）在其生命周期内的每日锁单变化阶段。
      并对照业务锚点（end/finish/换代 end / 至今）。
 
 用法:
-  python research_scripts/l6_lock_lifecycle_stages.py
-  python research_scripts/l6_lock_lifecycle_stages.py --gen CM0 CM1 CM2 --n-segments 6
-  python research_scripts/l6_lock_lifecycle_stages.py --format json --output outputs/tables/
-  python research_scripts/l6_lock_lifecycle_stages.py --chart --output outputs/charts/
+  python research_scripts/lock_lifecycle_stages.py
+  python research_scripts/lock_lifecycle_stages.py --gen CM0 CM1 CM2 --n-segments 6
+  python research_scripts/lock_lifecycle_stages.py --format json --output outputs/tables/
+  python research_scripts/lock_lifecycle_stages.py --chart --output outputs/charts/
 """
 
 from __future__ import annotations
@@ -410,7 +410,7 @@ def main(argv=None) -> int:
     if args.format == "json":
         payload = {
             "status": "success",
-            "script": "research_scripts/l6_lock_lifecycle_stages.py",
+            "script": "research_scripts/lock_lifecycle_stages.py",
             "scope": {
                 "data_source": "dataset/order_data.parquet",
                 "filters": {"order_type": "用户车/NaN（零售口径）",

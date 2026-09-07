@@ -119,6 +119,16 @@
         "required": ["df", "as_of"],
         "optional": ["train_window_days", "maturity_days", "current_start", "series", "model", "shrinkage"]
       }
+    },
+    "repurchase": {
+      "name": "复购 / 老车主拆分",
+      "intent": "repurchase",
+      "dataset": "order_data",
+      "description": "按 owner_identity_no 将窗口内零售锁单拆为四互斥桶（prior_fulfilled/prior_unfulfilled/no_prior_history/unknown_identity），mode=fulfilled_repurchase 仅计 prior_fulfilled 为复购（默认，canonical）；mode=prior_locker 计 prior_fulfilled+prior_unfulfilled（宽松对照）。兑现判定以事件时间早于窗口开始为界（PIT 不穿越）",
+      "parameters": {
+        "required": ["df", "window_start", "window_end"],
+        "optional": ["mode", "series", "series_col", "identity_col"]
+      }
     }
   },
   "intent_map": {
@@ -193,6 +203,12 @@
       "metric_names": ["有效锁单当量", "ELOE", "effective_locked_orders", "有效待交付当量"],
       "dataset": "order_data",
       "query_hints": ["ELOE", "有效锁单当量", "有效待交付当量", "悬置", "backlog"]
+    },
+    "repurchase": {
+      "operator": "repurchase",
+      "metric_names": ["复购"],
+      "dataset": "order_data",
+      "query_hints": ["复购"]
     }
   }
 }

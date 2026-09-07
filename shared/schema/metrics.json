@@ -127,6 +127,30 @@
       "type": "operator",
       "operator": "effective_locked_orders"
     },
+    "复购锁单数": {
+      "dataset": "order_data",
+      "field": "order_number",
+      "agg": "count",
+      "time_field": "lock_time",
+      "aliases": ["复购"],
+      "group": "用户画像",
+      "type": "operator",
+      "operator": "repurchase",
+      "mode": "fulfilled_repurchase",
+      "value": "summary.repeat"
+    },
+    "复购率": {
+      "dataset": "order_data",
+      "field": "order_number",
+      "agg": "count",
+      "time_field": "lock_time",
+      "aliases": ["老车主复购率", "复购占比"],
+      "group": "用户画像",
+      "type": "operator",
+      "operator": "repurchase",
+      "mode": "fulfilled_repurchase",
+      "value": "summary.repeat_rate"
+    },
     "下发线索数": {
       "dataset": "assign_data",
       "field": "下发线索数",
@@ -317,7 +341,7 @@
     },
     "用户画像": {
       "description": "用户特征指标",
-      "metrics": ["购车人年龄", "车主年龄", "年龄代际分布"]
+      "metrics": ["购车人年龄", "车主年龄", "年龄代际分布", "复购锁单数", "复购率"]
     },
     "地域分析": {
       "description": "地域分布指标",
