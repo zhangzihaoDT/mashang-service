@@ -127,6 +127,82 @@ def _detect_section(header_cells: list[str]) -> str | None:
     return None
 
 
+def _is_section_title(value: str) -> bool:
+    """段标题杂项（如 '（二）重型商用车'）混在数据行尾部时识别丢弃。"""
+    if not value:
+        return False
+    return any(ch in value for ch in "（）()一二三四五六七八九十、sectionTitle") and not value[0].isdigit()
+
+
+def _extract_tables(lines: list[str]) -> list[tuple[str, list[str]]]:
+    """将 txt 行流解析为 [(section, all_cells)]。
+
+    textutil 对 Word 表格的导出有两种形态：
+      - 89 批式：表头 + 全部数据挤在同一行（行以 "序号" 开头）
+      - 90 批式：表头被拆成两行（"序号…" 行 + 以 "(" 开头的表头续行），
+        数据全部跟在表头续行之后
+    因此需要跨行累积表头，识别 section 后再由公共逻辑解析数据。
+
+    天然气轻型/重型同列名，无法从表头区分，需要读取表格前的独立段标题
+    （如 "1.天然气重型商用车"）。
+    """
+    tables: list[tuple[str, list[str]]] = []
+    pending: dict | None = None  # {"sec": str|None, "cells": [str]}
+    last_heading: str = ""
+
+    def flush():
+        nonlocal pending, last_heading
+        if pending is None:
+            return
+        sec = pending["sec"]
+        if sec is None:
+            sec = _detect_section(pending["cells"])
+        if sec == "天然气":
+            heading = pending.get("heading", "")
+            sec = ("天然气重型商用车" if "重型" in heading
+                   else "天然气轻型商用车")
+        if sec:
+            tables.append((sec, pending["cells"]))
+        pending = None
+
+    for raw_line in lines:
+        stripped = raw_line.strip()
+        if not stripped:
+            continue
+        cells = [c.strip() for c in stripped.split(SEP)]
+
+        if stripped.startswith("序号"):
+            flush()
+            pending = {
+                "sec": _detect_section(cells),
+                "cells": cells,
+                "heading": last_heading,  # 表格开始时就快照其段标题
+            }
+            continue
+
+        if pending is None:
+            # 无活动表格时，独立段标题/散文行
+            if SEP not in stripped:
+                last_heading = stripped
+            continue
+
+        if SEP not in stripped:
+            # 独立段标题（如 1.天然气重型商用车）：更新，供下一表格使用
+            last_heading = stripped
+            continue
+        if stripped.startswith(("(", "（")):
+            # 表头续行：并入 pending 表头后重试识别 section
+            pending["cells"].extend(cells)
+            if pending["sec"] is None:
+                pending["sec"] = _detect_section(pending["cells"])
+        else:
+            # 数据续行（理论上 90 批应为表头续行携带全部数据）
+            pending["cells"].extend(cells)
+
+    flush()
+    return tables
+
+
 def parse_txt(input_path: str) -> dict:
     """Main parse function: reads txt → structured dict"""
     raw = Path(input_path).read_text(encoding="utf-8")
@@ -146,26 +222,12 @@ def parse_txt(input_path: str) -> dict:
     }
 
     known_brands = set()
-    gas_occurrence = 0
 
-    for line in lines:
-        stripped = line.strip()
-        if not stripped.startswith("序号"):
-            continue
-        cells = [c.strip() for c in stripped.split(SEP)]
-
-        section = _detect_section(cells)
-        if section is None:
-            continue  # 序号 单独一行等非扁平格式，跳过
-        if section == "天然气":
-            gas_occurrence += 1
-            section = ("天然气轻型商用车" if gas_occurrence == 1
-                       else "天然气重型商用车")
-
+    for section, all_cells in _extract_tables(lines):
         schema = SECTION_SCHEMAS.get(section, {}).get("schema", [])
         if not schema:
             continue
-        records = _parse_data_line(line, schema)
+        records = _parse_data_cells(all_cells, schema)
 
         result["sections"][section] = {
             "records": records,
@@ -200,24 +262,42 @@ def parse_txt(input_path: str) -> dict:
     return result
 
 
-def _parse_data_line(line: str, schema: list[str]) -> list[OrderedDict]:
-    """Parse one data line (header + all rows) into structured records."""
-    cells = [c.strip() for c in line.strip().split(SEP)]
-    row_width = len(schema) + 1
+def _find_data_start(all_cells: list[str]) -> int:
+    """定位第一条数据行起点。
 
-    if len(cells) <= row_width:
+    表头因跨行拆分宽度不固定（如 "序号…" 行 + "(…)" 续行），
+    但任何表格第一条数据行都以纯整数"序号"开头，以此为可靠边界。
+    """
+    for i, cell in enumerate(all_cells):
+        if cell and cell.isdigit():
+            return i
+    return len(all_cells)
+
+
+def _parse_data_cells(all_cells: list[str], schema: list[str]) -> list[OrderedDict]:
+    """从表格全量 cells（表头 + 数据）解析记录。
+
+    数据区以第一个纯整数单元格（序号）作为起点，其后按固定行宽分组，
+    兼顾拆行表头与合并单元格两种形态。
+    """
+    row_width = len(schema) + 1
+    start = _find_data_start(all_cells)
+    if start == 0 or len(all_cells) <= start + row_width:
         return []
 
-    data_cells = cells[row_width:]
+    data_cells = all_cells[start:]
     rows = _group_into_rows(data_cells, row_width)
     rows = _apply_inheritance(rows)
 
-    records = []
+    records: list[OrderedDict] = []
     for row in rows:
         clean_row = row[:len(schema)]
         record = OrderedDict()
         for i, key in enumerate(schema):
             record[key] = clean_row[i] if i < len(clean_row) and clean_row[i] else None
+        seq = record.get("序号", "")
+        if not seq or not seq[0].isdigit():
+            continue  # 段标题杂项，非有效记录
         records.append(record)
     return records
 
@@ -229,8 +309,8 @@ def _group_into_rows(data_cells: list[str], row_width: int) -> list[list[str]]:
         if len(current) == row_width:
             rows.append(current)
             current = []
-    if current:
-        rows.append(current)
+    # 丢弃末尾未满行：Word 导出尾部常混入下一节段标题或空单元格，
+    # 继承填充后会形成读数错误的幽灵记录
     return rows
 
 

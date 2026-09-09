@@ -283,8 +283,9 @@ def main():
     parser.add_argument("--all", action="store_true", help="生成全部分类报告")
     parser.add_argument("--batch", default="", help="公告批次号（如 410）；空则默认 409 配置")
     parser.add_argument("--tax-json", default="", help="车船税 JSON 路径（默认按批次自动匹配）")
-    parser.add_argument("--output-dir", default="miit_category_reports",
-                        help="HTML 输出目录（相对路径落在 reports/ 下，默认 miit_category_reports）")
+    parser.add_argument("--output-dir", default="",
+                        help="HTML 输出目录（相对路径落在 reports/ 下）。"
+                             "未指定时：给了 --batch 则默认 batch_{batch}/category_report，否则 miit_category_reports")
     parser.add_argument("--dry-run", action="store_true", help="仅预览，不生成 HTML")
     args = parser.parse_args()
 
@@ -296,7 +297,10 @@ def main():
     if args.batch:
         default_tax = _apply_batch(args.batch)
 
-    output_dir = Path(args.output_dir)
+    output_dir = Path(args.output_dir) if args.output_dir else (
+        Path(f"batch_{args.batch}/category_report") if args.batch
+        else Path("miit_category_reports")
+    )
     if not output_dir.is_absolute():
         output_dir = REPORTS_DIR / output_dir
     tax_path = Path(args.tax_json) if args.tax_json else default_tax

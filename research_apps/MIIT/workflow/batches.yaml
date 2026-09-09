@@ -29,3 +29,12 @@
   vehicle_tax_batch: 89
   scan_file: scan_batch_410.md
   tax_file: 车型清单_第89批车船税.json
+
+411:
+  notice_date: 2026-09-08
+  archive_date: 2026-09-09
+  page_id: 6e2409267b5f42c798f1d591764caa1a
+  index: xcpgs411sdwdw3
+  vehicle_tax_batch: 90
+  scan_file: scan_batch_411.md
+  tax_file: 车型清单_第90批车船税.json

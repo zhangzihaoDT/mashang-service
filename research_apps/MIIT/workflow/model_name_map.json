@@ -56,6 +56,61 @@
       "name": "iCar V27 Max",
       "confidence": "high",
       "note": "5055mm 增程 SUV，命名 iCar V27 Max"
+    },
+    "CC6500DL21BHEV": {
+      "name": "魏牌V6X",
+      "confidence": "medium",
+      "note": "用户提供映射，2026-09-09，未核实媒体来源，待确认"
+    },
+    "CC6510DG21BHEV": {
+      "name": "魏牌V8X",
+      "confidence": "medium",
+      "note": "用户提供映射，2026-09-09，未核实媒体来源，待确认"
+    },
+    "CC6510DG21HABEV": {
+      "name": "魏牌V8X",
+      "confidence": "medium",
+      "note": "用户提供映射，2026-09-09，未核实媒体来源，待确认"
+    },
+    "MR6521BEV101": {
+      "name": "极氪009光辉",
+      "confidence": "medium",
+      "note": "5217mm/3205/4座 纯电 MPV，用户提供映射，2026-09-09，待确认"
+    },
+    "MR6481BEV106": {
+      "name": "极氪7X",
+      "confidence": "medium",
+      "note": "4825mm/2925/5座 纯电 SUV，用户提供映射，2026-09-09，待确认"
+    },
+    "SQR6450BEVT1VA2": {
+      "name": "捷途环游者",
+      "confidence": "medium",
+      "note": "用户提供映射，2026-09-09，未核实媒体来源，待确认"
+    },
+    "SQR6450BEVT1VA3": {
+      "name": "捷途环游者",
+      "confidence": "medium",
+      "note": "用户提供映射，2026-09-09，未核实媒体来源，待确认"
+    },
+    "LXA6503BEVW04": {
+      "name": "理想i6",
+      "confidence": "medium",
+      "note": "4950mm/3000 纯电 SUV，用户提供映射，2026-09-09，待确认"
+    },
+    "LXA6503BEVW05": {
+      "name": "理想i6",
+      "confidence": "medium",
+      "note": "4950mm/3000 纯电 SUV，用户提供映射，2026-09-09，待确认"
+    },
+    "LXA6503BEVW06": {
+      "name": "理想i6",
+      "confidence": "medium",
+      "note": "4950mm/3000 纯电 SUV，用户提供映射，2026-09-09，待确认"
+    },
+    "LXA6540BEVW12": {
+      "name": "理想MegaHome",
+      "confidence": "medium",
+      "note": "5355mm/3300/7座 纯电 MPV，用户提供映射，2026-09-09，待确认"
     }
   }
 }

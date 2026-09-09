@@ -465,7 +465,10 @@ def build_record(model: dict, md: dict | None, tax: dict) -> dict:
             elif "增程" in name:
                 power = "插电式增程混合动力"
             elif "混合" in fuel or "混合" in name:
-                power = "插电式混合动力"
+                if "插电式" in name:
+                    power = "插电式混合动力"
+                else:
+                    power = "混合动力(HEV)"
             elif "燃料电池" in name:
                 power = "燃料电池"
     mid = model["model_id"]
@@ -616,15 +619,22 @@ def build_record(model: dict, md: dict | None, tax: dict) -> dict:
     r["_bat_mass_hi"] = _bm_hi
     r["_range_num"] = elec_range
     r["_curb_num"] = curb_weight
+    power_type = r.get("动力形式", "")
     if not tax_available:
-        r["missing_reason"] = "来源未覆盖（附件2车船税未收录该车型）"
+        if "HEV" in power_type or ("混合动力" in power_type and "插电式" not in power_type):
+            r["missing_reason"] = "HEV（非插电混合动力）不在车船税减免目录，电池容量/续航不适用"
+        elif "纯电动" in power_type and "混合" not in power_type:
+            r["missing_reason"] = "纯电乘用车不在车船税目录；待对应购置税目录批次发布后补充"
+        else:
+            r["missing_reason"] = "来源未覆盖（附件2车船税未收录该车型）"
     else:
         r["missing_reason"] = ""
-    power_type = r.get("动力形式", "")
     if tax_available:
         r["metric_scope"] = "全数据"
     elif "纯电动" in power_type and "混合" not in power_type:
-        r["metric_scope"] = "仅增程/插混（纯电车型附件2未覆盖）"
+        r["metric_scope"] = "待购置税目录（纯电乘用车电池/续航待购置税目录批次补充）"
+    elif "HEV" in power_type or "混合动力" in power_type:
+        r["metric_scope"] = "HEV（非插电混合动力，附件2车船税目录不含，属预期）"
     else:
         r["metric_scope"] = "数据缺失"
 
@@ -750,7 +760,10 @@ def build_eidc_record(source_record: dict, tax_rec: dict | None = None,
         elif "增程" in product_name:
             energy_type = "插电式增程混合动力"
         elif "混合" in product_name:
-            energy_type = "插电式混合动力"
+            if "插电式" in product_name:
+                energy_type = "插电式混合动力"
+            else:
+                energy_type = "混合动力(HEV)"
         elif "燃料电池" in product_name:
             energy_type = "燃料电池"
     r["energy_type"] = energy_type
@@ -792,7 +805,7 @@ def build_eidc_record(source_record: dict, tax_rec: dict | None = None,
         r["metric_scope"] = "全数据"
     else:
         if energy_type == "纯电动":
-            r["metric_scope"] = "数据缺失"
+            r["metric_scope"] = "待购置税目录（纯电乘用车电池/续航待购置税目录批次补充）"
         elif energy_type:
             r["metric_scope"] = (f"非纯电车型"
                                  f"（tax hit={r['vehicle_tax_match_flag']} pur hit={r['purchase_tax_match_flag']}）")

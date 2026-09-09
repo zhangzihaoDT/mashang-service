@@ -142,7 +142,10 @@ def extract_all_params(md_data: dict, model_id: str, tax_index: dict) -> Ordered
     elif "增程" in md_data.get("产品名称", ""):
         p["申报动力形式"] = "插电式增程混合动力"
     elif "混合" in md_data.get("燃料种类", ""):
-        p["申报动力形式"] = "插电式混合动力"
+        if "插电式" in md_data.get("产品名称", ""):
+            p["申报动力形式"] = "插电式混合动力"
+        else:
+            p["申报动力形式"] = "混合动力(HEV)"
 
     if p.get("申报动力形式", "") != "纯电动":
         parts = []
@@ -206,6 +209,13 @@ def extract_all_params(md_data: dict, model_id: str, tax_index: dict) -> Ordered
     if curb:
         p["整备质量"] = f"{curb}kg"
 
+    # 纯电乘用车占位：车船税目录只收纯电商用车，电池容量/续航待购置税目录批次补充
+    if p.get("申报动力形式") == "纯电动":
+        if "电池容量" not in p:
+            p["电池容量"] = "待购置税目录"
+        if "纯电续航（WLTC）" not in p:
+            p["纯电续航（WLTC）"] = "待购置税目录"
+
     return p
 
 
@@ -224,7 +234,7 @@ def discover_models(brand: str = "", tax_index: dict | None = None,
     for md_file in sorted(VEHICLE_DETAILS_DIR.glob(f"{batch}_*.md")):
         md_data = read_md(md_file)
         cpsb = md_data.get("产品商标", "")
-        if brand and cpsb and brand not in cpsb.replace("牌", ""):
+        if brand and cpsb and (brand.replace("牌", "") not in cpsb.replace("牌", "")):
             continue
         stem = md_file.name.split("-", 1)[0]          # "{batch}_{model_id}"
         model_id = stem.split("_", 1)[1]

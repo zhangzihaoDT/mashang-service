@@ -372,11 +372,35 @@ body {{
 
 
 def update_batch_index(batch: str):
+    """向 workflow/docs/公告批次.md 追加一行批次索引，信息取自唯一来源 batches.yaml。
+
+    字段无法从 yaml 完整推导时，回退为最小占位行（不再写死 409 的值）。
+    """
     path = BATCH_INDEX_DOC
     lines = path.read_text(encoding="utf-8").splitlines()
     if any(f"| {batch} " in line for line in lines):
         return
-    new_row = f"| {batch} | 2026-07-07 | [公告页](https://www.miit.gov.cn/datainfo/cpgg/art/2026/art_55c31979bd934c1dac88e3976bc7570a.html) | 见简报 |"
+
+    from miit_paths import load_batches  # noqa: E402
+    cfg = load_batches().get(str(batch))
+    if cfg:
+        notice_date = cfg.get("notice_date", "")
+        notice_url = (f"https://www.miit.gov.cn/jgsj/zbys/qcgy/art/2026/"
+                      f"art_{cfg.get('page_id', '')}.html") if cfg.get("page_id") else cfg.get("notice_url", "")
+        tax_batch = cfg.get("vehicle_tax_batch", "")
+        tax_link = (f"[车船税第{tax_batch}批](../data/vehicle_tax/车型清单_第{tax_batch}批车船税.md)"
+                    if tax_batch else "")
+        scan_link = f"[品牌搜索简报](../reports/batch_{batch}/scan_report.html)"
+        cells = [
+            batch, notice_date,
+            f"[公示页]({notice_url})" if notice_url else "—",
+            "公示页（附件含新车清单" + (f"+车船税第{tax_batch}批" if tax_batch else "") + "）",
+            scan_link, tax_link or "—", "",
+        ]
+        new_row = "| " + " | ".join(cells) + " |"
+    else:
+        new_row = f"| {batch} | — | — | — | — | — | |"
+
     for i in range(len(lines) - 1, -1, -1):
         if lines[i].strip().startswith("|"):
             lines.insert(i + 1, new_row)

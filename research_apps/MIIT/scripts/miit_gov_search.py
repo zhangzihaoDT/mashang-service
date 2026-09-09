@@ -102,7 +102,7 @@ def search_batch(batch: str, cpsb: str = "", qymc: str = "") -> dict:
     search_obj = {
         "title": "",
         "PICI": batch,
-        "QYMC": qymc or " ",
+        "QYMC": qymc,
         "CPSB": cpsb,
         "CPMC": "",
         "CPXH": "",
