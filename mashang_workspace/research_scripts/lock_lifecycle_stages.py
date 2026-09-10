@@ -45,12 +45,8 @@ for p in (str(REPO_ROOT), str(_WS)):
     if p not in sys.path:
         sys.path.insert(0, p)
 
-from research_scripts.l6_m2_launch_lock_metrics_to_feishu import (  # noqa: E402
-    _parse_logic,
-    _rule_condition,
-    apply_series_group_logic,
-    load_business_definition,
-)
+from utils.monitors.phase import load_business_definition  # noqa: E402
+from utils.monitors.series_group import apply_series_group_logic  # noqa: E402
 
 _BUSINESS_DEF = REPO_ROOT / "shared" / "schema" / "business_definition.json"
 ORDER_PARQUET = REPO_ROOT / "dataset" / "order_data.parquet"
@@ -74,9 +70,7 @@ def load_order() -> pd.DataFrame:
     df = pd.read_parquet(ORDER_PARQUET)
     df["lock_time"] = pd.to_datetime(df["lock_time"], errors="coerce")
     bd = load_business_definition(_BUSINESS_DEF)
-    asts = {g: _parse_logic(_rule_condition(c))
-            for g, c in bd["series_group_logic"].items()}
-    df = apply_series_group_logic(df, bd, asts)
+    df = apply_series_group_logic(df, bd)
     df = df[(df["order_type"].isna()) | (df["order_type"] == "用户车")].copy()
     return df
 

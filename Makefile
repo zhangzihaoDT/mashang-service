@@ -1,5 +1,5 @@
 PYTHON ?= .venv/bin/python
-.PHONY: eval full-eval core-eval research-eval capability-audit test ci data-dict lock-demo parser-demo followup-demo numeric-eval reference-eval atp-demo backtest-demo clean-outputs dataset-update dataset-validate daily-observation-dry-run daily-observation-sync daily-data-pipeline-dry-run daily-data-pipeline render-official-doc render-official-doc-smoke production-golden build-workspace-skills-catalog build-workspace-capability-inventory inventory-status inventory-trend inventory-report lock-attribution lock-attribution-compare
+.PHONY: eval full-eval core-eval research-eval capability-audit test ci data-dict lock-demo parser-demo followup-demo numeric-eval reference-eval atp-demo backtest-demo clean-outputs dataset-update dataset-validate daily-observation-dry-run daily-observation-sync daily-data-pipeline-dry-run daily-data-pipeline monitor monitor-dry-run scheduler render-official-doc render-official-doc-smoke production-golden build-workspace-skills-catalog build-workspace-capability-inventory inventory-status inventory-trend inventory-report lock-attribution lock-attribution-compare
 
 ## 生成 Eval 结果（显式产物 unified_eval_result.json）
 ## 用法: make eval [SUITE=default|ci|all|research|core]
@@ -229,6 +229,28 @@ daily-data-pipeline-dry-run: dataset-validate daily-observation-dry-run
 ## 注意：会刷新 dataset 并同步外部系统
 daily-data-pipeline: dataset-update dataset-validate daily-observation-sync
 
+## ─── Vehicle Sales Monitor（预售/上市监控）─────────────────────────
+
+## 统一预售/上市监控（自动判定 active 代际 + phase；AS_OF/SERIES/PHASE/FORMAT 可选）
+## 用法: make monitor [AS_OF=2026-09-10] [SERIES=CM3] [PHASE=presale] [FORMAT=json]
+monitor:
+	$(PYTHON) mashang_workspace/runtime_scripts/vehicle_sales_monitor.py \
+		$(if $(AS_OF),--as-of $(AS_OF)) \
+		$(if $(SERIES),--series $(SERIES)) \
+		$(if $(PHASE),--phase $(PHASE)) \
+		$(if $(FORMAT),--format $(FORMAT))
+
+## 预售/上市监控 dry-run（只打印卡片，不发送飞书）
+monitor-dry-run:
+	$(PYTHON) mashang_workspace/runtime_scripts/vehicle_sales_monitor.py --dry-run \
+		$(if $(AS_OF),--as-of $(AS_OF)) \
+		$(if $(SERIES),--series $(SERIES)) \
+		$(if $(PHASE),--phase $(PHASE))
+
+## 常驻定时器：09:00 全量刷新 + key day 日内刷新/监控（配合 caffeinate -i）
+scheduler:
+	$(PYTHON) schedule_launch_lock_evening_updates.py
+
 ## 单日 DC 库存变动分析（默认昨天）
 dc-inventory-change:
 	$(PYTHON) mashang_workspace/runtime_scripts/daily_dc_inventory_change.py
@@ -417,6 +439,11 @@ help:
 	@echo "make daily-data-pipeline-dry-run  管道 dry-run（安全预检）"
 	@echo "make daily-data-pipeline      完整管道（含写操作）"
 	@echo "make daily-sync-dry-run       [DEPRECATED]"
+	@echo ""
+	@echo "=== Vehicle Sales Monitor ==="
+	@echo "make monitor                  预售/上市监控（自动判定 active 代际 + phase）"
+	@echo "make monitor-dry-run          监控 dry-run（只打印卡片）"
+	@echo "make scheduler                常驻定时器（刷新 + key day 高频监控）"
 	@echo ""
 	@echo "=== Render ==="
 	@echo "make render-official-doc       正式材料排版渲染（Markdown→PDF/HTML/DOCX）"

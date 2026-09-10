@@ -361,6 +361,32 @@ class TestLaunchEvents:
         finally:
             os.unlink(tmp)
 
+    def _parse_tmp_events(self, periods, as_of):
+        import json, tempfile, os
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+            json.dump({"time_periods": periods}, f)
+            tmp = f.name
+        try:
+            return self.bt.parse_launch_events(tmp, as_of=as_of)
+        finally:
+            os.unlink(tmp)
+
+    def test_missing_finish_current_generation_truncated_to_as_of(self):
+        """当前代际（end <= as_of）finish 缺失 → 窗口截断到 as_of，仍纳入回测。"""
+        events = self._parse_tmp_events(
+            {"CUR": {"start": "2025-05-01", "end": "2025-06-01"}}, as_of="2025-06-20"
+        )
+        assert len(events) == 1
+        assert bool(events["is_open_ended"].iloc[0])
+        assert events["benefit_end_date"].iloc[0] == pd.Timestamp("2025-06-20")
+
+    def test_missing_finish_future_generation_skipped(self):
+        """未来代际（end > as_of）finish 缺失 → 跳过，不报错。"""
+        events = self._parse_tmp_events(
+            {"FUT": {"start": "2026-09-10", "end": "2026-09-24"}}, as_of="2026-09-10"
+        )
+        assert events.empty
+
     def _make_test_event(self, start=None, end="2025-06-01", finish="2025-07-01"):
         """Create a temporary event definition and return parsed events."""
         import json, tempfile, os

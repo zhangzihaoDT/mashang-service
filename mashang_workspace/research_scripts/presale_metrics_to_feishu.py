@@ -1,15 +1,14 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""上市锁单监控 CLI（发送飞书）— 通用代际版。
+"""通用预售小订监控 CLI（发送飞书）。
 
-历史为 L6 M2（DM2）上市监控，现已泛化为任意 series_group_logic 代际；
-计算逻辑收敛到 utils/monitors/launch.py，口径来自 business_definition.json。
+代际口径全部来自 shared/schema/business_definition.json + monitor 配置，
+脚本不再硬编码 DM2/CM3。
 
 用法:
-    python research_scripts/l6_m2_launch_lock_metrics_to_feishu.py            # 默认 DM2
-    python research_scripts/l6_m2_launch_lock_metrics_to_feishu.py --series CM3
-    python research_scripts/l6_m2_launch_lock_metrics_to_feishu.py --series CM3 --dry-run
-    python research_scripts/l6_m2_launch_lock_metrics_to_feishu.py --as-of 2026-09-24
+    python research_scripts/presale_metrics_to_feishu.py --series CM3
+    python research_scripts/presale_metrics_to_feishu.py --series CM3 --dry-run
+    python research_scripts/presale_metrics_to_feishu.py --series CM3 --as-of 2026-09-10
+    python research_scripts/presale_metrics_to_feishu.py            # 默认当前 presale 代际
 """
 
 from __future__ import annotations
@@ -36,11 +35,10 @@ except ImportError:
     pass
 
 from capabilities.notify.notify_service import notify  # noqa: E402
-from utils.monitors.launch import build_card, compute  # noqa: E402
-from utils.monitors.phase import load_business_definition  # noqa: E402
+from utils.monitors.phase import detect_active, load_business_definition  # noqa: E402
+from utils.monitors.presale import build_card, compute  # noqa: E402
 from utils.monitors.series_group import apply_series_group_logic  # noqa: E402
 
-DEFAULT_SERIES = "DM2"
 ORDER_PARQUET = REPO_ROOT / "dataset" / "order_data.parquet"
 DATETIME_COLS = [
     "intention_payment_time",
@@ -61,11 +59,10 @@ def load_order() -> pd.DataFrame:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="读取 order_data.parquet 并发送车型上市锁单监控指标到飞书")
-    parser.add_argument("--series", type=str, default=DEFAULT_SERIES,
-                        help=f"要监控的代际（series_group_logic 键，默认 {DEFAULT_SERIES}）")
-    parser.add_argument("--dry-run", action="store_true", help="只打印不发送飞书")
-    parser.add_argument("--as-of", type=str, default=None, help="指定统计基准日 YYYY-MM-DD（默认今天）")
+    parser = argparse.ArgumentParser(description="通用预售小订监控（飞书）")
+    parser.add_argument("--series", default=None, help="代际（series_group_logic 键），默认当前 presale 代际")
+    parser.add_argument("--dry-run", action="store_true", help="只打印卡片，不发送飞书")
+    parser.add_argument("--as-of", default=None, help="统计基准日 YYYY-MM-DD（默认今天）")
     args = parser.parse_args()
 
     if not ORDER_PARQUET.exists():
@@ -73,15 +70,18 @@ def main() -> int:
         return 1
 
     bdef = load_business_definition()
-    series = args.series.strip()
-    if series not in bdef.get("series_group_logic", {}):
-        print(f"⚠️ 警告: 车型 '{series}' 不在 series_group_logic 中，但仍会继续执行。")
-    if series not in bdef.get("time_periods", {}):
-        print(f"⚠️ 警告: 车型 '{series}' 不在 time_periods 中，无法解析上市日。")
+    today = pd.Timestamp(args.as_of) if args.as_of else pd.Timestamp(datetime.now().date())
+
+    series = args.series
+    if not series:
+        active = detect_active(bdef, today, phases=("presale",))
+        if not active:
+            print(f"⚠️ {today.date()} 无 presale 代际")
+            return 0
+        series = active[0]["generation"]
 
     print(f"📖 Loading: {ORDER_PARQUET}（series={series}）")
     df = apply_series_group_logic(load_order(), bdef)
-    today = pd.Timestamp(args.as_of) if args.as_of else pd.Timestamp(datetime.now().date())
     metrics = compute(df, bdef, today, series)
     card = build_card(metrics, show_notes=args.dry_run)
 

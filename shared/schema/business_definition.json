@@ -129,7 +129,7 @@
   "series_group_logic": {
     "CM3": {
       "priority": 4,
-      "condition": "product_name LIKE '%M3%' AND product_name LIKE '%LS6%'"
+      "condition": "product_name LIKE '%M3%' AND product_name LIKE '%LS6%' OR product_name LIKE '%全新一代智己LS6%'"
     },
     "CM2": {
       "priority": 3,
@@ -180,6 +180,26 @@
   "model_series_mapping": {
     "LS6": ["CM0", "CM1", "CM2", "CM3"],
     "L6": ["DM0", "DM1", "DM2"]
+  },
+  "monitor": {
+    "description": "预售/上市监控配置：open_hour 按代际（默认 20:00）、series_labels 展示名、compare_by_series 历史对标代际、launch_window_days 上市窗口、freshness 数据新鲜度 gate。",
+    "default_open_hour": 20,
+    "open_hour_by_series": {
+      "CM3": 19
+    },
+    "series_labels": {
+      "CM3": "全新一代 LS6",
+      "DM2": "L6 M2"
+    },
+    "compare_by_series": {
+      "LS6": ["CM2", "CM1", "CM0"],
+      "L6": ["DM1", "CM2", "LS9", "LS8"]
+    },
+    "launch_window_days": 14,
+    "freshness": {
+      "max_staleness_hours": 2,
+      "key_day_hours": [17, 18, 19, 20, 21, 22, 23]
+    }
   },
   "ls9_variant_logic": {
     "Hyper": "product_name LIKE '%Hyper%' AND product_name LIKE '%LS9%'",

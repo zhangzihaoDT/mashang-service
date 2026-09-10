@@ -16,6 +16,7 @@ workspace 为 first-match-wins）。
 
 import importlib.util
 import json
+import sys
 from pathlib import Path
 
 import pandas as pd
@@ -24,6 +25,8 @@ import pytest
 _WS_DIR = Path(__file__).resolve().parents[1]
 _PRJ_DIR = _WS_DIR.parent
 _BUSINESS_DEF = _PRJ_DIR / "shared" / "schema" / "business_definition.json"
+if str(_WS_DIR) not in sys.path:
+    sys.path.insert(0, str(_WS_DIR))
 
 
 def _load_module(name: str, rel_path: str):
@@ -39,7 +42,7 @@ def _load_module(name: str, rel_path: str):
 def _executors():
     return {
         "shared": _load_module("shared_sgl", "shared/operators/series_group_logic.py"),
-        "l6m2": _load_module("l6m2", "mashang_workspace/research_scripts/l6_m2_presale_metrics_to_feishu.py"),
+        "monitors": _load_module("monitors_sgl", "mashang_workspace/utils/monitors/series_group.py"),
     }
 
 
@@ -72,6 +75,13 @@ CASES = [
     ("智己LS6 Max", "CM0"),
     ("新一代智己LS6 Max", "CM2"),
     ("上汽一亿台限定版智己LS6", "CM2"),
+    # —— LS6 CM3（M3 工程代号 + 全新一代市场命名）——
+    ("LS6 M3 92 RWD", "CM3"),
+    ("LS6 M3 76RWD", "CM3"),
+    ("全新一代智己LS6", "CM3"),
+    ("全新一代智己LS6 Max", "CM3"),
+    ("全新一代智己LS6 Pro Max", "CM3"),
+    ("全新一代智己LS6 Ultra", "CM3"),
     # —— 独立车系 ——
     ("智己LS9", "LS9"),
     ("智己LS8", "LS8"),
@@ -93,7 +103,7 @@ def test_dm2_precedence_higher_than_broad_rules():
         return int(rule["priority"])
 
     assert prio("DM2") > prio("DM1") > prio("DM0")
-    assert prio("CM2") > prio("CM1") > prio("CM0")
+    assert prio("CM3") > prio("CM2") > prio("CM1") > prio("CM0")
     assert prio("DM0") == prio("CM0") == prio("LS8") > 0
     assert prio("其他") == 0
 
@@ -104,12 +114,11 @@ def test_shared_operator_classification(_executors):
     assert out["series_group_logic"].tolist() == [g for _, g in CASES]
 
 
-def test_workspace_l6m2_classification_consistent_with_shared(_executors):
+def test_monitors_classification_consistent_with_shared(_executors):
+    """监控层 series_group 入口应与 shared operator 分类完全一致。"""
     bdef = _bdef()
-    l6m2 = _executors["l6m2"]
     df = pd.DataFrame({"product_name": [c for c, _ in CASES]})
-    asts = {g: l6m2._parse_logic(l6m2._rule_condition(c)) for g, c in bdef["series_group_logic"].items()}
-    out = l6m2._apply_series_group_logic(df, bdef, asts)
+    out = _executors["monitors"].apply_series_group_logic(df, bdef)
     assert out["series_group_logic"].tolist() == [g for _, g in CASES]
 
     shared_df = pd.DataFrame({"product_name": [c for c, _ in CASES]})
@@ -128,3 +137,21 @@ def test_m2_orders_never_fall_into_dm0_dm1(_executors):
     assert m2_mask.any(), "数据集中应存在 M2/Jimmy 订单"
     groups = out.loc[m2_mask, "series_group_logic"].unique().tolist()
     assert groups == ["DM2"], f"M2/Jimmy 订单被错分到 {groups}"
+
+
+# CM3 目标样本：M3 工程代号 + 全新一代市场命名，均应归 CM3
+CM3_CASES = [
+    "全新一代智己LS6",
+    "全新一代智己LS6 Max",
+    "全新一代智己LS6 Pro Max",
+    "全新一代智己LS6 Ultra",
+    "LS6 M3 76RWD",
+    "LS6 M3 92 RWD",
+]
+
+
+def test_cm3_recognizes_m3_and_new_generation(_executors):
+    """CM3 规则应同时覆盖 M3 工程代号与全新一代智己LS6 市场命名。"""
+    df = pd.DataFrame({"product_name": CM3_CASES})
+    out = _executors["shared"].apply_series_group_logic(df, _bdef())
+    assert out["series_group_logic"].tolist() == ["CM3"] * len(CM3_CASES), out.to_dict("records")

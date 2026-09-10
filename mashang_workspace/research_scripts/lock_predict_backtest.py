@@ -142,7 +142,15 @@ def load_daily_lock_count():
 
 # ── Launch Event Parsing ──
 
-def parse_launch_events(source_path=None):
+def parse_launch_events(source_path=None, as_of=None):
+    """解析代际上市事件。
+
+    `finish`（权益结束）是业务事实，不强制填写：
+      - 历史代际：有 finish → 完整窗口回测；
+      - 当前代际：已上市（end <= as_of）但 finish 缺失 → 窗口截断到 as_of；
+      - 未来代际：尚未上市（end > as_of）且 finish 缺失 → 跳过。
+    `as_of` 缺省取当天；主流程应传入数据最新日期（cutoff）。
+    """
     global HAS_EVENTS
     path = Path(source_path or EVENT_SOURCE)
     if not path.exists():
@@ -156,6 +164,7 @@ def parse_launch_events(source_path=None):
         warnings.warn("事件定义文件中无 time_periods")
         HAS_EVENTS = False
         return pd.DataFrame()
+    as_of_ts = pd.Timestamp(as_of).normalize() if as_of is not None else pd.Timestamp.now().normalize()
     rows = []
     for eid, info in periods.items():
         # end is required
@@ -174,15 +183,22 @@ def parse_launch_events(source_path=None):
                 start_dt = pd.Timestamp(info["start"]).normalize()
             except Exception:
                 raise ValueError(f"事件 {eid} 的 start 日期非法: {info['start']}")
-        # finish is required
-        if "finish" not in info:
-            raise ValueError(f"事件 {eid} 缺少必要字段 'finish'")
-        try:
-            finish_dt = pd.Timestamp(info["finish"]).normalize()
-        except Exception:
-            raise ValueError(f"事件 {eid} 的 finish 日期非法: {info['finish']}")
-        if pd.isna(finish_dt):
-            raise ValueError(f"事件 {eid} 的 finish 无法解析为日期: {info['finish']}")
+        # finish 可选：缺失时按“当前 / 未来代际”处理
+        is_open_ended = False
+        if info.get("finish"):
+            try:
+                finish_dt = pd.Timestamp(info["finish"]).normalize()
+            except Exception:
+                raise ValueError(f"事件 {eid} 的 finish 日期非法: {info['finish']}")
+            if pd.isna(finish_dt):
+                raise ValueError(f"事件 {eid} 的 finish 无法解析为日期: {info['finish']}")
+        else:
+            if end_dt > as_of_ts:
+                # 未来代际：尚未上市，无可用观察窗口 → 跳过
+                continue
+            # 当前代际：窗口截断到 as_of（数据最新日）
+            finish_dt = as_of_ts
+            is_open_ended = True
         row = {
             "event_id": eid, "event_name": eid, "event_type": "launch",
             "event_date": end_dt,  # keep for backward compat
@@ -190,9 +206,13 @@ def parse_launch_events(source_path=None):
             "launch_date": end_dt,
             "benefit_end_date": finish_dt,
             "has_presale": start_dt is not None,
+            "is_open_ended": is_open_ended,
             "source": str(path),
         }
         rows.append(row)
+    if not rows:
+        HAS_EVENTS = False
+        return pd.DataFrame()
     events = pd.DataFrame(rows).sort_values("event_date").reset_index(drop=True)
     HAS_EVENTS = len(events) > 0
     return events
@@ -1352,7 +1372,7 @@ def main():
         rd = compute_baseline_rolling_rate(df, rd)
 
         # ── Launch Event Experiment ──
-        events = parse_launch_events()
+        events = parse_launch_events(as_of=cutoff)
         rd = compute_event_features(rd, events)
         coeffs_list = compute_rolling_event_coefficients(rd, df, events)
         rd["cohort_pred_treatment_c1"] = rd["cohort_pred_30_lock"]

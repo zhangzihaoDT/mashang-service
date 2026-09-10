@@ -41,12 +41,8 @@ for p in (str(REPO_ROOT), str(_WS)):
     if p not in sys.path:
         sys.path.insert(0, p)
 
-from research_scripts.l6_m2_launch_lock_metrics_to_feishu import (  # noqa: E402
-    load_business_definition,
-    apply_series_group_logic,
-    _parse_logic,
-    _rule_condition,
-)
+from utils.monitors.phase import load_business_definition  # noqa: E402
+from utils.monitors.series_group import apply_series_group_logic  # noqa: E402
 from utils.result_contract import (  # noqa: E402
     build_success_contract,
     save_contract_json,
@@ -290,7 +286,6 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     business_def = load_business_definition(_BUSINESS_DEF)
-    asts = {g: _parse_logic(_rule_condition(c)) for g, c in business_def["series_group_logic"].items()}
     periods = business_def.get("time_periods", {}) or {}
 
     print(f"📖 Loading: {_ORDER_DATA}")
@@ -298,7 +293,7 @@ def main(argv: list[str] | None = None) -> int:
     for c in ["lock_time", "intention_payment_time", "intention_refund_time", "deposit_payment_time", "delivery_date"]:
         if not pd.api.types.is_datetime64_any_dtype(df[c]):
             df[c] = pd.to_datetime(df[c], errors="coerce")
-    df = apply_series_group_logic(df, business_def, asts)
+    df = apply_series_group_logic(df, business_def)
 
     as_of = pd.Timestamp(args.as_of) if args.as_of else pd.Timestamp(datetime.now().date())
     as_of = min(as_of, pd.Timestamp(df["lock_time"].max()).normalize() + pd.Timedelta(days=1))

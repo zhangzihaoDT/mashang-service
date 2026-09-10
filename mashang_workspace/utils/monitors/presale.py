@@ -1,0 +1,284 @@
+"""预售小订监控 — 泛化 compute + 飞书卡片。
+
+口径来自 shared/schema/business_definition.json：
+  - time_periods.{generation}.start = 预售起点
+  - monitor.open_hour_by_series.{generation} = 预售开放时刻（默认 20:00）
+  - monitor.compare_by_series = 历史对标代际
+
+调用方需先对 df 应用 series_group_logic（列 `series_group_logic`）。
+"""
+
+from __future__ import annotations
+
+from datetime import datetime
+
+import pandas as pd
+
+from utils.monitors.phase import (
+    compare_keys,
+    open_hour,
+    series_label,
+)
+
+
+def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generation: str) -> dict:
+    time_periods: dict = business_def.get("time_periods", {})
+    tp = time_periods.get(generation, {}) or {}
+    start = pd.Timestamp(tp["start"]) if tp.get("start") else None
+    end = pd.Timestamp(tp["end"]) if tp.get("end") else None
+    open_h = open_hour(business_def, generation)
+    label = series_label(business_def, generation)
+
+    if start is not None:
+        n_raw = int((today.normalize() - start.normalize()).days + 1)  # type: ignore[union-attr]
+    else:
+        n_raw = 1
+    n = max(1, n_raw)
+
+    base = df.loc[
+        df["intention_payment_time"].notna(),
+        [
+            "order_number",
+            "intention_payment_time",
+            "intention_refund_time",
+            "series_group_logic",
+            "product_name",
+            "parent_region_name",
+            "buyer_identity_no",
+            "store_name",
+        ],
+    ].copy()
+
+    metrics = {
+        "generation": generation,
+        "label": label,
+        "open_hour": open_h,
+        "today": today.date().isoformat(),
+        "series_start": start.date().isoformat() if start is not None else None,
+        "series_end": end.date().isoformat() if end is not None else None,
+        "n": n,
+        "n_raw": n_raw,
+        "cum": 0,
+        "retention": 0,
+        "retention_users": 0,
+        "peak_hour": None,
+        "peak_count": 0,
+        "next_hour_count": 0,
+        "start_day_total": 0,
+        "launch_day_total": 0,
+        "launch_day_retention": 0,
+        "n_day_cum": 0,
+        "retention_by_product": [],
+        "retention_by_region": [],
+        "retention_no_region": 0,
+        "compare": {},
+    }
+
+    if start is None:
+        return metrics
+
+    open_t = start + pd.Timedelta(hours=open_h)
+
+    current_mask = (
+        base["series_group_logic"].eq(generation)
+        & (base["intention_payment_time"] >= open_t)
+        & (base["intention_payment_time"] < (today + pd.Timedelta(days=1)))
+    )
+
+    metrics["cum"] = int(base.loc[current_mask, "order_number"].nunique())
+
+    retention_slice = base.loc[
+        current_mask & base["intention_refund_time"].isna(),
+        ["order_number", "product_name", "parent_region_name", "buyer_identity_no", "store_name"],
+    ]
+    metrics["retention"] = int(retention_slice["order_number"].nunique()) if not retention_slice.empty else 0
+
+    if not retention_slice.empty:
+        order_counts_per_user = retention_slice.groupby("buyer_identity_no")["order_number"].nunique()
+        metrics["retention_users"] = int((order_counts_per_user == 1).sum())
+
+        product_counts = retention_slice.groupby("product_name")["order_number"].nunique()
+        metrics["retention_by_product"] = sorted(
+            [
+                {
+                    "product_name": p,
+                    "count": int(c),
+                    "share": round(c / metrics["retention"] * 100, 1),
+                    "limited": "限量版" in (p or ""),
+                }
+                for p, c in product_counts.items()
+            ],
+            key=lambda x: x["count"],
+            reverse=True,
+        )
+
+        region_rows = []
+        for region_name, region_slice in retention_slice.groupby("parent_region_name"):
+            count = int(region_slice["order_number"].nunique())
+            cr5 = None
+            store_counts = region_slice.dropna(subset=["store_name"]).groupby("store_name")["order_number"].nunique()
+            total = float(store_counts.sum())
+            if total > 0:
+                cr5 = round(float(store_counts.nlargest(5).sum()) / total * 100, 1)
+            region_rows.append(
+                {
+                    "region_name": region_name,
+                    "count": count,
+                    "share": round(count / metrics["retention"] * 100, 1),
+                    "cr5": cr5,
+                }
+            )
+        metrics["retention_by_region"] = sorted(region_rows, key=lambda x: x["count"], reverse=True)
+        metrics["retention_no_region"] = int(
+            retention_slice.loc[retention_slice["parent_region_name"].isna(), "order_number"].nunique()
+        )
+
+    day_slice = base.loc[
+        base["series_group_logic"].eq(generation)
+        & (base["intention_payment_time"] >= open_t)
+        & (base["intention_payment_time"] < (open_t + pd.Timedelta(hours=24))),
+        ["order_number", "intention_payment_time"],
+    ].copy()
+    if not day_slice.empty:
+        day_slice["hour"] = day_slice["intention_payment_time"].dt.hour.astype("int64")
+        hourly = day_slice.groupby("hour")["order_number"].nunique().reindex(range(24), fill_value=0)
+        peak_hour = int(hourly.idxmax())
+        metrics["peak_hour"] = peak_hour
+        metrics["peak_count"] = int(hourly.iloc[peak_hour])
+        metrics["next_hour_count"] = int(hourly.iloc[peak_hour + 1]) if peak_hour < 23 else 0
+        metrics["start_day_total"] = int(hourly.sum())
+
+    launch_day_end = start + pd.Timedelta(days=1)
+    launch_slice = base.loc[
+        base["series_group_logic"].eq(generation)
+        & (base["intention_payment_time"] >= open_t)
+        & (base["intention_payment_time"] < launch_day_end),
+        ["order_number", "intention_refund_time"],
+    ]
+    metrics["launch_day_total"] = int(launch_slice["order_number"].nunique())
+    metrics["launch_day_retention"] = int(
+        launch_slice.loc[
+            launch_slice["intention_refund_time"].isna() | (launch_slice["intention_refund_time"] > launch_day_end),
+            "order_number",
+        ].nunique()
+    )
+
+    if end is not None:
+        window_end_excl = min(open_t + pd.Timedelta(days=n), end + pd.Timedelta(days=1))
+    else:
+        window_end_excl = open_t + pd.Timedelta(days=n)
+    metrics["n_day_cum"] = int(
+        base.loc[
+            base["series_group_logic"].eq(generation)
+            & (base["intention_payment_time"] >= open_t)
+            & (base["intention_payment_time"] < window_end_excl),
+            "order_number",
+        ].nunique()
+    )
+
+    for cmp_key in compare_keys(business_def, generation):
+        cmp_tp = time_periods.get(cmp_key, {}) or {}
+        if not cmp_tp.get("start"):
+            metrics["compare"][cmp_key] = None
+            continue
+        cmp_start = pd.to_datetime(cmp_tp["start"])
+        cmp_open = cmp_start + pd.Timedelta(hours=open_hour(business_def, cmp_key))
+        cmp_window_end = cmp_open + pd.Timedelta(days=n)
+        cmp_slice = base.loc[
+            base["series_group_logic"].eq(cmp_key)
+            & (base["intention_payment_time"] >= cmp_open)
+            & (base["intention_payment_time"] < cmp_window_end)
+            & ((base["intention_refund_time"] > cmp_window_end) | base["intention_refund_time"].isna()),
+            "order_number",
+        ]
+        metrics["compare"][cmp_key] = int(cmp_slice.nunique())
+
+    return metrics
+
+
+def _section(title: str) -> list:
+    return ["", f"**{title}**"]
+
+
+def build_card(metrics: dict, show_notes: bool = False) -> dict:
+    label = metrics.get("label") or metrics["generation"]
+    open_h = metrics.get("open_hour", 20)
+    peak_hour_str = f"{metrics['peak_hour']:02d}:00" if metrics["peak_hour"] is not None else "NA"
+
+    lines = [f"**{label} 预售指标（{metrics['today']}）**"]
+
+    lines += _section("① 核心指标")
+    lines.append(f"当前累计小订数：{metrics['cum']}")
+    lines.append(f"累计留存订单数：{metrics['retention']}")
+    lines.append(f"累计留存唯一订单用户数：{metrics['retention_users']}")
+
+    lines += _section("② 峰值分析")
+    lines.append(f"峰值小时小订数：{metrics['peak_count']}（{peak_hour_str}）")
+    lines.append(f"峰值后 1h：{metrics['next_hour_count']}")
+    lines.append(f"开放后 24h 累计：{metrics['start_day_total']}")
+    lines.append(f"N=0 发布会当日留存（{open_h}:00-24:00）：{metrics['launch_day_retention']}（小订 {metrics['launch_day_total']}）")
+
+    lines += _section("③ 累计")
+    lines.append(f"预售至今累计留存：{metrics['retention']}")
+    lines.append(f"预售至 N 日累计小订：{metrics['n_day_cum']}")
+
+    compare_str = "｜".join(
+        f"{k}（{v}）" if v is not None else f"{k}（无数据）" for k, v in metrics["compare"].items()
+    )
+    lines += _section("④ 对标（同 N 日窗口留存）")
+    lines.append(compare_str)
+
+    lines += _section("⑤ 细分")
+    if metrics.get("retention_by_product"):
+        lines.append("**分 product_name（限量版 / 非限量版）：**")
+        limited_items = [i for i in metrics["retention_by_product"] if i.get("limited")]
+        normal_items = [i for i in metrics["retention_by_product"] if not i.get("limited")]
+        limited_total = sum(i["count"] for i in limited_items)
+        normal_total = sum(i["count"] for i in normal_items)
+        lines.append(f"  · 限量版（{limited_total}）")
+        for item in limited_items:
+            lines.append(f"    - {item['product_name']}：{item['count']}（{item['share']}%）")
+        lines.append(f"  · 非限量版（{normal_total}）")
+        for item in normal_items:
+            lines.append(f"    - {item['product_name']}：{item['count']}（{item['share']}%）")
+    else:
+        lines.append("分 product_name：暂无留存订单")
+
+    if metrics.get("retention_by_region"):
+        lines.append("**分 parent_region_name：**")
+        for item in metrics["retention_by_region"]:
+            cr5_str = f"｜CR5（{item['cr5']}%）" if item.get("cr5") is not None else ""
+            lines.append(f"  - {item['region_name']}：{item['count']}（{item['share']}%）{cr5_str}")
+        no_region = metrics.get("retention_no_region") or 0
+        if no_region > 0:
+            no_region_share = round(no_region / metrics["retention"] * 100, 1) if metrics["retention"] else 0
+            lines.append(f"  - 无大区归属：{no_region}（{no_region_share}%）")
+    else:
+        lines.append("分 parent_region_name：暂无留存订单")
+
+    lines += _section("⑥ 附注")
+    if metrics.get("series_start") and metrics.get("series_end"):
+        lines.append(f"预售期：{metrics['series_start']} ~ {metrics['series_end']}")
+    lines.append(f"口径：从预售开放时刻（{open_h}:00）起算，不含预售日白天零星订单；小订含当日未退意向金订单")
+    lines.append(f"N=0 发布会当日留存：开放 {open_h}:00 至当日 24:00 内支付意向金且未退（退订晚于当日 24:00 视为留存）的唯一订单数")
+    lines.append(f"N（日）= 当前日期 - {metrics['generation']} startday + 1 = {metrics['n']}")
+    lines.append("对标口径：历史代际开放时刻起同样 N 日窗口内，意向金未退的唯一订单数（退订晚于窗口末视为留存）")
+    lines.append("数据源：dataset/order_data.parquet + shared/schema/business_definition.json")
+
+    body_md = "\n".join(lines)
+    return {
+        "msg_type": "interactive",
+        "card": {
+            "header": {
+                "title": {"tag": "plain_text", "content": f"📊 {label} 预售小订监控（{metrics['today']}）"},
+                "template": "blue",
+            },
+            "elements": [
+                {"tag": "div", "text": {"tag": "lark_md", "content": body_md}},
+                {
+                    "tag": "note",
+                    "elements": [{"tag": "plain_text", "content": f"统计时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"}],
+                },
+            ],
+        },
+    }

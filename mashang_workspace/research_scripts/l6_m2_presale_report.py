@@ -36,12 +36,8 @@ for p in (str(REPO_ROOT), str(_WS_ROOT)):
     if p not in sys.path:
         sys.path.insert(0, p)
 
-from research_scripts.l6_m2_presale_metrics_to_feishu import (
-    load_business_definition,
-    _apply_series_group_logic,
-    _parse_logic,
-    _rule_condition,
-)
+from utils.monitors.phase import load_business_definition
+from utils.monitors.series_group import apply_series_group_logic
 from utils.regions import REGION_MAP_OLD_TO_NEW
 
 OPEN_HOUR = 20
@@ -85,8 +81,7 @@ def load_order(apply_group: bool = True) -> pd.DataFrame:
         df[c] = pd.to_datetime(df[c], errors="coerce")
     if apply_group:
         bd = load_business_definition(REPO_ROOT / "shared/schema/business_definition.json")
-        asts = {g: _parse_logic(_rule_condition(c)) for g, c in bd["series_group_logic"].items()}
-        df = _apply_series_group_logic(df, bd, asts)
+        df = apply_series_group_logic(df, bd)
     return df
 
 

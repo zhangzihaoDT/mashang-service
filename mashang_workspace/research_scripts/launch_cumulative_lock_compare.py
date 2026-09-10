@@ -61,13 +61,9 @@ for p in (str(REPO_ROOT), str(_WS)):
     if p not in sys.path:
         sys.path.insert(0, p)
 
-from research_scripts.l6_m2_launch_lock_metrics_to_feishu import (  # noqa: E402
-    _norm_product_name,
-    _parse_logic,
-    _rule_condition,
-    apply_series_group_logic,
-    load_business_definition,
-)
+from utils.monitors.launch import _norm_product_name  # noqa: E402
+from utils.monitors.phase import load_business_definition  # noqa: E402
+from utils.monitors.series_group import apply_series_group_logic  # noqa: E402
 from research_scripts.l6_m2_lock_config_distribution import (  # noqa: E402
     compute_lock_config_distribution,
 )
@@ -118,12 +114,11 @@ def _fmt_int(v) -> str:
 
 def load_data() -> pd.DataFrame:
     bd = load_business_definition(_BUSINESS_DEF)
-    asts = {g: _parse_logic(_rule_condition(c)) for g, c in bd["series_group_logic"].items()}
     df = pd.read_parquet(_ORDER_DATA)
     for c in ["lock_time", "intention_payment_time", "delivery_date"]:
         if c in df.columns and not pd.api.types.is_datetime64_any_dtype(df[c]):
             df[c] = pd.to_datetime(df[c], errors="coerce")
-    df = apply_series_group_logic(df, bd, asts)
+    df = apply_series_group_logic(df, bd)
     return df
 
 

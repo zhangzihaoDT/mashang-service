@@ -36,12 +36,8 @@ for p in (str(REPO_ROOT), str(_WS)):
     if p not in sys.path:
         sys.path.insert(0, p)
 
-from research_scripts.l6_m2_launch_lock_metrics_to_feishu import (  # noqa: E402
-    _parse_logic,
-    _rule_condition,
-    apply_series_group_logic,
-    load_business_definition,
-)
+from utils.monitors.phase import load_business_definition  # noqa: E402
+from utils.monitors.series_group import apply_series_group_logic  # noqa: E402
 from utils.result_contract import build_success_contract  # noqa: E402
 
 _BUSINESS_DEF = REPO_ROOT / "shared" / "schema" / "business_definition.json"
@@ -61,10 +57,9 @@ def _retail_mask(order_type: pd.Series) -> pd.Series:
 def load_order() -> tuple[pd.DataFrame, pd.Timestamp]:
     bd = load_business_definition(_BUSINESS_DEF)
     end = pd.Timestamp(bd["time_periods"][GEN]["end"]).normalize()
-    asts = {g: _parse_logic(_rule_condition(c)) for g, c in bd["series_group_logic"].items()}
     df = pd.read_parquet(_ORDER_DATA)
     df["lock_time"] = pd.to_datetime(df["lock_time"], errors="coerce")
-    df = apply_series_group_logic(df, bd, asts)
+    df = apply_series_group_logic(df, bd)
     return df, end
 
 
