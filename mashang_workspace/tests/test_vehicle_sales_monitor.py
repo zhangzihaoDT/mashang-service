@@ -233,6 +233,29 @@ def test_freshness_flags_stale_and_fresh():
 # ── scheduler ──────────────────────────────────────────────────────
 
 
+def _scheduler_args(**overrides):
+    import argparse
+    sched = _load_scheduler()
+    base = dict(dry_run=False, as_of=None, series=None, phase="presale")
+    base.update(overrides)
+    return sched, argparse.Namespace(**base)
+
+
+def test_scheduler_monitor_cmd_defaults_to_presale(bdef):
+    """常驻/--once 默认只推 presale，避免混入 launch（如 DM2）。"""
+    sched, args = _scheduler_args(dry_run=True)
+    cmd = sched._monitor_cmd(args)
+    assert "--phase" in cmd
+    assert cmd[cmd.index("--phase") + 1] == "presale"
+    assert "--series" not in cmd
+
+    # 显式覆盖时透传
+    sched, args = _scheduler_args(phase="launch,presale", series="DM2,CM3", dry_run=True)
+    cmd = sched._monitor_cmd(args)
+    assert cmd[cmd.index("--phase") + 1] == "launch,presale"
+    assert cmd[cmd.index("--series") + 1] == "DM2,CM3"
+
+
 def test_scheduler_due_actions_key_day_gating(bdef):
     sched = _load_scheduler()
     # 每日 09:00 全量刷新 / 09:30 日报

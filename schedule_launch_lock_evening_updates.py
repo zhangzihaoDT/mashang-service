@@ -7,6 +7,9 @@
   key day 17:00–23:00 每小时 :00  order_data 刷新 + 监控（串行）
   每日 09:30                     监控（日报）
 
+监控默认只推送 presale 阶段代际（--phase presale）；
+需要 launch 监控时显式传 --phase launch,presale 或 --series。
+
 启动方式：
     source .venv/bin/activate
     # 方式一：两个终端
@@ -127,7 +130,7 @@ def run_once(args, bdef: dict) -> int:
 
 def run_loop(args, bdef: dict) -> int:
     log("调度器启动", datetime.now())
-    log(f"  key_day_hours={_key_hours(bdef)}  全量刷新={FULL_REFRESH_TIME}  日报={MONITOR_DAILY_TIME}", datetime.now())
+    log(f"  key_day_hours={_key_hours(bdef)}  全量刷新={FULL_REFRESH_TIME}  日报={MONITOR_DAILY_TIME}  monitor_phase={args.phase}", datetime.now())
     fired: set[str] = set()
     last_minute: tuple[int, int] | None = None
 
@@ -168,7 +171,7 @@ def main() -> int:
     parser.add_argument("--dry-run", action="store_true", help="不真正刷新/发送，只打印/写日志")
     parser.add_argument("--as-of", default=None, help="传给监控的统计基准日 YYYY-MM-DD")
     parser.add_argument("--series", default=None, help="过滤代际，逗号分隔")
-    parser.add_argument("--phase", default=None, help="过滤阶段 presale/launch")
+    parser.add_argument("--phase", default="presale", help="过滤阶段 presale/launch（默认 presale）")
     args = parser.parse_args()
 
     signal.signal(signal.SIGINT, _handle_signal)
