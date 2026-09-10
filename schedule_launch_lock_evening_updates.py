@@ -118,7 +118,9 @@ def _monitor_cmd(args) -> list[str]:
 
 def run_once(args, bdef: dict) -> int:
     now = datetime.now()
-    log("--once：执行一轮监控", now)
+    log("--once：执行一轮完整链路（刷新 + 监控）", now)
+    _run([sys.executable, str(REPO_ROOT / "dataset" / "updater" / "order_data_to_parquet.py")],
+         "refresh_order_data", args.dry_run, now)
     _run(_monitor_cmd(args), "monitor", args.dry_run, now)
     return 0
 
