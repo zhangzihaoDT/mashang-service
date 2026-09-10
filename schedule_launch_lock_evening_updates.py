@@ -3,7 +3,7 @@
 """常驻定时器：预售/上市监控刷新 + 推送（标准库实现，无第三方依赖）。
 
 调度（key day = 任一 active 代际的预售首日 start 或上市日 end）：
-  每日 09:00                     dataset 全量刷新
+  每日 09:00                     dataset 全量刷新 + 校验 + 每日观察同步（串行；校验失败则跳过同步）
   key day 17:00–23:00 每小时 :00  order_data 刷新 + 监控（串行）
   每日 09:30                     监控（日报）
 
@@ -72,7 +72,7 @@ def due_actions(now: datetime, bdef: dict) -> list[str]:
     key = is_key_day(bdef, now.date())
     actions: list[str] = []
     if hm == FULL_REFRESH_TIME:
-        actions.append("refresh_full")
+        actions += ["refresh_full", "dataset_validate", "daily_observation_sync"]
     if now.minute == 0 and now.hour in _key_hours(bdef) and key:
         actions += ["refresh_order_data", "monitor"]
     if hm == MONITOR_DAILY_TIME:
@@ -96,14 +96,15 @@ def log(msg: str, now: datetime | None = None) -> None:
         pass
 
 
-def _run(cmd: list[str], label: str, dry_run: bool, now: datetime) -> None:
+def _run(cmd: list[str], label: str, dry_run: bool, now: datetime) -> int:
     if dry_run:
         log(f"[dry-run] {label}: {' '.join(cmd)}", now)
-        return
+        return 0
     log(f"▶ {label}: {' '.join(cmd)}", now)
     with open(_log_path(now), "a", encoding="utf-8") as f:
         p = subprocess.run(cmd, cwd=str(REPO_ROOT), env=os.environ.copy(), stdout=f, stderr=subprocess.STDOUT)
     log(f"■ {label} exit={p.returncode}", now)
+    return p.returncode
 
 
 def _monitor_cmd(args) -> list[str]:
@@ -119,6 +120,41 @@ def _monitor_cmd(args) -> list[str]:
     return cmd
 
 
+def _dispatch(action: str, args, now: datetime) -> int:
+    """按动作名执行对应子进程，返回 exit code。"""
+    if action == "refresh_full":
+        return _run([sys.executable, str(REPO_ROOT / "dataset" / "updater" / "update_all_datasets.py")],
+                    "refresh_full", args.dry_run, now)
+    if action == "dataset_validate":
+        return _run([sys.executable, str(_WS_ROOT / "utility_scripts" / "dataset_validate.py")],
+                    "dataset_validate", args.dry_run, now)
+    if action == "daily_observation_sync":
+        return _run([sys.executable, str(_WS_ROOT / "utility_scripts" / "skills_order_observation_daily.py")],
+                    "daily_observation_sync", args.dry_run, now)
+    if action == "refresh_order_data":
+        return _run([sys.executable, str(REPO_ROOT / "dataset" / "updater" / "order_data_to_parquet.py")],
+                    "refresh_order_data", args.dry_run, now)
+    if action == "monitor":
+        return _run(_monitor_cmd(args), "monitor", args.dry_run, now)
+    return 0
+
+
+def process_batch(now: datetime, bdef: dict, args, fired: set[str]) -> None:
+    """按序执行当前时刻 due_actions 的全部动作；dataset_validate 失败时跳过 daily_observation_sync。"""
+    validate_ok: bool | None = None
+    for action in due_actions(now, bdef):
+        token = f"{now:%Y-%m-%d} {action} {now.hour}:{now.minute}"
+        if token in fired:
+            continue
+        fired.add(token)
+        if action == "daily_observation_sync" and validate_ok is False:
+            log("跳过 daily_observation_sync：dataset_validate 失败，不写外部系统", now)
+            continue
+        rc = _dispatch(action, args, now)
+        if action == "dataset_validate":
+            validate_ok = rc == 0
+
+
 def run_once(args, bdef: dict) -> int:
     now = datetime.now()
     log("--once：执行一轮完整链路（刷新 + 监控）", now)
@@ -130,7 +166,7 @@ def run_once(args, bdef: dict) -> int:
 
 def run_loop(args, bdef: dict) -> int:
     log("调度器启动", datetime.now())
-    log(f"  key_day_hours={_key_hours(bdef)}  全量刷新={FULL_REFRESH_TIME}  日报={MONITOR_DAILY_TIME}  monitor_phase={args.phase}", datetime.now())
+    log(f"  key_day_hours={_key_hours(bdef)}  数据管道={FULL_REFRESH_TIME}  日报={MONITOR_DAILY_TIME}  monitor_phase={args.phase}", datetime.now())
     fired: set[str] = set()
     last_minute: tuple[int, int] | None = None
 
@@ -141,19 +177,7 @@ def run_loop(args, bdef: dict) -> int:
             last_minute = minute_key
             # 每分钟重置一次去重集合（按动作名 + 当日）
             fired = {k for k in fired if k.startswith(f"{now:%Y-%m-%d} ")}
-            for action in due_actions(now, bdef):
-                token = f"{now:%Y-%m-%d} {action} {now.hour}:{now.minute}"
-                if token in fired:
-                    continue
-                fired.add(token)
-                if action == "refresh_full":
-                    _run([sys.executable, str(REPO_ROOT / "dataset" / "updater" / "update_all_datasets.py")],
-                         "refresh_full", args.dry_run, now)
-                elif action == "refresh_order_data":
-                    _run([sys.executable, str(REPO_ROOT / "dataset" / "updater" / "order_data_to_parquet.py")],
-                         "refresh_order_data", args.dry_run, now)
-                elif action == "monitor":
-                    _run(_monitor_cmd(args), "monitor", args.dry_run, now)
+            process_batch(now, bdef, args, fired)
         time.sleep(5)
 
     log("调度器停止", datetime.now())
