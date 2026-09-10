@@ -39,11 +39,11 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
     if test_mask.any():
         df = df.loc[~test_mask].copy()
 
-    if start is not None:
-        n_raw = int((today.normalize() - start.normalize()).days + 1)  # type: ignore[union-attr]
-    else:
-        n_raw = 1
-    n = max(1, n_raw)
+    # 观测截止点：数据最新时刻，封顶当日 23:59:59
+    obs = today.normalize() + pd.Timedelta(hours=23, minutes=59, seconds=59)
+    max_it = df["intention_payment_time"].max()
+    if pd.notna(max_it):
+        obs = min(obs, pd.Timestamp(max_it))
 
     base = df.loc[
         df["intention_payment_time"].notna(),
@@ -67,8 +67,8 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
         "today": today.date().isoformat(),
         "series_start": start.date().isoformat() if start is not None else None,
         "series_end": end.date().isoformat() if end is not None else None,
-        "n": n,
-        "n_raw": n_raw,
+        "obs": obs.isoformat(),
+        "elapsed_hours": 0,
         "cum": 0,
         "retention": 0,
         "retention_users": 0,
@@ -79,7 +79,6 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
         "start_day_retained": 0,
         "launch_day_total": 0,
         "launch_day_retention": 0,
-        "n_day_cum": 0,
         "retention_by_product": [],
         "retention_by_region": [],
         "retention_no_region": 0,
@@ -94,7 +93,7 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
     current_mask = (
         base["series_group_logic"].eq(generation)
         & (base["intention_payment_time"] >= open_t)
-        & (base["intention_payment_time"] < (today + pd.Timedelta(days=1)))
+        & (base["intention_payment_time"] <= obs)
     )
 
     metrics["cum"] = int(base.loc[current_mask, "order_number"].nunique())
@@ -184,18 +183,8 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
         ].nunique()
     )
 
-    if end is not None:
-        window_end_excl = min(open_t + pd.Timedelta(days=n), end + pd.Timedelta(days=1))
-    else:
-        window_end_excl = open_t + pd.Timedelta(days=n)
-    metrics["n_day_cum"] = int(
-        base.loc[
-            base["series_group_logic"].eq(generation)
-            & (base["intention_payment_time"] >= open_t)
-            & (base["intention_payment_time"] < window_end_excl),
-            "order_number",
-        ].nunique()
-    )
+    if obs > open_t:
+        metrics["elapsed_hours"] = round((obs - open_t).total_seconds() / 3600, 1)
 
     for cmp_key in compare_keys(business_def, generation):
         cmp_tp = time_periods.get(cmp_key, {}) or {}
@@ -204,12 +193,12 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
             continue
         cmp_start = pd.to_datetime(cmp_tp["start"])
         cmp_open = cmp_start + pd.Timedelta(hours=open_hour(business_def, cmp_key))
-        cmp_window_end = cmp_open + pd.Timedelta(days=n)
+        cmp_end = cmp_open + pd.Timedelta(hours=metrics["elapsed_hours"])
         cmp_slice = base.loc[
             base["series_group_logic"].eq(cmp_key)
             & (base["intention_payment_time"] >= cmp_open)
-            & (base["intention_payment_time"] < cmp_window_end)
-            & ((base["intention_refund_time"] > cmp_window_end) | base["intention_refund_time"].isna()),
+            & (base["intention_payment_time"] <= cmp_end)
+            & ((base["intention_refund_time"] > cmp_end) | base["intention_refund_time"].isna()),
             "order_number",
         ]
         metrics["compare"][cmp_key] = int(cmp_slice.nunique())
@@ -241,12 +230,12 @@ def build_card(metrics: dict, show_notes: bool = False) -> dict:
 
     lines += _section("③ 累计")
     lines.append(f"预售至今累计留存：{metrics['retention']}")
-    lines.append(f"预售至 N 日累计小订：{metrics['n_day_cum']}")
+    lines.append(f"预售至今累计小订：{metrics['cum']}")
 
     compare_str = "｜".join(
         f"{k}（{v}）" if v is not None else f"{k}（无数据）" for k, v in metrics["compare"].items()
     )
-    lines += _section("④ 对标（同 N 日窗口留存）")
+    lines += _section("④ 对标（自开放起同期留存，相同时长）")
     lines.append(compare_str)
 
     lines += _section("⑤ 细分")
@@ -284,8 +273,8 @@ def build_card(metrics: dict, show_notes: bool = False) -> dict:
         lines.append(f"已剔除测试单：{metrics['test_orders_excluded']} 笔（总部主理店 + 假身份号）")
     lines.append(f"口径：从预售开放时刻（{open_h}:00）起算，不含预售日白天零星订单；小订含当日未退意向金订单")
     lines.append(f"N=0 发布会当日留存：开放 {open_h}:00 至当日 24:00 内支付意向金且未退（退订晚于当日 24:00 视为留存）的唯一订单数")
-    lines.append(f"N（日）= 当前日期 - {metrics['generation']} startday + 1 = {metrics['n']}")
-    lines.append("对标口径：历史代际开放时刻起同样 N 日窗口内，意向金未退的唯一订单数（退订晚于窗口末视为留存）")
+    lines.append(f"观测截止：{metrics.get('obs', '—')}（数据最新时刻，封顶当日 23:59:59）")
+    lines.append(f"对标口径：各代际自开放时刻起与目标相同时长（{metrics.get('elapsed_hours', 0)} 小时）内，意向金未退的唯一订单数（退订晚于窗口末视为留存）")
     lines.append("数据源：dataset/order_data.parquet + shared/schema/business_definition.json")
 
     body_md = "\n".join(lines)

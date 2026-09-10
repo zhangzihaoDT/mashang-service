@@ -105,8 +105,8 @@ def _presale_df(rows) -> pd.DataFrame:
         columns=["order_number", "intention_payment_time", "intention_refund_time",
                  "series_group_logic", "product_name"],
     )
-    df["intention_payment_time"] = pd.to_datetime(df["intention_payment_time"])
-    df["intention_refund_time"] = pd.to_datetime(df["intention_refund_time"])
+    df["intention_payment_time"] = pd.to_datetime(df["intention_payment_time"], format="mixed")
+    df["intention_refund_time"] = pd.to_datetime(df["intention_refund_time"], format="mixed")
     df["parent_region_name"] = None
     df["buyer_identity_no"] = "u1"
     df["store_name"] = "s1"
@@ -163,6 +163,57 @@ def test_presale_compute_excludes_test_orders(bdef):
     m = presale_compute(df, bdef, today, "CM3")
     assert m["cum"] == 1
     assert m["test_orders_excluded"] == 1
+
+
+def test_presale_obs_capped_at_data_latest(bdef):
+    """obs = min(当日 23:59:59, 数据最新 intention_payment_time)"""
+    today = pd.Timestamp("2026-09-11")
+    df = _presale_df(
+        [
+            ("o1", "2026-09-10 20:00", None, "CM3", "LS6 M3 92 RWD"),
+            ("o2", "2026-09-10 23:50", None, "CM3", "LS6 M3 92 RWD"),  # 数据最新
+        ]
+    )
+    m = presale_compute(df, bdef, today, "CM3")
+    assert m["obs"] == "2026-09-10T23:50:00"  # 数据最新 < 23:59:59
+    assert m["cum"] == 2
+    assert m["elapsed_hours"] == round(
+        (pd.Timestamp("2026-09-10 23:50:00") - pd.Timestamp("2026-09-10 19:00")).total_seconds() / 3600, 1
+    )
+
+
+def test_presale_obs_defaults_to_end_of_day(bdef):
+    """若数据最新 ≥ 23:59:59，obs = 当日 23:59:59"""
+    today = pd.Timestamp("2026-09-11")
+    df = _presale_df(
+        [
+            ("o1", "2026-09-10 20:00", None, "CM3", "LS6 M3 92 RWD"),
+            ("o2", "2026-09-10T23:59:59", None, "CM3", "LS6 M3 92 RWD"),  # ISO 格式含秒
+        ]
+    )
+    m = presale_compute(df, bdef, today, "CM3")
+    assert m["obs"] == "2026-09-10T23:59:59"
+    assert m["cum"] == 2
+
+
+def test_presale_compare_window_matches_elapsed(bdef):
+    """对标窗口长度应与目标 elapsed 完全对齐（同 elapsed 小时）"""
+    today = pd.Timestamp("2026-09-10")
+    rows = [
+        # 目标 CM3: 2 笔
+        ("t1", "2026-09-10 20:00", None, "CM3", "LS6 M3 92 RWD"),
+        ("t2", "2026-09-10 22:00", None, "CM3", "LS6 M3 92 RWD"),
+        # CM2: 1 笔在 22:00 前（elapsed 内），1 笔在次日（elapsed 外）
+        ("c1", "2025-08-15 21:00", None, "CM2", "LS6"),
+        ("c2", "2025-08-16 21:00", None, "CM2", "LS6"),
+    ]
+    df = _presale_df(rows)
+    m = presale_compute(df, bdef, today, "CM3")
+    # obs = min(23:59:59, max intention=22:00) = 22:00
+    assert m["obs"] == "2026-09-10T22:00:00"
+    assert m["cum"] == 2
+    # elapsed = 22:00 - 19:00 = 3h; compare 窗口 = [2025-08-15 20:00, +3h]
+    assert m["compare"]["CM2"] == 1  # c1 在 3h 内，c2 不在
 
 
 # ── freshness ──────────────────────────────────────────────────────
