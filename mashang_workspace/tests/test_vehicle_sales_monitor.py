@@ -34,6 +34,7 @@ from utils.monitors.phase import (  # noqa: E402
     open_hour,
     phase_of,
 )
+from utils.monitors.presale import build_card as presale_build_card  # noqa: E402
 from utils.monitors.presale import compute as presale_compute  # noqa: E402
 from utils.monitors.order_filter import is_fake_identity, flag_test_orders  # noqa: E402
 
@@ -334,3 +335,76 @@ def test_scheduler_keyday_refresh_failure_blocks_monitor(bdef):
     sched = _load_scheduler()
     now = datetime(2026, 9, 10, 19, 0)
     assert _run_chain(sched, now, bdef, {"refresh_order_data": 1}) == ["refresh_order_data"]
+
+
+# ── presale card 结构（参照 launch 精简） ────────────────────────────
+
+
+def _presale_metrics() -> dict:
+    return {
+        "generation": "CM3",
+        "label": "全新一代 LS6",
+        "open_hour": 19,
+        "test_orders_excluded": 2,
+        "today": "2026-09-10",
+        "series_start": "2026-09-10",
+        "series_end": "2026-09-24",
+        "obs": "2026-09-10 15:30:01",
+        "elapsed_hours": 20.5,
+        "cum": 2480,
+        "retention": 2415,
+        "retention_users": 2380,
+        "peak_hour": 18,
+        "peak_count": 1200,
+        "next_hour_count": 380,
+        "start_day_total": 2050,
+        "start_day_retained": 1980,
+        "launch_day_total": 1700,
+        "launch_day_retention": 1600,
+        "retention_by_product": [
+            {"product_name": "66 Ultra 限量版", "count": 120, "share": 5.0, "limited": True},
+            {"product_name": "66 Ultra", "count": 1500, "share": 62.1, "limited": False},
+            {"product_name": "48 Ultra", "count": 795, "share": 32.9, "limited": False},
+        ],
+        "retention_by_region": [
+            {"region_name": "上海", "count": 1200, "share": 49.7, "cr5": 88.1},
+            {"region_name": "北京", "count": 450, "share": 18.6, "cr5": None},
+            {"region_name": "杭州", "count": 300, "share": 12.4, "cr5": None},
+        ],
+        "retention_no_region": 10,
+        "compare": {"CM2": 2000, "CM1": 900, "CM0": 1500},
+    }
+
+
+def _presale_card_body(show_notes: bool) -> str:
+    return presale_build_card(_presale_metrics(), show_notes=show_notes)["card"]["elements"][0]["text"]["content"]
+
+
+def test_presale_card_slim_no_notes_in_production():
+    """生产推送（show_notes=False）不带附注/口径/数据源，保留核心指标与固定信息行。"""
+    body = _presale_card_body(show_notes=False)
+    assert "①" not in body and "附注" not in body and "口径" not in body and "数据源" not in body
+    assert "预售小订：**2,480**" in body
+    assert "累计留存订单：**2,415**（唯一订单用户 2,380）" in body
+    assert "峰值小时：**1,200**（18:00）｜峰值后 1h **380**" in body
+    assert "开放后 24h 累计留存：**1,980**" in body
+    assert "发布会当日留存：**1,600**（小订 1,700）" in body
+    assert "历史对比（自开放起同期留存，相同时长）：**CM2（2,000） / CM1（900） / CM0（1,500）**" in body
+    assert "预售期：2026-09-10 ~ 2026-09-24" in body
+    assert "观察时间：2026-09-10 15:30" in body
+
+
+def test_presale_card_region_compressed_to_one_line():
+    """分大区压成一行，同一行内多区域以｜分隔。"""
+    body = _presale_card_body(show_notes=False)
+    assert "分大区：" in body
+    first_line = next(l for l in body.splitlines() if l.startswith("分大区："))
+    assert first_line == "分大区：上海 49.7%｜北京 18.6%｜杭州 12.4%｜无大区 0.4%"
+
+
+def test_presale_card_notes_only_in_dry_run():
+    """注释块仅 show_notes=True（dry-run）展示。"""
+    body = _presale_card_body(show_notes=True)
+    assert "口径：" in body
+    assert "数据源：" in body
+    assert "已剔除测试单：2 笔" in body

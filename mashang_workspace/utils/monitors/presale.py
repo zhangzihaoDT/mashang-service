@@ -206,76 +206,70 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
     return metrics
 
 
-def _section(title: str) -> list:
-    return ["", f"**{title}**"]
-
-
 def build_card(metrics: dict, show_notes: bool = False) -> dict:
     label = metrics.get("label") or metrics["generation"]
     open_h = metrics.get("open_hour", 20)
     peak_hour_str = f"{metrics['peak_hour']:02d}:00" if metrics["peak_hour"] is not None else "NA"
 
+    cum = metrics.get("cum", 0)
+    retention = metrics.get("retention", 0)
+    retention_users = metrics.get("retention_users", 0)
+    peak_count = metrics.get("peak_count", 0)
+    next_hour = metrics.get("next_hour_count", 0)
+    start_day_retained = metrics.get("start_day_retained", 0)
+    launch_day_retention = metrics.get("launch_day_retention", 0)
+    launch_day_total = metrics.get("launch_day_total", 0)
+
     lines = [f"**{label} 预售指标（{metrics['today']}）**"]
 
-    lines += _section("① 核心指标")
-    lines.append(f"当前累计小订数：{metrics['cum']}")
-    lines.append(f"累计留存订单数：{metrics['retention']}")
-    lines.append(f"累计留存唯一订单用户数：{metrics['retention_users']}")
+    lines += ["", f"预售小订：**{cum:,}**（预售至今累计意向金支付）"]
+    lines.append(f"　累计留存订单：**{retention:,}**（唯一订单用户 {retention_users:,}）")
+    lines.append(f"峰值小时：**{peak_count:,}**（{peak_hour_str}）｜峰值后 1h **{next_hour:,}**")
+    lines.append(f"开放后 24h 累计留存：**{start_day_retained:,}**")
+    lines.append(f"发布会当日留存：**{launch_day_retention:,}**（小订 {launch_day_total:,}）")
 
-    lines += _section("② 峰值分析")
-    lines.append(f"峰值小时小订数：{metrics['peak_count']}（{peak_hour_str}）")
-    lines.append(f"峰值后 1h：{metrics['next_hour_count']}")
-    lines.append(f"开放后 24h 累计留存：{metrics['start_day_retained']}")
-    lines.append(f"N=0 发布会当日留存（{open_h}:00-24:00）：{metrics['launch_day_retention']}（小订 {metrics['launch_day_total']}）")
-
-    lines += _section("③ 累计")
-    lines.append(f"预售至今累计留存：{metrics['retention']}")
-    lines.append(f"预售至今累计小订：{metrics['cum']}")
-
-    compare_str = "｜".join(
-        f"{k}（{v}）" if v is not None else f"{k}（无数据）" for k, v in metrics["compare"].items()
-    )
-    lines += _section("④ 对标（自开放起同期留存，相同时长）")
-    lines.append(compare_str)
-
-    lines += _section("⑤ 细分")
-    if metrics.get("retention_by_product"):
-        lines.append("**分 product_name（限量版 / 非限量版）：**")
-        limited_items = [i for i in metrics["retention_by_product"] if i.get("limited")]
-        normal_items = [i for i in metrics["retention_by_product"] if not i.get("limited")]
+    kept_by_product = metrics.get("retention_by_product") or []
+    if kept_by_product:
+        limited_items = [i for i in kept_by_product if i.get("limited")]
+        normal_items = [i for i in kept_by_product if not i.get("limited")]
         limited_total = sum(i["count"] for i in limited_items)
         normal_total = sum(i["count"] for i in normal_items)
-        lines.append(f"  · 限量版（{limited_total}）")
-        for item in limited_items:
-            lines.append(f"    - {item['product_name']}：{item['count']}（{item['share']}%）")
-        lines.append(f"  · 非限量版（{normal_total}）")
-        for item in normal_items:
-            lines.append(f"    - {item['product_name']}：{item['count']}（{item['share']}%）")
+        lines.append(f"留存分类：限量版 **{limited_total:,}** ｜ 非限量 **{normal_total:,}**")
+        for tag, items in (("限量版", limited_items), ("非限量", normal_items)):
+            for item in items:
+                lines.append(f"　· {tag}：{item['product_name']}：{item['count']:,}（{item['share']}%）")
     else:
-        lines.append("分 product_name：暂无留存订单")
+        lines.append("留存分类：暂无留存订单明细")
 
-    if metrics.get("retention_by_region"):
-        lines.append("**分 parent_region_name：**")
-        for item in metrics["retention_by_region"]:
-            cr5_str = f"｜CR5（{item['cr5']}%）" if item.get("cr5") is not None else ""
-            lines.append(f"  - {item['region_name']}：{item['count']}（{item['share']}%）{cr5_str}")
+    region_items = metrics.get("retention_by_region") or []
+    if region_items:
+        parts = [f"{i['region_name']} {i['share']}%" for i in region_items[:5]]
+        if len(region_items) > 5:
+            parts.append("…")
         no_region = metrics.get("retention_no_region") or 0
-        if no_region > 0:
-            no_region_share = round(no_region / metrics["retention"] * 100, 1) if metrics["retention"] else 0
-            lines.append(f"  - 无大区归属：{no_region}（{no_region_share}%）")
+        if no_region > 0 and retention:
+            parts.append(f"无大区 {round(no_region / retention * 100, 1)}%")
+        lines.append(f"分大区：{'｜'.join(parts)}")
     else:
-        lines.append("分 parent_region_name：暂无留存订单")
+        lines.append("分大区：暂无留存订单")
 
-    lines += _section("⑥ 附注")
-    if metrics.get("series_start") and metrics.get("series_end"):
-        lines.append(f"预售期：{metrics['series_start']} ~ {metrics['series_end']}")
-    if metrics.get("test_orders_excluded"):
-        lines.append(f"已剔除测试单：{metrics['test_orders_excluded']} 笔（总部主理店 + 假身份号）")
-    lines.append(f"口径：从预售开放时刻（{open_h}:00）起算，不含预售日白天零星订单；小订含当日未退意向金订单")
-    lines.append(f"N=0 发布会当日留存：开放 {open_h}:00 至当日 24:00 内支付意向金且未退（退订晚于当日 24:00 视为留存）的唯一订单数")
-    lines.append(f"观测截止：{metrics.get('obs', '—')}（数据最新时刻，封顶当日 23:59:59）")
-    lines.append(f"对标口径：各代际自开放时刻起与目标相同时长（{metrics.get('elapsed_hours', 0)} 小时）内，意向金未退的唯一订单数（退订晚于窗口末视为留存）")
-    lines.append("数据源：dataset/order_data.parquet + shared/schema/business_definition.json")
+    compare_str = " / ".join(
+        f"{k}（{v:,}）" if v is not None else f"{k}（无数据）" for k, v in metrics["compare"].items()
+    )
+    lines.append(f"历史对比（自开放起同期留存，相同时长）：**{compare_str}**")
+
+    lines += ["", f"预售期：{metrics.get('series_start', '—')} ~ {metrics.get('series_end', '—')}"]
+    obs_raw = metrics.get("obs")
+    obs_str = pd.Timestamp(obs_raw).strftime("%Y-%m-%d %H:%M") if obs_raw else "—"
+    lines.append(f"观察时间：{obs_str}")
+
+    if show_notes:
+        lines.append(f"口径：自开放时刻（{open_h}:00）起算，不含预售日白天零星订单；小订 = 当日未退意向金订单；留存 = 意向金未退（退订晚于观测截止视为留存）")
+        lines.append(f"N=0 发布会当日留存：开放 {open_h}:00 至当日 24:00 内支付且未退（退订晚于当日 24:00 视为留存）")
+        lines.append(f"对标：各代际自开放时刻起与目标相同时长（{metrics.get('elapsed_hours', 0)} 小时）内的留存小订")
+        if metrics.get("test_orders_excluded"):
+            lines.append(f"已剔除测试单：{metrics['test_orders_excluded']} 笔（总部主理店 + 假身份号）")
+        lines.append("数据源：dataset/order_data.parquet + shared/schema/business_definition.json")
 
     body_md = "\n".join(lines)
     return {
