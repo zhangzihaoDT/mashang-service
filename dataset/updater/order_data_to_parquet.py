@@ -424,7 +424,35 @@ def tableau_download_view_data_csv(
     raise RuntimeError(f"Tableau 下载数据失败 (HTTP {last_status}): {msg[:3000]}")
 
 
-def step_export_tableau_order_data_2026(mobile: bool = False, timeout: int = 600) -> bool:
+def _is_connectivity_error(msg: str | None) -> bool:
+    """判断 Tableau 导出失败是否属于网络不可达类（办公网/外网链路问题）。
+
+    命中 DNS 解析失败、超时、连接被拒、无路由等错误时返回 True，
+    便于回退到移动链路重试；鉴权（HTTP 401/403）等业务错误不在此列。
+    """
+    if not msg:
+        return False
+    m = msg.lower()
+    markers = (
+        "http 0",
+        "nodename",
+        "name or service not known",
+        "cannot resolve",
+        "getaddrinfo",
+        "connection refused",
+        "timed out",
+        "timeout",
+        "no route to host",
+        "network is unreachable",
+        "errno 8",
+        "errno 60",
+        "errno 61",
+        "errno 64",
+    )
+    return any(k in m for k in markers)
+
+
+def step_export_tableau_order_data_2026(mobile: bool = False, timeout: int = 600) -> tuple[bool, str | None]:
     print("\n" + "=" * 60)
     print("步骤 0: 从 Tableau 导出最新 order_data_2026.csv")
     print("=" * 60)
@@ -436,7 +464,7 @@ def step_export_tableau_order_data_2026(mobile: bool = False, timeout: int = 600
     token_value = os.getenv("TABLEAU_TOKEN_VALUE")
     if not token_name or not token_value:
         print("❌ 缺少 Tableau PAT：TABLEAU_TOKEN_NAME / TABLEAU_TOKEN_VALUE")
-        return False
+        return False, "缺少 Tableau PAT"
 
     if mobile:
         base_url = os.getenv("TABLEAU_SERVER_URL_MOBILE") or "https://mobile-tableau-hs.immotors.com"
@@ -475,10 +503,10 @@ def step_export_tableau_order_data_2026(mobile: bool = False, timeout: int = 600
         finally:
             tableau_sign_out(base_url=base_url, api_version=api_version, auth_token=auth_token, timeout=timeout)
         print(f"✅ Tableau 数据导出成功: {output_path}")
-        return True
+        return True, None
     except Exception as e:
         print(f"❌ Tableau 数据导出失败: {e}")
-        return False
+        return False, str(e)
 
 
 def clean_column_names(df: pd.DataFrame) -> pd.DataFrame:
@@ -696,8 +724,12 @@ def main(argv: list[str] | None = None) -> int:
 
     if not args.skip_export:
         load_env_file(REPO_ROOT / ".env")
-        ok = step_export_tableau_order_data_2026(mobile=args.mobile, timeout=args.timeout)
+        ok, err = step_export_tableau_order_data_2026(mobile=args.mobile, timeout=args.timeout)
+        if not ok and not args.mobile and _is_connectivity_error(err):
+            print("\n⚠️ 办公网 Tableau 不可达，回退到移动链路重试 ...")
+            ok, err = step_export_tableau_order_data_2026(mobile=True, timeout=args.timeout)
         if not ok:
+            print(f"❌ Tableau 数据导出失败: {err}")
             return 1
 
     if not INPUT_FILE_2026.exists():

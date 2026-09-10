@@ -254,6 +254,30 @@ def _load_merge_order_data():
     return mod.merge_order_data
 
 
+def _load_updater_module():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("odp_mod", UPDATER_DIR / "order_data_to_parquet.py")
+    if spec is None or spec.loader is None:
+        raise ImportError(f"无法加载 {UPDATER_DIR / 'order_data_to_parquet.py'}")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_is_connectivity_error_detects_network_failures():
+    """办公网 Tableau DNS 失败应判定为网络不可达，触发 mobile 回退。"""
+    mod = _load_updater_module()
+    assert mod._is_connectivity_error(
+        "Tableau 登录失败 (HTTP 0): <urlopen error [Errno 8] nodename nor servname provided, or not known>"
+    ) is True
+    assert mod._is_connectivity_error("getaddrinfo failed") is True
+    assert mod._is_connectivity_error("timed out") is True
+    assert mod._is_connectivity_error("Connection refused") is True
+    assert mod._is_connectivity_error("HTTP 404: site not found") is False
+    assert mod._is_connectivity_error("HTTP 401: unauthorized") is False
+    assert mod._is_connectivity_error(None) is False
+
+
 def test_merge_backfills_intention_for_existing_no_lock_order():
     """底座已存在订单（仅 order_create_date，意向金为空），CSV 后补意向金 → 字段级回填不丢单。
 
