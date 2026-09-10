@@ -52,11 +52,25 @@ def open_hour(bdef: dict, generation: str) -> int:
     return int(by.get(generation, mon.get("default_open_hour", DEFAULT_OPEN_HOUR)))
 
 
+def open_minute(bdef: dict, generation: str) -> int:
+    """预售开放分钟（按代际，默认 0）。用于非整点开放，如 CM2=20:55。"""
+    mon = bdef.get("monitor") or {}
+    by = mon.get("open_minute_by_series") or {}
+    return int(by.get(generation, 0))
+
+
 def launch_open_hour(bdef: dict, generation: str) -> int:
     """上市开放时刻（历史对标用，默认 default_open_hour=20）。"""
     mon = bdef.get("monitor") or {}
     by = mon.get("launch_open_hour_by_series") or {}
     return int(by.get(generation, mon.get("default_open_hour", DEFAULT_OPEN_HOUR)))
+
+
+def launch_open_minute(bdef: dict, generation: str) -> int:
+    """上市开放分钟（历史对标用，默认 0）。"""
+    mon = bdef.get("monitor") or {}
+    by = mon.get("launch_open_minute_by_series") or {}
+    return int(by.get(generation, 0))
 
 
 def series_label(bdef: dict, generation: str) -> str:

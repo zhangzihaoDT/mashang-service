@@ -3,6 +3,7 @@
 口径来自 shared/schema/business_definition.json：
   - time_periods.{generation}.start = 预售起点
   - monitor.open_hour_by_series.{generation} = 预售开放时刻（默认 20:00）
+  - monitor.open_minute_by_series.{generation} = 预售开放分钟（默认 0，如 CM2=20:55）
   - monitor.compare_by_series = 历史对标代际
 
 调用方需先对 df 应用 series_group_logic（列 `series_group_logic`）。
@@ -17,6 +18,7 @@ import pandas as pd
 from utils.monitors.phase import (
     compare_keys,
     open_hour,
+    open_minute,
     series_label,
 )
 from utils.monitors.order_filter import flag_test_orders
@@ -28,6 +30,7 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
     start = pd.Timestamp(tp["start"]) if tp.get("start") else None
     end = pd.Timestamp(tp["end"]) if tp.get("end") else None
     open_h = open_hour(business_def, generation)
+    open_m = open_minute(business_def, generation)
     label = series_label(business_def, generation)
 
     # 剔除测试单（总部主理店 + 假身份号）；计数按当前代际口径
@@ -63,6 +66,7 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
         "generation": generation,
         "label": label,
         "open_hour": open_h,
+        "open_minute": open_m,
         "test_orders_excluded": test_excluded,
         "today": today.date().isoformat(),
         "series_start": start.date().isoformat() if start is not None else None,
@@ -88,7 +92,7 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
     if start is None:
         return metrics
 
-    open_t = start + pd.Timedelta(hours=open_h)
+    open_t = start + pd.Timedelta(hours=open_h, minutes=open_m)
 
     current_mask = (
         base["series_group_logic"].eq(generation)
@@ -192,7 +196,9 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
             metrics["compare"][cmp_key] = None
             continue
         cmp_start = pd.to_datetime(cmp_tp["start"])
-        cmp_open = cmp_start + pd.Timedelta(hours=open_hour(business_def, cmp_key))
+        cmp_open = cmp_start + pd.Timedelta(
+            hours=open_hour(business_def, cmp_key), minutes=open_minute(business_def, cmp_key)
+        )
         cmp_end = cmp_open + pd.Timedelta(hours=metrics["elapsed_hours"])
         cmp_slice = base.loc[
             base["series_group_logic"].eq(cmp_key)
@@ -209,6 +215,8 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
 def build_card(metrics: dict, show_notes: bool = False) -> dict:
     label = metrics.get("label") or metrics["generation"]
     open_h = metrics.get("open_hour", 20)
+    open_m = metrics.get("open_minute", 0)
+    open_str = f"{open_h:02d}:{open_m:02d}"
     peak_hour_str = f"{metrics['peak_hour']:02d}:00" if metrics["peak_hour"] is not None else "NA"
 
     cum = metrics.get("cum", 0)
@@ -269,8 +277,8 @@ def build_card(metrics: dict, show_notes: bool = False) -> dict:
     lines.append(f"观察时间：{obs_str}")
 
     if show_notes:
-        lines.append(f"口径：自开放时刻（{open_h}:00）起算，不含预售日白天零星订单；小订 = 当日未退意向金订单；留存 = 意向金未退（退订晚于观测截止视为留存）")
-        lines.append(f"N=0 发布会当日留存：开放 {open_h}:00 至当日 24:00 内支付且未退（退订晚于当日 24:00 视为留存）")
+        lines.append(f"口径：自开放时刻（{open_str}）起算，不含预售日白天零星订单；小订 = 当日未退意向金订单；留存 = 意向金未退（退订晚于观测截止视为留存）")
+        lines.append(f"N=0 发布会当日留存：开放 {open_str} 至当日 24:00 内支付且未退（退订晚于当日 24:00 视为留存）")
         lines.append(f"对标：各代际自开放时刻起与目标相同时长（{metrics.get('elapsed_hours', 0)} 小时）内的留存小订")
         if metrics.get("test_orders_excluded"):
             lines.append(f"已剔除测试单：{metrics['test_orders_excluded']} 笔（总部主理店 + 假身份号）")

@@ -32,6 +32,7 @@ from utils.monitors.phase import (  # noqa: E402
     launch_open_hour,
     load_business_definition,
     open_hour,
+    open_minute,
     phase_of,
 )
 from utils.monitors.presale import build_card as presale_build_card  # noqa: E402
@@ -86,6 +87,9 @@ def test_open_hour_calibration(bdef):
     assert open_hour(bdef, "CM1") == 11
     assert open_hour(bdef, "CM2") == 20
     assert open_hour(bdef, "DM2") == 20
+    # 非整点开放：CM2 实测 20:55（21:00 前已有真实订单）
+    assert open_minute(bdef, "CM2") == 55
+    assert open_minute(bdef, "CM3") == 0
     # 上市开放时刻历史对标默认 20:00
     assert launch_open_hour(bdef, "CM1") == 20
     assert launch_open_hour(bdef, "CM0") == 20
@@ -127,6 +131,24 @@ def test_presale_compute_uses_generation_open_hour(bdef):
     assert m["cum"] == 2
     assert m["retention"] == 2
     assert m["open_hour"] == 19
+    assert m["open_minute"] == 0
+
+
+def test_presale_compute_uses_generation_open_minute(bdef):
+    """CM2 非整点开放 20:55：20:54 的单不计，20:56 起计入。"""
+    today = pd.Timestamp("2025-08-15")
+    df = _presale_df(
+        [
+            ("o1", "2025-08-15 20:54", None, "CM2", "新一代智己LS6 Max"),  # 开放前 → 不计
+            ("o2", "2025-08-15 20:56", None, "CM2", "新一代智己LS6 Max"),  # 开放后 → 计
+            ("o3", "2025-08-15 21:05", None, "CM2", "新一代智己LS6 Max"),  # 开放后 → 计
+        ]
+    )
+    m = presale_compute(df, bdef, today, "CM2")
+    assert m["cum"] == 2
+    assert m["retention"] == 2
+    assert m["open_hour"] == 20
+    assert m["open_minute"] == 55
 
 
 # ── 测试单过滤 ─────────────────────────────────────────────────────

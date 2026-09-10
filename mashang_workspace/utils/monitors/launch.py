@@ -14,7 +14,7 @@ from datetime import datetime
 
 import pandas as pd
 
-from utils.monitors.phase import compare_keys, launch_open_hour, open_hour, series_label
+from utils.monitors.phase import compare_keys, launch_open_hour, open_hour, open_minute, series_label
 from utils.monitors.order_filter import flag_test_orders
 
 
@@ -233,7 +233,9 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
     if launch is not None:
         tp_key = time_periods.get(generation, {}) or {}
         if tp_key.get("start"):
-            presale_open = pd.Timestamp(tp_key["start"]).normalize() + pd.Timedelta(hours=open_hour(business_def, generation))
+            presale_open = pd.Timestamp(tp_key["start"]).normalize() + pd.Timedelta(
+                hours=open_hour(business_def, generation), minutes=open_minute(business_def, generation)
+            )
             retained_mask = (
                 df["series_group_logic"].eq(generation)
                 & df["intention_payment_time"].notna()

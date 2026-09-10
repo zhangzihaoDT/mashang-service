@@ -182,12 +182,16 @@
     "L6": ["DM0", "DM1", "DM2"]
   },
   "monitor": {
-    "description": "预售/上市监控配置：open_hour_by_series = 预售开放时刻（按代际，默认 20:00；CM0=10:00、CM1=11:00 为数据校准的白天开放）；launch_open_hour_by_series = 上市开放时刻（历史对标用，默认 20:00）；series_labels 展示名、compare_by_series 历史对标代际、launch_window_days 上市窗口、freshness 数据新鲜度 gate。",
+    "description": "预售/上市监控配置：open_hour_by_series = 预售开放时刻（按代际，默认 20:00；CM0=10:00、CM1=11:00 为数据校准的白天开放）；open_minute_by_series = 预售开放分钟（默认 0，用于非整点开放，如 CM2=20:55）；launch_open_hour_by_series = 上市开放时刻（历史对标用，默认 20:00）；series_labels 展示名、compare_by_series 历史对标代际、launch_window_days 上市窗口、freshness 数据新鲜度 gate。",
     "default_open_hour": 20,
     "open_hour_by_series": {
       "CM0": 10,
       "CM1": 11,
+      "CM2": 20,
       "CM3": 19
+    },
+    "open_minute_by_series": {
+      "CM2": 55
     },
     "launch_open_hour_by_series": {},
     "series_labels": {
