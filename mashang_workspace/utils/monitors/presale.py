@@ -75,6 +75,7 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
         "open_ts": None,
         "data_before_open": False,
         "elapsed_hours": 0,
+        "elapsed_minutes": 0,
         "cum": 0,
         "retention": 0,
         "retention_users": 0,
@@ -192,8 +193,11 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
         ].nunique()
     )
 
+    elapsed_hours_exact = 0.0
     if obs > open_t:
-        metrics["elapsed_hours"] = round((obs - open_t).total_seconds() / 3600, 1)
+        elapsed_hours_exact = (obs - open_t).total_seconds() / 3600
+        metrics["elapsed_hours"] = round(elapsed_hours_exact, 1)
+        metrics["elapsed_minutes"] = round(elapsed_hours_exact * 60)
 
     for cmp_key in compare_keys(business_def, generation):
         cmp_tp = time_periods.get(cmp_key, {}) or {}
@@ -204,7 +208,7 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
         cmp_open = cmp_start + pd.Timedelta(
             hours=open_hour(business_def, cmp_key), minutes=open_minute(business_def, cmp_key)
         )
-        cmp_end = cmp_open + pd.Timedelta(hours=metrics["elapsed_hours"])
+        cmp_end = cmp_open + pd.Timedelta(hours=elapsed_hours_exact)
         cmp_slice = base.loc[
             base["series_group_logic"].eq(cmp_key)
             & (base["intention_payment_time"] >= cmp_open)
@@ -215,6 +219,14 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
         metrics["compare"][cmp_key] = int(cmp_slice.nunique())
 
     return metrics
+
+
+def _elapsed_label(metrics: dict) -> str:
+    """对标时长展示：<1h 用分钟，避免 round(0.03h,1)=0.0 的误导。"""
+    minutes = metrics.get("elapsed_minutes", 0)
+    if minutes < 60:
+        return f"{minutes} 分钟"
+    return f"{metrics.get('elapsed_hours', 0)} 小时"
 
 
 def build_waiting_card(metrics: dict) -> dict:
@@ -317,7 +329,7 @@ def build_card(metrics: dict, show_notes: bool = False) -> dict:
     if show_notes:
         lines.append(f"口径：自开放时刻（{open_str}）起算，不含预售日白天零星订单；小订 = 当日未退意向金订单；留存 = 意向金未退（退订晚于观测截止视为留存）")
         lines.append(f"N=0 发布会当日留存：开放 {open_str} 至当日 24:00 内支付且未退（退订晚于当日 24:00 视为留存）")
-        lines.append(f"对标：各代际自开放时刻起与目标相同时长（{metrics.get('elapsed_hours', 0)} 小时）内的留存小订")
+        lines.append(f"对标：各代际自开放时刻起与目标相同时长（{_elapsed_label(metrics)}）内的留存小订")
         if metrics.get("test_orders_excluded"):
             lines.append(f"已剔除测试单：{metrics['test_orders_excluded']} 笔（总部主理店 + 假身份号）")
         lines.append("数据源：dataset/order_data.parquet + shared/schema/business_definition.json")

@@ -262,6 +262,21 @@ def test_presale_compare_window_matches_elapsed(bdef):
     assert m["compare"]["CM2"] == 1  # c1 在窗口内，c2 不在
 
 
+def test_presale_compare_window_uses_exact_elapsed(bdef):
+    """elapsed < 3min 时 round(...,1)=0.0；对标窗口必须按精确时长算，否则会塌成 0。"""
+    today = pd.Timestamp("2026-09-10")
+    df = _presale_df(
+        [
+            ("t1", "2026-09-10 19:45:30", None, "CM3", "全新一代智己LS6"),  # obs=19:45:30 → elapsed=30s
+            ("c1", "2025-08-15 20:55:10", None, "CM2", "新一代智己LS6"),  # 落在 [20:55:00, +30s]
+            ("c2", "2025-08-15 20:56:30", None, "CM2", "新一代智己LS6"),  # 窗口外
+        ]
+    )
+    m = presale_compute(df, bdef, today, "CM3")
+    assert m["elapsed_hours"] == 0.0  # 展示值仍四舍五入到 0.0
+    assert m["compare"]["CM2"] == 1  # 但 c1 应计入
+
+
 # ── freshness ──────────────────────────────────────────────────────
 
 
