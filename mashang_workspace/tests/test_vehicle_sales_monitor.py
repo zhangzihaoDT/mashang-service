@@ -36,6 +36,7 @@ from utils.monitors.phase import (  # noqa: E402
     phase_of,
 )
 from utils.monitors.presale import build_card as presale_build_card  # noqa: E402
+from utils.monitors.presale import build_waiting_card as presale_build_waiting_card  # noqa: E402
 from utils.monitors.presale import compute as presale_compute  # noqa: E402
 from utils.monitors.order_filter import is_fake_identity, flag_test_orders  # noqa: E402
 
@@ -149,6 +150,28 @@ def test_presale_compute_uses_generation_open_minute(bdef):
     assert m["retention"] == 2
     assert m["open_hour"] == 20
     assert m["open_minute"] == 55
+
+
+def test_presale_compute_flags_data_before_open(bdef):
+    """数据未更新到开放时刻 → data_before_open=True（不渲染 0 指标）。"""
+    today = pd.Timestamp("2026-09-10")  # CM3 open 19:00
+    before = _presale_df([("o1", "2026-09-10 18:30", None, "CM3", "全新一代智己LS6 Max")])
+    after = _presale_df([("o1", "2026-09-10 19:30", None, "CM3", "全新一代智己LS6 Max")])
+    assert presale_compute(before, bdef, today, "CM3")["data_before_open"] is True
+    assert presale_compute(after, bdef, today, "CM3")["data_before_open"] is False
+
+
+def test_presale_waiting_card_content():
+    """等待卡：不渲染 0 指标，提示开放时刻与数据最新时间。"""
+    m = _presale_metrics()
+    m["open_hour"], m["open_minute"] = 19, 0
+    m["obs"] = "2026-09-10 18:30:41"
+    m["data_before_open"] = True
+    body = presale_build_waiting_card(m)["card"]["elements"][0]["text"]["content"]
+    assert "暂不推送指标" in body
+    assert "开放时刻：19:00" in body
+    assert "数据最新：2026-09-10 18:30" in body
+    assert "预售小订" not in body
 
 
 # ── 测试单过滤 ─────────────────────────────────────────────────────

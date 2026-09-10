@@ -72,6 +72,8 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
         "series_start": start.date().isoformat() if start is not None else None,
         "series_end": end.date().isoformat() if end is not None else None,
         "obs": obs.isoformat(),
+        "open_ts": None,
+        "data_before_open": False,
         "elapsed_hours": 0,
         "cum": 0,
         "retention": 0,
@@ -93,6 +95,9 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
         return metrics
 
     open_t = start + pd.Timedelta(hours=open_h, minutes=open_m)
+    metrics["open_ts"] = open_t.isoformat()
+    # 数据尚未更新到开放时刻（如开放当天源数据滞后）：不渲染 0 指标，改发等待提示
+    metrics["data_before_open"] = bool(obs < open_t)
 
     current_mask = (
         base["series_group_logic"].eq(generation)
@@ -210,6 +215,39 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
         metrics["compare"][cmp_key] = int(cmp_slice.nunique())
 
     return metrics
+
+
+def build_waiting_card(metrics: dict) -> dict:
+    """数据尚未更新到预售开放时刻时的等待提示卡（不渲染 0 指标）。"""
+    label = metrics.get("label") or metrics["generation"]
+    open_str = f"{metrics.get('open_hour', 20):02d}:{metrics.get('open_minute', 0):02d}"
+    obs_raw = metrics.get("obs")
+    obs_str = pd.Timestamp(obs_raw).strftime("%Y-%m-%d %H:%M") if obs_raw else "—"
+    lines = [
+        f"**⏳ {label} 预售监控（{metrics['today']}）**",
+        "",
+        "数据源尚未更新到预售开放时刻，本次暂不推送指标。",
+        f"开放时刻：{open_str}",
+        f"数据最新：{obs_str}",
+        "",
+        "待数据源更新后，下个整点自动重发。",
+    ]
+    return {
+        "msg_type": "interactive",
+        "card": {
+            "header": {
+                "title": {"tag": "plain_text", "content": f"⏳ {label} 预售监控（{metrics['today']}）"},
+                "template": "grey",
+            },
+            "elements": [
+                {"tag": "div", "text": {"tag": "lark_md", "content": "\n".join(lines)}},
+                {
+                    "tag": "note",
+                    "elements": [{"tag": "plain_text", "content": f"统计时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"}],
+                },
+            ],
+        },
+    }
 
 
 def build_card(metrics: dict, show_notes: bool = False) -> dict:

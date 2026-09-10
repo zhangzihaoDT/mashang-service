@@ -159,7 +159,10 @@ def run(args) -> int:
         try:
             if phase == "presale":
                 metrics = presale_monitor.compute(df, bdef, today, gen)
-                card = presale_monitor.build_card(metrics, show_notes=args.dry_run)
+                if metrics.get("data_before_open"):
+                    card = presale_monitor.build_waiting_card(metrics)
+                else:
+                    card = presale_monitor.build_card(metrics, show_notes=args.dry_run)
             elif phase == "launch":
                 metrics = launch_monitor.compute(df, bdef, today, gen)
                 card = launch_monitor.build_card(metrics, show_notes=args.dry_run)
