@@ -2,7 +2,7 @@
 
 覆盖：
   - phase 判定（presale / launch / normal）与多 active 代际
-  - open_hour 按代际（CM3=19）
+  - open_hour 按代际（CM3=19:45）
   - freshness 按小时 gate
   - presale compute 使用代际 open_hour
   - scheduler due_actions 的 key day 门控
@@ -88,9 +88,9 @@ def test_open_hour_calibration(bdef):
     assert open_hour(bdef, "CM1") == 11
     assert open_hour(bdef, "CM2") == 20
     assert open_hour(bdef, "DM2") == 20
-    # 非整点开放：CM2 实测 20:55（21:00 前已有真实订单）
+    # 非整点开放：CM2=20:55、CM3=19:45
     assert open_minute(bdef, "CM2") == 55
-    assert open_minute(bdef, "CM3") == 0
+    assert open_minute(bdef, "CM3") == 45
     # 上市开放时刻历史对标默认 20:00
     assert launch_open_hour(bdef, "CM1") == 20
     assert launch_open_hour(bdef, "CM0") == 20
@@ -123,16 +123,16 @@ def test_presale_compute_uses_generation_open_hour(bdef):
     today = pd.Timestamp("2026-09-10")
     df = _presale_df(
         [
-            ("o1", "2026-09-10 18:59", None, "CM3", "LS6 M3 92 RWD"),      # 开放前 → 不计
-            ("o2", "2026-09-10 19:01", None, "CM3", "LS6 M3 92 RWD"),      # 开放后 → 计
-            ("o3", "2026-09-10 19:05", None, "CM3", "全新一代智己LS6 Max"),  # 开放后 → 计
+            ("o1", "2026-09-10 19:44", None, "CM3", "LS6 M3 92 RWD"),      # 开放前 → 不计
+            ("o2", "2026-09-10 19:46", None, "CM3", "LS6 M3 92 RWD"),      # 开放后 → 计
+            ("o3", "2026-09-10 19:50", None, "CM3", "全新一代智己LS6 Max"),  # 开放后 → 计
         ]
     )
     m = presale_compute(df, bdef, today, "CM3")
     assert m["cum"] == 2
     assert m["retention"] == 2
     assert m["open_hour"] == 19
-    assert m["open_minute"] == 0
+    assert m["open_minute"] == 45
 
 
 def test_presale_compute_uses_generation_open_minute(bdef):
@@ -154,9 +154,9 @@ def test_presale_compute_uses_generation_open_minute(bdef):
 
 def test_presale_compute_flags_data_before_open(bdef):
     """数据未更新到开放时刻 → data_before_open=True（不渲染 0 指标）。"""
-    today = pd.Timestamp("2026-09-10")  # CM3 open 19:00
-    before = _presale_df([("o1", "2026-09-10 18:30", None, "CM3", "全新一代智己LS6 Max")])
-    after = _presale_df([("o1", "2026-09-10 19:30", None, "CM3", "全新一代智己LS6 Max")])
+    today = pd.Timestamp("2026-09-10")  # CM3 open 19:45
+    before = _presale_df([("o1", "2026-09-10 19:30", None, "CM3", "全新一代智己LS6 Max")])
+    after = _presale_df([("o1", "2026-09-10 20:30", None, "CM3", "全新一代智己LS6 Max")])
     assert presale_compute(before, bdef, today, "CM3")["data_before_open"] is True
     assert presale_compute(after, bdef, today, "CM3")["data_before_open"] is False
 
@@ -200,8 +200,8 @@ def test_presale_compute_excludes_test_orders(bdef):
     today = pd.Timestamp("2026-09-10")
     df = _presale_df(
         [
-            ("o1", "2026-09-10 19:05", None, "CM3", "LS6 M3 92 RWD"),
-            ("o2", "2026-09-10 19:06", None, "CM3", "全新一代智己LS6"),
+            ("o1", "2026-09-10 20:05", None, "CM3", "LS6 M3 92 RWD"),
+            ("o2", "2026-09-10 20:06", None, "CM3", "全新一代智己LS6"),
         ]
     )
     df.loc[df["order_number"] == "o2", "store_name"] = "总部主理店"
@@ -224,7 +224,7 @@ def test_presale_obs_capped_at_data_latest(bdef):
     assert m["obs"] == "2026-09-10T23:50:00"  # 数据最新 < 23:59:59
     assert m["cum"] == 2
     assert m["elapsed_hours"] == round(
-        (pd.Timestamp("2026-09-10 23:50:00") - pd.Timestamp("2026-09-10 19:00")).total_seconds() / 3600, 1
+        (pd.Timestamp("2026-09-10 23:50:00") - pd.Timestamp("2026-09-10 19:45")).total_seconds() / 3600, 1
     )
 
 
@@ -258,8 +258,8 @@ def test_presale_compare_window_matches_elapsed(bdef):
     # obs = min(23:59:59, max intention=22:00) = 22:00
     assert m["obs"] == "2026-09-10T22:00:00"
     assert m["cum"] == 2
-    # elapsed = 22:00 - 19:00 = 3h; compare 窗口 = [2025-08-15 20:00, +3h]
-    assert m["compare"]["CM2"] == 1  # c1 在 3h 内，c2 不在
+    # elapsed = 22:00 - 19:45 = 2.25h; compare 窗口 = [2025-08-15 20:55, +2.25h]
+    assert m["compare"]["CM2"] == 1  # c1 在窗口内，c2 不在
 
 
 # ── freshness ──────────────────────────────────────────────────────
