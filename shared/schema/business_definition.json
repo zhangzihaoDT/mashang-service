@@ -182,11 +182,14 @@
     "L6": ["DM0", "DM1", "DM2"]
   },
   "monitor": {
-    "description": "预售/上市监控配置：open_hour 按代际（默认 20:00）、series_labels 展示名、compare_by_series 历史对标代际、launch_window_days 上市窗口、freshness 数据新鲜度 gate。",
+    "description": "预售/上市监控配置：open_hour_by_series = 预售开放时刻（按代际，默认 20:00；CM0=10:00、CM1=11:00 为数据校准的白天开放）；launch_open_hour_by_series = 上市开放时刻（历史对标用，默认 20:00）；series_labels 展示名、compare_by_series 历史对标代际、launch_window_days 上市窗口、freshness 数据新鲜度 gate。",
     "default_open_hour": 20,
     "open_hour_by_series": {
+      "CM0": 10,
+      "CM1": 11,
       "CM3": 19
     },
+    "launch_open_hour_by_series": {},
     "series_labels": {
       "CM3": "全新一代 LS6",
       "DM2": "L6 M2"

@@ -46,8 +46,16 @@ def model_series_of(bdef: dict, generation: str) -> str | None:
 
 
 def open_hour(bdef: dict, generation: str) -> int:
+    """预售开放时刻（按代际，默认 default_open_hour）。"""
     mon = bdef.get("monitor") or {}
     by = mon.get("open_hour_by_series") or {}
+    return int(by.get(generation, mon.get("default_open_hour", DEFAULT_OPEN_HOUR)))
+
+
+def launch_open_hour(bdef: dict, generation: str) -> int:
+    """上市开放时刻（历史对标用，默认 default_open_hour=20）。"""
+    mon = bdef.get("monitor") or {}
+    by = mon.get("launch_open_hour_by_series") or {}
     return int(by.get(generation, mon.get("default_open_hour", DEFAULT_OPEN_HOUR)))
 
 

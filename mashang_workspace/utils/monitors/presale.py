@@ -76,6 +76,7 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
         "peak_count": 0,
         "next_hour_count": 0,
         "start_day_total": 0,
+        "start_day_retained": 0,
         "launch_day_total": 0,
         "launch_day_retention": 0,
         "n_day_cum": 0,
@@ -144,11 +145,12 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
             retention_slice.loc[retention_slice["parent_region_name"].isna(), "order_number"].nunique()
         )
 
+    day_window_end = open_t + pd.Timedelta(hours=24)
     day_slice = base.loc[
         base["series_group_logic"].eq(generation)
         & (base["intention_payment_time"] >= open_t)
-        & (base["intention_payment_time"] < (open_t + pd.Timedelta(hours=24))),
-        ["order_number", "intention_payment_time"],
+        & (base["intention_payment_time"] < day_window_end),
+        ["order_number", "intention_payment_time", "intention_refund_time"],
     ].copy()
     if not day_slice.empty:
         day_slice["hour"] = day_slice["intention_payment_time"].dt.hour.astype("int64")
@@ -158,6 +160,14 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
         metrics["peak_count"] = int(hourly.iloc[peak_hour])
         metrics["next_hour_count"] = int(hourly.iloc[peak_hour + 1]) if peak_hour < 23 else 0
         metrics["start_day_total"] = int(hourly.sum())
+        # 留存口径：窗口内支付且未退（退订晚于窗口末视为留存）
+        metrics["start_day_retained"] = int(
+            day_slice.loc[
+                day_slice["intention_refund_time"].isna()
+                | (day_slice["intention_refund_time"] > day_window_end),
+                "order_number",
+            ].nunique()
+        )
 
     launch_day_end = start + pd.Timedelta(days=1)
     launch_slice = base.loc[
@@ -226,7 +236,7 @@ def build_card(metrics: dict, show_notes: bool = False) -> dict:
     lines += _section("② 峰值分析")
     lines.append(f"峰值小时小订数：{metrics['peak_count']}（{peak_hour_str}）")
     lines.append(f"峰值后 1h：{metrics['next_hour_count']}")
-    lines.append(f"开放后 24h 累计：{metrics['start_day_total']}")
+    lines.append(f"开放后 24h 累计留存：{metrics['start_day_retained']}")
     lines.append(f"N=0 发布会当日留存（{open_h}:00-24:00）：{metrics['launch_day_retention']}（小订 {metrics['launch_day_total']}）")
 
     lines += _section("③ 累计")

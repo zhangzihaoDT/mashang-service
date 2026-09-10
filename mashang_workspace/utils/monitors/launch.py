@@ -14,7 +14,7 @@ from datetime import datetime
 
 import pandas as pd
 
-from utils.monitors.phase import compare_keys, open_hour, series_label
+from utils.monitors.phase import compare_keys, launch_open_hour, open_hour, series_label
 from utils.monitors.order_filter import flag_test_orders
 
 
@@ -197,7 +197,7 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
         for cmp_key in compare_keys(business_def, generation):
             cmp_launch = resolve_launch_date(time_periods, cmp_key)
             cmp_open = (
-                cmp_launch.normalize() + pd.Timedelta(hours=open_hour(business_def, cmp_key))
+                cmp_launch.normalize() + pd.Timedelta(hours=launch_open_hour(business_def, cmp_key))
                 if cmp_launch is not None
                 else None
             )

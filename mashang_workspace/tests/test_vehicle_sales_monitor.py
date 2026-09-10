@@ -29,6 +29,7 @@ from utils.monitors import freshness  # noqa: E402
 from utils.monitors.phase import (  # noqa: E402
     detect_active,
     is_key_day,
+    launch_open_hour,
     load_business_definition,
     open_hour,
     phase_of,
@@ -77,9 +78,16 @@ def test_multi_active_on_20260910(bdef):
     assert by_gen.get("DM2") == "launch"
 
 
-def test_cm3_open_hour_is_19(bdef):
+def test_open_hour_calibration(bdef):
+    # 预售开放时刻按代际校准（数据驱动）
     assert open_hour(bdef, "CM3") == 19
+    assert open_hour(bdef, "CM0") == 10
+    assert open_hour(bdef, "CM1") == 11
+    assert open_hour(bdef, "CM2") == 20
     assert open_hour(bdef, "DM2") == 20
+    # 上市开放时刻历史对标默认 20:00
+    assert launch_open_hour(bdef, "CM1") == 20
+    assert launch_open_hour(bdef, "CM0") == 20
 
 
 def test_key_day(bdef):
