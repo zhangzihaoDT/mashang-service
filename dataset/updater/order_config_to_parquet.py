@@ -35,6 +35,23 @@ def parse_sql_condition(df, condition_str):
         print(f"⚠️ 解析条件失败: {condition_str}, Error: {e}")
         return pd.Series([False] * len(df), index=df.index)
 
+def _rule_condition(rule) -> str:
+    """提取规则表达式字符串，兼容旧字符串格式与新的 {priority, condition} 对象格式。"""
+    if isinstance(rule, dict):
+        return str(rule.get("condition", ""))
+    return str(rule)
+
+
+def _rule_priority(rule, default: int = 0) -> int:
+    """提取规则优先级；旧字符串格式视为 priority=0。"""
+    if isinstance(rule, dict):
+        try:
+            return int(rule.get("priority", default))
+        except (TypeError, ValueError):
+            return default
+    return default
+
+
 def apply_series_group_logic(df, business_def):
     logic = business_def.get("series_group_logic", {})
     if "product_name" not in df.columns:
@@ -43,11 +60,17 @@ def apply_series_group_logic(df, business_def):
 
     group_col = pd.Series(pd.NA, index=df.index, dtype="string")
     default_group = "其他"
-    for group, cond in logic.items():
-        if str(cond).strip().upper() == "ELSE":
+    rules = []
+    for i, (group, cond) in enumerate(logic.items()):
+        expr = _rule_condition(cond)
+        if str(expr).strip().upper() == "ELSE":
             default_group = group
             continue
-        mask = parse_sql_condition(df, str(cond))
+        rules.append((_rule_priority(cond), i, group, expr))
+    rules.sort(key=lambda r: (-r[0], r[1]))
+
+    for _, _, group, expr in rules:
+        mask = parse_sql_condition(df, str(expr))
         if not isinstance(mask, pd.Series):
             continue
         mask = mask.fillna(False)
