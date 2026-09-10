@@ -238,9 +238,9 @@ def test_scheduler_due_actions_key_day_gating(bdef):
     # 每日 09:00 全量刷新 / 09:30 日报
     assert "refresh_full" in sched.due_actions(datetime(2026, 9, 15, 9, 0), bdef)
     assert sched.due_actions(datetime(2026, 9, 15, 9, 30), bdef) == ["monitor"]
-    # key day 19:00 / 19:30 日内刷新与监控
-    assert sched.due_actions(datetime(2026, 9, 10, 19, 0), bdef) == ["refresh_order_data"]
-    assert sched.due_actions(datetime(2026, 9, 10, 19, 30), bdef) == ["monitor"]
+    # key day 19:00 刷新+监控串行（:30 不再单独触发 monitor）
+    assert sched.due_actions(datetime(2026, 9, 10, 19, 0), bdef) == ["refresh_order_data", "monitor"]
+    assert sched.due_actions(datetime(2026, 9, 10, 19, 30), bdef) == []
     # 非 key day 晚间不触发
     assert sched.due_actions(datetime(2026, 9, 15, 19, 0), bdef) == []
     assert sched.due_actions(datetime(2026, 9, 15, 19, 30), bdef) == []

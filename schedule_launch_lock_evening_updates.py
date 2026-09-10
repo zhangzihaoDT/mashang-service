@@ -4,9 +4,8 @@
 
 调度（key day = 任一 active 代际的预售首日 start 或上市日 end）：
   每日 09:00                     dataset 全量刷新
-  key day 17:00–23:00 每小时 :00  order_data 单表刷新
+  key day 17:00–23:00 每小时 :00  order_data 刷新 + 监控（串行）
   每日 09:30                     监控（日报）
-  key day 17:00–23:00 每小时 :30  监控（高频）
 
 启动方式：
     source .venv/bin/activate
@@ -72,10 +71,8 @@ def due_actions(now: datetime, bdef: dict) -> list[str]:
     if hm == FULL_REFRESH_TIME:
         actions.append("refresh_full")
     if now.minute == 0 and now.hour in _key_hours(bdef) and key:
-        actions.append("refresh_order_data")
+        actions += ["refresh_order_data", "monitor"]
     if hm == MONITOR_DAILY_TIME:
-        actions.append("monitor")
-    if now.minute == 30 and now.hour in _key_hours(bdef) and key:
         actions.append("monitor")
     return actions
 
