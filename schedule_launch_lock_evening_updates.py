@@ -3,9 +3,14 @@
 """常驻定时器：预售/上市监控刷新 + 推送（标准库实现，无第三方依赖）。
 
 调度（key day = 任一 active 代际的预售首日 start 或上市日 end）：
-  每日 09:00                     dataset 全量刷新 + 校验 + 每日观察同步（串行；校验失败则跳过同步）
-  key day 17:00–23:00 每小时 :00  order_data 刷新 + 监控（串行）
-  每日 09:30                     监控（日报）
+
+  Daily pipeline（每日 09:00）
+    refresh_full → dataset_validate → daily_observation_sync → monitor
+    按依赖成功顺序串行：任一上游失败即中止后续步骤；
+    monitor 是最后一步，使用同一批次、同一时点数据（不再按钟点单独触发）。
+
+  Event monitoring（key day 17:00–23:00 每小时 :00）
+    refresh_order_data → monitor（刷新成功后执行）
 
 监控默认只推送 presale 阶段代际（--phase presale）；
 需要 launch 监控时显式传 --phase launch,presale 或 --series。
@@ -54,7 +59,6 @@ from utils.monitors.phase import is_key_day, load_business_definition  # noqa: E
 
 LOG_DIR = REPO_ROOT / "logs" / "scheduler"
 FULL_REFRESH_TIME = (9, 0)
-MONITOR_DAILY_TIME = (9, 30)
 DEFAULT_KEY_HOURS = [17, 18, 19, 20, 21, 22, 23]
 
 _STOP = False
@@ -72,11 +76,9 @@ def due_actions(now: datetime, bdef: dict) -> list[str]:
     key = is_key_day(bdef, now.date())
     actions: list[str] = []
     if hm == FULL_REFRESH_TIME:
-        actions += ["refresh_full", "dataset_validate", "daily_observation_sync"]
+        actions += ["refresh_full", "dataset_validate", "daily_observation_sync", "monitor"]
     if now.minute == 0 and now.hour in _key_hours(bdef) and key:
         actions += ["refresh_order_data", "monitor"]
-    if hm == MONITOR_DAILY_TIME:
-        actions.append("monitor")
     return actions
 
 
@@ -140,19 +142,19 @@ def _dispatch(action: str, args, now: datetime) -> int:
 
 
 def process_batch(now: datetime, bdef: dict, args, fired: set[str]) -> None:
-    """按序执行当前时刻 due_actions 的全部动作；dataset_validate 失败时跳过 daily_observation_sync。"""
-    validate_ok: bool | None = None
+    """按序执行当前时刻 due_actions 的整批动作；任一上游失败即中止该批后续步骤。"""
+    chain_ok = True
     for action in due_actions(now, bdef):
         token = f"{now:%Y-%m-%d} {action} {now.hour}:{now.minute}"
         if token in fired:
             continue
         fired.add(token)
-        if action == "daily_observation_sync" and validate_ok is False:
-            log("跳过 daily_observation_sync：dataset_validate 失败，不写外部系统", now)
+        if not chain_ok:
+            log(f"跳过 {action}：上游步骤失败，本轮 batch 中止", now)
             continue
         rc = _dispatch(action, args, now)
-        if action == "dataset_validate":
-            validate_ok = rc == 0
+        if action in ("refresh_full", "dataset_validate", "daily_observation_sync", "refresh_order_data"):
+            chain_ok = rc == 0
 
 
 def run_once(args, bdef: dict) -> int:
@@ -166,7 +168,7 @@ def run_once(args, bdef: dict) -> int:
 
 def run_loop(args, bdef: dict) -> int:
     log("调度器启动", datetime.now())
-    log(f"  key_day_hours={_key_hours(bdef)}  数据管道={FULL_REFRESH_TIME}  日报={MONITOR_DAILY_TIME}  monitor_phase={args.phase}", datetime.now())
+    log(f"  DailyPipeline={FULL_REFRESH_TIME}（刷新→校验→同步→监控）  KeyDay={_key_hours(bdef)}时整   monitor_phase={args.phase}", datetime.now())
     fired: set[str] = set()
     last_minute: tuple[int, int] | None = None
 

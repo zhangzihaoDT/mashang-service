@@ -258,12 +258,11 @@ def test_scheduler_monitor_cmd_defaults_to_presale(bdef):
 
 def test_scheduler_due_actions_key_day_gating(bdef):
     sched = _load_scheduler()
-    # 每日 09:00 数据管道：全量刷新 + 校验 + 每日观察同步；09:30 日报
-    acts = sched.due_actions(datetime(2026, 9, 15, 9, 0), bdef)
-    assert "refresh_full" in acts
-    assert "dataset_validate" in acts
-    assert "daily_observation_sync" in acts
-    assert sched.due_actions(datetime(2026, 9, 15, 9, 30), bdef) == ["monitor"]
+    # 每日 09:00 数据管道末步含 monitor（09:30 不再独立触发）
+    assert sched.due_actions(datetime(2026, 9, 15, 9, 0), bdef) == [
+        "refresh_full", "dataset_validate", "daily_observation_sync", "monitor",
+    ]
+    assert sched.due_actions(datetime(2026, 9, 15, 9, 30), bdef) == []
     # key day 19:00 刷新+监控串行（:30 不再单独触发 monitor）
     assert sched.due_actions(datetime(2026, 9, 10, 19, 0), bdef) == ["refresh_order_data", "monitor"]
     assert sched.due_actions(datetime(2026, 9, 10, 19, 30), bdef) == []
@@ -273,38 +272,65 @@ def test_scheduler_due_actions_key_day_gating(bdef):
 
 
 def test_scheduler_daily_pipeline_serial_order(bdef):
-    """09:00 数据管道顺序 = 刷新 → 校验 → 同步（对应 make daily-data-pipeline 依赖序）。"""
+    """09:00 数据管道顺序 = 刷新 → 校验 → 同步 → 监控。"""
     sched = _load_scheduler()
     assert sched.due_actions(datetime(2026, 9, 15, 9, 0), bdef) == [
+        "refresh_full", "dataset_validate", "daily_observation_sync", "monitor",
+    ]
+
+
+def _run_chain(sched, now, bdef, result_map):
+    calls: list[str] = []
+
+    def fake_run(cmd, label, dry_run, t):
+        calls.append(label)
+        return result_map.get(label, 0)
+
+    monkeypatch = pytest.MonkeyPatch()
+    monkeypatch.setattr(sched, "_run", fake_run)
+    try:
+        sched.process_batch(now, bdef, _scheduler_args()[1], set())
+    finally:
+        monkeypatch.undo()
+    return calls
+
+
+def test_scheduler_pipeline_runs_all_in_order(bdef):
+    """全链路成功后 monitor 作为末步执行。"""
+    sched = _load_scheduler()
+    now = datetime(2026, 9, 15, 9, 0)
+    assert _run_chain(sched, now, bdef, {}) == [
+        "refresh_full", "dataset_validate", "daily_observation_sync", "monitor",
+    ]
+
+
+def test_scheduler_refresh_failure_halts_pipeline(bdef):
+    """refresh_full 失败即中止整批（validate/sync/monitor 都不执行）。"""
+    sched = _load_scheduler()
+    now = datetime(2026, 9, 15, 9, 0)
+    assert _run_chain(sched, now, bdef, {"refresh_full": 1}) == ["refresh_full"]
+
+
+def test_scheduler_validate_failure_blocks_sync_and_monitor(bdef):
+    """dataset_validate 失败 → 跳过 daily_observation_sync 与 monitor。"""
+    sched = _load_scheduler()
+    now = datetime(2026, 9, 15, 9, 0)
+    assert _run_chain(sched, now, bdef, {"dataset_validate": 1}) == [
+        "refresh_full", "dataset_validate",
+    ]
+
+
+def test_scheduler_sync_failure_blocks_monitor(bdef):
+    """daily_observation_sync 失败 → 跳过末步 monitor。"""
+    sched = _load_scheduler()
+    now = datetime(2026, 9, 15, 9, 0)
+    assert _run_chain(sched, now, bdef, {"daily_observation_sync": 1}) == [
         "refresh_full", "dataset_validate", "daily_observation_sync",
     ]
 
 
-def test_scheduler_pipeline_runs_all_in_order(monkeypatch, bdef):
-    """validate 成功后同步正常执行。"""
+def test_scheduler_keyday_refresh_failure_blocks_monitor(bdef):
+    """key day 高频 refresh_order_data 失败 → 跳过 monitor。"""
     sched = _load_scheduler()
-    now = datetime(2026, 9, 15, 9, 0)
-    calls: list[str] = []
-
-    def fake_run(cmd, label, dry_run, t):
-        calls.append(label)
-        return 0
-
-    monkeypatch.setattr(sched, "_run", fake_run)
-    sched.process_batch(now, bdef, _scheduler_args()[1], set())
-    assert calls == ["refresh_full", "dataset_validate", "daily_observation_sync"]
-
-
-def test_scheduler_validate_failure_blocks_daily_observation_sync(monkeypatch, bdef):
-    """dataset_validate 失败时跳过 daily_observation_sync，不写外部系统。"""
-    sched = _load_scheduler()
-    now = datetime(2026, 9, 15, 9, 0)
-    calls: list[str] = []
-
-    def fake_run(cmd, label, dry_run, t):
-        calls.append(label)
-        return 1 if label == "dataset_validate" else 0
-
-    monkeypatch.setattr(sched, "_run", fake_run)
-    sched.process_batch(now, bdef, _scheduler_args()[1], set())
-    assert calls == ["refresh_full", "dataset_validate"]
+    now = datetime(2026, 9, 10, 19, 0)
+    assert _run_chain(sched, now, bdef, {"refresh_order_data": 1}) == ["refresh_order_data"]

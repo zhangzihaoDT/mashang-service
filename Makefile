@@ -247,7 +247,7 @@ monitor-dry-run:
 		$(if $(SERIES),--series $(SERIES)) \
 		$(if $(PHASE),--phase $(PHASE))
 
-## 常驻定时器：09:00 全量刷新 + key day 日内刷新/监控（配合 caffeinate -i）
+## 常驻定时器：09:00 每日管道（刷新→校验→同步→监控）+ key day 17-23 高频刷新/监控（配合 caffeinate -i）
 scheduler:
 	$(PYTHON) schedule_launch_lock_evening_updates.py
 
