@@ -74,12 +74,16 @@ def load_order() -> pd.DataFrame:
 
 def build_stale_card(fresh: dict, active: list[dict]) -> dict:
     gens = "、".join(f"{a['label']}（{a['generation']}·{a['phase']}）" for a in active) or "无"
+    ref = fresh.get("refresh_ts")
+    ref_str = f"{ref:%Y-%m-%d %H:%M}" if ref is not None else "未知"
+    source = "调度器刷新" if fresh.get("refresh_source") == "scheduler" else "文件 mtime"
     latest = fresh.get("latest_ts")
     latest_str = f"{latest:%Y-%m-%d %H:%M}" if latest is not None else "未知"
     lines = [
         "**⚠ 监控数据尚未刷新，本次指标推送跳过**",
         "",
         f"监控对象：{gens}",
+        f"数据刷新时间：{ref_str}（{source}）",
         f"最新订单时间：{latest_str}",
         f"判定：{fresh.get('reason')}",
         "",
@@ -116,7 +120,8 @@ def run(args) -> int:
     fresh = None
     if live:
         now = pd.Timestamp(args.now) if args.now else pd.Timestamp.now()
-        fresh = freshness.check(now=now, bdef=bdef)
+        refresh_ts = pd.Timestamp(args.refresh_ts) if args.refresh_ts else None
+        fresh = freshness.check(now=now, bdef=bdef, refresh_ts=refresh_ts)
 
     scope = {
         "data_source": "dataset/order_data.parquet",
@@ -222,6 +227,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="统一预售/上市监控 runner")
     parser.add_argument("--as-of", default=None, help="统计基准日 YYYY-MM-DD（默认今天；给定时跳过新鲜度 gate）")
     parser.add_argument("--now", default=None, help="覆盖当前时刻（用于新鲜度 gate 测试）")
+    parser.add_argument("--refresh-ts", default=None, help="本轮数据刷新完成时刻（ISO，调度器注入）；缺省回退 parquet mtime")
     parser.add_argument("--series", default=None, help="过滤代际，逗号分隔，如 CM3,DM2")
     parser.add_argument("--phase", default=None, help="过滤阶段，逗号分隔：presale,launch")
     parser.add_argument("--dry-run", action="store_true", help="只打印卡片，不发送飞书")

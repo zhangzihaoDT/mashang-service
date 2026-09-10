@@ -265,15 +265,28 @@ def test_presale_compare_window_matches_elapsed(bdef):
 # ── freshness ──────────────────────────────────────────────────────
 
 
-def test_freshness_flags_stale_and_fresh():
-    latest = freshness.latest_data_ts()
-    if latest is None:
-        pytest.skip("dataset/order_data.parquet 不存在")
-    fresh = freshness.check(now=latest + pd.Timedelta(minutes=30), max_hours=2)
+def test_freshness_uses_scheduler_refresh_ts(bdef):
+    """调度器传入 refresh_ts 时以其为准：2 分钟内 fresh，超时 stale。"""
+    now = pd.Timestamp("2026-09-10 19:17:00")
+    fresh = freshness.check(now=now, refresh_ts=now - pd.Timedelta(minutes=1), bdef=bdef)
     assert fresh["fresh"], fresh
-    stale = freshness.check(now=latest + pd.Timedelta(hours=5), max_hours=2)
+    assert fresh["refresh_source"] == "scheduler"
+
+    stale = freshness.check(now=now, refresh_ts=now - pd.Timedelta(minutes=10), bdef=bdef)
     assert not stale["fresh"]
-    assert "最新数据" in stale["reason"]
+    assert "数据刷新于" in stale["reason"]
+    assert "> 2min" in stale["reason"]
+
+
+def test_freshness_falls_back_to_mtime(bdef):
+    """未传 refresh_ts 时回退 parquet mtime 判定。"""
+    mtime = pd.Timestamp.fromtimestamp(freshness.ORDER_DATA_PARQUET.stat().st_mtime)
+    fresh = freshness.check(now=mtime + pd.Timedelta(minutes=1), bdef=bdef)
+    assert fresh["fresh"], fresh
+    assert fresh["refresh_source"] == "mtime"
+
+    stale = freshness.check(now=mtime + pd.Timedelta(hours=1), bdef=bdef)
+    assert not stale["fresh"]
 
 
 # ── scheduler ──────────────────────────────────────────────────────
@@ -300,6 +313,51 @@ def test_scheduler_monitor_cmd_defaults_to_presale(bdef):
     cmd = sched._monitor_cmd(args)
     assert cmd[cmd.index("--phase") + 1] == "launch,presale"
     assert cmd[cmd.index("--series") + 1] == "DM2,CM3"
+
+
+def test_scheduler_monitor_cmd_includes_refresh_ts(bdef):
+    """有 refresh_ts 时注入 --refresh-ts；缺省不注入。"""
+    sched, args = _scheduler_args(dry_run=True)
+    assert "--refresh-ts" not in sched._monitor_cmd(args)
+    ts = datetime(2026, 9, 10, 19, 0, 1)
+    cmd = sched._monitor_cmd(args, refresh_ts=ts)
+    assert cmd[cmd.index("--refresh-ts") + 1] == ts.isoformat()
+
+
+def test_scheduler_pipeline_passes_refresh_ts_to_monitor(bdef):
+    """刷新成功后，管道把本轮刷新完成时刻透传给 monitor。"""
+    sched = _load_scheduler()
+    cmds: dict[str, list[str]] = {}
+
+    def fake_run(cmd, label, dry_run, t):
+        cmds[label] = cmd
+        return 0
+
+    mp = pytest.MonkeyPatch()
+    mp.setattr(sched, "_run", fake_run)
+    try:
+        sched.process_batch(datetime(2026, 9, 15, 9, 0), bdef, _scheduler_args()[1], set())
+    finally:
+        mp.undo()
+    assert "--refresh-ts" in cmds["monitor"]
+
+
+def test_scheduler_refresh_failure_no_refresh_ts_and_skips_monitor(bdef):
+    """刷新失败 → monitor 被跳过，不会带 refresh_ts 执行。"""
+    sched = _load_scheduler()
+    cmds: dict[str, list[str]] = {}
+
+    def fake_run(cmd, label, dry_run, t):
+        cmds[label] = cmd
+        return 1 if label == "refresh_full" else 0
+
+    mp = pytest.MonkeyPatch()
+    mp.setattr(sched, "_run", fake_run)
+    try:
+        sched.process_batch(datetime(2026, 9, 15, 9, 0), bdef, _scheduler_args()[1], set())
+    finally:
+        mp.undo()
+    assert "monitor" not in cmds
 
 
 def test_scheduler_due_actions_key_day_gating(bdef):

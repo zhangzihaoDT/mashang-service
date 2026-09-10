@@ -204,7 +204,8 @@
     },
     "launch_window_days": 14,
     "freshness": {
-      "max_staleness_hours": 2,
+      "description": "数据新鲜度 gate：以数据刷新时间为准（调度器传入的 refresh_ts；手动运行回退 order_data.parquet mtime）。距今超过 max_refresh_age_minutes 即视为 stale，监控跳过指标推送并告警。",
+      "max_refresh_age_minutes": 2,
       "key_day_hours": [17, 18, 19, 20, 21, 22, 23]
     },
     "test_order_filter": {

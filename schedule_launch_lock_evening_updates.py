@@ -109,7 +109,7 @@ def _run(cmd: list[str], label: str, dry_run: bool, now: datetime) -> int:
     return p.returncode
 
 
-def _monitor_cmd(args) -> list[str]:
+def _monitor_cmd(args, refresh_ts: datetime | None = None) -> list[str]:
     cmd = [sys.executable, str(_WS_ROOT / "runtime_scripts" / "vehicle_sales_monitor.py")]
     if args.dry_run:
         cmd.append("--dry-run")
@@ -119,10 +119,12 @@ def _monitor_cmd(args) -> list[str]:
         cmd += ["--series", args.series]
     if args.phase:
         cmd += ["--phase", args.phase]
+    if refresh_ts is not None:
+        cmd += ["--refresh-ts", refresh_ts.isoformat()]
     return cmd
 
 
-def _dispatch(action: str, args, now: datetime) -> int:
+def _dispatch(action: str, args, now: datetime, refresh_ts: datetime | None = None) -> int:
     """按动作名执行对应子进程，返回 exit code。"""
     if action == "refresh_full":
         return _run([sys.executable, str(REPO_ROOT / "dataset" / "updater" / "update_all_datasets.py")],
@@ -137,13 +139,21 @@ def _dispatch(action: str, args, now: datetime) -> int:
         return _run([sys.executable, str(REPO_ROOT / "dataset" / "updater" / "order_data_to_parquet.py")],
                     "refresh_order_data", args.dry_run, now)
     if action == "monitor":
-        return _run(_monitor_cmd(args), "monitor", args.dry_run, now)
+        return _run(_monitor_cmd(args, refresh_ts), "monitor", args.dry_run, now)
     return 0
 
 
+REFRESH_ACTIONS = ("refresh_full", "refresh_order_data")
+GATE_ACTIONS = ("refresh_full", "dataset_validate", "daily_observation_sync", "refresh_order_data")
+
+
 def process_batch(now: datetime, bdef: dict, args, fired: set[str]) -> None:
-    """按序执行当前时刻 due_actions 的整批动作；任一上游失败即中止该批后续步骤。"""
+    """按序执行当前时刻 due_actions 的整批动作；任一上游失败即中止该批后续步骤。
+
+    本轮刷新动作成功后记录完成时刻，透传给 monitor 作新鲜度门控依据。
+    """
     chain_ok = True
+    refresh_ts: datetime | None = None
     for action in due_actions(now, bdef):
         token = f"{now:%Y-%m-%d} {action} {now.hour}:{now.minute}"
         if token in fired:
@@ -152,17 +162,20 @@ def process_batch(now: datetime, bdef: dict, args, fired: set[str]) -> None:
         if not chain_ok:
             log(f"跳过 {action}：上游步骤失败，本轮 batch 中止", now)
             continue
-        rc = _dispatch(action, args, now)
-        if action in ("refresh_full", "dataset_validate", "daily_observation_sync", "refresh_order_data"):
+        rc = _dispatch(action, args, now, refresh_ts=refresh_ts)
+        if action in GATE_ACTIONS:
             chain_ok = rc == 0
+        if action in REFRESH_ACTIONS and rc == 0:
+            refresh_ts = datetime.now()
 
 
 def run_once(args, bdef: dict) -> int:
     now = datetime.now()
     log("--once：执行一轮完整链路（刷新 + 监控）", now)
-    _run([sys.executable, str(REPO_ROOT / "dataset" / "updater" / "order_data_to_parquet.py")],
-         "refresh_order_data", args.dry_run, now)
-    _run(_monitor_cmd(args), "monitor", args.dry_run, now)
+    rc = _run([sys.executable, str(REPO_ROOT / "dataset" / "updater" / "order_data_to_parquet.py")],
+              "refresh_order_data", args.dry_run, now)
+    refresh_ts = datetime.now() if rc == 0 else None
+    _run(_monitor_cmd(args, refresh_ts), "monitor", args.dry_run, now)
     return 0
 
 
