@@ -19,6 +19,7 @@ from utils.monitors.phase import (
     open_hour,
     series_label,
 )
+from utils.monitors.order_filter import flag_test_orders
 
 
 def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generation: str) -> dict:
@@ -28,6 +29,15 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
     end = pd.Timestamp(tp["end"]) if tp.get("end") else None
     open_h = open_hour(business_def, generation)
     label = series_label(business_def, generation)
+
+    # 剔除测试单（总部主理店 + 假身份号）；计数按当前代际口径
+    test_mask = flag_test_orders(df, business_def)
+    if "series_group_logic" in df.columns:
+        test_excluded = int((test_mask & df["series_group_logic"].eq(generation)).sum())
+    else:
+        test_excluded = int(test_mask.sum())
+    if test_mask.any():
+        df = df.loc[~test_mask].copy()
 
     if start is not None:
         n_raw = int((today.normalize() - start.normalize()).days + 1)  # type: ignore[union-attr]
@@ -53,6 +63,7 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
         "generation": generation,
         "label": label,
         "open_hour": open_h,
+        "test_orders_excluded": test_excluded,
         "today": today.date().isoformat(),
         "series_start": start.date().isoformat() if start is not None else None,
         "series_end": end.date().isoformat() if end is not None else None,
@@ -259,6 +270,8 @@ def build_card(metrics: dict, show_notes: bool = False) -> dict:
     lines += _section("⑥ 附注")
     if metrics.get("series_start") and metrics.get("series_end"):
         lines.append(f"预售期：{metrics['series_start']} ~ {metrics['series_end']}")
+    if metrics.get("test_orders_excluded"):
+        lines.append(f"已剔除测试单：{metrics['test_orders_excluded']} 笔（总部主理店 + 假身份号）")
     lines.append(f"口径：从预售开放时刻（{open_h}:00）起算，不含预售日白天零星订单；小订含当日未退意向金订单")
     lines.append(f"N=0 发布会当日留存：开放 {open_h}:00 至当日 24:00 内支付意向金且未退（退订晚于当日 24:00 视为留存）的唯一订单数")
     lines.append(f"N（日）= 当前日期 - {metrics['generation']} startday + 1 = {metrics['n']}")

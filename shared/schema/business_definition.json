@@ -199,6 +199,10 @@
     "freshness": {
       "max_staleness_hours": 2,
       "key_day_hours": [17, 18, 19, 20, 21, 22, 23]
+    },
+    "test_order_filter": {
+      "description": "监控测试单过滤：store_name 属于 hq_stores 且 buyer_identity_no 非空且非 18 位身份证格式。order_type 为空不作为判定条件。",
+      "hq_stores": ["总部主理店"]
     }
   },
   "ls9_variant_logic": {

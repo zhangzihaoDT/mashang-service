@@ -15,6 +15,7 @@ from datetime import datetime
 import pandas as pd
 
 from utils.monitors.phase import compare_keys, open_hour, series_label
+from utils.monitors.order_filter import flag_test_orders
 
 
 def resolve_launch_date(time_periods: dict, key: str) -> pd.Timestamp | None:
@@ -87,6 +88,15 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
     missing = [c for c in required_cols if c not in df.columns]
     if missing:
         raise KeyError(f"数据缺少列: {', '.join(missing)}")
+
+    # 剔除测试单（总部主理店 + 假身份号）；计数按当前代际口径
+    test_mask = flag_test_orders(df, business_def)
+    if "series_group_logic" in df.columns:
+        test_excluded = int((test_mask & df["series_group_logic"].eq(generation)).sum())
+    else:
+        test_excluded = int(test_mask.sum())
+    if test_mask.any():
+        df = df.loc[~test_mask].copy()
 
     run_date = today.normalize()
     max_lock_time = df["lock_time"].max()
@@ -237,6 +247,7 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
         "generation": generation,
         "label": label,
         "series": generation,
+        "test_orders_excluded": test_excluded,
         "today": today.date().isoformat(),
         "launch": launch.date().isoformat() if launch is not None else None,
         "obs": obs.isoformat(sep=" ", timespec="minutes"),
@@ -309,6 +320,8 @@ def build_card(metrics: dict, show_notes: bool = True) -> dict:
 
     if show_notes:
         lines.append("口径：开放时刻起至观察时间的锁单累计（目标开放时刻 = 上市日当天首个转大定，无则上市日 00:00；排除测试单）；历史对比 = 各代际自上市日开放时刻起算相同时长")
+        if metrics.get("test_orders_excluded"):
+            lines.append(f"已剔除测试单：{metrics['test_orders_excluded']} 笔（总部主理店 + 假身份号）")
         lines.append("数据源：dataset/order_data.parquet + shared/schema/business_definition.json")
 
     if metrics["as_of_date"] != metrics["run_date"]:

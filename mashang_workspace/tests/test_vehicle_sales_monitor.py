@@ -34,6 +34,7 @@ from utils.monitors.phase import (  # noqa: E402
     phase_of,
 )
 from utils.monitors.presale import compute as presale_compute  # noqa: E402
+from utils.monitors.order_filter import is_fake_identity, flag_test_orders  # noqa: E402
 
 _BUSINESS_DEF = _PRJ_DIR / "shared" / "schema" / "business_definition.json"
 
@@ -117,6 +118,43 @@ def test_presale_compute_uses_generation_open_hour(bdef):
     assert m["cum"] == 2
     assert m["retention"] == 2
     assert m["open_hour"] == 19
+
+
+# ── 测试单过滤 ─────────────────────────────────────────────────────
+
+
+def test_is_fake_identity():
+    assert is_fake_identity("310101199001011234") is False
+    assert is_fake_identity("31010119900101567X") is False
+    assert is_fake_identity("123456") is True
+    assert is_fake_identity("1111") is True
+    assert is_fake_identity(None) is False
+    assert is_fake_identity("") is False
+
+
+def test_flag_test_orders_requires_hq_and_fake(bdef):
+    df = pd.DataFrame(
+        {
+            "store_name": ["总部主理店", "总部主理店", "门店A", "门店A"],
+            "buyer_identity_no": ["123456", "310101199001011234", "123456", "310101199001011234"],
+        }
+    )
+    assert flag_test_orders(df, bdef).tolist() == [True, False, False, False]
+
+
+def test_presale_compute_excludes_test_orders(bdef):
+    today = pd.Timestamp("2026-09-10")
+    df = _presale_df(
+        [
+            ("o1", "2026-09-10 19:05", None, "CM3", "LS6 M3 92 RWD"),
+            ("o2", "2026-09-10 19:06", None, "CM3", "全新一代智己LS6"),
+        ]
+    )
+    df.loc[df["order_number"] == "o2", "store_name"] = "总部主理店"
+    df.loc[df["order_number"] == "o2", "buyer_identity_no"] = "123456"
+    m = presale_compute(df, bdef, today, "CM3")
+    assert m["cum"] == 1
+    assert m["test_orders_excluded"] == 1
 
 
 # ── freshness ──────────────────────────────────────────────────────
