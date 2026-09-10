@@ -231,15 +231,20 @@ def build_card(metrics: dict, show_notes: bool = False) -> dict:
     kept_by_product = metrics.get("retention_by_product") or []
     if kept_by_product:
         limited_items = [i for i in kept_by_product if i.get("limited")]
-        normal_items = [i for i in kept_by_product if not i.get("limited")]
-        limited_total = sum(i["count"] for i in limited_items)
-        normal_total = sum(i["count"] for i in normal_items)
-        lines.append(f"留存分类：限量版 **{limited_total:,}** ｜ 非限量 **{normal_total:,}**")
-        for tag, items in (("限量版", limited_items), ("非限量", normal_items)):
-            for item in items:
-                lines.append(f"　· {tag}：{item['product_name']}：{item['count']:,}（{item['share']}%）")
+        if limited_items:
+            normal_items = [i for i in kept_by_product if not i.get("limited")]
+            limited_total = sum(i["count"] for i in limited_items)
+            normal_total = sum(i["count"] for i in normal_items)
+            lines.append(f"留存分类：限量版 **{limited_total:,}** ｜ 非限量 **{normal_total:,}**")
+            for tag, items in (("限量版", limited_items), ("非限量", normal_items)):
+                for item in items:
+                    lines.append(f"　· {tag}：{item['product_name']}：{item['count']:,}（{item['share']}%）")
+        else:
+            lines.append("留存明细：")
+            for item in kept_by_product:
+                lines.append(f"　· {item['product_name']}：{item['count']:,}（{item['share']}%）")
     else:
-        lines.append("留存分类：暂无留存订单明细")
+        lines.append("留存明细：暂无留存订单")
 
     region_items = metrics.get("retention_by_region") or []
     if region_items:

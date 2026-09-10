@@ -408,3 +408,17 @@ def test_presale_card_notes_only_in_dry_run():
     assert "口径：" in body
     assert "数据源：" in body
     assert "已剔除测试单：2 笔" in body
+
+
+def test_presale_card_no_limited_skips_split():
+    """无「限量版」命中的代际（如 CM3）不渲染限量/非限量二分，直接列留存明细。"""
+    m = _presale_metrics()
+    m["retention_by_product"] = [
+        {"product_name": "全新一代智己LS6 Max", "count": 1500, "share": 66.7, "limited": False},
+        {"product_name": "全新一代智己LS6 Ultra", "count": 750, "share": 33.3, "limited": False},
+    ]
+    body = presale_build_card(m, show_notes=False)["card"]["elements"][0]["text"]["content"]
+    assert "限量版 **0**" not in body
+    assert "留存明细：" in body
+    assert "　· 全新一代智己LS6 Max：1,500（66.7%）" in body
+    assert "全新一代智己LS6 Ultra：750（33.3%）" in body
