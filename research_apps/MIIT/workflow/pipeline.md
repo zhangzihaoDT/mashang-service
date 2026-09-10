@@ -10,6 +10,8 @@ SOURCE
    ↓  data/vehicle_details/ + data/vehicle_photos/ + data/raw_html/ + data/fetch_status/
 03 EIDC fetch（03_fetch_eidc_batch → eidc_parser）
    ↓  data/eidc/batch_{401..408}/
+03' MIIT formal fetch（03_fetch_miit_formal_batch → miit_formal_source + eidc_parser）
+   ↓  data/miit_formal/batch_{N}/（Gov 正式公告，source=miit_gov, stage=confirmed）
 
 ENRICHMENT
 04 vehicle tax（04_parse_vehicle_tax）
@@ -30,7 +32,7 @@ REPORT
    ↓  reports/batch_{batch}/
 ```
 
-Gov proposed（01→02→04→06→07→09）与 EIDC confirmed（03→04/05→06）共用同一 canonical 出口（06）；401-408 全 fresh rebuild，legacy 导入已删除。编号 = pipeline topology，非开发顺序。
+Gov proposed（01→02→04→06→07→09）、MIIT formal confirmed（03'→04→06）与 EIDC confirmed（03→04/05→06）共用同一 canonical 出口（06）；401-408 全 fresh rebuild，legacy 导入已删除。编号 = pipeline topology，非开发顺序（`03` 与 `03'` 均为 SOURCE fetch，分别对应 EIDC 镜像与 Gov 正式公告）。
 
 ## 5 类资产（顶层认知入口）
 
@@ -61,16 +63,18 @@ MIIT/
 |------|------|------|
 | `01_scan_gov_batch.py` | SOURCE | Gov 品牌搜索 + 简报（scan 快照 + scan_report.html） |
 | `02_archive_gov_vehicle_details.py` | SOURCE | Gov 车型详情归档（可恢复：失败分类 + checkpoint + retry） |
-| `03_fetch_eidc_batch.py` | SOURCE | EIDC 公告抓取/解析/归档（fresh，401-408） |
+| `03_fetch_eidc_batch.py` | SOURCE | EIDC 公告抓取/解析/归档（fresh，401-408；confirmed fallback） |
+| `03_fetch_miit_formal_batch.py` | SOURCE | MIIT 正式公告抓取/解析/归档（`/jgsj/zbys/wjfb/`，confirmed 主源） |
 | `04_parse_vehicle_tax.py` | ENRICHMENT | 车船税 doc/txt → json/md |
 | `05_parse_purchase_tax.py` | ENRICHMENT | 购置税 doc/txt → json/md |
-| `06_build_vehicle_dataset.py` | CANONICAL | **canonical 唯一入口**（product_master / vehicle_parameter，passenger scope） |
+| `06_build_vehicle_dataset.py` | CANONICAL | **canonical 唯一入口**（product_master / vehicle_parameter，passenger scope；proposed→confirmed merge） |
 | `07_build_wide_table.py` | DERIVED | 参数宽表 csv/md |
 | `08_generate_brand_report.py` | REPORT | 单品牌车型对比 HTML |
 | `09_generate_category_report.py` | REPORT | 按分类多品牌对比 HTML |
 | `validate_eidc_batch.py` | validation | 每批 EIDC 批次验收（schema_status） |
-| `eidc_parser.py` | EIDC source | EIDC 附件 source record 解析（road/tax/purchase） |
+| `eidc_parser.py` | EIDC/MIIT formal source | 正式公告附件 source record 解析（road/tax/purchase；MIIT formal 与 EIDC 附件同构复用） |
 | `eidc_source.py` | EIDC source | EIDC 网络抓取/附件下载/doc→txt |
+| `miit_formal_source.py` | MIIT formal source | MIIT 正式公告栏目发现/页面抓取/元数据/附件下载（复用 eidc doc/parse） |
 | `eidc_doc_extract.py` | EIDC source | 超大 .doc 备用提取（olefile FIB 文本区） |
 | `miit_gov_search.py` | Gov source | MIIT 搜索底层（HTTP/反爬/API），供 01 调用 |
 | `vehicle_record_builder.py` | 公共领域 | 原始资料→标准字段（build_record/build_eidc_record/classify/is_canonical_in_scope/derive_metrics/explode_variants），06/07 共用 |
@@ -114,6 +118,7 @@ product_master/parameter   wide_table
 | `vehicle_photos/` | Gov 公告照片（{batch}_{型号}/ 下） | 02 |
 | `raw_html/` | Gov 原始详情页缓存（{batch}_{型号}.html） | 02 |
 | `eidc/` | EIDC source archive（batch_401..408 + 迁移记录） | 03 |
+| `miit_formal/` | MIIT Gov 正式公告 source archive（batch_{N}，与 eidc/ 同构） | 03' |
 | `vehicle_tax/` | 车船税/购置税 doc/txt/json/md | 04 / 05 |
 | `vehicle_parameters/` | **canonical 事实层**（product_master / vehicle_parameter，passenger scope） | 06 |
 | `wide_tables/` | 参数宽表 csv/md | 07 |
@@ -335,13 +340,67 @@ python3 MIIT/scripts/validate_eidc_batch.py                   # 每批 fresh 验
 - 超大附件（32MB 完整版目录）：`eidc_doc_extract.py`（olefile FIB 文本区提取）→ 04/05 parser
 - legacy 导入已随迁移删除（见 `data/eidc/migration_eidc_fresh_rebuild.json`）
 
-### 观测时间轴（401–410）
+## 管线 03'+04/05+06：MIIT 正式公告 confirmed（主源）
+
+```bash
+python3 MIIT/scripts/03_fetch_miit_formal_batch.py --batch 409            # 定位→下载→解析→归档
+python3 MIIT/scripts/03_fetch_miit_formal_batch.py --batch 409 --discover # 只搜索定位公告页
+python3 MIIT/scripts/03_fetch_miit_formal_batch.py --batch 409 --url <URL># 显式指定公告页
+python3 MIIT/scripts/06_build_vehicle_dataset.py                          # canonical（Gov+MIIT formal+EIDC 统一）
+```
+
+- 来源：`miit.gov.cn` 装备工业一司 → **文件发布** 栏目 `/jgsj/zbys/wjfb/`（正式公告，非拟发布公示）。
+- 流程：`discover/fetch formal page → parse metadata → download road .doc → doc→txt`
+  `→ eidc_parser.parse_road_products → product_list.json`（source record contract 与 EIDC 同构）。
+- 写入：`data/miit_formal/batch_{N}/`，`import_manifest.json` 记 `source=miit_gov, stage=confirmed`。
+- 附件与 EIDC 同源（同为 `miit.gov.cn/cms_files` 的「道路机动车辆生产企业及产品（第N批）.doc」），
+  **解析层完全复用** `eidc_parser`；`miit_formal_source` 只负责 gov 栏目发现/页面/元数据。
+- **canonical scope**：仅 `vehicle_category == passenger_vehicle` 进入；非乘用车完整保留在 source archive。
+- 与 EIDC 定位：**MIIT formal = primary final source；EIDC formal = fallback / historical support**。
+  同批同时存在时 canonical 取 MIIT formal（`MIIT formal > EIDC formal > Gov proposed`）。
+
+### 观测时间轴（401–411）
 
 | 批次 | source | stage | 说明 |
 |------|--------|-------|------|
-| 401–408 | eidc | confirmed | 正式公告（全部 fresh rebuild） |
-| 409–410 | miit_gov | proposed | 当前 Gov 公示 |
-| 409–410 未来 | eidc | confirmed | EIDC 同批正式发布后形成双观测 |
+| 401–408 | eidc | confirmed | EIDC 正式公告（全部 fresh rebuild） |
+| 409 | miit_gov | confirmed | MIIT 正式公告（`/jgsj/zbys/wjfb/`，2026-08-13）+ EIDC 同批未来 fallback |
+| 410–411 | miit_gov | proposed | 当前 Gov 新车公示（拟发布） |
+| 410–411 未来 | miit_gov / eidc | confirmed | 正式公告发布后形成 confirmed |
+
+## source / stage 语义与 canonical merge
+
+**`stage` 描述业务事实状态，`source` 描述来源，二者解绑：**
+
+| 观测 | source | stage |
+|------|--------|-------|
+| MIIT Gov 新车公示（拟发布） | `miit_gov` | `proposed` |
+| MIIT Gov 正式公告（`/jgsj/zbys/wjfb/`） | `miit_gov` | `confirmed` |
+| EIDC 正式公告（miit-eidc.org.cn） | `eidc` | `confirmed` |
+
+**canonical 事实优先级（`06`，`vehicle_record_builder.OBSERVATION_PRIORITY`）：**
+
+```
+MIIT formal (miit_gov/confirmed)  >  EIDC formal (eidc/confirmed)  >  Gov proposed (miit_gov/proposed)
+```
+
+`06` 的 canonical 由两步组成：
+
+1. **formal confirmation matching**（`apply_formal_confirmation`）：
+   - **strict fallback**：对每个 Gov proposed variant，按优先级找第一个存在前缀匹配基码的
+     confirmed source；MIIT formal 无匹配才回落 EIDC formal。
+   - **保留 variant 粒度**：命中的 Gov 记录保留**完整申报型号**（`XMA6500KREEVA1`）与
+     `vehicle_record_id`，仅升级 `stage=confirmed` / `source` / `observation_id`；
+     **一条 formal base code 可确认多个 variant**。
+   - **字段只补缺**：formal 基码行是族级事实，只填 variant 的空字段，**绝不覆盖** variant 的
+     具体字段（`product_name` / `detail_url` / 尺寸 / 电池 / 供应商 等保留 Gov 值）。
+   - **consume matched base only**：只消费被命中的基码（同 batch、同 `model_code`，跨 source），
+     避免低优先级同基码行重复，同时不"抢走"其他 variant 仍需的基码。
+   - **formal-only**：未被任何 variant 命中的 confirmed 行原样保留，使用 `batch:base_model_code` 身份。
+2. **exact-key dedup**（`merge_rows_by_key`）：仅收敛**完全相同** `vehicle_record_id` 的多 confirmed
+   源（如 MIIT formal 与 EIDC formal 同基码）。不承担 variant 行级合并。
+
+> 低优先级证据**不删除**：source archive（`data/`）完整保留；canonical 只在上述两步内收敛。
 
 ## 管线 08/09：报告
 

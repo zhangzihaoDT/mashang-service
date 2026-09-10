@@ -85,6 +85,10 @@ mashang_workspace/outputs/miit_new_car/state/
 research_apps/MIIT/data/eidc/*/attachments/
 research_apps/MIIT/data/eidc/*/raw_detail.html
 
+# MIIT 正式公告归档：原始附件二进制（.doc）与原始页面不提交，仅本地保留证据
+research_apps/MIIT/data/miit_formal/*/attachments/
+research_apps/MIIT/data/miit_formal/*/raw_detail.html
+
 # Auto launch: all outputs are runtime-generated, not committed
 mashang_workspace/outputs/auto_launch/
 research_apps/auto_launch/outputs/

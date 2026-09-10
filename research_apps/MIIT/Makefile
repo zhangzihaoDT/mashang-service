@@ -16,10 +16,11 @@
 # 说明：P3 车船税补充为手动步骤（附件需人工下载/转换），见 workflow/commands.md
 
 BATCH ?= 410
-PY ?= python3
 MIIT_ROOT := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
+# 优先使用仓库共享 venv（与根 Makefile 一致）；否则回退系统 python3
+PY ?= $(if $(wildcard $(MIIT_ROOT)/../../.venv/bin/python),$(MIIT_ROOT)/../../.venv/bin/python,python3)
 
-.PHONY: miit-scan miit-archive miit-archive-retry miit-enrich miit-build miit-dataset miit-eidc-fetch miit-eidc-tax miit-report miit-run test
+.PHONY: miit-scan miit-archive miit-archive-retry miit-enrich miit-build miit-dataset miit-eidc-fetch miit-formal-fetch miit-eidc-tax miit-report miit-run test
 
 miit-scan:
 	$(PY) $(MIIT_ROOT)/scripts/01_scan_gov_batch.py --batch $(BATCH)
@@ -42,6 +43,9 @@ miit-dataset:
 
 miit-eidc-fetch:
 	$(PY) $(MIIT_ROOT)/scripts/03_fetch_eidc_batch.py --batch $(BATCH)
+
+miit-formal-fetch:
+	$(PY) $(MIIT_ROOT)/scripts/03_fetch_miit_formal_batch.py --batch $(BATCH)
 
 miit-eidc-tax:
 	@echo "P3 车船税：04_parse_vehicle_tax.py 解析 data/eidc/batch_$(BATCH)/attachment_text_src/ 下的车船税 .txt"

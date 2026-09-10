@@ -30,6 +30,7 @@ VEHICLE_PARAMETERS_DIR = DATA_DIR / "vehicle_parameters"  # 结构化车型参�
 WIDE_TABLES_DIR = DATA_DIR / "wide_tables"              # P4 参数宽表 csv/md
 FETCH_STATUS_DIR = DATA_DIR / "fetch_status"            # P2 checkpoint / 抓取状态
 EIDC_DIR = DATA_DIR / "eidc"                            # EIDC 历史批次归档（401-408, confirmed 层）
+MIIT_FORMAL_DIR = DATA_DIR / "miit_formal"              # MIIT Gov 正式公告归档（confirmed 层，与 eidc/ 同构）
 
 # ① 最终报告（reports/）
 REPORTS_DIR = MIIT_ROOT / "reports"
@@ -45,6 +46,9 @@ BATCHES_PATH = WORKFLOW_DIR / "batches.yaml"
 
 # 批次索引文档（01_scan_gov_batch 管线会更新它）
 BATCH_INDEX_DOC = WORKFLOW_DOCS_DIR / "公告批次.md"
+
+# MIIT 正式公告栏目（Gov 主站 装备工业一司 → 文件发布）
+MIIT_WJFB_COLUMN_URL = "https://www.miit.gov.cn/jgsj/zbys/wjfb/"
 
 DEFAULT_BATCH = "409"
 
@@ -107,6 +111,15 @@ def raw_html_path(batch: str, model_code: str) -> Path:
 def fetch_status_path(batch: str) -> Path:
     """P2 抓取 checkpoint 文件。"""
     return FETCH_STATUS_DIR / f"fetch_status_{batch}.json"
+
+
+def miit_formal_batch_dir(batch: str) -> Path:
+    """MIIT 正式公告归档目录：`data/miit_formal/batch_{N}/`（与 data/eidc/batch_{N}/ 同构）。
+
+    内含 import_manifest.json / product_list.json / raw_metadata.json /
+    attachment_text_src/（.txt）/ attachments/（.doc）/ raw_detail.html。
+    """
+    return MIIT_FORMAL_DIR / f"batch_{batch}"
 
 
 def ensure_dir(p: Path) -> Path:

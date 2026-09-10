@@ -188,6 +188,156 @@ def is_canonical_in_scope(record: dict) -> bool:
     return (record or {}).get("vehicle_category") == CANONICAL_VEHICLE_CATEGORY
 
 
+# ── 观测优先级（proposed → confirmed 事实确认）─────────────────────
+# stage 描述业务事实状态，source 描述来源，二者解绑：
+#   miit_gov/proposed   = Gov 新车公示（最新发现 + 丰富车型参数）
+#   miit_gov/confirmed  = MIIT 正式公告（最终确认，source=miit.gov.cn 文件发布栏目）
+#   eidc/confirmed      = EIDC 正式公告（同批正式公告镜像 / 历史 fallback）
+# 同 vehicle_record_id 多条观测存在时：
+#   MIIT formal > EIDC formal > Gov proposed（canonical 事实优先级，不删除低优先级证据）。
+
+OBSERVATION_PRIORITY = {
+    ("miit_gov", "confirmed"): 3,   # MIIT 正式公告 = 最终确认源
+    ("eidc", "confirmed"): 2,       # EIDC 正式公告 = fallback / 历史支撑
+    ("miit_gov", "proposed"): 1,    # Gov 新车公示 = proposed
+}
+
+
+def observation_rank(source: str, stage: str) -> int:
+    return OBSERVATION_PRIORITY.get((source or "", stage or ""), 0)
+
+
+def merge_rows_by_key(rows: list[dict], key: str = "vehicle_record_id") -> list[dict]:
+    """同一 identity key 的多 source 行合并为一行（canonical merge）。
+
+    - 以 observation_rank 最高的一行为准（stage/source/observation_id 取它）
+    - 高 rank 行缺失的字段用低 rank 行补齐（保留 proposed rich fields，不清空）
+    - 字段冲突以高 rank 行为准（formal 确认字段优先，proposed 只补缺）
+
+    低优先级证据不删除：不回写 source archive，仅在 canonical 以 rank 收敛为一行。
+    """
+    by_key: dict[str, dict] = {}
+    for r in rows:
+        k = r.get(key, "")
+        if not k:
+            continue
+        cur = by_key.get(k)
+        if cur is None:
+            by_key[k] = dict(r)
+            continue
+        cur_rank = observation_rank(cur.get("source", ""), cur.get("stage", ""))
+        new_rank = observation_rank(r.get("source", ""), r.get("stage", ""))
+        if new_rank < cur_rank:
+            # 低 rank 行 → 只补 cur 缺失字段
+            for f, v in r.items():
+                if f not in cur or cur[f] in ("", None):
+                    cur[f] = v
+        else:
+            # 高 rank 行成为主行，缺失字段用 cur（低 rank）补齐
+            base = dict(r)
+            for f, v in cur.items():
+                if f not in base or base[f] in ("", None):
+                    base[f] = v
+            by_key[k] = base
+    return list(by_key.values())
+
+
+def match_base_model_code(full_code: str, base_codes) -> str | None:
+    """返回 base_codes 中作为 full_code 前缀的最长基码（无匹配返回 None）。
+
+    MIIT 公示（proposed）返回完整申报型号（如 XMA6500KREEVA1），正式公告
+    （confirmed）返回目录基码（如 XMA6500）。二者为同一物理车型的不同代码粒度。
+    最长前缀保证确定性（同批内基码族不会互相误配）。
+    """
+    full_code = (full_code or "").strip()
+    if not full_code:
+        return None
+    best = None
+    for b in base_codes:
+        b = (b or "").strip()
+        if not b:
+            continue
+        if full_code == b or full_code.startswith(b):
+            if best is None or len(b) > len(best):
+                best = b
+    return best
+
+
+def _fill_missing(target: dict, donor: dict) -> None:
+    """用 donor 的非空字段补齐 target 的空字段（就地修改，不覆盖已有值）。
+
+    用于 formal confirmation：formal 基码行是**族级**事实，一条 base 可对应多个
+    Gov variant，故 formal 字段只补缺，绝不覆盖 variant 的已有（更具体）字段。
+    身份 / 观测字段不参与补齐（由调用方显式决定）。
+    """
+    for f, v in donor.items():
+        if f in ("vehicle_record_id", "observation_id", "source", "stage"):
+            continue
+        if v not in ("", None) and target.get(f) in ("", None):
+            target[f] = v
+
+
+def apply_formal_confirmation(rows: list[dict],
+                              confirmed_sources: list[tuple[str, str]],
+                              proposed_source: str = "miit_gov",
+                              proposed_stage: str = "proposed") -> list[dict]:
+    """formal confirmation matching：用正式公告（confirmed）确认 Gov 公示（proposed）。
+
+    语义（与 `merge_rows_by_key` 的分工：本函数不做 canonical 行级去重）：
+      - **strict fallback**：`confirmed_sources` 按优先级排列（MIIT formal > EIDC formal）。
+        对每个 proposed variant，按顺序找第一个存在前缀匹配基码的 confirmed source；
+        仅当高优先级源无匹配时才回落到下一源。
+      - **保留 variant 粒度**：命中的 proposed 行保留完整 `model_code` / `vehicle_record_id`
+        与 rich fields，仅升级 `stage=confirmed` / `source` / `observation_id`；
+        formal 字段只补缺（族级事实不覆盖 variant 具体字段）。
+      - **consume matched base only**：消费 `best` 及同 batch、同 `model_code`（基码完全相同）
+        的 confirmed 行（跨 source），避免低优先级同基码行重复出现；
+        不按前缀消费，避免"抢走"其他 variant 仍需的基码。
+      - **formal-only**：未被任何 variant 命中的 confirmed 行原样保留（base 身份）。
+    """
+    confirmed_stages = set(confirmed_sources)
+    priority = {s: i for i, s in enumerate(confirmed_sources)}
+
+    confirmed = [r for r in rows
+                 if (r.get("source"), r.get("stage")) in confirmed_stages]
+    proposed = [r for r in rows
+                if (r.get("source"), r.get("stage")) == (proposed_source, proposed_stage)]
+
+    confirmed_by_batch: dict[str, list[dict]] = {}
+    for c in confirmed:
+        confirmed_by_batch.setdefault(str(c.get("batch_no", "")), []).append(c)
+
+    consumed: set[tuple[str, str]] = set()
+    out = []
+    for p in proposed:
+        batch = str(p.get("batch_no", ""))
+        best = None
+        for src in confirmed_sources:
+            src_rows = [c for c in confirmed_by_batch.get(batch, [])
+                        if (c.get("source"), c.get("stage")) == src]
+            base = match_base_model_code(
+                p.get("model_code", ""), [c.get("model_code", "") for c in src_rows])
+            if base:
+                best = next(c for c in src_rows if c.get("model_code", "") == base)
+                break
+        if best is None:
+            out.append(p)
+            continue
+
+        promoted = dict(p)
+        promoted["source"] = best.get("source", "")
+        promoted["stage"] = best.get("stage", "")
+        promoted["observation_id"] = f"{p['vehicle_record_id']}:{best.get('stage', '')}"
+        _fill_missing(promoted, best)
+        out.append(promoted)
+        # consume matched base only（同基码，跨 source）
+        consumed.add((batch, best.get("model_code", "")))
+
+    out += [c for c in confirmed
+            if (str(c.get("batch_no", "")), c.get("model_code", "")) not in consumed]
+    return out
+
+
 def classify_source_record(source_record: dict) -> tuple[str, str]:
     """thin wrapper：对 EIDC source record 直接做分类（在 build/enrichment 之前）。
 

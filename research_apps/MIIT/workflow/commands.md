@@ -25,6 +25,8 @@ make -C research_apps/MIIT miit-run BATCH=410   # P1 搜索 → P2 归档 → P4
 | EIDC fresh 抓取 | `python3 MIIT/scripts/03_fetch_eidc_batch.py --batch 408` |
 | EIDC fresh 验收 | `python3 MIIT/scripts/validate_eidc_batch.py` |
 | EIDC 超大doc提取 | `python3 MIIT/scripts/eidc_doc_extract.py --input a.doc --output a.txt` |
+| MIIT 正式公告抓取 | `python3 MIIT/scripts/03_fetch_miit_formal_batch.py --batch 409` |
+| MIIT 正式公告定位 | `python3 MIIT/scripts/03_fetch_miit_formal_batch.py --batch 409 --discover` |
 | 5. 分类报告 | `python3 MIIT/scripts/09_generate_category_report.py --batch 410 --all --output-dir batch_410/category_report` |
 | 5b. 单品牌报告 | `python3 MIIT/scripts/08_generate_brand_report.py --batch 409 --brand 小米 --output-dir batch_409/brand_report --batch-label "第409批"` |
 

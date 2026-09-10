@@ -35,6 +35,23 @@ EIDC 官方公告页
 
 **完整技术说明 / source contract / pipeline 细节见 [data/eidc/README.md](data/eidc/README.md)。**
 
+## MIIT 正式公告（primary confirmed）
+
+MIIT 主站正式公告（`miit.gov.cn/jgsj/zbys/wjfb/` 文件发布）作为**最终确认主源**：
+
+```
+miit.gov.cn 文件发布栏目（正式公告，非拟发布公示）
+  → 03_fetch_miit_formal_batch.py（发现/抓取/解析/归档）
+  → data/miit_formal/batch_{N}/（product_list.json + import_manifest，source=miit_gov, stage=confirmed）
+  → 06_build_vehicle_dataset.py（canonical，proposed→confirmed merge）
+  → data/vehicle_parameters/
+```
+
+- 附件与 EIDC 同源（同一 `miit.gov.cn/cms_files` 的「道路机动车辆生产企业及产品（第N批）.doc」），**解析层完全复用** `eidc_parser`。
+- 定位：**MIIT formal = primary final source；EIDC formal = fallback / historical support**。
+- canonical merge 优先级：`MIIT formal > EIDC formal > Gov proposed`；formal 确认字段优先，proposed rich fields 只补缺。
+- 详见 [workflow/pipeline.md](workflow/pipeline.md) 与 [data/miit_formal/README.md](data/miit_formal/README.md)。
+
 ## 5 类资产（阅读顺序）
 
 | 目录 | 是什么 | 什么时候打开 |
@@ -69,15 +86,17 @@ make -C research_apps/MIIT miit-run BATCH=410   # P1 搜索 → P2 归档 → P4
 
 ## 当前状态
 
-已处理 **401–410** 全部批次。统一 Dataset（`data/vehicle_parameters/product_master` + `vehicle_parameter`）当前 **831 车型，全部为乘用车（`vehicle_category == passenger_vehicle`）**：
-- **miit_gov / proposed**：409:49 + 410:17（66）
+已处理 **401–411** 全部批次。统一 Dataset（`data/vehicle_parameters/product_master` + `vehicle_parameter`）当前 **930 车型，全部为乘用车（`vehicle_category == passenger_vehicle`）**：
+- **miit_gov / confirmed**：409（**128** = 49 Gov variant 被正式公告确认 + 79 formal-only，MIIT 正式公告 2026-08-13）
+- **miit_gov / proposed**：410:17 + 411:20（37）
 - **eidc / confirmed**：**401-408 全部 fresh rebuild**，合计 765
   - 401:117 / 402:135 / 403:43 / 404:84 / 405:63 / 406:94 / 407:96 / 408:133
 
-> **401-408 EIDC fresh/confirmed + 409-410 Gov fresh/proposed = 干净版本节点。**
+> **401-408 EIDC fresh/confirmed + 409 MIIT formal confirmed + 410-411 Gov fresh/proposed = 干净版本节点。**
 > canonical 收敛为乘用车业务事实层：Source archive 保留全量道路机动车辆，`vehicle_parameters/` 只落乘用车（`model_code valid AND vehicle_category==passenger_vehicle`）。
+> 409 的 Gov proposed 由 MIIT 正式公告做 **formal confirmation matching**：variant 保留完整申报型号（`XMA6500KREEVA1`），formal 基码只补缺、不覆盖，`stage` 升级为 `confirmed`；无 Gov 详情的正式车型以目录基码独立成行。
 
-观测时间轴：`observation_id = {batch}:{model_code}:{stage}`，401 confirmed → 410 proposed。
+观测时间轴：`observation_id = {batch}:{model_code}:{stage}`，401 confirmed → 411 proposed。
 批次索引见 [workflow/docs/公告批次.md](workflow/docs/公告批次.md)，各批运行经验见 [runs/](runs/)。
 
 ## 测试

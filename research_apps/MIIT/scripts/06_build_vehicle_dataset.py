@@ -39,6 +39,7 @@ from miit_paths import (  # noqa: E402
     VEHICLE_PARAMETERS_DIR,
     VEHICLE_TAX_DIR,
     EIDC_DIR,
+    MIIT_FORMAL_DIR,
     load_batches,
     scan_path,
     tax_json_path,
@@ -58,19 +59,40 @@ from vehicle_record_builder import (  # noqa: E402
     CANONICAL_VEHICLE_CATEGORY,
     derive_metrics,
     resolve_name,
+    merge_rows_by_key,
+    apply_formal_confirmation,
 )
 from report_common import load_name_map  # noqa: E402
 
 MIIT_URL_BASE = "https://www.miit.gov.cn"
 
-# Gov 公示批次（409/410 当前）→ proposed 观测；EIDC 历史（401-408）→ confirmed
+# ── source / stage（语义解绑，不绑定 source→stage）──────────────
+# stage 描述业务事实状态：proposed=公示中（拟发布）/ confirmed=已正式发布。
+# source 描述来源：
+#   miit_gov/proposed    = Gov 新车公示（最新发现 + 丰富车型参数）
+#   miit_gov/confirmed   = MIIT 正式公告（文件发布栏目，最终确认）
+#   eidc/confirmed       = EIDC 正式公告（同批镜像 / 历史 fallback）
 GOV_SOURCE = "miit_gov"
 GOV_STAGE = "proposed"
+MIIT_FORMAL_SOURCE = "miit_gov"
+MIIT_FORMAL_STAGE = "confirmed"
 EIDC_SOURCE = "eidc"
 EIDC_STAGE = "confirmed"
 
-# 登记的 Gov 批次（batches.yaml）与 EIDC 归档批次（data/eidc/）自动合并
+# EIDC 归档批次（data/eidc/）：401-408 全 fresh rebuild
 EIDC_BATCHES = [f"{b:03d}" for b in range(401, 409)]
+
+
+def _miit_formal_batches() -> list[str]:
+    """data/miit_formal/ 下已归档的 MIIT 正式公告批次（按目录名排序）。"""
+    if not MIIT_FORMAL_DIR.exists():
+        return []
+    return sorted(
+        p.name.replace("batch_", "")
+        for p in MIIT_FORMAL_DIR.glob("batch_*")
+        if (p / "product_list.json").exists()
+    )
+
 
 MASTER_COLUMNS = [
     "vehicle_record_id", "observation_id", "batch_no", "model_code",
@@ -319,14 +341,19 @@ def _load_eidc_tax_purchase_index(batch: str, manifest: dict) -> tuple[dict, dic
     return tax_index, purchase_index
 
 
-def build_eidc_rows(batch: str) -> tuple[list[dict], list[dict]]:
-    """从 data/eidc/batch_{N}/product_list.json 构建 EIDC confirmed 行。
+def build_confirmed_rows(batch: str, archive_dir: Path,
+                         source: str, stage: str) -> tuple[list[dict], list[dict]]:
+    """从 {archive_dir}/batch_{N}/product_list.json 构建 confirmed canonical 行。
 
-    EIDC source record（eidc_parser 产出）→ vehicle_record_builder.build_eidc_record
-    → canonical 行（source=eidc, stage=confirmed）。
+    统一构建器：EIDC（source=eidc）与 MIIT 正式公告（source=miit_gov）共用同一
+    source record contract（eidc_parser 产出，`*_raw`）与 canonical 出口。
+
+    source record → vehicle_record_builder.build_eidc_record
+    → canonical 行（source, stage 由参数决定）。
     流程（scope gate 提前，enrichment 只对 passenger）：
       product_list → normalize model_code → classify source record
       → passenger scope gate → tax/purchase enrichment → build_eidc_record → canonical
+
     只有 model_code_valid=true AND vehicle_category==passenger_vehicle 才生成主键；
     非乘用车 / 非法型号仅留 source evidence（不进入 canonical）。
 
@@ -337,12 +364,12 @@ def build_eidc_rows(batch: str) -> tuple[list[dict], list[dict]]:
       不得把 gate 移到聚合之后按"首条记录分类"判定——那会漏掉
       同 chassis 多车型（旅居车/商务车 + 专用车）的乘用变体（如 407:KLF5040X）。
     """
-    pl_path = EIDC_DIR / f"batch_{batch}" / "product_list.json"
+    pl_path = archive_dir / f"batch_{batch}" / "product_list.json"
     if not pl_path.exists():
         return [], []
 
     manifest = {}
-    mpath = EIDC_DIR / f"batch_{batch}" / "import_manifest.json"
+    mpath = archive_dir / f"batch_{batch}" / "import_manifest.json"
     if mpath.exists():
         manifest = json.loads(mpath.read_text())
 
@@ -396,7 +423,7 @@ def build_eidc_rows(batch: str) -> tuple[list[dict], list[dict]]:
 
         quality = first.get("quality") or rec.get("record_quality", "high")
         vid = vehicle_record_id(batch, mid)
-        obs = f"{vid}:{EIDC_STAGE}"
+        obs = f"{vid}:{stage}"
         publish_date = manifest.get("publish_date", "")
         if publish_date:
             publish_date = str(publish_date)[:10]
@@ -417,8 +444,8 @@ def build_eidc_rows(batch: str) -> tuple[list[dict], list[dict]]:
             "common_name": rec.get("common_name", ""),
             "detail_url": manifest.get("source_url", ""),
             "publish_date": publish_date,
-            "source": EIDC_SOURCE,
-            "stage": EIDC_STAGE,
+            "source": source,
+            "stage": stage,
             "record_quality": quality,
             # vehicle type classification
             "source_vehicle_type": rec.get("source_vehicle_type", ""),
@@ -442,8 +469,8 @@ def build_eidc_rows(batch: str) -> tuple[list[dict], list[dict]]:
             "brand": rec["品牌"],
             "common_name": rec.get("common_name", ""),
             "energy_type": rec.get("energy_type", ""),
-            "source": EIDC_SOURCE,
-            "stage": EIDC_STAGE,
+            "source": source,
+            "stage": stage,
             "record_quality": quality,
             "length_mm": "", "width_mm": "", "height_mm": "", "wheelbase_mm": "",
             # vehicle type classification (param table)
@@ -481,6 +508,17 @@ def build_eidc_rows(batch: str) -> tuple[list[dict], list[dict]]:
         param_rows.append(param_row)
 
     return master_rows, param_rows
+
+
+def build_eidc_rows(batch: str) -> tuple[list[dict], list[dict]]:
+    """EIDC confirmed 行（data/eidc/batch_{N}/，source=eidc）。"""
+    return build_confirmed_rows(batch, EIDC_DIR, EIDC_SOURCE, EIDC_STAGE)
+
+
+def build_miit_formal_rows(batch: str) -> tuple[list[dict], list[dict]]:
+    """MIIT 正式公告 confirmed 行（data/miit_formal/batch_{N}/，source=miit_gov）。"""
+    return build_confirmed_rows(batch, MIIT_FORMAL_DIR,
+                                MIIT_FORMAL_SOURCE, MIIT_FORMAL_STAGE)
 
 
 def write_table(dir_path: Path, name: str, rows: list[dict], columns: list[str]):
@@ -522,7 +560,7 @@ def main():
 
     # Gov proposed 批次（batches.yaml 登记）
     for batch in sorted(batches):
-        print(f"batch {batch} (gov): 构建中...")
+        print(f"batch {batch} (gov proposed): 构建中...")
         m, p = build_rows(batch, name_map)
         master_rows += m
         param_rows += p
@@ -532,9 +570,37 @@ def main():
         if (EIDC_DIR / f"batch_{batch}" / "product_list.json").exists():
             m, p = build_eidc_rows(batch)
             if m:
-                print(f"batch {batch} (eidc): {len(m)} canonical rows")
+                print(f"batch {batch} (eidc confirmed): {len(m)} canonical rows")
                 master_rows += m
                 param_rows += p
+
+    # MIIT 正式公告 confirmed 批次（data/miit_formal/ 归档）
+    for batch in _miit_formal_batches():
+        m, p = build_miit_formal_rows(batch)
+        if m:
+            print(f"batch {batch} (miit_gov confirmed): {len(m)} canonical rows")
+            master_rows += m
+            param_rows += p
+
+    # ── formal confirmation matching：正式公告确认 Gov 公示 ──
+    # strict fallback：MIIT formal 优先，无匹配才回落 EIDC formal。
+    # 命中的 Gov variant 保留完整申报型号 / rich fields，仅升级 stage=confirmed；
+    # formal 基码字段只补缺（一条 base 可确认多个 variant，族级事实不覆盖具体字段）。
+    # 未命中的 confirmed 行（formal-only）原样保留（base 身份）。
+    confirmed_sources = [(MIIT_FORMAL_SOURCE, MIIT_FORMAL_STAGE),
+                         (EIDC_SOURCE, EIDC_STAGE)]
+    master_rows = apply_formal_confirmation(
+        master_rows, confirmed_sources, GOV_SOURCE, GOV_STAGE)
+    param_rows = apply_formal_confirmation(
+        param_rows, confirmed_sources, GOV_SOURCE, GOV_STAGE)
+
+    # exact-key dedup：同 vehicle_record_id 的多 confirmed 源（MIIT/EIDC 同基码）收敛为一行
+    before = len(master_rows)
+    master_rows = merge_rows_by_key(master_rows, key="vehicle_record_id")
+    param_rows = merge_rows_by_key(param_rows, key="vehicle_record_id")
+    if before != len(master_rows):
+        print(f"canonical exact-key dedup: {before} -> {len(master_rows)} 行"
+              f"（同键多 confirmed 源收敛）")
 
     master_rows.sort(key=lambda r: r["vehicle_record_id"])
     param_rows.sort(key=lambda r: r["vehicle_record_id"])

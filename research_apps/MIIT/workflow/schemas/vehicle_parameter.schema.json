@@ -20,12 +20,12 @@
     "source": {
       "type": "string",
       "enum": ["miit_gov", "eidc"],
-      "description": "数据来源：miit_gov / eidc"
+      "description": "数据来源（描述来源，不绑定 stage）：miit_gov / eidc"
     },
     "stage": {
       "type": "string",
       "enum": ["proposed", "confirmed"],
-      "description": "观测阶段：proposed=公示中 / confirmed=已正式发布"
+      "description": "业务事实状态（不绑定 source）：proposed=公示中 / confirmed=已正式发布"
     },
     "record_quality": {
       "type": "string",

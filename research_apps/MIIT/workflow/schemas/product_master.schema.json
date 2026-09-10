@@ -49,12 +49,12 @@
     "source": {
       "type": "string",
       "enum": ["miit_gov", "eidc"],
-      "description": "数据来源：miit_gov=工信部公告（Gov 公示/详情页）/ eidc=工信部装备工业发展中心（正式公告历史）"
+      "description": "数据来源（描述来源，不绑定 stage）：miit_gov=工信部（Gov 新车公示 或 正式公告）/ eidc=工信部装备工业发展中心（正式公告镜像/历史 fallback）"
     },
     "stage": {
       "type": "string",
       "enum": ["proposed", "confirmed"],
-      "description": "观测阶段：proposed=公示中（Gov 409/410 当前）/ confirmed=已正式发布（EIDC 401-408 历史）"
+      "description": "业务事实状态（描述事实，不绑定 source）：proposed=公示中（拟发布，如 Gov 新车公示）/ confirmed=已正式发布（Gov 正式公告 或 EIDC 正式公告）。canonical merge 优先级 MIIT formal > EIDC formal > Gov proposed。"
     },
     "record_quality": {
       "type": "string",

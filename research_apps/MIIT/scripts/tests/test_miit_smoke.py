@@ -13,6 +13,7 @@ ENTRY_POINTS = [
     "scripts/01_scan_gov_batch.py",
     "scripts/02_archive_gov_vehicle_details.py",
     "scripts/03_fetch_eidc_batch.py",
+    "scripts/03_fetch_miit_formal_batch.py",
     "scripts/04_parse_vehicle_tax.py",
     "scripts/05_parse_purchase_tax.py",
     "scripts/06_build_vehicle_dataset.py",
