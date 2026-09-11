@@ -1,13 +1,27 @@
-# OpenCode Skills
+# OpenCode Control Plane
 
-## official_document_render
+项目级 OpenCode 配置的控制面索引：
 
-用于将 Markdown 渲染为正式通知、项目申报书、比赛材料、政府/机构申报附件风格的 Word、PDF 和 HTML 文件。
+```text
+.opencode/
+├── skills/         能力本身
+├── commands/       显式调用入口
+├── integrations/   外部能力如何接入本项目
+└── README.md       控制面索引
+```
 
-核心脚本：
+## Skills
 
-scripts/render_official_document.py
+- `.opencode/skills/README.md`
+- `.opencode/skills/official_document_render/`
+- `.opencode/skills/doubao-search/`
+- `.opencode/skills/nev-research/`
+- `.opencode/skills/diagram-design` → 独立 upstream checkout
 
-Skill 说明：
+## Commands
 
-.opencode/skills/official_document_render/SKILL.md
+- `.opencode/commands/diagram.md` → `/diagram`
+
+## Integrations
+
+- `.opencode/integrations/diagram-design.md`
