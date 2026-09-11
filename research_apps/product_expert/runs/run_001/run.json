@@ -2,6 +2,7 @@
   "run_id": "run_001",
   "executed_at": "2026-09-11",
   "study_year": 2026,
+  "record_count": 9,
   "dataset": "/Users/zihao_/Documents/coding/dataset/original/L6 M2_LS6 M3 产品专家门店支持信息收集汇总_数据表_表格.csv",
   "method": ["workflow/issue_discovery.md", "workflow/issue_review.md", "workflow/convergence.md"],
   "notes": "study_year 用于 support_date 区间标准化；不从字符串猜测年份。"

@@ -1,0 +1,122 @@
+{
+  "taxonomy_version": "0.1",
+  "description": "预设问题 taxonomy（Preset Question Coding）。这些问题在抽取前已经定义，LLM 只做编码器：把自由文本映射到固定 code；计数由 derive_preset_stats.py 确定性聚合。与 Open Discovery（Evidence → Issue → Pattern → Convergence）是两种不同的研究方法，结果不得互相替代或合并。",
+  "models": ["L6", "LS6", "LS8", "LS9", "STORE", "OTHER"],
+  "model_notes": {
+    "STORE": "全店 / 未区分车型：原文只到门店层级，未指向具体车型（如门店客流、无试驾车）。",
+    "OTHER": "其他具体车型（非 L6/LS6/LS8/LS9）。"
+  },
+  "groups": {
+    "support_overview": {
+      "label": "门店支持概况",
+      "mode": "direct_field",
+      "note": "由记录直接字段统计，不需要 LLM 编码。",
+      "fields": ["产品专家", "支持城市+门店", "支持日期"]
+    },
+    "store_ops": {
+      "label": "门店经营现场",
+      "mode": "coded_from_text",
+      "source_field": "store_sales",
+      "note": "只统计门店经营字段中明确写出的内容；未写出即未记录。",
+      "codes": {
+        "footfall": "客流组数",
+        "peak_hours": "客流高峰时段",
+        "leads": "留资",
+        "test_drive": "试驾",
+        "lock_order": "锁单/交付",
+        "walk_in": "自然客流来源"
+      }
+    },
+    "availability": {
+      "label": "产品可体验性",
+      "mode": "coded_from_text",
+      "source_fields": ["l6_weakness", "ls6_weakness", "test_drive_feedback", "store_sales"],
+      "note": "保留原始语义：无展车 / 未到店 / 未开放体验 / 无试驾车 不可混为一类。",
+      "codes": {
+        "display_available": "有展车",
+        "no_display_car": "无展车",
+        "not_arrived": "新款未到店",
+        "not_open": "暂未开放用户体验",
+        "test_drive_available": "有试驾车",
+        "no_test_car": "无试驾车"
+      }
+    },
+    "customer_concern": {
+      "label": "客户关注主题",
+      "mode": "coded_from_text",
+      "note": "只编码文本中明确表达关注、询问、对标、偏好或顾虑的内容；不从弱点文本反推需求。",
+      "codes": {
+        "range_battery": "续航/电池",
+        "price_incentive": "价格/权益/优惠",
+        "configuration_year_diff": "配置/新老款差异",
+        "brand_warranty_service": "品牌/质保/售后",
+        "smart_cockpit": "智舱",
+        "adas": "智驾",
+        "space_storage": "空间/储物",
+        "exterior_interior": "外观/内饰",
+        "cockpit_ergonomics": "人机/视野",
+        "nvh": "NVH",
+        "driving_dynamics": "驾驶/底盘",
+        "other": "其他"
+      }
+    },
+    "positive_feedback": {
+      "label": "正向产品反馈",
+      "mode": "coded_from_text",
+      "note": "只编码明确的正向表述（满意、不错、认可、优势）；不从负面文本反推。",
+      "codes": {
+        "range_battery": "续航/电池",
+        "charging": "补能",
+        "adas": "智驾",
+        "smart_cockpit": "智舱",
+        "driving_dynamics": "驾驶/底盘",
+        "exterior_interior": "外观/内饰",
+        "space_storage": "空间/储物",
+        "nvh": "NVH",
+        "service": "门店服务",
+        "positioning": "人群/市场适配",
+        "other": "其他"
+      }
+    },
+    "competitor_attention": {
+      "label": "竞品关注",
+      "mode": "coded_from_text",
+      "note": "按竞品名称计次；保留原始名称，归一到 canonical name。",
+      "codes": {
+        "xiaopeng_gx": "小鹏 GX",
+        "xiaopeng_p7": "小鹏 P7",
+        "xiaopeng_l03": "小鹏 L03",
+        "xiaopeng_m03": "小鹏 M03",
+        "zeekr_7x": "极氪 7X",
+        "xiaomi_n70": "小米 N70",
+        "xiaomi_n90": "小米 N90",
+        "xiaomi_su7": "小米 SU7",
+        "leapmotor_c16": "零跑 C16",
+        "avatr_07": "阿维塔 07",
+        "other": "其他"
+      }
+    },
+    "purchase_barrier": {
+      "label": "下单阻碍",
+      "mode": "coded_from_text",
+      "note": "只统计明确表达的下单阻碍（犹豫、等待、顾虑、拒购风险）；不从客流、销量或主观印象反推。",
+      "codes": {
+        "wait_new_model": "等待新款/配额",
+        "price_incentive": "价格/优惠/权益",
+        "competitor_comparison": "对比竞品中",
+        "configuration_concern": "产品配置顾虑",
+        "exterior_interior_dissatisfaction": "外观/内饰不满",
+        "brand_trust_after_sales": "品牌/信任/售后顾虑",
+        "availability": "展车/试驾不可用",
+        "other": "其他"
+      }
+    },
+    "dissatisfaction_theme": {
+      "label": "不满意主题",
+      "mode": "coded_from_text",
+      "status": "deferred",
+      "note": "与 Open Discovery 的弱项重叠度高，数据积累后再启用；本轮不编码。",
+      "codes": {}
+    }
+  }
+}

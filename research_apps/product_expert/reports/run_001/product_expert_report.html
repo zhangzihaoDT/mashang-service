@@ -1,0 +1,461 @@
+<!doctype html><html lang='zh-CN'><head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'>
+<title>产品专家一线问题发现 · 08/29–09/13</title><style>
+
+:root{--paper:#ffffff;--paper-2:#f5f5f5;--ink:#2d3142;--muted:#4f5d75;--soft:#7a8399;
+  --rule:rgba(45,49,66,.12);--rule-solid:#e3e3e3;--accent:#eb6c36;--accent-tint:rgba(235,108,54,.08);--link:#2e5aa8;
+  --fill:rgba(45,49,66,.05);--fill-strong:rgba(45,49,66,.09)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:"Noto Sans CJK SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;line-height:1.7;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:960px;margin:0 auto;padding:56px 28px 72px}
+.eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin:0 0 12px}
+h1{font-size:34px;line-height:1.2;font-weight:600;letter-spacing:-.01em;color:var(--ink);margin:0 0 12px}
+.overview{font-size:14.5px;color:var(--muted);margin:0 0 16px;font-variant-numeric:tabular-nums}
+h2.sect{font-size:20px;font-weight:600;color:var(--ink);margin:52px 0 16px;padding-bottom:10px;border-bottom:1px solid var(--rule-solid)}
+h2.sect small{display:block;font-size:12.5px;font-weight:400;color:var(--soft);letter-spacing:0;margin-top:4px}
+h3{font-size:15px;color:var(--ink);font-weight:600;margin:32px 0 12px}
+h3 .n{color:var(--soft);margin-right:8px;font-variant-numeric:tabular-nums}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:10px}
+.card{background:var(--paper-2);border:1px solid var(--rule);border-radius:8px;padding:18px 20px}
+.card.span-2{grid-column:1 / -1}
+.card h3{margin-top:0}
+.card .note{margin-top:12px}
+.obs-list{margin:0;padding-left:20px}
+.obs-list li{margin:6px 0;font-size:14px}
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:4px}
+.stat-row.two{grid-template-columns:repeat(2,1fr)}
+.stat{background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:12px 14px}
+.stat b{display:block;font-size:24px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.1}
+.stat span{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
+th,td{padding:11px 10px;border-bottom:1px solid var(--rule);text-align:left;vertical-align:top}
+th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;
+  border-bottom:1px solid var(--rule-solid);white-space:nowrap}
+tr:last-child td{border-bottom:none}
+.chip{display:inline-block;font-size:11.5px;color:var(--muted);background:var(--fill);
+  border:1px solid var(--rule);border-radius:4px;padding:1px 6px;margin:2px 4px 2px 0;white-space:nowrap}
+.note{font-size:12.5px;color:var(--soft);margin:10px 0 0}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.rank{display:flex;flex-direction:column;gap:7px;margin:8px 0 0}
+.rank .row{display:grid;grid-template-columns:1fr 1fr 42px;align-items:center;gap:10px}
+.rank .label{font-size:13px;color:var(--ink);white-space:normal;overflow-wrap:anywhere}
+.rank .track{height:10px;background:var(--fill-strong);border-radius:3px;overflow:hidden}
+.rank .track>i{display:block;height:100%;background:var(--muted);border-radius:3px}
+.rank .row:first-child .track>i{background:var(--accent)}
+.rank .num{font-size:13.5px;font-weight:600;color:var(--ink);text-align:right;font-variant-numeric:tabular-nums}
+.rank-title{font-size:11.5px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin:0}
+.other-models{font-size:12.5px;color:var(--soft);margin:10px 0 0;font-variant-numeric:tabular-nums}
+.detail{background:var(--paper-2);border:1px solid var(--rule);border-radius:8px;padding:18px 20px;margin:14px 0}
+.detail h4{font-size:17px;color:var(--ink);font-weight:600;margin:0 0 8px}
+.meta{font-size:13px;color:var(--muted);font-weight:600;margin:0 0 12px;font-variant-numeric:tabular-nums}
+.detail .block{margin:10px 0}
+.detail .k{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--soft);margin-bottom:3px}
+.detail .v{font-size:14px;margin:0}
+.raw{margin-top:14px;border-top:1px solid var(--rule);padding-top:10px}
+blockquote{margin:0 0 2px;padding:9px 13px;background:var(--paper);border-left:2px solid var(--rule-solid);border-radius:0 4px 4px 0;font-size:13.5px}
+blockquote .norm{color:var(--soft);font-size:11.5px}
+.src{font-size:11px;color:var(--soft);margin:0 0 12px 13px}
+details.other{margin-top:16px}
+details.other summary{cursor:pointer;font-size:14px;color:var(--link);font-weight:600}
+details.more{margin-top:8px}
+details.more summary{cursor:pointer;font-size:12.5px;color:var(--link);font-weight:600;margin-bottom:8px}
+.temporal{font-size:13.5px;color:var(--muted);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:14px 0;margin:40px 0 0}
+.appendix{font-size:12.5px;color:var(--soft);margin-top:28px}
+.appendix summary{cursor:pointer;font-size:13px;color:var(--link);font-weight:600}
+.appendix ul{margin:10px 0 0;padding-left:18px}
+.appendix table{font-size:12px}.appendix th,.appendix td{padding:7px 8px}
+footer{margin-top:40px;color:var(--soft);font-size:12px;letter-spacing:.04em}
+@media(max-width:760px){.cols{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.stat-row{grid-template-columns:1fr 1fr}h1{font-size:26px}}
+
+</style></head><body><main class='wrap'>
+<p class="eyebrow">FIELD INTELLIGENCE · run_001</p>
+<h1>产品专家一线问题发现｜08/29–09/13</h1>
+<h2 class='sect'>01 本期概览</h2>
+<section class='card span-2'>
+<p class='overview'>9 条记录 · 7 位专家 · 6 家门店 · 55 条一线观察 · 15 个开放问题 · 83 条预设编码</p>
+<ul class='obs-list'>
+<li>LS8/LS9 及部分 L6 用户持续反馈内饰不够高级、豪华感不足、配件质感与配色不佳，并在对比极氪 7X、小鹏 GX 时被强化；该问题跨 5 家门店、4 类对象复现，属系统性问题。</li>
+<li>对标小鹏 GX/N70/N90/小米等，LS9 在 B 柱扶手、三排 Type C、三排电动折叠、后排滑轨等家庭便利配置上存在差距；用户同时偏好半隐藏式门把手并关注 HUD。</li>
+<li>跨门店出现品牌认知度低、门店自然客流质量弱、竞品分流明显（小米/小鹏/零跑/阿维塔）等信号，构成销售端的系统性约束。</li>
+</ul>
+</section>
+<h2 class='sect'>02 业务主题扫描<small>预设问题编码：问题事先已知；LLM 只做编码；计数由脚本确定性聚合</small></h2>
+<div class='grid'>
+<section class='card span-2'>
+<h3><span class='n'>A1</span>门店支持概况</h3>
+<div class='stat-row'>
+<div class='stat'><b>9</b><span>门店记录</span></div>
+<div class='stat'><b>7</b><span>产品专家</span></div>
+<div class='stat'><b>6</b><span>城市+门店</span></div>
+<div class='stat'><b>3</b><span>支持波次</span></div>
+</div>
+<p class='note'>产品专家：吴昊、郑少伟、方园园、李文涛、周正成、胡然、陈晓雪<br>城市+门店：遵义吾悦广场、金华永康万达、金华世贸广场、安徽亳州诚谯（交付）、阜阳商厦时代广场、温州印象城MEGA<br>支持波次：08/29-08/30、09/05-09/06、9/10-13</p>
+</section>
+<section class='card span-2'>
+<h3><span class='n'>A2</span>现场客流情况</h3>
+<table><thead><tr><th>记录</th><th>专家 / 门店</th><th>客流</th><th>留资</th><th>试驾</th><th>锁单/交付</th><th>高峰</th></tr></thead><tbody>
+<tr><td>9/10-13</td><td>吴昊 / 遵义吾悦广场</td><td>12组左右</td><td>5组左右意愿度高的已留资</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td>09/05-09/06</td><td>郑少伟 / 安徽亳州诚谯（交付）</td><td>—</td><td>2组留资</td><td>1组试驾L6，1组试驾LS6</td><td>1组提车LS6</td><td>—</td></tr>
+<tr><td>09/05-09/06</td><td>周正成 / 阜阳商厦时代广场</td><td>下午8组、15组左右</td><td>留资4人、留资5组</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td>08/29-08/30</td><td>郑少伟 / 金华永康万达</td><td>全天客流12组、全天客流7组</td><td>—</td><td>试驾3组</td><td>无锁单</td><td>集中在14:00-16:00时间段</td></tr>
+<tr><td>08/29-08/30</td><td>陈晓雪 / 温州印象城MEGA</td><td>全天客流量比较小，四五组</td><td>—</td><td>—</td><td>—</td><td>晚上8点以后会集中来一小波</td></tr>
+<tr><td>08/29-08/30</td><td>方园园 / 金华世贸广场</td><td>全天客流18组客户、全天客流25组</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+</tbody></table>
+<p class='note'>只统计明确写出的内容；空值为未记录，不代表 0。</p>
+</section>
+<section class='card span-2'>
+<h3><span class='n'>A3</span>展车状态</h3>
+<table><thead><tr><th>门店</th><th>车型</th><th>展车</th><th>试驾车</th><th>原文</th></tr></thead><tbody>
+<tr><td>温州印象城MEGA</td><td>L6</td><td>未到店</td><td>—</td><td>「新款未到店」</td></tr>
+<tr><td>遵义吾悦广场</td><td>L6</td><td>无</td><td>—</td><td>「-无展车」</td></tr>
+<tr><td>遵义吾悦广场</td><td>全店</td><td>—</td><td>无</td><td>「-无试驾车」</td></tr>
+<tr><td>金华世贸广场</td><td>L6</td><td>—</td><td>无</td><td>「L6当天无试驾」</td></tr>
+<tr><td>阜阳商厦时代广场</td><td>LS6</td><td>未开放</td><td>—</td><td>「车辆暂未开放用户体验」</td></tr>
+<tr><td>阜阳商厦时代广场</td><td>LS8</td><td>无</td><td>—</td><td>「此快闪店未摆放ls8跟ls9」</td></tr>
+<tr><td>阜阳商厦时代广场</td><td>LS9</td><td>无</td><td>—</td><td>「此快闪店未摆放ls8跟ls9」</td></tr>
+</tbody></table>
+</section>
+<section class='card span-2'>
+<h3><span class='n'>A4</span>客户关注主题</h3>
+<div class='cols'>
+<div>
+<p class='rank-title'>LS6</p>
+<div class='rank'>
+<div class='row' title='编码条目 6'><div class='label'>外观/内饰</div><div class='track'><i style='width:44%'></i></div><div class='num'>4/9</div></div>
+<div class='row' title='编码条目 4'><div class='label'>配置/新老款差异</div><div class='track'><i style='width:33%'></i></div><div class='num'>3/9</div></div>
+<div class='row' title='编码条目 1'><div class='label'>人机/视野</div><div class='track'><i style='width:11%'></i></div><div class='num'>1/9</div></div>
+<div class='row' title='编码条目 1'><div class='label'>价格/权益/优惠</div><div class='track'><i style='width:11%'></i></div><div class='num'>1/9</div></div>
+<div class='row' title='编码条目 1'><div class='label'>智舱</div><div class='track'><i style='width:11%'></i></div><div class='num'>1/9</div></div>
+<div class='row' title='编码条目 1'><div class='label'>智驾</div><div class='track'><i style='width:11%'></i></div><div class='num'>1/9</div></div>
+<div class='row' title='编码条目 1'><div class='label'>空间/储物</div><div class='track'><i style='width:11%'></i></div><div class='num'>1/9</div></div>
+</div>
+</div>
+<div>
+<p class='rank-title'>L6</p>
+<div class='rank'>
+<div class='row' title='编码条目 4'><div class='label'>配置/新老款差异</div><div class='track'><i style='width:33%'></i></div><div class='num'>3/9</div></div>
+<div class='row' title='编码条目 4'><div class='label'>空间/储物</div><div class='track'><i style='width:22%'></i></div><div class='num'>2/9</div></div>
+<div class='row' title='编码条目 2'><div class='label'>NVH</div><div class='track'><i style='width:11%'></i></div><div class='num'>1/9</div></div>
+<div class='row' title='编码条目 1'><div class='label'>品牌/质保/售后</div><div class='track'><i style='width:11%'></i></div><div class='num'>1/9</div></div>
+<div class='row' title='编码条目 1'><div class='label'>外观/内饰</div><div class='track'><i style='width:11%'></i></div><div class='num'>1/9</div></div>
+</div>
+</div>
+</div>
+<p class='other-models'>其他车型：人机/视野 1/9（编码 1）、外观/内饰 1/9（编码 1）、空间/储物 1/9（编码 1）</p>
+<p class='other-models'>全店（未区分车型）：价格/权益/优惠 1/9（编码 1）、品牌/质保/售后 1/9（编码 1）</p>
+</section>
+<section class='card span-2'>
+<h3><span class='n'>A5</span>正向产品反馈</h3>
+<div class='cols'>
+<div>
+<p class='rank-title'>LS6</p>
+<div class='rank'>
+<div class='row' title='编码条目 1'><div class='label'>智驾</div><div class='track'><i style='width:11%'></i></div><div class='num'>1/9</div></div>
+</div>
+</div>
+<div>
+<p class='rank-title'>L6</p>
+<p class='note'>无明确记录</p>
+</div>
+</div>
+<p class='other-models'>其他车型：人群/市场适配 1/9（编码 1）</p>
+<p class='other-models'>全店（未区分车型）：门店服务 1/9（编码 1）</p>
+</section>
+<section class='card span-2'>
+<h3><span class='n'>A6</span>竞品关注</h3>
+<div class='cols'>
+<div>
+<p class='rank-title'>LS6</p>
+<div class='rank'>
+<div class='row' title='编码条目 1'><div class='label'>小米 N70</div><div class='track'><i style='width:11%'></i></div><div class='num'>1/9</div></div>
+<div class='row' title='编码条目 1'><div class='label'>小米 N90</div><div class='track'><i style='width:11%'></i></div><div class='num'>1/9</div></div>
+<div class='row' title='编码条目 1'><div class='label'>小鹏 L03</div><div class='track'><i style='width:11%'></i></div><div class='num'>1/9</div></div>
+<div class='row' title='编码条目 1'><div class='label'>阿维塔 07</div><div class='track'><i style='width:11%'></i></div><div class='num'>1/9</div></div>
+<div class='row' title='编码条目 1'><div class='label'>零跑 C16</div><div class='track'><i style='width:11%'></i></div><div class='num'>1/9</div></div>
+</div>
+</div>
+<div>
+<p class='rank-title'>L6</p>
+<div class='rank'>
+<div class='row' title='编码条目 1'><div class='label'>小鹏 GX</div><div class='track'><i style='width:11%'></i></div><div class='num'>1/9</div></div>
+<div class='row' title='编码条目 1'><div class='label'>小鹏 L03</div><div class='track'><i style='width:11%'></i></div><div class='num'>1/9</div></div>
+<div class='row' title='编码条目 1'><div class='label'>小鹏 M03</div><div class='track'><i style='width:11%'></i></div><div class='num'>1/9</div></div>
+<div class='row' title='编码条目 1'><div class='label'>小鹏 P7</div><div class='track'><i style='width:11%'></i></div><div class='num'>1/9</div></div>
+</div>
+</div>
+</div>
+<p class='other-models'>其他车型：小米 N70 1/9（编码 1）、小米 N90 1/9（编码 1）、小鹏 GX 1/9（编码 1）、极氪 7X 1/9（编码 1）</p>
+</section>
+<section class='card span-2'>
+<h3><span class='n'>A7</span>下单阻碍</h3>
+<div class='cols'>
+<div>
+<p class='rank-title'>LS6</p>
+<div class='rank'>
+<div class='row' title='编码条目 4'><div class='label'>等待新款/配额</div><div class='track'><i style='width:33%'></i></div><div class='num'>3/9</div></div>
+<div class='row' title='编码条目 1'><div class='label'>外观/内饰不满</div><div class='track'><i style='width:11%'></i></div><div class='num'>1/9</div></div>
+</div>
+</div>
+<div>
+<p class='rank-title'>L6</p>
+<div class='rank'>
+<div class='row' title='编码条目 2'><div class='label'>等待新款/配额</div><div class='track'><i style='width:22%'></i></div><div class='num'>2/9</div></div>
+<div class='row' title='编码条目 1'><div class='label'>产品配置顾虑</div><div class='track'><i style='width:11%'></i></div><div class='num'>1/9</div></div>
+<div class='row' title='编码条目 1'><div class='label'>品牌/信任/售后顾虑</div><div class='track'><i style='width:11%'></i></div><div class='num'>1/9</div></div>
+</div>
+</div>
+</div>
+</section>
+<section class='card span-2'>
+<h3><span class='n'>A8</span>不满意主题</h3>
+<p class='note'>暂缓启用：与开放问题发现的弱项重叠度高，待数据积累后再编码。</p>
+</section>
+</div>
+<p class='note'>A4–A7 为<strong>记录覆盖率</strong>：分子是命中该主题的去重 record_index 数，分母是门店记录数（N=9）。同一记录可命中多个主题，故各行分数不可相加。</p>
+<h2 class='sect'>03 一线问题发现<small>开放问题发现：问题事先未知；由模型从一线文字中发现并归并</small></h2>
+<section class='card span-2'>
+<div class='stat-row two'>
+<div class='stat'><b>9</b><span>门店记录</span></div>
+<div class='stat'><b>15</b><span>识别出的开放问题</span></div>
+</div>
+<p class='note'>9 条门店记录中，模型发现并归并出 15 个开放问题；其余问题折叠在文末。</p>
+</section>
+<div class='detail'>
+<h4>B1 内饰豪华感与质感不足（跨车型）</h4>
+<p class='meta'>10 次提及 · 6 位专家 · 5 家门店</p>
+<div class='block'><span class='k'>LLM 提炼</span><p class='v'>LS8/LS9 及部分 L6 用户认为内饰用料、配色与配件质感低于豪华品牌预期，并被竞品对比进一步放大。</p></div>
+<div class='raw'><span class='k'>一线上报</span>
+<blockquote>店长反馈部分用户认为LS9豪华感不足，不少用户选择小鹏GX</blockquote>
+<div class='src'>李文涛 · 安徽亳州诚谯（交付） · 09/05-09/06 · LS8/LS9 建议或销售 · 专家转述</div>
+<blockquote>有组用户觉得内饰不够高级</blockquote>
+<div class='src'>周正成 · 阜阳商厦时代广场 · 09/05-09/06 · 试驾反馈 · 专家转述</div>
+<blockquote>LS8: 内饰豪华感不足，多提及极氪7X</blockquote>
+<div class='src'>胡然 · 温州印象城MEGA · 08/29-08/30 · LS8/LS9 建议或销售 · 专家转述</div>
+<details class='more'><summary>更多原文（7）</summary>
+<blockquote>顾客反馈L6外加的配件小头枕软塌，没有质感，不够精致</blockquote>
+<div class='src'>方园园 · 金华世贸广场 · 08/29-08/30 · L6 体验弱点 · 专家转述</div>
+<blockquote>用户选择浅色内饰的话，只能搭配深色方向盘，个人认为这个组合不太合理</blockquote>
+<div class='src'>李文涛 · 安徽亳州诚谯（交付） · 09/05-09/06 · LS6 体验弱点 · 专家观察</div>
+<blockquote>紫色内饰，优雅大气，比LS9的米白色更小众</blockquote>
+<div class='src'>李文涛 · 安徽亳州诚谯（交付） · 09/05-09/06 · LS8/LS9 建议或销售 · 竞品对标</div>
+<blockquote>在后续改款或新产品上考虑小众豪华颜色的内饰，而非大众化的米白色内饰</blockquote>
+<div class='src'>李文涛 · 安徽亳州诚谯（交付） · 09/05-09/06 · LS8/LS9 建议或销售 · 专家观察</div>
+<blockquote>有一个用户觉得内饰拼接色太多，不够协调</blockquote>
+<div class='src'>陈晓雪 · 阜阳商厦时代广场 · 09/05-09/06 · 试驾反馈 · 专家转述</div>
+<blockquote>改善踏板质量，避免踏板晃动或响声，拉低品牌质感</blockquote>
+<div class='src'>李文涛 · 安徽亳州诚谯（交付） · 09/05-09/06 · LS8/LS9 建议或销售 · 专家转述</div>
+<blockquote>对ls8车漆不满意，不高级，没档次</blockquote>
+<div class='src'>吴昊 · 遵义吾悦广场 · 9/10-13 · LS6 体验弱点 · 专家转述</div>
+</details>
+</div></div>
+<div class='detail'>
+<h4>B2 竞品对标暴露的便利配置差距与设计偏好</h4>
+<p class='meta'>8 次提及 · 3 位专家 · 3 家门店</p>
+<div class='block'><span class='k'>LLM 提炼</span><p class='v'>对标小鹏 GX/N70/N90/小米等，LS9 在 B 柱扶手、三排充电口、三排电动折叠、后排滑轨等便利配置上存在差距；用户同时偏好半隐藏式门把手等设计。</p></div>
+<div class='raw'><span class='k'>一线上报</span>
+<blockquote>B柱内侧有上车扶手，老人小孩上车更方便</blockquote>
+<div class='src'>李文涛 · 安徽亳州诚谯（交付） · 09/05-09/06 · LS8/LS9 建议或销售 · 竞品对标</div>
+<blockquote>B柱内侧增加上车扶手</blockquote>
+<div class='src'>李文涛 · 安徽亳州诚谯（交付） · 09/05-09/06 · LS8/LS9 建议或销售 · 专家观察</div>
+<blockquote>一二三排都有Type C充电接口，三排左右各有一个，满足一家人长途出行时的充电平权</blockquote>
+<div class='src'>李文涛 · 安徽亳州诚谯（交付） · 09/05-09/06 · LS8/LS9 建议或销售 · 竞品对标</div>
+<details class='more'><summary>更多原文（5）</summary>
+<blockquote>三排增加2个Type C充电口</blockquote>
+<div class='src'>李文涛 · 安徽亳州诚谯（交付） · 09/05-09/06 · LS8/LS9 建议或销售 · 专家观察</div>
+<blockquote>三排可翻折座椅可自动折叠至纯平，大幅拓展后备厢空间</blockquote>
+<div class='src'>李文涛 · 安徽亳州诚谯（交付） · 09/05-09/06 · LS8/LS9 建议或销售 · 竞品对标</div>
+<blockquote>另有年轻用户关注HUD</blockquote>
+<div class='src'>胡然 · 温州印象城MEGA · 08/29-08/30 · LS6 体验弱点 · 专家转述</div>
+<blockquote>客户对标小米N70、N90，小鹏L03，半隐藏式门把手更容易接受</blockquote>
+<div class='src'>方园园 · 金华世贸广场 · 08/29-08/30 · LS6 体验弱点 · 专家转述</div>
+<blockquote>对标N70、N90增加长滑轨，后排座椅调节空间自由度增大，能够更大拓展后备箱容积率，靠背角度可调范围大，长途乘坐舒适度高</blockquote>
+<div class='src'>方园园 · 金华世贸广场 · 08/29-08/30 · LS8/LS9 建议或销售 · 竞品对标</div>
+</details>
+</div></div>
+<div class='detail'>
+<h4>B3 品牌认知与渠道吸引力约束销售</h4>
+<p class='meta'>5 次提及 · 4 位专家 · 3 家门店</p>
+<div class='block'><span class='k'>LLM 提炼</span><p class='v'>品牌认知度低、门店自然客流质量弱，叠加竞品分流，构成销售端的系统性约束。</p></div>
+<div class='raw'><span class='k'>一线上报</span>
+<blockquote>人流大，位置好，但是车不抓眼球，潮流时尚打扮的人过问的极少，多往小米店里跑</blockquote>
+<div class='src'>吴昊 · 遵义吾悦广场 · 9/10-13 · 门店印象 · 专家观察</div>
+<blockquote>工作人员自己都担心智己会不会倒闭。今年销量比去年差了</blockquote>
+<div class='src'>吴昊 · 遵义吾悦广场 · 9/10-13 · 门店印象 · 专家观察</div>
+<blockquote>L6没有主动询问的，一个留资，无试驾</blockquote>
+<div class='src'>陈晓雪 · 温州印象城MEGA · 08/29-08/30 · 门店销售 · 专家观察</div>
+<details class='more'><summary>更多原文（2）</summary>
+<blockquote>近期因老款价格下调至18.99，用户竞对下探至零跑C16较多，销售反馈上市期对比阿维塔07较多</blockquote>
+<div class='src'>胡然 · 温州印象城MEGA · 08/29-08/30 · LS6 体验弱点 · 专家观察</div>
+<blockquote>门店客流基本来自隔壁小鹏门店，对标P7、GX，L03及M03价格</blockquote>
+<div class='src'>方园园 · 金华世贸广场 · 08/29-08/30 · L6 体验弱点 · 专家观察</div>
+</details>
+</div></div>
+<details class='other'><summary>其余开放问题（12）</summary>
+<div class='detail'>
+<h4>前部与车内储物空间不足</h4>
+<p class='meta'>4 次提及 · 3 位专家 · 3 家门店</p>
+<div class='block'><span class='k'>LLM 提炼</span><p class='v'>前备箱/前舱储物箱的容量、开启方式与门板储物深度不足，影响特定使用场景（如钓鱼干湿分离、日常随手收纳）。</p></div>
+<div class='raw'><span class='k'>一线上报</span>
+<blockquote>销售反映前备箱敲一敲logo附近有时不灵敏，有时远端玻璃下反而能开</blockquote>
+<div class='src'>吴昊 · 遵义吾悦广场 · 9/10-13 · LS6 体验弱点 · 专家转述</div>
+<blockquote>前备箱小（用户说约等于没有前备箱），前备箱是手动开启</blockquote>
+<div class='src'>郑少伟 · 金华永康万达 · 08/29-08/30 · L6 体验弱点 · 专家转述</div>
+<blockquote>L6前舱储物箱尺寸小，箱体深度浅，客户为钓鱼爱好者，希望将钓鱼用具放到前舱储物箱</blockquote>
+<div class='src'>方园园 · 金华世贸广场 · 08/29-08/30 · L6 体验弱点 · 专家转述</div>
+<details class='more'><summary>更多原文（1）</summary>
+<blockquote>车内门板储物阁浅</blockquote>
+<div class='src'>方园园 · 金华世贸广场 · 08/29-08/30 · L6 体验弱点 · 专家转述</div>
+</details>
+</div></div>
+<div class='detail'>
+<h4>配置减配感知削弱价值感</h4>
+<p class='meta'>4 次提及 · 2 位专家 · 2 家门店</p>
+<div class='block'><span class='k'>LLM 提炼</span><p class='v'>慢充口盖、电吸门、天窗开启、后排电动放倒等配置的缺失或简化被用户读作减配，削弱价值感。</p></div>
+<div class='raw'><span class='k'>一线上报</span>
+<blockquote>有用户认为天窗不需要，要能打开透风</blockquote>
+<div class='src'>周正成 · 阜阳商厦时代广场 · 09/05-09/06 · L6 体验弱点 · 专家转述</div>
+<blockquote>用户提出慢充充电口没有盖，认为减配了</blockquote>
+<div class='src'>周正成 · 阜阳商厦时代广场 · 09/05-09/06 · LS6 体验弱点 · 专家转述</div>
+<blockquote>有几组年轻用户觉得l6没有电吸门是缺点</blockquote>
+<div class='src'>周正成 · 阜阳商厦时代广场 · 09/05-09/06 · 试驾反馈 · 专家转述</div>
+<details class='more'><summary>更多原文（1）</summary>
+<blockquote>后排座椅是手动放倒</blockquote>
+<div class='src'>郑少伟 · 金华永康万达 · 08/29-08/30 · L6 体验弱点 · 专家转述</div>
+</details>
+</div></div>
+<div class='detail'>
+<h4>内饰锐角造成磕碰与划伤风险</h4>
+<p class='meta'>3 次提及 · 1 位专家 · 1 家门店</p>
+<div class='block'><span class='k'>LLM 提炼</span><p class='v'>主驾门内侧下沿尖角与冰箱口内沿直角存在磕碰/划伤风险，友商已采用圆角加密封条的成熟方案。</p></div>
+<div class='raw'><span class='k'>一线上报</span>
+<blockquote>老LS6不少用户抱怨：主驾门内侧下沿的尖角在关门的时候容易磕到小腿，新LS6和L6都存在类似风险</blockquote>
+<div class='src'>李文涛 · 安徽亳州诚谯（交付） · 09/05-09/06 · LS6 体验弱点 · 专家转述</div>
+<blockquote>LS6主驾门的下沿是尖角设计，而友商多为圆角设计，且有厚密封条可以缓冲</blockquote>
+<div class='src'>李文涛 · 安徽亳州诚谯（交付） · 09/05-09/06 · LS6 体验弱点 · 竞品对标</div>
+<blockquote>冰箱口内沿划伤手背手指的风险：冰箱口较窄，且内沿为直角设计，比较锋利</blockquote>
+<div class='src'>李文涛 · 安徽亳州诚谯（交付） · 09/05-09/06 · LS6 体验弱点 · 专家观察</div>
+</div></div>
+<div class='detail'>
+<h4>智能座舱语音体验不稳定</h4>
+<p class='meta'>3 次提及 · 1 位专家 · 1 家门店</p>
+<div class='block'><span class='k'>LLM 提炼</span><p class='v'>IMClaw 在多音字识别、场景推荐与指令程度区分上表现不稳定，削弱智能座舱体验。</p></div>
+<div class='raw'><span class='k'>一线上报</span>
+<blockquote>IMClaw有时候把“亳”读成hao，对当地人体验大打折扣</blockquote>
+<div class='src'>郑少伟 · 安徽亳州诚谯（交付） · 09/05-09/06 · LS6 体验弱点 · 专家转述</div>
+<blockquote>IMClaw不够智能，比如让其推荐当地美食，找到的都不是当地特色美食，而是常规小吃</blockquote>
+<div class='src'>郑少伟 · 安徽亳州诚谯（交付） · 09/05-09/06 · LS6 体验弱点 · 专家转述</div>
+<blockquote>语音控制遮阳帘的时候，无法区分打开程度是“打开程度”还是“关闭程度”</blockquote>
+<div class='src'>郑少伟 · 安徽亳州诚谯（交付） · 09/05-09/06 · LS6 体验弱点 · 专家转述</div>
+</div></div>
+<div class='detail'>
+<h4>驾驶卖点传达受损（后轮转向/线控）</h4>
+<p class='meta'>3 次提及 · 3 位专家 · 2 家门店</p>
+<div class='block'><span class='k'>LLM 提炼</span><p class='v'>新款 L6 后轮转向被反馈不如老款，LS6 线控转向又缺乏试驾机会，削弱驾驶卖点的传达与体验。</p></div>
+<div class='raw'><span class='k'>一线上报</span>
+<blockquote>店长反馈新款后轮转向感觉不如老款</blockquote>
+<div class='src'>郑少伟 · 安徽亳州诚谯（交付） · 09/05-09/06 · L6 体验弱点 · 专家转述</div>
+<blockquote>LS6线控转向功能目前不能试驾</blockquote>
+<div class='src'>李文涛 · 安徽亳州诚谯（交付） · 09/05-09/06 · LS6 体验弱点 · 专家转述</div>
+<blockquote>一组客户（二孩家庭夫妻）询问LS6线控情况，期待新款</blockquote>
+<div class='src'>胡然 · 温州印象城MEGA · 08/29-08/30 · LS6 体验弱点 · 专家转述</div>
+</div></div>
+<div class='detail'>
+<h4>已验证的产品与服务优势项</h4>
+<p class='meta'>3 次提及 · 3 位专家 · 3 家门店</p>
+<div class='block'><span class='k'>LLM 提炼</span><p class='v'>雨天辅助驾驶、LS8 人群适配与门店接待服务是被正面验证的优势，应保留并在营销中放大。</p></div>
+<div class='raw'><span class='k'>一线上报</span>
+<blockquote>试驾时下雨，顾客反馈雨天辅助自动驾驶表现不错，能够丝滑接管，画面也很清晰</blockquote>
+<div class='src'>方园园 · 金华世贸广场 · 08/29-08/30 · LS6 体验弱点 · 专家转述</div>
+<blockquote>LS8明显更吸引年长的用户以及有实力的仁怀用户，富裕的仁怀市场可以重点考虑ls8</blockquote>
+<div class='src'>吴昊 · 遵义吾悦广场 · 9/10-13 · LS8/LS9 建议或销售 · 专家观察</div>
+<blockquote>接待客户积极热情</blockquote>
+<div class='src'>李文涛 · 安徽亳州诚谯（交付） · 09/05-09/06 · 门店印象 · 专家观察</div>
+</div></div>
+<div class='detail'>
+<h4>椭圆方向盘的人机视野与购买阻断</h4>
+<p class='meta'>2 次提及 · 1 位专家 · 1 家门店</p>
+<div class='block'><span class='k'>LLM 提炼</span><p class='v'>椭圆方向盘的造型取向导致前方/电子后视镜视野遮挡，在部分用户中直接转化为拒购意愿。</p></div>
+<div class='raw'><span class='k'>一线上报</span>
+<blockquote>ls6和ls8椭圆方向盘严重挡视线，尤其是遮挡电子后视镜，画面完全可以向上移动</blockquote>
+<div class='src'>吴昊 · 遵义吾悦广场 · 9/10-13 · LS6 体验弱点 · 专家转述</div>
+<blockquote>多数用户对椭圆方向盘不喜欢，拒购风险大</blockquote>
+<div class='src'>吴昊 · 遵义吾悦广场 · 9/10-13 · LS6 体验弱点 · 专家转述</div>
+</div></div>
+<div class='detail'>
+<h4>NVH：音响调校与胎噪</h4>
+<p class='meta'>2 次提及 · 1 位专家 · 1 家门店</p>
+<div class='block'><span class='k'>LLM 提炼</span><p class='v'>L6 在 BO 音响调校与 19 寸佳通 P10 轮胎胎噪上的 NVH 表现未达部分用户预期。</p></div>
+<div class='raw'><span class='k'>一线上报</span>
+<blockquote>BO音响环绕感强，音质处理温润柔和，重低音浑厚，但爆发力不足</blockquote>
+<div class='src'>方园园 · 金华世贸广场 · 08/29-08/30 · L6 体验弱点 · 专家转述</div>
+<blockquote>L6 19寸标配轮胎为佳通P10轮胎，客户有些介意，试驾后表示胎噪音大</blockquote>
+<div class='src'>方园园 · 金华世贸广场 · 08/29-08/30 · L6 体验弱点 · 专家转述</div>
+</div></div>
+<div class='detail'>
+<h4>后排空间与人体工程设定</h4>
+<p class='meta'>2 次提及 · 2 位专家 · 2 家门店</p>
+<div class='block'><span class='k'>LLM 提炼</span><p class='v'>后排乘坐/头部空间与二排大屏观看距离等人体工程设定存在不适，影响家庭出行体验。</p></div>
+<div class='raw'><span class='k'>一线上报</span>
+<blockquote>后排空间三个人并排坐有些挤，个子高坐后排，头部空间太低</blockquote>
+<div class='src'>方园园 · 金华世贸广场 · 08/29-08/30 · L6 体验弱点 · 专家转述</div>
+<blockquote>多数用户提及六座版二排大屏距离座椅太近，观看体验不佳，建议增加导轨自主调节距离</blockquote>
+<div class='src'>胡然 · 温州印象城MEGA · 08/29-08/30 · LS8/LS9 建议或销售 · 专家转述</div>
+</div></div>
+<div class='detail'>
+<h4>售后服务与保障担忧</h4>
+<p class='meta'>2 次提及 · 1 位专家 · 1 家门店</p>
+<div class='block'><span class='k'>LLM 提炼</span><p class='v'>智己售后服务体系（如缺少取送车）与既有用户负面口碑引发购前犹豫。</p></div>
+<div class='raw'><span class='k'>一线上报</span>
+<blockquote>鉴于智己目前没有类似于小米和极氪的售后取送车服务，目前还在犹豫中</blockquote>
+<div class='src'>郑少伟 · 金华永康万达 · 08/29-08/30 · L6 体验弱点 · 专家转述</div>
+<blockquote>门店销售有个朋友之前买了一台LS7，但对智己的售后服务体系不是很满意，开了不到一年就卖掉了</blockquote>
+<div class='src'>郑少伟 · 金华永康万达 · 08/29-08/30 · L6 体验弱点 · 专家转述</div>
+</div></div>
+<div class='detail'>
+<h4>智驾能力与品牌认知担忧</h4>
+<p class='meta'>2 次提及 · 2 位专家 · 2 家门店</p>
+<div class='block'><span class='k'>LLM 提炼</span><p class='v'>用户对 L6 智驾硬件规格存疑，且普遍不了解供应商 momenta，智驾卖点难以建立可信度。</p></div>
+<div class='raw'><span class='k'>一线上报</span>
+<blockquote>有用户反馈新款L6的激光雷达是126线的，担忧智驾性能是否弱于同级别竞品</blockquote>
+<div class='src'>郑少伟 · 金华永康万达 · 08/29-08/30 · L6 体验弱点 · 专家转述</div>
+<blockquote>没有一个客户知道momenta</blockquote>
+<div class='src'>吴昊 · 遵义吾悦广场 · 9/10-13 · LS6 体验弱点 · 专家观察</div>
+</div></div>
+<div class='detail'>
+<h4>用户持币观望、等待新款</h4>
+<p class='meta'>2 次提及 · 1 位专家 · 1 家门店</p>
+<div class='block'><span class='k'>LLM 提炼</span><p class='v'>老款吸引力不足叠加配额未抢到，用户转向等待新款，形成短期锁单抑制。</p></div>
+<div class='raw'><span class='k'>一线上报</span>
+<blockquote>有用户不想买老款LS6，期待新款</blockquote>
+<div class='src'>郑少伟 · 金华永康万达 · 08/29-08/30 · LS6 体验弱点 · 专家转述</div>
+<blockquote>有用户没有抢到前1000台，又不想买老款LS6，目前还在新款L6和尚未发布的新款LS6之间犹豫</blockquote>
+<div class='src'>郑少伟 · 金华永康万达 · 08/29-08/30 · 门店销售 · 专家转述</div>
+</div></div>
+</details>
+<p class='temporal'>Baseline only：本期为首个基线窗口，暂无跨期趋势。</p>
+<details class='appendix'><summary>方法与 Runtime 追溯</summary><ul>
+<li>A 预设编码：问题事先已知，LLM 只编码，计数由 <code>derive_preset_stats.py</code> 聚合。</li>
+<li>B 开放发现：问题事先未知，Evidence → Issue → Pattern → Convergence。</li>
+<li>数字只读 <code>preset_stats.json</code> / <code>convergence.json</code>；一线原文逐字取自 <code>evidence.jsonl</code>，报告不生成、不改写任何原话。</li>
+<li>样本为定性、自报、非随机门店样本，不用于估计总体比例。</li>
+</ul><table><thead><tr><th>Pattern</th><th>pattern_key</th><th>证据强度</th><th>复现</th><th>证据</th><th>Convergence</th><th>Issues</th></tr></thead><tbody>
+<tr><td>PAT-0001</td><td><code>cockpit_ergonomics_steering_visibility</code></td><td>weak</td><td>isolated</td><td>2</td><td>CONV-0001</td><td>ISS-0001</td></tr>
+<tr><td>PAT-0002</td><td><code>storage_front_trunk_capacity</code></td><td>strong</td><td>systemic</td><td>4</td><td>CONV-0002</td><td>ISS-0002、ISS-0003</td></tr>
+<tr><td>PAT-0003</td><td><code>interior_luxury_material_perception</code></td><td>strong</td><td>systemic</td><td>10</td><td>CONV-0003</td><td>ISS-0005、ISS-0006、ISS-0017、ISS-0019</td></tr>
+<tr><td>PAT-0004</td><td><code>interior_sharp_edge_injury_risk</code></td><td>weak</td><td>isolated</td><td>3</td><td>CONV-0004</td><td>ISS-0007</td></tr>
+<tr><td>PAT-0005</td><td><code>smart_cockpit_voice_assistant</code></td><td>weak</td><td>isolated</td><td>3</td><td>CONV-0005</td><td>ISS-0004</td></tr>
+<tr><td>PAT-0006</td><td><code>nvh_audio_tire_noise</code></td><td>weak</td><td>isolated</td><td>2</td><td>CONV-0006</td><td>ISS-0008、ISS-0009</td></tr>
+<tr><td>PAT-0007</td><td><code>seating_rear_space_ergonomics</code></td><td>moderate</td><td>repeated</td><td>2</td><td>CONV-0007</td><td>ISS-0010、ISS-0018</td></tr>
+<tr><td>PAT-0008</td><td><code>configuration_decontent_perception</code></td><td>moderate</td><td>repeated</td><td>4</td><td>CONV-0008</td><td>ISS-0011</td></tr>
+<tr><td>PAT-0009</td><td><code>sales_service_after_sales_support</code></td><td>weak</td><td>isolated</td><td>2</td><td>CONV-0009</td><td>ISS-0012</td></tr>
+<tr><td>PAT-0010</td><td><code>adas_capability_brand_trust</code></td><td>moderate</td><td>repeated</td><td>2</td><td>CONV-0010</td><td>ISS-0013</td></tr>
+<tr><td>PAT-0011</td><td><code>configuration_benchmark_convenience_gap</code></td><td>strong</td><td>systemic</td><td>8</td><td>CONV-0011</td><td>ISS-0014、ISS-0015、ISS-0016、ISS-0028、ISS-0029、ISS-0030</td></tr>
+<tr><td>PAT-0012</td><td><code>driving_dynamics_steering_tech_demo</code></td><td>moderate</td><td>repeated</td><td>3</td><td>CONV-0012</td><td>ISS-0020、ISS-0021</td></tr>
+<tr><td>PAT-0013</td><td><code>brand_channel_attraction_constraint</code></td><td>strong</td><td>systemic</td><td>5</td><td>CONV-0013</td><td>ISS-0022、ISS-0023</td></tr>
+<tr><td>PAT-0014</td><td><code>demand_wait_for_new_model</code></td><td>weak</td><td>isolated</td><td>2</td><td>CONV-0014</td><td>ISS-0024</td></tr>
+<tr><td>PAT-0015</td><td><code>verified_product_service_strengths</code></td><td>strong</td><td>systemic</td><td>3</td><td>CONV-0015</td><td>ISS-0025、ISS-0026、ISS-0027</td></tr>
+</tbody></table></details>
+<footer>产品专家一线问题发现 · 08/29–09/13 · run_001 · Field Intelligence Report</footer>
+</main></body></html>

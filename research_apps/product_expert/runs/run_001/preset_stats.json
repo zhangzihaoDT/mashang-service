@@ -1,0 +1,1156 @@
+{
+  "run_id": "run_001",
+  "taxonomy_version": "0.1",
+  "coding_count": 83,
+  "store_ops": {
+    "records": [
+      {
+        "record_index": 0,
+        "expert": "吴昊",
+        "store": "遵义吾悦广场",
+        "support_date": "9/10-13",
+        "items": [
+          {
+            "code": "footfall",
+            "label": "客流组数",
+            "quote": "12组左右"
+          },
+          {
+            "code": "leads",
+            "label": "留资",
+            "quote": "5组左右意愿度高的已留资"
+          }
+        ]
+      },
+      {
+        "record_index": 1,
+        "expert": "郑少伟",
+        "store": "安徽亳州诚谯（交付）",
+        "support_date": "09/05-09/06",
+        "items": [
+          {
+            "code": "leads",
+            "label": "留资",
+            "quote": "2组留资"
+          },
+          {
+            "code": "lock_order",
+            "label": "锁单/交付",
+            "quote": "1组提车LS6"
+          },
+          {
+            "code": "test_drive",
+            "label": "试驾",
+            "quote": "1组试驾L6，1组试驾LS6"
+          }
+        ]
+      },
+      {
+        "record_index": 3,
+        "expert": "周正成",
+        "store": "阜阳商厦时代广场",
+        "support_date": "09/05-09/06",
+        "items": [
+          {
+            "code": "footfall",
+            "label": "客流组数",
+            "quote": "下午8组"
+          },
+          {
+            "code": "footfall",
+            "label": "客流组数",
+            "quote": "15组左右"
+          },
+          {
+            "code": "leads",
+            "label": "留资",
+            "quote": "留资4人"
+          },
+          {
+            "code": "leads",
+            "label": "留资",
+            "quote": "留资5组"
+          }
+        ]
+      },
+      {
+        "record_index": 5,
+        "expert": "郑少伟",
+        "store": "金华永康万达",
+        "support_date": "08/29-08/30",
+        "items": [
+          {
+            "code": "footfall",
+            "label": "客流组数",
+            "quote": "全天客流12组"
+          },
+          {
+            "code": "footfall",
+            "label": "客流组数",
+            "quote": "全天客流7组"
+          },
+          {
+            "code": "lock_order",
+            "label": "锁单/交付",
+            "quote": "无锁单"
+          },
+          {
+            "code": "peak_hours",
+            "label": "客流高峰时段",
+            "quote": "集中在14:00-16:00时间段"
+          },
+          {
+            "code": "test_drive",
+            "label": "试驾",
+            "quote": "试驾3组"
+          }
+        ]
+      },
+      {
+        "record_index": 7,
+        "expert": "陈晓雪",
+        "store": "温州印象城MEGA",
+        "support_date": "08/29-08/30",
+        "items": [
+          {
+            "code": "footfall",
+            "label": "客流组数",
+            "quote": "全天客流量比较小，四五组"
+          },
+          {
+            "code": "peak_hours",
+            "label": "客流高峰时段",
+            "quote": "晚上8点以后会集中来一小波"
+          }
+        ]
+      },
+      {
+        "record_index": 8,
+        "expert": "方园园",
+        "store": "金华世贸广场",
+        "support_date": "08/29-08/30",
+        "items": [
+          {
+            "code": "footfall",
+            "label": "客流组数",
+            "quote": "全天客流18组客户"
+          },
+          {
+            "code": "footfall",
+            "label": "客流组数",
+            "quote": "全天客流25组"
+          }
+        ]
+      }
+    ]
+  },
+  "availability": {
+    "rows": [
+      {
+        "store": "温州印象城MEGA",
+        "model": "L6",
+        "display": {
+          "code": "not_arrived",
+          "label": "未到店",
+          "quote": "新款未到店"
+        },
+        "test_drive": null,
+        "quotes": [
+          "新款未到店"
+        ]
+      },
+      {
+        "store": "遵义吾悦广场",
+        "model": "L6",
+        "display": {
+          "code": "no_display_car",
+          "label": "无",
+          "quote": "-无展车"
+        },
+        "test_drive": null,
+        "quotes": [
+          "-无展车"
+        ]
+      },
+      {
+        "store": "遵义吾悦广场",
+        "model": "STORE",
+        "display": null,
+        "test_drive": {
+          "code": "no_test_car",
+          "label": "无",
+          "quote": "-无试驾车"
+        },
+        "quotes": [
+          "-无试驾车"
+        ]
+      },
+      {
+        "store": "金华世贸广场",
+        "model": "L6",
+        "display": null,
+        "test_drive": {
+          "code": "no_test_car",
+          "label": "无",
+          "quote": "L6当天无试驾"
+        },
+        "quotes": [
+          "L6当天无试驾"
+        ]
+      },
+      {
+        "store": "阜阳商厦时代广场",
+        "model": "LS6",
+        "display": {
+          "code": "not_open",
+          "label": "未开放",
+          "quote": "车辆暂未开放用户体验"
+        },
+        "test_drive": null,
+        "quotes": [
+          "车辆暂未开放用户体验"
+        ]
+      },
+      {
+        "store": "阜阳商厦时代广场",
+        "model": "LS8",
+        "display": {
+          "code": "no_display_car",
+          "label": "无",
+          "quote": "此快闪店未摆放ls8跟ls9"
+        },
+        "test_drive": null,
+        "quotes": [
+          "此快闪店未摆放ls8跟ls9"
+        ]
+      },
+      {
+        "store": "阜阳商厦时代广场",
+        "model": "LS9",
+        "display": {
+          "code": "no_display_car",
+          "label": "无",
+          "quote": "此快闪店未摆放ls8跟ls9"
+        },
+        "test_drive": null,
+        "quotes": [
+          "此快闪店未摆放ls8跟ls9"
+        ]
+      }
+    ]
+  },
+  "customer_concern": {
+    "label": "客户关注主题",
+    "counts": [
+      {
+        "code": "configuration_year_diff",
+        "label": "配置/新老款差异",
+        "by_model": {
+          "L6": 4,
+          "LS6": 4
+        },
+        "records_by_model": {
+          "L6": [
+            1,
+            3,
+            5
+          ],
+          "LS6": [
+            2,
+            3,
+            6
+          ]
+        },
+        "samples": [
+          {
+            "record_index": 1,
+            "source_field": "l6_weakness",
+            "expert": "郑少伟",
+            "store": "安徽亳州诚谯（交付）",
+            "support_date": "09/05-09/06",
+            "quote": "店长反馈新款后轮转向感觉不如老款"
+          },
+          {
+            "record_index": 2,
+            "source_field": "ls6_weakness",
+            "expert": "李文涛",
+            "store": "安徽亳州诚谯（交付）",
+            "support_date": "09/05-09/06",
+            "quote": "LS6线控转向功能目前不能试驾"
+          },
+          {
+            "record_index": 3,
+            "source_field": "test_drive_feedback",
+            "expert": "周正成",
+            "store": "阜阳商厦时代广场",
+            "support_date": "09/05-09/06",
+            "quote": "l6没有电吸门是缺点"
+          },
+          {
+            "record_index": 3,
+            "source_field": "l6_weakness",
+            "expert": "周正成",
+            "store": "阜阳商厦时代广场",
+            "support_date": "09/05-09/06",
+            "quote": "天窗不需要，要能打开透风"
+          },
+          {
+            "record_index": 3,
+            "source_field": "ls6_weakness",
+            "expert": "周正成",
+            "store": "阜阳商厦时代广场",
+            "support_date": "09/05-09/06",
+            "quote": "慢充充电口没有盖，认为减配了"
+          },
+          {
+            "record_index": 5,
+            "source_field": "l6_weakness",
+            "expert": "郑少伟",
+            "store": "金华永康万达",
+            "support_date": "08/29-08/30",
+            "quote": "后排座椅是手动放倒"
+          },
+          {
+            "record_index": 6,
+            "source_field": "ls6_weakness",
+            "expert": "胡然",
+            "store": "温州印象城MEGA",
+            "support_date": "08/29-08/30",
+            "quote": "询问LS6线控情况，期待新款"
+          },
+          {
+            "record_index": 6,
+            "source_field": "ls6_weakness",
+            "expert": "胡然",
+            "store": "温州印象城MEGA",
+            "support_date": "08/29-08/30",
+            "quote": "关注HUD"
+          }
+        ],
+        "total": 8
+      },
+      {
+        "code": "exterior_interior",
+        "label": "外观/内饰",
+        "by_model": {
+          "LS8": 1,
+          "LS6": 6,
+          "L6": 1
+        },
+        "records_by_model": {
+          "LS8": [
+            0
+          ],
+          "LS6": [
+            2,
+            3,
+            4,
+            8
+          ],
+          "L6": [
+            8
+          ]
+        },
+        "samples": [
+          {
+            "record_index": 0,
+            "source_field": "ls6_weakness",
+            "expert": "吴昊",
+            "store": "遵义吾悦广场",
+            "support_date": "9/10-13",
+            "quote": "对ls8车漆不满意，不高级，没档次"
+          },
+          {
+            "record_index": 2,
+            "source_field": "ls6_weakness",
+            "expert": "李文涛",
+            "store": "安徽亳州诚谯（交付）",
+            "support_date": "09/05-09/06",
+            "quote": "主驾门内侧下沿的尖角在关门的时候容易磕到小腿"
+          },
+          {
+            "record_index": 2,
+            "source_field": "ls6_weakness",
+            "expert": "李文涛",
+            "store": "安徽亳州诚谯（交付）",
+            "support_date": "09/05-09/06",
+            "quote": "冰箱口内沿划伤手背手指的风险"
+          },
+          {
+            "record_index": 2,
+            "source_field": "ls6_weakness",
+            "expert": "李文涛",
+            "store": "安徽亳州诚谯（交付）",
+            "support_date": "09/05-09/06",
+            "quote": "只能搭配深色方向盘"
+          },
+          {
+            "record_index": 3,
+            "source_field": "test_drive_feedback",
+            "expert": "周正成",
+            "store": "阜阳商厦时代广场",
+            "support_date": "09/05-09/06",
+            "quote": "有组用户觉得内饰不够高级"
+          },
+          {
+            "record_index": 4,
+            "source_field": "test_drive_feedback",
+            "expert": "陈晓雪",
+            "store": "阜阳商厦时代广场",
+            "support_date": "09/05-09/06",
+            "quote": "内饰拼接色太多，不够协调"
+          },
+          {
+            "record_index": 8,
+            "source_field": "l6_weakness",
+            "expert": "方园园",
+            "store": "金华世贸广场",
+            "support_date": "08/29-08/30",
+            "quote": "小头枕软塌，没有质感，不够精致"
+          },
+          {
+            "record_index": 8,
+            "source_field": "ls6_weakness",
+            "expert": "方园园",
+            "store": "金华世贸广场",
+            "support_date": "08/29-08/30",
+            "quote": "半隐藏式门把手更容易接受"
+          }
+        ],
+        "total": 8
+      },
+      {
+        "code": "space_storage",
+        "label": "空间/储物",
+        "by_model": {
+          "LS6": 1,
+          "L6": 4,
+          "LS8": 1
+        },
+        "records_by_model": {
+          "LS6": [
+            0
+          ],
+          "L6": [
+            5,
+            8
+          ],
+          "LS8": [
+            6
+          ]
+        },
+        "samples": [
+          {
+            "record_index": 0,
+            "source_field": "ls6_weakness",
+            "expert": "吴昊",
+            "store": "遵义吾悦广场",
+            "support_date": "9/10-13",
+            "quote": "前备箱敲一敲logo附近有时不灵敏"
+          },
+          {
+            "record_index": 5,
+            "source_field": "l6_weakness",
+            "expert": "郑少伟",
+            "store": "金华永康万达",
+            "support_date": "08/29-08/30",
+            "quote": "前备箱小（用户说约等于没有前备箱）"
+          },
+          {
+            "record_index": 6,
+            "source_field": "ls8_ls9_suggestion",
+            "expert": "胡然",
+            "store": "温州印象城MEGA",
+            "support_date": "08/29-08/30",
+            "quote": "六座版二排大屏距离座椅太近"
+          },
+          {
+            "record_index": 8,
+            "source_field": "l6_weakness",
+            "expert": "方园园",
+            "store": "金华世贸广场",
+            "support_date": "08/29-08/30",
+            "quote": "后排空间三个人并排坐有些挤"
+          },
+          {
+            "record_index": 8,
+            "source_field": "l6_weakness",
+            "expert": "方园园",
+            "store": "金华世贸广场",
+            "support_date": "08/29-08/30",
+            "quote": "车内门板储物阁浅"
+          },
+          {
+            "record_index": 8,
+            "source_field": "l6_weakness",
+            "expert": "方园园",
+            "store": "金华世贸广场",
+            "support_date": "08/29-08/30",
+            "quote": "前舱储物箱尺寸小，箱体深度浅"
+          }
+        ],
+        "total": 6
+      },
+      {
+        "code": "brand_warranty_service",
+        "label": "品牌/质保/售后",
+        "by_model": {
+          "L6": 1,
+          "STORE": 1
+        },
+        "records_by_model": {
+          "L6": [
+            5
+          ],
+          "STORE": [
+            7
+          ]
+        },
+        "samples": [
+          {
+            "record_index": 5,
+            "source_field": "l6_weakness",
+            "expert": "郑少伟",
+            "store": "金华永康万达",
+            "support_date": "08/29-08/30",
+            "quote": "没有类似于小米和极氪的售后取送车服务"
+          },
+          {
+            "record_index": 7,
+            "source_field": "store_sales",
+            "expert": "陈晓雪",
+            "store": "温州印象城MEGA",
+            "support_date": "08/29-08/30",
+            "quote": "大多对品牌认知度比较陌生"
+          }
+        ],
+        "total": 2
+      },
+      {
+        "code": "cockpit_ergonomics",
+        "label": "人机/视野",
+        "by_model": {
+          "LS6": 1,
+          "LS8": 1
+        },
+        "records_by_model": {
+          "LS6": [
+            0
+          ],
+          "LS8": [
+            0
+          ]
+        },
+        "samples": [
+          {
+            "record_index": 0,
+            "source_field": "ls6_weakness",
+            "expert": "吴昊",
+            "store": "遵义吾悦广场",
+            "support_date": "9/10-13",
+            "quote": "椭圆方向盘严重挡视线"
+          },
+          {
+            "record_index": 0,
+            "source_field": "ls6_weakness",
+            "expert": "吴昊",
+            "store": "遵义吾悦广场",
+            "support_date": "9/10-13",
+            "quote": "ls6和ls8椭圆方向盘严重挡视线"
+          }
+        ],
+        "total": 2
+      },
+      {
+        "code": "nvh",
+        "label": "NVH",
+        "by_model": {
+          "L6": 2
+        },
+        "records_by_model": {
+          "L6": [
+            8
+          ]
+        },
+        "samples": [
+          {
+            "record_index": 8,
+            "source_field": "l6_weakness",
+            "expert": "方园园",
+            "store": "金华世贸广场",
+            "support_date": "08/29-08/30",
+            "quote": "BO音响环绕感强"
+          },
+          {
+            "record_index": 8,
+            "source_field": "l6_weakness",
+            "expert": "方园园",
+            "store": "金华世贸广场",
+            "support_date": "08/29-08/30",
+            "quote": "胎噪音大"
+          }
+        ],
+        "total": 2
+      },
+      {
+        "code": "price_incentive",
+        "label": "价格/权益/优惠",
+        "by_model": {
+          "LS6": 1,
+          "STORE": 1
+        },
+        "records_by_model": {
+          "LS6": [
+            6
+          ],
+          "STORE": [
+            7
+          ]
+        },
+        "samples": [
+          {
+            "record_index": 6,
+            "source_field": "ls6_weakness",
+            "expert": "胡然",
+            "store": "温州印象城MEGA",
+            "support_date": "08/29-08/30",
+            "quote": "老款价格下调至18.99"
+          },
+          {
+            "record_index": 7,
+            "source_field": "store_sales",
+            "expert": "陈晓雪",
+            "store": "温州印象城MEGA",
+            "support_date": "08/29-08/30",
+            "quote": "问SUV价格为主"
+          }
+        ],
+        "total": 2
+      },
+      {
+        "code": "adas",
+        "label": "智驾",
+        "by_model": {
+          "LS6": 1
+        },
+        "records_by_model": {
+          "LS6": [
+            0
+          ]
+        },
+        "samples": [
+          {
+            "record_index": 0,
+            "source_field": "ls6_weakness",
+            "expert": "吴昊",
+            "store": "遵义吾悦广场",
+            "support_date": "9/10-13",
+            "quote": "没有一个客户知道momenta"
+          }
+        ],
+        "total": 1
+      },
+      {
+        "code": "smart_cockpit",
+        "label": "智舱",
+        "by_model": {
+          "LS6": 1
+        },
+        "records_by_model": {
+          "LS6": [
+            1
+          ]
+        },
+        "samples": [
+          {
+            "record_index": 1,
+            "source_field": "ls6_weakness",
+            "expert": "郑少伟",
+            "store": "安徽亳州诚谯（交付）",
+            "support_date": "09/05-09/06",
+            "quote": "IMClaw有时候把“亳”读成hao"
+          }
+        ],
+        "total": 1
+      }
+    ]
+  },
+  "positive_feedback": {
+    "label": "正向产品反馈",
+    "counts": [
+      {
+        "code": "adas",
+        "label": "智驾",
+        "by_model": {
+          "LS6": 1
+        },
+        "records_by_model": {
+          "LS6": [
+            8
+          ]
+        },
+        "samples": [
+          {
+            "record_index": 8,
+            "source_field": "ls6_weakness",
+            "expert": "方园园",
+            "store": "金华世贸广场",
+            "support_date": "08/29-08/30",
+            "quote": "雨天辅助自动驾驶表现不错，能够丝滑接管"
+          }
+        ],
+        "total": 1
+      },
+      {
+        "code": "positioning",
+        "label": "人群/市场适配",
+        "by_model": {
+          "LS8": 1
+        },
+        "records_by_model": {
+          "LS8": [
+            0
+          ]
+        },
+        "samples": [
+          {
+            "record_index": 0,
+            "source_field": "ls8_ls9_suggestion",
+            "expert": "吴昊",
+            "store": "遵义吾悦广场",
+            "support_date": "9/10-13",
+            "quote": "LS8明显更吸引年长的用户"
+          }
+        ],
+        "total": 1
+      },
+      {
+        "code": "service",
+        "label": "门店服务",
+        "by_model": {
+          "STORE": 1
+        },
+        "records_by_model": {
+          "STORE": [
+            2
+          ]
+        },
+        "samples": [
+          {
+            "record_index": 2,
+            "source_field": "store_impression",
+            "expert": "李文涛",
+            "store": "安徽亳州诚谯（交付）",
+            "support_date": "09/05-09/06",
+            "quote": "接待客户积极热情"
+          }
+        ],
+        "total": 1
+      }
+    ]
+  },
+  "competitor_attention": {
+    "label": "竞品关注",
+    "counts": [
+      {
+        "code": "xiaomi_n70",
+        "label": "小米 N70",
+        "by_model": {
+          "LS6": 1,
+          "LS8": 1
+        },
+        "records_by_model": {
+          "LS6": [
+            8
+          ],
+          "LS8": [
+            8
+          ]
+        },
+        "samples": [
+          {
+            "record_index": 8,
+            "source_field": "ls6_weakness",
+            "expert": "方园园",
+            "store": "金华世贸广场",
+            "support_date": "08/29-08/30",
+            "quote": "对标小米N70、N90"
+          },
+          {
+            "record_index": 8,
+            "source_field": "ls8_ls9_suggestion",
+            "expert": "方园园",
+            "store": "金华世贸广场",
+            "support_date": "08/29-08/30",
+            "quote": "对标N70、N90增加长滑轨"
+          }
+        ],
+        "total": 2
+      },
+      {
+        "code": "xiaomi_n90",
+        "label": "小米 N90",
+        "by_model": {
+          "LS6": 1,
+          "LS8": 1
+        },
+        "records_by_model": {
+          "LS6": [
+            8
+          ],
+          "LS8": [
+            8
+          ]
+        },
+        "samples": [
+          {
+            "record_index": 8,
+            "source_field": "ls6_weakness",
+            "expert": "方园园",
+            "store": "金华世贸广场",
+            "support_date": "08/29-08/30",
+            "quote": "对标小米N70、N90"
+          },
+          {
+            "record_index": 8,
+            "source_field": "ls8_ls9_suggestion",
+            "expert": "方园园",
+            "store": "金华世贸广场",
+            "support_date": "08/29-08/30",
+            "quote": "对标N70、N90增加长滑轨"
+          }
+        ],
+        "total": 2
+      },
+      {
+        "code": "xiaopeng_gx",
+        "label": "小鹏 GX",
+        "by_model": {
+          "LS9": 1,
+          "L6": 1
+        },
+        "records_by_model": {
+          "LS9": [
+            2
+          ],
+          "L6": [
+            8
+          ]
+        },
+        "samples": [
+          {
+            "record_index": 2,
+            "source_field": "ls8_ls9_suggestion",
+            "expert": "李文涛",
+            "store": "安徽亳州诚谯（交付）",
+            "support_date": "09/05-09/06",
+            "quote": "不少用户选择小鹏GX"
+          },
+          {
+            "record_index": 8,
+            "source_field": "l6_weakness",
+            "expert": "方园园",
+            "store": "金华世贸广场",
+            "support_date": "08/29-08/30",
+            "quote": "对标P7、GX，L03及M03价格"
+          }
+        ],
+        "total": 2
+      },
+      {
+        "code": "xiaopeng_l03",
+        "label": "小鹏 L03",
+        "by_model": {
+          "L6": 1,
+          "LS6": 1
+        },
+        "records_by_model": {
+          "L6": [
+            8
+          ],
+          "LS6": [
+            8
+          ]
+        },
+        "samples": [
+          {
+            "record_index": 8,
+            "source_field": "l6_weakness",
+            "expert": "方园园",
+            "store": "金华世贸广场",
+            "support_date": "08/29-08/30",
+            "quote": "对标P7、GX，L03及M03价格"
+          },
+          {
+            "record_index": 8,
+            "source_field": "ls6_weakness",
+            "expert": "方园园",
+            "store": "金华世贸广场",
+            "support_date": "08/29-08/30",
+            "quote": "小鹏L03"
+          }
+        ],
+        "total": 2
+      },
+      {
+        "code": "avatr_07",
+        "label": "阿维塔 07",
+        "by_model": {
+          "LS6": 1
+        },
+        "records_by_model": {
+          "LS6": [
+            6
+          ]
+        },
+        "samples": [
+          {
+            "record_index": 6,
+            "source_field": "ls6_weakness",
+            "expert": "胡然",
+            "store": "温州印象城MEGA",
+            "support_date": "08/29-08/30",
+            "quote": "上市期对比阿维塔07较多"
+          }
+        ],
+        "total": 1
+      },
+      {
+        "code": "leapmotor_c16",
+        "label": "零跑 C16",
+        "by_model": {
+          "LS6": 1
+        },
+        "records_by_model": {
+          "LS6": [
+            6
+          ]
+        },
+        "samples": [
+          {
+            "record_index": 6,
+            "source_field": "ls6_weakness",
+            "expert": "胡然",
+            "store": "温州印象城MEGA",
+            "support_date": "08/29-08/30",
+            "quote": "用户竞对下探至零跑C16较多"
+          }
+        ],
+        "total": 1
+      },
+      {
+        "code": "xiaopeng_m03",
+        "label": "小鹏 M03",
+        "by_model": {
+          "L6": 1
+        },
+        "records_by_model": {
+          "L6": [
+            8
+          ]
+        },
+        "samples": [
+          {
+            "record_index": 8,
+            "source_field": "l6_weakness",
+            "expert": "方园园",
+            "store": "金华世贸广场",
+            "support_date": "08/29-08/30",
+            "quote": "对标P7、GX，L03及M03价格"
+          }
+        ],
+        "total": 1
+      },
+      {
+        "code": "xiaopeng_p7",
+        "label": "小鹏 P7",
+        "by_model": {
+          "L6": 1
+        },
+        "records_by_model": {
+          "L6": [
+            8
+          ]
+        },
+        "samples": [
+          {
+            "record_index": 8,
+            "source_field": "l6_weakness",
+            "expert": "方园园",
+            "store": "金华世贸广场",
+            "support_date": "08/29-08/30",
+            "quote": "对标P7、GX，L03及M03价格"
+          }
+        ],
+        "total": 1
+      },
+      {
+        "code": "zeekr_7x",
+        "label": "极氪 7X",
+        "by_model": {
+          "LS8": 1
+        },
+        "records_by_model": {
+          "LS8": [
+            6
+          ]
+        },
+        "samples": [
+          {
+            "record_index": 6,
+            "source_field": "ls8_ls9_suggestion",
+            "expert": "胡然",
+            "store": "温州印象城MEGA",
+            "support_date": "08/29-08/30",
+            "quote": "多提及极氪7X"
+          }
+        ],
+        "total": 1
+      }
+    ]
+  },
+  "purchase_barrier": {
+    "label": "下单阻碍",
+    "counts": [
+      {
+        "code": "wait_new_model",
+        "label": "等待新款/配额",
+        "by_model": {
+          "LS6": 4,
+          "L6": 2
+        },
+        "records_by_model": {
+          "LS6": [
+            5,
+            6,
+            8
+          ],
+          "L6": [
+            5,
+            8
+          ]
+        },
+        "samples": [
+          {
+            "record_index": 5,
+            "source_field": "store_sales",
+            "expert": "郑少伟",
+            "store": "金华永康万达",
+            "support_date": "08/29-08/30",
+            "quote": "不想买老款LS6"
+          },
+          {
+            "record_index": 5,
+            "source_field": "store_sales",
+            "expert": "郑少伟",
+            "store": "金华永康万达",
+            "support_date": "08/29-08/30",
+            "quote": "在新款L6和尚未发布的新款LS6之间犹豫"
+          },
+          {
+            "record_index": 5,
+            "source_field": "ls6_weakness",
+            "expert": "郑少伟",
+            "store": "金华永康万达",
+            "support_date": "08/29-08/30",
+            "quote": "不想买老款LS6，期待新款"
+          },
+          {
+            "record_index": 6,
+            "source_field": "ls6_weakness",
+            "expert": "胡然",
+            "store": "温州印象城MEGA",
+            "support_date": "08/29-08/30",
+            "quote": "询问LS6线控情况，期待新款"
+          },
+          {
+            "record_index": 8,
+            "source_field": "store_sales",
+            "expert": "方园园",
+            "store": "金华世贸广场",
+            "support_date": "08/29-08/30",
+            "quote": "L6客户没有抢到前1000名，目前在犹豫中"
+          },
+          {
+            "record_index": 8,
+            "source_field": "ls6_weakness",
+            "expert": "方园园",
+            "store": "金华世贸广场",
+            "support_date": "08/29-08/30",
+            "quote": "一组客户，询问新款"
+          }
+        ],
+        "total": 6
+      },
+      {
+        "code": "brand_trust_after_sales",
+        "label": "品牌/信任/售后顾虑",
+        "by_model": {
+          "L6": 1
+        },
+        "records_by_model": {
+          "L6": [
+            5
+          ]
+        },
+        "samples": [
+          {
+            "record_index": 5,
+            "source_field": "l6_weakness",
+            "expert": "郑少伟",
+            "store": "金华永康万达",
+            "support_date": "08/29-08/30",
+            "quote": "没有类似于小米和极氪的售后取送车服务"
+          }
+        ],
+        "total": 1
+      },
+      {
+        "code": "configuration_concern",
+        "label": "产品配置顾虑",
+        "by_model": {
+          "L6": 1
+        },
+        "records_by_model": {
+          "L6": [
+            5
+          ]
+        },
+        "samples": [
+          {
+            "record_index": 5,
+            "source_field": "l6_weakness",
+            "expert": "郑少伟",
+            "store": "金华永康万达",
+            "support_date": "08/29-08/30",
+            "quote": "担忧智驾性能是否弱于同级别竞品"
+          }
+        ],
+        "total": 1
+      },
+      {
+        "code": "exterior_interior_dissatisfaction",
+        "label": "外观/内饰不满",
+        "by_model": {
+          "LS6": 1
+        },
+        "records_by_model": {
+          "LS6": [
+            0
+          ]
+        },
+        "samples": [
+          {
+            "record_index": 0,
+            "source_field": "ls6_weakness",
+            "expert": "吴昊",
+            "store": "遵义吾悦广场",
+            "support_date": "9/10-13",
+            "quote": "多数用户对椭圆方向盘不喜欢，拒购风险大"
+          }
+        ],
+        "total": 1
+      }
+    ]
+  }
+}

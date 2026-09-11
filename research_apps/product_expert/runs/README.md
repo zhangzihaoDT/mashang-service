@@ -7,7 +7,9 @@
 
 ```text
 runs/<run_id>/
-├── run.json           运行元数据（run_id / executed_at / study_year，供时间标准化）
+├── run.json           运行元数据（run_id / executed_at / study_year / record_count）
+├── preset_coding.json 预设问题编码（schemas/preset_coding.schema.json，逐字 quote + source_ref）
+├── preset_stats.json  预设问题确定性聚合（derive_preset_stats.py）
 ├── evidence.jsonl     最小可追溯观察（schemas/evidence.schema.json）
 ├── issues.json        问题归并单元（schemas/issue.schema.json）
 ├── patterns.json      语义模式对象（schemas/pattern.schema.json，含 pattern_key，不含统计）
@@ -15,6 +17,9 @@ runs/<run_id>/
 ├── findings.json      业务结论（schemas/finding.schema.json，引用 pattern + convergence）
 └── run.md             本次 run 报告
 ```
+
+A（拟设编码）与 B（开放发现）是同一 run 上的两条独立链路：`preset_coding.json` 属于 A，
+`evidence → … → findings` 属于 B，二者不得混加。
 
 ## 约定
 

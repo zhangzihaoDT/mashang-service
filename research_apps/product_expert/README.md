@@ -3,10 +3,38 @@
 Research Application（第 4 个成员）。研究对象：**L6 M2 / LS6 M3 产品专家门店支持信息收集**，
 即一线门店产品专家在支持期间记录的车型体验弱点、试驾反馈、门店销售与整体印象。
 
-> 当前阶段：**V0.2 架构冻结**，首次 run 完成（`runs/run_001/`）。已在 9 条门店记录上完成
-> Evidence → Issue → Pattern → Convergence → Finding 全链路，产出 55 evidence / 30 issue /
-> 15 pattern / 15 convergence / 12 finding。统计全部由 Convergence 从 evidence 派生。
+> 当前阶段：**双研究方法 + V0.2 架构**，首次 run 完成（`runs/run_001/`），并已产出业务报告
+> （`reports/run_001/`）。同一份自由文本上运行两条互不替代的链路：
+> **A. 预设问题编码（Preset Coding）** 与 **B. 开放问题发现（Open Discovery）**。
+> 产出 83 条预设编码 / 55 evidence / 30 issue / 15 pattern / 15 convergence / 12 finding。
 > 确定性 engine / gate / artifacts 仍按需演进。
+
+## 两种研究方法
+
+```text
+原始自由文本
+    │
+    ├───────────────────┬───────────────────┐
+    ▼                   ▼
+① 预设问题抽取统计     ② 开放问题发现
+Preset Coding          Open Discovery
+    │                   │
+问题事先已知            问题事先未知
+LLM = 编码器            LLM = 发现器
+固定 taxonomy 抽取      Evidence → Issue
+确定性计数              → Pattern → Convergence
+    │                   │
+    ▼                   ▼
+结构化统计图表          问题详情
+```
+
+- **A. Preset Coding**：问题定义在 `preset_questions/taxonomy.json`；LLM 只把原文映射到固定
+  `question_code`；计数由 `scripts/derive_preset_stats.py` 确定性聚合。产出 `preset_coding.json`
+  与 `preset_stats.json`。规则见 `preset_questions/README.md`。
+- **B. Open Discovery**：不预设问题，由模型从原文发现；产出 `evidence / issues / patterns /
+  convergence / findings`。规则见 `workflow/issue_discovery.md` 与 `workflow/convergence.md`。
+
+两条链路的结果**不得互相替代或混加**。业务报告 `reports/` 分开呈现 A 与 B。
 
 ## 数据来源
 
@@ -86,6 +114,9 @@ Finding     FND-####   ← schemas/finding.schema.json
 ```text
 product_expert/
 ├── README.md
+├── preset_questions/
+│   ├── README.md
+│   └── taxonomy.json           预设问题与受控 code（版本化）
 ├── workflow/
 │   ├── issue_discovery.md      发现流程（evidence → issue → pattern → convergence → finding）
 │   ├── convergence.md          统计收敛（Attribution / Counts / recurrence / Temporal）
@@ -96,27 +127,33 @@ product_expert/
 │   ├── pattern.schema.json     语义模式对象（含 pattern_key，不含统计）
 │   ├── convergence.schema.json 统计快照（Attribution + Counts + Temporal）
 │   ├── pattern_keys.schema.json 跨 run 语义主键注册表结构
+│   ├── preset_coding.schema.json 预设问题编码条目
 │   └── finding.schema.json     面向业务的结论（引用 pattern + convergence）
 ├── patterns/
 │   ├── README.md
 │   └── pattern_keys.json       跨 run 语义主键注册表
 ├── scripts/
-│   └── derive_convergence.py   从 run 目录确定性派生 convergence.json
+│   ├── derive_convergence.py   从 run 目录确定性派生 convergence.json
+│   ├── derive_preset_stats.py  从 preset_coding.json 确定性聚合 preset_stats.json
+│   └── build_report.py         生成 Field Intelligence Report（md + html）
 ├── eval/
 │   ├── README.md
 │   └── cases/
-│       ├── README.md
-│       └── case_001_steering_wheel_sightline.json
+├── reports/
+│   ├── README.md
+│   └── run_001/                A 预设编码统计 + B 开放问题发现
 └── runs/
     ├── README.md
     └── run_001/
-        ├── run.json            运行元数据（含 study_year）
-        ├── evidence.jsonl      55 条最小可追溯观察
-        ├── issues.json         30 个问题
-        ├── patterns.json       15 个语义模式
-        ├── convergence.json    15 个统计快照
-        ├── findings.json       12 条结论
-        └── run.md              本次 run 报告
+        ├── run.json            运行元数据（含 study_year / record_count）
+        ├── preset_coding.json   83 条预设问题编码（逐字 quote + source_ref）
+        ├── preset_stats.json    预设问题确定性聚合结果
+        ├── evidence.jsonl       55 条最小可追溯观察
+        ├── issues.json          30 个问题
+        ├── patterns.json        15 个语义模式
+        ├── convergence.json     15 个统计快照
+        ├── findings.json        12 条结论
+        └── run.md               本次 run 报告
 ```
 
 ## 研究性质与边界

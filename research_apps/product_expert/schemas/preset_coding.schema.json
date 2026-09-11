@@ -1,0 +1,92 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Product Expert Preset Coding",
+  "description": "Preset Coding = 预设问题编码条目。问题事先定义在 preset_questions/taxonomy.json，LLM 只做编码：把自由文本映射到固定 question_code，并保留逐字 quote 与 source_ref。编码条目不含统计数字；计数由 derive_preset_stats.py 确定性聚合。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "coding_id",
+    "group",
+    "question_code",
+    "label",
+    "model",
+    "source_ref",
+    "quote",
+    "coding_mode",
+    "taxonomy_version"
+  ],
+  "properties": {
+    "coding_id": {
+      "type": "string",
+      "pattern": "^PQC-[0-9]{4}$",
+      "description": "编码条目唯一标识，如 PQC-0001"
+    },
+    "group": {
+      "type": "string",
+      "enum": [
+        "store_ops",
+        "availability",
+        "customer_concern",
+        "positive_feedback",
+        "competitor_attention",
+        "purchase_barrier"
+      ],
+      "description": "所属预设问题组"
+    },
+    "question_code": {
+      "type": "string",
+      "description": "组内受控 code，取值来自 taxonomy.json 中该组的 codes"
+    },
+    "label": {
+      "type": "string",
+      "description": "question_code 的中文标签"
+    },
+    "model": {
+      "type": "string",
+      "enum": ["L6", "LS6", "LS8", "LS9", "STORE", "OTHER"],
+      "description": "所属车型；L6/LS6 分开统计。STORE=全店/未区分车型（原文只到门店层级）；OTHER=其他具体车型"
+    },
+    "source_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["record_index", "source_field", "quote"],
+      "description": "原文锚点",
+      "properties": {
+        "record_index": { "type": "integer", "minimum": 0 },
+        "source_field": {
+          "type": "string",
+          "enum": [
+            "l6_weakness",
+            "ls6_weakness",
+            "test_drive_feedback",
+            "ls8_ls9_suggestion",
+            "store_sales",
+            "store_impression",
+            "other"
+          ]
+        },
+        "expert": { "type": "string" },
+        "store": { "type": "string" },
+        "support_date": { "type": "string" }
+      }
+    },
+    "quote": {
+      "type": "string",
+      "minLength": 1,
+      "description": "逐字原文片段，必须是源字段文本的子串"
+    },
+    "coding_mode": {
+      "type": "string",
+      "enum": ["preset_question"],
+      "description": "固定为 preset_question"
+    },
+    "taxonomy_version": {
+      "type": "string",
+      "description": "编码时使用的 taxonomy 版本，如 0.1"
+    },
+    "notes": {
+      "type": "string",
+      "description": "编码歧义或存疑说明"
+    }
+  }
+}
