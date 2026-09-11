@@ -1,0 +1,72 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Product Expert Pattern Key Registry",
+  "description": "跨 run 的语义主键注册表。pattern_key 是 Pattern 的稳定语义身份，跨 run 复用；pattern_id 只是本次 run 的实例 ID。任何新 Pattern 必须先在注册表匹配或登记，不能由单次 run 的 Agent 自由生成。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "keys"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "description": "契约版本，如 0.2"
+    },
+    "keys": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "pattern_key",
+          "title",
+          "category",
+          "first_pattern_id",
+          "first_run_id",
+          "status",
+          "created_at"
+        ],
+        "properties": {
+          "pattern_key": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,63}$",
+            "description": "稳定语义主键，如 cockpit_ergonomics_steering_visibility"
+          },
+          "title": {
+            "type": "string",
+            "description": "语义模式标题"
+          },
+          "category": {
+            "type": "string",
+            "description": "主导体验维度"
+          },
+          "first_pattern_id": {
+            "type": "string",
+            "pattern": "^PAT-[0-9]{4}$",
+            "description": "首次定义该 key 的 pattern 实例 ID"
+          },
+          "first_run_id": {
+            "type": "string",
+            "description": "首次定义该 key 的 run"
+          },
+          "aliases": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "已确认可映射到该 key 的表述别名，用于后续 run 的匹配"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["active", "retired"],
+            "description": "active=可复用；retired=已废弃，仅供历史追溯"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      }
+    }
+  }
+}

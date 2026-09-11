@@ -1,0 +1,145 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Product Expert Evidence",
+  "description": "Evidence = 从门店反馈原文抽取的、最小可追溯的观察单元。它只记录『谁在什么时候、哪家店、哪个字段、说了什么』，不做归并、不上升为问题。所有下游 issue/pattern/finding 必须能回溯到 evidence，再由 evidence 回溯到原始 CSV 记录。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "evidence_id",
+    "source_ref",
+    "series",
+    "evidence_type",
+    "statement",
+    "category",
+    "sentiment"
+  ],
+  "properties": {
+    "evidence_id": {
+      "type": "string",
+      "pattern": "^EV-[0-9]{4}$",
+      "description": "证据唯一标识，顺序分配，如 EV-0001"
+    },
+    "source_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dataset", "record_index", "source_field"],
+      "description": "原始数据锚点：任何 evidence 都必须能定位回 CSV 的某一行某一列",
+      "properties": {
+        "dataset": {
+          "type": "string",
+          "description": "数据来源标识（外部绝对路径或已登记的数据源名）"
+        },
+        "record_index": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "原始表记录序号（0 基，不含表头）"
+        },
+        "support_date": {
+          "type": "string",
+          "description": "支持日期原文，如 08/29-08/30"
+        },
+        "expert": {
+          "type": "string",
+          "description": "产品专家（记录人）"
+        },
+        "store": {
+          "type": "string",
+          "description": "支持城市+门店原文"
+        },
+        "city": {
+          "type": "string",
+          "description": "城市（可从门店字段拆分，缺失则留空）"
+        },
+        "source_field": {
+          "type": "string",
+          "enum": [
+            "l6_weakness",
+            "ls6_weakness",
+            "test_drive_feedback",
+            "ls8_ls9_suggestion",
+            "store_sales",
+            "store_impression",
+            "other"
+          ],
+          "description": "证据来自原始表的哪个字段"
+        }
+      }
+    },
+    "series": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "enum": ["L6", "LS6", "LS7", "LS8", "LS9", "OTHER"] },
+      "description": "涉及车系；跨车系观察可含多个值"
+    },
+    "product": {
+      "type": "string",
+      "description": "更具体的对象，如『新款 LS6』『老款 LS6』『LS8 六座版』；不明确则留空"
+    },
+    "evidence_type": {
+      "type": "string",
+      "enum": ["direct_quote", "paraphrase", "expert_observation", "benchmark"],
+      "description": "direct_quote=用户/店长原话；paraphrase=转述；expert_observation=专家自身观察；benchmark=对标友商得出"
+    },
+    "statement": {
+      "type": "string",
+      "description": "归一化后的一句话观察（保留对象 + 现象 + 方向），不得加入原文没有的因果"
+    },
+    "quote": {
+      "type": "string",
+      "description": "原文片段，用于复核；尽量逐字摘录"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "exterior",
+        "interior",
+        "cockpit_ergonomics",
+        "seating_space",
+        "storage",
+        "charging",
+        "driving_dynamics",
+        "nvh",
+        "smart_cockpit",
+        "adas",
+        "quality_reliability",
+        "configuration",
+        "sales_service",
+        "other"
+      ],
+      "description": "体验维度分类（受控词表，见 workflow/issue_discovery.md）"
+    },
+    "sentiment": {
+      "type": "string",
+      "enum": ["negative", "neutral", "positive", "mixed"],
+      "description": "情感方向；positive 也保留，用于识别优势项与正面对标"
+    },
+    "severity_hint": {
+      "type": "string",
+      "enum": ["blocker", "high", "medium", "low"],
+      "description": "单条证据的严重度初判（供 issue 归并参考，不是最终严重度）"
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "自由标签，如 前备箱 / 方向盘 / 取送车 / 小鹏GX"
+    },
+    "image_refs": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "原始表『配图』字段中的文件名"
+    },
+    "extracted_by": {
+      "type": "string",
+      "description": "抽取者（人 / agent 标识）"
+    },
+    "extracted_at": {
+      "type": "string",
+      "format": "date",
+      "description": "抽取日期 YYYY-MM-DD"
+    },
+    "notes": {
+      "type": "string",
+      "description": "抽取时的歧义、存疑或需复核说明"
+    }
+  }
+}

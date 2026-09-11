@@ -1,0 +1,93 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Product Expert Pattern",
+  "description": "Pattern = 纯语义对象。它只回答『这些 issue 是否属于同一个主题或机制』：把共享功能、共享体验维度或共享竞争对标的多个 issue 聚在一起，形成可检验的机制假设。所有统计量（evidence/store/expert/time 计数、recurrence、evidence_strength）都由 Convergence 派生，Pattern 不再携带，以免出现双份事实漂移。pattern_key 是跨 run 的稳定语义身份，必须先查 patterns/pattern_keys.json。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "pattern_id",
+    "pattern_key",
+    "title",
+    "category",
+    "series",
+    "hypothesis",
+    "issue_ids",
+    "confidence",
+    "status"
+  ],
+  "properties": {
+    "pattern_id": {
+      "type": "string",
+      "pattern": "^PAT-[0-9]{4}$",
+      "description": "本次 run 的 pattern 实例 ID，如 PAT-0001"
+    },
+    "pattern_key": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{0,63}$",
+      "description": "跨 run 的稳定语义主键，必须来自 patterns/pattern_keys.json；匹配已有 key 优先复用，确为新语义才登记新 key"
+    },
+    "title": {
+      "type": "string",
+      "description": "模式标题"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "exterior",
+        "interior",
+        "cockpit_ergonomics",
+        "seating_space",
+        "storage",
+        "charging",
+        "driving_dynamics",
+        "nvh",
+        "smart_cockpit",
+        "adas",
+        "quality_reliability",
+        "configuration",
+        "sales_service",
+        "other"
+      ],
+      "description": "主导体验维度"
+    },
+    "series": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "enum": ["L6", "LS6", "LS7", "LS8", "LS9", "OTHER"] },
+      "description": "涉及车系"
+    },
+    "hypothesis": {
+      "type": "string",
+      "description": "机制假设（可能被后续证据推翻），不得写成已证实结论"
+    },
+    "issue_ids": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "pattern": "^ISS-[0-9]{4}$" },
+      "description": "构成该模式的 issue"
+    },
+    "competitive_refs": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "对标竞品，如 小鹏GX / 极氪7X / 小米SU7"
+    },
+    "confidence": {
+      "type": "string",
+      "enum": ["high", "medium", "low"],
+      "description": "研究者对语义模式本身的置信判断；与 Convergence.evidence_strength（证据强度）是两件事"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["candidate", "confirmed", "rejected", "inconclusive"],
+      "description": "模式状态"
+    },
+    "boundary": {
+      "type": "string",
+      "description": "适用边界：样本、门店、时间、不能外推的范围"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date"
+    }
+  }
+}

@@ -33,7 +33,8 @@ mashang_workspace/  日常业务分析脚本与工具
 | `MIIT/` | 工信部车型与申报研究 |
 | `auto_launch/` | 新车上市与竞争动态研究 |
 | `nev_apeal/` | 新能源用户体验研究 |
-| 未来 `project_4/5` | 应符合本层判定准则（长期研究对象 + 自身 state/engine/contracts/gate/artifacts）再立项 |
+| `product_expert/` | 产品专家门店支持研究（L6 M2 / LS6 M3 一线门店反馈） |
+| 未来 `project_5+` | 应符合本层判定准则（长期研究对象 + 自身 state/engine/contracts/gate/artifacts）再立项 |
 
 ## 编排接入约定
 

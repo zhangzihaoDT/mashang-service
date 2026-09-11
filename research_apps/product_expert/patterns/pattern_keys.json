@@ -1,0 +1,170 @@
+{
+  "schema_version": "0.2",
+  "keys": [
+    {
+      "pattern_key": "cockpit_ergonomics_steering_visibility",
+      "title": "椭圆方向盘的人机视野与购买阻断",
+      "category": "cockpit_ergonomics",
+      "first_pattern_id": "PAT-0001",
+      "first_run_id": "run_001",
+      "aliases": ["方向盘挡流媒体后视镜", "方向盘上沿影响驾驶员后视镜观察", "方向盘遮挡前方视野"],
+      "status": "active",
+      "created_at": "2026-09-11",
+      "updated_at": "2026-09-11"
+    },
+    {
+      "pattern_key": "storage_front_trunk_capacity",
+      "title": "前部与车内储物空间不足",
+      "category": "storage",
+      "first_pattern_id": "PAT-0002",
+      "first_run_id": "run_001",
+      "aliases": ["前备箱容量小", "前备箱开启不灵敏", "门板储物格偏浅", "前舱储物箱偏小"],
+      "status": "active",
+      "created_at": "2026-09-11",
+      "updated_at": "2026-09-11"
+    },
+    {
+      "pattern_key": "interior_luxury_material_perception",
+      "title": "内饰豪华感与质感不足（跨车型）",
+      "category": "interior",
+      "first_pattern_id": "PAT-0003",
+      "first_run_id": "run_001",
+      "aliases": ["内饰不高级", "内饰豪华感不足", "配件质感不足", "内饰配色不协调", "车漆不高级"],
+      "status": "active",
+      "created_at": "2026-09-11",
+      "updated_at": "2026-09-11"
+    },
+    {
+      "pattern_key": "interior_sharp_edge_injury_risk",
+      "title": "内饰锐角造成磕碰与划伤风险",
+      "category": "quality_reliability",
+      "first_pattern_id": "PAT-0004",
+      "first_run_id": "run_001",
+      "aliases": ["门内侧下沿尖角磕腿", "冰箱口内沿划手"],
+      "status": "active",
+      "created_at": "2026-09-11",
+      "updated_at": "2026-09-11"
+    },
+    {
+      "pattern_key": "smart_cockpit_voice_assistant",
+      "title": "智能座舱语音体验不稳定",
+      "category": "smart_cockpit",
+      "first_pattern_id": "PAT-0005",
+      "first_run_id": "run_001",
+      "aliases": ["IMClaw 多音字误读", "语音助手场景推荐不准", "语音指令程度无法区分"],
+      "status": "active",
+      "created_at": "2026-09-11",
+      "updated_at": "2026-09-11"
+    },
+    {
+      "pattern_key": "nvh_audio_tire_noise",
+      "title": "NVH：音响调校与胎噪",
+      "category": "nvh",
+      "first_pattern_id": "PAT-0006",
+      "first_run_id": "run_001",
+      "aliases": ["BO 音响爆发力不足", "佳通 P10 胎噪偏大"],
+      "status": "active",
+      "created_at": "2026-09-11",
+      "updated_at": "2026-09-11"
+    },
+    {
+      "pattern_key": "seating_rear_space_ergonomics",
+      "title": "后排空间与人体工程设定",
+      "category": "seating_space",
+      "first_pattern_id": "PAT-0007",
+      "first_run_id": "run_001",
+      "aliases": ["L6 后排三人偏挤", "LS8 二排大屏距离过近", "后排头部空间偏低"],
+      "status": "active",
+      "created_at": "2026-09-11",
+      "updated_at": "2026-09-11"
+    },
+    {
+      "pattern_key": "configuration_decontent_perception",
+      "title": "配置减配感知削弱价值感",
+      "category": "configuration",
+      "first_pattern_id": "PAT-0008",
+      "first_run_id": "run_001",
+      "aliases": ["慢充口无盖", "L6 无电吸门", "天窗不可开启", "后排手动放倒"],
+      "status": "active",
+      "created_at": "2026-09-11",
+      "updated_at": "2026-09-11"
+    },
+    {
+      "pattern_key": "sales_service_after_sales_support",
+      "title": "售后服务与保障担忧",
+      "category": "sales_service",
+      "first_pattern_id": "PAT-0009",
+      "first_run_id": "run_001",
+      "aliases": ["缺少取送车服务", "售后服务满意度低", "既有用户流失口碑"],
+      "status": "active",
+      "created_at": "2026-09-11",
+      "updated_at": "2026-09-11"
+    },
+    {
+      "pattern_key": "adas_capability_brand_trust",
+      "title": "智驾能力与品牌认知担忧",
+      "category": "adas",
+      "first_pattern_id": "PAT-0010",
+      "first_run_id": "run_001",
+      "aliases": ["激光雷达线数存疑", "不了解 momenta", "智驾供应商认知度低"],
+      "status": "active",
+      "created_at": "2026-09-11",
+      "updated_at": "2026-09-11"
+    },
+    {
+      "pattern_key": "configuration_benchmark_convenience_gap",
+      "title": "竞品对标暴露的便利配置差距与设计偏好",
+      "category": "configuration",
+      "first_pattern_id": "PAT-0011",
+      "first_run_id": "run_001",
+      "aliases": ["B 柱上车扶手缺失", "三排 Type C 不足", "三排无法电动折叠", "偏好半隐藏式门把手", "后排滑轨不及竞品"],
+      "status": "active",
+      "created_at": "2026-09-11",
+      "updated_at": "2026-09-11"
+    },
+    {
+      "pattern_key": "driving_dynamics_steering_tech_demo",
+      "title": "驾驶卖点传达受损（后轮转向/线控）",
+      "category": "driving_dynamics",
+      "first_pattern_id": "PAT-0012",
+      "first_run_id": "run_001",
+      "aliases": ["新款后轮转向不如老款", "线控转向无法试驾"],
+      "status": "active",
+      "created_at": "2026-09-11",
+      "updated_at": "2026-09-11"
+    },
+    {
+      "pattern_key": "brand_channel_attraction_constraint",
+      "title": "品牌认知与渠道吸引力约束销售",
+      "category": "other",
+      "first_pattern_id": "PAT-0013",
+      "first_run_id": "run_001",
+      "aliases": ["品牌认知度低", "门店客流吸引力不足", "竞品分流"],
+      "status": "active",
+      "created_at": "2026-09-11",
+      "updated_at": "2026-09-11"
+    },
+    {
+      "pattern_key": "demand_wait_for_new_model",
+      "title": "用户持币观望、等待新款",
+      "category": "other",
+      "first_pattern_id": "PAT-0014",
+      "first_run_id": "run_001",
+      "aliases": ["不买老款等新款", "配额未抢到", "短期锁单抑制"],
+      "status": "active",
+      "created_at": "2026-09-11",
+      "updated_at": "2026-09-11"
+    },
+    {
+      "pattern_key": "verified_product_service_strengths",
+      "title": "已验证的产品与服务优势项",
+      "category": "other",
+      "first_pattern_id": "PAT-0015",
+      "first_run_id": "run_001",
+      "aliases": ["雨天辅助驾驶表现良好", "LS8 人群适配", "门店接待服务积极"],
+      "status": "active",
+      "created_at": "2026-09-11",
+      "updated_at": "2026-09-11"
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Product Expert Finding",
+  "description": "Finding = 面向业务的研究结论。它把 confirmed pattern 上升为可行动判断，必须携带业务含义、建议动作与边界。V0.2 起 Finding 只引用 Pattern（语义）与 Convergence（统计），不再复制 evidence_count / evidence_strength，避免统计事实出现第二来源。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "finding_id",
+    "title",
+    "statement",
+    "pattern_ids",
+    "convergence_ids",
+    "confidence",
+    "business_implication",
+    "priority",
+    "status"
+  ],
+  "properties": {
+    "finding_id": {
+      "type": "string",
+      "pattern": "^FND-[0-9]{4}$",
+      "description": "结论唯一标识，如 FND-0001"
+    },
+    "title": {
+      "type": "string",
+      "description": "结论标题（可读、可传播）"
+    },
+    "statement": {
+      "type": "string",
+      "description": "结论陈述：一句完整判断，区分观察与推断"
+    },
+    "pattern_ids": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "pattern": "^PAT-[0-9]{4}$" },
+      "description": "支撑该结论的语义 pattern"
+    },
+    "convergence_ids": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "pattern": "^CONV-[0-9]{4}$" },
+      "description": "该结论对应的统计快照；证据强度、复现层级、覆盖门店/专家/时间均从这里读取"
+    },
+    "issue_ids": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^ISS-[0-9]{4}$" },
+      "description": "直接相关 issue（可选，便于取证）"
+    },
+    "confidence": {
+      "type": "string",
+      "enum": ["high", "medium", "low"],
+      "description": "研究者对结论的置信度"
+    },
+    "business_implication": {
+      "type": "string",
+      "description": "业务含义：对产品、配置、销售或服务意味着什么"
+    },
+    "recommended_action": {
+      "type": "string",
+      "description": "建议动作（可执行、可指派）"
+    },
+    "priority": {
+      "type": "string",
+      "enum": ["P0", "P1", "P2", "P3"],
+      "description": "优先级：P0=立即处理；P3=观察项"
+    },
+    "boundary": {
+      "type": "string",
+      "description": "结论边界：样本限制、不可外推范围、需进一步验证的前提"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "ready", "rejected", "superseded"],
+      "description": "结论状态"
+    },
+    "superseded_by": {
+      "type": "string",
+      "pattern": "^FND-[0-9]{4}$",
+      "description": "status=superseded 时指向替代结论"
+    },
+    "owner": {
+      "type": "string",
+      "description": "结论负责人/团队"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date"
+    }
+  }
+}

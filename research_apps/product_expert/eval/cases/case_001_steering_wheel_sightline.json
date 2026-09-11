@@ -1,0 +1,58 @@
+{
+  "case_id": "case_001_steering_wheel_sightline",
+  "description": "检验同一段 LS6 弱点文本中，能否把『前备箱开启不灵敏』『椭圆方向盘挡视线』『不喜欢椭圆方向盘/拒购风险』『车漆不高级』拆成独立 evidence，并把方向盘相关观察归并为一个 blocker 级 issue。",
+  "stage": "discovery",
+  "input_ref": {
+    "dataset": "/Users/zihao_/Documents/coding/dataset/original/L6 M2_LS6 M3 产品专家门店支持信息收集汇总_数据表_表格.csv",
+    "record_index": 0,
+    "source_field": "ls6_weakness"
+  },
+  "expected": {
+    "evidence": [
+      {
+        "statement_contains": ["前备箱", "开启", "不灵敏"],
+        "category": "storage",
+        "series": ["LS6"],
+        "sentiment": "negative"
+      },
+      {
+        "statement_contains": ["椭圆方向盘", "挡视线"],
+        "category": "cockpit_ergonomics",
+        "series": ["LS6", "LS8"],
+        "sentiment": "negative"
+      },
+      {
+        "statement_contains": ["椭圆方向盘", "不喜欢", "拒购"],
+        "category": "cockpit_ergonomics",
+        "series": ["LS6", "LS8"],
+        "sentiment": "negative",
+        "severity_hint": "blocker"
+      },
+      {
+        "statement_contains": ["车漆", "不高级"],
+        "category": "exterior",
+        "series": ["LS8"],
+        "sentiment": "negative"
+      }
+    ],
+    "issues": [
+      {
+        "title_contains": ["方向盘", "挡视线"],
+        "category": "cockpit_ergonomics",
+        "series": ["LS6", "LS8"],
+        "affected_function": "椭圆方向盘 / 视线",
+        "severity": "blocker",
+        "business_signal": "purchase_blocker",
+        "evidence_count_min": 2,
+        "status_after_review": "confirmed"
+      }
+    ]
+  },
+  "metrics": [
+    "evidence_recall",
+    "category_match",
+    "severity_match",
+    "dedup_correct",
+    "traceability"
+  ]
+}

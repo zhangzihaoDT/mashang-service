@@ -1,0 +1,35 @@
+{
+  "case_id": "case_002_convergence_attribution",
+  "description": "检验 Convergence 是否从 evidence.source_ref 确定性派生固定三维 Attribution 与 counts。PAT-0002（storage_front_trunk_capacity）覆盖 3 个独立城市+门店、跨 L6/LS6、跨 2 个支持时间区间，按 convergence.md 冻结规则应判 systemic / strong。",
+  "stage": "convergence",
+  "input_ref": {
+    "run_id": "run_001",
+    "pattern_key": "storage_front_trunk_capacity",
+    "pattern_id": "PAT-0002"
+  },
+  "expected": {
+    "attribution": {
+      "product_experts": ["吴昊", "郑少伟", "方园园"],
+      "city_stores": ["遵义吾悦广场", "金华永康万达", "金华世贸广场"],
+      "support_period_count": 2
+    },
+    "counts": {
+      "evidence_count": 4,
+      "issue_count": 2,
+      "product_expert_count": 3,
+      "city_store_count": 3,
+      "support_period_count": 2,
+      "series_count": 2
+    },
+    "recurrence": "systemic",
+    "evidence_strength": "strong",
+    "temporal_comparison_status": "baseline_only"
+  },
+  "metrics": [
+    "attribution_exact",
+    "counts_match",
+    "recurrence_match",
+    "evidence_strength_match",
+    "temporal_status_match"
+  ]
+}

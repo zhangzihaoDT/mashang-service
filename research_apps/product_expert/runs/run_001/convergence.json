@@ -1,0 +1,787 @@
+[
+  {
+    "convergence_id": "CONV-0001",
+    "pattern_id": "PAT-0001",
+    "pattern_key": "cockpit_ergonomics_steering_visibility",
+    "run_id": "run_001",
+    "source_issue_ids": [
+      "ISS-0001"
+    ],
+    "source_evidence_ids": [
+      "EV-0002",
+      "EV-0003"
+    ],
+    "attribution": {
+      "product_experts": [
+        "吴昊"
+      ],
+      "city_stores": [
+        "遵义吾悦广场"
+      ],
+      "support_periods": [
+        {
+          "raw": "9/10-13",
+          "start_date": "2026-09-10",
+          "end_date": "2026-09-13"
+        }
+      ]
+    },
+    "counts": {
+      "evidence_count": 2,
+      "issue_count": 1,
+      "product_expert_count": 1,
+      "city_store_count": 1,
+      "support_period_count": 1,
+      "series_count": 2
+    },
+    "cross_store": false,
+    "cross_series": true,
+    "recurrence": "isolated",
+    "evidence_strength": "weak",
+    "temporal_comparison": {
+      "status": "baseline_only"
+    },
+    "derived_at": "2026-09-11"
+  },
+  {
+    "convergence_id": "CONV-0002",
+    "pattern_id": "PAT-0002",
+    "pattern_key": "storage_front_trunk_capacity",
+    "run_id": "run_001",
+    "source_issue_ids": [
+      "ISS-0002",
+      "ISS-0003"
+    ],
+    "source_evidence_ids": [
+      "EV-0001",
+      "EV-0036",
+      "EV-0052",
+      "EV-0048"
+    ],
+    "attribution": {
+      "product_experts": [
+        "吴昊",
+        "郑少伟",
+        "方园园"
+      ],
+      "city_stores": [
+        "遵义吾悦广场",
+        "金华永康万达",
+        "金华世贸广场"
+      ],
+      "support_periods": [
+        {
+          "raw": "08/29-08/30",
+          "start_date": "2026-08-29",
+          "end_date": "2026-08-30"
+        },
+        {
+          "raw": "9/10-13",
+          "start_date": "2026-09-10",
+          "end_date": "2026-09-13"
+        }
+      ]
+    },
+    "counts": {
+      "evidence_count": 4,
+      "issue_count": 2,
+      "product_expert_count": 3,
+      "city_store_count": 3,
+      "support_period_count": 2,
+      "series_count": 2
+    },
+    "cross_store": true,
+    "cross_series": true,
+    "recurrence": "systemic",
+    "evidence_strength": "strong",
+    "temporal_comparison": {
+      "status": "baseline_only"
+    },
+    "derived_at": "2026-09-11"
+  },
+  {
+    "convergence_id": "CONV-0003",
+    "pattern_id": "PAT-0003",
+    "pattern_key": "interior_luxury_material_perception",
+    "run_id": "run_001",
+    "source_issue_ids": [
+      "ISS-0005",
+      "ISS-0006",
+      "ISS-0017",
+      "ISS-0019"
+    ],
+    "source_evidence_ids": [
+      "EV-0018",
+      "EV-0030",
+      "EV-0043",
+      "EV-0046",
+      "EV-0016",
+      "EV-0019",
+      "EV-0023",
+      "EV-0032",
+      "EV-0026",
+      "EV-0005"
+    ],
+    "attribution": {
+      "product_experts": [
+        "李文涛",
+        "周正成",
+        "胡然",
+        "方园园",
+        "陈晓雪",
+        "吴昊"
+      ],
+      "city_stores": [
+        "安徽亳州诚谯（交付）",
+        "阜阳商厦时代广场",
+        "温州印象城MEGA",
+        "金华世贸广场",
+        "遵义吾悦广场"
+      ],
+      "support_periods": [
+        {
+          "raw": "08/29-08/30",
+          "start_date": "2026-08-29",
+          "end_date": "2026-08-30"
+        },
+        {
+          "raw": "09/05-09/06",
+          "start_date": "2026-09-05",
+          "end_date": "2026-09-06"
+        },
+        {
+          "raw": "9/10-13",
+          "start_date": "2026-09-10",
+          "end_date": "2026-09-13"
+        }
+      ]
+    },
+    "counts": {
+      "evidence_count": 10,
+      "issue_count": 4,
+      "product_expert_count": 6,
+      "city_store_count": 5,
+      "support_period_count": 3,
+      "series_count": 5
+    },
+    "cross_store": true,
+    "cross_series": true,
+    "recurrence": "systemic",
+    "evidence_strength": "strong",
+    "temporal_comparison": {
+      "status": "baseline_only"
+    },
+    "derived_at": "2026-09-11"
+  },
+  {
+    "convergence_id": "CONV-0004",
+    "pattern_id": "PAT-0004",
+    "pattern_key": "interior_sharp_edge_injury_risk",
+    "run_id": "run_001",
+    "source_issue_ids": [
+      "ISS-0007"
+    ],
+    "source_evidence_ids": [
+      "EV-0013",
+      "EV-0014",
+      "EV-0015"
+    ],
+    "attribution": {
+      "product_experts": [
+        "李文涛"
+      ],
+      "city_stores": [
+        "安徽亳州诚谯（交付）"
+      ],
+      "support_periods": [
+        {
+          "raw": "09/05-09/06",
+          "start_date": "2026-09-05",
+          "end_date": "2026-09-06"
+        }
+      ]
+    },
+    "counts": {
+      "evidence_count": 3,
+      "issue_count": 1,
+      "product_expert_count": 1,
+      "city_store_count": 1,
+      "support_period_count": 1,
+      "series_count": 2
+    },
+    "cross_store": false,
+    "cross_series": true,
+    "recurrence": "isolated",
+    "evidence_strength": "weak",
+    "temporal_comparison": {
+      "status": "baseline_only"
+    },
+    "derived_at": "2026-09-11"
+  },
+  {
+    "convergence_id": "CONV-0005",
+    "pattern_id": "PAT-0005",
+    "pattern_key": "smart_cockpit_voice_assistant",
+    "run_id": "run_001",
+    "source_issue_ids": [
+      "ISS-0004"
+    ],
+    "source_evidence_ids": [
+      "EV-0010",
+      "EV-0011",
+      "EV-0012"
+    ],
+    "attribution": {
+      "product_experts": [
+        "郑少伟"
+      ],
+      "city_stores": [
+        "安徽亳州诚谯（交付）"
+      ],
+      "support_periods": [
+        {
+          "raw": "09/05-09/06",
+          "start_date": "2026-09-05",
+          "end_date": "2026-09-06"
+        }
+      ]
+    },
+    "counts": {
+      "evidence_count": 3,
+      "issue_count": 1,
+      "product_expert_count": 1,
+      "city_store_count": 1,
+      "support_period_count": 1,
+      "series_count": 1
+    },
+    "cross_store": false,
+    "cross_series": false,
+    "recurrence": "isolated",
+    "evidence_strength": "weak",
+    "temporal_comparison": {
+      "status": "baseline_only"
+    },
+    "derived_at": "2026-09-11"
+  },
+  {
+    "convergence_id": "CONV-0006",
+    "pattern_id": "PAT-0006",
+    "pattern_key": "nvh_audio_tire_noise",
+    "run_id": "run_001",
+    "source_issue_ids": [
+      "ISS-0008",
+      "ISS-0009"
+    ],
+    "source_evidence_ids": [
+      "EV-0050",
+      "EV-0051"
+    ],
+    "attribution": {
+      "product_experts": [
+        "方园园"
+      ],
+      "city_stores": [
+        "金华世贸广场"
+      ],
+      "support_periods": [
+        {
+          "raw": "08/29-08/30",
+          "start_date": "2026-08-29",
+          "end_date": "2026-08-30"
+        }
+      ]
+    },
+    "counts": {
+      "evidence_count": 2,
+      "issue_count": 2,
+      "product_expert_count": 1,
+      "city_store_count": 1,
+      "support_period_count": 1,
+      "series_count": 1
+    },
+    "cross_store": false,
+    "cross_series": false,
+    "recurrence": "isolated",
+    "evidence_strength": "weak",
+    "temporal_comparison": {
+      "status": "baseline_only"
+    },
+    "derived_at": "2026-09-11"
+  },
+  {
+    "convergence_id": "CONV-0007",
+    "pattern_id": "PAT-0007",
+    "pattern_key": "seating_rear_space_ergonomics",
+    "run_id": "run_001",
+    "source_issue_ids": [
+      "ISS-0010",
+      "ISS-0018"
+    ],
+    "source_evidence_ids": [
+      "EV-0047",
+      "EV-0044"
+    ],
+    "attribution": {
+      "product_experts": [
+        "方园园",
+        "胡然"
+      ],
+      "city_stores": [
+        "金华世贸广场",
+        "温州印象城MEGA"
+      ],
+      "support_periods": [
+        {
+          "raw": "08/29-08/30",
+          "start_date": "2026-08-29",
+          "end_date": "2026-08-30"
+        }
+      ]
+    },
+    "counts": {
+      "evidence_count": 2,
+      "issue_count": 2,
+      "product_expert_count": 2,
+      "city_store_count": 2,
+      "support_period_count": 1,
+      "series_count": 2
+    },
+    "cross_store": true,
+    "cross_series": true,
+    "recurrence": "repeated",
+    "evidence_strength": "moderate",
+    "temporal_comparison": {
+      "status": "baseline_only"
+    },
+    "derived_at": "2026-09-11"
+  },
+  {
+    "convergence_id": "CONV-0008",
+    "pattern_id": "PAT-0008",
+    "pattern_key": "configuration_decontent_perception",
+    "run_id": "run_001",
+    "source_issue_ids": [
+      "ISS-0011"
+    ],
+    "source_evidence_ids": [
+      "EV-0028",
+      "EV-0029",
+      "EV-0031",
+      "EV-0037"
+    ],
+    "attribution": {
+      "product_experts": [
+        "周正成",
+        "郑少伟"
+      ],
+      "city_stores": [
+        "阜阳商厦时代广场",
+        "金华永康万达"
+      ],
+      "support_periods": [
+        {
+          "raw": "08/29-08/30",
+          "start_date": "2026-08-29",
+          "end_date": "2026-08-30"
+        },
+        {
+          "raw": "09/05-09/06",
+          "start_date": "2026-09-05",
+          "end_date": "2026-09-06"
+        }
+      ]
+    },
+    "counts": {
+      "evidence_count": 4,
+      "issue_count": 1,
+      "product_expert_count": 2,
+      "city_store_count": 2,
+      "support_period_count": 2,
+      "series_count": 2
+    },
+    "cross_store": true,
+    "cross_series": true,
+    "recurrence": "repeated",
+    "evidence_strength": "moderate",
+    "temporal_comparison": {
+      "status": "baseline_only"
+    },
+    "derived_at": "2026-09-11"
+  },
+  {
+    "convergence_id": "CONV-0009",
+    "pattern_id": "PAT-0009",
+    "pattern_key": "sales_service_after_sales_support",
+    "run_id": "run_001",
+    "source_issue_ids": [
+      "ISS-0012"
+    ],
+    "source_evidence_ids": [
+      "EV-0033",
+      "EV-0034"
+    ],
+    "attribution": {
+      "product_experts": [
+        "郑少伟"
+      ],
+      "city_stores": [
+        "金华永康万达"
+      ],
+      "support_periods": [
+        {
+          "raw": "08/29-08/30",
+          "start_date": "2026-08-29",
+          "end_date": "2026-08-30"
+        }
+      ]
+    },
+    "counts": {
+      "evidence_count": 2,
+      "issue_count": 1,
+      "product_expert_count": 1,
+      "city_store_count": 1,
+      "support_period_count": 1,
+      "series_count": 2
+    },
+    "cross_store": false,
+    "cross_series": true,
+    "recurrence": "isolated",
+    "evidence_strength": "weak",
+    "temporal_comparison": {
+      "status": "baseline_only"
+    },
+    "derived_at": "2026-09-11"
+  },
+  {
+    "convergence_id": "CONV-0010",
+    "pattern_id": "PAT-0010",
+    "pattern_key": "adas_capability_brand_trust",
+    "run_id": "run_001",
+    "source_issue_ids": [
+      "ISS-0013"
+    ],
+    "source_evidence_ids": [
+      "EV-0035",
+      "EV-0004"
+    ],
+    "attribution": {
+      "product_experts": [
+        "郑少伟",
+        "吴昊"
+      ],
+      "city_stores": [
+        "金华永康万达",
+        "遵义吾悦广场"
+      ],
+      "support_periods": [
+        {
+          "raw": "08/29-08/30",
+          "start_date": "2026-08-29",
+          "end_date": "2026-08-30"
+        },
+        {
+          "raw": "9/10-13",
+          "start_date": "2026-09-10",
+          "end_date": "2026-09-13"
+        }
+      ]
+    },
+    "counts": {
+      "evidence_count": 2,
+      "issue_count": 1,
+      "product_expert_count": 2,
+      "city_store_count": 2,
+      "support_period_count": 2,
+      "series_count": 2
+    },
+    "cross_store": true,
+    "cross_series": true,
+    "recurrence": "repeated",
+    "evidence_strength": "moderate",
+    "temporal_comparison": {
+      "status": "baseline_only"
+    },
+    "derived_at": "2026-09-11"
+  },
+  {
+    "convergence_id": "CONV-0011",
+    "pattern_id": "PAT-0011",
+    "pattern_key": "configuration_benchmark_convenience_gap",
+    "run_id": "run_001",
+    "source_issue_ids": [
+      "ISS-0014",
+      "ISS-0015",
+      "ISS-0016",
+      "ISS-0028",
+      "ISS-0029",
+      "ISS-0030"
+    ],
+    "source_evidence_ids": [
+      "EV-0020",
+      "EV-0024",
+      "EV-0021",
+      "EV-0025",
+      "EV-0022",
+      "EV-0041",
+      "EV-0054",
+      "EV-0055"
+    ],
+    "attribution": {
+      "product_experts": [
+        "李文涛",
+        "胡然",
+        "方园园"
+      ],
+      "city_stores": [
+        "安徽亳州诚谯（交付）",
+        "温州印象城MEGA",
+        "金华世贸广场"
+      ],
+      "support_periods": [
+        {
+          "raw": "08/29-08/30",
+          "start_date": "2026-08-29",
+          "end_date": "2026-08-30"
+        },
+        {
+          "raw": "09/05-09/06",
+          "start_date": "2026-09-05",
+          "end_date": "2026-09-06"
+        }
+      ]
+    },
+    "counts": {
+      "evidence_count": 8,
+      "issue_count": 6,
+      "product_expert_count": 3,
+      "city_store_count": 3,
+      "support_period_count": 2,
+      "series_count": 2
+    },
+    "cross_store": true,
+    "cross_series": true,
+    "recurrence": "systemic",
+    "evidence_strength": "strong",
+    "temporal_comparison": {
+      "status": "baseline_only"
+    },
+    "derived_at": "2026-09-11"
+  },
+  {
+    "convergence_id": "CONV-0012",
+    "pattern_id": "PAT-0012",
+    "pattern_key": "driving_dynamics_steering_tech_demo",
+    "run_id": "run_001",
+    "source_issue_ids": [
+      "ISS-0020",
+      "ISS-0021"
+    ],
+    "source_evidence_ids": [
+      "EV-0009",
+      "EV-0017",
+      "EV-0040"
+    ],
+    "attribution": {
+      "product_experts": [
+        "郑少伟",
+        "李文涛",
+        "胡然"
+      ],
+      "city_stores": [
+        "安徽亳州诚谯（交付）",
+        "温州印象城MEGA"
+      ],
+      "support_periods": [
+        {
+          "raw": "08/29-08/30",
+          "start_date": "2026-08-29",
+          "end_date": "2026-08-30"
+        },
+        {
+          "raw": "09/05-09/06",
+          "start_date": "2026-09-05",
+          "end_date": "2026-09-06"
+        }
+      ]
+    },
+    "counts": {
+      "evidence_count": 3,
+      "issue_count": 2,
+      "product_expert_count": 3,
+      "city_store_count": 2,
+      "support_period_count": 2,
+      "series_count": 2
+    },
+    "cross_store": true,
+    "cross_series": true,
+    "recurrence": "repeated",
+    "evidence_strength": "moderate",
+    "temporal_comparison": {
+      "status": "baseline_only"
+    },
+    "derived_at": "2026-09-11"
+  },
+  {
+    "convergence_id": "CONV-0013",
+    "pattern_id": "PAT-0013",
+    "pattern_key": "brand_channel_attraction_constraint",
+    "run_id": "run_001",
+    "source_issue_ids": [
+      "ISS-0022",
+      "ISS-0023"
+    ],
+    "source_evidence_ids": [
+      "EV-0007",
+      "EV-0008",
+      "EV-0045",
+      "EV-0042",
+      "EV-0049"
+    ],
+    "attribution": {
+      "product_experts": [
+        "吴昊",
+        "陈晓雪",
+        "胡然",
+        "方园园"
+      ],
+      "city_stores": [
+        "遵义吾悦广场",
+        "温州印象城MEGA",
+        "金华世贸广场"
+      ],
+      "support_periods": [
+        {
+          "raw": "08/29-08/30",
+          "start_date": "2026-08-29",
+          "end_date": "2026-08-30"
+        },
+        {
+          "raw": "9/10-13",
+          "start_date": "2026-09-10",
+          "end_date": "2026-09-13"
+        }
+      ]
+    },
+    "counts": {
+      "evidence_count": 5,
+      "issue_count": 2,
+      "product_expert_count": 4,
+      "city_store_count": 3,
+      "support_period_count": 2,
+      "series_count": 2
+    },
+    "cross_store": true,
+    "cross_series": true,
+    "recurrence": "systemic",
+    "evidence_strength": "strong",
+    "temporal_comparison": {
+      "status": "baseline_only"
+    },
+    "derived_at": "2026-09-11"
+  },
+  {
+    "convergence_id": "CONV-0014",
+    "pattern_id": "PAT-0014",
+    "pattern_key": "demand_wait_for_new_model",
+    "run_id": "run_001",
+    "source_issue_ids": [
+      "ISS-0024"
+    ],
+    "source_evidence_ids": [
+      "EV-0038",
+      "EV-0039"
+    ],
+    "attribution": {
+      "product_experts": [
+        "郑少伟"
+      ],
+      "city_stores": [
+        "金华永康万达"
+      ],
+      "support_periods": [
+        {
+          "raw": "08/29-08/30",
+          "start_date": "2026-08-29",
+          "end_date": "2026-08-30"
+        }
+      ]
+    },
+    "counts": {
+      "evidence_count": 2,
+      "issue_count": 1,
+      "product_expert_count": 1,
+      "city_store_count": 1,
+      "support_period_count": 1,
+      "series_count": 2
+    },
+    "cross_store": false,
+    "cross_series": true,
+    "recurrence": "isolated",
+    "evidence_strength": "weak",
+    "temporal_comparison": {
+      "status": "baseline_only"
+    },
+    "derived_at": "2026-09-11"
+  },
+  {
+    "convergence_id": "CONV-0015",
+    "pattern_id": "PAT-0015",
+    "pattern_key": "verified_product_service_strengths",
+    "run_id": "run_001",
+    "source_issue_ids": [
+      "ISS-0025",
+      "ISS-0026",
+      "ISS-0027"
+    ],
+    "source_evidence_ids": [
+      "EV-0053",
+      "EV-0006",
+      "EV-0027"
+    ],
+    "attribution": {
+      "product_experts": [
+        "方园园",
+        "吴昊",
+        "李文涛"
+      ],
+      "city_stores": [
+        "金华世贸广场",
+        "遵义吾悦广场",
+        "安徽亳州诚谯（交付）"
+      ],
+      "support_periods": [
+        {
+          "raw": "08/29-08/30",
+          "start_date": "2026-08-29",
+          "end_date": "2026-08-30"
+        },
+        {
+          "raw": "09/05-09/06",
+          "start_date": "2026-09-05",
+          "end_date": "2026-09-06"
+        },
+        {
+          "raw": "9/10-13",
+          "start_date": "2026-09-10",
+          "end_date": "2026-09-13"
+        }
+      ]
+    },
+    "counts": {
+      "evidence_count": 3,
+      "issue_count": 3,
+      "product_expert_count": 3,
+      "city_store_count": 3,
+      "support_period_count": 3,
+      "series_count": 3
+    },
+    "cross_store": true,
+    "cross_series": true,
+    "recurrence": "systemic",
+    "evidence_strength": "strong",
+    "temporal_comparison": {
+      "status": "baseline_only"
+    },
+    "derived_at": "2026-09-11"
+  }
+]
