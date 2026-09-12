@@ -200,7 +200,7 @@
       "DM2": "L6 M2"
     },
     "compare_by_series": {
-      "LS6": ["CM2", "CM1", "CM0"],
+      "LS6": ["CM2", "CM1", "CM0", "LS8", "LS9"],
       "L6": ["DM1", "CM2", "LS9", "LS8"]
     },
     "launch_window_days": 14,

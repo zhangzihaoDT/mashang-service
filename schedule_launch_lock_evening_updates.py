@@ -174,8 +174,10 @@ def run_once(args, bdef: dict) -> int:
     log("--once：执行一轮完整链路（刷新 + 监控）", now)
     rc = _run([sys.executable, str(REPO_ROOT / "dataset" / "updater" / "order_data_to_parquet.py")],
               "refresh_order_data", args.dry_run, now)
-    refresh_ts = datetime.now() if rc == 0 else None
-    _run(_monitor_cmd(args, refresh_ts), "monitor", args.dry_run, now)
+    if rc != 0:
+        log("刷新失败，freshness gate 跳过 monitor：不用陈旧数据生成监控", now)
+        return rc
+    _run(_monitor_cmd(args, datetime.now()), "monitor", args.dry_run, now)
     return 0
 
 

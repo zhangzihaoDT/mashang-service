@@ -77,6 +77,7 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
         "elapsed_hours": 0,
         "elapsed_minutes": 0,
         "cum": 0,
+        "today_count": 0,
         "retention": 0,
         "retention_users": 0,
         "peak_hour": None,
@@ -107,6 +108,15 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
     )
 
     metrics["cum"] = int(base.loc[current_mask, "order_number"].nunique())
+
+    # 当日小订：观察当日（自然日）内新增意向金支付订单
+    today_start = today.normalize()
+    today_mask = (
+        base["series_group_logic"].eq(generation)
+        & (base["intention_payment_time"] >= max(open_t, today_start))
+        & (base["intention_payment_time"] <= obs)
+    )
+    metrics["today_count"] = int(base.loc[today_mask, "order_number"].nunique())
 
     retention_slice = base.loc[
         current_mask & base["intention_refund_time"].isna(),
@@ -270,6 +280,7 @@ def build_card(metrics: dict, show_notes: bool = False) -> dict:
     peak_hour_str = f"{metrics['peak_hour']:02d}:00" if metrics["peak_hour"] is not None else "NA"
 
     cum = metrics.get("cum", 0)
+    today_count = metrics.get("today_count", 0)
     retention = metrics.get("retention", 0)
     retention_users = metrics.get("retention_users", 0)
     peak_count = metrics.get("peak_count", 0)
@@ -278,9 +289,12 @@ def build_card(metrics: dict, show_notes: bool = False) -> dict:
     launch_day_retention = metrics.get("launch_day_retention", 0)
     launch_day_total = metrics.get("launch_day_total", 0)
 
-    lines = [f"**{label} 预售指标（{metrics['today']}）**"]
-
-    lines += ["", f"预售小订：**{cum:,}**（预售至今累计意向金支付）"]
+    lines = [
+        f"**{label} 预售指标（{metrics['today']}）**",
+        "",
+        f"当日小订：**{today_count:,}**（当日新增意向金支付）",
+        f"预售小订：**{cum:,}**（预售至今累计意向金支付）",
+    ]
     lines.append(f"　累计留存订单：**{retention:,}**（唯一订单用户 {retention_users:,}）")
     lines.append(f"峰值小时：**{peak_count:,}**（{peak_hour_str}）｜峰值后 1h **{next_hour:,}**")
     lines.append(f"开放后 24h 累计留存：**{start_day_retained:,}**")

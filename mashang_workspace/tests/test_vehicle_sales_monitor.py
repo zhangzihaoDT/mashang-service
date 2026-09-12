@@ -130,9 +130,25 @@ def test_presale_compute_uses_generation_open_hour(bdef):
     )
     m = presale_compute(df, bdef, today, "CM3")
     assert m["cum"] == 2
+    assert m["today_count"] == 2
     assert m["retention"] == 2
     assert m["open_hour"] == 19
     assert m["open_minute"] == 45
+
+
+def test_presale_today_count_only_counts_current_day(bdef):
+    """当日小订只统计观察当日新增，不含开放日/历史日。"""
+    today = pd.Timestamp("2026-09-11")
+    df = _presale_df(
+        [
+            ("o1", "2026-09-10 20:00", None, "CM3", "全新一代智己LS6"),  # 开放日
+            ("o2", "2026-09-11 10:00", None, "CM3", "全新一代智己LS6"),  # 当日
+            ("o3", "2026-09-11 12:00", None, "CM3", "全新一代智己LS6"),  # 当日
+        ]
+    )
+    m = presale_compute(df, bdef, today, "CM3")
+    assert m["cum"] == 3
+    assert m["today_count"] == 2
 
 
 def test_presale_compute_uses_generation_open_minute(bdef):
@@ -455,6 +471,25 @@ def test_scheduler_keyday_refresh_failure_blocks_monitor(bdef):
     assert _run_chain(sched, now, bdef, {"refresh_order_data": 1}) == ["refresh_order_data"]
 
 
+def test_scheduler_run_once_refresh_failure_skips_monitor(bdef):
+    """--once：刷新失败 → 返回失败码且不执行 monitor（freshness gate，不用陈旧数据）。"""
+    sched = _load_scheduler()
+    calls: list[str] = []
+
+    def fake_run(cmd, label, dry_run, t):
+        calls.append(label)
+        return 1 if label == "refresh_order_data" else 0
+
+    monkeypatch = pytest.MonkeyPatch()
+    monkeypatch.setattr(sched, "_run", fake_run)
+    try:
+        rc = sched.run_once(_scheduler_args()[1], bdef)
+    finally:
+        monkeypatch.undo()
+    assert rc == 1
+    assert calls == ["refresh_order_data"]
+
+
 # ── presale card 结构（参照 launch 精简） ────────────────────────────
 
 
@@ -470,6 +505,7 @@ def _presale_metrics() -> dict:
         "obs": "2026-09-10 15:30:01",
         "elapsed_hours": 20.5,
         "cum": 2480,
+        "today_count": 123,
         "retention": 2415,
         "retention_users": 2380,
         "peak_hour": 18,
@@ -490,7 +526,7 @@ def _presale_metrics() -> dict:
             {"region_name": "杭州", "count": 300, "share": 12.4, "cr5": None},
         ],
         "retention_no_region": 10,
-        "compare": {"CM2": 2000, "CM1": 900, "CM0": 1500},
+        "compare": {"CM2": 2000, "CM1": 900, "CM0": 1500, "LS8": 1100, "LS9": 700},
     }
 
 
@@ -502,12 +538,13 @@ def test_presale_card_slim_no_notes_in_production():
     """生产推送（show_notes=False）不带附注/口径/数据源，保留核心指标与固定信息行。"""
     body = _presale_card_body(show_notes=False)
     assert "①" not in body and "附注" not in body and "口径" not in body and "数据源" not in body
+    assert "当日小订：**123**（当日新增意向金支付）" in body
     assert "预售小订：**2,480**" in body
     assert "累计留存订单：**2,415**（唯一订单用户 2,380）" in body
     assert "峰值小时：**1,200**（18:00）｜峰值后 1h **380**" in body
     assert "开放后 24h 累计留存：**1,980**" in body
     assert "发布会当日留存：**1,600**（小订 1,700）" in body
-    assert "历史对比（自开放起同期留存，相同时长）：**CM2（2,000） / CM1（900） / CM0（1,500）**" in body
+    assert "历史对比（自开放起同期留存，相同时长）：**CM2（2,000） / CM1（900） / CM0（1,500） / LS8（1,100） / LS9（700）**" in body
     assert "预售期：2026-09-10 ~ 2026-09-24" in body
     assert "观察时间：2026-09-10 15:30" in body
 
