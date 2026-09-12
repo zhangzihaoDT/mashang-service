@@ -7,6 +7,8 @@
 
 import sys
 import os
+import re
+import json
 import argparse
 from pathlib import Path
 from urllib.parse import urlencode, quote
@@ -26,7 +28,99 @@ OUTPUT_FILE = DATASET_DIR / "order_data.parquet"
 TABLEAU_VIEW = "core_metric_observation/11"
 TABLEAU_OUTPUT_2026 = DATASET_DIR / "order_data_2026.csv"
 
+# 稳定 View 身份配置：日常刷新直接复用这里的 view_id，只有失效时才进入 discovery。
+TABLEAU_VIEWS_CONFIG = Path(__file__).resolve().parent / "tableau_views.json"
+TABLEAU_ORDER_DATA_KEY = "order_data"
+
 INPUT_FILE_2026 = DATASET_DIR / "order_data_2026.csv"
+
+
+class TableauDiscoveryUnavailable(RuntimeError):
+    """View discovery / content exploration 服务不可用。
+
+    典型表现：HTTP 400 + errorCode=121。这是"发现服务不可用"，
+    不是"目标对象不存在"，两者必须区分，否则会误导排障方向。
+    """
+
+    code = "tableau_content_exploration_unavailable"
+
+
+class TableauViewUnavailable(RuntimeError):
+    """已知 view_id 已失效（HTTP 404 / view not found），需要重新发现。"""
+
+    code = "tableau_view_unavailable"
+
+
+def _tableau_error_text(payload: bytes | None) -> str:
+    if not payload:
+        return ""
+    return payload.decode("utf-8", errors="ignore")
+
+
+def _is_content_exploration_unavailable(status: int, text: str) -> bool:
+    """HTTP 400 + errorCode=121 属于 discovery 服务不可用，而非目标不存在。"""
+    if status != 400:
+        return False
+    low = (text or "").lower()
+    if "content exploration" in low or "contentexploration" in low:
+        return True
+    patterns = (
+        r'errorcode"?\s*[=:]\s*"?121"?',
+        r'"code"\s*:\s*"?121"?',
+        r"<error\s+code\s*=\s*\"121\"",
+    )
+    return any(re.search(p, low) for p in patterns)
+
+
+def _raise_tableau_discovery_error(status: int, data: bytes, context: str) -> None:
+    """发现类请求失败时按语义分类：服务不可用 vs 普通错误。"""
+    text = _tableau_error_text(data)
+    if _is_content_exploration_unavailable(status, text):
+        raise TableauDiscoveryUnavailable(
+            f"{context}: Tableau content exploration 服务不可用 (HTTP {status}, errorCode=121)"
+            f" — 这是发现服务不可用，不是目标对象不存在: {text[:2000]}"
+        )
+    raise RuntimeError(f"{context} (HTTP {status}): {text[:3000]}")
+
+
+def load_tableau_views_config(config_path: Path) -> dict:
+    if not config_path.exists():
+        return {}
+    try:
+        data = json.loads(config_path.read_text(encoding="utf-8"))
+    except Exception as e:
+        print(f"⚠️ Tableau 视图配置解析失败，忽略: {config_path} ({e})")
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def get_tableau_view_identity(config_path: Path, key: str) -> dict:
+    cfg = load_tableau_views_config(config_path)
+    entry = (cfg.get("tableau") or {}).get(key) or {}
+    return entry if isinstance(entry, dict) else {}
+
+
+def update_tableau_view_identity(
+    config_path: Path,
+    key: str,
+    *,
+    content_url: str | None = None,
+    view_id: str | None = None,
+    workbook_id: str | None = None,
+) -> None:
+    """把新发现的稳定身份原子写回配置，供后续刷新直接复用。"""
+    cfg = load_tableau_views_config(config_path)
+    tableau = cfg.setdefault("tableau", {})
+    entry = tableau.setdefault(key, {})
+    entry.setdefault("content_url", content_url or TABLEAU_VIEW)
+    if view_id:
+        entry["view_id"] = view_id
+    if workbook_id:
+        entry["workbook_id"] = workbook_id
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    tmp_path = config_path.with_name(config_path.name + ".tmp")
+    tmp_path.write_text(json.dumps(cfg, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    tmp_path.replace(config_path)
 
 
 def normalize_owner_cell_phone(series: pd.Series) -> pd.Series:
@@ -249,8 +343,7 @@ def tableau_find_workbook_id(
             timeout=timeout,
         )
         if status != 200:
-            msg = data.decode("utf-8", errors="ignore")
-            raise RuntimeError(f"Tableau 查询工作簿失败 (HTTP {status}): {msg[:3000]}")
+            _raise_tableau_discovery_error(status, data, "Tableau 查询工作簿失败")
 
         root = ET.fromstring(data)
         for wb in root.findall(".//{*}workbook"):
@@ -271,7 +364,63 @@ def tableau_find_workbook_id(
     raise RuntimeError(f"未找到工作簿: {workbook_url_name}")
 
 
-def tableau_find_view_id(
+def _match_view_id_from_xml(
+    xml_bytes: bytes,
+    *,
+    workbook_url_name: str,
+    view_url_name: str,
+) -> str | None:
+    expected = f"{workbook_url_name}/{view_url_name}"
+    root = ET.fromstring(xml_bytes)
+    for v in root.findall(".//{*}view"):
+        view_id = (v.attrib.get("id") or "").strip()
+        if not view_id:
+            continue
+        content_url = (v.attrib.get("contentUrl") or "").strip().strip("/")
+        view_url = (v.attrib.get("viewUrlName") or "").strip().strip("/")
+        name = (v.attrib.get("name") or "").strip()
+
+        if content_url == expected:
+            return view_id
+        if content_url == view_url_name:
+            return view_id
+        if content_url.endswith("/" + view_url_name) and content_url.split("/", 1)[0] == workbook_url_name:
+            return view_id
+        if view_url == view_url_name and content_url.split("/", 1)[0] == workbook_url_name:
+            return view_id
+        if name == view_url_name and content_url.split("/", 1)[0] == workbook_url_name:
+            return view_id
+    return None
+
+
+def tableau_find_view_id_in_workbook(
+    *,
+    base_url: str,
+    api_version: str,
+    auth_token: str,
+    site_id: str,
+    workbook_id: str,
+    workbook_url_name: str,
+    view_url_name: str,
+    timeout: int,
+) -> str | None:
+    """Tier 2: workbook-scoped discovery（优先于 site-wide）。"""
+    base = base_url.rstrip("/")
+    url = f"{base}/api/{api_version}/sites/{site_id}/workbooks/{workbook_id}/views"
+    status, data = _http_request(
+        method="GET",
+        url=url,
+        headers={"X-Tableau-Auth": auth_token, "Accept": "application/xml"},
+        timeout=timeout,
+    )
+    if status != 200:
+        _raise_tableau_discovery_error(status, data, "Tableau 查询工作簿视图失败")
+    return _match_view_id_from_xml(
+        data, workbook_url_name=workbook_url_name, view_url_name=view_url_name
+    )
+
+
+def tableau_find_view_id_site_wide(
     *,
     base_url: str,
     api_version: str,
@@ -280,31 +429,10 @@ def tableau_find_view_id(
     workbook_url_name: str,
     view_url_name: str,
     timeout: int,
-) -> str:
+) -> str | None:
+    """Tier 3: site-wide discovery（最后手段，依赖 content exploration 服务）。"""
     base = base_url.rstrip("/")
     expected = f"{workbook_url_name}/{view_url_name}"
-
-    def _match_view_id_from_xml(xml_bytes: bytes) -> str | None:
-        root = ET.fromstring(xml_bytes)
-        for v in root.findall(".//{*}view"):
-            view_id = (v.attrib.get("id") or "").strip()
-            if not view_id:
-                continue
-            content_url = (v.attrib.get("contentUrl") or "").strip().strip("/")
-            view_url = (v.attrib.get("viewUrlName") or "").strip().strip("/")
-            name = (v.attrib.get("name") or "").strip()
-
-            if content_url == expected:
-                return view_id
-            if content_url == view_url_name:
-                return view_id
-            if content_url.endswith("/" + view_url_name) and content_url.split("/", 1)[0] == workbook_url_name:
-                return view_id
-            if view_url == view_url_name and content_url.split("/", 1)[0] == workbook_url_name:
-                return view_id
-            if name == view_url_name and content_url.split("/", 1)[0] == workbook_url_name:
-                return view_id
-        return None
 
     def _query_views(*, filter_expr: str) -> str | None:
         page_number = 1
@@ -319,10 +447,11 @@ def tableau_find_view_id(
                 timeout=timeout,
             )
             if status != 200:
-                msg = data.decode("utf-8", errors="ignore")
-                raise RuntimeError(f"Tableau 查询视图失败 (HTTP {status}): {msg[:3000]}")
+                _raise_tableau_discovery_error(status, data, "Tableau site-wide 查询视图失败")
 
-            vid = _match_view_id_from_xml(data)
+            vid = _match_view_id_from_xml(
+                data, workbook_url_name=workbook_url_name, view_url_name=view_url_name
+            )
             if vid:
                 return vid
 
@@ -340,31 +469,72 @@ def tableau_find_view_id(
         vid = _query_views(filter_expr=f)
         if vid:
             return vid
+    return None
 
-    workbook_id = tableau_find_workbook_id(
+
+def discover_view_id(
+    *,
+    base_url: str,
+    api_version: str,
+    auth_token: str,
+    site_id: str,
+    workbook_url_name: str,
+    view_url_name: str,
+    timeout: int,
+    workbook_id: str | None = None,
+) -> tuple[str, str | None, str]:
+    """按 workbook-scoped → site-wide 顺序发现 view_id。
+
+    返回 (view_id, workbook_id, source)，source ∈ {"workbook-scoped", "site-wide"}。
+    discovery 是恢复手段，不是日常必经依赖。
+    """
+    wb_id = workbook_id
+    if not wb_id:
+        try:
+            wb_id = tableau_find_workbook_id(
+                base_url=base_url,
+                api_version=api_version,
+                auth_token=auth_token,
+                site_id=site_id,
+                workbook_url_name=workbook_url_name,
+                timeout=timeout,
+            )
+        except RuntimeError as e:
+            print(f"⚠️ 查询 workbook_id 失败，跳过 workbook-scoped discovery: {e}")
+            wb_id = None
+
+    if wb_id:
+        try:
+            vid = tableau_find_view_id_in_workbook(
+                base_url=base_url,
+                api_version=api_version,
+                auth_token=auth_token,
+                site_id=site_id,
+                workbook_id=wb_id,
+                workbook_url_name=workbook_url_name,
+                view_url_name=view_url_name,
+                timeout=timeout,
+            )
+            if vid:
+                return vid, wb_id, "workbook-scoped"
+            print("⚠️ workbook-scoped discovery 未命中，回退 site-wide discovery ...")
+        except RuntimeError as e:
+            print(f"⚠️ workbook-scoped discovery 不可用: {e}")
+            print("⚠️ 回退 site-wide discovery ...")
+
+    vid = tableau_find_view_id_site_wide(
         base_url=base_url,
         api_version=api_version,
         auth_token=auth_token,
         site_id=site_id,
         workbook_url_name=workbook_url_name,
+        view_url_name=view_url_name,
         timeout=timeout,
     )
-    url = f"{base}/api/{api_version}/sites/{site_id}/workbooks/{workbook_id}/views"
-    status, data = _http_request(
-        method="GET",
-        url=url,
-        headers={"X-Tableau-Auth": auth_token, "Accept": "application/xml"},
-        timeout=timeout,
-    )
-    if status != 200:
-        msg = data.decode("utf-8", errors="ignore")
-        raise RuntimeError(f"Tableau 查询工作簿视图失败 (HTTP {status}): {msg[:3000]}")
-
-    vid = _match_view_id_from_xml(data)
     if vid:
-        return vid
+        return vid, wb_id, "site-wide"
 
-    raise RuntimeError(f"未找到视图: {expected}")
+    raise RuntimeError(f"未找到视图: {workbook_url_name}/{view_url_name}")
 
 
 def tableau_download_view_data_csv(
@@ -421,6 +591,8 @@ def tableau_download_view_data_csv(
             break
 
     msg = (last_data or b"").decode("utf-8", errors="ignore")
+    if last_status == 404:
+        raise TableauViewUnavailable(f"Tableau 视图不存在或已失效 (HTTP 404): {msg[:1000]}")
     raise RuntimeError(f"Tableau 下载数据失败 (HTTP {last_status}): {msg[:3000]}")
 
 
@@ -452,7 +624,14 @@ def _is_connectivity_error(msg: str | None) -> bool:
     return any(k in m for k in markers)
 
 
-def step_export_tableau_order_data_2026(mobile: bool = False, timeout: int = 600) -> tuple[bool, str | None]:
+def step_export_tableau_order_data_2026(
+    mobile: bool = False,
+    timeout: int = 600,
+    *,
+    view_id: str | None = None,
+    config_path: Path = TABLEAU_VIEWS_CONFIG,
+    allow_discovery: bool = True,
+) -> tuple[bool, str | None]:
     print("\n" + "=" * 60)
     print("步骤 0: 从 Tableau 导出最新 order_data_2026.csv")
     print("=" * 60)
@@ -472,8 +651,14 @@ def step_export_tableau_order_data_2026(mobile: bool = False, timeout: int = 600
         base_url = os.getenv("TABLEAU_SERVER_URL") or "https://tableau-hs.immotors.com"
     site_content_url = os.getenv("TABLEAU_SITE_CONTENT_URL", "")
 
+    config_entry = get_tableau_view_identity(config_path, TABLEAU_ORDER_DATA_KEY)
+    view_ref = (config_entry.get("content_url") or TABLEAU_VIEW).strip()
+    configured_view_id = (config_entry.get("view_id") or "").strip() or None
+    configured_workbook_id = (config_entry.get("workbook_id") or "").strip() or None
+    explicit_view_id = (view_id or "").strip() or None
+
     try:
-        workbook_url_name, view_url_name = parse_tableau_view_path(TABLEAU_VIEW)
+        workbook_url_name, view_url_name = parse_tableau_view_path(view_ref)
         api_version, auth_token, site_id = tableau_sign_in(
             base_url=base_url,
             token_name=token_name,
@@ -481,8 +666,43 @@ def step_export_tableau_order_data_2026(mobile: bool = False, timeout: int = 600
             site_content_url=site_content_url,
             timeout=timeout,
         )
+
+        def _download(vid: str) -> None:
+            tableau_download_view_data_csv(
+                base_url=base_url,
+                api_version=api_version,
+                auth_token=auth_token,
+                site_id=site_id,
+                view_id=vid,
+                output_path=output_path,
+                timeout=timeout,
+            )
+
         try:
-            view_id = tableau_find_view_id(
+            # Tier 1: 已知 view_id（显式优先，其次配置/缓存）；可访问即直接导出。
+            known: list[tuple[str, str]] = []
+            if explicit_view_id:
+                known.append(("--view-id", explicit_view_id))
+            if configured_view_id and configured_view_id != explicit_view_id:
+                known.append(("配置缓存 view_id", configured_view_id))
+
+            for label, vid in known:
+                try:
+                    _download(vid)
+                    print(f"✅ 使用{label}直接导出成功: {vid}")
+                    return True, None
+                except TableauViewUnavailable as e:
+                    print(f"⚠️ {label} 已失效，转入 discovery: {e}")
+
+            # Tier 2/3: 仅当已知身份缺失或失效时才进入 discovery（恢复手段）。
+            if not allow_discovery:
+                raise TableauViewUnavailable(
+                    "无可用 view_id，且已禁用 discovery (--no-discovery)。"
+                    "请通过 --view-id 指定或恢复配置中的 view_id。"
+                )
+
+            print("🔎 进入 view discovery（workbook-scoped → site-wide）...")
+            found_view_id, found_workbook_id, source = discover_view_id(
                 base_url=base_url,
                 api_version=api_version,
                 auth_token=auth_token,
@@ -490,23 +710,29 @@ def step_export_tableau_order_data_2026(mobile: bool = False, timeout: int = 600
                 workbook_url_name=workbook_url_name,
                 view_url_name=view_url_name,
                 timeout=timeout,
+                workbook_id=configured_workbook_id,
             )
-            tableau_download_view_data_csv(
-                base_url=base_url,
-                api_version=api_version,
-                auth_token=auth_token,
-                site_id=site_id,
-                view_id=view_id,
-                output_path=output_path,
-                timeout=timeout,
-            )
+            _download(found_view_id)
+            try:
+                update_tableau_view_identity(
+                    config_path,
+                    TABLEAU_ORDER_DATA_KEY,
+                    content_url=view_ref,
+                    view_id=found_view_id,
+                    workbook_id=found_workbook_id,
+                )
+                print(f"💾 已缓存稳定 view 身份到: {config_path}")
+            except Exception as e:
+                print(f"⚠️ view_id 缓存写入失败（不影响本次导出）: {e}")
+            print(f"✅ discovery({source}) 命中并导出成功: {found_view_id}")
+            return True, None
         finally:
             tableau_sign_out(base_url=base_url, api_version=api_version, auth_token=auth_token, timeout=timeout)
-        print(f"✅ Tableau 数据导出成功: {output_path}")
-        return True, None
     except Exception as e:
-        print(f"❌ Tableau 数据导出失败: {e}")
-        return False, str(e)
+        code = getattr(e, "code", None)
+        msg = f"{code}: {e}" if code else str(e)
+        print(f"❌ Tableau 数据导出失败: {msg}")
+        return False, msg
 
 
 def clean_column_names(df: pd.DataFrame) -> pd.DataFrame:
@@ -717,17 +943,45 @@ def merge_order_data(df_base: pd.DataFrame, df_new: pd.DataFrame) -> pd.DataFram
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="order_data 合并清洗并写入 Parquet（可选自动从 Tableau 更新 2026 数据）")
-    parser.add_argument("--skip-export", action="store_true", help="跳过从 Tableau 导出 2026 数据步骤")
+    parser.add_argument(
+        "--skip-export",
+        action="store_true",
+        help="人工灾备：跳过 Tableau 导出，直接使用已有 CSV（自动调度链路不应使用）",
+    )
     parser.add_argument("--mobile", action="store_true", help="使用移动端/非办公网络服务器地址导出")
     parser.add_argument("--timeout", type=int, default=600, help="Tableau 导出超时（秒）")
+    parser.add_argument("--view-id", default=None, help="显式指定 Tableau view_id（优先级最高，跳过 discovery）")
+    parser.add_argument(
+        "--config",
+        default=str(TABLEAU_VIEWS_CONFIG),
+        help=f"Tableau 视图身份配置文件（默认 {TABLEAU_VIEWS_CONFIG.name}）",
+    )
+    parser.add_argument(
+        "--no-discovery",
+        action="store_true",
+        help="禁用 view discovery，仅使用 --view-id / 配置中的已知 view_id",
+    )
     args = parser.parse_args(argv)
+
+    if args.skip_export:
+        print("\n⚠️ --skip-export：使用已有 CSV 作为数据源（人工灾备通道）。")
+        print("   自动调度链路不得使用此参数，否则可能把旧数据误判为刷新成功。")
 
     if not args.skip_export:
         load_env_file(REPO_ROOT / ".env")
-        ok, err = step_export_tableau_order_data_2026(mobile=args.mobile, timeout=args.timeout)
+        export_kwargs = {
+            "view_id": args.view_id,
+            "config_path": Path(args.config),
+            "allow_discovery": not args.no_discovery,
+        }
+        ok, err = step_export_tableau_order_data_2026(
+            mobile=args.mobile, timeout=args.timeout, **export_kwargs
+        )
         if not ok and not args.mobile and _is_connectivity_error(err):
             print("\n⚠️ 办公网 Tableau 不可达，回退到移动链路重试 ...")
-            ok, err = step_export_tableau_order_data_2026(mobile=True, timeout=args.timeout)
+            ok, err = step_export_tableau_order_data_2026(
+                mobile=True, timeout=args.timeout, **export_kwargs
+            )
         if not ok:
             print(f"❌ Tableau 数据导出失败: {err}")
             return 1

@@ -7,6 +7,8 @@ Phase 13 Step 2.5 — Dataset Updater Integration & Daily Pipeline Naming
 import sys
 from pathlib import Path
 
+import pytest
+
 _WS_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(_WS_DIR))
 
@@ -369,3 +371,184 @@ def test_merge_appends_brand_new_no_lock_order():
     out = merge(base, new)
     assert len(out) == 2
     assert out[out["order_number"] == "O2"]["intention_payment_time"].iloc[0] == pd.Timestamp("2026-08-18 21:00:00")
+
+
+def test_content_exploration_unavailable_classification():
+    """HTTP 400 + errorCode=121 应归类为 discovery 服务不可用，而非对象不存在。"""
+    mod = _load_updater_module()
+    assert mod._is_content_exploration_unavailable(
+        400, '<error errorCode="121">content exploration unavailable</error>'
+    ) is True
+    assert mod._is_content_exploration_unavailable(400, '{"errorCode": 121}') is True
+    assert mod._is_content_exploration_unavailable(400, "content exploration service down") is True
+    # 真实 Tableau 400 报文（code="400117" + detail 内 errorCode=121）
+    real_payload = (
+        '<tsResponse><error code="400117"><summary>错误请求</summary>'
+        "<detail>SearchServiceClientException: "
+        "com.tableau.contentexploration.client.exception.ContentExplorationHttpException: "
+        "Content exploration service request failed (errorCode=121)</detail></error></tsResponse>"
+    )
+    assert mod._is_content_exploration_unavailable(400, real_payload) is True
+    assert mod._is_content_exploration_unavailable(404, "view not found") is False
+    assert mod._is_content_exploration_unavailable(400, "some other bad request") is False
+
+
+def test_discovery_error_raises_classified_exception():
+    """发现类请求 400/121 抛 TableauDiscoveryUnavailable，普通错误抛 RuntimeError。"""
+    mod = _load_updater_module()
+    with pytest.raises(mod.TableauDiscoveryUnavailable) as ei:
+        mod._raise_tableau_discovery_error(400, b'<error errorCode="121">boom</error>', "查询视图失败")
+    assert ei.value.code == "tableau_content_exploration_unavailable"
+    with pytest.raises(RuntimeError) as ei2:
+        mod._raise_tableau_discovery_error(500, b"server error", "查询视图失败")
+    assert not isinstance(ei2.value, mod.TableauDiscoveryUnavailable)
+
+
+def test_view_id_config_round_trip(tmp_path):
+    """配置中的稳定 view 身份可读写，供日常刷新直接复用。"""
+    mod = _load_updater_module()
+    cfg = tmp_path / "tableau_views.json"
+    mod.update_tableau_view_identity(
+        cfg,
+        "order_data",
+        content_url="core_metric_observation/11",
+        view_id="V1",
+        workbook_id="W1",
+    )
+    entry = mod.get_tableau_view_identity(cfg, "order_data")
+    assert entry["view_id"] == "V1"
+    assert entry["workbook_id"] == "W1"
+    assert entry["content_url"] == "core_metric_observation/11"
+    # 再次更新仅刷新 view_id，保留既有 content_url
+    mod.update_tableau_view_identity(cfg, "order_data", view_id="V2")
+    entry2 = mod.get_tableau_view_identity(cfg, "order_data")
+    assert entry2["view_id"] == "V2"
+    assert entry2["workbook_id"] == "W1"
+    assert entry2["content_url"] == "core_metric_observation/11"
+
+
+def test_match_view_id_from_xml():
+    """workbook-scoped 返回的 XML 能按 contentUrl 匹配 view_id。"""
+    mod = _load_updater_module()
+    xml = (
+        b'<?xml version="1.0"?>'
+        b"<tsResponse><views>"
+        b'<view id="abc-123" name="11" contentUrl="core_metric_observation/11" viewUrlName="11"/>'
+        b"</views></tsResponse>"
+    )
+    vid = mod._match_view_id_from_xml(
+        xml, workbook_url_name="core_metric_observation", view_url_name="11"
+    )
+    assert vid == "abc-123"
+
+
+def test_view_discovery_split_by_scope():
+    """workbook-scoped 与 site-wide 拆分；旧 site-wide-first 函数已移除。"""
+    mod = _load_updater_module()
+    assert hasattr(mod, "tableau_find_view_id_in_workbook")
+    assert hasattr(mod, "tableau_find_view_id_site_wide")
+    assert hasattr(mod, "discover_view_id")
+    assert not hasattr(mod, "tableau_find_view_id")
+
+
+def test_view_unavailable_code():
+    mod = _load_updater_module()
+    assert mod.TableauViewUnavailable("x").code == "tableau_view_unavailable"
+
+
+def _patch_tableau_env(monkeypatch):
+    monkeypatch.setenv("TABLEAU_TOKEN_NAME", "t")
+    monkeypatch.setenv("TABLEAU_TOKEN_VALUE", "s")
+    monkeypatch.delenv("TABLEAU_SERVER_URL", raising=False)
+    monkeypatch.delenv("TABLEAU_SERVER_URL_MOBILE", raising=False)
+    monkeypatch.delenv("TABLEAU_SITE_CONTENT_URL", raising=False)
+
+
+def test_step_export_prefers_configured_view_id(tmp_path, monkeypatch):
+    """Tier 1：配置中有可用 view_id 时直接导出，不进入 discovery。"""
+    mod = _load_updater_module()
+    cfg = tmp_path / "tableau_views.json"
+    mod.update_tableau_view_identity(
+        cfg, "order_data", content_url="core_metric_observation/11", view_id="KNOWN", workbook_id="WB1"
+    )
+    _patch_tableau_env(monkeypatch)
+    monkeypatch.setattr(mod, "tableau_sign_in", lambda **kw: ("3.25", "tok", "site"))
+    monkeypatch.setattr(mod, "tableau_sign_out", lambda **kw: None)
+    downloaded: dict[str, str] = {}
+    monkeypatch.setattr(
+        mod, "tableau_download_view_data_csv", lambda **kw: downloaded.setdefault("view_id", kw["view_id"])
+    )
+
+    def fail_discover(**kw):
+        raise AssertionError("configured view_id 可用时不应进入 discovery")
+
+    monkeypatch.setattr(mod, "discover_view_id", fail_discover)
+
+    ok, err = mod.step_export_tableau_order_data_2026(config_path=cfg)
+    assert ok is True and err is None
+    assert downloaded["view_id"] == "KNOWN"
+
+
+def test_step_export_rediscovers_and_caches_when_view_id_stale(tmp_path, monkeypatch):
+    """Tier 1 失效 → discovery 命中并回写缓存。"""
+    mod = _load_updater_module()
+    cfg = tmp_path / "tableau_views.json"
+    mod.update_tableau_view_identity(
+        cfg, "order_data", content_url="core_metric_observation/11", view_id="STALE"
+    )
+    _patch_tableau_env(monkeypatch)
+    monkeypatch.setattr(mod, "tableau_sign_in", lambda **kw: ("3.25", "tok", "site"))
+    monkeypatch.setattr(mod, "tableau_sign_out", lambda **kw: None)
+
+    used: list[str] = []
+
+    def fake_download(**kw):
+        if kw["view_id"] == "STALE":
+            raise mod.TableauViewUnavailable("404 stale")
+        used.append(kw["view_id"])
+
+    monkeypatch.setattr(mod, "tableau_download_view_data_csv", fake_download)
+    monkeypatch.setattr(mod, "discover_view_id", lambda **kw: ("FRESH", "WB2", "workbook-scoped"))
+
+    ok, err = mod.step_export_tableau_order_data_2026(config_path=cfg)
+    assert ok is True and err is None
+    assert used == ["FRESH"]
+    assert mod.get_tableau_view_identity(cfg, "order_data")["view_id"] == "FRESH"
+    assert mod.get_tableau_view_identity(cfg, "order_data")["workbook_id"] == "WB2"
+
+
+def test_step_export_reports_discovery_unavailable(tmp_path, monkeypatch):
+    """discovery 服务不可用 → 返回明确分类码，而非"视图不存在"。"""
+    mod = _load_updater_module()
+    cfg = tmp_path / "tableau_views.json"  # 无已知 view_id
+    _patch_tableau_env(monkeypatch)
+    monkeypatch.setattr(mod, "tableau_sign_in", lambda **kw: ("3.25", "tok", "site"))
+    monkeypatch.setattr(mod, "tableau_sign_out", lambda **kw: None)
+
+    def fail_discover(**kw):
+        raise mod.TableauDiscoveryUnavailable("content exploration down")
+
+    monkeypatch.setattr(mod, "discover_view_id", fail_discover)
+
+    ok, err = mod.step_export_tableau_order_data_2026(config_path=cfg)
+    assert ok is False
+    assert err is not None
+    assert err.startswith("tableau_content_exploration_unavailable")
+
+
+def test_step_export_no_discovery_requires_known_view_id(tmp_path, monkeypatch):
+    """--no-discovery 且无已知 view_id → 直接失败，不调用 discovery。"""
+    mod = _load_updater_module()
+    cfg = tmp_path / "tableau_views.json"
+    _patch_tableau_env(monkeypatch)
+    monkeypatch.setattr(mod, "tableau_sign_in", lambda **kw: ("3.25", "tok", "site"))
+    monkeypatch.setattr(mod, "tableau_sign_out", lambda **kw: None)
+
+    def fail_discover(**kw):
+        raise AssertionError("--no-discovery 时不应调用 discovery")
+
+    monkeypatch.setattr(mod, "discover_view_id", fail_discover)
+
+    ok, err = mod.step_export_tableau_order_data_2026(config_path=cfg, allow_discovery=False)
+    assert ok is False
+    assert err is not None and err.startswith("tableau_view_unavailable")
