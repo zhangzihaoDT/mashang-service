@@ -52,14 +52,14 @@ python research_apps/product_expert/scripts/build_report.py research_apps/produc
 02 业务主题扫描
    A1 门店支持概况
    A2 现场客流情况
-   A3 展车状态（门店 | 车型 | 展车 | 试驾车 | 原文）
+   A3 展车 / 试驾车缺失报备（按车型的展车/试驾车覆盖率统计 + 折叠的缺失门店×车型明细；❌ 标缺失）
    A4 客户关注主题（LS6 / L6 分开，记录覆盖率）
    A5 正向产品反馈（LS6 / L6 分开，记录覆盖率）
    A6 竞品关注（LS6 / L6 分开，记录覆盖率）
    A7 下单阻碍（LS6 / L6 分开，记录覆盖率）
-   A8 不满意主题（暂缓）
+   A8 不满意主题（LS6 / L6 分开，记录覆盖率）
 
-> A4–A7 为**记录覆盖率**：分子是命中该主题的去重 `record_index` 数，分母是门店记录数（run 的记录数）。
+> A4–A8 为**记录覆盖率**：分子是命中该主题的去重 `record_index` 数，分母是门店记录数（run 的记录数）。
 > 同一记录可命中多个主题，故各行分数不可相加；编码条目数（mentions）作为附注保留。
 
 03 一线问题发现
@@ -74,8 +74,8 @@ python research_apps/product_expert/scripts/build_report.py research_apps/produc
 
 | 部分 | 内容 | 来源 |
 | --- | --- | --- |
-| A | 预设问题编码计数 | `preset_stats.json`（由 `preset_coding.json` 确定性聚合） |
-| A | 编码原文 | `preset_coding.json` 的 `quote` |
+| A | 预设问题/问卷计数 | v0.2 `survey_stats.json`（`derive_survey_stats.py` 直读问卷）；v0.1 `preset_stats.json`（由 `preset_coding.json` 确定性聚合） |
+| A | 编码原文 | v0.2 问卷选项/补充原文；v0.1 `preset_coding.json` 的 `quote` |
 | B | 问题语义、LLM 提炼 | `patterns.json` |
 | B | 提及次数、来源、复现层级 | `convergence.json` |
 | B | 一线原文 | `evidence.jsonl` |

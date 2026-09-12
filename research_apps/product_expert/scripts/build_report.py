@@ -51,11 +51,20 @@ RECURRENCE_LABEL = {
     "repeated": "Repeated（多店复现）",
     "isolated": "Isolated（单店孤立）",
 }
-STORE_OPS_CODE = ["footfall", "peak_hours", "leads", "test_drive", "lock_order", "walk_in"]
+STORE_OPS_CODE = ["footfall", "footfall_trend", "ls6_attention_share", "peak_hours", "leads", "test_drive", "lock_order", "walk_in"]
 STORE_OPS_LABEL = {
-    "footfall": "客流", "peak_hours": "高峰", "leads": "留资",
-    "test_drive": "试驾", "lock_order": "锁单/交付", "walk_in": "自然客流",
+    "footfall": "客流", "footfall_trend": "客流趋势", "ls6_attention_share": "关注LS6",
+    "peak_hours": "高峰", "leads": "留资", "test_drive": "试驾",
+    "lock_order": "锁单/交付", "walk_in": "自然客流",
 }
+STORE_OPS_TABLE = ["footfall", "footfall_trend", "ls6_attention_share", "peak_hours", "leads", "test_drive", "lock_order"]
+RANKING_TITLES = [
+    ("customer_concern", "客户关注主题"),
+    ("positive_feedback", "正向产品反馈"),
+    ("competitor_attention", "竞品关注"),
+    ("purchase_barrier", "下单阻碍"),
+    ("dissatisfaction_theme", "不满意主题"),
+]
 
 
 def load_json(path: Path):
@@ -82,7 +91,18 @@ def window_from(periods: list[dict]) -> str:
     return f"{fmt_md(min(p['start_date'] for p in periods))}–{fmt_md(max(p['end_date'] for p in periods))}"
 
 
-def scope_from(run, convergences) -> dict:
+def scope_from(run, convergences, pstats=None) -> dict:
+    if pstats and pstats.get("scope"):
+        s = pstats["scope"]
+        periods = s.get("support_periods") or []
+        return {
+            "run_id": run["run_id"],
+            "record_count": pstats.get("record_count") or run.get("record_count"),
+            "product_experts": s.get("product_experts", []),
+            "city_stores": s.get("city_stores", []),
+            "support_periods": periods,
+            "window": s.get("window") or window_from(periods),
+        }
     experts, stores = [], []
     periods = {}
     for c in convergences:
@@ -227,10 +247,41 @@ def store_ops_columns(record: dict) -> dict:
     return cols
 
 
+AVAILABILITY_PRESENT = {"display_available", "test_drive_available"}
+
+
+def availability_gaps(rows: list[dict]) -> list[dict]:
+    """A3 只列缺少展车或试驾车的门店×车型：有则不展示。"""
+    out = []
+    for r in rows:
+        disp = (r.get("display") or {}).get("code")
+        test = (r.get("test_drive") or {}).get("code")
+        if disp in AVAILABILITY_PRESENT and test in AVAILABILITY_PRESENT:
+            continue
+        out.append(r)
+    return out
+
+
+def availability_label(entry: dict | None) -> str:
+    """缺失状态（无展车/无试驾车/未到店/未开放）加 ❌ 标记；有则不标。"""
+    if not entry:
+        return "—"
+    label = entry.get("label") or "—"
+    if entry.get("code") not in AVAILABILITY_PRESENT:
+        return f"❌ {label}"
+    return label
+
+
+def pct_cell(count: int, denom: int) -> str:
+    if not denom:
+        return f"{count}/0"
+    return f"{count}/{denom}（{round(count / denom * 100)}%）"
+
+
 def scope_line(scope, evidence_count, problem_count, coding_count) -> str:
     return (f"{scope['record_count']} 条记录 · {len(scope['product_experts'])} 位专家 · "
             f"{len(scope['city_stores'])} 家门店 · {evidence_count} 条一线观察 · "
-            f"{problem_count} 个开放问题 · {coding_count} 条预设编码")
+            f"{problem_count} 个开放问题 · {coding_count} 条编码")
 
 
 # ----------------------------------------------------------------------------
@@ -241,7 +292,7 @@ def scope_line(scope, evidence_count, problem_count, coding_count) -> str:
 def build_markdown(run, patterns, convergences, findings, issues, evidence, pstats) -> str:
     pidx = {p["pattern_id"]: p for p in patterns}
     conv_by_pattern = {c["pattern_id"]: c for c in convergences}
-    scope = scope_from(run, convergences)
+    scope = scope_from(run, convergences, pstats)
     obs = research_observations(findings, conv_by_pattern)
     ordered = sorted(convergences, key=lambda c: (-c["counts"]["evidence_count"], c["pattern_id"]))
     top, rest = ordered[:DETAIL_LIMIT], ordered[DETAIL_LIMIT:]
@@ -260,10 +311,13 @@ def build_markdown(run, patterns, convergences, findings, issues, evidence, psta
             add(f"- {f['statement']}")
         add("")
 
-    # ---- 02 Preset Coding ----
+    # ---- 02 Preset Coding / Survey ----
+    is_survey = "mapping_version" in pstats
     add("# 02 业务主题扫描")
     add("")
-    add("> 预设问题编码：问题事先已知，LLM 只做编码，计数由脚本确定性聚合。")
+    add("> 结构化问卷：选择题由一线问卷直读，计数由 `derive_survey_stats.py` 确定性聚合，不经 LLM。"
+        if is_survey else
+        "> 预设问题编码：问题事先已知，LLM 只做编码，计数由脚本确定性聚合。")
     add("")
 
     add("## A1 门店支持概况")
@@ -281,43 +335,72 @@ def build_markdown(run, patterns, convergences, findings, issues, evidence, psta
     add("")
     add("## A2 现场客流情况")
     add("")
-    add("| 记录 | 专家 / 门店 | 客流 | 留资 | 试驾 | 锁单/交付 | 高峰 |")
-    add("| --- | --- | --- | --- | --- | --- | --- |")
+    add("| 记录 | 专家 / 门店 | " + " | ".join(STORE_OPS_LABEL[c] for c in STORE_OPS_TABLE) + " |")
+    add("| --- | --- | " + " | ".join(["---"] * len(STORE_OPS_TABLE)) + " |")
     for rec in pstats["store_ops"]["records"]:
         cols = store_ops_columns(rec)
-        add(f"| {rec['support_date']} | {rec['expert']} / {rec['store']} | "
-            f"{fmt_list(cols['footfall'])} | {fmt_list(cols['leads'])} | {fmt_list(cols['test_drive'])} | "
-            f"{fmt_list(cols['lock_order'])} | {fmt_list(cols['peak_hours'])} |")
+        cells = " | ".join(fmt_list(cols[c]) for c in STORE_OPS_TABLE)
+        add(f"| {rec['support_date']} | {rec['expert']} / {rec['store']} | {cells} |")
     add("")
     add("> 只统计门店经营字段中明确写出的内容；空值为未记录，不代表 0。")
     add("")
 
     add("---")
     add("")
-    add("## A3 展车状态")
+    add("## A3 展车 / 试驾车缺失报备")
     add("")
-    add("| 门店 | 车型 | 展车 | 试驾车 | 原文 |")
-    add("| --- | --- | --- | --- | --- |")
-    for r in pstats["availability"]["rows"]:
-        disp = r["display"]["label"] if r["display"] else "—"
-        test = r["test_drive"]["label"] if r["test_drive"] else "—"
-        quotes = "；".join(f"「{q}」" for q in r["quotes"])
-        add(f"| {r['store']} | {model_label(r['model'])} | {disp} | {test} | {quotes} |")
-    add("")
+    summary = (pstats.get("availability") or {}).get("summary")
+    gaps = availability_gaps(pstats["availability"]["rows"])
+    if summary:
+        denom = summary["denominator_records"]
+        add(f"> 覆盖率 =「报告该车型有展车/试驾车」的反馈条数 ÷ {denom} 条门店记录；❌ 标记缺失。")
+        add("")
+        add("| 车型 | 展车 | 试驾车 |")
+        add("| --- | --- | --- |")
+        for row in summary["by_model"]:
+            add(f"| {model_label(row['model'])} | {pct_cell(row['display_records'], denom)} "
+                f"| {pct_cell(row['test_drive_records'], denom)} |")
+        add("")
+        store_bits = " · ".join(
+            f"{model_label(row['model'])} {row['display_stores']}/{summary['denominator_stores']}"
+            for row in summary["by_model"]
+        )
+        add(f"> 门店维度（展车）：{store_bits}")
+        add("")
+    else:
+        add("> 只列出缺少展车或试驾车的门店×车型；两者都有则不再展示；❌ 标记缺失项。")
+        add("")
+    if not gaps:
+        add("本轮全部门店×车型均有展车与试驾车。")
+        add("")
+    else:
+        add(f"<details><summary>缺失明细（门店×车型，{len(gaps)}）</summary>")
+        add("")
+        add("| 门店 | 车型 | 展车 | 试驾车 | 原文 |")
+        add("| --- | --- | --- | --- | --- |")
+        for r in gaps:
+            disp = availability_label(r["display"])
+            test = availability_label(r["test_drive"])
+            quotes = "；".join(f"「{q}」" for q in r["quotes"])
+            add(f"| {r['store']} | {model_label(r['model'])} | {disp} | {test} | {quotes} |")
+        add("")
+        add("</details>")
+        add("")
 
     denom = scope["record_count"]
-    add(f"> A4–A7 为**记录覆盖率**：分子是命中该主题的去重 record_index 数，"
+    add(f"> A4–A8 为**记录覆盖率**：分子是命中该主题的去重 record_index 数，"
         f"分母是门店记录数（N={denom}）。同一记录可命中多个主题，故各行分数不可相加。")
     add("")
-    for gkey, title in [("customer_concern", "A4 客户关注主题"),
-                        ("positive_feedback", "A5 正向产品反馈"),
-                        ("competitor_attention", "A6 竞品关注"),
-                        ("purchase_barrier", "A7 下单阻碍")]:
-        group = pstats[gkey]
+    for idx, (gkey, title) in enumerate(RANKING_TITLES, start=4):
+        group = pstats.get(gkey)
         add("---")
         add("")
-        add(f"## {title}")
+        add(f"## A{idx} {title}")
         add("")
+        if not group:
+            add("本轮未启用。")
+            add("")
+            continue
         any_rows = False
         for model in MODELS:
             rows = ranked(group["counts"], model)
@@ -343,13 +426,16 @@ def build_markdown(run, patterns, convergences, findings, issues, evidence, psta
         if not any_rows:
             add("本轮 L6/LS6 无明确记录（unavailable）。")
             add("")
+        other_entry = next((r for r in group["counts"] if r["code"] == "other"), None)
+        if other_entry and other_entry.get("details"):
+            add("其他补充（未归类）：" + "；".join(other_entry["details"]))
+            add("")
 
-    add("---")
-    add("")
-    add("## A8 不满意主题")
-    add("")
-    add("暂缓启用：与开放问题发现的弱项重叠度高，待数据积累后再编码。")
-    add("")
+    ignored = pstats.get("ignored_other_values") or []
+    if ignored:
+        add(f"> A4–A8 共忽略无效「其他」填写 {len(ignored)} 条"
+            f"（{' / '.join(sorted({i['value'] for i in ignored}))}）；其余「其他」补充原文见上。")
+        add("")
 
     # ---- 03 Open Discovery ----
     add("# 03 一线问题发现")
@@ -400,9 +486,12 @@ def build_markdown(run, patterns, convergences, findings, issues, evidence, psta
 
     add("## 方法与 Runtime 追溯")
     add("")
-    add("- A 预设编码：问题事先已知，LLM 只编码，计数由 `derive_preset_stats.py` 聚合。")
+    add("- A 业务主题扫描：选择题由 `derive_survey_stats.py` 直读问卷列并确定性聚合；文本编码期（run_001）由 `derive_preset_stats.py` 聚合。"
+        if is_survey else
+        "- A 预设编码：问题事先已知，LLM 只编码，计数由 `derive_preset_stats.py` 聚合。")
     add("- B 开放发现：问题事先未知，Evidence → Issue → Pattern → Convergence。")
-    add("- 数字只读 `preset_stats.json` / `convergence.json`；一线原文逐字取自 `evidence.jsonl`，报告不生成、不改写任何原话。")
+    add("- 数字只读 `preset_stats.json`（v0.1）/ `survey_stats.json`（v0.2）/ `convergence.json`；"
+        "一线原文逐字取自 `evidence.jsonl`，报告不生成、不改写任何原话。")
     add("- 样本为定性、自报、非随机门店样本，用于发现问题与形成假设，不用于估计总体比例。")
     add("")
     add("| Pattern | pattern_key | 证据强度 | 复现 | 证据 | Convergence | Issues |")
@@ -434,7 +523,7 @@ def _chips(values):
 def build_html(run, patterns, convergences, findings, issues, evidence, pstats) -> str:
     pidx = {p["pattern_id"]: p for p in patterns}
     conv_by_pattern = {c["pattern_id"]: c for c in convergences}
-    scope = scope_from(run, convergences)
+    scope = scope_from(run, convergences, pstats)
     obs = research_observations(findings, conv_by_pattern)
     ordered = sorted(convergences, key=lambda c: (-c["counts"]["evidence_count"], c["pattern_id"]))
     top, rest = ordered[:DETAIL_LIMIT], ordered[DETAIL_LIMIT:]
@@ -527,8 +616,12 @@ footer{margin-top:40px;color:var(--soft);font-size:12px;letter-spacing:.04em}
     add("</section>")
 
     # 02
+    is_survey = "mapping_version" in pstats
+    sub = ("结构化问卷：选择题直读；计数由 derive_survey_stats.py 确定性聚合，不经 LLM"
+           if is_survey else
+           "预设问题编码：问题事先已知；LLM 只做编码；计数由脚本确定性聚合")
     add("<h2 class='sect'>02 业务主题扫描"
-        "<small>预设问题编码：问题事先已知；LLM 只做编码；计数由脚本确定性聚合</small></h2>")
+        f"<small>{sub}</small></h2>")
     add("<div class='grid'>")
 
     add("<section class='card span-2'>")
@@ -546,37 +639,63 @@ footer{margin-top:40px;color:var(--soft);font-size:12px;letter-spacing:.04em}
 
     add("<section class='card span-2'>")
     add("<h3><span class='n'>A2</span>现场客流情况</h3>")
-    add("<table><thead><tr><th>记录</th><th>专家 / 门店</th><th>客流</th><th>留资</th><th>试驾</th><th>锁单/交付</th><th>高峰</th></tr></thead><tbody>")
+    add("<table><thead><tr><th>记录</th><th>专家 / 门店</th>"
+        + "".join(f"<th>{_esc(STORE_OPS_LABEL[c])}</th>" for c in STORE_OPS_TABLE)
+        + "</tr></thead><tbody>")
     for rec in pstats["store_ops"]["records"]:
         c = store_ops_columns(rec)
+        cells = "".join(f"<td>{_esc(fmt_list(c[code]))}</td>" for code in STORE_OPS_TABLE)
         add(f"<tr><td>{_esc(rec['support_date'])}</td><td>{_esc(rec['expert'])} / {_esc(rec['store'])}</td>"
-            f"<td>{_esc(fmt_list(c['footfall']))}</td><td>{_esc(fmt_list(c['leads']))}</td>"
-            f"<td>{_esc(fmt_list(c['test_drive']))}</td><td>{_esc(fmt_list(c['lock_order']))}</td>"
-            f"<td>{_esc(fmt_list(c['peak_hours']))}</td></tr>")
+            f"{cells}</tr>")
     add("</tbody></table>")
     add("<p class='note'>只统计明确写出的内容；空值为未记录，不代表 0。</p>")
     add("</section>")
 
     add("<section class='card span-2'>")
-    add("<h3><span class='n'>A3</span>展车状态</h3>")
-    add("<table><thead><tr><th>门店</th><th>车型</th><th>展车</th><th>试驾车</th><th>原文</th></tr></thead><tbody>")
-    for r in pstats["availability"]["rows"]:
-        disp = r["display"]["label"] if r["display"] else "—"
-        test = r["test_drive"]["label"] if r["test_drive"] else "—"
-        quotes = "；".join(f"「{q}」" for q in r["quotes"])
-        add(f"<tr><td>{_esc(r['store'])}</td><td>{_esc(model_label(r['model']))}</td><td>{_esc(disp)}</td>"
-            f"<td>{_esc(test)}</td><td>{_esc(quotes)}</td></tr>")
-    add("</tbody></table>")
+    add("<h3><span class='n'>A3</span>展车 / 试驾车缺失报备</h3>")
+    summary = (pstats.get("availability") or {}).get("summary")
+    gaps = availability_gaps(pstats["availability"]["rows"])
+    if summary:
+        denom = summary["denominator_records"]
+        add("<p class='note'>覆盖率 =「报告该车型有展车/试驾车」的反馈条数 ÷ " + str(denom)
+            + " 条门店记录；❌ 标记缺失。</p>")
+        add("<table><thead><tr><th>车型</th><th>展车</th><th>试驾车</th></tr></thead><tbody>")
+        for row in summary["by_model"]:
+            add(f"<tr><td>{_esc(model_label(row['model']))}</td>"
+                f"<td>{_esc(pct_cell(row['display_records'], denom))}</td>"
+                f"<td>{_esc(pct_cell(row['test_drive_records'], denom))}</td></tr>")
+        add("</tbody></table>")
+        store_bits = " · ".join(
+            f"{model_label(row['model'])} {row['display_stores']}/{summary['denominator_stores']}"
+            for row in summary["by_model"]
+        )
+        add("<p class='note'>门店维度（展车）：" + _esc(store_bits) + "</p>")
+    else:
+        add("<p class='note'>只列出缺少展车或试驾车的门店×车型；两者都有则不再展示；❌ 标记缺失项。</p>")
+    if not gaps:
+        add("<p class='note'>本轮全部门店×车型均有展车与试驾车。</p>")
+    else:
+        add(f"<details class='other'><summary>缺失明细（门店×车型，{len(gaps)}）</summary>")
+        add("<table><thead><tr><th>门店</th><th>车型</th><th>展车</th><th>试驾车</th><th>原文</th></tr></thead><tbody>")
+        for r in gaps:
+            disp = availability_label(r["display"])
+            test = availability_label(r["test_drive"])
+            quotes = "；".join(f"「{q}」" for q in r["quotes"])
+            add(f"<tr><td>{_esc(r['store'])}</td><td>{_esc(model_label(r['model']))}</td><td>{_esc(disp)}</td>"
+                f"<td>{_esc(test)}</td><td>{_esc(quotes)}</td></tr>")
+        add("</tbody></table>")
+        add("</details>")
     add("</section>")
 
     denom = scope["record_count"]
-    for idx, (gkey, title) in enumerate([("customer_concern", "客户关注主题"),
-                                          ("positive_feedback", "正向产品反馈"),
-                                          ("competitor_attention", "竞品关注"),
-                                          ("purchase_barrier", "下单阻碍")], start=4):
-        group = pstats[gkey]
+    for idx, (gkey, title) in enumerate(RANKING_TITLES, start=4):
+        group = pstats.get(gkey)
         add("<section class='card span-2'>")
         add(f"<h3><span class='n'>A{idx}</span>{_esc(title)}</h3>")
+        if not group:
+            add("<p class='note'>本轮未启用。</p>")
+            add("</section>")
+            continue
         add("<div class='cols'>")
         has = False
         for model in MODELS:
@@ -607,15 +726,18 @@ footer{margin-top:40px;color:var(--soft);font-size:12px;letter-spacing:.04em}
                 _esc("、".join(f"{r['label']} {r['record_count']}/{denom}（编码 {r['mentions']}）" for r in st)) + "</p>")
         if not has:
             add("<p class='note'>本轮 L6/LS6 无明确记录（unavailable）。</p>")
+        other_entry = next((r for r in group["counts"] if r["code"] == "other"), None)
+        if other_entry and other_entry.get("details"):
+            add("<p class='other-models'>其他补充（未归类）："
+                + _esc("；".join(other_entry["details"])) + "</p>")
         add("</section>")
 
-    add("<section class='card span-2'>")
-    add("<h3><span class='n'>A8</span>不满意主题</h3>")
-    add("<p class='note'>暂缓启用：与开放问题发现的弱项重叠度高，待数据积累后再编码。</p>")
-    add("</section>")
-
     add("</div>")
-    add(f"<p class='note'>A4–A7 为<strong>记录覆盖率</strong>：分子是命中该主题的去重 record_index 数，"
+    ignored = pstats.get("ignored_other_values") or []
+    if ignored:
+        add("<p class='note'>A4–A8 共忽略无效「其他」填写 " + str(len(ignored)) + " 条（"
+            + _esc(" / ".join(sorted({i["value"] for i in ignored}))) + "）；其余「其他」补充原文见上。</p>")
+    add(f"<p class='note'>A4–A8 为<strong>记录覆盖率</strong>：分子是命中该主题的去重 record_index 数，"
         f"分母是门店记录数（N={denom}）。同一记录可命中多个主题，故各行分数不可相加。</p>")
 
     # B
@@ -653,9 +775,12 @@ footer{margin-top:40px;color:var(--soft);font-size:12px;letter-spacing:.04em}
     add("<p class='temporal'>Baseline only：本期为首个基线窗口，暂无跨期趋势。</p>")
 
     add("<details class='appendix'><summary>方法与 Runtime 追溯</summary><ul>")
-    add("<li>A 预设编码：问题事先已知，LLM 只编码，计数由 <code>derive_preset_stats.py</code> 聚合。</li>")
+    add("<li>A 业务主题扫描：选择题由 <code>derive_survey_stats.py</code> 直读问卷列并确定性聚合；"
+        "文本编码期（run_001）由 <code>derive_preset_stats.py</code> 聚合。</li>" if is_survey else
+        "<li>A 预设编码：问题事先已知，LLM 只编码，计数由 <code>derive_preset_stats.py</code> 聚合。</li>")
     add("<li>B 开放发现：问题事先未知，Evidence → Issue → Pattern → Convergence。</li>")
-    add("<li>数字只读 <code>preset_stats.json</code> / <code>convergence.json</code>；一线原文逐字取自 "
+    add("<li>数字只读 <code>preset_stats.json</code>（v0.1）/ <code>survey_stats.json</code>（v0.2）/"
+        "<code>convergence.json</code>；一线原文逐字取自 "
         "<code>evidence.jsonl</code>，报告不生成、不改写任何原话。</li>")
     add("<li>样本为定性、自报、非随机门店样本，不用于估计总体比例。</li>")
     add("</ul><table><thead><tr><th>Pattern</th><th>pattern_key</th><th>证据强度</th><th>复现</th>"
@@ -686,7 +811,11 @@ def main() -> int:
     findings = load_json(run_dir / "findings.json")
     issues = {r["issue_id"]: r for r in load_json(run_dir / "issues.json")}
     evidence = {r["evidence_id"]: r for r in load_jsonl(run_dir / "evidence.jsonl")}
-    pstats = load_json(run_dir / "preset_stats.json")
+    survey_path = run_dir / "survey_stats.json"
+    if survey_path.exists():
+        pstats = load_json(survey_path)
+    else:
+        pstats = load_json(run_dir / "preset_stats.json")
 
     out_dir = args.output_dir or (APP_DIR / "reports" / run["run_id"])
     out_dir.mkdir(parents=True, exist_ok=True)
