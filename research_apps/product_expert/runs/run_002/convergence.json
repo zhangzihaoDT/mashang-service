@@ -1,0 +1,424 @@
+[
+  {
+    "convergence_id": "CONV-0001",
+    "pattern_id": "PAT-0001",
+    "pattern_key": "brand_channel_attraction_constraint",
+    "run_id": "run_002",
+    "source_issue_ids": [
+      "ISS-0001",
+      "ISS-0007"
+    ],
+    "source_evidence_ids": [
+      "EV-0001",
+      "EV-0014",
+      "EV-0016",
+      "EV-0008",
+      "EV-0011",
+      "EV-0013"
+    ],
+    "attribution": {
+      "product_experts": [
+        "吴昊",
+        "孙佳佳",
+        "刘同帅",
+        "丁一航",
+        "张蓉",
+        "宋平翰"
+      ],
+      "city_stores": [
+        "遵义·吾悦广场快闪",
+        "贵阳·智己汽车贵阳悦然时光体验中心",
+        "重庆·南岸交付中心",
+        "重庆·重庆礼嘉天街e",
+        "重庆·渝北交付中心"
+      ],
+      "support_periods": [
+        {
+          "raw": "2026/09/11",
+          "start_date": "2026-09-11",
+          "end_date": "2026-09-11"
+        },
+        {
+          "raw": "2026/09/12",
+          "start_date": "2026-09-12",
+          "end_date": "2026-09-12"
+        }
+      ]
+    },
+    "counts": {
+      "evidence_count": 6,
+      "issue_count": 2,
+      "product_expert_count": 6,
+      "city_store_count": 5,
+      "support_period_count": 2,
+      "series_count": 2
+    },
+    "cross_store": true,
+    "cross_series": true,
+    "recurrence": "systemic",
+    "evidence_strength": "strong",
+    "temporal_comparison": {
+      "status": "baseline_only"
+    },
+    "derived_at": "2026-09-12"
+  },
+  {
+    "convergence_id": "CONV-0002",
+    "pattern_id": "PAT-0002",
+    "pattern_key": "adas_capability_brand_trust",
+    "run_id": "run_002",
+    "source_issue_ids": [
+      "ISS-0002"
+    ],
+    "source_evidence_ids": [
+      "EV-0003",
+      "EV-0020",
+      "EV-0022"
+    ],
+    "attribution": {
+      "product_experts": [
+        "吴昊",
+        "王昊东",
+        "王浩铭"
+      ],
+      "city_stores": [
+        "遵义·吾悦广场快闪",
+        "贵阳·贵阳万象汇",
+        "重庆·重庆金菱车世界车城店"
+      ],
+      "support_periods": [
+        {
+          "raw": "2026/09/11",
+          "start_date": "2026-09-11",
+          "end_date": "2026-09-11"
+        },
+        {
+          "raw": "2026/09/12",
+          "start_date": "2026-09-12",
+          "end_date": "2026-09-12"
+        }
+      ]
+    },
+    "counts": {
+      "evidence_count": 3,
+      "issue_count": 1,
+      "product_expert_count": 3,
+      "city_store_count": 3,
+      "support_period_count": 2,
+      "series_count": 2
+    },
+    "cross_store": true,
+    "cross_series": true,
+    "recurrence": "systemic",
+    "evidence_strength": "strong",
+    "temporal_comparison": {
+      "status": "baseline_only"
+    },
+    "derived_at": "2026-09-12"
+  },
+  {
+    "convergence_id": "CONV-0003",
+    "pattern_id": "PAT-0003",
+    "pattern_key": "configuration_decontent_perception",
+    "run_id": "run_002",
+    "source_issue_ids": [
+      "ISS-0003"
+    ],
+    "source_evidence_ids": [
+      "EV-0007"
+    ],
+    "attribution": {
+      "product_experts": [
+        "吴臻熠"
+      ],
+      "city_stores": [
+        "重庆万州·万州万达慢闪"
+      ],
+      "support_periods": [
+        {
+          "raw": "2026/09/11",
+          "start_date": "2026-09-11",
+          "end_date": "2026-09-11"
+        }
+      ]
+    },
+    "counts": {
+      "evidence_count": 1,
+      "issue_count": 1,
+      "product_expert_count": 1,
+      "city_store_count": 1,
+      "support_period_count": 1,
+      "series_count": 2
+    },
+    "cross_store": false,
+    "cross_series": true,
+    "recurrence": "isolated",
+    "evidence_strength": "weak",
+    "temporal_comparison": {
+      "status": "baseline_only"
+    },
+    "derived_at": "2026-09-12"
+  },
+  {
+    "convergence_id": "CONV-0004",
+    "pattern_id": "PAT-0004",
+    "pattern_key": "interior_luxury_material_perception",
+    "run_id": "run_002",
+    "source_issue_ids": [
+      "ISS-0004"
+    ],
+    "source_evidence_ids": [
+      "EV-0005",
+      "EV-0010",
+      "EV-0015"
+    ],
+    "attribution": {
+      "product_experts": [
+        "吴昊",
+        "丁一航",
+        "孙佳佳"
+      ],
+      "city_stores": [
+        "遵义·吾悦广场快闪",
+        "重庆·南岸交付中心",
+        "贵阳·智己汽车贵阳悦然时光体验中心"
+      ],
+      "support_periods": [
+        {
+          "raw": "2026/09/11",
+          "start_date": "2026-09-11",
+          "end_date": "2026-09-11"
+        },
+        {
+          "raw": "2026/09/12",
+          "start_date": "2026-09-12",
+          "end_date": "2026-09-12"
+        }
+      ]
+    },
+    "counts": {
+      "evidence_count": 3,
+      "issue_count": 1,
+      "product_expert_count": 3,
+      "city_store_count": 3,
+      "support_period_count": 2,
+      "series_count": 4
+    },
+    "cross_store": true,
+    "cross_series": true,
+    "recurrence": "systemic",
+    "evidence_strength": "strong",
+    "temporal_comparison": {
+      "status": "baseline_only"
+    },
+    "derived_at": "2026-09-12"
+  },
+  {
+    "convergence_id": "CONV-0005",
+    "pattern_id": "PAT-0005",
+    "pattern_key": "demand_wait_for_new_model",
+    "run_id": "run_002",
+    "source_issue_ids": [
+      "ISS-0005"
+    ],
+    "source_evidence_ids": [
+      "EV-0012",
+      "EV-0024",
+      "EV-0026"
+    ],
+    "attribution": {
+      "product_experts": [
+        "张蓉",
+        "王浩铭",
+        "陈晓雪"
+      ],
+      "city_stores": [
+        "重庆·重庆礼嘉天街e",
+        "重庆·重庆金菱车世界车城店",
+        "重庆·重庆时代龙湖天街"
+      ],
+      "support_periods": [
+        {
+          "raw": "2026/09/12",
+          "start_date": "2026-09-12",
+          "end_date": "2026-09-12"
+        }
+      ]
+    },
+    "counts": {
+      "evidence_count": 3,
+      "issue_count": 1,
+      "product_expert_count": 3,
+      "city_store_count": 3,
+      "support_period_count": 1,
+      "series_count": 2
+    },
+    "cross_store": true,
+    "cross_series": true,
+    "recurrence": "systemic",
+    "evidence_strength": "strong",
+    "temporal_comparison": {
+      "status": "baseline_only"
+    },
+    "derived_at": "2026-09-12"
+  },
+  {
+    "convergence_id": "CONV-0006",
+    "pattern_id": "PAT-0006",
+    "pattern_key": "model_positioning_audience_fit",
+    "run_id": "run_002",
+    "source_issue_ids": [
+      "ISS-0006"
+    ],
+    "source_evidence_ids": [
+      "EV-0002",
+      "EV-0018",
+      "EV-0027",
+      "EV-0028"
+    ],
+    "attribution": {
+      "product_experts": [
+        "吴昊",
+        "王昊东",
+        "刘心怡"
+      ],
+      "city_stores": [
+        "遵义·吾悦广场快闪",
+        "贵阳·贵阳万象汇",
+        "贵阳·万象汇"
+      ],
+      "support_periods": [
+        {
+          "raw": "2026/09/11",
+          "start_date": "2026-09-11",
+          "end_date": "2026-09-11"
+        },
+        {
+          "raw": "2026/09/12",
+          "start_date": "2026-09-12",
+          "end_date": "2026-09-12"
+        }
+      ]
+    },
+    "counts": {
+      "evidence_count": 4,
+      "issue_count": 1,
+      "product_expert_count": 3,
+      "city_store_count": 3,
+      "support_period_count": 2,
+      "series_count": 4
+    },
+    "cross_store": true,
+    "cross_series": true,
+    "recurrence": "systemic",
+    "evidence_strength": "strong",
+    "temporal_comparison": {
+      "status": "baseline_only"
+    },
+    "derived_at": "2026-09-12"
+  },
+  {
+    "convergence_id": "CONV-0007",
+    "pattern_id": "PAT-0007",
+    "pattern_key": "verified_product_service_strengths",
+    "run_id": "run_002",
+    "source_issue_ids": [
+      "ISS-0008",
+      "ISS-0009",
+      "ISS-0010",
+      "ISS-0013"
+    ],
+    "source_evidence_ids": [
+      "EV-0009",
+      "EV-0017",
+      "EV-0021",
+      "EV-0023",
+      "EV-0019",
+      "EV-0025",
+      "EV-0029",
+      "EV-0030"
+    ],
+    "attribution": {
+      "product_experts": [
+        "丁一航",
+        "刘同帅",
+        "王昊东",
+        "王浩铭",
+        "吴昊"
+      ],
+      "city_stores": [
+        "重庆·南岸交付中心",
+        "贵阳·智己汽车贵阳悦然时光体验中心",
+        "贵阳·贵阳万象汇",
+        "重庆·重庆金菱车世界车城店",
+        "遵义·吾悦广场快闪"
+      ],
+      "support_periods": [
+        {
+          "raw": "2026/09/12",
+          "start_date": "2026-09-12",
+          "end_date": "2026-09-12"
+        }
+      ]
+    },
+    "counts": {
+      "evidence_count": 8,
+      "issue_count": 4,
+      "product_expert_count": 5,
+      "city_store_count": 5,
+      "support_period_count": 1,
+      "series_count": 2
+    },
+    "cross_store": true,
+    "cross_series": true,
+    "recurrence": "systemic",
+    "evidence_strength": "strong",
+    "temporal_comparison": {
+      "status": "baseline_only"
+    },
+    "derived_at": "2026-09-12"
+  },
+  {
+    "convergence_id": "CONV-0008",
+    "pattern_id": "PAT-0008",
+    "pattern_key": "competitor_smart_space_benchmark",
+    "run_id": "run_002",
+    "source_issue_ids": [
+      "ISS-0012"
+    ],
+    "source_evidence_ids": [
+      "EV-0006"
+    ],
+    "attribution": {
+      "product_experts": [
+        "吴昊"
+      ],
+      "city_stores": [
+        "遵义·吾悦广场快闪"
+      ],
+      "support_periods": [
+        {
+          "raw": "2026/09/11",
+          "start_date": "2026-09-11",
+          "end_date": "2026-09-11"
+        }
+      ]
+    },
+    "counts": {
+      "evidence_count": 1,
+      "issue_count": 1,
+      "product_expert_count": 1,
+      "city_store_count": 1,
+      "support_period_count": 1,
+      "series_count": 1
+    },
+    "cross_store": false,
+    "cross_series": false,
+    "recurrence": "isolated",
+    "evidence_strength": "weak",
+    "temporal_comparison": {
+      "status": "baseline_only"
+    },
+    "derived_at": "2026-09-12"
+  }
+]

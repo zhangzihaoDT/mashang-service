@@ -1,0 +1,33 @@
+{
+  "case_id": "case_004_single_day_support_date",
+  "description": "检验 Convergence 能把每日反馈的单日 support_date（如 2026/09/11）标准化为 start=end 的 ISO 区间，并据此派生日级 support_period_count；同时验证 run_002 的品牌/渠道 pattern 判 systemic / strong。",
+  "stage": "convergence",
+  "input_ref": {
+    "run_id": "run_002",
+    "pattern_key": "brand_channel_attraction_constraint",
+    "pattern_id": "PAT-0001"
+  },
+  "expected": {
+    "support_periods": [
+      {"raw": "2026/09/11", "start_date": "2026-09-11", "end_date": "2026-09-11"},
+      {"raw": "2026/09/12", "start_date": "2026-09-12", "end_date": "2026-09-12"}
+    ],
+    "counts": {
+      "evidence_count": 6,
+      "issue_count": 2,
+      "product_expert_count": 6,
+      "city_store_count": 5,
+      "support_period_count": 2,
+      "series_count": 2
+    },
+    "recurrence": "systemic",
+    "evidence_strength": "strong",
+    "temporal_comparison_status": "baseline_only"
+  },
+  "metrics": [
+    "support_date_normalized_single_day",
+    "counts_match",
+    "recurrence_match",
+    "evidence_strength_match"
+  ]
+}

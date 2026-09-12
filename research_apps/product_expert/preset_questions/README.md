@@ -29,10 +29,35 @@ LLM = 编码器            LLM = 发现器
 
 ## 文件
 
-- `taxonomy.json`：预设问题与受控 code（含 `taxonomy_version`）。
-- `../schemas/preset_coding.schema.json`：编码条目结构。
-- `../runs/<run_id>/preset_coding.json`：某次 run 的编码结果。
-- `../runs/<run_id>/preset_stats.json`：由 `derive_preset_stats.py` 派生的计数。
+- `taxonomy.json`：预设问题与受控 code（含 `taxonomy_version`，当前 v0.2）。
+- `taxonomy_v0.1.json`：v0.1 文本编码期 taxonomy（归档；复现 run_001 时用 `--taxonomy taxonomy_v0.1.json`）。
+- `daily_feedback_mapping.json`：v0.2 问卷「列/选项 → code」确定性映射。
+- `../schemas/preset_coding.schema.json`：v0.1 编码条目结构。
+- `../schemas/survey_stats.schema.json`：v0.2 结构化统计结构。
+- `../scripts/derive_survey_stats.py`：v0.2 确定性解析（无 LLM）。
+- `../scripts/derive_preset_stats.py`：v0.1 编码聚合。
+- `../runs/<run_id>/preset_coding.json` / `preset_stats.json`：v0.1 产物。
+- `../runs/<run_id>/survey_stats.json`：v0.2 产物。
+
+## 版本与数据说明
+
+### v0.2（2026-09-12 起，run_002）
+
+源表为『产品专家支持每日反馈』：**前段选择题**，**后段自由文本**。因此：
+
+- 选择题（客流/展车/试驾车/客户关注/满意点/竞品/下单原因/不满意主题）由
+  `derive_survey_stats.py` **直读问卷列**，不经 LLM；`taxonomy.json` v0.2 与选项一一对应。
+- 自由文本（`daily_impression` / `product_issue_*` / `competitor_comment`）走 Open Discovery。
+- `dissatisfaction_theme` **启用**（问卷已采集）；v0.2.1 增 `configuration`（配置/底盘）承接「其他」中的诉求。
+- 「其他-补充内容」确定性处理：`other_aliases` 命中 → 归入对应 code；全局
+  `ignore_other_values`（`无` / `没有表现不满` / `未有L6展车` / `未有L6竞品`）→ 整条忽略并计入
+  `ignored_other_values` 审计；其余保留 `other`，原文渲染进报告「其他补充」。
+- 问卷未采集留资/试驾/锁单计数与「未到店/未开放」语义，对应 code 保留但标 unavailable。
+
+### v0.1（文本编码期，run_001，归档）
+
+源表只有 10 个自由文本列，不含独立选择题字段，故上述各 group 均为 `coded_from_text`，
+`dissatisfaction_theme` 暂缓。任何未在文本中明确出现的项显示为 **unavailable（未记录）**，不编造。
 
 ## 编码纪律
 
@@ -46,18 +71,8 @@ LLM = 编码器            LLM = 发现器
 
 ## 与 Open Discovery 的边界
 
-Preset Coding 回答：“预设问题在样本中各出现了多少次？”
+业务主题扫描回答：“预设问题在样本中各出现了多少次？”
 
 Open Discovery 回答：“原始文本里还发现了哪些事先没有预设的问题？”
 
 二者合在一起：既不丢失业务已知指标，也不限制模型发现未知问题。
-
-## 当前数据说明（run_001）
-
-当前源表只有 10 列，不含独立的「客流高峰 / 展车 / 试驾车 / 客户关心主题 / 满意点 / 竞品 /
-下单核心原因 / 不满意主题」字段。因此：
-
-- `store_ops` / `availability` / `customer_concern` / `positive_feedback` /
-  `competitor_attention` / `purchase_barrier` 均为 `coded_from_text`，从自由文本抽取；
-- `dissatisfaction_theme` 暂缓启用；
-- 任何未在文本中明确出现的问题，报告中显示为 **unavailable（未记录）**，不编造。

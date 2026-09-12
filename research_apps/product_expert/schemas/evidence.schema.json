@@ -59,6 +59,11 @@
             "ls8_ls9_suggestion",
             "store_sales",
             "store_impression",
+            "daily_impression",
+            "product_issue_ls6",
+            "product_issue_l6",
+            "product_issue_ls8_ls9",
+            "competitor_comment",
             "other"
           ],
           "description": "证据来自原始表的哪个字段"

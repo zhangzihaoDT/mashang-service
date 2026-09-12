@@ -1,0 +1,10 @@
+{
+  "run_id": "run_002",
+  "executed_at": "2026-09-12",
+  "study_year": 2026,
+  "record_count": 12,
+  "dataset": "/Users/zihao_/Documents/coding/dataset/original/L6 M2_LS6 M3 产品专家门店支持信息收集汇总_产品专家支持每日反馈_收集结果.csv",
+  "method": ["workflow/issue_discovery.md", "workflow/issue_review.md", "workflow/convergence.md"],
+  "taxonomy_version": "0.2.1",
+  "notes": "数据源切换为『产品专家支持每日反馈』问卷：前段选择题由 derive_survey_stats.py 确定性解析（survey_stats.json），后段自由文本走 Open Discovery。study_year 用于 support_date 标准化。run_001 为文本编码期历史基线，保留归档。"
+}

@@ -17,5 +17,6 @@
 | 可追溯性 | 每个 issue 是否可回到 evidence 与原始记录 |
 | Attribution 派生 | Convergence 的三维来源是否与 evidence.source_ref 一致 |
 | 复现层级 | `recurrence` / `evidence_strength` 是否与 `convergence.md` 冻结规则一致 |
-| 时间标准化 | `support_date` 是否按 run 的 `study_year` 标准化，未猜测年份 |
+| 时间标准化 | `support_date` 是否按 run 的 `study_year` 标准化，未猜测年份（含 v0.2 单日日期） |
 | 单一事实来源 | Pattern/Finding 是否不再内联统计字段 |
+| 问卷确定性 | 选择题是否直读问卷列、选项全部命中 mapping、重复运行 counts 一致 |

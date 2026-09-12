@@ -1,0 +1,61 @@
+{
+  "case_id": "case_003_survey_determinism",
+  "description": "检验『产品专家支持每日反馈』选择题是否由 derive_survey_stats.py 确定性直读：同一 CSV 重复运行应得到相同 counts；选项全部命中 mapping（unmapped_options 为空）。",
+  "stage": "survey",
+  "input_ref": {
+    "run_id": "run_002",
+    "dataset": "/Users/zihao_/Documents/coding/dataset/original/L6 M2_LS6 M3 产品专家支持每日反馈_收集结果.csv"
+  },
+  "expected": {
+    "record_count": 12,
+    "coding_count": 289,
+    "unmapped_options": [],
+    "groups": {
+      "customer_concern": {
+        "price_incentive": {"by_model": {"LS6": 12, "L6": 8}},
+        "brand_warranty_service": {"by_model": {"LS6": 9, "L6": 6}}
+      },
+      "positive_feedback": {
+        "catl_battery": {"by_model": {"LS6": 8, "L6": 8}},
+        "rear_steering": {"by_model": {"LS6": 9, "L6": 7}}
+      },
+      "competitor_attention": {
+        "xiaomi_su7": {"by_model": {"L6": 11}},
+        "xiaomi_yu7": {"by_model": {"LS6": 6}},
+        "zeekr_7x": {"by_model": {"LS6": 6}}
+      },
+      "purchase_barrier": {
+        "brand_trust_after_sales": {"by_model": {"LS6": 6, "L6": 3}},
+        "competitor_comparison": {"by_model": {"LS6": 5, "L6": 7}}
+      },
+      "dissatisfaction_theme": {
+        "space": {"by_model": {"L6": 3}},
+        "exterior_interior": {"by_model": {"LS6": 4}}
+      }
+    },
+    "store_ops": {
+      "record_count": 12,
+      "ls6_attention_share_format": "percent"
+    },
+    "availability": {
+      "row_count": 40,
+      "models": ["LS6", "L6", "LS8", "LS9"],
+      "summary": {
+        "denominator_records": 12,
+        "denominator_stores": 10,
+        "by_model": [
+          {"model": "LS6", "display_records": 12, "test_drive_records": 12, "display_stores": 10, "test_drive_stores": 10},
+          {"model": "L6", "display_records": 9, "test_drive_records": 11, "display_stores": 8, "test_drive_stores": 9},
+          {"model": "LS8", "display_records": 11, "test_drive_records": 11, "display_stores": 9, "test_drive_stores": 9},
+          {"model": "LS9", "display_records": 8, "test_drive_records": 7, "display_stores": 7, "test_drive_stores": 6}
+        ]
+      }
+    }
+  },
+  "metrics": [
+    "counts_match",
+    "unmapped_empty",
+    "deterministic_rerun",
+    "option_code_coverage"
+  ]
+}

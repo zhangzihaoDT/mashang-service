@@ -1,0 +1,141 @@
+{
+  "mapping_version": "0.2.1",
+  "taxonomy_version": "0.2.1",
+  "description": "『产品专家支持每日反馈』问卷 → 确定性统计映射。列名/选项与问卷导出原样对应；选择题由 derive_survey_stats.py 直读，不经 LLM。taxonomy.json(v0.2.1) 提供 code→label。",
+  "ignore_other_values": ["无", "没有表现不满", "未有L6展车", "未有L6竞品"],
+  "record_meta": {
+    "submission_id": "自动编号",
+    "submitter": "提交人",
+    "expert": "产品专家姓名",
+    "city": "支援城市",
+    "store": "支援门店",
+    "support_date": "提交时间"
+  },
+  "store_ops": {
+    "fields": [
+      {"code": "footfall", "column": "今日门店客流（组）", "kind": "value"},
+      {"code": "peak_hours", "column": "客流高峰时段", "kind": "value"},
+      {"code": "footfall_trend", "column": "客流相比往常如何", "kind": "value"},
+      {"code": "ls6_attention_share", "column": "关注LS6的客户占比", "kind": "percent"}
+    ]
+  },
+  "availability": {
+    "models": ["LS6", "L6", "LS8", "LS9"],
+    "display_column": "门店展车有哪些",
+    "test_drive_column": "门店试驾车有哪些"
+  },
+  "groups": {
+    "customer_concern": {
+      "sources": [
+        {"model": "LS6", "column": "客户关心的主题——LS6", "other_column": "客户关心的主题——LS6-其他-补充内容"},
+        {"model": "L6", "column": "客户关心的主题——L6", "other_column": "客户关心的主题——L6-其他-补充内容"}
+      ],
+      "options": {
+        "价格/权益/优惠": "price_incentive",
+        "续航/电池": "range_battery",
+        "智驾": "adas",
+        "空间/内外饰": "space_exterior_interior",
+        "品牌/质保/售后": "brand_warranty_service",
+        "配置/新老款差异": "configuration_year_diff",
+        "上市/试驾/交付时间": "listing_timing",
+        "智舱": "smart_cockpit",
+        "其他": "other"
+      },
+      "other_aliases": {}
+    },
+    "positive_feedback": {
+      "sources": [
+        {"model": "LS6", "column": "客户满意的产品点——LS6", "other_column": "客户满意的产品点——LS6-其他-补充内容"},
+        {"model": "L6", "column": "客户感兴趣的产品点——L6", "other_column": "客户感兴趣的产品点——L6-其他-补充内容"}
+      ],
+      "options": {
+        "B&O音响": "bo_audio",
+        "主驾机械按摩": "mechanical_massage",
+        "智能冷暖冰箱": "fridge",
+        "四门电吸门": "soft_close_door",
+        "内饰质感（麂皮绒顶棚等）": "interior_material",
+        "782km续航": "range_782",
+        "850km续航": "range_850",
+        "后轮转向（含转弯半径/驾驶灵巧）": "rear_steering",
+        "前备箱（空间/敲一敲/电吸）": "frunk",
+        "智驾硬件（芯片/雷达等）": "adas_hardware",
+        "IM Claw 龙虾智能体": "im_claw",
+        "宁德时代电池": "catl_battery",
+        "线控转向（含相关安全增益）": "steer_by_wire",
+        "四驱": "awd",
+        "空气悬架/电控阻尼调节": "air_suspension",
+        "整体美学设计（Prof. JimmyChoo 高定设计等）": "jimmy_choo_design",
+        "其他": "other"
+      },
+      "other_aliases": {
+        "隔音": "nvh"
+      }
+    },
+    "competitor_attention": {
+      "sources": [
+        {"model": "LS6", "column": "用户关心的竞品——LS6", "other_column": "用户关心的竞品——LS6-其他-补充内容"},
+        {"model": "L6", "column": "用户关心的竞品——L6", "other_column": "用户关心的竞品——L6-其他-补充内容"}
+      ],
+      "options": {
+        "理想i6": "li_auto_i6",
+        "理想L6": "li_auto_l6",
+        "小米YU7": "xiaomi_yu7",
+        "小米N70": "xiaomi_n70",
+        "小米SU7": "xiaomi_su7",
+        "特斯拉Model Y": "tesla_model_y",
+        "特斯拉Model 3": "tesla_model_3",
+        "极氪7X": "zeekr_7x",
+        "极氪007/007GT": "zeekr_007",
+        "阿维塔07/07L": "avatr_07",
+        "阿维塔06/06T": "avatr_06",
+        "华为系（问界M6/智界R7）": "huawei_wenjie_zhijie",
+        "华为系（尚界Z7/Z7T）": "huawei_shangjie",
+        "海狮08": "byd_sealion08",
+        "岚图知音": "lantu_zhin",
+        "其他": "other"
+      },
+      "other_aliases": {
+        "岚图知音": "lantu_zhin",
+        "海狮08": "byd_sealion08"
+      }
+    },
+    "purchase_barrier": {
+      "sources": [
+        {"model": "LS6", "column": "影响下单的核心原因——LS6", "other_column": "影响下单的核心原因——LS6-其他-补充内容"},
+        {"model": "L6", "column": "影响下单的核心原因——L6", "other_column": "影响下单的核心原因——L6-其他-补充内容"}
+      ],
+      "options": {
+        "品牌/信任顾虑": "brand_trust_after_sales",
+        "对比竞品中": "competitor_comparison",
+        "价格不满（等价格优惠）": "price_incentive",
+        "外观/内饰不满": "exterior_interior_dissatisfaction",
+        "其他": "other"
+      },
+      "other_aliases": {}
+    },
+    "dissatisfaction_theme": {
+      "sources": [
+        {"model": "LS6", "column": "客户最不满意的主题——LS6", "other_column": "客户最不满意的主题——LS6-其他-补充内容"},
+        {"model": "L6", "column": "客户最不满意的主题——L6", "other_column": "客户最不满意的主题——L6-其他-补充内容"}
+      ],
+      "options": {
+        "内外饰": "exterior_interior",
+        "空间": "space",
+        "品牌/质保/售后": "brand_warranty_service",
+        "智驾": "adas",
+        "价格/权益/优惠": "price_incentive",
+        "其他": "other"
+      },
+      "other_aliases": {
+        "要CDC标配": "configuration"
+      }
+    }
+  },
+  "text_sources": {
+    "daily_impression": "今日产品专家门店支持最大的感想",
+    "product_issue_ls6": "LS6产品体验相关问题",
+    "product_issue_l6": "L6产品体验相关问题",
+    "product_issue_ls8_ls9": "LS8/LS9产品体验相关问题",
+    "competitor_comment": "关于LS6的竞品，用户有什么特别想说的"
+  }
+}

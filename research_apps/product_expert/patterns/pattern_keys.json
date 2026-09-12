@@ -29,10 +29,10 @@
       "category": "interior",
       "first_pattern_id": "PAT-0003",
       "first_run_id": "run_001",
-      "aliases": ["内饰不高级", "内饰豪华感不足", "配件质感不足", "内饰配色不协调", "车漆不高级"],
+      "aliases": ["内饰不高级", "内饰豪华感不足", "配件质感不足", "内饰配色不协调", "车漆不高级", "内外饰第一印象质感不足"],
       "status": "active",
       "created_at": "2026-09-11",
-      "updated_at": "2026-09-11"
+      "updated_at": "2026-09-12"
     },
     {
       "pattern_key": "interior_sharp_edge_injury_risk",
@@ -84,10 +84,10 @@
       "category": "configuration",
       "first_pattern_id": "PAT-0008",
       "first_run_id": "run_001",
-      "aliases": ["慢充口无盖", "L6 无电吸门", "天窗不可开启", "后排手动放倒"],
+      "aliases": ["慢充口无盖", "L6 无电吸门", "天窗不可开启", "后排手动放倒", "外门把手电容感应仅前排", "显性配置不齐"],
       "status": "active",
       "created_at": "2026-09-11",
-      "updated_at": "2026-09-11"
+      "updated_at": "2026-09-12"
     },
     {
       "pattern_key": "sales_service_after_sales_support",
@@ -106,10 +106,10 @@
       "category": "adas",
       "first_pattern_id": "PAT-0010",
       "first_run_id": "run_001",
-      "aliases": ["激光雷达线数存疑", "不了解 momenta", "智驾供应商认知度低"],
+      "aliases": ["激光雷达线数存疑", "不了解 momenta", "智驾供应商认知度低", "没人知道momenta", "智驾认同不如华为"],
       "status": "active",
       "created_at": "2026-09-11",
-      "updated_at": "2026-09-11"
+      "updated_at": "2026-09-12"
     },
     {
       "pattern_key": "configuration_benchmark_convenience_gap",
@@ -139,10 +139,10 @@
       "category": "other",
       "first_pattern_id": "PAT-0013",
       "first_run_id": "run_001",
-      "aliases": ["品牌认知度低", "门店客流吸引力不足", "竞品分流"],
+      "aliases": ["品牌认知度低", "门店客流吸引力不足", "竞品分流", "品牌知名度影响下单", "门店缺乏线索", "自然客流不足"],
       "status": "active",
       "created_at": "2026-09-11",
-      "updated_at": "2026-09-11"
+      "updated_at": "2026-09-12"
     },
     {
       "pattern_key": "demand_wait_for_new_model",
@@ -150,10 +150,10 @@
       "category": "other",
       "first_pattern_id": "PAT-0014",
       "first_run_id": "run_001",
-      "aliases": ["不买老款等新款", "配额未抢到", "短期锁单抑制"],
+      "aliases": ["不买老款等新款", "配额未抢到", "短期锁单抑制", "价格权益政策观望", "盲订不实惠"],
       "status": "active",
       "created_at": "2026-09-11",
-      "updated_at": "2026-09-11"
+      "updated_at": "2026-09-12"
     },
     {
       "pattern_key": "verified_product_service_strengths",
@@ -161,10 +161,32 @@
       "category": "other",
       "first_pattern_id": "PAT-0015",
       "first_run_id": "run_001",
-      "aliases": ["雨天辅助驾驶表现良好", "LS8 人群适配", "门店接待服务积极"],
+      "aliases": ["雨天辅助驾驶表现良好", "LS8 人群适配", "门店接待服务积极", "后轮转向重庆适用", "20万起大满配", "试驾转化积极"],
       "status": "active",
       "created_at": "2026-09-11",
-      "updated_at": "2026-09-11"
+      "updated_at": "2026-09-12"
+    },
+    {
+      "pattern_key": "model_positioning_audience_fit",
+      "title": "车型定位与目标人群匹配问题",
+      "category": "other",
+      "first_pattern_id": "PAT-0006",
+      "first_run_id": "run_002",
+      "aliases": ["LS8 定位模糊", "L6 目标客户二线城市少", "客户画像区隔"],
+      "status": "active",
+      "created_at": "2026-09-12",
+      "updated_at": "2026-09-12"
+    },
+    {
+      "pattern_key": "competitor_smart_space_benchmark",
+      "title": "竞品智能与空间可感知对标差距",
+      "category": "smart_cockpit",
+      "first_pattern_id": "PAT-0008",
+      "first_run_id": "run_002",
+      "aliases": ["理想语音快", "N70 空间大"],
+      "status": "active",
+      "created_at": "2026-09-12",
+      "updated_at": "2026-09-12"
     }
   ]
 }

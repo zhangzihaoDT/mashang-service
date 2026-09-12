@@ -1,0 +1,208 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Product Expert Survey Stats",
+  "description": "结构化问卷（产品专家支持每日反馈）的确定性统计快照。由 scripts/derive_survey_stats.py 从 CSV 直读列、展开多选、映射 code 后生成；不含任何 LLM 语义判断。与 Open Discovery 的 evidence/issues/patterns/convergence 是两条互不替代的链路。",
+  "type": "object",
+  "required": [
+    "run_id",
+    "taxonomy_version",
+    "mapping_version",
+    "dataset",
+    "record_count",
+    "coding_count",
+    "scope",
+    "records",
+    "store_ops",
+    "availability"
+  ],
+  "properties": {
+    "run_id": { "type": "string" },
+    "taxonomy_version": { "type": "string" },
+    "mapping_version": { "type": "string" },
+    "dataset": { "type": "string", "description": "仓库外原始 CSV 路径" },
+    "record_count": { "type": "integer", "minimum": 0 },
+    "coding_count": { "type": "integer", "minimum": 0, "description": "所有 group 的选项命中总数（含多选展开）" },
+    "scope": {
+      "type": "object",
+      "required": ["product_experts", "city_stores", "support_periods"],
+      "properties": {
+        "product_experts": { "type": "array", "items": { "type": "string" } },
+        "city_stores": { "type": "array", "items": { "type": "string" } },
+        "support_periods": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["raw", "start_date", "end_date"],
+            "properties": {
+              "raw": { "type": "string" },
+              "start_date": { "type": "string" },
+              "end_date": { "type": "string" }
+            }
+          }
+        },
+        "window": { "type": "string" }
+      }
+    },
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["record_index", "expert", "city", "store"],
+        "properties": {
+          "record_index": { "type": "integer", "minimum": 0 },
+          "submission_id": { "type": "string" },
+          "submitter": { "type": "string" },
+          "expert": { "type": "string" },
+          "city": { "type": "string" },
+          "store": { "type": "string" },
+          "support_date": { "type": "string" },
+          "support_date_iso": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "store_ops": {
+      "type": "object",
+      "required": ["records"],
+      "properties": {
+        "records": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["record_index", "items"],
+            "properties": {
+              "record_index": { "type": "integer" },
+              "expert": { "type": "string" },
+              "store": { "type": "string" },
+              "support_date": { "type": "string" },
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["code", "label", "quote"],
+                  "properties": {
+                    "code": { "type": "string" },
+                    "label": { "type": "string" },
+                    "quote": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "availability": {
+      "type": "object",
+      "required": ["rows"],
+      "properties": {
+        "rows": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["store", "model", "display", "test_drive"],
+            "properties": {
+              "store": { "type": "string" },
+              "model": { "type": "string" },
+              "display": {
+                "type": "object",
+                "properties": { "code": { "type": "string" }, "label": { "type": "string" } }
+              },
+              "test_drive": {
+                "type": "object",
+                "properties": { "code": { "type": "string" }, "label": { "type": "string" } }
+              },
+              "quotes": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        },
+        "summary": {
+          "type": "object",
+          "description": "A3 覆盖率统计；分母由记录/门店数计算，不硬编码",
+          "required": ["denominator_records", "denominator_stores", "by_model"],
+          "properties": {
+            "denominator_records": { "type": "integer", "minimum": 0 },
+            "denominator_stores": { "type": "integer", "minimum": 0 },
+            "by_model": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["model", "display_records", "test_drive_records", "display_stores", "test_drive_stores"],
+                "properties": {
+                  "model": { "type": "string" },
+                  "display_records": { "type": "integer", "minimum": 0 },
+                  "test_drive_records": { "type": "integer", "minimum": 0 },
+                  "display_stores": { "type": "integer", "minimum": 0 },
+                  "test_drive_stores": { "type": "integer", "minimum": 0 }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "customer_concern": { "$ref": "#/definitions/group" },
+    "positive_feedback": { "$ref": "#/definitions/group" },
+    "competitor_attention": { "$ref": "#/definitions/group" },
+    "purchase_barrier": { "$ref": "#/definitions/group" },
+    "dissatisfaction_theme": { "$ref": "#/definitions/group" },
+    "unmapped_options": {
+      "type": "array",
+      "description": "未能在 mapping 中找到的选项值（应为空；非空需修 mapping）",
+      "items": {
+        "type": "object",
+        "properties": {
+          "group": { "type": "string" },
+          "model": { "type": "string" },
+          "record_index": { "type": "integer" },
+          "value": { "type": "string" }
+        }
+      }
+    },
+    "ignored_other_values": {
+      "type": "array",
+      "description": "「其他-补充内容」中被 ignore_other_values 忽略的填写（审计用）",
+      "items": {
+        "type": "object",
+        "properties": {
+          "group": { "type": "string" },
+          "model": { "type": "string" },
+          "record_index": { "type": "integer" },
+          "value": { "type": "string" }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "group": {
+      "type": "object",
+      "required": ["label", "counts"],
+      "properties": {
+        "label": { "type": "string" },
+        "counts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["code", "label", "by_model", "records_by_model", "total"],
+            "properties": {
+              "code": { "type": "string" },
+              "label": { "type": "string" },
+              "by_model": {
+                "type": "object",
+                "additionalProperties": { "type": "integer" }
+              },
+              "records_by_model": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "array",
+                  "items": { "type": "integer" }
+                }
+              },
+              "total": { "type": "integer", "minimum": 0 },
+              "details": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        }
+      }
+    }
+  }
+}

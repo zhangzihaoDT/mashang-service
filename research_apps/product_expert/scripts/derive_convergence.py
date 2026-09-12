@@ -37,14 +37,26 @@ def load_jsonl(path: Path):
 
 
 def normalize_period(raw: str, study_year: int) -> dict:
-    """Normalize a raw support_date interval into an ISO start/end range.
+    """Normalize a raw support_date into an ISO start/end range.
 
-    Supported forms: "MM/DD-MM/DD" and "M/D-D" (right side day-only inherits
-    the left side month). Cross-month ranges are rejected, never guessed.
+    Supported forms: "MM/DD-MM/DD", "M/D-D" (right side day-only inherits the
+    left side month), and single-day "YYYY/M/D" or "M/D" (daily-feedback source).
+    Cross-month ranges are rejected, never guessed.
     """
     raw = raw.strip()
     if "-" not in raw:
-        raise ValueError(f"unsupported support_date (no range): {raw!r}")
+        parts = [p for p in raw.replace(".", "/").split("/") if p != ""]
+        if len(parts) == 3:
+            year, month, day = (int(p) for p in parts)
+        elif len(parts) == 2:
+            year = study_year
+            month, day = (int(p) for p in parts)
+        else:
+            raise ValueError(f"unsupported single support_date: {raw!r}")
+        if not (1 <= month <= 12 and 1 <= day <= 31):
+            raise ValueError(f"invalid support_date: {raw!r}")
+        iso = f"{year:04d}-{month:02d}-{day:02d}"
+        return {"raw": raw, "start_date": iso, "end_date": iso}
     left, right = raw.split("-", 1)
     left = left.strip()
     right = right.strip()

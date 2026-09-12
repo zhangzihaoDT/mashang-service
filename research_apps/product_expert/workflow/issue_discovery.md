@@ -36,18 +36,25 @@ evidence，再回到原始表的某一行某一列（`source_ref`）。跳过 ev
 ## 输入
 
 - 原始数据：见 `README.md` 的「数据来源」，仓库外绝对路径，只读引用，不复制进仓库。
-- 记录粒度：一行 = 一位产品专家在一次门店支持中的汇总。
+- 记录粒度：一行 = 一位产品专家在一次门店支持（v0.2 起为一次每日反馈提交）中的汇总。
+- v0.2（2026-09-12 起）数据源为『产品专家支持每日反馈』：前段选择题由
+  `scripts/derive_survey_stats.py` 确定性解析（不进本发现流程）；本流程只处理后段自由文本。
 - 关键字段映射（`source_ref.source_field`）：
 
-| 原始字段 | source_field | 主要证据类型 |
-| --- | --- | --- |
-| L6产品体验弱点 | `l6_weakness` | 用户反馈 / 专家观察 |
-| LS6产品体验弱点 | `ls6_weakness` | 用户反馈 / 专家观察 |
-| 各车型试驾反馈 | `test_drive_feedback` | 试驾用户反馈 |
-| LS8/LS9产品建议或销售情况 | `ls8_ls9_suggestion` | 建议 / 销售情况 / 对标 |
-| 门店整体销售情况（客流/试驾/锁单） | `store_sales` | 运营事实 |
-| 门店整体印象 | `store_impression` | 专家整体判断 |
-| 配图 | `other` | 附件引用 |
+| 原始字段 | source_field | 主要证据类型 | 适用版本 |
+| --- | --- | --- | --- |
+| L6产品体验弱点 | `l6_weakness` | 用户反馈 / 专家观察 | v0.1 |
+| LS6产品体验弱点 | `ls6_weakness` | 用户反馈 / 专家观察 | v0.1 |
+| 各车型试驾反馈 | `test_drive_feedback` | 试驾用户反馈 | v0.1 |
+| LS8/LS9产品建议或销售情况 | `ls8_ls9_suggestion` | 建议 / 销售情况 / 对标 | v0.1 |
+| 门店整体销售情况（客流/试驾/锁单） | `store_sales` | 运营事实 | v0.1 |
+| 门店整体印象 | `store_impression` | 专家整体判断 | v0.1 |
+| 今日产品专家门店支持最大的感想 | `daily_impression` | 专家观察 / 用户原话 | v0.2 |
+| LS6产品体验相关问题 | `product_issue_ls6` | 专家观察 | v0.2 |
+| L6产品体验相关问题 | `product_issue_l6` | 专家观察 | v0.2 |
+| LS8/LS9产品体验相关问题 | `product_issue_ls8_ls9` | 专家观察 | v0.2 |
+| 关于LS6的竞品，用户有什么特别想说的 | `competitor_comment` | 竞品对标 | v0.2 |
+| 配图 | `other` | 附件引用 | 通用 |
 
 支持日期 / 产品专家 / 支持城市+门店 不单独抽取，而是作为每条 evidence 的 `source_ref`
 上下文保留。

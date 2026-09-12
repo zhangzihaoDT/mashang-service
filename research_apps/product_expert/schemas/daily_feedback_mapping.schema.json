@@ -1,0 +1,82 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Product Expert Daily Feedback Mapping",
+  "description": "『产品专家支持每日反馈』问卷列/选项 → 受控 code 的确定性映射。由 scripts/derive_survey_stats.py 读取；选项串到 code 一一对应，taxonomy.json 提供 code→label。",
+  "type": "object",
+  "required": ["mapping_version", "taxonomy_version", "record_meta", "store_ops", "availability", "groups"],
+  "properties": {
+    "mapping_version": { "type": "string" },
+    "taxonomy_version": { "type": "string" },
+    "description": { "type": "string" },
+    "ignore_other_values": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "「其他-补充内容」中明确无信息量的填写，整条忽略并记入审计"
+    },
+    "record_meta": {
+      "type": "object",
+      "required": ["submission_id", "expert", "city", "store", "support_date"],
+      "additionalProperties": { "type": "string" }
+    },
+    "store_ops": {
+      "type": "object",
+      "required": ["fields"],
+      "properties": {
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["code", "column"],
+            "properties": {
+              "code": { "type": "string" },
+              "column": { "type": "string" },
+              "kind": { "type": "string", "enum": ["value", "percent"] }
+            }
+          }
+        }
+      }
+    },
+    "availability": {
+      "type": "object",
+      "required": ["models", "display_column", "test_drive_column"],
+      "properties": {
+        "models": { "type": "array", "items": { "type": "string" } },
+        "display_column": { "type": "string" },
+        "test_drive_column": { "type": "string" }
+      }
+    },
+    "groups": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["sources", "options"],
+        "properties": {
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["model", "column"],
+              "properties": {
+                "model": { "type": "string" },
+                "column": { "type": "string" },
+                "other_column": { "type": "string" }
+              }
+            }
+          },
+          "options": {
+            "type": "object",
+            "additionalProperties": { "type": "string" }
+          },
+          "other_aliases": {
+            "type": "object",
+            "additionalProperties": { "type": "string" }
+          }
+        }
+      }
+    },
+    "text_sources": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    }
+  }
+}
