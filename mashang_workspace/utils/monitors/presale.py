@@ -292,8 +292,8 @@ def build_card(metrics: dict, show_notes: bool = False) -> dict:
     lines = [
         f"**{label} 预售指标（{metrics['today']}）**",
         "",
-        f"当日小订：**{today_count:,}**（当日新增意向金支付）",
-        f"预售小订：**{cum:,}**（预售至今累计意向金支付）",
+        f"当日小订：**{today_count:,}**（当日新增）",
+        f"预售小订：**{cum:,}**（预售至今累计）",
     ]
     lines.append(f"　累计留存订单：**{retention:,}**（唯一订单用户 {retention_users:,}）")
     lines.append(f"峰值小时：**{peak_count:,}**（{peak_hour_str}）｜峰值后 1h **{next_hour:,}**")

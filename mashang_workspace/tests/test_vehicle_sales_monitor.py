@@ -538,8 +538,8 @@ def test_presale_card_slim_no_notes_in_production():
     """生产推送（show_notes=False）不带附注/口径/数据源，保留核心指标与固定信息行。"""
     body = _presale_card_body(show_notes=False)
     assert "①" not in body and "附注" not in body and "口径" not in body and "数据源" not in body
-    assert "当日小订：**123**（当日新增意向金支付）" in body
-    assert "预售小订：**2,480**" in body
+    assert "当日小订：**123**（当日新增）" in body
+    assert "预售小订：**2,480**（预售至今累计）" in body
     assert "累计留存订单：**2,415**（唯一订单用户 2,380）" in body
     assert "峰值小时：**1,200**（18:00）｜峰值后 1h **380**" in body
     assert "开放后 24h 累计留存：**1,980**" in body
