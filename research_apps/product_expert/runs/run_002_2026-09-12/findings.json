@@ -1,0 +1,138 @@
+[
+  {
+    "finding_id": "FND-0001",
+    "title": "品牌认知与店端客流是当前转化前置双约束",
+    "statement": "一线反馈显示，智己品牌在当地用户中认知偏低，且多家门店自然客流/线索受限；两者相互强化，构成下单转化之前的前置约束。",
+    "pattern_ids": [
+      "PAT-0001"
+    ],
+    "convergence_ids": [
+      "CONV-0001"
+    ],
+    "issue_ids": [
+      "ISS-0001",
+      "ISS-0007"
+    ],
+    "confidence": "medium",
+    "business_implication": "若认知与自然客流不改善，前端线索池将持续偏窄，后续优惠与转化手段的杠杆有限。",
+    "recommended_action": "在重点城市强化品牌与『大厂背书』传播；对自然客流弱、位置受限的门店加大线索运营与邀约支持，并评估快闪/中庭点位的引流经验复制。",
+    "priority": "P1",
+    "boundary": "样本为 4 家门店、2 天自报记录，非随机抽样，不能据此估计总体认知水平；本地与区域差异需更多门店验证。",
+    "status": "ready",
+    "owner": "品牌市场 / 渠道运营",
+    "created_at": "2026-09-12"
+  },
+  {
+    "finding_id": "FND-0002",
+    "title": "momenta 智驾认知与信任是相对华为的核心短板",
+    "statement": "多店反馈用户普遍不知道 momenta、智驾感知不强，认同感远不如华为；在华为具地缘影响力的重庆，智驾提问尤为集中。",
+    "pattern_ids": [
+      "PAT-0002"
+    ],
+    "convergence_ids": [
+      "CONV-0002"
+    ],
+    "issue_ids": [
+      "ISS-0002"
+    ],
+    "confidence": "medium",
+    "business_implication": "智驾作为高价值卖点，其供应商认知不足会削弱价格与配置的说服力，尤其在华为强势市场。",
+    "recommended_action": "统一 momenta 智驾能力的用户化传播语言（场景化、可体验），在试驾中强化可感知表现；针对华为强势城市准备对比话术与体验设计。",
+    "priority": "P1",
+    "boundary": "3 条证据跨 3 店 2 天；认知度无法量化，结论限于『存在认知落差』而非比例。",
+    "status": "ready",
+    "owner": "智驾产品市场 / 销售培训",
+    "created_at": "2026-09-12"
+  },
+  {
+    "finding_id": "FND-0003",
+    "title": "价格与权益预期管理主导观望，需稳定政策叙事",
+    "statement": "用户对价格持观望，上市后权益政策不稳定、盲订实惠感不足，叠加网络口碑影响，使用户推迟决策甚至流向竞品。",
+    "pattern_ids": [
+      "PAT-0005"
+    ],
+    "convergence_ids": [
+      "CONV-0004"
+    ],
+    "issue_ids": [
+      "ISS-0005"
+    ],
+    "confidence": "medium",
+    "business_implication": "权益政策的不确定性直接影响预售/上市窗口的转化效率，并可能放大口碑负反馈。",
+    "recommended_action": "明确并稳定权益政策口径与兑现节奏，针对老客盲订预期做专属说明；统一一线对价格与权益预期的应答口径。",
+    "priority": "P1",
+    "boundary": "3 条证据集中在重庆 3 店同一天；可能与上市临近的节奏性观望叠加，需结合时间窗口解读。",
+    "status": "ready",
+    "owner": "销售政策 / 用户运营",
+    "created_at": "2026-09-12"
+  },
+  {
+    "finding_id": "FND-0004",
+    "title": "显性配置与内外饰质感影响第一印象与销售讲述意愿",
+    "statement": "外门把手电容感应仅前排导致销售回避讲解；内外饰与车漆质感被反复提及为第一印象要素，质感不足会削弱进店好感。",
+    "pattern_ids": [
+      "PAT-0004"
+    ],
+    "convergence_ids": [
+      "CONV-0003"
+    ],
+    "issue_ids": [
+      "ISS-0004"
+    ],
+    "confidence": "medium",
+    "business_implication": "可感知配置不齐与质感短板会削弱『大满配』价值感知，并降低一线主动讲卖的意愿。",
+    "recommended_action": "梳理显性配置清单，确保可宣传配置做齐或明确解释；针对内外饰与车漆质感收集更多门店样本，评估改款或配置调整优先级。",
+    "priority": "P2",
+    "boundary": "显性配置问题为单条证据；内外饰质感跨 3 店但仍属主观第一印象，非盲测结论。",
+    "status": "ready",
+    "owner": "产品规划 / 整车设计",
+    "created_at": "2026-09-12"
+  },
+  {
+    "finding_id": "FND-0005",
+    "title": "车型定位与人群区隔需清晰化",
+    "statement": "LS8 定位略模糊、家庭客户更偏好 LS9；L6 在二线城市目标客户偏少；同时出现被 L6 颜值吸引、最终转选 LS6 的溢出。",
+    "pattern_ids": [
+      "PAT-0006"
+    ],
+    "convergence_ids": [
+      "CONV-0005"
+    ],
+    "issue_ids": [
+      "ISS-0006"
+    ],
+    "confidence": "low",
+    "business_implication": "定位与人群匹配不清会降低线索投放与店端话术效率，也可能造成车型间互相分流。",
+    "recommended_action": "在各城市明确主推车型与人群画像，统一店端导购话术；用更多门店数据验证 LS8/LS9 与 L6 的目标人群匹配。",
+    "priority": "P2",
+    "boundary": "人群判断来自产品专家观察，非结构化画像数据；仅 3 店 2 天，不能外推。",
+    "status": "ready",
+    "owner": "产品规划 / 销售运营",
+    "created_at": "2026-09-12"
+  },
+  {
+    "finding_id": "FND-0006",
+    "title": "后轮转向、大满配定价与试驾转化是应强化的正向动因",
+    "statement": "后轮转向在重庆市区适用度高并被用户列为购车原因；『20 万起大满配』与配置加分获正向反馈；试驾用户基本提交小订，门店人气与新车效应仍在。",
+    "pattern_ids": [
+      "PAT-0007"
+    ],
+    "convergence_ids": [
+      "CONV-0006"
+    ],
+    "issue_ids": [
+      "ISS-0008",
+      "ISS-0009",
+      "ISS-0010",
+      "ISS-0013"
+    ],
+    "confidence": "medium",
+    "business_implication": "这些动因已验证有效，可作为卖点传播、试驾转化与门店引流打法的复用基础。",
+    "recommended_action": "把后轮转向与『大满配』做成一线必讲卖点，强化试驾邀约与转化动作；总结快闪/中庭点位的引流经验并复制。",
+    "priority": "P3",
+    "boundary": "正向证据来自少数门店短期观察，适合作为打法假设而非成熟结论。",
+    "status": "ready",
+    "owner": "销售运营 / 产品市场",
+    "created_at": "2026-09-12"
+  }
+]

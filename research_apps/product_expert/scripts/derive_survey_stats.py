@@ -96,7 +96,7 @@ def group_counts(entries: list[dict], group: str, taxonomy: dict) -> dict:
     return {"label": taxonomy["groups"][group]["label"], "counts": rows}
 
 
-def derive(run_dir: Path, mapping_path: Path, taxonomy_path: Path) -> dict:
+def derive(run_dir: Path, mapping_path: Path, taxonomy_path: Path, date_filter: str | None = None) -> dict:
     run = load_json(run_dir / "run.json")
     mapping = load_json(mapping_path)
     taxonomy = load_json(taxonomy_path)
@@ -113,6 +113,17 @@ def derive(run_dir: Path, mapping_path: Path, taxonomy_path: Path) -> dict:
     df.columns = [str(c).strip() for c in df.columns]
 
     meta = mapping["record_meta"]
+
+    # 日期 cut（日报）：run.json 的 support_date_filter 或 CLI --date
+    date_filter = date_filter or run.get("support_date_filter")
+    if date_filter:
+        target = pd.to_datetime(date_filter, errors="coerce")
+        if pd.isna(target):
+            raise SystemExit(f"invalid date filter: {date_filter!r}")
+        col_date = pd.to_datetime(df[meta["support_date"]], errors="coerce").dt.normalize()
+        df = df.loc[col_date == target.normalize()].reset_index(drop=True)
+        if df.empty:
+            raise SystemExit(f"no records for date filter: {date_filter}")
 
     def col(name: str):
         if name not in df.columns:
@@ -148,11 +159,12 @@ def derive(run_dir: Path, mapping_path: Path, taxonomy_path: Path) -> dict:
         if iso:
             periods.setdefault(iso, {"raw": r["support_date"], "start_date": iso, "end_date": iso})
     support_periods = sorted(periods.values(), key=lambda p: p["start_date"])
-    window = (
-        f"{fmt_md(support_periods[0]['start_date'])}–{fmt_md(support_periods[-1]['end_date'])}"
-        if support_periods
-        else "—"
-    )
+    if support_periods:
+        start = support_periods[0]["start_date"]
+        end = support_periods[-1]["end_date"]
+        window = fmt_md(start) if start == end else f"{fmt_md(start)}–{fmt_md(end)}"
+    else:
+        window = "—"
 
     # ---- store_ops (direct values per record) ----
     store_ops_codes = taxonomy["groups"]["store_ops"]["codes"]
@@ -313,10 +325,11 @@ def main() -> int:
     parser.add_argument("run_dir", type=Path)
     parser.add_argument("--mapping", type=Path, default=DEFAULT_MAPPING)
     parser.add_argument("--taxonomy", type=Path, default=DEFAULT_TAXONOMY)
+    parser.add_argument("--date", default=None, help="仅保留该提交日期（YYYY-MM-DD 或 YYYY/MM/DD），用于日报 cut")
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
 
-    stats = derive(args.run_dir, args.mapping, args.taxonomy)
+    stats = derive(args.run_dir, args.mapping, args.taxonomy, date_filter=args.date)
     if args.check:
         print(f"OK {args.run_dir} ({stats['record_count']} records, {stats['coding_count']} codings)")
         return 0

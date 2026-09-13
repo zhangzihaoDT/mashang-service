@@ -166,6 +166,7 @@ product_expert/
 │   ├── derive_survey_stats.py  从日报问卷确定性派生 survey_stats.json（v0.2，无 LLM）
 │   ├── derive_preset_stats.py  从 preset_coding.json 确定性聚合 preset_stats.json（v0.1）
 │   ├── derive_convergence.py   从 run 目录确定性派生 convergence.json
+│   ├── filter_run_by_date.py   从已有 run 生成按日期 cut 的日报 run（survey + discovery）
 │   └── build_report.py         生成 Field Intelligence Report（md + html）
 ├── eval/
 │   ├── README.md
@@ -173,18 +174,29 @@ product_expert/
 ├── reports/
 │   ├── README.md
 │   ├── run_001/                v0.1 报告（归档）
-│   └── run_002/                v0.2 报告（当前）
+│   ├── run_002/                v0.2 报告（全量 12 条）
+│   └── run_002_2026-09-12/     仅 09/12 日报（10 条）
 └── runs/
     ├── README.md
     ├── run_001/                文本编码期基线（归档）
-    └── run_002/                每日反馈问卷期
-        ├── run.json            运行元数据（dataset / record_count / taxonomy_version）
-        ├── survey_stats.json   289 条结构化编码（确定性统计）
-        ├── evidence.jsonl      30 条最小可追溯观察
-        ├── issues.json         13 个问题
-        ├── patterns.json       8 个语义模式
-        ├── convergence.json    8 个统计快照
-        └── findings.json       6 条结论
+    ├── run_002/                每日反馈问卷期（全量 12 条）
+    │   ├── run.json            运行元数据（dataset / record_count / taxonomy_version）
+    │   ├── survey_stats.json   289 条结构化编码（确定性统计）
+    │   ├── evidence.jsonl      30 条最小可追溯观察
+    │   ├── issues.json         13 个问题
+    │   ├── patterns.json       8 个语义模式
+    │   ├── convergence.json    8 个统计快照
+    │   └── findings.json       6 条结论
+    └── run_002_2026-09-12/     仅 09/12 日报 cut（10 条）
+```
+
+## 日报 cut
+
+按 `提交时间` 从已有 run 生成单日 run（survey + discovery 同步过滤，计数动态）：
+
+```bash
+python scripts/filter_run_by_date.py runs/run_002 runs/run_002_2026-09-12 --date 2026-09-12
+python scripts/build_report.py runs/run_002_2026-09-12
 ```
 
 ## 研究性质与边界

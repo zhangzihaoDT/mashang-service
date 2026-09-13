@@ -88,7 +88,11 @@ def fmt_md(iso_date: str) -> str:
 def window_from(periods: list[dict]) -> str:
     if not periods:
         return "—"
-    return f"{fmt_md(min(p['start_date'] for p in periods))}–{fmt_md(max(p['end_date'] for p in periods))}"
+    start = min(p["start_date"] for p in periods)
+    end = max(p["end_date"] for p in periods)
+    if start == end:
+        return fmt_md(start)
+    return f"{fmt_md(start)}–{fmt_md(end)}"
 
 
 def scope_from(run, convergences, pstats=None) -> dict:
