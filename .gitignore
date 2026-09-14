@@ -151,3 +151,8 @@ research_apps/auto_launch/outputs_backup_*
 
 # Runtime V2 local session data (per-session, regenerable)
 mashang_runtime_v2/data/
+
+# Docx conversion media — retained locally but not committed with Markdown archives
+mashang_workspace/docs/archive/L6_M1_images/
+mashang_workspace/docs/archive/LS6_M2_T1_images/
+mashang_workspace/docs/archive/L6竞品竞争力研究/新款智己L6竞品对比大全_images/
