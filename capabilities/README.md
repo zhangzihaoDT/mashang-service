@@ -63,6 +63,7 @@ Base Capabilities 是**被消费方**。
 | OCR | `capabilities/ocr/` | `capabilities.ocr` | 图片 → 文字/markdown/表格（火山 general_ocr + document_parse），缓存 + QPS + retry |
 | Notify | `capabilities/notify/` | `capabilities.notify` | 文本/交互卡片 → 渠道推送（飞书群 Webhook），重试 + dry-run + mock |
 | Search | `capabilities/search/` | `capabilities.search` | 网页搜索原语（豆包 Global Search），重试 + 本地缓存 + multi-query + mock |
+| Diagram | `capabilities/diagram/` | `capabilities.diagram` | 图表数据契约 + 确定性渲染原语（首个：Milestone Temporal Dumbbell），自包含 HTML/SVG |
 
 ### Candidate（已存在但散落，待按需收敛）
 

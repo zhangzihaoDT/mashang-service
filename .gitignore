@@ -141,6 +141,9 @@ outputs/ocr/
 # Search base capability: local cache (regenerable, content-addressed)
 outputs/search/
 
+# Diagram base capability: rendered charts (regenerable from JSON contracts)
+outputs/diagram/
+
 research_apps/auto_launch/outputs/runs/
 
 # auto_launch migration backup

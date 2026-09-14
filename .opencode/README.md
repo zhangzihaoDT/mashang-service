@@ -16,7 +16,8 @@
 - `.opencode/skills/official_document_render/`
 - `.opencode/skills/doubao-search/`
 - `.opencode/skills/nev-research/`
-- `.opencode/skills/diagram-design` → 独立 upstream checkout
+- `.opencode/skills/mashang-diagram/` → 项目自有 diagram 路由 Skill
+- `.opencode/skills/diagram-design` → 独立 upstream checkout（只读消费）
 
 ## Commands
 

@@ -1,0 +1,30 @@
+{
+  "title": "BEV / 端到端智驾方案落地时间差",
+  "subtitle": "Tesla vs Huawei — 对应里程碑的发布时间位置",
+  "entity_a": "Tesla",
+  "entity_b": "Huawei",
+  "source_note": "示例数据，仅用于演示 Milestone Temporal Dumbbell 图表结构；不代表事实核验结论。",
+  "rows": [
+    {
+      "milestone": "BEV 感知",
+      "date_a": "2021-08-19",
+      "event_a": "AI Day BEV",
+      "date_b": "2022-05-07",
+      "event_b": "ADS 1.0"
+    },
+    {
+      "milestone": "占用网络",
+      "date_a": "2022-09-30",
+      "event_a": "AI Day Occupancy",
+      "date_b": "2023-04-16",
+      "event_b": "GOD Network"
+    },
+    {
+      "milestone": "端到端",
+      "date_a": "2024-01-22",
+      "event_a": "FSD V12",
+      "date_b": "2024-08-26",
+      "event_b": "ADS 3.0"
+    }
+  ]
+}
