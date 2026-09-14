@@ -187,6 +187,28 @@
       "status": "active",
       "created_at": "2026-09-12",
       "updated_at": "2026-09-12"
+    },
+    {
+      "pattern_key": "launch_rhythm_derivative_sync",
+      "title": "上市节奏与版本排期建议",
+      "category": "other",
+      "first_pattern_id": "PAT-0008",
+      "first_run_id": "run_003",
+      "aliases": ["增程纯电同步上市", "上市版本排期建议"],
+      "status": "active",
+      "created_at": "2026-09-13",
+      "updated_at": "2026-09-13"
+    },
+    {
+      "pattern_key": "store_operations_conversion_levers",
+      "title": "门店运营与转化动作建议",
+      "category": "sales_service",
+      "first_pattern_id": "PAT-0009",
+      "first_run_id": "run_003",
+      "aliases": ["提前释放权益", "到店有礼/试驾有礼引流", "销售工装质感"],
+      "status": "active",
+      "created_at": "2026-09-13",
+      "updated_at": "2026-09-13"
     }
   ]
 }

@@ -1,5 +1,5 @@
 {
-  "taxonomy_version": "0.2.1",
+  "taxonomy_version": "0.2.2",
   "description": "预设问题 taxonomy（Preset Question Coding，v0.2）。自 2026-09-12 起数据源切换为『产品专家支持每日反馈』问卷：前段为结构化选择题，后段为自由文本。v0.2 与问卷选项一一对应，选择题由 scripts/derive_survey_stats.py 确定性解析，不经 LLM；自由文本仍走 Open Discovery（Evidence → Issue → Pattern → Convergence）。两条链路结果不得互相替代或合并。v0.1（文本编码期）归档于 taxonomy_v0.1.json。",
   "models": ["L6", "LS6", "LS8", "LS9", "STORE", "OTHER"],
   "model_notes": {
@@ -76,6 +76,7 @@
         "awd": "四驱",
         "air_suspension": "空气悬架/电控阻尼调节",
         "jimmy_choo_design": "整体美学设计（Prof. JimmyChoo 高定设计等）",
+        "dimming_roof": "调光天幕",
         "nvh": "隔音/NVH",
         "other": "其他"
       }
@@ -100,6 +101,9 @@
         "huawei_shangjie": "华为系（尚界Z7/Z7T）",
         "lantu_zhin": "岚图知音",
         "byd_sealion08": "海狮08",
+        "xpeng_g6_g7_g9": "小鹏G6/G7/G9",
+        "onvo_l60_l80": "乐道L60/L80",
+        "xpeng_p7": "小鹏P7/P7+",
         "other": "其他"
       }
     },
@@ -112,6 +116,8 @@
         "competitor_comparison": "对比竞品中",
         "price_incentive": "价格不满（等价格优惠）",
         "exterior_interior_dissatisfaction": "外观/内饰不满",
+        "smart_tech_dissatisfaction": "智能化不满",
+        "configuration_concern": "产品配置顾虑",
         "other": "其他"
       }
     },
@@ -127,6 +133,7 @@
         "adas": "智驾",
         "price_incentive": "价格/权益/优惠",
         "configuration": "配置/底盘",
+        "configuration_missing": "缺失某项配置",
         "other": "其他"
       }
     }

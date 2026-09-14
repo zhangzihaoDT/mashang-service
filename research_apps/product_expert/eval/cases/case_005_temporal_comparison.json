@@ -1,0 +1,48 @@
+{
+  "case_id": "case_005_temporal_comparison",
+  "description": "检验 C7 跨期比较：run_003（09/13 单日）按 run.json 声明的 comparison_baseline_run_id=run_002_2026-09-12（09/12 单日）比较，按 pattern_key 对齐；基线有、当日无的 key 不伪造 Convergence，由报告层列为消退主题。",
+  "stage": "convergence",
+  "input_ref": {
+    "run_id": "run_003",
+    "baseline_run_id": "run_002_2026-09-12"
+  },
+  "expected": {
+    "temporal": {
+      "brand_channel_attraction_constraint": {
+        "status": "compared",
+        "baseline_run_id": "run_002_2026-09-12",
+        "presence": "expanded",
+        "counts": {"evidence_count": {"baseline": 5, "current": 8, "delta": 3}}
+      },
+      "adas_capability_brand_trust": {
+        "status": "compared",
+        "presence": "continued",
+        "counts": {"evidence_count": {"baseline": 2, "current": 2, "delta": 0}}
+      },
+      "sales_service_after_sales_support": {
+        "status": "compared",
+        "presence": "new",
+        "counts": {"evidence_count": {"baseline": 0, "current": 2, "delta": 2}}
+      },
+      "demand_wait_for_new_model": {
+        "status": "compared",
+        "presence": "contracted",
+        "counts": {"evidence_count": {"baseline": 3, "current": 2, "delta": -1}}
+      },
+      "verified_product_service_strengths": {
+        "status": "compared",
+        "presence": "contracted",
+        "counts": {"evidence_count": {"baseline": 8, "current": 2, "delta": -6}}
+      }
+    },
+    "disappeared_pattern_keys": []
+  },
+  "metrics": [
+    "temporal_status_match",
+    "baseline_alignment_by_pattern_key",
+    "presence_match",
+    "counts_delta_match",
+    "no_reverse_causality",
+    "disappeared_not_fabricated"
+  ]
+}

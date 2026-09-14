@@ -19,4 +19,5 @@
 | 复现层级 | `recurrence` / `evidence_strength` 是否与 `convergence.md` 冻结规则一致 |
 | 时间标准化 | `support_date` 是否按 run 的 `study_year` 标准化，未猜测年份（含 v0.2 单日日期） |
 | 单一事实来源 | Pattern/Finding 是否不再内联统计字段 |
+| 跨期比较 | C7 是否按 `pattern_key` 对齐已声明基线、派生 `presence`/`delta`；基线有、当日无的主题不伪造当前 Convergence |
 | 问卷确定性 | 选择题是否直读问卷列、选项全部命中 mapping、重复运行 counts 一致 |

@@ -1,0 +1,23 @@
+{
+  "run_id": "run_003",
+  "executed_at": "2026-09-13",
+  "study_year": 2026,
+  "record_count": 10,
+  "dataset": "/Users/zihao_/Documents/coding/dataset/original/L6 M2_LS6 M3 产品专家门店支持信息收集汇总_产品专家支持每日反馈_收集结果.csv",
+  "dataset_sha256": "06311d8f5ef9e7c8d5fbab318a34d976d20c44d78e150514090618d8913f29a2",
+  "method": [
+    "workflow/issue_discovery.md",
+    "workflow/issue_review.md",
+    "workflow/convergence.md"
+  ],
+  "taxonomy_version": "0.2.2",
+  "support_date_filter": "2026-09-13",
+  "scope": {
+    "start_date": "2026-09-13",
+    "end_date": "2026-09-13",
+    "granularity": "daily"
+  },
+  "comparison_baseline_run_id": "run_002_2026-09-12",
+  "comparison_granularity": "daily",
+  "notes": "数据源为『产品专家支持每日反馈』问卷（v0.2）；本轮为 2026-09-13 单日 cut（10 条），前段选择题由 derive_survey_stats.py 确定性解析，后段自由文本走 Open Discovery。跨期比较基线为 run_002_2026-09-12（同为单日 cut）。"
+}

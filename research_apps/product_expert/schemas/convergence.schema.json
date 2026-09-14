@@ -127,7 +127,7 @@
       "type": "object",
       "additionalProperties": false,
       "required": ["status"],
-      "description": "跨 Convergence 的时间比较；首个 wave 为 baseline_only",
+      "description": "按 pattern_key 对齐的跨 run 比较。未声明可比基线时为 baseline_only；声明基线后为 compared，delta 只描述证据覆盖与统计变化，不作因果解释。",
       "properties": {
         "status": { "type": "string", "enum": ["baseline_only", "compared"] },
         "baseline_run_id": { "type": "string" },
@@ -137,7 +137,59 @@
         },
         "delta": {
           "type": "object",
-          "description": "跨 run 变化：counts / attribution / recurrence 的增减，不做因果解释"
+          "additionalProperties": false,
+          "required": ["presence", "counts", "attribution", "recurrence", "evidence_strength"],
+          "description": "跨 run 变化：counts / attribution / recurrence 的增减，不做因果解释",
+          "properties": {
+            "presence": {
+              "type": "string",
+              "enum": ["new", "continued", "expanded", "contracted"],
+              "description": "new=基线无此 key；expanded=证据增加或复现层级上升；contracted=证据减少或复现层级下降；continued=无变化"
+            },
+            "counts": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "evidence_count": { "$ref": "#/definitions/count_delta" },
+                "issue_count": { "$ref": "#/definitions/count_delta" },
+                "product_expert_count": { "$ref": "#/definitions/count_delta" },
+                "city_store_count": { "$ref": "#/definitions/count_delta" },
+                "support_period_count": { "$ref": "#/definitions/count_delta" },
+                "series_count": { "$ref": "#/definitions/count_delta" }
+              }
+            },
+            "attribution": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "added_city_stores": { "type": "array", "items": { "type": "string" } },
+                "removed_city_stores": { "type": "array", "items": { "type": "string" } },
+                "added_product_experts": { "type": "array", "items": { "type": "string" } },
+                "removed_product_experts": { "type": "array", "items": { "type": "string" } },
+                "added_support_periods": { "$ref": "#/definitions/support_period_list" },
+                "removed_support_periods": { "$ref": "#/definitions/support_period_list" }
+              }
+            },
+            "recurrence": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["baseline", "current", "changed"],
+              "properties": {
+                "baseline": { "type": ["string", "null"], "enum": ["isolated", "repeated", "systemic", null] },
+                "current": { "type": "string", "enum": ["isolated", "repeated", "systemic"] },
+                "changed": { "type": "boolean" }
+              }
+            },
+            "evidence_strength": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["baseline", "current"],
+              "properties": {
+                "baseline": { "type": ["string", "null"], "enum": ["weak", "moderate", "strong", null] },
+                "current": { "type": "string", "enum": ["weak", "moderate", "strong"] }
+              }
+            }
+          }
         },
         "notes": { "type": "string" }
       }
@@ -146,6 +198,31 @@
       "type": "string",
       "format": "date",
       "description": "派生日期 YYYY-MM-DD"
+    }
+  },
+  "definitions": {
+    "count_delta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseline", "current", "delta"],
+      "properties": {
+        "baseline": { "type": "integer", "minimum": 0 },
+        "current": { "type": "integer", "minimum": 0 },
+        "delta": { "type": "integer" }
+      }
+    },
+    "support_period_list": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["raw", "start_date", "end_date"],
+        "properties": {
+          "raw": { "type": "string" },
+          "start_date": { "type": "string" },
+          "end_date": { "type": "string" }
+        }
+      }
     }
   }
 }

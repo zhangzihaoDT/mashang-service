@@ -124,6 +124,54 @@ def scope_from(run, convergences, pstats=None) -> dict:
             "support_periods": plist, "window": window_from(plist)}
 
 
+PRESENCE_LABEL = {
+    "new": "新增",
+    "continued": "持续",
+    "expanded": "扩大",
+    "contracted": "收缩",
+}
+
+
+def load_baseline(run, run_dir: Path) -> dict | None:
+    """Load the declared baseline run (by manifest id) for temporal rendering."""
+    ids = run.get("comparison_baseline_run_ids")
+    if not ids:
+        single = run.get("comparison_baseline_run_id")
+        ids = [single] if single else []
+    if not ids:
+        return None
+    bid = ids[0]
+    bdir = run_dir.parent / bid
+    b_json = load_json(bdir / "run.json") if (bdir / "run.json").exists() else {}
+    b_conv = load_json(bdir / "convergence.json") if (bdir / "convergence.json").exists() else []
+    b_scope = {}
+    b_survey = bdir / "survey_stats.json"
+    if b_survey.exists():
+        b_scope = (load_json(b_survey).get("scope") or {})
+    window = b_scope.get("window") or b_json.get("support_date_filter") or b_json.get("executed_at") or "—"
+    return {
+        "run_id": bid,
+        "window": window,
+        "convergences": {c["pattern_key"]: c for c in b_conv},
+    }
+
+
+def temporal_rows(patterns, convergences, baseline):
+    """(pattern, delta) rows for compared patterns, plus keys that disappeared."""
+    if not baseline:
+        return None
+    pidx = {p["pattern_id"]: p for p in patterns}
+    cur_keys = {c["pattern_key"] for c in convergences}
+    rows = []
+    for c in convergences:
+        tc = c.get("temporal_comparison") or {}
+        if tc.get("status") != "compared":
+            continue
+        rows.append((pidx[c["pattern_id"]], tc.get("delta") or {}))
+    disappeared = sorted(set(baseline["convergences"]) - cur_keys)
+    return {"rows": rows, "disappeared": disappeared}
+
+
 def evidence_text(row: dict):
     quote = (row.get("quote") or "").strip()
     if quote:
@@ -293,7 +341,7 @@ def scope_line(scope, evidence_count, problem_count, coding_count) -> str:
 # ----------------------------------------------------------------------------
 
 
-def build_markdown(run, patterns, convergences, findings, issues, evidence, pstats) -> str:
+def build_markdown(run, patterns, convergences, findings, issues, evidence, pstats, baseline=None) -> str:
     pidx = {p["pattern_id"]: p for p in patterns}
     conv_by_pattern = {c["pattern_id"]: c for c in convergences}
     scope = scope_from(run, convergences, pstats)
@@ -485,8 +533,37 @@ def build_markdown(run, patterns, convergences, findings, issues, evidence, psta
 
     add("## 时间比较")
     add("")
-    add("Baseline only：本期为首个基线窗口，暂无跨期趋势。")
-    add("")
+    tview = temporal_rows(patterns, convergences, baseline)
+    if not tview:
+        add("baseline_only：本期无已声明的可比基线，暂无跨期趋势。")
+        add("")
+    else:
+        cur_run = run["run_id"]
+        base_run_id = (baseline or {}).get("run_id", "—")
+        base_window = (baseline or {}).get("window", "—")
+        add(f"**{cur_run}（{scope['window']}） vs {base_run_id}（{base_window}）**，"
+            f"按 `pattern_key` 对齐（不按 `pattern_id`）。")
+        add("")
+        add("| 主题 | 状态 | 证据 | 覆盖门店 | 复现 | 证据强度 |")
+        add("| --- | --- | --- | --- | --- | --- |")
+        for p, d in tview["rows"]:
+            counts = d.get("counts", {})
+            ev = counts.get("evidence_count", {})
+            st = counts.get("city_store_count", {})
+            rec = d.get("recurrence", {})
+            strength = d.get("evidence_strength", {})
+            rec_txt = (f"{rec.get('baseline') or '—'} → {rec.get('current')}"
+                       + ("（升降）" if rec.get("changed") else ""))
+            add(f"| {p['title']} | {PRESENCE_LABEL.get(d.get('presence'), d.get('presence', '—'))} "
+                f"| {ev.get('baseline', 0)} → {ev.get('current', 0)}（{ev.get('delta', 0):+d}） "
+                f"| {st.get('baseline', 0)} → {st.get('current', 0)}（{st.get('delta', 0):+d}） "
+                f"| {rec_txt} | {strength.get('baseline') or '—'} → {strength.get('current')} |")
+        add("")
+        if tview["disappeared"]:
+            add("**本期未再出现的主题**：" + "、".join(f"`{k}`" for k in tview["disappeared"]))
+            add("")
+        add("> 跨期比较只描述证据覆盖与统计变化，不代表因果关系或总体市场趋势。")
+        add("")
 
     add("## 方法与 Runtime 追溯")
     add("")
@@ -524,7 +601,7 @@ def _chips(values):
     return "".join(f'<span class="chip">{_esc(v)}</span>' for v in values if v)
 
 
-def build_html(run, patterns, convergences, findings, issues, evidence, pstats) -> str:
+def build_html(run, patterns, convergences, findings, issues, evidence, pstats, baseline=None) -> str:
     pidx = {p["pattern_id"]: p for p in patterns}
     conv_by_pattern = {c["pattern_id"]: c for c in convergences}
     scope = scope_from(run, convergences, pstats)
@@ -776,7 +853,38 @@ footer{margin-top:40px;color:var(--soft);font-size:12px;letter-spacing:.04em}
             render_detail("", c)
         add("</details>")
 
-    add("<p class='temporal'>Baseline only：本期为首个基线窗口，暂无跨期趋势。</p>")
+    tview = temporal_rows(patterns, convergences, baseline)
+    if not tview:
+        add("<p class='temporal'>baseline_only：本期无已声明的可比基线，暂无跨期趋势。</p>")
+    else:
+        cur_run = _esc(run["run_id"])
+        base_run_id = _esc((baseline or {}).get("run_id", "—"))
+        base_window = _esc((baseline or {}).get("window", "—"))
+        add("<h2 class='sect'>跨期比较"
+            f"<small>{cur_run}（{_esc(scope['window'])}） vs {base_run_id}（{base_window}）；按 pattern_key 对齐</small></h2>")
+        add("<section class='card span-2'>")
+        add("<table><thead><tr><th>主题</th><th>状态</th><th>证据</th><th>覆盖门店</th>"
+            "<th>复现</th><th>证据强度</th></tr></thead><tbody>")
+        for p, d in tview["rows"]:
+            counts = d.get("counts", {})
+            ev = counts.get("evidence_count", {})
+            st = counts.get("city_store_count", {})
+            rec = d.get("recurrence", {})
+            strength = d.get("evidence_strength", {})
+            rec_txt = (f"{rec.get('baseline') or '—'} → {rec.get('current')}"
+                       + ("（升降）" if rec.get("changed") else ""))
+            add(f"<tr><td>{_esc(p['title'])}</td>"
+                f"<td>{_esc(PRESENCE_LABEL.get(d.get('presence'), d.get('presence', '—')))}</td>"
+                f"<td>{ev.get('baseline', 0)} → {ev.get('current', 0)}（{ev.get('delta', 0):+d}）</td>"
+                f"<td>{st.get('baseline', 0)} → {st.get('current', 0)}（{st.get('delta', 0):+d}）</td>"
+                f"<td>{_esc(rec_txt)}</td>"
+                f"<td>{_esc(str(strength.get('baseline') or '—'))} → {_esc(str(strength.get('current')))}</td></tr>")
+        add("</tbody></table>")
+        if tview["disappeared"]:
+            add("<p class='other-models'>本期未再出现的主题："
+                + _esc("、".join(tview["disappeared"])) + "</p>")
+        add("<p class='note'>跨期比较只描述证据覆盖与统计变化，不代表因果关系或总体市场趋势。</p>")
+        add("</section>")
 
     add("<details class='appendix'><summary>方法与 Runtime 追溯</summary><ul>")
     add("<li>A 业务主题扫描：选择题由 <code>derive_survey_stats.py</code> 直读问卷列并确定性聚合；"
@@ -821,12 +929,20 @@ def main() -> int:
     else:
         pstats = load_json(run_dir / "preset_stats.json")
 
+    baseline = load_baseline(run, run_dir)
+
     out_dir = args.output_dir or (APP_DIR / "reports" / run["run_id"])
     out_dir.mkdir(parents=True, exist_ok=True)
     md_path = out_dir / "product_expert_report.md"
     html_path = out_dir / "product_expert_report.html"
-    md_path.write_text(build_markdown(run, patterns, convergences, findings, issues, evidence, pstats), encoding="utf-8")
-    html_path.write_text(build_html(run, patterns, convergences, findings, issues, evidence, pstats), encoding="utf-8")
+    md_path.write_text(
+        build_markdown(run, patterns, convergences, findings, issues, evidence, pstats, baseline),
+        encoding="utf-8",
+    )
+    html_path.write_text(
+        build_html(run, patterns, convergences, findings, issues, evidence, pstats, baseline),
+        encoding="utf-8",
+    )
     print(f"wrote {md_path}")
     print(f"wrote {html_path}")
     return 0

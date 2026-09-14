@@ -128,29 +128,57 @@ systemic → strong
 
 ### C7 Temporal Comparison
 
-第一个 wave（只有一次 run）时：
+**比较的是研究窗口，不是数据集路径。** 同一个 CSV 路径可能被不同 run 在不同时间、不同窗口读取，
+因此比较对象必须由 run manifest 显式声明，不得自动推断。
+
+#### C7.1 基线声明
+
+当前 run 通过 `run.json` 声明可比基线（推荐单日对单日、同期对同期）：
 
 ```json
-{ "status": "baseline_only" }
+{
+  "run_id": "run_003",
+  "support_date_filter": "2026-09-13",
+  "scope": { "start_date": "2026-09-13", "end_date": "2026-09-13", "granularity": "daily" },
+  "comparison_baseline_run_id": "run_002_2026-09-12",
+  "comparison_granularity": "daily"
+}
 ```
 
-出现新 wave（新 run）后，比较同一 `pattern_key` 的 Convergence：
+- 未声明基线：`temporal_comparison.status = "baseline_only"`，不产出 `delta`。
+- 已声明基线：按 `pattern_key` 对齐逐 pattern 派生 `status = "compared"` 与 `delta`。
+- `dataset_sha256` 记录数据快照；路径相同不代表快照相同。
+- 多基线用 `comparison_baseline_run_ids`（当前实现只对首个基线派生 `delta`，其余记入 `compared_run_ids`）。
 
-| 比较项 | 说明 |
-| --- | --- |
-| `counts` | evidence / issue / expert / store / period / series 增减 |
-| `attribution` | 产品专家、城市+门店、支持时间的新增与消失 |
-| `recurrence` | `isolated → repeated → systemic` 的升降 |
-| `evidence_strength` | 由 recurrence 同步变化 |
-| 主题状态 | 新出现 / 持续 / 消退（由 presence + recurrence 判断） |
+#### C7.2 对齐与 delta
 
-对齐方式：
+对齐方式：**按 `pattern_key` 对齐，不按 `pattern_id`**。对每个当前 pattern：
 
 ```text
-按 pattern_key 对齐，不按 pattern_id
+基线无此 key                     → presence = new
+evidence_count 增加 或 recurrence 上升 → presence = expanded
+evidence_count 减少 或 recurrence 下降 → presence = contracted
+其余                              → presence = continued
 ```
 
-Temporal Comparison 只描述变化，**不直接下因果结论**；因果判断属于 Finding，并需显式标注边界。
+`delta` 固定结构（全部为集合/数组运算，不做因果解释）：
+
+| 字段 | 内容 |
+| --- | --- |
+| `presence` | `new` / `continued` / `expanded` / `contracted` |
+| `counts` | 6 个计数各含 `{baseline, current, delta}`；`new` 时 baseline=0 |
+| `attribution` | 新增/消失的产品专家、城市+门店、支持时间区间 |
+| `recurrence` | `{baseline, current, changed}`；`new` 时 baseline=null |
+| `evidence_strength` | `{baseline, current}`；由 recurrence 同步 |
+
+- 基线存在、当前 run 未再出现的 `pattern_key`：**不伪造当前 Convergence**，由报告层作为「消退主题」列出。
+- Temporal Comparison 只描述证据覆盖与统计变化，**不直接下因果结论**；因果判断属于 Finding，并需显式标注边界。
+
+#### C7.3 派生器
+
+`scripts/derive_convergence.py` 读取 `run.json` 的基线声明（可被 `--baseline <dir>` 覆盖），
+加载基线 run 的 `convergence.json` 并派生上述 `temporal_comparison`。旧 run 无基线声明时保持
+`baseline_only`，其产物不被改写。
 
 ## pattern_key 生命周期
 

@@ -102,3 +102,6 @@ convergence 阶段（统计必须与 `workflow/convergence.md` 冻结规则一�
 | --- | --- | --- |
 | `case_001_steering_wheel_sightline.json` | discovery | 同段多观察拆分 + 拒购风险严重度 + 跨车系 |
 | `case_002_convergence_attribution.json` | convergence | Attribution 三维派生 + counts + systemic/strong 规则 |
+| `case_003_survey_determinism.json` | survey | 问卷直读确定性 + 选项全命中 mapping |
+| `case_004_single_day_support_date.json` | convergence | 单日 `support_date` 标准化 + 日级 support_period_count |
+| `case_005_temporal_comparison.json` | convergence | C7 按 `pattern_key` 对齐基线 + `presence`/`delta` 派生 + 消退不伪造 |
