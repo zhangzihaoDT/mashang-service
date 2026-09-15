@@ -7,6 +7,7 @@
 ├── skills/         能力本身
 ├── commands/       显式调用入口
 ├── integrations/   外部能力如何接入本项目
+├── verification/   Verification Scope Contract（验证范围契约）
 └── README.md       控制面索引
 ```
 
@@ -26,3 +27,8 @@
 ## Integrations
 
 - `.opencode/integrations/diagram-design.md`
+
+## Verification
+
+- `.opencode/verification/README.md` → Verification Scope Contract：把「充分验证」定义为「命中改动范围的验证」，避免测试范围膨胀。
+- `make verify-scope` / `make verify` / `make verify-all`

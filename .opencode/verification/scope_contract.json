@@ -1,0 +1,198 @@
+{
+  "version": "0.1.1",
+  "description": "Verification Scope Contract — 把『充分验证』定义为『命中改动范围的验证』，而不是『扩大 pytest scope』。",
+  "policy": {
+    "statement": "验证范围必须与改动范围匹配。未命中改动范围的测试失败，不算本次回归。",
+    "rules": [
+      "只运行 matched_rules 解析出的 required_targets。",
+      "scope 外的失败不阻断本次改动，但必须在报告中显式列出。",
+      "扩大验证范围必须显式声明（--include / --all）并说明理由，不得默认扩大。",
+      "baseline_failures 是仓库已知历史失败（P1 待修），不视为本次回归。",
+      "doc-only 改动 decision=no-op，不运行任何测试。"
+    ]
+  },
+  "targets": {
+    "harness.selftest": {
+      "command": ["{python}", "-m", "pytest", ".opencode/verification/tests", "-q"],
+      "data_dependency": false,
+      "tier": "harness",
+      "description": "Verification Scope Contract 自测"
+    },
+    "eval.ci": {
+      "command": ["{python}", "mashang_workspace/eval/run_eval.py", "--suite", "ci", "--format", "terminal"],
+      "data_dependency": false,
+      "tier": "eval",
+      "description": "CI-safe eval（parser + followup + reference），不依赖 dataset"
+    },
+    "eval.core": {
+      "command": ["{python}", "mashang_workspace/eval/run_eval.py", "--suite", "core", "--format", "terminal"],
+      "data_dependency": true,
+      "tier": "eval",
+      "description": "Core eval（runtime 脚本 numeric + contract gate），依赖 dataset"
+    },
+    "pytest.eval": {
+      "command": ["{python}", "-m", "pytest", "mashang_workspace/tests/eval", "-q"],
+      "data_dependency": false,
+      "tier": "pytest",
+      "description": "workspace eval 单测"
+    },
+    "pytest.scripts": {
+      "command": ["{python}", "-m", "pytest", "mashang_workspace/tests/scripts", "-q"],
+      "data_dependency": false,
+      "tier": "pytest",
+      "description": "workspace 脚本 smoke / Result Contract 单测"
+    },
+    "pytest.workspace": {
+      "command": ["{python}", "-m", "pytest", "mashang_workspace/tests", "-q"],
+      "data_dependency": true,
+      "tier": "pytest",
+      "description": "workspace 全量单测（部分依赖 dataset）"
+    },
+    "pytest.dataset": {
+      "command": ["{python}", "-m", "pytest", "tests", "-q"],
+      "data_dependency": true,
+      "tier": "pytest",
+      "description": "根 tests/（dataset 构建契约）"
+    },
+    "runtime_v2.tests": {
+      "command": ["{python}", "-m", "pytest", "mashang_runtime_v2/tests/test_core_generic.py", "mashang_runtime_v2/tests/test_feature_job_adapter.py", "-q"],
+      "data_dependency": false,
+      "tier": "pytest",
+      "description": "Runtime V2 核心编排单测"
+    },
+    "pytest.legacy-runtime": {
+      "command": ["{python}", "-m", "pytest", "mashang_workspace/tests/test_legacy_runtime_packaging.py", "-q"],
+      "data_dependency": false,
+      "tier": "pytest",
+      "description": "legacy runtime 打包契约"
+    }
+  },
+  "rules": [
+    {
+      "id": "harness-contract",
+      "match": [".opencode/verification/**"],
+      "targets": ["harness.selftest"],
+      "dynamic": null,
+      "note": "验证契约自身的改动，跑契约自测"
+    },
+    {
+      "id": "opencode-config",
+      "match": [".opencode/**", "opencode.jsonc"],
+      "targets": ["harness.selftest"],
+      "dynamic": null,
+      "note": "OpenCode 控制面改动，跑契约自测作为基线"
+    },
+    {
+      "id": "runtime-script",
+      "match": ["mashang_workspace/runtime_scripts/*.py"],
+      "targets": ["pytest.scripts", "eval.core"],
+      "dynamic": "script_help",
+      "note": "runtime tier 受 Result Contract + numeric gate 约束（eval.core 依赖 dataset）"
+    },
+    {
+      "id": "workspace-script",
+      "match": [
+        "mashang_workspace/research_scripts/*.py",
+        "mashang_workspace/utility_scripts/*.py"
+      ],
+      "targets": ["pytest.scripts"],
+      "dynamic": "script_help",
+      "note": "脚本改动跑 workspace 脚本单测 + 改动脚本 --help 冒烟"
+    },
+    {
+      "id": "workspace-test",
+      "match": ["mashang_workspace/tests/**"],
+      "targets": [],
+      "dynamic": "pytest_file",
+      "note": "直接运行改动的测试文件"
+    },
+    {
+      "id": "workspace-eval",
+      "match": ["mashang_workspace/eval/**"],
+      "targets": ["pytest.eval", "eval.ci"],
+      "dynamic": "pytest_file",
+      "note": "eval 逻辑改动跑 eval 单测 + CI-safe eval"
+    },
+    {
+      "id": "shared",
+      "match": ["shared/**"],
+      "targets": ["pytest.workspace"],
+      "dynamic": null,
+      "note": "shared operator/schema 改动影响 workspace，跑 workspace 单测"
+    },
+    {
+      "id": "capability",
+      "match": ["capabilities/**"],
+      "targets": [],
+      "dynamic": "nearest_tests",
+      "note": "capability 改动跑其自带 tests/"
+    },
+    {
+      "id": "runtime-v2",
+      "match": ["mashang_runtime_v2/**"],
+      "targets": ["runtime_v2.tests"],
+      "dynamic": "pytest_file",
+      "note": "Runtime V2 改动跑核心编排单测"
+    },
+    {
+      "id": "legacy-runtime",
+      "match": ["mashang_runtime/**"],
+      "targets": ["pytest.legacy-runtime"],
+      "dynamic": null,
+      "note": "legacy runtime（frozen）改动跑打包契约"
+    },
+    {
+      "id": "research-app",
+      "match": ["research_apps/**"],
+      "targets": [],
+      "dynamic": "nearest_tests",
+      "note": "research app 改动跑其自带 tests/"
+    },
+    {
+      "id": "dataset-tp-and-mix",
+      "match": ["dataset/TP&MIX-ways/**"],
+      "targets": ["pytest.dataset"],
+      "dynamic": null,
+      "note": "TP&MIX-ways 数据资产有构建契约，跑 dataset 构建测试"
+    },
+    {
+      "id": "dataset-asset",
+      "match": ["dataset/**"],
+      "targets": [],
+      "dynamic": null,
+      "code": false,
+      "note": "通用数据资产改动无通用自动契约；验证其消费能力（脚本）而非扩大到全量测试"
+    },
+    {
+      "id": "root-tests",
+      "match": ["tests/**"],
+      "targets": [],
+      "dynamic": "pytest_file",
+      "note": "根 tests/ 改动直接运行改动文件"
+    },
+    {
+      "id": "makefile",
+      "match": ["Makefile"],
+      "targets": ["eval.ci"],
+      "dynamic": null,
+      "note": "Makefile 改动跑 CI-safe eval 作为基线 smoke，并人工确认受影响 target"
+    },
+    {
+      "id": "generated-outputs",
+      "match": ["mashang_workspace/outputs/**", "outputs/**"],
+      "targets": [],
+      "dynamic": null,
+      "code": false,
+      "note": "生成产物（outputs/），不触发验证"
+    },
+    {
+      "id": "doc-only",
+      "match": ["**/*.md"],
+      "targets": [],
+      "dynamic": null,
+      "code": false,
+      "note": "纯文档改动，无需运行测试"
+    }
+  ],
+  "baseline_failures": []
+}

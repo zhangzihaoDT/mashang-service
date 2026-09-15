@@ -1,5 +1,5 @@
 PYTHON ?= .venv/bin/python
-.PHONY: eval full-eval core-eval research-eval capability-audit test ci data-dict lock-demo parser-demo followup-demo numeric-eval reference-eval atp-demo backtest-demo clean-outputs dataset-update dataset-validate daily-observation-dry-run daily-observation-sync daily-data-pipeline-dry-run daily-data-pipeline monitor monitor-dry-run scheduler render-official-doc render-official-doc-smoke production-golden build-workspace-skills-catalog build-workspace-capability-inventory inventory-status inventory-trend inventory-report lock-attribution lock-attribution-compare
+.PHONY: eval full-eval core-eval research-eval capability-audit test ci data-dict lock-demo parser-demo followup-demo numeric-eval reference-eval atp-demo backtest-demo clean-outputs dataset-update dataset-validate daily-observation-dry-run daily-observation-sync daily-data-pipeline-dry-run daily-data-pipeline monitor monitor-dry-run scheduler render-official-doc render-official-doc-smoke production-golden build-workspace-skills-catalog build-workspace-capability-inventory inventory-status inventory-trend inventory-report lock-attribution lock-attribution-compare tesla-report tesla-report-json verify-scope verify verify-all
 
 ## 生成 Eval 结果（显式产物 unified_eval_result.json）
 ## 用法: make eval [SUITE=default|ci|all|research|core]
@@ -20,7 +20,7 @@ research-eval:
 
 ## 完整测试
 test:
-	$(PYTHON) -m pytest mashang_workspace/tests capabilities/ocr/tests capabilities/notify/tests capabilities/search/tests capabilities/diagram/tests -q
+	$(PYTHON) -m pytest mashang_workspace/tests capabilities/ocr/tests capabilities/notify/tests capabilities/search/tests capabilities/diagram/tests .opencode/verification/tests -q
 	$(PYTHON) -m pytest mashang_runtime_v2/tests/test_core_generic.py mashang_runtime_v2/tests/test_feature_job_adapter.py -q
 
 ## CI 门禁 = 复用 eval(CI-safe) + 数据无关测试
@@ -38,8 +38,19 @@ ci:
 		capabilities/notify/tests \
 		capabilities/search/tests \
 		capabilities/diagram/tests \
+		.opencode/verification/tests \
 		-q
 	$(PYTHON) -m pytest mashang_runtime_v2/tests/test_core_generic.py mashang_runtime_v2/tests/test_feature_job_adapter.py -q
+
+## Verification Scope — 解析改动范围对应的最小验证范围
+verify-scope:  ## 解析当前工作区改动的最小验证范围（只计划，不执行）
+	$(PYTHON) .opencode/verification/resolve_verification_scope.py --worktree
+
+verify:  ## 解析并执行 scope 内验证（哪些算本次回归，由契约决定）
+	$(PYTHON) .opencode/verification/resolve_verification_scope.py --worktree --run
+
+verify-all:  ## 显式扩大范围：解析并执行全部 target
+	$(PYTHON) .opencode/verification/resolve_verification_scope.py --worktree --all --run
 
 ## 数据字典
 data-dict:
@@ -368,6 +379,13 @@ cpca-weekly-early-signal-json:  ## 乘联分会周度数据早源监控（JSON �
 
 cpca-weekly-data-capture:  ## 捕捉乘联分会周度早源数据并生成 fact_result JSON（WEEK=目标数据周，默认自动计算）
 	$(PYTHON) mashang_workspace/research_scripts/cpca_weekly_early_signal.py $(if $(WEEK),--week $(WEEK)) --format html --capture-json --write-fact-result
+
+# === Tesla 月度批发/零售/出口 ===
+tesla-report:  ## Tesla 月度批发/零售/出口报告（HTML，SOURCE_URL=最新月份数据来源）
+	$(PYTHON) mashang_workspace/research_scripts/tesla_wholesale_export_report.py --html $(if $(SOURCE_URL),--source-url $(SOURCE_URL))
+
+tesla-report-json:  ## Tesla 月度批发/零售/出口（JSON Result Contract）
+	$(PYTHON) mashang_workspace/research_scripts/tesla_wholesale_export_report.py --format json $(if $(SOURCE_URL),--source-url $(SOURCE_URL))
 
 # Workspace Skills Catalog
 build-workspace-skills-catalog:

@@ -51,7 +51,7 @@ mashang-service 是一个**汽车业务数据分析项目**，包含以下分支
 7. **OpenCode 应优先读取 `mashang_workspace/AGENTS.md`**
 8. **不要在根目录创建新的 `docs/scripts/eval/tests/utils`**
 9. **新分析能力优先沉淀到 `mashang_workspace/runtime_scripts/ + research_scripts/ + docs/ + eval/`**
-10. **每次完成改动后运行 `make eval` 或 `make ci`**
+10. **验证范围必须与改动范围匹配**：改动后先 `make verify-scope` 解析本次改动的最小验证范围，再 `make verify` 执行。**scope 外失败不算本次回归**；扩大范围必须显式（`make verify-all` / `--include`），不得把「充分验证」等价成「跑全量 pytest / `make ci`」。契约见 `.opencode/verification/README.md`。
 11. **能力产品化路径**：workspace 中验证稳定的能力先成为 `runtime_scripts`，供 `mashang_runtime_v2`（Unified Research Runtime）确定性调度；不要绕过 workspace 直接在 runtime_v2 中开发探索性能力，也不把业务分析代码复制进 runtime_v2 或 legacy runtime。
 12. **`shared/` 边界**：共享 operator/schema 层，不应随意修改。如修改需说明影响范围，并同步相关测试。
 13. **MCP 边界**：MCP 能力由根目录统一提供（`.opencode/` / `opencode.jsonc`），workspace 只消费能力。不得将本地 profile、cookies、API key、incoming 原始数据等提交进仓库。
@@ -361,6 +361,9 @@ mashang-service/
 | 生成 Eval | `python mashang_workspace/utility_scripts/generate_eval_cases.py` | utility |
 | 数据更新并同步 | `make daily-data-pipeline` (写操作) | DataOps |
 | 预检数据 | `make daily-data-pipeline-dry-run` | DataOps |
+| 解析验证范围 | `make verify-scope`（按改动解析最小验证范围） | harness |
+| 执行验证 | `make verify`（仅 scope 内；baseline 不算回归） | harness |
+| 扩大验证 | `make verify-all`（显式全量） | harness |
 | 运行 Runtime Eval | `python eval/run_runtime_eval.py` |
 | 运行 Follow-up Eval | `python mashang_workspace/eval/run_followup_eval.py` |
 | 运行 Numeric Eval | `python mashang_workspace/eval/run_numeric_eval.py` |
