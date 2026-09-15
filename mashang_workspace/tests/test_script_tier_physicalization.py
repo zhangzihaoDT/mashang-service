@@ -77,20 +77,20 @@ def test_capability_registry_runtime_scripts_paths():
         if cap.get("tier") == "runtime":
             sp = cap.get("script", "")
             assert "runtime_scripts" in sp, f"{cap['capability_id']} script path 不是 runtime_scripts: {sp}"
-            full_path = WORKSPACE_ROOT / sp.replace("mashang_workspace/", "")
+            full_path = PROJECT_ROOT / sp
             assert full_path.exists(), f"{cap['capability_id']} 脚本不存在: {full_path}"
 
 
 def test_capability_registry_research_scripts_paths():
-    """capability_registry 中 research script paths 指向 research_scripts/ 或 promptbuilders/。"""
-    valid_prefixes = ("research_scripts", "promptbuilders")
+    """research script paths 指向 research_scripts/、promptbuilders/ 或 research_apps/。"""
+    valid_prefixes = ("research_scripts", "promptbuilders", "research_apps")
     registry = json.loads(REGISTRY_PATH.read_text())
     for cap in registry:
         if cap.get("tier") == "research":
             sp = cap.get("script", "")
             assert any(p in sp for p in valid_prefixes), \
                 f"{cap['capability_id']} script path 不是 {valid_prefixes}: {sp}"
-            full_path = WORKSPACE_ROOT / sp.replace("mashang_workspace/", "")
+            full_path = PROJECT_ROOT / sp
             assert full_path.exists(), f"{cap['capability_id']} 脚本不存在: {full_path}"
 
 
@@ -101,7 +101,7 @@ def test_capability_registry_utility_scripts_paths():
         if cap.get("tier") == "utility":
             sp = cap.get("script", "")
             assert "utility_scripts" in sp, f"{cap['capability_id']} script path 不是 utility_scripts: {sp}"
-            full_path = WORKSPACE_ROOT / sp.replace("mashang_workspace/", "")
+            full_path = PROJECT_ROOT / sp
             assert full_path.exists(), f"{cap['capability_id']} 脚本不存在: {full_path}"
 
 

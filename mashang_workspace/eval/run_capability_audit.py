@@ -26,7 +26,7 @@ _PRJ_ROOT = _WS_ROOT.parent
 REGISTRY_FILE = _WS_ROOT / "registry" / "capability_registry.json"
 
 VALID_TIERS = {"runtime", "research", "utility", "legacy"}
-VALID_STATUSES = {"active", "partial", "experimental", "deprecated"}
+VALID_STATUSES = {"active", "partial", "experimental", "deprecated", "retired"}
 
 AUDIT_CHECKS = [
     "script_exists", "tier_valid", "status_valid",
@@ -35,15 +35,15 @@ AUDIT_CHECKS = [
 ]
 
 
-def audit_capability(cap: dict, ws_root: Path) -> dict:
+def audit_capability(cap: dict) -> dict:
     cap_id = cap.get("capability_id", "unknown")
     tier = cap.get("tier", "")
     status = cap.get("status", "")
     script_path = cap.get("script", "")
     checks = {}
 
-    # 1. Script exists
-    checks["script_exists"] = (ws_root / script_path.replace("mashang_workspace/", "")).exists() if script_path else False
+    # 1. Script exists — registry 路径统一为仓库根相对路径（mashang_workspace/… 或 research_apps/…）
+    checks["script_exists"] = bool(script_path) and (_PRJ_ROOT / script_path).exists()
 
     # 2. Tier valid
     checks["tier_valid"] = tier in VALID_TIERS
@@ -114,7 +114,7 @@ def main():
     with open(reg_path, encoding="utf-8") as f:
         registry = json.load(f)
 
-    results = [audit_capability(c, _WS_ROOT) for c in registry]
+    results = [audit_capability(c) for c in registry]
     total = len(results)
     passed = sum(1 for r in results if r["status"] == "passed")
     failed = total - passed

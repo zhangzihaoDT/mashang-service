@@ -6,14 +6,15 @@ import subprocess, sys, json
 from pathlib import Path
 
 _WS_DIR = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = _WS_DIR.parent
 REGISTRY_FILE = _WS_DIR / "registry" / "capability_registry.json"
 AUDIT_RUNNER = _WS_DIR / "eval" / "run_capability_audit.py"
 
 VALID_TIERS = {"runtime", "research", "utility", "legacy"}
-VALID_STATUSES = {"active", "partial", "experimental", "deprecated"}
+VALID_STATUSES = {"active", "partial", "experimental", "deprecated", "retired"}
 
 
-def _run_audit(args: list[str] = None) -> subprocess.CompletedProcess:
+def _run_audit(args: list[str] | None = None) -> subprocess.CompletedProcess:
     cmd = [sys.executable, str(AUDIT_RUNNER)]
     if args:
         cmd.extend(args)
@@ -53,7 +54,7 @@ def test_all_scripts_exist():
     for c in data:
         script = c.get("script", "")
         if script:
-            full = _WS_DIR / script.replace("mashang_workspace/", "")
+            full = PROJECT_ROOT / script
             assert full.exists(), f"{c['capability_id']}: script not found {full}"
 
 
