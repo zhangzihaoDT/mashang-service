@@ -8,7 +8,7 @@
 - **本地数据落点**：
   - `dataset/cpca/` — CPCA 数据资产根目录。
   - `dataset/cpca/AKShare/` — AKShare 拉取脚本（`fetch_cpca_data.py`、`calc_nev_penetration.py`）及其生成的 CSV。
-  - `dataset/cpca/tesla_monthly_wholesale_retail_export.csv` — **Tesla** 月度批发/零售/出口明细（手动整理数据）。数据来源：乘联会《全国乘用车市场分析》月报，2026-07 拆分值来自 2026-08-11 发布（https://www.cada.cn/Trends/info_91_10550.html）。
+  - `dataset/cpca/tesla_monthly_wholesale_retail_export.csv` — **Tesla** 月度批发/零售/出口明细（手动整理数据）。数据来源：乘联会《全国乘用车市场分析》月报，2026-07 拆分值来自 2026-08-11 发布（https://www.cada.cn/Trends/info_91_10550.html），2026-08 拆分值来自 2026-09-09 发布（https://www.cada.cn/Trends/info_91_10566.html）。
   - `dataset/cpca_weekly/` — 周度数据捕捉 JSON（`cpca_weekly_data_capture.json`、`cpca_weekly_fact_result.json`）。
   - `mashang_workspace/research_scripts/cpca_weekly_early_signal.py` — 周度数据早源监控脚本。
 
@@ -45,11 +45,13 @@
 | 出口 | 月度出口量 |
 | 出口占比 | 出口 / 批发（0-1 小数） |
 
-口径说明：数据为 **Tesla 月度口径**，来源乘联会统计；`2026-07` 行批发 93,579 = 国内零售 27,249（29.1%）+ 上海工厂出口 66,330（70.9%）。
+口径说明：数据为 **Tesla 月度口径**，来源乘联会统计；`2026-07` 行批发 93,579 = 国内零售 27,249（29.1%）+ 上海工厂出口 66,330（70.9%）；`2026-08` 行批发 86,166 = 国内零售 50,047（58.1%）+ 上海工厂出口 36,119（41.9%）。
+
+月度报告生成：`python mashang_workspace/research_scripts/tesla_wholesale_export_report.py --html --source-url <最新月份来源链接>`（或 `make tesla-report SOURCE_URL=...`），输出 `mashang_workspace/outputs/reports/tesla_wholesale_export_report.html`。
 
 ## 经验要点
 
-1. **先分内销/外销再看总量**：出口占比超过 30% 的月份，总量增长可能主要由出口驱动，不代表国内终端走强。
+1. **先分内销/外销再看总量**：出口占比超过 30% 的月份，总量增长可能主要由出口驱动，不代表国内终端走强。反之如 2026-08，出口占比回落至 41.9%（出口环比 -45.5%），国内零售 50,047 辆、环比 +83.7%（低基数反弹），结构阶段性向内销回摆，但同比仍 -12.4%。
 2. **批零剪刀差预警**：批发持续高于零售说明渠道在累库，反之在去库。
 3. **Tesla 动作先行**：观察 Tesla 交付/价格变化后，再回看自主品牌同价位带车型的批发零售响应。
 4. **周度早源优先**：周度数据比月度官方数据更早可得，适合做提前信号，见 `cpca_weekly_early_signal.py`。
