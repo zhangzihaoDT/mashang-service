@@ -342,6 +342,11 @@ table.content-table tbody tr:hover {
 .report-table .delta-positive { color: var(--status-positive); font-weight: 600; }
 .report-table .delta-negative { color: var(--status-negative); font-weight: 600; }
 .report-table .delta-neutral { color: var(--zh-muted); }
+.report-table .cell-max {
+  background: var(--zh-gold-100);
+  color: var(--zh-gold-700);
+  font-weight: 700;
+}
 
 /* ── Badge Family ── */
 .badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid transparent; }
