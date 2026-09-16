@@ -54,6 +54,8 @@ def parse_args(argv: list[str] | None = None):
     p.add_argument("--input", default=str(DEFAULT_INPUT), help="观察 CSV 路径")
     p.add_argument("--output", default=str(DEFAULT_OUT), help="输出 HTML 路径")
     p.add_argument("--top-label", type=int, default=10, help="标注门店数（按线索降序，默认 10）")
+    p.add_argument("--color-by", default="type", choices=["type", "format", "quadrant"],
+                   help="点着色维度：type=门店分类(门店类型, 默认) / format=门店形态(store_format) / quadrant=四象限")
     return p.parse_args(argv)
 
 
@@ -85,7 +87,23 @@ def classify(df: pd.DataFrame) -> tuple[pd.DataFrame, float, float]:
     return df, x_th, y_th
 
 
-def make_figure(df: pd.DataFrame, x_th: float, y_th: float, top_label: int) -> go.Figure:
+FORMAT_PALETTE = [ZH["own"], ZH["event"], ZH["steel"], ZH["sage"], ZH["mauve"],
+                  ZH["sky_muted"], ZH["ash"], ZH["clay"]]
+
+
+def _scatter(fig, sub: pd.DataFrame, color: str, name: str):
+    fig.add_trace(go.Scatter(
+        x=sub["近7日下发线索"].tolist(), y=sub["转化率"].tolist(), mode="markers", name=name,
+        marker=dict(color=color, size=9, opacity=0.8, line=dict(width=0.5, color="#FFFFFF")),
+        customdata=sub[["门店", "门店类型", "门店形态", "CM3小订", "小订/线索"]].values.tolist(),
+        hovertemplate=("<b>%{customdata[0]}</b><br>门店类型：%{customdata[1]}"
+                       "<br>门店形态：%{customdata[2]}<br>近7日下发线索：%{x}"
+                       "<br>CM3小订：%{customdata[3]}<br>小订/线索：%{customdata[4]}<extra></extra>"),
+    ))
+
+
+def make_figure(df: pd.DataFrame, x_th: float, y_th: float, top_label: int,
+                color_by: str = "quadrant") -> go.Figure:
     fig = go.Figure()
 
     # 对数 X 轴范围（左边界取正的最小值）
@@ -105,19 +123,22 @@ def make_figure(df: pd.DataFrame, x_th: float, y_th: float, top_label: int) -> g
         fig.add_shape(type="rect", x0=x0, x1=x1, y0=y0, y1=y1,
                       fillcolor=f"rgba({r},{g},{b},0.06)", line_width=0, layer="below")
 
-    # 各象限散点
-    for name, color in QUADRANTS:
-        sub = df[df["象限"] == name]
-        if sub.empty:
-            continue
-        fig.add_trace(go.Scatter(
-            x=sub["近7日下发线索"].tolist(), y=sub["转化率"].tolist(), mode="markers", name=f"{name}（{len(sub)}）",
-            marker=dict(color=color, size=9, opacity=0.8, line=dict(width=0.5, color="#FFFFFF")),
-            customdata=sub[["门店", "门店类型", "CM3小订", "小订/线索"]].values.tolist(),
-            hovertemplate=("<b>%{customdata[0]}</b><br>类型：%{customdata[1]}"
-                           "<br>近7日下发线索：%{x}<br>CM3小订：%{customdata[2]}"
-                           "<br>小订/线索：%{customdata[3]}<extra></extra>"),
-        ))
+    # 散点：按 门店分类(门店类型) / 门店形态(store_format) / 四象限 着色
+    if color_by == "format":
+        cats = df["门店形态"].value_counts().index.tolist()
+        for i, cat in enumerate(cats):
+            _scatter(fig, df[df["门店形态"] == cat], FORMAT_PALETTE[i % len(FORMAT_PALETTE)],
+                     f"{cat}（{int((df['门店形态'] == cat).sum())}）")
+    elif color_by == "type":
+        cats = df["门店类型"].value_counts().index.tolist()
+        for i, cat in enumerate(cats):
+            _scatter(fig, df[df["门店类型"] == cat], FORMAT_PALETTE[i % len(FORMAT_PALETTE)],
+                     f"{cat}（{int((df['门店类型'] == cat).sum())}）")
+    else:
+        for name, color in QUADRANTS:
+            sub = df[df["象限"] == name]
+            if not sub.empty:
+                _scatter(fig, sub, color, f"{name}（{len(sub)}）")
 
     # 中位参考线
     fig.add_vline(x=x_th, line=dict(color=ZH["ash"], width=1, dash="dash"))
@@ -170,7 +191,8 @@ def _table(df: pd.DataFrame) -> str:
     return "\n".join(rows)
 
 
-def render_html(fig: go.Figure, df: pd.DataFrame, x_th: float, y_th: float) -> str:
+def render_html(fig: go.Figure, df: pd.DataFrame, x_th: float, y_th: float,
+                color_by: str = "quadrant") -> str:
     static = "../.."
     chart = fig.to_html(full_html=False, include_plotlyjs=False, div_id="quad",
                         config={"displayModeBar": False, "responsive": True})
@@ -216,7 +238,7 @@ def render_html(fig: go.Figure, df: pd.DataFrame, x_th: float, y_th: float) -> s
   <section class="report-section">
     <h2 class="section-title">线索量 × 转化率分布</h2>
     <div class="chart-box">{chart}</div>
-    <p class="section-note">X=近7日下发线索（条），Y=小订/线索（%）。虚线为中位数（X={x_th:,.0f}，Y={y_th:.1f}%）。点按象限着色，标注线索量 Top{min(10, len(active))} 门店。</p>
+    <p class="section-note">X=近7日下发线索（条，对数轴），Y=小订/线索（%）。虚线为中位数（X={x_th:,.0f}，Y={y_th:.1f}%）。点按<strong>门店分类（门店类型）</strong>分组着色，标注线索量 Top{min(10, len(active))} 门店。</p>
   </section>
   <section class="report-section">
     <h2 class="section-title">四象限汇总</h2>
@@ -238,8 +260,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     df = load_data(Path(args.input))
     df, x_th, y_th = classify(df)
-    fig = make_figure(df, x_th, y_th, args.top_label)
-    html = render_html(fig, df, x_th, y_th)
+    fig = make_figure(df, x_th, y_th, args.top_label, args.color_by)
+    html = render_html(fig, df, x_th, y_th, args.color_by)
     out = Path(args.output)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(html, encoding="utf-8")
