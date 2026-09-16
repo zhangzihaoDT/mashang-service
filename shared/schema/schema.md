@@ -318,14 +318,33 @@
 | Store Create Status Desc     | string    | 门店状态：开业/暂停/在建/停业 |
 | store_create_time（原始列名为 Tableau 计算式）| datetime | 门店开业时间（读取时经 loader rename） |
 | store_stop_time（原始列名为 Tableau 计算式） | datetime | 门店停业时间（空=在营） |
+| store_format（派生）          | string    | 门店形态/店型，由 Dealer Code 前缀派生（见下『门店编码定义』），非原始列 |
 
-**规模**：1,747 行 / 1,073 门店名 / 213 经销商集团（Bloc）；Grain = Dealer Code。
+**规模**：1,788 行 / 1,103 门店名 / 214 经销商集团（Bloc）；Grain = Dealer Code。
+
+**门店编码定义（店型分类模型）**：
+
+> 完整机器可读定义见 `store_info_schema.json` 的 `dealer_code_prefix_definitions`；
+> 读取统一用 `store_info_loader.get_store_format(code)`（`load_store_info()` 已派生 `store_format` 列）。
+
+| Dealer Code 前缀 | store_format | 典型业态 | 名称形态 |
+| :--- | :--- | :--- | :--- |
+| IMA | 授权经销商门店 | 交付店 | 用户中心 / 体验中心 |
+| IMD / IMS | 交付/售后中心 | 交付店 / 售后服务店 | 用户中心 |
+| IMH / IMV | 体验店 | 体验店 | 体验中心 |
+| IMM | 体验及交付服务中心 | 体验店 / 售后服务店 | 体验及交付服务中心 |
+| **IMP / IME** | **快闪/慢闪** | 未分类 | 城市展厅 / 临时展厅（pop-up） |
+| IMB / IMF / IMJ / IMK / IML | 城市空间 | 未分类 | 城市空间 |
+| IMX | 快闪交付中心 | 未分类 | -XN交付中心 |
+| IMO / IMT | 海外网点 | 未分类 | 上汽国际 / 海外 |
+| IMC / IMG / IMI | 其他 | 未分类 | 单店/特殊 |
+| 其他/空 | 未知 | — | — |
 
 **关联口径（order_data → 经销商）**：
 
 - order_data 只有 `store_name` 门店简称；store_info `Dealer Name Fc` 是完整名。
 - 用 `store_info_loader.resolve_dealer_info(store_name)` 做归一化子串匹配，返回
-  `bloc_name / dealer_type / region_name / city_name / dealer_code`。
+  `bloc_name / dealer_type / store_format / region_name / city_name / dealer_code`。
 - 覆盖约 92% 门店；popup 快闪店、跨集团同名、作废/新址门店可能不命中，需人工补录。
 
 **数据源**：`dataset/updater/store_info_to_csv.py`（Tableau store_info_1 视图 → external original）。

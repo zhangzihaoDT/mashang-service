@@ -7,9 +7,37 @@
   "grain": {
     "key": "Dealer Code",
     "note": "每行 = 一个 Dealer Code（门店业务代码）。同 Dealer Name Fc 可映射 1~8 个 Dealer Code，对应同一门店的不同业务职能代码（销售/交付/体验/售后等）。",
-    "unique_rows": 1747,
-    "unique_store_names": 1073,
-    "unique_blocs": 213
+    "unique_rows": 1788,
+    "unique_store_names": 1103,
+    "unique_blocs": 214
+  },
+  "dealer_code_prefix_definitions": {
+    "description": "门店编码定义：Dealer Code 前缀 → 门店形态（store_format）。这是『门店类型分类模型』的编码口径，loader 据此派生 store_format 列。",
+    "code_pattern": "<前缀3位><3位数字>，如 IMP597 / IMA236 / IMH160",
+    "usage": "按店型过滤/聚合：识别快闪/慢闪、体验店、交付中心、城市空间、海外网点等",
+    "note": "前缀是门店形态的强信号，但历史数据存在少量跨界（IMP 含 2 家体验店、IMH 含少量城市展厅），最终以 loader 派生的 store_format 为准；Dealer_type 仍为 Tableau 原始业态。未匹配前缀统一归入『未知』。",
+    "prefixes": [
+      { "prefix": "IMA", "store_format": "授权经销商门店", "typical_dealer_type": "交付店", "name_pattern": "用户中心 / 体验中心", "note": "授权 4S 类综合门店（销售主体）" },
+      { "prefix": "IMD", "store_format": "交付/售后中心", "typical_dealer_type": "交付店 / 售后服务店", "name_pattern": "用户中心", "note": "交付与售后职能代码" },
+      { "prefix": "IMS", "store_format": "交付/售后中心", "typical_dealer_type": "交付店 / 售后服务店", "name_pattern": "用户中心", "note": "交付与售后职能代码" },
+      { "prefix": "IMH", "store_format": "体验店", "typical_dealer_type": "体验店", "name_pattern": "体验中心", "note": "商超/城市体验门店" },
+      { "prefix": "IMM", "store_format": "体验及交付服务中心", "typical_dealer_type": "体验店 / 售后服务店", "name_pattern": "体验及交付服务中心", "note": "体验 + 交付 + 售后一体" },
+      { "prefix": "IMV", "store_format": "体验店", "typical_dealer_type": "体验店", "name_pattern": "体验中心", "note": "单店特殊编码" },
+      { "prefix": "IMP", "store_format": "快闪/慢闪", "typical_dealer_type": "未分类", "name_pattern": "城市展厅 / 临时展厅", "note": "pop-up 档期门店：快闪（短期）与慢闪（长期）" },
+      { "prefix": "IME", "store_format": "快闪/慢闪", "typical_dealer_type": "未分类", "name_pattern": "城市展厅", "note": "历史城市展厅编码，口径同 IMP" },
+      { "prefix": "IMB", "store_format": "城市空间", "typical_dealer_type": "未分类", "name_pattern": "城市空间", "note": "轻量城市空间（本地化网点）" },
+      { "prefix": "IMF", "store_format": "城市空间", "typical_dealer_type": "未分类", "name_pattern": "城市空间", "note": "同上（少量编码）" },
+      { "prefix": "IMJ", "store_format": "城市空间", "typical_dealer_type": "未分类", "name_pattern": "城市空间", "note": "同上" },
+      { "prefix": "IMK", "store_format": "城市空间", "typical_dealer_type": "未分类", "name_pattern": "城市空间", "note": "同上" },
+      { "prefix": "IML", "store_format": "城市空间", "typical_dealer_type": "未分类", "name_pattern": "城市空间", "note": "同上" },
+      { "prefix": "IMX", "store_format": "快闪交付中心", "typical_dealer_type": "未分类", "name_pattern": "-XN交付中心", "note": "快闪/临时交付中心" },
+      { "prefix": "IMO", "store_format": "海外网点", "typical_dealer_type": "未分类", "name_pattern": "上汽国际 / 加纳 等", "note": "海外市场网点" },
+      { "prefix": "IMT", "store_format": "海外网点", "typical_dealer_type": "未分类", "name_pattern": "上汽国际 / 加纳 等", "note": "海外市场网点" },
+      { "prefix": "IMC", "store_format": "其他", "typical_dealer_type": "未分类", "name_pattern": "—", "note": "单店/特殊编码" },
+      { "prefix": "IMG", "store_format": "其他", "typical_dealer_type": "未分类", "name_pattern": "—", "note": "单店/特殊编码" },
+      { "prefix": "IMI", "store_format": "其他", "typical_dealer_type": "未分类", "name_pattern": "—", "note": "单店/特殊编码" }
+    ],
+    "store_format_enum": ["授权经销商门店", "交付/售后中心", "体验店", "体验及交付服务中心", "快闪/慢闪", "城市空间", "快闪交付中心", "海外网点", "其他", "未知"]
   },
   "columns": [
     {
@@ -34,9 +62,9 @@
       "field": "Dealer Code",
       "data_type": "string",
       "semantic": "门店业务代码（主键）",
-      "note": "形如 IMA236 / IMD236 / IMS236 / IMH404 等。前缀 IMA/IMD/IMS 以交付店为主、IMH 以体验店为主、IMP 以未分类为主，但前缀并不严格唯一决定业态，业态以 Dealer_type 列为准。",
-      "unique_count": 1747,
-      "usage": "表主键/去重键；跨系统门店代码",
+      "note": "形如 IMA236 / IMD236 / IMS236 / IMH404 / IMP597 等，前缀 3 位标示门店形态。完整『编码定义』见本文件 dealer_code_prefix_definitions（如 IMP = 快闪/慢闪）。注意：前缀是门店形态的强信号，但历史数据存在少量跨界，业态以 Dealer_type 列为准。",
+      "unique_count": 1788,
+      "usage": "表主键/去重键；经前缀派生 store_format（门店形态）",
       "aliases": ["门店代码", "store_code"]
     },
     {
@@ -45,7 +73,7 @@
       "semantic": "门店业态类型",
       "note": "枚举：交付店 / 体验店 / 售后服务店 / 未分类。另有聚合行 '全部' 与空值行需剔除。",
       "enum_values": ["交付店", "体验店", "售后服务店", "未分类"],
-      "counts": {"交付店": 588, "体验店": 580, "售后服务店": 170, "未分类": 408},
+      "counts": {"交付店": 588, "体验店": 581, "售后服务店": 170, "未分类": 449},
       "usage": "门店业态过滤、销售/交付/体验网络结构",
       "aliases": ["业态", "店型", "store_type"]
     },
@@ -60,8 +88,8 @@
       "field": "City Name",
       "data_type": "string",
       "semantic": "门店所在城市（含市后缀）",
-      "note": "如『安庆市』。183 个城市。",
-      "unique_count": 183,
+      "note": "如『安庆市』。182 个城市。",
+      "unique_count": 182,
       "usage": "城市维度；order store_city 关联目标（注意本表带『市』后缀，需清洗）",
       "aliases": ["城市"]
     },
@@ -69,16 +97,16 @@
       "field": "Province Name",
       "data_type": "string",
       "semantic": "门店所在省份（含省后缀）",
-      "note": "如『安徽省』。31 个省份。",
-      "unique_count": 31,
+      "note": "如『安徽省』。30 个省份。",
+      "unique_count": 30,
       "usage": "省份维度"
     },
     {
       "field": "Region Name",
       "data_type": "string",
       "semantic": "大区（销售大区/渠道区）",
-      "note": "如『华中区』『东区-鲁豫』『北区-西北』。23 个大区值。",
-      "unique_count": 23,
+      "note": "如『华中区』『东区-鲁豫』『北区-西北』。22 个大区值。",
+      "unique_count": 22,
       "usage": "大区聚合/对比；与 order parent_region_name 语义不同需注意",
       "aliases": ["大区", "region"]
     },
@@ -95,7 +123,7 @@
       "semantic": "门店状态",
       "note": "枚举：开业 / 暂停 / 在建 / 停业。另有聚合行 '全部'。在营门店统计应过滤 status=开业（或按口径含暂停）。",
       "enum_values": ["开业", "暂停", "在建", "停业"],
-      "counts": {"开业": 976, "暂停": 564, "在建": 194, "停业": 12},
+      "counts": {"开业": 1022, "暂停": 573, "在建": 181, "停业": 12},
       "usage": "门店是否在营判定",
       "aliases": ["门店状态", "store_status"]
     },
@@ -119,6 +147,16 @@
       "semantic": "门店计数（Tableau 聚合列，非业务原始字段）",
       "note": "取值仅 1 或 1072（集团内门店行数聚合），非行级有效字段，业务分析应忽略。",
       "usage": "忽略"
+    }
+  ],
+  "derived_fields": [
+    {
+      "field": "store_format",
+      "data_type": "string",
+      "semantic": "门店形态/店型（由 Dealer Code 前缀派生）",
+      "note": "由 shared/loaders/store_info_loader.py 的 get_store_format 依据 dealer_code_prefix_definitions 生成；IMP / IME → 快闪/慢闪，未匹配前缀 → 未知。",
+      "enum_values": ["授权经销商门店", "交付/售后中心", "体验店", "体验及交付服务中心", "快闪/慢闪", "城市空间", "快闪交付中心", "海外网点", "其他", "未知"],
+      "usage": "按店型过滤/聚合；识别快闪/慢闪、体验店、交付中心等门店形态"
     }
   ],
   "join_to_order": {

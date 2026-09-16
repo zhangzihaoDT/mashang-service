@@ -9,6 +9,7 @@
 - order_data.parquet
 - config_attribute.parquet
 - store_info.csv（外部 original 目录，门店主数据）
+- 门店下发线索数.csv（仓库 dataset/，滚动窗口增量合并）
 """
 
 from __future__ import annotations
@@ -66,6 +67,7 @@ def show_outputs() -> None:
         DATASET_DIR / "order_data.parquet",
         DATASET_DIR / "config_attribute.parquet",
         Path("/Users/zihao_/Documents/coding/dataset/original/store_info.csv"),
+        DATASET_DIR / "门店下发线索数.csv",
     ]
     for p in targets:
         if not p.exists():
@@ -90,6 +92,11 @@ def main(argv: list[str] | None = None) -> int:
         "--skip-store-info",
         action="store_true",
         help="跳过 STEP 5：门店信息主数据导出（store_info.csv）",
+    )
+    parser.add_argument(
+        "--skip-store-leads",
+        action="store_true",
+        help="跳过 STEP 6：门店下发线索数增量更新（门店下发线索数.csv）",
     )
     args = parser.parse_args(argv)
     step_timeout = args.step_timeout or (args.timeout + 1800)
@@ -178,6 +185,26 @@ def main(argv: list[str] | None = None) -> int:
     else:
         print("\n" + "=" * 80)
         print("STEP 5: 跳过门店信息主数据导出 (--skip-store-info)")
+        print("=" * 80)
+
+    if not args.skip_store_leads:
+        print("\n" + "=" * 80)
+        print("STEP 6: 增量更新门店下发线索数 (门店下发线索数.csv)")
+        print("=" * 80)
+        run(
+            [
+                sys.executable,
+                str(UPDATER_DIR / "store_daily_leads_to_csv.py"),
+                "--timeout",
+                str(int(args.timeout)),
+                *(["--mobile"] if args.mobile else []),
+            ],
+            cwd=REPO_ROOT,
+            step_timeout=step_timeout,
+        )
+    else:
+        print("\n" + "=" * 80)
+        print("STEP 6: 跳过门店下发线索数更新 (--skip-store-leads)")
         print("=" * 80)
 
     print("\n" + "=" * 80)
