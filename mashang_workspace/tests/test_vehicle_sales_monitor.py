@@ -64,9 +64,9 @@ def _load_scheduler():
 
 def test_cm3_presale_phase(bdef):
     assert phase_of(bdef, "CM3", pd.Timestamp("2026-09-10")) == "presale"
-    assert phase_of(bdef, "CM3", pd.Timestamp("2026-09-23")) == "presale"
-    assert phase_of(bdef, "CM3", pd.Timestamp("2026-09-24")) == "launch"  # end = 上市日
-    assert phase_of(bdef, "CM3", pd.Timestamp("2026-09-25")) == "launch"
+    assert phase_of(bdef, "CM3", pd.Timestamp("2026-09-22")) == "presale"
+    assert phase_of(bdef, "CM3", pd.Timestamp("2026-09-23")) == "launch"  # end = 上市日
+    assert phase_of(bdef, "CM3", pd.Timestamp("2026-09-24")) == "launch"
     assert phase_of(bdef, "CM3", pd.Timestamp("2026-11-01")) is None
 
 
@@ -98,7 +98,7 @@ def test_open_hour_calibration(bdef):
 
 def test_key_day(bdef):
     assert is_key_day(bdef, pd.Timestamp("2026-09-10"))  # CM3 预售首日
-    assert is_key_day(bdef, pd.Timestamp("2026-09-24"))  # CM3 上市日
+    assert is_key_day(bdef, pd.Timestamp("2026-09-23"))  # CM3 上市日
     assert not is_key_day(bdef, pd.Timestamp("2026-09-15"))
 
 
@@ -501,7 +501,7 @@ def _presale_metrics() -> dict:
         "test_orders_excluded": 2,
         "today": "2026-09-10",
         "series_start": "2026-09-10",
-        "series_end": "2026-09-24",
+        "series_end": "2026-09-23",
         "obs": "2026-09-10 15:30:01",
         "elapsed_hours": 20.5,
         "cum": 2480,
@@ -545,7 +545,7 @@ def test_presale_card_slim_no_notes_in_production():
     assert "开放后 24h 累计留存：**1,980**" in body
     assert "发布会当日留存：**1,600**（小订 1,700）" in body
     assert "历史对比（自开放起同期留存，相同时长）：**CM2（2,000） / CM1（900） / CM0（1,500） / LS8（1,100） / LS9（700）**" in body
-    assert "预售期：2026-09-10 ~ 2026-09-24" in body
+    assert "预售期：2026-09-10 ~ 2026-09-23" in body
     assert "观察时间：2026-09-10 15:30" in body
 
 

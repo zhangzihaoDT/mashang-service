@@ -135,6 +135,8 @@ python mashang_workspace/eval/run_eval.py --suite parser  # 单套件
 | `python runtime_scripts/lock_city_distribution.py` | 城市分布 | runtime |
 | `python research_scripts/release_curve_analysis.py` | 释放曲线 | research |
 | `python research_scripts/cohort_forecast.py` | 预测锁单 | research |
+| `python research_scripts/presale_cumulative_order_compare.py --gens DM1 CM2 LS9 LS8 DM2 --as-of YYYY-MM-DD --format html` | **预售累计订单跨代际对比（canonical）** — 通用预售固定框架；`--gens` 末位=主代际、其余对标，缺省取当前 presale 代际；`--format terminal/json/html`（Result Contract）；`--to-feishu` 额外产出飞书云文档（默认仅 HTML） | research |
+| `l6_m2_presale_report.py` | ~~L6 M2 预售汇报~~ **compatibility shim** — 默认 DM2 + HTML，转调上一条通用入口；勿再围绕本脚本扩功能 | research |
 | `make lock-attribution START=2026-01-01 END=2026-08-31 HTML=1` | 锁单归因分析（单样本；`--series/--channel` 过滤） | make |
 | `make lock-attribution-compare START=2024-01-01 END=2024-08-01 START_B=2026-01-01 END_B=2026-08-01 HTML=1` | 锁单归因**对比**分析（两任意样本，差异高亮报告；`LABEL/LABEL_B` 自定义标签，`SERIES_B/CHANNEL_B` 按样本过滤） | make |
 | `python research_scripts/lock_attribution_analysis.py --start-date … --end-date … --compare-start-date … --compare-end-date … --html` | 锁单归因对比脚本（底层，Result Contract） | research |

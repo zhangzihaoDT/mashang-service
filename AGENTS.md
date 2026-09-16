@@ -344,6 +344,8 @@ mashang-service/
 | 预测锁单 | `python mashang_workspace/research_scripts/cohort_forecast.py` | research |
 | 回测 | `python mashang_workspace/research_scripts/lock_predict_backtest.py` | research |
 | 同比分析 | `python mashang_workspace/research_scripts/quick_lock_ratio.py` | research |
+| 预售累计订单跨代际对比 | `python mashang_workspace/research_scripts/presale_cumulative_order_compare.py --gens DM1 CM2 LS9 LS8 DM2 --as-of YYYY-MM-DD --format html`(通用预售固定框架:末位=主代际,其余为对标;默认当前 presale 代际;`--format terminal/json/html`;`--to-feishu` 额外产出飞书云文档,默认仅 HTML) | research |
+| 预售累计订单跨代际对比（旧入口 shim） | `python mashang_workspace/research_scripts/l6_m2_presale_report.py` 已降为 **compatibility shim**（默认 DM2 + HTML，转调上面的通用脚本）；后续功能扩展一律走通用入口，勿再围绕旧脚本开发 | research |
 | 锁单月度预估 | `make lock-forecast` 或 `python mashang_workspace/research_scripts/structured_business_forecast.py --as-of YYYY-MM-DD --target-month YYYY-MM [--prior-strength N]` | research |
 | 开票月度预估 | `make invoice-forecast` 或 `python mashang_workspace/research_scripts/invoice_monthly_forecast.py --as-of YYYY-MM-DD --target-month YYYY-MM --lock-regime mode` | research |
 | 锁单归因分析 | `make lock-attribution START=2026-01-01 END=2026-08-31 HTML=1`(单样本;可选 `SERIES/CHANNEL`) | make |

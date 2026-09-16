@@ -46,7 +46,7 @@
     },
     "CM3": {
       "start": "2026-09-10",
-      "end": "2026-09-24"
+      "end": "2026-09-23"
     }
   },
   "presale_periods": {
@@ -202,6 +202,16 @@
     "compare_by_series": {
       "LS6": ["CM2", "CM1", "CM0", "LS8", "LS9"],
       "L6": ["DM1", "CM2", "LS9", "LS8"]
+    },
+    "pk_series_by_generation": {
+      "description": "竞争 PK 正反向排名数据中的 series 字段映射（按代际）。缺省时回退 model_series_mapping。",
+      "CM3": "LS6",
+      "DM2": "L6"
+    },
+    "group_model_by_generation": {
+      "description": "集团/观星台订单日报「重点车型」名称映射（按代际）。供独立的集团对比模块使用，通用预售脚本不产出该模块。",
+      "CM3": "智己LS6",
+      "DM2": "智己L6"
     },
     "launch_window_days": 14,
     "freshness": {
