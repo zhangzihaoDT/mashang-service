@@ -343,6 +343,8 @@ mashang-service/
 | 门店→经销商主体画像 | `python mashang_workspace/runtime_scripts/store_dealer_profile.py 门店1 门店2`(返回 门店/经销商主体(Bloc)/大区/该主体门店数(在营)/城市分布 + 近期主理 + 近7日下发线索 + 近7日锁单及车系分布 + CM3留存小订，含主体内排名占比，无独立口径时回落关联车城店;`--status` 在营口径;`--as-of`/`--window-days`;`--format json/csv`) | runtime |
 | 主理数据更新 | `python dataset/updater/store_daily_zhuli_to_csv.py [--with-roster]`(Tableau→`dataset/门店日报_主理_当月.csv`;`--with-roster` 另出 `dataset/主理信息表.csv`) | DataOps |
 | 门店下发线索数更新 | `python dataset/updater/store_daily_leads_to_csv.py`(Tableau 165 门店级视图 → `dataset/门店下发线索数.csv`;**滚动窗口增量合并**,逐日扩长;`--dry-run`/`--rebuild`) | DataOps |
+| 门店经营状况观察 | `python mashang_workspace/utility_scripts/store_operation_observation.py`(全门店 门店/门店类型/近7日下发线索/CM3小订/小订线索比;`--format csv` 落 `outputs/tables/store_operation_observation.csv`) | utility |
+| 门店线索×小订四象限 | `python mashang_workspace/research_scripts/store_leads_intention_quadrant.py`(读观察 CSV → 四象限散点 HTML;高/低线索×高/低转化,中位数切分;`--input`/`--top-label`;落 `outputs/reports/`) | research |
 | 释放曲线 | `python mashang_workspace/research_scripts/release_curve_analysis.py` | research |
 | 预测锁单 | `python mashang_workspace/research_scripts/cohort_forecast.py` | research |
 | 回测 | `python mashang_workspace/research_scripts/lock_predict_backtest.py` | research |
