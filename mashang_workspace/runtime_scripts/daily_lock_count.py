@@ -23,6 +23,8 @@ import pandas as pd
 from datetime import datetime, timedelta
 from utils.result_contract import build_success_contract, save_contract_json, contract_to_terminal
 from utils.business import get_launch_date
+from utils.paths import BUSINESS_DEFINITION_PATH
+from utils.monitors.series_group import apply_series_group_logic
 
 ORDER_PARQUET = REPO_ROOT / "dataset" / "order_data.parquet"
 
@@ -61,18 +63,37 @@ def resolve_time_range(args):
     d = pd.Timestamp(yesterday.date())
     return d, d + timedelta(days=1), yesterday.strftime("%Y-%m-%d"), "date"
 
+def load_business_definition() -> dict:
+    import json
+    return json.loads(BUSINESS_DEFINITION_PATH.read_text(encoding="utf-8"))
+
 def main():
     args = parse_args()
     t_start, t_end, t_label, tw_type = resolve_time_range(args)
 
+    series_filter = args.series or args.since_launch
+    bdef = None
+    if series_filter:
+        try:
+            sg_keys = set((load_business_definition().get("series_group_logic") or {}).keys())
+        except Exception:
+            sg_keys = set()
+        if series_filter in sg_keys:
+            bdef = load_business_definition()
+
     df = pd.read_parquet(str(ORDER_PARQUET))
     df["lock_time"] = pd.to_datetime(df["lock_time"], errors="coerce")
     df = df[df["lock_time"].notna()].copy()
+    if bdef is not None:
+        df = apply_series_group_logic(df, bdef)
     mask = (df["lock_time"] >= t_start) & (df["lock_time"] < t_end)
     df_f = df[mask]
 
-    series_filter = args.series or args.since_launch
-    if series_filter: df_f = df_f[df_f["series"] == series_filter]
+    if series_filter:
+        if bdef is not None:
+            df_f = df_f[df_f["series_group_logic"] == series_filter]
+        else:
+            df_f = df_f[df_f["series"] == series_filter]
     if args.model: df_f = df_f[df_f["product_name"].str.contains(args.model, na=False)]
     if args.city: df_f = df_f[df_f["license_city"] == args.city]
 
