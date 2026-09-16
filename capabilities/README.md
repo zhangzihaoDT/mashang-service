@@ -64,6 +64,7 @@ Base Capabilities 是**被消费方**。
 | Notify | `capabilities/notify/` | `capabilities.notify` | 文本/交互卡片 → 渠道推送（飞书群 Webhook），重试 + dry-run + mock |
 | Search | `capabilities/search/` | `capabilities.search` | 网页搜索原语（豆包 Global Search），重试 + 本地缓存 + multi-query + mock |
 | Diagram | `capabilities/diagram/` | `capabilities.diagram` | 图表数据契约 + 确定性渲染原语（首个：Milestone Temporal Dumbbell），自包含 HTML/SVG |
+| Feishu（docx） | `capabilities/feishu/docx/` | `capabilities.feishu.docx` | Markdown/HTML → 飞书云文档（tenant token + 服务端 block convert + descendant；dry-run） |
 
 ### Candidate（已存在但散落，待按需收敛）
 
@@ -72,7 +73,7 @@ Base Capabilities 是**被消费方**。
 | Browser / Capture | Playwright MCP（根 `opencode.jsonc`）+ `dataset/incoming/` | service 级接线能力，尚未包化 |
 | Doc Parse | 部分在 `capabilities/ocr` document_parse；MIIT `eidc_doc_extract.py` 为领域内实现 | 通用文档→结构化契约待抽象 |
 | Render | `.opencode/skills/official_document_render/` + `mashang_workspace/templates/` | 正式文档/报告渲染能力待收敛 |
-| Feishu Bitable 写入 | `mashang_workspace/utility_scripts/skills_order_observation_daily.py`（tenant token + bitable REST） | Notify 之外的飞书 app 数据原语，另议 |
+| Feishu Bitable 写入 | `mashang_workspace/utility_scripts/skills_order_observation_daily.py`（tenant token + bitable REST） | 与 `capabilities/feishu/docx` 同属飞书 app 原语，后续按需收敛到 `capabilities/feishu/` |
 
 Candidate 不设迁移截止时间；**在出现真实复用需求时**按本 README 的规范逐项收敛，不做大爆炸迁移。
 
