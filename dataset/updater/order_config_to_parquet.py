@@ -619,11 +619,13 @@ def main(force: bool = False, mobile: bool = False, timeout: int = 600, incremen
 
     # 2. Convert config data to Parquet
     print("正在加载并处理所有年份的配置文件...")
+    # 顺序 = 去重优先级：最新 Tableau 增量 > 新年份 > 旧年份（keep="first"）
     year_files = [
-        ("2023", "config_attribute_data.csv"),
-        ("2024", "config_attribute_data2024.csv"),
-        ("2025", "config_attribute_data2025.csv"),
+        ("update", "config_attribute_data_update.csv"),
         ("2026", "config_attribute_data2026.csv"),
+        ("2025", "config_attribute_data2025.csv"),
+        ("2024", "config_attribute_data2024.csv"),
+        ("2023", "config_attribute_data.csv"),
     ]
     processed_list = []
 
@@ -677,7 +679,10 @@ def main(force: bool = False, mobile: bool = False, timeout: int = 600, incremen
         return
 
     config_df = pd.concat(processed_list, ignore_index=True)
-    print(f"✅ 处理完成，总行数: {len(config_df)}")
+    # 按 (Order Number, Attribute) 去重：保持最新视图/年份优先（processed_list 顺序即优先级）
+    rows_before_dedup = len(config_df)
+    config_df = config_df.drop_duplicates(subset=["Order Number", "Attribute"], keep="first")
+    print(f"✅ 处理完成，去重前 {rows_before_dedup:,} 行 → 去重后 {len(config_df):,} 行")
     order_col_name = "Order Number"
 
     # Enrich with order-level info from order_data
@@ -718,7 +723,7 @@ def main(force: bool = False, mobile: bool = False, timeout: int = 600, incremen
     if "lock_time" in order_df.columns and not pd.api.types.is_datetime64_any_dtype(order_df["lock_time"]):
         order_df["lock_time"] = pd.to_datetime(order_df["lock_time"], errors="coerce")
 
-    target_models = ["CM0", "DM0", "CM1", "DM1", "CM2", "LS9", "LS8"]
+    target_models = ["CM0", "DM0", "CM1", "DM1", "CM2", "DM2", "CM3", "LS9", "LS8"]
     
     print("\n" + "=" * 100)
     print(
