@@ -1,0 +1,64 @@
+{
+  "run_id": "run_004_budget_persona",
+  "lens": "budget_first_user_persona",
+  "dataset": "/Users/zihao_/Documents/coding/dataset/original/L6 M2_LS6 M3 产品专家门店支持信息收集汇总_产品专家支持每日反馈_收集结果.csv",
+  "dataset_sha256": "06311d8f5ef9e7c8d5fbab318a34d976d20c44d78e150514090618d8913f29a2",
+  "record_count": 23,
+  "bands": {
+    "LE_20W": {
+      "label": "20万以下",
+      "n": 1,
+      "record_keys": [
+        "DS-14"
+      ]
+    },
+    "20_25W": {
+      "label": "20-25万",
+      "n": 1,
+      "record_keys": [
+        "DS-16"
+      ]
+    },
+    "GT_25W": {
+      "label": "25万以上",
+      "n": 0,
+      "record_keys": []
+    },
+    "UNKNOWN": {
+      "label": "预算未知-不归纳",
+      "n": 21,
+      "record_keys": [
+        "DS-6",
+        "DS-7",
+        "DS-8",
+        "DS-9",
+        "DS-10",
+        "DS-11",
+        "DS-12",
+        "DS-13",
+        "DS-15",
+        "DS-17",
+        "DS-18",
+        "DS-19",
+        "DS-20",
+        "DS-21",
+        "DS-22",
+        "DS-23",
+        "DS-24",
+        "DS-25",
+        "DS-26",
+        "DS-27",
+        "DS-28"
+      ]
+    }
+  },
+  "bandable_records": 2,
+  "price_sensitive_records": 23,
+  "records_with_budget_word": 1,
+  "findings": [
+    "23 条记录中仅 2 条具备可用的用户预算证据，其中 1 条为个体预算上限、1 条为目标价格段描述。",
+    "其余 21 条仅有价格敏感/等待价格/权益观望信号，金额未知，按约定不纳入预算分箱。",
+    "LS6 价格/权益被 23/23 条记录列为客户关注主题，但自报表述中出现‘预算’的仅 1 条：问卷未采集预算字段，预算优先法当前不可行。",
+    "预算段的画像结论不能从现有记录稳定得出；应先补采用户预算，再按 ≤20/20-25/>25 分箱。"
+  ]
+}

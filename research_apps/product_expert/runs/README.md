@@ -21,6 +21,13 @@ runs/<run_id>/
 A（拟设编码）与 B（开放发现）是同一 run 上的两条独立链路：`preset_coding.json` 属于 A，
 `evidence → … → findings` 属于 B，二者不得混加。
 
+## 特殊视角 run
+
+除 `issue_discovery` 发现流程外，允许在 `runs/` 下建立**其他研究视角**的快照，但必须自描述、不得伪装成发现流程产物：
+
+- `run_004_budget_persona/`：预算优先的用户画像编码（`budget_coding.jsonl` / `budget_summary.json`）。
+  分箱 `≤20 万 / 20–25 万 / >25 万`，预算未知不归纳；不使用 discovery 的 evidence/issue/pattern schema。
+
 ## 约定
 
 - `run_id` 形如 `run_001`，顺序递增。

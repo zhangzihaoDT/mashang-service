@@ -1,0 +1,25 @@
+{
+  "run_id": "run_004_budget_persona",
+  "executed_at": "2026-09-14",
+  "study_year": 2026,
+  "lens": "budget_first_user_persona",
+  "method": [
+    "从记录出发的归纳式用户预算编码（budget-first inductive coding）"
+  ],
+  "dataset": "/Users/zihao_/Documents/coding/dataset/original/L6 M2_LS6 M3 产品专家门店支持信息收集汇总_产品专家支持每日反馈_收集结果.csv",
+  "dataset_sha256": "06311d8f5ef9e7c8d5fbab318a34d976d20c44d78e150514090618d8913f29a2",
+  "record_count": 23,
+  "bands": [
+    "LE_20W",
+    "20_25W",
+    "GT_25W",
+    "UNKNOWN(不归纳)"
+  ],
+  "budget_evidence_types": [
+    "user_budget_cap",
+    "target_segment_price",
+    "product_price_anchor",
+    "none"
+  ],
+  "notes": "区别于 issue_discovery 的 evidence→issue→pattern 流程，本轮为预算优先的用户画像编码；UNKNOWN 不进入归纳。原始 CSV 仓库外只读，run 目录仅存结构化产物。"
+}
