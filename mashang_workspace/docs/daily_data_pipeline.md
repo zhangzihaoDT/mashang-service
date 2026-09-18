@@ -89,6 +89,23 @@ make daily-data-pipeline           # dataset-update + dataset-validate + daily-o
 - `daily-observation-sync` 会写入飞书多维表格和发送飞书机器人通知
 - 不要在 CI 中自动执行写操作
 
+### 网络回退（办公网 / 移动链路）
+
+Tableau 在办公网与移动网络使用不同入口。`update_all_datasets.py` 启动时会探测办公网 Tableau 是否可达：
+
+- 可达 → 走默认办公网链路
+- 不可达（DNS/连接失败）→ 自动对全部步骤回退移动链路（`--mobile`），无需手动干预
+
+也可显式强制移动链路（例如已知当前不在办公网）：
+
+```bash
+make dataset-update MOBILE=1
+# 或
+python dataset/updater/update_all_datasets.py --mobile
+```
+
+> 历史问题：`order_config_to_parquet.py` 等子步骤没有单体自动回退，只在办公网探测失败时才由编排层统一传 `--mobile`；因此请通过 `update_all_datasets.py` / `make dataset-update` 编排执行，不要单独调用子脚本。
+
 ## 自然语言入口
 
 中文自然语言入口：**数据更新并同步**

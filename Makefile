@@ -219,8 +219,9 @@ runtime-v2-clean-sessions:
 
 ## 数据集更新（从 Tableau/数据源刷新 dataset/*.parquet/.csv）
 ## 注意：写操作，会修改本地 dataset 文件
+## 办公网不可达时自动回退移动链路；可用 MOBILE=1 显式强制（如 make dataset-update MOBILE=1）
 dataset-update:
-	$(PYTHON) dataset/updater/update_all_datasets.py
+	$(PYTHON) dataset/updater/update_all_datasets.py $(if $(MOBILE),--mobile)
 
 ## 数据集完整性校验（只读）
 dataset-validate:
@@ -452,7 +453,7 @@ help:
 	@echo "make runtime-v2-clean-sessions  Runtime V2 清理过期 Session"
 	@echo ""
 	@echo "=== Daily Data Pipeline ==="
-	@echo "make dataset-update           刷新 dataset（写操作）"
+	@echo "make dataset-update           刷新 dataset（写操作；MOBILE=1 强制移动链路）"
 	@echo "make dataset-validate         校验 dataset（只读）"
 	@echo "make daily-observation-dry-run  每日观察预检（只读）"
 	@echo "make daily-observation-sync    每日观察同步（写操作）"

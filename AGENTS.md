@@ -366,7 +366,7 @@ mashang-service/
 | 每日观察 | `python mashang_workspace/utility_scripts/skills_order_observation_daily.py` | utility |
 | 达成率预警 | `python mashang_workspace/utility_scripts/skills_attainment_rate_alert.py --days 10` | utility |
 | 生成 Eval | `python mashang_workspace/utility_scripts/generate_eval_cases.py` | utility |
-| 数据更新并同步 | `make daily-data-pipeline` (写操作) | DataOps |
+| 数据更新并同步 | `make daily-data-pipeline` (写操作；办公网不可达时自动回退移动链路，可 `MOBILE=1` 强制) | DataOps |
 | 预检数据 | `make daily-data-pipeline-dry-run` | DataOps |
 | 解析验证范围 | `make verify-scope`（按改动解析最小验证范围） | harness |
 | 执行验证 | `make verify`（仅 scope 内；baseline 不算回归） | harness |

@@ -45,6 +45,27 @@ def load_env_file(env_path: Path) -> None:
         return
 
 
+def office_tableau_reachable(timeout: float = 8.0) -> bool:
+    """探测办公网 Tableau 主机是否可达（DNS 解析 + TCP 连接）。
+
+    命中 DNS/连接失败时返回 False，供编排层整体回退移动链路（--mobile）。
+    """
+    import socket
+    from urllib.parse import urlparse
+
+    base_url = os.getenv("TABLEAU_SERVER_URL") or "https://tableau-hs.immotors.com"
+    parsed = urlparse(base_url)
+    host = parsed.hostname
+    if not host:
+        return True
+    port = parsed.port or (80 if parsed.scheme == "http" else 443)
+    try:
+        socket.create_connection((host, port), timeout=timeout).close()
+        return True
+    except OSError:
+        return False
+
+
 def run(cmd: list[str], cwd: Path, step_timeout: int | None = None) -> None:
     kwargs: dict = {"cwd": str(cwd), "env": os.environ.copy()}
     if step_timeout is not None:
@@ -104,6 +125,11 @@ def main(argv: list[str] | None = None) -> int:
     DATASET_DIR.mkdir(parents=True, exist_ok=True)
     load_env_file(REPO_ROOT / ".env")
 
+    mobile = args.mobile
+    if not mobile and not office_tableau_reachable():
+        print("⚠️ 办公网 Tableau 不可达，自动回退到移动链路（--mobile）")
+        mobile = True
+
     print("\n" + "=" * 80)
     print("STEP 1: 更新订单数据 (order_data.parquet)")
     print("=" * 80)
@@ -113,7 +139,7 @@ def main(argv: list[str] | None = None) -> int:
             str(UPDATER_DIR / "order_data_to_parquet.py"),
             "--timeout",
             str(int(args.timeout)),
-            *(["--mobile"] if args.mobile else []),
+            *(["--mobile"] if mobile else []),
         ],
         cwd=REPO_ROOT,
         step_timeout=step_timeout,
@@ -129,7 +155,7 @@ def main(argv: list[str] | None = None) -> int:
             "--force",
             "--timeout",
             str(int(args.timeout)),
-            *(["--mobile"] if args.mobile else []),
+            *(["--mobile"] if mobile else []),
         ],
         cwd=REPO_ROOT,
         step_timeout=step_timeout,
@@ -146,7 +172,7 @@ def main(argv: list[str] | None = None) -> int:
         "--timeout",
         str(int(args.timeout)),
     ]
-    if args.mobile:
+    if mobile:
         lock_cmd.append("--mobile")
     if args.lock_view:
         lock_cmd.extend(["--view", args.lock_view, "--with-assign-test-drive"])
@@ -161,7 +187,7 @@ def main(argv: list[str] | None = None) -> int:
             str(UPDATER_DIR / "delivery_inventory_to_parquet.py"),
             "--timeout",
             str(int(args.timeout)),
-            *(["--mobile"] if args.mobile else []),
+            *(["--mobile"] if mobile else []),
         ],
         cwd=REPO_ROOT,
         step_timeout=step_timeout,
@@ -177,7 +203,7 @@ def main(argv: list[str] | None = None) -> int:
                 str(UPDATER_DIR / "store_info_to_csv.py"),
                 "--timeout",
                 str(int(args.timeout)),
-                *(["--mobile"] if args.mobile else []),
+                *(["--mobile"] if mobile else []),
             ],
             cwd=REPO_ROOT,
             step_timeout=step_timeout,
@@ -197,7 +223,7 @@ def main(argv: list[str] | None = None) -> int:
                 str(UPDATER_DIR / "store_daily_leads_to_csv.py"),
                 "--timeout",
                 str(int(args.timeout)),
-                *(["--mobile"] if args.mobile else []),
+                *(["--mobile"] if mobile else []),
             ],
             cwd=REPO_ROOT,
             step_timeout=step_timeout,
