@@ -1,0 +1,676 @@
+[
+  {
+    "convergence_id": "CONV-0001",
+    "pattern_id": "PAT-0001",
+    "pattern_key": "competitor_smart_space_benchmark",
+    "run_id": "run_006_2026-09-20",
+    "source_issue_ids": [
+      "ISS-0001"
+    ],
+    "source_evidence_ids": [
+      "EV-0001"
+    ],
+    "attribution": {
+      "product_experts": [
+        "张梓豪"
+      ],
+      "city_stores": [
+        "重庆万州·万州万达广场快慢闪"
+      ],
+      "support_periods": [
+        {
+          "raw": "2026/09/20",
+          "start_date": "2026-09-20",
+          "end_date": "2026-09-20"
+        }
+      ]
+    },
+    "counts": {
+      "evidence_count": 1,
+      "issue_count": 1,
+      "product_expert_count": 1,
+      "city_store_count": 1,
+      "support_period_count": 1,
+      "series_count": 1
+    },
+    "cross_store": false,
+    "cross_series": false,
+    "recurrence": "isolated",
+    "evidence_strength": "weak",
+    "temporal_comparison": {
+      "status": "compared",
+      "baseline_run_id": "run_005_2026-09-19",
+      "compared_run_ids": [
+        "run_005_2026-09-19"
+      ],
+      "delta": {
+        "presence": "new",
+        "counts": {
+          "evidence_count": {
+            "baseline": 0,
+            "current": 1,
+            "delta": 1
+          },
+          "issue_count": {
+            "baseline": 0,
+            "current": 1,
+            "delta": 1
+          },
+          "product_expert_count": {
+            "baseline": 0,
+            "current": 1,
+            "delta": 1
+          },
+          "city_store_count": {
+            "baseline": 0,
+            "current": 1,
+            "delta": 1
+          },
+          "support_period_count": {
+            "baseline": 0,
+            "current": 1,
+            "delta": 1
+          },
+          "series_count": {
+            "baseline": 0,
+            "current": 1,
+            "delta": 1
+          }
+        },
+        "attribution": {
+          "added_city_stores": [
+            "重庆万州·万州万达广场快慢闪"
+          ],
+          "removed_city_stores": [],
+          "added_product_experts": [
+            "张梓豪"
+          ],
+          "removed_product_experts": [],
+          "added_support_periods": [
+            {
+              "raw": "2026/09/20",
+              "start_date": "2026-09-20",
+              "end_date": "2026-09-20"
+            }
+          ],
+          "removed_support_periods": []
+        },
+        "recurrence": {
+          "baseline": null,
+          "current": "isolated",
+          "changed": false
+        },
+        "evidence_strength": {
+          "baseline": null,
+          "current": "weak"
+        }
+      },
+      "notes": "该 pattern_key 在基线中未出现，标记为新增；无历史统计可比。"
+    },
+    "derived_at": "2026-09-20"
+  },
+  {
+    "convergence_id": "CONV-0002",
+    "pattern_id": "PAT-0002",
+    "pattern_key": "interior_detail_usability_perception",
+    "run_id": "run_006_2026-09-20",
+    "source_issue_ids": [
+      "ISS-0002"
+    ],
+    "source_evidence_ids": [
+      "EV-0002"
+    ],
+    "attribution": {
+      "product_experts": [
+        "张梓豪"
+      ],
+      "city_stores": [
+        "重庆万州·万州万达广场快慢闪"
+      ],
+      "support_periods": [
+        {
+          "raw": "2026/09/20",
+          "start_date": "2026-09-20",
+          "end_date": "2026-09-20"
+        }
+      ]
+    },
+    "counts": {
+      "evidence_count": 1,
+      "issue_count": 1,
+      "product_expert_count": 1,
+      "city_store_count": 1,
+      "support_period_count": 1,
+      "series_count": 1
+    },
+    "cross_store": false,
+    "cross_series": false,
+    "recurrence": "isolated",
+    "evidence_strength": "weak",
+    "temporal_comparison": {
+      "status": "compared",
+      "baseline_run_id": "run_005_2026-09-19",
+      "compared_run_ids": [
+        "run_005_2026-09-19"
+      ],
+      "delta": {
+        "presence": "contracted",
+        "counts": {
+          "evidence_count": {
+            "baseline": 2,
+            "current": 1,
+            "delta": -1
+          },
+          "issue_count": {
+            "baseline": 1,
+            "current": 1,
+            "delta": 0
+          },
+          "product_expert_count": {
+            "baseline": 2,
+            "current": 1,
+            "delta": -1
+          },
+          "city_store_count": {
+            "baseline": 2,
+            "current": 1,
+            "delta": -1
+          },
+          "support_period_count": {
+            "baseline": 1,
+            "current": 1,
+            "delta": 0
+          },
+          "series_count": {
+            "baseline": 2,
+            "current": 1,
+            "delta": -1
+          }
+        },
+        "attribution": {
+          "added_city_stores": [
+            "重庆万州·万州万达广场快慢闪"
+          ],
+          "removed_city_stores": [
+            "天津·天津龙湖天街店",
+            "重庆万州·万州万达快慢闪"
+          ],
+          "added_product_experts": [],
+          "removed_product_experts": [
+            "覃熊妃"
+          ],
+          "added_support_periods": [
+            {
+              "raw": "2026/09/20",
+              "start_date": "2026-09-20",
+              "end_date": "2026-09-20"
+            }
+          ],
+          "removed_support_periods": [
+            {
+              "raw": "2026/09/19",
+              "start_date": "2026-09-19",
+              "end_date": "2026-09-19"
+            }
+          ]
+        },
+        "recurrence": {
+          "baseline": "repeated",
+          "current": "isolated",
+          "changed": true
+        },
+        "evidence_strength": {
+          "baseline": "moderate",
+          "current": "weak"
+        }
+      },
+      "notes": "仅描述证据覆盖与统计变化，不作因果解释。"
+    },
+    "derived_at": "2026-09-20"
+  },
+  {
+    "convergence_id": "CONV-0003",
+    "pattern_id": "PAT-0003",
+    "pattern_key": "interior_luxury_material_perception",
+    "run_id": "run_006_2026-09-20",
+    "source_issue_ids": [
+      "ISS-0003"
+    ],
+    "source_evidence_ids": [
+      "EV-0003",
+      "EV-0004",
+      "EV-0005",
+      "EV-0006"
+    ],
+    "attribution": {
+      "product_experts": [
+        "张梓豪"
+      ],
+      "city_stores": [
+        "重庆万州·万州万达广场快慢闪"
+      ],
+      "support_periods": [
+        {
+          "raw": "2026/09/20",
+          "start_date": "2026-09-20",
+          "end_date": "2026-09-20"
+        }
+      ]
+    },
+    "counts": {
+      "evidence_count": 4,
+      "issue_count": 1,
+      "product_expert_count": 1,
+      "city_store_count": 1,
+      "support_period_count": 1,
+      "series_count": 1
+    },
+    "cross_store": false,
+    "cross_series": false,
+    "recurrence": "isolated",
+    "evidence_strength": "weak",
+    "temporal_comparison": {
+      "status": "compared",
+      "baseline_run_id": "run_005_2026-09-19",
+      "compared_run_ids": [
+        "run_005_2026-09-19"
+      ],
+      "delta": {
+        "presence": "new",
+        "counts": {
+          "evidence_count": {
+            "baseline": 0,
+            "current": 4,
+            "delta": 4
+          },
+          "issue_count": {
+            "baseline": 0,
+            "current": 1,
+            "delta": 1
+          },
+          "product_expert_count": {
+            "baseline": 0,
+            "current": 1,
+            "delta": 1
+          },
+          "city_store_count": {
+            "baseline": 0,
+            "current": 1,
+            "delta": 1
+          },
+          "support_period_count": {
+            "baseline": 0,
+            "current": 1,
+            "delta": 1
+          },
+          "series_count": {
+            "baseline": 0,
+            "current": 1,
+            "delta": 1
+          }
+        },
+        "attribution": {
+          "added_city_stores": [
+            "重庆万州·万州万达广场快慢闪"
+          ],
+          "removed_city_stores": [],
+          "added_product_experts": [
+            "张梓豪"
+          ],
+          "removed_product_experts": [],
+          "added_support_periods": [
+            {
+              "raw": "2026/09/20",
+              "start_date": "2026-09-20",
+              "end_date": "2026-09-20"
+            }
+          ],
+          "removed_support_periods": []
+        },
+        "recurrence": {
+          "baseline": null,
+          "current": "isolated",
+          "changed": false
+        },
+        "evidence_strength": {
+          "baseline": null,
+          "current": "weak"
+        }
+      },
+      "notes": "该 pattern_key 在基线中未出现，标记为新增；无历史统计可比。"
+    },
+    "derived_at": "2026-09-20"
+  },
+  {
+    "convergence_id": "CONV-0004",
+    "pattern_id": "PAT-0004",
+    "pattern_key": "design_narrative_competitor_led",
+    "run_id": "run_006_2026-09-20",
+    "source_issue_ids": [
+      "ISS-0004"
+    ],
+    "source_evidence_ids": [
+      "EV-0007",
+      "EV-0008"
+    ],
+    "attribution": {
+      "product_experts": [
+        "张梓豪"
+      ],
+      "city_stores": [
+        "重庆万州·万州万达广场快慢闪"
+      ],
+      "support_periods": [
+        {
+          "raw": "2026/09/20",
+          "start_date": "2026-09-20",
+          "end_date": "2026-09-20"
+        }
+      ]
+    },
+    "counts": {
+      "evidence_count": 2,
+      "issue_count": 1,
+      "product_expert_count": 1,
+      "city_store_count": 1,
+      "support_period_count": 1,
+      "series_count": 1
+    },
+    "cross_store": false,
+    "cross_series": false,
+    "recurrence": "isolated",
+    "evidence_strength": "weak",
+    "temporal_comparison": {
+      "status": "compared",
+      "baseline_run_id": "run_005_2026-09-19",
+      "compared_run_ids": [
+        "run_005_2026-09-19"
+      ],
+      "delta": {
+        "presence": "new",
+        "counts": {
+          "evidence_count": {
+            "baseline": 0,
+            "current": 2,
+            "delta": 2
+          },
+          "issue_count": {
+            "baseline": 0,
+            "current": 1,
+            "delta": 1
+          },
+          "product_expert_count": {
+            "baseline": 0,
+            "current": 1,
+            "delta": 1
+          },
+          "city_store_count": {
+            "baseline": 0,
+            "current": 1,
+            "delta": 1
+          },
+          "support_period_count": {
+            "baseline": 0,
+            "current": 1,
+            "delta": 1
+          },
+          "series_count": {
+            "baseline": 0,
+            "current": 1,
+            "delta": 1
+          }
+        },
+        "attribution": {
+          "added_city_stores": [
+            "重庆万州·万州万达广场快慢闪"
+          ],
+          "removed_city_stores": [],
+          "added_product_experts": [
+            "张梓豪"
+          ],
+          "removed_product_experts": [],
+          "added_support_periods": [
+            {
+              "raw": "2026/09/20",
+              "start_date": "2026-09-20",
+              "end_date": "2026-09-20"
+            }
+          ],
+          "removed_support_periods": []
+        },
+        "recurrence": {
+          "baseline": null,
+          "current": "isolated",
+          "changed": false
+        },
+        "evidence_strength": {
+          "baseline": null,
+          "current": "weak"
+        }
+      },
+      "notes": "该 pattern_key 在基线中未出现，标记为新增；无历史统计可比。"
+    },
+    "derived_at": "2026-09-20"
+  },
+  {
+    "convergence_id": "CONV-0005",
+    "pattern_id": "PAT-0005",
+    "pattern_key": "brand_channel_attraction_constraint",
+    "run_id": "run_006_2026-09-20",
+    "source_issue_ids": [
+      "ISS-0005"
+    ],
+    "source_evidence_ids": [
+      "EV-0009",
+      "EV-0010"
+    ],
+    "attribution": {
+      "product_experts": [
+        "覃熊妃"
+      ],
+      "city_stores": [
+        "天津·天津龙湖天街智己汽车"
+      ],
+      "support_periods": [
+        {
+          "raw": "2026/09/20",
+          "start_date": "2026-09-20",
+          "end_date": "2026-09-20"
+        }
+      ]
+    },
+    "counts": {
+      "evidence_count": 2,
+      "issue_count": 1,
+      "product_expert_count": 1,
+      "city_store_count": 1,
+      "support_period_count": 1,
+      "series_count": 2
+    },
+    "cross_store": false,
+    "cross_series": true,
+    "recurrence": "isolated",
+    "evidence_strength": "weak",
+    "temporal_comparison": {
+      "status": "compared",
+      "baseline_run_id": "run_005_2026-09-19",
+      "compared_run_ids": [
+        "run_005_2026-09-19"
+      ],
+      "delta": {
+        "presence": "new",
+        "counts": {
+          "evidence_count": {
+            "baseline": 0,
+            "current": 2,
+            "delta": 2
+          },
+          "issue_count": {
+            "baseline": 0,
+            "current": 1,
+            "delta": 1
+          },
+          "product_expert_count": {
+            "baseline": 0,
+            "current": 1,
+            "delta": 1
+          },
+          "city_store_count": {
+            "baseline": 0,
+            "current": 1,
+            "delta": 1
+          },
+          "support_period_count": {
+            "baseline": 0,
+            "current": 1,
+            "delta": 1
+          },
+          "series_count": {
+            "baseline": 0,
+            "current": 2,
+            "delta": 2
+          }
+        },
+        "attribution": {
+          "added_city_stores": [
+            "天津·天津龙湖天街智己汽车"
+          ],
+          "removed_city_stores": [],
+          "added_product_experts": [
+            "覃熊妃"
+          ],
+          "removed_product_experts": [],
+          "added_support_periods": [
+            {
+              "raw": "2026/09/20",
+              "start_date": "2026-09-20",
+              "end_date": "2026-09-20"
+            }
+          ],
+          "removed_support_periods": []
+        },
+        "recurrence": {
+          "baseline": null,
+          "current": "isolated",
+          "changed": false
+        },
+        "evidence_strength": {
+          "baseline": null,
+          "current": "weak"
+        }
+      },
+      "notes": "该 pattern_key 在基线中未出现，标记为新增；无历史统计可比。"
+    },
+    "derived_at": "2026-09-20"
+  },
+  {
+    "convergence_id": "CONV-0006",
+    "pattern_id": "PAT-0006",
+    "pattern_key": "store_operations_conversion_levers",
+    "run_id": "run_006_2026-09-20",
+    "source_issue_ids": [
+      "ISS-0006"
+    ],
+    "source_evidence_ids": [
+      "EV-0011"
+    ],
+    "attribution": {
+      "product_experts": [
+        "覃熊妃"
+      ],
+      "city_stores": [
+        "天津·天津龙湖天街智己汽车"
+      ],
+      "support_periods": [
+        {
+          "raw": "2026/09/20",
+          "start_date": "2026-09-20",
+          "end_date": "2026-09-20"
+        }
+      ]
+    },
+    "counts": {
+      "evidence_count": 1,
+      "issue_count": 1,
+      "product_expert_count": 1,
+      "city_store_count": 1,
+      "support_period_count": 1,
+      "series_count": 2
+    },
+    "cross_store": false,
+    "cross_series": true,
+    "recurrence": "isolated",
+    "evidence_strength": "weak",
+    "temporal_comparison": {
+      "status": "compared",
+      "baseline_run_id": "run_005_2026-09-19",
+      "compared_run_ids": [
+        "run_005_2026-09-19"
+      ],
+      "delta": {
+        "presence": "new",
+        "counts": {
+          "evidence_count": {
+            "baseline": 0,
+            "current": 1,
+            "delta": 1
+          },
+          "issue_count": {
+            "baseline": 0,
+            "current": 1,
+            "delta": 1
+          },
+          "product_expert_count": {
+            "baseline": 0,
+            "current": 1,
+            "delta": 1
+          },
+          "city_store_count": {
+            "baseline": 0,
+            "current": 1,
+            "delta": 1
+          },
+          "support_period_count": {
+            "baseline": 0,
+            "current": 1,
+            "delta": 1
+          },
+          "series_count": {
+            "baseline": 0,
+            "current": 2,
+            "delta": 2
+          }
+        },
+        "attribution": {
+          "added_city_stores": [
+            "天津·天津龙湖天街智己汽车"
+          ],
+          "removed_city_stores": [],
+          "added_product_experts": [
+            "覃熊妃"
+          ],
+          "removed_product_experts": [],
+          "added_support_periods": [
+            {
+              "raw": "2026/09/20",
+              "start_date": "2026-09-20",
+              "end_date": "2026-09-20"
+            }
+          ],
+          "removed_support_periods": []
+        },
+        "recurrence": {
+          "baseline": null,
+          "current": "isolated",
+          "changed": false
+        },
+        "evidence_strength": {
+          "baseline": null,
+          "current": "weak"
+        }
+      },
+      "notes": "该 pattern_key 在基线中未出现，标记为新增；无历史统计可比。"
+    },
+    "derived_at": "2026-09-20"
+  }
+]

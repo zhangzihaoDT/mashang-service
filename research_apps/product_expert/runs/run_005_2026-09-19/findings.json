@@ -1,0 +1,18 @@
+[
+  {
+    "finding_id": "FND-0001",
+    "title": "内饰细节与操作体验值得优先复核",
+    "statement": "跨 2 家门店的反馈指出副驾屏设计与化妆镜打开方式不符合用户直觉，内饰细节的操作与设计体验存在可优化点。",
+    "pattern_ids": ["PAT-0002"],
+    "convergence_ids": ["CONV-0002"],
+    "issue_ids": ["ISS-0002"],
+    "confidence": "low",
+    "business_implication": "内饰细节是进店第一印象与日常使用体验的一部分，操作不符合直觉会拉低整体质感评价。",
+    "recommended_action": "复核副驾屏与化妆镜的交互与设计，收集更多门店反馈确认是否为共性问题后再排优先级。",
+    "priority": "P2",
+    "boundary": "2 条证据跨 2 店、1 天，均为定性个别反馈，不代表总体发生比例。",
+    "status": "ready",
+    "owner": "产品规划 / 内饰设计",
+    "created_at": "2026-09-19"
+  }
+]

@@ -1,0 +1,357 @@
+[
+  {
+    "convergence_id": "CONV-0001",
+    "pattern_id": "PAT-0001",
+    "pattern_key": "model_positioning_audience_fit",
+    "run_id": "run_005_2026-09-19",
+    "source_issue_ids": [
+      "ISS-0001"
+    ],
+    "source_evidence_ids": [
+      "EV-0001"
+    ],
+    "attribution": {
+      "product_experts": [
+        "张梓豪"
+      ],
+      "city_stores": [
+        "重庆万州·万州万达快慢闪"
+      ],
+      "support_periods": [
+        {
+          "raw": "2026/09/19",
+          "start_date": "2026-09-19",
+          "end_date": "2026-09-19"
+        }
+      ]
+    },
+    "counts": {
+      "evidence_count": 1,
+      "issue_count": 1,
+      "product_expert_count": 1,
+      "city_store_count": 1,
+      "support_period_count": 1,
+      "series_count": 2
+    },
+    "cross_store": false,
+    "cross_series": true,
+    "recurrence": "isolated",
+    "evidence_strength": "weak",
+    "temporal_comparison": {
+      "status": "baseline_only",
+      "notes": "本期无已声明的可比基线。"
+    },
+    "derived_at": "2026-09-19"
+  },
+  {
+    "convergence_id": "CONV-0002",
+    "pattern_id": "PAT-0002",
+    "pattern_key": "interior_detail_usability_perception",
+    "run_id": "run_005_2026-09-19",
+    "source_issue_ids": [
+      "ISS-0002"
+    ],
+    "source_evidence_ids": [
+      "EV-0002",
+      "EV-0006"
+    ],
+    "attribution": {
+      "product_experts": [
+        "张梓豪",
+        "覃熊妃"
+      ],
+      "city_stores": [
+        "重庆万州·万州万达快慢闪",
+        "天津·天津龙湖天街店"
+      ],
+      "support_periods": [
+        {
+          "raw": "2026/09/19",
+          "start_date": "2026-09-19",
+          "end_date": "2026-09-19"
+        }
+      ]
+    },
+    "counts": {
+      "evidence_count": 2,
+      "issue_count": 1,
+      "product_expert_count": 2,
+      "city_store_count": 2,
+      "support_period_count": 1,
+      "series_count": 2
+    },
+    "cross_store": true,
+    "cross_series": true,
+    "recurrence": "repeated",
+    "evidence_strength": "moderate",
+    "temporal_comparison": {
+      "status": "baseline_only",
+      "notes": "本期无已声明的可比基线。"
+    },
+    "derived_at": "2026-09-19"
+  },
+  {
+    "convergence_id": "CONV-0003",
+    "pattern_id": "PAT-0003",
+    "pattern_key": "storage_front_trunk_capacity",
+    "run_id": "run_005_2026-09-19",
+    "source_issue_ids": [
+      "ISS-0003"
+    ],
+    "source_evidence_ids": [
+      "EV-0003"
+    ],
+    "attribution": {
+      "product_experts": [
+        "覃熊妃"
+      ],
+      "city_stores": [
+        "天津·天津龙湖天街店"
+      ],
+      "support_periods": [
+        {
+          "raw": "2026/09/19",
+          "start_date": "2026-09-19",
+          "end_date": "2026-09-19"
+        }
+      ]
+    },
+    "counts": {
+      "evidence_count": 1,
+      "issue_count": 1,
+      "product_expert_count": 1,
+      "city_store_count": 1,
+      "support_period_count": 1,
+      "series_count": 1
+    },
+    "cross_store": false,
+    "cross_series": false,
+    "recurrence": "isolated",
+    "evidence_strength": "weak",
+    "temporal_comparison": {
+      "status": "baseline_only",
+      "notes": "本期无已声明的可比基线。"
+    },
+    "derived_at": "2026-09-19"
+  },
+  {
+    "convergence_id": "CONV-0004",
+    "pattern_id": "PAT-0004",
+    "pattern_key": "smart_cockpit_voice_assistant",
+    "run_id": "run_005_2026-09-19",
+    "source_issue_ids": [
+      "ISS-0004"
+    ],
+    "source_evidence_ids": [
+      "EV-0004"
+    ],
+    "attribution": {
+      "product_experts": [
+        "覃熊妃"
+      ],
+      "city_stores": [
+        "天津·天津龙湖天街店"
+      ],
+      "support_periods": [
+        {
+          "raw": "2026/09/19",
+          "start_date": "2026-09-19",
+          "end_date": "2026-09-19"
+        }
+      ]
+    },
+    "counts": {
+      "evidence_count": 1,
+      "issue_count": 1,
+      "product_expert_count": 1,
+      "city_store_count": 1,
+      "support_period_count": 1,
+      "series_count": 1
+    },
+    "cross_store": false,
+    "cross_series": false,
+    "recurrence": "isolated",
+    "evidence_strength": "weak",
+    "temporal_comparison": {
+      "status": "baseline_only",
+      "notes": "本期无已声明的可比基线。"
+    },
+    "derived_at": "2026-09-19"
+  },
+  {
+    "convergence_id": "CONV-0005",
+    "pattern_id": "PAT-0005",
+    "pattern_key": "demand_wait_for_new_model",
+    "run_id": "run_005_2026-09-19",
+    "source_issue_ids": [
+      "ISS-0005"
+    ],
+    "source_evidence_ids": [
+      "EV-0005"
+    ],
+    "attribution": {
+      "product_experts": [
+        "覃熊妃"
+      ],
+      "city_stores": [
+        "天津·天津龙湖天街店"
+      ],
+      "support_periods": [
+        {
+          "raw": "2026/09/19",
+          "start_date": "2026-09-19",
+          "end_date": "2026-09-19"
+        }
+      ]
+    },
+    "counts": {
+      "evidence_count": 1,
+      "issue_count": 1,
+      "product_expert_count": 1,
+      "city_store_count": 1,
+      "support_period_count": 1,
+      "series_count": 1
+    },
+    "cross_store": false,
+    "cross_series": false,
+    "recurrence": "isolated",
+    "evidence_strength": "weak",
+    "temporal_comparison": {
+      "status": "baseline_only",
+      "notes": "本期无已声明的可比基线。"
+    },
+    "derived_at": "2026-09-19"
+  },
+  {
+    "convergence_id": "CONV-0006",
+    "pattern_id": "PAT-0006",
+    "pattern_key": "configuration_decontent_perception",
+    "run_id": "run_005_2026-09-19",
+    "source_issue_ids": [
+      "ISS-0006"
+    ],
+    "source_evidence_ids": [
+      "EV-0007"
+    ],
+    "attribution": {
+      "product_experts": [
+        "覃熊妃"
+      ],
+      "city_stores": [
+        "天津·天津龙湖天街店"
+      ],
+      "support_periods": [
+        {
+          "raw": "2026/09/19",
+          "start_date": "2026-09-19",
+          "end_date": "2026-09-19"
+        }
+      ]
+    },
+    "counts": {
+      "evidence_count": 1,
+      "issue_count": 1,
+      "product_expert_count": 1,
+      "city_store_count": 1,
+      "support_period_count": 1,
+      "series_count": 1
+    },
+    "cross_store": false,
+    "cross_series": false,
+    "recurrence": "isolated",
+    "evidence_strength": "weak",
+    "temporal_comparison": {
+      "status": "baseline_only",
+      "notes": "本期无已声明的可比基线。"
+    },
+    "derived_at": "2026-09-19"
+  },
+  {
+    "convergence_id": "CONV-0007",
+    "pattern_id": "PAT-0007",
+    "pattern_key": "interior_sharp_edge_injury_risk",
+    "run_id": "run_005_2026-09-19",
+    "source_issue_ids": [
+      "ISS-0007"
+    ],
+    "source_evidence_ids": [
+      "EV-0008"
+    ],
+    "attribution": {
+      "product_experts": [
+        "覃熊妃"
+      ],
+      "city_stores": [
+        "天津·天津龙湖天街店"
+      ],
+      "support_periods": [
+        {
+          "raw": "2026/09/19",
+          "start_date": "2026-09-19",
+          "end_date": "2026-09-19"
+        }
+      ]
+    },
+    "counts": {
+      "evidence_count": 1,
+      "issue_count": 1,
+      "product_expert_count": 1,
+      "city_store_count": 1,
+      "support_period_count": 1,
+      "series_count": 1
+    },
+    "cross_store": false,
+    "cross_series": false,
+    "recurrence": "isolated",
+    "evidence_strength": "weak",
+    "temporal_comparison": {
+      "status": "baseline_only",
+      "notes": "本期无已声明的可比基线。"
+    },
+    "derived_at": "2026-09-19"
+  },
+  {
+    "convergence_id": "CONV-0008",
+    "pattern_id": "PAT-0008",
+    "pattern_key": "competitor_emotional_value_differentiation",
+    "run_id": "run_005_2026-09-19",
+    "source_issue_ids": [
+      "ISS-0008"
+    ],
+    "source_evidence_ids": [
+      "EV-0009"
+    ],
+    "attribution": {
+      "product_experts": [
+        "覃熊妃"
+      ],
+      "city_stores": [
+        "天津·天津龙湖天街店"
+      ],
+      "support_periods": [
+        {
+          "raw": "2026/09/19",
+          "start_date": "2026-09-19",
+          "end_date": "2026-09-19"
+        }
+      ]
+    },
+    "counts": {
+      "evidence_count": 1,
+      "issue_count": 1,
+      "product_expert_count": 1,
+      "city_store_count": 1,
+      "support_period_count": 1,
+      "series_count": 1
+    },
+    "cross_store": false,
+    "cross_series": false,
+    "recurrence": "isolated",
+    "evidence_strength": "weak",
+    "temporal_comparison": {
+      "status": "baseline_only",
+      "notes": "本期无已声明的可比基线。"
+    },
+    "derived_at": "2026-09-19"
+  }
+]

@@ -1,0 +1,697 @@
+{
+  "run_id": "run_006_2026-09-20",
+  "taxonomy_version": "0.2.3",
+  "mapping_version": "0.2.3",
+  "dataset": "/Users/zihao_/Documents/coding/dataset/original/L6 M2_LS6 M3 产品专家门店支持信息收集汇总_产品专家支持每日反馈_收集结果.csv",
+  "record_count": 2,
+  "coding_count": 40,
+  "scope": {
+    "product_experts": [
+      "张梓豪",
+      "覃熊妃"
+    ],
+    "city_stores": [
+      "重庆万州·万州万达广场快慢闪",
+      "天津·天津龙湖天街智己汽车"
+    ],
+    "support_periods": [
+      {
+        "raw": "2026/09/20",
+        "start_date": "2026-09-20",
+        "end_date": "2026-09-20"
+      }
+    ],
+    "window": "09/20"
+  },
+  "records": [
+    {
+      "record_index": 0,
+      "submission_id": "32",
+      "submitter": "张梓豪",
+      "expert": "张梓豪",
+      "city": "重庆万州",
+      "store": "万州万达广场快慢闪",
+      "support_date": "2026/09/20",
+      "support_date_iso": "2026-09-20"
+    },
+    {
+      "record_index": 1,
+      "submission_id": "33",
+      "submitter": "覃熊妃",
+      "expert": "覃熊妃",
+      "city": "天津",
+      "store": "天津龙湖天街智己汽车",
+      "support_date": "2026/09/20",
+      "support_date_iso": "2026-09-20"
+    }
+  ],
+  "store_ops": {
+    "records": [
+      {
+        "record_index": 0,
+        "expert": "张梓豪",
+        "store": "万州万达广场快慢闪",
+        "support_date": "2026/09/20",
+        "items": [
+          {
+            "code": "footfall",
+            "label": "客流组数",
+            "quote": "6-8"
+          },
+          {
+            "code": "footfall_trend",
+            "label": "客流相比往常",
+            "quote": "与以往相当"
+          },
+          {
+            "code": "ls6_attention_share",
+            "label": "关注LS6客户占比",
+            "quote": "80%"
+          },
+          {
+            "code": "peak_hours",
+            "label": "客流高峰时段",
+            "quote": "13.30-16.30"
+          }
+        ]
+      },
+      {
+        "record_index": 1,
+        "expert": "覃熊妃",
+        "store": "天津龙湖天街智己汽车",
+        "support_date": "2026/09/20",
+        "items": [
+          {
+            "code": "footfall",
+            "label": "客流组数",
+            "quote": "6以下"
+          },
+          {
+            "code": "footfall_trend",
+            "label": "客流相比往常",
+            "quote": "较以往明显更少"
+          },
+          {
+            "code": "ls6_attention_share",
+            "label": "关注LS6客户占比",
+            "quote": "80%"
+          },
+          {
+            "code": "peak_hours",
+            "label": "客流高峰时段",
+            "quote": "11.30-13.30"
+          }
+        ]
+      }
+    ]
+  },
+  "availability": {
+    "rows": [
+      {
+        "store": "万州万达广场快慢闪",
+        "model": "LS6",
+        "display": {
+          "code": "display_available",
+          "label": "有"
+        },
+        "test_drive": {
+          "code": "test_drive_available",
+          "label": "有"
+        },
+        "quotes": [
+          "LS6"
+        ]
+      },
+      {
+        "store": "万州万达广场快慢闪",
+        "model": "L6",
+        "display": {
+          "code": "no_display_car",
+          "label": "无"
+        },
+        "test_drive": {
+          "code": "no_test_car",
+          "label": "无"
+        },
+        "quotes": [
+          "LS6"
+        ]
+      },
+      {
+        "store": "万州万达广场快慢闪",
+        "model": "LS8",
+        "display": {
+          "code": "no_display_car",
+          "label": "无"
+        },
+        "test_drive": {
+          "code": "no_test_car",
+          "label": "无"
+        },
+        "quotes": [
+          "LS6"
+        ]
+      },
+      {
+        "store": "万州万达广场快慢闪",
+        "model": "LS9",
+        "display": {
+          "code": "no_display_car",
+          "label": "无"
+        },
+        "test_drive": {
+          "code": "no_test_car",
+          "label": "无"
+        },
+        "quotes": [
+          "LS6"
+        ]
+      },
+      {
+        "store": "天津龙湖天街智己汽车",
+        "model": "LS6",
+        "display": {
+          "code": "display_available",
+          "label": "有"
+        },
+        "test_drive": {
+          "code": "test_drive_available",
+          "label": "有"
+        },
+        "quotes": [
+          "LS6, L6",
+          "L6, LS6"
+        ]
+      },
+      {
+        "store": "天津龙湖天街智己汽车",
+        "model": "L6",
+        "display": {
+          "code": "display_available",
+          "label": "有"
+        },
+        "test_drive": {
+          "code": "test_drive_available",
+          "label": "有"
+        },
+        "quotes": [
+          "LS6, L6",
+          "L6, LS6"
+        ]
+      },
+      {
+        "store": "天津龙湖天街智己汽车",
+        "model": "LS8",
+        "display": {
+          "code": "no_display_car",
+          "label": "无"
+        },
+        "test_drive": {
+          "code": "no_test_car",
+          "label": "无"
+        },
+        "quotes": [
+          "LS6, L6",
+          "L6, LS6"
+        ]
+      },
+      {
+        "store": "天津龙湖天街智己汽车",
+        "model": "LS9",
+        "display": {
+          "code": "no_display_car",
+          "label": "无"
+        },
+        "test_drive": {
+          "code": "no_test_car",
+          "label": "无"
+        },
+        "quotes": [
+          "LS6, L6",
+          "L6, LS6"
+        ]
+      }
+    ],
+    "summary": {
+      "denominator_records": 2,
+      "denominator_stores": 2,
+      "by_model": [
+        {
+          "model": "LS6",
+          "display_records": 2,
+          "test_drive_records": 2,
+          "display_stores": 2,
+          "test_drive_stores": 2
+        },
+        {
+          "model": "L6",
+          "display_records": 1,
+          "test_drive_records": 1,
+          "display_stores": 1,
+          "test_drive_stores": 1
+        },
+        {
+          "model": "LS8",
+          "display_records": 0,
+          "test_drive_records": 0,
+          "display_stores": 0,
+          "test_drive_stores": 0
+        },
+        {
+          "model": "LS9",
+          "display_records": 0,
+          "test_drive_records": 0,
+          "display_stores": 0,
+          "test_drive_stores": 0
+        }
+      ]
+    }
+  },
+  "customer_concern": {
+    "label": "客户关注主题",
+    "counts": [
+      {
+        "code": "brand_warranty_service",
+        "label": "品牌/质保/售后",
+        "by_model": {
+          "LS6": 1,
+          "L6": 2
+        },
+        "records_by_model": {
+          "LS6": [
+            1
+          ],
+          "L6": [
+            0,
+            1
+          ]
+        },
+        "details": [],
+        "total": 3
+      },
+      {
+        "code": "price_incentive",
+        "label": "价格/权益/优惠",
+        "by_model": {
+          "LS6": 2,
+          "L6": 1
+        },
+        "records_by_model": {
+          "LS6": [
+            0,
+            1
+          ],
+          "L6": [
+            1
+          ]
+        },
+        "details": [],
+        "total": 3
+      },
+      {
+        "code": "range_battery",
+        "label": "续航/电池",
+        "by_model": {
+          "LS6": 2
+        },
+        "records_by_model": {
+          "LS6": [
+            0,
+            1
+          ]
+        },
+        "details": [],
+        "total": 2
+      },
+      {
+        "code": "adas",
+        "label": "智驾",
+        "by_model": {
+          "L6": 1
+        },
+        "records_by_model": {
+          "L6": [
+            1
+          ]
+        },
+        "details": [],
+        "total": 1
+      },
+      {
+        "code": "space_exterior_interior",
+        "label": "空间/内外饰",
+        "by_model": {
+          "LS6": 1
+        },
+        "records_by_model": {
+          "LS6": [
+            0
+          ]
+        },
+        "details": [],
+        "total": 1
+      }
+    ]
+  },
+  "positive_feedback": {
+    "label": "正向产品反馈",
+    "counts": [
+      {
+        "code": "other",
+        "label": "其他",
+        "by_model": {
+          "L6": 2
+        },
+        "records_by_model": {
+          "L6": [
+            0,
+            1
+          ]
+        },
+        "details": [
+          "对轿车提不起兴趣",
+          "外观好看"
+        ],
+        "total": 2
+      },
+      {
+        "code": "steer_by_wire",
+        "label": "线控转向",
+        "by_model": {
+          "LS6": 2
+        },
+        "records_by_model": {
+          "LS6": [
+            0,
+            1
+          ]
+        },
+        "details": [],
+        "total": 2
+      },
+      {
+        "code": "catl_battery",
+        "label": "宁德时代电池",
+        "by_model": {
+          "LS6": 1
+        },
+        "records_by_model": {
+          "LS6": [
+            0
+          ]
+        },
+        "details": [],
+        "total": 1
+      },
+      {
+        "code": "mechanical_massage",
+        "label": "主驾机械按摩",
+        "by_model": {
+          "LS6": 1
+        },
+        "records_by_model": {
+          "LS6": [
+            1
+          ]
+        },
+        "details": [],
+        "total": 1
+      },
+      {
+        "code": "range_782",
+        "label": "782km续航",
+        "by_model": {
+          "LS6": 1
+        },
+        "records_by_model": {
+          "LS6": [
+            0
+          ]
+        },
+        "details": [],
+        "total": 1
+      },
+      {
+        "code": "rear_steering",
+        "label": "后轮转向",
+        "by_model": {
+          "LS6": 1
+        },
+        "records_by_model": {
+          "LS6": [
+            0
+          ]
+        },
+        "details": [],
+        "total": 1
+      }
+    ]
+  },
+  "competitor_attention": {
+    "label": "竞品关注",
+    "counts": [
+      {
+        "code": "li_auto_i6",
+        "label": "理想i6",
+        "by_model": {
+          "LS6": 2
+        },
+        "records_by_model": {
+          "LS6": [
+            0,
+            1
+          ]
+        },
+        "details": [],
+        "total": 2
+      },
+      {
+        "code": "avatr_06",
+        "label": "阿维塔06/06T",
+        "by_model": {
+          "L6": 1
+        },
+        "records_by_model": {
+          "L6": [
+            0
+          ]
+        },
+        "details": [],
+        "total": 1
+      },
+      {
+        "code": "li_auto_l6",
+        "label": "理想L6",
+        "by_model": {
+          "LS6": 1
+        },
+        "records_by_model": {
+          "LS6": [
+            1
+          ]
+        },
+        "details": [],
+        "total": 1
+      },
+      {
+        "code": "other",
+        "label": "其他",
+        "by_model": {
+          "L6": 1
+        },
+        "records_by_model": {
+          "L6": [
+            1
+          ]
+        },
+        "details": [
+          "无人提及竞品"
+        ],
+        "total": 1
+      },
+      {
+        "code": "xiaomi_n70",
+        "label": "小米N70",
+        "by_model": {
+          "LS6": 1
+        },
+        "records_by_model": {
+          "LS6": [
+            0
+          ]
+        },
+        "details": [],
+        "total": 1
+      },
+      {
+        "code": "xiaomi_su7",
+        "label": "小米SU7",
+        "by_model": {
+          "L6": 1
+        },
+        "records_by_model": {
+          "L6": [
+            0
+          ]
+        },
+        "details": [],
+        "total": 1
+      },
+      {
+        "code": "zeekr_7x",
+        "label": "极氪7X",
+        "by_model": {
+          "LS6": 1
+        },
+        "records_by_model": {
+          "LS6": [
+            0
+          ]
+        },
+        "details": [],
+        "total": 1
+      }
+    ]
+  },
+  "purchase_barrier": {
+    "label": "下单阻碍",
+    "counts": [
+      {
+        "code": "brand_trust_after_sales",
+        "label": "品牌/信任顾虑",
+        "by_model": {
+          "LS6": 2,
+          "L6": 1
+        },
+        "records_by_model": {
+          "LS6": [
+            0,
+            1
+          ],
+          "L6": [
+            0
+          ]
+        },
+        "details": [],
+        "total": 3
+      },
+      {
+        "code": "competitor_comparison",
+        "label": "对比竞品中",
+        "by_model": {
+          "LS6": 2
+        },
+        "records_by_model": {
+          "LS6": [
+            0,
+            1
+          ]
+        },
+        "details": [],
+        "total": 2
+      },
+      {
+        "code": "exterior_interior_dissatisfaction",
+        "label": "外观/内饰不满",
+        "by_model": {
+          "LS6": 1,
+          "L6": 1
+        },
+        "records_by_model": {
+          "LS6": [
+            0
+          ],
+          "L6": [
+            0
+          ]
+        },
+        "details": [],
+        "total": 2
+      },
+      {
+        "code": "price_incentive",
+        "label": "价格不满（等价格优惠）",
+        "by_model": {
+          "LS6": 2
+        },
+        "records_by_model": {
+          "LS6": [
+            0,
+            1
+          ]
+        },
+        "details": [],
+        "total": 2
+      },
+      {
+        "code": "other",
+        "label": "其他",
+        "by_model": {
+          "L6": 1
+        },
+        "records_by_model": {
+          "L6": [
+            1
+          ]
+        },
+        "details": [
+          "好看，但是不太认识这个车"
+        ],
+        "total": 1
+      }
+    ]
+  },
+  "dissatisfaction_theme": {
+    "label": "不满意主题",
+    "counts": [
+      {
+        "code": "brand_warranty_service",
+        "label": "品牌/质保/售后",
+        "by_model": {
+          "LS6": 1,
+          "L6": 1
+        },
+        "records_by_model": {
+          "LS6": [
+            1
+          ],
+          "L6": [
+            0
+          ]
+        },
+        "details": [],
+        "total": 2
+      },
+      {
+        "code": "exterior_interior",
+        "label": "内外饰",
+        "by_model": {
+          "LS6": 1
+        },
+        "records_by_model": {
+          "LS6": [
+            0
+          ]
+        },
+        "details": [],
+        "total": 1
+      },
+      {
+        "code": "other",
+        "label": "其他",
+        "by_model": {
+          "L6": 1
+        },
+        "records_by_model": {
+          "L6": [
+            1
+          ]
+        },
+        "details": [
+          "今天没什么人看这个车"
+        ],
+        "total": 1
+      }
+    ]
+  }
+}

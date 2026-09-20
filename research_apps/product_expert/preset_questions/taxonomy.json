@@ -1,5 +1,5 @@
 {
-  "taxonomy_version": "0.2.2",
+  "taxonomy_version": "0.2.3",
   "description": "预设问题 taxonomy（Preset Question Coding，v0.2）。自 2026-09-12 起数据源切换为『产品专家支持每日反馈』问卷：前段为结构化选择题，后段为自由文本。v0.2 与问卷选项一一对应，选择题由 scripts/derive_survey_stats.py 确定性解析，不经 LLM；自由文本仍走 Open Discovery（Evidence → Issue → Pattern → Convergence）。两条链路结果不得互相替代或合并。v0.1（文本编码期）归档于 taxonomy_v0.1.json。",
   "models": ["L6", "LS6", "LS8", "LS9", "STORE", "OTHER"],
   "model_notes": {
@@ -125,12 +125,13 @@
       "label": "不满意主题",
       "mode": "direct_field",
       "status": "enabled",
-      "note": "v0.2 起由问卷直读启用。LS6/L6 选项并集；v0.2.1 增 configuration 承接「其他」中的配置/底盘诉求（如 CDC 标配）。",
+      "note": "v0.2 起由问卷直读启用。LS6/L6 选项并集；v0.2.1 增 configuration 承接「其他」中的配置/底盘诉求（如 CDC 标配）；v0.2.3 增 smart_cockpit 承接 2026-09-19 起问卷新增的「智舱」选项。",
       "codes": {
         "exterior_interior": "内外饰",
         "space": "空间",
         "brand_warranty_service": "品牌/质保/售后",
         "adas": "智驾",
+        "smart_cockpit": "智舱",
         "price_incentive": "价格/权益/优惠",
         "configuration": "配置/底盘",
         "configuration_missing": "缺失某项配置",

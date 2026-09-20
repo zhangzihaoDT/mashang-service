@@ -1,7 +1,7 @@
 {
-  "mapping_version": "0.2.2",
-  "taxonomy_version": "0.2.2",
-  "description": "『产品专家支持每日反馈』问卷 → 确定性统计映射。列名/选项与问卷导出原样对应；选择题由 derive_survey_stats.py 直读，不经 LLM。taxonomy.json(v0.2.2) 提供 code→label。v0.2.2 增补 2026-09-13 问卷新增选项（调光天幕 / 小鹏G6·G7·G9 / 乐道L60·L80 / 小鹏P7·P7+ / 智能化不满 / 产品配置顾虑 / 缺失某项配置）。",
+  "mapping_version": "0.2.3",
+  "taxonomy_version": "0.2.3",
+  "description": "『产品专家支持每日反馈』问卷 → 确定性统计映射。列名/选项与问卷导出原样对应；选择题由 derive_survey_stats.py 直读，不经 LLM。taxonomy.json(v0.2.3) 提供 code→label。v0.2.2 增补 2026-09-13 问卷新增选项（调光天幕 / 小鹏G6·G7·G9 / 乐道L60·L80 / 小鹏P7·P7+ / 智能化不满 / 产品配置顾虑 / 缺失某项配置）。v0.2.3 将「智舱」纳入 dissatisfaction_theme 选项。",
   "ignore_other_values": ["无", "没有表现不满", "未有L6展车", "未有L6竞品"],
   "record_meta": {
     "submission_id": "自动编号",
@@ -129,6 +129,7 @@
         "空间": "space",
         "品牌/质保/售后": "brand_warranty_service",
         "智驾": "adas",
+        "智舱": "smart_cockpit",
         "价格/权益/优惠": "price_incentive",
         "缺失某项配置": "configuration_missing",
         "其他": "other"

@@ -1,0 +1,50 @@
+[
+  {
+    "finding_id": "FND-0001",
+    "title": "内饰质感与设计感知是 LS6 的价值短板",
+    "statement": "内饰材质、豪华感表达与主副驾屏等细节设计，是当前用户对比竞品时最容易感知的短板；LS6 减少塑料感的进展被认可，但仍弱于阿维塔的豪华感。",
+    "pattern_ids": ["PAT-0002", "PAT-0003"],
+    "convergence_ids": ["CONV-0002", "CONV-0003"],
+    "issue_ids": ["ISS-0002", "ISS-0003"],
+    "confidence": "low",
+    "business_implication": "内饰是进店第一印象与「所见即所得」价值判断的核心，质感与设计表达不足会拉低整体价值感知。",
+    "recommended_action": "复核主副驾屏视觉设计与内饰材质（扶手下方软包化），收集更多门店反馈确认是否为共性问题后再排优先级。",
+    "priority": "P2",
+    "boundary": "证据集中在重庆万州 1 家门店、1 天，均为定性个别反馈，不代表总体评价比例。",
+    "status": "ready",
+    "owner": "产品规划 / 内饰设计",
+    "created_at": "2026-09-20"
+  },
+  {
+    "finding_id": "FND-0002",
+    "title": "自然客流不足下，曝光与有效线索下发是转化抓手",
+    "statement": "品牌小众认知与工作日自然客流不足叠加，展台更多承担广告曝光职能；一线认为要形成订单，有效线索下发是关键。",
+    "pattern_ids": ["PAT-0005", "PAT-0006"],
+    "convergence_ids": ["CONV-0005", "CONV-0006"],
+    "issue_ids": ["ISS-0005", "ISS-0006"],
+    "confidence": "low",
+    "business_implication": "在自然客流受限时，门店转化更依赖主动线索投放与展台曝光，而非自然进店转化。",
+    "recommended_action": "评估工作日有效线索下发的分配与效率，并跟踪展台曝光对到店与留资的贡献。",
+    "priority": "P2",
+    "boundary": "来自天津、重庆万州 2 家门店 1 天的自报观察；工作日客流受时点影响，不能外推为常态比例。",
+    "status": "ready",
+    "owner": "销售运营 / 渠道",
+    "created_at": "2026-09-20"
+  },
+  {
+    "finding_id": "FND-0003",
+    "title": "竞品叙事影响智能与设计卖点的价值感知",
+    "statement": "用户以竞品为参照评价 LS6 的车机对话流畅度，并指出座舱与门把手等设计叙事被竞品带动，一线解释成本偏高。",
+    "pattern_ids": ["PAT-0001", "PAT-0004"],
+    "convergence_ids": ["CONV-0001", "CONV-0004"],
+    "issue_ids": ["ISS-0001", "ISS-0004"],
+    "confidence": "low",
+    "business_implication": "竞品对比会直接削弱智能座舱与设计卖点的价值感知，并抬高门店讲解成本。",
+    "recommended_action": "梳理车机对话与门把手等卖点的对比话术，明确解释口径；对「头等舱」等表述做一线语义澄清。",
+    "priority": "P3",
+    "boundary": "证据为单店单日的定性观察，未指明具体竞品车型，不能量化差距。",
+    "status": "ready",
+    "owner": "产品市场 / 销售培训",
+    "created_at": "2026-09-20"
+  }
+]
