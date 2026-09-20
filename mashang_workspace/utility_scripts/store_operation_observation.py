@@ -105,6 +105,7 @@ def load_leads(as_of: pd.Timestamp | None, window_days: int) -> tuple[pd.Series,
     if not LEADS_CSV.exists():
         return pd.Series(dtype="int64"), None
     df = pd.read_csv(LEADS_CSV, encoding="utf-8-sig")
+    df["门店"] = df["门店"].astype("string").str.strip()
     df["日期"] = pd.to_datetime(df["日期"], errors="coerce")
     df["下发线索数"] = pd.to_numeric(df["下发线索数"], errors="coerce").fillna(0).astype(int)
     df = df.dropna(subset=["日期"])
@@ -121,6 +122,7 @@ def load_orders(as_of: pd.Timestamp | None, window_days: int) -> tuple[pd.Series
     if not ORDER_PARQUET.exists():
         return pd.Series(dtype="int64"), None
     df = pd.read_parquet(ORDER_PARQUET, columns=["order_number", "store_name", "lock_time"])
+    df["store_name"] = df["store_name"].astype("string").str.strip()
     df["lock_time"] = pd.to_datetime(df["lock_time"], errors="coerce")
     df = df.dropna(subset=["lock_time"])
     if df.empty:
@@ -143,6 +145,7 @@ def load_cm3(as_of: pd.Timestamp | None, presale_gen: str) -> tuple[pd.Series, p
         "order_number", "store_name", "series", "product_name",
         "intention_payment_time", "intention_refund_time", "lock_time",
     ])
+    df["store_name"] = df["store_name"].astype("string").str.strip()
     for c in ("intention_payment_time", "intention_refund_time", "lock_time"):
         df[c] = pd.to_datetime(df[c], errors="coerce")
     df = apply_series_group_logic(df, bd)

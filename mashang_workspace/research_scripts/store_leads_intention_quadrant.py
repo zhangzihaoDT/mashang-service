@@ -56,6 +56,8 @@ def parse_args(argv: list[str] | None = None):
     p.add_argument("--top-label", type=int, default=10, help="标注门店数（按线索降序，默认 10）")
     p.add_argument("--color-by", default="type", choices=["type", "format", "quadrant"],
                    help="点着色维度：type=门店分类(门店类型, 默认) / format=门店形态(store_format) / quadrant=四象限")
+    p.add_argument("--highlight", nargs="*", default=[],
+                   help="高亮门店名（可传多个，空格分隔；金色大点+标签）")
     return p.parse_args(argv)
 
 
@@ -103,7 +105,7 @@ def _scatter(fig, sub: pd.DataFrame, color: str, name: str):
 
 
 def make_figure(df: pd.DataFrame, x_th: float, y_th: float, top_label: int,
-                color_by: str = "quadrant") -> go.Figure:
+                color_by: str = "quadrant", highlight: list[str] | None = None) -> go.Figure:
     fig = go.Figure()
 
     # 对数 X 轴范围（左边界取正的最小值）
@@ -157,13 +159,35 @@ def make_figure(df: pd.DataFrame, x_th: float, y_th: float, top_label: int,
                            xanchor=ha, yanchor=va, font=dict(color=color, size=12),
                            bgcolor="rgba(255,255,255,0.75)")
 
-    # 标注 top 门店（按线索降序；用 text trace 稳定渲染）
-    top = df[df["近7日下发线索"] > 0].nlargest(top_label, "近7日下发线索")
+    # 标注 top 门店（按线索降序；排除高亮门店以免标签重叠）
+    hl = set(highlight or [])
+    top = df[(df["近7日下发线索"] > 0) & (~df["门店"].isin(hl))].nlargest(top_label, "近7日下发线索")
     fig.add_trace(go.Scatter(
         x=top["近7日下发线索"].tolist(), y=top["转化率"].tolist(), mode="text",
         text=top["门店"].tolist(), textposition="top center",
         textfont=dict(size=9, color="#6B7C8F"), showlegend=False, hoverinfo="skip",
     ))
+
+    # 高亮门店：金色大点 + 标签 + 星标 hover
+    if hl:
+        sub = df[df["门店"].isin(hl)]
+        if not sub.empty:
+            fig.add_trace(go.Scatter(
+                x=sub["近7日下发线索"].tolist(), y=sub["转化率"].tolist(), mode="markers",
+                name=f"{chr(128204)} 高亮（{len(sub)}）",
+                marker=dict(color=ZH["event"], size=15, opacity=0.95,
+                            line=dict(width=2, color="#FFFFFF")),
+                customdata=sub[["门店", "门店类型", "门店形态", "CM3小订", "小订/线索"]].values.tolist(),
+                hovertemplate=("<b>%{customdata[0]}</b><br>门店类型：%{customdata[1]}"
+                               "<br>门店形态：%{customdata[2]}<br>近7日下发线索：%{x}"
+                               "<br>CM3小订：%{customdata[3]}<br>小订/线索：%{customdata[4]}<extra></extra>"),
+            ))
+            fig.add_trace(go.Scatter(
+                x=sub["近7日下发线索"].tolist(), y=sub["转化率"].tolist(), mode="text",
+                text=sub["门店"].tolist(), textposition="top center",
+                textfont=dict(size=12, color=ZH["event"], family="PingFang SC, Microsoft YaHei, sans-serif"),
+                showlegend=False, hoverinfo="skip",
+            ))
 
     apply_zh_theme(fig)
     fig.update_xaxes(type="log", title_text="近7日下发线索（条，对数轴）")
@@ -192,7 +216,7 @@ def _table(df: pd.DataFrame) -> str:
 
 
 def render_html(fig: go.Figure, df: pd.DataFrame, x_th: float, y_th: float,
-                color_by: str = "quadrant") -> str:
+                color_by: str = "quadrant", highlight: list[str] | None = None) -> str:
     static = "../.."
     chart = fig.to_html(full_html=False, include_plotlyjs=False, div_id="quad",
                         config={"displayModeBar": False, "responsive": True})
@@ -238,7 +262,7 @@ def render_html(fig: go.Figure, df: pd.DataFrame, x_th: float, y_th: float,
   <section class="report-section">
     <h2 class="section-title">线索量 × 转化率分布</h2>
     <div class="chart-box">{chart}</div>
-    <p class="section-note">X=近7日下发线索（条，对数轴），Y=小订/线索（%）。虚线为中位数（X={x_th:,.0f}，Y={y_th:.1f}%）。点按<strong>门店分类（门店类型）</strong>分组着色，标注线索量 Top{min(10, len(active))} 门店。</p>
+    <p class="section-note">X=近7日下发线索（条，对数轴），Y=小订/线索（%）。虚线为中位数（X={x_th:,.0f}，Y={y_th:.1f}%）。点按<strong>门店分类（门店类型）</strong>分组着色，标注线索量 Top{min(10, len(active))} 门店；<strong class="hl-tag">金色大点=高亮门店（{len(highlight or [])} 家）</strong>。</p>
   </section>
   <section class="report-section">
     <h2 class="section-title">四象限汇总</h2>
@@ -260,8 +284,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     df = load_data(Path(args.input))
     df, x_th, y_th = classify(df)
-    fig = make_figure(df, x_th, y_th, args.top_label, args.color_by)
-    html = render_html(fig, df, x_th, y_th, args.color_by)
+    fig = make_figure(df, x_th, y_th, args.top_label, args.color_by, args.highlight)
+    html = render_html(fig, df, x_th, y_th, args.color_by, args.highlight)
     out = Path(args.output)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(html, encoding="utf-8")
