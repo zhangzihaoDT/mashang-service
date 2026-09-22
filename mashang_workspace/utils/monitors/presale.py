@@ -91,6 +91,8 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
         "retention_by_region": [],
         "retention_no_region": 0,
         "compare": {},
+        "prelaunch_compare": {},
+        "days_before_launch": None,
     }
 
     if start is None:
@@ -228,6 +230,33 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
         ]
         metrics["compare"][cmp_key] = int(cmp_slice.nunique())
 
+    # 历史上市前累计留存（上市前相同天数）：按「距上市天数」对齐。
+    # days_before = 目标上市日 - 当日；历史截止日 = 历史上市日 - days_before；
+    # 窗口 = [历史开放时刻, 历史截止日次日)，截至该时刻未退（退订晚于该时刻视为留存）。
+    days_before = (end.normalize() - today.normalize()).days if isinstance(end, pd.Timestamp) else None
+    metrics["days_before_launch"] = days_before
+    for cmp_key in compare_keys(business_def, generation):
+        cmp_tp = time_periods.get(cmp_key, {}) or {}
+        if days_before is None or not cmp_tp.get("start") or not cmp_tp.get("end"):
+            metrics["prelaunch_compare"][cmp_key] = None
+            continue
+        cmp_start = pd.to_datetime(cmp_tp["start"])
+        cmp_cut = pd.to_datetime(cmp_tp["end"]) - pd.Timedelta(days=days_before) + pd.Timedelta(days=1)
+        cmp_open = cmp_start + pd.Timedelta(
+            hours=open_hour(business_def, cmp_key), minutes=open_minute(business_def, cmp_key)
+        )
+        if cmp_cut <= cmp_open:
+            metrics["prelaunch_compare"][cmp_key] = None
+            continue
+        cmp_slice = base.loc[
+            base["series_group_logic"].eq(cmp_key)
+            & (base["intention_payment_time"] >= cmp_open)
+            & (base["intention_payment_time"] < cmp_cut)
+            & ((base["intention_refund_time"] > cmp_cut) | base["intention_refund_time"].isna()),
+            "order_number",
+        ]
+        metrics["prelaunch_compare"][cmp_key] = int(cmp_slice.nunique())
+
     return metrics
 
 
@@ -335,6 +364,13 @@ def build_card(metrics: dict, show_notes: bool = False) -> dict:
     )
     lines.append(f"历史对比（自开放起同期留存，相同时长）：**{compare_str}**")
 
+    prelaunch_compare = metrics.get("prelaunch_compare") or {}
+    if prelaunch_compare:
+        prelaunch_str = " / ".join(
+            f"{k}（{v:,}）" if v is not None else f"{k}（无数据）" for k, v in prelaunch_compare.items()
+        )
+        lines.append(f"历史上市前累计留存（上市前相同天数）：**{prelaunch_str}**")
+
     lines += ["", f"预售期：{metrics.get('series_start', '—')} ~ {metrics.get('series_end', '—')}"]
     obs_raw = metrics.get("obs")
     obs_str = pd.Timestamp(obs_raw).strftime("%Y-%m-%d %H:%M") if obs_raw else "—"
@@ -344,6 +380,9 @@ def build_card(metrics: dict, show_notes: bool = False) -> dict:
         lines.append(f"口径：自开放时刻（{open_str}）起算，不含预售日白天零星订单；小订 = 当日未退意向金订单；留存 = 意向金未退（退订晚于观测截止视为留存）")
         lines.append(f"N=0 发布会当日留存：开放 {open_str} 至当日 24:00 内支付且未退（退订晚于当日 24:00 视为留存）")
         lines.append(f"对标：各代际自开放时刻起与目标相同时长（{_elapsed_label(metrics)}）内的留存小订")
+        _db = metrics.get("days_before_launch")
+        _db_txt = f"当前上市前 {_db} 天" if _db is not None else "上市前天数未知"
+        lines.append(f"历史上市前累计留存：按「距上市天数」对齐（{_db_txt}），各代际取各自上市日前相同天数内支付、且截至该时点未退的留存小订（不受目标 elapsed 截断）")
         if metrics.get("test_orders_excluded"):
             lines.append(f"已剔除测试单：{metrics['test_orders_excluded']} 笔（总部主理店 + 假身份号）")
         lines.append("数据源：dataset/order_data.parquet + shared/schema/business_definition.json")

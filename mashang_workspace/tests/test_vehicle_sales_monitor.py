@@ -293,6 +293,32 @@ def test_presale_compare_window_uses_exact_elapsed(bdef):
     assert m["compare"]["CM2"] == 1  # 但 c1 应计入
 
 
+def test_presale_prelaunch_compare_aligns_days_before_launch(bdef):
+    """历史上市前累计留存：按「距上市天数」对齐，各代际取上市日前相同天数 [open, hist_end-days_before+1d)。"""
+    rows = [
+        ("t1", "2026-09-22 10:00", None, "CM3", "全新一代智己LS6"),  # 目标，obs 当天
+        ("c1", "2025-08-15 21:00", None, "CM2", "新一代智己LS6"),                       # 预售期内、未退 → 计
+        ("c2", "2025-09-01 21:00", None, "CM2", "新一代智己LS6"),                       # 预售期内、未退 → 计
+        ("c3", "2025-09-20 21:00", None, "CM2", "新一代智己LS6"),                       # 上市后 → 不计
+        ("c4", "2025-08-16 21:00", "2025-09-11 10:00", "CM2", "新一代智己LS6"),         # 退订晚于截止 → 计
+        ("c5", "2025-08-16 22:00", "2025-08-20 10:00", "CM2", "新一代智己LS6"),         # 截止前已退 → 不计
+        ("c6", "2025-09-10 19:00", None, "CM2", "新一代智己LS6"),                       # 上市日 → 不计（截止为 end-1 末）
+        ("c7", "2025-09-10 21:00", None, "CM2", "新一代智己LS6"),                       # 上市日 → 不计
+        ("c8", "2025-09-05 21:00", None, "CM2", "新一代智己LS6"),                       # 截止日附近
+    ]
+    df = _presale_df(rows)
+
+    # 上市前 1 天（今日=上市前一日）：CM2 截止 = 2025-09-10 → 计 c1/c2/c4/c8 = 4
+    m1 = presale_compute(df, bdef, pd.Timestamp("2026-09-22"), "CM3")
+    assert m1["days_before_launch"] == 1
+    assert m1["prelaunch_compare"]["CM2"] == 4
+
+    # 上市前 8 天：CM2 截止 = 2025-09-03 → c8(09-05) 落在窗口外，计 c1/c2/c4 = 3
+    m8 = presale_compute(df, bdef, pd.Timestamp("2026-09-15"), "CM3")
+    assert m8["days_before_launch"] == 8
+    assert m8["prelaunch_compare"]["CM2"] == 3
+
+
 # ── freshness ──────────────────────────────────────────────────────
 
 
@@ -527,6 +553,8 @@ def _presale_metrics() -> dict:
         ],
         "retention_no_region": 10,
         "compare": {"CM2": 2000, "CM1": 900, "CM0": 1500, "LS8": 1100, "LS9": 700},
+        "prelaunch_compare": {"CM2": 37165, "CM1": 18696, "CM0": 18235, "LS8": 13814, "LS9": 7635},
+        "days_before_launch": 1,
     }
 
 
@@ -545,6 +573,7 @@ def test_presale_card_slim_no_notes_in_production():
     assert "开放后 24h 累计留存：**1,980**" in body
     assert "发布会当日留存：**1,600**（小订 1,700）" in body
     assert "历史对比（自开放起同期留存，相同时长）：**CM2（2,000） / CM1（900） / CM0（1,500） / LS8（1,100） / LS9（700）**" in body
+    assert "历史上市前累计留存（上市前相同天数）：**CM2（37,165） / CM1（18,696） / CM0（18,235） / LS8（13,814） / LS9（7,635）**" in body
     assert "预售期：2026-09-10 ~ 2026-09-23" in body
     assert "观察时间：2026-09-10 15:30" in body
 
