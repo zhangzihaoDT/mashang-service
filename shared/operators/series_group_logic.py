@@ -1,8 +1,18 @@
+import re
+
 import pandas as pd
 
 
+def _strip_ws(value: str) -> str:
+    """折叠并移除全部空白字符，使 product_name 与规则 token 的匹配与空格无关。"""
+    return re.sub(r"\s+", "", str(value))
+
+
 def _eval_series_group_logic_expr(product_name: pd.Series, expr: str) -> pd.Series:
+    # product_name 去空白后再匹配：容忍「全新一代 智己LS6」等空格变体，
+    # 避免其因字面量 token（如 CM3 的「全新一代智己LS6」）含空格而漏配到低优先级代际。
     s = product_name.astype("string").fillna("")
+    s = s.str.replace(r"\s+", "", regex=True)
     expr = str(expr or "").strip()
     if not expr or expr.upper() == "ELSE":
         return pd.Series([False] * len(s), index=s.index)
@@ -18,11 +28,11 @@ def _eval_series_group_logic_expr(product_name: pd.Series, expr: str) -> pd.Seri
             cond = cond.strip()
             if " NOT LIKE " in cond:
                 tok = cond.split(" NOT LIKE ", 1)[1].strip().strip("'").strip('"')
-                tok = tok.strip("%")
+                tok = _strip_ws(tok.strip("%"))
                 m = m & (~s.str.contains(tok, na=False, regex=False))
             elif " LIKE " in cond:
                 tok = cond.split(" LIKE ", 1)[1].strip().strip("'").strip('"')
-                tok = tok.strip("%")
+                tok = _strip_ws(tok.strip("%"))
                 m = m & (s.str.contains(tok, na=False, regex=False))
         out = out | m
     return out

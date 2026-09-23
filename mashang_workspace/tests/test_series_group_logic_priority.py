@@ -155,3 +155,56 @@ def test_cm3_recognizes_m3_and_new_generation(_executors):
     df = pd.DataFrame({"product_name": CM3_CASES})
     out = _executors["shared"].apply_series_group_logic(df, _bdef())
     assert out["series_group_logic"].tolist() == ["CM3"] * len(CM3_CASES), out.to_dict("records")
+
+
+# 空白变体：规则 token（CM3=「全新一代智己LS6」）无空格，product_name 带空格时不应掉到 CM2/CM1
+CM3_WS_CASES = [
+    "全新一代 智己LS6",
+    "全新一代智己 LS6",
+    "全新一代 智己 LS6",
+    "全新一代智己LS6  Max",
+    " 全新一代智己LS6 Ultra ",
+]
+
+
+def test_cm3_whitespace_insensitive(_executors):
+    """CM3 分类与 product_name 内空白无关（空格/多空格/首尾空格均可）。"""
+    df = pd.DataFrame({"product_name": CM3_WS_CASES})
+    out = _executors["shared"].apply_series_group_logic(df, _bdef())
+    assert out["series_group_logic"].tolist() == ["CM3"] * len(CM3_WS_CASES), out.to_dict("records")
+
+
+def test_monitors_whitespace_insensitive(_executors):
+    """监控层入口与 shared 一致地做空白归一化。"""
+    df = pd.DataFrame({"product_name": CM3_WS_CASES})
+    out = _executors["monitors"].apply_series_group_logic(df, _bdef())
+    assert out["series_group_logic"].tolist() == ["CM3"] * len(CM3_WS_CASES), out.to_dict("records")
+
+
+def test_whitespace_normalization_preserves_spaced_rule_token(_executors):
+    """规则 token 自身含空格（DM2 的 'Jimmy Choo'）在归一化后仍能匹配。"""
+    df = pd.DataFrame(
+        {"product_name": ["全新一代 智己 L6 Prof. Jimmy Choo 高定限量版（76kWh）"]}
+    )
+    out = _executors["shared"].apply_series_group_logic(df, _bdef())
+    assert out["series_group_logic"].tolist() == ["DM2"]
+
+
+def test_eval_expr_whitespace_insensitive(_executors):
+    """底层匹配：token 与 product_name 均按去空白比较。"""
+    shared = _executors["shared"]
+    hit = shared._eval_series_group_logic_expr(
+        pd.Series(["AB C", "A BC", "ABC", "XYZ"]),
+        "product_name LIKE '%ABC%'",
+    )
+    assert hit.tolist() == [True, True, True, False]
+
+
+def test_whitespace_insensitive_not_like(_executors):
+    """NOT LIKE 分支同样按去空白匹配。"""
+    shared = _executors["shared"]
+    hit = shared._eval_series_group_logic_expr(
+        pd.Series(["A B C", "XY Z"]),
+        "product_name NOT LIKE '%ABC%'",
+    )
+    assert hit.tolist() == [False, True]

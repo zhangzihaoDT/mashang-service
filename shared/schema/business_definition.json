@@ -176,7 +176,7 @@
       "condition": "ELSE"
     }
   },
-  "series_group_logic_priority_semantics": "series_group_logic 每条规则为 {priority, condition}。priority 是纯优先级（precedence），仅用于重叠规则裁决：数值大的规则优先命中，同分按书写顺序（first-match-wins）；跨车系、互不重叠的规则可共用同一档（LS6 家族 3>2>1，L6 家族 3>2>1，独立车系 LS8/LS9/LS7/L7 均为 1）。执行器按 priority 降序、同分按书写顺序取首个命中。兼容旧格式：值为字符串时视为 {priority: 0, condition: 字符串}。",
+  "series_group_logic_priority_semantics": "series_group_logic 每条规则为 {priority, condition}。priority 是纯优先级（precedence），仅用于重叠规则裁决：数值大的规则优先命中，同分按书写顺序（first-match-wins）；跨车系、互不重叠的规则可共用同一档（LS6 家族 3>2>1，L6 家族 3>2>1，独立车系 LS8/LS9/LS7/L7 均为 1）。执行器按 priority 降序、同分按书写顺序取首个命中。兼容旧格式：值为字符串时视为 {priority: 0, condition: 字符串}。匹配前 product_name 与规则 token 均去除全部空白字符（空格不敏感），避免「全新一代 智己LS6」等空格变体漏配到低优先级代际。",
   "model_series_mapping": {
     "LS6": ["CM0", "CM1", "CM2", "CM3"],
     "L6": ["DM0", "DM1", "DM2"]
