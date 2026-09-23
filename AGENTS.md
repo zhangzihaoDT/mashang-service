@@ -349,7 +349,8 @@ mashang-service/
 | 每日运营 | `make daily-ops` | — | local + Feishu write + 卡片 |
 | 当前预售/上市监控 | `make sales-monitor` | `monitor` | Feishu card |
 | 监控预检 | `make sales-monitor-dry-run` | `monitor-dry-run` | read-only |
-| 指定代际预售小订快照 | `make presale-snapshot SERIES=<GEN>` | — | Feishu card |
+| 数据更新+指定代际监控走廊 | `make monitor-sync SERIES=<GEN> [PHASE=launch\|presale] [DRY=1]` | `sales-monitor-sync` | local write（仅订单表）+ Feishu card |
+| 指定代际预售小订快照 | `make presale-snapshot SERIES=<GEN>`（= `sales-monitor --force-phase --phase presale`） | — | Feishu card |
 | 常驻调度 | `make sales-scheduler` | `scheduler` | 常驻 + local + Feishu |
 | 预售累计订单对比报告 | `presale_cumulative_order_compare.py` | `l6_m2_presale_report.py`（shim） | local write（可选 Feishu docx） |
 
@@ -365,11 +366,14 @@ mashang-service/
 
 ### 小订 / 预售 / 上市入口边界（勿混用）
 
-- “小订监控 / 预售小订” 默认指**指定代际预售快照** → `make presale-snapshot SERIES=<GEN>`（底层 `mashang_workspace/research_scripts/presale_metrics_to_feishu.py`）。
-- “当前预售/上市监控” 指**当前 active 代际的 phase 监控** → `make sales-monitor`（底层 `vehicle_sales_monitor.py`，带 freshness gate）。
-- 两者不可互相替代：指定代际已进入 `launch` 阶段时，`sales-monitor` 会按 launch 口径监控，而 `presale-snapshot` 仍按该代际预售口径生成快照（用于上市日最终预售快照）。
+- “小订监控 / 预售小订” 默认指**指定代际预售快照** → `make presale-snapshot SERIES=<GEN>`（底层 `presale_metrics_to_feishu.py` shim → `vehicle_sales_monitor --force-phase --phase presale`）。
+- **唯一监控实现** = `runtime_scripts/vehicle_sales_monitor.py`：`sales-monitor`（按 active phase）与 `presale-snapshot`（`--force-phase` 忽略 phase）共用同一 compute/card，不再有独立预售实现。
+- “当前预售/上市监控” 指**当前 active 代际的 phase 监控** → `make sales-monitor`（底层 `vehicle_sales_monitor.py`，带 freshness gate；**不刷新数据**）。
+- “数据更新并同步 <代际> 上市/小订/预售监控”（**仅刷新订单表** → 计算 → 推送）→ `make monitor-sync SERIES=<GEN> PHASE=<launch|presale>`（`DRY=1` 预览；底层 `order_data_to_parquet.py` + `vehicle_sales_monitor.py`）。对应关系：上市监控→`PHASE=launch`，小订/预售监控→`PHASE=presale`。
+- 指定代际已进入 `launch` 阶段时，`sales-monitor` / `monitor-sync` 会按 launch 口径监控，而 `presale-snapshot` 仍按该代际预售口径生成快照（用于上市日最终预售快照）。
 - 发送指定代际快照时，输出必须标注：统计截止时间、预售窗口、当前所处阶段（presale/launch）。
-- `make data-pipeline` / `daily-data-pipeline` **不含**销售监控；如需“数据更新 + 监控推送”一体执行，用 `make daily-ops`。
+- `make data-pipeline` / `daily-data-pipeline` **不含**销售监控；如需“数据更新 + 监控推送”一体执行：全量数据用 `make daily-ops`，仅订单表用 `make monitor-sync`。
+- `monitor-sync` 仅刷新订单表（`order_data`），不等价于 `make data-refresh`（全量数据集）；需要全量刷新时改用 `make daily-ops` 或先 `make data-refresh`。
 
 ## Fast Reference
 
@@ -413,6 +417,7 @@ mashang-service/
 | 数据更新 + 监控推送 | `make daily-ops`（写操作：data-pipeline + sales-monitor） | DataOps |
 | 预检数据 | `make data-pipeline-dry-run`（只读；旧名 `daily-data-pipeline-dry-run`） | DataOps |
 | 当前预售/上市监控 | `make sales-monitor`（当前 active 代际 + phase；旧名 `monitor`；先 `make sales-monitor-dry-run` 预览） | monitor |
+| 数据更新+指定代际监控走廊 | `make monitor-sync SERIES=CM3 PHASE=launch|presale [DRY=1]`（仅刷新订单表 → 计算 → 推送/dry-run；旧名 `sales-monitor-sync`） | monitor |
 | 指定代际小订快照 | `make presale-snapshot SERIES=CM3`（先 `DRY=1` 预览；底层 `presale_metrics_to_feishu.py --series CM3`） | monitor |
 | 常驻调度 | `make sales-scheduler`（旧名 `scheduler`） | monitor |
 | 解析验证范围 | `make verify-scope`（按改动解析最小验证范围） | harness |

@@ -35,6 +35,7 @@ from utils.monitors.phase import (  # noqa: E402
     open_minute,
     phase_of,
 )
+from utils.monitors.launch import build_card as launch_build_card  # noqa: E402
 from utils.monitors.presale import build_card as presale_build_card  # noqa: E402
 from utils.monitors.presale import build_waiting_card as presale_build_waiting_card  # noqa: E402
 from utils.monitors.presale import compute as presale_compute  # noqa: E402
@@ -352,18 +353,23 @@ def test_freshness_falls_back_to_mtime(bdef):
 def _scheduler_args(**overrides):
     import argparse
     sched = _load_scheduler()
-    base = dict(dry_run=False, as_of=None, series=None, phase="presale")
+    base = dict(dry_run=False, as_of=None, series=None, phase="presale,launch")
     base.update(overrides)
     return sched, argparse.Namespace(**base)
 
 
-def test_scheduler_monitor_cmd_defaults_to_presale(bdef):
-    """常驻/--once 默认只推 presale，避免混入 launch（如 DM2）。"""
+def test_scheduler_monitor_cmd_default_phase_launch_presale(bdef):
+    """常驻/--once 默认推送全部 active 阶段（presale,launch），支持显式收窄。"""
     sched, args = _scheduler_args(dry_run=True)
     cmd = sched._monitor_cmd(args)
     assert "--phase" in cmd
-    assert cmd[cmd.index("--phase") + 1] == "presale"
+    assert cmd[cmd.index("--phase") + 1] == "presale,launch"
     assert "--series" not in cmd
+
+    # 显式收窄到仅预售
+    sched, args = _scheduler_args(phase="presale", dry_run=True)
+    cmd = sched._monitor_cmd(args)
+    assert cmd[cmd.index("--phase") + 1] == "presale"
 
     # 显式覆盖时透传
     sched, args = _scheduler_args(phase="launch,presale", series="DM2,CM3", dry_run=True)
@@ -606,3 +612,71 @@ def test_presale_card_no_limited_skips_split():
     assert "留存明细：" in body
     assert "　· 全新一代智己LS6 Max：1,500（66.7%）" in body
     assert "全新一代智己LS6 Ultra：750（33.3%）" in body
+
+
+# ── launch card 留存明细（按 product_name，不做代际无关的限定分类）────
+
+
+def _launch_metrics(products: list[dict]) -> dict:
+    return {
+        "generation": "CM3",
+        "label": "全新一代 LS6",
+        "series": "CM3",
+        "as_of_date": "2026-09-23",
+        "run_date": "2026-09-23",
+        "launch": "2026-09-23",
+        "obs": "2026-09-23 16:23",
+        "today_lock_count": 0,
+        "today_user_car_lock_count": 0,
+        "today_intention_conv": 0,
+        "presale_retained": 0,
+        "today_direct_lock": 0,
+        "retention": 10,
+        "retention_kept": 8,
+        "retention_kept_by_product": products,
+        "peak_hour": None,
+        "peak_count": 0,
+        "compare": {"CM2": 1},
+        "test_orders_excluded": 0,
+    }
+
+
+def _launch_card_body(products: list[dict], extra: dict | None = None) -> str:
+    m = _launch_metrics(products)
+    if extra:
+        m.update(extra)
+    return launch_build_card(m, show_notes=False)["card"]["elements"][0]["text"]["content"]
+
+
+def test_launch_card_no_limited_lists_by_product_only():
+    """无高定限量版的代际（如 CM3）：不渲染限定/非限定分类，按 product_name 平铺。"""
+    body = _launch_card_body(
+        [
+            {"product_name": "全新一代智己LS6 Max", "count": 5, "share": 62.5, "limited": False},
+            {"product_name": "全新一代智己LS6 Ultra", "count": 3, "share": 37.5, "limited": False},
+        ]
+    )
+    assert "留存锁单明细：" in body
+    assert "留存锁单分类" not in body
+    assert "Jimmy" not in body and "限定" not in body and "非限定" not in body
+    assert "　· 全新一代智己LS6 Max：5（62.5%）" in body
+
+
+def test_launch_card_splits_when_limited_present():
+    """确有高定限量版（如 DM2 的 Jimmy Choo）时保留限定/非限定二分。"""
+    body = _launch_card_body(
+        [
+            {"product_name": "L6 JimmyChoo 高定限量版", "count": 2, "share": 40.0, "limited": True},
+            {"product_name": "L6 Max", "count": 3, "share": 60.0, "limited": False},
+        ],
+        extra={"retention_kept_limited": 2, "retention_kept_non_limited": 3},
+    )
+    assert "留存锁单分类：限定 **2** ｜ 非限定 **3**" in body
+    assert "　· 限定：L6 JimmyChoo 高定限量版：2（40.0%）" in body
+    assert "　· 非限定：L6 Max：3（60.0%）" in body
+
+
+def test_launch_card_no_retention_shows_empty():
+    body = _launch_card_body([])
+    assert "留存锁单明细：暂无留存锁单" in body
+    assert "留存锁单分类" not in body

@@ -1,24 +1,25 @@
 #!/usr/bin/env python
-"""通用预售小订监控 CLI（发送飞书）。
+"""预售小订监控（飞书）— compatibility shim。
 
-代际口径全部来自 shared/schema/business_definition.json + monitor 配置，
-脚本不再硬编码 DM2/CM3。
+已收敛到唯一入口 `runtime_scripts/vehicle_sales_monitor.py`：
+    python runtime_scripts/vehicle_sales_monitor.py --series CM3 --force-phase --phase presale
+
+`--force-phase` 让监控忽略 active 窗口判定，按指定 phase 渲染显式 series，
+因此「代际已进入 launch 后仍要发预售快照」无需独立实现。
+
+本文件保留仅为兼容旧调用；缺省 `--series` 取当前 presale 代际。
 
 用法:
     python research_scripts/presale_metrics_to_feishu.py --series CM3
     python research_scripts/presale_metrics_to_feishu.py --series CM3 --dry-run
-    python research_scripts/presale_metrics_to_feishu.py --series CM3 --as-of 2026-09-10
-    python research_scripts/presale_metrics_to_feishu.py            # 默认当前 presale 代际
+    python research_scripts/presale_metrics_to_feishu.py                 # 默认当前 presale 代际
 """
 
 from __future__ import annotations
 
-import argparse
-import json
+import importlib.util
 import sys
-from datetime import datetime
 from pathlib import Path
-from typing import cast
 
 import pandas as pd
 
@@ -28,94 +29,53 @@ for _p in (str(REPO_ROOT), str(_WS_ROOT)):
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
-try:
-    from dotenv import load_dotenv
-
-    load_dotenv(REPO_ROOT / ".env")
-except ImportError:
-    pass
-
-from capabilities.notify.notify_service import notify  # noqa: E402
 from utils.monitors.phase import detect_active, load_business_definition  # noqa: E402
-from utils.monitors import freshness  # noqa: E402
-from utils.monitors.presale import build_card, compute  # noqa: E402
-from utils.monitors.series_group import apply_series_group_logic  # noqa: E402
 
-ORDER_PARQUET = REPO_ROOT / "dataset" / "order_data.parquet"
-DATETIME_COLS = [
-    "intention_payment_time",
-    "intention_refund_time",
-    "deposit_payment_time",
-    "deposit_refund_time",
-    "lock_time",
-    "approve_refund_time",
-]
+_VSM_PATH = _WS_ROOT / "runtime_scripts" / "vehicle_sales_monitor.py"
 
 
-def load_order() -> pd.DataFrame:
-    df = pd.read_parquet(ORDER_PARQUET)
-    for c in DATETIME_COLS:
-        if c in df.columns:
-            df[c] = pd.to_datetime(df[c], errors="coerce")
-    return df
+def _next_value(argv: list[str], flag: str) -> str | None:
+    if flag in argv:
+        i = argv.index(flag)
+        if i + 1 < len(argv):
+            return argv[i + 1]
+    return None
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description="通用预售小订监控（飞书）")
-    parser.add_argument("--series", default=None, help="代际（series_group_logic 键），默认当前 presale 代际")
-    parser.add_argument("--dry-run", action="store_true", help="只打印卡片，不发送飞书")
-    parser.add_argument("--as-of", default=None, help="统计基准日 YYYY-MM-DD（默认今天）")
-    parser.add_argument("--refresh-ts", default=None, help="覆盖数据刷新完成时间 ISO 时间戳（调度器注入）")
-    parser.add_argument("--allow-stale", action="store_true", help="数据 stale 时仍发送，发送前会打印警告")
-    args = parser.parse_args()
-
-    if not ORDER_PARQUET.exists():
-        print(f"❌ 文件不存在: {ORDER_PARQUET}")
-        return 1
-
-    bdef = load_business_definition()
-    today = cast(pd.Timestamp, pd.Timestamp(args.as_of) if args.as_of else pd.Timestamp(datetime.now().date()))
-
-    # 历史复盘按显式 as-of 重建，不受实时 freshness gate 影响。
-    live = args.as_of is None
-    fresh = None
-    if live:
-        fresh = freshness.check(bdef=bdef, refresh_ts=args.refresh_ts)
-        if not fresh["fresh"] and not args.allow_stale and not args.dry_run:
-            print(f"⚠️ 数据 stale，跳过飞书推送：{fresh['reason']}")
-            print("   如需明确使用当前快照发送，请追加 --allow-stale。")
-            return 2
-
-    series = args.series
-    if not series:
+def _inject(argv: list[str]) -> list[str] | None:
+    """补齐 --force-phase / --phase presale，并在缺省时解析当前 presale 代际。"""
+    if "--force-phase" not in argv:
+        argv.append("--force-phase")
+    if "--phase" not in argv:
+        argv += ["--phase", "presale"]
+    if "--series" not in argv:
+        bdef = load_business_definition()
+        as_of = _next_value(argv, "--as-of")
+        today = pd.Timestamp(as_of) if as_of else pd.Timestamp.now().normalize()
         active = detect_active(bdef, today, phases=("presale",))
         if not active:
             print(f"⚠️ {today.date()} 无 presale 代际")
-            return 0
-        series = active[0]["generation"]
+            return None
+        argv += ["--series", active[0]["generation"]]
+    return argv
 
-    print(f"📖 Loading: {ORDER_PARQUET}（series={series}）")
-    df = apply_series_group_logic(load_order(), bdef)
-    metrics = compute(df, bdef, today, series)
-    card = build_card(metrics, show_notes=args.dry_run)
 
-    if live and fresh and not fresh["fresh"]:
-        print(f"⚠️ 数据 stale：{fresh['reason']}")
-        if args.allow_stale:
-            print("   已使用 --allow-stale，继续发送当前快照。")
-        elif args.dry_run:
-            print("   当前为 dry-run，仅预览卡片，不发送飞书。")
+def _load_runner():
+    spec = importlib.util.spec_from_file_location("vehicle_sales_monitor", _VSM_PATH)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"无法加载 {_VSM_PATH}")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
 
-    if args.dry_run:
-        print(json.dumps(card, ensure_ascii=False, indent=2))
+
+def main() -> int:
+    argv = _inject([a for a in sys.argv[1:]])
+    if argv is None:
         return 0
-
-    result = notify(raw_payload=card, provider_name="feishu_webhook")
-    if result.ok:
-        print("✅ 飞书消息发送成功")
-        return 0
-    print(f"❌ 飞书消息发送失败: {result.error}")
-    return 1
+    runner = _load_runner()
+    sys.argv = [sys.argv[0]] + argv
+    return runner.main()
 
 
 if __name__ == "__main__":

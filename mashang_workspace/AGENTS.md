@@ -228,11 +228,14 @@ from shared.loaders.tp_and_mix_ways_loader import (
 |--------|------|----------|
 | "数据更新并同步" | DataOps 指令，非日期分析问题 | `make data-pipeline`（旧名 `daily-data-pipeline`；注意：写操作） |
 | "预检数据" | 安全预检 | `make data-pipeline-dry-run`（只读） |
+| "数据更新并同步 CM3 上市监控" | 仅刷新订单表 + 推送指定代际上市锁单监控 | `make monitor-sync SERIES=CM3 PHASE=launch`（先 `DRY=1` 预览） |
+| "数据更新并同步 CM3 小订/预售监控" | 仅刷新订单表 + 推送指定代际预售小订监控 | `make monitor-sync SERIES=CM3 PHASE=presale`（先 `DRY=1` 预览） |
 | "同步一份 CM3 小订监控" | 指定代际预售小订快照推送 | `make presale-snapshot SERIES=CM3 DRY=1` 预览 → 去掉 `DRY=1` 正式发送 |
 | "当前预售/上市监控" | 当前 active 代际 presale/launch 阶段监控 | `make sales-monitor-dry-run` → `make sales-monitor` |
 
 注意：
 - "数据更新并同步" 不是带日期条件的分析问题，不表示"只更新今天的数据"
+- "数据更新并同步 <代际> 上市/小订/预售监控" 指 `monitor-sync` 走廊：**仅刷新订单表**（非全量 `data-refresh`）→ 计算 → 推送/dry-run
 - Runtime V2 不响应这个指令
 - "小订监控" 默认指**指定代际预售快照**（`presale-snapshot`），不是当前 active 阶段监控（`sales-monitor`）。指定代际已进入 `launch` 阶段时，仍可用 `presale-snapshot` 发送上市日最终预售快照，并标注统计截止时间、预售窗口、当前阶段。
 

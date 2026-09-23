@@ -8,7 +8,7 @@ PYTHON ?= .venv/bin/python
 	runtime-v2-demo runtime-v2-city-demo runtime-v2-followup-demo runtime-v2-eval runtime-v2-feature-job-demo runtime-v2-clean-sessions \
 	data-refresh data-validate observe-dry-run observe-sync data-pipeline-dry-run data-pipeline daily-ops \
 	dataset-update dataset-validate daily-observation-dry-run daily-observation-sync daily-data-pipeline-dry-run daily-data-pipeline \
-	sales-monitor sales-monitor-dry-run presale-snapshot monitor monitor-dry-run sales-scheduler scheduler \
+	sales-monitor sales-monitor-dry-run presale-snapshot monitor monitor-dry-run monitor-sync sales-scheduler scheduler \
 	dc-inventory-change dc-inventory-change-date state-diagnosis \
 	shock-scan shock-backtest shock-research shock-check market-observe \
 	daily-sync-dry-run update-tp-and-mix-ways-dataset rebuild-tp-and-mix-ways-dataset build-tp-and-mix-ways-dataset \
@@ -286,9 +286,10 @@ daily-data-pipeline: data-pipeline
 
 ## ─── Vehicle Sales Monitor（预售/上市监控，canonical 入口）─────────
 ##
-## 两个入口的边界（勿混用）：
-##   sales-monitor      当前 active 代际的 presale/launch 阶段监控（有 freshness gate）
-##   presale-snapshot   指定代际的预售小订快照（显式 --series，无 phase 判定）
+## 三个入口的边界（勿混用）：
+##   sales-monitor      当前 active 代际的 presale/launch 阶段监控（有 freshness gate，不刷新数据）
+##   monitor-sync       数据更新 + 监控走廊：仅刷新订单表 → 计算 → 推送/dry-run（SERIES/PHASE）
+##   presale-snapshot   指定代际的预售小订快照（显式 --series，无 phase 判定，不刷新数据）
 ## 指定代际已进入 launch 时，仍可用 presale-snapshot 发送上市日最终预售快照。
 
 ## 统一预售/上市监控（自动判定 active 代际 + phase；写操作：飞书卡片）
@@ -318,9 +319,31 @@ presale-snapshot:
 		$(if $(ALLOW_STALE),--allow-stale) \
 		$(if $(DRY),--dry-run)
 
+## 数据更新 + 监控一站式走廊（仅刷新订单表 → 计算 → 推送/dry-run）
+## 对应自然语言：「数据更新并同步 <代际> 上市监控 / 小订·预售监控」
+## 用法:
+##   make monitor-sync SERIES=CM3 PHASE=launch           # 刷新订单表 + 推送上市锁单监控
+##   make monitor-sync SERIES=CM3 PHASE=presale          # 刷新订单表 + 推送预售小订监控
+##   make monitor-sync SERIES=CM3 PHASE=presale DRY=1    # 仅预览（dry-run，不发送飞书）
+## 说明:
+##   - 仅刷新 order_data（非全量 make data-refresh）；MOBILE=1 走移动链路
+##   - PHASE 省略时监控全部 active 阶段（presale + launch）
+##   - 显式 SERIES+PHASE 时加 --force-phase：代际已进入 launch 后仍可按预售口径出快照
+##   - 正式推送前建议先 DRY=1 预览；ALLOW_STALE=1 可跳过 freshness gate
+monitor-sync:
+	$(PYTHON) dataset/updater/order_data_to_parquet.py $(if $(MOBILE),--mobile) && \
+	$(PYTHON) mashang_workspace/runtime_scripts/vehicle_sales_monitor.py \
+		$(if $(SERIES),--series $(SERIES)) \
+		$(if $(PHASE),--phase $(PHASE)) \
+		$(if $(and $(SERIES),$(PHASE)),--force-phase) \
+		$(if $(DRY),--dry-run) \
+		$(if $(ALLOW_STALE),--allow-stale) \
+		$(if $(REFRESH_TS),--refresh-ts $(REFRESH_TS),--refresh-ts "$$(/bin/date +%Y-%m-%dT%H:%M:%S)")
+
 ## 兼容别名
 monitor: sales-monitor
 monitor-dry-run: sales-monitor-dry-run
+sales-monitor-sync: monitor-sync
 
 ## 常驻定时器：09:00 每日管道（刷新→校验→同步→监控）+ key day 17-23 高频刷新/监控（配合 caffeinate -i）
 ## 注意：常驻进程，会刷新数据、同步飞书并发送监控卡片
@@ -530,9 +553,10 @@ help:
 	@echo "=== Vehicle Sales Monitor（canonical；旧名为兼容别名）==="
 	@echo "make sales-monitor           当前 active 代际预售/上市监控（自动判定 phase；写操作）"
 	@echo "make sales-monitor-dry-run   监控 dry-run（只打印卡片）"
+	@echo "make monitor-sync            数据更新+监控走廊 SERIES=CM3 [PHASE=launch|presale] [DRY=1]（仅刷新订单表）"
 	@echo "make presale-snapshot        指定代际预售小订快照推送 SERIES=CM3 [DRY=1] [ALLOW_STALE=1]（写操作）"
-	@echo "make sales-scheduler         常驻定时器（刷新 + key day 高频监控）"
-	@echo "  兼容别名: monitor / monitor-dry-run / scheduler"
+	@echo "make sales-scheduler         常驻定时器（刷新 + key day 高频监控；SERIES=CM3 限定代际）"
+	@echo "  兼容别名: monitor / monitor-dry-run / sales-monitor-sync / scheduler"
 	@echo ""
 	@echo "=== Render ==="
 	@echo "make render-official-doc       正式材料排版渲染（Markdown→PDF/HTML/DOCX）"

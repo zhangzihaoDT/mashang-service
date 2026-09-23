@@ -287,25 +287,25 @@ def build_card(metrics: dict, show_notes: bool = True) -> dict:
     )
     lines.append(f"　直接锁单数：**{metrics['today_direct_lock']:,}**")
 
-    kept_limited = metrics.get("retention_kept_limited") or 0
-    kept_non_limited = metrics.get("retention_kept_non_limited") or 0
-    lines.append(
-        f"留存锁单分类：限定（Jimmy Choo 高定）**{kept_limited:,}** ｜ 非限定 **{kept_non_limited:,}**"
-    )
     kept_by_product = metrics.get("retention_kept_by_product") or []
-    if kept_by_product:
-        limited_items = [i for i in kept_by_product if i.get("limited")]
-        normal_items = [i for i in kept_by_product if not i.get("limited")]
-        if limited_items:
-            lines.append("　· 限定：")
-            for item in limited_items:
-                lines.append(f"　　  {item['product_name']}：{item['count']:,}（{item['share']}%）")
-        if normal_items:
-            lines.append("　· 非限定：")
-            for item in normal_items:
-                lines.append(f"　　  {item['product_name']}：{item['count']:,}（{item['share']}%）")
+    limited_items = [i for i in kept_by_product if i.get("limited")]
+    if kept_by_product and limited_items:
+        # 仅当该代际确有高定限量版（如 DM2 的 Jimmy Choo）时才做限量/非限量二分
+        kept_limited = metrics.get("retention_kept_limited") or 0
+        kept_non_limited = metrics.get("retention_kept_non_limited") or 0
+        lines.append(f"留存锁单分类：限定 **{kept_limited:,}** ｜ 非限定 **{kept_non_limited:,}**")
+        for tag, items in (
+            ("限定", limited_items),
+            ("非限定", [i for i in kept_by_product if not i.get("limited")]),
+        ):
+            for item in items:
+                lines.append(f"　· {tag}：{item['product_name']}：{item['count']:,}（{item['share']}%）")
+    elif kept_by_product:
+        lines.append("留存锁单明细：")
+        for item in kept_by_product:
+            lines.append(f"　· {item['product_name']}：{item['count']:,}（{item['share']}%）")
     else:
-        lines.append("　· 暂无留存锁单明细")
+        lines.append("留存锁单明细：暂无留存锁单")
 
     lines.append(
         f"上市至今累计：**{metrics['retention']:,}**，峰值小时 **{metrics['peak_count']:,}**（{peak_hour_str}）"

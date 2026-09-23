@@ -1,4 +1,8 @@
-"""指定代际预售小订快照的 freshness gate 测试。"""
+"""presale_metrics_to_feishu shim 的委托与默认代际解析测试。
+
+预售监控实现已收敛到 runtime_scripts/vehicle_sales_monitor.py；
+本 shim 只负责注入 --force-phase / --phase presale 并委托。
+"""
 
 from __future__ import annotations
 
@@ -29,72 +33,77 @@ def module():
     return loaded
 
 
-def _prepare(monkeypatch, module, fresh: bool = True):
+def _value(argv: list[str], flag: str) -> str:
+    return argv[argv.index(flag) + 1]
+
+
+def test_inject_adds_force_phase_and_presale_phase(module):
+    argv = module._inject(["--series", "CM3", "--dry-run"])
+    assert "--force-phase" in argv
+    assert _value(argv, "--phase") == "presale"
+    assert _value(argv, "--series") == "CM3"
+    assert "--dry-run" in argv
+
+
+def test_inject_keeps_explicit_phase(module):
+    argv = module._inject(["--series", "CM3", "--phase", "presale"])
+    assert argv.count("--phase") == 1
+
+
+def test_inject_resolves_default_presale_series(monkeypatch, module):
     monkeypatch.setattr(module, "load_business_definition", lambda: {})
-    monkeypatch.setattr(module.freshness, "check", lambda **_: {"fresh": fresh, "reason": "test stale"})
-    monkeypatch.setattr(module, "load_order", lambda: object())
-    monkeypatch.setattr(module, "apply_series_group_logic", lambda df, _: df)
-    monkeypatch.setattr(module, "compute", lambda *_: {"generation": "CM3"})
-    monkeypatch.setattr(module, "build_card", lambda metrics, show_notes: {"metrics": metrics})
+    monkeypatch.setattr(
+        module, "detect_active", lambda bdef, today, phases=None: [{"generation": "CM3"}]
+    )
+    argv = module._inject([])
+    assert _value(argv, "--series") == "CM3"
 
 
-def _invoke(monkeypatch, module, *args):
-    monkeypatch.setattr(sys, "argv", ["presale_metrics_to_feishu.py", *args])
-    return module.main()
+def test_inject_default_series_uses_as_of(monkeypatch, module):
+    seen = {}
+    monkeypatch.setattr(module, "load_business_definition", lambda: {})
+
+    def fake_detect(bdef, today, phases=None):
+        seen["today"] = today
+        return [{"generation": "CM2"}]
+
+    monkeypatch.setattr(module, "detect_active", fake_detect)
+    argv = module._inject(["--as-of", "2025-08-15"])
+    assert _value(argv, "--series") == "CM2"
+    assert str(seen["today"].date()) == "2025-08-15"
 
 
-def test_fresh_snapshot_sends(monkeypatch, module):
-    _prepare(monkeypatch, module, fresh=True)
-    sent = []
-    monkeypatch.setattr(module, "notify", lambda **kwargs: sent.append(kwargs) or SimpleNamespace(ok=True))
-
-    rc = _invoke(monkeypatch, module, "--series", "CM3")
-
-    assert rc == 0
-    assert len(sent) == 1
+def test_inject_no_presale_returns_none(monkeypatch, module, capsys):
+    monkeypatch.setattr(module, "load_business_definition", lambda: {})
+    monkeypatch.setattr(module, "detect_active", lambda bdef, today, phases=None: [])
+    assert module._inject([]) is None
+    assert "无 presale 代际" in capsys.readouterr().out
 
 
-def test_stale_snapshot_does_not_send(monkeypatch, module, capsys):
-    _prepare(monkeypatch, module, fresh=False)
-    monkeypatch.setattr(module, "notify", lambda **_: pytest.fail("stale snapshot must not send"))
+def test_main_delegates_augmented_argv(monkeypatch, module):
+    captured: dict = {}
 
-    rc = _invoke(monkeypatch, module, "--series", "CM3")
+    class FakeRunner:
+        def main(self):
+            captured["argv"] = list(sys.argv[1:])
+            return 7
 
-    assert rc == 2
-    assert "跳过飞书推送" in capsys.readouterr().out
+    monkeypatch.setattr(module, "_load_runner", lambda: FakeRunner())
+    monkeypatch.setattr(sys, "argv", ["presale_metrics_to_feishu.py", "--series", "CM3"])
 
+    rc = module.main()
 
-def test_stale_dry_run_previews_without_sending(monkeypatch, module, capsys):
-    _prepare(monkeypatch, module, fresh=False)
-    monkeypatch.setattr(module, "notify", lambda **_: pytest.fail("dry-run must not send"))
-
-    rc = _invoke(monkeypatch, module, "--series", "CM3", "--dry-run")
-
-    output = capsys.readouterr().out
-    assert rc == 0
-    assert "数据 stale" in output
-    assert '"generation": "CM3"' in output
+    assert rc == 7
+    assert "--force-phase" in captured["argv"]
+    assert _value(captured["argv"], "--phase") == "presale"
+    assert _value(captured["argv"], "--series") == "CM3"
 
 
-def test_as_of_skips_live_freshness_gate(monkeypatch, module):
-    _prepare(monkeypatch, module, fresh=False)
-    monkeypatch.setattr(module.freshness, "check", lambda **_: pytest.fail("historical run must skip gate"))
-    sent = []
-    monkeypatch.setattr(module, "notify", lambda **kwargs: sent.append(kwargs) or SimpleNamespace(ok=True))
+def test_main_short_circuits_without_presale(monkeypatch, module, capsys):
+    monkeypatch.setattr(module, "load_business_definition", lambda: {})
+    monkeypatch.setattr(module, "detect_active", lambda bdef, today, phases=None: [])
+    monkeypatch.setattr(module, "_load_runner", lambda: SimpleNamespace(main=pytest.fail))
+    monkeypatch.setattr(sys, "argv", ["presale_metrics_to_feishu.py"])
 
-    rc = _invoke(monkeypatch, module, "--series", "CM3", "--as-of", "2026-09-23")
-
-    assert rc == 0
-    assert len(sent) == 1
-
-
-def test_allow_stale_sends_with_warning(monkeypatch, module, capsys):
-    _prepare(monkeypatch, module, fresh=False)
-    sent = []
-    monkeypatch.setattr(module, "notify", lambda **kwargs: sent.append(kwargs) or SimpleNamespace(ok=True))
-
-    rc = _invoke(monkeypatch, module, "--series", "CM3", "--allow-stale")
-
-    assert rc == 0
-    assert len(sent) == 1
-    assert "--allow-stale" in capsys.readouterr().out
+    assert module.main() == 0
+    assert "无 presale 代际" in capsys.readouterr().out

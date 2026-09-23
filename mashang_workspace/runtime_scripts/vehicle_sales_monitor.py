@@ -10,7 +10,11 @@
     python runtime_scripts/vehicle_sales_monitor.py --dry-run
     python runtime_scripts/vehicle_sales_monitor.py --as-of 2026-09-10 --dry-run
     python runtime_scripts/vehicle_sales_monitor.py --series CM3 --phase presale
+    python runtime_scripts/vehicle_sales_monitor.py --series CM3 --phase presale --force-phase
     python runtime_scripts/vehicle_sales_monitor.py --format json --output outputs/tables/
+
+`--force-phase`（配合 --series）忽略 active 窗口判定，按 --phase（默认 presale）
+渲染指定代际——用于「代际已进入 launch 后仍发预售快照」等场景（原 presale-snapshot 语义）。
 """
 
 from __future__ import annotations
@@ -40,7 +44,12 @@ from capabilities.notify.notify_service import notify  # noqa: E402
 from utils.monitors import freshness  # noqa: E402
 from utils.monitors import launch as launch_monitor  # noqa: E402
 from utils.monitors import presale as presale_monitor  # noqa: E402
-from utils.monitors.phase import detect_active, load_business_definition  # noqa: E402
+from utils.monitors.phase import (  # noqa: E402
+    detect_active,
+    load_business_definition,
+    model_series_of,
+    series_label,
+)
 from utils.monitors.series_group import apply_series_group_logic  # noqa: E402
 from utils.result_contract import (  # noqa: E402
     build_error_contract,
@@ -108,13 +117,31 @@ def run(args) -> int:
     bdef = load_business_definition()
     today = pd.Timestamp(args.as_of) if args.as_of else pd.Timestamp(datetime.now().date())
 
-    active = detect_active(bdef, today)
-    if args.series:
-        wanted = {s.strip() for s in args.series.split(",") if s.strip()}
-        active = [a for a in active if a["generation"] in wanted]
-    if args.phase:
-        wanted_p = {p.strip() for p in args.phase.split(",") if p.strip()}
-        active = [a for a in active if a["phase"] in wanted_p]
+    if args.force_phase:
+        # 强制按指定 phase 渲染显式 series，忽略 active 窗口判定。
+        # 用于「代际已进入 launch 后仍发预售快照」等场景（原 presale-snapshot 语义）。
+        wanted = {s.strip() for s in (args.series or "").split(",") if s.strip()}
+        if not wanted:
+            raise SystemExit("--force-phase 需要显式 --series")
+        wanted_p = {p.strip() for p in (args.phase or "presale").split(",") if p.strip()}
+        active = [
+            {
+                "generation": g,
+                "model_series": model_series_of(bdef, g),
+                "phase": p,
+                "label": series_label(bdef, g),
+            }
+            for g in wanted
+            for p in wanted_p
+        ]
+    else:
+        active = detect_active(bdef, today)
+        if args.series:
+            wanted = {s.strip() for s in args.series.split(",") if s.strip()}
+            active = [a for a in active if a["generation"] in wanted]
+        if args.phase:
+            wanted_p = {p.strip() for p in args.phase.split(",") if p.strip()}
+            active = [a for a in active if a["phase"] in wanted_p]
 
     live = args.as_of is None
     fresh = None
@@ -230,6 +257,11 @@ def main() -> int:
     parser.add_argument("--refresh-ts", default=None, help="本轮数据刷新完成时刻（ISO，调度器注入）；缺省回退 parquet mtime")
     parser.add_argument("--series", default=None, help="过滤代际，逗号分隔，如 CM3,DM2")
     parser.add_argument("--phase", default=None, help="过滤阶段，逗号分隔：presale,launch")
+    parser.add_argument(
+        "--force-phase",
+        action="store_true",
+        help="配合 --series 强制按 --phase（默认 presale）渲染，忽略 active 窗口判定（用于已 launch 代际发预售快照）",
+    )
     parser.add_argument("--dry-run", action="store_true", help="只打印卡片，不发送飞书")
     parser.add_argument("--allow-stale", action="store_true", help="数据 stale 时仍推送指标")
     parser.add_argument("--format", default="terminal", choices=["terminal", "json"])

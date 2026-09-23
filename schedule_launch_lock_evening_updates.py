@@ -12,8 +12,8 @@
   Event monitoring（key day 17:00–23:00 每小时 :00）
     refresh_order_data → monitor（刷新成功后执行）
 
-监控默认只推送 presale 阶段代际（--phase presale）；
-需要 launch 监控时显式传 --phase launch,presale 或 --series。
+监控默认推送全部 active 阶段代际（--phase presale,launch）；
+可用 --phase presale（仅预售）或 --series CM3（限定代际）收窄。
 
 启动方式：
     source .venv/bin/activate
@@ -212,7 +212,7 @@ def main() -> int:
     parser.add_argument("--dry-run", action="store_true", help="不真正刷新/发送，只打印/写日志")
     parser.add_argument("--as-of", default=None, help="传给监控的统计基准日 YYYY-MM-DD")
     parser.add_argument("--series", default=None, help="过滤代际，逗号分隔")
-    parser.add_argument("--phase", default="presale", help="过滤阶段 presale/launch（默认 presale）")
+    parser.add_argument("--phase", default="presale,launch", help="过滤阶段 presale/launch（默认 presale,launch）")
     args = parser.parse_args()
 
     signal.signal(signal.SIGINT, _handle_signal)
