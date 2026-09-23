@@ -2,8 +2,9 @@
 
 **注意：OpenCode 仍应从仓库根目录启动。** 本文件仅定义 `mashang_workspace/` 内的工作规则。
 
-等同于项目根目录 `AGENTS.md` 的 workspace 专用版本。
-所有 workspace 内的 AI Agent 请优先阅读此文档和根目录 AGENTS.md。
+- 仓库总体架构、模块边界（workspace / runtime_v2 / capabilities / research_apps）、canonical 命令入口与副作用分级，见根目录 `AGENTS.md`。
+- 本文件只补充 workspace 层规则：脚本分层、业务口径、canonical 脚本、输出与验证方式。
+- 两者冲突时，架构与入口以根 `AGENTS.md` 为准，业务口径以本文件与 `docs/` 为准。
 
 ## 项目结构
 
@@ -91,9 +92,12 @@ make parser-demo      # Context Parser
 make followup-demo    # Follow-up Runner
 make numeric-eval     # Numeric Eval
 make reference-eval   # Reference Eval
-make dataset-validate # 校验 dataset 完整性
-make daily-observation-dry-run  # 每日观察预检
+make data-validate    # 校验 dataset 完整性（只读；旧名 dataset-validate）
+make observe-dry-run  # 每日观察预检（只读；旧名 daily-observation-dry-run）
+make presale-snapshot SERIES=CM3 DRY=1  # 指定代际预售小订快照预览
 ```
+
+> 数据管道 / 监控的 canonical 入口与副作用分级见根 `AGENTS.md` 的「Canonical Entry Map」。
 
 > MIIT 公告情报已迁移至 `research_apps/MIIT/` 模块（`make -C research_apps/MIIT miit-run`）；workspace 旧 `miit_new_car` 实现已移除。
 
@@ -222,12 +226,15 @@ from shared.loaders.tp_and_mix_ways_loader import (
 
 | 用户说 | 含义 | 对应操作 |
 |--------|------|----------|
-| "数据更新并同步" | DataOps 指令，非日期分析问题 | `make daily-data-pipeline`（注意：写操作） |
-| "预检数据" | 安全预检 | `make daily-data-pipeline-dry-run` |
+| "数据更新并同步" | DataOps 指令，非日期分析问题 | `make data-pipeline`（旧名 `daily-data-pipeline`；注意：写操作） |
+| "预检数据" | 安全预检 | `make data-pipeline-dry-run`（只读） |
+| "同步一份 CM3 小订监控" | 指定代际预售小订快照推送 | `make presale-snapshot SERIES=CM3 DRY=1` 预览 → 去掉 `DRY=1` 正式发送 |
+| "当前预售/上市监控" | 当前 active 代际 presale/launch 阶段监控 | `make sales-monitor-dry-run` → `make sales-monitor` |
 
 注意：
 - "数据更新并同步" 不是带日期条件的分析问题，不表示"只更新今天的数据"
 - Runtime V2 不响应这个指令
+- "小订监控" 默认指**指定代际预售快照**（`presale-snapshot`），不是当前 active 阶段监控（`sales-monitor`）。指定代际已进入 `launch` 阶段时，仍可用 `presale-snapshot` 发送上市日最终预售快照，并标注统计截止时间、预售窗口、当前阶段。
 
 ## Visual Identity Usage
 

@@ -1,5 +1,22 @@
 PYTHON ?= .venv/bin/python
-.PHONY: eval full-eval core-eval research-eval capability-audit test ci data-dict lock-demo parser-demo followup-demo numeric-eval reference-eval atp-demo backtest-demo clean-outputs dataset-update dataset-validate daily-observation-dry-run daily-observation-sync daily-data-pipeline-dry-run daily-data-pipeline monitor monitor-dry-run scheduler render-official-doc render-official-doc-smoke production-golden build-workspace-skills-catalog build-workspace-capability-inventory inventory-status inventory-trend inventory-report lock-attribution lock-attribution-compare tesla-report tesla-report-json verify-scope verify verify-all
+.PHONY: eval full-eval core-eval research-eval test ci verify-scope verify verify-all \
+	data-dict lock-demo parser-demo followup-demo numeric-eval reference-eval atp-demo backtest-demo \
+	lock-forecast invoice-forecast lock-attribution lock-attribution-compare \
+	inventory-status inventory-trend inventory-report \
+	auto-launch-owned-brand-daily auto-launch-owned-brand-daily-dry-run auto-launch-search auto-launch-normalize-results \
+	capability-audit runtime-v2-audit shared-audit \
+	runtime-v2-demo runtime-v2-city-demo runtime-v2-followup-demo runtime-v2-eval runtime-v2-feature-job-demo runtime-v2-clean-sessions \
+	data-refresh data-validate observe-dry-run observe-sync data-pipeline-dry-run data-pipeline daily-ops \
+	dataset-update dataset-validate daily-observation-dry-run daily-observation-sync daily-data-pipeline-dry-run daily-data-pipeline \
+	sales-monitor sales-monitor-dry-run presale-snapshot monitor monitor-dry-run sales-scheduler scheduler \
+	dc-inventory-change dc-inventory-change-date state-diagnosis \
+	shock-scan shock-backtest shock-research shock-check market-observe \
+	daily-sync-dry-run update-tp-and-mix-ways-dataset rebuild-tp-and-mix-ways-dataset build-tp-and-mix-ways-dataset \
+	watchlist-brand-monthly-report watchlist-brand-trend watchlist-brand-driver \
+	render-official-doc render-official-doc-smoke production-golden \
+	cpca-weekly-early-signal cpca-weekly-early-signal-html cpca-weekly-early-signal-json cpca-weekly-data-capture \
+	tesla-report tesla-report-json \
+	build-workspace-skills-catalog build-workspace-capability-inventory clean-outputs help
 
 ## 生成 Eval 结果（显式产物 unified_eval_result.json）
 ## 用法: make eval [SUITE=default|ci|all|research|core]
@@ -215,39 +232,68 @@ runtime-v2-feature-job-demo:
 runtime-v2-clean-sessions:
 	$(PYTHON) mashang_runtime_v2/app/runtime_service.py --cleanup-sessions
 
-## ─── Daily Data Pipeline ──────────────────────────────────────────
+## ─── Daily Data Pipeline（canonical 入口）──────────────────────────
+##
+## 入口语义与副作用：
+##   make data-refresh    刷新 dataset（local write：dataset/*.parquet/.csv）
+##   make data-validate   校验 dataset 完整性（read-only）
+##   make observe-dry-run 每日观察预检（read-only）
+##   make observe-sync    每日观察同步（external write：飞书多维表 + 机器人）
+##   make data-pipeline   data-refresh → data-validate → observe-sync（local + external write；不含销售监控）
+##   make daily-ops       data-pipeline + sales-monitor（local + external write；含飞书推送）
+##
+## 兼容别名（保留向后兼容，新文档请引用 canonical 名）：
+##   dataset-update → data-refresh
+##   dataset-validate → data-validate
+##   daily-observation-dry-run → observe-dry-run
+##   daily-observation-sync → observe-sync
+##   daily-data-pipeline → data-pipeline
+##   daily-data-pipeline-dry-run → data-pipeline-dry-run
 
-## 数据集更新（从 Tableau/数据源刷新 dataset/*.parquet/.csv）
-## 注意：写操作，会修改本地 dataset 文件
-## 办公网不可达时自动回退移动链路；可用 MOBILE=1 显式强制（如 make dataset-update MOBILE=1）
-dataset-update:
+## 数据集刷新（canonical；写操作）
+## 办公网不可达时自动回退移动链路；可用 MOBILE=1 显式强制（如 make data-refresh MOBILE=1）
+data-refresh:
 	$(PYTHON) dataset/updater/update_all_datasets.py $(if $(MOBILE),--mobile)
 
 ## 数据集完整性校验（只读）
-dataset-validate:
+data-validate:
 	$(PYTHON) mashang_workspace/utility_scripts/dataset_validate.py
 
-## 每日观察预检 dry-run（仅本地计算，不写外部系统）
-daily-observation-dry-run:
+## 每日观察预检 dry-run（只读，仅本地计算，不写外部系统）
+observe-dry-run:
 	$(PYTHON) mashang_workspace/utility_scripts/skills_order_observation_daily.py --dry-run
 
-## 每日观察同步（计算并写入飞书多维表格/机器人）
-## 注意：写操作，会同步外部系统
-daily-observation-sync:
+## 每日观察同步（写操作：飞书多维表格 + 机器人）
+observe-sync:
 	$(PYTHON) mashang_workspace/utility_scripts/skills_order_observation_daily.py
 
-## 每日数据管道 dry-run（安全预检，不含写操作）
-daily-data-pipeline-dry-run: dataset-validate daily-observation-dry-run
+## 数据管道 dry-run（安全预检，不含写操作）
+data-pipeline-dry-run: data-validate observe-dry-run
 
-## 每日数据管道完整执行（包含写操作）
-## 注意：会刷新 dataset 并同步外部系统
-daily-data-pipeline: dataset-update dataset-validate daily-observation-sync
+## 数据管道完整执行（写操作：刷新 dataset 并同步外部系统；不含销售监控）
+data-pipeline: data-refresh data-validate observe-sync
 
-## ─── Vehicle Sales Monitor（预售/上市监控）─────────────────────────
+## 每日运营：数据管道 + 销售监控（写操作，会发送飞书）
+daily-ops: data-pipeline sales-monitor
 
-## 统一预售/上市监控（自动判定 active 代际 + phase；AS_OF/SERIES/PHASE/FORMAT 可选）
-## 用法: make monitor [AS_OF=2026-09-10] [SERIES=CM3] [PHASE=presale] [FORMAT=json]
-monitor:
+## ─── 兼容别名（已废弃命名，保留向后兼容）──────────────────────────
+dataset-update: data-refresh
+dataset-validate: data-validate
+daily-observation-dry-run: observe-dry-run
+daily-observation-sync: observe-sync
+daily-data-pipeline-dry-run: data-pipeline-dry-run
+daily-data-pipeline: data-pipeline
+
+## ─── Vehicle Sales Monitor（预售/上市监控，canonical 入口）─────────
+##
+## 两个入口的边界（勿混用）：
+##   sales-monitor      当前 active 代际的 presale/launch 阶段监控（有 freshness gate）
+##   presale-snapshot   指定代际的预售小订快照（显式 --series，无 phase 判定）
+## 指定代际已进入 launch 时，仍可用 presale-snapshot 发送上市日最终预售快照。
+
+## 统一预售/上市监控（自动判定 active 代际 + phase；写操作：飞书卡片）
+## 用法: make sales-monitor [AS_OF=2026-09-10] [SERIES=CM3] [PHASE=presale] [FORMAT=json]
+sales-monitor:
 	$(PYTHON) mashang_workspace/runtime_scripts/vehicle_sales_monitor.py \
 		$(if $(AS_OF),--as-of $(AS_OF)) \
 		$(if $(SERIES),--series $(SERIES)) \
@@ -255,15 +301,34 @@ monitor:
 		$(if $(FORMAT),--format $(FORMAT))
 
 ## 预售/上市监控 dry-run（只打印卡片，不发送飞书）
-monitor-dry-run:
+sales-monitor-dry-run:
 	$(PYTHON) mashang_workspace/runtime_scripts/vehicle_sales_monitor.py --dry-run \
 		$(if $(AS_OF),--as-of $(AS_OF)) \
 		$(if $(SERIES),--series $(SERIES)) \
 		$(if $(PHASE),--phase $(PHASE))
 
+## 指定代际预售小订快照推送（写操作：飞书卡片）
+## 用法: make presale-snapshot SERIES=CM3            # 正式发送
+##       make presale-snapshot SERIES=CM3 DRY=1      # 仅预览，不发送
+presale-snapshot:
+	$(PYTHON) mashang_workspace/research_scripts/presale_metrics_to_feishu.py \
+		$(if $(SERIES),--series $(SERIES)) \
+		$(if $(AS_OF),--as-of $(AS_OF)) \
+		$(if $(REFRESH_TS),--refresh-ts $(REFRESH_TS)) \
+		$(if $(ALLOW_STALE),--allow-stale) \
+		$(if $(DRY),--dry-run)
+
+## 兼容别名
+monitor: sales-monitor
+monitor-dry-run: sales-monitor-dry-run
+
 ## 常驻定时器：09:00 每日管道（刷新→校验→同步→监控）+ key day 17-23 高频刷新/监控（配合 caffeinate -i）
-scheduler:
+## 注意：常驻进程，会刷新数据、同步飞书并发送监控卡片
+sales-scheduler:
 	$(PYTHON) schedule_launch_lock_evening_updates.py
+
+## 兼容别名
+scheduler: sales-scheduler
 
 ## 单日 DC 库存变动分析（默认昨天）
 dc-inventory-change:
@@ -281,8 +346,6 @@ state-diagnosis:
 		$(if $(SERIES),--series $(SERIES)) \
 		$(if $(FORMAT),--format $(FORMAT)) \
 		$(if $(OUTPUT),--output $(OUTPUT))
-
-.PHONY: shock-scan shock-backtest shock-research shock-check market-observe
 
 ## 月度市场观察（V0.3 Runtime：市场状态评估 + 品牌化 HTML 报告）
 ## 用法: make market-observe [AS_OF=2026-07]   # 缺省 = 当前年月
@@ -452,19 +515,24 @@ help:
 	@echo "make runtime-v2-eval  Runtime V2 Eval"
 	@echo "make runtime-v2-clean-sessions  Runtime V2 清理过期 Session"
 	@echo ""
-	@echo "=== Daily Data Pipeline ==="
-	@echo "make dataset-update           刷新 dataset（写操作；MOBILE=1 强制移动链路）"
-	@echo "make dataset-validate         校验 dataset（只读）"
-	@echo "make daily-observation-dry-run  每日观察预检（只读）"
-	@echo "make daily-observation-sync    每日观察同步（写操作）"
-	@echo "make daily-data-pipeline-dry-run  管道 dry-run（安全预检）"
-	@echo "make daily-data-pipeline      完整管道（含写操作）"
-	@echo "make daily-sync-dry-run       [DEPRECATED]"
+	@echo "=== Daily Data Pipeline（canonical；旧名为兼容别名）==="
+	@echo "make data-refresh            刷新 dataset（写操作；MOBILE=1 强制移动链路）"
+	@echo "make data-validate           校验 dataset（只读）"
+	@echo "make observe-dry-run         每日观察预检（只读）"
+	@echo "make observe-sync            每日观察同步（写操作：飞书多维表 + 机器人）"
+	@echo "make data-pipeline-dry-run   管道 dry-run（安全预检，不含写操作）"
+	@echo "make data-pipeline           数据管道（刷新→校验→同步；写操作，不含销售监控）"
+	@echo "make daily-ops               每日运营 = data-pipeline + sales-monitor（写操作）"
+	@echo "  兼容别名: dataset-update / dataset-validate / daily-observation-dry-run /"
+	@echo "            daily-observation-sync / daily-data-pipeline[-dry-run]"
+	@echo "make daily-sync-dry-run      [DEPRECATED]"
 	@echo ""
-	@echo "=== Vehicle Sales Monitor ==="
-	@echo "make monitor                  预售/上市监控（自动判定 active 代际 + phase）"
-	@echo "make monitor-dry-run          监控 dry-run（只打印卡片）"
-	@echo "make scheduler                常驻定时器（刷新 + key day 高频监控）"
+	@echo "=== Vehicle Sales Monitor（canonical；旧名为兼容别名）==="
+	@echo "make sales-monitor           当前 active 代际预售/上市监控（自动判定 phase；写操作）"
+	@echo "make sales-monitor-dry-run   监控 dry-run（只打印卡片）"
+	@echo "make presale-snapshot        指定代际预售小订快照推送 SERIES=CM3 [DRY=1] [ALLOW_STALE=1]（写操作）"
+	@echo "make sales-scheduler         常驻定时器（刷新 + key day 高频监控）"
+	@echo "  兼容别名: monitor / monitor-dry-run / scheduler"
 	@echo ""
 	@echo "=== Render ==="
 	@echo "make render-official-doc       正式材料排版渲染（Markdown→PDF/HTML/DOCX）"

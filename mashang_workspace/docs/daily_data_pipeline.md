@@ -2,25 +2,27 @@
 
 ## 完整链路
 
+> canonical 入口为 `data-*` / `observe-*`；下表括号内为兼容旧名。
+
 ```
-daily-data-pipeline
+make data-pipeline（旧名 daily-data-pipeline）
   │
-  ├── 1. dataset-update
+  ├── 1. make data-refresh（旧名 dataset-update）
   │     dataset/updater/update_all_datasets.py
   │     从 Tableau/数据源刷新 dataset/*.parquet / *.csv
   │     → 写操作
   │
-  ├── 2. dataset-validate
+  ├── 2. make data-validate（旧名 dataset-validate）
   │     mashang_workspace/utility_scripts/dataset_validate.py
   │     检查 dataset 文件是否存在、行数、关键字段
   │     → 只读
   │
-  ├── 3. daily-observation-dry-run
+  ├── 3. make observe-dry-run（旧名 daily-observation-dry-run）
   │     mashang_workspace/utility_scripts/skills_order_observation_daily.py --dry-run
   │     基于本地 dataset 计算每日观察结果，不写外部系统
   │     → 安全预检
   │
-  ├── 4. daily-observation-sync
+  ├── 4. make observe-sync（旧名 daily-observation-sync）
   │     mashang_workspace/utility_scripts/skills_order_observation_daily.py
   │     计算观察结果并同步到飞书多维表格/飞书机器人
   │     → 写操作（外部系统）
@@ -29,6 +31,8 @@ daily-data-pipeline
        mashang_workspace/runtime_scripts/ 和 mashang_runtime_v2/
        消费已更新的 dataset 进行问数分析
 ```
+
+> 注意：`data-pipeline` **不含销售监控**。如需「数据更新 + 监控推送」一体执行，用 `make daily-ops`（= data-pipeline + sales-monitor）。
 
 ## 各层职责
 
@@ -56,37 +60,40 @@ mashang_runtime_v2/        ← 产品化问数层
 
 ## Makefile 命令
 
+> canonical 名优先；括号内为兼容旧名。
+
 ### 安全检查流程（推荐每日先用）
 
 ```bash
-make dataset-validate              # 检查 dataset 完整性
-make daily-observation-dry-run     # 预检观察结果
+make data-validate              # 检查 dataset 完整性（旧名 dataset-validate）
+make observe-dry-run            # 预检观察结果（旧名 daily-observation-dry-run）
 ```
 
 或合并：
 
 ```bash
-make daily-data-pipeline-dry-run   # dataset-validate + daily-observation-dry-run
+make data-pipeline-dry-run      # data-validate + observe-dry-run（旧名 daily-data-pipeline-dry-run）
 ```
 
 ### 完整执行流程（写操作）
 
 ```bash
-make dataset-update                # 刷新 dataset（从数据源拉取）
-make dataset-validate              # 校验
-make daily-observation-dry-run     # 预检
-make daily-observation-sync        # 同步到飞书
+make data-refresh               # 刷新 dataset（从数据源拉取；旧名 dataset-update）
+make data-validate              # 校验（旧名 dataset-validate）
+make observe-dry-run            # 预检（旧名 daily-observation-dry-run）
+make observe-sync               # 同步到飞书（旧名 daily-observation-sync）
 ```
 
 或合并：
 
 ```bash
-make daily-data-pipeline           # dataset-update + dataset-validate + daily-observation-sync
+make data-pipeline              # data-refresh + data-validate + observe-sync（旧名 daily-data-pipeline）
+make daily-ops                  # data-pipeline + sales-monitor（数据更新 + 监控推送）
 ```
 
 **注意**：
-- `dataset-update` 和 `daily-observation-sync` 是写操作
-- `daily-observation-sync` 会写入飞书多维表格和发送飞书机器人通知
+- `data-refresh` 和 `observe-sync` 是写操作
+- `observe-sync` 会写入飞书多维表格和发送飞书机器人通知
 - 不要在 CI 中自动执行写操作
 
 ### 网络回退（办公网 / 移动链路）
@@ -99,12 +106,12 @@ Tableau 在办公网与移动网络使用不同入口。`update_all_datasets.py`
 也可显式强制移动链路（例如已知当前不在办公网）：
 
 ```bash
-make dataset-update MOBILE=1
+make data-refresh MOBILE=1
 # 或
 python dataset/updater/update_all_datasets.py --mobile
 ```
 
-> 历史问题：`order_config_to_parquet.py` 等子步骤没有单体自动回退，只在办公网探测失败时才由编排层统一传 `--mobile`；因此请通过 `update_all_datasets.py` / `make dataset-update` 编排执行，不要单独调用子脚本。
+> 历史问题：`order_config_to_parquet.py` 等子步骤没有单体自动回退，只在办公网探测失败时才由编排层统一传 `--mobile`；因此请通过 `update_all_datasets.py` / `make data-refresh` 编排执行，不要单独调用子脚本。
 
 ## 自然语言入口
 
@@ -116,8 +123,8 @@ python dataset/updater/update_all_datasets.py --mobile
 
 | 入口 | 对应命令 |
 |------|----------|
-| "数据更新并同步" | `make daily-data-pipeline` |
-| "预检数据" | `make daily-data-pipeline-dry-run` |
+| "数据更新并同步" | `make data-pipeline`（旧名 `daily-data-pipeline`） |
+| "预检数据" | `make data-pipeline-dry-run`（旧名 `daily-data-pipeline-dry-run`） |
 
 ## Runtime V2 关系
 
@@ -130,4 +137,4 @@ python dataset/updater/update_all_datasets.py --mobile
 ## 废弃说明
 
 `make daily-sync-dry-run` 已废弃。
-请使用 `make daily-observation-dry-run` 替代。
+请使用 `make observe-dry-run`（旧名 `make daily-observation-dry-run`）替代。

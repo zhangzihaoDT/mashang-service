@@ -18,6 +18,7 @@ import json
 import sys
 from datetime import datetime
 from pathlib import Path
+from typing import cast
 
 import pandas as pd
 
@@ -36,6 +37,7 @@ except ImportError:
 
 from capabilities.notify.notify_service import notify  # noqa: E402
 from utils.monitors.phase import detect_active, load_business_definition  # noqa: E402
+from utils.monitors import freshness  # noqa: E402
 from utils.monitors.presale import build_card, compute  # noqa: E402
 from utils.monitors.series_group import apply_series_group_logic  # noqa: E402
 
@@ -63,6 +65,8 @@ def main() -> int:
     parser.add_argument("--series", default=None, help="代际（series_group_logic 键），默认当前 presale 代际")
     parser.add_argument("--dry-run", action="store_true", help="只打印卡片，不发送飞书")
     parser.add_argument("--as-of", default=None, help="统计基准日 YYYY-MM-DD（默认今天）")
+    parser.add_argument("--refresh-ts", default=None, help="覆盖数据刷新完成时间 ISO 时间戳（调度器注入）")
+    parser.add_argument("--allow-stale", action="store_true", help="数据 stale 时仍发送，发送前会打印警告")
     args = parser.parse_args()
 
     if not ORDER_PARQUET.exists():
@@ -70,7 +74,17 @@ def main() -> int:
         return 1
 
     bdef = load_business_definition()
-    today = pd.Timestamp(args.as_of) if args.as_of else pd.Timestamp(datetime.now().date())
+    today = cast(pd.Timestamp, pd.Timestamp(args.as_of) if args.as_of else pd.Timestamp(datetime.now().date()))
+
+    # 历史复盘按显式 as-of 重建，不受实时 freshness gate 影响。
+    live = args.as_of is None
+    fresh = None
+    if live:
+        fresh = freshness.check(bdef=bdef, refresh_ts=args.refresh_ts)
+        if not fresh["fresh"] and not args.allow_stale and not args.dry_run:
+            print(f"⚠️ 数据 stale，跳过飞书推送：{fresh['reason']}")
+            print("   如需明确使用当前快照发送，请追加 --allow-stale。")
+            return 2
 
     series = args.series
     if not series:
@@ -84,6 +98,13 @@ def main() -> int:
     df = apply_series_group_logic(load_order(), bdef)
     metrics = compute(df, bdef, today, series)
     card = build_card(metrics, show_notes=args.dry_run)
+
+    if live and fresh and not fresh["fresh"]:
+        print(f"⚠️ 数据 stale：{fresh['reason']}")
+        if args.allow_stale:
+            print("   已使用 --allow-stale，继续发送当前快照。")
+        elif args.dry_run:
+            print("   当前为 dry-run，仅预览卡片，不发送飞书。")
 
     if args.dry_run:
         print(json.dumps(card, ensure_ascii=False, indent=2))

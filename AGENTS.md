@@ -60,23 +60,23 @@ mashang-service 是一个**汽车业务数据分析项目**，包含以下分支
 
 其余原则详见 `mashang_workspace/AGENTS.md`。
 
-## 工作原则
+## 业务分析工作原则
 
-1. **优先阅读 docs**：`docs/` 目录下的文档是首要参考资料，包含业务术语、指标口径、车型映射、时间规则、分析范式、追问规则。
-2. **优先复用 scripts**：`scripts/` 已有 13+ 个独立脚本，新需求优先基于现有脚本扩展。
+1. **优先阅读 docs**：`mashang_workspace/docs/` 目录下的文档是首要参考资料，包含业务术语、指标口径、车型映射、时间规则、分析范式、追问规则。
+2. **优先复用脚本**：`mashang_workspace/runtime_scripts/`（runtime）、`research_scripts/`（research）、`utility_scripts/`（utility）已有脚本，新需求优先基于现有脚本扩展。**根目录不再有 `scripts/`。**
 3. **不要随意修改原始数据**：`dataset/` 下的 CSV/Parquet 是原始数据，分析应使用副本或只读方式。
 
 **上市时间必须从业务定义读取**：涉及"上市以来"的时间范围，必须使用 `shared/schema/business_definition.json` 中 `time_periods.{series}.end` 字段，不得从数据中取 `lock_time` 最小值推断。脚本优先使用 `--since-launch` 参数，临时分析使用 `mashang_workspace/utils/business.py` 的 `get_launch_date()`。
 4. **不要编造数据**：在数据无法支撑结论时，明确说明"无数据/数据不足"。
 5. **所有分析结果必须说明来源**：包括数据源、过滤条件、时间窗口、指标口径。
-6. **临时代码放 scratch/ 或 outputs/**，稳定脚本再沉淀到 `scripts/`。
+6. **临时代码放 `scratch/` 或 `outputs/`**，稳定脚本再沉淀到 `mashang_workspace/{runtime_scripts,research_scripts,utility_scripts}/`。
 7. **高频能力先在 workspace 内沉淀**：高频分析路径先沉淀到 `mashang_workspace/runtime_scripts/`，供 `mashang_runtime_v2` 确定性调度；旧 `mashang_runtime/` 不作为回流目标，业务代码不复制进 runtime_v2。
 8. **回答数据问题前，先看 `docs/data_dictionary.md` 和 `docs/metric_definitions.md`**，确认字段名和口径。
-9. **对标准分析问题，优先调用 `scripts/` 下已有脚本**，不要重复造轮子。
+9. **对标准分析问题，优先调用 `mashang_workspace/{runtime_scripts,research_scripts,utility_scripts}/` 下已有脚本**，不要重复造轮子。
 10. **如果脚本缺少参数，先小范围补充 CLI 参数，不要重写脚本**。
-11. **如果临时分析重复出现 2 次以上，再沉淀为 `scripts/` 稳定脚本**。
+11. **如果临时分析重复出现 2 次以上，再沉淀为 workspace 稳定脚本**。
 12. **所有脚本在 `--format json` 时输出标准 Result Contract**，包含 scope/result/followup_context。
-13. **分析结果可通过 `eval/run_numeric_eval.py` 做结构校验和非负校验**。
+13. **分析结果可通过 `mashang_workspace/eval/run_numeric_eval.py` 做结构校验和非负校验**。
 
 ## Phase 2: Script Interface & Data Contract
 
@@ -118,21 +118,21 @@ mashang-service 是一个**汽车业务数据分析项目**，包含以下分支
 ### 数据字典
 
 ```bash
-python scripts/data_dictionary.py                    # 终端输出
-python scripts/data_dictionary.py --format csv       # CSV 输出
-python scripts/data_dictionary.py --format json      # JSON 输出
+python mashang_workspace/utility_scripts/data_dictionary.py              # 终端输出
+python mashang_workspace/utility_scripts/data_dictionary.py --format csv # CSV 输出
+python mashang_workspace/utility_scripts/data_dictionary.py --format json # JSON 输出
 ```
 
 ### Smoke Test
 
 ```bash
-pytest tests/scripts -q                               # 运行所有脚本 smoke test
-python tests/scripts/test_script_help.py              # 验证 --help
+pytest mashang_workspace/tests/scripts -q             # 运行所有脚本 smoke test
+python mashang_workspace/tests/scripts/test_script_help.py  # 验证 --help
 ```
 
 ### Follow-up Eval Cases
 
-多轮追问测试用例在 `eval/cases/followup_cases.json`，覆盖:
+多轮追问测试用例在 `mashang_workspace/eval/cases/followup_cases.json`，覆盖:
 - 锁单分车型 → 追问城市分布 (时间继承 + 代指消解)
 - LS6 增程/纯电 → 追问改时间窗口 (时间替换)
 - LS8 分车型 → 追问加过滤条件 (条件追加)
@@ -144,14 +144,14 @@ python tests/scripts/test_script_help.py              # 验证 --help
 ### Follow-up Eval Runner
 
 ```bash
-python eval/run_followup_eval.py                     # dry-run 模式 (默认)
-python eval/run_followup_eval.py --format json       # JSON 输出
-python eval/run_followup_eval.py --execute           # 真实执行
-python eval/run_followup_eval.py --as-of-date 2026-06-11  # 指定基准日期
+python mashang_workspace/eval/run_followup_eval.py                     # dry-run 模式 (默认)
+python mashang_workspace/eval/run_followup_eval.py --format json       # JSON 输出
+python mashang_workspace/eval/run_followup_eval.py --execute           # 真实执行
+python mashang_workspace/eval/run_followup_eval.py --as-of-date 2026-06-11  # 指定基准日期
 ```
 
 Runner 功能:
-1. 读取 `eval/cases/followup_cases.json`
+1. 读取 `mashang_workspace/eval/cases/followup_cases.json`
 2. 逐轮解析 expected_context → 推荐脚本 + CLI 参数
 3. 多轮上下文继承 (时间/指标/车型/筛选条件)
 4. Symbolic time_window 解析为真实日期
@@ -161,36 +161,36 @@ Runner 功能:
 
 | expected_context | 脚本 |
 |-----------------|------|
-| lock_count + group_by=model/series | `scripts/lock_by_model.py` |
-| lock_count + group_by=city | `scripts/lock_city_distribution.py` |
-| lock_count (无分组) | `scripts/daily_lock_count.py` |
-| lock_forecast/cohort_forecast | `scripts/cohort_forecast.py` |
-| release_curve | `scripts/release_curve_analysis.py` |
-| voc_theme/jtbd_theme | `scripts/voc_theme_analysis.py` |
+| lock_count + group_by=model/series | `mashang_workspace/runtime_scripts/lock_by_model.py` |
+| lock_count + group_by=city | `mashang_workspace/runtime_scripts/lock_city_distribution.py` |
+| lock_count (无分组) | `mashang_workspace/runtime_scripts/daily_lock_count.py` |
+| lock_forecast/cohort_forecast | `mashang_workspace/research_scripts/cohort_forecast.py` |
+| release_curve | `mashang_workspace/research_scripts/release_curve_analysis.py` |
+| voc_theme/jtbd_theme | `mashang_workspace/utility_scripts/voc_theme_analysis.py` |
 
-详见 `docs/followup_runner_rules.md`。
+详见 `mashang_workspace/docs/followup_runner_rules.md`。
 
 ### Eval Tests
 
 ```bash
-pytest tests/eval -q                                 # 运行 eval 测试
-pytest tests/ -q                                     # 运行所有测试
+pytest mashang_workspace/tests/eval -q               # 运行 eval 测试
+pytest mashang_workspace/tests -q                    # 运行所有 workspace 测试
 ```
 
 ## Phase 4: Natural Language Context Parser
 
 ### Context Parser
 
-`eval/context_parser.py` 将用户自然语言解析为结构化 context，支持两种模式：
+`mashang_workspace/eval/context_parser.py` 将用户自然语言解析为结构化 context，支持两种模式：
 
 ```bash
 # 单轮解析 CLI
-python eval/parse_context_cli.py "昨天锁单数分车型"
-python eval/parse_context_cli.py "那最近 7 天呢？" --previous-context '{"metric":"lock_count_share","time_window":"last_15_days","series":"LS6","group_by":"energy_type"}'
+python mashang_workspace/eval/parse_context_cli.py "昨天锁单数分车型"
+python mashang_workspace/eval/parse_context_cli.py "那最近 7 天呢？" --previous-context '{"metric":"lock_count_share","time_window":"last_15_days","series":"LS6","group_by":"energy_type"}'
 
 # Runner 的 parse-text 模式
-python eval/run_followup_eval.py --parse-text
-python eval/run_followup_eval.py --parse-text --format json --output outputs/tables/parse_result.json
+python mashang_workspace/eval/run_followup_eval.py --parse-text
+python mashang_workspace/eval/run_followup_eval.py --parse-text --format json --output outputs/tables/parse_result.json
 ```
 
 ### Parser 支持的字段
@@ -211,12 +211,12 @@ python eval/run_followup_eval.py --parse-text --format json --output outputs/tab
 Parse-text 模式下比较 parsed context 与 expected_context，评估解析质量。
 
 ```bash
-python eval/run_followup_eval.py --parse-text --as-of-date 2026-06-11
+python mashang_workspace/eval/run_followup_eval.py --parse-text --as-of-date 2026-06-11
 ```
 
 目标: context match rate >= 80%。当前: **92.9%** (13/14 turns)。
 
-详见 `docs/context_parser_rules.md` 和 `eval/context_parser.py`。
+详见 `mashang_workspace/docs/context_parser_rules.md` 和 `mashang_workspace/eval/context_parser.py`。
 
 ## Phase 5: Execution Result Contract & Numeric Eval
 
@@ -227,7 +227,7 @@ python eval/run_followup_eval.py --parse-text --as-of-date 2026-06-11
 ```json
 {
   "status": "success | partial_success | error",
-  "script": "scripts/lock_by_model.py",
+  "script": "mashang_workspace/runtime_scripts/lock_by_model.py",
   "scope": { "data_source": "...", "time_window": {...}, "filters": {...}, "metric_definition": "..." },
   "result": { "summary": "...", "metrics": {...}, "dimensions": [...], "tables": [...] },
   "artifacts": { "csv": "...", "json": "..." },
@@ -238,21 +238,21 @@ python eval/run_followup_eval.py --parse-text --as-of-date 2026-06-11
 ```
 
 已支持 Contract 的脚本 (6个):
-- `scripts/daily_lock_count.py`
-- `scripts/lock_by_model.py`
-- `scripts/lock_city_distribution.py`
-- `scripts/cohort_forecast.py`
-- `scripts/assign_conversion_analysis.py`
-- `scripts/attribute_penetration_report.py`
+- `mashang_workspace/runtime_scripts/daily_lock_count.py`
+- `mashang_workspace/runtime_scripts/lock_by_model.py`
+- `mashang_workspace/runtime_scripts/lock_city_distribution.py`
+- `mashang_workspace/research_scripts/cohort_forecast.py`
+- `mashang_workspace/runtime_scripts/assign_conversion_analysis.py`
+- `mashang_workspace/runtime_scripts/attribute_penetration_report.py`
 
-详见 `docs/result_contract.md`。
+详见 `mashang_workspace/docs/result_contract.md`。
 
 ### Numeric Eval
 
 ```bash
-python eval/run_numeric_eval.py                              # 执行并校验结果
-python eval/run_numeric_eval.py --format json                # JSON 输出
-python eval/run_numeric_eval.py --cases eval/cases/numeric_cases.json
+python mashang_workspace/eval/run_numeric_eval.py                              # 执行并校验结果
+python mashang_workspace/eval/run_numeric_eval.py --format json                # JSON 输出
+python mashang_workspace/eval/run_numeric_eval.py --cases mashang_workspace/eval/cases/numeric_cases.json
 ```
 
 当前: 5/5 cases passing (100%)。
@@ -262,10 +262,10 @@ python eval/run_numeric_eval.py --cases eval/cases/numeric_cases.json
 context_parser 支持解析 "这 75 个" → 自动继承上一轮 top_entities 中的字段值。
 
 ```bash
-python eval/parse_context_cli.py "这 75 个锁单城市分布" --previous-context '{"series":"LS8","top_entities":[{"field":"series","value":"LS8","metrics":{"lock_count":75}}]}'
+python mashang_workspace/eval/parse_context_cli.py "这 75 个锁单城市分布" --previous-context '{"series":"LS8","top_entities":[{"field":"series","value":"LS8","metrics":{"lock_count":75}}]}'
 ```
 
-详见 `docs/context_parser_rules.md`。
+详见 `mashang_workspace/docs/context_parser_rules.md`。
 
 ## 追问处理规则
 
@@ -277,7 +277,7 @@ python eval/parse_context_cli.py "这 75 个锁单城市分布" --previous-conte
    - "昨天 LS8" → 继承 `series=LS8` + `time=昨天`
 4. **上下文不足时**：先输出需要澄清的字段（时间、车型、指标），不要假设业务口径。
 5. **口径一致**：同一次 session 内保持口径一致，除非用户主动要求变更。
-6. **追问→脚本映射**：根据继承的上下文选择对应脚本并传参（详见 `docs/followup_runner_rules.md`）。
+6. **追问→脚本映射**：根据继承的上下文选择对应脚本并传参（详见 `mashang_workspace/docs/followup_runner_rules.md`）。
 
 ## 输出规范
 
@@ -288,7 +288,7 @@ python eval/parse_context_cli.py "这 75 个锁单城市分布" --previous-conte
   - `outputs/reports/` — HTML/Markdown 报告
   - `outputs/charts/` — PNG/SVG/HTML 图表
 - **口径说明**：每次输出附带数据来源、过滤条件、时间窗口
-- **脚本路径**：如果是通过 `scripts/` 下的脚本执行，注明脚本路径
+- **脚本路径**：如果通过 workspace 脚本执行，注明脚本路径（`mashang_workspace/{runtime_scripts,research_scripts,utility_scripts}/...`）
 
 ## 目录结构
 
@@ -314,11 +314,17 @@ mashang-service/
 ├── mashang_runtime_v2/     ← Unified Research Runtime（编排层）
 │   └── README.md          ← Runtime V2 说明
 │
+├── capabilities/          ← Base Capabilities（领域无关原语：OCR/Search/Notify/Diagram/Feishu）
+│
+├── research_apps/         ← Research Applications（MIIT / auto_launch / nev_apeal）
+│
 └── mashang_workspace/     ← Daily Business Analytics Workspace（日常业务分析工具箱）
     ├── AGENTS.md          ← Workspace Agent 指南
     ├── README.md
     ├── docs/               ← 业务文档
-    ├── scripts/            ← 独立分析脚本 (16 个)
+    ├── runtime_scripts/    ← runtime tier（可被 runtime_v2 确定性调度）
+    ├── research_scripts/   ← research tier（预测/回测/报告）
+    ├── utility_scripts/    ← utility tier（DataOps/SyncOps/生成/检查）
     ├── eval/               ← Eval 测试框架
     ├── tests/              ← Smoke test (pytest)
     ├── utils/              ← 工具模块
@@ -327,6 +333,43 @@ mashang-service/
         ├── charts/
         └── tables/
 ```
+
+## Canonical Entry Map（入口与副作用分级）
+
+同一能力存在多个入口时，以下为 canonical 入口；旧名作为兼容别名保留。新文档、新脚本、Agent 路由一律引用 canonical 名。
+
+| 能力 | Canonical 入口 | 旧名 / 兼容别名 | 副作用等级 |
+|------|----------------|-----------------|-----------|
+| 数据集刷新 | `make data-refresh` | `dataset-update` | local write |
+| 数据集校验 | `make data-validate` | `dataset-validate` | read-only |
+| 每日观察预检 | `make observe-dry-run` | `daily-observation-dry-run` | read-only |
+| 每日观察同步 | `make observe-sync` | `daily-observation-sync` | Feishu write（多维表 + 机器人） |
+| 数据管道 | `make data-pipeline` | `daily-data-pipeline` | local + Feishu write |
+| 数据管道预检 | `make data-pipeline-dry-run` | `daily-data-pipeline-dry-run` | read-only |
+| 每日运营 | `make daily-ops` | — | local + Feishu write + 卡片 |
+| 当前预售/上市监控 | `make sales-monitor` | `monitor` | Feishu card |
+| 监控预检 | `make sales-monitor-dry-run` | `monitor-dry-run` | read-only |
+| 指定代际预售小订快照 | `make presale-snapshot SERIES=<GEN>` | — | Feishu card |
+| 常驻调度 | `make sales-scheduler` | `scheduler` | 常驻 + local + Feishu |
+| 预售累计订单对比报告 | `presale_cumulative_order_compare.py` | `l6_m2_presale_report.py`（shim） | local write（可选 Feishu docx） |
+
+副作用等级定义：
+
+- **read-only**：只读本地数据，可安全直接执行。
+- **local write**：写本地 `dataset/` 或 `outputs/`。
+- **Feishu write**：写飞书多维表 / 云文档。
+- **Feishu card**：发送飞书群卡片消息。
+- **常驻**：常驻进程，写日志并周期性触发上述副作用。
+
+**推送类操作（Feishu card / Feishu write）执行前必须先 `--dry-run` 预览**，确认口径后再正式发送；stale 数据默认阻断正式推送，只有显式 `ALLOW_STALE=1` / `--allow-stale` 才可强制发送。
+
+### 小订 / 预售 / 上市入口边界（勿混用）
+
+- “小订监控 / 预售小订” 默认指**指定代际预售快照** → `make presale-snapshot SERIES=<GEN>`（底层 `mashang_workspace/research_scripts/presale_metrics_to_feishu.py`）。
+- “当前预售/上市监控” 指**当前 active 代际的 phase 监控** → `make sales-monitor`（底层 `vehicle_sales_monitor.py`，带 freshness gate）。
+- 两者不可互相替代：指定代际已进入 `launch` 阶段时，`sales-monitor` 会按 launch 口径监控，而 `presale-snapshot` 仍按该代际预售口径生成快照（用于上市日最终预售快照）。
+- 发送指定代际快照时，输出必须标注：统计截止时间、预售窗口、当前所处阶段（presale/launch）。
+- `make data-pipeline` / `daily-data-pipeline` **不含**销售监控；如需“数据更新 + 监控推送”一体执行，用 `make daily-ops`。
 
 ## Fast Reference
 
@@ -366,14 +409,18 @@ mashang-service/
 | 每日观察 | `python mashang_workspace/utility_scripts/skills_order_observation_daily.py` | utility |
 | 达成率预警 | `python mashang_workspace/utility_scripts/skills_attainment_rate_alert.py --days 10` | utility |
 | 生成 Eval | `python mashang_workspace/utility_scripts/generate_eval_cases.py` | utility |
-| 数据更新并同步 | `make daily-data-pipeline` (写操作；办公网不可达时自动回退移动链路，可 `MOBILE=1` 强制) | DataOps |
-| 预检数据 | `make daily-data-pipeline-dry-run` | DataOps |
+| 数据更新并同步 | `make data-pipeline`（写操作；旧名 `daily-data-pipeline`；办公网不可达时自动回退移动链路，可 `MOBILE=1` 强制） | DataOps |
+| 数据更新 + 监控推送 | `make daily-ops`（写操作：data-pipeline + sales-monitor） | DataOps |
+| 预检数据 | `make data-pipeline-dry-run`（只读；旧名 `daily-data-pipeline-dry-run`） | DataOps |
+| 当前预售/上市监控 | `make sales-monitor`（当前 active 代际 + phase；旧名 `monitor`；先 `make sales-monitor-dry-run` 预览） | monitor |
+| 指定代际小订快照 | `make presale-snapshot SERIES=CM3`（先 `DRY=1` 预览；底层 `presale_metrics_to_feishu.py --series CM3`） | monitor |
+| 常驻调度 | `make sales-scheduler`（旧名 `scheduler`） | monitor |
 | 解析验证范围 | `make verify-scope`（按改动解析最小验证范围） | harness |
 | 执行验证 | `make verify`（仅 scope 内；baseline 不算回归） | harness |
 | 扩大验证 | `make verify-all`（显式全量） | harness |
-| 运行 Runtime Eval | `python eval/run_runtime_eval.py` |
+| 运行 Runtime Eval | `python mashang_workspace/eval/run_runtime_eval.py` |
 | 运行 Follow-up Eval | `python mashang_workspace/eval/run_followup_eval.py` |
 | 运行 Numeric Eval | `python mashang_workspace/eval/run_numeric_eval.py` |
 | 解析自然语言 | `python mashang_workspace/eval/parse_context_cli.py "昨天锁单数分车型"` |
 | Smoke Test | `pytest mashang_workspace/tests -q` |
-| 全量测试 | `pytest tests/ -q` |
+| 根数据集构建测试 | `pytest tests/ -q`（根 `tests/`，TP&MIX-ways 构建契约） |
