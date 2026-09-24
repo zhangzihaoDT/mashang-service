@@ -254,6 +254,8 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
     today_direct_lock = int(today_lock_count) - int(today_intention_conv)
 
     presale_retained = 0
+    presale_pool_total = 0
+    presale_refunded = 0
     if launch is not None:
         tp_key = time_periods.get(generation, {}) or {}
         if tp_key.get("start"):
@@ -268,6 +270,19 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
                 & df["intention_refund_time"].isna()
             )
             presale_retained = int(df.loc[retained_mask, "order_number"].nunique())
+            # 小订池 = 预售窗口内支付意向金（口径对齐 presale_intention_funnel：上市日结束）
+            pool_close = launch.normalize() + pd.Timedelta(days=1)
+            pool_mask = (
+                df["series_group_logic"].eq(generation)
+                & df["intention_payment_time"].notna()
+                & (df["intention_payment_time"] >= presale_open)
+                & (df["intention_payment_time"] < pool_close)
+            )
+            pool_slice = df.loc[pool_mask]
+            presale_pool_total = int(pool_slice["order_number"].nunique())
+            presale_refunded = int(
+                pool_slice.loc[pool_slice["intention_refund_time"].notna(), "order_number"].nunique()
+            )
 
     return {
         "generation": generation,
@@ -293,6 +308,8 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
         "today_intention_conv": today_intention_conv,
         "today_direct_lock": today_direct_lock,
         "presale_retained": presale_retained,
+        "presale_pool_total": presale_pool_total,
+        "presale_refunded": presale_refunded,
         "compare": compare,
     }
 
@@ -316,6 +333,12 @@ def build_card(metrics: dict, show_notes: bool = True) -> dict:
     lines.append(f"锁单数：**{lock_count:,}**{user_car_note}")
     lines.append(
         f"　小订转大定：**{metrics['today_intention_conv']:,}**/{metrics['presale_retained']:,}（转大定/留存小订）"
+    )
+    pool_total = metrics.get("presale_pool_total") or 0
+    pool_refunded = metrics.get("presale_refunded") or 0
+    pool_refunded_pct = (pool_refunded / pool_total * 100) if pool_total else 0.0
+    lines.append(
+        f"　已退订：**{pool_refunded:,}**/{pool_total:,}（退订/小订池 {pool_refunded_pct:.1f}%）"
     )
     lines.append(f"　直接锁单数：**{metrics['today_direct_lock']:,}**")
 

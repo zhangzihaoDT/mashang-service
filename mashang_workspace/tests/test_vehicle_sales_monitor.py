@@ -679,6 +679,8 @@ def _launch_metrics(products: list[dict]) -> dict:
         "today_user_car_lock_count": 0,
         "today_intention_conv": 0,
         "presale_retained": 0,
+        "presale_pool_total": 0,
+        "presale_refunded": 0,
         "today_direct_lock": 0,
         "retention": 10,
         "retention_kept": 8,
@@ -739,6 +741,25 @@ def test_launch_card_order_type_unfilled_annotates_instead_of_zero_user_car():
     )
     assert "锁单数：**249**（order_type 未回填）" in body
     assert "用户车" not in body
+
+
+def test_launch_card_shows_refunded_over_presale_pool():
+    """新增「已退订：退订数/总小订数（比例）」行，位于「小订转大定」之后。
+
+    分母取漏斗脚本口径的固定小订池（总小订数），而非动态的留存小订。
+    """
+    body = _launch_card_body(
+        [],
+        extra={"presale_pool_total": 16623, "presale_refunded": 238},
+    )
+    assert "　已退订：**238**/16,623（退订/小订池 1.4%）" in body
+    assert body.index("小订转大定") < body.index("已退订") < body.index("直接锁单数")
+
+
+def test_launch_card_refunded_line_zero_pool_safe():
+    """小订池为 0 时不除零，显示 0.0%。"""
+    body = _launch_card_body([], extra={"presale_pool_total": 0, "presale_refunded": 0})
+    assert "　已退订：**0**/0（退订/小订池 0.0%）" in body
 
 
 def test_launch_card_order_type_filled_keeps_user_car_breakdown():
