@@ -30,12 +30,14 @@ from utils.monitors.phase import (  # noqa: E402
     detect_active,
     is_key_day,
     launch_open_hour,
+    launch_open_minute,
     load_business_definition,
     open_hour,
     open_minute,
     phase_of,
 )
 from utils.monitors.launch import build_card as launch_build_card  # noqa: E402
+from utils.monitors.launch import compute as launch_compute  # noqa: E402
 from utils.monitors.presale import build_card as presale_build_card  # noqa: E402
 from utils.monitors.presale import build_waiting_card as presale_build_waiting_card  # noqa: E402
 from utils.monitors.presale import compute as presale_compute  # noqa: E402
@@ -92,9 +94,16 @@ def test_open_hour_calibration(bdef):
     # 非整点开放：CM2=20:55、CM3=19:45
     assert open_minute(bdef, "CM2") == 55
     assert open_minute(bdef, "CM3") == 45
-    # 上市开放时刻历史对标默认 20:00
+    # 上市开放时刻历史对标默认 20:00（小时），分钟按代际实测校准
     assert launch_open_hour(bdef, "CM1") == 20
     assert launch_open_hour(bdef, "CM0") == 20
+    assert launch_open_minute(bdef, "CM2") == 51
+    assert launch_open_minute(bdef, "CM1") == 42
+    assert launch_open_minute(bdef, "CM0") == 32
+    assert launch_open_minute(bdef, "LS8") == 23
+    assert launch_open_minute(bdef, "LS9") == 12
+    # 未配置代际回退默认 0
+    assert launch_open_minute(bdef, "LS9Hyper") == 0
 
 
 def test_key_day(bdef):
@@ -614,6 +623,46 @@ def test_presale_card_no_limited_skips_split():
     assert "全新一代智己LS6 Ultra：750（33.3%）" in body
 
 
+# ── launch compare 历史对标窗口 ─────────────────────────────────────
+
+
+def _launch_df(rows) -> pd.DataFrame:
+    df = pd.DataFrame(
+        rows,
+        columns=["order_number", "lock_time", "intention_payment_time",
+                 "series_group_logic", "product_name", "order_type"],
+    )
+    for c in ["lock_time", "intention_payment_time"]:
+        df[c] = pd.to_datetime(df[c], format="mixed")
+    for c in ["approve_refund_time", "intention_refund_time", "deposit_refund_time", "deposit_payment_time"]:
+        df[c] = pd.NaT
+    df["owner_identity_no"] = "310101199001011234"
+    df["buyer_identity_no"] = "310101199001011234"
+    df["store_name"] = "s1"
+    return df
+
+
+def test_launch_compare_window_uses_generation_launch_open_minute(bdef):
+    """历史对标窗口按各代际实测上市开放分钟起算（与目标 CM3 首笔 real lock 对称）。
+
+    CM2 实测锚点 = 20:51；窗口 = [20:51, +elapsed]。20:30 的订单应被排除 ——
+    若仍按 20:00 锚点（忽略分钟），它会被错误计入。
+    """
+    today = pd.Timestamp("2026-09-23")
+    df = _launch_df(
+        [
+            # 目标 CM3：首笔 real lock 20:00（=open_t），22:00 决定 obs → elapsed=2h
+            ("t1", "2026-09-23 20:00", "2026-09-23 19:00", "CM3", "全新一代智己LS6 Max", None),
+            ("t2", "2026-09-23 22:00", "2026-09-23 19:30", "CM3", "全新一代智己LS6 Max", None),
+            # CM2 锚点 20:51：c1(21:00) 在窗口内，c2(20:30) 早于锚点应排除
+            ("c1", "2025-09-10 21:00", None, "CM2", "新一代智己LS6", None),
+            ("c2", "2025-09-10 20:30", None, "CM2", "新一代智己LS6", None),
+        ]
+    )
+    m = launch_compute(df, bdef, today, "CM3")
+    assert m["compare"]["CM2"] == 1  # c2 早于 CM2 的 20:51 锚点，不计入
+
+
 # ── launch card 留存明细（按 product_name，不做代际无关的限定分类）────
 
 
@@ -680,3 +729,23 @@ def test_launch_card_no_retention_shows_empty():
     body = _launch_card_body([])
     assert "留存锁单明细：暂无留存锁单" in body
     assert "留存锁单分类" not in body
+
+
+def test_launch_card_order_type_unfilled_annotates_instead_of_zero_user_car():
+    """新上市代际 order_type 未回填时，不显示误导性的「用户车 0」，改为标注未回填。"""
+    body = _launch_card_body(
+        [],
+        extra={"today_lock_count": 249, "today_user_car_lock_count": 0, "order_type_filled_ratio": 0.0},
+    )
+    assert "锁单数：**249**（order_type 未回填）" in body
+    assert "用户车" not in body
+
+
+def test_launch_card_order_type_filled_keeps_user_car_breakdown():
+    """order_type 正常回填时，保留「用户车 N」子计数。"""
+    body = _launch_card_body(
+        [],
+        extra={"today_lock_count": 100, "today_user_car_lock_count": 87, "order_type_filled_ratio": 1.0},
+    )
+    assert "锁单数：**100**（用户车 87）" in body
+    assert "order_type 未回填" not in body

@@ -14,8 +14,21 @@ from datetime import datetime
 
 import pandas as pd
 
-from utils.monitors.phase import compare_keys, launch_open_hour, open_hour, open_minute, series_label
+from utils.monitors.phase import (
+    compare_keys,
+    launch_open_hour,
+    launch_open_minute,
+    open_hour,
+    open_minute,
+    series_label,
+)
 from utils.monitors.order_filter import flag_test_orders
+
+
+# 当锁单窗口内 order_type 填充率低于该阈值时，视为该代际 order_type 尚未回填
+# （新上市代际锁单初期 order_type 为空，见 docs/L6_M2_预售情况汇报分析框架.md）。
+# 此时严格 == "用户车" 的子计数会恒为 0，展示层降级为「order_type 未回填」，避免误导。
+ORDER_TYPE_FILL_SUPPRESS_RATIO = 0.5
 
 
 def resolve_launch_date(time_periods: dict, key: str) -> pd.Timestamp | None:
@@ -197,7 +210,11 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
         for cmp_key in compare_keys(business_def, generation):
             cmp_launch = resolve_launch_date(time_periods, cmp_key)
             cmp_open = (
-                cmp_launch.normalize() + pd.Timedelta(hours=launch_open_hour(business_def, cmp_key))
+                cmp_launch.normalize()
+                + pd.Timedelta(
+                    hours=launch_open_hour(business_def, cmp_key),
+                    minutes=launch_open_minute(business_def, cmp_key),
+                )
                 if cmp_launch is not None
                 else None
             )
@@ -225,6 +242,13 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
     today_user_car_lock_count = int(
         base.loc[lock_mask & (base["order_type"].astype("string") == "用户车"), "order_number"].nunique()
     )
+    # order_type 回填情况：新上市代际在锁单初期 order_type 尚未回填（NaN），
+    # 此时严格 == "用户车" 的子计数会恒为 0，仅用于展示层判断是否需要降级为「未回填」。
+    lock_rows = base.loc[lock_mask]
+    ot = lock_rows["order_type"].astype("string")
+    ot_filled = ot.notna() & (ot.str.strip() != "")
+    order_type_filled_count = int(lock_rows.loc[ot_filled, "order_number"].nunique())
+    order_type_filled_ratio = (order_type_filled_count / today_lock_count) if today_lock_count else 0.0
     conv_mask = lock_mask & base["intention_payment_time"].notna() & (base["intention_payment_time"] <= base["lock_time"])
     today_intention_conv = int(base.loc[conv_mask & base.apply(_is_real_lock, axis=1), "order_number"].nunique())
     today_direct_lock = int(today_lock_count) - int(today_intention_conv)
@@ -264,6 +288,8 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
         "peak_count": peak_count,
         "today_lock_count": today_lock_count,
         "today_user_car_lock_count": today_user_car_lock_count,
+        "order_type_filled_count": order_type_filled_count,
+        "order_type_filled_ratio": order_type_filled_ratio,
         "today_intention_conv": today_intention_conv,
         "today_direct_lock": today_direct_lock,
         "presale_retained": presale_retained,
@@ -279,9 +305,15 @@ def build_card(metrics: dict, show_notes: bool = True) -> dict:
     lines = [f"**{label} 上市锁单监控（{metrics['as_of_date']}）**"]
 
     lines += ["", f"车型：**{label}（{generation}）**"]
-    lines.append(
-        f"锁单数：**{metrics['today_lock_count']:,}**（用户车 {metrics['today_user_car_lock_count']:,}）"
-    )
+    lock_count = metrics["today_lock_count"]
+    fill_ratio = metrics.get("order_type_filled_ratio")
+    # 新上市代际 order_type 尚未回填（锁单初期为空属正常业务状态），
+    # 此时严格「用户车」子计数恒为 0，降级为「未回填」标注，不做误导性展示。
+    if lock_count and fill_ratio is not None and fill_ratio < ORDER_TYPE_FILL_SUPPRESS_RATIO:
+        user_car_note = "（order_type 未回填）"
+    else:
+        user_car_note = f"（用户车 {metrics['today_user_car_lock_count']:,}）"
+    lines.append(f"锁单数：**{lock_count:,}**{user_car_note}")
     lines.append(
         f"　小订转大定：**{metrics['today_intention_conv']:,}**/{metrics['presale_retained']:,}（转大定/留存小订）"
     )

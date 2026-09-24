@@ -136,43 +136,43 @@ def test_makefile_no_bare_python():
             raise AssertionError(f"bare python found: {line}")
 
 
-def test_makefile_dataset_update_uses_python_var():
-    """Makefile 中 dataset-update 使用 $(PYTHON)。"""
+def test_makefile_data_refresh_uses_python_var():
+    """Makefile 中 canonical data-refresh 使用 $(PYTHON)（dataset-update 为兼容别名）。"""
     text = MAKEFILE_PATH.read_text()
     lines = text.splitlines()
     found = False
     for i, line in enumerate(lines):
-        if line.strip() == "dataset-update:":
+        if line.strip() == "data-refresh:":
             next_line = lines[i + 1]
-            assert "$(PYTHON)" in next_line, f"dataset-update not using $(PYTHON): {next_line}"
+            assert "$(PYTHON)" in next_line, f"data-refresh not using $(PYTHON): {next_line}"
             found = True
-    assert found, "dataset-update target not found"
+    assert found, "data-refresh target not found"
 
 
-def test_makefile_dataset_validate_uses_python_var():
-    """Makefile 中 dataset-validate 使用 $(PYTHON)。"""
+def test_makefile_data_validate_uses_python_var():
+    """Makefile 中 canonical data-validate 使用 $(PYTHON)（dataset-validate 为兼容别名）。"""
     text = MAKEFILE_PATH.read_text()
     lines = text.splitlines()
     found = False
     for i, line in enumerate(lines):
-        if line.strip() == "dataset-validate:":
+        if line.strip() == "data-validate:":
             next_line = lines[i + 1]
-            assert "$(PYTHON)" in next_line, f"dataset-validate not using $(PYTHON): {next_line}"
+            assert "$(PYTHON)" in next_line, f"data-validate not using $(PYTHON): {next_line}"
             found = True
-    assert found, "dataset-validate target not found"
+    assert found, "data-validate target not found"
 
 
-def test_makefile_daily_observation_dry_run_uses_python_var():
-    """Makefile 中 daily-observation-dry-run 使用 $(PYTHON)。"""
+def test_makefile_observe_dry_run_uses_python_var():
+    """Makefile 中 canonical observe-dry-run 使用 $(PYTHON)（daily-observation-dry-run 为兼容别名）。"""
     text = MAKEFILE_PATH.read_text()
     lines = text.splitlines()
     found = False
     for i, line in enumerate(lines):
-        if line.strip() == "daily-observation-dry-run:":
+        if line.strip() == "observe-dry-run:":
             next_line = lines[i + 1]
-            assert "$(PYTHON)" in next_line, f"daily-observation-dry-run not using $(PYTHON): {next_line}"
+            assert "$(PYTHON)" in next_line, f"observe-dry-run not using $(PYTHON): {next_line}"
             found = True
-    assert found, "daily-observation-dry-run target not found"
+    assert found, "observe-dry-run target not found"
 
 
 def test_makefile_runtime_v2_eval_uses_python_var():
