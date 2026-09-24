@@ -81,6 +81,10 @@
   - **增程**: `product_name` 包含 "52" 或 "66"。请使用正则匹配: `filters: [{"field": "product_name", "op": "matches", "value": "52|66"}]`。
   - **纯电**: `product_name` **不**包含 "52" 且 **不**包含 "66"。请使用正则匹配: `filters: [{"field": "product_name", "op": "not matches", "value": "52|66"}]`。
   - **Planning Agent 请注意**: 对于"增程"或"纯电"查询，必须使用 `matches` 或 `not matches` 操作符，并使用正则 `52|66`。不要生成多个 `contains` 过滤器（因为它们是 AND 关系）。
+- `drive_type`: 驱动形式（四驱 / 后驱）。由 `business_definition.json: drive_type_logic` 基于 `product_name` 生成，当前仅覆盖 LS6 家族（CM0–CM3），非 LS6 车系保持未命中。
+  - **四驱**: `product_name` 含 `Ultra`（CM2/CM3）、`超强性能`（CM0/CM1 老款）或 `AWD`。
+  - **后驱**: LS6 且不含上述四驱标记（含 Max / Max+ / Pro Max / Pro / 限定版及全部增程）。
+  - **注意**: 智己命名中 `Max+` / `Pro Max` **不**表示四驱（与部分品牌习惯不同）。
 
 ### 地理位置
 

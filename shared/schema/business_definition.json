@@ -126,6 +126,11 @@
     "五座": "product_name LIKE '%五座%'",
     "六座": "product_name LIKE '%六座%'"
   },
+  "drive_type_logic": {
+    "四驱": "product_name LIKE '%LS6%' AND product_name LIKE '%Ultra%' OR product_name LIKE '%LS6%' AND product_name LIKE '%超强性能%' OR product_name LIKE '%LS6%' AND product_name LIKE '%AWD%' OR product_name LIKE '%LS6%' AND product_name LIKE '%四驱%'",
+    "后驱": "product_name LIKE '%LS6%' AND product_name NOT LIKE '%Ultra%' AND product_name NOT LIKE '%超强性能%' AND product_name NOT LIKE '%AWD%' AND product_name NOT LIKE '%四驱%'"
+  },
+  "drive_type_logic_semantics": "drive_type_logic 基于 product_name 判定驱动形式，当前仅覆盖 LS6 家族（CM0–CM3），非 LS6 车系不分类（保持未命中）。四驱 vs 后驱依据官方配置表：CM2/CM3（新一代/全新一代 LS6）仅 Ultra 为双电机四驱，其余（Max/Max+/Pro Max/Pro/限定版及全部增程）均为后驱（官方称『超级后驱』）；CM0/CM1 老款的四驱版型为『超强性能』（如 LS6 Max 超强性能版、全新LS6 超强性能灵蜥智享版），工程命名含 AWD。注意：智己命名中 Max+ / Pro Max 不表示四驱，与部分品牌习惯不同。匹配前 product_name 去全部空白字符。",
   "series_group_logic": {
     "CM3": {
       "priority": 4,

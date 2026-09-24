@@ -58,6 +58,21 @@ L6  → [DM0, DM1, DM2]
 
 **注意**：数据集中无 `product_type` 字段，需通过 `product_name` 模糊匹配。使用 `matches` 操作符和正则 `52|66`。
 
+## 驱动形式 (drive_type_logic)
+
+| 驱动形式 | 匹配规则（当前覆盖 LS6 家族 CM0–CM3） |
+|----------|----------------------------------------|
+| 四驱 | `product_name` 含 `Ultra`（CM2/CM3）、`超强性能`（CM0/CM1 老款）或 `AWD` |
+| 后驱 | LS6 且不含上述四驱标记（Max / Max+ / Pro Max / Pro / 限定版及全部增程） |
+
+**注意**：
+- 非 LS6 车系暂不分类（保持未命中）。
+- 智己命名中 `Max+` / `Pro Max` **不**表示四驱；CM2/CM3 仅 `Ultra` 为双电机四驱，官方称其余为「超级后驱」。
+- CM0/CM1 老款的四驱版型为「超强性能」（如 `LS6 Max 超强性能版`、`全新LS6 超强性能灵蜥智享版`），工程命名含 `AWD`（如 `LS6 M1 100AWD Max`）。
+- 应用到 DataFrame：`utils.monitors.drive_type.apply_drive_type_logic`。
+
+来源：智己官网配置表 `immotors.com/website/vehicle_config/ls6m2`；太平洋汽车 / 易车「智己LS6 2026款」参数库。
+
 ## 座位数 (seat_count_logic)
 
 | 座位数 | 匹配规则 |
