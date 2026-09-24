@@ -53,6 +53,7 @@ CORE_SCRIPTS = [
     "dc_showroom_age_report.py",
     "current_state_diagnosis.py",
     "monthly_sales_order_type_to_feishu.py",
+    "presale_intention_funnel.py",
 ]
 
 

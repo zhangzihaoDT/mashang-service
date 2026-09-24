@@ -8,7 +8,7 @@ PYTHON ?= .venv/bin/python
 	runtime-v2-demo runtime-v2-city-demo runtime-v2-followup-demo runtime-v2-eval runtime-v2-feature-job-demo runtime-v2-clean-sessions \
 	data-refresh data-validate observe-dry-run observe-sync data-pipeline-dry-run data-pipeline daily-ops \
 	dataset-update dataset-validate daily-observation-dry-run daily-observation-sync daily-data-pipeline-dry-run daily-data-pipeline \
-	sales-monitor sales-monitor-dry-run presale-snapshot monitor monitor-dry-run monitor-sync sales-scheduler scheduler \
+	sales-monitor sales-monitor-dry-run presale-snapshot presale-funnel monitor monitor-dry-run monitor-sync sales-scheduler scheduler \
 	dc-inventory-change dc-inventory-change-date state-diagnosis \
 	shock-scan shock-backtest shock-research shock-check market-observe \
 	daily-sync-dry-run update-tp-and-mix-ways-dataset rebuild-tp-and-mix-ways-dataset build-tp-and-mix-ways-dataset \
@@ -319,6 +319,16 @@ presale-snapshot:
 		$(if $(ALLOW_STALE),--allow-stale) \
 		$(if $(DRY),--dry-run)
 
+## 预售小订转化漏斗（泛化：任意代际；只读）
+## 固定链路：series_group_logic → 预售窗口 → 小订池 → 退订/留存/转大定/锁单
+## 用法: make presale-funnel SERIES=CM3 [AS_OF=2026-09-24] [FORMAT=terminal|json|csv]
+##       make presale-funnel SERIES="CM2 CM3 DM2"   # 多代际对比
+presale-funnel:
+	$(PYTHON) mashang_workspace/runtime_scripts/presale_intention_funnel.py \
+		$(if $(SERIES),--series $(SERIES)) \
+		$(if $(AS_OF),--as-of $(AS_OF)) \
+		$(if $(FORMAT),--format $(FORMAT))
+
 ## 数据更新 + 监控一站式走廊（仅刷新订单表 → 计算 → 推送/dry-run）
 ## 对应自然语言：「数据更新并同步 <代际> 上市监控 / 小订·预售监控」
 ## 用法:
@@ -555,6 +565,7 @@ help:
 	@echo "make sales-monitor-dry-run   监控 dry-run（只打印卡片）"
 	@echo "make monitor-sync            数据更新+监控走廊 SERIES=CM3 [PHASE=launch|presale] [DRY=1]（仅刷新订单表）"
 	@echo "make presale-snapshot        指定代际预售小订快照推送 SERIES=CM3 [DRY=1] [ALLOW_STALE=1]（写操作）"
+	@echo "make presale-funnel          预售小订转化漏斗（泛化，任意代际）SERIES=CM3 [AS_OF=] [FORMAT=]（只读）"
 	@echo "make sales-scheduler         常驻定时器（刷新 + key day 高频监控；SERIES=CM3 限定代际）"
 	@echo "  兼容别名: monitor / monitor-dry-run / sales-monitor-sync / scheduler"
 	@echo ""
