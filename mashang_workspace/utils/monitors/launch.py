@@ -153,10 +153,12 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
     retention_kept_by_product: list[dict] = []
     peak_hour = None
     peak_count = 0
-    today_lock_count = 0
-    today_user_car_lock_count = 0
-    today_intention_conv = 0
-    today_direct_lock = 0
+    cumulative_lock_count = 0
+    cumulative_user_car_lock_count = 0
+    daily_lock_count = 0
+    daily_user_car_lock_count = 0
+    cumulative_intention_conv = 0
+    cumulative_direct_lock = 0
     compare: dict = {}
 
     open_t = None
@@ -238,9 +240,16 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
         )
     else:
         lock_mask = pd.Series(False, index=base.index)
-    today_lock_count = int(base.loc[lock_mask, "order_number"].nunique())
-    today_user_car_lock_count = int(
+    cumulative_lock_count = int(base.loc[lock_mask, "order_number"].nunique())
+    cumulative_user_car_lock_count = int(
         base.loc[lock_mask & (base["order_type"].astype("string") == "用户车"), "order_number"].nunique()
+    )
+    # 当日锁单：观察当日（自然日）内新增锁单；上市日从开放时刻 open_t 起算（open_t <= run_date 时即整日）
+    day_start = max(open_t, run_date) if open_t is not None else run_date
+    daily_mask = lock_mask & (base["lock_time"] >= day_start)
+    daily_lock_count = int(base.loc[daily_mask, "order_number"].nunique())
+    daily_user_car_lock_count = int(
+        base.loc[daily_mask & (base["order_type"].astype("string") == "用户车"), "order_number"].nunique()
     )
     # order_type 回填情况：新上市代际在锁单初期 order_type 尚未回填（NaN），
     # 此时严格 == "用户车" 的子计数会恒为 0，仅用于展示层判断是否需要降级为「未回填」。
@@ -248,10 +257,10 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
     ot = lock_rows["order_type"].astype("string")
     ot_filled = ot.notna() & (ot.str.strip() != "")
     order_type_filled_count = int(lock_rows.loc[ot_filled, "order_number"].nunique())
-    order_type_filled_ratio = (order_type_filled_count / today_lock_count) if today_lock_count else 0.0
+    order_type_filled_ratio = (order_type_filled_count / cumulative_lock_count) if cumulative_lock_count else 0.0
     conv_mask = lock_mask & base["intention_payment_time"].notna() & (base["intention_payment_time"] <= base["lock_time"])
-    today_intention_conv = int(base.loc[conv_mask & base.apply(_is_real_lock, axis=1), "order_number"].nunique())
-    today_direct_lock = int(today_lock_count) - int(today_intention_conv)
+    cumulative_intention_conv = int(base.loc[conv_mask & base.apply(_is_real_lock, axis=1), "order_number"].nunique())
+    cumulative_direct_lock = int(cumulative_lock_count) - int(cumulative_intention_conv)
 
     presale_retained = 0
     presale_pool_total = 0
@@ -301,12 +310,14 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
         "retention_kept_by_product": retention_kept_by_product,
         "peak_hour": peak_hour,
         "peak_count": peak_count,
-        "today_lock_count": today_lock_count,
-        "today_user_car_lock_count": today_user_car_lock_count,
+        "cumulative_lock_count": cumulative_lock_count,
+        "cumulative_user_car_lock_count": cumulative_user_car_lock_count,
+        "daily_lock_count": daily_lock_count,
+        "daily_user_car_lock_count": daily_user_car_lock_count,
         "order_type_filled_count": order_type_filled_count,
         "order_type_filled_ratio": order_type_filled_ratio,
-        "today_intention_conv": today_intention_conv,
-        "today_direct_lock": today_direct_lock,
+        "cumulative_intention_conv": cumulative_intention_conv,
+        "cumulative_direct_lock": cumulative_direct_lock,
         "presale_retained": presale_retained,
         "presale_pool_total": presale_pool_total,
         "presale_refunded": presale_refunded,
@@ -322,17 +333,25 @@ def build_card(metrics: dict, show_notes: bool = True) -> dict:
     lines = [f"**{label} 上市锁单监控（{metrics['as_of_date']}）**"]
 
     lines += ["", f"车型：**{label}（{generation}）**"]
-    lock_count = metrics["today_lock_count"]
+    lock_count = metrics["cumulative_lock_count"]
     fill_ratio = metrics.get("order_type_filled_ratio")
-    # 新上市代际 order_type 尚未回填（锁单初期为空属正常业务状态），
-    # 此时严格「用户车」子计数恒为 0，降级为「未回填」标注，不做误导性展示。
-    if lock_count and fill_ratio is not None and fill_ratio < ORDER_TYPE_FILL_SUPPRESS_RATIO:
-        user_car_note = "（order_type 未回填）"
-    else:
-        user_car_note = f"（用户车 {metrics['today_user_car_lock_count']:,}）"
-    lines.append(f"锁单数：**{lock_count:,}**{user_car_note}")
+
+    def _user_car_note(count: int, user_car_count: int) -> str:
+        # 新上市代际 order_type 尚未回填（锁单初期为空属正常业务状态），
+        # 此时严格「用户车」子计数恒为 0，降级为「未回填」标注，不做误导性展示。
+        if not count:
+            return ""
+        if fill_ratio is not None and fill_ratio < ORDER_TYPE_FILL_SUPPRESS_RATIO:
+            return "（order_type 未回填）"
+        return f"（用户车 {user_car_count:,}）"
+
     lines.append(
-        f"　小订转大定：**{metrics['today_intention_conv']:,}**/{metrics['presale_retained']:,}（转大定/留存小订）"
+        f"当日锁单：**{metrics.get('daily_lock_count', 0):,}**"
+        f"{_user_car_note(metrics.get('daily_lock_count', 0), metrics.get('daily_user_car_lock_count', 0))}"
+    )
+    lines.append(f"上市至今累计锁单：**{lock_count:,}**{_user_car_note(lock_count, metrics['cumulative_user_car_lock_count'])}")
+    lines.append(
+        f"　小订转大定：**{metrics['cumulative_intention_conv']:,}**/{metrics['presale_retained']:,}（转大定/留存小订）"
     )
     pool_total = metrics.get("presale_pool_total") or 0
     pool_refunded = metrics.get("presale_refunded") or 0
@@ -340,7 +359,7 @@ def build_card(metrics: dict, show_notes: bool = True) -> dict:
     lines.append(
         f"　已退订：**{pool_refunded:,}**/{pool_total:,}（退订/小订池 {pool_refunded_pct:.1f}%）"
     )
-    lines.append(f"　直接锁单数：**{metrics['today_direct_lock']:,}**")
+    lines.append(f"　直接锁单数：**{metrics['cumulative_direct_lock']:,}**")
 
     kept_by_product = metrics.get("retention_kept_by_product") or []
     limited_items = [i for i in kept_by_product if i.get("limited")]
@@ -376,7 +395,7 @@ def build_card(metrics: dict, show_notes: bool = True) -> dict:
     lines.append(f"观察时间：{metrics['obs']}")
 
     if show_notes:
-        lines.append("口径：开放时刻起至观察时间的锁单累计（目标开放时刻 = 上市日当天首个转大定，无则上市日 00:00；排除测试单）；历史对比 = 各代际自上市日开放时刻起算相同时长")
+        lines.append("口径：当日锁单 = 观察当日（自然日）新增锁单，上市日从开放时刻起算；上市至今累计锁单 = 开放时刻起至观察时间的锁单累计（目标开放时刻 = 上市日当天首个转大定，无则上市日 00:00）；均按 order_number 去重并排除测试单；历史对比 = 各代际自上市日开放时刻起算相同时长")
         if metrics.get("test_orders_excluded"):
             lines.append(f"已剔除测试单：{metrics['test_orders_excluded']} 笔（总部主理店 + 假身份号）")
         lines.append("数据源：dataset/order_data.parquet + shared/schema/business_definition.json")

@@ -35,6 +35,8 @@ ensure_shared_on_path()
 from operators.mature_lock_prediction import run_mature_lock_prediction_operator
 from operators.assign_conversion import _parse_cn_date
 from utils.business import is_corporate_owner
+from utils.monitors.order_filter import flag_test_orders
+from utils.monitors.series_group import apply_series_group_logic
 from capabilities.notify.notify_service import notify
 load_dotenv(REPO_ROOT / ".env")
 
@@ -306,6 +308,11 @@ def analyze_daily_lock_orders(df, start_date, end_date):
         (df_copy['lock_time'] >= start_date) & 
         (df_copy['lock_time'] <= end_date)
     ]
+
+    # 剔除测试单（总部主理店 + 假身份号）——与上市/预售监控口径对齐
+    test_mask = flag_test_orders(daily_orders, business_def)
+    if test_mask.any():
+        daily_orders = daily_orders.loc[~test_mask].copy()
     
     # 1. 计算总锁单数 (基于 order_number 去重)
     total_lock_count = daily_orders['order_number'].nunique()
@@ -358,39 +365,29 @@ def analyze_daily_lock_orders(df, start_date, end_date):
             if capacity_counts:
                 stats["details"] = capacity_counts
 
-        # LS6 代际区隔（CM3/CM2/CM1/CM0，按 series_group_logic 优先级），CM2 再分增程/纯电
+        # LS6 代际区隔（CM3/CM2/CM1/CM0）：复用共享 series_group_logic（与上市监控同源），
+        # CM2 再按 product_type_logic 分增程/纯电
         if model == "LS6":
-            gen_rules = (business_def or {}).get("series_group_logic") or {}
-            gen_asts = {}
-            for g in ["CM3", "CM2", "CM1", "CM0"]:
-                rule = gen_rules.get(g) or {}
-                cond = rule.get("condition") if isinstance(rule, dict) else rule
-                if cond:
-                    gen_asts[g] = _parse_logic(str(cond))
+            grouped = apply_series_group_logic(model_df.copy(), business_def)
+            gen_counts = {g: 0 for g in ["CM3", "CM2", "CM1", "CM0"]}
+            cm2_ptype = {"增程": 0, "纯电": 0}
             pt_logic = (business_def or {}).get("product_type_logic") or {}
             pt_asts = {}
             for pt, cond in pt_logic.items():
                 if cond:
                     pt_asts[pt] = _parse_logic(str(cond))
 
-            gen_counts = {g: 0 for g in gen_asts}
-            cm2_ptype = {"增程": 0, "纯电": 0}
-            unique_orders = model_df[['order_number', 'product_name']].drop_duplicates('order_number')
+            unique_orders = grouped[['order_number', 'product_name', 'series_group_logic']].drop_duplicates('order_number')
             for _, row in unique_orders.iterrows():
-                p_name = row['product_name']
-                if pd.isna(p_name):
-                    continue
-                p_name = str(p_name)
-                matched = None
-                for g in ["CM3", "CM2", "CM1", "CM0"]:
-                    ast = gen_asts.get(g)
-                    if ast and _eval_ast(ast, p_name):
-                        matched = g
-                        break
-                if matched is None:
+                matched = row['series_group_logic']
+                if matched not in gen_counts:
                     continue
                 gen_counts[matched] += 1
                 if matched == "CM2":
+                    p_name = row['product_name']
+                    if pd.isna(p_name):
+                        continue
+                    p_name = str(p_name)
                     for pt, ast in pt_asts.items():
                         if _eval_ast(ast, p_name):
                             cm2_ptype[pt] += 1

@@ -101,6 +101,10 @@ L6  → [DM0, DM1, DM2]
 | LS9 | 2025-11-04 | 2025-11-12 | 2025-12-04 |
 | LS8 | 2026-03-26 | 2026-04-16 | 2026-05-31 |
 
+> **上市事件业务备注**（`business_definition.json` → `business_knowledge.launch_events`）：
+> - **CM0（2023-10-12）**：上市当日发生 **APP 故障**，锁单被压制（D0 仅 11 单），需求顺延至次日（D1=2288 单）。
+>   故 CM0 首日不是正常爆发力样本，上市节奏对比时应剔除或按 2023-10-13 等效锚定。
+
 ## 竞争车型 (6座主销车型)
 
 来源: business_definition.json business_knowledge.main_selling_models_seats_6，更新于 2026年3月。

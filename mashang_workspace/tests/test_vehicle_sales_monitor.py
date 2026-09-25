@@ -675,13 +675,15 @@ def _launch_metrics(products: list[dict]) -> dict:
         "run_date": "2026-09-23",
         "launch": "2026-09-23",
         "obs": "2026-09-23 16:23",
-        "today_lock_count": 0,
-        "today_user_car_lock_count": 0,
-        "today_intention_conv": 0,
+        "cumulative_lock_count": 0,
+        "cumulative_user_car_lock_count": 0,
+        "daily_lock_count": 0,
+        "daily_user_car_lock_count": 0,
+        "cumulative_intention_conv": 0,
         "presale_retained": 0,
         "presale_pool_total": 0,
         "presale_refunded": 0,
-        "today_direct_lock": 0,
+        "cumulative_direct_lock": 0,
         "retention": 10,
         "retention_kept": 8,
         "retention_kept_by_product": products,
@@ -737,10 +739,27 @@ def test_launch_card_order_type_unfilled_annotates_instead_of_zero_user_car():
     """新上市代际 order_type 未回填时，不显示误导性的「用户车 0」，改为标注未回填。"""
     body = _launch_card_body(
         [],
-        extra={"today_lock_count": 249, "today_user_car_lock_count": 0, "order_type_filled_ratio": 0.0},
+        extra={"cumulative_lock_count": 249, "cumulative_user_car_lock_count": 0, "order_type_filled_ratio": 0.0},
     )
-    assert "锁单数：**249**（order_type 未回填）" in body
+    assert "上市至今累计锁单：**249**（order_type 未回填）" in body
     assert "用户车" not in body
+
+
+def test_launch_card_shows_daily_and_cumulative_lock_rows():
+    """当日锁单与上市至今累计锁单分两行展示，当日在上。"""
+    body = _launch_card_body(
+        [],
+        extra={
+            "daily_lock_count": 42,
+            "daily_user_car_lock_count": 40,
+            "cumulative_lock_count": 3234,
+            "cumulative_user_car_lock_count": 3226,
+            "order_type_filled_ratio": 1.0,
+        },
+    )
+    assert "当日锁单：**42**（用户车 40）" in body
+    assert "上市至今累计锁单：**3,234**（用户车 3,226）" in body
+    assert body.index("当日锁单") < body.index("上市至今累计锁单")
 
 
 def test_launch_card_shows_refunded_over_presale_pool():
@@ -766,7 +785,7 @@ def test_launch_card_order_type_filled_keeps_user_car_breakdown():
     """order_type 正常回填时，保留「用户车 N」子计数。"""
     body = _launch_card_body(
         [],
-        extra={"today_lock_count": 100, "today_user_car_lock_count": 87, "order_type_filled_ratio": 1.0},
+        extra={"cumulative_lock_count": 100, "cumulative_user_car_lock_count": 87, "order_type_filled_ratio": 1.0},
     )
-    assert "锁单数：**100**（用户车 87）" in body
+    assert "上市至今累计锁单：**100**（用户车 87）" in body
     assert "order_type 未回填" not in body

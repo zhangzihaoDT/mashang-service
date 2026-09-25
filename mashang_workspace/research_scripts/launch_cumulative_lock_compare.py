@@ -21,16 +21,12 @@
   兑现购车（交付或开票早于上市日）→ 复购，排除"历史已锁未兑现"悬置误判；
    宽松对照 mode=prior_locker 对齐 lock_attribution_analysis "Repeat Lockers (Had Prior Locks)"）。
 
-模块 6：集团订单上市对比（智己L6 / MG 07 / 大众ID.ERA 5S，上市后 N 日每日 + 累计订单）；
-  数据源 = 观星台集团订单日报「重点车型(订单)」国内订单（outputs/tables/重点车型（订单）.csv，
-  由 saic_group_order_daily_parse.py 重刷），口径与模块 1 内部零售锁单不同源；命名归一复用
-  model_order_monthly_compare_report.NAME2CANON（保持两脚本一致）。
-
-模块 7：上市后下发线索窗口增幅对比（最新两代际 DM1/DM2，assign_data「下发线索数」整体口径，
+模块 6：上市后下发线索窗口增幅对比（最新两代际 DM1/DM2，assign_data「下发线索数」整体口径，
   上市后 N 天窗口 vs 上市前等长基线，N=1/3/7；含上市后 D1..D7 每日相对前 7 日均值节奏）。
 
-模块 8：DM2 上市以来锁单配置分布（复用 research_scripts/l6_m2_lock_config_distribution.py；
-  数据源 = config_attribute.parquet 增量更新后；核心 5 属性 + 是/否型选装项拥有率）。
+模块 7：最新代际上市以来锁单配置分布（复用 research_scripts/lock_config_distribution.py，
+  gen = 报告最新代际 series_group_logic；数据源 = config_attribute.parquet 增量更新后；
+  核心 5 属性 + 是/否型选装项拥有率）。
 
 口径：
   - 锁单 = lock_time 非空 COUNTD(order_number)
@@ -64,10 +60,9 @@ for p in (str(REPO_ROOT), str(_WS)):
 from utils.monitors.launch import _norm_product_name  # noqa: E402
 from utils.monitors.phase import load_business_definition  # noqa: E402
 from utils.monitors.series_group import apply_series_group_logic  # noqa: E402
-from research_scripts.l6_m2_lock_config_distribution import (  # noqa: E402
+from research_scripts.lock_config_distribution import (  # noqa: E402
     compute_lock_config_distribution,
 )
-from research_scripts.model_order_monthly_compare_report import NAME2CANON  # noqa: E402
 from research_scripts.store_network_compare import compute_store_network  # noqa: E402
 from runtime_scripts.user_profile import (  # noqa: E402
     CITY_TO_PROVINCE,
@@ -85,20 +80,11 @@ from operators.repurchase import split_repurchase  # noqa: E402
 _BUSINESS_DEF = REPO_ROOT / "shared" / "schema" / "business_definition.json"
 _ORDER_DATA = REPO_ROOT / "dataset" / "order_data.parquet"
 _ASSIGN_DATA = REPO_ROOT / "dataset" / "assign_data.csv"
-_GROUP_ORDER_CSV = _WS / "outputs" / "tables" / "重点车型（订单）.csv"
 _DEFAULT_REPORT = _WS / "outputs" / "reports"
 _DEFAULT_TABLE = _WS / "outputs" / "tables"
 
 DEFAULT_GENS = ["DM0", "DM1", "DM2"]
 NON_RETAIL = {"试驾车", "大客户", "员工", "集团员工", "经销商员工", "享道", "仅批售", "项目", "展车", "海外"}
-
-# 集团订单上市对比（观星台订单日报「重点车型(订单)」口径，全代际汇总）：
-# 车型规范名 → 上市日 t0（用户口径：智己L6=08-28 上市；MG 07 / 大众ID.ERA 5S 以 08-21 为基准，近似对齐）
-GROUP_ORDER_MODELS = [
-    {"model": "智己L6", "t0": "2026-08-28", "label": "智己L6（上市 08-28）"},
-    {"model": "MG 07", "t0": "2026-08-21", "label": "MG 07（以 08-21 对齐）"},
-    {"model": "大众ID.ERA 5S", "t0": "2026-08-21", "label": "大众ID.ERA 5S（以 08-21 对齐）"},
-]
 
 
 def _retail_mask(order_type: pd.Series) -> pd.Series:
@@ -177,9 +163,8 @@ def compute_curves(df: pd.DataFrame, bd: dict, gens: list[str],
         "network": compute_store_network(retail, gens, ends, n_days),
         "user_profile": _user_profile_compare(retail, gens, ends, n_days),
         "age_repurchase": _age_repurchase_compare(retail, gens, ends, n_days),
-        "group_order": _group_order_compare(),
         "lead_window": _lead_window_compare(ends),
-        "lock_config": _lock_config_distribution(as_of.normalize()),
+        "lock_config": _lock_config_distribution(as_of.normalize(), gens[-1]),
     }
 
 
@@ -507,21 +492,24 @@ def _load_assign_daily() -> pd.DataFrame:
     return out.sort_values("d")
 
 
-def _lock_config_distribution(as_of: pd.Timestamp | None = None) -> dict | None:
-    """模块 8：DM2 上市以来锁单配置分布。
+def _lock_config_distribution(as_of: pd.Timestamp | None = None,
+                              gen: str | None = None) -> dict | None:
+    """模块 7：最新代际上市以来锁单配置分布（gen = 报告最新代际 series_group_logic）。
 
-    复用 research_scripts/l6_m2_lock_config_distribution.py 的
-    compute_lock_config_distribution()（独立脚本，--format json 输出 Result Contract）。
-    窗口与报告对齐：上市日 end 起至 as_of（数据最新完整日）。
+    复用 research_scripts/lock_config_distribution.py 的
+    compute_lock_config_distribution(gen=...)（独立脚本，--format json 输出 Result Contract）。
+    窗口与报告对齐：该代际上市日 end 起至 as_of（数据最新完整日）。
     """
     try:
-        return compute_lock_config_distribution(as_of=as_of)
+        if gen is None:
+            return compute_lock_config_distribution(as_of=as_of)
+        return compute_lock_config_distribution(as_of=as_of, gen=gen)
     except Exception:
         return None
 
 
 def _lead_window_compare(ends: dict) -> dict | None:
-    """模块 7：最新两代际上市后下发线索窗口增幅对比。
+    """模块 6：最新两代际上市后下发线索窗口增幅对比。
 
     口径：assign_data「下发线索数」整体口径。
       - 上市后窗口 = 上市日 end 起 N 天（[end, end+N)）
@@ -616,78 +604,6 @@ def _lead_window_compare(ends: dict) -> dict | None:
                     f"持续性增量集中在快慢闪/门店。")
     return {"gens": [gen_a, gen_b], "per": per, "channels": channels_out,
             "insights": insights, "metric": "下发线索数", "baseline": "上市前等长窗口"}
-
-
-def _load_group_order_daily() -> pd.DataFrame:
-    """读重刷后的观星台重点车型(订单)宽表 → 长表（主体/日期/订单值/快照日）。
-
-    命名先用 NAME2CANON 归一（与 model_order_monthly_compare_report 一致：智己L6/L6、
-    大众ID.ERA 5S 空格变体等）；跨快照重叠日取最新快照值。
-    """
-    if not _GROUP_ORDER_CSV.exists():
-        return pd.DataFrame()
-    df = pd.read_csv(_GROUP_ORDER_CSV)
-    df["主体"] = df["主体"].map(lambda x: NAME2CANON.get(x, x))
-    daily_cols = [c for c in df.columns if c.startswith("每日_")]
-    rows = []
-    for _, r in df.iterrows():
-        snap_year = str(r["数据日期"])[:4]
-        for c in daily_cols:
-            if pd.notna(r[c]):
-                md = c.split("_")[1]
-                m, dd = md.split("/")
-                rows.append({
-                    "主体": r["主体"],
-                    "日期": f"{snap_year}-{int(m):02d}-{int(dd):02d}",
-                    "订单": r[c],
-                    "快照": str(r["数据日期"]),
-                })
-    long = pd.DataFrame(rows)
-    if long.empty:
-        return long
-    # 跨快照重叠：按（主体,日期）取最新快照值
-    long = long.sort_values("快照").groupby(["主体", "日期"], as_index=False).last()
-    return long
-
-
-def _group_order_compare() -> dict | None:
-    """集团订单上市对比：智己L6 / MG 07 / 大众ID.ERA 5S 上市后第 1..N 日每日及累计订单。
-
-    口径：观星台「重点车型(订单)」国内订单（含渠道/预售/试驾全量，非零售锁单，全代际汇总）；
-    t0：智己L6 = 2026-08-28（业务定义 DM2 上市日）；MG 07 / 大众ID.ERA 5S = 2026-08-21（用户近似对齐基准）。
-    """
-    long = _load_group_order_daily()
-    if long.empty:
-        return None
-    out = {"data_source": "观星台集团订单日报·重点车型(订单)", "models": []}
-    for spec in GROUP_ORDER_MODELS:
-        m = spec["model"]
-        sub = long[long["主体"].eq(m)].copy()
-        if sub.empty:
-            continue
-        sub["日期"] = pd.to_datetime(sub["日期"])
-        t0 = pd.Timestamp(spec["t0"])
-        # 上市后第 t 天 = t0 + (t-1)（含 t0 当日为第 1 天），至数据覆盖末
-        end = sub["日期"].max()
-        full = pd.date_range(t0, end, freq="D")
-        s = sub.groupby("日期")["订单"].sum().reindex(full).fillna(0)
-        daily = [int(v) for v in s]
-        cum = []
-        acc = 0
-        for v in daily:
-            acc += v
-            cum.append(acc)
-        out["models"].append({
-            "model": m,
-            "t0": spec["t0"],
-            "label": spec["label"],
-            "dates": [d.date().isoformat() for d in full],
-            "day_offset": [i + 1 for i in range(len(full))],
-            "daily": daily,
-            "cum": cum,
-            "latest_date": end.date().isoformat(),
-        })
-    return out
 
 
 def _daily_product_table(c: dict) -> str:
@@ -945,39 +861,6 @@ def _age_repurchase_table(c: dict) -> str:
     </div>"""
 
 
-def _group_order_table(c: dict) -> str:
-    gc = c.get("group_order")
-    if not gc or not gc.get("models"):
-        return ""
-    model_names = [m["model"] for m in gc["models"]]
-    common_n = min(len(m["day_offset"]) for m in gc["models"])
-    blocks = []
-    for m in gc["models"]:
-        rows = "".join(
-            f"<tr><td class='num'>{t}</td><td class='num'>{d[5:]}</td>"
-            f"<td class='num'>{int(m['daily'][t - 1]):,}</td>"
-            f"<td class='num'><strong>{int(m['cum'][t - 1]):,}</strong></td></tr>"
-            for t, d in zip(m["day_offset"], m["dates"])
-        )
-        blocks.append(f"""
-        <h3 style="margin-top:18px;">{m['model']} <span class="text-muted" style="font-weight:400;font-size:0.9em;">— {m['label']}，t0 = {m['t0']}，数据至 {m['latest_date']}</span></h3>
-        <div class="table-wrap">
-        <table class="report-table">
-          <thead><tr><th>上市后第 t 日</th><th>日期</th><th>每日订单</th><th>累计订单</th></tr></thead>
-          <tbody>{rows}</tbody>
-        </table>
-        </div>""")
-    return f"""
-    <div class="card">
-      <h2>模块 6 · 集团订单上市对比：{ ' / '.join(model_names) }（上市后 N 日 · 每日 + 累计订单）</h2>
-      <p class="section-note">数据源 = 观星台集团订单日报「重点车型(订单)」国内订单（重刷至最新快照 {gc['models'][0]['latest_date']}）；口径为全渠道国内订单（含门店/预售/试驾锁定等全量进单）。第 1 日 = 各车 t0（上市基准日）：智己L6 = 2026-08-28（业务定义 DM2 上市日）；MG 07 / 大众ID.ERA 5S = 2026-08-21（近似对齐基准）。跨快照重叠日取最新快照值。<br/><br/><strong>口径对齐说明（智己L6 集团 vs 内部 order_data）</strong>：集团「智己L6」为全代际（含 DM1 老款）+ 自 08 月中旬预售试驾铺车即开始计 + 含试驾车锁定等全量订单，故其同期累计（{gc['models'][0]['cum'][-1]:,} 单）与内部按同尺口径 <strong>L6 全代际自 08-14 起全口径锁单（约 1,282 单）基本一致</strong>（尾差 ~7 为命名/录入差异）。切勿将集团订单与模块 1/5 的「DM2 上市后零售锁单（655）」直接横比——差异主要来自①全代际（含 DM1 老款 ~278）②含预售试驾车铺车锁定（~390）③全渠道订单流 vs 零售锁单漏斗，而非数据口径缺陷。</p>
-      <h3 style="margin-top:14px;">上市后累计订单收口对比（公共窗口：第 1..{common_n} 日）</h3>
-      <div class="chart-box" id="chart-group-order-cum" style="height:440px;"></div>
-      <div class="section-note">折线按各车型上市日 t0 对齐为第 1 天，仅展示公共窗口前 {common_n} 天（三车中数据覆盖最短者）；y = 上市以来累计订单。累计口径即下方每日订单逐日累加。</div>
-      {''.join(blocks)}
-    </div>"""
-
-
 def _lead_window_table(c: dict) -> str:
     lc = c.get("lead_window")
     if not lc or not lc.get("per"):
@@ -1076,7 +959,7 @@ def _lead_window_table(c: dict) -> str:
     return f"""
 
     <div class="card">
-      <h2>模块 7 · 上市后下发线索窗口增幅对比：{gb} vs {ga}</h2>
+      <h2>模块 6 · 上市后下发线索窗口增幅对比：{gb} vs {ga}</h2>
       <p class="section-note">数据源 = dataset/assign_data.csv「下发线索数」（整体口径）。上市后窗口 = 各代际上市日 end 起 N 天；基线 = 上市前等长窗口（end−N ~ end）；窗口增幅 = (上市后窗口 − 等长基线) ÷ 基线。每日行 = 上市后 D1..D7 当日线索及其相对上市前 7 日均值的增减。注意：{gb} 的基线（上市前 7 天）正处于 8/18 预售开启后的放量高峰，故其窗口增幅被抬高基线拉低；当日值受周内节奏影响（周一/周二为周内低谷）。</p>
       <div class="table-wrap">
       <table class="report-table">
@@ -1141,8 +1024,8 @@ def _lock_config_table(c: dict) -> str:
 
     return f"""
     <div class="card">
-      <h2>模块 8 · DM2 上市以来锁单配置分布（{lc['launch']} ~ {lc['hi']}，零售 {n} 单）</h2>
-      <p class="section-note">本模块复用 research_scripts/l6_m2_lock_config_distribution.py（独立脚本，--format json 输出 Result Contract）。数据源 = dataset/config_attribute.parquet（order_config_to_parquet.py 增量更新后含 DM2）。锁单窗口 = DM2 上市日 {lc['launch']} 起至 {lc['hi']}（零售口径 order_type ∈ 用户车/NaN，与模块 1 一致）；配置归属 = 锁单订单 (Order Number) 匹配的 Attribute/value；核心 5 配置 = 内饰 / 外饰 / 轮毂 / 方向盘 / 超远距高精度激光雷达（每单 1 值）。{n} 单全部可关联配置，核心 5 配置完整 {lc['core_complete']} 单（{lc['core_complete'] / n * 100:.0f}%）。</p>
+      <h2>模块 7 · {lc['gen']} 上市以来锁单配置分布（{lc['launch']} ~ {lc['hi']}，零售 {n} 单）</h2>
+      <p class="section-note">本模块复用 research_scripts/lock_config_distribution.py（独立脚本，--format json 输出 Result Contract）。数据源 = dataset/config_attribute.parquet（order_config_to_parquet.py 增量更新后含最新代际）。锁单窗口 = {lc['gen']} 上市日 {lc['launch']} 起至 {lc['hi']}（零售口径 order_type ∈ 用户车/NaN，与模块 1 一致）；配置归属 = 锁单订单 (Order Number) 匹配的 Attribute/value；核心 5 配置 = 内饰 / 外饰 / 轮毂 / 方向盘 / 超远距高精度激光雷达（每单 1 值）。{n} 单全部可关联配置，核心 5 配置完整 {lc['core_complete']} 单（{lc['core_complete'] / n * 100:.0f}%）。</p>
       {''.join(core_rows)}
       {f'<h3 style="margin-top:20px;">是/否型选装项拥有率（是 = 已选）</h3><div class="table-wrap"><table class="report-table"><thead><tr><th>选装项</th><th>已选</th><th>锁单总数</th><th>拥有率</th><th style="min-width:180px;"></th></tr></thead><tbody>{opt_rows}</tbody></table></div>' if opt_rows else ''}
     </div>"""
@@ -1268,44 +1151,6 @@ def render_html(c: dict) -> str:
         },
     }, ensure_ascii=False)
 
-    # 模块 6 集团订单收口对比图（公共窗口 = 各车型上市后第 1..common_n 日）
-    gc = c.get("group_order")
-    group_fig_json = None
-    if gc and gc.get("models"):
-        common_n = min(len(m["day_offset"]) for m in gc["models"])
-        gdata = []
-        for i, m in enumerate(gc["models"]):
-            days = list(range(1, common_n + 1))
-            cum = m["cum"][:common_n]
-            dates = m["dates"][:common_n]
-            role = "own" if i == 0 else "competitor"
-            gdata.append({
-                "x": days,
-                "y": cum,
-                "customdata": dates,
-                "mode": "lines+markers",
-                "name": m["model"],
-                "line": {"width": 3.0 if i == 0 else 2.4,
-                         "color": get_series_color("own") if i == 0 else get_series_color("competitor", i - 1),
-                         "dash": None if i == 0 else ("dot" if i == 1 else "dash")},
-                "marker": {"size": 5},
-                "hovertemplate": f"<b>{m['model']}</b> · 上市后第 %{{x}} 天（%{{customdata}}）<br>累计订单 %{{y:,}} 单<extra></extra>",
-            })
-        group_fig_json = json.dumps({
-            "data": gdata,
-            "layout": {
-                "title": {"text": f"上市后累计订单收口对比（第 1..{common_n} 日 · 集团订单口径）",
-                          "x": 0.01, "xanchor": "left"},
-                "xaxis": {"title": "上市后天数（第 1 天 = 各车上市日 t0）",
-                          "range": [0.5, common_n + 0.5],
-                          "tickmode": "array", "tickvals": list(range(1, common_n + 1))},
-                "yaxis": {"title": "累计订单（单）", "rangemode": "tozero"},
-                "legend": {"orientation": "h", "y": -0.25, "x": 0},
-                "margin": {"l": 60, "r": 30, "t": 55, "b": 70},
-                "height": 440,
-            },
-        }, ensure_ascii=False)
-
     html = f"""<!doctype html>
 <html lang="zh-CN">
 <head>
@@ -1364,8 +1209,6 @@ def render_html(c: dict) -> str:
 
   {_age_repurchase_table(c)}
 
-  {_group_order_table(c)}
-
   {_lead_window_table(c)}
 
   {_lock_config_table(c)}
@@ -1374,7 +1217,7 @@ def render_html(c: dict) -> str:
     <h2 class="section-title">口径与数据来源</h2>
     <div class="method-grid">
       <div class="method-item"><div class="method-icon" style="background:var(--zh-blue-100);color:var(--zh-blue);">D</div>
-        <div class="method-body"><strong>数据源</strong><br/>dataset/order_data.parquet<br/>dataset/assign_data.csv（有效门店 / 下发线索，模块 7）<br/>shared/schema/business_definition.json<br/>shared/loaders/store_info_loader.py（经销商 Bloc 关联）<br/>research_scripts/store_network_compare.py（网络对比组件）<br/>runtime_scripts/user_profile.py（画像字段口径）<br/>shared/operators/repurchase.py（复购算子）<br/>research_scripts/l6_m2_lock_config_distribution.py（模块 8 · 配置分布）<br/>dataset/config_attribute.parquet（模块 8 · 配置）<br/>outputs/tables/重点车型（订单）.csv（模块 6 · 集团订单）</div></div>
+        <div class="method-body"><strong>数据源</strong><br/>dataset/order_data.parquet<br/>dataset/assign_data.csv（有效门店 / 下发线索，模块 6）<br/>shared/schema/business_definition.json<br/>shared/loaders/store_info_loader.py（经销商 Bloc 关联）<br/>research_scripts/store_network_compare.py（网络对比组件）<br/>runtime_scripts/user_profile.py（画像字段口径）<br/>shared/operators/repurchase.py（复购算子）<br/>research_scripts/lock_config_distribution.py（模块 7 · 配置分布）<br/>dataset/config_attribute.parquet（模块 7 · 配置）</div></div>
       <div class="method-item"><div class="method-icon" style="background:var(--zh-gold-100);color:var(--zh-gold-700);">T</div>
         <div class="method-body"><strong>时间窗口</strong><br/>各代际上市日（time_periods.end）起<br/>共同 {c['n_days']} 天，累计至 {c['last_date']}</div></div>
       <div class="method-item"><div class="method-icon" style="background:#E8F8FD;color:#2D6FA3;">F</div>
@@ -1392,7 +1235,6 @@ def render_html(c: dict) -> str:
 
 <script>
 Plotly.newPlot('chart-launch-cum', {fig_json});
-{('Plotly.newPlot(\'chart-group-order-cum\', ' + group_fig_json + ');') if group_fig_json else '// 无集团订单数据，跳过模块 6 折线图'}
 </script>
 </body>
 </html>"""
@@ -1453,7 +1295,6 @@ def main(argv: list[str] | None = None) -> int:
                 "store_network_compare": c["network"],
                 "user_profile_compare": c["user_profile"],
                 "age_repurchase_compare": c["age_repurchase"],
-                "group_order_compare": c["group_order"],
                 "lead_window_compare": c["lead_window"],
                 "lock_config_distribution": c["lock_config"],
             },

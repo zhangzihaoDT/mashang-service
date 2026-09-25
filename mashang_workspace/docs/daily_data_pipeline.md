@@ -44,6 +44,8 @@ make data-pipeline（旧名 daily-data-pipeline）
 | 分析消费 | `runtime_scripts/` | 稳定分析能力 | ❌ |
 | 产品化问数 | `mashang_runtime_v2/` | Runtime V2 问数服务 | ❌ |
 
+> **锁单口径对齐**：`skills_order_observation_daily.py` 的锁单统计与上市/预售监控（`utils/monitors/`）同源——按 `order_number` 去重、剔除测试单（总部主理店 + 假身份号）、LS6 代际分类复用 `utils.monitors.series_group.apply_series_group_logic`。唯一差异是时间窗口：观察为**单日**（自然日）；上市监控卡片「上市至今累计锁单」自上市开放时刻起累计，并另有「当日锁单」行。开票口径不属于本次对齐范围（仍为全量开票，不剔测试单）。
+
 ## 层级关系
 
 ```
