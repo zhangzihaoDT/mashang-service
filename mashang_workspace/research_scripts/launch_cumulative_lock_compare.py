@@ -843,7 +843,7 @@ def _age_repurchase_table(c: dict) -> str:
     return f"""
     <div class="card">
       <h2>模块 5 · 车主年龄分层 &amp; 复购对比：{b} vs {a}（上市同期 {ar['n_days']} 天窗口）</h2>
-      <p class="section-note">年龄分层按 owner_age（车主年龄，DM0/DM1/DM2 窗口缺失 5–9%）分桶，占比为各带占「已知年龄」比例。复购（老车主）复用 shared/operators/repurchase.py 算子（mode=fulfilled_repurchase，canonical）：窗口内锁单的 owner_identity_no（18 位有效，缺失/无效记无法判定）须在窗口开始前已完成过**兑现购车**——历史零售锁单的交付或开票时间早于上市日；仅历史锁单、从未交付/开票的「悬置单」不计复购，另列悬置历史，避免误判（PIT 不穿越；宽松对照 mode=prior_locker 对齐 lock_attribution_analysis.py "Repeat Lockers (Had Prior Locks)"）。复购占比按可判定业务单（复购+悬置+首购）计。</p>
+      <p class="section-note">年龄分层按 owner_age（车主年龄，各代际窗口缺失约 5–9%）分桶，占比为各带占「已知年龄」比例。复购（老车主）复用 shared/operators/repurchase.py 算子（mode=fulfilled_repurchase，canonical）：窗口内锁单的 owner_identity_no（18 位有效，缺失/无效记无法判定）须在窗口开始前已完成过**兑现购车**——历史零售锁单的交付或开票时间早于上市日；仅历史锁单、从未交付/开票的「悬置单」不计复购，另列悬置历史，避免误判（PIT 不穿越；宽松对照 mode=prior_locker 对齐 lock_attribution_analysis.py "Repeat Lockers (Had Prior Locks)"）。复购占比按可判定业务单（复购+悬置+首购）计。</p>
       <div class="table-wrap">
       <table class="report-table">
         <thead><tr><th>年龄段</th><th>{a} 单数</th><th>{a} 占已知</th><th>{b} 单数</th><th>{b} 占已知</th><th>占比差（{b}−{a}）</th></tr></thead>
@@ -1192,8 +1192,8 @@ def render_html(c: dict) -> str:
     <h2>模块 1 · 上市后每日累计锁单对比折线图</h2>
     <div class="chart-box" id="chart-launch-cum" style="height:520px;"></div>
     <div class="section-note">
-      各代际自其上市日（DM0 {c['curves'][gens[0]]['end']} / DM1 {c['curves'][gens[1]]['end']} / DM2 {c['curves'][gens[2]]['end']}）起，
-      按 DM2 上市后天数对齐第 1..{n} 天；累计 = 截至当日 23:59 零售锁单 COUNTD(order_number)。DM2 为菱形实线，DM0 点线供形态参考。
+      各代际自其上市日（{' / '.join(f"{g} {c['curves'][g]['end']}" for g in gens)}）起，
+      按 {gens[-1]} 上市后天数对齐第 1..{n} 天；累计 = 截至当日 23:59 零售锁单 COUNTD(order_number)。{gens[-1]} 为菱形实线，{gens[0]} 点线供形态参考。
     </div>
   </section>
 
