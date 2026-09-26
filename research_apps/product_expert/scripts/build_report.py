@@ -531,7 +531,7 @@ def build_markdown(run, patterns, convergences, findings, issues, evidence, psta
         add("</details>")
         add("")
 
-    add("## 时间比较")
+    add("<details class='temporal'><summary>时间比较（跨期比较）</summary>")
     add("")
     tview = temporal_rows(patterns, convergences, baseline)
     if not tview:
@@ -564,6 +564,8 @@ def build_markdown(run, patterns, convergences, findings, issues, evidence, psta
             add("")
         add("> 跨期比较只描述证据覆盖与统计变化，不代表因果关系或总体市场趋势。")
         add("")
+    add("</details>")
+    add("")
 
     add("## 方法与 Runtime 追溯")
     add("")
@@ -674,7 +676,14 @@ details.other{margin-top:16px}
 details.other summary{cursor:pointer;font-size:14px;color:var(--link);font-weight:600}
 details.more{margin-top:8px}
 details.more summary{cursor:pointer;font-size:12.5px;color:var(--link);font-weight:600;margin-bottom:8px}
-.temporal{font-size:13.5px;color:var(--muted);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:14px 0;margin:40px 0 0}
+details.temporal{font-size:13.5px;color:var(--muted);border-top:1px solid var(--rule-solid);border-bottom:1px solid var(--rule-solid);padding:14px 0;margin:40px 0 0}
+details.temporal>summary{cursor:pointer;font-size:20px;font-weight:600;color:var(--ink);list-style:none}
+details.temporal>summary::-webkit-details-marker{display:none}
+details.temporal>summary::before{content:"▸";color:var(--soft);font-size:14px;margin-right:8px}
+details.temporal[open]>summary::before{content:"▾"}
+details.temporal>summary small{display:block;font-size:12.5px;font-weight:400;color:var(--soft);letter-spacing:0;margin-top:4px}
+details.temporal .note{color:var(--muted)}
+details.temporal section.card{margin-top:14px}
 .appendix{font-size:12.5px;color:var(--soft);margin-top:28px}
 .appendix summary{cursor:pointer;font-size:13px;color:var(--link);font-weight:600}
 .appendix ul{margin:10px 0 0;padding-left:18px}
@@ -854,14 +863,17 @@ footer{margin-top:40px;color:var(--soft);font-size:12px;letter-spacing:.04em}
         add("</details>")
 
     tview = temporal_rows(patterns, convergences, baseline)
-    if not tview:
-        add("<p class='temporal'>baseline_only：本期无已声明的可比基线，暂无跨期趋势。</p>")
-    else:
+    if tview:
         cur_run = _esc(run["run_id"])
         base_run_id = _esc((baseline or {}).get("run_id", "—"))
         base_window = _esc((baseline or {}).get("window", "—"))
-        add("<h2 class='sect'>跨期比较"
-            f"<small>{cur_run}（{_esc(scope['window'])}） vs {base_run_id}（{base_window}）；按 pattern_key 对齐</small></h2>")
+        t_sub = f"{cur_run}（{_esc(scope['window'])}） vs {base_run_id}（{base_window}）；按 pattern_key 对齐"
+    else:
+        t_sub = "本期无已声明的可比基线"
+    add(f"<details class='temporal'><summary>跨期比较<small>{t_sub}</small></summary>")
+    if not tview:
+        add("<p class='note'>baseline_only：本期无已声明的可比基线，暂无跨期趋势。</p>")
+    else:
         add("<section class='card span-2'>")
         add("<table><thead><tr><th>主题</th><th>状态</th><th>证据</th><th>覆盖门店</th>"
             "<th>复现</th><th>证据强度</th></tr></thead><tbody>")
@@ -885,6 +897,7 @@ footer{margin-top:40px;color:var(--soft);font-size:12px;letter-spacing:.04em}
                 + _esc("、".join(tview["disappeared"])) + "</p>")
         add("<p class='note'>跨期比较只描述证据覆盖与统计变化，不代表因果关系或总体市场趋势。</p>")
         add("</section>")
+    add("</details>")
 
     add("<details class='appendix'><summary>方法与 Runtime 追溯</summary><ul>")
     add("<li>A 业务主题扫描：选择题由 <code>derive_survey_stats.py</code> 直读问卷列并确定性聚合；"

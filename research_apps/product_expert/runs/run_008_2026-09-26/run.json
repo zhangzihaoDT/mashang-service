@@ -1,0 +1,23 @@
+{
+  "run_id": "run_008_2026-09-26",
+  "executed_at": "2026-09-26",
+  "study_year": 2026,
+  "record_count": 9,
+  "dataset": "/Users/zihao_/Documents/coding/dataset/original/L6 M2_LS6 M3 产品专家门店支持信息收集汇总_产品专家支持每日反馈_收集结果.csv",
+  "dataset_sha256": "c2cd2bbf5fcdf50cc1e085d2b9f03bf6e4991f1f4df22b8ebae8803823a93968",
+  "method": [
+    "workflow/issue_discovery.md",
+    "workflow/issue_review.md",
+    "workflow/convergence.md"
+  ],
+  "taxonomy_version": "0.2.3",
+  "support_date_filter": "2026-09-26",
+  "scope": {
+    "start_date": "2026-09-26",
+    "end_date": "2026-09-26",
+    "granularity": "daily"
+  },
+  "comparison_baseline_run_id": "run_007_2026-09-25",
+  "comparison_granularity": "daily",
+  "notes": "数据源为『产品专家支持每日反馈』问卷（v0.2.3）；本轮为 2026-09-26 单日 cut（9 条）。前段选择题由 derive_survey_stats.py 确定性解析，后段自由文本走 Open Discovery。evidence.record_index 为 09/26 cut 内的 0 基序号（与 survey_stats.records 对齐）。最近单日基线为 run_007_2026-09-25（相邻日），跨期比较仅按 pattern_key 对齐、只描述证据覆盖与统计变化。"
+}
