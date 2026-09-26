@@ -389,7 +389,7 @@ mashang-service/
 | 业务状态排查 | `make state-diagnosis` 或 `python mashang_workspace/runtime_scripts/current_state_diagnosis.py [--as-of YYYY-MM-DD]`(库存×待开票未退订×风险暴露;`AS_OF` 支持历史时点 PIT 重建,可选 `SERIES/FORMAT/OUTPUT`) | runtime |
 | 门店→经销商主体画像 | `python mashang_workspace/runtime_scripts/store_dealer_profile.py 门店1 门店2`(返回 门店/经销商主体(Bloc)/大区/该主体门店数(在营)/城市分布 + 近期主理 + 近7日下发线索 + 近7日锁单及车系分布 + CM3留存小订，含主体内排名占比，无独立口径时回落关联车城店;`--status` 在营口径;`--as-of`/`--window-days`;`--format json/csv`) | runtime |
 | 主理数据更新 | `python dataset/updater/store_daily_zhuli_to_csv.py [--with-roster]`(Tableau→`dataset/门店日报_主理_当月.csv`;`--with-roster` 另出 `dataset/主理信息表.csv`) | DataOps |
-| 门店下发线索数更新 | `python dataset/updater/store_daily_leads_to_csv.py`(Tableau 165 门店级视图 → `dataset/门店下发线索数.csv`;**滚动窗口增量合并**,逐日扩长;`--dry-run`/`--rebuild`) | DataOps |
+| 每日下发线索（by门店）更新 | `python dataset/updater/store_daily_leads_to_csv.py`(Tableau 165 门店级视图 → `dataset/store_daily_leads.csv`;**滚动窗口增量合并**,逐日扩长;`--dry-run`/`--rebuild`) | DataOps |
 | 门店经营状况观察 | `python mashang_workspace/utility_scripts/store_operation_observation.py`(全门店 门店/门店类型/门店形态/近7日下发线索/CM3小订/小订线索比;默认仅保留有线索或小订的门店,`--include-relations` 额外纳入无数据快闪/慢闪并标关联门店;`--format csv` 落 `outputs/tables/store_operation_observation.csv`) | utility |
 | 门店线索×小订四象限 | `python mashang_workspace/research_scripts/store_leads_intention_quadrant.py`(读观察 CSV → 四象限散点 HTML;高/低线索×高/低转化,中位数切分;`--color-by type/format/quadrant` 默认按门店分类着色;`--input`/`--top-label`;落 `outputs/reports/`) | research |
 | 释放曲线 | `python mashang_workspace/research_scripts/release_curve_analysis.py` | research |

@@ -12,7 +12,7 @@ _WS_DIR = _PRJ / "mashang_workspace"
 SCRIPT = _WS_DIR / "utility_scripts" / "store_operation_observation.py"
 
 COLUMNS = ["门店", "门店类型", "门店形态", "关联门店", "近7日下发线索", "近7日锁单", "CM3小订", "小订/线索"]
-LEADS_CSV = _PRJ / "dataset" / "门店下发线索数.csv"
+LEADS_CSV = _PRJ / "dataset" / "store_daily_leads.csv"
 ORDER_PARQUET = _PRJ / "dataset" / "order_data.parquet"
 
 

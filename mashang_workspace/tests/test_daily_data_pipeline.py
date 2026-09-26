@@ -242,7 +242,7 @@ def test_dataset_validate_script_works():
     data = json.loads(r.stdout)
     assert "status" in data
     assert "files" in data
-    assert len(data["files"]) == 5
+    assert len(data["files"]) == 8
 
 
 def _load_merge_order_data():
@@ -552,3 +552,81 @@ def test_step_export_no_discovery_requires_known_view_id(tmp_path, monkeypatch):
     ok, err = mod.step_export_tableau_order_data_2026(config_path=cfg, allow_discovery=False)
     assert ok is False
     assert err is not None and err.startswith("tableau_view_unavailable")
+
+
+# ── dataset update-all / registry / status-only ─────────────────────────────
+
+DATASET_REGISTRY_PATH = UPDATER_DIR / "dataset_registry.py"
+ALL_DATASET_KEYS = {
+    "order_data",
+    "config_attribute",
+    "assign_data",
+    "test_drive_data",
+    "lock_attribution",
+    "delivery_inventory",
+    "store_info",
+    "store_daily_leads",
+}
+
+
+def _load_module(path: Path, name: str):
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(name, path)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"无法加载 {path}")
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules[name] = mod
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_dataset_registry_is_single_source_of_truth():
+    """registry 唯一清单：8 个数据集、key 唯一。"""
+    mod = _load_module(DATASET_REGISTRY_PATH, "dsreg_test")
+    keys = [d.key for d in mod.DATASETS]
+    assert len(keys) == 8
+    assert len(set(keys)) == 8
+    assert set(keys) == ALL_DATASET_KEYS
+
+
+def test_update_all_run_returns_code_without_raising(tmp_path):
+    """run() continue-on-error：失败返回退出码，不抛 SystemExit。"""
+    mod = _load_module(UPDATER_DIR / "update_all_datasets.py", "uad_test")
+    rc = mod.run([sys.executable, "-c", "import sys; sys.exit(3)"], cwd=tmp_path, step_timeout=30)
+    assert rc == 3
+
+
+def test_update_all_status_only_lists_every_dataset():
+    """--status-only 只读打印全部数据集与「数据最新时点」，退出码 0。"""
+    import subprocess
+
+    r = subprocess.run(
+        [sys.executable, str(UPDATER_DIR / "update_all_datasets.py"), "--status-only"],
+        capture_output=True,
+        text=True,
+        timeout=180,
+    )
+    assert r.returncode == 0, f"status-only failed: {r.stderr}"
+    assert "数据最新时点" in r.stdout
+    for label in ["订单数据", "选配信息", "下发线索", "试驾数据", "锁单归因",
+                  "交付-库存", "门店主数据", "每日下发线索（by门店）"]:
+        assert label in r.stdout, f"status-only 缺少数据集: {label}"
+
+
+def test_makefile_has_data_status():
+    """Makefile 包含 data-status target。"""
+    text = MAKEFILE_PATH.read_text()
+    assert "data-status:" in text
+
+
+def test_makefile_data_status_uses_python_var():
+    """Makefile 中 data-status 使用 $(PYTHON)。"""
+    text = MAKEFILE_PATH.read_text()
+    lines = text.splitlines()
+    found = False
+    for i, line in enumerate(lines):
+        if line.strip() == "data-status:":
+            assert "$(PYTHON)" in lines[i + 1], f"data-status not using $(PYTHON): {lines[i + 1]}"
+            found = True
+    assert found, "data-status target not found"

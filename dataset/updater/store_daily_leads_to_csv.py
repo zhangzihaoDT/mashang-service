@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-门店下发线索数（增量更新）
+每日下发线索（by门店）：增量更新
+
+粒度：门店 × 日期 → 下发线索数（非渠道/全局聚合）
 
 来源视图:
     https://tableau-hs.immotors.com/#/views/165/leads_assign_city_store2_1
@@ -12,7 +14,7 @@
     每次拉取窗口数据 → 与已有 dataset 去重合并 → 逐日扩长历史。
 
 输出（仓库 dataset/，.gitignore 不提交）:
-    dataset/门店下发线索数.csv    列: 门店 / 日期 / 下发线索数
+    dataset/store_daily_leads.csv    列: 门店 / 日期 / 下发线索数
 
 用法:
     python dataset/updater/store_daily_leads_to_csv.py            # 增量更新
@@ -31,7 +33,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 DATASET_DIR = REPO_ROOT / "dataset"
 
 LEADS_VIEW = "https://tableau-hs.immotors.com/#/views/165/leads_assign_city_store2_1"
-OUTPUT_CSV = DATASET_DIR / "门店下发线索数.csv"
+OUTPUT_CSV = DATASET_DIR / "store_daily_leads.csv"
 
 SRC_STORE_COL = "lc_assign_1st2sales_dealer_name"
 SRC_DATE_COL = "日(lc_assign_time_min)"
@@ -105,7 +107,7 @@ def export_view(exporter, *, tmp: Path, token_name: str, token_value: str,
 def main(argv: list[str] | None = None) -> int:
     import pandas as pd
 
-    parser = argparse.ArgumentParser(description="门店下发线索数：Tableau → dataset（增量）")
+    parser = argparse.ArgumentParser(description="每日下发线索（by门店）：Tableau → dataset（增量）")
     parser.add_argument("--timeout", type=int, default=600, help="Tableau 导出超时（秒）")
     parser.add_argument("--mobile", action="store_true", help="使用移动端服务器地址导出")
     parser.add_argument("--dry-run", action="store_true", help="只拉取校验，不合并写盘")
@@ -122,7 +124,7 @@ def main(argv: list[str] | None = None) -> int:
     DATASET_DIR.mkdir(parents=True, exist_ok=True)
     exporter = import_lock_attribution_exporter()
 
-    tmp = DATASET_DIR / "门店下发线索数.csv.tmp"
+    tmp = DATASET_DIR / "store_daily_leads.csv.tmp"
     try:
         export_view(exporter, tmp=tmp, token_name=token_name, token_value=token_value,
                     timeout=args.timeout, mobile=args.mobile)

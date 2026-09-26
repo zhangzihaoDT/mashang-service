@@ -235,7 +235,8 @@ runtime-v2-clean-sessions:
 ## ─── Daily Data Pipeline（canonical 入口）──────────────────────────
 ##
 ## 入口语义与副作用：
-##   make data-refresh    刷新 dataset（local write：dataset/*.parquet/.csv）
+##   make data-refresh    刷新 dataset（local write：dataset/*.parquet/.csv；结束打印逐数据集结论）
+##   make data-status     数据集现状（read-only：行数 / 文件更新时间 / 数据最新时点）
 ##   make data-validate   校验 dataset 完整性（read-only）
 ##   make observe-dry-run 每日观察预检（read-only）
 ##   make observe-sync    每日观察同步（external write：飞书多维表 + 机器人）
@@ -254,6 +255,10 @@ runtime-v2-clean-sessions:
 ## 办公网不可达时自动回退移动链路；可用 MOBILE=1 显式强制（如 make data-refresh MOBILE=1）
 data-refresh:
 	$(PYTHON) dataset/updater/update_all_datasets.py $(if $(MOBILE),--mobile)
+
+## 数据集现状（只读）：逐数据集 行数 / 文件更新时间 / 数据最新时点，不触发数据源
+data-status:
+	$(PYTHON) dataset/updater/update_all_datasets.py --status-only
 
 ## 数据集完整性校验（只读）
 data-validate:
@@ -358,7 +363,7 @@ sales-monitor-sync: monitor-sync
 ## 常驻定时器：09:00 每日管道（刷新→校验→同步→监控）+ key day 17-23 高频刷新/监控（配合 caffeinate -i）
 ## 注意：常驻进程，会刷新数据、同步飞书并发送监控卡片
 sales-scheduler:
-	$(PYTHON) schedule_launch_lock_evening_updates.py
+	$(PYTHON) mashang_workspace/utility_scripts/sales_scheduler.py
 
 ## 兼容别名
 scheduler: sales-scheduler

@@ -10,7 +10,9 @@ make data-pipeline（旧名 daily-data-pipeline）
   ├── 1. make data-refresh（旧名 dataset-update）
   │     dataset/updater/update_all_datasets.py
   │     从 Tableau/数据源刷新 dataset/*.parquet / *.csv
-  │     → 写操作
+  │     数据集清单唯一来源于 dataset/updater/dataset_registry.py
+  │     结束（无论成败）打印逐数据集结论：本次是否更新 / 状态 / 行数 / 文件更新时间 / 数据最新时点
+  │     → 写操作（continue-on-error：单个 step 失败不中断，整体返回非 0）
   │
   ├── 2. make data-validate（旧名 dataset-validate）
   │     mashang_workspace/utility_scripts/dataset_validate.py
@@ -67,6 +69,7 @@ mashang_runtime_v2/        ← 产品化问数层
 ### 安全检查流程（推荐每日先用）
 
 ```bash
+make data-status                # 数据集现状：逐数据集 行数 / 文件更新时间 / 数据最新时点（只读）
 make data-validate              # 检查 dataset 完整性（旧名 dataset-validate）
 make observe-dry-run            # 预检观察结果（旧名 daily-observation-dry-run）
 ```
@@ -76,6 +79,9 @@ make observe-dry-run            # 预检观察结果（旧名 daily-observation-
 ```bash
 make data-pipeline-dry-run      # data-validate + observe-dry-run（旧名 daily-data-pipeline-dry-run）
 ```
+
+> `make data-status` 只读，不触发数据源；等价于 `python dataset/updater/update_all_datasets.py --status-only`。
+> `data-refresh` 结束也会打印同一张逐数据集结论表（含「本次已更新 N/8」）。
 
 ### 完整执行流程（写操作）
 
@@ -97,6 +103,21 @@ make daily-ops                  # data-pipeline + sales-monitor（数据更新 +
 - `data-refresh` 和 `observe-sync` 是写操作
 - `observe-sync` 会写入飞书多维表格和发送飞书机器人通知
 - 不要在 CI 中自动执行写操作
+
+### 数据集清单（update-all 覆盖范围）
+
+清单在 `dataset/updater/dataset_registry.py` 维护，`update_all_datasets.py`（刷新/汇总）与 `dataset_validate.py`（校验）同源消费，共 8 个：
+
+| step | 数据集 | 文件 | 必需 | 数据最新时点口径 |
+|------|--------|------|------|------------------|
+| 1 | 订单数据 | `dataset/order_data.parquet` | ✅ | `lock_time` 等业务时间列 |
+| 2 | 选配信息 | `dataset/config_attribute.parquet` | ✅ | 无日期列（看文件更新时间） |
+| 3 | 下发线索 | `dataset/assign_data.csv` | ✅ | `Assign Time 年/月/日` |
+| 3 | 试驾数据 | `dataset/test_drive_data.csv` | | `create_date 年/月/日` |
+| 3 | 锁单归因 | `dataset/lock_attribution_data.parquet` | | `lc_order_lock_time_min` |
+| 4 | 交付-库存 | `dataset/delivery_inventory.parquet` | | `attribute_dealer_date` |
+| 5 | 门店主数据 | `<original>/store_info.csv`（可用 `STORE_INFO_CSV` 覆盖） | | 无日期列 |
+| 6 | 每日下发线索（by门店） | `dataset/store_daily_leads.csv` | | `日期` |
 
 ### 网络回退（办公网 / 移动链路）
 

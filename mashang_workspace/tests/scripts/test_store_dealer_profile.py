@@ -79,7 +79,7 @@ def test_zhuli_section_fallback():
 
 
 ORDER_PARQUET = _PRJ / "dataset" / "order_data.parquet"
-LEADS_CSV = _PRJ / "dataset" / "门店下发线索数.csv"
+LEADS_CSV = _PRJ / "dataset" / "store_daily_leads.csv"
 
 
 @pytest.mark.skipif(not ORDER_PARQUET.exists(), reason="dataset/order_data.parquet 不存在")
@@ -102,7 +102,7 @@ def test_lock_and_presale_sections():
 
 
 @pytest.mark.skipif(not (ORDER_PARQUET.exists() and LEADS_CSV.exists()),
-                    reason="order_data / 门店下发线索数 不存在")
+                    reason="order_data / store_daily_leads 不存在")
 def test_leads_section_fallback():
     r = _run("遵义吾悦广场城市展厅", "--format", "json", "--as-of", "2026-09-16")
     assert r.returncode == 0, r.stderr[-2000:]

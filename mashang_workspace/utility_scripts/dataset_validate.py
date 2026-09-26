@@ -1,122 +1,76 @@
 #!/usr/bin/env python
 """
-轻量 dataset 校验脚本 — 检查关键数据集是否存在、可读、非空。
+轻量 dataset 校验脚本 — 检查关键数据集是否存在、可读、非空，并报告数据最新时点。
 
-校验对象:
+校验清单来自 dataset/updater/dataset_registry.py（与 update_all_datasets.py 同源），
+避免「更新清单 / 校验清单」漂移。
+
+校验对象（8 个）:
   - dataset/order_data.parquet
   - dataset/config_attribute.parquet
   - dataset/assign_data.csv
   - dataset/test_drive_data.csv
   - dataset/lock_attribution_data.parquet
+  - dataset/delivery_inventory.parquet
+  - store_info.csv（仓库外 original 目录）
+  - dataset/store_daily_leads.csv
 
 用法:
     python mashang_workspace/utility_scripts/dataset_validate.py
     python mashang_workspace/utility_scripts/dataset_validate.py --json
 """
 
-import sys, argparse, json
+import sys, argparse, json, importlib.util
 from datetime import datetime
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-DATASET_DIR = REPO_ROOT / "dataset"
-
-DATASET_FILES = [
-    {
-        "path": "dataset/order_data.parquet",
-        "key_fields": ["order_number", "lock_time"],
-        "required": True,
-    },
-    {
-        "path": "dataset/config_attribute.parquet",
-        "key_fields": ["Order Number"],
-        "required": True,
-    },
-    {
-        "path": "dataset/assign_data.csv",
-        "key_fields": ["Assign Time 年/月/日"],
-        "required": True,
-    },
-    {
-        "path": "dataset/test_drive_data.csv",
-        "key_fields": [],
-        "required": False,
-    },
-    {
-        "path": "dataset/lock_attribution_data.parquet",
-        "key_fields": [],
-        "required": False,
-    },
-]
 
 
-def _read_parquet_meta(filepath: Path) -> tuple[int | None, list[str]]:
-    try:
-        import pandas as pd
-        df = pd.read_parquet(filepath)
-        return len(df), list(df.columns)
-    except Exception:
-        return None, []
+def _load_registry():
+    path = REPO_ROOT / "dataset" / "updater" / "dataset_registry.py"
+    spec = importlib.util.spec_from_file_location("mashang_dataset_registry", path)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"无法加载 dataset registry: {path}")
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules["mashang_dataset_registry"] = mod
+    spec.loader.exec_module(mod)
+    return mod
 
 
-def _get_row_count(filepath: Path) -> int | None:
-    try:
-        if filepath.suffix == ".parquet":
-            n, _ = _read_parquet_meta(filepath)
-            return n
-        elif filepath.suffix == ".csv":
-            with open(filepath) as f:
-                return sum(1 for _ in f) - 1
-    except Exception:
-        return None
+_registry = _load_registry()
+DATASETS = _registry.DATASETS
+_describe = _registry.describe
 
 
-def _get_columns(filepath: Path) -> list[str]:
-    try:
-        if filepath.suffix == ".parquet":
-            _, cols = _read_parquet_meta(filepath)
-            return cols
-        elif filepath.suffix == ".csv":
-            with open(filepath) as f:
-                header = f.readline().strip()
-                return [c.strip() for c in header.split(",")]
-    except Exception:
-        return []
-
-
-def validate_file(spec: dict) -> dict:
-    rel_path = spec["path"]
-    full_path = DATASET_DIR / rel_path.split("/", 1)[1]
+def validate_spec(spec) -> dict:
+    d = _describe(spec)
     result = {
-        "path": rel_path,
-        "exists": full_path.exists(),
-        "rows": None,
-        "size_bytes": None,
-        "modified_at": None,
+        "path": d["path"],
+        "key": d["key"],
+        "label": d["label"],
+        "required": d["required"],
+        "exists": d["exists"],
+        "rows": d["rows"],
+        "size_bytes": d["size_bytes"],
+        "modified_at": d["file_mtime"],
+        "data_asof": d["data_asof"],
+        "data_asof_column": d["data_asof_column"],
         "warnings": [],
         "errors": [],
     }
-    if not result["exists"]:
+    if not d["exists"]:
         result["errors"].append("file not found")
         return result
 
-    stat = full_path.stat()
-    result["size_bytes"] = stat.st_size
-    result["modified_at"] = datetime.fromtimestamp(stat.st_mtime).isoformat()
-    result["rows"] = _get_row_count(full_path)
-
     if result["rows"] is not None and result["rows"] == 0:
         result["warnings"].append("file is empty (0 data rows)")
-
     if result["rows"] is None:
         result["warnings"].append("could not read row count")
 
-    key_fields = spec.get("key_fields", [])
-    if key_fields:
-        columns = _get_columns(full_path)
-        missing = [f for f in key_fields if f not in columns]
-        if missing:
-            result["warnings"].append(f"missing key fields: {missing}")
+    missing = [f for f in spec.key_fields if f not in d["columns"]]
+    if missing:
+        result["warnings"].append(f"missing key fields: {missing}")
 
     return result
 
@@ -126,13 +80,12 @@ def main():
     parser.add_argument("--json", action="store_true", help="JSON output")
     args = parser.parse_args()
 
-    file_results = [validate_file(spec) for spec in DATASET_FILES]
+    file_results = [validate_spec(spec) for spec in DATASETS]
 
     has_errors = any(r["errors"] for r in file_results)
     has_warnings = any(r["warnings"] for r in file_results)
     critical_missing = any(
-        r["errors"] and spec["required"]
-        for r, spec in zip(file_results, DATASET_FILES)
+        r["errors"] and r["required"] for r in file_results
     )
 
     if critical_missing:
@@ -162,7 +115,12 @@ def main():
             rows = r["rows"] if r["rows"] is not None else "?"
             size_kb = r["size_bytes"] / 1024 if r["size_bytes"] else 0
             mod = r["modified_at"][:19] if r["modified_at"] else "N/A"
-            print(f"  {icon} {r['path']}: {status_str}, rows={rows}, size={size_kb:.0f}KB, mod={mod}")
+            asof = (
+                f", asof={r['data_asof'][:16]} ({r['data_asof_column']})"
+                if r["data_asof"]
+                else ""
+            )
+            print(f"  {icon} {r['path']}: {status_str}, rows={rows}, size={size_kb:.0f}KB, mod={mod}{asof}")
             for w in r["warnings"]:
                 print(f"       warning: {w}")
             for e in r["errors"]:

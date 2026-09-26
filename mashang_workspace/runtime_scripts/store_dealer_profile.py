@@ -72,8 +72,8 @@ BUSINESS_DEF = REPO_ROOT / "shared" / "schema" / "business_definition.json"
 LOCK_COLUMNS = ["门店", "近7日锁单", "车系分布", "该主体近7日锁单", "锁单主体内排名", "锁单主体内占比", "水平"]
 PRESALE_COLUMNS = ["门店", "统计门店", "CM3留存小订", "该主体CM3留存小订", "CM3主体内占比", "小订/线索"]
 
-# 门店下发线索数（增量库；dataset/updater/store_daily_leads_to_csv.py）
-LEADS_CSV = REPO_ROOT / "dataset" / "门店下发线索数.csv"
+# 每日下发线索（by门店；增量库；dataset/updater/store_daily_leads_to_csv.py）
+LEADS_CSV = REPO_ROOT / "dataset" / "store_daily_leads.csv"
 LEADS_COLUMNS = ["门店", "近7日下发线索", "该主体近7日下发线索", "线索主体内排名", "线索主体内占比"]
 
 
@@ -277,7 +277,7 @@ def match_order_store(store_name: str, info: dict | None, order_store_names: lis
 
 
 def load_leads_metrics(as_of=None, window_days: int = 7) -> dict | None:
-    """读取门店下发线索数增量库，聚合近 window_days 日每店下发线索数。
+    """读取每日下发线索（by门店）增量库，聚合近 window_days 日每店下发线索数。
 
     返回 {as_of, window_days, leads_by_store, bloc_of, store_names}
     """

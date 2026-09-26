@@ -19,16 +19,16 @@
     source .venv/bin/activate
     # 方式一：两个终端
     caffeinate -i
-    python schedule_launch_lock_evening_updates.py
+    python mashang_workspace/utility_scripts/sales_scheduler.py
     # 方式二：合并
-    caffeinate -i python schedule_launch_lock_evening_updates.py
+    caffeinate -i python mashang_workspace/utility_scripts/sales_scheduler.py
     # 后台
-    nohup caffeinate -i .venv/bin/python schedule_launch_lock_evening_updates.py \\
+    nohup caffeinate -i .venv/bin/python mashang_workspace/utility_scripts/sales_scheduler.py \\
         > logs/scheduler/stdout.log 2>&1 &
 
 用法:
-    python schedule_launch_lock_evening_updates.py --once --dry-run   # 立即跑一轮监控后退出
-    python schedule_launch_lock_evening_updates.py --once --as-of 2026-09-10 --dry-run
+    python mashang_workspace/utility_scripts/sales_scheduler.py --once --dry-run   # 立即跑一轮监控后退出
+    python mashang_workspace/utility_scripts/sales_scheduler.py --once --as-of 2026-09-10 --dry-run
 """
 
 from __future__ import annotations
@@ -42,8 +42,8 @@ import time
 from datetime import datetime
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent
-_WS_ROOT = REPO_ROOT / "mashang_workspace"
+_WS_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = _WS_ROOT.parent
 for _p in (str(REPO_ROOT), str(_WS_ROOT)):
     if _p not in sys.path:
         sys.path.insert(0, _p)

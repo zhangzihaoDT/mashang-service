@@ -11,7 +11,7 @@
   - 门店形态（我们的 schema）: 取该表 门店编码(Dealer Code) 前缀经 store_info_loader
     .get_store_format 派生（如 IMP/IME=快闪/慢闪）；无编码时仅按 store_info 门店全名**精确**匹配，
     仍无则记「未知」（不做子串猜测）
-  - 近 N 日下发线索: dataset/门店下发线索数.csv（增量库）窗口求和
+  - 近 N 日下发线索: dataset/store_daily_leads.csv（by门店增量库）窗口求和
   - 近 N 日锁单: order_data.parquet，lock_time ∈ 窗口（全部车系）
   - CM3 留存小订: order_data.parquet，series_group=CM3 且意向金时间 ∈ [CM3预售开放, 截止) 且未退意向金
   - 小订/线索 = CM3 留存小订 ÷ 近 N 日下发线索
@@ -48,7 +48,7 @@ from shared.loaders import store_info_loader as sl  # noqa: E402
 
 ORDER_PARQUET = REPO_ROOT / "dataset" / "order_data.parquet"
 BUSINESS_DEF = REPO_ROOT / "shared" / "schema" / "business_definition.json"
-LEADS_CSV = REPO_ROOT / "dataset" / "门店下发线索数.csv"
+LEADS_CSV = REPO_ROOT / "dataset" / "store_daily_leads.csv"
 ZHULI_ZAIGANG_CSV = REPO_ROOT / "dataset" / "门店日报_主理_当月.csv"
 
 COLUMNS = ["门店", "门店类型", "门店形态", "关联门店", "近7日下发线索", "近7日锁单", "CM3小订", "小订/线索"]

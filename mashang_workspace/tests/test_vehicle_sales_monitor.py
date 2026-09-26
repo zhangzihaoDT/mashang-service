@@ -53,7 +53,7 @@ def bdef() -> dict:
 
 def _load_scheduler():
     spec = importlib.util.spec_from_file_location(
-        "schedule_launch_lock_evening_updates", _PRJ_DIR / "schedule_launch_lock_evening_updates.py"
+        "sales_scheduler", _WS_DIR / "utility_scripts" / "sales_scheduler.py"
     )
     if spec is None or spec.loader is None:
         raise ImportError("无法加载 scheduler")

@@ -1,15 +1,22 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-一键更新 dataset 目录下的核心数据集：
+一键更新 dataset 目录下的核心数据集（dataset update-all）。
 
-- assign_data.csv
-- test_drive_data.csv
-- lock_attribution_data.parquet
-- order_data.parquet
-- config_attribute.parquet
-- store_info.csv（外部 original 目录，门店主数据）
-- 门店下发线索数.csv（仓库 dataset/，滚动窗口增量合并）
+数据集清单由 dataset/updater/dataset_registry.py 统一维护（唯一 source of truth），
+本脚本负责按 step 刷新，并在结束（无论成败）打印逐数据集结论：
+
+- 本次是否更新 / 状态 / 行数 / 文件更新时间 / 数据最新时点
+
+行为约定：
+- 单个 step 失败不再中断全链路（continue-on-error），最终整体返回非 0。
+- `--fail-fast` 可恢复「首个失败即停」的旧行为。
+- `--status-only` 只读查看现状，不触发任何数据源/写操作。
+
+覆盖数据集（见 registry）：
+- order_data.parquet / config_attribute.parquet
+- assign_data.csv / test_drive_data.csv / lock_attribution_data.parquet
+- delivery_inventory.parquet / store_info.csv / store_daily_leads.csv
 """
 
 from __future__ import annotations
@@ -18,7 +25,12 @@ import os
 import sys
 import argparse
 import subprocess
+import time
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from dataset_registry import describe_all, format_report  # noqa: E402
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -66,41 +78,130 @@ def office_tableau_reachable(timeout: float = 8.0) -> bool:
         return False
 
 
-def run(cmd: list[str], cwd: Path, step_timeout: int | None = None) -> None:
+def run(cmd: list[str], cwd: Path, step_timeout: int | None = None) -> int:
+    """执行子进程并返回退出码；不再因失败抛 SystemExit，便于 continue-on-error。
+
+    超时返回 124（沿用 shell timeout 约定）。
+    """
     kwargs: dict = {"cwd": str(cwd), "env": os.environ.copy()}
     if step_timeout is not None:
         kwargs["timeout"] = step_timeout
     try:
         p = subprocess.run(cmd, **kwargs)
     except subprocess.TimeoutExpired:
-        raise SystemExit(
-            f"❌ 子进程超时 ({step_timeout}s): {' '.join(str(x) for x in cmd[:3])}..."
-        )
-    if p.returncode != 0:
-        raise SystemExit(p.returncode)
+        print(f"❌ 子进程超时 ({step_timeout}s): {' '.join(str(x) for x in cmd[:3])}...")
+        return 124
+    return p.returncode
 
 
-def show_outputs() -> None:
-    targets = [
-        DATASET_DIR / "assign_data.csv",
-        DATASET_DIR / "test_drive_data.csv",
-        DATASET_DIR / "lock_attribution_data.parquet",
-        DATASET_DIR / "order_data.parquet",
-        DATASET_DIR / "config_attribute.parquet",
-        Path("/Users/zihao_/Documents/coding/dataset/original/store_info.csv"),
-        DATASET_DIR / "门店下发线索数.csv",
+def _header(title: str) -> None:
+    print("\n" + "=" * 80, flush=True)
+    print(title, flush=True)
+    print("=" * 80, flush=True)
+
+
+def build_steps(args: argparse.Namespace, mobile: bool) -> list[dict]:
+    """按 step 组织更新命令；cmd=None 表示跳过。"""
+    steps: list[dict] = []
+
+    steps.append(
+        {
+            "id": "1",
+            "title": "STEP 1: 更新订单数据 (order_data.parquet)",
+            "cmd": [
+                sys.executable,
+                str(UPDATER_DIR / "order_data_to_parquet.py"),
+                "--timeout",
+                str(int(args.timeout)),
+                *(["--mobile"] if mobile else []),
+            ],
+        }
+    )
+
+    steps.append(
+        {
+            "id": "2",
+            "title": "STEP 2: 更新选配信息 (config_attribute.parquet)",
+            "cmd": [
+                sys.executable,
+                str(UPDATER_DIR / "order_config_to_parquet.py"),
+                "--force",
+                "--timeout",
+                str(int(args.timeout)),
+                *(["--mobile"] if mobile else []),
+            ],
+        }
+    )
+
+    lock_cmd = [
+        sys.executable,
+        str(UPDATER_DIR / "lock_attribution_data_to_parquet.py"),
+        "--timeout",
+        str(int(args.timeout)),
     ]
-    for p in targets:
-        if not p.exists():
-            print(f"❌ missing: {p}")
-            continue
-        size_mb = p.stat().st_size / (1024 * 1024)
-        mtime = p.stat().st_mtime
-        print(f"✅ {p.name}  size={size_mb:.2f}MB  mtime={mtime:.0f}")
+    if mobile:
+        lock_cmd.append("--mobile")
+    if args.lock_view:
+        lock_cmd.extend(["--view", args.lock_view, "--with-assign-test-drive"])
+    steps.append(
+        {
+            "id": "3",
+            "title": "STEP 3: 更新每日 Tableau 运营数据集 (assign / test_drive / lock attribution)",
+            "cmd": lock_cmd,
+        }
+    )
+
+    steps.append(
+        {
+            "id": "4",
+            "title": "STEP 4: 更新交付-库存数据 (delivery_inventory.parquet)",
+            "cmd": [
+                sys.executable,
+                str(UPDATER_DIR / "delivery_inventory_to_parquet.py"),
+                "--timeout",
+                str(int(args.timeout)),
+                *(["--mobile"] if mobile else []),
+            ],
+        }
+    )
+
+    steps.append(
+        {
+            "id": "5",
+            "title": "STEP 5: 更新门店信息主数据 (store_info.csv)",
+            "cmd": None
+            if args.skip_store_info
+            else [
+                sys.executable,
+                str(UPDATER_DIR / "store_info_to_csv.py"),
+                "--timeout",
+                str(int(args.timeout)),
+                *(["--mobile"] if mobile else []),
+            ],
+        }
+    )
+
+    steps.append(
+        {
+            "id": "6",
+            "title": "STEP 6: 增量更新每日下发线索（by门店）(store_daily_leads.csv)",
+            "cmd": None
+            if args.skip_store_leads
+            else [
+                sys.executable,
+                str(UPDATER_DIR / "store_daily_leads_to_csv.py"),
+                "--timeout",
+                str(int(args.timeout)),
+                *(["--mobile"] if mobile else []),
+            ],
+        }
+    )
+
+    return steps
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="一键更新 dataset 下的核心数据集")
+    parser = argparse.ArgumentParser(description="一键更新 dataset 下的核心数据集（dataset update-all）")
     parser.add_argument("--timeout", type=int, default=600, help="Tableau 导出超时（秒）")
     parser.add_argument("--step-timeout", type=int, default=None, help="每个步骤的总超时（秒），默认 timeout+1800")
     parser.add_argument("--mobile", action="store_true", help="使用移动端/非办公网络服务器地址导出")
@@ -117,9 +218,24 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--skip-store-leads",
         action="store_true",
-        help="跳过 STEP 6：门店下发线索数增量更新（门店下发线索数.csv）",
+        help="跳过 STEP 6：每日下发线索（by门店）增量更新（store_daily_leads.csv）",
+    )
+    parser.add_argument(
+        "--fail-fast",
+        action="store_true",
+        help="首个 step 失败即停止（默认 continue-on-error，跑完全部 step 再汇总）",
+    )
+    parser.add_argument(
+        "--status-only",
+        action="store_true",
+        help="只读查看各数据集现状（行数 / 文件更新时间 / 数据最新时点），不触发更新",
     )
     args = parser.parse_args(argv)
+
+    if args.status_only:
+        print(format_report(describe_all(), status_only=True), flush=True)
+        return 0
+
     step_timeout = args.step_timeout or (args.timeout + 1800)
 
     DATASET_DIR.mkdir(parents=True, exist_ok=True)
@@ -127,119 +243,33 @@ def main(argv: list[str] | None = None) -> int:
 
     mobile = args.mobile
     if not mobile and not office_tableau_reachable():
-        print("⚠️ 办公网 Tableau 不可达，自动回退到移动链路（--mobile）")
+        print("⚠️ 办公网 Tableau 不可达，自动回退到移动链路（--mobile）", flush=True)
         mobile = True
 
-    print("\n" + "=" * 80)
-    print("STEP 1: 更新订单数据 (order_data.parquet)")
-    print("=" * 80)
-    run(
-        [
-            sys.executable,
-            str(UPDATER_DIR / "order_data_to_parquet.py"),
-            "--timeout",
-            str(int(args.timeout)),
-            *(["--mobile"] if mobile else []),
-        ],
-        cwd=REPO_ROOT,
-        step_timeout=step_timeout,
-    )
+    run_started = time.time()
+    failed_steps: list[str] = []
 
-    print("\n" + "=" * 80)
-    print("STEP 2: 更新选配信息 (config_attribute.parquet)")
-    print("=" * 80)
-    run(
-        [
-            sys.executable,
-            str(UPDATER_DIR / "order_config_to_parquet.py"),
-            "--force",
-            "--timeout",
-            str(int(args.timeout)),
-            *(["--mobile"] if mobile else []),
-        ],
-        cwd=REPO_ROOT,
-        step_timeout=step_timeout,
-    )
+    for step in build_steps(args, mobile):
+        if step["cmd"] is None:
+            _header(f"{step['title']} —— 跳过")
+            continue
+        _header(step["title"])
+        rc = run(step["cmd"], cwd=REPO_ROOT, step_timeout=step_timeout)
+        if rc != 0:
+            failed_steps.append(step["id"])
+            print(f"⚠️ {step['title']} 失败 (rc={rc})", flush=True)
+            if args.fail_fast:
+                print("⏹ --fail-fast：停止后续步骤", flush=True)
+                break
 
-    print("\n" + "=" * 80)
-    print("STEP 3: 更新每日 Tableau 运营数据集")
-    print("  3a  assign / test_drive")
-    print("  3b  lock attribution")
-    print("=" * 80)
-    lock_cmd = [
-        sys.executable,
-        str(UPDATER_DIR / "lock_attribution_data_to_parquet.py"),
-        "--timeout",
-        str(int(args.timeout)),
-    ]
-    if mobile:
-        lock_cmd.append("--mobile")
-    if args.lock_view:
-        lock_cmd.extend(["--view", args.lock_view, "--with-assign-test-drive"])
-    run(lock_cmd, cwd=REPO_ROOT, step_timeout=step_timeout)
+    print("\n" + format_report(describe_all(), run_started=run_started, failed_steps=failed_steps), flush=True)
 
-    print("\n" + "=" * 80)
-    print("STEP 4: 更新交付-库存数据 (delivery_inventory.parquet)")
-    print("=" * 80)
-    run(
-        [
-            sys.executable,
-            str(UPDATER_DIR / "delivery_inventory_to_parquet.py"),
-            "--timeout",
-            str(int(args.timeout)),
-            *(["--mobile"] if mobile else []),
-        ],
-        cwd=REPO_ROOT,
-        step_timeout=step_timeout,
-    )
-
-    if not args.skip_store_info:
-        print("\n" + "=" * 80)
-        print("STEP 5: 更新门店信息主数据 (store_info.csv)")
-        print("=" * 80)
-        run(
-            [
-                sys.executable,
-                str(UPDATER_DIR / "store_info_to_csv.py"),
-                "--timeout",
-                str(int(args.timeout)),
-                *(["--mobile"] if mobile else []),
-            ],
-            cwd=REPO_ROOT,
-            step_timeout=step_timeout,
-        )
-    else:
-        print("\n" + "=" * 80)
-        print("STEP 5: 跳过门店信息主数据导出 (--skip-store-info)")
-        print("=" * 80)
-
-    if not args.skip_store_leads:
-        print("\n" + "=" * 80)
-        print("STEP 6: 增量更新门店下发线索数 (门店下发线索数.csv)")
-        print("=" * 80)
-        run(
-            [
-                sys.executable,
-                str(UPDATER_DIR / "store_daily_leads_to_csv.py"),
-                "--timeout",
-                str(int(args.timeout)),
-                *(["--mobile"] if mobile else []),
-            ],
-            cwd=REPO_ROOT,
-            step_timeout=step_timeout,
-        )
-    else:
-        print("\n" + "=" * 80)
-        print("STEP 6: 跳过门店下发线索数更新 (--skip-store-leads)")
-        print("=" * 80)
-
-    print("\n" + "=" * 80)
-    print("DONE: 输出文件")
-    print("=" * 80)
-    show_outputs()
+    if failed_steps:
+        print(f"\n❌ 失败 step: {', '.join(failed_steps)}", flush=True)
+        return 1
+    print("\n✅ 全部 step 完成", flush=True)
     return 0
 
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
