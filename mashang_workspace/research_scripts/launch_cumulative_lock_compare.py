@@ -31,6 +31,7 @@
 口径：
   - 锁单 = lock_time 非空 COUNTD(order_number)
   - 零售 = order_type ∈ {用户车, NaN}（DM2 新车型 order_type 未填充，保留 NaN；其余代际排除非零售单）
+  - 剔除测试单 = flag_test_orders（总部主理店 + 假身份号，与 utils/monitors/launch.py 上市监控同口径）
   - 代际归属 = shared/schema/business_definition.json series_group_logic
   - 对齐参考：analyze_order_launch.py build_same_period_lock_totals / _compute_same_period_n
 
@@ -50,6 +51,8 @@ from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 _WS = REPO_ROOT / "mashang_workspace"
@@ -58,10 +61,12 @@ for p in (str(REPO_ROOT), str(_WS)):
         sys.path.insert(0, p)
 
 from utils.monitors.launch import _norm_product_name  # noqa: E402
+from utils.monitors.order_filter import flag_test_orders  # noqa: E402
 from utils.monitors.phase import load_business_definition  # noqa: E402
 from utils.monitors.series_group import apply_series_group_logic  # noqa: E402
 from research_scripts.lock_config_distribution import (  # noqa: E402
     compute_lock_config_distribution,
+    is_core_attribute,
 )
 from research_scripts.store_network_compare import compute_store_network  # noqa: E402
 from runtime_scripts.user_profile import (  # noqa: E402
@@ -69,6 +74,9 @@ from runtime_scripts.user_profile import (  # noqa: E402
     age_cohort_distribution,
     city_to_tier_label,
     norm_city,
+)
+from runtime_scripts.presale_intention_funnel import (  # noqa: E402
+    compute_funnel as compute_presale_funnel,
 )
 from utils.paths import ensure_shared_on_path  # noqa: E402
 from utils.plotly_theme import apply_zh_theme, get_series_color  # noqa: E402
@@ -84,7 +92,15 @@ _DEFAULT_REPORT = _WS / "outputs" / "reports"
 _DEFAULT_TABLE = _WS / "outputs" / "tables"
 
 DEFAULT_GENS = ["DM0", "DM1", "DM2"]
+CHART_WINDOW_DAYS = 30  # 模块 1 折线固定窗口：上市后天数 1..30；未满 30 天的代际只画到已有天数
 NON_RETAIL = {"试驾车", "大客户", "员工", "集团员工", "经销商员工", "享道", "仅批售", "项目", "展车", "海外"}
+# 预售小订 → 上市 N 日锁单分解（对齐 runtime_scripts/presale_intention_funnel.py 通用漏斗）
+_BREAKDOWN_COLORS = {
+    "留存小订": "#174A7C",       # 本品蓝
+    "预售退订": "#D95F59",       # 负向
+    "预售转化锁单": "#D79A36",   # 重点金
+    "直接锁单": "#9AA3AD",       # 中性灰
+}
 
 
 def _retail_mask(order_type: pd.Series) -> pd.Series:
@@ -113,6 +129,42 @@ def resolve_end_day(bd: dict, gen: str) -> pd.Timestamp:
     return pd.Timestamp(tp["end"]).normalize()
 
 
+def _chart_curves(retail: pd.DataFrame, ends: dict, last_date: pd.Timestamp,
+                  window_days: int) -> dict:
+    """模块 1 折线窗口：固定 window_days 天 X 轴，各代际只绘制其上市至今已发生的天数。
+
+    第 t 天 = 各代际自身上市日 + (t-1)；某代际上市不足 window_days 天时不补齐、不画完整，
+    曲线在第 available_days 天处截至（last_date = as-of 前一日，即最后完整观察日）。
+    """
+    out: dict[str, dict] = {}
+    for g, end in ends.items():
+        avail = int((last_date - end).days) + 1
+        avail = max(0, min(avail, window_days))
+        if avail <= 0:
+            out[g] = {"end": end.date().isoformat(), "available_days": 0,
+                      "day_offset": [], "dates": [], "daily": [], "cum": []}
+            continue
+        window_end = end + pd.Timedelta(days=avail)
+        sub = retail[retail["series_group_logic"].eq(g) &
+                     retail["lock_time"].notna() &
+                     (retail["lock_time"] >= end) &
+                     (retail["lock_time"] < window_end)].copy()
+        sub["d"] = sub["lock_time"].dt.normalize()
+        daily = sub.groupby("d")["order_number"].nunique()
+        full = pd.date_range(end, periods=avail)
+        daily = daily.reindex(full, fill_value=0)
+        cum = daily.cumsum().astype(int)
+        out[g] = {
+            "end": end.date().isoformat(),
+            "available_days": avail,
+            "day_offset": list(range(1, avail + 1)),
+            "dates": [d.date().isoformat() for d in full],
+            "daily": [int(v) for v in daily],
+            "cum": [int(v) for v in cum],
+        }
+    return out
+
+
 def compute_curves(df: pd.DataFrame, bd: dict, gens: list[str],
                    as_of: pd.Timestamp) -> dict:
     """逐代际上市后每日累计锁单曲线（对齐上市后天数 1..N）。"""
@@ -126,7 +178,9 @@ def compute_curves(df: pd.DataFrame, bd: dict, gens: list[str],
     last_date = as_of.normalize() - pd.Timedelta(days=1)
     n_days = max(1, int((last_date - max_end).days) + 1)  # 含首尾：第1天=end，最后一天=today-1
 
-    retail = df[_retail_mask(df["order_type"])].copy()
+    # 锁单口径与上市监控一致：剔除测试单（总部主理店 + 假身份号，flag_test_orders）
+    # 并在其基础上保留零售口径（order_type ∈ 用户车/NaN，排除试驾车/员工/大客户等非零售单）。
+    retail = df[_retail_mask(df["order_type"]) & ~flag_test_orders(df, bd)].copy()
     curves: dict[str, dict] = {}
 
     for g in gens:
@@ -153,17 +207,19 @@ def compute_curves(df: pd.DataFrame, bd: dict, gens: list[str],
     return {
         "gens": gens,
         "n_days": n_days,
+        "chart_window": CHART_WINDOW_DAYS,
         "as_of": as_of.date().isoformat(),
         "last_date": last_date.date().isoformat(),
         "max_end": max_end.date().isoformat(),
         "curves": curves,
-        "presale": _presale_conversion(retail, bd, gens, ends, n_days),
+        "chart": _chart_curves(retail, ends, last_date, CHART_WINDOW_DAYS),
+        "presale": _presale_conversion(df, bd, gens, ends, n_days),
         "daily_product": _daily_product_breakdown(retail, bd, gens, ends, n_days),
         "region": _region_compare(retail, gens, ends, n_days),
         "network": compute_store_network(retail, gens, ends, n_days),
         "user_profile": _user_profile_compare(retail, gens, ends, n_days),
         "age_repurchase": _age_repurchase_compare(retail, gens, ends, n_days),
-        "lead_window": _lead_window_compare(ends),
+        "lead_window": _lead_window_compare(ends, last_date),
         "lock_config": _lock_config_distribution(as_of.normalize(), gens[-1]),
     }
 
@@ -508,14 +564,15 @@ def _lock_config_distribution(as_of: pd.Timestamp | None = None,
         return None
 
 
-def _lead_window_compare(ends: dict) -> dict | None:
+def _lead_window_compare(ends: dict, complete_day: pd.Timestamp | None = None) -> dict | None:
     """模块 6：最新两代际上市后下发线索窗口增幅对比。
 
     口径：assign_data「下发线索数」整体口径。
-      - 上市后窗口 = 上市日 end 起 N 天（[end, end+N)）
-      - 基线 = 上市前等长窗口（[end-N, end)），N = 1/3/7
-      - 每日节奏：上市后 D1..D7 相对上市前 7 天日均的增减
-    DM2 基线(08-21~08-27)处于预售放量高峰，故窗口增幅走低；DM1 上市日见顶。
+      - 上市后窗口 = 上市日 end 起 N 天（[end, end+N)），N = 1/3/5/7
+      - 基线 = 上市前 7 天（[end-7, end)）日均，N 日基线 = 日均 × N
+      - 每日节奏：上市后 D1..D7 当日线索，及相对上市前 7 日均值的倍数
+      - 完整性：仅当 N 天全部落在完整观察日（complete_day，默认数据最新日）内才给结论；
+        未完成窗口（如 CM3 上市仅 5 天时的 N=7）标记 pending，缺失日不补 0。
     """
     if len(ends) < 2:
         return None
@@ -525,38 +582,46 @@ def _lead_window_compare(ends: dict) -> dict | None:
     if df.empty:
         return None
     s = df.set_index("d")["下发线索数"]
+    complete_day = pd.Timestamp(complete_day).normalize() if complete_day is not None \
+        else pd.Timestamp(s.index.max()).normalize()
+    target_days = 7
 
     def _sum(lo: pd.Timestamp, n: int) -> float:
         return float(s.loc[lo:lo + pd.Timedelta(days=n) - pd.Timedelta(microseconds=1)].sum())
 
-    def _daily(lo: pd.Timestamp) -> dict:
+    def _daily(lo: pd.Timestamp, observed: int) -> dict:
         out = {}
-        for t in range(1, 8):
+        for t in range(1, target_days + 1):
             d = lo + pd.Timedelta(days=t - 1)
-            out[t] = float(s.get(d, 0.0)) if d in s.index else 0.0
+            out[str(t)] = float(s.get(d, 0.0)) if (t <= observed and d <= complete_day) else None
         return out
 
     per = {}
     channels_out = {}
     for g, key in ((gen_a, "a"), (gen_b, "b")):
-        end = pd.Timestamp(ends[g])
+        end = pd.Timestamp(ends[g]).normalize()
+        observed = int((complete_day - end).days) + 1 if complete_day >= end else 0
         base7 = _sum(end - pd.Timedelta(days=7), 7)
         base_daily_avg = base7 / 7
-        daily = _daily(end)
+        daily = _daily(end, observed)
         windows = {}
-        for n in (1, 3, 7):
-            wsum = _sum(end, n)
-            bsum = base7 * n / 7
-            windows[n] = {
-                "win": int(round(wsum)),
-                "base": int(round(bsum)),
-                "delta": int(round(wsum - bsum)),
-                "delta_pct": round((wsum - bsum) / bsum, 4) if bsum else None,
-            }
+        for n in (1, 3, 5, 7):
+            if n <= observed:
+                wsum = _sum(end, n)
+                bsum = base7 * n / 7
+                windows[n] = {
+                    "win": int(round(wsum)),
+                    "base": int(round(bsum)),
+                    "delta": int(round(wsum - bsum)),
+                    "delta_pct": round((wsum - bsum) / bsum, 4) if bsum else None,
+                }
+            else:
+                windows[n] = {"pending": True, "required_days": n, "observed_days": observed}
         per[key] = {
             "gen": g, "end": end.date().isoformat(),
             "base7_total": int(round(base7)),
             "base7_daily_avg": int(round(base_daily_avg)),
+            "observed_days": observed,
             "daily": daily,
             "windows": windows,
         }
@@ -568,42 +633,54 @@ def _lead_window_compare(ends: dict) -> dict | None:
             cc = df.set_index("d")[c]
             base7c = float(cc.loc[end - pd.Timedelta(days=7):end - pd.Timedelta(microseconds=1)].sum())
             row = {"channel": _CHANNEL_LABELS[c], "windows": {}}
-            for n in (1, 3, 7):
-                win = float(cc.loc[end:end + pd.Timedelta(days=n) - pd.Timedelta(microseconds=1)].sum())
-                bsum = base7c * n / 7
-                row["windows"][n] = {
-                    "win": int(round(win)),
-                    "base": int(round(bsum)),
-                    "delta": int(round(win - bsum)),
-                    "delta_pct": round((win - bsum) / bsum, 4) if bsum else None,
-                }
+            for n in (1, 3, 5, 7):
+                if n <= observed:
+                    win = float(cc.loc[end:end + pd.Timedelta(days=n) - pd.Timedelta(microseconds=1)].sum())
+                    bsum = base7c * n / 7
+                    row["windows"][n] = {
+                        "win": int(round(win)),
+                        "base": int(round(bsum)),
+                        "delta": int(round(win - bsum)),
+                        "delta_pct": round((win - bsum) / bsum, 4) if bsum else None,
+                    }
+                else:
+                    row["windows"][n] = {"pending": True}
             ch_rows.append(row)
         channels_out[key] = ch_rows
+
     # 判断要点（整体）
     insights = []
-    for n in (1, 3, 7):
-        w = per["a"]["windows"][n], per["b"]["windows"][n]
-        a_s, b_s = w[0]["delta_pct"], w[1]["delta_pct"]
+    for n in (1, 3, 5, 7):
+        wa, wb = per["a"]["windows"][n], per["b"]["windows"][n]
+        if "pending" in wa or "pending" in wb:
+            pend_key = "b" if "pending" in wb else "a"
+            gname = per[pend_key]["gen"]
+            insights.append(
+                f"上市后 {n} 天窗口：{gname} 数据未足 {n} 个完整日"
+                f"（已观察 {per[pend_key]['observed_days']} 天），暂不给结论，待补数据。")
+            continue
+        a_s, b_s = wa["delta_pct"], wb["delta_pct"]
         if a_s is not None and b_s is not None:
             insights.append(
                 f"上市后 {n} 天窗口增幅：{gen_a} {a_s:+.1%} / {gen_b} {b_s:+.1%}（"
-                f"窗口累计 {per['a']['windows'][n]['win']:,} vs 基线 {per['a']['windows'][n]['base']:,}；"
-                f"{per['b']['windows'][n]['win']:,} vs {per['b']['windows'][n]['base']:,}）。")
-    # 渠道要点（最新代际 DM2 = b）
+                f"窗口累计 {wa['win']:,} vs 基线 {wa['base']:,}；"
+                f"{wb['win']:,} vs {wb['base']:,}）。")
+    # 渠道要点（最新代际 = b，取已完成的窗口）
     if channels_out["b"]:
-        def _best(n: int) -> dict:
-            cands = [r for r in channels_out["b"] if r["windows"][n]["delta_pct"] is not None]
-            return max(cands, key=lambda r: r["windows"][n]["delta_pct"]) if cands else {}
-        for n in (1, 3, 7):
-            r = _best(n)
-            if r:
-                w = r["windows"][n]
-                insights.append(
-                    f"{gen_b} 上市后 {n} 天窗口渠道增幅最高 = {r['channel']}（{w['delta_pct']:+.1%}，"
-                    f"窗口 {w['win']:,} vs 基线 {w['base']:,}）；单日看 APP小程序在上市当日冲高，"
-                    f"持续性增量集中在快慢闪/门店。")
+        for n in (1, 3, 5, 7):
+            cands = [r for r in channels_out["b"]
+                     if "pending" not in r["windows"][n] and r["windows"][n]["delta_pct"] is not None]
+            if not cands:
+                continue
+            r = max(cands, key=lambda x: x["windows"][n]["delta_pct"])
+            w = r["windows"][n]
+            insights.append(
+                f"{gen_b} 上市后 {n} 天窗口渠道增幅最高 = {r['channel']}"
+                f"（{w['delta_pct']:+.1%}，窗口 {w['win']:,} vs 基线 {w['base']:,}）。")
     return {"gens": [gen_a, gen_b], "per": per, "channels": channels_out,
-            "insights": insights, "metric": "下发线索数", "baseline": "上市前等长窗口"}
+            "insights": insights, "metric": "下发线索数", "baseline": "上市前 7 日均值",
+            "target_days": target_days, "complete_day": complete_day.date().isoformat(),
+            "window_days": [1, 3, 5, 7]}
 
 
 def _daily_product_table(c: dict) -> str:
@@ -861,96 +938,164 @@ def _age_repurchase_table(c: dict) -> str:
     </div>"""
 
 
+def _lead_daily_figure(lc: dict) -> str:
+    """每日下发线索：上=绝对值（分组柱 + 前 7 日均值虚线），下=相对前 7 日均值倍数（基准 1.0）。
+
+    未完成日（如 CM3 上市仅 5 天时的 D6/D7）留空不补 0，并标注「待补」。
+    """
+    a, b = lc["per"]["a"], lc["per"]["b"]
+    ga, gb = a["gen"], b["gen"]
+    td = lc.get("target_days", 7)
+    xs = [f"D{t}" for t in range(1, td + 1)]
+    ya = [a["daily"].get(str(t)) for t in range(1, td + 1)]
+    yb = [b["daily"].get(str(t)) for t in range(1, td + 1)]
+    avg_a, avg_b = a["base7_daily_avg"], b["base7_daily_avg"]
+    ia = [(v / avg_a if (v is not None and avg_a) else None) for v in ya]
+    ib = [(v / avg_b if (v is not None and avg_b) else None) for v in yb]
+    ca, cb = get_series_color("sage"), get_series_color("own")
+
+    fig = make_subplots(
+        rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.18, row_heights=[0.56, 0.44],
+        subplot_titles=["每日下发线索（绝对值 · 虚线 = 上市前 7 日均值）",
+                        "相对上市前 7 日均值（基准 = 1.0）"],
+    )
+    fig.add_trace(go.Bar(x=xs, y=ya, name=ga, marker_color=ca,
+                         text=[f"{int(v):,}" if v is not None else "" for v in ya],
+                         textposition="outside", cliponaxis=False,
+                         hovertemplate=f"<b>{ga}</b> · %{{x}}<br>%{{y:,}} 条<extra></extra>"), row=1, col=1)
+    fig.add_trace(go.Bar(x=xs, y=yb, name=gb, marker_color=cb,
+                         text=[f"{int(v):,}" if v is not None else "" for v in yb],
+                         textposition="outside", cliponaxis=False,
+                         hovertemplate=f"<b>{gb}</b> · %{{x}}<br>%{{y:,}} 条<extra></extra>"), row=1, col=1)
+    fig.add_hline(y=avg_a, line_dash="dot", line_color=ca, row=1, col=1,
+                  annotation_text=f"{ga} 基线 {avg_a:,}", annotation_position="top right",
+                  annotation_font_color=ca)
+    fig.add_hline(y=avg_b, line_dash="dot", line_color=cb, row=1, col=1,
+                  annotation_text=f"{gb} 基线 {avg_b:,}", annotation_position="top right",
+                  annotation_font_color=cb)
+    for g, y, color in ((ga, ia, ca), (gb, ib, cb)):
+        fig.add_trace(go.Scatter(x=xs, y=y, name=g, mode="lines+markers",
+                                 line={"color": color}, marker={"size": 7}, connectgaps=False,
+                                 showlegend=False,
+                                 hovertemplate=f"<b>{g}</b> · %{{x}}<br>%{{y:.2f}}× 前7日均<extra></extra>"),
+                      row=2, col=1)
+    fig.add_hline(y=1.0, line_dash="dash", line_color="#9AA3AD", row=2, col=1,
+                  annotation_text="基准 100%", annotation_position="top left",
+                  annotation_font_color="#6B7C8A")
+    # 未完成日标注（最新代际 b）
+    y_top = max([v for v in (ya + yb) if v is not None] or [1])
+    for t in range(1, td + 1):
+        if b["daily"].get(str(t)) is None:
+            fig.add_annotation(x=f"D{t}", y=y_top * 1.06, row=1, col=1, text="待补",
+                               showarrow=False, font={"size": 10, "color": "#9AA3AD"})
+    fig.update_layout(
+        template="none", height=560, barmode="group",
+        margin={"l": 10, "r": 90, "t": 60, "b": 30},
+        paper_bgcolor="#FFFFFF", plot_bgcolor="#FFFFFF", font={"color": "#374151", "size": 12},
+        legend={"orientation": "h", "y": -0.10, "x": 0}, bargap=0.25, bargroupgap=0.08,
+    )
+    fig.update_yaxes(title_text="线索数（条）", automargin=True, gridcolor="#EEF2F6", linecolor="#C7CDD4", row=1, col=1)
+    fig.update_yaxes(tickformat=".0%", rangemode="tozero", automargin=True,
+                     gridcolor="#EEF2F6", linecolor="#C7CDD4", row=2, col=1)
+    fig.update_xaxes(gridcolor="#FFFFFF", linecolor="#C7CDD4")
+    return fig.to_json()
+
+
 def _lead_window_table(c: dict) -> str:
     lc = c.get("lead_window")
     if not lc or not lc.get("per"):
         return ""
     a, b = lc["per"]["a"], lc["per"]["b"]
     ga, gb = lc["gens"]
+    NDS = lc.get("window_days", [1, 3, 5, 7])
+
+    def _pct_cell(w, bold: bool = False) -> str:
+        if "pending" in w:
+            return ("<td class='num' style='color:#9AA3AD;'>—<span style='font-size:0.85em;'>（待补）</span></td>")
+        v = w["delta_pct"]
+        cls = " pos" if v > 0 else (" neg" if v < 0 else "")
+        s = f"{w['delta']:+,}（{v * 100:+.1f}%）"
+        return f"<td class='num{cls}'><strong>{s}</strong></td>" if bold else f"<td class='num{cls}'>{s}</td>"
+
+    def _num_cell(w, key: str) -> str:
+        if "pending" in w:
+            return "<td class='num' style='color:#9AA3AD;'>—</td>"
+        return f"<td class='num'>{w[key]:,}</td>"
+
     # 表 1：窗口增幅
     rows1 = []
-    for n in (1, 3, 7):
+    for n in NDS:
         wa, wb = a["windows"][n], b["windows"][n]
         rows1.append(
             f"<tr><td>上市后 {n} 天窗口</td>"
-            f"<td class='num'>{wa['win']:,}</td><td class='num'>{wa['base']:,}</td>"
-            f"<td class='num'>{wa['delta']:+,}（{wa['delta_pct'] * 100:+.1f}%）</td>"
-            f"<td class='num'><strong>{wb['win']:,}</strong></td><td class='num'>{wb['base']:,}</td>"
-            f"<td class='num'><strong>{wb['delta']:+,}（{wb['delta_pct'] * 100:+.1f}%）</strong></td></tr>"
+            f"{_num_cell(wa, 'win')}{_num_cell(wa, 'base')}{_pct_cell(wa)}"
+            f"{_num_cell(wb, 'win')}{_num_cell(wb, 'base')}{_pct_cell(wb, bold=True)}</tr>"
         )
-    # 表 2：上市后每日线索 vs 上市前 7 日日均
-    def _daily_row(p: dict, bold: bool = False) -> str:
-        avg = p["base7_daily_avg"]
-        cells = []
-        for t in range(1, 8):
-            v = p["daily"][t]
-            d = v - avg
-            sign = "pos" if d >= 0 else "neg"
-            cells.append(
-                f"<td class='num'>{int(v):,}</td><td class='num {sign}'>{d:+,.0f}</td>")
-        return "".join(cells)
-
-    thead2 = "".join(
-        f"<th colspan='2'>D{t}</th>" for t in range(1, 8))
-    rows2 = (
-        f"<tr><td><strong>{ga}</strong>（上市日 {a['end']}，前7日均 {a['base7_daily_avg']:,}）</td>{_daily_row(a)}</tr>"
-        f"<tr><td><strong>{gb}</strong>（上市日 {b['end']}，前7日均 {b['base7_daily_avg']:,}）</td>{_daily_row(b, bold=True)}</tr>"
+    # 表 2 → 图：每日下发线索（上绝对值 + 基线，下相对倍数）
+    fig = _lead_daily_figure(lc)
+    chart_html = (
+        '<div class="chart-box" id="chart-lead-daily" style="height:560px;"></div>'
+        if fig else ""
+    )
+    script_html = (
+        f'<script>Plotly.newPlot("chart-lead-daily", {fig});</script>'
+        if fig else ""
     )
 
-    # 表 3：渠道窗口增幅（最新代际 DM2 为主视角，DM1 对照）
+    # 表 3：渠道窗口增幅（最新代际为主视角）
     def _ch_cell(row, n, bold: bool = False) -> str:
-        w = row["windows"].get(n)
-        if not w or w.get("delta_pct") is None:
-            return "<td class='num'>—</td>"
+        w = row["windows"].get(n) if row else None
+        if not w or "pending" in w or w.get("delta_pct") is None:
+            return "<td class='num' style='color:#9AA3AD;'>—</td>"
         v = w["delta_pct"]
         cls = " pos" if v > 0 else (" neg" if v < 0 else "")
         s = f"{v * 100:+.1f}%"
         return f"<td class='num{cls}'>{s}</td>" if not bold else f"<td class='num{cls}'><strong>{s}</strong></td>"
 
     rows3 = []
-    for i, cname in enumerate(_CHANNEL_LABELS.values()):
+    for cname in _CHANNEL_LABELS.values():
         ra = next((r for r in lc["channels"]["a"] if r["channel"] == cname), None)
         rb = next((r for r in lc["channels"]["b"] if r["channel"] == cname), None)
-        b_cells = "".join(_ch_cell(rb, n, bold=True) for n in (1, 3, 7)) if rb else "<td colspan='3' class='num'>—</td>"
-        a_cells = "".join(_ch_cell(ra, n) for n in (1, 3, 7)) if ra else "<td colspan='3' class='num'>—</td>"
         rows3.append(
-            f"<tr><td><strong>{cname}</strong></td>{a_cells}{b_cells}</tr>")
-    # 合计行（整体）
-    ra = None
-    rb_tot = {n: b["windows"][n]["delta_pct"] for n in (1, 3, 7)}
-    a_tot = {n: a["windows"][n]["delta_pct"] for n in (1, 3, 7)}
+            f"<tr><td><strong>{cname}</strong></td>"
+            + "".join(_ch_cell(ra, n) for n in NDS)
+            + "".join(_ch_cell(rb, n, bold=True) for n in NDS) + "</tr>")
+    # 合计行（整体，复用整体窗口窗口）
     rows3.append(
         f"<tr><td><strong>全部渠道合计</strong></td>"
-        + "".join(f"<td class='num'>{a_tot[n] * 100:+.1f}%</td>" for n in (1, 3, 7))
-        + "".join(f"<td class='num'><strong>{rb_tot[n] * 100:+.1f}%</strong></td>" for n in (1, 3, 7))
-        + "</tr>"
+        + "".join(_ch_cell(a, n) for n in NDS)
+        + "".join(_ch_cell(b, n, bold=True) for n in NDS) + "</tr>"
     )
-    thead3 = f"<th>渠道</th><th colspan='3'>{ga}</th><th colspan='3'>{gb}（重点）</th>"
-    subhead3 = "<th></th>" + "<th>N1</th><th>N3</th><th>N7</th>" * 2
+    thead3 = (f"<th>渠道</th><th colspan='{len(NDS)}'>{ga}</th>"
+              f"<th colspan='{len(NDS)}'>{gb}（重点）</th>")
+    subhead3 = "<th></th>" + "".join(f"<th>N{n}</th>" for n in NDS) * 2
 
-    # 表 4：渠道窗口绝对值（{gb} = 重点，上市后窗口 / 等长基线 / 净增）
+    # 表 4：渠道窗口绝对值（{gb} = 重点，上市后窗口 / 基线 / 净增）
     def _abs3(row, n) -> str:
-        w = row["windows"].get(n)
-        if not w:
-            return "<td colspan='3' class='num'>—</td>"
+        w = row["windows"].get(n) if row else None
+        if not w or "pending" in w:
+            return "<td colspan='3' class='num' style='color:#9AA3AD;'>—（待补）</td>"
         return (f"<td class='num'>{w['win']:,}</td>"
                 f"<td class='num'>{w['base']:,}</td>"
                 f"<td class='num'>{w['delta']:+,}</td>")
 
     def _tot3(p, n) -> str:
         w = p["windows"][n]
-        return f"<td class='num'><strong>{w['win']:,}</strong></td><td class='num'>{w['base']:,}</td><td class='num'>{w['delta']:+,}</td>"
+        if "pending" in w:
+            return "<td colspan='3' class='num' style='color:#9AA3AD;'>—（待补）</td>"
+        return (f"<td class='num'><strong>{w['win']:,}</strong></td><td class='num'>{w['base']:,}</td>"
+                f"<td class='num'>{w['delta']:+,}</td>")
 
     rows4 = []
     for cname in _CHANNEL_LABELS.values():
         rb = next((r for r in lc["channels"]["b"] if r["channel"] == cname), None)
-        cells = "".join(_abs3(rb, n) for n in (1, 3, 7)) if rb else ""
-        rows4.append(f"<tr><td><strong>{cname}</strong></td>{cells}</tr>")
+        rows4.append(f"<tr><td><strong>{cname}</strong></td>"
+                     + "".join(_abs3(rb, n) for n in NDS) + "</tr>")
     rows4.append(f"<tr><td><strong>全部渠道合计</strong></td>"
-                 + "".join(_tot3(b, n) for n in (1, 3, 7)) + "</tr>")
+                 + "".join(_tot3(b, n) for n in NDS) + "</tr>")
     thead4 = f"<th>渠道（{gb} 上市日 {b['end']}）</th>"
-    thead4 += "".join(f"<th colspan='3'>上市后 {n} 天窗口</th>" for n in (1, 3, 7))
-    subhead4 = "<th></th>" + ("<th>上市后</th><th>等长基线</th><th>净增</th>" * 3)
+    thead4 += "".join(f"<th colspan='3'>上市后 {n} 天窗口</th>" for n in NDS)
+    subhead4 = "<th></th>" + ("<th>上市后</th><th>基线(7日均值×N)</th><th>净增</th>" * len(NDS))
 
     insights_html = ""
     if lc.get("insights"):
@@ -960,28 +1105,23 @@ def _lead_window_table(c: dict) -> str:
 
     <div class="card">
       <h2>模块 6 · 上市后下发线索窗口增幅对比：{gb} vs {ga}</h2>
-      <p class="section-note">数据源 = dataset/assign_data.csv「下发线索数」（整体口径）。上市后窗口 = 各代际上市日 end 起 N 天；基线 = 上市前等长窗口（end−N ~ end）；窗口增幅 = (上市后窗口 − 等长基线) ÷ 基线。每日行 = 上市后 D1..D7 当日线索及其相对上市前 7 日均值的增减。注意：{gb} 的基线（上市前 7 天）正处于 8/18 预售开启后的放量高峰，故其窗口增幅被抬高基线拉低；当日值受周内节奏影响（周一/周二为周内低谷）。</p>
+      <p class="section-note">数据源 = dataset/assign_data.csv「下发线索数」（整体口径）；完整观察日截至 <strong>{lc.get('complete_day', '—')}</strong>。上市后窗口 = 上市日 end 起 N 天（N = {'/'.join(str(n) for n in NDS)}）；基线 = 上市前 7 天日均 × N；窗口增幅 = (上市后窗口 − 基线) ÷ 基线。<strong>仅当 N 天全部为完整日才给结论</strong>：{gb} 上市已 {b['observed_days']} 天，未满 7 天的窗口标「待补」，不补 0。每日线索见下图（上：绝对值 + 上市前 7 日均值虚线；下：相对前 7 日均值倍数，基准 1.0）。</p>
       <div class="table-wrap">
       <table class="report-table">
         <thead><tr><th>窗口</th><th>{ga} 上市后</th><th>{ga} 基线</th><th>{ga} 增幅</th><th>{gb} 上市后</th><th>{gb} 基线</th><th>{gb} 增幅</th></tr></thead>
         <tbody>{''.join(rows1)}</tbody>
       </table>
       </div>
-      <h3 style="margin-top:20px;">上市后每日下发线索（相对上市前 7 日均值）</h3>
-      <div class="table-wrap">
-      <table class="report-table">
-        <thead><tr><th>代际</th>{thead2}</tr><tr><th></th>{'<th>当日</th><th>vs 日均</th>' * 7}</tr></thead>
-        <tbody>{rows2}</tbody>
-      </table>
-      </div>
-      <h3 style="margin-top:20px;">渠道窗口增幅（上市后 N 天 vs 上市前等长基线）</h3>
+      <h3 style="margin-top:20px;">上市后每日下发线索（上：绝对值 + 前 7 日均值；下：相对前 7 日均值倍数）</h3>
+      {chart_html}
+      <h3 style="margin-top:20px;">渠道窗口增幅（上市后 N 天 vs 上市前 7 日均值 × N）</h3>
       <div class="table-wrap">
       <table class="report-table">
         <thead><tr>{thead3}</tr><tr>{subhead3}</tr></thead>
         <tbody>{''.join(rows3)}</tbody>
       </table>
       </div>
-      <h3 style="margin-top:20px;">渠道窗口绝对值（{gb}：上市后窗口 / 等长基线 / 净增）</h3>
+      <h3 style="margin-top:20px;">渠道窗口绝对值（{gb}：上市后窗口 / 基线 / 净增）</h3>
       <div class="table-wrap">
       <table class="report-table">
         <thead><tr>{thead4}</tr><tr>{subhead4}</tr></thead>
@@ -989,7 +1129,8 @@ def _lead_window_table(c: dict) -> str:
       </table>
       </div>
       {insights_html}
-    </div>"""
+    </div>
+    {script_html}"""
 
 
 def _lock_config_table(c: dict) -> str:
@@ -999,7 +1140,7 @@ def _lock_config_table(c: dict) -> str:
     n = lc["n"]
     core_rows = []
     for a in lc["attrs"]:
-        tag = " · 核心" if a["attribute"] in ("内饰", "外饰", "轮毂", "方向盘", "超远距高精度激光雷达") else ""
+        tag = " · 核心" if is_core_attribute(a["attribute"]) else ""
         items = "".join(
             f"<tr><td>{it['value']}</td><td class='num'>{it['count']:,}</td>"
             f"<td class='num'>{it['share'] * 100:.1f}%</td>"
@@ -1025,7 +1166,7 @@ def _lock_config_table(c: dict) -> str:
     return f"""
     <div class="card">
       <h2>模块 7 · {lc['gen']} 上市以来锁单配置分布（{lc['launch']} ~ {lc['hi']}，零售 {n} 单）</h2>
-      <p class="section-note">本模块复用 research_scripts/lock_config_distribution.py（独立脚本，--format json 输出 Result Contract）。数据源 = dataset/config_attribute.parquet（order_config_to_parquet.py 增量更新后含最新代际）。锁单窗口 = {lc['gen']} 上市日 {lc['launch']} 起至 {lc['hi']}（零售口径 order_type ∈ 用户车/NaN，与模块 1 一致）；配置归属 = 锁单订单 (Order Number) 匹配的 Attribute/value；核心 5 配置 = 内饰 / 外饰 / 轮毂 / 方向盘 / 超远距高精度激光雷达（每单 1 值）。{n} 单全部可关联配置，核心 5 配置完整 {lc['core_complete']} 单（{lc['core_complete'] / n * 100:.0f}%）。</p>
+      <p class="section-note">本模块复用 research_scripts/lock_config_distribution.py（独立脚本，--format json 输出 Result Contract）。数据源 = dataset/config_attribute.parquet（order_config_to_parquet.py 增量更新后含最新代际）。锁单窗口 = {lc['gen']} 上市日 {lc['launch']} 起至 {lc['hi']}（零售口径 order_type ∈ 用户车/NaN，并剔除测试单：总部主理店 + 假身份号，与模块 1 一致）；配置归属 = 锁单订单 (Order Number) 匹配的 Attribute/value；核心 5 配置 = 内饰 / 外饰 / 轮毂 / 方向盘 / 激光雷达（含「超远距高精度激光雷达」等同槽位别名）。{n} 单全部可关联配置，核心 5 配置完整 {lc['core_complete']} 单（{lc['core_complete'] / n * 100:.0f}%）。</p>
       {''.join(core_rows)}
       {f'<h3 style="margin-top:20px;">是/否型选装项拥有率（是 = 已选）</h3><div class="table-wrap"><table class="report-table"><thead><tr><th>选装项</th><th>已选</th><th>锁单总数</th><th>拥有率</th><th style="min-width:180px;"></th></tr></thead><tbody>{opt_rows}</tbody></table></div>' if opt_rows else ''}
     </div>"""
@@ -1033,39 +1174,60 @@ def _lock_config_table(c: dict) -> str:
 
 def _presale_conversion(df: pd.DataFrame, bd: dict, gens: list[str],
                         ends: dict, n_days: int) -> list[dict]:
-    """预售期留存小订 → 上市同期锁单转化（对齐 retained_intention_conversion operator）。"""
-    rows = []
+    """预售小订 → 上市 N 日锁单分解（口径对齐 runtime_scripts/presale_intention_funnel.py 通用漏斗）。
+
+    逐代际，统一 N 日窗口（截止 = 上市日 + N - 1，与本报告折线同窗口，保证各代际可比）：
+      预售小订池 cohort_total（预售开放 ~ 上市日结束支付意向金，order_number 去重、剔测试单）
+        ├─ 预售退订 refunded_total（截止前意向金已退）
+        └─ 留存小订 retained_count = 小订池 − 预售退订
+      上市 N 日锁单总数 total_lock（该代际 lock_time ∈ [上市日, 上市日+N)，剔测试单）
+        ├─ 预售转化锁单 presale_conv（小订池中于截止前锁单；= 通用漏斗 locked_only）
+        └─ 直接锁单 direct_lock = N 日锁单总数 − 预售转化锁单
+    预售退订率 = 预售退订 ÷ 小订池；预售转化率 = 预售转化锁单 ÷ 留存小订；
+    直接锁单占比 = 直接锁单 ÷ N 日锁单总数。
+    """
+    rows: list[dict] = []
     for g in gens:
-        tp = (bd.get("time_periods", {}) or {}).get(g, {}) or {}
-        start = pd.Timestamp(tp["start"]).normalize()
-        end = pd.Timestamp(tp["end"]).normalize()
-        presale_end_excl = end + pd.Timedelta(days=1)
+        launch = pd.Timestamp(ends[g]).normalize()
+        as_of = launch + pd.Timedelta(days=n_days - 1)
+        try:
+            f = compute_presale_funnel(df, bd, g, as_of, include_test_orders=False)
+        except Exception as exc:  # noqa: BLE001
+            rows.append({"gen": g, "error": str(exc)})
+            continue
+        cohort = int(f["cohort_total"])
+        refunded = int(f["refunded_total"])
+        retained = int(f["retained_not_refunded"])
+        presale_conv = int(f["locked_only"])
 
-        sub = df[df["series_group_logic"].eq(g)].copy()
-        pay = pd.to_datetime(sub["intention_payment_time"], errors="coerce")
-        exit_cols = [c for c in ["intention_refund_time", "deposit_payment_time",
-                                  "deposit_refund_time", "lock_time"] if c in sub.columns]
-        exit_time = sub[exit_cols].min(axis=1, skipna=True)
-        m_pay = pay.notna() & (pay >= start) & (pay < presale_end_excl)
-        m_retained = m_pay & (exit_time.isna() | (exit_time >= presale_end_excl))
-        retained_ids = sub.loc[m_retained, "order_number"].dropna().astype("string")
-        retained_cnt = int(retained_ids.nunique())
-
+        sub = df[df["series_group_logic"].eq(g)
+                 & _retail_mask(df["order_type"])
+                 & ~flag_test_orders(df, bd)].copy()
         lock = pd.to_datetime(sub["lock_time"], errors="coerce")
-        m_lock = lock.notna() & (lock >= end) & (lock < end + pd.Timedelta(days=n_days))
-        lock_ids = sub.loc[m_lock, "order_number"].dropna().astype("string")
-        total_lock = int(lock_ids.nunique())
-        retained_lock = int(lock_ids.isin(retained_ids).sum())
+        win = lock.notna() & (lock >= launch) & (lock < launch + pd.Timedelta(days=n_days))
+        total_lock = int(sub.loc[win, "order_number"].nunique())
+        direct = max(total_lock - presale_conv, 0)
+
+        def rate(num: int, den: int) -> float | None:
+            return (num / den) if den else None
 
         rows.append({
             "gen": g,
-            "presale_period": f"{start.date().isoformat()} ~ {end.date().isoformat()}",
-            "presale_days": int((end - start).days) + 1,
-            "retained_count": retained_cnt,
+            "label": f.get("label", g),
+            "launch": launch.date().isoformat(),
+            "as_of": as_of.date().isoformat(),
+            "n_days": n_days,
+            "cohort_total": cohort,
+            "refunded_total": refunded,
+            "retained_count": retained,
             "total_lock": total_lock,
-            "retained_lock": retained_lock,
-            "share": (retained_lock / total_lock) if total_lock else None,
-            "rate": (retained_lock / retained_cnt) if retained_cnt else None,
+            "presale_conv": presale_conv,
+            "direct_lock": direct,
+            "refund_rate": rate(refunded, cohort),
+            "presale_conversion_rate": rate(presale_conv, retained),
+            "direct_share": rate(direct, total_lock),
+            "presale_conv_share": rate(presale_conv, total_lock),
+            "test_orders_excluded": int(f.get("test_orders_excluded") or 0),
         })
     return rows
 
@@ -1082,71 +1244,180 @@ def terminal(c: dict) -> None:
         print(row)
 
 
+def _presale_breakdown_figure(rows: list[dict], n_days: int) -> str:
+    """预售小订 → 上市 N 日锁单 双层堆叠分解图（每代际两条：预售小订池 / 上市 N 日锁单）。"""
+    valid = [r for r in rows if "error" not in r and r.get("cohort_total")]
+    if not valid:
+        return ""
+    order = list(reversed(valid))  # 最新代际在上
+    ys, retained_x, refunded_x, conv_x, direct_x = [], [], [], [], []
+    for r in order:
+        ys.append(f"{r['gen']}·预售小订池")
+        retained_x.append(r["retained_count"])
+        refunded_x.append(r["refunded_total"])
+        conv_x.append(0)
+        direct_x.append(0)
+        ys.append(f"{r['gen']}·{n_days}日锁单")
+        retained_x.append(0)
+        refunded_x.append(0)
+        conv_x.append(r["presale_conv"])
+        direct_x.append(r["direct_lock"])
+
+    x_max = max([r["cohort_total"] for r in valid] + [r["total_lock"] for r in valid]) or 1
+    txt_threshold = x_max * 0.04
+
+    def _bar(name: str, x: list[int], color: str) -> go.Bar:
+        return go.Bar(
+            name=name, y=ys, x=x, orientation="h",
+            marker={"color": color},
+            text=[f"{v:,}" if v >= txt_threshold else "" for v in x],
+            textposition="inside", insidetextanchor="middle",
+            textfont={"color": "#FFFFFF", "size": 11},
+            hovertemplate=f"<b>%{{y}}</b><br>{name}：%{{x:,}} 单<extra></extra>",
+        )
+
+    fig = go.Figure(data=[
+        _bar("留存小订", retained_x, _BREAKDOWN_COLORS["留存小订"]),
+        _bar("预售退订", refunded_x, _BREAKDOWN_COLORS["预售退订"]),
+        _bar("预售转化锁单", conv_x, _BREAKDOWN_COLORS["预售转化锁单"]),
+        _bar("直接锁单", direct_x, _BREAKDOWN_COLORS["直接锁单"]),
+    ])
+
+    def _pct(v) -> str:
+        return "—" if v is None else f"{v * 100:.1f}%"
+
+    annotations = []
+    for r in order:
+        annotations.append(dict(
+            x=x_max * 1.03, y=f"{r['gen']}·预售小订池", xref="x", yref="y", showarrow=False,
+            xanchor="left", align="left", font={"size": 11, "color": "#5F6B7A"},
+            text=f"退订率 {_pct(r['refund_rate'])}｜留存 {r['retained_count']:,}",
+        ))
+        annotations.append(dict(
+            x=x_max * 1.03, y=f"{r['gen']}·{n_days}日锁单", xref="x", yref="y", showarrow=False,
+            xanchor="left", align="left", font={"size": 11, "color": "#5F6B7A"},
+            text=f"预售转化率 {_pct(r['presale_conversion_rate'])}｜直接锁单占比 {_pct(r['direct_share'])}",
+        ))
+    fig.update_layout(
+        template="none",
+        barmode="stack",
+        height=150 + 56 * len(ys),
+        margin={"l": 10, "r": 10, "t": 50, "b": 30},
+        paper_bgcolor="#FFFFFF", plot_bgcolor="#FFFFFF",
+        font={"color": "#374151", "size": 12},
+        title={"text": f"预售小订 → 上市 {n_days} 日锁单分解（每代际：小订池 / 锁单）", "x": 0.01, "xanchor": "left"},
+        legend={"orientation": "h", "y": -0.16, "x": 0},
+        xaxis={"title": "订单数（单）", "rangemode": "tozero", "range": [0, x_max * 1.45],
+               "gridcolor": "#EEF2F6", "linecolor": "#C7CDD4", "zeroline": False},
+        yaxis={"autorange": "reversed", "automargin": True, "tickfont": {"size": 12},
+               "gridcolor": "#FFFFFF", "linecolor": "#FFFFFF"},
+        annotations=annotations,
+    )
+    return fig.to_json()
+
+
 def _key_points_table(c: dict) -> str:
+    rows = c["presale"]
+    n_days = c["n_days"]
     body = []
-    for r in c["presale"]:
-        share = r["share"] or 0
-        rate = r["rate"] or 0
+
+    def _pct(v) -> str:
+        return "—" if v is None else f"{v * 100:.1f}%"
+
+    for r in rows:
+        if "error" in r:
+            body.append(
+                f"<tr><td><strong>{r['gen']}</strong></td>"
+                f"<td colspan='10' class='cell-note'>无法计算：{r['error']}</td></tr>"
+            )
+            continue
         body.append(
             f"<tr><td><strong>{r['gen']}</strong></td>"
-            f"<td>{r['presale_period']}</td>"
-            f"<td class='num'>{r['presale_days']}</td>"
+            f"<td class='num'>{r['launch'] or '—'}</td>"
+            f"<td class='num'>{r['cohort_total']:,}</td>"
+            f"<td class='num'>{r['refunded_total']:,}</td>"
             f"<td class='num'>{r['retained_count']:,}</td>"
-            f"<td class='num'>{r['total_lock']:,}</td>"
-            f"<td class='num'>{r['retained_lock']:,}</td>"
-            f"<td class='num'>{share:.0%}</td>"
-            f"<td class='num'>{rate:.0%}</td></tr>"
+            f"<td class='num'><strong>{r['total_lock']:,}</strong></td>"
+            f"<td class='num'>{r['presale_conv']:,}</td>"
+            f"<td class='num'>{r['direct_lock']:,}</td>"
+            f"<td class='num'>{_pct(r['refund_rate'])}</td>"
+            f"<td class='num'>{_pct(r['presale_conversion_rate'])}</td>"
+            f"<td class='num'>{_pct(r['direct_share'])}</td></tr>"
         )
+    fig = _presale_breakdown_figure(rows, n_days)
+    chart_html = (
+        '<div class="chart-box" id="chart-presale-breakdown" style="height:520px;"></div>'
+        if fig else ""
+    )
+    script_html = (
+        f'<script>Plotly.newPlot("chart-presale-breakdown", {fig});</script>'
+        if fig else ""
+    )
     return f"""
     <div class="card">
-      <h2>预售期留存小订 × 上市周期转化（上市后第 1..{c['n_days']} 天）</h2>
-      <p class="section-note">预售期 = time_periods.start ~ end；留存小订 = 预售期内支付意向金且预售期末未退（exit_time 空或 ≥ end+1 天）；上市同期 = 各代际上市日起第 1..N 天（N = {c['n_days']}，同折线窗口）；留存小订转化占比 = 转化数 ÷ 上市同期累计锁单；转化率 = 转化数 ÷ 留存小订数。</p>
+      <h2>预售小订 → 上市 {n_days} 日锁单分解（口径对齐通用漏斗）</h2>
+      <p class="section-note">指标定义对齐 runtime_scripts/presale_intention_funnel.py（通用漏斗，已剔测试单），各代际统一 <strong>{n_days} 日窗口</strong>（截止 = 上市日 + {n_days - 1}，与折线同窗口，保证可比）：预售小订池 = 预售开放 ~ 上市日结束支付意向金（order_number 去重）；预售退订 = 截止前意向金已退；留存小订 = 小订池 − 预售退订；上市 {n_days} 日锁单总数 = 该代际 [上市日, 上市日+{n_days}) 内 lock_time 非空订单（零售口径，剔测试单，去重）；预售转化锁单 = 小订池中截止前锁单；直接锁单 = 锁单总数 − 预售转化锁单。预售退订率 = 预售退订 ÷ 小订池；<strong>预售转化率 = 预售转化锁单 ÷ 留存小订</strong>；直接锁单占比 = 直接锁单 ÷ {n_days} 日锁单总数。</p>
+      {chart_html}
       <div class="table-wrap">
       <table class="report-table">
-        <thead><tr><th>系列分组</th><th>预售期</th><th>预售周期（日）</th><th>留存小订数</th><th>上市同期累计锁单数</th><th>上市同期累计留存小订转化数</th><th>留存小订转化占比</th><th>转化率</th></tr></thead>
-        <tbody>{{}}</tbody>
+        <thead><tr><th>代际</th><th>上市日</th><th>预售小订池</th><th>预售退订</th><th>留存小订</th><th>上市 {n_days} 日锁单总数</th><th>预售转化锁单</th><th>直接锁单</th><th>预售退订率</th><th>预售转化率</th><th>直接锁单占比</th></tr></thead>
+        <tbody>{''.join(body)}</tbody>
       </table>
       </div>
-    </div>""".format("\n".join(body))
+    </div>
+    {script_html}"""
 
 
 def render_html(c: dict) -> str:
     gens = c["gens"]
     n = c["n_days"]
     cur = c["curves"]
+    chart = c["chart"]
+    chart_n = c["chart_window"]
     latest = {g: cur[g]["cum"][n - 1] for g in gens}
     top_gen = max(latest, key=latest.get)
     second = sorted(latest.values(), reverse=True)[1] if len(latest) > 1 else 1
     ratio = latest[top_gen] / max(second, 1)
 
-    x_range = [0.5, n + 0.5]
-    x_ticks = list(range(1, n + 1))
-    if n > 30:
-        step = (n // 10) or 1
-        x_ticks = list(range(1, n + 1, step))
-    y_max = max(cur[g]["cum"][-1] for g in gens)
+    x_range = [0.5, chart_n + 2.0]
+    x_ticks = list(range(1, chart_n + 1))
+
+    def _color(g: str) -> str:
+        if g == gens[-1]:
+            return get_series_color("own")
+        # 由近及远分配异色（跳过与本品蓝接近的 steel）：最近的上代际取 sage，更早取 mauve
+        i = list(reversed(gens[:-1])).index(g)
+        return get_series_color(["sage", "mauve", "clay", "sky_muted"][i % 4])
+
+    end_labels = [
+        {"x": chart[g]["day_offset"][-1], "y": chart[g]["cum"][-1],
+         "text": f"{chart[g]['cum'][-1]:,}", "showarrow": False,
+         "xanchor": "left", "yanchor": "middle", "xshift": 7,
+         "font": {"color": _color(g), "size": 12}}
+        for g in gens if chart[g]["cum"]
+    ]
 
     fig_json = json.dumps({
         "data": [{
-            "x": cur[g]["day_offset"],
-            "y": cur[g]["cum"],
-            "customdata": cur[g]["dates"],
+            "x": chart[g]["day_offset"],
+            "y": chart[g]["cum"],
+            "customdata": chart[g]["dates"],
             "mode": "lines+markers",
-            "name": g,
+            "name": f"{g}（{chart[g]['available_days']} 天）",
             "line": {"width": (3.0 if g == gens[-1] else 2.5),
-                     "color": (get_series_color("own") if g == gens[-1]
-                               else get_series_color("competitor", gens.index(g))),
+                     "color": _color(g),
                      "dash": None if g == gens[-1] else ("dot" if g == gens[0] else "dash")},
-            "marker": {"size": 4},
+            "marker": {"size": 5 if g == gens[-1] else 4},
             "hovertemplate": f"<b>{g}</b> · 上市后第 %{{x}} 天（%{{customdata}}）<br>累计锁单 %{{y:,}} 单<extra></extra>",
         } for g in gens],
         "layout": {
-            "title": {"text": f"上市后累计锁单对比（{''.join(gens)}）", "x": 0.01, "xanchor": "left"},
+            "title": {"text": f"上市后累计锁单对比（{''.join(gens)}，{chart_n} 天窗口）", "x": 0.01, "xanchor": "left"},
             "xaxis": {"title": "上市后天数（第 1 天 = 各代际上市日）",
                       "range": x_range, "tickmode": "array", "tickvals": x_ticks},
             "yaxis": {"title": "累计零售锁单（单）", "rangemode": "tozero"},
+            "annotations": end_labels,
             "legend": {"orientation": "h", "y": -0.25, "x": 0},
-            "margin": {"l": 60, "r": 30, "t": 55, "b": 70},
+            "margin": {"l": 60, "r": 70, "t": 55, "b": 70},
             "height": 480,
         },
     }, ensure_ascii=False)
@@ -1174,16 +1445,16 @@ def render_html(c: dict) -> str:
 <main class="container">
   <section class="hero">
     <h1>上市后累计锁单对比：{ ' / '.join(gens) }</h1>
-    <p>{n} 天窗口（{c['max_end']} = {gens[-1]} 上市日，第 1 天）至 {c['last_date']}；三系 t 轴对齐上市后天数。</p>
+    <p>折线窗口 {chart_n} 天（第 1 天 = 各代际上市日）；{gens[-1]} 上市 {chart[gens[-1]]['available_days']} 天暂画至该天数，其余代际满 {chart_n} 天；累计至 {c['last_date']}。</p>
   </section>
 
   <div class="summary-grid">
     <div class="summary-card"><div class="summary-value">{_fmt_int(latest[gens[-1]])}</div>
-      <div class="summary-label">{gens[-1]} 上市 {n} 天累计</div><div class="summary-hint">第 {n} 天</div></div>
+      <div class="summary-label">{gens[-1]} 同窗口（{n} 天）累计</div><div class="summary-hint">第 {n} 天</div></div>
     <div class="summary-card"><div class="summary-value">{_fmt_int(latest[gens[1]])}</div>
-      <div class="summary-label">{gens[1]} 同窗口累计</div><div class="summary-hint">第 {n} 天</div></div>
+      <div class="summary-label">{gens[1]} 同窗口（{n} 天）累计</div><div class="summary-hint">第 {n} 天</div></div>
     <div class="summary-card"><div class="summary-value">{_fmt_int(latest[gens[0]])}</div>
-      <div class="summary-label">{gens[0]} 同窗口累计</div><div class="summary-hint">第 {n} 天</div></div>
+      <div class="summary-label">{gens[0]} 同窗口（{n} 天）累计</div><div class="summary-hint">第 {n} 天</div></div>
     <div class="summary-card"><div class="summary-value">{top_gen}</div>
       <div class="summary-label">同窗口最高</div><div class="summary-hint">领先约 {ratio:.1f} 倍</div></div>
   </div>
@@ -1192,8 +1463,8 @@ def render_html(c: dict) -> str:
     <h2>模块 1 · 上市后每日累计锁单对比折线图</h2>
     <div class="chart-box" id="chart-launch-cum" style="height:520px;"></div>
     <div class="section-note">
-      各代际自其上市日（{' / '.join(f"{g} {c['curves'][g]['end']}" for g in gens)}）起，
-      按 {gens[-1]} 上市后天数对齐第 1..{n} 天；累计 = 截至当日 23:59 零售锁单 COUNTD(order_number)。{gens[-1]} 为菱形实线，{gens[0]} 点线供形态参考。
+      各代际自其上市日（{' / '.join(f"{g} {chart[g]['end']}" for g in gens)}）起，按上市后天数对齐绘制第 1..{chart_n} 天；
+      累计 = 截至当日 23:59 零售锁单 COUNTD(order_number)（order_type ∈ 用户车/NaN，且剔除测试单：总部主理店 + 假身份号，与上市监控同口径）。{gens[-1]} 上市仅 {chart[gens[-1]]['available_days']} 天，曲线暂绘制至该天数（不补齐）；其余代际满 {chart_n} 天。{gens[-1]} 为实线，{gens[1]} 虚线、{gens[0]} 点线以示区分。
     </div>
   </section>
 
@@ -1221,7 +1492,7 @@ def render_html(c: dict) -> str:
       <div class="method-item"><div class="method-icon" style="background:var(--zh-gold-100);color:var(--zh-gold-700);">T</div>
         <div class="method-body"><strong>时间窗口</strong><br/>各代际上市日（time_periods.end）起<br/>共同 {c['n_days']} 天，累计至 {c['last_date']}</div></div>
       <div class="method-item"><div class="method-icon" style="background:#E8F8FD;color:#2D6FA3;">F</div>
-        <div class="method-body"><strong>筛选口径</strong><br/>零售 = order_type ∈ {{用户车, NaN}}<br/>排除试驾车/员工/大客户/批售等</div></div>
+        <div class="method-body"><strong>筛选口径</strong><br/>零售 = order_type ∈ {{用户车, NaN}}<br/>排除试驾车/员工/大客户/批售等非零售单<br/>剔除测试单（总部主理店 + 假身份号，flag_test_orders，与上市监控同口径）</div></div>
       <div class="method-item"><div class="method-icon" style="background:#F3F6F8;color:#374151;">M</div>
         <div class="method-body"><strong>指标定义</strong><br/>锁单 = lock_time 非空 COUNTD(order_number)<br/>累计 = 上市日起至第 t 天末</div></div>
     </div>
@@ -1279,7 +1550,8 @@ def main(argv: list[str] | None = None) -> int:
             "scope": {
                 "data_source": "dataset/order_data.parquet + shared/schema/business_definition.json",
                 "time_window": {"start": c["max_end"], "end": c["last_date"],
-                                "n_days": c["n_days"]},
+                                "n_days": c["n_days"],
+                                "chart_window": c["chart_window"]},
                 "filters": {"gens": gens,
                             "order_type": "用户车/NaN（零售口径）",
                             "metric_definition": "累计锁单 = 自上市日起 COUNTD(order_number) 截至当日；天数以最新代际上市日为第1天"},
@@ -1289,6 +1561,7 @@ def main(argv: list[str] | None = None) -> int:
                 "metrics": {g: {"cum": c["curves"][g]["cum"][-1],
                                 "daily_last": c["curves"][g]["daily"][-1]} for g in gens},
                 "curve": c["curves"],
+                "chart": c["chart"],
                 "presale_conversion": c["presale"],
                 "daily_product_lock": c["daily_product"],
                 "region_compare": c["region"],

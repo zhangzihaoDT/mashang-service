@@ -10,6 +10,7 @@
 口径：
   - 锁单 = lock_time 落在上市窗口 [<gen>.end, as-of) 的 <gen> 订单（order_number 去重）
   - 默认零售口径 = order_type ∈ {用户车, NaN}；--include-test-drive 时含试驾车
+  - 剔除测试单（总部主理店 + 假身份号，flag_test_orders），与上市监控口径一致
   - 配置归属 = config_attribute.parquet 中 (Order Number) 匹配锁单且 value 非空的 Attribute/value
   - 核心配置 = 内饰 / 外饰 / 轮毂 / 方向盘 / 超远距高精度激光雷达（5 大核心属性，每单 1 值）
   - 分布 = 各 Attribute 下 value(显示名) 的计数与占锁单比例
@@ -38,6 +39,7 @@ for p in (str(REPO_ROOT), str(_WS)):
         sys.path.insert(0, p)
 
 from utils.monitors.phase import load_business_definition  # noqa: E402
+from utils.monitors.order_filter import flag_test_orders  # noqa: E402
 from utils.monitors.series_group import apply_series_group_logic  # noqa: E402
 from utils.result_contract import build_success_contract  # noqa: E402
 
@@ -47,7 +49,21 @@ _CONFIG_DATA = REPO_ROOT / "dataset" / "config_attribute.parquet"
 _DEFAULT_TABLE = _WS / "outputs" / "tables"
 NON_RETAIL = {"试驾车", "大客户", "员工", "集团员工", "经销商员工", "享道", "仅批售", "项目", "展车", "海外"}
 DEFAULT_GEN = "DM2"
-CORE_ATTRS = ["内饰", "外饰", "轮毂", "方向盘", "超远距高精度激光雷达"]
+# 核心 5 属性槽位 → 属性名别名集合（同一槽位不同代际命名不同，如 CM3 用「激光雷达」）
+CORE_ATTR_ALIASES: dict[str, set[str]] = {
+    "内饰": {"内饰"},
+    "外饰": {"外饰"},
+    "轮毂": {"轮毂"},
+    "方向盘": {"方向盘"},
+    "激光雷达": {"激光雷达", "超远距高精度激光雷达", "超远距高精度双激光雷达"},
+}
+CORE_ATTRS = list(CORE_ATTR_ALIASES)  # 核心槽位（顺序保留）
+_ATTR_TO_SLOT = {alias: slot for slot, aliases in CORE_ATTR_ALIASES.items() for alias in aliases}
+
+
+def is_core_attribute(attribute: str) -> bool:
+    """属性名是否属于核心 5 属性槽位（按别名归一，如 激光雷达 / 超远距高精度激光雷达）。"""
+    return attribute in _ATTR_TO_SLOT
 
 
 def _retail_mask(order_type: pd.Series) -> pd.Series:
@@ -85,6 +101,7 @@ def compute_lock_config_distribution(
       - launch / hi: 窗口起止
     """
     df, launch = load_order(gen)
+    bd = load_business_definition(_BUSINESS_DEF)
     lo = launch
     max_lock = pd.to_datetime(df["lock_time"], errors="coerce").max()
     if as_of is None:
@@ -95,6 +112,8 @@ def compute_lock_config_distribution(
             & (df["lock_time"] >= lo) & (df["lock_time"] < hi)].copy()
     if not include_test_drive:
         d2 = d2[_retail_mask(d2["order_type"])]
+    # 剔除测试单（总部主理店 + 假身份号），与上市监控/上市报告锁单口径一致
+    d2 = d2[~flag_test_orders(d2, bd)]
     locks = d2.drop_duplicates(subset=["order_number"])
     lock_ids = set(locks["order_number"].astype(str).str.strip())
     n = len(lock_ids)
@@ -104,16 +123,21 @@ def compute_lock_config_distribution(
     sub = cfg[cfg["Order Number"].isin(lock_ids) & cfg["value"].notna()].copy()
     covered = int(sub["Order Number"].nunique())
 
-    # 核心 5 属性完整覆盖
-    per_order_attrs = sub.groupby("Order Number")["Attribute"].apply(set).to_dict()
+    # 核心 5 属性完整覆盖（属性名按别名归一到槽位：激光雷达 / 超远距高精度激光雷达 视为同一槽位）
+    sub["_slot"] = sub["Attribute"].map(_ATTR_TO_SLOT)
+    per_order_slots = (sub.dropna(subset=["_slot"])
+                       .groupby("Order Number")["_slot"].apply(set).to_dict())
+    core_slots = set(CORE_ATTR_ALIASES)
     core_complete = sum(1 for o in lock_ids
-                        if len(set(CORE_ATTRS) & per_order_attrs.get(o, set())) == len(CORE_ATTRS))
+                        if core_slots <= per_order_slots.get(o, set()))
 
     # 各 Attribute 值分布（value 去空后计数）
     attrs = []
     option_attrs = []
-    core_total_orders = {a: int(sub[sub["Attribute"].eq(a)]["Order Number"].nunique())
-                         for a in CORE_ATTRS}
+    core_total_orders = {
+        slot: int(sub.loc[sub["Attribute"].isin(aliases), "Order Number"].nunique())
+        for slot, aliases in CORE_ATTR_ALIASES.items()
+    }
     for attr, grp in sub.groupby("Attribute"):
         vc = grp["value"].value_counts()
         vset = {str(v) for v in vc.index}
@@ -133,8 +157,8 @@ def compute_lock_config_distribution(
             attrs.append({"attribute": attr,
                           "orders_with_value": int(grp["Order Number"].nunique()),
                           "items": items})
-    attrs.sort(key=lambda a: CORE_ATTRS.index(a["attribute"])
-               if a["attribute"] in CORE_ATTRS else len(CORE_ATTRS) + 1)
+    attrs.sort(key=lambda a: CORE_ATTRS.index(_ATTR_TO_SLOT[a["attribute"]])
+               if a["attribute"] in _ATTR_TO_SLOT else len(CORE_ATTRS) + 1)
 
     return {
         "gen": gen,
@@ -185,6 +209,7 @@ def main(argv: list[str] | None = None) -> int:
                         "start": launch.date().isoformat(), "end": hi.date().isoformat()},
         "filters": {"order_type": "用户车/NaN（零售）" if not args.include_test_drive
                     else "含试驾车（全口径）",
+                    "test_orders": "剔除测试单（总部主理店 + 假身份号）",
                     "metric_definition": "配置分布 = config_attribute 中锁单订单的 Attribute/value 显示名分布；核心 5 属性 = 内饰/外饰/轮毂/方向盘/超远距高精度激光雷达；是/否型选装项按「是」占锁单比例计拥有率"},
     }
     result = {
@@ -234,7 +259,7 @@ def main(argv: list[str] | None = None) -> int:
     print(f"  {gen} 上市以来锁单 {n} 单；配置可关联 {covered} 单；核心 5 配置完整 {core_complete} 单。")
     print()
     for a in attrs:
-        tag = "核心" if a["attribute"] in CORE_ATTRS else ""
+        tag = "核心" if is_core_attribute(a["attribute"]) else ""
         print(f"[{a['attribute']}{(' · ' + tag) if tag else ''}] 关联 {a['orders_with_value']}/{n} 单")
         for it in a["items"]:
             bar = "#" * int(round(it["share"] * 60))
