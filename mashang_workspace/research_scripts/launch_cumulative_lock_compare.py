@@ -88,11 +88,15 @@ from operators.repurchase import split_repurchase  # noqa: E402
 _BUSINESS_DEF = REPO_ROOT / "shared" / "schema" / "business_definition.json"
 _ORDER_DATA = REPO_ROOT / "dataset" / "order_data.parquet"
 _ASSIGN_DATA = REPO_ROOT / "dataset" / "assign_data.csv"
+_TEST_DRIVE_DATA = REPO_ROOT / "dataset" / "test_drive_data.csv"
 _DEFAULT_REPORT = _WS / "outputs" / "reports"
 _DEFAULT_TABLE = _WS / "outputs" / "tables"
 
 DEFAULT_GENS = ["DM0", "DM1", "DM2"]
 CHART_WINDOW_DAYS = 30  # 模块 1 折线固定窗口：上市后天数 1..30；未满 30 天的代际只画到已有天数
+# 模块 8 试驾数据（test_drive_data.csv）按车系拆分，有效试驾数列
+_TESTDRIVE_SERIES_COL = {"L6": "L6有效试驾数", "LS6": "LS6有效试驾数", "LS9": "LS9有效试驾数"}
+_TEST_DRIVE_PRE_DAYS = 14  # 模块 8 上市前观察天数（含预售爬坡）
 NON_RETAIL = {"试驾车", "大客户", "员工", "集团员工", "经销商员工", "享道", "仅批售", "项目", "展车", "海外"}
 # 预售小订 → 上市 N 日锁单分解（对齐 runtime_scripts/presale_intention_funnel.py 通用漏斗）
 _BREAKDOWN_COLORS = {
@@ -221,6 +225,7 @@ def compute_curves(df: pd.DataFrame, bd: dict, gens: list[str],
         "age_repurchase": _age_repurchase_compare(retail, gens, ends, n_days),
         "lead_window": _lead_window_compare(ends, last_date),
         "lock_config": _lock_config_distribution(as_of.normalize(), gens[-1]),
+        "test_drive": _test_drive_compare(bd, gens, ends, last_date),
     }
 
 
@@ -391,21 +396,21 @@ def _user_profile_compare(df: pd.DataFrame, gens: list[str], ends: dict,
 
     # 判断要点
     insights = []
-    male_target = _share(target, "gender", "男")
+    female_target = _share(target, "owner_gender", "女")
     if others:
-        male_others = [_share(p, "gender", "男") for p in others]
-        direction = "高于" if male_target >= max(male_others) else \
-            ("介于" if min(male_others) < male_target < max(male_others) else "低于")
-        insights.append(f"{latest} 男性占比 {male_target * 100:.0f}%，{direction}其余代际"
-                        f"（{min(male_others) * 100:.0f}%~{max(male_others) * 100:.0f}%）。")
-    med_target = target["age_owner"].get("median")
-    if med_target is not None and others:
-        meds = [p["age_owner"].get("median") for p in others]
-        meds = [m for m in meds if m is not None]
-        if meds:
-            direction = "更年轻" if med_target <= min(meds) else ("更年长" if med_target >= max(meds) else "与历届相近")
-            insights.append(f"{latest} 车主年龄中位 {med_target:.0f} 岁，{direction}"
-                            f"（其余代际 {min(meds):.0f}~{max(meds):.0f} 岁）。")
+        female_others = [_share(p, "owner_gender", "女") for p in others]
+        direction = "高于" if female_target >= max(female_others) else \
+            ("介于" if min(female_others) < female_target < max(female_others) else "低于")
+        insights.append(f"{latest} 女性占比（owner_gender）{female_target * 100:.0f}%，{direction}其余代际"
+                        f"（{min(female_others) * 100:.0f}%~{max(female_others) * 100:.0f}%）。")
+    mean_target = target["age_owner"].get("mean")
+    if mean_target is not None and others:
+        means = [p["age_owner"].get("mean") for p in others]
+        means = [m for m in means if m is not None]
+        if means:
+            direction = "更年轻" if mean_target <= min(means) else ("更年长" if mean_target >= max(means) else "与历届相近")
+            insights.append(f"{latest} 车主年龄均值（owner_age）{mean_target:.1f} 岁，{direction}"
+                            f"（其余代际 {min(means):.1f}~{max(means):.1f} 岁）。")
     new1_t1 = _share(target, "tier", "新一线") + _share(target, "tier", "一线")
     top_prov = target["province"][:3]
     insights.append(
@@ -719,20 +724,33 @@ def _daily_product_table(c: dict) -> str:
     </div>"""
 
 
+def _diff_barcell(diff_pp: float | None, max_abs: float) -> str:
+    """占比差（pp）行内数据条：宽度 ∝ |差| / 最大 |差|，正向绿、负向红。
+
+    样式复用 templates/report_style.css 的 .barcell（与模块 7 一致），
+    直接在表格「占比差」单元格内可视化。
+    """
+    if diff_pp is None:
+        return "<div class='barcell'><div class='txt'>—</div></div>"
+    ratio = min(abs(diff_pp) / max_abs, 1.0) if max_abs else 0.0
+    cls = "positive" if diff_pp > 0 else ("negative" if diff_pp < 0 else "")
+    bar = f"<div class='bar {cls}' style='width:{ratio * 100:.1f}%;'></div>" if cls else ""
+    txt = "0.0" if diff_pp == 0 else f"{diff_pp:+.1f}"
+    return f"<div class='barcell'>{bar}<div class='txt'>{txt} pp</div></div>"
+
+
 def _region_table(c: dict) -> str:
     rc = c.get("region")
     if not rc:
         return ""
+    max_abs = max((abs(r["diff_pp"]) for r in rc["regions"]), default=0.0) or 1.0
     rows_html = []
     for r in rc["regions"]:
-        diff = r["diff_pp"]
-        sign = f"+{diff:.1f}" if diff > 0 else f"{diff:.1f}"
-        cls = " class='pos'" if diff > 0 else (" class='neg'" if diff < 0 else "")
         rows_html.append(
             f"<tr><td>{r['region']}</td>"
             f"<td class='num'><strong>{r['b']:,}</strong></td><td class='num'>{r['b_share'] * 100:.1f}%</td>"
             f"<td class='num'>{r['a']:,}</td><td class='num'>{r['a_share'] * 100:.1f}%</td>"
-            f"<td class='num'{cls}>{sign} pp</td></tr>"
+            f"<td style='min-width:180px;'>{_diff_barcell(r['diff_pp'], max_abs)}</td></tr>"
         )
     rows_html.append(
         f"<tr><td><strong>合计</strong></td>"
@@ -750,7 +768,7 @@ def _region_table(c: dict) -> str:
     return f"""
     <div class="card">
       <h2>分大区对比：{b} vs {a}（上市同期累计锁单 + 有效门店）</h2>
-      <p class="section-note">上市同期 = 各代际自上市日起第 1..{rc['n_days']} 天（与折线同窗口，N = {c['n_days']}）；大区 = parent_region_name，旧架构（一区/二区/三区）已归一到新架构（东区/西区/北区/华中），详见口径说明。占比差 = {b} 占比 − {a} 占比（pp）。</p>
+      <p class="section-note">上市同期 = 各代际自上市日起第 1..{rc['n_days']} 天（与折线同窗口，N = {c['n_days']}）；大区 = parent_region_name，旧架构（一区/二区/三区）已归一到新架构（东区/西区/北区/华中），详见口径说明。占比差 = {b} 占比 − {a} 占比（pp）；数据条宽度 ∝ |占比差|，绿 = {b} 更高、红 = {a} 更高。</p>
       <div class="table-wrap">
       <table class="report-table">
         <thead><tr><th>大区</th><th>{b} 锁单</th><th>{b} 占比</th><th>{a} 锁单</th><th>{a} 占比</th><th>占比差（{b}−{a}）</th></tr></thead>
@@ -819,20 +837,12 @@ def _user_profile_table(c: dict) -> str:
 
     _row("锁单样本（去重订单）", [
         _cell(lambda p: int(p["n"]), g, g == latest) for g in gens])
-    _row("男性占比（order_gender）", [
-        _cell(lambda p: (p["gender"].get("男", 0) / p["n"]) if p["n"] else None, g, g == latest)
+    _row("女性占比（owner_gender）", [
+        _cell(lambda p: (p["owner_gender"].get("女", 0) / p["n"]) if p["n"] else None, g, g == latest)
         for g in gens])
-    _row("男性占比（owner_gender 对照）", [
-        _cell(lambda p: (p["owner_gender"].get("男", 0) / p["n"]) if p["n"] else None, g, g == latest)
-        for g in gens])
-    _row("车主年龄中位 / 均值（owner_age）", [
-        _cell(lambda p: None
-              if p["age_owner"].get("median") is None
-              else f"{p['age_owner']['median']:.0f} / {p['age_owner']['mean']:.1f}", g, g == latest)
-        for g in gens])
-    _row("购车人年龄中位（buyer_age）", [
-        _cell(lambda p: None if p["age_buyer"].get("median") is None
-              else f"{p['age_buyer']['median']:.0f}（缺失 {p['age_buyer']['missing_pct']:.0f}%）", g, g == latest)
+    _row("车主年龄均值（owner_age）", [
+        _cell(lambda p: None if p["age_owner"].get("mean") is None
+              else f"{p['age_owner']['mean']:.1f}", g, g == latest)
         for g in gens])
     _row("00后 / 95后 占已知年龄", [
         _cell(lambda p: None if not p["cohorts_known"]
@@ -857,7 +867,7 @@ def _user_profile_table(c: dict) -> str:
     return f"""
     <div class="card">
       <h2>模块 4 · 锁单用户画像对比（{ ' / '.join(gens) }，上市同期 {pc['n_days']} 天窗口）</h2>
-      <p class="section-note">口径：各代际上市同期第 1..{pc['n_days']} 天窗口内零售锁单（order_type ∈ 用户车/NaN，排除非零售），按 order_number 去重；性别字段 order_gender / owner_gender，年龄字段 owner_age（车主）/ buyer_age（购车人），城市线级与省份 = license_city 归一（norm_city → city_to_tier_label / CITY_TO_PROVINCE）；年龄代际 = owner_age → birth = 上市年 − age → COHORTS（00后/95后…）。字段口径与 runtime_scripts/user_profile.py、l6_m2_presale_report 用户画像模块一致。</p>
+      <p class="section-note">口径：各代际上市同期第 1..{pc['n_days']} 天窗口内零售锁单（order_type ∈ 用户车/NaN，排除非零售），按 order_number 去重；性别仅取 owner_gender 口径（女性占比 = owner_gender 女 ÷ 锁单样本），年龄仅取 owner_age 口径（仅列均值，不含中位数），城市线级与省份 = license_city 归一（norm_city → city_to_tier_label / CITY_TO_PROVINCE）；年龄代际 = owner_age → birth = 上市年 − age → COHORTS（00后/95后…）。字段口径与 runtime_scripts/user_profile.py、l6_m2_presale_report 用户画像模块一致。</p>
       <div class="table-wrap">
       <table class="report-table">
         <thead><tr><th>指标</th>{thead_cells}</tr></thead>
@@ -873,16 +883,14 @@ def _age_repurchase_table(c: dict) -> str:
     if not ar or not ar.get("rows"):
         return ""
     a, b = ar["gens"][0], ar["gens"][1]
+    max_abs = max((abs(r["diff_pp"]) for r in ar["rows"]), default=0.0) or 1.0
     rows_html = []
     for r in ar["rows"]:
-        diff = r["diff_pp"]
-        sign = f"+{diff:.1f}" if diff > 0 else f"{diff:.1f}"
-        cls = " class='pos'" if diff > 0 else (" class='neg'" if diff < 0 else "")
         rows_html.append(
             f"<tr><td>{r['band']}</td>"
             f"<td class='num'>{r['a']}</td><td class='num'>{r['a_share_known'] * 100:.0f}%</td>"
             f"<td class='num'><strong>{r['b']}</strong></td><td class='num'><strong>{r['b_share_known'] * 100:.0f}%</strong></td>"
-            f"<td class='num'{cls}>{sign} pp</td></tr>"
+            f"<td style='min-width:180px;'>{_diff_barcell(r['diff_pp'], max_abs)}</td></tr>"
         )
 
     # 复购表
@@ -920,7 +928,7 @@ def _age_repurchase_table(c: dict) -> str:
     return f"""
     <div class="card">
       <h2>模块 5 · 车主年龄分层 &amp; 复购对比：{b} vs {a}（上市同期 {ar['n_days']} 天窗口）</h2>
-      <p class="section-note">年龄分层按 owner_age（车主年龄，各代际窗口缺失约 5–9%）分桶，占比为各带占「已知年龄」比例。复购（老车主）复用 shared/operators/repurchase.py 算子（mode=fulfilled_repurchase，canonical）：窗口内锁单的 owner_identity_no（18 位有效，缺失/无效记无法判定）须在窗口开始前已完成过**兑现购车**——历史零售锁单的交付或开票时间早于上市日；仅历史锁单、从未交付/开票的「悬置单」不计复购，另列悬置历史，避免误判（PIT 不穿越；宽松对照 mode=prior_locker 对齐 lock_attribution_analysis.py "Repeat Lockers (Had Prior Locks)"）。复购占比按可判定业务单（复购+悬置+首购）计。</p>
+      <p class="section-note">年龄分层按 owner_age（车主年龄，各代际窗口缺失约 5–9%）分桶，占比为各带占「已知年龄」比例；占比差 = {b} 占已知 − {a} 占已知（pp）；数据条宽度 ∝ |占比差|，绿 = {b} 更高、红 = {a} 更高。复购（老车主）复用 shared/operators/repurchase.py 算子（mode=fulfilled_repurchase，canonical）：窗口内锁单的 owner_identity_no（18 位有效，缺失/无效记无法判定）须在窗口开始前已完成过**兑现购车**——历史零售锁单的交付或开票时间早于上市日；仅历史锁单、从未交付/开票的「悬置单」不计复购，另列悬置历史，避免误判（PIT 不穿越；宽松对照 mode=prior_locker 对齐 lock_attribution_analysis.py "Repeat Lockers (Had Prior Locks)"）。复购占比按可判定业务单（复购+悬置+首购）计。</p>
       <div class="table-wrap">
       <table class="report-table">
         <thead><tr><th>年龄段</th><th>{a} 单数</th><th>{a} 占已知</th><th>{b} 单数</th><th>{b} 占已知</th><th>占比差（{b}−{a}）</th></tr></thead>
@@ -1131,6 +1139,176 @@ def _lead_window_table(c: dict) -> str:
       {insights_html}
     </div>
     {script_html}"""
+
+
+def _gen_to_testdrive_series(bd: dict, gen: str) -> str | None:
+    """把代际映射到 test_drive_data.csv 的车系列（L6/LS6/LS9）；无对应列返回 None。"""
+    for series, gens in (bd.get("model_series_mapping", {}) or {}).items():
+        if gen in gens and series in _TESTDRIVE_SERIES_COL:
+            return series
+    if gen in _TESTDRIVE_SERIES_COL:
+        return gen
+    for series in _TESTDRIVE_SERIES_COL:  # 前缀兜底，如 LS9Hyper → LS9
+        if gen.startswith(series):
+            return series
+    return None
+
+
+def _load_test_drive_daily() -> pd.DataFrame | None:
+    """读取试驾数据（Tableau core_metric_observation/7），日频，按车系列列。
+
+    注意：有效试驾数列在 CSV 中带千分位逗号（如 "1,020"），需先去除再加数值化。
+    """
+    if not _TEST_DRIVE_DATA.exists():
+        return None
+    df = pd.read_csv(_TEST_DRIVE_DATA, encoding="utf-8-sig")
+    out = {"d": pd.to_datetime(df["create_date 年/月/日"], format="%Y年%m月%d日", errors="coerce")}
+    for series, col in _TESTDRIVE_SERIES_COL.items():
+        if col in df.columns:
+            out[series] = pd.to_numeric(df[col].astype(str).str.replace(",", ""), errors="coerce")
+    return pd.DataFrame(out).dropna(subset=["d"]).sort_values("d")
+
+
+def _test_drive_compare(bd: dict, gens: list[str], ends: dict,
+                        last_date: pd.Timestamp) -> dict | None:
+    """模块 8：试驾数据（按车系）对齐上市前后天数，对比各代际上市周期试驾表现。
+
+    - 试驾数据按车系（L6/LS6/LS9）拆分，无法按代际拆分；每个代际映射到其车系列，
+      读该系列日频「有效试驾数」，按各代际自己的上市日对齐「上市前后天数」。
+    - 窗口 = 上市前 _TEST_DRIVE_PRE_DAYS 天 ~ 上市后截至数据最新完整日（各代际同窗口）。
+    - 上市前 7 日均值 = 上市日前第 1..7 天（不含上市日）的均值。
+    """
+    daily = _load_test_drive_daily()
+    if daily is None:
+        return None
+    series_map = {g: _gen_to_testdrive_series(bd, g) for g in gens}
+    usable = [g for g in gens if series_map[g]]
+    if not usable:
+        return None
+    last_date = pd.Timestamp(last_date).normalize()
+    max_end = max(pd.Timestamp(ends[g]).normalize() for g in usable)
+    end_off = max(0, int((last_date - max_end).days))
+    start_off = -_TEST_DRIVE_PRE_DAYS
+    s_by_series = {s: daily.set_index("d")[s] for s in {series_map[g] for g in usable}}
+    offsets = list(range(start_off, end_off + 1))
+
+    def _val(series: str, end: pd.Timestamp, off: int):
+        v = s_by_series[series].get(end + pd.Timedelta(days=off))
+        return None if (v is None or pd.isna(v)) else int(round(float(v)))
+
+    rows, per = [], {}
+    for g in usable:
+        end = pd.Timestamp(ends[g]).normalize()
+        series = series_map[g]
+        vals = {off: _val(series, end, off) for off in offsets}
+        pre7 = [vals[o] for o in range(-7, 0) if vals.get(o) is not None]
+        post = [vals[o] for o in range(1, end_off + 1) if vals.get(o) is not None]
+        per[g] = {
+            "gen": g, "series": series, "end": end.date().isoformat(),
+            "values": vals,
+            "pre7_avg": round(sum(pre7) / len(pre7), 1) if pre7 else None,
+            "launch": vals.get(0),
+            "post_avg": round(sum(post) / len(post), 1) if post else None,
+            "post_sum": int(sum(post)) if post else None,
+            "post_days": len(post),
+        }
+    for off in offsets:
+        rows.append({"offset": off,
+                     "values": {g: per[g]["values"].get(off) for g in usable},
+                     "dates": {g: (pd.Timestamp(per[g]["end"]) + pd.Timedelta(days=off)).date().isoformat()
+                               for g in usable}})
+
+    insights = []
+    if len(usable) >= 2:
+        gb, ga = usable[-1], usable[-2]
+        pb, pa = per[gb], per[ga]
+        if pb["pre7_avg"] and pa["pre7_avg"]:
+            chg = (pb["pre7_avg"] - pa["pre7_avg"]) / pa["pre7_avg"]
+            insights.append(
+                f"上市前 7 日试驾日均：{gb}（{pb['series']}）{pb['pre7_avg']:,.0f} vs "
+                f"{ga}（{pa['series']}）{pa['pre7_avg']:,.0f}（{chg:+.0%}）。")
+        if pb["post_avg"] and pa["post_avg"]:
+            chg = (pb["post_avg"] - pa["post_avg"]) / pa["post_avg"]
+            insights.append(
+                f"上市后 {pb['post_days']} 日试驾日均：{gb} {pb['post_avg']:,.0f} vs "
+                f"{ga} {pa['post_avg']:,.0f}（{chg:+.0%}）。")
+    return {"gens": usable, "series_map": series_map, "start_off": start_off,
+            "end_off": end_off, "rows": rows, "per": per, "insights": insights,
+            "metric": "有效试驾数", "pre_days": _TEST_DRIVE_PRE_DAYS,
+            "last_date": last_date.date().isoformat(),
+            "data_source": "dataset/test_drive_data.csv（Tableau core_metric_observation/7）"}
+
+
+def _test_drive_table(c: dict) -> str:
+    td = c.get("test_drive")
+    if not td or not td.get("rows"):
+        return ""
+    usable = td["gens"]
+    end_off = td["end_off"]
+
+    def _off_label(o: int) -> str:
+        if o == 0:
+            return "★ 上市日"
+        return f"上市前 {abs(o)} 天" if o < 0 else f"上市后 {o} 天"
+
+    head = "<tr><th>上市前后天</th>"
+    for g in usable:
+        head += f"<th>{g} 日期</th><th>{g} 有效试驾</th>"
+    head += "</tr>"
+
+    body = []
+    for r in td["rows"]:
+        o = r["offset"]
+        cls = " style='background:var(--zh-gold-100);'" if o == 0 else ""
+        cells = f"<td>{_off_label(o)}</td>"
+        for g in usable:
+            v = r["values"].get(g)
+            vs = "—" if v is None else f"{v:,}"
+            if g == usable[-1] and v is not None:
+                vs = f"<strong>{vs}</strong>"
+            cells += f"<td class='num' style='color:#6B7280;'>{r['dates'][g]}</td><td class='num'>{vs}</td>"
+        body.append(f"<tr{cls}>{cells}</tr>")
+
+    def _fmt(v, dec: int = 0) -> str:
+        return "—" if v is None else f"{v:,.{dec}f}"
+
+    sum_rows = []
+    for label, key in (("上市前 7 日试驾日均", "pre7_avg"),
+                       ("上市日", "launch"),
+                       (f"上市后 {end_off} 日日均", "post_avg"),
+                       (f"上市后 {end_off} 日合计", "post_sum")):
+        cells = f"<td>{label}</td>"
+        for g in usable:
+            cells += f"<td class='num'>{_fmt(td['per'][g].get(key))}</td>"
+        sum_rows.append(f"<tr>{cells}</tr>")
+    sum_head = "<tr><th>周期指标</th>" + "".join(f"<th>{g}</th>" for g in usable) + "</tr>"
+
+    insights_html = ""
+    if td.get("insights"):
+        insights_html = ('<div class="section-note" style="margin-top:14px;"><strong>判断</strong>'
+                         '<ul style="margin:6px 0 0 18px;padding:0;">'
+                         + "".join(f"<li>{s}</li>" for s in td["insights"]) + "</ul></div>")
+
+    gmap = " / ".join(f"{g}→{td['series_map'][g]}" for g in usable)
+    return f"""
+    <div class="card">
+      <h2>模块 8 · 上市周期试驾数据对比：{''.join(usable)}（对齐上市前后天数）</h2>
+      <p class="section-note">数据源 = {td['data_source']}（日频，按<strong>车系</strong>拆分，无法按代际拆分）；代际→车系映射 = {gmap}。各代际读其车系列的「有效试驾数」，按各自上市日对齐「上市前后天数」，窗口 = 上市前 {td['pre_days']} 天 ~ 上市后 {end_off} 天（★ 上市日），上市后数据统计截至 {td['last_date']}。上市前 7 日试驾日均 = 上市日前第 1..7 天均值（不含上市日）。</p>
+      <div class="table-wrap">
+      <table class="report-table">
+        <thead>{head}</thead>
+        <tbody>{''.join(body)}</tbody>
+      </table>
+      </div>
+      <h3 style="margin-top:20px;">周期汇总</h3>
+      <div class="table-wrap">
+      <table class="report-table">
+        <thead>{sum_head}</thead>
+        <tbody>{''.join(sum_rows)}</tbody>
+      </table>
+      </div>
+      {insights_html}
+    </div>"""
 
 
 def _lock_config_table(c: dict) -> str:
@@ -1484,11 +1662,13 @@ def render_html(c: dict) -> str:
 
   {_lock_config_table(c)}
 
+  {_test_drive_table(c)}
+
   <div class="method-section">
     <h2 class="section-title">口径与数据来源</h2>
     <div class="method-grid">
       <div class="method-item"><div class="method-icon" style="background:var(--zh-blue-100);color:var(--zh-blue);">D</div>
-        <div class="method-body"><strong>数据源</strong><br/>dataset/order_data.parquet<br/>dataset/assign_data.csv（有效门店 / 下发线索，模块 6）<br/>shared/schema/business_definition.json<br/>shared/loaders/store_info_loader.py（经销商 Bloc 关联）<br/>research_scripts/store_network_compare.py（网络对比组件）<br/>runtime_scripts/user_profile.py（画像字段口径）<br/>shared/operators/repurchase.py（复购算子）<br/>research_scripts/lock_config_distribution.py（模块 7 · 配置分布）<br/>dataset/config_attribute.parquet（模块 7 · 配置）</div></div>
+        <div class="method-body"><strong>数据源</strong><br/>dataset/order_data.parquet<br/>dataset/assign_data.csv（有效门店 / 下发线索，模块 6）<br/>shared/schema/business_definition.json<br/>shared/loaders/store_info_loader.py（经销商 Bloc 关联）<br/>research_scripts/store_network_compare.py（网络对比组件）<br/>runtime_scripts/user_profile.py（画像字段口径）<br/>shared/operators/repurchase.py（复购算子）<br/>research_scripts/lock_config_distribution.py（模块 7 · 配置分布）<br/>dataset/config_attribute.parquet（模块 7 · 配置）<br/>dataset/test_drive_data.csv（模块 8 · 试驾，Tableau core_metric_observation/7）</div></div>
       <div class="method-item"><div class="method-icon" style="background:var(--zh-gold-100);color:var(--zh-gold-700);">T</div>
         <div class="method-body"><strong>时间窗口</strong><br/>各代际上市日（time_periods.end）起<br/>共同 {c['n_days']} 天，累计至 {c['last_date']}</div></div>
       <div class="method-item"><div class="method-icon" style="background:#E8F8FD;color:#2D6FA3;">F</div>
@@ -1570,6 +1750,7 @@ def main(argv: list[str] | None = None) -> int:
                 "age_repurchase_compare": c["age_repurchase"],
                 "lead_window_compare": c["lead_window"],
                 "lock_config_distribution": c["lock_config"],
+                "test_drive_compare": c["test_drive"],
             },
             "artifacts": {},
             "followup_context": {"metric": "lock_count_cumulative", "gens": gens,
