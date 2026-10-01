@@ -34,6 +34,7 @@ from utils.monitors.phase import (  # noqa: E402
     load_business_definition,
     open_hour,
     open_minute,
+    presale_cohort_start_parts,
     phase_of,
 )
 from utils.monitors.launch import build_card as launch_build_card  # noqa: E402
@@ -42,6 +43,7 @@ from utils.monitors.presale import build_card as presale_build_card  # noqa: E40
 from utils.monitors.presale import build_waiting_card as presale_build_waiting_card  # noqa: E402
 from utils.monitors.presale import compute as presale_compute  # noqa: E402
 from utils.monitors.order_filter import is_fake_identity, flag_test_orders  # noqa: E402
+from runtime_scripts.presale_intention_funnel import resolve_window  # noqa: E402
 
 _BUSINESS_DEF = _PRJ_DIR / "shared" / "schema" / "business_definition.json"
 
@@ -94,6 +96,8 @@ def test_open_hour_calibration(bdef):
     # 非整点开放：CM2=20:55、CM3=19:45
     assert open_minute(bdef, "CM2") == 55
     assert open_minute(bdef, "CM3") == 45
+    assert presale_cohort_start_parts(bdef, "CM3") == (0, 0)
+    assert presale_cohort_start_parts(bdef, "DM2") == (20, 0)
     # 上市开放时刻历史对标默认 20:00（小时），分钟按代际实测校准
     assert launch_open_hour(bdef, "CM1") == 20
     assert launch_open_hour(bdef, "CM0") == 20
@@ -104,6 +108,15 @@ def test_open_hour_calibration(bdef):
     assert launch_open_minute(bdef, "LS9") == 12
     # 未配置代际回退默认 0
     assert launch_open_minute(bdef, "LS9Hyper") == 0
+
+
+def test_cm3_presale_cohort_starts_on_presale_day(bdef):
+    cohort_start, close = resolve_window(bdef, "CM3")
+    assert cohort_start == pd.Timestamp("2026-09-10 00:00:00")
+    assert close == pd.Timestamp("2026-09-24 00:00:00")
+    # 官方开放时刻仍保留给预售监控展示与实时判断。
+    assert open_hour(bdef, "CM3") == 19
+    assert open_minute(bdef, "CM3") == 45
 
 
 def test_key_day(bdef):

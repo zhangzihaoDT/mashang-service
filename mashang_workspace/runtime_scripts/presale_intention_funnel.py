@@ -3,7 +3,7 @@
 
 固定链路（口径全部来自 shared/schema/business_definition.json）：
   1) 代际归属：series_group_logic（按 product_name 判定），而非 series 字段
-  2) 预售窗口：time_periods.{gen}.start + monitor.open_hour/minute（预售开放时刻）
+  2) 预售窗口：按 monitor.presale_cohort_start_by_series 解析 cohort 起点；未配置时沿用官方预售开放时刻
                ~ time_periods.{gen}.end + 1 天（上市日结束，口径到当日 24:00）
   3) 小订池：intention_payment_time ∈ [开放时刻, 上市日结束)，按 order_number 去重；
               默认剔除测试单（总部主理店 + 假身份号），可选 --include-test-orders
@@ -44,6 +44,7 @@ from utils.monitors.phase import (
     model_series_of,
     open_hour,
     open_minute,
+    presale_cohort_start_parts,
     series_label,
 )
 from utils.monitors.series_group import apply_series_group_logic
@@ -93,9 +94,8 @@ def resolve_window(bdef: dict, generation: str) -> tuple[pd.Timestamp, pd.Timest
     start, end = tp.get("start"), tp.get("end")
     if not start or not end:
         raise ValueError(f"business_definition.time_periods.{generation} 缺少 start/end")
-    open_ts = pd.Timestamp(start) + pd.Timedelta(
-        hours=open_hour(bdef, generation), minutes=open_minute(bdef, generation)
-    )
+    cohort_hour, cohort_minute = presale_cohort_start_parts(bdef, generation)
+    open_ts = pd.Timestamp(start) + pd.Timedelta(hours=cohort_hour, minutes=cohort_minute)
     close_ts = pd.Timestamp(end) + pd.Timedelta(days=1)
     return cast(pd.Timestamp, open_ts), cast(pd.Timestamp, close_ts)
 

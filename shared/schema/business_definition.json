@@ -199,6 +199,9 @@
       "CM2": 55,
       "CM3": 45
     },
+    "presale_cohort_start_by_series": {
+      "CM3": "start_of_day"
+    },
     "launch_open_hour_by_series": {},
     "launch_open_minute_by_series": {
       "CM0": 32,

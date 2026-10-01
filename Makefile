@@ -279,7 +279,14 @@ data-pipeline-dry-run: data-validate observe-dry-run
 data-pipeline: data-refresh data-validate observe-sync
 
 ## 每日运营：数据管道 + 销售监控（写操作，会发送飞书）
-daily-ops: data-pipeline sales-monitor
+## 监控注入本轮 refresh_ts（管道刚完成），避免 freshness gate 用 parquet mtime 误判 stale
+daily-ops: data-pipeline
+	$(PYTHON) mashang_workspace/runtime_scripts/vehicle_sales_monitor.py \
+		$(if $(AS_OF),--as-of $(AS_OF)) \
+		$(if $(SERIES),--series $(SERIES)) \
+		$(if $(PHASE),--phase $(PHASE)) \
+		$(if $(FORMAT),--format $(FORMAT)) \
+		--refresh-ts "$$(/bin/date +%Y-%m-%dT%H:%M:%S)"
 
 ## ─── 兼容别名（已废弃命名，保留向后兼容）──────────────────────────
 dataset-update: data-refresh
@@ -363,7 +370,9 @@ sales-monitor-sync: monitor-sync
 ## 常驻定时器：09:00 每日管道（刷新→校验→同步→监控）+ key day 17-23 高频刷新/监控（配合 caffeinate -i）
 ## 注意：常驻进程，会刷新数据、同步飞书并发送监控卡片
 sales-scheduler:
-	$(PYTHON) mashang_workspace/utility_scripts/sales_scheduler.py
+	$(PYTHON) mashang_workspace/utility_scripts/sales_scheduler.py \
+		$(if $(SERIES),--series $(SERIES)) \
+		$(if $(PHASE),--phase $(PHASE))
 
 ## 兼容别名
 scheduler: sales-scheduler

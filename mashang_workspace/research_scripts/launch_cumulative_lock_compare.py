@@ -1355,7 +1355,7 @@ def _presale_conversion(df: pd.DataFrame, bd: dict, gens: list[str],
     """预售小订 → 上市 N 日锁单分解（口径对齐 runtime_scripts/presale_intention_funnel.py 通用漏斗）。
 
     逐代际，统一 N 日窗口（截止 = 上市日 + N - 1，与本报告折线同窗口，保证各代际可比）：
-      预售小订池 cohort_total（预售开放 ~ 上市日结束支付意向金，order_number 去重、剔测试单）
+       预售小订池 cohort_total（预售 cohort 起点 ~ 上市日结束支付意向金，order_number 去重、剔测试单）
         ├─ 预售退订 refunded_total（截止前意向金已退）
         └─ 留存小订 retained_count = 小订池 − 预售退订
       上市 N 日锁单总数 total_lock（该代际 lock_time ∈ [上市日, 上市日+N)，剔测试单）
@@ -1534,7 +1534,7 @@ def _key_points_table(c: dict) -> str:
     return f"""
     <div class="card">
       <h2>预售小订 → 上市 {n_days} 日锁单分解（口径对齐通用漏斗）</h2>
-      <p class="section-note">指标定义对齐 runtime_scripts/presale_intention_funnel.py（通用漏斗，已剔测试单），各代际统一 <strong>{n_days} 日窗口</strong>（截止 = 上市日 + {n_days - 1}，与折线同窗口，保证可比）：预售小订池 = 预售开放 ~ 上市日结束支付意向金（order_number 去重）；预售退订 = 截止前意向金已退；留存小订 = 小订池 − 预售退订；上市 {n_days} 日锁单总数 = 该代际 [上市日, 上市日+{n_days}) 内 lock_time 非空订单（零售口径，剔测试单，去重）；预售转化锁单 = 小订池中截止前锁单；直接锁单 = 锁单总数 − 预售转化锁单。预售退订率 = 预售退订 ÷ 小订池；<strong>预售转化率 = 预售转化锁单 ÷ 留存小订</strong>；直接锁单占比 = 直接锁单 ÷ {n_days} 日锁单总数。</p>
+      <p class="section-note">指标定义对齐 runtime_scripts/presale_intention_funnel.py（通用漏斗，已剔测试单），各代际统一 <strong>{n_days} 日窗口</strong>（截止 = 上市日 + {n_days - 1}，与折线同窗口，保证可比）：预售小订池 = 预售 cohort 起点 ~ 上市日结束支付意向金（order_number 去重）；预售退订 = 截止前意向金已退；留存小订 = 小订池 − 预售退订；上市 {n_days} 日锁单总数 = 该代际 [上市日, 上市日+{n_days}) 内 lock_time 非空订单（零售口径，剔测试单，去重）；预售转化锁单 = 小订池中截止前锁单；直接锁单 = 锁单总数 − 预售转化锁单。预售退订率 = 预售退订 ÷ 小订池；<strong>预售转化率 = 预售转化锁单 ÷ 留存小订</strong>；直接锁单占比 = 直接锁单 ÷ {n_days} 日锁单总数。</p>
       {chart_html}
       <div class="table-wrap">
       <table class="report-table">

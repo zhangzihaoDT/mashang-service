@@ -59,6 +59,14 @@ def open_minute(bdef: dict, generation: str) -> int:
     return int(by.get(generation, 0))
 
 
+def presale_cohort_start_parts(bdef: dict, generation: str) -> tuple[int, int]:
+    """返回预售 cohort 起点时分，不改变官方预售开放时刻。"""
+    mode = ((bdef.get("monitor") or {}).get("presale_cohort_start_by_series") or {}).get(generation)
+    if mode == "start_of_day":
+        return 0, 0
+    return open_hour(bdef, generation), open_minute(bdef, generation)
+
+
 def launch_open_hour(bdef: dict, generation: str) -> int:
     """上市开放时刻（历史对标用，默认 default_open_hour=20）。"""
     mon = bdef.get("monitor") or {}

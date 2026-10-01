@@ -20,6 +20,7 @@ from utils.monitors.phase import (
     launch_open_minute,
     open_hour,
     open_minute,
+    presale_cohort_start_parts,
     series_label,
 )
 from utils.monitors.order_filter import flag_test_orders
@@ -160,6 +161,7 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
     cumulative_intention_conv = 0
     cumulative_direct_lock = 0
     compare: dict = {}
+    presale_pool_order_numbers: set[str] = set()
 
     open_t = None
     if launch is not None:
@@ -258,8 +260,23 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
     ot_filled = ot.notna() & (ot.str.strip() != "")
     order_type_filled_count = int(lock_rows.loc[ot_filled, "order_number"].nunique())
     order_type_filled_ratio = (order_type_filled_count / cumulative_lock_count) if cumulative_lock_count else 0.0
-    conv_mask = lock_mask & base["intention_payment_time"].notna() & (base["intention_payment_time"] <= base["lock_time"])
-    cumulative_intention_conv = int(base.loc[conv_mask & base.apply(_is_real_lock, axis=1), "order_number"].nunique())
+    if launch is not None:
+        tp_key = time_periods.get(generation, {}) or {}
+        if tp_key.get("start"):
+            cohort_hour, cohort_minute = presale_cohort_start_parts(business_def, generation)
+            cohort_start = pd.Timestamp(tp_key["start"]).normalize() + pd.Timedelta(
+                hours=cohort_hour, minutes=cohort_minute
+            )
+            pool_close = launch.normalize() + pd.Timedelta(days=1)
+            pool_mask = (
+                df["series_group_logic"].eq(generation)
+                & df["intention_payment_time"].notna()
+                & (df["intention_payment_time"] >= cohort_start)
+                & (df["intention_payment_time"] < pool_close)
+            )
+            presale_pool_order_numbers = set(df.loc[pool_mask, "order_number"].astype(str))
+    conv_mask = lock_mask & base["order_number"].astype(str).isin(presale_pool_order_numbers)
+    cumulative_intention_conv = int(base.loc[conv_mask, "order_number"].nunique())
     cumulative_direct_lock = int(cumulative_lock_count) - int(cumulative_intention_conv)
 
     presale_retained = 0
@@ -268,8 +285,9 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
     if launch is not None:
         tp_key = time_periods.get(generation, {}) or {}
         if tp_key.get("start"):
+            cohort_hour, cohort_minute = presale_cohort_start_parts(business_def, generation)
             presale_open = pd.Timestamp(tp_key["start"]).normalize() + pd.Timedelta(
-                hours=open_hour(business_def, generation), minutes=open_minute(business_def, generation)
+                hours=cohort_hour, minutes=cohort_minute
             )
             retained_mask = (
                 df["series_group_logic"].eq(generation)
