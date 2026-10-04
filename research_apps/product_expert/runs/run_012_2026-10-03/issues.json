@@ -1,0 +1,579 @@
+[
+  {
+    "issue_id": "ISS-0001",
+    "title": "门店到店客流情境与到店质量分化",
+    "category": "sales_service",
+    "series": [
+      "L6",
+      "LS6",
+      "LS8"
+    ],
+    "affected_function": "到店客流 / 进店质量",
+    "description": "国庆第三日多店客流情境分化：遵义播州约 11 组、与平时相当，关注 LS6/LS8 各约四成且多数当天预约试驾；重庆龙湖天街顾客被造型吸引进店、万州快闪门店位置好人流大；而重庆金陵车城店 LS6 进店明显增加；遵义吾悦相邻电竞比赛活动仍影响客流、万州快闪第三天客流较前两日减少、以走马观花为主。反映到店量与进店质量受门店形态、选址与外部活动情境影响而分化。",
+    "evidence_ids": [
+      "EV-0001",
+      "EV-0002",
+      "EV-0003",
+      "EV-0022",
+      "EV-0042",
+      "EV-0043",
+      "EV-0045"
+    ],
+    "evidence_count": 7,
+    "store_count": 4,
+    "stores": [
+      "万州·万达广场快闪",
+      "遵义·吾悦广场",
+      "遵义·播州用户中心",
+      "重庆·金陵车世界车城店"
+    ],
+    "severity": "medium",
+    "severity_rationale": "7 条证据跨 4 店，指向到店量与进店质量受门店形态、选址与外部活动影响，属运营信号而非产品抱怨。",
+    "business_signal": "operational",
+    "status": "confirmed",
+    "first_seen_date": "2026-10-03",
+    "last_seen_date": "2026-10-03",
+    "review": {
+      "reviewed_by": "opencode-agent",
+      "reviewed_at": "2026-10-03",
+      "decision": "confirmed",
+      "notes": "7 条证据跨 4 店；复用 pattern_key=store_footfall_context_quality。"
+    },
+    "pattern_ids": [
+      "PAT-0001"
+    ],
+    "created_at": "2026-10-03"
+  },
+  {
+    "issue_id": "ISS-0002",
+    "title": "产品力与服务正向认可（可复用优势）",
+    "category": "other",
+    "series": [
+      "L6",
+      "LS6",
+      "LS8"
+    ],
+    "affected_function": "产品认可 / 正面口碑",
+    "description": "多店正向信号：试驾后底盘与空间获一致好评、重庆用户认可底盘素质、贵州路况下底盘优势突出；客户对产品整体满意；LS6 被车辆造型吸引进店、进店看车与用户数量明显增加、配置丰富性价比较高、被认为适合务实家庭用户；LS6 外观好评高于以往、LS8 茶色好评高；一线销售承压但井然有序。构成本期可复用的产品与服务优势叙事。",
+    "evidence_ids": [
+      "EV-0004",
+      "EV-0007",
+      "EV-0010",
+      "EV-0015",
+      "EV-0016",
+      "EV-0023",
+      "EV-0024",
+      "EV-0029",
+      "EV-0040",
+      "EV-0041"
+    ],
+    "evidence_count": 10,
+    "store_count": 7,
+    "stores": [
+      "贵阳·万象汇",
+      "遵义·吾悦广场",
+      "遵义·播州用户中心",
+      "重庆·礼嘉天街体验中心",
+      "重庆·重庆南岸服务中心",
+      "重庆·金陵车世界车城店",
+      "重庆·龙湖天街体验中心"
+    ],
+    "severity": "low",
+    "severity_rationale": "10 条证据跨 7 店，均为正向产品与服务信号，非抱怨或拒购。",
+    "business_signal": "positive_signal",
+    "status": "confirmed",
+    "first_seen_date": "2026-10-03",
+    "last_seen_date": "2026-10-03",
+    "review": {
+      "reviewed_by": "opencode-agent",
+      "reviewed_at": "2026-10-03",
+      "decision": "confirmed",
+      "notes": "10 条证据跨 7 店；复用 pattern_key=verified_product_service_strengths。"
+    },
+    "pattern_ids": [
+      "PAT-0002"
+    ],
+    "created_at": "2026-10-03"
+  },
+  {
+    "issue_id": "ISS-0003",
+    "title": "价格与权益预期抑制短期转化",
+    "category": "configuration",
+    "series": [
+      "L6",
+      "LS6"
+    ],
+    "affected_function": "价格 / 权益预期",
+    "description": "重庆南岸反馈客户对产品满意但在价格和权益上希望多争取、销售只能按厂家报价，专家建议给销售小额优惠额度促高意向锁单；南坪专家认为降价并非有效方式、LS6 已具性价比但用户仍能找到不满意；贵阳万象汇用户价格敏感、爱讨价还价、等价格优惠，门店缺少有力逼单政策。反映价格与权益预期仍抑制短期转化。",
+    "evidence_ids": [
+      "EV-0011",
+      "EV-0012",
+      "EV-0018",
+      "EV-0034"
+    ],
+    "evidence_count": 4,
+    "store_count": 3,
+    "stores": [
+      "贵阳·万象汇",
+      "重庆·南坪金菱车世界店",
+      "重庆·重庆南岸服务中心"
+    ],
+    "severity": "medium",
+    "severity_rationale": "4 条证据跨 3 店，明确指向价格/权益拉扯与逼单不足，但未直接表述拒购。",
+    "business_signal": "complaint",
+    "status": "confirmed",
+    "first_seen_date": "2026-10-03",
+    "last_seen_date": "2026-10-03",
+    "review": {
+      "reviewed_by": "opencode-agent",
+      "reviewed_at": "2026-10-03",
+      "decision": "confirmed",
+      "notes": "4 条证据跨 3 店；复用 pattern_key=price_equity_decision_barrier。"
+    },
+    "pattern_ids": [
+      "PAT-0003"
+    ],
+    "created_at": "2026-10-03"
+  },
+  {
+    "issue_id": "ISS-0004",
+    "title": "门店引流与转化动作建议",
+    "category": "sales_service",
+    "series": [
+      "L6",
+      "LS6"
+    ],
+    "affected_function": "营销传达 / 转化动作",
+    "description": "多店一线建议与落地：遵义播州直播持续；重庆南岸建议与隔壁上汽大众异业互推；重庆龙湖天街建议在每台车前明示核心竞品比较优势（易拉宝、车内 one page）；重庆金陵车城店建议加强线上传播；贵阳贵阳万象汇建议进店送小礼品。反映可视化物料、线上传播与异业/进店礼是可复制的转化动作。",
+    "evidence_ids": [
+      "EV-0006",
+      "EV-0013",
+      "EV-0017",
+      "EV-0025",
+      "EV-0027"
+    ],
+    "evidence_count": 5,
+    "store_count": 5,
+    "stores": [
+      "贵阳·贵阳万象汇",
+      "遵义·播州用户中心",
+      "重庆·重庆南岸服务中心",
+      "重庆·金陵车世界车城店",
+      "重庆·龙湖天街体验中心"
+    ],
+    "severity": "low",
+    "severity_rationale": "5 条证据跨 5 店，均为一线运营动作建议与落地反馈，非抱怨或拒购。",
+    "business_signal": "operational",
+    "status": "confirmed",
+    "first_seen_date": "2026-10-03",
+    "last_seen_date": "2026-10-03",
+    "review": {
+      "reviewed_by": "opencode-agent",
+      "reviewed_at": "2026-10-03",
+      "decision": "confirmed",
+      "notes": "5 条证据跨 5 店；复用 pattern_key=store_operations_conversion_levers。"
+    },
+    "pattern_ids": [
+      "PAT-0004"
+    ],
+    "created_at": "2026-10-03"
+  },
+  {
+    "issue_id": "ISS-0005",
+    "title": "品牌认可度与曝光诉求约束到店",
+    "category": "other",
+    "series": [
+      "L6",
+      "LS6"
+    ],
+    "affected_function": "品牌认知 / 曝光",
+    "description": "重庆南坪反馈需提升用户认可度与品牌社交知名度、并建议提升品牌曝光吸引主动到店；万州快闪反馈智己在当地算偏贵车型。反映品牌认知与价格定位仍是到店与转化的约束。",
+    "evidence_ids": [
+      "EV-0019",
+      "EV-0020",
+      "EV-0044"
+    ],
+    "evidence_count": 3,
+    "store_count": 2,
+    "stores": [
+      "万州·万达广场快闪",
+      "重庆·南坪金菱车世界店"
+    ],
+    "severity": "medium",
+    "severity_rationale": "3 条证据跨 2 店，指向品牌认可度与价格定位约束，但未量化对到店/转化的影响。",
+    "business_signal": "other",
+    "status": "confirmed",
+    "first_seen_date": "2026-10-03",
+    "last_seen_date": "2026-10-03",
+    "review": {
+      "reviewed_by": "opencode-agent",
+      "reviewed_at": "2026-10-03",
+      "decision": "confirmed",
+      "notes": "3 条证据跨 2 店；复用 pattern_key=brand_channel_attraction_constraint。"
+    },
+    "pattern_ids": [
+      "PAT-0005"
+    ],
+    "created_at": "2026-10-03"
+  },
+  {
+    "issue_id": "ISS-0006",
+    "title": "老客户口碑与老带新转介绍机会",
+    "category": "sales_service",
+    "series": [
+      "L6",
+      "LS6"
+    ],
+    "affected_function": "老客户 / 口碑与转介绍",
+    "description": "重庆南坪建议门店维护老客户口碑、发动老客户带人进店体验。反映老用户口碑与转介绍是可运营的忠诚度资源。",
+    "evidence_ids": [
+      "EV-0021"
+    ],
+    "evidence_count": 1,
+    "store_count": 1,
+    "stores": [
+      "重庆·南坪金菱车世界店"
+    ],
+    "severity": "low",
+    "severity_rationale": "单店单条正向机会建议，非抱怨或拒购。",
+    "business_signal": "positive_signal",
+    "status": "confirmed",
+    "first_seen_date": "2026-10-03",
+    "last_seen_date": "2026-10-03",
+    "review": {
+      "reviewed_by": "opencode-agent",
+      "reviewed_at": "2026-10-03",
+      "decision": "confirmed",
+      "notes": "单条建议；复用 pattern_key=existing_owner_loyalty_benefit。"
+    },
+    "pattern_ids": [
+      "PAT-0006"
+    ],
+    "created_at": "2026-10-03"
+  },
+  {
+    "issue_id": "ISS-0007",
+    "title": "国庆活动与竞品赠品/权益差距",
+    "category": "sales_service",
+    "series": [
+      "L6",
+      "LS6"
+    ],
+    "affected_function": "促销活动 / 赠品权益",
+    "description": "重庆龙湖天街反馈用户重点关注购车是否免费赠送家充桩；贵阳万象汇反馈国庆活动力度不够、竞品试驾有礼品，且有多组客户询问充电桩权益并以此结束探店。反映国庆促销力度与充电桩等权益相对竞品存在差距。",
+    "evidence_ids": [
+      "EV-0014",
+      "EV-0030",
+      "EV-0032",
+      "EV-0038"
+    ],
+    "evidence_count": 4,
+    "store_count": 2,
+    "stores": [
+      "贵阳·万象汇",
+      "重庆·龙湖天街体验中心"
+    ],
+    "severity": "medium",
+    "severity_rationale": "4 条证据跨 2 店，指向促销力度与充电桩权益差距，可能影响短期转化，但未直接表述拒购。",
+    "business_signal": "competitive_gap",
+    "status": "confirmed",
+    "first_seen_date": "2026-10-03",
+    "last_seen_date": "2026-10-03",
+    "review": {
+      "reviewed_by": "opencode-agent",
+      "reviewed_at": "2026-10-03",
+      "decision": "confirmed",
+      "notes": "4 条证据跨 2 店；复用 pattern_key=competitor_promotion_perk_gap。"
+    },
+    "pattern_ids": [
+      "PAT-0007"
+    ],
+    "created_at": "2026-10-03"
+  },
+  {
+    "issue_id": "ISS-0008",
+    "title": "家庭多代同堂需求与车型定位适配",
+    "category": "other",
+    "series": [
+      "L6",
+      "LS6"
+    ],
+    "affected_function": "车型定位 / 目标人群",
+    "description": "贵阳两店均反馈到店客户三代同堂、全家出动、家庭单位更大且年龄更大，单组可达 7-8 人，需同时满足不同年龄段诉求；重庆新光里反馈大部分人仍看 SUV、轿车因重庆山路多且存在磕底盘顾虑而接受度低。反映家庭多代同堂用车场景对产品适配提出更高要求，同时也说明轿车（L6）在重庆等山路城市面临定位约束。",
+    "evidence_ids": [
+      "EV-0026",
+      "EV-0028",
+      "EV-0033",
+      "EV-0046"
+    ],
+    "evidence_count": 4,
+    "store_count": 3,
+    "stores": [
+      "贵阳·万象汇",
+      "贵阳·贵阳万象汇",
+      "重庆·新光里"
+    ],
+    "severity": "medium",
+    "severity_rationale": "4 条证据跨 3 店，指向家庭多代用车适配与轿车在山区市场接受度，属定位观察而非拒购。",
+    "business_signal": "other",
+    "status": "confirmed",
+    "first_seen_date": "2026-10-03",
+    "last_seen_date": "2026-10-03",
+    "review": {
+      "reviewed_by": "opencode-agent",
+      "reviewed_at": "2026-10-03",
+      "decision": "confirmed",
+      "notes": "4 条证据跨 3 店；复用 pattern_key=model_positioning_audience_fit。"
+    },
+    "pattern_ids": [
+      "PAT-0008"
+    ],
+    "created_at": "2026-10-03"
+  },
+  {
+    "issue_id": "ISS-0009",
+    "title": "L6 前后备箱偏小、实用性感知不足",
+    "category": "storage",
+    "series": [
+      "L6"
+    ],
+    "affected_function": "前部与后部储物空间",
+    "description": "重庆新光里反馈 L6 肉眼第一感前后备箱都比较小，用户觉得实用性不高。反映 L6 储物空间的直观感知可能削弱其实用性评价。",
+    "evidence_ids": [
+      "EV-0047"
+    ],
+    "evidence_count": 1,
+    "store_count": 1,
+    "stores": [
+      "重庆·新光里"
+    ],
+    "severity": "medium",
+    "severity_rationale": "单店单条专家观察，明确指向储物空间与实用性感知，但未直接表述拒购。",
+    "business_signal": "complaint",
+    "status": "confirmed",
+    "first_seen_date": "2026-10-03",
+    "last_seen_date": "2026-10-03",
+    "review": {
+      "reviewed_by": "opencode-agent",
+      "reviewed_at": "2026-10-03",
+      "decision": "confirmed",
+      "notes": "单条观察；复用 pattern_key=storage_front_trunk_capacity。"
+    },
+    "pattern_ids": [
+      "PAT-0009"
+    ],
+    "created_at": "2026-10-03"
+  },
+  {
+    "issue_id": "ISS-0010",
+    "title": "智驾品牌认知差距（华为系光环）",
+    "category": "adas",
+    "series": [
+      "LS6"
+    ],
+    "affected_function": "智驾 / 品牌信任",
+    "description": "贵阳万象汇反馈用户认为华为智驾自带光环，与 momenta 相比印象更深，即使表现差不多也觉得华为更好；重庆新光里反馈用户认为华为系智驾体验非常好。反映智驾供应商品牌认知与信任是竞品对标差距。",
+    "evidence_ids": [
+      "EV-0036",
+      "EV-0048"
+    ],
+    "evidence_count": 2,
+    "store_count": 2,
+    "stores": [
+      "贵阳·万象汇",
+      "重庆·新光里"
+    ],
+    "severity": "medium",
+    "severity_rationale": "2 条证据跨 2 店，指向智驾供应商品牌认知差距，可能影响对比决策，但未直接表述拒购。",
+    "business_signal": "competitive_gap",
+    "status": "confirmed",
+    "first_seen_date": "2026-10-03",
+    "last_seen_date": "2026-10-03",
+    "review": {
+      "reviewed_by": "opencode-agent",
+      "reviewed_at": "2026-10-03",
+      "decision": "confirmed",
+      "notes": "2 条证据跨 2 店；复用 pattern_key=adas_capability_brand_trust。"
+    },
+    "pattern_ids": [
+      "PAT-0010"
+    ],
+    "created_at": "2026-10-03"
+  },
+  {
+    "issue_id": "ISS-0011",
+    "title": "竞品情绪价值与个性化设计差距",
+    "category": "other",
+    "series": [
+      "L6",
+      "LS6"
+    ],
+    "affected_function": "设计 / 情绪价值",
+    "description": "贵阳万象汇反馈有用户被老款智慧尾灯和半幅方向盘吸引、觉得能表达自我但对被砍略有失望，并希望有类似蔚来 babyblue 的外饰车漆而门店无此色；重庆新光里反馈用户认为 SU7 内饰更好看。反映竞品在情绪价值与个性化设计上的可感知吸引力。",
+    "evidence_ids": [
+      "EV-0035",
+      "EV-0037",
+      "EV-0049"
+    ],
+    "evidence_count": 3,
+    "store_count": 2,
+    "stores": [
+      "贵阳·万象汇",
+      "重庆·新光里"
+    ],
+    "severity": "medium",
+    "severity_rationale": "3 条证据跨 2 店，指向竞品情绪价值与个性化设计差距，属对标观察。",
+    "business_signal": "competitive_gap",
+    "status": "confirmed",
+    "first_seen_date": "2026-10-03",
+    "last_seen_date": "2026-10-03",
+    "review": {
+      "reviewed_by": "opencode-agent",
+      "reviewed_at": "2026-10-03",
+      "decision": "confirmed",
+      "notes": "3 条证据跨 2 店；复用 pattern_key=competitor_emotional_value_differentiation。"
+    },
+    "pattern_ids": [
+      "PAT-0011"
+    ],
+    "created_at": "2026-10-03"
+  },
+  {
+    "issue_id": "ISS-0012",
+    "title": "线控转向体验与卖点传达",
+    "category": "driving_dynamics",
+    "series": [
+      "LS6"
+    ],
+    "affected_function": "线控转向 / 驾驶体验",
+    "description": "重庆礼嘉天街反馈用户对底盘素质认可，但认为线控体验一般，且重庆急转弯道路较多。反映线控转向作为卖点在实际体验中的传达可能受损。",
+    "evidence_ids": [
+      "EV-0008"
+    ],
+    "evidence_count": 1,
+    "store_count": 1,
+    "stores": [
+      "重庆·礼嘉天街体验中心"
+    ],
+    "severity": "medium",
+    "severity_rationale": "单店单条专家观察，明确指向线控体验一般，但未直接表述拒购。",
+    "business_signal": "complaint",
+    "status": "confirmed",
+    "first_seen_date": "2026-10-03",
+    "last_seen_date": "2026-10-03",
+    "review": {
+      "reviewed_by": "opencode-agent",
+      "reviewed_at": "2026-10-03",
+      "decision": "confirmed",
+      "notes": "单条观察；复用 pattern_key=driving_dynamics_steering_tech_demo。"
+    },
+    "pattern_ids": [
+      "PAT-0012"
+    ],
+    "created_at": "2026-10-03"
+  },
+  {
+    "issue_id": "ISS-0013",
+    "title": "后排座椅包裹性不足",
+    "category": "seating_space",
+    "series": [
+      "LS6"
+    ],
+    "affected_function": "后排座椅 / 座椅人体工程",
+    "description": "重庆礼嘉天街反馈用户试驾后觉得后排座椅包裹性不够。反映后排座椅人体工程学设定可能影响乘坐体验。",
+    "evidence_ids": [
+      "EV-0009"
+    ],
+    "evidence_count": 1,
+    "store_count": 1,
+    "stores": [
+      "重庆·礼嘉天街体验中心"
+    ],
+    "severity": "medium",
+    "severity_rationale": "单店单条专家观察，明确指向后排座椅包裹性，但未直接表述拒购。",
+    "business_signal": "complaint",
+    "status": "confirmed",
+    "first_seen_date": "2026-10-03",
+    "last_seen_date": "2026-10-03",
+    "review": {
+      "reviewed_by": "opencode-agent",
+      "reviewed_at": "2026-10-03",
+      "decision": "confirmed",
+      "notes": "单条观察；复用 pattern_key=seating_rear_space_ergonomics。"
+    },
+    "pattern_ids": [
+      "PAT-0013"
+    ],
+    "created_at": "2026-10-03"
+  },
+  {
+    "issue_id": "ISS-0014",
+    "title": "LS8 尾门感应开启需多次尝试、学习成本高",
+    "category": "quality_reliability",
+    "series": [
+      "LS8"
+    ],
+    "affected_function": "尾门 / 感应开启",
+    "description": "遵义播州反馈静态体验中 LS8 尾门 KK 需要多试两次才能触发打开尾门，需要一点学习成本。反映尾门感应开启的触发可用性存在学习成本。",
+    "evidence_ids": [
+      "EV-0005"
+    ],
+    "evidence_count": 1,
+    "store_count": 1,
+    "stores": [
+      "遵义·播州用户中心"
+    ],
+    "severity": "medium",
+    "severity_rationale": "单店单条专家观察，明确指向尾门感应开启不易触发，但未直接表述拒购。",
+    "business_signal": "complaint",
+    "status": "confirmed",
+    "first_seen_date": "2026-10-03",
+    "last_seen_date": "2026-10-03",
+    "review": {
+      "reviewed_by": "opencode-agent",
+      "reviewed_at": "2026-10-03",
+      "decision": "confirmed",
+      "notes": "单条观察；作为尾门感应开启可用性的新语义登记（pattern_key=power_tailgate_activation_usability）。"
+    },
+    "pattern_ids": [
+      "PAT-0014"
+    ],
+    "created_at": "2026-10-03"
+  },
+  {
+    "issue_id": "ISS-0015",
+    "title": "门店选址/朝向可见性影响自然引流",
+    "category": "sales_service",
+    "series": [
+      "L6",
+      "LS6"
+    ],
+    "affected_function": "门店位置 / 可见性",
+    "description": "贵阳万象汇反馈门店位置不好、在拐角处视野盲区很难找；另一专家反馈门店位置和朝向难引流、对面装修、过道上看不到智己招牌、特地找过来容易迷路。反映门店选址与可见性直接影响自然到店。",
+    "evidence_ids": [
+      "EV-0031",
+      "EV-0039"
+    ],
+    "evidence_count": 2,
+    "store_count": 1,
+    "stores": [
+      "贵阳·万象汇"
+    ],
+    "severity": "medium",
+    "severity_rationale": "2 条证据同店（贵阳万象汇），明确指向选址/朝向/招牌可见性影响引流，属运营信号。",
+    "business_signal": "operational",
+    "status": "confirmed",
+    "first_seen_date": "2026-10-03",
+    "last_seen_date": "2026-10-03",
+    "review": {
+      "reviewed_by": "opencode-agent",
+      "reviewed_at": "2026-10-03",
+      "decision": "confirmed",
+      "notes": "2 条证据同店；作为门店选址/可见性影响引流的新语义登记（pattern_key=store_location_visibility_barrier）。"
+    },
+    "pattern_ids": [
+      "PAT-0015"
+    ],
+    "created_at": "2026-10-03"
+  }
+]

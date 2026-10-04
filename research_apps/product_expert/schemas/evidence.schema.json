@@ -64,6 +64,8 @@
             "product_issue_l6",
             "product_issue_ls8_ls9",
             "competitor_comment",
+            "competitor_comment_l6",
+            "store_growth_suggestion",
             "other"
           ],
           "description": "证据来自原始表的哪个字段"
@@ -111,7 +113,31 @@
         "sales_service",
         "other"
       ],
-      "description": "体验维度分类（受控词表，见 workflow/issue_discovery.md）"
+      "description": "主维度分类（受控词表，见 workflow/issue_discovery.md）。当同一判断跨多个维度时，此处填主维度，其余维度记入 dimensions[]。"
+    },
+    "dimensions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "exterior",
+          "interior",
+          "cockpit_ergonomics",
+          "seating_space",
+          "storage",
+          "charging",
+          "driving_dynamics",
+          "nvh",
+          "smart_cockpit",
+          "adas",
+          "quality_reliability",
+          "configuration",
+          "sales_service",
+          "other"
+        ]
+      },
+      "description": "当一条 evidence 是同一判断作用于多个对象/维度时，列出全部维度（含主维度 category）；单一维度时可省略。见 workflow/issue_discovery.md S1。"
     },
     "sentiment": {
       "type": "string",

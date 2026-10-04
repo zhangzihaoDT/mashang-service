@@ -28,6 +28,7 @@ APP_DIR = Path(__file__).resolve().parents[1]
 DETAIL_LIMIT = 3
 OBSERVATION_LIMIT = 3
 QUOTE_LIMIT = 3
+LOW_MENTION_COLLAPSE = 2  # 其余开放问题中，提及次数 < 2（即 1 次）的默认折叠
 MODELS = ["LS6", "L6"]
 OTHER_MODELS = ["LS8", "LS9", "OTHER"]
 
@@ -518,16 +519,25 @@ def build_markdown(run, patterns, convergences, findings, issues, evidence, psta
         add("")
         for c in rest:
             p = pidx[c["pattern_id"]]
-            add(f"### {p['title']}")
-            add("")
-            add(f"**{c['counts']['evidence_count']} 次提及 · {c['counts']['product_expert_count']} 位专家 · "
-                f"{c['counts']['city_store_count']} 家门店**")
-            add("")
+            meta = (f"{c['counts']['evidence_count']} 次提及 · {c['counts']['product_expert_count']} 位专家 · "
+                    f"{c['counts']['city_store_count']} 家门店")
+            low = c["counts"]["evidence_count"] < LOW_MENTION_COLLAPSE
+            if low:
+                add(f"<details><summary>{p['title']}（{meta}）</summary>")
+                add("")
+            else:
+                add(f"### {p['title']}")
+                add("")
+                add(f"**{meta}**")
+                add("")
             add(f"**LLM 提炼**：{p['hypothesis']}")
             add("")
             add("**一线上报**")
             add("")
             L.extend(quote_md(pattern_evidence(c, evidence)))
+            if low:
+                add("</details>")
+                add("")
         add("</details>")
         add("")
 
@@ -674,6 +684,8 @@ blockquote .norm{color:var(--soft);font-size:11.5px}
 .src{font-size:11px;color:var(--soft);margin:0 0 12px 13px}
 details.other{margin-top:16px}
 details.other summary{cursor:pointer;font-size:14px;color:var(--link);font-weight:600}
+details.other details.other.low{margin-top:10px;border-top:1px solid var(--rule);padding-top:10px}
+details.other details.other.low summary{font-size:13.5px;color:var(--muted)}
 details.more{margin-top:8px}
 details.more summary{cursor:pointer;font-size:12.5px;color:var(--link);font-weight:600;margin-bottom:8px}
 details.temporal{font-size:13.5px;color:var(--muted);border-top:1px solid var(--rule-solid);border-bottom:1px solid var(--rule-solid);padding:14px 0;margin:40px 0 0}
@@ -859,7 +871,15 @@ footer{margin-top:40px;color:var(--soft);font-size:12px;letter-spacing:.04em}
     if rest:
         add(f"<details class='other'><summary>其余开放问题（{len(rest)}）</summary>")
         for c in rest:
-            render_detail("", c)
+            if c["counts"]["evidence_count"] < LOW_MENTION_COLLAPSE:
+                p = pidx[c["pattern_id"]]
+                add(f"<details class='other low'><summary>{_esc(p['title'])}"
+                    f"（{c['counts']['evidence_count']} 次提及 · {c['counts']['product_expert_count']} 位专家 · "
+                    f"{c['counts']['city_store_count']} 家门店）</summary>")
+                render_detail("", c)
+                add("</details>")
+            else:
+                render_detail("", c)
         add("</details>")
 
     tview = temporal_rows(patterns, convergences, baseline)

@@ -1,0 +1,291 @@
+[
+  {
+    "pattern_id": "PAT-0001",
+    "pattern_key": "store_footfall_context_quality",
+    "title": "门店客流情境与到店质量分化",
+    "category": "sales_service",
+    "series": [
+      "L6",
+      "LS6",
+      "LS8"
+    ],
+    "hypothesis": "国庆第三日到店量与进店质量受门店形态、选址与外部活动情境主导而分化：核心门店客流稳定并吸引造型进店、LS6 进店明显增加、部分快闪门店位置优越人流大；而展点被相邻电竞活动遮挡、快闪第三天走马观花占比高、外地/低意向客流难以转化，说明到店量并非单一可控变量。",
+    "issue_ids": [
+      "ISS-0001"
+    ],
+    "competitive_refs": [],
+    "confidence": "low",
+    "status": "confirmed",
+    "boundary": "7 条证据跨 4 店、1 天；为各店自报观察，未与客流计数或转化数据做归因。",
+    "created_at": "2026-10-03"
+  },
+  {
+    "pattern_id": "PAT-0002",
+    "pattern_key": "verified_product_service_strengths",
+    "title": "已验证的产品与服务优势项",
+    "category": "other",
+    "series": [
+      "L6",
+      "LS6",
+      "LS8"
+    ],
+    "hypothesis": "底盘与空间体验（尤其在重庆/贵州路况下）、LS6 家庭用户适配与性价比、造型与外观、LS8 茶色等展示色，以及一线销售团队状态，构成本期可复用的产品与服务优势叙事。",
+    "issue_ids": [
+      "ISS-0002"
+    ],
+    "competitive_refs": [],
+    "confidence": "low",
+    "status": "confirmed",
+    "boundary": "10 条证据跨 7 店、跨多车型、1 天；正向信号为各店自报，未与成交/锁单数据做归因。",
+    "created_at": "2026-10-03"
+  },
+  {
+    "pattern_id": "PAT-0003",
+    "pattern_key": "price_equity_decision_barrier",
+    "title": "价格与权益预期成为短期决策抑制",
+    "category": "configuration",
+    "series": [
+      "L6",
+      "LS6"
+    ],
+    "hypothesis": "客户对产品认可但在价格与权益上持续拉扯，销售缺乏可用的优惠额度；即便定价已具性价比、降价也非有效方式，用户仍能找到不满意点；价格敏感与'等等党'叠加缺少逼单政策，说明价格与权益预期是当前转化抑制。",
+    "issue_ids": [
+      "ISS-0003"
+    ],
+    "competitive_refs": [],
+    "confidence": "low",
+    "status": "confirmed",
+    "boundary": "4 条证据跨 3 店、1 天；为价格与权益态度信号，未直接对应退单或流失行为。",
+    "created_at": "2026-10-03"
+  },
+  {
+    "pattern_id": "PAT-0004",
+    "pattern_key": "store_operations_conversion_levers",
+    "title": "门店引流与转化动作建议",
+    "category": "sales_service",
+    "series": [
+      "L6",
+      "LS6"
+    ],
+    "hypothesis": "多店在核心竞品对标公示、线上传播、异业互推、进店礼与直播上给出较一致建议或落地反馈，说明可视化物料与线上动作是当前提升进店与转化的关键抓手。",
+    "issue_ids": [
+      "ISS-0004"
+    ],
+    "competitive_refs": [],
+    "confidence": "low",
+    "status": "confirmed",
+    "boundary": "5 条证据跨 5 店、1 天；为一线建议与落地反馈，未验证各动作对进店/转化的实际效果。",
+    "created_at": "2026-10-03"
+  },
+  {
+    "pattern_id": "PAT-0005",
+    "pattern_key": "brand_channel_attraction_constraint",
+    "title": "品牌认知与价格定位约束销售",
+    "category": "other",
+    "series": [
+      "L6",
+      "LS6"
+    ],
+    "hypothesis": "一线将品牌认知与曝光视为吸引主动到店的关键抓手，并反馈智己在低线城市被视为偏贵车型，说明品牌认可度与价格定位仍是到店与转化约束。",
+    "issue_ids": [
+      "ISS-0005"
+    ],
+    "competitive_refs": [],
+    "confidence": "low",
+    "status": "confirmed",
+    "boundary": "3 条证据跨 2 店、1 天；未量化品牌认知或价格定位对到店与转化的影响。",
+    "created_at": "2026-10-03"
+  },
+  {
+    "pattern_id": "PAT-0006",
+    "pattern_key": "existing_owner_loyalty_benefit",
+    "title": "老用户权益与品牌忠诚度维护",
+    "category": "sales_service",
+    "series": [
+      "L6",
+      "LS6"
+    ],
+    "hypothesis": "一线建议维护老客户口碑、发动老带新到店，说明老用户口碑与转介绍是尚未充分运营的忠诚度资源。",
+    "issue_ids": [
+      "ISS-0006"
+    ],
+    "competitive_refs": [],
+    "confidence": "low",
+    "status": "confirmed",
+    "boundary": "单店单条建议、1 天；未量化为实际转介绍或复购贡献。",
+    "created_at": "2026-10-03"
+  },
+  {
+    "pattern_id": "PAT-0007",
+    "pattern_key": "competitor_promotion_perk_gap",
+    "title": "竞品促销赠品与权益差距",
+    "category": "sales_service",
+    "series": [
+      "L6",
+      "LS6"
+    ],
+    "hypothesis": "用户关注免费家充桩、多组询问充电桩权益并以此结束探店，同时反馈国庆活动力度不够、竞品试驾有礼品，说明促销力度与充电/赠品权益相对竞品存在可感知差距。",
+    "issue_ids": [
+      "ISS-0007"
+    ],
+    "competitive_refs": [
+      "竞品试驾礼品"
+    ],
+    "confidence": "low",
+    "status": "confirmed",
+    "boundary": "4 条证据跨 2 店、1 天；为促销与权益差距观察，未量化为流失或转化损失。",
+    "created_at": "2026-10-03"
+  },
+  {
+    "pattern_id": "PAT-0008",
+    "pattern_key": "model_positioning_audience_fit",
+    "title": "车型定位与目标人群适配问题",
+    "category": "other",
+    "series": [
+      "L6",
+      "LS6"
+    ],
+    "hypothesis": "贵阳门店到店客户呈现三代同堂、全家出动、家庭单位更大与年龄更大特征，对多年龄段适配提出更高要求；而重庆山路场景下轿车存在磕底盘顾虑、大部分人仍看 SUV，说明 L6 在部分市场人群与场景适配受限。",
+    "issue_ids": [
+      "ISS-0008"
+    ],
+    "competitive_refs": [],
+    "confidence": "low",
+    "status": "confirmed",
+    "boundary": "4 条证据跨 3 店、1 天；为人群与场景观察，不能外推为总体车型结构结论。",
+    "created_at": "2026-10-03"
+  },
+  {
+    "pattern_id": "PAT-0009",
+    "pattern_key": "storage_front_trunk_capacity",
+    "title": "前部与车内储物空间不足",
+    "category": "storage",
+    "series": [
+      "L6"
+    ],
+    "hypothesis": "用户第一感认为 L6 前后备箱偏小、实用性不高，说明 L6 的储物空间直观感知可能削弱其实用性评价。",
+    "issue_ids": [
+      "ISS-0009"
+    ],
+    "competitive_refs": [],
+    "confidence": "low",
+    "status": "confirmed",
+    "boundary": "单店单条专家观察、1 天；不能外推为总体储物空间评价。",
+    "created_at": "2026-10-03"
+  },
+  {
+    "pattern_id": "PAT-0010",
+    "pattern_key": "adas_capability_brand_trust",
+    "title": "智驾能力与品牌认知担忧",
+    "category": "adas",
+    "series": [
+      "LS6"
+    ],
+    "hypothesis": "用户对华为系智驾存在品牌光环，认为与 momenta 相比即使表现相近也更好，说明智驾供应商品牌认知与信任是可感知的对标差距。",
+    "issue_ids": [
+      "ISS-0010"
+    ],
+    "competitive_refs": [
+      "华为系"
+    ],
+    "confidence": "low",
+    "status": "confirmed",
+    "boundary": "2 条证据跨 2 店、1 天；未记录对比的具体车型与智驾细分差异点。",
+    "created_at": "2026-10-03"
+  },
+  {
+    "pattern_id": "PAT-0011",
+    "pattern_key": "competitor_emotional_value_differentiation",
+    "title": "竞品情绪价值与个性化差距",
+    "category": "other",
+    "series": [
+      "L6",
+      "LS6"
+    ],
+    "hypothesis": "用户被老款智慧尾灯与半幅方向盘吸引、追求可表达自我的个性化，也对竞品内饰与专属车漆产生偏好，说明竞品在情绪价值与个性化设计上具备可感知吸引力。",
+    "issue_ids": [
+      "ISS-0011"
+    ],
+    "competitive_refs": [
+      "小米SU7",
+      "蔚来"
+    ],
+    "confidence": "low",
+    "status": "confirmed",
+    "boundary": "3 条证据跨 2 店、1 天；为用户对标与偏好观察，不能量化其对锁单的影响。",
+    "created_at": "2026-10-03"
+  },
+  {
+    "pattern_id": "PAT-0012",
+    "pattern_key": "driving_dynamics_steering_tech_demo",
+    "title": "驾驶卖点传达受损（线控转向）",
+    "category": "driving_dynamics",
+    "series": [
+      "LS6"
+    ],
+    "hypothesis": "用户认可底盘素质但认为线控体验一般，结合重庆急转弯道路，说明线控转向作为卖点在实际体验中的传达可能受损。",
+    "issue_ids": [
+      "ISS-0012"
+    ],
+    "competitive_refs": [],
+    "confidence": "low",
+    "status": "confirmed",
+    "boundary": "单店单条专家观察、1 天；未记录线控体验具体的驾驶场景差异，不能作为产品缺陷结论。",
+    "created_at": "2026-10-03"
+  },
+  {
+    "pattern_id": "PAT-0013",
+    "pattern_key": "seating_rear_space_ergonomics",
+    "title": "后排空间与人体工程设定",
+    "category": "seating_space",
+    "series": [
+      "LS6"
+    ],
+    "hypothesis": "用户试驾后觉得后排座椅包裹性不够，说明后排座椅人体工程学设定可能影响乘坐体验。",
+    "issue_ids": [
+      "ISS-0013"
+    ],
+    "competitive_refs": [],
+    "confidence": "low",
+    "status": "confirmed",
+    "boundary": "单店单条专家观察、1 天；为单点体验反馈，不能外推为总体座椅评价。",
+    "created_at": "2026-10-03"
+  },
+  {
+    "pattern_id": "PAT-0014",
+    "pattern_key": "power_tailgate_activation_usability",
+    "title": "尾门感应开启需多次尝试、学习成本高",
+    "category": "quality_reliability",
+    "series": [
+      "LS8"
+    ],
+    "hypothesis": "用户在静态体验 LS8 时发现尾门 KK 需多试两次才能触发打开，说明尾门感应开启的触发可用性存在学习成本，可能与感应逻辑或触发区域相关。",
+    "issue_ids": [
+      "ISS-0014"
+    ],
+    "competitive_refs": [],
+    "confidence": "low",
+    "status": "confirmed",
+    "boundary": "单店单条观察、1 天；无法判断根因，不能作为质量缺陷结论。",
+    "created_at": "2026-10-03"
+  },
+  {
+    "pattern_id": "PAT-0015",
+    "pattern_key": "store_location_visibility_barrier",
+    "title": "门店选址/朝向可见性影响自然引流",
+    "category": "sales_service",
+    "series": [
+      "L6",
+      "LS6"
+    ],
+    "hypothesis": "门店位于拐角视野盲区、朝向不利且招牌被遮挡，导致顾客难以找到、自然引流受限，说明选址与可见性是门店到店的现实约束。",
+    "issue_ids": [
+      "ISS-0015"
+    ],
+    "competitive_refs": [],
+    "confidence": "low",
+    "status": "confirmed",
+    "boundary": "2 条证据同店（贵阳万象汇）、1 天；为单店位置观察，不能外推为全网门店选址结论。",
+    "created_at": "2026-10-03"
+  }
+]

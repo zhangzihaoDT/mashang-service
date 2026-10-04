@@ -1,0 +1,2358 @@
+{
+  "run_id": "run_011_2026-10-02",
+  "taxonomy_version": "0.2.3",
+  "mapping_version": "0.2.4",
+  "dataset": "/Users/zihao_/Documents/coding/dataset/original/L6 M2_LS6 M3 产品专家门店支持信息收集汇总_产品专家支持每日反馈_收集结果.csv",
+  "record_count": 12,
+  "coding_count": 258,
+  "scope": {
+    "product_experts": [
+      "王昊东",
+      "林鑫",
+      "郭能能",
+      "季佳佳",
+      "胡然",
+      "周正成",
+      "李文涛",
+      "汪翔",
+      "张耀文",
+      "陆宣妤",
+      "方园园",
+      "陈雅萍"
+    ],
+    "city_stores": [
+      "遵义·播州用户中心",
+      "重庆·重庆南岸服务中心",
+      "万州·万达广场快闪",
+      "重庆·礼嘉天街体验中心",
+      "遵义·吾悦广场",
+      "重庆·南坪金菱车世界店",
+      "重庆·金菱车世界车城店",
+      "重庆·龙湖天街体验中心",
+      "重庆·新光里",
+      "贵阳·悦然时光",
+      "贵阳·贵阳万象汇"
+    ],
+    "support_periods": [
+      {
+        "raw": "2026/10/02",
+        "start_date": "2026-10-02",
+        "end_date": "2026-10-02"
+      }
+    ],
+    "window": "10/02"
+  },
+  "records": [
+    {
+      "record_index": 0,
+      "submission_id": "75",
+      "submitter": "王昊东",
+      "expert": "王昊东",
+      "city": "遵义",
+      "store": "播州用户中心",
+      "support_date": "2026/10/02",
+      "support_date_iso": "2026-10-02"
+    },
+    {
+      "record_index": 1,
+      "submission_id": "76",
+      "submitter": "林鑫",
+      "expert": "林鑫",
+      "city": "重庆",
+      "store": "重庆南岸服务中心",
+      "support_date": "2026/10/02",
+      "support_date_iso": "2026-10-02"
+    },
+    {
+      "record_index": 2,
+      "submission_id": "77",
+      "submitter": "郭能能",
+      "expert": "郭能能",
+      "city": "万州",
+      "store": "万达广场快闪",
+      "support_date": "2026/10/02",
+      "support_date_iso": "2026-10-02"
+    },
+    {
+      "record_index": 3,
+      "submission_id": "78",
+      "submitter": "季佳佳",
+      "expert": "季佳佳",
+      "city": "重庆",
+      "store": "礼嘉天街体验中心",
+      "support_date": "2026/10/02",
+      "support_date_iso": "2026-10-02"
+    },
+    {
+      "record_index": 4,
+      "submission_id": "79",
+      "submitter": "胡然",
+      "expert": "胡然",
+      "city": "遵义",
+      "store": "吾悦广场",
+      "support_date": "2026/10/02",
+      "support_date_iso": "2026-10-02"
+    },
+    {
+      "record_index": 5,
+      "submission_id": "80",
+      "submitter": "周正成",
+      "expert": "周正成",
+      "city": "重庆",
+      "store": "南坪金菱车世界店",
+      "support_date": "2026/10/02",
+      "support_date_iso": "2026-10-02"
+    },
+    {
+      "record_index": 6,
+      "submission_id": "81",
+      "submitter": "李文涛",
+      "expert": "李文涛",
+      "city": "重庆",
+      "store": "金菱车世界车城店",
+      "support_date": "2026/10/02",
+      "support_date_iso": "2026-10-02"
+    },
+    {
+      "record_index": 7,
+      "submission_id": "82",
+      "submitter": "汪翔",
+      "expert": "汪翔",
+      "city": "重庆",
+      "store": "龙湖天街体验中心",
+      "support_date": "2026/10/02",
+      "support_date_iso": "2026-10-02"
+    },
+    {
+      "record_index": 8,
+      "submission_id": "83",
+      "submitter": "张耀文",
+      "expert": "张耀文",
+      "city": "重庆",
+      "store": "新光里",
+      "support_date": "2026/10/02",
+      "support_date_iso": "2026-10-02"
+    },
+    {
+      "record_index": 9,
+      "submission_id": "84",
+      "submitter": "陆宣妤",
+      "expert": "陆宣妤",
+      "city": "贵阳",
+      "store": "悦然时光",
+      "support_date": "2026/10/02",
+      "support_date_iso": "2026-10-02"
+    },
+    {
+      "record_index": 10,
+      "submission_id": "85",
+      "submitter": "方园园",
+      "expert": "方园园",
+      "city": "贵阳",
+      "store": "贵阳万象汇",
+      "support_date": "2026/10/02",
+      "support_date_iso": "2026-10-02"
+    },
+    {
+      "record_index": 11,
+      "submission_id": "86",
+      "submitter": "陈雅萍",
+      "expert": "陈雅萍",
+      "city": "贵阳",
+      "store": "悦然时光",
+      "support_date": "2026/10/02",
+      "support_date_iso": "2026-10-02"
+    }
+  ],
+  "store_ops": {
+    "records": [
+      {
+        "record_index": 0,
+        "expert": "王昊东",
+        "store": "播州用户中心",
+        "support_date": "2026/10/02",
+        "items": [
+          {
+            "code": "footfall",
+            "label": "客流组数",
+            "quote": "12-15"
+          },
+          {
+            "code": "footfall_trend",
+            "label": "客流相比往常",
+            "quote": "较以往稍多"
+          },
+          {
+            "code": "ls6_attention_share",
+            "label": "关注LS6客户占比",
+            "quote": "60%"
+          },
+          {
+            "code": "peak_hours",
+            "label": "客流高峰时段",
+            "quote": "13.30-16.30"
+          }
+        ]
+      },
+      {
+        "record_index": 1,
+        "expert": "林鑫",
+        "store": "重庆南岸服务中心",
+        "support_date": "2026/10/02",
+        "items": [
+          {
+            "code": "footfall",
+            "label": "客流组数",
+            "quote": "6-8"
+          },
+          {
+            "code": "footfall_trend",
+            "label": "客流相比往常",
+            "quote": "较以往稍多"
+          },
+          {
+            "code": "ls6_attention_share",
+            "label": "关注LS6客户占比",
+            "quote": "70%"
+          },
+          {
+            "code": "peak_hours",
+            "label": "客流高峰时段",
+            "quote": "13.30-16.30"
+          }
+        ]
+      },
+      {
+        "record_index": 2,
+        "expert": "郭能能",
+        "store": "万达广场快闪",
+        "support_date": "2026/10/02",
+        "items": [
+          {
+            "code": "footfall",
+            "label": "客流组数",
+            "quote": "19-22"
+          },
+          {
+            "code": "footfall_trend",
+            "label": "客流相比往常",
+            "quote": "较以往稍多"
+          },
+          {
+            "code": "ls6_attention_share",
+            "label": "关注LS6客户占比",
+            "quote": "90%"
+          },
+          {
+            "code": "peak_hours",
+            "label": "客流高峰时段",
+            "quote": "13.30-16.30"
+          }
+        ]
+      },
+      {
+        "record_index": 3,
+        "expert": "季佳佳",
+        "store": "礼嘉天街体验中心",
+        "support_date": "2026/10/02",
+        "items": [
+          {
+            "code": "footfall",
+            "label": "客流组数",
+            "quote": "6-8"
+          },
+          {
+            "code": "footfall_trend",
+            "label": "客流相比往常",
+            "quote": "较以往稍少"
+          },
+          {
+            "code": "ls6_attention_share",
+            "label": "关注LS6客户占比",
+            "quote": "80%"
+          },
+          {
+            "code": "peak_hours",
+            "label": "客流高峰时段",
+            "quote": "13.30-16.30"
+          }
+        ]
+      },
+      {
+        "record_index": 4,
+        "expert": "胡然",
+        "store": "吾悦广场",
+        "support_date": "2026/10/02",
+        "items": [
+          {
+            "code": "footfall",
+            "label": "客流组数",
+            "quote": "16-18"
+          },
+          {
+            "code": "footfall_trend",
+            "label": "客流相比往常",
+            "quote": "与以往相当"
+          },
+          {
+            "code": "ls6_attention_share",
+            "label": "关注LS6客户占比",
+            "quote": "50%"
+          },
+          {
+            "code": "peak_hours",
+            "label": "客流高峰时段",
+            "quote": "16.30-19.00"
+          }
+        ]
+      },
+      {
+        "record_index": 5,
+        "expert": "周正成",
+        "store": "南坪金菱车世界店",
+        "support_date": "2026/10/02",
+        "items": [
+          {
+            "code": "footfall",
+            "label": "客流组数",
+            "quote": "9-11"
+          },
+          {
+            "code": "footfall_trend",
+            "label": "客流相比往常",
+            "quote": "与以往相当"
+          },
+          {
+            "code": "ls6_attention_share",
+            "label": "关注LS6客户占比",
+            "quote": "60%"
+          },
+          {
+            "code": "peak_hours",
+            "label": "客流高峰时段",
+            "quote": "13.30-16.30"
+          }
+        ]
+      },
+      {
+        "record_index": 6,
+        "expert": "李文涛",
+        "store": "金菱车世界车城店",
+        "support_date": "2026/10/02",
+        "items": [
+          {
+            "code": "footfall",
+            "label": "客流组数",
+            "quote": "9-11"
+          },
+          {
+            "code": "footfall_trend",
+            "label": "客流相比往常",
+            "quote": "较以往稍多"
+          },
+          {
+            "code": "ls6_attention_share",
+            "label": "关注LS6客户占比",
+            "quote": "60%"
+          },
+          {
+            "code": "peak_hours",
+            "label": "客流高峰时段",
+            "quote": "13.30-16.30"
+          }
+        ]
+      },
+      {
+        "record_index": 7,
+        "expert": "汪翔",
+        "store": "龙湖天街体验中心",
+        "support_date": "2026/10/02",
+        "items": [
+          {
+            "code": "footfall",
+            "label": "客流组数",
+            "quote": "23-27"
+          },
+          {
+            "code": "footfall_trend",
+            "label": "客流相比往常",
+            "quote": "与以往相当"
+          },
+          {
+            "code": "ls6_attention_share",
+            "label": "关注LS6客户占比",
+            "quote": "70%"
+          },
+          {
+            "code": "peak_hours",
+            "label": "客流高峰时段",
+            "quote": "13.30-16.30"
+          }
+        ]
+      },
+      {
+        "record_index": 8,
+        "expert": "张耀文",
+        "store": "新光里",
+        "support_date": "2026/10/02",
+        "items": [
+          {
+            "code": "footfall",
+            "label": "客流组数",
+            "quote": "6-8"
+          },
+          {
+            "code": "footfall_trend",
+            "label": "客流相比往常",
+            "quote": "与以往相当"
+          },
+          {
+            "code": "ls6_attention_share",
+            "label": "关注LS6客户占比",
+            "quote": "70%"
+          },
+          {
+            "code": "peak_hours",
+            "label": "客流高峰时段",
+            "quote": "13.30-16.30"
+          }
+        ]
+      },
+      {
+        "record_index": 9,
+        "expert": "陆宣妤",
+        "store": "悦然时光",
+        "support_date": "2026/10/02",
+        "items": [
+          {
+            "code": "footfall",
+            "label": "客流组数",
+            "quote": "12-15"
+          },
+          {
+            "code": "footfall_trend",
+            "label": "客流相比往常",
+            "quote": "较以往明显更多"
+          },
+          {
+            "code": "ls6_attention_share",
+            "label": "关注LS6客户占比",
+            "quote": "65%"
+          },
+          {
+            "code": "peak_hours",
+            "label": "客流高峰时段",
+            "quote": "13.30-16.30"
+          }
+        ]
+      },
+      {
+        "record_index": 10,
+        "expert": "方园园",
+        "store": "贵阳万象汇",
+        "support_date": "2026/10/02",
+        "items": [
+          {
+            "code": "footfall",
+            "label": "客流组数",
+            "quote": "6-8"
+          },
+          {
+            "code": "footfall_trend",
+            "label": "客流相比往常",
+            "quote": "与以往相当"
+          },
+          {
+            "code": "ls6_attention_share",
+            "label": "关注LS6客户占比",
+            "quote": "40%"
+          },
+          {
+            "code": "peak_hours",
+            "label": "客流高峰时段",
+            "quote": "13.30-16.30"
+          }
+        ]
+      },
+      {
+        "record_index": 11,
+        "expert": "陈雅萍",
+        "store": "悦然时光",
+        "support_date": "2026/10/02",
+        "items": [
+          {
+            "code": "footfall",
+            "label": "客流组数",
+            "quote": "16-18"
+          },
+          {
+            "code": "footfall_trend",
+            "label": "客流相比往常",
+            "quote": "较以往稍少"
+          },
+          {
+            "code": "ls6_attention_share",
+            "label": "关注LS6客户占比",
+            "quote": "66%"
+          },
+          {
+            "code": "peak_hours",
+            "label": "客流高峰时段",
+            "quote": "13.30-16.30"
+          }
+        ]
+      }
+    ]
+  },
+  "availability": {
+    "rows": [
+      {
+        "store": "万达广场快闪",
+        "model": "LS6",
+        "display": {
+          "code": "display_available",
+          "label": "有"
+        },
+        "test_drive": {
+          "code": "no_test_car",
+          "label": "无"
+        },
+        "quotes": [
+          "LS6",
+          "其他"
+        ]
+      },
+      {
+        "store": "万达广场快闪",
+        "model": "L6",
+        "display": {
+          "code": "no_display_car",
+          "label": "无"
+        },
+        "test_drive": {
+          "code": "no_test_car",
+          "label": "无"
+        },
+        "quotes": [
+          "LS6",
+          "其他"
+        ]
+      },
+      {
+        "store": "万达广场快闪",
+        "model": "LS8",
+        "display": {
+          "code": "no_display_car",
+          "label": "无"
+        },
+        "test_drive": {
+          "code": "no_test_car",
+          "label": "无"
+        },
+        "quotes": [
+          "LS6",
+          "其他"
+        ]
+      },
+      {
+        "store": "万达广场快闪",
+        "model": "LS9",
+        "display": {
+          "code": "no_display_car",
+          "label": "无"
+        },
+        "test_drive": {
+          "code": "no_test_car",
+          "label": "无"
+        },
+        "quotes": [
+          "LS6",
+          "其他"
+        ]
+      },
+      {
+        "store": "南坪金菱车世界店",
+        "model": "LS6",
+        "display": {
+          "code": "display_available",
+          "label": "有"
+        },
+        "test_drive": {
+          "code": "test_drive_available",
+          "label": "有"
+        },
+        "quotes": [
+          "LS6, LS8, LS9",
+          "LS6, L6, LS8, LS9"
+        ]
+      },
+      {
+        "store": "南坪金菱车世界店",
+        "model": "L6",
+        "display": {
+          "code": "no_display_car",
+          "label": "无"
+        },
+        "test_drive": {
+          "code": "test_drive_available",
+          "label": "有"
+        },
+        "quotes": [
+          "LS6, LS8, LS9",
+          "LS6, L6, LS8, LS9"
+        ]
+      },
+      {
+        "store": "南坪金菱车世界店",
+        "model": "LS8",
+        "display": {
+          "code": "display_available",
+          "label": "有"
+        },
+        "test_drive": {
+          "code": "test_drive_available",
+          "label": "有"
+        },
+        "quotes": [
+          "LS6, LS8, LS9",
+          "LS6, L6, LS8, LS9"
+        ]
+      },
+      {
+        "store": "南坪金菱车世界店",
+        "model": "LS9",
+        "display": {
+          "code": "display_available",
+          "label": "有"
+        },
+        "test_drive": {
+          "code": "test_drive_available",
+          "label": "有"
+        },
+        "quotes": [
+          "LS6, LS8, LS9",
+          "LS6, L6, LS8, LS9"
+        ]
+      },
+      {
+        "store": "吾悦广场",
+        "model": "LS6",
+        "display": {
+          "code": "display_available",
+          "label": "有"
+        },
+        "test_drive": {
+          "code": "no_test_car",
+          "label": "无"
+        },
+        "quotes": [
+          "LS6, LS8",
+          "其他"
+        ]
+      },
+      {
+        "store": "吾悦广场",
+        "model": "L6",
+        "display": {
+          "code": "no_display_car",
+          "label": "无"
+        },
+        "test_drive": {
+          "code": "no_test_car",
+          "label": "无"
+        },
+        "quotes": [
+          "LS6, LS8",
+          "其他"
+        ]
+      },
+      {
+        "store": "吾悦广场",
+        "model": "LS8",
+        "display": {
+          "code": "display_available",
+          "label": "有"
+        },
+        "test_drive": {
+          "code": "no_test_car",
+          "label": "无"
+        },
+        "quotes": [
+          "LS6, LS8",
+          "其他"
+        ]
+      },
+      {
+        "store": "吾悦广场",
+        "model": "LS9",
+        "display": {
+          "code": "no_display_car",
+          "label": "无"
+        },
+        "test_drive": {
+          "code": "no_test_car",
+          "label": "无"
+        },
+        "quotes": [
+          "LS6, LS8",
+          "其他"
+        ]
+      },
+      {
+        "store": "悦然时光",
+        "model": "LS6",
+        "display": {
+          "code": "display_available",
+          "label": "有"
+        },
+        "test_drive": {
+          "code": "test_drive_available",
+          "label": "有"
+        },
+        "quotes": [
+          "LS6, L6, LS8, LS9"
+        ]
+      },
+      {
+        "store": "悦然时光",
+        "model": "L6",
+        "display": {
+          "code": "display_available",
+          "label": "有"
+        },
+        "test_drive": {
+          "code": "test_drive_available",
+          "label": "有"
+        },
+        "quotes": [
+          "LS6, L6, LS8, LS9"
+        ]
+      },
+      {
+        "store": "悦然时光",
+        "model": "LS8",
+        "display": {
+          "code": "display_available",
+          "label": "有"
+        },
+        "test_drive": {
+          "code": "test_drive_available",
+          "label": "有"
+        },
+        "quotes": [
+          "LS6, L6, LS8, LS9"
+        ]
+      },
+      {
+        "store": "悦然时光",
+        "model": "LS9",
+        "display": {
+          "code": "display_available",
+          "label": "有"
+        },
+        "test_drive": {
+          "code": "test_drive_available",
+          "label": "有"
+        },
+        "quotes": [
+          "LS6, L6, LS8, LS9"
+        ]
+      },
+      {
+        "store": "播州用户中心",
+        "model": "LS6",
+        "display": {
+          "code": "display_available",
+          "label": "有"
+        },
+        "test_drive": {
+          "code": "test_drive_available",
+          "label": "有"
+        },
+        "quotes": [
+          "LS6, L6, LS8, LS9"
+        ]
+      },
+      {
+        "store": "播州用户中心",
+        "model": "L6",
+        "display": {
+          "code": "display_available",
+          "label": "有"
+        },
+        "test_drive": {
+          "code": "test_drive_available",
+          "label": "有"
+        },
+        "quotes": [
+          "LS6, L6, LS8, LS9"
+        ]
+      },
+      {
+        "store": "播州用户中心",
+        "model": "LS8",
+        "display": {
+          "code": "display_available",
+          "label": "有"
+        },
+        "test_drive": {
+          "code": "test_drive_available",
+          "label": "有"
+        },
+        "quotes": [
+          "LS6, L6, LS8, LS9"
+        ]
+      },
+      {
+        "store": "播州用户中心",
+        "model": "LS9",
+        "display": {
+          "code": "display_available",
+          "label": "有"
+        },
+        "test_drive": {
+          "code": "test_drive_available",
+          "label": "有"
+        },
+        "quotes": [
+          "LS6, L6, LS8, LS9"
+        ]
+      },
+      {
+        "store": "新光里",
+        "model": "LS6",
+        "display": {
+          "code": "display_available",
+          "label": "有"
+        },
+        "test_drive": {
+          "code": "test_drive_available",
+          "label": "有"
+        },
+        "quotes": [
+          "LS6, L6, LS8",
+          "LS6, L6, LS8, LS9"
+        ]
+      },
+      {
+        "store": "新光里",
+        "model": "L6",
+        "display": {
+          "code": "display_available",
+          "label": "有"
+        },
+        "test_drive": {
+          "code": "test_drive_available",
+          "label": "有"
+        },
+        "quotes": [
+          "LS6, L6, LS8",
+          "LS6, L6, LS8, LS9"
+        ]
+      },
+      {
+        "store": "新光里",
+        "model": "LS8",
+        "display": {
+          "code": "display_available",
+          "label": "有"
+        },
+        "test_drive": {
+          "code": "test_drive_available",
+          "label": "有"
+        },
+        "quotes": [
+          "LS6, L6, LS8",
+          "LS6, L6, LS8, LS9"
+        ]
+      },
+      {
+        "store": "新光里",
+        "model": "LS9",
+        "display": {
+          "code": "no_display_car",
+          "label": "无"
+        },
+        "test_drive": {
+          "code": "test_drive_available",
+          "label": "有"
+        },
+        "quotes": [
+          "LS6, L6, LS8",
+          "LS6, L6, LS8, LS9"
+        ]
+      },
+      {
+        "store": "礼嘉天街体验中心",
+        "model": "LS6",
+        "display": {
+          "code": "display_available",
+          "label": "有"
+        },
+        "test_drive": {
+          "code": "test_drive_available",
+          "label": "有"
+        },
+        "quotes": [
+          "LS6, L6, LS8",
+          "LS6, L6, LS8, LS9"
+        ]
+      },
+      {
+        "store": "礼嘉天街体验中心",
+        "model": "L6",
+        "display": {
+          "code": "display_available",
+          "label": "有"
+        },
+        "test_drive": {
+          "code": "test_drive_available",
+          "label": "有"
+        },
+        "quotes": [
+          "LS6, L6, LS8",
+          "LS6, L6, LS8, LS9"
+        ]
+      },
+      {
+        "store": "礼嘉天街体验中心",
+        "model": "LS8",
+        "display": {
+          "code": "display_available",
+          "label": "有"
+        },
+        "test_drive": {
+          "code": "test_drive_available",
+          "label": "有"
+        },
+        "quotes": [
+          "LS6, L6, LS8",
+          "LS6, L6, LS8, LS9"
+        ]
+      },
+      {
+        "store": "礼嘉天街体验中心",
+        "model": "LS9",
+        "display": {
+          "code": "no_display_car",
+          "label": "无"
+        },
+        "test_drive": {
+          "code": "test_drive_available",
+          "label": "有"
+        },
+        "quotes": [
+          "LS6, L6, LS8",
+          "LS6, L6, LS8, LS9"
+        ]
+      },
+      {
+        "store": "贵阳万象汇",
+        "model": "LS6",
+        "display": {
+          "code": "display_available",
+          "label": "有"
+        },
+        "test_drive": {
+          "code": "test_drive_available",
+          "label": "有"
+        },
+        "quotes": [
+          "LS6, L6, LS8, LS9"
+        ]
+      },
+      {
+        "store": "贵阳万象汇",
+        "model": "L6",
+        "display": {
+          "code": "display_available",
+          "label": "有"
+        },
+        "test_drive": {
+          "code": "test_drive_available",
+          "label": "有"
+        },
+        "quotes": [
+          "LS6, L6, LS8, LS9"
+        ]
+      },
+      {
+        "store": "贵阳万象汇",
+        "model": "LS8",
+        "display": {
+          "code": "display_available",
+          "label": "有"
+        },
+        "test_drive": {
+          "code": "test_drive_available",
+          "label": "有"
+        },
+        "quotes": [
+          "LS6, L6, LS8, LS9"
+        ]
+      },
+      {
+        "store": "贵阳万象汇",
+        "model": "LS9",
+        "display": {
+          "code": "display_available",
+          "label": "有"
+        },
+        "test_drive": {
+          "code": "test_drive_available",
+          "label": "有"
+        },
+        "quotes": [
+          "LS6, L6, LS8, LS9"
+        ]
+      },
+      {
+        "store": "重庆南岸服务中心",
+        "model": "LS6",
+        "display": {
+          "code": "display_available",
+          "label": "有"
+        },
+        "test_drive": {
+          "code": "test_drive_available",
+          "label": "有"
+        },
+        "quotes": [
+          "LS6, L6, LS8, LS9"
+        ]
+      },
+      {
+        "store": "重庆南岸服务中心",
+        "model": "L6",
+        "display": {
+          "code": "display_available",
+          "label": "有"
+        },
+        "test_drive": {
+          "code": "test_drive_available",
+          "label": "有"
+        },
+        "quotes": [
+          "LS6, L6, LS8, LS9"
+        ]
+      },
+      {
+        "store": "重庆南岸服务中心",
+        "model": "LS8",
+        "display": {
+          "code": "display_available",
+          "label": "有"
+        },
+        "test_drive": {
+          "code": "test_drive_available",
+          "label": "有"
+        },
+        "quotes": [
+          "LS6, L6, LS8, LS9"
+        ]
+      },
+      {
+        "store": "重庆南岸服务中心",
+        "model": "LS9",
+        "display": {
+          "code": "display_available",
+          "label": "有"
+        },
+        "test_drive": {
+          "code": "test_drive_available",
+          "label": "有"
+        },
+        "quotes": [
+          "LS6, L6, LS8, LS9"
+        ]
+      },
+      {
+        "store": "金菱车世界车城店",
+        "model": "LS6",
+        "display": {
+          "code": "display_available",
+          "label": "有"
+        },
+        "test_drive": {
+          "code": "test_drive_available",
+          "label": "有"
+        },
+        "quotes": [
+          "LS6, LS8, LS9, L6",
+          "LS6, L6, LS8, LS9"
+        ]
+      },
+      {
+        "store": "金菱车世界车城店",
+        "model": "L6",
+        "display": {
+          "code": "display_available",
+          "label": "有"
+        },
+        "test_drive": {
+          "code": "test_drive_available",
+          "label": "有"
+        },
+        "quotes": [
+          "LS6, LS8, LS9, L6",
+          "LS6, L6, LS8, LS9"
+        ]
+      },
+      {
+        "store": "金菱车世界车城店",
+        "model": "LS8",
+        "display": {
+          "code": "display_available",
+          "label": "有"
+        },
+        "test_drive": {
+          "code": "test_drive_available",
+          "label": "有"
+        },
+        "quotes": [
+          "LS6, LS8, LS9, L6",
+          "LS6, L6, LS8, LS9"
+        ]
+      },
+      {
+        "store": "金菱车世界车城店",
+        "model": "LS9",
+        "display": {
+          "code": "display_available",
+          "label": "有"
+        },
+        "test_drive": {
+          "code": "test_drive_available",
+          "label": "有"
+        },
+        "quotes": [
+          "LS6, LS8, LS9, L6",
+          "LS6, L6, LS8, LS9"
+        ]
+      },
+      {
+        "store": "龙湖天街体验中心",
+        "model": "LS6",
+        "display": {
+          "code": "display_available",
+          "label": "有"
+        },
+        "test_drive": {
+          "code": "test_drive_available",
+          "label": "有"
+        },
+        "quotes": [
+          "LS6, L6, LS8, LS9"
+        ]
+      },
+      {
+        "store": "龙湖天街体验中心",
+        "model": "L6",
+        "display": {
+          "code": "display_available",
+          "label": "有"
+        },
+        "test_drive": {
+          "code": "test_drive_available",
+          "label": "有"
+        },
+        "quotes": [
+          "LS6, L6, LS8, LS9"
+        ]
+      },
+      {
+        "store": "龙湖天街体验中心",
+        "model": "LS8",
+        "display": {
+          "code": "display_available",
+          "label": "有"
+        },
+        "test_drive": {
+          "code": "test_drive_available",
+          "label": "有"
+        },
+        "quotes": [
+          "LS6, L6, LS8, LS9"
+        ]
+      },
+      {
+        "store": "龙湖天街体验中心",
+        "model": "LS9",
+        "display": {
+          "code": "display_available",
+          "label": "有"
+        },
+        "test_drive": {
+          "code": "test_drive_available",
+          "label": "有"
+        },
+        "quotes": [
+          "LS6, L6, LS8, LS9"
+        ]
+      }
+    ],
+    "summary": {
+      "denominator_records": 12,
+      "denominator_stores": 11,
+      "by_model": [
+        {
+          "model": "LS6",
+          "display_records": 12,
+          "test_drive_records": 10,
+          "display_stores": 11,
+          "test_drive_stores": 9
+        },
+        {
+          "model": "L6",
+          "display_records": 9,
+          "test_drive_records": 10,
+          "display_stores": 8,
+          "test_drive_stores": 9
+        },
+        {
+          "model": "LS8",
+          "display_records": 11,
+          "test_drive_records": 10,
+          "display_stores": 10,
+          "test_drive_stores": 9
+        },
+        {
+          "model": "LS9",
+          "display_records": 8,
+          "test_drive_records": 10,
+          "display_stores": 7,
+          "test_drive_stores": 9
+        }
+      ]
+    }
+  },
+  "customer_concern": {
+    "label": "客户关注主题",
+    "counts": [
+      {
+        "code": "price_incentive",
+        "label": "价格/权益/优惠",
+        "by_model": {
+          "LS6": 12,
+          "L6": 10
+        },
+        "records_by_model": {
+          "LS6": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11
+          ],
+          "L6": [
+            0,
+            1,
+            3,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11
+          ]
+        },
+        "details": [],
+        "total": 22
+      },
+      {
+        "code": "range_battery",
+        "label": "续航/电池",
+        "by_model": {
+          "LS6": 10,
+          "L6": 5
+        },
+        "records_by_model": {
+          "LS6": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            6,
+            7,
+            8,
+            9,
+            11
+          ],
+          "L6": [
+            0,
+            1,
+            3,
+            7,
+            9
+          ]
+        },
+        "details": [],
+        "total": 15
+      },
+      {
+        "code": "space_exterior_interior",
+        "label": "空间/内外饰",
+        "by_model": {
+          "LS6": 5,
+          "L6": 5
+        },
+        "records_by_model": {
+          "LS6": [
+            0,
+            5,
+            7,
+            8,
+            11
+          ],
+          "L6": [
+            1,
+            7,
+            8,
+            9,
+            11
+          ]
+        },
+        "details": [],
+        "total": 10
+      },
+      {
+        "code": "adas",
+        "label": "智驾",
+        "by_model": {
+          "LS6": 7,
+          "L6": 2
+        },
+        "records_by_model": {
+          "LS6": [
+            1,
+            3,
+            5,
+            6,
+            7,
+            9,
+            11
+          ],
+          "L6": [
+            3,
+            6
+          ]
+        },
+        "details": [],
+        "total": 9
+      },
+      {
+        "code": "brand_warranty_service",
+        "label": "品牌/质保/售后",
+        "by_model": {
+          "LS6": 3,
+          "L6": 2
+        },
+        "records_by_model": {
+          "LS6": [
+            1,
+            7,
+            10
+          ],
+          "L6": [
+            1,
+            7
+          ]
+        },
+        "details": [],
+        "total": 5
+      },
+      {
+        "code": "smart_cockpit",
+        "label": "智舱",
+        "by_model": {
+          "LS6": 3,
+          "L6": 1
+        },
+        "records_by_model": {
+          "LS6": [
+            3,
+            7,
+            9
+          ],
+          "L6": [
+            3
+          ]
+        },
+        "details": [],
+        "total": 4
+      },
+      {
+        "code": "configuration_year_diff",
+        "label": "配置/新老款差异",
+        "by_model": {
+          "LS6": 3
+        },
+        "records_by_model": {
+          "LS6": [
+            0,
+            8,
+            11
+          ]
+        },
+        "details": [],
+        "total": 3
+      },
+      {
+        "code": "other",
+        "label": "其他",
+        "by_model": {
+          "LS6": 1,
+          "L6": 2
+        },
+        "records_by_model": {
+          "LS6": [
+            5
+          ],
+          "L6": [
+            2,
+            9
+          ]
+        },
+        "details": [
+          "操控",
+          "无l6",
+          "水晶车标能不能额外购买"
+        ],
+        "total": 3
+      },
+      {
+        "code": "listing_timing",
+        "label": "上市/试驾/交付时间",
+        "by_model": {
+          "LS6": 2
+        },
+        "records_by_model": {
+          "LS6": [
+            0,
+            1
+          ]
+        },
+        "details": [],
+        "total": 2
+      }
+    ]
+  },
+  "positive_feedback": {
+    "label": "正向产品反馈",
+    "counts": [
+      {
+        "code": "rear_steering",
+        "label": "后轮转向",
+        "by_model": {
+          "LS6": 9,
+          "L6": 4
+        },
+        "records_by_model": {
+          "LS6": [
+            0,
+            2,
+            3,
+            5,
+            6,
+            8,
+            9,
+            10,
+            11
+          ],
+          "L6": [
+            1,
+            3,
+            5,
+            6
+          ]
+        },
+        "details": [],
+        "total": 13
+      },
+      {
+        "code": "steer_by_wire",
+        "label": "线控转向",
+        "by_model": {
+          "LS6": 9,
+          "L6": 3
+        },
+        "records_by_model": {
+          "LS6": [
+            0,
+            1,
+            3,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11
+          ],
+          "L6": [
+            1,
+            3,
+            6
+          ]
+        },
+        "details": [],
+        "total": 12
+      },
+      {
+        "code": "bo_audio",
+        "label": "B&O音响",
+        "by_model": {
+          "LS6": 6,
+          "L6": 3
+        },
+        "records_by_model": {
+          "LS6": [
+            1,
+            2,
+            3,
+            5,
+            7,
+            8
+          ],
+          "L6": [
+            1,
+            5,
+            7
+          ]
+        },
+        "details": [],
+        "total": 9
+      },
+      {
+        "code": "catl_battery",
+        "label": "宁德时代电池",
+        "by_model": {
+          "LS6": 4,
+          "L6": 4
+        },
+        "records_by_model": {
+          "LS6": [
+            7,
+            8,
+            9,
+            11
+          ],
+          "L6": [
+            6,
+            7,
+            9,
+            10
+          ]
+        },
+        "details": [],
+        "total": 8
+      },
+      {
+        "code": "jimmy_choo_design",
+        "label": "整体美学设计（Prof. JimmyChoo 高定设计等）",
+        "by_model": {
+          "L6": 5
+        },
+        "records_by_model": {
+          "L6": [
+            0,
+            7,
+            8,
+            9,
+            11
+          ]
+        },
+        "details": [],
+        "total": 5
+      },
+      {
+        "code": "mechanical_massage",
+        "label": "主驾机械按摩",
+        "by_model": {
+          "LS6": 5
+        },
+        "records_by_model": {
+          "LS6": [
+            1,
+            3,
+            5,
+            7,
+            11
+          ]
+        },
+        "details": [],
+        "total": 5
+      },
+      {
+        "code": "range_782",
+        "label": "782km续航",
+        "by_model": {
+          "LS6": 5
+        },
+        "records_by_model": {
+          "LS6": [
+            0,
+            1,
+            3,
+            7,
+            9
+          ]
+        },
+        "details": [],
+        "total": 5
+      },
+      {
+        "code": "fridge",
+        "label": "智能冷暖冰箱",
+        "by_model": {
+          "LS6": 4
+        },
+        "records_by_model": {
+          "LS6": [
+            3,
+            5,
+            6,
+            8
+          ]
+        },
+        "details": [],
+        "total": 4
+      },
+      {
+        "code": "interior_material",
+        "label": "内饰质感（麂皮绒顶棚等）",
+        "by_model": {
+          "L6": 4
+        },
+        "records_by_model": {
+          "L6": [
+            1,
+            5,
+            7,
+            11
+          ]
+        },
+        "details": [],
+        "total": 4
+      },
+      {
+        "code": "range_850",
+        "label": "850km续航",
+        "by_model": {
+          "L6": 4
+        },
+        "records_by_model": {
+          "L6": [
+            1,
+            3,
+            7,
+            9
+          ]
+        },
+        "details": [],
+        "total": 4
+      },
+      {
+        "code": "frunk",
+        "label": "前备箱",
+        "by_model": {
+          "LS6": 3
+        },
+        "records_by_model": {
+          "LS6": [
+            5,
+            7,
+            11
+          ]
+        },
+        "details": [],
+        "total": 3
+      },
+      {
+        "code": "soft_close_door",
+        "label": "四门电吸门",
+        "by_model": {
+          "LS6": 3
+        },
+        "records_by_model": {
+          "LS6": [
+            2,
+            3,
+            6
+          ]
+        },
+        "details": [],
+        "total": 3
+      },
+      {
+        "code": "dimming_roof",
+        "label": "调光天幕",
+        "by_model": {
+          "L6": 2
+        },
+        "records_by_model": {
+          "L6": [
+            5,
+            10
+          ]
+        },
+        "details": [],
+        "total": 2
+      },
+      {
+        "code": "other",
+        "label": "其他",
+        "by_model": {
+          "LS6": 1,
+          "L6": 1
+        },
+        "records_by_model": {
+          "LS6": [
+            4
+          ],
+          "L6": [
+            2
+          ]
+        },
+        "details": [
+          "慢闪点无CM3",
+          "无l6"
+        ],
+        "total": 2
+      },
+      {
+        "code": "adas_hardware",
+        "label": "智驾硬件（芯片/雷达等）",
+        "by_model": {
+          "L6": 1
+        },
+        "records_by_model": {
+          "L6": [
+            10
+          ]
+        },
+        "details": [],
+        "total": 1
+      },
+      {
+        "code": "air_suspension",
+        "label": "空气悬架/电控阻尼调节",
+        "by_model": {
+          "LS6": 1
+        },
+        "records_by_model": {
+          "LS6": [
+            0
+          ]
+        },
+        "details": [],
+        "total": 1
+      }
+    ]
+  },
+  "competitor_attention": {
+    "label": "竞品关注",
+    "counts": [
+      {
+        "code": "li_auto_i6",
+        "label": "理想i6",
+        "by_model": {
+          "LS6": 8
+        },
+        "records_by_model": {
+          "LS6": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            8,
+            11
+          ]
+        },
+        "details": [],
+        "total": 8
+      },
+      {
+        "code": "xiaomi_su7",
+        "label": "小米SU7",
+        "by_model": {
+          "L6": 5
+        },
+        "records_by_model": {
+          "L6": [
+            0,
+            3,
+            6,
+            7,
+            8
+          ]
+        },
+        "details": [],
+        "total": 5
+      },
+      {
+        "code": "avatr_07",
+        "label": "阿维塔07/07L",
+        "by_model": {
+          "LS6": 4
+        },
+        "records_by_model": {
+          "LS6": [
+            1,
+            5,
+            6,
+            10
+          ]
+        },
+        "details": [],
+        "total": 4
+      },
+      {
+        "code": "xiaomi_yu7",
+        "label": "小米YU7",
+        "by_model": {
+          "LS6": 4
+        },
+        "records_by_model": {
+          "LS6": [
+            0,
+            6,
+            9,
+            10
+          ]
+        },
+        "details": [],
+        "total": 4
+      },
+      {
+        "code": "zeekr_7x",
+        "label": "极氪7X",
+        "by_model": {
+          "LS6": 4
+        },
+        "records_by_model": {
+          "LS6": [
+            5,
+            6,
+            8,
+            10
+          ]
+        },
+        "details": [],
+        "total": 4
+      },
+      {
+        "code": "huawei_wenjie_zhijie",
+        "label": "华为系（问界M6/智界R7）",
+        "by_model": {
+          "LS6": 3
+        },
+        "records_by_model": {
+          "LS6": [
+            0,
+            1,
+            11
+          ]
+        },
+        "details": [],
+        "total": 3
+      },
+      {
+        "code": "li_auto_l6",
+        "label": "理想L6",
+        "by_model": {
+          "LS6": 3
+        },
+        "records_by_model": {
+          "LS6": [
+            3,
+            7,
+            8
+          ]
+        },
+        "details": [],
+        "total": 3
+      },
+      {
+        "code": "other",
+        "label": "其他",
+        "by_model": {
+          "LS6": 1,
+          "L6": 2
+        },
+        "records_by_model": {
+          "LS6": [
+            11
+          ],
+          "L6": [
+            2,
+            9
+          ]
+        },
+        "details": [
+          "无l6",
+          "未提及"
+        ],
+        "total": 3
+      },
+      {
+        "code": "tesla_model_3",
+        "label": "特斯拉Model 3",
+        "by_model": {
+          "L6": 3
+        },
+        "records_by_model": {
+          "L6": [
+            0,
+            10,
+            11
+          ]
+        },
+        "details": [],
+        "total": 3
+      },
+      {
+        "code": "zeekr_007",
+        "label": "极氪007/007GT",
+        "by_model": {
+          "L6": 3
+        },
+        "records_by_model": {
+          "L6": [
+            5,
+            8,
+            10
+          ]
+        },
+        "details": [],
+        "total": 3
+      },
+      {
+        "code": "avatr_06",
+        "label": "阿维塔06/06T",
+        "by_model": {
+          "L6": 2
+        },
+        "records_by_model": {
+          "L6": [
+            1,
+            5
+          ]
+        },
+        "details": [],
+        "total": 2
+      },
+      {
+        "code": "huawei_shangjie",
+        "label": "华为系（尚界Z7/Z7T）",
+        "by_model": {
+          "L6": 1
+        },
+        "records_by_model": {
+          "L6": [
+            3
+          ]
+        },
+        "details": [],
+        "total": 1
+      },
+      {
+        "code": "onvo_l60_l80",
+        "label": "乐道L60/L80",
+        "by_model": {
+          "LS6": 1
+        },
+        "records_by_model": {
+          "LS6": [
+            5
+          ]
+        },
+        "details": [],
+        "total": 1
+      },
+      {
+        "code": "tesla_model_y",
+        "label": "特斯拉Model Y",
+        "by_model": {
+          "LS6": 1
+        },
+        "records_by_model": {
+          "LS6": [
+            10
+          ]
+        },
+        "details": [],
+        "total": 1
+      },
+      {
+        "code": "xiaomi_n70",
+        "label": "小米N70",
+        "by_model": {
+          "LS6": 1
+        },
+        "records_by_model": {
+          "LS6": [
+            9
+          ]
+        },
+        "details": [],
+        "total": 1
+      },
+      {
+        "code": "xpeng_g6_g7_g9",
+        "label": "小鹏G6/G7/G9",
+        "by_model": {
+          "LS6": 1
+        },
+        "records_by_model": {
+          "LS6": [
+            3
+          ]
+        },
+        "details": [],
+        "total": 1
+      },
+      {
+        "code": "xpeng_p7",
+        "label": "小鹏P7/P7+",
+        "by_model": {
+          "L6": 1
+        },
+        "records_by_model": {
+          "L6": [
+            10
+          ]
+        },
+        "details": [],
+        "total": 1
+      }
+    ]
+  },
+  "purchase_barrier": {
+    "label": "下单阻碍",
+    "counts": [
+      {
+        "code": "competitor_comparison",
+        "label": "对比竞品中",
+        "by_model": {
+          "LS6": 8,
+          "L6": 4
+        },
+        "records_by_model": {
+          "LS6": [
+            0,
+            1,
+            5,
+            7,
+            8,
+            9,
+            10,
+            11
+          ],
+          "L6": [
+            0,
+            5,
+            7,
+            8
+          ]
+        },
+        "details": [],
+        "total": 12
+      },
+      {
+        "code": "price_incentive",
+        "label": "价格不满（等价格优惠）",
+        "by_model": {
+          "LS6": 3,
+          "L6": 5
+        },
+        "records_by_model": {
+          "LS6": [
+            3,
+            6,
+            8
+          ],
+          "L6": [
+            1,
+            3,
+            8,
+            10,
+            11
+          ]
+        },
+        "details": [],
+        "total": 8
+      },
+      {
+        "code": "other",
+        "label": "其他",
+        "by_model": {
+          "LS6": 3,
+          "L6": 3
+        },
+        "records_by_model": {
+          "LS6": [
+            2,
+            4,
+            11
+          ],
+          "L6": [
+            2,
+            9,
+            11
+          ]
+        },
+        "details": [
+          "就看看不着急换车",
+          "非刚需",
+          "店里没有新款ls6",
+          "无l6",
+          "储物空间不满，举例手套箱",
+          "收纳空间不够"
+        ],
+        "total": 6
+      },
+      {
+        "code": "brand_trust_after_sales",
+        "label": "品牌/信任顾虑",
+        "by_model": {
+          "LS6": 2,
+          "L6": 1
+        },
+        "records_by_model": {
+          "LS6": [
+            3,
+            7
+          ],
+          "L6": [
+            7
+          ]
+        },
+        "details": [],
+        "total": 3
+      },
+      {
+        "code": "configuration_concern",
+        "label": "产品配置顾虑",
+        "by_model": {
+          "LS6": 1,
+          "L6": 1
+        },
+        "records_by_model": {
+          "LS6": [
+            3
+          ],
+          "L6": [
+            3
+          ]
+        },
+        "details": [],
+        "total": 2
+      },
+      {
+        "code": "exterior_interior_dissatisfaction",
+        "label": "外观/内饰不满",
+        "by_model": {
+          "LS6": 1,
+          "L6": 1
+        },
+        "records_by_model": {
+          "LS6": [
+            11
+          ],
+          "L6": [
+            11
+          ]
+        },
+        "details": [],
+        "total": 2
+      },
+      {
+        "code": "smart_tech_dissatisfaction",
+        "label": "智能化不满",
+        "by_model": {
+          "L6": 1
+        },
+        "records_by_model": {
+          "L6": [
+            6
+          ]
+        },
+        "details": [],
+        "total": 1
+      }
+    ]
+  },
+  "dissatisfaction_theme": {
+    "label": "不满意主题",
+    "counts": [
+      {
+        "code": "other",
+        "label": "其他",
+        "by_model": {
+          "LS6": 3,
+          "L6": 3
+        },
+        "records_by_model": {
+          "LS6": [
+            2,
+            6,
+            9
+          ],
+          "L6": [
+            2,
+            5,
+            9
+          ]
+        },
+        "details": [
+          "无明显不满",
+          "黑色内饰颜色太深",
+          "店里没有新款展车",
+          "无l6",
+          "无电吸门",
+          "储物空间不满意"
+        ],
+        "total": 6
+      },
+      {
+        "code": "brand_warranty_service",
+        "label": "品牌/质保/售后",
+        "by_model": {
+          "LS6": 4,
+          "L6": 1
+        },
+        "records_by_model": {
+          "LS6": [
+            3,
+            7,
+            8,
+            10
+          ],
+          "L6": [
+            10
+          ]
+        },
+        "details": [],
+        "total": 5
+      },
+      {
+        "code": "adas",
+        "label": "智驾",
+        "by_model": {
+          "LS6": 2,
+          "L6": 2
+        },
+        "records_by_model": {
+          "LS6": [
+            0,
+            11
+          ],
+          "L6": [
+            3,
+            6
+          ]
+        },
+        "details": [],
+        "total": 4
+      },
+      {
+        "code": "price_incentive",
+        "label": "价格/权益/优惠",
+        "by_model": {
+          "LS6": 1,
+          "L6": 3
+        },
+        "records_by_model": {
+          "LS6": [
+            1
+          ],
+          "L6": [
+            1,
+            7,
+            8
+          ]
+        },
+        "details": [],
+        "total": 4
+      },
+      {
+        "code": "space",
+        "label": "空间",
+        "by_model": {
+          "L6": 2
+        },
+        "records_by_model": {
+          "L6": [
+            0,
+            11
+          ]
+        },
+        "details": [],
+        "total": 2
+      },
+      {
+        "code": "exterior_interior",
+        "label": "内外饰",
+        "by_model": {
+          "LS6": 1
+        },
+        "records_by_model": {
+          "LS6": [
+            5
+          ]
+        },
+        "details": [],
+        "total": 1
+      }
+    ]
+  },
+  "ignored_other_values": [
+    {
+      "group": "customer_concern",
+      "model": "L6",
+      "record_index": 4,
+      "value": "无"
+    },
+    {
+      "group": "positive_feedback",
+      "model": "L6",
+      "record_index": 4,
+      "value": "无"
+    },
+    {
+      "group": "competitor_attention",
+      "model": "L6",
+      "record_index": 4,
+      "value": "无"
+    },
+    {
+      "group": "purchase_barrier",
+      "model": "L6",
+      "record_index": 4,
+      "value": "无"
+    },
+    {
+      "group": "dissatisfaction_theme",
+      "model": "LS6",
+      "record_index": 4,
+      "value": "无"
+    },
+    {
+      "group": "dissatisfaction_theme",
+      "model": "L6",
+      "record_index": 4,
+      "value": "无"
+    }
+  ]
+}

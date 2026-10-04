@@ -7,7 +7,11 @@
       "category": "cockpit_ergonomics",
       "first_pattern_id": "PAT-0001",
       "first_run_id": "run_001",
-      "aliases": ["方向盘挡流媒体后视镜", "方向盘上沿影响驾驶员后视镜观察", "方向盘遮挡前方视野"],
+      "aliases": [
+        "方向盘挡流媒体后视镜",
+        "方向盘上沿影响驾驶员后视镜观察",
+        "方向盘遮挡前方视野"
+      ],
       "status": "active",
       "created_at": "2026-09-11",
       "updated_at": "2026-09-11"
@@ -18,7 +22,12 @@
       "category": "storage",
       "first_pattern_id": "PAT-0002",
       "first_run_id": "run_001",
-      "aliases": ["前备箱容量小", "前备箱开启不灵敏", "门板储物格偏浅", "前舱储物箱偏小"],
+      "aliases": [
+        "前备箱容量小",
+        "前备箱开启不灵敏",
+        "门板储物格偏浅",
+        "前舱储物箱偏小"
+      ],
       "status": "active",
       "created_at": "2026-09-11",
       "updated_at": "2026-09-11"
@@ -29,7 +38,18 @@
       "category": "interior",
       "first_pattern_id": "PAT-0003",
       "first_run_id": "run_001",
-      "aliases": ["内饰不高级", "内饰豪华感不足", "配件质感不足", "内饰配色不协调", "车漆不高级", "内外饰第一印象质感不足", "内饰像2001年的感觉", "扶手塑料件改软包", "阿维塔豪华感环抱感"],
+      "aliases": [
+        "内饰不高级",
+        "内饰豪华感不足",
+        "配件质感不足",
+        "内饰配色不协调",
+        "车漆不高级",
+        "内外饰第一印象质感不足",
+        "内饰像2001年的感觉",
+        "扶手塑料件改软包",
+        "阿维塔豪华感环抱感",
+        "L6内饰质感设计一般"
+      ],
       "status": "active",
       "created_at": "2026-09-11",
       "updated_at": "2026-09-20"
@@ -40,7 +60,11 @@
       "category": "quality_reliability",
       "first_pattern_id": "PAT-0004",
       "first_run_id": "run_001",
-      "aliases": ["门内侧下沿尖角磕腿", "冰箱口内沿划手", "高定元素棱角刮手"],
+      "aliases": [
+        "门内侧下沿尖角磕腿",
+        "冰箱口内沿划手",
+        "高定元素棱角刮手"
+      ],
       "status": "active",
       "created_at": "2026-09-11",
       "updated_at": "2026-09-19"
@@ -51,7 +75,14 @@
       "category": "smart_cockpit",
       "first_pattern_id": "PAT-0005",
       "first_run_id": "run_001",
-      "aliases": ["IMClaw 多音字误读", "语音助手场景推荐不准", "语音指令程度无法区分", "语音识别不准确", "更关注语音控制精准性与流畅性", "龙虾智能体期待不高"],
+      "aliases": [
+        "IMClaw 多音字误读",
+        "语音助手场景推荐不准",
+        "语音指令程度无法区分",
+        "语音识别不准确",
+        "更关注语音控制精准性与流畅性",
+        "龙虾智能体期待不高"
+      ],
       "status": "active",
       "created_at": "2026-09-11",
       "updated_at": "2026-09-26"
@@ -62,7 +93,10 @@
       "category": "nvh",
       "first_pattern_id": "PAT-0006",
       "first_run_id": "run_001",
-      "aliases": ["BO 音响爆发力不足", "佳通 P10 胎噪偏大"],
+      "aliases": [
+        "BO 音响爆发力不足",
+        "佳通 P10 胎噪偏大"
+      ],
       "status": "active",
       "created_at": "2026-09-11",
       "updated_at": "2026-09-11"
@@ -73,7 +107,11 @@
       "category": "seating_space",
       "first_pattern_id": "PAT-0007",
       "first_run_id": "run_001",
-      "aliases": ["L6 后排三人偏挤", "LS8 二排大屏距离过近", "后排头部空间偏低"],
+      "aliases": [
+        "L6 后排三人偏挤",
+        "LS8 二排大屏距离过近",
+        "后排头部空间偏低"
+      ],
       "status": "active",
       "created_at": "2026-09-11",
       "updated_at": "2026-09-11"
@@ -84,10 +122,20 @@
       "category": "configuration",
       "first_pattern_id": "PAT-0008",
       "first_run_id": "run_001",
-      "aliases": ["慢充口无盖", "L6 无电吸门", "天窗不可开启", "后排手动放倒", "外门把手电容感应仅前排", "显性配置不齐", "高定版溢价价值感不足", "客户关注新老款配置差异"],
+      "aliases": [
+        "慢充口无盖",
+        "L6 无电吸门",
+        "天窗不可开启",
+        "后排手动放倒",
+        "外门把手电容感应仅前排",
+        "显性配置不齐",
+        "高定版溢价价值感不足",
+        "客户关注新老款配置差异",
+        "客户感觉不到 LS6 新老款差异"
+      ],
       "status": "active",
       "created_at": "2026-09-11",
-      "updated_at": "2026-09-26"
+      "updated_at": "2026-09-27"
     },
     {
       "pattern_key": "sales_service_after_sales_support",
@@ -95,7 +143,11 @@
       "category": "sales_service",
       "first_pattern_id": "PAT-0009",
       "first_run_id": "run_001",
-      "aliases": ["缺少取送车服务", "售后服务满意度低", "既有用户流失口碑"],
+      "aliases": [
+        "缺少取送车服务",
+        "售后服务满意度低",
+        "既有用户流失口碑"
+      ],
       "status": "active",
       "created_at": "2026-09-11",
       "updated_at": "2026-09-11"
@@ -106,7 +158,15 @@
       "category": "adas",
       "first_pattern_id": "PAT-0010",
       "first_run_id": "run_001",
-      "aliases": ["激光雷达线数存疑", "不了解 momenta", "智驾供应商认知度低", "没人知道momenta", "智驾认同不如华为"],
+      "aliases": [
+        "激光雷达线数存疑",
+        "不了解 momenta",
+        "智驾供应商认知度低",
+        "没人知道momenta",
+        "智驾认同不如华为",
+        "对智驾供应商认知度不高",
+        "LS9潜客关注Momenta背景与上汽归属"
+      ],
       "status": "active",
       "created_at": "2026-09-11",
       "updated_at": "2026-09-12"
@@ -117,7 +177,13 @@
       "category": "configuration",
       "first_pattern_id": "PAT-0011",
       "first_run_id": "run_001",
-      "aliases": ["B 柱上车扶手缺失", "三排 Type C 不足", "三排无法电动折叠", "偏好半隐藏式门把手", "后排滑轨不及竞品"],
+      "aliases": [
+        "B 柱上车扶手缺失",
+        "三排 Type C 不足",
+        "三排无法电动折叠",
+        "偏好半隐藏式门把手",
+        "后排滑轨不及竞品"
+      ],
       "status": "active",
       "created_at": "2026-09-11",
       "updated_at": "2026-09-11"
@@ -128,7 +194,10 @@
       "category": "driving_dynamics",
       "first_pattern_id": "PAT-0012",
       "first_run_id": "run_001",
-      "aliases": ["新款后轮转向不如老款", "线控转向无法试驾"],
+      "aliases": [
+        "新款后轮转向不如老款",
+        "线控转向无法试驾"
+      ],
       "status": "active",
       "created_at": "2026-09-11",
       "updated_at": "2026-09-11"
@@ -139,10 +208,25 @@
       "category": "other",
       "first_pattern_id": "PAT-0013",
       "first_run_id": "run_001",
-      "aliases": ["品牌认知度低", "门店客流吸引力不足", "竞品分流", "品牌知名度影响下单", "门店缺乏线索", "自然客流不足", "LS6偏小众", "工作日自然客流少", "展台承担曝光职能"],
+      "aliases": [
+        "品牌认知度低",
+        "门店客流吸引力不足",
+        "竞品分流",
+        "品牌知名度影响下单",
+        "门店缺乏线索",
+        "自然客流不足",
+        "LS6偏小众",
+        "工作日自然客流少",
+        "展台承担曝光职能",
+        "智己品牌知名度上升但仍需提高",
+        "品牌知名度尚需提高",
+        "小城市更看重品牌力",
+        "智己品牌知名度较过往大幅提升",
+        "建议提升品牌曝光量"
+      ],
       "status": "active",
       "created_at": "2026-09-11",
-      "updated_at": "2026-09-20"
+      "updated_at": "2026-10-02"
     },
     {
       "pattern_key": "demand_wait_for_new_model",
@@ -150,10 +234,21 @@
       "category": "other",
       "first_pattern_id": "PAT-0014",
       "first_run_id": "run_001",
-      "aliases": ["不买老款等新款", "配额未抢到", "短期锁单抑制", "价格权益政策观望", "盲订不实惠", "询问增程版本换新", "询问 LS8 纯电上市时间", "对比竞品价格观望"],
+      "aliases": [
+        "不买老款等新款",
+        "配额未抢到",
+        "短期锁单抑制",
+        "价格权益政策观望",
+        "盲订不实惠",
+        "询问增程版本换新",
+        "询问 LS8 纯电上市时间",
+        "对比竞品价格观望",
+        "很多客户在等 LS8 纯电",
+        "LS6新老款选择犹豫"
+      ],
       "status": "active",
       "created_at": "2026-09-11",
-      "updated_at": "2026-09-26"
+      "updated_at": "2026-10-02"
     },
     {
       "pattern_key": "verified_product_service_strengths",
@@ -161,10 +256,45 @@
       "category": "other",
       "first_pattern_id": "PAT-0015",
       "first_run_id": "run_001",
-      "aliases": ["雨天辅助驾驶表现良好", "LS8 人群适配", "门店接待服务积极", "后轮转向重庆适用", "20万起大满配", "试驾转化积极", "LS6 价格权益获认可", "品牌认知提升", "展车配置集中陈列", "到店客流近三个月最多", "LS8/LS6 组合展出人群互补", "油车置换为主", "门店服务专业真诚", "性价比高配置拉满", "交付中心客户意愿更高", "家庭用户对空间满意", "锁单表现积极", "线控转向慕名而来"],
+      "aliases": [
+        "雨天辅助驾驶表现良好",
+        "LS8 人群适配",
+        "门店接待服务积极",
+        "后轮转向重庆适用",
+        "20万起大满配",
+        "试驾转化积极",
+        "LS6 价格权益获认可",
+        "品牌认知提升",
+        "展车配置集中陈列",
+        "到店客流近三个月最多",
+        "LS8/LS6 组合展出人群互补",
+        "油车置换为主",
+        "门店服务专业真诚",
+        "性价比高配置拉满",
+        "交付中心客户意愿更高",
+        "家庭用户对空间满意",
+        "锁单表现积极",
+        "线控转向慕名而来",
+        "配置评价高静态体验座舱满意",
+        "服务专业建议加真心",
+        "交付中心高意向客流均试驾",
+        "用户对底盘和空间好评",
+        "LS6提升潜客关注座舱体验",
+        "LS8六座潜客预算导向",
+        "LS6高性价比底盘获高认可",
+        "门店团队训练有素",
+        "主理热情专业",
+        "LS6受年轻家庭用户喜欢",
+        "L6联名款外观成功",
+        "用户只认宁德时代电池",
+        "LS6银色展示色引客",
+        "相同配置竞品价格更高",
+        "试驾后有助于击败竞品",
+        "LS8四驱机械按摩获满意"
+      ],
       "status": "active",
       "created_at": "2026-09-11",
-      "updated_at": "2026-09-26"
+      "updated_at": "2026-10-02"
     },
     {
       "pattern_key": "model_positioning_audience_fit",
@@ -172,10 +302,24 @@
       "category": "other",
       "first_pattern_id": "PAT-0006",
       "first_run_id": "run_002",
-      "aliases": ["LS8 定位模糊", "L6 目标客户二线城市少", "客户画像区隔", "品牌定位与低线城市用户心智错位", "L6/LS6 价格重叠", "L6 价格优势不明显", "低线城市关注显性功能配置"],
+      "aliases": [
+        "LS8 定位模糊",
+        "L6 目标客户二线城市少",
+        "客户画像区隔",
+        "品牌定位与低线城市用户心智错位",
+        "L6/LS6 价格重叠",
+        "L6 价格优势不明显",
+        "低线城市关注显性功能配置",
+        "遵义客户更倾向SUV车型",
+        "L6 轿车目标群体小",
+        "喜欢轿车的对L6认可但到店占比低",
+        "贵州地势导致低底盘拒购",
+        "门店没人看L6",
+        "L6对比LS6后觉得性价比不高"
+      ],
       "status": "active",
       "created_at": "2026-09-12",
-      "updated_at": "2026-09-25"
+      "updated_at": "2026-10-02"
     },
     {
       "pattern_key": "competitor_smart_space_benchmark",
@@ -183,10 +327,16 @@
       "category": "smart_cockpit",
       "first_pattern_id": "PAT-0008",
       "first_run_id": "run_002",
-      "aliases": ["理想语音快", "N70 空间大", "竞品车机对话更流畅"],
+      "aliases": [
+        "理想语音快",
+        "N70 空间大",
+        "竞品车机对话更流畅",
+        "别人家的车机更好用",
+        "竞品智舱语音成为下单LS6卡点"
+      ],
       "status": "active",
       "created_at": "2026-09-12",
-      "updated_at": "2026-09-20"
+      "updated_at": "2026-10-02"
     },
     {
       "pattern_key": "launch_rhythm_derivative_sync",
@@ -194,10 +344,15 @@
       "category": "other",
       "first_pattern_id": "PAT-0008",
       "first_run_id": "run_003",
-      "aliases": ["增程纯电同步上市", "上市版本排期建议"],
+      "aliases": [
+        "增程纯电同步上市",
+        "上市版本排期建议",
+        "用户希望新车都出双动力形式",
+        "LS8纯电早点上更有赢率"
+      ],
       "status": "active",
       "created_at": "2026-09-13",
-      "updated_at": "2026-09-13"
+      "updated_at": "2026-10-02"
     },
     {
       "pattern_key": "store_operations_conversion_levers",
@@ -205,10 +360,25 @@
       "category": "sales_service",
       "first_pattern_id": "PAT-0009",
       "first_run_id": "run_003",
-      "aliases": ["提前释放权益", "到店有礼/试驾有礼引流", "销售工装质感", "有效线索下发"],
+      "aliases": [
+        "提前释放权益",
+        "到店有礼/试驾有礼引流",
+        "销售工装质感",
+        "有效线索下发",
+        "强化后轮转向智驾卖点营销传达",
+        "可以做直播",
+        "门口引流小活动",
+        "试驾送网红饮品",
+        "进店打卡送零食咖啡",
+        "餐饮店斜对面协同",
+        "增加车型版本价格配置介绍页",
+        "加强线上传播提高进店流量",
+        "核心竞品对标公示在显眼处",
+        "门店直播建议已落地"
+      ],
       "status": "active",
       "created_at": "2026-09-13",
-      "updated_at": "2026-09-20"
+      "updated_at": "2026-10-02"
     },
     {
       "pattern_key": "interior_detail_usability_perception",
@@ -216,7 +386,11 @@
       "category": "interior",
       "first_pattern_id": "PAT-0002",
       "first_run_id": "run_005_2026-09-19",
-      "aliases": ["副驾屏设计奇怪", "化妆镜打开方式隐蔽", "主副驾屏看起来怪"],
+      "aliases": [
+        "副驾屏设计奇怪",
+        "化妆镜打开方式隐蔽",
+        "主副驾屏看起来怪"
+      ],
       "status": "active",
       "created_at": "2026-09-19",
       "updated_at": "2026-09-20"
@@ -227,7 +401,11 @@
       "category": "other",
       "first_pattern_id": "PAT-0008",
       "first_run_id": "run_005_2026-09-19",
-      "aliases": ["情绪价值", "更多个性化", "差异化"],
+      "aliases": [
+        "情绪价值",
+        "更多个性化",
+        "差异化"
+      ],
       "status": "active",
       "created_at": "2026-09-19",
       "updated_at": "2026-09-19"
@@ -238,7 +416,11 @@
       "category": "other",
       "first_pattern_id": "PAT-0004",
       "first_run_id": "run_006_2026-09-20",
-      "aliases": ["头等舱接受度不高", "门把手新国标解释成本高", "半隐藏式门把手被带节奏"],
+      "aliases": [
+        "头等舱接受度不高",
+        "门把手新国标解释成本高",
+        "半隐藏式门把手被带节奏"
+      ],
       "status": "active",
       "created_at": "2026-09-20",
       "updated_at": "2026-09-20"
@@ -249,10 +431,17 @@
       "category": "other",
       "first_pattern_id": "PAT-0003",
       "first_run_id": "run_007_2026-09-25",
-      "aliases": ["非刚需购车", "可买可不买", "可选范围广", "反复对比后再决策"],
+      "aliases": [
+        "非刚需购车",
+        "可买可不买",
+        "可选范围广",
+        "反复对比后再决策",
+        "说明权益且试驾后仍难当场下单",
+        "到店用户普遍充分对比"
+      ],
       "status": "active",
       "created_at": "2026-09-25",
-      "updated_at": "2026-09-25"
+      "updated_at": "2026-10-02"
     },
     {
       "pattern_key": "competitor_price_advantage_low_tier",
@@ -260,7 +449,11 @@
       "category": "other",
       "first_pattern_id": "PAT-0004",
       "first_run_id": "run_007_2026-09-25",
-      "aliases": ["零跑有价格优势", "竞品展台客流较大", "三线城市竞品分流"],
+      "aliases": [
+        "零跑有价格优势",
+        "竞品展台客流较大",
+        "三线城市竞品分流"
+      ],
       "status": "active",
       "created_at": "2026-09-25",
       "updated_at": "2026-09-25"
@@ -271,10 +464,20 @@
       "category": "sales_service",
       "first_pattern_id": "PAT-0005",
       "first_run_id": "run_007_2026-09-25",
-      "aliases": ["App水晶权益削减", "增加获取水晶渠道", "提升老用户忠诚度", "老用户产品升级"],
+      "aliases": [
+        "App水晶权益削减",
+        "增加获取水晶渠道",
+        "提升老用户忠诚度",
+        "老用户产品升级",
+        "LS7老车主复购LS9愿宣传",
+        "维护老客户口碑发动老带新",
+        "借国庆发起老带新试驾活动",
+        "发动老客户带人进店体验",
+        "LS9 Hyper车主带朋友看LS6"
+      ],
       "status": "active",
       "created_at": "2026-09-25",
-      "updated_at": "2026-09-25"
+      "updated_at": "2026-10-02"
     },
     {
       "pattern_key": "smart_cockpit_screen_heat",
@@ -282,7 +485,10 @@
       "category": "smart_cockpit",
       "first_pattern_id": "PAT-0003",
       "first_run_id": "run_008_2026-09-26",
-      "aliases": ["LS6 屏幕很烫", "中控屏发热"],
+      "aliases": [
+        "LS6 屏幕很烫",
+        "中控屏发热"
+      ],
       "status": "active",
       "created_at": "2026-09-26",
       "updated_at": "2026-09-26"
@@ -293,7 +499,9 @@
       "category": "seating_space",
       "first_pattern_id": "PAT-0004",
       "first_run_id": "run_008_2026-09-26",
-      "aliases": ["LS8 副驾零重力腰部支撑不够"],
+      "aliases": [
+        "LS8 副驾零重力腰部支撑不够"
+      ],
       "status": "active",
       "created_at": "2026-09-26",
       "updated_at": "2026-09-26"
@@ -304,7 +512,9 @@
       "category": "configuration",
       "first_pattern_id": "PAT-0005",
       "first_run_id": "run_008_2026-09-26",
-      "aliases": ["LS6 标配线控转向 LS8 需加钱选装"],
+      "aliases": [
+        "LS6 标配线控转向 LS8 需加钱选装"
+      ],
       "status": "active",
       "created_at": "2026-09-26",
       "updated_at": "2026-09-26"
@@ -315,21 +525,197 @@
       "category": "driving_dynamics",
       "first_pattern_id": "PAT-0006",
       "first_run_id": "run_008_2026-09-26",
-      "aliases": ["静态展示无法体现底盘优势", "试驾意愿不高"],
+      "aliases": [
+        "静态展示无法体现底盘优势",
+        "试驾意愿不高"
+      ],
       "status": "active",
       "created_at": "2026-09-26",
       "updated_at": "2026-09-26"
     },
     {
       "pattern_key": "low_tier_demand_preference_shift",
-      "title": "低线城市需求向智能化与纯电倾斜",
+      "title": "低线城市需求向智能化与显性配置倾斜",
       "category": "other",
       "first_pattern_id": "PAT-0008",
       "first_run_id": "run_008_2026-09-26",
-      "aliases": ["三线城市智驾要求高", "相比增程更偏好纯电", "增程顾虑保养成本"],
+      "aliases": [
+        "三线城市智驾要求高",
+        "相比增程更偏好纯电",
+        "增程顾虑保养成本",
+        "低线城市关注看得见的功能配置",
+        "油车转电车用户询问智驾配置"
+      ],
       "status": "active",
       "created_at": "2026-09-26",
-      "updated_at": "2026-09-26"
+      "updated_at": "2026-09-27"
+    },
+    {
+      "pattern_key": "price_equity_decision_barrier",
+      "title": "价格与权益预期成为短期决策抑制",
+      "category": "configuration",
+      "first_pattern_id": "PAT-0005",
+      "first_run_id": "run_009_2026-09-27",
+      "aliases": [
+        "担心购后降价或权益赠送",
+        "客户对价格相当敏感",
+        "价格和权益方面双方有拉扯",
+        "客户总想要赠品"
+      ],
+      "status": "active",
+      "created_at": "2026-09-27",
+      "updated_at": "2026-10-02"
+    },
+    {
+      "pattern_key": "steering_by_wire_reliability_trust",
+      "title": "线控转向安全可靠性与信任顾虑",
+      "category": "driving_dynamics",
+      "first_pattern_id": "PAT-0007",
+      "first_run_id": "run_009_2026-09-27",
+      "aliases": [
+        "线控转向安全可靠性疑虑",
+        "线转安全可靠性需强化信心"
+      ],
+      "status": "active",
+      "created_at": "2026-09-27",
+      "updated_at": "2026-09-27"
+    },
+    {
+      "pattern_key": "ls6_user_persona_segmentation",
+      "title": "LS6 用户画像细分与置换结构",
+      "category": "other",
+      "first_pattern_id": "PAT-0010",
+      "first_run_id": "run_009_2026-09-27",
+      "aliases": [
+        "LS6 慢闪用户画像",
+        "油车升级置换用户占比高",
+        "女性用户关注电池安全"
+      ],
+      "status": "active",
+      "created_at": "2026-09-27",
+      "updated_at": "2026-09-27"
+    },
+    {
+      "pattern_key": "store_footfall_context_quality",
+      "title": "门店客流情境与到店质量分化",
+      "category": "sales_service",
+      "first_pattern_id": "PAT-0002",
+      "first_run_id": "run_010_2026-10-01",
+      "aliases": [
+        "国庆快闪走马观花深度体验少",
+        "降雨降温影响到店客源总量",
+        "商超路过型客流",
+        "雨天到店客源质量较高",
+        "友商普遍人流偏低",
+        "国庆次日快闪走马观花",
+        "展点被电竞舞台遮挡获客减半",
+        "外地探亲旅客客流",
+        "高意向客户试驾前关注续航电池"
+      ],
+      "status": "active",
+      "created_at": "2026-10-01",
+      "updated_at": "2026-10-02"
+    },
+    {
+      "pattern_key": "competitor_promotion_perk_gap",
+      "title": "竞品促销赠品与异业引流差距",
+      "category": "sales_service",
+      "first_pattern_id": "PAT-0009",
+      "first_run_id": "run_010_2026-10-01",
+      "aliases": [
+        "竞品送脚垫头枕智己没送",
+        "极氪与奶茶店合作试驾送奶茶"
+      ],
+      "status": "active",
+      "created_at": "2026-10-01",
+      "updated_at": "2026-10-01"
+    },
+    {
+      "pattern_key": "local_market_communication_barrier",
+      "title": "本地化沟通适配不足影响留资",
+      "category": "sales_service",
+      "first_pattern_id": "PAT-0012",
+      "first_run_id": "run_010_2026-10-01",
+      "aliases": [
+        "非本地口音导致距离感拒留资",
+        "留资用户习惯普通话"
+      ],
+      "status": "active",
+      "created_at": "2026-10-01",
+      "updated_at": "2026-10-01"
+    },
+    {
+      "pattern_key": "store_display_vehicle_staleness",
+      "title": "门店展车为旧款、物料未更新影响看车留客",
+      "category": "sales_service",
+      "first_pattern_id": "PAT-0012",
+      "first_run_id": "run_011_2026-10-02",
+      "aliases": [
+        "LS6展车售出后陈列旧款",
+        "门店物料未更新到最新状态",
+        "展厅放老款错失惊艳留客",
+        "一听是老款不上车体验"
+      ],
+      "status": "active",
+      "created_at": "2026-10-02",
+      "updated_at": "2026-10-02"
+    },
+    {
+      "pattern_key": "sales_service_consultation_quality",
+      "title": "门店销售服务与讲解水平存在店间差异",
+      "category": "sales_service",
+      "first_pattern_id": "PAT-0013",
+      "first_run_id": "run_011_2026-10-02",
+      "aliases": [
+        "主理十分热情专业",
+        "销售队伍成熟高效",
+        "销售介绍热情待提高"
+      ],
+      "status": "active",
+      "created_at": "2026-10-02",
+      "updated_at": "2026-10-02"
+    },
+    {
+      "pattern_key": "in_car_audio_playback_glitch",
+      "title": "车载音响播放偶发异常（天空扬声器无声）",
+      "category": "quality_reliability",
+      "first_pattern_id": "PAT-0014",
+      "first_run_id": "run_011_2026-10-02",
+      "aliases": [
+        "L6天空扬声器静态无声",
+        "更换音源后恢复"
+      ],
+      "status": "active",
+      "created_at": "2026-10-02",
+      "updated_at": "2026-10-02"
+    },
+    {
+      "pattern_key": "power_tailgate_activation_usability",
+      "title": "尾门感应开启需多次尝试、学习成本高",
+      "category": "quality_reliability",
+      "first_pattern_id": "PAT-0014",
+      "first_run_id": "run_012_2026-10-03",
+      "aliases": [
+        "LS8尾门KK需多试两次才能触发打开",
+        "静态体验尾门感应开启学习成本"
+      ],
+      "status": "active",
+      "created_at": "2026-10-03",
+      "updated_at": "2026-10-03"
+    },
+    {
+      "pattern_key": "store_location_visibility_barrier",
+      "title": "门店选址/朝向可见性影响自然引流",
+      "category": "sales_service",
+      "first_pattern_id": "PAT-0015",
+      "first_run_id": "run_012_2026-10-03",
+      "aliases": [
+        "门店位置拐角视野盲区难找",
+        "门店朝向难引流过道看不到招牌"
+      ],
+      "status": "active",
+      "created_at": "2026-10-03",
+      "updated_at": "2026-10-03"
     }
   ]
 }

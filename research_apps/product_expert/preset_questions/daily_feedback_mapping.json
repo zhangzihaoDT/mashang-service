@@ -1,7 +1,7 @@
 {
-  "mapping_version": "0.2.3",
+  "mapping_version": "0.2.4",
   "taxonomy_version": "0.2.3",
-  "description": "『产品专家支持每日反馈』问卷 → 确定性统计映射。列名/选项与问卷导出原样对应；选择题由 derive_survey_stats.py 直读，不经 LLM。taxonomy.json(v0.2.3) 提供 code→label。v0.2.2 增补 2026-09-13 问卷新增选项（调光天幕 / 小鹏G6·G7·G9 / 乐道L60·L80 / 小鹏P7·P7+ / 智能化不满 / 产品配置顾虑 / 缺失某项配置）。v0.2.3 将「智舱」纳入 dissatisfaction_theme 选项。",
+  "description": "『产品专家支持每日反馈』问卷 → 确定性统计映射。列名/选项与问卷导出原样对应；选择题由 derive_survey_stats.py 直读，不经 LLM。taxonomy.json(v0.2.3) 提供 code→label。v0.2.2 增补 2026-09-13 问卷新增选项（调光天幕 / 小鹏G6·G7·G9 / 乐道L60·L80 / 小鹏P7·P7+ / 智能化不满 / 产品配置顾虑 / 缺失某项配置）。v0.2.3 将「智舱」纳入 dissatisfaction_theme 选项。v0.2.4 增补 2026-10-01 问卷 purchase_barrier 拆分选项（外观不满 / 内饰不满 → exterior_interior_dissatisfaction），并登记新增自由文本列（针对门店扩大传播量、提升进店量&销量的建议；关于L6的竞品用户特别想说的）到 text_sources。",
   "ignore_other_values": ["无", "没有表现不满", "未有L6展车", "未有L6竞品"],
   "record_meta": {
     "submission_id": "自动编号",
@@ -113,6 +113,8 @@
         "对比竞品中": "competitor_comparison",
         "价格不满（等价格优惠）": "price_incentive",
         "外观/内饰不满": "exterior_interior_dissatisfaction",
+        "外观不满": "exterior_interior_dissatisfaction",
+        "内饰不满": "exterior_interior_dissatisfaction",
         "智能化不满": "smart_tech_dissatisfaction",
         "产品配置顾虑": "configuration_concern",
         "其他": "other"
@@ -144,6 +146,8 @@
     "product_issue_ls6": "LS6产品体验相关问题",
     "product_issue_l6": "L6产品体验相关问题",
     "product_issue_ls8_ls9": "LS8/LS9产品体验相关问题",
-    "competitor_comment": "关于LS6的竞品，用户有什么特别想说的"
+    "competitor_comment": "关于LS6的竞品，用户有什么特别想说的",
+    "competitor_comment_l6": "关于L6的竞品，用户有什么特别想说的",
+    "store_growth_suggestion": "针对门店扩大传播量、提升进店量&销量的建议"
   }
 }
