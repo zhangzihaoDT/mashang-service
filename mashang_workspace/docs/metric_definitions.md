@@ -45,6 +45,17 @@
 
 ## 线索类指标
 
+> **两套下发线索数据集，按粒度选用，勿混用：**
+>
+> | 口径 | 数据集 | 粒度 | 可拆分 | 适用问题 |
+> | --- | --- | --- | --- | --- |
+> | 门店级 | `dataset/store_daily_leads.csv` | 门店 × 日 | 否（无渠道拆分） | 门店排名、单店线索走势、门店经营观察、门店线索×小订四象限 |
+> | 全局渠道级 | `dataset/assign_data.csv` | 全局 × 日 | 门店渠道 / 平台 / APP小程序 / 快慢闪 / 直播 + 当日/7/30 日试驾与锁单 | 总量、渠道结构、快慢闪、直播、渠道转化 |
+>
+> - 更新入口：门店级 `dataset/updater/store_daily_leads_to_csv.py`（`--mobile` 非办公网）；全局级 `dataset/updater/lock_attribution_data_to_parquet.py --only-assign-test-drive`（同时更新 `test_drive_data.csv`）。
+> - 互校：完整日两套总量应接近（如 2026-10-02 分别为 22,028 / 22,042）。
+> - 注意：`assign_data.csv` 的 `下发线索数（门店）` 是**全局中「门店」这一个渠道**，**不等于** `store_daily_leads.csv` 的门店级明细。
+
 ### 下发线索数
 
 - **业务含义**：系统下发给门店/渠道的线索总数
