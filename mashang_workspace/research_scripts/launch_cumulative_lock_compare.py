@@ -169,6 +169,38 @@ def _chart_curves(retail: pd.DataFrame, ends: dict, last_date: pd.Timestamp,
     return out
 
 
+def _retail_bridge(df: pd.DataFrame, bd: dict, gens: list[str],
+                   ends: dict, n_days: int) -> dict:
+    """口径桥接：最新代际在模块 1 同窗口内，零售口径 vs 上市监控卡片口径。
+
+    本报告模块 1 采用零售口径（order_type ∈ 用户车/NaN，排除试驾车/员工/大客户等非零售单）；
+    上市监控卡片仅剔除测试单、不区分 order_type。本函数给出同一时间窗下两者差额与已排除类型，
+    便于报告读者与卡片数字对齐（避免误判为口径冲突）。
+    """
+    g = gens[-1]
+    end = ends[g]
+    hi = end + pd.Timedelta(days=n_days)  # 右开区间 = 第 n_days 天末
+    seg = df[
+        df["series_group_logic"].eq(g)
+        & df["lock_time"].notna()
+        & (df["lock_time"] >= end)
+        & (df["lock_time"] < hi)
+        & ~flag_test_orders(df, bd)
+    ]
+    is_retail = _retail_mask(seg["order_type"])
+    excluded = seg.loc[~is_retail]
+    counts = excluded["order_type"].fillna("(未标注)").value_counts()
+    return {
+        "gen": g,
+        "start": end.date().isoformat(),
+        "last_date": (hi - pd.Timedelta(days=1)).date().isoformat(),
+        "retail": int(seg.loc[is_retail, "order_number"].nunique()),
+        "all_types": int(seg["order_number"].nunique()),
+        "excluded": int(excluded["order_number"].nunique()),
+        "excluded_types": {str(k): int(v) for k, v in counts.items()},
+    }
+
+
 def compute_curves(df: pd.DataFrame, bd: dict, gens: list[str],
                    as_of: pd.Timestamp) -> dict:
     """逐代际上市后每日累计锁单曲线（对齐上市后天数 1..N）。"""
@@ -226,6 +258,7 @@ def compute_curves(df: pd.DataFrame, bd: dict, gens: list[str],
         "lead_window": _lead_window_compare(ends, last_date),
         "lock_config": _lock_config_distribution(as_of.normalize(), gens[-1]),
         "test_drive": _test_drive_compare(bd, gens, ends, last_date),
+        "retail_bridge": _retail_bridge(df, bd, gens, ends, n_days),
     }
 
 
@@ -586,7 +619,8 @@ def _lead_window_compare(ends: dict, complete_day: pd.Timestamp | None = None) -
     df = _load_assign_daily()
     if df.empty:
         return None
-    s = df.set_index("d")["下发线索数"]
+    ddf = df.set_index("d")
+    s = ddf["下发线索数"]
     complete_day = pd.Timestamp(complete_day).normalize() if complete_day is not None \
         else pd.Timestamp(s.index.max()).normalize()
     target_days = 7
@@ -632,10 +666,10 @@ def _lead_window_compare(ends: dict, complete_day: pd.Timestamp | None = None) -
         }
         # 各渠道窗口增幅（上市前 7 天为基线）
         ch_rows = []
-        for c in df.columns:
-            if c not in _CHANNEL_COLS:
+        for c in _CHANNEL_COLS:
+            if c not in df.columns:
                 continue
-            cc = df.set_index("d")[c]
+            cc = ddf[c]
             base7c = float(cc.loc[end - pd.Timedelta(days=7):end - pd.Timedelta(microseconds=1)].sum())
             row = {"channel": _CHANNEL_LABELS[c], "windows": {}}
             for n in (1, 3, 5, 7):
@@ -1009,6 +1043,98 @@ def _lead_daily_figure(lc: dict) -> str:
     return fig.to_json()
 
 
+def _hex_lerp(c1, c2, t):
+    return tuple(round(c1[i] + (c2[i] - c1[i]) * t) for i in range(3))
+
+
+def _heat_cell_style(v: float | None, vmax: float) -> str:
+    """表格式热力图：按数值返回 inline 背景色 + 文字色（发散色阶，0 为白）。"""
+    if v is None or not vmax:
+        return ""
+    t = max(-1.0, min(1.0, v / vmax))
+    white = (255, 255, 255)
+    if t >= 0:
+        rgb = _hex_lerp(white, (23, 74, 124), t)     # own 蓝 = 增幅高
+    else:
+        rgb = _hex_lerp(white, (185, 74, 68), -t)    # 负向红 = 低于基线
+    fg = "#FFFFFF" if abs(t) >= 0.55 else "#1F2D3D"
+    return f"background:rgb({rgb[0]},{rgb[1]},{rgb[2]});color:{fg};"
+
+
+def _lead_channel_abs_compare_figure(lc: dict) -> str | None:
+    """渠道窗口绝对值对比：CM2 / CM3 各自「上市后 vs 自身基线」，按 N 分面。
+
+    行 = 代际（CM2 / CM3），列 = N 窗口；每格灰条 = 基线(上市前 7 日均值×N)、
+    蓝条 = 上市后窗口、条末标净增。同一列共享 x 轴（shared_xaxes="columns"），
+    便于 CM2 与 CM3 在同一 N 下直接比较规模与净增。
+    """
+    a, b = lc["per"]["a"], lc["per"]["b"]
+    ga, gb = lc["gens"]
+    NDS = lc.get("window_days", [1, 3, 5, 7])
+    chans = list(_CHANNEL_LABELS.values()) + ["全部渠道合计"]
+    yorder = list(reversed(chans))  # 门店在上
+    base_c = get_series_color("ash")
+    gen_colors = {ga: get_series_color("steel"), gb: get_series_color("own")}
+
+    def vals(side_key, per, cname, nd):
+        if cname == "全部渠道合计":
+            w = per["windows"][nd]
+        else:
+            r = next((x for x in lc["channels"][side_key] if x["channel"] == cname), None)
+            w = r["windows"].get(nd) if r else None
+        if not w or "pending" in w:
+            return None
+        return w
+
+    rows = 2
+    cols = len(NDS)
+    col_max = [0.0] * cols
+    fig = make_subplots(rows=rows, cols=cols, shared_xaxes=False, shared_yaxes=False,
+                        horizontal_spacing=0.06, vertical_spacing=0.16,
+                        subplot_titles=[f"{g} · 上市后 {nd} 天" for g in (ga, gb) for nd in NDS])
+    for ri, (g, side_key, per) in enumerate(((ga, "a", a), (gb, "b", b)), start=1):
+        color = gen_colors[g]
+        for ci, nd in enumerate(NDS, start=1):
+            base_x, win_x, delta_s, yy = [], [], [], []
+            for cname in yorder:
+                w = vals(side_key, per, cname, nd)
+                yy.append(cname)
+                if w is None:
+                    base_x.append(None)
+                    win_x.append(None)
+                    delta_s.append("")
+                else:
+                    base_x.append(w["base"])
+                    win_x.append(w["win"])
+                    delta_s.append(f"{w['delta']:+,}")
+            nums = [v for v in (base_x + win_x) if v is not None]
+            if nums:
+                col_max[ci - 1] = max(col_max[ci - 1], max(nums))
+            fig.add_trace(go.Bar(y=yy, x=base_x, orientation="h", name="基线(7日均值×N)",
+                                 marker_color=base_c, showlegend=(ri == 1 and ci == 1),
+                                 hovertemplate="基线 %{x:,}<extra></extra>"), row=ri, col=ci)
+            fig.add_trace(go.Bar(y=yy, x=win_x, orientation="h", name=f"{g} 上市后",
+                                 marker_color=color, showlegend=(ci == 1),
+                                 text=delta_s, textposition="outside", cliponaxis=False,
+                                 textfont={"size": 10, "color": color},
+                                 hovertemplate=f"{g} 上市后 %{{x:,}}<extra></extra>"), row=ri, col=ci)
+    fig.update_layout(barmode="group", bargap=0.28, bargroupgap=0.1,
+                      height=330 * rows,
+                      margin={"l": 8, "r": 70, "t": 50, "b": 40},
+                      paper_bgcolor="#FFFFFF", plot_bgcolor="#FFFFFF",
+                      font={"color": "#374151", "size": 12},
+                      legend={"orientation": "h", "y": -0.06, "x": 0})
+    # 同列统一横轴范围（含条末净增文字留白），便于 CM2 / CM3 同一 N 直接比较
+    for ci in range(1, cols + 1):
+        hi = (col_max[ci - 1] or 1.0) * 1.18
+        fig.update_xaxes(range=[0, hi], row=1, col=ci)
+        fig.update_xaxes(range=[0, hi], row=2, col=ci)
+    fig.update_xaxes(gridcolor="#EEF2F6", linecolor="#C7CDD4", zeroline=False, automargin=True)
+    fig.update_xaxes(showticklabels=False, row=1)  # 上排隐藏刻度，避免与下排重复
+    fig.update_yaxes(gridcolor="#FFFFFF", linecolor="#C7CDD4", automargin=True)
+    return fig.to_json()
+
+
 def _lead_window_table(c: dict) -> str:
     lc = c.get("lead_window")
     if not lc or not lc.get("per"):
@@ -1049,16 +1175,40 @@ def _lead_window_table(c: dict) -> str:
         f'<script>Plotly.newPlot("chart-lead-daily", {fig});</script>'
         if fig else ""
     )
+    abs_fig = _lead_channel_abs_compare_figure(lc)
+    abs_chart_html = (
+        '<div class="chart-box" id="chart-lead-channel-abs" style="height:680px;"></div>'
+        if abs_fig else ""
+    )
+    if abs_fig:
+        script_html += f'\n<script>Plotly.newPlot("chart-lead-channel-abs", {abs_fig});</script>'
 
-    # 表 3：渠道窗口增幅（最新代际为主视角）
+    # 增幅热力基准（|%|；上限截断至 100，避免 CM3 首窗极值把 CM2 差异压扁）
+    _vals = []
+    for side in ("a", "b"):
+        for r in lc["channels"][side]:
+            for n in NDS:
+                w = r["windows"].get(n)
+                if w and "pending" not in w and w.get("delta_pct") is not None:
+                    _vals.append(abs(w["delta_pct"] * 100))
+        for n in NDS:
+            w = lc["per"][side]["windows"][n]
+            if "pending" not in w and w.get("delta_pct") is not None:
+                _vals.append(abs(w["delta_pct"] * 100))
+    vmax = max(40.0, min(max(_vals) if _vals else 40.0, 100.0))
+
+    # 表 3：渠道窗口增幅（表格式热力图：按值着色 + CM3 加粗 + ↑/↓）
     def _ch_cell(row, n, bold: bool = False) -> str:
         w = row["windows"].get(n) if row else None
         if not w or "pending" in w or w.get("delta_pct") is None:
             return "<td class='num' style='color:#9AA3AD;'>—</td>"
-        v = w["delta_pct"]
-        cls = " pos" if v > 0 else (" neg" if v < 0 else "")
-        s = f"{v * 100:+.1f}%"
-        return f"<td class='num{cls}'>{s}</td>" if not bold else f"<td class='num{cls}'><strong>{s}</strong></td>"
+        pv = w["delta_pct"] * 100
+        style = _heat_cell_style(pv, vmax)
+        arrow = " ↑" if pv > 0 else (" ↓" if pv < 0 else "")
+        s = f"{pv:+.1f}%{arrow}"
+        if bold:
+            s = f"<strong>{s}</strong>"
+        return f"<td class='num' style='{style}'>{s}</td>"
 
     rows3 = []
     for cname in _CHANNEL_LABELS.values():
@@ -1095,13 +1245,16 @@ def _lead_window_table(c: dict) -> str:
                 f"<td class='num'>{w['delta']:+,}</td>")
 
     rows4 = []
-    for cname in _CHANNEL_LABELS.values():
-        rb = next((r for r in lc["channels"]["b"] if r["channel"] == cname), None)
-        rows4.append(f"<tr><td><strong>{cname}</strong></td>"
-                     + "".join(_abs3(rb, n) for n in NDS) + "</tr>")
-    rows4.append(f"<tr><td><strong>全部渠道合计</strong></td>"
-                 + "".join(_tot3(b, n) for n in NDS) + "</tr>")
-    thead4 = f"<th>渠道（{gb} 上市日 {b['end']}）</th>"
+    for g, side_key, per in ((ga, "a", a), (gb, "b", b)):
+        rows4.append(
+            f"<tr class='section-row'><td colspan='{1 + 3 * len(NDS)}'>"
+            f"<strong>{g}</strong>（上市日 {per['end']}）</td></tr>")
+        for cname in _CHANNEL_LABELS.values():
+            r = next((x for x in lc["channels"][side_key] if x["channel"] == cname), None)
+            rows4.append(f"<tr><td>{cname}</td>" + "".join(_abs3(r, n) for n in NDS) + "</tr>")
+        rows4.append(f"<tr><td><strong>全部渠道合计</strong></td>"
+                     + "".join(_tot3(per, n) for n in NDS) + "</tr>")
+    thead4 = "<th>渠道</th>"
     thead4 += "".join(f"<th colspan='3'>上市后 {n} 天窗口</th>" for n in NDS)
     subhead4 = "<th></th>" + ("<th>上市后</th><th>基线(7日均值×N)</th><th>净增</th>" * len(NDS))
 
@@ -1123,13 +1276,16 @@ def _lead_window_table(c: dict) -> str:
       <h3 style="margin-top:20px;">上市后每日下发线索（上：绝对值 + 前 7 日均值；下：相对前 7 日均值倍数）</h3>
       {chart_html}
       <h3 style="margin-top:20px;">渠道窗口增幅（上市后 N 天 vs 上市前 7 日均值 × N）</h3>
+      <p class="section-note">表格式热力图：单元格底色按增幅着色（<span style="background:rgb(23,74,124);color:#fff;padding:0 4px;border-radius:3px;">蓝 = 增幅高</span> ／ <span style="background:rgb(185,74,68);color:#fff;padding:0 4px;border-radius:3px;">红 = 低于基线</span>，白色 = 与基线持平）；↑/↓ 表示方向，<strong>{gb}</strong> 列为加粗重点。为兼顾 CM2 与 CM3 可读性，色阶饱和上限截断至 ±{vmax:.0f}%（CM3 首窗 +242% 显示为饱和）。</p>
       <div class="table-wrap">
       <table class="report-table">
         <thead><tr>{thead3}</tr><tr>{subhead3}</tr></thead>
         <tbody>{''.join(rows3)}</tbody>
       </table>
       </div>
-      <h3 style="margin-top:20px;">渠道窗口绝对值（{gb}：上市后窗口 / 基线 / 净增）</h3>
+      <h3 style="margin-top:20px;">渠道窗口绝对值对比（{ga} / {gb}：各自上市后窗口 vs 自身基线）</h3>
+      <p class="section-note">行 = 代际（{ga} / {gb}），列 = 上市后 N 天；每格灰条 = 该代际<strong>上市前 7 日均值×N</strong>（基线），蓝条 = 该代际<strong>上市后窗口</strong>，条末标净增（上市后 − 基线）。<strong>同一列共享横轴</strong>，便于同一 N 下 {ga} 与 {gb} 直接比较规模与净增；两代基线各自独立（= 各自上市前 7 日均值），可区分「上市后规模差异」与「基线差异」。明细见下表。</p>
+      {abs_chart_html}
       <div class="table-wrap">
       <table class="report-table">
         <thead><tr>{thead4}</tr><tr>{subhead4}</tr></thead>
@@ -1557,6 +1713,17 @@ def render_html(c: dict) -> str:
     second = sorted(latest.values(), reverse=True)[1] if len(latest) > 1 else 1
     ratio = latest[top_gen] / max(second, 1)
 
+    # 口径桥接注记：零售口径 vs 上市监控卡片口径（仅未排除类型时显示）
+    rb = c.get("retail_bridge") or {}
+    bridge_note = ""
+    if rb.get("excluded"):
+        types = "、".join(rb.get("excluded_types", {}).keys()) or "非零售单"
+        bridge_note = (
+            f" 口径提示：本模块为<strong>零售口径</strong>，{rb['gen']} 同期（{rb['start']} ~ {rb['last_date']}）"
+            f"已排除 {rb['excluded']} 台{types}；若按<strong>上市监控卡片口径</strong>（全部 order_type、仅剔测试单），"
+            f"同期为 <strong>{rb['all_types']:,}</strong> 单（其中零售 {rb['retail']:,}）。"
+        )
+
     x_range = [0.5, chart_n + 2.0]
     x_ticks = list(range(1, chart_n + 1))
 
@@ -1642,7 +1809,7 @@ def render_html(c: dict) -> str:
     <div class="chart-box" id="chart-launch-cum" style="height:520px;"></div>
     <div class="section-note">
       各代际自其上市日（{' / '.join(f"{g} {chart[g]['end']}" for g in gens)}）起，按上市后天数对齐绘制第 1..{chart_n} 天；
-      累计 = 截至当日 23:59 零售锁单 COUNTD(order_number)（order_type ∈ 用户车/NaN，且剔除测试单：总部主理店 + 假身份号，与上市监控同口径）。{gens[-1]} 上市仅 {chart[gens[-1]]['available_days']} 天，曲线暂绘制至该天数（不补齐）；其余代际满 {chart_n} 天。{gens[-1]} 为实线，{gens[1]} 虚线、{gens[0]} 点线以示区分。
+      累计 = 截至当日 23:59 零售锁单 COUNTD(order_number)（order_type ∈ 用户车/NaN，且剔除测试单：总部主理店 + 假身份号）。{gens[-1]} 上市仅 {chart[gens[-1]]['available_days']} 天，曲线暂绘制至该天数（不补齐）；其余代际满 {chart_n} 天。{gens[-1]} 为实线，{gens[1]} 虚线、{gens[0]} 点线以示区分。{bridge_note}
     </div>
   </section>
 
@@ -1672,7 +1839,7 @@ def render_html(c: dict) -> str:
       <div class="method-item"><div class="method-icon" style="background:var(--zh-gold-100);color:var(--zh-gold-700);">T</div>
         <div class="method-body"><strong>时间窗口</strong><br/>各代际上市日（time_periods.end）起<br/>共同 {c['n_days']} 天，累计至 {c['last_date']}</div></div>
       <div class="method-item"><div class="method-icon" style="background:#E8F8FD;color:#2D6FA3;">F</div>
-        <div class="method-body"><strong>筛选口径</strong><br/>零售 = order_type ∈ {{用户车, NaN}}<br/>排除试驾车/员工/大客户/批售等非零售单<br/>剔除测试单（总部主理店 + 假身份号，flag_test_orders，与上市监控同口径）</div></div>
+        <div class="method-body"><strong>筛选口径</strong><br/>零售 = order_type ∈ {{用户车, NaN}}<br/>排除试驾车/员工/大客户/批售等非零售单<br/>剔除测试单（总部主理店 + 假身份号，flag_test_orders，与上市监控同口径）<br/>注意：上市监控卡片不区分 order_type（仅剔测试单），故卡片数 ≈ 本报告零售数 + 非零售单；见模块 1 口径提示</div></div>
       <div class="method-item"><div class="method-icon" style="background:#F3F6F8;color:#374151;">M</div>
         <div class="method-body"><strong>指标定义</strong><br/>锁单 = lock_time 非空 COUNTD(order_number)<br/>累计 = 上市日起至第 t 天末</div></div>
     </div>
