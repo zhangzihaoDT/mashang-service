@@ -45,6 +45,8 @@ if str(_WS_ROOT) not in sys.path:
     sys.path.insert(0, str(_WS_ROOT))
 
 from utils.result_contract import build_success_contract, contract_to_terminal, save_contract_json
+from utils.monitors.phase import load_business_definition
+from utils.monitors.series_group import apply_series_group_logic
 
 ATTRIBUTION_PARQUET = REPO_ROOT / "dataset" / "lock_attribution_data.parquet"
 ORDER_PARQUET = REPO_ROOT / "dataset" / "order_data.parquet"
@@ -199,6 +201,39 @@ def _calc_main_code_whitelist_from_order(
     df_lock = df.loc[lock_mask, ["series", "main_lead_id"]].copy()
     df_lock = df_lock[df_lock["main_lead_id"].notna() & (df_lock["series"] == series)].copy()
     return set(df_lock["main_lead_id"].astype("string").dropna().unique().tolist())
+
+
+def _calc_order_lock_by_gen(
+    order_table_path: Path,
+    start: pd.Timestamp,
+    end_exclusive: pd.Timestamp,
+    gen: str,
+) -> tuple[set[str], int]:
+    """按 series_group_logic 代际过滤：返回 (main_lead_id 白名单, 去重购车人数)。
+
+    代际归属用 product_name → series_group_logic（shared 规则），比 order_data.series 更精确
+    —— 同一 series（如 LS6）会混入多代际（CM0/CM1/CM2/CM3），按 series 过滤会串代。
+    """
+    df = pd.read_parquet(order_table_path)
+    if "product_name" not in df.columns:
+        raise ValueError("order_data 缺少 product_name，无法按代际(series_group_logic)过滤")
+    df["lock_time"] = pd.to_datetime(df["lock_time"], errors="coerce")
+    df = apply_series_group_logic(df, load_business_definition())
+
+    lock_mask = df["lock_time"].notna() & (df["lock_time"] >= start) & (df["lock_time"] < end_exclusive)
+    if "order_type" in df.columns:
+        lock_mask = lock_mask & (df["order_type"] != "试驾车")
+    sub = df.loc[lock_mask & df["series_group_logic"].astype("string").eq(gen)].copy()
+
+    if "main_lead_id" not in sub.columns:
+        raise ValueError("order_data 缺少 main_lead_id，无法按代际分组过滤")
+    whitelist = set(sub["main_lead_id"].astype("string").dropna().unique().tolist())
+    person_col = next(
+        (c for c in ["owner_identity_no", "buyer_identity_no", "owner_cell_phone"] if c in sub.columns),
+        None,
+    )
+    denom = int(sub[person_col].nunique()) if person_col and not sub.empty else 0
+    return whitelist, denom
 
 
 def _calc_attribution_metrics_for_range(
@@ -927,11 +962,13 @@ def parse_args():
     p.add_argument("--end-date", type=str, default="2023-12-31", help="样本 A 结束日期 (YYYY-MM-DD)")
     p.add_argument("--channel", type=str, default=None, help="样本 A 锁单渠道过滤 (lc_small_channel_name)")
     p.add_argument("--series", type=str, default=None, help="样本 A 车系过滤 (LS6/L6/LS7/LS8/LS9)")
+    p.add_argument("--gen", type=str, default=None, help="样本 A 代际过滤 (按 series_group_logic，如 CM3/DM2；优先于 --series，可精确分离同车系多代际)")
     p.add_argument("--label", type=str, default=None, help="样本 A 显示标签 (默认 日期范围)")
     p.add_argument("--compare-start-date", type=str, default=None, help="样本 B 开始日期 (YYYY-MM-DD)")
     p.add_argument("--compare-end-date", type=str, default=None, help="样本 B 结束日期 (YYYY-MM-DD)")
     p.add_argument("--compare-channel", type=str, default=None, help="样本 B 锁单渠道过滤")
     p.add_argument("--compare-series", type=str, default=None, help="样本 B 车系过滤")
+    p.add_argument("--compare-gen", type=str, default=None, help="样本 B 代际过滤 (按 series_group_logic)")
     p.add_argument("--compare-label", type=str, default=None, help="样本 B 显示标签 (默认 日期范围)")
     p.add_argument("--top-n", type=int, default=5, help="TopN 渠道数量 (默认 5)")
     p.add_argument("--output", type=str, default=None, help="输出目录 (默认 outputs/tables/)")
@@ -957,8 +994,11 @@ def _pct_to_float(v) -> float | None:
         return None
 
 
-def _sample_label(start_date: str, end_date: str, series: str | None, channel: str | None) -> str:
+def _sample_label(start_date: str, end_date: str, series: str | None, channel: str | None,
+                  gen: str | None = None) -> str:
     parts: list[str] = []
+    if gen:
+        parts.append(f"gen={gen}")
     if series:
         parts.append(f"series={series}")
     if channel:
@@ -975,6 +1015,7 @@ def _compute_sample(
     top_n: int,
     attr_df: pd.DataFrame,
     cols_map: dict[str, str | None],
+    gen: str | None = None,
 ) -> tuple[dict, list[str], dict]:
     start = pd.Timestamp(start_date).normalize()
     end_exclusive = pd.Timestamp(end_date).normalize() + pd.Timedelta(days=1)
@@ -983,7 +1024,11 @@ def _compute_sample(
 
     main_code_whitelist = None
     denom = None
-    if series is not None:
+    if gen is not None:
+        if not ORDER_PARQUET.exists():
+            raise FileNotFoundError(f"指定 --gen 时需提供 order_data {ORDER_PARQUET}")
+        main_code_whitelist, denom = _calc_order_lock_by_gen(ORDER_PARQUET, start, end_exclusive, gen)
+    elif series is not None:
         if not ORDER_PARQUET.exists():
             raise FileNotFoundError(f"指定 --series 时需提供 order_data {ORDER_PARQUET}")
         main_code_whitelist = _calc_main_code_whitelist_from_order(ORDER_PARQUET, start, end_exclusive, series)
@@ -1009,7 +1054,7 @@ def _compute_sample(
             "说明 lock_attribution_data.parquet 覆盖范围大于 order_data 主表，请按业务口径解释"
         )
 
-    return metrics, warnings, {"channel": channel, "series": series}
+    return metrics, warnings, {"channel": channel, "series": series, "gen": gen}
 
 
 def _fmt_metric_value(v, kind: str) -> str:
@@ -1254,7 +1299,8 @@ def main():
 
     compare_mode = any(
         x is not None
-        for x in (args.compare_start_date, args.compare_end_date, args.compare_channel, args.compare_series)
+        for x in (args.compare_start_date, args.compare_end_date, args.compare_channel,
+                  args.compare_series, args.compare_gen)
     )
 
     base_metric_def = (
@@ -1270,7 +1316,8 @@ def main():
                 print("错误: 对比模式需同时提供 --compare-start-date 和 --compare-end-date", file=sys.stderr)
                 sys.exit(1)
             base_metrics, base_warnings, base_filters = _compute_sample(
-                args.start_date, args.end_date, args.series, args.channel, args.top_n, attr_df, cols_map
+                args.start_date, args.end_date, args.series, args.channel, args.top_n, attr_df, cols_map,
+                gen=args.gen,
             )
             compare_metrics, compare_warnings, compare_filters = _compute_sample(
                 args.compare_start_date,
@@ -1280,10 +1327,13 @@ def main():
                 args.top_n,
                 attr_df,
                 cols_map,
+                gen=args.compare_gen,
             )
-            base_label = args.label or _sample_label(args.start_date, args.end_date, args.series, args.channel)
+            base_label = args.label or _sample_label(args.start_date, args.end_date, args.series, args.channel,
+                                                     args.gen)
             compare_label = args.compare_label or _sample_label(
-                args.compare_start_date, args.compare_end_date, args.compare_series, args.compare_channel
+                args.compare_start_date, args.compare_end_date, args.compare_series, args.compare_channel,
+                args.compare_gen,
             )
             comparison = _compute_comparison(
                 {"metrics": base_metrics},
@@ -1341,9 +1391,11 @@ def main():
             terminal_text = format_compare_terminal(comparison)
         else:
             metrics, warnings, filters = _compute_sample(
-                args.start_date, args.end_date, args.series, args.channel, args.top_n, attr_df, cols_map
+                args.start_date, args.end_date, args.series, args.channel, args.top_n, attr_df, cols_map,
+                gen=args.gen,
             )
-            label = args.label or _sample_label(args.start_date, args.end_date, args.series, args.channel)
+            label = args.label or _sample_label(args.start_date, args.end_date, args.series, args.channel,
+                                                args.gen)
             result = {
                 "summary": f"{label} 锁单用户数: {metrics['锁单用户数']}",
                 "metrics": metrics,
@@ -1370,6 +1422,8 @@ def main():
                 ctx["channel"] = args.channel
             if args.series:
                 ctx["series"] = args.series
+            if args.gen:
+                ctx["gen"] = args.gen
             fname_prefix = f"lock_attribution_{args.start_date}_{args.end_date}"
             terminal_text = None
     except (ValueError, FileNotFoundError) as e:
