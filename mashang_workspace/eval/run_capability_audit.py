@@ -5,7 +5,7 @@ Capability Audit Runner — 能力注册表健康检查
 读取 registry/capability_registry.json，检查每个 capability:
   - script 是否存在
   - tier/status 是否合法
-  - runtime 是否有 result_contract / numeric_eval / contract_gate
+  - business 是否有 result_contract / numeric_eval / contract_gate
   - research 是否 auto_schedulable=false
   - legacy 是否 auto_schedulable=false
   - docs 文件是否存在
@@ -25,12 +25,12 @@ _WS_ROOT = Path(__file__).resolve().parents[1]
 _PRJ_ROOT = _WS_ROOT.parent
 REGISTRY_FILE = _WS_ROOT / "registry" / "capability_registry.json"
 
-VALID_TIERS = {"runtime", "research", "utility", "legacy"}
+VALID_TIERS = {"business", "research", "utility", "legacy"}
 VALID_STATUSES = {"active", "partial", "experimental", "deprecated", "retired"}
 
 AUDIT_CHECKS = [
     "script_exists", "tier_valid", "status_valid",
-    "runtime_has_contract", "runtime_has_numeric", "runtime_has_gate",
+    "business_has_contract", "business_has_numeric", "business_has_gate",
     "research_not_auto", "legacy_not_auto", "promotion_fields",
 ]
 
@@ -51,20 +51,20 @@ def audit_capability(cap: dict) -> dict:
     # 3. Status valid
     checks["status_valid"] = status in VALID_STATUSES
 
-    # 4. Runtime tier must have result_contract
-    checks["runtime_has_contract"] = True
-    if tier == "runtime":
-        checks["runtime_has_contract"] = bool(cap.get("result_contract"))
+    # 4. Business tier must have result_contract
+    checks["business_has_contract"] = True
+    if tier == "business":
+        checks["business_has_contract"] = bool(cap.get("result_contract"))
 
-    # 5. Runtime tier must have numeric_eval_case
-    checks["runtime_has_numeric"] = True
-    if tier == "runtime":
-        checks["runtime_has_numeric"] = bool(cap.get("numeric_eval_case"))
+    # 5. Business tier must have numeric_eval_case
+    checks["business_has_numeric"] = True
+    if tier == "business":
+        checks["business_has_numeric"] = bool(cap.get("numeric_eval_case"))
 
-    # 6. Runtime tier must be in contract_gate
-    checks["runtime_has_gate"] = True
-    if tier == "runtime":
-        checks["runtime_has_gate"] = bool(cap.get("contract_gate"))
+    # 6. Business tier must be in contract_gate
+    checks["business_has_gate"] = True
+    if tier == "business":
+        checks["business_has_gate"] = bool(cap.get("contract_gate"))
 
     # 7. Research must not be auto_schedulable
     checks["research_not_auto"] = True
@@ -92,8 +92,8 @@ def audit_capability(cap: dict) -> dict:
         "checks": checks,
         "failed_checks": failed_checks,
         "promotion_assessment": {
-            "eligible_for_runtime_productization": promo.get("eligible_for_runtime_productization", False),
-            "eligible_for_runtime_script": promo.get("eligible_for_runtime_script", False),
+            "eligible_for_business_productization": promo.get("eligible_for_business_productization", False),
+            "eligible_for_business_script": promo.get("eligible_for_business_script", False),
             "blocked_reasons": promo.get("blocked_reasons", []),
         },
     }

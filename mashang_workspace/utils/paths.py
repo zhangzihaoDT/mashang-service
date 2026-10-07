@@ -6,7 +6,7 @@ mashang_workspace — 路径工具模块
 
 路径规则:
   PROJECT_ROOT   = mashang-service 根目录 (含 dataset/ .env 等)
-   WORKSPACE_ROOT = mashang_workspace 目录 (含 runtime_scripts/ research_scripts/ eval/ 等)
+   WORKSPACE_ROOT = mashang_workspace 目录 (含 business_scripts/ research_scripts/ eval/ 等)
   DATASET_DIR    = PROJECT_ROOT / "dataset"
   OUTPUTS_DIR    = WORKSPACE_ROOT / "outputs"
   DOCS_DIR       = WORKSPACE_ROOT / "docs"
@@ -24,7 +24,7 @@ PROJECT_ROOT = _PROJECT_ROOT
 DATASET_DIR = _PROJECT_ROOT / "dataset"
 OUTPUTS_DIR = _WORKSPACE_ROOT / "outputs"
 DOCS_DIR = _WORKSPACE_ROOT / "docs"
-RUNTIME_SCRIPTS_DIR = _WORKSPACE_ROOT / "runtime_scripts"
+BUSINESS_SCRIPTS_DIR = _WORKSPACE_ROOT / "business_scripts"
 RESEARCH_SCRIPTS_DIR = _WORKSPACE_ROOT / "research_scripts"
 UTILITY_SCRIPTS_DIR = _WORKSPACE_ROOT / "utility_scripts"
 LEGACY_SCRIPTS_DIR = _WORKSPACE_ROOT / "legacy_scripts"  # retired — directory deleted
@@ -33,7 +33,6 @@ EVAL_DIR = _WORKSPACE_ROOT / "eval"
 TESTS_DIR = _WORKSPACE_ROOT / "tests"
 UTILS_DIR = _WORKSPACE_ROOT / "utils"
 CASES_DIR = _WORKSPACE_ROOT / "eval" / "cases"
-RUNTIME_DIR = _PROJECT_ROOT / "mashang_runtime"
 SHARED_DIR = _PROJECT_ROOT / "shared"
 SHARED_OPERATORS_DIR = SHARED_DIR / "operators"
 SHARED_SCHEMA_DIR = SHARED_DIR / "schema"
@@ -76,27 +75,12 @@ def ensure_project_on_path() -> None:
         sys.path.insert(0, pr)
 
 
-def ensure_runtime_on_path() -> None:
-    """确保 RUNTIME_DIR 在 sys.path 中，方便旧 operators/schema 等模块导入。"""
-    rt = str(RUNTIME_DIR)
-    if rt not in sys.path:
-        sys.path.insert(0, rt)
-
-
 def ensure_shared_on_path() -> None:
-    """确保 SHARED_DIR 在 sys.path 中（优先于 runtime），以便 import operators/schema 使用共享版本。
-
-    无论 shared 是否已在 sys.path 中，都会把它提到最前，避免被 pytest 等其他 sys.path 修改
-    压到 runtime 之后，导致 import operators 解析到旧 mashang_runtime/operators。
-    """
+    """确保 SHARED_DIR 在 sys.path 最前，以便 import operators/schema 使用共享 canonical 版本。"""
     sh = str(SHARED_DIR)
-    rt = str(RUNTIME_DIR)
     if sh in sys.path:
         sys.path.remove(sh)
     sys.path.insert(0, sh)
-    if rt in sys.path:
-        sys.path.remove(rt)
-        sys.path.insert(1, rt)
 
 
 def get_output_path(kind: str, filename: str) -> Path:
@@ -118,5 +102,4 @@ def get_cases_path(filename: str) -> Path:
 # 启动时自动确保所有路径在 sys.path 中
 ensure_workspace_on_path()
 ensure_project_on_path()
-ensure_runtime_on_path()
 ensure_shared_on_path()

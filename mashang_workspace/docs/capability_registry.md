@@ -32,5 +32,5 @@
 | `contract_gate` | 是否在 Contract Gate 中 |
 | `followup_supported` | 是否可被 followup runner 映射 |
 | `promotion.current_stage` | 当前所在阶段 |
-| `promotion.eligible_for_runtime_productization` | 是否适合产品化 |
+| `promotion.eligible_for_business_productization` | 是否适合产品化 |
 | `promotion.blocked_reasons` | 阻塞原因 |

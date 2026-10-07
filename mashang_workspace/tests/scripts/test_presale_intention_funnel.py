@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 
 _PRJ = Path(__file__).resolve().parents[3]
-SCRIPT = _PRJ / "mashang_workspace" / "runtime_scripts" / "presale_intention_funnel.py"
+SCRIPT = _PRJ / "mashang_workspace" / "business_scripts" / "presale_intention_funnel.py"
 ORDER_DATA = _PRJ / "dataset" / "order_data.parquet"
 
 

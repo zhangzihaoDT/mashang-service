@@ -12,6 +12,8 @@
 - 单个 step 失败不再中断全链路（continue-on-error），最终整体返回非 0。
 - `--fail-fast` 可恢复「首个失败即停」的旧行为。
 - `--status-only` 只读查看现状，不触发任何数据源/写操作。
+- `--scope full`（默认）刷新全部数据集；`--scope daily` 仅刷新订单数据 + 下发线索，
+  供 Daily pipeline 使用（试驾数据 / 锁单归因只在 full 或独立更新时维护）。
 
 覆盖数据集（见 registry）：
 - order_data.parquet / config_attribute.parquet
@@ -100,8 +102,13 @@ def _header(title: str) -> None:
     print("=" * 80, flush=True)
 
 
-def build_steps(args: argparse.Namespace, mobile: bool) -> list[dict]:
-    """按 step 组织更新命令；cmd=None 表示跳过。"""
+def build_steps(args: argparse.Namespace, mobile: bool, scope: str = "full") -> list[dict]:
+    """按 step 组织更新命令；cmd=None 表示跳过。
+
+    scope:
+    - full（默认）：全量数据集更新（订单 / 选配 / assign / test_drive / 锁单归因 / 交付-库存 / 门店 / 门店下发线索）。
+    - daily：Daily pipeline 最小范围——仅订单数据 + 下发线索（assign）。
+    """
     steps: list[dict] = []
 
     steps.append(
@@ -118,6 +125,24 @@ def build_steps(args: argparse.Namespace, mobile: bool) -> list[dict]:
         }
     )
 
+    assign_cmd = [
+        sys.executable,
+        str(UPDATER_DIR / "assign_data_to_csv.py"),
+        "--timeout",
+        str(int(args.timeout)),
+        *(["--mobile"] if mobile else []),
+    ]
+
+    if scope == "daily":
+        steps.append(
+            {
+                "id": "3",
+                "title": "STEP 3: 更新下发线索 (assign_data.csv)",
+                "cmd": assign_cmd,
+            }
+        )
+        return steps
+
     steps.append(
         {
             "id": "2",
@@ -126,6 +151,28 @@ def build_steps(args: argparse.Namespace, mobile: bool) -> list[dict]:
                 sys.executable,
                 str(UPDATER_DIR / "order_config_to_parquet.py"),
                 "--force",
+                "--timeout",
+                str(int(args.timeout)),
+                *(["--mobile"] if mobile else []),
+            ],
+        }
+    )
+
+    steps.append(
+        {
+            "id": "3",
+            "title": "STEP 3: 更新下发线索 (assign_data.csv)",
+            "cmd": assign_cmd,
+        }
+    )
+
+    steps.append(
+        {
+            "id": "3",
+            "title": "STEP 3: 更新试驾数据 (test_drive_data.csv)",
+            "cmd": [
+                sys.executable,
+                str(UPDATER_DIR / "test_drive_data_to_csv.py"),
                 "--timeout",
                 str(int(args.timeout)),
                 *(["--mobile"] if mobile else []),
@@ -142,11 +189,11 @@ def build_steps(args: argparse.Namespace, mobile: bool) -> list[dict]:
     if mobile:
         lock_cmd.append("--mobile")
     if args.lock_view:
-        lock_cmd.extend(["--view", args.lock_view, "--with-assign-test-drive"])
+        lock_cmd.extend(["--view", args.lock_view])
     steps.append(
         {
             "id": "3",
-            "title": "STEP 3: 更新每日 Tableau 运营数据集 (assign / test_drive / lock attribution)",
+            "title": "STEP 3: 更新锁单归因 (lock_attribution_data.parquet)",
             "cmd": lock_cmd,
         }
     )
@@ -230,6 +277,12 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="只读查看各数据集现状（行数 / 文件更新时间 / 数据最新时点），不触发更新",
     )
+    parser.add_argument(
+        "--scope",
+        choices=["full", "daily"],
+        default="full",
+        help="full=全量数据集更新（默认）；daily=仅订单数据 + 下发线索（Daily pipeline 使用）",
+    )
     args = parser.parse_args(argv)
 
     if args.status_only:
@@ -249,7 +302,7 @@ def main(argv: list[str] | None = None) -> int:
     run_started = time.time()
     failed_steps: list[str] = []
 
-    for step in build_steps(args, mobile):
+    for step in build_steps(args, mobile, scope=args.scope):
         if step["cmd"] is None:
             _header(f"{step['title']} —— 跳过")
             continue

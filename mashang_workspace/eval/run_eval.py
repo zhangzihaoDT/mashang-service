@@ -26,12 +26,12 @@ DEFAULT_REFERENCE_CASES = str(WORKSPACE_ROOT / "eval" / "cases" / "result_refere
 
 # Core tier: 稳定日常脚本，自动调度
 CORE_CONTRACT_SCRIPTS = [
-    "mashang_workspace/runtime_scripts/daily_lock_count.py --date 2026-06-10 --format json",
-    "mashang_workspace/runtime_scripts/lock_by_model.py --date 2026-06-10 --format json",
-    "mashang_workspace/runtime_scripts/lock_city_distribution.py --date 2026-06-10 --format json",
-    "mashang_workspace/runtime_scripts/assign_conversion_analysis.py --start-date 2026-06-01 --end-date 2026-06-10 --format json",
-    "mashang_workspace/runtime_scripts/attribute_penetration_report.py --series LS6 --attribute 激光雷达 --limit 5 --format json",
-    "mashang_workspace/runtime_scripts/atp_price_report.py --month 2026-05 --format json",
+    "mashang_workspace/business_scripts/daily_lock_count.py --date 2026-06-10 --format json",
+    "mashang_workspace/business_scripts/lock_by_model.py --date 2026-06-10 --format json",
+    "mashang_workspace/business_scripts/lock_city_distribution.py --date 2026-06-10 --format json",
+    "mashang_workspace/business_scripts/assign_conversion_analysis.py --start-date 2026-06-01 --end-date 2026-06-10 --format json",
+    "mashang_workspace/business_scripts/attribute_penetration_report.py --series LS6 --attribute 激光雷达 --limit 5 --format json",
+    "mashang_workspace/business_scripts/atp_price_report.py --month 2026-05 --format json",
 ]
 
 # Research tier: 需要用户明确要求才调用的脚本
@@ -210,24 +210,6 @@ def _run_suite_capability() -> dict:
     }
 
 
-def _run_suite_runtime_v2() -> dict:
-    """Run Runtime V2 readiness audit (no data dependency)."""
-    runner = WORKSPACE_ROOT / "eval" / "run_runtime_v2_audit.py"
-    r = subprocess.run(
-        [sys.executable, str(runner), "--format", "json"],
-        capture_output=True, text=True, timeout=30,
-    )
-    if r.returncode != 0:
-        return {"status": "error", "total": 0, "passed": 0, "failed": 0, "error": r.stderr[:500]}
-    data = json.loads(r.stdout)
-    meta = data.get("meta", {})
-    return {
-        "status": "success" if meta.get("failed", 0) == 0 else "partial",
-        "total": meta.get("total", 0), "passed": meta.get("passed", 0), "failed": meta.get("failed", 0),
-        "pass_rate": meta.get("pass_rate", 0),
-    }
-
-
 SUITE_REGISTRY = {
     "parser": _run_suite_parser,
     "followup": _run_suite_followup,
@@ -236,7 +218,6 @@ SUITE_REGISTRY = {
     "smoke": _run_suite_smoke,
     "contract": lambda timeout=60: _run_suite_contract(timeout=timeout, tier="all"),
     "capability": _run_suite_capability,
-    "runtime-v2": _run_suite_runtime_v2,
     "core": lambda timeout=120:
         {"numeric": _run_suite_numeric(timeout=timeout, tier="core"),
          "contract": _run_suite_contract(timeout=min(timeout, 60), tier="core")},

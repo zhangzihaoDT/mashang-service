@@ -14,7 +14,7 @@ sys.path.insert(0, str(_WS_DIR))
 
 
 def _ensure_shared_operators():
-    """确保导入的是 shared/operators 而非 mashang_runtime/operators。"""
+    """确保导入的是 shared/operators canonical 实现。"""
     for _k in [k for k in list(sys.modules) if k == "operators" or k.startswith("operators.")]:
         del sys.modules[_k]
     from utils.paths import ensure_shared_on_path

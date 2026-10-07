@@ -9,7 +9,7 @@ import pytest
 
 _PRJ = Path(__file__).resolve().parents[3]
 _WS_DIR = _PRJ / "mashang_workspace"
-SCRIPT = _WS_DIR / "runtime_scripts" / "store_dealer_profile.py"
+SCRIPT = _WS_DIR / "business_scripts" / "store_dealer_profile.py"
 
 sys.path.insert(0, str(_PRJ))
 from shared.loaders import store_info_loader as sl  # noqa: E402

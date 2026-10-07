@@ -10,7 +10,7 @@
 - 不定义 namespace：各项目保留自己的顶层包名/执行约定（如 `auto_launch`），不做
   `research_apps.auto_launch` 式包化重写。
 - 不提供运行框架：项目各自拥有 CLI / Makefile / state / engine / contracts / gate / artifacts。
-- 不被 Runtime 吸收：编排经 `mashang_runtime_v2` 的声明式 `feature_jobs` 调用，业务代码不复制进 runtime。
+- 不被 Runtime 吸收：编排经 `jobs/config/jobs_config.json` 的声明式 `feature_jobs` 调用，业务代码不复制进 `jobs/`。
 
 ### 硬约束：不产生隐形共享层
 
@@ -40,10 +40,11 @@ mashang_workspace/  日常业务分析脚本与工具
 
 - 从仓库根统一启动；外部 CLI 用 `PYTHONPATH=research_apps` 使项目包可被 `python -m <app>.cli ...` 找到。
 - 项目内若引用仓库根（`capabilities.*` / `.env` / `dataset`），用显式 repo-root 锚点，不依赖调用 cwd。
-- `mashang_runtime_v2/config/runtime_v2_config.json` 的 `feature_jobs` 是编排入口
+- `jobs/config/jobs_config.json` 的 `feature_jobs` 是编排入口
   （job 声明式 argv/cwd/参数白名单/artifact），项目内 state/产物路径相对各自目录。
+  运行时系统由 Hub（Control Plane）+ Worker（Execution Gateway）+ OpenCode 组成。
 
 ## 沿革
 
 2026-09：`research_apps/` 建立为 canonical 归类层，MIIT / auto_launch / nev_apeal 一并迁入
-（原位于仓库根）；此前已完成 Runtime V2 Core Extraction 与 nev_apeal feature-job 编排 PoC。
+（原位于仓库根）；此前已完成 Core Extraction 与 nev_apeal feature-job 编排 PoC（现收敛到根目录 `jobs/`）。

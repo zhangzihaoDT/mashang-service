@@ -15,7 +15,7 @@ IMB/IMJ/IML → 城市空间 等。完整编码定义见
 shared/schema/store_info_schema.json 的 dealer_code_prefix_definitions。
 
 与 skills_store_lock_alert.py 内嵌映射的关系: 该脚本是首个内嵌实现，本 loader
-把映射逻辑收敛为共享能力，供 workspace / runtime 复用。
+把映射逻辑收敛为共享能力，供 workspace 复用。
 
 唯一事实源原则: 门店→经销商归属不应在多处各自维护一套清洗规则，统一从这里读取。
 """

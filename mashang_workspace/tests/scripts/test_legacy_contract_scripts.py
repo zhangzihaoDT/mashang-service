@@ -6,17 +6,17 @@ import subprocess, sys, json
 from pathlib import Path
 
 _WS_DIR = Path(__file__).resolve().parents[2]
-RUNTIME_DIR = _WS_DIR / "runtime_scripts"
+BUSINESS_DIR = _WS_DIR / "business_scripts"
 RESEARCH_DIR = _WS_DIR / "research_scripts"
 
 
 def _resolve_script(script_name: str) -> Path:
     # Map script names to their tier directories
     tier_map = {
-        "atp_price_report.py": RUNTIME_DIR,
+        "atp_price_report.py": BUSINESS_DIR,
         "lock_predict_backtest.py": RESEARCH_DIR,
     }
-    return tier_map.get(script_name, RUNTIME_DIR) / script_name
+    return tier_map.get(script_name, BUSINESS_DIR) / script_name
 
 
 def _run_help(script_name: str) -> subprocess.CompletedProcess:

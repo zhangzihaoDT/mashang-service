@@ -2,7 +2,7 @@
 
 **注意：OpenCode 仍应从仓库根目录启动。** 本文件仅定义 `mashang_workspace/` 内的工作规则。
 
-- 仓库总体架构、模块边界（workspace / runtime_v2 / capabilities / research_apps）、canonical 命令入口与副作用分级，见根目录 `AGENTS.md`。
+- 仓库总体架构、模块边界（workspace / jobs / capabilities / research_apps）、canonical 命令入口与副作用分级，见根目录 `AGENTS.md`。
 - 本文件只补充 workspace 层规则：脚本分层、业务口径、canonical 脚本、输出与验证方式。
 - 两者冲突时，架构与入口以根 `AGENTS.md` 为准，业务口径以本文件与 `docs/` 为准。
 
@@ -22,10 +22,7 @@ mashang-service/                   # 总项目根目录
 ├── requirements.txt               # 共享依赖
 ├── shared/               # Semantic Foundation — shared operators / schema 层，谨慎修改
 │
-├── mashang_runtime/             # Legacy runtime (frozen, packaged)
-│   └── README.md
-│
-├── mashang_runtime_v2/           # Unified Research Runtime（编排层）：调用 workspace 确定性能力 + 编排 Research Applications
+├── jobs/                         # 确定性执行契约层：声明式 Research Application job（Hub/Worker 调用）
 │   └── README.md
 │
 ├── capabilities/                 # Base Capabilities（领域无关原语：OCR/Search/Notify…）
@@ -36,11 +33,11 @@ mashang-service/                   # 总项目根目录
 │   ├── AGENTS.md                  # 本文件
 │   ├── README.md
 │   ├── docs/
-│   ├── runtime_scripts/           # Core — Runtime V2 可调度
+│   ├── business_scripts/           # Core — Hub 经 jobs/ 可调度
 │   ├── research_scripts/          # Research — 预测/回测/释放曲线
 │   ├── utility_scripts/           # Utility — DataOps/SyncOps 工具
 │   ├── (scripts/ — 已删除)        # 原始混合池已删除
-│   ├── (legacy_scripts/ — 已退休)  # 历史参考脚本已迁移到 runtime_scripts/research_scripts/utility_scripts
+│   ├── (legacy_scripts/ — 已退休)  # 历史参考脚本已迁移到 business_scripts/research_scripts/utility_scripts
 │   ├── eval/
 │   ├── tests/
 │   ├── utils/
@@ -51,13 +48,13 @@ mashang-service/                   # 总项目根目录
 
 1. **不要修改 dataset/ 下的原始数据**
 2. **不要移动 .env 或 .venv/**
-3. **优先使用已有 runtime_scripts/ / research_scripts/ / utility_scripts/ 脚本**
-4. **临时分析写入 outputs/，稳定后再沉淀到 runtime_scripts/**
+3. **优先使用已有 business_scripts/ / research_scripts/ / utility_scripts/ 脚本**
+4. **临时分析写入 outputs/，稳定后再沉淀到 business_scripts/**
 5. **所有分析结果说明数据来源、时间窗口、口径**
-6. **高频能力产品化路径**：先在 workspace 内沉淀（`runtime_scripts/`），供 `mashang_runtime_v2`（Unified Research Runtime）确定性调度；不要绕过 workspace 直接在 runtime_v2 开发，也不把业务代码复制进 runtime_v2 或 legacy `mashang_runtime/`。
+6. **高频能力产品化路径**：先在 workspace 内沉淀（`business_scripts/`），供 Hub 经 `jobs/` 确定性调度；不要绕过 workspace 直接在 `jobs/` 中开发，也不把业务代码复制进 `jobs/`。
 7. **验证范围与改动范围匹配**：先 `make verify-scope` 解析最小验证范围，再 `make verify` 执行；scope 外失败不算本次回归，扩大范围必须显式（`make verify-all`）。契约见 `.opencode/verification/README.md`。
 8. **脚本分层规则**：
-    - `runtime_scripts/`：可被 Agent 或 Makefile 调用的稳定运行脚本。
+    - `business_scripts/`：可被 Agent 或 Makefile 调用的稳定运行脚本。
     - `research_scripts/`：研究、探索、一次性分析脚本。
     - `utility_scripts/`：workspace 管理、生成、检查类工具脚本。
     - `legacy_scripts/`：已退休目录，不再作为有效脚本落点。发现历史脚本时应迁移到上述三类目录之一。
@@ -92,6 +89,8 @@ make parser-demo      # Context Parser
 make followup-demo    # Follow-up Runner
 make numeric-eval     # Numeric Eval
 make reference-eval   # Reference Eval
+make data-refresh-daily  # 仅刷新订单 + 下发线索（写操作）
+make allupdate           # 全量更新 + 校验（写操作；含试驾 / 锁单归因）
 make data-validate    # 校验 dataset 完整性（只读；旧名 dataset-validate）
 make observe-dry-run  # 每日观察预检（只读；旧名 daily-observation-dry-run）
 make presale-snapshot SERIES=CM3 DRY=1  # 指定代际预售小订快照预览
@@ -132,16 +131,16 @@ python mashang_workspace/eval/run_eval.py --suite parser  # 单套件
 
 | 命令 | 说明 | 层级 |
 |------|------|------|
-| `python runtime_scripts/daily_lock_count.py` | 每日锁单 | runtime |
-| `python runtime_scripts/daily_dc_inventory_change.py --date YYYY-MM-DD` | 单日 DC 库存变动分析 — 库存变化 × 开票流水交叉分析 | runtime |
-| `make state-diagnosis [AS_OF=YYYY-MM-DD]` 或 `python runtime_scripts/current_state_diagnosis.py [--as-of YYYY-MM-DD]` | 业务状态排查 — 库存 × 待开票未退订 × 风险暴露（滚动365d + 当年累计双口径，分车系 + 合计；`--as-of` 支持任意历史时点 point-in-time 重建，`--format json` Result Contract） | runtime |
-| `python runtime_scripts/lock_by_model.py --limit 5` | 车型拆分 | runtime |
-| `python runtime_scripts/lock_city_distribution.py` | 城市分布 | runtime |
+| `python business_scripts/daily_lock_count.py` | 每日锁单 | runtime |
+| `python business_scripts/daily_dc_inventory_change.py --date YYYY-MM-DD` | 单日 DC 库存变动分析 — 库存变化 × 开票流水交叉分析 | runtime |
+| `make state-diagnosis [AS_OF=YYYY-MM-DD]` 或 `python business_scripts/current_state_diagnosis.py [--as-of YYYY-MM-DD]` | 业务状态排查 — 库存 × 待开票未退订 × 风险暴露（滚动365d + 当年累计双口径，分车系 + 合计；`--as-of` 支持任意历史时点 point-in-time 重建，`--format json` Result Contract） | runtime |
+| `python business_scripts/lock_by_model.py --limit 5` | 车型拆分 | runtime |
+| `python business_scripts/lock_city_distribution.py` | 城市分布 | runtime |
 | `python research_scripts/release_curve_analysis.py` | 释放曲线 | research |
 | `python research_scripts/cohort_forecast.py` | 预测锁单 | research |
 | `python research_scripts/presale_cumulative_order_compare.py --gens DM1 CM2 LS9 LS8 DM2 --as-of YYYY-MM-DD --format html` | **预售累计订单跨代际对比（canonical）** — 通用预售固定框架；`--gens` 末位=主代际、其余对标，缺省取当前 presale 代际；`--format terminal/json/html`（Result Contract）；`--to-feishu` 额外产出飞书云文档（默认仅 HTML） | research |
 | `l6_m2_presale_report.py` | ~~L6 M2 预售汇报~~ **compatibility shim** — 默认 DM2 + HTML，转调上一条通用入口；勿再围绕本脚本扩功能 | research |
-| `python runtime_scripts/presale_intention_funnel.py --series CM3 --as-of YYYY-MM-DD` | **预售小订转化漏斗（泛化）** — 固定链路 series_group_logic→预售窗口→小订池→退订/留存/转大定/锁单；任意代际、多代际对比；`--list`、`--format terminal/json/csv`（Result Contract）；`make presale-funnel SERIES=CM3` | runtime |
+| `python business_scripts/presale_intention_funnel.py --series CM3 --as-of YYYY-MM-DD` | **预售小订转化漏斗（泛化）** — 固定链路 series_group_logic→预售窗口→小订池→退订/留存/转大定/锁单；任意代际、多代际对比；`--list`、`--format terminal/json/csv`（Result Contract）；`make presale-funnel SERIES=CM3` | runtime |
 | `make lock-attribution START=2026-01-01 END=2026-08-31 HTML=1` | 锁单归因分析（单样本；`--series/--channel` 过滤） | make |
 | `make lock-attribution-compare START=2024-01-01 END=2024-08-01 START_B=2026-01-01 END_B=2026-08-01 HTML=1` | 锁单归因**对比**分析（两任意样本，差异高亮报告；`LABEL/LABEL_B` 自定义标签，`SERIES_B/CHANNEL_B` 按样本过滤） | make |
 | `python research_scripts/lock_attribution_analysis.py --start-date … --end-date … --compare-start-date … --compare-end-date … --html` | 锁单归因对比脚本（底层，Result Contract） | research |
@@ -227,7 +226,7 @@ from shared.loaders.tp_and_mix_ways_loader import (
 
 | 用户说 | 含义 | 对应操作 |
 |--------|------|----------|
-| "数据更新并同步" | DataOps 指令，非日期分析问题 | `make data-pipeline`（旧名 `daily-data-pipeline`；注意：写操作） |
+| "数据更新并同步" | DataOps 指令，非日期分析问题（仅订单 + 下发线索） | `make data-pipeline`（旧名 `daily-data-pipeline`；注意：写操作） |
 | "预检数据" | 安全预检 | `make data-pipeline-dry-run`（只读） |
 | "数据更新并同步 CM3 上市监控" | 仅刷新订单表 + 推送指定代际上市锁单监控 | `make monitor-sync SERIES=CM3 PHASE=launch`（先 `DRY=1` 预览） |
 | "数据更新并同步 CM3 小订/预售监控" | 仅刷新订单表 + 推送指定代际预售小订监控 | `make monitor-sync SERIES=CM3 PHASE=presale`（先 `DRY=1` 预览） |
@@ -237,7 +236,7 @@ from shared.loaders.tp_and_mix_ways_loader import (
 注意：
 - "数据更新并同步" 不是带日期条件的分析问题，不表示"只更新今天的数据"
 - "数据更新并同步 <代际> 上市/小订/预售监控" 指 `monitor-sync` 走廊：**仅刷新订单表**（非全量 `data-refresh`）→ 计算 → 推送/dry-run
-- Runtime V2 不响应这个指令
+- service 的 `jobs/` 层不响应这个指令（Hub/Worker 负责调度触发）
 - "小订监控" 默认指**指定代际预售快照**（`presale-snapshot`），不是当前 active 阶段监控（`sales-monitor`）。指定代际已进入 `launch` 阶段时，仍可用 `presale-snapshot` 发送上市日最终预售快照，并标注统计截止时间、预售窗口、当前阶段。
 
 ## Visual Identity Usage

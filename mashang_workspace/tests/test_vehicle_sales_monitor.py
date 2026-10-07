@@ -43,7 +43,7 @@ from utils.monitors.presale import build_card as presale_build_card  # noqa: E40
 from utils.monitors.presale import build_waiting_card as presale_build_waiting_card  # noqa: E402
 from utils.monitors.presale import compute as presale_compute  # noqa: E402
 from utils.monitors.order_filter import is_fake_identity, flag_test_orders  # noqa: E402
-from runtime_scripts.presale_intention_funnel import resolve_window  # noqa: E402
+from business_scripts.presale_intention_funnel import resolve_window  # noqa: E402
 
 _BUSINESS_DEF = _PRJ_DIR / "shared" / "schema" / "business_definition.json"
 
@@ -434,7 +434,7 @@ def test_scheduler_refresh_failure_no_refresh_ts_and_skips_monitor(bdef):
 
     def fake_run(cmd, label, dry_run, t):
         cmds[label] = cmd
-        return 1 if label == "refresh_full" else 0
+        return 1 if label == "refresh_daily" else 0
 
     mp = pytest.MonkeyPatch()
     mp.setattr(sched, "_run", fake_run)
@@ -449,7 +449,7 @@ def test_scheduler_due_actions_key_day_gating(bdef):
     sched = _load_scheduler()
     # 每日 09:00 数据管道末步含 monitor（09:30 不再独立触发）
     assert sched.due_actions(datetime(2026, 9, 15, 9, 0), bdef) == [
-        "refresh_full", "dataset_validate", "daily_observation_sync", "monitor",
+        "refresh_daily", "dataset_validate", "daily_observation_sync", "monitor",
     ]
     assert sched.due_actions(datetime(2026, 9, 15, 9, 30), bdef) == []
     # key day 19:00 刷新+监控串行（:30 不再单独触发 monitor）
@@ -464,7 +464,7 @@ def test_scheduler_daily_pipeline_serial_order(bdef):
     """09:00 数据管道顺序 = 刷新 → 校验 → 同步 → 监控。"""
     sched = _load_scheduler()
     assert sched.due_actions(datetime(2026, 9, 15, 9, 0), bdef) == [
-        "refresh_full", "dataset_validate", "daily_observation_sync", "monitor",
+        "refresh_daily", "dataset_validate", "daily_observation_sync", "monitor",
     ]
 
 
@@ -489,15 +489,15 @@ def test_scheduler_pipeline_runs_all_in_order(bdef):
     sched = _load_scheduler()
     now = datetime(2026, 9, 15, 9, 0)
     assert _run_chain(sched, now, bdef, {}) == [
-        "refresh_full", "dataset_validate", "daily_observation_sync", "monitor",
+        "refresh_daily", "dataset_validate", "daily_observation_sync", "monitor",
     ]
 
 
 def test_scheduler_refresh_failure_halts_pipeline(bdef):
-    """refresh_full 失败即中止整批（validate/sync/monitor 都不执行）。"""
+    """refresh_daily 失败即中止整批（validate/sync/monitor 都不执行）。"""
     sched = _load_scheduler()
     now = datetime(2026, 9, 15, 9, 0)
-    assert _run_chain(sched, now, bdef, {"refresh_full": 1}) == ["refresh_full"]
+    assert _run_chain(sched, now, bdef, {"refresh_daily": 1}) == ["refresh_daily"]
 
 
 def test_scheduler_validate_failure_blocks_sync_and_monitor(bdef):
@@ -505,7 +505,7 @@ def test_scheduler_validate_failure_blocks_sync_and_monitor(bdef):
     sched = _load_scheduler()
     now = datetime(2026, 9, 15, 9, 0)
     assert _run_chain(sched, now, bdef, {"dataset_validate": 1}) == [
-        "refresh_full", "dataset_validate",
+        "refresh_daily", "dataset_validate",
     ]
 
 
@@ -514,7 +514,7 @@ def test_scheduler_sync_failure_blocks_monitor(bdef):
     sched = _load_scheduler()
     now = datetime(2026, 9, 15, 9, 0)
     assert _run_chain(sched, now, bdef, {"daily_observation_sync": 1}) == [
-        "refresh_full", "dataset_validate", "daily_observation_sync",
+        "refresh_daily", "dataset_validate", "daily_observation_sync",
     ]
 
 

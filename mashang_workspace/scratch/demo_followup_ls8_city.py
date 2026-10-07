@@ -9,8 +9,8 @@ demo_followup_ls8_city.py — 连续多轮追问 Demo
   R4: 生成一段可以放进日报的结论
 
 用法:
-    python runtime_scripts/demo_followup_ls8_city.py
-    python runtime_scripts/demo_followup_ls8_city.py --date 2026-06-14
+    python business_scripts/demo_followup_ls8_city.py
+    python business_scripts/demo_followup_ls8_city.py --date 2026-06-14
 """
 
 import argparse, json, sys, subprocess
@@ -108,8 +108,8 @@ def main():
     print()
 
     # Execute lock_by_model.py
-    print("    [Execute] python runtime_scripts/lock_by_model.py --date", date_str)
-    r1_result = run_script("runtime_scripts/lock_by_model.py", ["--date", date_str, "--limit", "7"], "R1")
+    print("    [Execute] python business_scripts/lock_by_model.py --date", date_str)
+    r1_result = run_script("business_scripts/lock_by_model.py", ["--date", date_str, "--limit", "7"], "R1")
     if r1_result.get("status") == "success":
         metrics = r1_result.get("result", {}).get("metrics", {})
         dims = r1_result.get("result", {}).get("dimensions", [])
@@ -149,8 +149,8 @@ def main():
     print()
 
     # Execute lock_city_distribution.py
-    print("    [Execute] python runtime_scripts/lock_city_distribution.py --date", date_str, "--series LS8")
-    r2_result = run_script("runtime_scripts/lock_city_distribution.py", ["--date", date_str, "--series", "LS8", "--limit", "12"], "R2")
+    print("    [Execute] python business_scripts/lock_city_distribution.py --date", date_str, "--series LS8")
+    r2_result = run_script("business_scripts/lock_city_distribution.py", ["--date", date_str, "--series", "LS8", "--limit", "12"], "R2")
     if r2_result.get("status") == "success":
         dims = r2_result.get("result", {}).get("dimensions", [])
         total_ls8 = r2_result.get("result", {}).get("metrics", {}).get("total_lock_count", 0)
@@ -286,10 +286,10 @@ def main():
     print("  │ 脚本映射 (Context → Script Resolution)                         │")
     print("  └" + "─" * 72 + "┘")
     print()
-    print(f"    Round 1: lock_count + group_by=model  →  runtime_scripts/lock_by_model.py")
-    print(f"    Round 2: lock_count + group_by=city   →  runtime_scripts/lock_city_distribution.py")
-    print(f"    Round 3: lock_count + compare         →  runtime_scripts/demo_followup_ls8_city.py (comparison)")
-    print(f"    Round 4: lock_count + summary         →  runtime_scripts/demo_followup_ls8_city.py (generation)")
+    print(f"    Round 1: lock_count + group_by=model  →  business_scripts/lock_by_model.py")
+    print(f"    Round 2: lock_count + group_by=city   →  business_scripts/lock_city_distribution.py")
+    print(f"    Round 3: lock_count + compare         →  business_scripts/demo_followup_ls8_city.py (comparison)")
+    print(f"    Round 4: lock_count + summary         →  business_scripts/demo_followup_ls8_city.py (generation)")
     print()
 
     # ────────────────────────────────────────────────────────────

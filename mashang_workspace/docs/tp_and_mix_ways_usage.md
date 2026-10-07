@@ -150,14 +150,14 @@ df = load_tp_and_mix_ways_table_duckdb("market_energy_monthly")
 | 通过 shared loader 读取 Parquet | 直接读取 raw_csv |
 | 基于 Parquet 做分析/图表/报告 | 复制 parquet 到 workspace |
 | 探索新分析路径 | 维护字段映射 |
-| 验证后沉淀到 runtime_scripts/ | 构建 Parquet |
+| 验证后沉淀到 business_scripts/ | 构建 Parquet |
 | 为 runtimeV2 提供查询原型 | 修改 registry |
 |  | 生成一张大宽表 |
 
 ### 成熟分析逻辑迁移路径
 
 1. workspace 中探索 → `research_scripts/`
-2. 验证稳定、口径明确 → `runtime_scripts/`
+2. 验证稳定、口径明确 → `business_scripts/`
 3. runtimeV2 消费 → 注册为 tool / operator
 4. TP&MIX-ways 的数据构建始终在 service 级（`scripts/build_tp_and_mix_ways_dataset.py`）
 

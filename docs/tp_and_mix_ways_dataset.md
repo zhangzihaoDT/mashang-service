@@ -4,7 +4,7 @@
 
 **Service 级共享数据资产。**
 
-本数据集由 6 张 Tableau 导出的窄视图 CSV 构建而成，面向 mashang_workspace 和 mashang_runtime_v2 提供标准化的乘用车上险数据（TP&MIX-ways Registration Data）查询能力。
+本数据集由 6 张 Tableau 导出的窄视图 CSV 构建而成，面向 mashang_workspace（及经 `jobs/` 调用的上层）提供标准化的乘用车上险数据（TP&MIX-ways Registration Data）查询能力。
 
 ### 分层
 

@@ -187,7 +187,7 @@ python scripts/skills_atp_price.py 2026-05 --output outputs/reports/atp_2026-05.
 - 部分历史行 value_code 为空（2874 行），但 value 显示名仍可识别，按 value 文本判断
 - `Pro` 另有"奢华智选包+520雷达"（2 单）等变体显示名
 - 分析激光雷达渗透率时，**必须下探"已选"的 value**：`已选=Stand`（超远距高精度激光雷达）即 LS8 标配激光雷达记录，不应遗漏
-- 配套脚本：`runtime_scripts/attribute_penetration_report.py` 已按 `(Attribute, value_code)` 归并并覆盖"已选"属性
+- 配套脚本：`business_scripts/attribute_penetration_report.py` 已按 `(Attribute, value_code)` 归并并覆盖"已选"属性
 
 ### 配置拥有率（业务逻辑驱动，不依赖官网配置页）
 

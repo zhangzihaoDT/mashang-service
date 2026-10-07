@@ -8,7 +8,7 @@ from pathlib import Path
 _WS_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(_WS_DIR))
 
-from utils.paths import PROJECT_ROOT, WORKSPACE_ROOT, DATASET_DIR, OUTPUTS_DIR, DOCS_DIR, EVAL_DIR, TESTS_DIR, UTILS_DIR, RUNTIME_SCRIPTS_DIR, RESEARCH_SCRIPTS_DIR, UTILITY_SCRIPTS_DIR, LEGACY_SCRIPTS_DIR, REPORTS_DIR
+from utils.paths import PROJECT_ROOT, WORKSPACE_ROOT, DATASET_DIR, OUTPUTS_DIR, DOCS_DIR, EVAL_DIR, TESTS_DIR, UTILS_DIR, BUSINESS_SCRIPTS_DIR, RESEARCH_SCRIPTS_DIR, UTILITY_SCRIPTS_DIR, LEGACY_SCRIPTS_DIR, REPORTS_DIR
 
 
 def _visible_items(directory: Path):
@@ -90,19 +90,19 @@ def test_workspace_scripts_not_exists():
     assert not (WORKSPACE_ROOT / "scripts").exists(), "workspace scripts/ 应该已经删除"
 
 
-def test_runtime_scripts_is_real_dir():
-    """runtime_scripts/ 是真实目录，不是 symlink。"""
-    assert RUNTIME_SCRIPTS_DIR.exists(), f"runtime_scripts 不存在: {RUNTIME_SCRIPTS_DIR}"
-    assert not RUNTIME_SCRIPTS_DIR.is_symlink(), "runtime_scripts 不应是 symlink"
+def test_business_scripts_is_real_dir():
+    """business_scripts/ 是真实目录，不是 symlink。"""
+    assert BUSINESS_SCRIPTS_DIR.exists(), f"business_scripts 不存在: {BUSINESS_SCRIPTS_DIR}"
+    assert not BUSINESS_SCRIPTS_DIR.is_symlink(), "business_scripts 不应是 symlink"
 
 
-def test_runtime_scripts_has_6_scripts():
-    """runtime_scripts/ 下应有 6 个 runtime 脚本。"""
-    files = [f.name for f in RUNTIME_SCRIPTS_DIR.iterdir() if f.suffix == ".py"]
+def test_business_scripts_has_6_scripts():
+    """business_scripts/ 下应有 6 个 runtime 脚本。"""
+    files = [f.name for f in BUSINESS_SCRIPTS_DIR.iterdir() if f.suffix == ".py"]
     expected = {"daily_lock_count.py", "lock_by_model.py", "lock_city_distribution.py",
                 "assign_conversion_analysis.py", "attribute_penetration_report.py",
                 "atp_price_report.py"}
-    assert expected.issubset(set(files)), f"runtime_scripts 缺少脚本: {expected - set(files)}"
+    assert expected.issubset(set(files)), f"business_scripts 缺少脚本: {expected - set(files)}"
 
 
 def test_research_scripts_exists():
@@ -192,7 +192,7 @@ def test_path_resolution():
     assert TESTS_DIR.exists()
     assert not (PROJECT_ROOT / "eval").exists(), "根目录 eval/ 应该已归档到 workspace"
     assert not (WORKSPACE_ROOT / "scripts").exists(), "workspace scripts/ 应该已经删除"
-    assert RUNTIME_SCRIPTS_DIR.exists()
+    assert BUSINESS_SCRIPTS_DIR.exists()
     assert RESEARCH_SCRIPTS_DIR.exists()
     assert UTILITY_SCRIPTS_DIR.exists()
     assert not LEGACY_SCRIPTS_DIR.exists()

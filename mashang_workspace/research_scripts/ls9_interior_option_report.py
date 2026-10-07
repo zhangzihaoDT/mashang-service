@@ -12,7 +12,7 @@
 口径:
     - 指定范围: series=LS9/LS9Hyper, order_type=用户车, 自上市以来 (business_definition LS9.end=2025-11-12)
     - 分两阶段: 阶段一 2025-11-12 ~ 2026-07-16 (LS9Hyper.end)；阶段二 2026-07-16 起
-    - 付费判定基于通用配置判定引擎 runtime_scripts/config_decision_engine.py
+    - 付费判定基于通用配置判定引擎 business_scripts/config_decision_engine.py
       （确认付费=有正价格证据；推定付费=产品规则应付费但价格缺失；Hyper 麂皮为标配不计付费）
     - 选配分布: 深色麂皮 / 浅色麂皮 / 橙黑+大地橘(IN2-ASF) 三类付费麂皮选项 + 免费配色
 
@@ -34,7 +34,7 @@ import pandas as pd
 from jinja2 import Environment, FileSystemLoader
 from utils.business import get_launch_date
 from utils.result_contract import build_success_contract
-from runtime_scripts.config_decision_engine import (
+from business_scripts.config_decision_engine import (
     run as engine_run, SUEDE_OPTION_CONFIG, YearlySnapshotResolver,
     STANDARD_CONFIRMED, PAID_CONFIRMED, PAID_INFERRED,
     FREE_OPTION_CONFIRMED,

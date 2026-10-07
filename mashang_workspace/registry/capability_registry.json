@@ -2,9 +2,9 @@
   {
     "capability_id": "daily_lock_count",
     "name": "每日锁单数统计",
-    "tier": "runtime",
+    "tier": "business",
     "status": "active",
-    "script": "mashang_workspace/runtime_scripts/daily_lock_count.py",
+    "script": "mashang_workspace/business_scripts/daily_lock_count.py",
     "auto_schedulable": true,
     "result_contract": true,
     "numeric_eval_case": "numeric_daily_lock_count_003",
@@ -16,12 +16,12 @@
       "mashang_workspace/docs/script_tiers.md"
     ],
     "promotion": {
-      "current_stage": "runtime_script",
-      "eligible_for_runtime_productization": false,
-      "eligible_for_runtime_script": false,
+      "current_stage": "business_script",
+      "eligible_for_business_productization": false,
+      "eligible_for_business_script": false,
       "blocked_reasons": [],
-      "eligible_for_runtime_v2": true,
-      "runtime_v2_candidate": true,
+      "eligible_for_jobs": true,
+      "jobs_candidate": true,
       "candidate_stage": "v2_candidate"
     },
     "notes": "每日锁单基础统计，CLI 完整，Result Contract 完整，followup 支持。"
@@ -29,9 +29,9 @@
   {
     "capability_id": "lock_by_model",
     "name": "锁单车型结构分析",
-    "tier": "runtime",
+    "tier": "business",
     "status": "active",
-    "script": "mashang_workspace/runtime_scripts/lock_by_model.py",
+    "script": "mashang_workspace/business_scripts/lock_by_model.py",
     "auto_schedulable": true,
     "result_contract": true,
     "numeric_eval_case": "numeric_lock_by_model_001",
@@ -43,12 +43,12 @@
       "mashang_workspace/docs/script_tiers.md"
     ],
     "promotion": {
-      "current_stage": "runtime_script",
-      "eligible_for_runtime_productization": true,
-      "eligible_for_runtime_script": false,
+      "current_stage": "business_script",
+      "eligible_for_business_productization": true,
+      "eligible_for_business_script": false,
       "blocked_reasons": [],
-      "eligible_for_runtime_v2": true,
-      "runtime_v2_candidate": true,
+      "eligible_for_jobs": true,
+      "jobs_candidate": true,
       "candidate_stage": "v2_candidate"
     },
     "notes": "按车型/车系拆分锁单，支持系列分组和 TopN，result contract 含 dimensions/top_entities。"
@@ -56,9 +56,9 @@
   {
     "capability_id": "lock_city_distribution",
     "name": "锁单城市分布分析",
-    "tier": "runtime",
+    "tier": "business",
     "status": "active",
-    "script": "mashang_workspace/runtime_scripts/lock_city_distribution.py",
+    "script": "mashang_workspace/business_scripts/lock_city_distribution.py",
     "auto_schedulable": true,
     "result_contract": true,
     "numeric_eval_case": "numeric_lock_city_distribution_002",
@@ -70,12 +70,12 @@
       "mashang_workspace/docs/script_tiers.md"
     ],
     "promotion": {
-      "current_stage": "runtime_script",
-      "eligible_for_runtime_productization": true,
-      "eligible_for_runtime_script": false,
+      "current_stage": "business_script",
+      "eligible_for_business_productization": true,
+      "eligible_for_business_script": false,
       "blocked_reasons": [],
-      "eligible_for_runtime_v2": true,
-      "runtime_v2_candidate": true,
+      "eligible_for_jobs": true,
+      "jobs_candidate": true,
       "candidate_stage": "v2_candidate"
     },
     "notes": "按城市/大区拆分锁单分布，支持 TopN 和 region 分组，result contract 含 dimensions。"
@@ -83,9 +83,9 @@
   {
     "capability_id": "assign_conversion_analysis",
     "name": "下发线索转化率分析",
-    "tier": "runtime",
+    "tier": "business",
     "status": "active",
-    "script": "mashang_workspace/runtime_scripts/assign_conversion_analysis.py",
+    "script": "mashang_workspace/business_scripts/assign_conversion_analysis.py",
     "auto_schedulable": true,
     "result_contract": true,
     "numeric_eval_case": "numeric_assign_conversion_004",
@@ -97,14 +97,14 @@
       "mashang_workspace/docs/script_tiers.md"
     ],
     "promotion": {
-      "current_stage": "runtime_script",
-      "eligible_for_runtime_productization": false,
-      "eligible_for_runtime_script": false,
+      "current_stage": "business_script",
+      "eligible_for_business_productization": false,
+      "eligible_for_business_script": false,
       "blocked_reasons": [
         "依赖 assign_data.csv 预聚合字段，口径需与 Tableau 源数据对齐"
       ],
-      "eligible_for_runtime_v2": true,
-      "runtime_v2_candidate": true,
+      "eligible_for_jobs": true,
+      "jobs_candidate": true,
       "candidate_stage": "v2_candidate"
     },
     "notes": "计算线索渠道、试驾率、锁单率，result contract 含渠道指标。"
@@ -112,9 +112,9 @@
   {
     "capability_id": "attribute_penetration_report",
     "name": "配置渗透率分析",
-    "tier": "runtime",
+    "tier": "business",
     "status": "active",
-    "script": "mashang_workspace/runtime_scripts/attribute_penetration_report.py",
+    "script": "mashang_workspace/business_scripts/attribute_penetration_report.py",
     "auto_schedulable": true,
     "result_contract": true,
     "numeric_eval_case": "numeric_attribute_penetration_005",
@@ -126,12 +126,12 @@
       "mashang_workspace/docs/script_tiers.md"
     ],
     "promotion": {
-      "current_stage": "runtime_script",
-      "eligible_for_runtime_productization": true,
-      "eligible_for_runtime_script": false,
+      "current_stage": "business_script",
+      "eligible_for_business_productization": true,
+      "eligible_for_business_script": false,
       "blocked_reasons": [],
-      "eligible_for_runtime_v2": true,
-      "runtime_v2_candidate": true,
+      "eligible_for_jobs": true,
+      "jobs_candidate": true,
       "candidate_stage": "v2_candidate"
     },
     "notes": "基于 order_data ⋈ config_attribute 计算选装率，支持任意属性名。"
@@ -139,9 +139,9 @@
   {
     "capability_id": "atp_price_report",
     "name": "ATP 价格月报",
-    "tier": "runtime",
+    "tier": "business",
     "status": "active",
-    "script": "mashang_workspace/runtime_scripts/atp_price_report.py",
+    "script": "mashang_workspace/business_scripts/atp_price_report.py",
     "auto_schedulable": true,
     "result_contract": true,
     "numeric_eval_case": "numeric_atp_price_006",
@@ -153,12 +153,12 @@
       "mashang_workspace/docs/script_tiers.md"
     ],
     "promotion": {
-      "current_stage": "runtime_script",
-      "eligible_for_runtime_productization": true,
-      "eligible_for_runtime_script": false,
+      "current_stage": "business_script",
+      "eligible_for_business_productization": true,
+      "eligible_for_business_script": false,
       "blocked_reasons": [],
-      "eligible_for_runtime_v2": true,
-      "runtime_v2_candidate": true,
+      "eligible_for_jobs": true,
+      "jobs_candidate": true,
       "candidate_stage": "v2_candidate"
     },
     "notes": "按月统计 ATP，复用 operators.atp_analysis，result contract 含 12 个 segment。"
@@ -180,15 +180,15 @@
     ],
     "promotion": {
       "current_stage": "research_script",
-      "eligible_for_runtime_productization": false,
-      "eligible_for_runtime_script": true,
+      "eligible_for_business_productization": false,
+      "eligible_for_business_script": true,
       "blocked_reasons": [
-        "依赖 runtime operators 运行",
+        "依赖 shared operators 运行",
         "预测口径需业务确认",
         "research script; requires manual interpretation"
       ],
-      "eligible_for_runtime_v2": false,
-      "runtime_v2_candidate": false,
+      "eligible_for_jobs": false,
+      "jobs_candidate": false,
       "candidate_stage": "not_eligible"
     },
     "notes": "三段式成熟度预测锁单，返回 partial_success contract。"
@@ -210,15 +210,15 @@
     ],
     "promotion": {
       "current_stage": "research_script",
-      "eligible_for_runtime_productization": false,
-      "eligible_for_runtime_script": true,
+      "eligible_for_business_productization": false,
+      "eligible_for_business_script": true,
       "blocked_reasons": [
         "运行时间较长（1-3 分钟）",
         "回测口径需业务确认",
         "research script; requires manual interpretation"
       ],
-      "eligible_for_runtime_v2": false,
-      "runtime_v2_candidate": false,
+      "eligible_for_jobs": false,
+      "jobs_candidate": false,
       "candidate_stage": "not_eligible"
     },
     "notes": "对预测锁单进行回测验证，输出 MAE/RMSE/MAPE。"
@@ -240,15 +240,15 @@
     ],
     "promotion": {
       "current_stage": "research_script",
-      "eligible_for_runtime_productization": false,
-      "eligible_for_runtime_script": false,
+      "eligible_for_business_productization": false,
+      "eligible_for_business_script": false,
       "blocked_reasons": [
         "目前为 HTML 报告输出，无 Result Contract",
         "运行时间较长（2-3 分钟）",
         "research script; requires manual interpretation"
       ],
-      "eligible_for_runtime_v2": false,
-      "runtime_v2_candidate": false,
+      "eligible_for_jobs": false,
+      "jobs_candidate": false,
       "candidate_stage": "not_eligible"
     },
     "notes": "基于 lock_release_curve.py（704 行），交互式 Plotly 报告。"
@@ -269,14 +269,14 @@
     ],
     "promotion": {
       "current_stage": "research_script",
-      "eligible_for_runtime_productization": false,
-      "eligible_for_runtime_script": true,
+      "eligible_for_business_productization": false,
+      "eligible_for_business_script": true,
       "blocked_reasons": [
         "归因口径（观察分类）跨维度重叠，需业务确认口径",
         "research script; requires manual interpretation"
       ],
-      "eligible_for_runtime_v2": false,
-      "runtime_v2_candidate": false,
+      "eligible_for_jobs": false,
+      "jobs_candidate": false,
       "candidate_stage": "not_eligible"
     },
     "notes": "锁单来源归因指标（渠道 TopN / 触达行为分类 / 助攻渠道），支持两任意样本对比，差异高亮 HTML 报告。归因计算参考 index_summary.py:_calc_attribution_metrics。"
@@ -298,14 +298,14 @@
     ],
     "promotion": {
       "current_stage": "utility_script",
-      "eligible_for_runtime_productization": false,
-      "eligible_for_runtime_script": false,
+      "eligible_for_business_productization": false,
+      "eligible_for_business_script": false,
       "blocked_reasons": [
         "工具类能力，不纳入业务分析晋级流程",
-        "utility script; not business runtime capability"
+        "utility script; not a business tier capability"
       ],
-      "eligible_for_runtime_v2": false,
-      "runtime_v2_candidate": false,
+      "eligible_for_jobs": false,
+      "jobs_candidate": false,
       "candidate_stage": "not_eligible"
     },
     "notes": "扫描 dataset/ 目录输出字段清单，终端/csv/json 格式。"
@@ -326,14 +326,14 @@
     ],
     "promotion": {
       "current_stage": "utility_script",
-      "eligible_for_runtime_productization": false,
-      "eligible_for_runtime_script": true,
+      "eligible_for_business_productization": false,
+      "eligible_for_business_script": true,
       "blocked_reasons": [
         "当前为骨架（词频统计），NLP/JTBD 分类未集成",
-        "utility script; not business runtime capability"
+        "utility script; not a business tier capability"
       ],
-      "eligible_for_runtime_v2": false,
-      "runtime_v2_candidate": false,
+      "eligible_for_jobs": false,
+      "jobs_candidate": false,
       "candidate_stage": "not_eligible"
     },
     "notes": "依赖 dataset/wechat/*.parquet，当前为基础词频统计。"
@@ -355,14 +355,14 @@
     ],
     "promotion": {
       "current_stage": "retired",
-      "eligible_for_runtime_productization": false,
-      "eligible_for_runtime_script": false,
+      "eligible_for_business_productization": false,
+      "eligible_for_business_script": false,
       "blocked_reasons": [
         "实现已迁移移除（workspace miit_new_car → MIIT/ 模块）",
         "历史 OCR 产物归档于 MIIT/data/eidc/vehicle_publicity_detail/"
       ],
-      "eligible_for_runtime_v2": false,
-      "runtime_v2_candidate": false,
+      "eligible_for_jobs": false,
+      "jobs_candidate": false,
       "candidate_stage": "not_eligible"
     },
     "notes": "已退役：原 promptbuilders/miit_new_car 实现于 2026-08 移除，能力在 research_apps/MIIT/scripts 重新实现。"
@@ -384,14 +384,14 @@
     ],
     "promotion": {
       "current_stage": "retired",
-      "eligible_for_runtime_productization": false,
-      "eligible_for_runtime_script": false,
+      "eligible_for_business_productization": false,
+      "eligible_for_business_script": false,
       "blocked_reasons": [
         "实现已迁移移除（workspace miit_new_car → MIIT/ 模块）",
         "对比报告能力由 MIIT 06_generate_category_report 承接"
       ],
-      "eligible_for_runtime_v2": false,
-      "runtime_v2_candidate": false,
+      "eligible_for_jobs": false,
+      "jobs_candidate": false,
       "candidate_stage": "not_eligible"
     },
     "notes": "已退役：原 promptbuilders/miit_new_car 实现于 2026-08 移除，能力在 research_apps/MIIT/scripts 重新实现。"
@@ -399,9 +399,9 @@
   {
     "capability_id": "current_state_diagnosis",
     "name": "当前业务状态排查（库存 × Backlog × 风险暴露）",
-    "tier": "runtime",
+    "tier": "business",
     "status": "active",
-    "script": "mashang_workspace/runtime_scripts/current_state_diagnosis.py",
+    "script": "mashang_workspace/business_scripts/current_state_diagnosis.py",
     "auto_schedulable": true,
     "result_contract": true,
     "numeric_eval_case": "numeric_current_state_diagnosis_001",
@@ -411,12 +411,12 @@
       "mashang_workspace/docs/metric_definitions.md"
     ],
     "promotion": {
-      "current_stage": "runtime_script",
-      "eligible_for_runtime_productization": false,
-      "eligible_for_runtime_script": false,
+      "current_stage": "business_script",
+      "eligible_for_business_productization": false,
+      "eligible_for_business_script": false,
       "blocked_reasons": [],
-      "eligible_for_runtime_v2": true,
-      "runtime_v2_candidate": true,
+      "eligible_for_jobs": true,
+      "jobs_candidate": true,
       "candidate_stage": "v2_candidate"
     },
     "notes": "当前库存/待开票未退订/风险暴露三水位快照，消费 dealer_unsold_inventory + effective_locked_orders 共享算子。"

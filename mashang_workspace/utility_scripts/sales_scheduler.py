@@ -5,7 +5,9 @@
 调度（key day = 任一 active 代际的预售首日 start 或上市日 end）：
 
   Daily pipeline（每日 09:00）
-    refresh_full → dataset_validate → daily_observation_sync → monitor
+    refresh_daily → dataset_validate → daily_observation_sync → monitor
+    refresh_daily 仅刷新订单数据 + 下发线索（update_all_datasets.py --scope daily）；
+    试驾 / 锁单归因等其余数据集走 make allupdate 或独立更新入口。
     按依赖成功顺序串行：任一上游失败即中止后续步骤；
     monitor 是最后一步，使用同一批次、同一时点数据（不再按钟点单独触发）。
 
@@ -76,7 +78,7 @@ def due_actions(now: datetime, bdef: dict) -> list[str]:
     key = is_key_day(bdef, now.date())
     actions: list[str] = []
     if hm == FULL_REFRESH_TIME:
-        actions += ["refresh_full", "dataset_validate", "daily_observation_sync", "monitor"]
+        actions += ["refresh_daily", "dataset_validate", "daily_observation_sync", "monitor"]
     if now.minute == 0 and now.hour in _key_hours(bdef) and key:
         actions += ["refresh_order_data", "monitor"]
     return actions
@@ -110,7 +112,7 @@ def _run(cmd: list[str], label: str, dry_run: bool, now: datetime) -> int:
 
 
 def _monitor_cmd(args, refresh_ts: datetime | None = None) -> list[str]:
-    cmd = [sys.executable, str(_WS_ROOT / "runtime_scripts" / "vehicle_sales_monitor.py")]
+    cmd = [sys.executable, str(_WS_ROOT / "business_scripts" / "vehicle_sales_monitor.py")]
     if args.dry_run:
         cmd.append("--dry-run")
     if args.as_of:
@@ -126,9 +128,10 @@ def _monitor_cmd(args, refresh_ts: datetime | None = None) -> list[str]:
 
 def _dispatch(action: str, args, now: datetime, refresh_ts: datetime | None = None) -> int:
     """按动作名执行对应子进程，返回 exit code。"""
-    if action == "refresh_full":
-        return _run([sys.executable, str(REPO_ROOT / "dataset" / "updater" / "update_all_datasets.py")],
-                    "refresh_full", args.dry_run, now)
+    if action == "refresh_daily":
+        return _run([sys.executable, str(REPO_ROOT / "dataset" / "updater" / "update_all_datasets.py"),
+                     "--scope", "daily"],
+                    "refresh_daily", args.dry_run, now)
     if action == "dataset_validate":
         return _run([sys.executable, str(_WS_ROOT / "utility_scripts" / "dataset_validate.py")],
                     "dataset_validate", args.dry_run, now)
@@ -143,8 +146,8 @@ def _dispatch(action: str, args, now: datetime, refresh_ts: datetime | None = No
     return 0
 
 
-REFRESH_ACTIONS = ("refresh_full", "refresh_order_data")
-GATE_ACTIONS = ("refresh_full", "dataset_validate", "daily_observation_sync", "refresh_order_data")
+REFRESH_ACTIONS = ("refresh_daily", "refresh_order_data")
+GATE_ACTIONS = ("refresh_daily", "dataset_validate", "daily_observation_sync", "refresh_order_data")
 
 
 def process_batch(now: datetime, bdef: dict, args, fired: set[str]) -> None:
@@ -183,7 +186,7 @@ def run_once(args, bdef: dict) -> int:
 
 def run_loop(args, bdef: dict) -> int:
     log("调度器启动", datetime.now())
-    log(f"  DailyPipeline={FULL_REFRESH_TIME}（刷新→校验→同步→监控）  KeyDay={_key_hours(bdef)}时整   monitor_phase={args.phase}", datetime.now())
+    log(f"  DailyPipeline={FULL_REFRESH_TIME}（刷新订单+下发线索→校验→同步→监控）  KeyDay={_key_hours(bdef)}时整   monitor_phase={args.phase}", datetime.now())
     fired: set[str] = set()
     last_minute: tuple[int, int] | None = None
 

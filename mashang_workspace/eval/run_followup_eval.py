@@ -30,11 +30,11 @@ DEFAULT_CASES = WORKSPACE_ROOT / "eval" / "cases" / "followup_cases.json"
 FOLLOWUP_OUTPUT_DIR = WORKSPACE_ROOT / "outputs" / "tables"
 
 CONTEXT_SCRIPT_MAP: list[tuple[list[str], list[str], str]] = [
-    (["lock_count"], ["model", "model_or_series", "series", "energy_type"], "runtime_scripts/lock_by_model.py"),
-    (["lock_count_share", "share"], ["model", "series", "energy_type"], "runtime_scripts/lock_by_model.py"),
-    (["reev_share_trend", "share_trend"], [], "runtime_scripts/lock_by_model.py"),
-    (["lock_count"], ["city"], "runtime_scripts/lock_city_distribution.py"),
-    (["lock_count"], [], "runtime_scripts/daily_lock_count.py"),
+    (["lock_count"], ["model", "model_or_series", "series", "energy_type"], "business_scripts/lock_by_model.py"),
+    (["lock_count_share", "share"], ["model", "series", "energy_type"], "business_scripts/lock_by_model.py"),
+    (["reev_share_trend", "share_trend"], [], "business_scripts/lock_by_model.py"),
+    (["lock_count"], ["city"], "business_scripts/lock_city_distribution.py"),
+    (["lock_count"], [], "business_scripts/daily_lock_count.py"),
     (["lock_forecast", "forecast_lock_count", "cohort_forecast"], [], "research_scripts/cohort_forecast.py"),
     (["release_curve", "lock_release_curve"], [], "research_scripts/release_curve_analysis.py"),
     (["voc_theme", "jtbd_theme"], [], "utility_scripts/voc_theme_analysis.py"),
@@ -52,7 +52,7 @@ def _match_script(ctx: dict) -> str:
     for metrics, group_bys, script in CONTEXT_SCRIPT_MAP:
         if group_by in group_bys:
             return script
-    return "runtime_scripts/daily_lock_count.py"
+    return "business_scripts/daily_lock_count.py"
 
 
 # ─── 2. Context → CLI Args 生成 ────────────────────────────────────────────

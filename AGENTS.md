@@ -21,12 +21,15 @@ mashang-service 是一个**汽车业务数据分析项目**，包含以下分支
 
 | 分支 | 目录 | 定位 |
 |------|------|------|
-| **Runtime (legacy)** | `mashang_runtime/` | Legacy / frozen 旧 Runtime 层；当前不作为日常活跃开发目录 |
-| **Unified Research Runtime** | `mashang_runtime_v2/` | 统一研究 Runtime（编排层）：调用 workspace 确定性业务分析能力 + 长期编排 Research Applications（编排演进中） |
-| **Workspace** | `mashang_workspace/` | **Daily Business Analytics Workspace** —— 日常业务分析工具箱（research → runtime → eval） |
+| **Jobs** | `jobs/` | 确定性执行契约层：声明式 Research Application job + 参数白名单 + 固定执行入口 + 状态/摘要/artifact 契约（Hub/Worker 调用） |
+| **Workspace** | `mashang_workspace/` | **Daily Business Analytics Workspace** —— 日常业务分析工具箱（research → business → eval） |
 | **Shared** | `shared/` | Semantic Foundation —— 共享 operator/schema 层（非默认工作区） |
-| **Base Capabilities** | `capabilities/` | 领域无关基础能力层（OCR/Search/Notify 等），与日常业务分析能力平级，供 workspace / runtime_v2 / Research Application 复用 |
-| **Research Applications** | `research_apps/`（MIIT / auto_launch / nev_apeal，未来 p4/5） | 独立研究型子项目（研究单元：有自己 state/engine/contracts/gate/artifacts；仅归类不共享；runtime_v2 编排目标） |
+| **Base Capabilities** | `capabilities/` | 领域无关基础能力层（OCR/Search/Notify 等），与日常业务分析能力平级，供 workspace / jobs / Research Application 复用 |
+| **Research Applications** | `research_apps/`（MIIT / auto_launch / nev_apeal，未来 p4/5） | 独立研究型子项目（研究单元：有自己 state/engine/contracts/gate/artifacts；仅归类不共享；由 Hub 经 `jobs/` 编排） |
+
+> 旧 `mashang_runtime/`（legacy frozen Runtime）与 `mashang_runtime_v2/`（NL 问数 Runtime）均已退役移除：
+> 运行时系统由 **Hub（Control Plane）+ Worker（Execution Gateway）+ OpenCode** 共同组成；
+> service 侧只保留「业务能力 + 确定性 Job Contract」，即 `mashang_workspace/` + `research_apps/` + `jobs/`。
 
 **共享底座**：
 - `dataset/` — 原始数据
@@ -43,16 +46,16 @@ mashang-service 是一个**汽车业务数据分析项目**，包含以下分支
 ## 工作原则
 
 1. **新分析能力**：优先进入 `mashang_workspace/`
-2. **Runtime 分层**：`mashang_runtime/` 是 legacy / frozen 旧 Runtime 层，不作为日常活跃开发目录。`mashang_runtime_v2/` 是 **Unified Research Runtime（编排层）**，消费 workspace 已治理能力 + 长期编排 Research Applications（MIIT/auto_launch/nev_apeal）。
+2. **运行时分层**：旧 `mashang_runtime/`（legacy frozen）与 `mashang_runtime_v2/`（NL 问数）均已退役移除。运行时系统 = **Hub（Control Plane）+ Worker（Execution Gateway）+ OpenCode**；service 侧只保留业务能力 + 确定性 `jobs/` contract。operators/schema 的 canonical 位置是 `shared/`。
 3. **不要移动 `dataset/` `.env` `.venv/`**
-4. **不要在 runtime 中做临时分析**
-5. **不要在 workspace 中引入破坏 runtime 的改动**
+4. **不要在 `jobs/` 中做临时分析**（jobs 只承接确定性执行契约）
+5. **不要在 workspace 中引入破坏 `jobs/` 契约的改动**
 6. **`mashang_workspace` 是日常唯一主工作区**
 7. **OpenCode 应优先读取 `mashang_workspace/AGENTS.md`**
 8. **不要在根目录创建新的 `docs/scripts/eval/tests/utils`**
-9. **新分析能力优先沉淀到 `mashang_workspace/runtime_scripts/ + research_scripts/ + docs/ + eval/`**
+9. **新分析能力优先沉淀到 `mashang_workspace/business_scripts/ + research_scripts/ + docs/ + eval/`**
 10. **验证范围必须与改动范围匹配**：改动后先 `make verify-scope` 解析本次改动的最小验证范围，再 `make verify` 执行。**scope 外失败不算本次回归**；扩大范围必须显式（`make verify-all` / `--include`），不得把「充分验证」等价成「跑全量 pytest / `make ci`」。契约见 `.opencode/verification/README.md`。
-11. **能力产品化路径**：workspace 中验证稳定的能力先成为 `runtime_scripts`，供 `mashang_runtime_v2`（Unified Research Runtime）确定性调度；不要绕过 workspace 直接在 runtime_v2 中开发探索性能力，也不把业务分析代码复制进 runtime_v2 或 legacy runtime。
+11. **能力产品化路径**：workspace 中验证稳定的能力先成为 `business_scripts`，供 Hub 经 `jobs/` 确定性调度；不要绕过 workspace 直接在 `jobs/` 或 Research Application 中重复实现业务分析逻辑。
 12. **`shared/` 边界**：共享 operator/schema 层，不应随意修改。如修改需说明影响范围，并同步相关测试。
 13. **MCP 边界**：MCP 能力由根目录统一提供（`.opencode/` / `opencode.jsonc`），workspace 只消费能力。不得将本地 profile、cookies、API key、incoming 原始数据等提交进仓库。
 14. **`capabilities/` 边界**：Base Capabilities 是领域无关基础能力层。新基础能力先以 `capabilities/ocr/` 为样板归位并自描述（接口 + provider + mock + tests + 消费方记录）；不要在 capabilities/ 中写入业务规则或领域解析逻辑。OCR 已从历史根 `ocr/` 迁移至此（namespace `capabilities.ocr`）。
@@ -63,16 +66,16 @@ mashang-service 是一个**汽车业务数据分析项目**，包含以下分支
 ## 业务分析工作原则
 
 1. **优先阅读 docs**：`mashang_workspace/docs/` 目录下的文档是首要参考资料，包含业务术语、指标口径、车型映射、时间规则、分析范式、追问规则。
-2. **优先复用脚本**：`mashang_workspace/runtime_scripts/`（runtime）、`research_scripts/`（research）、`utility_scripts/`（utility）已有脚本，新需求优先基于现有脚本扩展。**根目录不再有 `scripts/`。**
+2. **优先复用脚本**：`mashang_workspace/business_scripts/`（runtime）、`research_scripts/`（research）、`utility_scripts/`（utility）已有脚本，新需求优先基于现有脚本扩展。**根目录不再有 `scripts/`。**
 3. **不要随意修改原始数据**：`dataset/` 下的 CSV/Parquet 是原始数据，分析应使用副本或只读方式。
 
 **上市时间必须从业务定义读取**：涉及"上市以来"的时间范围，必须使用 `shared/schema/business_definition.json` 中 `time_periods.{series}.end` 字段，不得从数据中取 `lock_time` 最小值推断。脚本优先使用 `--since-launch` 参数，临时分析使用 `mashang_workspace/utils/business.py` 的 `get_launch_date()`。
 4. **不要编造数据**：在数据无法支撑结论时，明确说明"无数据/数据不足"。
 5. **所有分析结果必须说明来源**：包括数据源、过滤条件、时间窗口、指标口径。
-6. **临时代码放 `scratch/` 或 `outputs/`**，稳定脚本再沉淀到 `mashang_workspace/{runtime_scripts,research_scripts,utility_scripts}/`。
-7. **高频能力先在 workspace 内沉淀**：高频分析路径先沉淀到 `mashang_workspace/runtime_scripts/`，供 `mashang_runtime_v2` 确定性调度；旧 `mashang_runtime/` 不作为回流目标，业务代码不复制进 runtime_v2。
+6. **临时代码放 `scratch/` 或 `outputs/`**，稳定脚本再沉淀到 `mashang_workspace/{business_scripts,research_scripts,utility_scripts}/`。
+7. **高频能力先在 workspace 内沉淀**：高频分析路径先沉淀到 `mashang_workspace/business_scripts/`，供 Hub 经 `jobs/` 确定性调度；业务代码不复制进 `jobs/`。
 8. **回答数据问题前，先看 `docs/data_dictionary.md` 和 `docs/metric_definitions.md`**，确认字段名和口径。
-9. **对标准分析问题，优先调用 `mashang_workspace/{runtime_scripts,research_scripts,utility_scripts}/` 下已有脚本**，不要重复造轮子。
+9. **对标准分析问题，优先调用 `mashang_workspace/{business_scripts,research_scripts,utility_scripts}/` 下已有脚本**，不要重复造轮子。
 10. **如果脚本缺少参数，先小范围补充 CLI 参数，不要重写脚本**。
 11. **如果临时分析重复出现 2 次以上，再沉淀为 workspace 稳定脚本**。
 12. **所有脚本在 `--format json` 时输出标准 Result Contract**，包含 scope/result/followup_context。
@@ -161,9 +164,9 @@ Runner 功能:
 
 | expected_context | 脚本 |
 |-----------------|------|
-| lock_count + group_by=model/series | `mashang_workspace/runtime_scripts/lock_by_model.py` |
-| lock_count + group_by=city | `mashang_workspace/runtime_scripts/lock_city_distribution.py` |
-| lock_count (无分组) | `mashang_workspace/runtime_scripts/daily_lock_count.py` |
+| lock_count + group_by=model/series | `mashang_workspace/business_scripts/lock_by_model.py` |
+| lock_count + group_by=city | `mashang_workspace/business_scripts/lock_city_distribution.py` |
+| lock_count (无分组) | `mashang_workspace/business_scripts/daily_lock_count.py` |
 | lock_forecast/cohort_forecast | `mashang_workspace/research_scripts/cohort_forecast.py` |
 | release_curve | `mashang_workspace/research_scripts/release_curve_analysis.py` |
 | voc_theme/jtbd_theme | `mashang_workspace/utility_scripts/voc_theme_analysis.py` |
@@ -227,7 +230,7 @@ python mashang_workspace/eval/run_followup_eval.py --parse-text --as-of-date 202
 ```json
 {
   "status": "success | partial_success | error",
-  "script": "mashang_workspace/runtime_scripts/lock_by_model.py",
+  "script": "mashang_workspace/business_scripts/lock_by_model.py",
   "scope": { "data_source": "...", "time_window": {...}, "filters": {...}, "metric_definition": "..." },
   "result": { "summary": "...", "metrics": {...}, "dimensions": [...], "tables": [...] },
   "artifacts": { "csv": "...", "json": "..." },
@@ -238,12 +241,12 @@ python mashang_workspace/eval/run_followup_eval.py --parse-text --as-of-date 202
 ```
 
 已支持 Contract 的脚本 (6个):
-- `mashang_workspace/runtime_scripts/daily_lock_count.py`
-- `mashang_workspace/runtime_scripts/lock_by_model.py`
-- `mashang_workspace/runtime_scripts/lock_city_distribution.py`
+- `mashang_workspace/business_scripts/daily_lock_count.py`
+- `mashang_workspace/business_scripts/lock_by_model.py`
+- `mashang_workspace/business_scripts/lock_city_distribution.py`
 - `mashang_workspace/research_scripts/cohort_forecast.py`
-- `mashang_workspace/runtime_scripts/assign_conversion_analysis.py`
-- `mashang_workspace/runtime_scripts/attribute_penetration_report.py`
+- `mashang_workspace/business_scripts/assign_conversion_analysis.py`
+- `mashang_workspace/business_scripts/attribute_penetration_report.py`
 
 详见 `mashang_workspace/docs/result_contract.md`。
 
@@ -288,7 +291,7 @@ python mashang_workspace/eval/parse_context_cli.py "这 75 个锁单城市分布
   - `outputs/reports/` — HTML/Markdown 报告
   - `outputs/charts/` — PNG/SVG/HTML 图表
 - **口径说明**：每次输出附带数据来源、过滤条件、时间窗口
-- **脚本路径**：如果通过 workspace 脚本执行，注明脚本路径（`mashang_workspace/{runtime_scripts,research_scripts,utility_scripts}/...`）
+- **脚本路径**：如果通过 workspace 脚本执行，注明脚本路径（`mashang_workspace/{business_scripts,research_scripts,utility_scripts}/...`）
 
 ## 目录结构
 
@@ -302,17 +305,8 @@ mashang-service/
 ├── requirements.txt       ← 共享依赖
 ├── shared/        ← 共享 operator/schema（非默认工作区）
 │
-├── mashang_runtime/       ← Legacy / frozen 旧 Runtime（非活跃开发，仅历史兼容）
-│   ├── agent/             ← Agent Loop / Planner / Router / Decisions
-│   ├── tools/             ← 确定性执行工具
-│   ├── operators/         ← 固定业务算子
-│   ├── schema/            ← 配置/指标/路径定义
-│   ├── main.py            ← CLI 入口
-│   ├── feishu_bot.py      ← 飞书入口
-│   └── README.md          ← Runtime 说明
-│
-├── mashang_runtime_v2/     ← Unified Research Runtime（编排层）
-│   └── README.md          ← Runtime V2 说明
+├── jobs/                  ← 确定性执行契约层（Hub/Worker 调用的 Research Application job）
+│   └── README.md          ← jobs 说明
 │
 ├── capabilities/          ← Base Capabilities（领域无关原语：OCR/Search/Notify/Diagram/Feishu）
 │
@@ -322,7 +316,7 @@ mashang-service/
     ├── AGENTS.md          ← Workspace Agent 指南
     ├── README.md
     ├── docs/               ← 业务文档
-    ├── runtime_scripts/    ← runtime tier（可被 runtime_v2 确定性调度）
+    ├── business_scripts/    ← business tier（可被 Hub 经 jobs/ 调度）
     ├── research_scripts/   ← research tier（预测/回测/报告）
     ├── utility_scripts/    ← utility tier（DataOps/SyncOps/生成/检查）
     ├── eval/               ← Eval 测试框架
@@ -340,18 +334,20 @@ mashang-service/
 
 | 能力 | Canonical 入口 | 旧名 / 兼容别名 | 副作用等级 |
 |------|----------------|-----------------|-----------|
-| 数据集刷新 | `make data-refresh` | `dataset-update` | local write |
+| Daily 数据集刷新（订单 + 下发线索） | `make data-refresh-daily` | — | local write |
+| 全量数据集刷新 | `make data-refresh` | `dataset-update` | local write |
+| 全量更新 + 校验（hub 统一入口） | `make allupdate` | `updateall` | local write |
 | 数据集校验 | `make data-validate` | `dataset-validate` | read-only |
 | 每日观察预检 | `make observe-dry-run` | `daily-observation-dry-run` | read-only |
 | 每日观察同步 | `make observe-sync` | `daily-observation-sync` | Feishu write（多维表 + 机器人） |
-| 数据管道 | `make data-pipeline` | `daily-data-pipeline` | local + Feishu write |
+| 数据管道（订单+下发线索 → 观察同步） | `make data-pipeline` | `daily-data-pipeline` | local + Feishu write |
 | 数据管道预检 | `make data-pipeline-dry-run` | `daily-data-pipeline-dry-run` | read-only |
 | 每日运营 | `make daily-ops` | — | local + Feishu write + 卡片 |
 | 当前预售/上市监控 | `make sales-monitor` | `monitor` | Feishu card |
 | 监控预检 | `make sales-monitor-dry-run` | `monitor-dry-run` | read-only |
 | 数据更新+指定代际监控走廊 | `make monitor-sync SERIES=<GEN> [PHASE=launch\|presale] [DRY=1]` | `sales-monitor-sync` | local write（仅订单表）+ Feishu card |
 | 指定代际预售小订快照 | `make presale-snapshot SERIES=<GEN>`（= `sales-monitor --force-phase --phase presale`） | — | Feishu card |
-| 常驻调度 | `make sales-scheduler` | `scheduler` | 常驻 + local + Feishu |
+| 常驻调度（09:00 daily 刷新订单+下发线索；key day 高频刷新订单） | `make sales-scheduler` | `scheduler` | 常驻 + local + Feishu |
 | 预售累计订单对比报告 | `presale_cumulative_order_compare.py` | `l6_m2_presale_report.py`（shim） | local write（可选 Feishu docx） |
 
 副作用等级定义：
@@ -367,30 +363,34 @@ mashang-service/
 ### 小订 / 预售 / 上市入口边界（勿混用）
 
 - “小订监控 / 预售小订” 默认指**指定代际预售快照** → `make presale-snapshot SERIES=<GEN>`（底层 `presale_metrics_to_feishu.py` shim → `vehicle_sales_monitor --force-phase --phase presale`）。
-- **唯一监控实现** = `runtime_scripts/vehicle_sales_monitor.py`：`sales-monitor`（按 active phase）与 `presale-snapshot`（`--force-phase` 忽略 phase）共用同一 compute/card，不再有独立预售实现。
+- **唯一监控实现** = `business_scripts/vehicle_sales_monitor.py`：`sales-monitor`（按 active phase）与 `presale-snapshot`（`--force-phase` 忽略 phase）共用同一 compute/card，不再有独立预售实现。
 - “当前预售/上市监控” 指**当前 active 代际的 phase 监控** → `make sales-monitor`（底层 `vehicle_sales_monitor.py`，带 freshness gate；**不刷新数据**）。
 - “数据更新并同步 <代际> 上市/小订/预售监控”（**仅刷新订单表** → 计算 → 推送）→ `make monitor-sync SERIES=<GEN> PHASE=<launch|presale>`（`DRY=1` 预览；底层 `order_data_to_parquet.py` + `vehicle_sales_monitor.py`）。对应关系：上市监控→`PHASE=launch`，小订/预售监控→`PHASE=presale`。
 - 指定代际已进入 `launch` 阶段时，`sales-monitor` / `monitor-sync` 会按 launch 口径监控，而 `presale-snapshot` 仍按该代际预售口径生成快照（用于上市日最终预售快照）。
 - 发送指定代际快照时，输出必须标注：统计截止时间、预售窗口、当前所处阶段（presale/launch）。
-- `make data-pipeline` / `daily-data-pipeline` **不含**销售监控；如需“数据更新 + 监控推送”一体执行：全量数据用 `make daily-ops`，仅订单表用 `make monitor-sync`。
-- `monitor-sync` 仅刷新订单表（`order_data`），不等价于 `make data-refresh`（全量数据集）；需要全量刷新时改用 `make daily-ops` 或先 `make data-refresh`。
+- `make data-pipeline` / `daily-data-pipeline` **只刷新订单 + 下发线索**，且**不含**销售监控；如需“数据更新 + 监控推送”一体执行：用 `make daily-ops`（= daily pipeline + sales-monitor），仅订单表用 `make monitor-sync`。
+- 试驾数据 / 锁单归因等其余数据集**不在 Daily pipeline 内**，只在 `make allupdate`（全量更新 + 校验）或各自独立更新入口维护，走“更新 + 整理”路径。
+- `monitor-sync` 仅刷新订单表（`order_data`），不等价于 `make allupdate`（全量数据集）；需要全量刷新时用 `make allupdate` 或 `make data-refresh`。
+- `make sales-scheduler` 的 09:00 每日管道同样**只刷新订单 + 下发线索**（daily scope）+ 校验 + 观察同步 + 监控；key day 17–23 点仅刷新订单表。试驾 / 锁单归因不在调度器内，走 `make allupdate` 或独立更新入口。
 
 ## Fast Reference
 
 | 查询类型 | CLI 方式 |
 |----------|----------|
-| CLI 问答 | `python main.py "昨天锁单数"` |
-| 锁单总览 | `python mashang_workspace/runtime_scripts/daily_lock_count.py` | runtime |
-| 车型拆分 | `python mashang_workspace/runtime_scripts/lock_by_model.py --limit 5` | runtime |
-| 城市分布 | `python mashang_workspace/runtime_scripts/lock_city_distribution.py` | runtime |
-| 线索转化 | `python mashang_workspace/runtime_scripts/assign_conversion_analysis.py` | runtime |
-| 配置渗透率 | `python mashang_workspace/runtime_scripts/attribute_penetration_report.py` | runtime |
-| ATP 月报 | `python mashang_workspace/runtime_scripts/atp_price_report.py 2026-05` | runtime |
-| 业务状态排查 | `make state-diagnosis` 或 `python mashang_workspace/runtime_scripts/current_state_diagnosis.py [--as-of YYYY-MM-DD]`(库存×待开票未退订×风险暴露;`AS_OF` 支持历史时点 PIT 重建,可选 `SERIES/FORMAT/OUTPUT`) | runtime |
-| 门店→经销商主体画像 | `python mashang_workspace/runtime_scripts/store_dealer_profile.py 门店1 门店2`(返回 门店/经销商主体(Bloc)/大区/该主体门店数(在营)/城市分布 + 近期主理 + 近7日下发线索 + 近7日锁单及车系分布 + CM3留存小订，含主体内排名占比，无独立口径时回落关联车城店;`--status` 在营口径;`--as-of`/`--window-days`;`--format json/csv`) | runtime |
+| 执行 Research Application job | `make jobs-run JOB=nev_apeal_production_golden` 或 `python -m jobs.cli --job nev_apeal_production_golden` | jobs |
+| 锁单总览 | `python mashang_workspace/business_scripts/daily_lock_count.py` | runtime |
+| 车型拆分 | `python mashang_workspace/business_scripts/lock_by_model.py --limit 5` | runtime |
+| 城市分布 | `python mashang_workspace/business_scripts/lock_city_distribution.py` | runtime |
+| 线索转化 | `python mashang_workspace/business_scripts/assign_conversion_analysis.py` | runtime |
+| 配置渗透率 | `python mashang_workspace/business_scripts/attribute_penetration_report.py` | runtime |
+| ATP 月报 | `python mashang_workspace/business_scripts/atp_price_report.py 2026-05` | runtime |
+| 业务状态排查 | `make state-diagnosis` 或 `python mashang_workspace/business_scripts/current_state_diagnosis.py [--as-of YYYY-MM-DD]`(库存×待开票未退订×风险暴露;`AS_OF` 支持历史时点 PIT 重建,可选 `SERIES/FORMAT/OUTPUT`) | runtime |
+| 门店→经销商主体画像 | `python mashang_workspace/business_scripts/store_dealer_profile.py 门店1 门店2`(返回 门店/经销商主体(Bloc)/大区/该主体门店数(在营)/城市分布 + 近期主理 + 近7日下发线索 + 近7日锁单及车系分布 + CM3留存小订，含主体内排名占比，无独立口径时回落关联车城店;`--status` 在营口径;`--as-of`/`--window-days`;`--format json/csv`) | runtime |
 | 主理数据更新 | `python dataset/updater/store_daily_zhuli_to_csv.py [--with-roster]`(Tableau→`dataset/门店日报_主理_当月.csv`;`--with-roster` 另出 `dataset/主理信息表.csv`) | DataOps |
 | 每日下发线索（by门店）更新 | `python dataset/updater/store_daily_leads_to_csv.py`(Tableau 165 门店级视图 → `dataset/store_daily_leads.csv`;**滚动窗口增量合并**,逐日扩长;`--dry-run`/`--rebuild`;非办公网 `--mobile`) | DataOps |
-| 下发线索（全局渠道级）更新 | `python dataset/updater/lock_attribution_data_to_parquet.py --only-assign-test-drive`(Tableau `core_metric_observation/assign` → `dataset/assign_data.csv`,含门店/平台/APP/快慢闪/直播渠道拆分 + 当日/7/30日转化;同时更新 `test_drive_data.csv`;非办公网 `--mobile`) | DataOps |
+| 下发线索（全局渠道级）更新 | `python dataset/updater/assign_data_to_csv.py`(Tableau `core_metric_observation/assign` → `dataset/assign_data.csv`,含门店/平台/APP/快慢闪/直播渠道拆分 + 当日/7/30日转化;Daily pipeline 调用;非办公网 `--mobile`) | DataOps |
+| 试驾数据更新 | `python dataset/updater/test_drive_data_to_csv.py`(Tableau `core_metric_observation/7` → `dataset/test_drive_data.csv`;仅 `allupdate` 或独立更新;非办公网 `--mobile`) | DataOps |
+| 锁单归因数据更新 | `python dataset/updater/lock_attribution_data_to_parquet.py`(Tableau `1h/sheet10` → `dataset/lock_attribution_data.parquet`;仅 `allupdate` 或独立更新;`--no-export` 仅整理本地 CSV;非办公网 `--mobile`) | DataOps |
 | 门店经营状况观察 | `python mashang_workspace/utility_scripts/store_operation_observation.py`(全门店 门店/门店类型/门店形态/近7日下发线索/CM3小订/小订线索比;默认仅保留有线索或小订的门店,`--include-relations` 额外纳入无数据快闪/慢闪并标关联门店;`--format csv` 落 `outputs/tables/store_operation_observation.csv`) | utility |
 | 门店线索×小订四象限 | `python mashang_workspace/research_scripts/store_leads_intention_quadrant.py`(读观察 CSV → 四象限散点 HTML;高/低线索×高/低转化,中位数切分;`--color-by type/format/quadrant` 默认按门店分类着色;`--input`/`--top-label`;落 `outputs/reports/`) | research |
 | 释放曲线 | `python mashang_workspace/research_scripts/release_curve_analysis.py` | research |
@@ -399,7 +399,7 @@ mashang-service/
 | 同比分析 | `python mashang_workspace/research_scripts/quick_lock_ratio.py` | research |
 | 预售累计订单跨代际对比 | `python mashang_workspace/research_scripts/presale_cumulative_order_compare.py --gens DM1 CM2 LS9 LS8 DM2 --as-of YYYY-MM-DD --format html`(通用预售固定框架:末位=主代际,其余为对标;默认当前 presale 代际;`--format terminal/json/html`;`--to-feishu` 额外产出飞书云文档,默认仅 HTML) | research |
 | 预售累计订单跨代际对比（旧入口 shim） | `python mashang_workspace/research_scripts/l6_m2_presale_report.py` 已降为 **compatibility shim**（默认 DM2 + HTML，转调上面的通用脚本）；后续功能扩展一律走通用入口，勿再围绕旧脚本开发 | research |
-| 预售小订转化漏斗 | `python mashang_workspace/runtime_scripts/presale_intention_funnel.py --series CM3 --as-of YYYY-MM-DD`(泛化任意代际;`--series A B C` 多代际对比;`--list` 列可用代际;`--format terminal/json/csv`;`make presale-funnel SERIES=CM3`;固定链路=series_group_logic→预售窗口→小订池→退订/留存/转大定/锁单) | runtime |
+| 预售小订转化漏斗 | `python mashang_workspace/business_scripts/presale_intention_funnel.py --series CM3 --as-of YYYY-MM-DD`(泛化任意代际;`--series A B C` 多代际对比;`--list` 列可用代际;`--format terminal/json/csv`;`make presale-funnel SERIES=CM3`;固定链路=series_group_logic→预售窗口→小订池→退订/留存/转大定/锁单) | runtime |
 | 锁单月度预估 | `make lock-forecast` 或 `python mashang_workspace/research_scripts/structured_business_forecast.py --as-of YYYY-MM-DD --target-month YYYY-MM [--prior-strength N]` | research |
 | 开票月度预估 | `make invoice-forecast` 或 `python mashang_workspace/research_scripts/invoice_monthly_forecast.py --as-of YYYY-MM-DD --target-month YYYY-MM --lock-regime mode` | research |
 | 锁单归因分析 | `make lock-attribution START=2026-01-01 END=2026-08-31 HTML=1`(单样本;可选 `SERIES/CHANNEL`) | make |
@@ -414,18 +414,17 @@ mashang-service/
 | 分组重叠审计 | `python mashang_workspace/utility_scripts/audit_series_group_overlap.py [--json] [--strict]` | utility |
 | 每日观察 | `python mashang_workspace/utility_scripts/skills_order_observation_daily.py` | utility |
 | 达成率预警 | `python mashang_workspace/utility_scripts/skills_attainment_rate_alert.py --days 10` | utility |
-| 生成 Eval | `python mashang_workspace/utility_scripts/generate_eval_cases.py` | utility |
-| 数据更新并同步 | `make data-pipeline`（写操作；旧名 `daily-data-pipeline`；办公网不可达时自动回退移动链路，可 `MOBILE=1` 强制） | DataOps |
+| 数据更新并同步 | `make data-pipeline`（写操作；**仅刷新订单 + 下发线索**；旧名 `daily-data-pipeline`；办公网不可达时自动回退移动链路，可 `MOBILE=1` 强制） | DataOps |
+| 全量更新 + 校验 | `make allupdate`（写操作：`data-refresh` + `data-validate`；含试驾 / 锁单归因“更新 + 整理”；hub 调度别名 `make updateall`） | DataOps |
 | 数据更新 + 监控推送 | `make daily-ops`（写操作：data-pipeline + sales-monitor） | DataOps |
 | 预检数据 | `make data-pipeline-dry-run`（只读；旧名 `daily-data-pipeline-dry-run`） | DataOps |
 | 当前预售/上市监控 | `make sales-monitor`（当前 active 代际 + phase；旧名 `monitor`；先 `make sales-monitor-dry-run` 预览） | monitor |
 | 数据更新+指定代际监控走廊 | `make monitor-sync SERIES=CM3 PHASE=launch|presale [DRY=1]`（仅刷新订单表 → 计算 → 推送/dry-run；旧名 `sales-monitor-sync`） | monitor |
 | 指定代际小订快照 | `make presale-snapshot SERIES=CM3`（先 `DRY=1` 预览；底层 `presale_metrics_to_feishu.py --series CM3`） | monitor |
-| 常驻调度 | `make sales-scheduler`（旧名 `scheduler`） | monitor |
+| 常驻调度 | `make sales-scheduler`（旧名 `scheduler`；09:00 刷新订单+下发线索，key day 仅刷新订单） | monitor |
 | 解析验证范围 | `make verify-scope`（按改动解析最小验证范围） | harness |
 | 执行验证 | `make verify`（仅 scope 内；baseline 不算回归） | harness |
 | 扩大验证 | `make verify-all`（显式全量） | harness |
-| 运行 Runtime Eval | `python mashang_workspace/eval/run_runtime_eval.py` |
 | 运行 Follow-up Eval | `python mashang_workspace/eval/run_followup_eval.py` |
 | 运行 Numeric Eval | `python mashang_workspace/eval/run_numeric_eval.py` |
 | 解析自然语言 | `python mashang_workspace/eval/parse_context_cli.py "昨天锁单数分车型"` |

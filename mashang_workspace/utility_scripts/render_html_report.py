@@ -7,7 +7,7 @@ templates with the Raccoon Research visual identity.
 
 Usage:
     python utility_scripts/render_html_report.py --input contract.json --output report.html
-    python runtime_scripts/daily_lock_count.py --format json | python utility_scripts/render_html_report.py
+    python business_scripts/daily_lock_count.py --format json | python utility_scripts/render_html_report.py
     python utility_scripts/render_html_report.py --input contract.json
 """
 

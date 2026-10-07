@@ -1,14 +1,14 @@
 {
   "inventory_name": "workspace_capability_inventory",
   "version": "0.1",
-  "generated_at": "2026-08-18 04:40:32",
+  "generated_at": "2026-10-07 09:35:28",
   "workspace": "mashang_workspace",
   "summary": {
     "skills": 4,
     "script_categories": 3,
-    "scripts": 60,
+    "scripts": 99,
     "data_assets": 6,
-    "outputs": 82,
+    "outputs": 127,
     "quality_assets": 6
   },
   "groups": [
@@ -68,12 +68,12 @@
       "id": "scripts",
       "title": "Scripts",
       "subtitle": "Agent 能调用什么",
-      "description": "Agent 可直接调用的 Python 脚本，按功能分为 runtime（稳定运行入口）、research（研究分析）、utility（工具/渲染/验证）和 legacy（历史保留）四类。",
+      "description": "Agent 可直接调用的 Python 脚本，按功能分为 business（稳定运行入口）、research（研究分析）、utility（工具/渲染/验证）和 legacy（历史保留）四类。",
       "items": [
         {
           "name": "assign_conversion_analysis.py",
-          "path": "mashang_workspace/runtime_scripts/assign_conversion_analysis.py",
-          "category": "runtime_scripts",
+          "path": "mashang_workspace/business_scripts/assign_conversion_analysis.py",
+          "category": "business_scripts",
           "description": "",
           "short_description": "",
           "has_cli": true,
@@ -85,8 +85,8 @@
         },
         {
           "name": "atp_price_report.py",
-          "path": "mashang_workspace/runtime_scripts/atp_price_report.py",
-          "category": "runtime_scripts",
+          "path": "mashang_workspace/business_scripts/atp_price_report.py",
+          "category": "business_scripts",
           "description": "",
           "short_description": "",
           "has_cli": true,
@@ -98,8 +98,8 @@
         },
         {
           "name": "attribute_penetration_report.py",
-          "path": "mashang_workspace/runtime_scripts/attribute_penetration_report.py",
-          "category": "runtime_scripts",
+          "path": "mashang_workspace/business_scripts/attribute_penetration_report.py",
+          "category": "business_scripts",
           "description": "",
           "short_description": "",
           "has_cli": true,
@@ -111,8 +111,8 @@
         },
         {
           "name": "config_decision_engine.py",
-          "path": "mashang_workspace/runtime_scripts/config_decision_engine.py",
-          "category": "runtime_scripts",
+          "path": "mashang_workspace/business_scripts/config_decision_engine.py",
+          "category": "business_scripts",
           "description": "",
           "short_description": "",
           "has_cli": true,
@@ -123,8 +123,8 @@
         },
         {
           "name": "current_state_diagnosis.py",
-          "path": "mashang_workspace/runtime_scripts/current_state_diagnosis.py",
-          "category": "runtime_scripts",
+          "path": "mashang_workspace/business_scripts/current_state_diagnosis.py",
+          "category": "business_scripts",
           "description": "",
           "short_description": "",
           "has_cli": true,
@@ -135,8 +135,8 @@
         },
         {
           "name": "daily_dc_inventory_change.py",
-          "path": "mashang_workspace/runtime_scripts/daily_dc_inventory_change.py",
-          "category": "runtime_scripts",
+          "path": "mashang_workspace/business_scripts/daily_dc_inventory_change.py",
+          "category": "business_scripts",
           "description": "",
           "short_description": "",
           "has_cli": true,
@@ -147,8 +147,8 @@
         },
         {
           "name": "daily_lock_count.py",
-          "path": "mashang_workspace/runtime_scripts/daily_lock_count.py",
-          "category": "runtime_scripts",
+          "path": "mashang_workspace/business_scripts/daily_lock_count.py",
+          "category": "business_scripts",
           "description": "",
           "short_description": "",
           "has_cli": true,
@@ -159,8 +159,8 @@
         },
         {
           "name": "lock_by_model.py",
-          "path": "mashang_workspace/runtime_scripts/lock_by_model.py",
-          "category": "runtime_scripts",
+          "path": "mashang_workspace/business_scripts/lock_by_model.py",
+          "category": "business_scripts",
           "description": "",
           "short_description": "",
           "has_cli": true,
@@ -171,8 +171,44 @@
         },
         {
           "name": "lock_city_distribution.py",
-          "path": "mashang_workspace/runtime_scripts/lock_city_distribution.py",
-          "category": "runtime_scripts",
+          "path": "mashang_workspace/business_scripts/lock_city_distribution.py",
+          "category": "business_scripts",
+          "description": "",
+          "short_description": "",
+          "has_cli": true,
+          "likely_outputs": [
+            "structured_data"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "monthly_sales_order_type_to_feishu.py",
+          "path": "mashang_workspace/business_scripts/monthly_sales_order_type_to_feishu.py",
+          "category": "business_scripts",
+          "description": "",
+          "short_description": "",
+          "has_cli": true,
+          "likely_outputs": [
+            "structured_data"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "presale_intention_funnel.py",
+          "path": "mashang_workspace/business_scripts/presale_intention_funnel.py",
+          "category": "business_scripts",
+          "description": "",
+          "short_description": "",
+          "has_cli": true,
+          "likely_outputs": [
+            "structured_data"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "store_dealer_profile.py",
+          "path": "mashang_workspace/business_scripts/store_dealer_profile.py",
+          "category": "business_scripts",
           "description": "",
           "short_description": "",
           "has_cli": true,
@@ -183,8 +219,20 @@
         },
         {
           "name": "user_profile.py",
-          "path": "mashang_workspace/runtime_scripts/user_profile.py",
-          "category": "runtime_scripts",
+          "path": "mashang_workspace/business_scripts/user_profile.py",
+          "category": "business_scripts",
+          "description": "",
+          "short_description": "",
+          "has_cli": true,
+          "likely_outputs": [
+            "structured_data"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "vehicle_sales_monitor.py",
+          "path": "mashang_workspace/business_scripts/vehicle_sales_monitor.py",
+          "category": "business_scripts",
           "description": "",
           "short_description": "",
           "has_cli": true,
@@ -281,6 +329,18 @@
           "status": "active"
         },
         {
+          "name": "cq_lock_share_trend.py",
+          "path": "mashang_workspace/research_scripts/cq_lock_share_trend.py",
+          "category": "research_scripts",
+          "description": "",
+          "short_description": "",
+          "has_cli": true,
+          "likely_outputs": [
+            "structured_data"
+          ],
+          "status": "active"
+        },
+        {
           "name": "dc_inventory_trend_report.py",
           "path": "mashang_workspace/research_scripts/dc_inventory_trend_report.py",
           "category": "research_scripts",
@@ -307,6 +367,42 @@
           "status": "active"
         },
         {
+          "name": "downshift_receiver_screen.py",
+          "path": "mashang_workspace/research_scripts/downshift_receiver_screen.py",
+          "category": "research_scripts",
+          "description": "",
+          "short_description": "",
+          "has_cli": true,
+          "likely_outputs": [
+            "structured_data"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "group_order_launch_compare.py",
+          "path": "mashang_workspace/research_scripts/group_order_launch_compare.py",
+          "category": "research_scripts",
+          "description": "",
+          "short_description": "",
+          "has_cli": true,
+          "likely_outputs": [
+            "structured_data"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "historical_opportunity_validation.py",
+          "path": "mashang_workspace/research_scripts/historical_opportunity_validation.py",
+          "category": "research_scripts",
+          "description": "",
+          "short_description": "",
+          "has_cli": true,
+          "likely_outputs": [
+            "structured_data"
+          ],
+          "status": "active"
+        },
+        {
           "name": "invoice_monthly_forecast.py",
           "path": "mashang_workspace/research_scripts/invoice_monthly_forecast.py",
           "category": "research_scripts",
@@ -320,12 +416,85 @@
           "status": "active"
         },
         {
+          "name": "l6_m2_daily_lock_by_edition.py",
+          "path": "mashang_workspace/research_scripts/l6_m2_daily_lock_by_edition.py",
+          "category": "research_scripts",
+          "description": "",
+          "short_description": "",
+          "has_cli": true,
+          "likely_outputs": [
+            "structured_data"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "l6_m2_daily_retention.py",
+          "path": "mashang_workspace/research_scripts/l6_m2_daily_retention.py",
+          "category": "research_scripts",
+          "description": "",
+          "short_description": "",
+          "has_cli": true,
+          "likely_outputs": [
+            "structured_data"
+          ],
+          "status": "active"
+        },
+        {
           "name": "l6_m2_presale_metrics_to_feishu.py",
           "path": "mashang_workspace/research_scripts/l6_m2_presale_metrics_to_feishu.py",
           "category": "research_scripts",
           "description": "",
           "short_description": "",
           "has_cli": true,
+          "likely_outputs": [
+            "unknown"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "l6_m2_presale_report.py",
+          "path": "mashang_workspace/research_scripts/l6_m2_presale_report.py",
+          "category": "research_scripts",
+          "description": "",
+          "short_description": "",
+          "has_cli": true,
+          "likely_outputs": [
+            "html_report"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "launch_cumulative_lock_compare.py",
+          "path": "mashang_workspace/research_scripts/launch_cumulative_lock_compare.py",
+          "category": "research_scripts",
+          "description": "",
+          "short_description": "",
+          "has_cli": true,
+          "likely_outputs": [
+            "structured_data"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "launch_rhythm_incremental_analysis.py",
+          "path": "mashang_workspace/research_scripts/launch_rhythm_incremental_analysis.py",
+          "category": "research_scripts",
+          "description": "",
+          "short_description": "",
+          "has_cli": true,
+          "likely_outputs": [
+            "html_report",
+            "structured_data"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "launch_rhythm_incremental_html.py",
+          "path": "mashang_workspace/research_scripts/launch_rhythm_incremental_html.py",
+          "category": "research_scripts",
+          "description": "",
+          "short_description": "",
+          "has_cli": false,
           "likely_outputs": [
             "unknown"
           ],
@@ -357,6 +526,30 @@
           "status": "active"
         },
         {
+          "name": "lock_config_distribution.py",
+          "path": "mashang_workspace/research_scripts/lock_config_distribution.py",
+          "category": "research_scripts",
+          "description": "",
+          "short_description": "",
+          "has_cli": true,
+          "likely_outputs": [
+            "structured_data"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "lock_lifecycle_stages.py",
+          "path": "mashang_workspace/research_scripts/lock_lifecycle_stages.py",
+          "category": "research_scripts",
+          "description": "",
+          "short_description": "",
+          "has_cli": true,
+          "likely_outputs": [
+            "structured_data"
+          ],
+          "status": "active"
+        },
+        {
           "name": "lock_predict_backtest.py",
           "path": "mashang_workspace/research_scripts/lock_predict_backtest.py",
           "category": "research_scripts",
@@ -377,6 +570,18 @@
           "has_cli": false,
           "likely_outputs": [
             "unknown"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "ls6_invoice_atp_trend.py",
+          "path": "mashang_workspace/research_scripts/ls6_invoice_atp_trend.py",
+          "category": "research_scripts",
+          "description": "",
+          "short_description": "",
+          "has_cli": true,
+          "likely_outputs": [
+            "structured_data"
           ],
           "status": "active"
         },
@@ -482,6 +687,30 @@
           "status": "active"
         },
         {
+          "name": "market_state_assessment.py",
+          "path": "mashang_workspace/research_scripts/market_state_assessment.py",
+          "category": "research_scripts",
+          "description": "",
+          "short_description": "",
+          "has_cli": true,
+          "likely_outputs": [
+            "structured_data"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "mature_market_shock.py",
+          "path": "mashang_workspace/research_scripts/mature_market_shock.py",
+          "category": "research_scripts",
+          "description": "",
+          "short_description": "",
+          "has_cli": true,
+          "likely_outputs": [
+            "structured_data"
+          ],
+          "status": "active"
+        },
+        {
           "name": "model_order_monthly_compare_report.py",
           "path": "mashang_workspace/research_scripts/model_order_monthly_compare_report.py",
           "category": "research_scripts",
@@ -506,14 +735,26 @@
           "status": "active"
         },
         {
+          "name": "pk_weekly_compare.py",
+          "path": "mashang_workspace/research_scripts/pk_weekly_compare.py",
+          "category": "research_scripts",
+          "description": "name: pk_weekly_compare\nuse: python research_scripts/pk_weekly_compare.py --series LS6 --weeks 2026-09-21~2026-09-27 2026-09-07~2026-09-13\nsummary: 读取\"正反向对比\"CSV，按显式指定周（或最近 N 周）对比任意车型的 PK次数、PK正向排名、PK反向排名，输出 Markdown / HTML / JSON。\ninputs:\n  - schema/data_path.md（读取\"正反向对比\"路径）；--data-csv 可直接指定\n  - schema/business_definition.json（6 座车型标记）\noutputs:\n  - stdout：Markdown 表格（terminal）\n  - outputs/reports/pk_weekly_compare_<series>_<range>.html（默认，可用 --output/--html-out 覆盖）\n  - --format json：标准 Result Contract",
+          "short_description": "name: pk_weekly_compare\nuse: python research_scripts/pk_weekly_compare.",
+          "has_cli": true,
+          "likely_outputs": [
+            "structured_data"
+          ],
+          "status": "active"
+        },
+        {
           "name": "pk_weekly_ls8_ls9.py",
           "path": "mashang_workspace/research_scripts/pk_weekly_ls8_ls9.py",
           "category": "research_scripts",
-          "description": "name: pk_weekly_compare_ls8_ls9\nuse: python research_scripts/pk_weekly_ls8_ls9.py -n 7\nupdated_at: \"2026-05-27\"\nsummary: 读取\"正反向对比\"CSV，对比 LS8/LS9 在（end day 所在周的周一）起算连续 N 周的 PK次数、PK正向排名、PK反向排名，并输出 N 个表格到 stdout。\ninputs:\n  - schema/data_path.md（读取\"正反向对比\"路径）\n  - schema/business_definition.json（读取 time_periods.<series>.end）\noutputs:\n  - stdout：Markdown 表格\n  - outputs/reports/pk_weekly_compare_ls8_ls9.html（默认）",
-          "short_description": "name: pk_weekly_compare_ls8_ls9\nuse: python research_scripts/pk_weekly_ls8_ls9.",
+          "description": "",
+          "short_description": "",
           "has_cli": true,
           "likely_outputs": [
-            "unknown"
+            "structured_data"
           ],
           "status": "active"
         },
@@ -530,8 +771,44 @@
           "status": "active"
         },
         {
+          "name": "presale_cumulative_order_compare.py",
+          "path": "mashang_workspace/research_scripts/presale_cumulative_order_compare.py",
+          "category": "research_scripts",
+          "description": "",
+          "short_description": "",
+          "has_cli": true,
+          "likely_outputs": [
+            "structured_data"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "presale_metrics_to_feishu.py",
+          "path": "mashang_workspace/research_scripts/presale_metrics_to_feishu.py",
+          "category": "research_scripts",
+          "description": "",
+          "short_description": "",
+          "has_cli": true,
+          "likely_outputs": [
+            "unknown"
+          ],
+          "status": "active"
+        },
+        {
           "name": "presale_performance_compare.py",
           "path": "mashang_workspace/research_scripts/presale_performance_compare.py",
+          "category": "research_scripts",
+          "description": "",
+          "short_description": "",
+          "has_cli": true,
+          "likely_outputs": [
+            "structured_data"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "price_band_migration.py",
+          "path": "mashang_workspace/research_scripts/price_band_migration.py",
           "category": "research_scripts",
           "description": "",
           "short_description": "",
@@ -550,6 +827,18 @@
           "has_cli": true,
           "likely_outputs": [
             "unknown"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "region_series_preference.py",
+          "path": "mashang_workspace/research_scripts/region_series_preference.py",
+          "category": "research_scripts",
+          "description": "",
+          "short_description": "",
+          "has_cli": true,
+          "likely_outputs": [
+            "structured_data"
           ],
           "status": "active"
         },
@@ -579,6 +868,18 @@
           "status": "active"
         },
         {
+          "name": "saic_group_order_query.py",
+          "path": "mashang_workspace/research_scripts/saic_group_order_query.py",
+          "category": "research_scripts",
+          "description": "",
+          "short_description": "",
+          "has_cli": true,
+          "likely_outputs": [
+            "structured_data"
+          ],
+          "status": "active"
+        },
+        {
           "name": "saic_sales_profile_report.py",
           "path": "mashang_workspace/research_scripts/saic_sales_profile_report.py",
           "category": "research_scripts",
@@ -591,6 +892,42 @@
           "status": "active"
         },
         {
+          "name": "shock_detector_backtest.py",
+          "path": "mashang_workspace/research_scripts/shock_detector_backtest.py",
+          "category": "research_scripts",
+          "description": "",
+          "short_description": "",
+          "has_cli": true,
+          "likely_outputs": [
+            "structured_data"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "shock_detector_rolling.py",
+          "path": "mashang_workspace/research_scripts/shock_detector_rolling.py",
+          "category": "research_scripts",
+          "description": "",
+          "short_description": "",
+          "has_cli": true,
+          "likely_outputs": [
+            "structured_data"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "shock_detector_scan.py",
+          "path": "mashang_workspace/research_scripts/shock_detector_scan.py",
+          "category": "research_scripts",
+          "description": "",
+          "short_description": "",
+          "has_cli": true,
+          "likely_outputs": [
+            "structured_data"
+          ],
+          "status": "active"
+        },
+        {
           "name": "stalled_order_forecast.py",
           "path": "mashang_workspace/research_scripts/stalled_order_forecast.py",
           "category": "research_scripts",
@@ -599,6 +936,30 @@
           "has_cli": true,
           "likely_outputs": [
             "html_report",
+            "structured_data"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "store_leads_intention_quadrant.py",
+          "path": "mashang_workspace/research_scripts/store_leads_intention_quadrant.py",
+          "category": "research_scripts",
+          "description": "",
+          "short_description": "",
+          "has_cli": true,
+          "likely_outputs": [
+            "structured_data"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "store_network_compare.py",
+          "path": "mashang_workspace/research_scripts/store_network_compare.py",
+          "category": "research_scripts",
+          "description": "",
+          "short_description": "",
+          "has_cli": true,
+          "likely_outputs": [
             "structured_data"
           ],
           "status": "active"
@@ -617,9 +978,83 @@
           "status": "active"
         },
         {
+          "name": "tesla_wholesale_export_report.py",
+          "path": "mashang_workspace/research_scripts/tesla_wholesale_export_report.py",
+          "category": "research_scripts",
+          "description": "",
+          "short_description": "",
+          "has_cli": true,
+          "likely_outputs": [
+            "html_report",
+            "structured_data"
+          ],
+          "status": "active"
+        },
+        {
           "name": "tp_and_mix_ways/check_tp_and_mix_ways_asset.py",
           "path": "mashang_workspace/research_scripts/tp_and_mix_ways/check_tp_and_mix_ways_asset.py",
           "category": "research_scripts",
+          "description": "",
+          "short_description": "",
+          "has_cli": true,
+          "likely_outputs": [
+            "unknown"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "tp_and_mix_ways_market_volume.py",
+          "path": "mashang_workspace/research_scripts/tp_and_mix_ways_market_volume.py",
+          "category": "research_scripts",
+          "description": "",
+          "short_description": "",
+          "has_cli": true,
+          "likely_outputs": [
+            "structured_data"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "watchlist_brand_driver_decomposition.py",
+          "path": "mashang_workspace/research_scripts/watchlist_brand_driver_decomposition.py",
+          "category": "research_scripts",
+          "description": "",
+          "short_description": "",
+          "has_cli": true,
+          "likely_outputs": [
+            "structured_data"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "watchlist_brand_monthly_report.py",
+          "path": "mashang_workspace/research_scripts/watchlist_brand_monthly_report.py",
+          "category": "research_scripts",
+          "description": "",
+          "short_description": "",
+          "has_cli": true,
+          "likely_outputs": [
+            "html_report",
+            "structured_data"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "watchlist_brand_trend.py",
+          "path": "mashang_workspace/research_scripts/watchlist_brand_trend.py",
+          "category": "research_scripts",
+          "description": "",
+          "short_description": "",
+          "has_cli": true,
+          "likely_outputs": [
+            "structured_data"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "audit_series_group_overlap.py",
+          "path": "mashang_workspace/utility_scripts/audit_series_group_overlap.py",
+          "category": "utility_scripts",
           "description": "",
           "short_description": "",
           "has_cli": true,
@@ -727,6 +1162,18 @@
           "status": "active"
         },
         {
+          "name": "docx2md.py",
+          "path": "mashang_workspace/utility_scripts/docx2md.py",
+          "category": "utility_scripts",
+          "description": "",
+          "short_description": "",
+          "has_cli": true,
+          "likely_outputs": [
+            "structured_data"
+          ],
+          "status": "active"
+        },
+        {
           "name": "generate_delivery_inventory_report.py",
           "path": "mashang_workspace/utility_scripts/generate_delivery_inventory_report.py",
           "category": "utility_scripts",
@@ -735,18 +1182,6 @@
           "has_cli": true,
           "likely_outputs": [
             "html_report",
-            "structured_data"
-          ],
-          "status": "active"
-        },
-        {
-          "name": "generate_eval_cases.py",
-          "path": "mashang_workspace/utility_scripts/generate_eval_cases.py",
-          "category": "utility_scripts",
-          "description": "",
-          "short_description": "",
-          "has_cli": true,
-          "likely_outputs": [
             "structured_data"
           ],
           "status": "active"
@@ -761,6 +1196,18 @@
           "likely_outputs": [
             "html_report",
             "structured_data"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "sales_scheduler.py",
+          "path": "mashang_workspace/utility_scripts/sales_scheduler.py",
+          "category": "utility_scripts",
+          "description": "",
+          "short_description": "",
+          "has_cli": true,
+          "likely_outputs": [
+            "unknown"
           ],
           "status": "active"
         },
@@ -797,6 +1244,30 @@
           "has_cli": true,
           "likely_outputs": [
             "structured_data"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "store_operation_observation.py",
+          "path": "mashang_workspace/utility_scripts/store_operation_observation.py",
+          "category": "utility_scripts",
+          "description": "",
+          "short_description": "",
+          "has_cli": true,
+          "likely_outputs": [
+            "structured_data"
+          ],
+          "status": "active"
+        },
+        {
+          "name": "validate_study_spec.py",
+          "path": "mashang_workspace/utility_scripts/validate_study_spec.py",
+          "category": "utility_scripts",
+          "description": "",
+          "short_description": "",
+          "has_cli": true,
+          "likely_outputs": [
+            "unknown"
           ],
           "status": "active"
         },
@@ -858,9 +1329,9 @@
           "allowed_usage": "锁单统计、车型分布、城市分布、时间趋势分析",
           "forbidden_usage": "不修改原始数据",
           "related_scripts": [
-            "runtime_scripts/daily_lock_count.py",
-            "runtime_scripts/lock_by_model.py",
-            "runtime_scripts/lock_city_distribution.py"
+            "business_scripts/daily_lock_count.py",
+            "business_scripts/lock_by_model.py",
+            "business_scripts/lock_city_distribution.py"
           ],
           "status": "active"
         },
@@ -877,7 +1348,7 @@
           "allowed_usage": "线索转化率分析、渠道拆解",
           "forbidden_usage": "不修改原始数据",
           "related_scripts": [
-            "runtime_scripts/assign_conversion_analysis.py",
+            "business_scripts/assign_conversion_analysis.py",
             "research_scripts/lock_predict_backtest.py"
           ],
           "status": "active"
@@ -895,7 +1366,7 @@
           "allowed_usage": "选装率分析、属性分布、配置渗透率报告",
           "forbidden_usage": "不修改原始数据",
           "related_scripts": [
-            "runtime_scripts/attribute_penetration_report.py"
+            "business_scripts/attribute_penetration_report.py"
           ],
           "status": "active"
         },
@@ -944,11 +1415,11 @@
         {
           "name": ".DS_Store",
           "path": "mashang_workspace/outputs/reports/.DS_Store",
-          "description": "生成报告，14.0 KB，other，关联能力：general_report",
-          "short_description": "other · 14.0 KB",
+          "description": "生成报告，10.0 KB，other，关联能力：general_report",
+          "short_description": "other · 10.0 KB",
           "type": "other",
-          "modified_at": "2026-08-13 07:23",
-          "size_kb": 14.0,
+          "modified_at": "2026-08-26 07:56",
+          "size_kb": 10.0,
           "related_capability": "general_report",
           "status": "generated"
         },
@@ -975,6 +1446,94 @@
           "status": "generated"
         },
         {
+          "name": "CDG_2026-08_lock.html",
+          "path": "mashang_workspace/outputs/reports/CDG_2026-08_lock.html",
+          "description": "生成报告，7.5 KB，html report，关联能力：lock_analysis",
+          "short_description": "html report · 7.5 KB",
+          "type": "html_report",
+          "modified_at": "2026-09-24 05:56",
+          "size_kb": 7.5,
+          "related_capability": "lock_analysis",
+          "status": "generated"
+        },
+        {
+          "name": "L6_M2_预售情况汇报_2026-08-24.html",
+          "path": "mashang_workspace/outputs/reports/L6_M2_预售情况汇报_2026-08-24.html",
+          "description": "生成报告，25.5 KB，html report，关联能力：general_report",
+          "short_description": "html report · 25.5 KB",
+          "type": "html_report",
+          "modified_at": "2026-08-24 08:30",
+          "size_kb": 25.5,
+          "related_capability": "general_report",
+          "status": "generated"
+        },
+        {
+          "name": "L6_M2_预售情况汇报_2026-08-24.md",
+          "path": "mashang_workspace/outputs/reports/L6_M2_预售情况汇报_2026-08-24.md",
+          "description": "生成报告，19.5 KB，markdown report，关联能力：general_report",
+          "short_description": "markdown report · 19.5 KB",
+          "type": "markdown_report",
+          "modified_at": "2026-08-24 08:30",
+          "size_kb": 19.5,
+          "related_capability": "general_report",
+          "status": "generated"
+        },
+        {
+          "name": "L6_M2_预售情况汇报_2026-08-25.html",
+          "path": "mashang_workspace/outputs/reports/L6_M2_预售情况汇报_2026-08-25.html",
+          "description": "生成报告，27.1 KB，html report，关联能力：general_report",
+          "short_description": "html report · 27.1 KB",
+          "type": "html_report",
+          "modified_at": "2026-08-25 01:44",
+          "size_kb": 27.1,
+          "related_capability": "general_report",
+          "status": "generated"
+        },
+        {
+          "name": "L6_M2_预售情况汇报_2026-08-25.md",
+          "path": "mashang_workspace/outputs/reports/L6_M2_预售情况汇报_2026-08-25.md",
+          "description": "生成报告，19.8 KB，markdown report，关联能力：general_report",
+          "short_description": "markdown report · 19.8 KB",
+          "type": "markdown_report",
+          "modified_at": "2026-08-25 01:44",
+          "size_kb": 19.8,
+          "related_capability": "general_report",
+          "status": "generated"
+        },
+        {
+          "name": "L6_M2_预售情况汇报_2026-08-26.html",
+          "path": "mashang_workspace/outputs/reports/L6_M2_预售情况汇报_2026-08-26.html",
+          "description": "生成报告，27.1 KB，html report，关联能力：general_report",
+          "short_description": "html report · 27.1 KB",
+          "type": "html_report",
+          "modified_at": "2026-08-26 01:57",
+          "size_kb": 27.1,
+          "related_capability": "general_report",
+          "status": "generated"
+        },
+        {
+          "name": "L6_M2_预售情况汇报_2026-08-26.md",
+          "path": "mashang_workspace/outputs/reports/L6_M2_预售情况汇报_2026-08-26.md",
+          "description": "生成报告，19.9 KB，markdown report，关联能力：general_report",
+          "short_description": "markdown report · 19.9 KB",
+          "type": "markdown_report",
+          "modified_at": "2026-08-26 01:57",
+          "size_kb": 19.9,
+          "related_capability": "general_report",
+          "status": "generated"
+        },
+        {
+          "name": "L6_lifecycle_lock_stages.md",
+          "path": "mashang_workspace/outputs/reports/L6_lifecycle_lock_stages.md",
+          "description": "生成报告，5.3 KB，markdown report，关联能力：lock_analysis",
+          "short_description": "markdown report · 5.3 KB",
+          "type": "markdown_report",
+          "modified_at": "2026-09-07 01:51",
+          "size_kb": 5.3,
+          "related_capability": "lock_analysis",
+          "status": "generated"
+        },
+        {
           "name": "LS8_week_model_report_20260626.html",
           "path": "mashang_workspace/outputs/reports/LS8_week_model_report_20260626.html",
           "description": "生成报告，30.4 KB，html report，关联能力：general_report",
@@ -994,6 +1553,17 @@
           "modified_at": "2026-06-26 02:31",
           "size_kb": 24.3,
           "related_capability": "general_report",
+          "status": "generated"
+        },
+        {
+          "name": "Lifecycle_lock_stages_CM_LS.md",
+          "path": "mashang_workspace/outputs/reports/Lifecycle_lock_stages_CM_LS.md",
+          "description": "生成报告，8.6 KB，markdown report，关联能力：lock_analysis",
+          "short_description": "markdown report · 8.6 KB",
+          "type": "markdown_report",
+          "modified_at": "2026-09-07 01:50",
+          "size_kb": 8.6,
+          "related_capability": "lock_analysis",
           "status": "generated"
         },
         {
@@ -1059,6 +1629,28 @@
           "type": "html_report",
           "modified_at": "2026-08-07 02:22",
           "size_kb": 7.6,
+          "related_capability": "atp_price",
+          "status": "generated"
+        },
+        {
+          "name": "atp_2026-08.html",
+          "path": "mashang_workspace/outputs/reports/atp_2026-08.html",
+          "description": "生成报告，7.7 KB，html report，关联能力：atp_price",
+          "short_description": "html report · 7.7 KB",
+          "type": "html_report",
+          "modified_at": "2026-09-04 01:32",
+          "size_kb": 7.7,
+          "related_capability": "atp_price",
+          "status": "generated"
+        },
+        {
+          "name": "atp_2026-09.html",
+          "path": "mashang_workspace/outputs/reports/atp_2026-09.html",
+          "description": "生成报告，7.7 KB，html report，关联能力：atp_price",
+          "short_description": "html report · 7.7 KB",
+          "type": "html_report",
+          "modified_at": "2026-10-04 05:06",
+          "size_kb": 7.7,
           "related_capability": "atp_price",
           "status": "generated"
         },
@@ -1195,6 +1787,17 @@
           "status": "generated"
         },
         {
+          "name": "cq_lock_share_trend.html",
+          "path": "mashang_workspace/outputs/reports/cq_lock_share_trend.html",
+          "description": "生成报告，67.8 KB，html report，关联能力：lock_analysis",
+          "short_description": "html report · 67.8 KB",
+          "type": "html_report",
+          "modified_at": "2026-09-20 09:08",
+          "size_kb": 67.8,
+          "related_capability": "lock_analysis",
+          "status": "generated"
+        },
+        {
           "name": "daily_msg_report.html",
           "path": "mashang_workspace/outputs/reports/daily_msg_report.html",
           "description": "生成报告，25.8 KB，html report，关联能力：voc_analysis",
@@ -1250,6 +1853,28 @@
           "status": "generated"
         },
         {
+          "name": "downshift_receiver_validation_2024-03_2025-03.md",
+          "path": "mashang_workspace/outputs/reports/downshift_receiver_validation_2024-03_2025-03.md",
+          "description": "生成报告，15.9 KB，markdown report，关联能力：general_report",
+          "short_description": "markdown report · 15.9 KB",
+          "type": "markdown_report",
+          "modified_at": "2026-08-27 05:04",
+          "size_kb": 15.9,
+          "related_capability": "general_report",
+          "status": "generated"
+        },
+        {
+          "name": "downshift_receiver_validation_downshift_receiver.md",
+          "path": "mashang_workspace/outputs/reports/downshift_receiver_validation_downshift_receiver.md",
+          "description": "生成报告，15.9 KB，markdown report，关联能力：general_report",
+          "short_description": "markdown report · 15.9 KB",
+          "type": "markdown_report",
+          "modified_at": "2026-08-27 05:03",
+          "size_kb": 15.9,
+          "related_capability": "general_report",
+          "status": "generated"
+        },
+        {
           "name": "followup_trace_ls8_city.md",
           "path": "mashang_workspace/outputs/reports/followup_trace_ls8_city.md",
           "description": "生成报告，9.4 KB，markdown report，关联能力：agent_trace",
@@ -1261,6 +1886,50 @@
           "status": "generated"
         },
         {
+          "name": "historical_opportunity_validation_202303.md",
+          "path": "mashang_workspace/outputs/reports/historical_opportunity_validation_202303.md",
+          "description": "生成报告，7.5 KB，markdown report，关联能力：general_report",
+          "short_description": "markdown report · 7.5 KB",
+          "type": "markdown_report",
+          "modified_at": "2026-08-27 04:50",
+          "size_kb": 7.5,
+          "related_capability": "general_report",
+          "status": "generated"
+        },
+        {
+          "name": "historical_opportunity_validation_202403.md",
+          "path": "mashang_workspace/outputs/reports/historical_opportunity_validation_202403.md",
+          "description": "生成报告，7.0 KB，markdown report，关联能力：general_report",
+          "short_description": "markdown report · 7.0 KB",
+          "type": "markdown_report",
+          "modified_at": "2026-08-27 04:50",
+          "size_kb": 7.0,
+          "related_capability": "general_report",
+          "status": "generated"
+        },
+        {
+          "name": "historical_opportunity_validation_202503.md",
+          "path": "mashang_workspace/outputs/reports/historical_opportunity_validation_202503.md",
+          "description": "生成报告，7.5 KB，markdown report，关联能力：general_report",
+          "short_description": "markdown report · 7.5 KB",
+          "type": "markdown_report",
+          "modified_at": "2026-08-27 04:50",
+          "size_kb": 7.5,
+          "related_capability": "general_report",
+          "status": "generated"
+        },
+        {
+          "name": "historical_opportunity_validation_multi_period.md",
+          "path": "mashang_workspace/outputs/reports/historical_opportunity_validation_multi_period.md",
+          "description": "生成报告，5.3 KB，markdown report，关联能力：general_report",
+          "short_description": "markdown report · 5.3 KB",
+          "type": "markdown_report",
+          "modified_at": "2026-08-27 04:50",
+          "size_kb": 5.3,
+          "related_capability": "general_report",
+          "status": "generated"
+        },
+        {
           "name": "june_2026_forecast.html",
           "path": "mashang_workspace/outputs/reports/june_2026_forecast.html",
           "description": "生成报告，5.9 KB，html report，关联能力：prediction",
@@ -1269,6 +1938,61 @@
           "modified_at": "2026-06-15 05:03",
           "size_kb": 5.9,
           "related_capability": "prediction",
+          "status": "generated"
+        },
+        {
+          "name": "launch_cum_lock_compare_20260907.html",
+          "path": "mashang_workspace/outputs/reports/launch_cum_lock_compare_20260907.html",
+          "description": "生成报告，50.7 KB，html report，关联能力：lock_analysis",
+          "short_description": "html report · 50.7 KB",
+          "type": "html_report",
+          "modified_at": "2026-09-07 06:08",
+          "size_kb": 50.7,
+          "related_capability": "lock_analysis",
+          "status": "generated"
+        },
+        {
+          "name": "launch_cum_lock_compare_20260925.html",
+          "path": "mashang_workspace/outputs/reports/launch_cum_lock_compare_20260925.html",
+          "description": "生成报告，37.9 KB，html report，关联能力：lock_analysis",
+          "short_description": "html report · 37.9 KB",
+          "type": "html_report",
+          "modified_at": "2026-09-25 02:47",
+          "size_kb": 37.9,
+          "related_capability": "lock_analysis",
+          "status": "generated"
+        },
+        {
+          "name": "launch_cum_lock_compare_20260928.html",
+          "path": "mashang_workspace/outputs/reports/launch_cum_lock_compare_20260928.html",
+          "description": "生成报告，59.3 KB，html report，关联能力：lock_analysis",
+          "short_description": "html report · 59.3 KB",
+          "type": "html_report",
+          "modified_at": "2026-09-28 04:10",
+          "size_kb": 59.3,
+          "related_capability": "lock_analysis",
+          "status": "generated"
+        },
+        {
+          "name": "launch_cum_lock_compare_20261005.html",
+          "path": "mashang_workspace/outputs/reports/launch_cum_lock_compare_20261005.html",
+          "description": "生成报告，85.3 KB，html report，关联能力：lock_analysis",
+          "short_description": "html report · 85.3 KB",
+          "type": "html_report",
+          "modified_at": "2026-10-05 08:32",
+          "size_kb": 85.3,
+          "related_capability": "lock_analysis",
+          "status": "generated"
+        },
+        {
+          "name": "launch_rhythm_incremental_analysis.html",
+          "path": "mashang_workspace/outputs/reports/launch_rhythm_incremental_analysis.html",
+          "description": "生成报告，16.1 KB，html report，关联能力：general_report",
+          "short_description": "html report · 16.1 KB",
+          "type": "html_report",
+          "modified_at": "2026-08-31 00:58",
+          "size_kb": 16.1,
+          "related_capability": "general_report",
           "status": "generated"
         },
         {
@@ -1316,13 +2040,24 @@
           "status": "generated"
         },
         {
+          "name": "lock_attribution_compare_2025-09-10_2025-09-16_vs_2026-09-23_2026-09-29.html",
+          "path": "mashang_workspace/outputs/reports/lock_attribution_compare_2025-09-10_2025-09-16_vs_2026-09-23_2026-09-29.html",
+          "description": "生成报告，12.1 KB，html report，关联能力：lock_analysis",
+          "short_description": "html report · 12.1 KB",
+          "type": "html_report",
+          "modified_at": "2026-10-06 02:34",
+          "size_kb": 12.1,
+          "related_capability": "lock_analysis",
+          "status": "generated"
+        },
+        {
           "name": "lock_predict_backtest.html",
           "path": "mashang_workspace/outputs/reports/lock_predict_backtest.html",
-          "description": "生成报告，424.9 KB，html report，关联能力：prediction",
-          "short_description": "html report · 424.9 KB",
+          "description": "生成报告，438.6 KB，html report，关联能力：prediction",
+          "short_description": "html report · 438.6 KB",
           "type": "html_report",
-          "modified_at": "2026-08-18 02:48",
-          "size_kb": 424.9,
+          "modified_at": "2026-10-07 09:34",
+          "size_kb": 438.6,
           "related_capability": "prediction",
           "status": "generated"
         },
@@ -1417,11 +2152,11 @@
         {
           "name": "ls9_interior_option_report.html",
           "path": "mashang_workspace/outputs/reports/ls9_interior_option_report.html",
-          "description": "生成报告，11.9 KB，html report，关联能力：general_report",
-          "short_description": "html report · 11.9 KB",
+          "description": "生成报告，12.4 KB，html report，关联能力：general_report",
+          "short_description": "html report · 12.4 KB",
           "type": "html_report",
-          "modified_at": "2026-08-05 13:11",
-          "size_kb": 11.9,
+          "modified_at": "2026-10-07 09:35",
+          "size_kb": 12.4,
           "related_capability": "general_report",
           "status": "generated"
         },
@@ -1434,6 +2169,28 @@
           "modified_at": "2026-07-23 04:29",
           "size_kb": 90.9,
           "related_capability": "lock_analysis",
+          "status": "generated"
+        },
+        {
+          "name": "market_state_observation_2026-07.html",
+          "path": "mashang_workspace/outputs/reports/market_state_observation_2026-07.html",
+          "description": "生成报告，29.5 KB，html report，关联能力：general_report",
+          "short_description": "html report · 29.5 KB",
+          "type": "html_report",
+          "modified_at": "2026-08-28 01:26",
+          "size_kb": 29.5,
+          "related_capability": "general_report",
+          "status": "generated"
+        },
+        {
+          "name": "mature_market_shock_2022-04_2026-03.md",
+          "path": "mashang_workspace/outputs/reports/mature_market_shock_2022-04_2026-03.md",
+          "description": "生成报告，3.4 KB，markdown report，关联能力：general_report",
+          "short_description": "markdown report · 3.4 KB",
+          "type": "markdown_report",
+          "modified_at": "2026-08-27 05:12",
+          "size_kb": 3.4,
+          "related_capability": "general_report",
           "status": "generated"
         },
         {
@@ -1450,23 +2207,56 @@
         {
           "name": "model_order_monthly_compare.html",
           "path": "mashang_workspace/outputs/reports/model_order_monthly_compare.html",
-          "description": "生成报告，9.1 KB，html report，关联能力：general_report",
-          "short_description": "html report · 9.1 KB",
+          "description": "生成报告，9.2 KB，html report，关联能力：general_report",
+          "short_description": "html report · 9.2 KB",
           "type": "html_report",
-          "modified_at": "2026-08-03 02:25",
-          "size_kb": 9.1,
+          "modified_at": "2026-09-07 05:12",
+          "size_kb": 9.2,
           "related_capability": "general_report",
+          "status": "generated"
+        },
+        {
+          "name": "pk_weekly_compare_LS6_09-21_09-27.html",
+          "path": "mashang_workspace/outputs/reports/pk_weekly_compare_LS6_09-21_09-27.html",
+          "description": "生成报告，7.8 KB，html report，关联能力：competitive_analysis",
+          "short_description": "html report · 7.8 KB",
+          "type": "html_report",
+          "modified_at": "2026-09-28 02:30",
+          "size_kb": 7.8,
+          "related_capability": "competitive_analysis",
+          "status": "generated"
+        },
+        {
+          "name": "pk_weekly_compare_LS6_09-22_09-28.html",
+          "path": "mashang_workspace/outputs/reports/pk_weekly_compare_LS6_09-22_09-28.html",
+          "description": "生成报告，8.7 KB，html report，关联能力：competitive_analysis",
+          "short_description": "html report · 8.7 KB",
+          "type": "html_report",
+          "modified_at": "2026-09-28 03:22",
+          "size_kb": 8.7,
+          "related_capability": "competitive_analysis",
           "status": "generated"
         },
         {
           "name": "pk_weekly_compare_ls8_ls9.html",
           "path": "mashang_workspace/outputs/reports/pk_weekly_compare_ls8_ls9.html",
-          "description": "生成报告，29.0 KB，html report，关联能力：competitive_analysis",
-          "short_description": "html report · 29.0 KB",
+          "description": "生成报告，1.4 KB，html report，关联能力：competitive_analysis",
+          "short_description": "html report · 1.4 KB",
           "type": "html_report",
-          "modified_at": "2026-07-23 03:00",
-          "size_kb": 29.0,
+          "modified_at": "2026-09-28 02:18",
+          "size_kb": 1.4,
           "related_capability": "competitive_analysis",
+          "status": "generated"
+        },
+        {
+          "name": "presale_cum_order_compare_CM3_CM2_CM1_CM0_LS8_LS9_20260915.html",
+          "path": "mashang_workspace/outputs/reports/presale_cum_order_compare_CM3_CM2_CM1_CM0_LS8_LS9_20260915.html",
+          "description": "生成报告，106.0 KB，html report，关联能力：general_report",
+          "short_description": "html report · 106.0 KB",
+          "type": "html_report",
+          "modified_at": "2026-09-16 01:21",
+          "size_kb": 106.0,
+          "related_capability": "general_report",
           "status": "generated"
         },
         {
@@ -1477,6 +2267,28 @@
           "type": "html_report",
           "modified_at": "2026-08-03 02:11",
           "size_kb": 13.2,
+          "related_capability": "general_report",
+          "status": "generated"
+        },
+        {
+          "name": "price_band_migration_2022-04_2026-03.md",
+          "path": "mashang_workspace/outputs/reports/price_band_migration_2022-04_2026-03.md",
+          "description": "生成报告，16.2 KB，markdown report，关联能力：general_report",
+          "short_description": "markdown report · 16.2 KB",
+          "type": "markdown_report",
+          "modified_at": "2026-08-27 04:58",
+          "size_kb": 16.2,
+          "related_capability": "general_report",
+          "status": "generated"
+        },
+        {
+          "name": "price_down_volume_opportunity_202304_202403.md",
+          "path": "mashang_workspace/outputs/reports/price_down_volume_opportunity_202304_202403.md",
+          "description": "生成报告，19.8 KB，markdown report，关联能力：general_report",
+          "short_description": "markdown report · 19.8 KB",
+          "type": "markdown_report",
+          "modified_at": "2026-08-27 01:03",
+          "size_kb": 19.8,
           "related_capability": "general_report",
           "status": "generated"
         },
@@ -1492,6 +2304,61 @@
           "status": "generated"
         },
         {
+          "name": "raw-field-notes-evidence-flow.html",
+          "path": "mashang_workspace/outputs/reports/raw-field-notes-evidence-flow.html",
+          "description": "生成报告，9.7 KB，html report，关联能力：general_report",
+          "short_description": "html report · 9.7 KB",
+          "type": "html_report",
+          "modified_at": "2026-09-11 03:50",
+          "size_kb": 9.7,
+          "related_capability": "general_report",
+          "status": "generated"
+        },
+        {
+          "name": "raw-field-notes-evidence-issue-pattern-finding.html",
+          "path": "mashang_workspace/outputs/reports/raw-field-notes-evidence-issue-pattern-finding.html",
+          "description": "生成报告，9.2 KB，html report，关联能力：general_report",
+          "short_description": "html report · 9.2 KB",
+          "type": "html_report",
+          "modified_at": "2026-09-11 04:00",
+          "size_kb": 9.2,
+          "related_capability": "general_report",
+          "status": "generated"
+        },
+        {
+          "name": "region_series_preference.html",
+          "path": "mashang_workspace/outputs/reports/region_series_preference.html",
+          "description": "生成报告，17.4 KB，html report，关联能力：general_report",
+          "short_description": "html report · 17.4 KB",
+          "type": "html_report",
+          "modified_at": "2026-09-20 09:15",
+          "size_kb": 17.4,
+          "related_capability": "general_report",
+          "status": "generated"
+        },
+        {
+          "name": "shock_detector_backtest_2023-06_2025-06.md",
+          "path": "mashang_workspace/outputs/reports/shock_detector_backtest_2023-06_2025-06.md",
+          "description": "生成报告，12.9 KB，markdown report，关联能力：prediction",
+          "short_description": "markdown report · 12.9 KB",
+          "type": "markdown_report",
+          "modified_at": "2026-08-27 05:32",
+          "size_kb": 12.9,
+          "related_capability": "prediction",
+          "status": "generated"
+        },
+        {
+          "name": "shock_detector_scan_2022-04_2026-03.md",
+          "path": "mashang_workspace/outputs/reports/shock_detector_scan_2022-04_2026-03.md",
+          "description": "生成报告，7.4 KB，markdown report，关联能力：general_report",
+          "short_description": "markdown report · 7.4 KB",
+          "type": "markdown_report",
+          "modified_at": "2026-08-27 05:21",
+          "size_kb": 7.4,
+          "related_capability": "general_report",
+          "status": "generated"
+        },
+        {
           "name": "store_bloc_distribution.md",
           "path": "mashang_workspace/outputs/reports/store_bloc_distribution.md",
           "description": "生成报告，8.7 KB，markdown report，关联能力：general_report",
@@ -1499,6 +2366,39 @@
           "type": "markdown_report",
           "modified_at": "2026-07-22 01:46",
           "size_kb": 8.7,
+          "related_capability": "general_report",
+          "status": "generated"
+        },
+        {
+          "name": "store_leads_intention_quadrant.html",
+          "path": "mashang_workspace/outputs/reports/store_leads_intention_quadrant.html",
+          "description": "生成报告，48.9 KB，html report，关联能力：general_report",
+          "short_description": "html report · 48.9 KB",
+          "type": "html_report",
+          "modified_at": "2026-09-16 08:40",
+          "size_kb": 48.9,
+          "related_capability": "general_report",
+          "status": "generated"
+        },
+        {
+          "name": "store_leads_intention_quadrant_by_quadrant.html",
+          "path": "mashang_workspace/outputs/reports/store_leads_intention_quadrant_by_quadrant.html",
+          "description": "生成报告，48.0 KB，html report，关联能力：general_report",
+          "short_description": "html report · 48.0 KB",
+          "type": "html_report",
+          "modified_at": "2026-09-16 08:36",
+          "size_kb": 48.0,
+          "related_capability": "general_report",
+          "status": "generated"
+        },
+        {
+          "name": "store_leads_intention_quadrant_chongqing.html",
+          "path": "mashang_workspace/outputs/reports/store_leads_intention_quadrant_chongqing.html",
+          "description": "生成报告，50.3 KB，html report，关联能力：general_report",
+          "short_description": "html report · 50.3 KB",
+          "type": "html_report",
+          "modified_at": "2026-09-20 08:16",
+          "size_kb": 50.3,
           "related_capability": "general_report",
           "status": "generated"
         },
@@ -1516,12 +2416,34 @@
         {
           "name": "tesla_wholesale_export_report.html",
           "path": "mashang_workspace/outputs/reports/tesla_wholesale_export_report.html",
-          "description": "生成报告，25.3 KB，html report，关联能力：general_report",
-          "short_description": "html report · 25.3 KB",
+          "description": "生成报告，24.9 KB，html report，关联能力：general_report",
+          "short_description": "html report · 24.9 KB",
           "type": "html_report",
-          "modified_at": "2026-08-10 03:37",
-          "size_kb": 25.3,
+          "modified_at": "2026-09-15 03:46",
+          "size_kb": 24.9,
           "related_capability": "general_report",
+          "status": "generated"
+        },
+        {
+          "name": "tp_and_mix_ways_market_volume_2025-08_2026-07.md",
+          "path": "mashang_workspace/outputs/reports/tp_and_mix_ways_market_volume_2025-08_2026-07.md",
+          "description": "生成报告，20.9 KB，markdown report，关联能力：data_quality",
+          "short_description": "markdown report · 20.9 KB",
+          "type": "markdown_report",
+          "modified_at": "2026-08-27 01:03",
+          "size_kb": 20.9,
+          "related_capability": "data_quality",
+          "status": "generated"
+        },
+        {
+          "name": "tp_and_mix_ways_market_volume_research_plan.md",
+          "path": "mashang_workspace/outputs/reports/tp_and_mix_ways_market_volume_research_plan.md",
+          "description": "生成报告，6.7 KB，markdown report，关联能力：data_quality",
+          "short_description": "markdown report · 6.7 KB",
+          "type": "markdown_report",
+          "modified_at": "2026-08-26 08:06",
+          "size_kb": 6.7,
+          "related_capability": "data_quality",
           "status": "generated"
         },
         {
@@ -1554,6 +2476,39 @@
           "type": "markdown_report",
           "modified_at": "2026-07-11 04:35",
           "size_kb": 4.1,
+          "related_capability": "general_report",
+          "status": "generated"
+        },
+        {
+          "name": "watchlist_brand_driver_2026-07.html",
+          "path": "mashang_workspace/outputs/reports/watchlist_brand_driver_2026-07.html",
+          "description": "生成报告，16.0 KB，html report，关联能力：general_report",
+          "short_description": "html report · 16.0 KB",
+          "type": "html_report",
+          "modified_at": "2026-08-18 05:24",
+          "size_kb": 16.0,
+          "related_capability": "general_report",
+          "status": "generated"
+        },
+        {
+          "name": "watchlist_brand_sales_2026-07.html",
+          "path": "mashang_workspace/outputs/reports/watchlist_brand_sales_2026-07.html",
+          "description": "生成报告，15.9 KB，html report，关联能力：general_report",
+          "short_description": "html report · 15.9 KB",
+          "type": "html_report",
+          "modified_at": "2026-08-18 05:26",
+          "size_kb": 15.9,
+          "related_capability": "general_report",
+          "status": "generated"
+        },
+        {
+          "name": "watchlist_brand_trend_2026-07.html",
+          "path": "mashang_workspace/outputs/reports/watchlist_brand_trend_2026-07.html",
+          "description": "生成报告，45.4 KB，html report，关联能力：general_report",
+          "short_description": "html report · 45.4 KB",
+          "type": "html_report",
+          "modified_at": "2026-08-18 05:20",
+          "size_kb": 45.4,
           "related_capability": "general_report",
           "status": "generated"
         },
@@ -1679,6 +2634,17 @@
           "status": "generated"
         },
         {
+          "name": "门店观察_2026新开门店_2026-08-25.md",
+          "path": "mashang_workspace/outputs/reports/门店观察_2026新开门店_2026-08-25.md",
+          "description": "生成报告，19.6 KB，markdown report，关联能力：general_report",
+          "short_description": "markdown report · 19.6 KB",
+          "type": "markdown_report",
+          "modified_at": "2026-08-25 04:17",
+          "size_kb": 19.6,
+          "related_capability": "general_report",
+          "status": "generated"
+        },
+        {
           "name": "阿维塔_product_line.md",
           "path": "mashang_workspace/outputs/reports/阿维塔_product_line.md",
           "description": "生成报告，2.6 KB，markdown report，关联能力：general_report",
@@ -1695,7 +2661,7 @@
           "description": "2026-02 月报JSON results，21.2 KB",
           "short_description": "月报 · 2026-02 · 21.2 KB",
           "type": "monthly_market_output",
-          "modified_at": "2026-08-17 05:02",
+          "modified_at": "2026-10-07 09:33",
           "size_kb": 21.2,
           "related_capability": "monthly_market_report",
           "status": "generated"
@@ -1706,7 +2672,7 @@
           "description": "2026-02 月报monthly output，22.5 KB",
           "short_description": "月报 · 2026-02 · 22.5 KB",
           "type": "monthly_market_output",
-          "modified_at": "2026-08-17 05:02",
+          "modified_at": "2026-10-07 09:33",
           "size_kb": 22.5,
           "related_capability": "monthly_market_report",
           "status": "generated"
@@ -1717,7 +2683,7 @@
           "description": "2026-02 月报report draft，8.7 KB",
           "short_description": "月报 · 2026-02 · 8.7 KB",
           "type": "monthly_market_output",
-          "modified_at": "2026-08-17 05:02",
+          "modified_at": "2026-10-07 09:33",
           "size_kb": 8.7,
           "related_capability": "monthly_market_report",
           "status": "generated"
@@ -1728,7 +2694,7 @@
           "description": "2026-02 月报JSON results，0.6 KB",
           "short_description": "月报 · 2026-02 · 0.6 KB",
           "type": "monthly_market_output",
-          "modified_at": "2026-08-17 05:02",
+          "modified_at": "2026-10-07 09:33",
           "size_kb": 0.6,
           "related_capability": "monthly_market_report",
           "status": "generated"
@@ -1805,7 +2771,7 @@
           "description": "2026-12 月报JSON results，21.2 KB",
           "short_description": "月报 · 2026-12 · 21.2 KB",
           "type": "monthly_market_output",
-          "modified_at": "2026-08-17 05:02",
+          "modified_at": "2026-10-07 09:33",
           "size_kb": 21.2,
           "related_capability": "monthly_market_report",
           "status": "generated"
@@ -1816,7 +2782,7 @@
           "description": "2026-12 月报monthly output，22.5 KB",
           "short_description": "月报 · 2026-12 · 22.5 KB",
           "type": "monthly_market_output",
-          "modified_at": "2026-08-17 05:02",
+          "modified_at": "2026-10-07 09:33",
           "size_kb": 22.5,
           "related_capability": "monthly_market_report",
           "status": "generated"
@@ -1827,7 +2793,7 @@
           "description": "2026-12 月报report draft，8.7 KB",
           "short_description": "月报 · 2026-12 · 8.7 KB",
           "type": "monthly_market_output",
-          "modified_at": "2026-08-17 05:02",
+          "modified_at": "2026-10-07 09:33",
           "size_kb": 8.7,
           "related_capability": "monthly_market_report",
           "status": "generated"
@@ -1838,7 +2804,7 @@
           "description": "2026-12 月报JSON results，0.6 KB",
           "short_description": "月报 · 2026-12 · 0.6 KB",
           "type": "monthly_market_output",
-          "modified_at": "2026-08-17 05:02",
+          "modified_at": "2026-10-07 09:33",
           "size_kb": 0.6,
           "related_capability": "monthly_market_report",
           "status": "generated"
@@ -1857,7 +2823,7 @@
           "type": "eval_framework",
           "description": "统一 Eval 框架，支持 6 个 suite（core, research, parser, followup, numeric, reference）。",
           "short_description": "统一 Eval 框架，6 suites。",
-          "eval_files": 12,
+          "eval_files": 10,
           "config_or_case_files": 5,
           "doc_files": 1,
           "suites": [
@@ -1900,9 +2866,9 @@
           "name": "pytest_tests",
           "path": "mashang_workspace/tests",
           "type": "test_suite",
-          "description": "pytest 测试套件，共 23 个测试文件。覆盖：脚本 smoke test、eval 测试、数据流水线测试、根目录清理验证、脚本分层验证。",
-          "short_description": "23 个测试文件的 pytest 套件。",
-          "eval_files": 23,
+          "description": "pytest 测试套件，共 37 个测试文件。覆盖：脚本 smoke test、eval 测试、数据流水线测试、根目录清理验证、脚本分层验证。",
+          "short_description": "37 个测试文件的 pytest 套件。",
+          "eval_files": 37,
           "config_or_case_files": 0,
           "suites": [],
           "status": "active"

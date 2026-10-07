@@ -53,20 +53,9 @@ def test_ensure_shared_can_read_business_def():
     assert "series_group_logic" in bdef
 
 
-def test_legacy_runtime_operators_still_exist():
-    assert (_PRJ_DIR / "mashang_runtime" / "operators").exists()
-
-
-def test_legacy_runtime_schema_still_exist():
-    assert (_PRJ_DIR / "mashang_runtime" / "schema").exists()
-
-
-def test_legacy_runtime_operators_readme():
-    assert (_PRJ_DIR / "mashang_runtime" / "operators" / "README.md").exists()
-
-
-def test_legacy_runtime_schema_readme():
-    assert (_PRJ_DIR / "mashang_runtime" / "schema" / "README.md").exists()
+def test_legacy_runtime_retired():
+    """旧 Runtime 已退役，仓库不再保留 mashang_runtime/。"""
+    assert not (_PRJ_DIR / "mashang_runtime").exists()
 
 
 def test_root_no_operators():
@@ -81,7 +70,7 @@ def test_make_atp_demo_works():
     """atp_price_report.py 通过 shared operators 可运行。"""
     import subprocess
     r = subprocess.run(
-        [sys.executable, str(_WS_DIR / "runtime_scripts" / "atp_price_report.py"),
+        [sys.executable, str(_WS_DIR / "business_scripts" / "atp_price_report.py"),
          "--month", "2026-05", "--format", "json"],
         capture_output=True, text=True, timeout=60,
     )

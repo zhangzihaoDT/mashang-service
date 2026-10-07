@@ -4,7 +4,7 @@ build_workspace_capability_inventory.py — 生成 Workspace 级能力总览
 
 扫描 mashang_workspace 中的能力资产，生成 capability inventory：
   - Skills: Agent 会什么（从 workspace_skills_catalog.json 或 SKILL.md 目录）
-  - Scripts: Agent 能调用什么（从 runtime/research/utility/legacy scripts）
+  - Scripts: Agent 能调用什么（从 business/research/utility/legacy scripts）
   - Data Assets: Agent 能查什么（从 docs / configs / shared）
   - Outputs / Reports: Agent 已沉淀什么（从 outputs/reports/ / monthly_market_report/）
   - Evaluation / Quality: Agent 是否可靠（从 eval/ / tests/）
@@ -29,7 +29,7 @@ NOW = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
 TODAY = NOW[:10]
 
 SCRIPT_DIRS = {
-    "runtime_scripts": WS_ROOT / "runtime_scripts",
+    "business_scripts": WS_ROOT / "business_scripts",
     "research_scripts": WS_ROOT / "research_scripts",
     "utility_scripts": WS_ROOT / "utility_scripts",
 }
@@ -295,9 +295,9 @@ def scan_data_assets() -> list[dict]:
             "allowed_usage": "锁单统计、车型分布、城市分布、时间趋势分析",
             "forbidden_usage": "不修改原始数据",
             "related_scripts": [
-                "runtime_scripts/daily_lock_count.py",
-                "runtime_scripts/lock_by_model.py",
-                "runtime_scripts/lock_city_distribution.py",
+                "business_scripts/daily_lock_count.py",
+                "business_scripts/lock_by_model.py",
+                "business_scripts/lock_city_distribution.py",
             ],
             "status": "active",
         }
@@ -316,7 +316,7 @@ def scan_data_assets() -> list[dict]:
             "allowed_usage": "线索转化率分析、渠道拆解",
             "forbidden_usage": "不修改原始数据",
             "related_scripts": [
-                "runtime_scripts/assign_conversion_analysis.py",
+                "business_scripts/assign_conversion_analysis.py",
                 "research_scripts/lock_predict_backtest.py",
             ],
             "status": "active",
@@ -336,7 +336,7 @@ def scan_data_assets() -> list[dict]:
             "allowed_usage": "选装率分析、属性分布、配置渗透率报告",
             "forbidden_usage": "不修改原始数据",
             "related_scripts": [
-                "runtime_scripts/attribute_penetration_report.py",
+                "business_scripts/attribute_penetration_report.py",
             ],
             "status": "active",
         }
@@ -659,7 +659,7 @@ def build_inventory() -> dict:
             "id": "scripts",
             "title": GROUP_LABELS["scripts"][0],
             "subtitle": GROUP_LABELS["scripts"][1],
-            "description": "Agent 可直接调用的 Python 脚本，按功能分为 runtime（稳定运行入口）、research（研究分析）、utility（工具/渲染/验证）和 legacy（历史保留）四类。",
+            "description": "Agent 可直接调用的 Python 脚本，按功能分为 business（稳定运行入口）、research（研究分析）、utility（工具/渲染/验证）和 legacy（历史保留）四类。",
             "items": scripts,
         },
         {

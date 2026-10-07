@@ -1,7 +1,7 @@
 """series_group_logic 统一入口。
 
 直接按文件加载 shared/operators/series_group_logic.py，避免 `import operators`
-触发 shared/operators/__init__.py → registry → mashang_runtime/tools 依赖链。
+触发 shared/operators/__init__.py → registry 的完整依赖链。
 """
 
 from __future__ import annotations

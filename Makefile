@@ -4,9 +4,9 @@ PYTHON ?= .venv/bin/python
 	lock-forecast invoice-forecast lock-attribution lock-attribution-compare \
 	inventory-status inventory-trend inventory-report \
 	auto-launch-owned-brand-daily auto-launch-owned-brand-daily-dry-run auto-launch-search auto-launch-normalize-results \
-	capability-audit runtime-v2-audit shared-audit \
-	runtime-v2-demo runtime-v2-city-demo runtime-v2-followup-demo runtime-v2-eval runtime-v2-feature-job-demo runtime-v2-clean-sessions \
-	data-refresh data-validate observe-dry-run observe-sync data-pipeline-dry-run data-pipeline daily-ops \
+	capability-audit shared-audit \
+	jobs-list jobs-run \
+	data-refresh data-refresh-daily allupdate updateall data-validate observe-dry-run observe-sync data-pipeline-dry-run data-pipeline daily-ops \
 	dataset-update dataset-validate daily-observation-dry-run daily-observation-sync daily-data-pipeline-dry-run daily-data-pipeline \
 	sales-monitor sales-monitor-dry-run presale-snapshot presale-funnel monitor monitor-dry-run monitor-sync sales-scheduler scheduler \
 	dc-inventory-change dc-inventory-change-date state-diagnosis \
@@ -37,8 +37,7 @@ research-eval:
 
 ## 完整测试
 test:
-	$(PYTHON) -m pytest mashang_workspace/tests capabilities/ocr/tests capabilities/notify/tests capabilities/search/tests capabilities/diagram/tests capabilities/feishu/tests .opencode/verification/tests -q
-	$(PYTHON) -m pytest mashang_runtime_v2/tests/test_core_generic.py mashang_runtime_v2/tests/test_feature_job_adapter.py -q
+	$(PYTHON) -m pytest mashang_workspace/tests capabilities/ocr/tests capabilities/notify/tests capabilities/search/tests capabilities/diagram/tests capabilities/feishu/tests .opencode/verification/tests jobs/tests -q
 
 ## CI 门禁 = 复用 eval(CI-safe) + 数据无关测试
 ci:
@@ -57,8 +56,8 @@ ci:
 		capabilities/diagram/tests \
 		capabilities/feishu/tests \
 		.opencode/verification/tests \
+		jobs/tests \
 		-q
-	$(PYTHON) -m pytest mashang_runtime_v2/tests/test_core_generic.py mashang_runtime_v2/tests/test_feature_job_adapter.py -q
 
 ## Verification Scope — 解析改动范围对应的最小验证范围
 verify-scope:  ## 解析当前工作区改动的最小验证范围（只计划，不执行）
@@ -76,7 +75,7 @@ data-dict:
 
 ## 锁单分析 Demo
 lock-demo:
-	$(PYTHON) mashang_workspace/runtime_scripts/lock_by_model.py --date 2026-06-10 --format json
+	$(PYTHON) mashang_workspace/business_scripts/lock_by_model.py --date 2026-06-10 --format json
 
 ## Context Parser Demo
 parser-demo:
@@ -98,7 +97,7 @@ reference-eval:
 
 ## ATP 月报 Demo
 atp-demo:
-	$(PYTHON) mashang_workspace/runtime_scripts/atp_price_report.py --month 2026-05 --format json
+	$(PYTHON) mashang_workspace/business_scripts/atp_price_report.py --month 2026-05 --format json
 
 ## 锁单预测回测 Demo
 backtest-demo:
@@ -201,47 +200,36 @@ auto-launch-normalize-results:
 capability-audit:
 	$(PYTHON) mashang_workspace/eval/run_capability_audit.py --format json --output mashang_workspace/outputs/tables/capability_audit_result.json
 
-## Runtime V2 Readiness Audit
-runtime-v2-audit:
-	$(PYTHON) mashang_workspace/eval/run_runtime_v2_audit.py --format json --output mashang_workspace/outputs/tables/runtime_v2_audit_result.json
-
 ## Shared Audit
 shared-audit:
 	$(PYTHON) -c "from mashang_workspace.utils.paths import BUSINESS_DEFINITION_PATH, ensure_shared_on_path; ensure_shared_on_path(); import operators; print('shared ok:', BUSINESS_DEFINITION_PATH)"
 
-## Runtime V2 Demo
-runtime-v2-demo:
-	$(PYTHON) mashang_runtime_v2/app/runtime_service.py "昨天锁单数分车型"
+## jobs — 列出已声明 Research Application job
+jobs-list:
+	$(PYTHON) -m jobs.cli --list
 
-runtime-v2-city-demo:
-	$(PYTHON) mashang_runtime_v2/app/runtime_service.py "昨天 LS8 锁单城市分布"
-
-runtime-v2-followup-demo:
-	$(PYTHON) mashang_runtime_v2/app/runtime_service.py "昨天锁单数分车型" --session demo --reset-session
-	$(PYTHON) mashang_runtime_v2/app/runtime_service.py "LS8 的城市分布" --session demo
-
-runtime-v2-eval:
-	$(PYTHON) mashang_runtime_v2/eval/run_runtime_v2_eval.py
-
-## Runtime V2 Feature Job demo（Research Application orchestration）
-## 用法: make runtime-v2-feature-job-demo JOB=nev_apeal_production_golden
-##       make runtime-v2-feature-job-demo JOB=nev_apeal_research_state JOB_PARAMS="--job-param topic=topic_x"
-runtime-v2-feature-job-demo:
-	$(PYTHON) mashang_runtime_v2/app/runtime_service.py --job $(or $(JOB),nev_apeal_production_golden) $(JOB_PARAMS)
-
-runtime-v2-clean-sessions:
-	$(PYTHON) mashang_runtime_v2/app/runtime_service.py --cleanup-sessions
+## jobs — 执行一个 job（确定性执行契约；Hub/Worker 调用）
+## 用法: make jobs-run JOB=nev_apeal_production_golden
+##       make jobs-run JOB=nev_apeal_research_state JOB_PARAMS="--job-param topic=topic_x"
+jobs-run:
+	$(PYTHON) -m jobs.cli --job $(or $(JOB),nev_apeal_production_golden) $(JOB_PARAMS)
 
 ## ─── Daily Data Pipeline（canonical 入口）──────────────────────────
 ##
 ## 入口语义与副作用：
-##   make data-refresh    刷新 dataset（local write：dataset/*.parquet/.csv；结束打印逐数据集结论）
-##   make data-status     数据集现状（read-only：行数 / 文件更新时间 / 数据最新时点）
-##   make data-validate   校验 dataset 完整性（read-only）
-##   make observe-dry-run 每日观察预检（read-only）
-##   make observe-sync    每日观察同步（external write：飞书多维表 + 机器人）
-##   make data-pipeline   data-refresh → data-validate → observe-sync（local + external write；不含销售监控）
-##   make daily-ops       data-pipeline + sales-monitor（local + external write；含飞书推送）
+##   make data-refresh-daily Daily pipeline 数据刷新：仅订单数据 + 下发线索（local write）
+##   make data-refresh       全量数据刷新（allupdate 底层；含试驾 / 锁单归因）
+##   make data-status        数据集现状（read-only：行数 / 文件更新时间 / 数据最新时点）
+##   make data-validate      校验 dataset 完整性（read-only）
+##   make observe-dry-run    每日观察预检（read-only）
+##   make observe-sync       每日观察同步（external write：飞书多维表 + 机器人）
+##   make allupdate          全量更新 + 校验 = data-refresh + data-validate（local write）
+##   make updateall          allupdate 别名（hub 统一调度入口）
+##   make data-pipeline      data-refresh-daily → data-validate → observe-sync（local + external write；不含销售监控）
+##   make daily-ops          data-pipeline + sales-monitor（local + external write；含飞书推送）
+##
+## 边界：Daily pipeline 只负责订单 + 下发线索；试驾数据 / 锁单归因只在 `make allupdate`
+##       或各自独立更新入口维护（走“更新 + 整理”路径）。
 ##
 ## 兼容别名（保留向后兼容，新文档请引用 canonical 名）：
 ##   dataset-update → data-refresh
@@ -251,10 +239,22 @@ runtime-v2-clean-sessions:
 ##   daily-data-pipeline → data-pipeline
 ##   daily-data-pipeline-dry-run → data-pipeline-dry-run
 
-## 数据集刷新（canonical；写操作）
+## Daily pipeline 数据刷新（canonical；写操作）：仅订单数据 + 下发线索
+## 办公网不可达时自动回退移动链路；可用 MOBILE=1 显式强制
+data-refresh-daily:
+	$(PYTHON) dataset/updater/update_all_datasets.py --scope daily $(if $(MOBILE),--mobile)
+
+## 全量数据集刷新（写操作）：含试驾 / 锁单归因等其余数据集
 ## 办公网不可达时自动回退移动链路；可用 MOBILE=1 显式强制（如 make data-refresh MOBILE=1）
 data-refresh:
 	$(PYTHON) dataset/updater/update_all_datasets.py $(if $(MOBILE),--mobile)
+
+## 全量更新 + 校验（allupdate；写操作）：data-refresh + data-validate
+## hub 统一调度入口：一次完成 full scope 全量数据集刷新
+allupdate: data-refresh data-validate
+
+## 全量更新 hub 别名（与 allupdate 等价）
+updateall: allupdate
 
 ## 数据集现状（只读）：逐数据集 行数 / 文件更新时间 / 数据最新时点，不触发数据源
 data-status:
@@ -276,12 +276,13 @@ observe-sync:
 data-pipeline-dry-run: data-validate observe-dry-run
 
 ## 数据管道完整执行（写操作：刷新 dataset 并同步外部系统；不含销售监控）
-data-pipeline: data-refresh data-validate observe-sync
+## Daily pipeline 仅刷新订单数据 + 下发线索；试驾 / 锁单归因走 allupdate 或独立更新入口
+data-pipeline: data-refresh-daily data-validate observe-sync
 
 ## 每日运营：数据管道 + 销售监控（写操作，会发送飞书）
 ## 监控注入本轮 refresh_ts（管道刚完成），避免 freshness gate 用 parquet mtime 误判 stale
 daily-ops: data-pipeline
-	$(PYTHON) mashang_workspace/runtime_scripts/vehicle_sales_monitor.py \
+	$(PYTHON) mashang_workspace/business_scripts/vehicle_sales_monitor.py \
 		$(if $(AS_OF),--as-of $(AS_OF)) \
 		$(if $(SERIES),--series $(SERIES)) \
 		$(if $(PHASE),--phase $(PHASE)) \
@@ -307,7 +308,7 @@ daily-data-pipeline: data-pipeline
 ## 统一预售/上市监控（自动判定 active 代际 + phase；写操作：飞书卡片）
 ## 用法: make sales-monitor [AS_OF=2026-09-10] [SERIES=CM3] [PHASE=presale] [FORMAT=json]
 sales-monitor:
-	$(PYTHON) mashang_workspace/runtime_scripts/vehicle_sales_monitor.py \
+	$(PYTHON) mashang_workspace/business_scripts/vehicle_sales_monitor.py \
 		$(if $(AS_OF),--as-of $(AS_OF)) \
 		$(if $(SERIES),--series $(SERIES)) \
 		$(if $(PHASE),--phase $(PHASE)) \
@@ -315,7 +316,7 @@ sales-monitor:
 
 ## 预售/上市监控 dry-run（只打印卡片，不发送飞书）
 sales-monitor-dry-run:
-	$(PYTHON) mashang_workspace/runtime_scripts/vehicle_sales_monitor.py --dry-run \
+	$(PYTHON) mashang_workspace/business_scripts/vehicle_sales_monitor.py --dry-run \
 		$(if $(AS_OF),--as-of $(AS_OF)) \
 		$(if $(SERIES),--series $(SERIES)) \
 		$(if $(PHASE),--phase $(PHASE))
@@ -336,7 +337,7 @@ presale-snapshot:
 ## 用法: make presale-funnel SERIES=CM3 [AS_OF=2026-09-24] [FORMAT=terminal|json|csv]
 ##       make presale-funnel SERIES="CM2 CM3 DM2"   # 多代际对比
 presale-funnel:
-	$(PYTHON) mashang_workspace/runtime_scripts/presale_intention_funnel.py \
+	$(PYTHON) mashang_workspace/business_scripts/presale_intention_funnel.py \
 		$(if $(SERIES),--series $(SERIES)) \
 		$(if $(AS_OF),--as-of $(AS_OF)) \
 		$(if $(FORMAT),--format $(FORMAT))
@@ -354,7 +355,7 @@ presale-funnel:
 ##   - 正式推送前建议先 DRY=1 预览；ALLOW_STALE=1 可跳过 freshness gate
 monitor-sync:
 	$(PYTHON) dataset/updater/order_data_to_parquet.py $(if $(MOBILE),--mobile) && \
-	$(PYTHON) mashang_workspace/runtime_scripts/vehicle_sales_monitor.py \
+	$(PYTHON) mashang_workspace/business_scripts/vehicle_sales_monitor.py \
 		$(if $(SERIES),--series $(SERIES)) \
 		$(if $(PHASE),--phase $(PHASE)) \
 		$(if $(and $(SERIES),$(PHASE)),--force-phase) \
@@ -367,8 +368,8 @@ monitor: sales-monitor
 monitor-dry-run: sales-monitor-dry-run
 sales-monitor-sync: monitor-sync
 
-## 常驻定时器：09:00 每日管道（刷新→校验→同步→监控）+ key day 17-23 高频刷新/监控（配合 caffeinate -i）
-## 注意：常驻进程，会刷新数据、同步飞书并发送监控卡片
+## 常驻定时器：09:00 每日管道（刷新订单+下发线索→校验→同步→监控）+ key day 17-23 高频刷新/监控（配合 caffeinate -i）
+## 注意：常驻进程，会刷新数据、同步飞书并发送监控卡片；09:00 仅刷新订单+下发线索（试驾/锁单归因走 allupdate）
 sales-scheduler:
 	$(PYTHON) mashang_workspace/utility_scripts/sales_scheduler.py \
 		$(if $(SERIES),--series $(SERIES)) \
@@ -379,16 +380,16 @@ scheduler: sales-scheduler
 
 ## 单日 DC 库存变动分析（默认昨天）
 dc-inventory-change:
-	$(PYTHON) mashang_workspace/runtime_scripts/daily_dc_inventory_change.py
+	$(PYTHON) mashang_workspace/business_scripts/daily_dc_inventory_change.py
 
 dc-inventory-change-date:
-	$(PYTHON) mashang_workspace/runtime_scripts/daily_dc_inventory_change.py --date $(DATE)
+	$(PYTHON) mashang_workspace/business_scripts/daily_dc_inventory_change.py --date $(DATE)
 
 ## 业务状态排查（库存 × 待开票未退订 × 风险暴露；滚动365d + 当年累计双口径）
 ## 用法: make state-diagnosis [AS_OF=2025-04-17] [SERIES=LS8] [FORMAT=json] [OUTPUT=outputs/tables/]
 ## AS_OF 支持任意历史时点（point-in-time 重建）；缺省 = 最新数据日
 state-diagnosis:
-	$(PYTHON) mashang_workspace/runtime_scripts/current_state_diagnosis.py \
+	$(PYTHON) mashang_workspace/business_scripts/current_state_diagnosis.py \
 		$(if $(AS_OF),--as-of $(AS_OF)) \
 		$(if $(SERIES),--series $(SERIES)) \
 		$(if $(FORMAT),--format $(FORMAT)) \
@@ -553,22 +554,21 @@ help:
 	@echo "=== Audit ==="
 	@echo "make capability-audit  Capability Audit"
 	@echo "make shared-audit     Shared Layer Audit"
-	@echo "make runtime-v2-audit  Runtime V2 Readiness Audit"
 	@echo ""
-	@echo "=== Runtime V2 ==="
-	@echo "make runtime-v2-demo  Runtime V2 Demo (锁单车型)"
-	@echo "make runtime-v2-city-demo  Runtime V2 Demo (城市分布)"
-	@echo "make runtime-v2-followup-demo  Runtime V2 多轮追问 Demo"
-	@echo "make runtime-v2-eval  Runtime V2 Eval"
-	@echo "make runtime-v2-clean-sessions  Runtime V2 清理过期 Session"
+	@echo "=== jobs（确定性执行契约；Hub/Worker 调用）==="
+	@echo "make jobs-list        列出已声明 Research Application job"
+	@echo "make jobs-run         JOB=nev_apeal_production_golden [JOB_PARAMS=...]"
 	@echo ""
 	@echo "=== Daily Data Pipeline（canonical；旧名为兼容别名）==="
-	@echo "make data-refresh            刷新 dataset（写操作；MOBILE=1 强制移动链路）"
+	@echo "make data-refresh-daily      仅刷新订单数据 + 下发线索（写操作；Daily pipeline 用）"
+	@echo "make data-refresh            全量刷新 dataset（写操作；含试驾 / 锁单归因）"
+	@echo "make allupdate               全量更新 + 校验 = data-refresh + data-validate（写操作）"
+	@echo "make updateall               allupdate 别名（hub 统一调度入口）"
 	@echo "make data-validate           校验 dataset（只读）"
 	@echo "make observe-dry-run         每日观察预检（只读）"
 	@echo "make observe-sync            每日观察同步（写操作：飞书多维表 + 机器人）"
 	@echo "make data-pipeline-dry-run   管道 dry-run（安全预检，不含写操作）"
-	@echo "make data-pipeline           数据管道（刷新→校验→同步；写操作，不含销售监控）"
+	@echo "make data-pipeline           数据管道（订单+下发线索→校验→同步；写操作，不含销售监控）"
 	@echo "make daily-ops               每日运营 = data-pipeline + sales-monitor（写操作）"
 	@echo "  兼容别名: dataset-update / dataset-validate / daily-observation-dry-run /"
 	@echo "            daily-observation-sync / daily-data-pipeline[-dry-run]"
@@ -580,7 +580,7 @@ help:
 	@echo "make monitor-sync            数据更新+监控走廊 SERIES=CM3 [PHASE=launch|presale] [DRY=1]（仅刷新订单表）"
 	@echo "make presale-snapshot        指定代际预售小订快照推送 SERIES=CM3 [DRY=1] [ALLOW_STALE=1]（写操作）"
 	@echo "make presale-funnel          预售小订转化漏斗（泛化，任意代际）SERIES=CM3 [AS_OF=] [FORMAT=]（只读）"
-	@echo "make sales-scheduler         常驻定时器（刷新 + key day 高频监控；SERIES=CM3 限定代际）"
+	@echo "make sales-scheduler         常驻定时器（09:00 订单+下发线索刷新 + key day 高频订单刷新/监控；SERIES=CM3 限定代际）"
 	@echo "  兼容别名: monitor / monitor-dry-run / sales-monitor-sync / scheduler"
 	@echo ""
 	@echo "=== Render ==="

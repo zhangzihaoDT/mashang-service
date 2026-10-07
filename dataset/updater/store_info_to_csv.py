@@ -65,12 +65,12 @@ def load_env_file(env_path: Path) -> None:
         return
 
 
-def import_lock_attribution_exporter():
-    """复用 lock_attribution_data_to_parquet 的 Tableau REST 导出实现。"""
+def import_tableau_exporter():
+    """复用 tableau_export 的 Tableau REST 导出实现。"""
     updater_dir = REPO_ROOT / "dataset" / "updater"
     if str(updater_dir) not in sys.path:
         sys.path.insert(0, str(updater_dir))
-    import lock_attribution_data_to_parquet as _mod
+    import tableau_export as _mod
 
     return _mod
 
@@ -110,7 +110,7 @@ def main(argv: list[str] | None = None) -> int:
         print("❌ 缺少 Tableau PAT：TABLEAU_TOKEN_NAME / TABLEAU_TOKEN_VALUE")
         return 1
 
-    exporter = import_lock_attribution_exporter()
+    exporter = import_tableau_exporter()
 
     if args.dry_run:
         tmp_path = REPO_ROOT / "dataset" / "store_info_export_check.csv"

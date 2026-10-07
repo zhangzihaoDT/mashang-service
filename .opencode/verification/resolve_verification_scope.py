@@ -384,12 +384,15 @@ def main(argv=None):
 
     if args.changed is not None:
         changed = sorted(set(args.changed))
-    elif args.staged:
-        changed = git_changed_files("staged", None)
-    elif args.range:
-        changed = git_changed_files("range", args.range)
     else:
-        changed = git_changed_files("worktree", None)
+        if args.staged:
+            changed = git_changed_files("staged", None)
+        elif args.range:
+            changed = git_changed_files("range", args.range)
+        else:
+            changed = git_changed_files("worktree", None)
+        # 已删除文件不再产生验证 target（smoke/pytest 无法运行不存在的路径）
+        changed = [p for p in changed if (PROJECT_ROOT / p).exists()]
 
     include = list(args.include or [])
 

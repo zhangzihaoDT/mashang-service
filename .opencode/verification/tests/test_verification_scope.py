@@ -61,9 +61,9 @@ def test_research_script_adds_scripts_and_help_smoke():
     assert f"smoke:{path}" in ids
 
 
-def test_runtime_script_adds_core_eval():
+def test_business_script_adds_core_eval():
     scope = rvs.resolve_scope(
-        _contract(), ["mashang_workspace/runtime_scripts/daily_lock_count.py"]
+        _contract(), ["mashang_workspace/business_scripts/daily_lock_count.py"]
     )
     ids = {t["id"] for t in scope["required_targets"]}
     assert "eval.core" in ids

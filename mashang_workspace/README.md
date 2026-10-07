@@ -3,7 +3,7 @@
 ## 定位
 
 `mashang_workspace` 是 **Daily Business Analytics Workspace（日常业务分析工作区）**：面向 OpenCode / Claude Code 等 AI Coding Agent 的标准化业务分析工具箱，解决"今天要查什么、算什么、分析什么"（锁单、库存、门店、车型、渠道等高频、相对确定的业务分析）。
-与 `mashang_runtime_v2`（Unified Research Runtime）共享 `dataset/` `.env` `.venv` 等底座资源；成熟能力以 `runtime_scripts` 形态被 runtime_v2 确定性调度。
+与 `jobs/`（确定性执行契约）共享 `dataset/` `.env` `.venv` 等底座资源；成熟能力以 `business_scripts` 形态经 `jobs/` 被 Hub 确定性调度。
 
 ## 目录结构
 
@@ -12,10 +12,10 @@ mashang_workspace/
 ├── AGENTS.md              # Workspace Agent 指南
 ├── README.md              # 本文件
 ├── docs/                  # 业务文档（术语/指标/车型/时间/分析范式/追问/合同）
-├── runtime_scripts/       # Core — Runtime V2 可调度（6 个稳定分析脚本）
+├── business_scripts/       # Core — Hub 经 jobs/ 可调度（6 个稳定分析脚本）
 ├── research_scripts/      # Research — 预测/回测/释放曲线/MIIT 新车公告（7 个）
 ├── utility_scripts/       # Utility — DataOps/SyncOps/工具（5 个）
-├── (legacy_scripts/ — 已退休)  # 历史参考脚本已迁移到 runtime_scripts/research_scripts/utility_scripts
+├── (legacy_scripts/ — 已退休)  # 历史参考脚本已迁移到 business_scripts/research_scripts/utility_scripts
 ├── eval/                  # Eval 测试框架
 │   ├── run_followup_eval.py    # 多轮追问 Runner
 │   ├── run_numeric_eval.py     # 数值校验 Runner
@@ -45,9 +45,9 @@ python mashang_workspace/utility_scripts/data_dictionary.py --input dataset
 python mashang_workspace/research_scripts/tp_and_mix_ways/check_tp_and_mix_ways_asset.py
 
 # 锁单分析（runtime）
-python mashang_workspace/runtime_scripts/daily_lock_count.py --date 2026-06-10
-python mashang_workspace/runtime_scripts/lock_by_model.py --date 2026-06-10 --limit 5
-python mashang_workspace/runtime_scripts/lock_city_distribution.py --date 2026-06-10 --series LS8
+python mashang_workspace/business_scripts/daily_lock_count.py --date 2026-06-10
+python mashang_workspace/business_scripts/lock_by_model.py --date 2026-06-10 --limit 5
+python mashang_workspace/business_scripts/lock_city_distribution.py --date 2026-06-10 --series LS8
 
 # 释放曲线 / 预测（research）
 python mashang_workspace/research_scripts/release_curve_analysis.py
@@ -62,11 +62,11 @@ python3 MIIT/scripts/validate_eidc_batch.py
 python mashang_workspace/utility_scripts/voc_theme_analysis.py
 
 # 线索转化 / 配置渗透率（runtime）
-python mashang_workspace/runtime_scripts/assign_conversion_analysis.py
-python mashang_workspace/runtime_scripts/attribute_penetration_report.py
+python mashang_workspace/business_scripts/assign_conversion_analysis.py
+python mashang_workspace/business_scripts/attribute_penetration_report.py
 
 # ATP 月报（runtime）
-python mashang_workspace/runtime_scripts/atp_price_report.py 2026-05
+python mashang_workspace/business_scripts/atp_price_report.py 2026-05
 
 # Context Parser
 python mashang_workspace/eval/parse_context_cli.py "昨天锁单数分车型"
@@ -127,12 +127,12 @@ python mashang_workspace/eval/parse_context_cli.py "昨天锁单数分车型"
 
 所有脚本的 `--format json` 输出统一 Result Contract，包含 scope/result/followup_context。
 
-## 与 mashang_runtime 的关系
+## 与 jobs / Hub 的关系
 
-| 维度 | mashang_workspace | mashang_runtime |
-|------|------------------|-----------------|
-| 定位 | AI Agent 分析工作区 | 产品化 Agentic BI Runtime |
-| 用户 | OpenCode / Claude Code | 飞书 Bot / 命令行 |
-| 开发方式 | 快速分析脚本 | 稳定算子 + Tool |
-| 验证 | pytest + numeric eval | Runtime Eval |
-| 回流 | 高频能力→沉淀到 runtime | — |
+| 维度 | mashang_workspace | jobs（Hub/Worker 调用） |
+|------|------------------|--------------------------|
+| 定位 | 日常业务分析工作区 | 确定性执行契约层 |
+| 用户 | OpenCode | Hub（Control Plane）+ Worker（Execution Gateway） |
+| 开发方式 | 分析脚本 + Result Contract | 声明式 job + 参数白名单 + 执行契约 |
+| 验证 | pytest + numeric eval + contract gate | jobs 契约单测 |
+| 回流 | 高频能力→沉淀到 business_scripts | 经 jobs/ 确定性调度 |

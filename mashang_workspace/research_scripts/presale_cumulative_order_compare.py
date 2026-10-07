@@ -505,7 +505,7 @@ AGE_BAND_LABELS = (
 
 
 def _profile(ret: pd.DataFrame) -> dict:
-    from runtime_scripts.user_profile import CITY_TO_PROVINCE, city_to_tier_label, norm_city
+    from business_scripts.user_profile import CITY_TO_PROVINCE, city_to_tier_label, norm_city
 
     n = len(ret)
     if not n:

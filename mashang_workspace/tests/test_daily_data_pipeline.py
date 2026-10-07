@@ -18,7 +18,6 @@ DATASET_DIR = PROJECT_ROOT / "dataset"
 UPDATER_DIR = DATASET_DIR / "updater"
 MAKEFILE_PATH = PROJECT_ROOT / "Makefile"
 REGISTRY_PATH = WORKSPACE_ROOT / "registry" / "capability_registry.json"
-V2_CONFIG_PATH = PROJECT_ROOT / "mashang_runtime_v2" / "config" / "runtime_v2_config.json"
 PIPELINE_DOC = WORKSPACE_ROOT / "docs" / "daily_data_pipeline.md"
 
 
@@ -95,9 +94,9 @@ def test_makefile_daily_sync_dry_run_is_deprecated():
     assert "daily-observation-dry-run" in text
 
 
-def test_runtime_v2_config_not_referencing_updater():
-    """Runtime V2 config 不引用 dataset/updater。"""
-    text = V2_CONFIG_PATH.read_text()
+def test_jobs_config_not_referencing_updater():
+    """jobs config 不引用 dataset/updater。"""
+    text = (PROJECT_ROOT / "jobs" / "config" / "jobs_config.json").read_text()
     assert "dataset/updater" not in text
     assert "update_all_datasets" not in text
 
@@ -175,17 +174,17 @@ def test_makefile_observe_dry_run_uses_python_var():
     assert found, "observe-dry-run target not found"
 
 
-def test_makefile_runtime_v2_eval_uses_python_var():
-    """Makefile 中 runtime-v2-eval 使用 $(PYTHON)。"""
+def test_makefile_jobs_run_uses_python_var():
+    """Makefile 中 jobs-run 使用 $(PYTHON)。"""
     text = MAKEFILE_PATH.read_text()
     lines = text.splitlines()
     found = False
     for i, line in enumerate(lines):
-        if line.strip() == "runtime-v2-eval:":
+        if line.strip() == "jobs-run:":
             next_line = lines[i + 1]
-            assert "$(PYTHON)" in next_line, f"runtime-v2-eval not using $(PYTHON): {next_line}"
+            assert "$(PYTHON)" in next_line, f"jobs-run not using $(PYTHON): {next_line}"
             found = True
-    assert found, "runtime-v2-eval target not found"
+    assert found, "jobs-run target not found"
 
 
 def test_makefile_python_overridable():
@@ -595,6 +594,91 @@ def test_update_all_run_returns_code_without_raising(tmp_path):
     mod = _load_module(UPDATER_DIR / "update_all_datasets.py", "uad_test")
     rc = mod.run([sys.executable, "-c", "import sys; sys.exit(3)"], cwd=tmp_path, step_timeout=30)
     assert rc == 3
+
+
+def _uad_args(**overrides):
+    import argparse
+
+    base = dict(
+        timeout=600,
+        mobile=False,
+        lock_view=None,
+        skip_store_info=False,
+        skip_store_leads=False,
+    )
+    base.update(overrides)
+    return argparse.Namespace(**base)
+
+
+def test_update_all_daily_scope_only_order_and_assign():
+    """--scope daily：仅刷新订单 + 下发线索，且下发线索走独立 assign updater。"""
+    mod = _load_module(UPDATER_DIR / "update_all_datasets.py", "uad_scope_daily")
+    steps = mod.build_steps(_uad_args(), mobile=False, scope="daily")
+    assert [s["id"] for s in steps] == ["1", "3"]
+    cmds = " ".join(" ".join(str(c) for c in s["cmd"]) for s in steps)
+    assert "order_data_to_parquet.py" in cmds
+    assert "assign_data_to_csv.py" in cmds
+    # daily 范围外数据集不得出现
+    assert "order_config_to_parquet.py" not in cmds
+    assert "test_drive_data_to_csv.py" not in cmds
+    assert "lock_attribution_data_to_parquet.py" not in cmds
+    assert "delivery_inventory_to_parquet.py" not in cmds
+    assert "store_info_to_csv.py" not in cmds
+    assert "store_daily_leads_to_csv.py" not in cmds
+
+
+def test_update_all_full_scope_includes_all_steps():
+    """--scope full（默认）：覆盖 step 1-6 全量数据集（assign/test_drive/lock 各自独立）。"""
+    mod = _load_module(UPDATER_DIR / "update_all_datasets.py", "uad_scope_full")
+    steps = mod.build_steps(_uad_args(), mobile=False, scope="full")
+    assert [s["id"] for s in steps] == ["1", "2", "3", "3", "3", "4", "5", "6"]
+    cmds = " ".join(" ".join(str(c) for c in s["cmd"]) for s in steps)
+    assert "assign_data_to_csv.py" in cmds
+    assert "test_drive_data_to_csv.py" in cmds
+    assert "lock_attribution_data_to_parquet.py" in cmds
+    assert "order_config_to_parquet.py" in cmds
+    assert "delivery_inventory_to_parquet.py" in cmds
+
+
+def test_assign_and_test_drive_have_dedicated_updaters():
+    """assign / test_drive 各自有独立 updater，复用 tableau_export。"""
+    assign = _load_module(UPDATER_DIR / "assign_data_to_csv.py", "assign_csv_test")
+    test_drive = _load_module(UPDATER_DIR / "test_drive_data_to_csv.py", "test_drive_csv_test")
+    assert hasattr(assign, "export_assign")
+    assert hasattr(test_drive, "export_test_drive")
+    assert assign.OUTPUT_CSV.name == "assign_data.csv"
+    assert test_drive.OUTPUT_CSV.name == "test_drive_data.csv"
+
+
+def test_tableau_export_module_is_shared():
+    """Tableau 导出能力抽到共享 tableau_export 模块。"""
+    mod = _load_module(UPDATER_DIR / "tableau_export.py", "tableau_export_test")
+    assert hasattr(mod, "export_tableau_csv_to_original")
+    assert hasattr(mod, "parse_tableau_view_path")
+    assert hasattr(mod, "load_env_file")
+
+
+def test_makefile_has_data_refresh_daily_and_allupdate():
+    """Makefile 存在 data-refresh-daily、allupdate 与 updateall(hub 别名) target。"""
+    text = MAKEFILE_PATH.read_text()
+    assert "data-refresh-daily:" in text
+    assert "allupdate:" in text
+    assert "updateall:" in text
+
+
+def test_data_pipeline_uses_daily_refresh():
+    """data-pipeline 使用 data-refresh-daily（仅订单+下发线索），不依赖全量 data-refresh。"""
+    text = MAKEFILE_PATH.read_text()
+    lines = text.splitlines()
+    found = False
+    for line in lines:
+        if line.strip().startswith("data-pipeline:"):
+            depends = line.split(":", 1)[1].strip()
+            assert "data-refresh-daily" in depends, f"data-pipeline 未使用 data-refresh-daily: {depends}"
+            assert "data-refresh " not in depends + " ", f"data-pipeline 仍依赖全量 data-refresh: {depends}"
+            found = True
+            break
+    assert found, "data-pipeline target not found"
 
 
 def test_update_all_status_only_lists_every_dataset():

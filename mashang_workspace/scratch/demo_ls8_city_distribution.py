@@ -14,7 +14,7 @@ demo_ls8_city_distribution.py — Agent 执行链路 Demo
   - outputs/reports/ls8_city_distribution_report.html
 
 用法:
-    python runtime_scripts/demo_ls8_city_distribution.py
+    python business_scripts/demo_ls8_city_distribution.py
 """
 
 import json, sys, os
@@ -289,7 +289,7 @@ footer{{text-align:center;padding:28px 0;color:var(--zmu);font-size:12px}}
 <tr><td>时间窗口</td><td>{date_str} 全天</td></tr>
 <tr><td>筛选条件</td><td>series = LS8</td></tr>
 <tr><td>指标口径</td><td>lock_count = COUNTD(order_number)，按 license_city 分组</td></tr>
-<tr><td>执行脚本</td><td>runtime_scripts/demo_ls8_city_distribution.py</td></tr>
+<tr><td>执行脚本</td><td>business_scripts/demo_ls8_city_distribution.py</td></tr>
 <tr><td>生成时间</td><td>{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</td></tr>
 </tbody>
 </table>
@@ -337,9 +337,9 @@ footer{{text-align:center;padding:28px 0;color:var(--zmu);font-size:12px}}
                            for k, v in grouped.head(5).items()],
            "date": date_str, "series": "LS8"}
 
-    cmd = "python runtime_scripts/demo_ls8_city_distribution.py"
+    cmd = "python business_scripts/demo_ls8_city_distribution.py"
     contract = build_success_contract(
-        script="runtime_scripts/demo_ls8_city_distribution.py", command=cmd,
+        script="business_scripts/demo_ls8_city_distribution.py", command=cmd,
         scope=scope, result=result, artifacts=artifacts, followup_context=ctx,
     )
 

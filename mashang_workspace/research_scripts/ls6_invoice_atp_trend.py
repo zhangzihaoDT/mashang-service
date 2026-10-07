@@ -14,8 +14,7 @@ from pathlib import Path
 
 _WS_ROOT = Path(__file__).resolve().parents[1]
 _PRG_ROOT = _WS_ROOT.parent
-_RUNTIME_DIR = _PRG_ROOT / "mashang_runtime"
-for p in [str(_WS_ROOT), str(_PRG_ROOT), str(_RUNTIME_DIR)]:
+for p in [str(_WS_ROOT), str(_PRG_ROOT)]:
     if p not in sys.path:
         sys.path.insert(0, p)
 

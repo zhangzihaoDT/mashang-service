@@ -4,7 +4,7 @@ import subprocess, sys, json
 from pathlib import Path
 
 _WS_DIR = Path(__file__).resolve().parents[2]
-SCRIPT = _WS_DIR / "runtime_scripts" / "current_state_diagnosis.py"
+SCRIPT = _WS_DIR / "business_scripts" / "current_state_diagnosis.py"
 
 
 def test_current_state_diagnosis_help():

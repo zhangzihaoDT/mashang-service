@@ -14,7 +14,7 @@
   compute_store_network 计算结果；独立脚本可单独 --format json 输出 Result Contract）。
 
 模块 4：锁单用户画像对比（各代际上市同期窗口内零售锁单的性别 / 年龄代际 / 城市线级 /
-  省份结构；口径字段参考 l6_m2_presale_report 用户画像模块与 runtime_scripts/user_profile.py）。
+  省份结构；口径字段参考 l6_m2_presale_report 用户画像模块与 business_scripts/user_profile.py）。
 
 模块 5：车主年龄分层 & 复购对比（owner_age 分年龄段 vs 历届；复购复用 shared/operators/
   repurchase.py 算子 mode=fulfilled_repurchase（canonical）：owner_identity_no 在窗口前已完成
@@ -69,20 +69,20 @@ from research_scripts.lock_config_distribution import (  # noqa: E402
     is_core_attribute,
 )
 from research_scripts.store_network_compare import compute_store_network  # noqa: E402
-from runtime_scripts.user_profile import (  # noqa: E402
+from business_scripts.user_profile import (  # noqa: E402
     CITY_TO_PROVINCE,
     age_cohort_distribution,
     city_to_tier_label,
     norm_city,
 )
-from runtime_scripts.presale_intention_funnel import (  # noqa: E402
+from business_scripts.presale_intention_funnel import (  # noqa: E402
     compute_funnel as compute_presale_funnel,
 )
 from utils.paths import ensure_shared_on_path  # noqa: E402
 from utils.plotly_theme import apply_zh_theme, get_series_color  # noqa: E402
 from utils.regions import REGION_MAP_OLD_TO_NEW, norm_region  # noqa: E402
 
-ensure_shared_on_path()  # 让 operators.*（shared/operators）优先于 legacy runtime 可导入
+ensure_shared_on_path()  # 让 operators.*（shared/operators）优先于其他 operators 可导入
 from operators.repurchase import split_repurchase  # noqa: E402
 
 _BUSINESS_DEF = REPO_ROOT / "shared" / "schema" / "business_definition.json"
@@ -98,7 +98,7 @@ CHART_WINDOW_DAYS = 30  # 模块 1 折线固定窗口：上市后天数 1..30；
 _TESTDRIVE_SERIES_COL = {"L6": "L6有效试驾数", "LS6": "LS6有效试驾数", "LS9": "LS9有效试驾数"}
 _TEST_DRIVE_PRE_DAYS = 14  # 模块 8 上市前观察天数（含预售爬坡）
 NON_RETAIL = {"试驾车", "大客户", "员工", "集团员工", "经销商员工", "享道", "仅批售", "项目", "展车", "海外"}
-# 预售小订 → 上市 N 日锁单分解（对齐 runtime_scripts/presale_intention_funnel.py 通用漏斗）
+# 预售小订 → 上市 N 日锁单分解（对齐 business_scripts/presale_intention_funnel.py 通用漏斗）
 _BREAKDOWN_COLORS = {
     "留存小订": "#174A7C",       # 本品蓝
     "预售退订": "#D95F59",       # 负向
@@ -367,7 +367,7 @@ def _lock_user_profile(df: pd.DataFrame, gen: str, end: pd.Timestamp, n_days: in
                        lock_year: int) -> dict:
     """某代际上市同期窗口内零售锁单的用户画像（订单级去重）。
 
-    口径字段参考 l6_m2_presale_report 用户画像模块与 runtime_scripts/user_profile.py：
+    口径字段参考 l6_m2_presale_report 用户画像模块与 business_scripts/user_profile.py：
       - 样本 = 窗口内零售锁单 COUNTD(order_number)
       - 性别 = order_gender（含 owner_gender 对照，缺失少）
       - 年龄 = buyer_age 中位/均值 + owner_age 对照；缺失率单列
@@ -901,7 +901,7 @@ def _user_profile_table(c: dict) -> str:
     return f"""
     <div class="card">
       <h2>模块 4 · 锁单用户画像对比（{ ' / '.join(gens) }，上市同期 {pc['n_days']} 天窗口）</h2>
-      <p class="section-note">口径：各代际上市同期第 1..{pc['n_days']} 天窗口内零售锁单（order_type ∈ 用户车/NaN，排除非零售），按 order_number 去重；性别仅取 owner_gender 口径（女性占比 = owner_gender 女 ÷ 锁单样本），年龄仅取 owner_age 口径（仅列均值，不含中位数），城市线级与省份 = license_city 归一（norm_city → city_to_tier_label / CITY_TO_PROVINCE）；年龄代际 = owner_age → birth = 上市年 − age → COHORTS（00后/95后…）。字段口径与 runtime_scripts/user_profile.py、l6_m2_presale_report 用户画像模块一致。</p>
+      <p class="section-note">口径：各代际上市同期第 1..{pc['n_days']} 天窗口内零售锁单（order_type ∈ 用户车/NaN，排除非零售），按 order_number 去重；性别仅取 owner_gender 口径（女性占比 = owner_gender 女 ÷ 锁单样本），年龄仅取 owner_age 口径（仅列均值，不含中位数），城市线级与省份 = license_city 归一（norm_city → city_to_tier_label / CITY_TO_PROVINCE）；年龄代际 = owner_age → birth = 上市年 − age → COHORTS（00后/95后…）。字段口径与 business_scripts/user_profile.py、l6_m2_presale_report 用户画像模块一致。</p>
       <div class="table-wrap">
       <table class="report-table">
         <thead><tr><th>指标</th>{thead_cells}</tr></thead>
@@ -1508,7 +1508,7 @@ def _lock_config_table(c: dict) -> str:
 
 def _presale_conversion(df: pd.DataFrame, bd: dict, gens: list[str],
                         ends: dict, n_days: int) -> list[dict]:
-    """预售小订 → 上市 N 日锁单分解（口径对齐 runtime_scripts/presale_intention_funnel.py 通用漏斗）。
+    """预售小订 → 上市 N 日锁单分解（口径对齐 business_scripts/presale_intention_funnel.py 通用漏斗）。
 
     逐代际，统一 N 日窗口（截止 = 上市日 + N - 1，与本报告折线同窗口，保证各代际可比）：
        预售小订池 cohort_total（预售 cohort 起点 ~ 上市日结束支付意向金，order_number 去重、剔测试单）
@@ -1690,7 +1690,7 @@ def _key_points_table(c: dict) -> str:
     return f"""
     <div class="card">
       <h2>预售小订 → 上市 {n_days} 日锁单分解（口径对齐通用漏斗）</h2>
-      <p class="section-note">指标定义对齐 runtime_scripts/presale_intention_funnel.py（通用漏斗，已剔测试单），各代际统一 <strong>{n_days} 日窗口</strong>（截止 = 上市日 + {n_days - 1}，与折线同窗口，保证可比）：预售小订池 = 预售 cohort 起点 ~ 上市日结束支付意向金（order_number 去重）；预售退订 = 截止前意向金已退；留存小订 = 小订池 − 预售退订；上市 {n_days} 日锁单总数 = 该代际 [上市日, 上市日+{n_days}) 内 lock_time 非空订单（零售口径，剔测试单，去重）；预售转化锁单 = 小订池中截止前锁单；直接锁单 = 锁单总数 − 预售转化锁单。预售退订率 = 预售退订 ÷ 小订池；<strong>预售转化率 = 预售转化锁单 ÷ 留存小订</strong>；直接锁单占比 = 直接锁单 ÷ {n_days} 日锁单总数。</p>
+      <p class="section-note">指标定义对齐 business_scripts/presale_intention_funnel.py（通用漏斗，已剔测试单），各代际统一 <strong>{n_days} 日窗口</strong>（截止 = 上市日 + {n_days - 1}，与折线同窗口，保证可比）：预售小订池 = 预售 cohort 起点 ~ 上市日结束支付意向金（order_number 去重）；预售退订 = 截止前意向金已退；留存小订 = 小订池 − 预售退订；上市 {n_days} 日锁单总数 = 该代际 [上市日, 上市日+{n_days}) 内 lock_time 非空订单（零售口径，剔测试单，去重）；预售转化锁单 = 小订池中截止前锁单；直接锁单 = 锁单总数 − 预售转化锁单。预售退订率 = 预售退订 ÷ 小订池；<strong>预售转化率 = 预售转化锁单 ÷ 留存小订</strong>；直接锁单占比 = 直接锁单 ÷ {n_days} 日锁单总数。</p>
       {chart_html}
       <div class="table-wrap">
       <table class="report-table">
@@ -1835,7 +1835,7 @@ def render_html(c: dict) -> str:
     <h2 class="section-title">口径与数据来源</h2>
     <div class="method-grid">
       <div class="method-item"><div class="method-icon" style="background:var(--zh-blue-100);color:var(--zh-blue);">D</div>
-        <div class="method-body"><strong>数据源</strong><br/>dataset/order_data.parquet<br/>dataset/assign_data.csv（有效门店 / 下发线索，模块 6）<br/>shared/schema/business_definition.json<br/>shared/loaders/store_info_loader.py（经销商 Bloc 关联）<br/>research_scripts/store_network_compare.py（网络对比组件）<br/>runtime_scripts/user_profile.py（画像字段口径）<br/>shared/operators/repurchase.py（复购算子）<br/>research_scripts/lock_config_distribution.py（模块 7 · 配置分布）<br/>dataset/config_attribute.parquet（模块 7 · 配置）<br/>dataset/test_drive_data.csv（模块 8 · 试驾，Tableau core_metric_observation/7）</div></div>
+        <div class="method-body"><strong>数据源</strong><br/>dataset/order_data.parquet<br/>dataset/assign_data.csv（有效门店 / 下发线索，模块 6）<br/>shared/schema/business_definition.json<br/>shared/loaders/store_info_loader.py（经销商 Bloc 关联）<br/>research_scripts/store_network_compare.py（网络对比组件）<br/>business_scripts/user_profile.py（画像字段口径）<br/>shared/operators/repurchase.py（复购算子）<br/>research_scripts/lock_config_distribution.py（模块 7 · 配置分布）<br/>dataset/config_attribute.parquet（模块 7 · 配置）<br/>dataset/test_drive_data.csv（模块 8 · 试驾，Tableau core_metric_observation/7）</div></div>
       <div class="method-item"><div class="method-icon" style="background:var(--zh-gold-100);color:var(--zh-gold-700);">T</div>
         <div class="method-body"><strong>时间窗口</strong><br/>各代际上市日（time_periods.end）起<br/>共同 {c['n_days']} 天，累计至 {c['last_date']}</div></div>
       <div class="method-item"><div class="method-icon" style="background:#E8F8FD;color:#2D6FA3;">F</div>

@@ -4,7 +4,7 @@
 
 | Tier | 目录 | 说明 | 自动调度 | Core Eval | Research Eval | 示例 |
 |------|------|------|:--------:|:---------:|:-------------:|------|
-| **core** | `runtime_scripts/` | 稳定日常脚本，can be auto-invoked by followup_runner / OpenCode / Runtime V2 | ✅ | ✅ | ❌ | lock_by_model, daily_lock_count |
+| **core** | `business_scripts/` | 稳定日常脚本，can be auto-invoked by followup_runner / OpenCode / Hub(经 jobs) | ✅ | ✅ | ❌ | lock_by_model, daily_lock_count |
 | **research** | `research_scripts/` | 研发脚本，仅用户明确要求时调用（预测/回测/释放曲线） | ❌ | ❌ | ✅ | cohort_forecast, backtest, release_curve |
 | **utility** | `utility_scripts/` | 基础设施脚本（DataOps/SyncOps/数据字典/VOC），非分析能力 | ❌ | ❌ | ❌ | data_dictionary, skills_order_observation_daily |
 
@@ -12,7 +12,7 @@
 
 ```
 mashang_workspace/
-├── runtime_scripts/       # Core — Runtime V2 可调度
+├── business_scripts/       # Core — Hub 经 jobs/ 可调度
 ├── research_scripts/      # Research — 仅手动执行
 ├── utility_scripts/       # Utility — DataOps/SyncOps 工具
 ├── outputs/reports/       # 报告输出
@@ -22,7 +22,7 @@ mashang_workspace/
 
 ## 脚本 Tier 归属
 
-### Core Scripts (6 个) — `runtime_scripts/`
+### Core Scripts (6 个) — `business_scripts/`
 
 | 脚本 | 说明 | CLI | Result Contract | Make target |
 |------|------|:---:|:---------------:|-------------|
@@ -50,7 +50,6 @@ mashang_workspace/
 |------|------|------|
 | `data_dictionary.py` | 数据字典 | 数据工具 |
 | `voc_theme_analysis.py` | VOC 骨架 | 分析工具 |
-| `generate_eval_cases.py` | Eval 用例生成 | 测试工具 |
 | `skills_order_observation_daily.py` | 每日数据观察与同步 | **DataOps/SyncOps** |
 | `skills_attainment_rate_alert.py` | 达成率预警 | 监控工具 |
 
@@ -82,17 +81,20 @@ mashang_workspace/
 | `dataset/updater/update_all_datasets.py` | 从 Tableau/数据源刷新 dataset | ✅ 刷新本地文件 |
 | `dataset/updater/order_data_to_parquet.py` | 刷新 order_data.parquet | ✅ |
 | `dataset/updater/order_config_to_parquet.py` | 刷新 config_attribute.parquet | ✅ |
-| `dataset/updater/lock_attribution_data_to_parquet.py` | 刷新 assign/test_drive/lock_attribution | ✅ |
+| `dataset/updater/assign_data_to_csv.py` | 刷新 assign_data.csv | ✅ |
+| `dataset/updater/test_drive_data_to_csv.py` | 刷新 test_drive_data.csv | ✅ |
+| `dataset/updater/lock_attribution_data_to_parquet.py` | 刷新 lock_attribution_data.parquet | ✅ |
+| `dataset/updater/tableau_export.py` | 共享 Tableau REST 导出能力（非独立入口） | — |
 
 详见 `docs/daily_data_pipeline.md`。
 
 ## 使用规则
 
-1. **OpenCode / followup_runner / Runtime V2** 只能自动调用 **runtime_scripts/** （core tier）脚本
+1. **OpenCode / followup_runner / Hub(经 jobs)** 只能自动调用 **business_scripts/** （core tier）脚本
 2. 用户明确提到"预测""回测""释放曲线"等关键词时，可调用 **research_scripts/**
-3. **legacy_scripts/** 已退休删除，历史脚本已迁移到 runtime_scripts/research_scripts/utility_scripts
+3. **legacy_scripts/** 已退休删除，历史脚本已迁移到 business_scripts/research_scripts/utility_scripts
 4. **skills_order_observation_daily.py** 是 DataOps/SyncOps 脚本，涉及外部写操作，必须通过 dry-run/execute 安全开关
 5. **dataset/updater/** 是数据供给基础设施，不属于 workspace 分析能力
-6. **Runtime V2 不调度 dataset/updater 和 utility_scripts**
-7. 新脚本默认进入 **research_scripts/**，稳定迭代后升为 **runtime_scripts/**
+6. **jobs 不调度 dataset/updater 和 utility_scripts**
+7. 新脚本默认进入 **research_scripts/**，稳定迭代后升为 **business_scripts/**
 8. 核心口径变更必须先批准再升级

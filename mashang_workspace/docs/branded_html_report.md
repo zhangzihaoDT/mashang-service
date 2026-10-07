@@ -54,7 +54,7 @@ python utility_scripts/render_html_report.py \
   --output outputs/reports/report.html
 
 # 从 pipe 渲染（分析脚本 → 报告）
-python runtime_scripts/daily_lock_count.py --format json \
+python business_scripts/daily_lock_count.py --format json \
   | python utility_scripts/render_html_report.py
 ```
 

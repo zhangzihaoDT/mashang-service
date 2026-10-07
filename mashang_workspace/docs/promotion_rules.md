@@ -3,14 +3,14 @@
 ## 能力生命周期
 
 ```
-research_script → runtime_script → mashang_runtime (产品化)
+research_script → business_script → jobs (产品化，Hub/Worker 调度)
                       ↑
                   utility_script (需包装)
                       ↑
                   legacy_script  (需包装)
 ```
 
-## research → runtime 晋级条件
+## research → business 晋级条件
 
 必须全部满足：
 
@@ -27,7 +27,7 @@ research_script → runtime_script → mashang_runtime (产品化)
 | 9 | 不会产生外部副作用 | 人工审查 | P1 |
 | 10 | 可被自然语言 parser / followup runner 映射 | 人工审查 | P1 |
 
-## runtime → mashang_runtime 晋级条件
+## business → jobs 晋级条件
 
 必须全部满足：
 
@@ -36,7 +36,7 @@ research_script → runtime_script → mashang_runtime (产品化)
 | 1 | 高频使用或明确业务价值 | 频率统计 / 业务需求 | P0 |
 | 2 | 指标口径稳定 | 人工审查 | P0 |
 | 3 | Result Contract 稳定（字段不改） | 版本对比 | P0 |
-| 4 | core/runtime eval 通过 | `make core-eval` | P0 |
+| 4 | core eval 通过 | `make core-eval` | P0 |
 | 5 | 有 followup case 或明确的调度场景 | followup_cases.json | P1 |
 | 6 | 有错误处理（status != error） | 人工审查 | P1 |
 | 7 | 有 docs 文档 | 检查 docs 字段 | P1 |
@@ -48,8 +48,8 @@ research_script → runtime_script → mashang_runtime (产品化)
 
 | 情况 | 处理方式 |
 |------|----------|
-| utility_script 有价值 | 包装为 runtime_script 后再晋级 |
-| legacy_script 仍有需求 | 写 wrapper → runtime_script 再晋级 |
+| utility_script 有价值 | 包装为 business_script 后再晋级 |
+| legacy_script 仍有需求 | 写 wrapper → business_script 再晋级 |
 | legacy_script 无需求 | 归档到 archive/ |
 | 工具类（data_dictionary） | 不晋级，保留为 utility |
 

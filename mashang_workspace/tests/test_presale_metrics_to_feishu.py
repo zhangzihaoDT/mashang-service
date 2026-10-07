@@ -1,6 +1,6 @@
 """presale_metrics_to_feishu shim 的委托与默认代际解析测试。
 
-预售监控实现已收敛到 runtime_scripts/vehicle_sales_monitor.py；
+预售监控实现已收敛到 business_scripts/vehicle_sales_monitor.py；
 本 shim 只负责注入 --force-phase / --phase presale 并委托。
 """
 

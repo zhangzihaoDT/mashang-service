@@ -28,7 +28,7 @@
       "command": ["{python}", "mashang_workspace/eval/run_eval.py", "--suite", "core", "--format", "terminal"],
       "data_dependency": true,
       "tier": "eval",
-      "description": "Core eval（runtime 脚本 numeric + contract gate），依赖 dataset"
+      "description": "Core eval（business 脚本 numeric + contract gate），依赖 dataset"
     },
     "pytest.eval": {
       "command": ["{python}", "-m", "pytest", "mashang_workspace/tests/eval", "-q"],
@@ -54,17 +54,11 @@
       "tier": "pytest",
       "description": "根 tests/（dataset 构建契约）"
     },
-    "runtime_v2.tests": {
-      "command": ["{python}", "-m", "pytest", "mashang_runtime_v2/tests/test_core_generic.py", "mashang_runtime_v2/tests/test_feature_job_adapter.py", "-q"],
+    "jobs.tests": {
+      "command": ["{python}", "-m", "pytest", "jobs/tests", "-q"],
       "data_dependency": false,
       "tier": "pytest",
-      "description": "Runtime V2 核心编排单测"
-    },
-    "pytest.legacy-runtime": {
-      "command": ["{python}", "-m", "pytest", "mashang_workspace/tests/test_legacy_runtime_packaging.py", "-q"],
-      "data_dependency": false,
-      "tier": "pytest",
-      "description": "legacy runtime 打包契约"
+      "description": "jobs 确定性执行契约单测"
     }
   },
   "rules": [
@@ -83,11 +77,11 @@
       "note": "OpenCode 控制面改动，跑契约自测作为基线"
     },
     {
-      "id": "runtime-script",
-      "match": ["mashang_workspace/runtime_scripts/*.py"],
+      "id": "business-script",
+      "match": ["mashang_workspace/business_scripts/*.py"],
       "targets": ["pytest.scripts", "eval.core"],
       "dynamic": "script_help",
-      "note": "runtime tier 受 Result Contract + numeric gate 约束（eval.core 依赖 dataset）"
+      "note": "business tier 受 Result Contract + numeric gate 约束（eval.core 依赖 dataset）"
     },
     {
       "id": "workspace-script",
@@ -128,18 +122,11 @@
       "note": "capability 改动跑其自带 tests/"
     },
     {
-      "id": "runtime-v2",
-      "match": ["mashang_runtime_v2/**"],
-      "targets": ["runtime_v2.tests"],
+      "id": "jobs",
+      "match": ["jobs/**"],
+      "targets": ["jobs.tests"],
       "dynamic": "pytest_file",
-      "note": "Runtime V2 改动跑核心编排单测"
-    },
-    {
-      "id": "legacy-runtime",
-      "match": ["mashang_runtime/**"],
-      "targets": ["pytest.legacy-runtime"],
-      "dynamic": null,
-      "note": "legacy runtime（frozen）改动跑打包契约"
+      "note": "jobs 执行契约改动跑契约单测"
     },
     {
       "id": "research-app",

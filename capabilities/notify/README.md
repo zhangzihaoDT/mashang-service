@@ -49,7 +49,7 @@
 
 - 适用：数据看板/观察结果/简报推送飞书群、任何"发送通知"调用。
 - 不适用（not for / 边界声明）：
-  - **接收 / 对话 bot**：飞书收消息 + agent 路由（`mashang_runtime/feishu_bot.py` 属 legacy inbound，不并入）。
+  - **接收 / 对话 bot**：飞书收消息 + agent 路由（旧 `mashang_runtime/feishu_bot.py` legacy inbound 已退役移除，不在本层范围内）。
   - **Bitable / 多维表格写入**：tenant token + bitable REST 是另一原语（`skills_order_observation_daily.py` 内嵌），候选能力另行收敛。
   - **文件下载/采集**：`dataset/incoming/feishu/` 属 Browser/Capture 管道。
   - 业务卡片的内容与版式设计（留在各消费方）。
@@ -58,10 +58,10 @@
 
 | 消费方 | 用途 | 状态 |
 |--------|------|------|
-| `mashang_workspace/runtime_scripts/monthly_sales_order_type_to_feishu.py` | 月度销量推送 | ✅ 已迁移 |
-| `mashang_workspace/runtime_scripts/daily_dc_inventory_change.py` | DC 库存变动推送 | ✅ 已迁移 |
+| `mashang_workspace/business_scripts/monthly_sales_order_type_to_feishu.py` | 月度销量推送 | ✅ 已迁移 |
+| `mashang_workspace/business_scripts/daily_dc_inventory_change.py` | DC 库存变动推送 | ✅ 已迁移 |
 | `mashang_workspace/utility_scripts/skills_order_observation_daily.py` | 每日观察推送（webhook 段；Bitable 段不动） | ✅ 已迁移 |
-| `mashang_workspace/runtime_scripts/vehicle_sales_monitor.py` | 预售/上市锁单监控推送（唯一实现） | ✅ 已迁移 |
+| `mashang_workspace/business_scripts/vehicle_sales_monitor.py` | 预售/上市锁单监控推送（唯一实现） | ✅ 已迁移 |
 | `mashang_workspace/research_scripts/presale_metrics_to_feishu.py` | 预售小订推送（compat shim → `vehicle_sales_monitor --force-phase`） | ✅ 已迁移 |
 | `auto_launch/src/feishu_sender.py` | 竞品营销日报推送 | ✅ 已迁移（薄封装） |
 
@@ -70,4 +70,4 @@
 - 收敛前：5+ 个 workspace/feature 脚本各自内嵌 `build_feishu_card` + `send_to_feishu`（requests），`auto_launch/src/feishu_sender.py` 为其一（httpx）。
 - 2026-09 按 Base Capabilities 规划新增 `capabilities/notify`（传输 + 通用信封 + mock）。
 - 阶段 B 完成：消费方（workspace 脚本 + auto_launch）全部收敛，本地 POST/重试逻辑移除。
-- 2026-09：上市/预售监控收敛到唯一入口 `runtime_scripts/vehicle_sales_monitor.py`；`l6_m2_launch_lock_metrics_to_feishu.py` 已删除，`presale_metrics_to_feishu.py` 降为 compat shim（统一走 `vehicle_sales_monitor --force-phase`）。
+- 2026-09：上市/预售监控收敛到唯一入口 `business_scripts/vehicle_sales_monitor.py`；`l6_m2_launch_lock_metrics_to_feishu.py` 已删除，`presale_metrics_to_feishu.py` 降为 compat shim（统一走 `vehicle_sales_monitor --force-phase`）。

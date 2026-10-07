@@ -2,7 +2,45 @@ import datetime
 import re
 import pandas as pd
 
-from tools.statistics_tool import StatisticsTool
+
+def _category_share(category_field: str, value_field: str, top_k: int | None, input_df: pd.DataFrame) -> dict:
+    """类别占比聚合（自 legacy tools.statistics_tool.category_share 内联，去除旧 Runtime 依赖）。"""
+    df = input_df[[category_field, value_field]].copy()
+    df[value_field] = pd.to_numeric(df[value_field], errors="coerce").fillna(0.0)
+    grouped = df.groupby(category_field, as_index=False).agg({value_field: "sum"})
+    grouped = grouped.sort_values(value_field, ascending=False).reset_index(drop=True)
+    total = float(grouped[value_field].sum())
+
+    if total <= 0:
+        rows = [
+            {"category": str(r[category_field]), "count": float(r[value_field]), "share": 0.0}
+            for _, r in grouped.iterrows()
+        ]
+        return {"type": "category_share", "total": 0.0, "rows": rows}
+
+    grouped["share"] = grouped[value_field] / total
+    rows = []
+    if isinstance(top_k, int):
+        top = grouped.head(top_k)
+        for _, r in top.iterrows():
+            rows.append(
+                {"category": str(r[category_field]), "count": float(r[value_field]), "share": float(r["share"])}
+            )
+        others_count = float(grouped.iloc[top_k:][value_field].sum()) if len(grouped) > top_k else 0.0
+        others_share = float(others_count / total) if total > 0 else 0.0
+        return {
+            "type": "category_share",
+            "top_k": int(top_k),
+            "total": float(total),
+            "rows": rows,
+            "others": {"count": others_count, "share": others_share},
+        }
+
+    for _, r in grouped.iterrows():
+        rows.append(
+            {"category": str(r[category_field]), "count": float(r[value_field]), "share": float(r["share"])}
+        )
+    return {"type": "category_share", "total": float(total), "rows": rows}
 
 
 def _normalize_city(value: object) -> str | None:
@@ -354,15 +392,7 @@ def run_province_topk_share_operator(
     counts.columns = ["province", "count"]
     counts_df = counts.copy()
 
-    stat = StatisticsTool().perform_statistics(
-        {
-            "type": "category_share",
-            "category_field": "province",
-            "value_field": "count",
-            "top_k": top_k,
-        },
-        counts_df,
-    )
+    stat = _category_share("province", "count", top_k, counts_df)
     if isinstance(stat, str):
         return {"type": "province_topk_share", "error": "statistics_failed", "message": stat}
 

@@ -13,12 +13,12 @@ dataset/ + shared/          Semantic Foundation（数据与业务语义底座）
 capabilities/                 mashang_workspace/
 Base Capabilities             Daily Business Analytics Workspace
 OCR / Search / Notify         日常业务分析工具箱
-Browser / Parse / Render      research → runtime → eval
+Browser / Parse / Render      research → business → eval
         │                             │
         └──────────────┬──────────────┘
                        ▼
-              mashang_runtime_v2
-           Unified Research Runtime
+                    jobs/
+           deterministic execution contract
                        │
           ┌────────────┼────────────┬────────────┬───────
           ▼            ▼            ▼            ▼
@@ -32,7 +32,7 @@ Browser / Parse / Render      research → runtime → eval
 
 - 接口是领域无关的原语（如 `image → text/markdown/tables`），而不是业务结论。
 - 不依赖 `dataset/` 的业务表结构，不隐含车系/城市/口径。
-- 可被多个上层（Daily Business Analytics workspace scripts、runtime_v2、Research Applications）通过同一份接口复用。
+- 可被多个上层（Daily Business Analytics workspace scripts、jobs、Research Applications）通过同一份接口复用。
 - 自带真实 provider + mock、自描述契约与测试，可离线验证。
 
 `mashang_workspace/`（日常业务分析）与 Research Applications（MIIT / auto_launch / nev_apeal）是**消费者**；
@@ -79,6 +79,6 @@ Candidate 不设迁移截止时间；**在出现真实复用需求时**按本 RE
 
 ## 边界声明（本轮约定）
 
-- **runtime_v2 编排边界**：`mashang_runtime_v2`（Unified Research Runtime）编排 = Base Capabilities + Daily Business Analytics（workspace 能力）→ 将 MIIT / auto_launch / nev_apeal 作为 **Research Applications** 长期驱动。本层只定义此边界，不在本轮改 runtime_v2 代码。
-- **Research Applications 现状**：MIIT / auto_launch / nev_apeal 仍是独立研究项目（各自 CLI / Makefile / state / 数据目录），未接入 runtime_v2 编排；后续按编排化路径演进。
+- **编排边界**：运行时系统 = **Hub（Control Plane）+ Worker（Execution Gateway）+ OpenCode**；service 侧确定性边界是根目录 `jobs/`（声明式 Research Application job + 状态/摘要/artifact 契约）。Base Capabilities 与 Daily Business Analytics（workspace 能力）供其上调用。
+- **Research Applications 现状**：MIIT / auto_launch / nev_apeal 仍是独立研究项目（各自 CLI / Makefile / state / 数据目录），经 `jobs/` 编排接入；后续按编排化路径演进。
 - **不要**在 capabilities/ 里放业务规则、业务脚本或领域解析逻辑——那属于 `mashang_workspace/` 或 Research Application 模块。

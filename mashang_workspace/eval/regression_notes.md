@@ -1,10 +1,14 @@
 # Regression Notes — Eval 回归测试记录
 
-> 本文件记录 Runtime Eval / Follow-up Eval 回归测试的状态和注意事项。
+> 本文件记录 Eval 回归测试的历史状态和注意事项。
+>
+> **注意**：旧 Runtime 已退役——`eval/run_runtime_eval.py`、`mashang_runtime/`、`mashang_runtime_v2/`
+> 均已移除。当前 eval 入口为 `eval/run_eval.py`（parser / followup / reference / numeric / contract 等 suite）
+> 与 `eval/run_followup_eval.py` / `eval/run_numeric_eval.py`。下方 Phase 1 内容为历史记录。
 
-## Phase 1: Runtime Eval
+## Phase 1: Runtime Eval（已退役）
 
-- Eval Runner: `eval/run_runtime_eval.py`
+- Eval Runner: `eval/run_runtime_eval.py`（已随旧 Runtime 退役移除）
 - 用例文件: `eval/runtime_cases.jsonl` (自动生成)
 - 报告输出: `eval/eval_report.json`
 - 用例生成: `utility_scripts/generate_eval_cases.py`
@@ -131,12 +135,12 @@ context_parser 支持从文本解析结果引用:
 - `warnings / errors`
 
 已支持 Contract 的脚本 (6个):
-- `runtime_scripts/daily_lock_count.py` ✅
-- `runtime_scripts/lock_by_model.py` ✅
-- `runtime_scripts/lock_city_distribution.py` ✅
+- `business_scripts/daily_lock_count.py` ✅
+- `business_scripts/lock_by_model.py` ✅
+- `business_scripts/lock_city_distribution.py` ✅
 - `research_scripts/cohort_forecast.py` ✅ (partial_success)
-- `runtime_scripts/assign_conversion_analysis.py` ✅
-- `runtime_scripts/attribute_penetration_report.py` ✅
+- `business_scripts/assign_conversion_analysis.py` ✅
+- `business_scripts/attribute_penetration_report.py` ✅
 
 ### Numeric Eval
 
@@ -202,15 +206,15 @@ context_parser 支持从文本解析结果引用:
 python mashang_workspace/eval/run_capability_audit.py
 ```
 
-覆盖 9 项检查: script_exists, tier_valid, status_valid, runtime_has_contract/numeric/gate, research/legacy_not_auto, promotion_fields.
+覆盖 9 项检查: script_exists, tier_valid, status_valid, business_has_contract/numeric/gate, research/legacy_not_auto, promotion_fields.
 
 ## Phase 13 Step 2.3: Remove Legacy Workspace Scripts Pool
 
 - `mashang_workspace/scripts/` 已删除
-- 脚本已物理分层到 `runtime_scripts/` / `research_scripts/` / `utility_scripts/` / `legacy_scripts/`
+- 脚本已物理分层到 `business_scripts/` / `research_scripts/` / `utility_scripts/` / `legacy_scripts/`
 - `paths.py` 中 `SCRIPTS_DIR` 已移除
 - `skills_order_observation_daily.py` 位于 `utility_scripts/`，DataOps/SyncOps，需要 `--dry-run` 安全模式
-- Runtime V2 只调度 `runtime_scripts/`
+- jobs 只调度 `business_scripts/`
 - 所有代码路径不再引用 `mashang_workspace/scripts/`
 - `run_eval.py` output path 双前缀问题已修复（resolve_output_path）
 - `outputs/tables/` 中引用旧 `scripts/` 路径的缓存已清理

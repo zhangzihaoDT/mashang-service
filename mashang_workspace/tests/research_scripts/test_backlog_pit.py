@@ -17,7 +17,7 @@ sys.path.insert(0, str(_WS_DIR))
 
 
 def _purge_operators():
-    """避免跨文件测试已把 mashang_runtime 的 operators 载入 sys.modules。"""
+    """避免跨文件测试把 operators 包缓存在 sys.modules 中。"""
     for k in [k for k in list(sys.modules) if k == "operators" or k.startswith("operators.")]:
         del sys.modules[k]
 

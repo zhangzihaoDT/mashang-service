@@ -10,7 +10,7 @@ PROJECT_ROOT = _WS_DIR.parent
 REGISTRY_FILE = _WS_DIR / "registry" / "capability_registry.json"
 AUDIT_RUNNER = _WS_DIR / "eval" / "run_capability_audit.py"
 
-VALID_TIERS = {"runtime", "research", "utility", "legacy"}
+VALID_TIERS = {"business", "research", "utility", "legacy"}
 VALID_STATUSES = {"active", "partial", "experimental", "deprecated", "retired"}
 
 
@@ -58,25 +58,25 @@ def test_all_scripts_exist():
             assert full.exists(), f"{c['capability_id']}: script not found {full}"
 
 
-def test_runtime_has_contract():
+def test_business_has_contract():
     data = json.loads(REGISTRY_FILE.read_text())
     for c in data:
-        if c["tier"] == "runtime":
-            assert c["result_contract"] is True, f"{c['capability_id']}: runtime missing result_contract"
+        if c["tier"] == "business":
+            assert c["result_contract"] is True, f"{c['capability_id']}: business missing result_contract"
 
 
-def test_runtime_has_numeric():
+def test_business_has_numeric():
     data = json.loads(REGISTRY_FILE.read_text())
     for c in data:
-        if c["tier"] == "runtime":
-            assert c.get("numeric_eval_case"), f"{c['capability_id']}: runtime missing numeric_eval_case"
+        if c["tier"] == "business":
+            assert c.get("numeric_eval_case"), f"{c['capability_id']}: business missing numeric_eval_case"
 
 
-def test_runtime_has_gate():
+def test_business_has_gate():
     data = json.loads(REGISTRY_FILE.read_text())
     for c in data:
-        if c["tier"] == "runtime":
-            assert c["contract_gate"] is True, f"{c['capability_id']}: runtime missing contract_gate"
+        if c["tier"] == "business":
+            assert c["contract_gate"] is True, f"{c['capability_id']}: business missing contract_gate"
 
 
 def test_research_not_auto():

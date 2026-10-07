@@ -36,7 +36,7 @@ mashang-service/                          # Project root (service layer)
 │   └── loaders/                          #   Dataset loaders (TP&MIX-ways)
 │
 ├── mashang_workspace/                    # AI-native analysis workspace (active dev)
-│   ├── runtime_scripts/                  #   Core stable analysis scripts (6)
+│   ├── business_scripts/                  #   Core stable analysis scripts (6)
 │   ├── research_scripts/                 #   Research / experimental scripts (7)
 │   ├── utility_scripts/                  #   DataOps / SyncOps tools (9)
 │   ├── legacy_scripts/                   #   Frozen historical scripts (1)
@@ -127,7 +127,7 @@ mashang-service/                          # Project root (service layer)
 
 | Directory | Count | Status | Notes |
 |-----------|-------|--------|-------|
-| `runtime_scripts/` | 6 | ✅ Core | Lock/assign/ATP/attribute — stable with Contract |
+| `business_scripts/` | 6 | ✅ Core | Lock/assign/ATP/attribute — stable with Contract |
 | `research_scripts/` | 7 | ✅ Research | Forecast/backtest/release curve |
 | `utility_scripts/` | 9 | ✅ Utility | DataOps/render/catalog/eval generation |
 | `legacy_scripts/` | 1 | ✅ Frozen | `skills_atp_price.py` — replaced by `atp_price_report.py` |
@@ -321,7 +321,7 @@ mashang-service/
 ├── tests/                        # Service-level tests
 │
 ├── mashang_workspace/            # Active development workspace
-│   ├── runtime_scripts/
+│   ├── business_scripts/
 │   ├── research_scripts/
 │   ├── utility_scripts/
 │   ├── legacy_scripts/

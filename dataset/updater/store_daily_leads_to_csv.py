@@ -59,11 +59,11 @@ def load_env_file(env_path: Path) -> None:
         return
 
 
-def import_lock_attribution_exporter():
+def import_tableau_exporter():
     updater_dir = REPO_ROOT / "dataset" / "updater"
     if str(updater_dir) not in sys.path:
         sys.path.insert(0, str(updater_dir))
-    import lock_attribution_data_to_parquet as _mod
+    import tableau_export as _mod
 
     return _mod
 
@@ -122,7 +122,7 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     DATASET_DIR.mkdir(parents=True, exist_ok=True)
-    exporter = import_lock_attribution_exporter()
+    exporter = import_tableau_exporter()
 
     tmp = DATASET_DIR / "store_daily_leads.csv.tmp"
     try:

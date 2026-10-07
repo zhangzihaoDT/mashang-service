@@ -11,7 +11,7 @@
   ↓
 2. Base Capabilities（capabilities） +  3. Daily Business Analytics（mashang_workspace）
   ↓
-4. Unified Research Runtime（mashang_runtime_v2）
+4. Jobs（确定性执行契约，jobs/）
   ↓
 5. Research Applications（MIIT / auto_launch / nev_apeal / …）
 ```
@@ -21,8 +21,10 @@
 - `shared/` + `dataset/` 提供共享业务语义、业务算子、业务定义与原始数据（Semantic Foundation）；
 - `capabilities/` 提供领域无关基础能力（OCR / Search / Notify 等），与日常业务分析能力平级，供上层复用（Base Capabilities）；
 - `mashang_workspace/` 是**日常业务分析工作区（Daily Business Analytics）**：负责分析、脚本开发、文档沉淀、Result Contract、Eval 与 Capability Registry，回答"今天要查什么/算什么"；
-- `mashang_runtime_v2/` 是 **Unified Research Runtime**：一方面调用 workspace 的确定性业务分析能力，另一方面长期编排独立 Research Applications；
+- `jobs/` 是 **确定性执行契约层**：声明式 Research Application job + 参数白名单 + 状态/摘要/artifact 契约，供 **Hub（Control Plane）+ Worker（Execution Gateway）** 调用；
 - MIIT / auto_launch / nev_apeal 是承载长期研究对象的 **Research Applications**（研究单元），有自己的状态、流程、contracts、gate 与产物。
+
+> 运行时系统由 **Hub + Worker + OpenCode** 组成，不再是 service 内的 Python package；service 侧只保留业务能力 + 确定性 `jobs/` contract。
 
 ---
 
@@ -164,19 +166,14 @@ make data-dict
 
 ---
 
-### 运行 Runtime V2 Demo
+### 运行 Research Application job
 
 ```bash
-make runtime-v2-demo
+make jobs-list
+make jobs-run JOB=nev_apeal_production_golden
 ```
 
-或：
-
-```bash
-make runtime-v2-city-demo
-```
-
-用于验证 Runtime V2 的能力调度链路。
+用于验证 `jobs/` 确定性执行契约（Hub/Worker 调用入口）。
 
 ---
 
@@ -199,7 +196,7 @@ Capability Registry
   ↓
 稳定能力
   ↓
-mashang_runtime
+jobs
 ```
 
 其中：
@@ -231,12 +228,6 @@ make capability-audit
 检查 Capability Registry。
 
 ```bash
-make runtime-v2-audit
-```
-
-检查 Runtime V2 就绪状态。
-
-```bash
 make ci
 ```
 
@@ -253,7 +244,7 @@ make ci
 重点关注：
 
 ```text
-mashang_workspace/runtime_scripts/
+mashang_workspace/business_scripts/
 mashang_workspace/research_scripts/
 mashang_workspace/docs/
 mashang_workspace/eval/
@@ -266,8 +257,7 @@ mashang_workspace/eval/
 重点关注：
 
 ```text
-mashang_runtime_v2/
-mashang_runtime/
+jobs/
 ```
 
 ---
@@ -288,10 +278,10 @@ shared/operators/
 重点关注：
 
 ```text
-mashang_runtime/
+jobs/
 ```
 
-这里存放已经沉淀完成的产品能力。
+这里存放确定性 Job Contract（供 Hub/Worker 调用）。
 
 ---
 
@@ -314,7 +304,7 @@ mashang_workspace/research_scripts/
 封装为：
 
 ```text
-mashang_workspace/runtime_scripts/
+mashang_workspace/business_scripts/
 ```
 
 标准 Runtime Script。
@@ -350,7 +340,7 @@ mashang_workspace/registry/capability_registry.json
 ```text
 mashang_workspace
   ↓
-mashang_runtime
+jobs
 ```
 
 完成产品化沉淀。
@@ -430,11 +420,11 @@ ELOE = Σ P(最终开票 | 当前仍悬置)
 2. Base Capabilities          3. Daily Business Analytics Workspace
    capabilities/                 mashang_workspace/
    OCR / Search / Notify         日常业务分析工具箱
-   Browser / Parse / Render      research → runtime → eval
+   Browser / Parse / Render      research → business → eval
         │                             │
         └──────────────┬──────────────┘
                        ▼
-4. Unified Research Runtime      mashang_runtime_v2
+4. Jobs（确定性执行契约）          jobs/
                        │
           ┌────────────┼────────────┬────────────┬───────
           ▼            ▼            ▼            ▼
@@ -455,7 +445,7 @@ mashang-service/
 │   └── search/            # 豆包 Global Search 检索原语
 │
 ├── mashang_workspace/     # 3. Daily Business Analytics Workspace（日常业务分析工具箱）
-│   ├── runtime_scripts/   #    高频确定业务分析，成熟后被 Runtime V2 调用
+│   ├── business_scripts/   #    高频确定业务分析，成熟后经 jobs/ 被 Hub 确定性调度
 │   ├── research_scripts/
 │   ├── utility_scripts/
 │   ├── registry/
@@ -464,8 +454,7 @@ mashang-service/
 │   ├── docs/
 │   └── utils/
 │
-├── mashang_runtime_v2/    # 4. Unified Research Runtime（编排层）
-├── mashang_runtime/       #   legacy frozen runtime（已冻结，canonical 迁至 shared/）
+├── jobs/                  # 4. 确定性执行契约层（Research Application job）
 │
 ├── research_apps/         # 5. Research Applications（研究单元归类层：只归类，不提供共享逻辑）
 │   ├── MIIT/              #    Research Application：工信部车型与申报研究
@@ -473,15 +462,13 @@ mashang-service/
 │   └── nev_apeal/         #    Research Application：新能源用户体验研究
 │
 ├── ocr/ 已迁移 → capabilities/ocr   （历史路径不再使用）
-├── main.py
-├── feishu_bot.py
 ├── Makefile
 ├── pyproject.toml
 └── README.md
 ```
 
 > 分层要点：`capabilities/`（Base Capabilities）与 `mashang_workspace/`（Daily Business Analytics）是两支平级的能力来源；
-> `mashang_runtime_v2`（Unified Research Runtime）负责两类消费——调用 workspace 日常业务分析能力 + 长期编排 Research Applications。
+> `jobs/`（确定性执行契约）供 Hub/Worker 调用 workspace 业务能力与长期编排 Research Applications。
 
 ## Research Applications（冻结定义）
 
@@ -489,7 +476,7 @@ mashang-service/
 
 - 解决的是一个**长期问题**，不是一次查询；
 - 拥有**自己的状态、流程、研究对象、产物、阶段与演化历史**——有自己的 engine/state 流转、contracts、QA gate 与 artifacts；
-- 是**持续存在的研究对象/研究程序**，可被 Runtime V2 长期驱动，而不只是一个脚本。
+- 是**持续存在的研究对象/研究程序**，可经 Hub 长期驱动（经 `jobs/` 契约），而不只是一个脚本。
 
 | Research Application | 研究对象 |
 |----------------------|----------|
@@ -498,7 +485,7 @@ mashang-service/
 | `nev_apeal` | 新能源用户体验研究 |
 | `project_4 / project_5` | 未来项目（应符合上述准则再立项） |
 
-`mashang_workspace/` 与它们**不是同一概念**：workspace 是**日常业务分析工作区**，回答"今天我要查什么、算什么"；Research Applications 回答"我要持续研究的一个长期问题"。当前 `nev_apeal` 是第一个成熟、已具备 engine/state/contracts/gate/artifacts 的 Research Application，作为迁入 Runtime V2 编排的优先候选。
+`mashang_workspace/` 与它们**不是同一概念**：workspace 是**日常业务分析工作区**，回答"今天我要查什么、算什么"；Research Applications 回答"我要持续研究的一个长期问题"。当前 `nev_apeal` 是第一个成熟、已具备 engine/state/contracts/gate/artifacts 的 Research Application，作为纳入 Hub 编排的优先候选。
 
 ---
 
@@ -535,8 +522,8 @@ shared/schema/business_definition.json
 
 ```text
 mashang_workspace
-mashang_runtime
-mashang_runtime_v2
+shared
+jobs
 ```
 
 原则：
@@ -560,7 +547,7 @@ mashang_workspace/
 
 推荐日常所有分析工作都从这里开始。负责：
 
-- 能力孵化（research_scripts → runtime_scripts）；
+- 能力孵化（research_scripts → business_scripts）；
 - 数据探索；
 - Runtime Script 管理；
 - Result Contract；
@@ -569,68 +556,49 @@ mashang_workspace/
 - 文档沉淀；
 - 能力治理。
 
-成熟后的 `runtime_scripts` 会被 Unified Research Runtime（mashang_runtime_v2）以确定性方式调用。
+成熟后的 `business_scripts` 会被 Hub 经 `jobs/` 以确定性方式调用。
 
 ---
 
-## 2.3 Unified Research Runtime（mashang_runtime_v2）
+## 2.3 Jobs（确定性执行契约，jobs/）
 
 目录：
 
 ```text
-mashang_runtime_v2/
+jobs/
+├── adapter.py              # execution contract：load_jobs / validate_params / run_job
+├── cli.py                  # Worker/Hub 调用入口（--job / --job-param / --list）
+├── config/jobs_config.json # 声明式 job 定义
+└── tests/
 ```
 
-**统一研究 Runtime**。消费两类对象：
+**确定性执行契约层**。运行时系统由 **Hub（Control Plane）+ Worker（Execution Gateway）+ OpenCode**
+组成，`jobs/` 是 service 侧唯一被调度的确定性边界：
 
 ```text
-mashang_runtime_v2
-├── Tool / Capability invocation
-│     └── mashang_workspace（确定性业务分析，Result Contract）
-└── Research Application orchestration
-      ├── MIIT / auto_launch / nev_apeal / project_4 / project_5
-      └── 长期驱动、持续产出状态与成果的研究程序
+jobs/
+├── Job 声明             config/jobs_config.json（argv 模板 / cwd / 参数白名单 / artifact）
+├── 参数校验             validate_params（date / pattern / 未声明参数拒绝）
+├── 确定性执行           run_job（无 shell，固定 argv，超时）
+└── Execution Contract   status / returncode / duration / summary / artifacts
 ```
 
 原则：
 
 ```text
-Runtime V2 不重新发明分析能力；
-Runtime V2 调用 Workspace 中已经治理完成的能力，统一消费 Result Contract；
-Runtime V2 长期编排独立 Research Applications。
+jobs 不重新发明分析能力；
+jobs 调用 workspace 已治理能力与 Research Applications（不复制业务代码）；
+jobs 只做声明、校验、执行与结果契约，不做 NL 路由 / 会话 / 渲染 / UI。
 ```
 
-当前已实现的最小运行链路（确定性分析一侧）：
-
-```text
-user text
-  ↓
-context_parser
-  ↓
-capability_dispatcher
-  ↓
-workspace_script_adapter
-  ↓
-runtime_scripts
-  ↓
-Result Contract
-  ↓
-response_renderer
-```
-
-Research Application 编排为演进目标，见 §1「Research Applications（冻结定义）」。
+Research Application 编排见 §1「Research Applications（冻结定义）」。
 
 ---
 
-## 2.4 Legacy Runtime Layer（mashang_runtime，frozen）
+## 2.4 Legacy Runtime（已退役）
 
-目录：
-
-```text
-mashang_runtime/
-```
-
-Legacy / frozen 旧 Runtime（产品化沉淀层的历史形态，已冻结）。operators/schema 的 canonical 版本已迁移至 `shared/`，不再作为活跃开发目录；不作为新能力回流目标。
+旧 `mashang_runtime/`（legacy frozen）与 `mashang_runtime_v2/`（NL 问数 Runtime）均已**退役移除**。
+operators/schema 的 canonical 版本一直在 `shared/`；确定性的 Research Application job 能力已收敛到根目录 `jobs/`。
 
 ---
 
@@ -641,7 +609,7 @@ Legacy / frozen 旧 Runtime（产品化沉淀层的历史形态，已冻结）�
 ```text
 research_scripts
   ↓
-runtime_scripts
+business_scripts
   ↓
 Result Contract
   ↓
@@ -651,7 +619,7 @@ Capability Registry
   ↓
 业务验证
   ↓
-mashang_runtime
+jobs
 ```
 
 对应：
@@ -678,7 +646,7 @@ mashang_runtime
 
 | Tier     | Directory           | Role         | Auto Schedulable | Default Eval |
 | -------- | ------------------- | ------------ | ---------------- | ------------ |
-| runtime  | `runtime_scripts/`  | 稳定分析能力 | yes              | yes          |
+| runtime  | `business_scripts/`  | 稳定分析能力 | yes              | yes          |
 | research | `research_scripts/` | 研究能力     | no               | no           |
 | utility  | `utility_scripts/`  | 工具脚本     | no               | no           |
 | legacy   | `legacy_scripts/`   | 历史脚本     | no               | no           |
@@ -686,7 +654,7 @@ mashang_runtime
 原则：
 
 ```text
-普通业务问题默认只调度 runtime_scripts。
+普通业务问题默认只调度 business_scripts。
 research_scripts 必须显式调用。
 ```
 
@@ -773,21 +741,24 @@ Eval 的目标不是测试代码本身，而是验证：
 
 ---
 
-# 8. Current Runtime V2 Status
+# 8. Current jobs Status
 
-当前支持能力：
-
-```text
-lock_by_model
-lock_city_distribution
-```
-
-示例问题：
+`jobs/` 当前声明的 Research Application job：
 
 ```text
-昨天锁单数分车型
-昨天 LS8 锁单城市分布
+nev_apeal_production_golden   # Golden Gate（--format json → PASS/FAIL + 验收数）
+nev_apeal_research_state      # --job-param topic=<run> → topic state + artifact
 ```
+
+调用：
+
+```bash
+make jobs-list
+make jobs-run JOB=nev_apeal_production_golden
+python -m jobs.cli --job nev_apeal_research_state --job-param topic=topic_x
+```
+
+> 普通问数不由 service 内部 Runtime 承担：运行时系统 = Hub（Control Plane）+ Worker（Execution Gateway）+ OpenCode。
 
 ---
 
@@ -829,8 +800,7 @@ Runtime 产品化沉淀
 ```text
 shared              # shared business semantics
 mashang_workspace   # capability incubation and governance
-mashang_runtime_v2  # runtime architecture evolution
-mashang_runtime     # productized capabilities
+jobs                # deterministic execution contract (Hub/Worker)
 ```
 
 核心原则：
@@ -840,7 +810,7 @@ mashang_runtime     # productized capabilities
 让 OpenCode 分析、写脚本、补文档、沉淀 Eval 和 Result Contract；
 
 当能力经过验证、使用频繁且业务口径稳定后，
-再回流到 Runtime，成为真正的产品能力。
+再经 jobs/ 契约被 Hub 确定性调度，成为真正的产品能力。
 ```
 
 ---
@@ -894,7 +864,7 @@ dataset/incoming/feishu/
 `mashang_workspace/` 是当前 Agent 工作区，负责：
 
 - 分析探索（`research_scripts/`）
-- 稳定分析脚本（`runtime_scripts/`）
+- 稳定分析脚本（`business_scripts/`）
 - 工具脚本（`utility_scripts/`）
 - 数据管道（DataOps）
 - 测试（`tests/`）
@@ -936,21 +906,17 @@ shared/
 └── loaders/       # dataset loaders (TP&MIX-ways 等)
 ```
 
-`shared/` 中的 operators 是 canonical 版本。
-`mashang_runtime/operators/` 保留 legacy 副本，已不再作为活跃来源。
+`shared/` 中的 operators 是 canonical 版本（旧 Runtime 副本已随 `mashang_runtime/` 退役移除）。
 
 ---
 
-## mashang_runtime
+## mashang_runtime（已退役）
 
-`mashang_runtime/` 是 **legacy frozen runtime**。
+`mashang_runtime/` 已**退役移除**：
 
-- 不再作为当前 workspace 的 canonical source
-- 不建议新增依赖
-- operators 和 schema 的 canonical 版本已迁移到 `shared/`
-- 未来考虑重命名为 `mashang_runtime.legacy/`
-
-当前 workspace **没有**任何 import 指向 `mashang_runtime/`。
+- operators 和 schema 的 canonical 版本一直是 `shared/`
+- 根 `main.py` / `feishu_bot.py` 兼容 shim 一并移除
+- workspace 不再有任何 import 指向旧 Runtime
 
 ---
 

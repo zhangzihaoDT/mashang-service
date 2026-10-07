@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """预售小订监控（飞书）— compatibility shim。
 
-已收敛到唯一入口 `runtime_scripts/vehicle_sales_monitor.py`：
-    python runtime_scripts/vehicle_sales_monitor.py --series CM3 --force-phase --phase presale
+已收敛到唯一入口 `business_scripts/vehicle_sales_monitor.py`：
+    python business_scripts/vehicle_sales_monitor.py --series CM3 --force-phase --phase presale
 
 `--force-phase` 让监控忽略 active 窗口判定，按指定 phase 渲染显式 series，
 因此「代际已进入 launch 后仍要发预售快照」无需独立实现。
@@ -31,7 +31,7 @@ for _p in (str(REPO_ROOT), str(_WS_ROOT)):
 
 from utils.monitors.phase import detect_active, load_business_definition  # noqa: E402
 
-_VSM_PATH = _WS_ROOT / "runtime_scripts" / "vehicle_sales_monitor.py"
+_VSM_PATH = _WS_ROOT / "business_scripts" / "vehicle_sales_monitor.py"
 
 
 def _next_value(argv: list[str], flag: str) -> str | None:

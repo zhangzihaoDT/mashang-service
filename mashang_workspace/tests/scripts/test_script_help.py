@@ -8,14 +8,14 @@ import sys
 from pathlib import Path
 
 _WS_DIR = Path(__file__).resolve().parents[2]
-RUNTIME_DIR = _WS_DIR / "runtime_scripts"
+BUSINESS_DIR = _WS_DIR / "business_scripts"
 RESEARCH_DIR = _WS_DIR / "research_scripts"
 UTILITY_DIR = _WS_DIR / "utility_scripts"
 
 
 def _find_script(script_name: str) -> Path | None:
-    """在 runtime/research/utility 目录中查找脚本。"""
-    for d in (RUNTIME_DIR, RESEARCH_DIR, UTILITY_DIR):
+    """在 business/research/utility 目录中查找脚本。"""
+    for d in (BUSINESS_DIR, RESEARCH_DIR, UTILITY_DIR):
         p = d / script_name
         if p.exists():
             return p
