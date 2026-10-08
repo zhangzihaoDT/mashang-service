@@ -1,0 +1,334 @@
+[
+  {
+    "pattern_id": "PAT-0001",
+    "pattern_key": "store_footfall_context_quality",
+    "title": "门店客流情境与到店质量分化",
+    "category": "sales_service",
+    "series": [
+      "L6",
+      "LS6",
+      "LS8",
+      "LS9"
+    ],
+    "hypothesis": "国庆尾声到店量与进店质量受门店形态、选址与到店场景主导而分化：核心门店客流随假期尾声回落、快闪门店位置好且人流大、9 系客群在部分门店回升，说明到店量并非单一可控变量。",
+    "issue_ids": [
+      "ISS-0001"
+    ],
+    "competitive_refs": [],
+    "confidence": "low",
+    "status": "confirmed",
+    "boundary": "5 条证据跨 4 店、1 天；为各店自报观察，未与客流计数或转化数据做归因。",
+    "created_at": "2026-10-05"
+  },
+  {
+    "pattern_id": "PAT-0002",
+    "pattern_key": "price_equity_decision_barrier",
+    "title": "价格与权益预期抑制短期决策",
+    "category": "configuration",
+    "series": [
+      "L6",
+      "LS6"
+    ],
+    "hypothesis": "用户核心关注价格与权益：L6 用户期待再降价、LS6 用户认可价格但仍要更多权益，说明价格预期与权益力度仍是短期转化的关注焦点。",
+    "issue_ids": [
+      "ISS-0002"
+    ],
+    "competitive_refs": [],
+    "confidence": "low",
+    "status": "confirmed",
+    "boundary": "3 条证据跨 3 店、1 天；为价格/权益关注信号，未直接对应退单或流失行为。",
+    "created_at": "2026-10-05"
+  },
+  {
+    "pattern_id": "PAT-0003",
+    "pattern_key": "sales_service_consultation_quality",
+    "title": "一线销售服务获正向认可",
+    "category": "sales_service",
+    "series": [
+      "L6",
+      "LS6"
+    ],
+    "hypothesis": "多店反馈主理与销售队伍专业、热情、配合默契，说明一线服务状态良好但店间仍可能存在差异。",
+    "issue_ids": [
+      "ISS-0003"
+    ],
+    "competitive_refs": [],
+    "confidence": "low",
+    "status": "confirmed",
+    "boundary": "2 条证据跨 2 店、1 天；为正向服务反馈，未与转化数据做归因。",
+    "created_at": "2026-10-05"
+  },
+  {
+    "pattern_id": "PAT-0004",
+    "pattern_key": "verified_product_service_strengths",
+    "title": "产品力与亲子体验获正向认可（可复用优势）",
+    "category": "other",
+    "series": [
+      "LS6",
+      "LS8",
+      "LS9"
+    ],
+    "hypothesis": "LS6 配置完整性与性价比、副驾电视/智能体的亲子体验等构成可复用的产品优势叙事，正向产品力仍是转化基础。",
+    "issue_ids": [
+      "ISS-0004"
+    ],
+    "competitive_refs": [],
+    "confidence": "low",
+    "status": "confirmed",
+    "boundary": "2 条证据跨 2 店、跨车型、1 天；正向信号为各店自报，未与成交/锁单数据做归因。",
+    "created_at": "2026-10-05"
+  },
+  {
+    "pattern_id": "PAT-0005",
+    "pattern_key": "store_operations_conversion_levers",
+    "title": "门店引流与转化动作建议",
+    "category": "sales_service",
+    "series": [
+      "L6",
+      "LS6"
+    ],
+    "hypothesis": "一线在直播、Momenta 智驾物料、进店礼品等运营动作上给出一致建议，说明门店运营与物料是当前提升进店与转化的关键抓手。",
+    "issue_ids": [
+      "ISS-0005"
+    ],
+    "competitive_refs": [
+      "华为"
+    ],
+    "confidence": "low",
+    "status": "confirmed",
+    "boundary": "4 条证据跨 4 店、1 天；为一线建议与落地反馈，未验证各动作对进店/转化的实际效果。",
+    "created_at": "2026-10-05"
+  },
+  {
+    "pattern_id": "PAT-0006",
+    "pattern_key": "existing_owner_loyalty_benefit",
+    "title": "老车主口碑与转介绍机会",
+    "category": "sales_service",
+    "series": [
+      "L6",
+      "LS6"
+    ],
+    "hypothesis": "一线建议维护老客户口碑、对现车主推荐朋友购车给予奖励，说明老用户口碑与转介绍是尚未充分运营的忠诚度资源。",
+    "issue_ids": [
+      "ISS-0006"
+    ],
+    "competitive_refs": [],
+    "confidence": "low",
+    "status": "confirmed",
+    "boundary": "2 条证据跨 2 店、1 天；未量化为实际转介绍或复购贡献。",
+    "created_at": "2026-10-05"
+  },
+  {
+    "pattern_id": "PAT-0007",
+    "pattern_key": "brand_channel_attraction_constraint",
+    "title": "品牌认知与曝光约束到店与信任",
+    "category": "other",
+    "series": [
+      "L6",
+      "LS6"
+    ],
+    "hypothesis": "客户先问品牌、需先介绍上汽再介绍智己，且存在身边朋友劝阻购买的口碑顾虑，说明品牌认知、曝光与信任仍是到店与留资约束。",
+    "issue_ids": [
+      "ISS-0007"
+    ],
+    "competitive_refs": [],
+    "confidence": "low",
+    "status": "confirmed",
+    "boundary": "3 条证据跨 3 店、1 天；未量化品牌认知或口碑对到店与转化的影响。",
+    "created_at": "2026-10-05"
+  },
+  {
+    "pattern_id": "PAT-0008",
+    "pattern_key": "store_location_visibility_barrier",
+    "title": "门店位置不佳影响自然引流",
+    "category": "sales_service",
+    "series": [
+      "L6",
+      "LS6"
+    ],
+    "hypothesis": "门店位置不佳、难以自然引流，说明选址与可见性是门店自然引流的现实约束。",
+    "issue_ids": [
+      "ISS-0008"
+    ],
+    "competitive_refs": [],
+    "confidence": "low",
+    "status": "confirmed",
+    "boundary": "单店单条位置观察、1 天；不能外推为全网门店选址结论。",
+    "created_at": "2026-10-05"
+  },
+  {
+    "pattern_id": "PAT-0009",
+    "pattern_key": "smart_cockpit_voice_assistant",
+    "title": "智舱功能（小龙虾/大模型）响应与稳定性不足",
+    "category": "smart_cockpit",
+    "series": [
+      "LS6"
+    ],
+    "hypothesis": "IMClaw 小龙虾功能响应慢、对话不流畅，且会误导用户对芯片算力的判断，说明智舱功能响应与稳定性缺口可能损害智能化口碑。",
+    "issue_ids": [
+      "ISS-0009"
+    ],
+    "competitive_refs": [],
+    "confidence": "low",
+    "status": "confirmed",
+    "boundary": "单店单条专家观察、1 天；未记录具体触发场景与版本信息，不能作为质量缺陷结论。",
+    "created_at": "2026-10-05"
+  },
+  {
+    "pattern_id": "PAT-0010",
+    "pattern_key": "adas_capability_brand_trust",
+    "title": "智驾对标竞争差距（对比华为）",
+    "category": "adas",
+    "series": [
+      "LS6"
+    ],
+    "hypothesis": "用户以华为为智驾标杆、认为 LS6 智驾不如华为，说明智驾能力是用户对标竞品时的可感知差距，并可能影响品牌信任。",
+    "issue_ids": [
+      "ISS-0010"
+    ],
+    "competitive_refs": [
+      "华为"
+    ],
+    "confidence": "low",
+    "status": "confirmed",
+    "boundary": "单店单条用户对标反馈、1 天；未记录具体功能差异，不能量化对锁单的影响。",
+    "created_at": "2026-10-05"
+  },
+  {
+    "pattern_id": "PAT-0011",
+    "pattern_key": "model_positioning_audience_fit",
+    "title": "车型人群区隔与潜客差异",
+    "category": "other",
+    "series": [
+      "L6",
+      "LS6"
+    ],
+    "hypothesis": "L6 潜客更不了解汽车、被外观吸引，LS6 潜客更懂车、会做配置对比，说明两车型潜客区隔明显、可做差异化运营。",
+    "issue_ids": [
+      "ISS-0011"
+    ],
+    "competitive_refs": [],
+    "confidence": "low",
+    "status": "confirmed",
+    "boundary": "单店单条观察、1 天；不能外推为总体车型人群结构结论。",
+    "created_at": "2026-10-05"
+  },
+  {
+    "pattern_id": "PAT-0012",
+    "pattern_key": "competitor_emotional_value_differentiation",
+    "title": "竞品情绪价值与造型个性化差距",
+    "category": "exterior",
+    "series": [
+      "LS6"
+    ],
+    "hypothesis": "用户被新款 LS6 造型劝退、偏好特斯拉/极氪风格，说明竞品在造型风格与情绪价值上具备可感知吸引力。",
+    "issue_ids": [
+      "ISS-0012"
+    ],
+    "competitive_refs": [
+      "特斯拉",
+      "极氪"
+    ],
+    "confidence": "low",
+    "status": "confirmed",
+    "boundary": "单店单条用户偏好反馈、1 天；不能量化其对锁单的影响。",
+    "created_at": "2026-10-05"
+  },
+  {
+    "pattern_id": "PAT-0013",
+    "pattern_key": "family_seating_scenario_demand",
+    "title": "家庭出行与座椅场景配置需求",
+    "category": "seating_space",
+    "series": [
+      "L6",
+      "LS8",
+      "LS9",
+      "OTHER"
+    ],
+    "hypothesis": "用户对后排纯平躺平、7 座与主驾零重力座椅/小腿托存在明确诉求，说明家庭出行场景下的座椅与空间配置是影响选择的需求点。",
+    "issue_ids": [
+      "ISS-0013"
+    ],
+    "competitive_refs": [],
+    "confidence": "low",
+    "status": "confirmed",
+    "boundary": "3 条证据跨 2 店、1 天；为场景与配置诉求观察，未量化对锁单的影响。",
+    "created_at": "2026-10-05"
+  },
+  {
+    "pattern_id": "PAT-0014",
+    "pattern_key": "hardware_material_feel_quality",
+    "title": "硬件材质与手感品质问题（脚踏板/售后配件）",
+    "category": "quality_reliability",
+    "series": [
+      "L6",
+      "LS8"
+    ],
+    "hypothesis": "LS8 脚踏板脚感偏软、售后颈托/腰托材质过硬或过软并变形，说明部分硬件与配件的材质/手感存在可感知的品质问题。",
+    "issue_ids": [
+      "ISS-0014"
+    ],
+    "competitive_refs": [],
+    "confidence": "low",
+    "status": "confirmed",
+    "boundary": "2 条证据跨 2 店、1 天；脚踏板部件原文未明确，不能作为产品缺陷结论。",
+    "created_at": "2026-10-05"
+  },
+  {
+    "pattern_id": "PAT-0015",
+    "pattern_key": "sales_finance_approval_process_barrier",
+    "title": "成交流程中贷款资质审批受阻",
+    "category": "sales_service",
+    "series": [
+      "L6",
+      "LS6"
+    ],
+    "hypothesis": "客户在已达成成交意向阶段因贷款资质问题流程受阻、处理难度高，说明金融审批环节可能造成临门一脚的成交流失。",
+    "issue_ids": [
+      "ISS-0015"
+    ],
+    "competitive_refs": [],
+    "confidence": "low",
+    "status": "confirmed",
+    "boundary": "单店单条观察、1 天；未量化受阻比例与损失，不能外推为总体成交结论。",
+    "created_at": "2026-10-05"
+  },
+  {
+    "pattern_id": "PAT-0016",
+    "pattern_key": "range_perception_benchmark_gap",
+    "title": "纯电续航对标感知差距",
+    "category": "charging",
+    "series": [
+      "LS6"
+    ],
+    "hypothesis": "用户认为 LS6 标称 782km 续航打折后相比特斯拉偏少，说明续航在用户对标竞品时形成可感知差距。",
+    "issue_ids": [
+      "ISS-0016"
+    ],
+    "competitive_refs": [
+      "特斯拉"
+    ],
+    "confidence": "low",
+    "status": "confirmed",
+    "boundary": "单店单条用户对标反馈、1 天；未记录实际续航表现，不能作为续航缺陷结论。",
+    "created_at": "2026-10-05"
+  },
+  {
+    "pattern_id": "PAT-0017",
+    "pattern_key": "customer_basics_over_features_attention",
+    "title": "用户关注基础信息、对特色功能兴致不高",
+    "category": "other",
+    "series": [
+      "LS6"
+    ],
+    "hypothesis": "用户重点仍关注价格、续航等基础情况，不深入尝试车机、对特色功能兴致不高，说明特色功能在部分客群中的体验转化有限。",
+    "issue_ids": [
+      "ISS-0017"
+    ],
+    "competitive_refs": [],
+    "confidence": "low",
+    "status": "confirmed",
+    "boundary": "单店单条观察、1 天；不能外推为全部客群的关注结构结论。",
+    "created_at": "2026-10-05"
+  }
+]

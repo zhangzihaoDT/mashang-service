@@ -1,0 +1,561 @@
+<!doctype html><html lang='zh-CN'><head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'>
+<title>产品专家一线问题发现 · 10/05</title><style>
+
+:root{--paper:#ffffff;--paper-2:#f5f5f5;--ink:#2d3142;--muted:#4f5d75;--soft:#7a8399;
+  --rule:rgba(45,49,66,.12);--rule-solid:#e3e3e3;--accent:#eb6c36;--accent-tint:rgba(235,108,54,.08);--link:#2e5aa8;
+  --fill:rgba(45,49,66,.05);--fill-strong:rgba(45,49,66,.09)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:"Noto Sans CJK SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;line-height:1.7;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:960px;margin:0 auto;padding:56px 28px 72px}
+.eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin:0 0 12px}
+h1{font-size:34px;line-height:1.2;font-weight:600;letter-spacing:-.01em;color:var(--ink);margin:0 0 12px}
+.overview{font-size:14.5px;color:var(--muted);margin:0 0 16px;font-variant-numeric:tabular-nums}
+h2.sect{font-size:20px;font-weight:600;color:var(--ink);margin:52px 0 16px;padding-bottom:10px;border-bottom:1px solid var(--rule-solid)}
+h2.sect small{display:block;font-size:12.5px;font-weight:400;color:var(--soft);letter-spacing:0;margin-top:4px}
+h3{font-size:15px;color:var(--ink);font-weight:600;margin:32px 0 12px}
+h3 .n{color:var(--soft);margin-right:8px;font-variant-numeric:tabular-nums}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:10px}
+.card{background:var(--paper-2);border:1px solid var(--rule);border-radius:8px;padding:18px 20px}
+.card.span-2{grid-column:1 / -1}
+.card h3{margin-top:0}
+.card .note{margin-top:12px}
+.obs-list{margin:0;padding-left:20px}
+.obs-list li{margin:6px 0;font-size:14px}
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:4px}
+.stat-row.two{grid-template-columns:repeat(2,1fr)}
+.stat{background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:12px 14px}
+.stat b{display:block;font-size:24px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.1}
+.stat span{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
+th,td{padding:11px 10px;border-bottom:1px solid var(--rule);text-align:left;vertical-align:top}
+th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;
+  border-bottom:1px solid var(--rule-solid);white-space:nowrap}
+tr:last-child td{border-bottom:none}
+.chip{display:inline-block;font-size:11.5px;color:var(--muted);background:var(--fill);
+  border:1px solid var(--rule);border-radius:4px;padding:1px 6px;margin:2px 4px 2px 0;white-space:nowrap}
+.note{font-size:12.5px;color:var(--soft);margin:10px 0 0}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.rank{display:flex;flex-direction:column;gap:7px;margin:8px 0 0}
+.rank .row{display:grid;grid-template-columns:1fr 1fr 42px;align-items:center;gap:10px}
+.rank .label{font-size:13px;color:var(--ink);white-space:normal;overflow-wrap:anywhere}
+.rank .track{height:10px;background:var(--fill-strong);border-radius:3px;overflow:hidden}
+.rank .track>i{display:block;height:100%;background:var(--muted);border-radius:3px}
+.rank .row:first-child .track>i{background:var(--accent)}
+.rank .num{font-size:13.5px;font-weight:600;color:var(--ink);text-align:right;font-variant-numeric:tabular-nums}
+.rank-title{font-size:11.5px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin:0}
+.other-models{font-size:12.5px;color:var(--soft);margin:10px 0 0;font-variant-numeric:tabular-nums}
+.detail{background:var(--paper-2);border:1px solid var(--rule);border-radius:8px;padding:18px 20px;margin:14px 0}
+.detail h4{font-size:17px;color:var(--ink);font-weight:600;margin:0 0 8px}
+.meta{font-size:13px;color:var(--muted);font-weight:600;margin:0 0 12px;font-variant-numeric:tabular-nums}
+.detail .block{margin:10px 0}
+.detail .k{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--soft);margin-bottom:3px}
+.detail .v{font-size:14px;margin:0}
+.raw{margin-top:14px;border-top:1px solid var(--rule);padding-top:10px}
+blockquote{margin:0 0 2px;padding:9px 13px;background:var(--paper);border-left:2px solid var(--rule-solid);border-radius:0 4px 4px 0;font-size:13.5px}
+blockquote .norm{color:var(--soft);font-size:11.5px}
+.src{font-size:11px;color:var(--soft);margin:0 0 12px 13px}
+details.other{margin-top:16px}
+details.other summary{cursor:pointer;font-size:14px;color:var(--link);font-weight:600}
+details.other details.other.low{margin-top:10px;border-top:1px solid var(--rule);padding-top:10px}
+details.other details.other.low summary{font-size:13.5px;color:var(--muted)}
+details.more{margin-top:8px}
+details.more summary{cursor:pointer;font-size:12.5px;color:var(--link);font-weight:600;margin-bottom:8px}
+details.temporal{font-size:13.5px;color:var(--muted);border-top:1px solid var(--rule-solid);border-bottom:1px solid var(--rule-solid);padding:14px 0;margin:40px 0 0}
+details.temporal>summary{cursor:pointer;font-size:20px;font-weight:600;color:var(--ink);list-style:none}
+details.temporal>summary::-webkit-details-marker{display:none}
+details.temporal>summary::before{content:"▸";color:var(--soft);font-size:14px;margin-right:8px}
+details.temporal[open]>summary::before{content:"▾"}
+details.temporal>summary small{display:block;font-size:12.5px;font-weight:400;color:var(--soft);letter-spacing:0;margin-top:4px}
+details.temporal .note{color:var(--muted)}
+details.temporal section.card{margin-top:14px}
+.appendix{font-size:12.5px;color:var(--soft);margin-top:28px}
+.appendix summary{cursor:pointer;font-size:13px;color:var(--link);font-weight:600}
+.appendix ul{margin:10px 0 0;padding-left:18px}
+.appendix table{font-size:12px}.appendix th,.appendix td{padding:7px 8px}
+footer{margin-top:40px;color:var(--soft);font-size:12px;letter-spacing:.04em}
+@media(max-width:760px){.cols{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.stat-row{grid-template-columns:1fr 1fr}h1{font-size:26px}}
+
+</style></head><body><main class='wrap'>
+<p class="eyebrow">FIELD INTELLIGENCE · run_014_2026-10-05</p>
+<h1>产品专家一线问题发现｜10/05</h1>
+<h2 class='sect'>01 本期概览</h2>
+<section class='card span-2'>
+<p class='overview'>12 条记录 · 12 位专家 · 11 家门店 · 34 条一线观察 · 17 个开放问题 · 255 条编码</p>
+<ul class='obs-list'>
+<li>一线建议增加直播、静态讲好 Momenta 智驾故事并张贴 one page 物料、进店赠送礼品；另有门店反馈没有直播、建议开播。</li>
+<li>客户重点关注续航与价格；L6 用户希望价格再便宜约 1.5 万；LS6 用户认可价格给力与性价比，但仍想要更多权益。</li>
+</ul>
+</section>
+<h2 class='sect'>02 业务主题扫描<small>结构化问卷：选择题直读；计数由 derive_survey_stats.py 确定性聚合，不经 LLM</small></h2>
+<div class='grid'>
+<section class='card span-2'>
+<h3><span class='n'>A1</span>门店支持概况</h3>
+<div class='stat-row'>
+<div class='stat'><b>12</b><span>门店记录</span></div>
+<div class='stat'><b>12</b><span>产品专家</span></div>
+<div class='stat'><b>11</b><span>城市+门店</span></div>
+<div class='stat'><b>1</b><span>支持波次</span></div>
+</div>
+<p class='note'>产品专家：王昊东、周正成、李文涛、林鑫、汪翔、方园园、陆宣妤、陈雅萍、张耀文、郭能能、胡然、季佳佳<br>城市+门店：遵义·播州用户中心、重庆·南坪金菱车世界店、重庆·金陵车世界车城店、重庆·重庆南岸服务中心、重庆·龙湖天街体验中心、贵阳·贵阳万象汇、贵阳·万象汇、重庆·新光里、万州·万达快闪、遵义·吾悦广场、重庆·礼嘉天街<br>支持波次：2026/10/05</p>
+</section>
+<section class='card span-2'>
+<h3><span class='n'>A2</span>现场客流情况</h3>
+<table><thead><tr><th>记录</th><th>专家 / 门店</th><th>客流</th><th>客流趋势</th><th>关注LS6</th><th>高峰</th><th>留资</th><th>试驾</th><th>锁单/交付</th></tr></thead><tbody>
+<tr><td>2026/10/05</td><td>王昊东 / 播州用户中心</td><td>6-8</td><td>较以往稍少</td><td>50%</td><td>13.30-16.30</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td>2026/10/05</td><td>周正成 / 南坪金菱车世界店</td><td>9-11</td><td>与以往相当</td><td>50%</td><td>13.30-16.30</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td>2026/10/05</td><td>李文涛 / 金陵车世界车城店</td><td>9-11</td><td>较以往稍多</td><td>50%</td><td>13.30-16.30</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td>2026/10/05</td><td>林鑫 / 重庆南岸服务中心</td><td>6-8</td><td>与以往相当</td><td>80%</td><td>13.30-16.30</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td>2026/10/05</td><td>汪翔 / 龙湖天街体验中心</td><td>28-32</td><td>与以往相当</td><td>80%</td><td>16.30-19.00</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td>2026/10/05</td><td>方园园 / 贵阳万象汇</td><td>16-18</td><td>与以往相当</td><td>60%</td><td>16.30-19.00</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td>2026/10/05</td><td>陆宣妤 / 万象汇</td><td>19-22</td><td>较以往明显更多</td><td>45%</td><td>16.30-19.00</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td>2026/10/05</td><td>陈雅萍 / 万象汇</td><td>19-22</td><td>与以往相当</td><td>50%</td><td>16.30-19.00</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td>2026/10/05</td><td>张耀文 / 新光里</td><td>6-8</td><td>与以往相当</td><td>70%</td><td>13.30-16.30</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td>2026/10/05</td><td>郭能能 / 万达快闪</td><td>19-22</td><td>较以往稍多</td><td>100%</td><td>13.30-16.30</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td>2026/10/05</td><td>胡然 / 吾悦广场</td><td>16-18</td><td>较以往稍少</td><td>30%</td><td>16.30-19.00</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td>2026/10/05</td><td>季佳佳 / 礼嘉天街</td><td>12-15</td><td>较以往稍少</td><td>80%</td><td>13.30-16.30</td><td>—</td><td>—</td><td>—</td></tr>
+</tbody></table>
+<p class='note'>只统计明确写出的内容；空值为未记录，不代表 0。</p>
+</section>
+<section class='card span-2'>
+<h3><span class='n'>A3</span>展车 / 试驾车缺失报备</h3>
+<p class='note'>覆盖率 =「报告该车型有展车/试驾车」的反馈条数 ÷ 12 条门店记录；❌ 标记缺失。</p>
+<table><thead><tr><th>车型</th><th>展车</th><th>试驾车</th></tr></thead><tbody>
+<tr><td>LS6</td><td>12/12（100%）</td><td>10/12（83%）</td></tr>
+<tr><td>L6</td><td>10/12（83%）</td><td>10/12（83%）</td></tr>
+<tr><td>LS8</td><td>11/12（92%）</td><td>10/12（83%）</td></tr>
+<tr><td>LS9</td><td>6/12（50%）</td><td>10/12（83%）</td></tr>
+</tbody></table>
+<p class='note'>门店维度（展车）：LS6 11/11 · L6 9/11 · LS8 10/11 · LS9 5/11</p>
+<details class='other'><summary>缺失明细（门店×车型，12）</summary>
+<table><thead><tr><th>门店</th><th>车型</th><th>展车</th><th>试驾车</th><th>原文</th></tr></thead><tbody>
+<tr><td>万达快闪</td><td>LS6</td><td>有</td><td>❌ 无</td><td>「LS6」；「其他」</td></tr>
+<tr><td>万达快闪</td><td>L6</td><td>❌ 无</td><td>❌ 无</td><td>「LS6」；「其他」</td></tr>
+<tr><td>万达快闪</td><td>LS8</td><td>❌ 无</td><td>❌ 无</td><td>「LS6」；「其他」</td></tr>
+<tr><td>万达快闪</td><td>LS9</td><td>❌ 无</td><td>❌ 无</td><td>「LS6」；「其他」</td></tr>
+<tr><td>南坪金菱车世界店</td><td>LS9</td><td>❌ 无</td><td>有</td><td>「LS6, L6, LS8」；「LS6, L6, LS8, LS9」</td></tr>
+<tr><td>吾悦广场</td><td>LS6</td><td>有</td><td>❌ 无</td><td>「LS8, LS6」；「其他」</td></tr>
+<tr><td>吾悦广场</td><td>L6</td><td>❌ 无</td><td>❌ 无</td><td>「LS8, LS6」；「其他」</td></tr>
+<tr><td>吾悦广场</td><td>LS8</td><td>有</td><td>❌ 无</td><td>「LS8, LS6」；「其他」</td></tr>
+<tr><td>吾悦广场</td><td>LS9</td><td>❌ 无</td><td>❌ 无</td><td>「LS8, LS6」；「其他」</td></tr>
+<tr><td>新光里</td><td>LS9</td><td>❌ 无</td><td>有</td><td>「LS6, L6, LS8」；「LS6, L6, LS8, LS9」</td></tr>
+<tr><td>礼嘉天街</td><td>LS9</td><td>❌ 无</td><td>有</td><td>「LS6, L6, LS8」；「LS6, L6, LS8, LS9」</td></tr>
+<tr><td>金陵车世界车城店</td><td>LS9</td><td>❌ 无</td><td>有</td><td>「LS6, L6, LS8」；「LS6, L6, LS8, LS9」</td></tr>
+</tbody></table>
+</details>
+</section>
+<section class='card span-2'>
+<h3><span class='n'>A4</span>客户关注主题</h3>
+<div class='cols'>
+<div>
+<p class='rank-title'>LS6</p>
+<div class='rank'>
+<div class='row' title='编码条目 12'><div class='label'>价格/权益/优惠</div><div class='track'><i style='width:100%'></i></div><div class='num'>12/12</div></div>
+<div class='row' title='编码条目 12'><div class='label'>续航/电池</div><div class='track'><i style='width:100%'></i></div><div class='num'>12/12</div></div>
+<div class='row' title='编码条目 7'><div class='label'>品牌/质保/售后</div><div class='track'><i style='width:58%'></i></div><div class='num'>7/12</div></div>
+<div class='row' title='编码条目 6'><div class='label'>智驾</div><div class='track'><i style='width:50%'></i></div><div class='num'>6/12</div></div>
+<div class='row' title='编码条目 5'><div class='label'>空间/内外饰</div><div class='track'><i style='width:42%'></i></div><div class='num'>5/12</div></div>
+<div class='row' title='编码条目 1'><div class='label'>配置/新老款差异</div><div class='track'><i style='width:8%'></i></div><div class='num'>1/12</div></div>
+</div>
+</div>
+<div>
+<p class='rank-title'>L6</p>
+<div class='rank'>
+<div class='row' title='编码条目 9'><div class='label'>价格/权益/优惠</div><div class='track'><i style='width:75%'></i></div><div class='num'>9/12</div></div>
+<div class='row' title='编码条目 7'><div class='label'>续航/电池</div><div class='track'><i style='width:58%'></i></div><div class='num'>7/12</div></div>
+<div class='row' title='编码条目 5'><div class='label'>品牌/质保/售后</div><div class='track'><i style='width:42%'></i></div><div class='num'>5/12</div></div>
+<div class='row' title='编码条目 2'><div class='label'>智驾</div><div class='track'><i style='width:17%'></i></div><div class='num'>2/12</div></div>
+<div class='row' title='编码条目 2'><div class='label'>空间/内外饰</div><div class='track'><i style='width:17%'></i></div><div class='num'>2/12</div></div>
+<div class='row' title='编码条目 1'><div class='label'>其他</div><div class='track'><i style='width:8%'></i></div><div class='num'>1/12</div></div>
+<div class='row' title='编码条目 1'><div class='label'>配置/新老款差异</div><div class='track'><i style='width:8%'></i></div><div class='num'>1/12</div></div>
+</div>
+</div>
+</div>
+<p class='other-models'>其他补充（未归类）：无l6</p>
+</section>
+<section class='card span-2'>
+<h3><span class='n'>A5</span>正向产品反馈</h3>
+<div class='cols'>
+<div>
+<p class='rank-title'>LS6</p>
+<div class='rank'>
+<div class='row' title='编码条目 9'><div class='label'>宁德时代电池</div><div class='track'><i style='width:75%'></i></div><div class='num'>9/12</div></div>
+<div class='row' title='编码条目 8'><div class='label'>B&amp;O音响</div><div class='track'><i style='width:67%'></i></div><div class='num'>8/12</div></div>
+<div class='row' title='编码条目 6'><div class='label'>主驾机械按摩</div><div class='track'><i style='width:50%'></i></div><div class='num'>6/12</div></div>
+<div class='row' title='编码条目 6'><div class='label'>后轮转向</div><div class='track'><i style='width:50%'></i></div><div class='num'>6/12</div></div>
+<div class='row' title='编码条目 5'><div class='label'>782km续航</div><div class='track'><i style='width:42%'></i></div><div class='num'>5/12</div></div>
+<div class='row' title='编码条目 5'><div class='label'>线控转向</div><div class='track'><i style='width:42%'></i></div><div class='num'>5/12</div></div>
+<div class='row' title='编码条目 4'><div class='label'>前备箱</div><div class='track'><i style='width:33%'></i></div><div class='num'>4/12</div></div>
+<div class='row' title='编码条目 4'><div class='label'>智能冷暖冰箱</div><div class='track'><i style='width:33%'></i></div><div class='num'>4/12</div></div>
+<div class='row' title='编码条目 2'><div class='label'>空气悬架/电控阻尼调节</div><div class='track'><i style='width:17%'></i></div><div class='num'>2/12</div></div>
+<div class='row' title='编码条目 1'><div class='label'>内饰质感（麂皮绒顶棚等）</div><div class='track'><i style='width:8%'></i></div><div class='num'>1/12</div></div>
+<div class='row' title='编码条目 1'><div class='label'>四门电吸门</div><div class='track'><i style='width:8%'></i></div><div class='num'>1/12</div></div>
+<div class='row' title='编码条目 1'><div class='label'>四驱</div><div class='track'><i style='width:8%'></i></div><div class='num'>1/12</div></div>
+</div>
+</div>
+<div>
+<p class='rank-title'>L6</p>
+<div class='rank'>
+<div class='row' title='编码条目 7'><div class='label'>整体美学设计（Prof. JimmyChoo 高定设计等）</div><div class='track'><i style='width:58%'></i></div><div class='num'>7/12</div></div>
+<div class='row' title='编码条目 5'><div class='label'>宁德时代电池</div><div class='track'><i style='width:42%'></i></div><div class='num'>5/12</div></div>
+<div class='row' title='编码条目 4'><div class='label'>850km续航</div><div class='track'><i style='width:33%'></i></div><div class='num'>4/12</div></div>
+<div class='row' title='编码条目 4'><div class='label'>后轮转向</div><div class='track'><i style='width:33%'></i></div><div class='num'>4/12</div></div>
+<div class='row' title='编码条目 3'><div class='label'>B&amp;O音响</div><div class='track'><i style='width:25%'></i></div><div class='num'>3/12</div></div>
+<div class='row' title='编码条目 3'><div class='label'>内饰质感（麂皮绒顶棚等）</div><div class='track'><i style='width:25%'></i></div><div class='num'>3/12</div></div>
+<div class='row' title='编码条目 2'><div class='label'>线控转向</div><div class='track'><i style='width:17%'></i></div><div class='num'>2/12</div></div>
+<div class='row' title='编码条目 1'><div class='label'>其他</div><div class='track'><i style='width:8%'></i></div><div class='num'>1/12</div></div>
+<div class='row' title='编码条目 1'><div class='label'>四驱</div><div class='track'><i style='width:8%'></i></div><div class='num'>1/12</div></div>
+<div class='row' title='编码条目 1'><div class='label'>调光天幕</div><div class='track'><i style='width:8%'></i></div><div class='num'>1/12</div></div>
+</div>
+</div>
+</div>
+<p class='other-models'>其他补充（未归类）：无l6</p>
+</section>
+<section class='card span-2'>
+<h3><span class='n'>A6</span>竞品关注</h3>
+<div class='cols'>
+<div>
+<p class='rank-title'>LS6</p>
+<div class='rank'>
+<div class='row' title='编码条目 6'><div class='label'>极氪7X</div><div class='track'><i style='width:50%'></i></div><div class='num'>6/12</div></div>
+<div class='row' title='编码条目 4'><div class='label'>理想i6</div><div class='track'><i style='width:33%'></i></div><div class='num'>4/12</div></div>
+<div class='row' title='编码条目 3'><div class='label'>特斯拉Model Y</div><div class='track'><i style='width:25%'></i></div><div class='num'>3/12</div></div>
+<div class='row' title='编码条目 3'><div class='label'>理想L6</div><div class='track'><i style='width:25%'></i></div><div class='num'>3/12</div></div>
+<div class='row' title='编码条目 3'><div class='label'>阿维塔07/07L</div><div class='track'><i style='width:25%'></i></div><div class='num'>3/12</div></div>
+<div class='row' title='编码条目 2'><div class='label'>其他</div><div class='track'><i style='width:17%'></i></div><div class='num'>2/12</div></div>
+<div class='row' title='编码条目 2'><div class='label'>华为系（问界M6/智界R7）</div><div class='track'><i style='width:17%'></i></div><div class='num'>2/12</div></div>
+<div class='row' title='编码条目 2'><div class='label'>小米YU7</div><div class='track'><i style='width:17%'></i></div><div class='num'>2/12</div></div>
+<div class='row' title='编码条目 1'><div class='label'>乐道L60/L80</div><div class='track'><i style='width:8%'></i></div><div class='num'>1/12</div></div>
+<div class='row' title='编码条目 1'><div class='label'>小米N70</div><div class='track'><i style='width:8%'></i></div><div class='num'>1/12</div></div>
+<div class='row' title='编码条目 1'><div class='label'>小鹏G6/G7/G9</div><div class='track'><i style='width:8%'></i></div><div class='num'>1/12</div></div>
+</div>
+</div>
+<div>
+<p class='rank-title'>L6</p>
+<div class='rank'>
+<div class='row' title='编码条目 6'><div class='label'>小米SU7</div><div class='track'><i style='width:50%'></i></div><div class='num'>6/12</div></div>
+<div class='row' title='编码条目 3'><div class='label'>极氪007/007GT</div><div class='track'><i style='width:25%'></i></div><div class='num'>3/12</div></div>
+<div class='row' title='编码条目 3'><div class='label'>特斯拉Model 3</div><div class='track'><i style='width:25%'></i></div><div class='num'>3/12</div></div>
+<div class='row' title='编码条目 2'><div class='label'>其他</div><div class='track'><i style='width:17%'></i></div><div class='num'>2/12</div></div>
+<div class='row' title='编码条目 2'><div class='label'>小鹏P7/P7+</div><div class='track'><i style='width:17%'></i></div><div class='num'>2/12</div></div>
+<div class='row' title='编码条目 2'><div class='label'>阿维塔06/06T</div><div class='track'><i style='width:17%'></i></div><div class='num'>2/12</div></div>
+</div>
+</div>
+</div>
+<p class='other-models'>其他补充（未归类）：弈境9X；今日无提及；没说；无l6</p>
+</section>
+<section class='card span-2'>
+<h3><span class='n'>A7</span>下单阻碍</h3>
+<div class='cols'>
+<div>
+<p class='rank-title'>LS6</p>
+<div class='rank'>
+<div class='row' title='编码条目 9'><div class='label'>对比竞品中</div><div class='track'><i style='width:75%'></i></div><div class='num'>9/12</div></div>
+<div class='row' title='编码条目 5'><div class='label'>价格不满（等价格优惠）</div><div class='track'><i style='width:42%'></i></div><div class='num'>5/12</div></div>
+<div class='row' title='编码条目 2'><div class='label'>品牌/信任顾虑</div><div class='track'><i style='width:17%'></i></div><div class='num'>2/12</div></div>
+<div class='row' title='编码条目 2'><div class='label'>外观/内饰不满</div><div class='track'><i style='width:17%'></i></div><div class='num'>2/12</div></div>
+<div class='row' title='编码条目 1'><div class='label'>其他</div><div class='track'><i style='width:8%'></i></div><div class='num'>1/12</div></div>
+<div class='row' title='编码条目 1'><div class='label'>智能化不满</div><div class='track'><i style='width:8%'></i></div><div class='num'>1/12</div></div>
+</div>
+</div>
+<div>
+<p class='rank-title'>L6</p>
+<div class='rank'>
+<div class='row' title='编码条目 6'><div class='label'>对比竞品中</div><div class='track'><i style='width:50%'></i></div><div class='num'>6/12</div></div>
+<div class='row' title='编码条目 5'><div class='label'>价格不满（等价格优惠）</div><div class='track'><i style='width:42%'></i></div><div class='num'>5/12</div></div>
+<div class='row' title='编码条目 2'><div class='label'>其他</div><div class='track'><i style='width:17%'></i></div><div class='num'>2/12</div></div>
+<div class='row' title='编码条目 2'><div class='label'>品牌/信任顾虑</div><div class='track'><i style='width:17%'></i></div><div class='num'>2/12</div></div>
+</div>
+</div>
+</div>
+<p class='other-models'>其他补充（未归类）：购车意愿不强随便看看；jc内饰颜色和无法任意和其他车漆色组合；无l6</p>
+</section>
+<section class='card span-2'>
+<h3><span class='n'>A8</span>不满意主题</h3>
+<div class='cols'>
+<div>
+<p class='rank-title'>LS6</p>
+<div class='rank'>
+<div class='row' title='编码条目 3'><div class='label'>品牌/质保/售后</div><div class='track'><i style='width:25%'></i></div><div class='num'>3/12</div></div>
+<div class='row' title='编码条目 3'><div class='label'>智驾</div><div class='track'><i style='width:25%'></i></div><div class='num'>3/12</div></div>
+<div class='row' title='编码条目 2'><div class='label'>价格/权益/优惠</div><div class='track'><i style='width:17%'></i></div><div class='num'>2/12</div></div>
+<div class='row' title='编码条目 1'><div class='label'>其他</div><div class='track'><i style='width:8%'></i></div><div class='num'>1/12</div></div>
+<div class='row' title='编码条目 1'><div class='label'>智舱</div><div class='track'><i style='width:8%'></i></div><div class='num'>1/12</div></div>
+<div class='row' title='编码条目 1'><div class='label'>空间</div><div class='track'><i style='width:8%'></i></div><div class='num'>1/12</div></div>
+</div>
+</div>
+<div>
+<p class='rank-title'>L6</p>
+<div class='rank'>
+<div class='row' title='编码条目 6'><div class='label'>价格/权益/优惠</div><div class='track'><i style='width:50%'></i></div><div class='num'>6/12</div></div>
+<div class='row' title='编码条目 3'><div class='label'>品牌/质保/售后</div><div class='track'><i style='width:25%'></i></div><div class='num'>3/12</div></div>
+<div class='row' title='编码条目 1'><div class='label'>其他</div><div class='track'><i style='width:8%'></i></div><div class='num'>1/12</div></div>
+</div>
+</div>
+</div>
+<p class='other-models'>其他补充（未归类）：外观和续航；无l6</p>
+</section>
+</div>
+<p class='note'>A4–A8 共忽略无效「其他」填写 11 条（无）；其余「其他」补充原文见上。</p>
+<p class='note'>A4–A8 为<strong>记录覆盖率</strong>：分子是命中该主题的去重 record_index 数，分母是门店记录数（N=12）。同一记录可命中多个主题，故各行分数不可相加。</p>
+<h2 class='sect'>03 一线问题发现<small>开放问题发现：问题事先未知；由模型从一线文字中发现并归并</small></h2>
+<section class='card span-2'>
+<div class='stat-row two'>
+<div class='stat'><b>12</b><span>门店记录</span></div>
+<div class='stat'><b>17</b><span>识别出的开放问题</span></div>
+</div>
+<p class='note'>12 条门店记录中，模型发现并归并出 17 个开放问题；其余问题折叠在文末。</p>
+</section>
+<div class='detail'>
+<h4>B1 门店客流情境与到店质量分化</h4>
+<p class='meta'>5 次提及 · 4 位专家 · 4 家门店</p>
+<div class='block'><span class='k'>LLM 提炼</span><p class='v'>国庆尾声到店量与进店质量受门店形态、选址与到店场景主导而分化：核心门店客流随假期尾声回落、快闪门店位置好且人流大、9 系客群在部分门店回升，说明到店量并非单一可控变量。</p></div>
+<div class='raw'><span class='k'>一线上报</span>
+<blockquote>今日客流明显减少，关注LS6及LS8五五开</blockquote>
+<div class='src'>王昊东 · 遵义·播州用户中心 · 2026/10/05 · daily_impression · 专家观察</div>
+<blockquote>今日9系客户显著增加，4点后人流明显增加，客户意向度相比昨日有所提高。</blockquote>
+<div class='src'>陆宣妤 · 贵阳·万象汇 · 2026/10/05 · daily_impression · 专家观察</div>
+<blockquote>今日客流较昨日维稳，上车进一步了解的客户比昨天多</blockquote>
+<div class='src'>郭能能 · 万州·万达快闪 · 2026/10/05 · daily_impression · 专家观察</div>
+<details class='more'><summary>更多原文（2）</summary>
+<blockquote>门店位于一楼过道 位置合理 人流量大 无明显提升建议</blockquote>
+<div class='src'>郭能能 · 万州·万达快闪 · 2026/10/05 · store_growth_suggestion · 专家观察</div>
+<blockquote>国庆假期进入尾声，客流量有一定程度的降低，留资依然以LS8为主</blockquote>
+<div class='src'>胡然 · 遵义·吾悦广场 · 2026/10/05 · daily_impression · 专家观察</div>
+</details>
+</div></div>
+<div class='detail'>
+<h4>B2 门店引流与转化动作建议</h4>
+<p class='meta'>4 次提及 · 4 位专家 · 4 家门店</p>
+<div class='block'><span class='k'>LLM 提炼</span><p class='v'>一线在直播、Momenta 智驾物料、进店礼品等运营动作上给出一致建议，说明门店运营与物料是当前提升进店与转化的关键抓手。</p></div>
+<div class='raw'><span class='k'>一线上报</span>
+<blockquote>可以考虑增加直播</blockquote>
+<div class='src'>李文涛 · 重庆·金陵车世界车城店 · 2026/10/05 · store_growth_suggestion · 专家观察</div>
+<blockquote>在店内静态环境下就讲好Momenta智驾的故事，而不是简单空洞地提及“与华为并驾齐驱第一梯队”。张贴出：M公司来历（中国原生/物理AI/上市）、合作车企范围（世界巨头云集）、功能版图（与华为ADS5对标，没有的就写“规划中”）、智己与M的深度合作关系</blockquote>
+<div class='src'>汪翔 · 重庆·龙湖天街体验中心 · 2026/10/05 · store_growth_suggestion · 专家观察</div>
+<blockquote>进店赠送礼品。</blockquote>
+<div class='src'>方园园 · 贵阳·贵阳万象汇 · 2026/10/05 · store_growth_suggestion · 专家观察</div>
+<details class='more'><summary>更多原文（1）</summary>
+<blockquote>这个门店没有直播，可以有空播一下。</blockquote>
+<div class='src'>陈雅萍 · 贵阳·万象汇 · 2026/10/05 · store_growth_suggestion · 专家观察</div>
+</details>
+</div></div>
+<div class='detail'>
+<h4>B3 价格与权益预期抑制短期决策</h4>
+<p class='meta'>3 次提及 · 3 位专家 · 3 家门店</p>
+<div class='block'><span class='k'>LLM 提炼</span><p class='v'>用户核心关注价格与权益：L6 用户期待再降价、LS6 用户认可价格但仍要更多权益，说明价格预期与权益力度仍是短期转化的关注焦点。</p></div>
+<div class='raw'><span class='k'>一线上报</span>
+<blockquote>重点关注续航和价格</blockquote>
+<div class='src'>王昊东 · 遵义·播州用户中心 · 2026/10/05 · daily_impression · 专家观察</div>
+<blockquote>价格希望再便宜1万5左右</blockquote>
+<div class='src'>张耀文 · 重庆·新光里 · 2026/10/05 · competitor_comment_l6 · 用户/店长原话</div>
+<blockquote>用户整体认可这次LS6价格确实比较给力，对产品性价比也认可，但还是既要还要，想要更多权益</blockquote>
+<div class='src'>季佳佳 · 重庆·礼嘉天街 · 2026/10/05 · daily_impression · 专家观察</div>
+</div></div>
+<details class='other'><summary>其余开放问题（14）</summary>
+<div class='detail'>
+<h4>品牌认知与曝光约束到店与信任</h4>
+<p class='meta'>3 次提及 · 3 位专家 · 3 家门店</p>
+<div class='block'><span class='k'>LLM 提炼</span><p class='v'>客户先问品牌、需先介绍上汽再介绍智己，且存在身边朋友劝阻购买的口碑顾虑，说明品牌认知、曝光与信任仍是到店与留资约束。</p></div>
+<div class='raw'><span class='k'>一线上报</span>
+<blockquote>提升品牌曝光量，吸引用户主动到店咨询体验。</blockquote>
+<div class='src'>周正成 · 重庆·南坪金菱车世界店 · 2026/10/05 · store_growth_suggestion · 专家观察</div>
+<blockquote>客户进店咨询时会首先询问品牌相关信息，需先介绍上汽，再介绍智己。</blockquote>
+<div class='src'>方园园 · 贵阳·贵阳万象汇 · 2026/10/05 · daily_impression · 专家观察</div>
+<blockquote>贵阳用户对智己品牌的认知度不高，有个用户十分看中ls6销售说带全家来看过好几回ls6了但是身边朋友都说不要买智己……</blockquote>
+<div class='src'>陈雅萍 · 贵阳·万象汇 · 2026/10/05 · daily_impression · 专家观察</div>
+</div></div>
+<div class='detail'>
+<h4>家庭出行与座椅场景配置需求</h4>
+<p class='meta'>3 次提及 · 2 位专家 · 2 家门店</p>
+<div class='block'><span class='k'>LLM 提炼</span><p class='v'>用户对后排纯平躺平、7 座与主驾零重力座椅/小腿托存在明确诉求，说明家庭出行场景下的座椅与空间配置是影响选择的需求点。</p></div>
+<div class='raw'><span class='k'>一线上报</span>
+<blockquote>LS8/9潜客关注的“支线场景”是〖车内躺平睡觉〗（提问形如“这车的后排能放成纯平吗？”）</blockquote>
+<div class='src'>汪翔 · 重庆·龙湖天街体验中心 · 2026/10/05 · daily_impression · 专家观察</div>
+<blockquote>贵阳用户家庭很大，碰到不少7-9人全家出门，指定看7座车的</blockquote>
+<div class='src'>陈雅萍 · 贵阳·万象汇 · 2026/10/05 · daily_impression · 专家观察</div>
+<blockquote>部分用户对零重力座椅配置有强烈需求，偏好主驾座椅的舒适性，但当前车型主驾未配备该配置。用户认可 L6 的座椅舒适性，但 L6 车型未搭载零重力座椅及小腿托配置。</blockquote>
+<div class='src'>陈雅萍 · 贵阳·万象汇 · 2026/10/05 · store_growth_suggestion · 专家观察</div>
+</div></div>
+<details class='other low'><summary>一线销售服务获正向认可（2 次提及 · 2 位专家 · 2 家门店）</summary>
+<div class='detail'>
+<h4>一线销售服务获正向认可</h4>
+<p class='meta'>2 次提及 · 2 位专家 · 2 家门店</p>
+<div class='block'><span class='k'>LLM 提炼</span><p class='v'>多店反馈主理与销售队伍专业、热情、配合默契，说明一线服务状态良好但店间仍可能存在差异。</p></div>
+<div class='raw'><span class='k'>一线上报</span>
+<blockquote>用户主理十分热情专业</blockquote>
+<div class='src'>王昊东 · 遵义·播州用户中心 · 2026/10/05 · daily_impression · 专家转述</div>
+<blockquote>销售队伍素质精干、士气饱满、配合默契</blockquote>
+<div class='src'>汪翔 · 重庆·龙湖天街体验中心 · 2026/10/05 · daily_impression · 专家观察</div>
+</div></div>
+</details>
+<details class='other low'><summary>产品力与亲子体验获正向认可（可复用优势）（2 次提及 · 2 位专家 · 2 家门店）</summary>
+<div class='detail'>
+<h4>产品力与亲子体验获正向认可（可复用优势）</h4>
+<p class='meta'>2 次提及 · 2 位专家 · 2 家门店</p>
+<div class='block'><span class='k'>LLM 提炼</span><p class='v'>LS6 配置完整性与性价比、副驾电视/智能体的亲子体验等构成可复用的产品优势叙事，正向产品力仍是转化基础。</p></div>
+<div class='raw'><span class='k'>一线上报</span>
+<blockquote>对于25万的家用SUV来讲， LS6确实是各方面配置最顶的。从空间、舒适、三电、安全、操控、智驾等6个方面来讲，每个方面自己都有很强的配置，从性价比的角度讲配置很强，非常适合家庭用户。</blockquote>
+<div class='src'>李文涛 · 重庆·金陵车世界车城店 · 2026/10/05 · daily_impression · 专家观察</div>
+<blockquote>青少年儿童上车后最关注副驾电视和智能体</blockquote>
+<div class='src'>汪翔 · 重庆·龙湖天街体验中心 · 2026/10/05 · daily_impression · 专家观察</div>
+</div></div>
+</details>
+<details class='other low'><summary>老车主口碑与转介绍机会（2 次提及 · 2 位专家 · 2 家门店）</summary>
+<div class='detail'>
+<h4>老车主口碑与转介绍机会</h4>
+<p class='meta'>2 次提及 · 2 位专家 · 2 家门店</p>
+<div class='block'><span class='k'>LLM 提炼</span><p class='v'>一线建议维护老客户口碑、对现车主推荐朋友购车给予奖励，说明老用户口碑与转介绍是尚未充分运营的忠诚度资源。</p></div>
+<div class='raw'><span class='k'>一线上报</span>
+<blockquote>店铺可以维护好老客户的口碑，发动老客户带人进店体验</blockquote>
+<div class='src'>周正成 · 重庆·南坪金菱车世界店 · 2026/10/05 · store_growth_suggestion · 专家观察</div>
+<blockquote>有些用户是因为朋友开智己，推荐过来看车或者下订的。可以出一些对于现车主推荐朋友购车后的奖励</blockquote>
+<div class='src'>林鑫 · 重庆·重庆南岸服务中心 · 2026/10/05 · store_growth_suggestion · 专家观察</div>
+</div></div>
+</details>
+<details class='other low'><summary>硬件材质与手感品质问题（脚踏板/售后配件）（2 次提及 · 2 位专家 · 2 家门店）</summary>
+<div class='detail'>
+<h4>硬件材质与手感品质问题（脚踏板/售后配件）</h4>
+<p class='meta'>2 次提及 · 2 位专家 · 2 家门店</p>
+<div class='block'><span class='k'>LLM 提炼</span><p class='v'>LS8 脚踏板脚感偏软、售后颈托/腰托材质过硬或过软并变形，说明部分硬件与配件的材质/手感存在可感知的品质问题。</p></div>
+<div class='raw'><span class='k'>一线上报</span>
+<blockquote>其中一组用户反馈LS8脚踏板踩上去脚感偏软，踏板本体感觉会有些弹性形变</blockquote>
+<div class='src'>王昊东 · 遵义·播州用户中心 · 2026/10/05 · daily_impression · 专家转述</div>
+<blockquote>售后配套材质有问题：颈托材质过硬，腰托材质过软。实际使用用户频繁上下主驾位置时，导致腰托会褶皱变形成坐垫，影响外观观感。</blockquote>
+<div class='src'>陈雅萍 · 贵阳·万象汇 · 2026/10/05 · daily_impression · 专家观察</div>
+</div></div>
+</details>
+<details class='other low'><summary>门店位置不佳影响自然引流（1 次提及 · 1 位专家 · 1 家门店）</summary>
+<div class='detail'>
+<h4>门店位置不佳影响自然引流</h4>
+<p class='meta'>1 次提及 · 1 位专家 · 1 家门店</p>
+<div class='block'><span class='k'>LLM 提炼</span><p class='v'>门店位置不佳、难以自然引流，说明选址与可见性是门店自然引流的现实约束。</p></div>
+<div class='raw'><span class='k'>一线上报</span>
+<blockquote>门店位置不佳</blockquote>
+<div class='src'>陆宣妤 · 贵阳·万象汇 · 2026/10/05 · store_growth_suggestion · 专家观察</div>
+</div></div>
+</details>
+<details class='other low'><summary>智舱功能（小龙虾/大模型）响应与稳定性不足（1 次提及 · 1 位专家 · 1 家门店）</summary>
+<div class='detail'>
+<h4>智舱功能（小龙虾/大模型）响应与稳定性不足</h4>
+<p class='meta'>1 次提及 · 1 位专家 · 1 家门店</p>
+<div class='block'><span class='k'>LLM 提炼</span><p class='v'>IMClaw 小龙虾功能响应慢、对话不流畅，且会误导用户对芯片算力的判断，说明智舱功能响应与稳定性缺口可能损害智能化口碑。</p></div>
+<div class='raw'><span class='k'>一线上报</span>
+<blockquote>今天在展车上试了一下imclaw小龙虾功能，实际体验并不是太好，主要体现在响应慢，对话不够流程。用户主理也反馈小龙虾不太好用，用户体验后会误认为我们的芯片算力不够高</blockquote>
+<div class='src'>林鑫 · 重庆·重庆南岸服务中心 · 2026/10/05 · daily_impression · 专家观察</div>
+</div></div>
+</details>
+<details class='other low'><summary>智驾对标竞争差距（对比华为）（1 次提及 · 1 位专家 · 1 家门店）</summary>
+<div class='detail'>
+<h4>智驾对标竞争差距（对比华为）</h4>
+<p class='meta'>1 次提及 · 1 位专家 · 1 家门店</p>
+<div class='block'><span class='k'>LLM 提炼</span><p class='v'>用户以华为为智驾标杆、认为 LS6 智驾不如华为，说明智驾能力是用户对标竞品时的可感知差距，并可能影响品牌信任。</p></div>
+<div class='raw'><span class='k'>一线上报</span>
+<blockquote>觉得智驾没有华为强</blockquote>
+<div class='src'>张耀文 · 重庆·新光里 · 2026/10/05 · competitor_comment · 专家转述</div>
+</div></div>
+</details>
+<details class='other low'><summary>车型人群区隔与潜客差异（1 次提及 · 1 位专家 · 1 家门店）</summary>
+<div class='detail'>
+<h4>车型人群区隔与潜客差异</h4>
+<p class='meta'>1 次提及 · 1 位专家 · 1 家门店</p>
+<div class='block'><span class='k'>LLM 提炼</span><p class='v'>L6 潜客更不了解汽车、被外观吸引，LS6 潜客更懂车、会做配置对比，说明两车型潜客区隔明显、可做差异化运营。</p></div>
+<div class='raw'><span class='k'>一线上报</span>
+<blockquote>L6和LS6两台车人群其实差异比较大，准确来讲是潜客差异较大，前者基本不了解汽车，纯粹被外观吸引过来，有个品牌音响觉得不错，但是经常对内饰不太感冒。后者对车有一定了解，雷达音响按摩什么的会有一个对比过程</blockquote>
+<div class='src'>张耀文 · 重庆·新光里 · 2026/10/05 · daily_impression · 专家观察</div>
+</div></div>
+</details>
+<details class='other low'><summary>竞品情绪价值与造型个性化差距（1 次提及 · 1 位专家 · 1 家门店）</summary>
+<div class='detail'>
+<h4>竞品情绪价值与造型个性化差距</h4>
+<p class='meta'>1 次提及 · 1 位专家 · 1 家门店</p>
+<div class='block'><span class='k'>LLM 提炼</span><p class='v'>用户被新款 LS6 造型劝退、偏好特斯拉/极氪风格，说明竞品在造型风格与情绪价值上具备可感知吸引力。</p></div>
+<div class='raw'><span class='k'>一线上报</span>
+<blockquote>有用户被新款LS6的造型劝退，喜欢特斯拉或者极氪的风格</blockquote>
+<div class='src'>陈雅萍 · 贵阳·万象汇 · 2026/10/05 · competitor_comment · 专家转述</div>
+</div></div>
+</details>
+<details class='other low'><summary>成交流程中贷款资质审批受阻（1 次提及 · 1 位专家 · 1 家门店）</summary>
+<div class='detail'>
+<h4>成交流程中贷款资质审批受阻</h4>
+<p class='meta'>1 次提及 · 1 位专家 · 1 家门店</p>
+<div class='block'><span class='k'>LLM 提炼</span><p class='v'>客户在已达成成交意向阶段因贷款资质问题流程受阻、处理难度高，说明金融审批环节可能造成临门一脚的成交流失。</p></div>
+<div class='raw'><span class='k'>一线上报</span>
+<blockquote>今日有一组客户已达成成交意向，但因贷款资质问题流程受阻。据销售同事反馈，该类情况处理难度较高。</blockquote>
+<div class='src'>周正成 · 重庆·南坪金菱车世界店 · 2026/10/05 · daily_impression · 专家观察</div>
+</div></div>
+</details>
+<details class='other low'><summary>纯电续航对标感知差距（1 次提及 · 1 位专家 · 1 家门店）</summary>
+<div class='detail'>
+<h4>纯电续航对标感知差距</h4>
+<p class='meta'>1 次提及 · 1 位专家 · 1 家门店</p>
+<div class='block'><span class='k'>LLM 提炼</span><p class='v'>用户认为 LS6 标称 782km 续航打折后相比特斯拉偏少，说明续航在用户对标竞品时形成可感知差距。</p></div>
+<div class='raw'><span class='k'>一线上报</span>
+<blockquote>另外有用户觉得相比特斯拉续航782打个折后太少了</blockquote>
+<div class='src'>陈雅萍 · 贵阳·万象汇 · 2026/10/05 · competitor_comment · 专家转述</div>
+</div></div>
+</details>
+<details class='other low'><summary>用户关注基础信息、对特色功能兴致不高（1 次提及 · 1 位专家 · 1 家门店）</summary>
+<div class='detail'>
+<h4>用户关注基础信息、对特色功能兴致不高</h4>
+<p class='meta'>1 次提及 · 1 位专家 · 1 家门店</p>
+<div class='block'><span class='k'>LLM 提炼</span><p class='v'>用户重点仍关注价格、续航等基础情况，不深入尝试车机、对特色功能兴致不高，说明特色功能在部分客群中的体验转化有限。</p></div>
+<div class='raw'><span class='k'>一线上报</span>
+<blockquote>重点还是关注价格续航等基础情况，不会深入的去尝试车机，对特色功能等兴致不高</blockquote>
+<div class='src'>郭能能 · 万州·万达快闪 · 2026/10/05 · daily_impression · 专家观察</div>
+</div></div>
+</details>
+</details>
+<details class='temporal'><summary>跨期比较<small>run_014_2026-10-05（10/05） vs run_013_2026-10-04（10/04）；按 pattern_key 对齐</small></summary>
+<section class='card span-2'>
+<table><thead><tr><th>主题</th><th>状态</th><th>证据</th><th>覆盖门店</th><th>复现</th><th>证据强度</th></tr></thead><tbody>
+<tr><td>门店客流情境与到店质量分化</td><td>扩大</td><td>4 → 5（+1）</td><td>3 → 4（+1）</td><td>systemic → systemic</td><td>strong → strong</td></tr>
+<tr><td>价格与权益预期抑制短期决策</td><td>扩大</td><td>2 → 3（+1）</td><td>2 → 3（+1）</td><td>repeated → systemic（升降）</td><td>moderate → strong</td></tr>
+<tr><td>一线销售服务获正向认可</td><td>持续</td><td>2 → 2（+0）</td><td>2 → 2（+0）</td><td>repeated → repeated</td><td>moderate → moderate</td></tr>
+<tr><td>产品力与亲子体验获正向认可（可复用优势）</td><td>收缩</td><td>6 → 2（-4）</td><td>6 → 2（-4）</td><td>systemic → repeated（升降）</td><td>strong → moderate</td></tr>
+<tr><td>门店引流与转化动作建议</td><td>收缩</td><td>5 → 4（-1）</td><td>5 → 4（-1）</td><td>systemic → systemic</td><td>strong → strong</td></tr>
+<tr><td>老车主口碑与转介绍机会</td><td>扩大</td><td>1 → 2（+1）</td><td>1 → 2（+1）</td><td>isolated → repeated（升降）</td><td>weak → moderate</td></tr>
+<tr><td>品牌认知与曝光约束到店与信任</td><td>扩大</td><td>2 → 3（+1）</td><td>2 → 3（+1）</td><td>repeated → systemic（升降）</td><td>moderate → strong</td></tr>
+<tr><td>门店位置不佳影响自然引流</td><td>持续</td><td>1 → 1（+0）</td><td>1 → 1（+0）</td><td>isolated → isolated</td><td>weak → weak</td></tr>
+<tr><td>智舱功能（小龙虾/大模型）响应与稳定性不足</td><td>收缩</td><td>2 → 1（-1）</td><td>2 → 1（-1）</td><td>repeated → isolated（升降）</td><td>moderate → weak</td></tr>
+<tr><td>智驾对标竞争差距（对比华为）</td><td>新增</td><td>0 → 1（+1）</td><td>0 → 1（+1）</td><td>— → isolated</td><td>— → weak</td></tr>
+<tr><td>车型人群区隔与潜客差异</td><td>收缩</td><td>4 → 1（-3）</td><td>2 → 1（-1）</td><td>repeated → isolated（升降）</td><td>moderate → weak</td></tr>
+<tr><td>竞品情绪价值与造型个性化差距</td><td>收缩</td><td>4 → 1（-3）</td><td>3 → 1（-2）</td><td>systemic → isolated（升降）</td><td>strong → weak</td></tr>
+<tr><td>家庭出行与座椅场景配置需求</td><td>新增</td><td>0 → 3（+3）</td><td>0 → 2（+2）</td><td>— → repeated</td><td>— → moderate</td></tr>
+<tr><td>硬件材质与手感品质问题（脚踏板/售后配件）</td><td>新增</td><td>0 → 2（+2）</td><td>0 → 2（+2）</td><td>— → repeated</td><td>— → moderate</td></tr>
+<tr><td>成交流程中贷款资质审批受阻</td><td>新增</td><td>0 → 1（+1）</td><td>0 → 1（+1）</td><td>— → isolated</td><td>— → weak</td></tr>
+<tr><td>纯电续航对标感知差距</td><td>新增</td><td>0 → 1（+1）</td><td>0 → 1（+1）</td><td>— → isolated</td><td>— → weak</td></tr>
+<tr><td>用户关注基础信息、对特色功能兴致不高</td><td>新增</td><td>0 → 1（+1）</td><td>0 → 1（+1）</td><td>— → isolated</td><td>— → weak</td></tr>
+</tbody></table>
+<p class='other-models'>本期未再出现的主题：adas_rain_wiper_interlock、configuration_benchmark_convenience_gap、driving_dynamics_steering_tech_demo、interior_luxury_material_perception、launch_rhythm_derivative_sync、local_market_communication_barrier、purchase_consideration_non_urgent、store_accessory_display_seating_impact</p>
+<p class='note'>跨期比较只描述证据覆盖与统计变化，不代表因果关系或总体市场趋势。</p>
+</section>
+</details>
+<details class='appendix'><summary>方法与 Runtime 追溯</summary><ul>
+<li>A 业务主题扫描：选择题由 <code>derive_survey_stats.py</code> 直读问卷列并确定性聚合；文本编码期（run_001）由 <code>derive_preset_stats.py</code> 聚合。</li>
+<li>B 开放发现：问题事先未知，Evidence → Issue → Pattern → Convergence。</li>
+<li>数字只读 <code>preset_stats.json</code>（v0.1）/ <code>survey_stats.json</code>（v0.2）/<code>convergence.json</code>；一线原文逐字取自 <code>evidence.jsonl</code>，报告不生成、不改写任何原话。</li>
+<li>样本为定性、自报、非随机门店样本，不用于估计总体比例。</li>
+</ul><table><thead><tr><th>Pattern</th><th>pattern_key</th><th>证据强度</th><th>复现</th><th>证据</th><th>Convergence</th><th>Issues</th></tr></thead><tbody>
+<tr><td>PAT-0001</td><td><code>store_footfall_context_quality</code></td><td>strong</td><td>systemic</td><td>5</td><td>CONV-0001</td><td>ISS-0001</td></tr>
+<tr><td>PAT-0002</td><td><code>price_equity_decision_barrier</code></td><td>strong</td><td>systemic</td><td>3</td><td>CONV-0002</td><td>ISS-0002</td></tr>
+<tr><td>PAT-0003</td><td><code>sales_service_consultation_quality</code></td><td>moderate</td><td>repeated</td><td>2</td><td>CONV-0003</td><td>ISS-0003</td></tr>
+<tr><td>PAT-0004</td><td><code>verified_product_service_strengths</code></td><td>moderate</td><td>repeated</td><td>2</td><td>CONV-0004</td><td>ISS-0004</td></tr>
+<tr><td>PAT-0005</td><td><code>store_operations_conversion_levers</code></td><td>strong</td><td>systemic</td><td>4</td><td>CONV-0005</td><td>ISS-0005</td></tr>
+<tr><td>PAT-0006</td><td><code>existing_owner_loyalty_benefit</code></td><td>moderate</td><td>repeated</td><td>2</td><td>CONV-0006</td><td>ISS-0006</td></tr>
+<tr><td>PAT-0007</td><td><code>brand_channel_attraction_constraint</code></td><td>strong</td><td>systemic</td><td>3</td><td>CONV-0007</td><td>ISS-0007</td></tr>
+<tr><td>PAT-0008</td><td><code>store_location_visibility_barrier</code></td><td>weak</td><td>isolated</td><td>1</td><td>CONV-0008</td><td>ISS-0008</td></tr>
+<tr><td>PAT-0009</td><td><code>smart_cockpit_voice_assistant</code></td><td>weak</td><td>isolated</td><td>1</td><td>CONV-0009</td><td>ISS-0009</td></tr>
+<tr><td>PAT-0010</td><td><code>adas_capability_brand_trust</code></td><td>weak</td><td>isolated</td><td>1</td><td>CONV-0010</td><td>ISS-0010</td></tr>
+<tr><td>PAT-0011</td><td><code>model_positioning_audience_fit</code></td><td>weak</td><td>isolated</td><td>1</td><td>CONV-0011</td><td>ISS-0011</td></tr>
+<tr><td>PAT-0012</td><td><code>competitor_emotional_value_differentiation</code></td><td>weak</td><td>isolated</td><td>1</td><td>CONV-0012</td><td>ISS-0012</td></tr>
+<tr><td>PAT-0013</td><td><code>family_seating_scenario_demand</code></td><td>moderate</td><td>repeated</td><td>3</td><td>CONV-0013</td><td>ISS-0013</td></tr>
+<tr><td>PAT-0014</td><td><code>hardware_material_feel_quality</code></td><td>moderate</td><td>repeated</td><td>2</td><td>CONV-0014</td><td>ISS-0014</td></tr>
+<tr><td>PAT-0015</td><td><code>sales_finance_approval_process_barrier</code></td><td>weak</td><td>isolated</td><td>1</td><td>CONV-0015</td><td>ISS-0015</td></tr>
+<tr><td>PAT-0016</td><td><code>range_perception_benchmark_gap</code></td><td>weak</td><td>isolated</td><td>1</td><td>CONV-0016</td><td>ISS-0016</td></tr>
+<tr><td>PAT-0017</td><td><code>customer_basics_over_features_attention</code></td><td>weak</td><td>isolated</td><td>1</td><td>CONV-0017</td><td>ISS-0017</td></tr>
+</tbody></table></details>
+<footer>产品专家一线问题发现 · 10/05 · run_014_2026-10-05 · Field Intelligence Report</footer>
+</main></body></html>

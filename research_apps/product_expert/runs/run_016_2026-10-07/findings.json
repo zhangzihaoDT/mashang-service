@@ -1,0 +1,157 @@
+[
+  {
+    "finding_id": "FND-0001",
+    "title": "假期尾声客流收缩，且流量与意向质量分化",
+    "statement": "多家门店反馈假期最后一天客流明显减少、意向下降，另有门店客流相当但多次到店试驾暂未锁单。",
+    "pattern_ids": [
+      "PAT-0001"
+    ],
+    "convergence_ids": [
+      "CONV-0001"
+    ],
+    "issue_ids": [
+      "ISS-0011"
+    ],
+    "confidence": "medium",
+    "business_implication": "只看进店人数难以判断销售机会，需把到访目的、留资与复访状态分开记录。",
+    "recommended_action": "在客流记录中增加到访目的与留资意向；对假期后连续几日做同口径观察。",
+    "priority": "P1",
+    "boundary": "4 家门店（6 条反馈）单日自报，口径未统一；不将客流下降归因于单一假期因素。",
+    "status": "ready",
+    "owner": "销售运营",
+    "created_at": "2026-10-07"
+  },
+  {
+    "finding_id": "FND-0002",
+    "title": "一线集中提出传播、引流与激励机制建议",
+    "statement": "一线建议涵盖线上传播、门店直播、进店赠礼、场景化话术与销售激励，均指向获客与转化。",
+    "pattern_ids": [
+      "PAT-0002"
+    ],
+    "convergence_ids": [
+      "CONV-0002"
+    ],
+    "issue_ids": [
+      "ISS-0008"
+    ],
+    "confidence": "medium",
+    "business_implication": "建议分属不同渠道，若不记录投入与线索质量，难以判断优先级。",
+    "recommended_action": "选择门店先行试点并逐项记录触达、到店、留资与试驾结果，再决定是否复制。",
+    "priority": "P2",
+    "boundary": "5 家门店建议性反馈，没有执行与效果数据。",
+    "status": "ready",
+    "owner": "销售运营",
+    "created_at": "2026-10-07"
+  },
+  {
+    "finding_id": "FND-0003",
+    "title": "产品配置与亲子场景获得一线正向反馈",
+    "statement": "多家门店反馈 LS6 配置完整、底盘与空间舒适，并观察到副驾屏动画对学龄儿童吸引力强。",
+    "pattern_ids": [
+      "PAT-0003"
+    ],
+    "convergence_ids": [
+      "CONV-0003"
+    ],
+    "issue_ids": [
+      "ISS-0005",
+      "ISS-0006"
+    ],
+    "confidence": "medium",
+    "business_implication": "这些正向信号可作为讲解与展车陈列线索，但仍需结构化数据验证。",
+    "recommended_action": "沉淀可复用的讲解话术与家庭场景演示，跟踪对应配置与场景的到店反馈。",
+    "priority": "P2",
+    "boundary": "多店定性观察，不代表总体用户偏好和实际配置选择。",
+    "status": "ready",
+    "owner": "产品 / 销售运营",
+    "created_at": "2026-10-07"
+  },
+  {
+    "finding_id": "FND-0004",
+    "title": "新款与纯电等待延后部分用户决策",
+    "statement": "部分 LS8 客户在等纯电版、部分 LS9 客户在等新款，并关注上市价格。",
+    "pattern_ids": [
+      "PAT-0006"
+    ],
+    "convergence_ids": [
+      "CONV-0006"
+    ],
+    "issue_ids": [
+      "ISS-0009"
+    ],
+    "confidence": "medium",
+    "business_implication": "当用户等待新版本或价格信息时，现款比较可能转为等待，延长决策周期。",
+    "recommended_action": "统一说明新版本上市与价格信息节奏，对反复到店客户记录等待条件并跟踪后续成交。",
+    "priority": "P1",
+    "boundary": "两家门店单日自报；未记录等待比例与实际转化。",
+    "status": "ready",
+    "owner": "产品 / 销售运营",
+    "created_at": "2026-10-07"
+  },
+  {
+    "finding_id": "FND-0005",
+    "title": "价格权益与竞品价格感知压制短期下单",
+    "statement": "专家建议 LS8 纯电定价不高于理想 i6，并有用户认为极氪价格更划算；价格权益是 6 系首要决策因素。",
+    "pattern_ids": [
+      "PAT-0007"
+    ],
+    "convergence_ids": [
+      "CONV-0007"
+    ],
+    "issue_ids": [
+      "ISS-0010"
+    ],
+    "confidence": "medium",
+    "business_implication": "价格与竞品价格感知如果缺少可比较的信息，用户容易持续观望。",
+    "recommended_action": "准备可核验的价格与权益对比信息；对价格敏感客户记录比较对象与等待条件。",
+    "priority": "P1",
+    "boundary": "自报与个别对标，不能量化为价格敏感度。",
+    "status": "ready",
+    "owner": "产品 / 销售运营",
+    "created_at": "2026-10-07"
+  },
+  {
+    "finding_id": "FND-0006",
+    "title": "方向盘挡屏幕在个别客户处放大为强异议",
+    "statement": "有客户因方向盘会挡屏幕对车辆提出强烈异议，经深入沟通后表示理解。",
+    "pattern_ids": [
+      "PAT-0010"
+    ],
+    "convergence_ids": [
+      "CONV-0010"
+    ],
+    "issue_ids": [
+      "ISS-0001"
+    ],
+    "confidence": "low",
+    "business_implication": "人机视野类异议一旦触发，可能显著抬高沟通成本，需在一线提前准备解释与体验引导。",
+    "recommended_action": "将方向盘/仪表视野纳入试驾前静态讲解要点，收集坐姿与视线反馈。",
+    "priority": "P2",
+    "boundary": "单店单条反馈，不能推断普遍拒购或总体发生率。",
+    "status": "ready",
+    "owner": "产品 / 销售运营",
+    "created_at": "2026-10-07"
+  },
+  {
+    "finding_id": "FND-0007",
+    "title": "后排屏误操作可能触发安全顾虑并导致离店",
+    "statement": "有用户因后排语音误关闭前排屏幕、担心安全隐患而产生强烈抵触并离店。",
+    "pattern_ids": [
+      "PAT-0014"
+    ],
+    "convergence_ids": [
+      "CONV-0014"
+    ],
+    "issue_ids": [
+      "ISS-0015"
+    ],
+    "confidence": "low",
+    "business_implication": "跨区屏幕控制若缺少清晰反馈或权限边界，可能被用户解读为安全隐患。",
+    "recommended_action": "复核屏幕控制的跨区操作逻辑与提示机制，收集门店对此类反馈的原话与场景。",
+    "priority": "P2",
+    "boundary": "单店单条反馈；因果关系为用户自述，未复现。",
+    "status": "ready",
+    "owner": "产品 / 车机团队",
+    "created_at": "2026-10-07"
+  }
+]

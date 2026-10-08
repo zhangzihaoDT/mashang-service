@@ -1,0 +1,281 @@
+[
+  {
+    "finding_id": "FND-0001",
+    "title": "到店量与进店质量随门店形态/场景分化，位置可见性构成约束",
+    "statement": "遵义播州客流明显减少、关注 LS6/LS8 各半；贵阳万象汇 9 系客户增加、意向度回升；万州快闪客流维稳、位置好人流大；遵义吾悦随假期尾声客流下降、留资仍以 LS8 为主；同时另有门店反馈位置不佳难引流。",
+    "pattern_ids": [
+      "PAT-0001",
+      "PAT-0008"
+    ],
+    "convergence_ids": [
+      "CONV-0001",
+      "CONV-0008"
+    ],
+    "issue_ids": [
+      "ISS-0001",
+      "ISS-0008"
+    ],
+    "confidence": "low",
+    "business_implication": "到店量受门店形态、选址可见性与到店场景主导，等客到店效率有限；把路过/闲逛型客流转为深度体验需要场景化动作与选址可见性改善。",
+    "recommended_action": "汇总可复制的到店转化动作；对位置难找/可见性差的门店做专项引导与招牌改善；建立到店场景与客群结构的日常记录。",
+    "priority": "P2",
+    "boundary": "到店情境 5 条跨 4 店、位置 1 条单店，均为单日定性自报；未与客流计数/转化数据归因。",
+    "status": "ready",
+    "owner": "产品 / 销售运营",
+    "created_at": "2026-10-05"
+  },
+  {
+    "finding_id": "FND-0002",
+    "title": "产品力与一线服务获正向认可，是可复用的转化基础",
+    "statement": "LS6 被评 25 万级家用 SUV 配置最顶、六方面均强、适合家庭用户；儿童上车后最关注副驾电视与智能体；主理热情专业、销售队伍精干配合默契。",
+    "pattern_ids": [
+      "PAT-0004",
+      "PAT-0003"
+    ],
+    "convergence_ids": [
+      "CONV-0004",
+      "CONV-0003"
+    ],
+    "issue_ids": [
+      "ISS-0004",
+      "ISS-0003"
+    ],
+    "confidence": "low",
+    "business_implication": "产品优势项与良好的一线服务是当前转化的确定性抓手，应固化为标准动作而非依赖个体。",
+    "recommended_action": "将已验证的产品展示与销售话术（配置完整、亲子体验）沉淀为门店标准动作；延续对一线服务的正向反馈机制。",
+    "priority": "P3",
+    "boundary": "产品优势 2 条跨 2 店、服务 2 条跨 2 店，均为单日定性自报；未与成交/锁单数据归因。",
+    "status": "ready",
+    "owner": "产品 / 销售运营",
+    "created_at": "2026-10-05"
+  },
+  {
+    "finding_id": "FND-0003",
+    "title": "价格与权益预期仍是短期决策焦点",
+    "statement": "客户重点关注续航与价格；L6 用户希望价格再便宜约 1.5 万；LS6 用户认可价格给力与性价比，但仍想要更多权益。",
+    "pattern_ids": [
+      "PAT-0002"
+    ],
+    "convergence_ids": [
+      "CONV-0002"
+    ],
+    "issue_ids": [
+      "ISS-0002"
+    ],
+    "confidence": "low",
+    "business_implication": "价格与权益预期未被清晰回应时，用户容易停留在观望；需要标准化的价格/权益口径与对比解释。",
+    "recommended_action": "准备价格与续航的标准应答与权益说明；结合假期权益把价格保护与权益边界讲清楚。",
+    "priority": "P1",
+    "boundary": "3 条证据跨 3 店、单日定性自报；为价格关注信号，不等同于实际退单或流失。",
+    "status": "ready",
+    "owner": "产品 / 销售运营",
+    "created_at": "2026-10-05"
+  },
+  {
+    "finding_id": "FND-0004",
+    "title": "竞品差距集中在造型情绪价值、智驾与续航感知",
+    "statement": "用户被新款 LS6 造型劝退、偏好特斯拉/极氪风格；认为智驾没有华为强；认为 782km 续航打折后相比特斯拉偏少。",
+    "pattern_ids": [
+      "PAT-0012",
+      "PAT-0010",
+      "PAT-0016"
+    ],
+    "convergence_ids": [
+      "CONV-0012",
+      "CONV-0010",
+      "CONV-0016"
+    ],
+    "issue_ids": [
+      "ISS-0012",
+      "ISS-0010",
+      "ISS-0016"
+    ],
+    "confidence": "low",
+    "business_implication": "造型情绪价值、智驾与续航是可被用户直接感知的对标维度，缺失或弱势会形成对比劣势。",
+    "recommended_action": "评估造型/个性化风格诉求并纳入门店演示脚本；强化智驾价值演示与 Momenta 故事；准备续航口径与对比解释。",
+    "priority": "P2",
+    "boundary": "造型 1 条、智驾 1 条、续航 1 条，均单店单日；未记录对比车型与细分差异，不能量化对锁单的影响。",
+    "status": "ready",
+    "owner": "产品 / 销售运营",
+    "created_at": "2026-10-05"
+  },
+  {
+    "finding_id": "FND-0005",
+    "title": "智舱功能响应与稳定性是体验短板",
+    "statement": "在展车试 IMClaw 小龙虾功能体验不佳：响应慢、对话不流畅；主理也反馈不好用，用户体验后可能误认为芯片算力不够高。",
+    "pattern_ids": [
+      "PAT-0009"
+    ],
+    "convergence_ids": [
+      "CONV-0009"
+    ],
+    "issue_ids": [
+      "ISS-0009"
+    ],
+    "confidence": "low",
+    "business_implication": "智舱功能响应与稳定性会直接影响用户对智能化与算力的现场感知，需核实并优先处理。",
+    "recommended_action": "收集小龙虾功能的具体触发场景与版本信息并同步产品；规范展车演示话术，避免让功能卡顿直接暴露给用户。",
+    "priority": "P2",
+    "boundary": "单店单条观察、单日；未记录触发场景与版本，不能作为质量缺陷结论。",
+    "status": "ready",
+    "owner": "产品 / 销售运营",
+    "created_at": "2026-10-05"
+  },
+  {
+    "finding_id": "FND-0006",
+    "title": "家庭出行场景对座椅与空间配置有明确需求",
+    "statement": "LS8/LS9 潜客关注车内躺平睡觉、询问后排能否放纯平；贵阳用户家庭大、常 7-9 人出行、指定看 7 座车；部分用户对主驾零重力座椅及小腿托有强烈需求而当前未配备。",
+    "pattern_ids": [
+      "PAT-0013"
+    ],
+    "convergence_ids": [
+      "CONV-0013"
+    ],
+    "issue_ids": [
+      "ISS-0013"
+    ],
+    "confidence": "low",
+    "business_implication": "家庭与多成员出行场景对后排空间、座椅布局与舒适配置有明确诉求，是可运营的差异化机会。",
+    "recommended_action": "梳理后排纯平/躺平与 7 座布局的演示口径；评估零重力座椅/小腿托的配置与选装策略。",
+    "priority": "P2",
+    "boundary": "3 条证据跨 2 店、单日；为需求观察，未量化对锁单的影响。",
+    "status": "ready",
+    "owner": "产品 / 销售运营",
+    "created_at": "2026-10-05"
+  },
+  {
+    "finding_id": "FND-0007",
+    "title": "品牌认知/曝光与老客户转介绍是到店与留资抓手",
+    "statement": "一线建议提升品牌曝光吸引主动到店；客户进店先问品牌、需先介绍上汽再介绍智己；有用户被朋友劝阻不要买智己；同时建议维护老客户口碑并对现车主推荐购车给予奖励。",
+    "pattern_ids": [
+      "PAT-0007",
+      "PAT-0006"
+    ],
+    "convergence_ids": [
+      "CONV-0007",
+      "CONV-0006"
+    ],
+    "issue_ids": [
+      "ISS-0007",
+      "ISS-0006"
+    ],
+    "confidence": "low",
+    "business_implication": "品牌认知、曝光与口碑信任会同时影响主动到店与到店后的留资；老用户转介绍是相对低成本的补充抓手。",
+    "recommended_action": "延续线上传播与品牌曝光投入、统一品牌介绍口径；设计老带新/转介绍激励机制并沉淀可执行话术。",
+    "priority": "P2",
+    "boundary": "品牌 3 条跨 3 店、老客户 2 条跨 2 店，单日；未量化对到店与留资的影响。",
+    "status": "ready",
+    "owner": "产品 / 销售运营",
+    "created_at": "2026-10-05"
+  },
+  {
+    "finding_id": "FND-0008",
+    "title": "门店引流与物料动作可复制，是当前进店转化抓手",
+    "statement": "一线建议增加直播、静态讲好 Momenta 智驾故事并张贴 one page 物料、进店赠送礼品；另有门店反馈没有直播、建议开播。",
+    "pattern_ids": [
+      "PAT-0005"
+    ],
+    "convergence_ids": [
+      "CONV-0005"
+    ],
+    "issue_ids": [
+      "ISS-0005"
+    ],
+    "confidence": "low",
+    "business_implication": "可复制的运营与物料动作是相对低成本的进店与转化抓手，建议标准化落地。",
+    "recommended_action": "沉淀标准化引流/物料动作（直播、Momenta one page、进店礼品）并在门店落地。",
+    "priority": "P3",
+    "boundary": "4 条证据跨 4 店、单日；未验证各动作对进店/转化的实际效果。",
+    "status": "ready",
+    "owner": "产品 / 销售运营",
+    "created_at": "2026-10-05"
+  },
+  {
+    "finding_id": "FND-0009",
+    "title": "成交流程中的金融审批阻力需关注",
+    "statement": "一组客户已达成成交意向，但因贷款资质问题流程受阻，销售同事反馈该类情况处理难度较高。",
+    "pattern_ids": [
+      "PAT-0015"
+    ],
+    "convergence_ids": [
+      "CONV-0015"
+    ],
+    "issue_ids": [
+      "ISS-0015"
+    ],
+    "confidence": "low",
+    "business_implication": "金融审批环节可能造成临门一脚的成交流失，值得排查流程与预案。",
+    "recommended_action": "排查贷款资质受阻的常见场景与处理难点，建立金融审批预检与替代方案，减少意向客户流失。",
+    "priority": "P2",
+    "boundary": "单店单条观察、单日；未量化受阻比例与损失。",
+    "status": "ready",
+    "owner": "产品 / 销售运营",
+    "created_at": "2026-10-05"
+  },
+  {
+    "finding_id": "FND-0010",
+    "title": "硬件与配件材质/手感品质存在可感知问题",
+    "statement": "LS8 脚踏板脚感偏软、踏板本体有弹性形变；售后配套颈托材质过硬、腰托材质过软并褶皱变形，影响观感。",
+    "pattern_ids": [
+      "PAT-0014"
+    ],
+    "convergence_ids": [
+      "CONV-0014"
+    ],
+    "issue_ids": [
+      "ISS-0014"
+    ],
+    "confidence": "low",
+    "business_implication": "硬件与配件的材质/手感会被用户直接感知，可能影响品质印象。",
+    "recommended_action": "同步脚踏板手感与售后配件材质问题给产品/售后；复核配件规格与座椅舒适性设计。",
+    "priority": "P3",
+    "boundary": "2 条证据跨 2 店、单日；脚踏板部件原文未明确，不能作为产品缺陷结论。",
+    "status": "ready",
+    "owner": "产品 / 销售运营",
+    "created_at": "2026-10-05"
+  },
+  {
+    "finding_id": "FND-0011",
+    "title": "部分客群关注基础信息、特色功能体验转化有限",
+    "statement": "用户重点仍关注价格、续航等基础情况，不会深入尝试车机、对特色功能兴致不高。",
+    "pattern_ids": [
+      "PAT-0017"
+    ],
+    "convergence_ids": [
+      "CONV-0017"
+    ],
+    "issue_ids": [
+      "ISS-0017"
+    ],
+    "confidence": "low",
+    "business_implication": "特色功能在部分客群中的体验转化有限，演示应优先回应基础关注点再引导功能体验。",
+    "recommended_action": "优化门店动线与会话节奏：先用价格/续航等基础信息建立信任，再以场景化演示引导特色功能体验。",
+    "priority": "P3",
+    "boundary": "单店单条观察、单日；不能外推为全部客群的关注结构结论。",
+    "status": "ready",
+    "owner": "产品 / 销售运营",
+    "created_at": "2026-10-05"
+  },
+  {
+    "finding_id": "FND-0012",
+    "title": "车型人群区隔明显，可做差异化运营",
+    "statement": "L6 与 LS6 潜客差异较大：L6 客群基本不了解汽车、被外观吸引、对内饰不太感冒；LS6 客群对车有一定了解，会对雷达、音响、按摩等做对比。",
+    "pattern_ids": [
+      "PAT-0011"
+    ],
+    "convergence_ids": [
+      "CONV-0011"
+    ],
+    "issue_ids": [
+      "ISS-0011"
+    ],
+    "confidence": "low",
+    "business_implication": "两车型潜客区隔明显，差异化演示与话术可提升沟通效率与转化。",
+    "recommended_action": "按人群设计差异化演示与话术（L6 侧重外观/第一印象，LS6 侧重配置对比与专业讲解）。",
+    "priority": "P3",
+    "boundary": "单店单条观察、单日；不能外推为总体车型人群结构结论。",
+    "status": "ready",
+    "owner": "产品 / 销售运营",
+    "created_at": "2026-10-05"
+  }
+]

@@ -1,0 +1,269 @@
+[
+  {
+    "pattern_id": "PAT-0001",
+    "pattern_key": "store_footfall_context_quality",
+    "title": "门店客流情境与到店质量分化",
+    "category": "sales_service",
+    "series": [
+      "LS6",
+      "LS8",
+      "OTHER"
+    ],
+    "hypothesis": "假期尾声的客流规模与到店目的可能同时影响门店销售机会，把流量与意向质量分开观察比只看进店人数更有解释力。",
+    "issue_ids": [
+      "ISS-0011"
+    ],
+    "confidence": "medium",
+    "status": "confirmed",
+    "boundary": "4 家门店（6 条反馈）单日定性自报，门店口径与客流统计未统一；不作城市或假期因果推断。",
+    "created_at": "2026-10-07"
+  },
+  {
+    "pattern_id": "PAT-0002",
+    "pattern_key": "store_operations_conversion_levers",
+    "title": "门店运营与转化动作建议",
+    "category": "sales_service",
+    "series": [
+      "OTHER",
+      "LS6",
+      "L6"
+    ],
+    "hypothesis": "直播、进店赠礼、场景化话术与销售激励等动作可能增加触达与到店机会，效果需要小范围跟踪验证。",
+    "issue_ids": [
+      "ISS-0008"
+    ],
+    "confidence": "medium",
+    "status": "confirmed",
+    "boundary": "5 家门店的一线建议，不是已实施动作或效果评估。",
+    "created_at": "2026-10-07"
+  },
+  {
+    "pattern_id": "PAT-0003",
+    "pattern_key": "verified_product_service_strengths",
+    "title": "已验证的产品与服务优势项",
+    "category": "other",
+    "series": [
+      "LS6",
+      "LS8",
+      "OTHER"
+    ],
+    "hypothesis": "LS6 的配置完整度、底盘与空间舒适度，以及副驾屏对亲子场景的吸引力，可作为讲解与陈列线索。",
+    "issue_ids": [
+      "ISS-0005",
+      "ISS-0006"
+    ],
+    "confidence": "medium",
+    "status": "confirmed",
+    "boundary": "多家门店定性观察，缺少结构化统计，不代表总体用户偏好。",
+    "created_at": "2026-10-07"
+  },
+  {
+    "pattern_id": "PAT-0004",
+    "pattern_key": "sales_service_consultation_quality",
+    "title": "门店销售服务与讲解水平",
+    "category": "sales_service",
+    "series": [
+      "OTHER"
+    ],
+    "hypothesis": "服务态度、专业知识与团队配合可能影响客户体验与异议化解，店间可能存在差异。",
+    "issue_ids": [
+      "ISS-0002"
+    ],
+    "confidence": "low",
+    "status": "confirmed",
+    "boundary": "3 家门店的正面自报，未做标准化评分或店间比较。",
+    "created_at": "2026-10-07"
+  },
+  {
+    "pattern_id": "PAT-0005",
+    "pattern_key": "model_positioning_audience_fit",
+    "title": "车型定位与目标人群匹配问题",
+    "category": "other",
+    "series": [
+      "L6",
+      "LS6",
+      "LS8"
+    ],
+    "hypothesis": "不同车系的客户价格敏感度与动力偏好可能分化，车型热度与库存结构可能随之变化。",
+    "issue_ids": [
+      "ISS-0007"
+    ],
+    "confidence": "low",
+    "status": "confirmed",
+    "boundary": "3 家门店的定性观察与销售自报，不能外推为人群结构或销量结论。",
+    "created_at": "2026-10-07"
+  },
+  {
+    "pattern_id": "PAT-0006",
+    "pattern_key": "demand_wait_for_new_model",
+    "title": "用户持币观望、等待新款",
+    "category": "other",
+    "series": [
+      "LS8",
+      "LS9"
+    ],
+    "hypothesis": "当用户等待纯电版或新款上市、并关注上市价格时，现款决策可能延后。",
+    "issue_ids": [
+      "ISS-0009"
+    ],
+    "confidence": "medium",
+    "status": "confirmed",
+    "boundary": "两家门店单日自报，未记录等待比例与实际转化。",
+    "created_at": "2026-10-07"
+  },
+  {
+    "pattern_id": "PAT-0007",
+    "pattern_key": "price_equity_decision_barrier",
+    "title": "价格与权益预期成为短期决策抑制",
+    "category": "configuration",
+    "series": [
+      "LS8",
+      "L6",
+      "LS6"
+    ],
+    "hypothesis": "价格权益与竞品价格感知可能共同影响下单，明确的价格与权益边界或能缓解观望。",
+    "issue_ids": [
+      "ISS-0010"
+    ],
+    "confidence": "medium",
+    "status": "confirmed",
+    "boundary": "自报与个别对标，不能量化为价格敏感度。",
+    "created_at": "2026-10-07"
+  },
+  {
+    "pattern_id": "PAT-0008",
+    "pattern_key": "brand_channel_attraction_constraint",
+    "title": "品牌认知与渠道吸引力约束销售",
+    "category": "other",
+    "series": [
+      "OTHER"
+    ],
+    "hypothesis": "品牌曝光不足与可验证背书缺失可能增加沟通成本；清晰、可核验的品牌信息或有助于建立认知。",
+    "issue_ids": [
+      "ISS-0003"
+    ],
+    "confidence": "medium",
+    "status": "confirmed",
+    "boundary": "两家门店建议性反馈，无认知度量化数据。",
+    "created_at": "2026-10-07"
+  },
+  {
+    "pattern_id": "PAT-0009",
+    "pattern_key": "store_location_visibility_barrier",
+    "title": "门店选址/朝向可见性影响自然引流",
+    "category": "sales_service",
+    "series": [
+      "OTHER"
+    ],
+    "hypothesis": "门店位置的可见性与周边人流可能影响自然引流，正反案例并存。",
+    "issue_ids": [
+      "ISS-0012"
+    ],
+    "confidence": "low",
+    "status": "confirmed",
+    "boundary": "两家门店定性反馈，不作选址结论。",
+    "created_at": "2026-10-07"
+  },
+  {
+    "pattern_id": "PAT-0010",
+    "pattern_key": "cockpit_ergonomics_steering_visibility",
+    "title": "椭圆方向盘的人机视野与购买阻断",
+    "category": "cockpit_ergonomics",
+    "series": [
+      "LS6"
+    ],
+    "hypothesis": "方向盘遮挡屏幕/视野可能在个别客户处放大为强烈异议，影响体验与信任。",
+    "issue_ids": [
+      "ISS-0001"
+    ],
+    "confidence": "low",
+    "status": "confirmed",
+    "boundary": "单店单条反馈；客户经沟通后表示理解，不能推断普遍拒购。",
+    "created_at": "2026-10-07"
+  },
+  {
+    "pattern_id": "PAT-0011",
+    "pattern_key": "existing_owner_loyalty_benefit",
+    "title": "老用户权益与品牌忠诚度维护",
+    "category": "sales_service",
+    "series": [
+      "OTHER"
+    ],
+    "hypothesis": "维护老客户口碑、发动老带新可能带来额外到店机会，但效果需跟踪。",
+    "issue_ids": [
+      "ISS-0004"
+    ],
+    "confidence": "low",
+    "status": "confirmed",
+    "boundary": "单店单条建议，无执行与效果数据。",
+    "created_at": "2026-10-07"
+  },
+  {
+    "pattern_id": "PAT-0012",
+    "pattern_key": "adas_capability_brand_trust",
+    "title": "智驾能力与升级预期关注",
+    "category": "adas",
+    "series": [
+      "LS6"
+    ],
+    "hypothesis": "用户对线控转向可升级实现 L3 智驾的关注，可能反映对智驾能力与可升级性的期待。",
+    "issue_ids": [
+      "ISS-0013"
+    ],
+    "confidence": "low",
+    "status": "confirmed",
+    "boundary": "单店单条提问，不代表功能承诺或普遍需求。",
+    "created_at": "2026-10-07"
+  },
+  {
+    "pattern_id": "PAT-0013",
+    "pattern_key": "competitor_smart_space_benchmark",
+    "title": "竞品智能与空间可感知对标差距",
+    "category": "smart_cockpit",
+    "series": [
+      "LS6"
+    ],
+    "hypothesis": "竞品在空间舒适性上的可感知表现可能影响对比，按维度呈现比笼统的车型优劣更有解释力。",
+    "issue_ids": [
+      "ISS-0014"
+    ],
+    "confidence": "low",
+    "status": "confirmed",
+    "boundary": "单店单条对标反馈，不代表竞品总体评价。",
+    "created_at": "2026-10-07"
+  },
+  {
+    "pattern_id": "PAT-0014",
+    "pattern_key": "smart_cockpit_screen_control_safety",
+    "title": "座舱屏幕控制逻辑引发安全顾虑",
+    "category": "smart_cockpit",
+    "series": [
+      "LS8"
+    ],
+    "hypothesis": "当屏幕控制逻辑允许跨区误操作时，后排乘客可能对安全性产生质疑，并在个别案例中直接导致离店。",
+    "issue_ids": [
+      "ISS-0015"
+    ],
+    "confidence": "low",
+    "status": "confirmed",
+    "boundary": "单店单条反馈，因果关系为用户自述，未复现。",
+    "created_at": "2026-10-07"
+  },
+  {
+    "pattern_id": "PAT-0015",
+    "pattern_key": "powertrain_plugin_hybrid_interest",
+    "title": "用户对插混动力形式的关注",
+    "category": "configuration",
+    "series": [
+      "OTHER"
+    ],
+    "hypothesis": "部分北方游客与 BBA 用户主动询问插混与增程差异，动力形式偏好可能影响其比较路径。",
+    "issue_ids": [
+      "ISS-0016"
+    ],
+    "confidence": "low",
+    "status": "confirmed",
+    "boundary": "单店单条观察，不能代表用户结构的动力形式偏好。",
+    "created_at": "2026-10-07"
+  }
+]

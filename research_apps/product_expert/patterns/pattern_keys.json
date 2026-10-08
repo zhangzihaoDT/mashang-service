@@ -48,11 +48,12 @@
         "内饰像2001年的感觉",
         "扶手塑料件改软包",
         "阿维塔豪华感环抱感",
-        "L6内饰质感设计一般"
+        "L6内饰质感设计一般",
+        "理想内饰质感不错"
       ],
       "status": "active",
       "created_at": "2026-09-11",
-      "updated_at": "2026-09-20"
+      "updated_at": "2026-10-04"
     },
     {
       "pattern_key": "interior_sharp_edge_injury_risk",
@@ -81,11 +82,14 @@
         "语音指令程度无法区分",
         "语音识别不准确",
         "更关注语音控制精准性与流畅性",
-        "龙虾智能体期待不高"
+        "龙虾智能体期待不高",
+        "车机大模型响应需更快",
+        "用户吐槽语音功能不稳定",
+        "IMClaw小龙虾响应慢、对话不流畅"
       ],
       "status": "active",
       "created_at": "2026-09-11",
-      "updated_at": "2026-09-26"
+      "updated_at": "2026-10-05"
     },
     {
       "pattern_key": "nvh_audio_tire_noise",
@@ -165,11 +169,12 @@
         "没人知道momenta",
         "智驾认同不如华为",
         "对智驾供应商认知度不高",
-        "LS9潜客关注Momenta背景与上汽归属"
+        "LS9潜客关注Momenta背景与上汽归属",
+        "智驾不如华为"
       ],
       "status": "active",
       "created_at": "2026-09-11",
-      "updated_at": "2026-09-12"
+      "updated_at": "2026-10-05"
     },
     {
       "pattern_key": "configuration_benchmark_convenience_gap",
@@ -182,11 +187,12 @@
         "三排 Type C 不足",
         "三排无法电动折叠",
         "偏好半隐藏式门把手",
-        "后排滑轨不及竞品"
+        "后排滑轨不及竞品",
+        "用户询问是否有抬头显示HUD"
       ],
       "status": "active",
       "created_at": "2026-09-11",
-      "updated_at": "2026-09-11"
+      "updated_at": "2026-10-04"
     },
     {
       "pattern_key": "driving_dynamics_steering_tech_demo",
@@ -196,11 +202,12 @@
       "first_run_id": "run_001",
       "aliases": [
         "新款后轮转向不如老款",
-        "线控转向无法试驾"
+        "线控转向无法试驾",
+        "用户对线控转向无感不愿买单"
       ],
       "status": "active",
       "created_at": "2026-09-11",
-      "updated_at": "2026-09-11"
+      "updated_at": "2026-10-04"
     },
     {
       "pattern_key": "brand_channel_attraction_constraint",
@@ -222,11 +229,15 @@
         "品牌知名度尚需提高",
         "小城市更看重品牌力",
         "智己品牌知名度较过往大幅提升",
-        "建议提升品牌曝光量"
+        "建议提升品牌曝光量",
+        "加强线上传播提高品牌门店知名度",
+        "提升品牌曝光吸引主动到店",
+        "客户先问品牌、需先介绍上汽再介绍智己",
+        "身边朋友劝阻不要买智己"
       ],
       "status": "active",
       "created_at": "2026-09-11",
-      "updated_at": "2026-10-02"
+      "updated_at": "2026-10-05"
     },
     {
       "pattern_key": "demand_wait_for_new_model",
@@ -290,11 +301,18 @@
         "LS6银色展示色引客",
         "相同配置竞品价格更高",
         "试驾后有助于击败竞品",
-        "LS8四驱机械按摩获满意"
+        "LS8四驱机械按摩获满意",
+        "试驾后舒适性配置齐全",
+        "LS6配置同级最全人无我有",
+        "双6车型颜值获认可",
+        "龙虾与副驾屏对亲子效果好",
+        "L6联名版吸引眼球",
+        "LS6在25万级家用SUV配置最顶",
+        "儿童关注副驾电视与智能体"
       ],
       "status": "active",
       "created_at": "2026-09-11",
-      "updated_at": "2026-10-02"
+      "updated_at": "2026-10-05"
     },
     {
       "pattern_key": "model_positioning_audience_fit",
@@ -315,11 +333,16 @@
         "喜欢轿车的对L6认可但到店占比低",
         "贵州地势导致低底盘拒购",
         "门店没人看L6",
-        "L6对比LS6后觉得性价比不高"
+        "L6对比LS6后觉得性价比不高",
+        "L6与LS6用户不属于同一群体",
+        "L6侧重女性推广",
+        "LS6侧重家用推广",
+        "家庭用户关注品质延续性",
+        "L6潜客不懂车、被外观吸引，LS6潜客会做配置对比"
       ],
       "status": "active",
       "created_at": "2026-09-12",
-      "updated_at": "2026-10-02"
+      "updated_at": "2026-10-05"
     },
     {
       "pattern_key": "competitor_smart_space_benchmark",
@@ -348,11 +371,12 @@
         "增程纯电同步上市",
         "上市版本排期建议",
         "用户希望新车都出双动力形式",
-        "LS8纯电早点上更有赢率"
+        "LS8纯电早点上更有赢率",
+        "对LS8纯电版较期待"
       ],
       "status": "active",
       "created_at": "2026-09-13",
-      "updated_at": "2026-10-02"
+      "updated_at": "2026-10-04"
     },
     {
       "pattern_key": "store_operations_conversion_levers",
@@ -374,11 +398,18 @@
         "增加车型版本价格配置介绍页",
         "加强线上传播提高进店流量",
         "核心竞品对标公示在显眼处",
-        "门店直播建议已落地"
+        "门店直播建议已落地",
+        "建议店内放儿童玩具",
+        "明示高频问答onepage物料",
+        "L6展厅只放腰托不放售后件",
+        "直播加慢闪引流到4S试驾",
+        "增加直播",
+        "进店赠送礼品",
+        "静态讲好Momenta智驾故事并张贴onepage"
       ],
       "status": "active",
       "created_at": "2026-09-13",
-      "updated_at": "2026-10-02"
+      "updated_at": "2026-10-05"
     },
     {
       "pattern_key": "interior_detail_usability_perception",
@@ -404,11 +435,15 @@
       "aliases": [
         "情绪价值",
         "更多个性化",
-        "差异化"
+        "差异化",
+        "对比小米YU7外观",
+        "被JC内饰蓝色吸引希望选装",
+        "功能体验不如理想i6情绪价值",
+        "新款LS6造型劝退、偏好特斯拉/极氪风格"
       ],
       "status": "active",
       "created_at": "2026-09-19",
-      "updated_at": "2026-09-19"
+      "updated_at": "2026-10-05"
     },
     {
       "pattern_key": "design_narrative_competitor_led",
@@ -437,11 +472,14 @@
         "可选范围广",
         "反复对比后再决策",
         "说明权益且试驾后仍难当场下单",
-        "到店用户普遍充分对比"
+        "到店用户普遍充分对比",
+        "年轻人不愿留资倾向自行了解",
+        "体验后直接离店意向度不高",
+        "强意向客户明显减少"
       ],
       "status": "active",
       "created_at": "2026-09-25",
-      "updated_at": "2026-10-02"
+      "updated_at": "2026-10-04"
     },
     {
       "pattern_key": "competitor_price_advantage_low_tier",
@@ -473,11 +511,14 @@
         "维护老客户口碑发动老带新",
         "借国庆发起老带新试驾活动",
         "发动老客户带人进店体验",
-        "LS9 Hyper车主带朋友看LS6"
+        "LS9 Hyper车主带朋友看LS6",
+        "维护老客户口碑发动老带新进店",
+        "老客户口碑老带新",
+        "现车主推荐朋友购车奖励"
       ],
       "status": "active",
       "created_at": "2026-09-25",
-      "updated_at": "2026-10-02"
+      "updated_at": "2026-10-05"
     },
     {
       "pattern_key": "smart_cockpit_screen_heat",
@@ -560,11 +601,15 @@
         "担心购后降价或权益赠送",
         "客户对价格相当敏感",
         "价格和权益方面双方有拉扯",
-        "客户总想要赠品"
+        "客户总想要赠品",
+        "用户核心关注价格及纯电续航",
+        "L6竞品不明显主要看价格",
+        "L6希望价格再降1.5万",
+        "认可LS6价格但仍要更多权益"
       ],
       "status": "active",
       "created_at": "2026-09-27",
-      "updated_at": "2026-10-02"
+      "updated_at": "2026-10-05"
     },
     {
       "pattern_key": "steering_by_wire_reliability_trust",
@@ -610,11 +655,17 @@
         "国庆次日快闪走马观花",
         "展点被电竞舞台遮挡获客减半",
         "外地探亲旅客客流",
-        "高意向客户试驾前关注续航电池"
+        "高意向客户试驾前关注续航电池",
+        "商超饭后小孩闲逛为主",
+        "强意向客户明显减少",
+        "体验后直接离店意向度不高",
+        "部分客户因车辆调性驻足",
+        "国庆尾声客流下降、留资以LS8为主",
+        "快闪门店位置好、人流大"
       ],
       "status": "active",
       "created_at": "2026-10-01",
-      "updated_at": "2026-10-02"
+      "updated_at": "2026-10-05"
     },
     {
       "pattern_key": "competitor_promotion_perk_gap",
@@ -638,11 +689,13 @@
       "first_run_id": "run_010_2026-10-01",
       "aliases": [
         "非本地口音导致距离感拒留资",
-        "留资用户习惯普通话"
+        "留资用户习惯普通话",
+        "本地家庭方言交流外地专家流失",
+        "建议按员工家乡分配产品专家"
       ],
       "status": "active",
       "created_at": "2026-10-01",
-      "updated_at": "2026-10-01"
+      "updated_at": "2026-10-04"
     },
     {
       "pattern_key": "store_display_vehicle_staleness",
@@ -669,11 +722,14 @@
       "aliases": [
         "主理十分热情专业",
         "销售队伍成熟高效",
-        "销售介绍热情待提高"
+        "销售介绍热情待提高",
+        "主理热情专业",
+        "销售队伍高效精干",
+        "销售队伍精干、士气饱满、配合默契"
       ],
       "status": "active",
       "created_at": "2026-10-02",
-      "updated_at": "2026-10-02"
+      "updated_at": "2026-10-05"
     },
     {
       "pattern_key": "in_car_audio_playback_glitch",
@@ -711,11 +767,138 @@
       "first_run_id": "run_012_2026-10-03",
       "aliases": [
         "门店位置拐角视野盲区难找",
-        "门店朝向难引流过道看不到招牌"
+        "门店朝向难引流过道看不到招牌",
+        "门店位置不佳很难找"
       ],
       "status": "active",
       "created_at": "2026-10-03",
-      "updated_at": "2026-10-03"
+      "updated_at": "2026-10-04"
+    },
+    {
+      "pattern_key": "store_accessory_display_seating_impact",
+      "title": "门店陈列售后件影响落座与空间感知",
+      "category": "seating_space",
+      "first_pattern_id": "PAT-0014",
+      "first_run_id": "run_013_2026-10-04",
+      "aliases": [
+        "L6展厅颈托头枕导致落座不适",
+        "门店售后件把头枕刺绣挡住"
+      ],
+      "status": "active",
+      "created_at": "2026-10-04",
+      "updated_at": "2026-10-04"
+    },
+    {
+      "pattern_key": "adas_rain_wiper_interlock",
+      "title": "雨刮与智驾功能联动影响可用性",
+      "category": "adas",
+      "first_pattern_id": "PAT-0017",
+      "first_run_id": "run_013_2026-10-04",
+      "aliases": [
+        "雨刮速度快时智驾无法打开",
+        "小雨快速刮导致智驾无法及时开启"
+      ],
+      "status": "active",
+      "created_at": "2026-10-04",
+      "updated_at": "2026-10-04"
+    },
+    {
+      "pattern_key": "family_seating_scenario_demand",
+      "title": "家庭出行与座椅场景配置需求",
+      "category": "seating_space",
+      "first_pattern_id": "PAT-0013",
+      "first_run_id": "run_014_2026-10-05",
+      "aliases": [
+        "后排纯平躺平睡觉需求",
+        "大家庭7座需求",
+        "主驾零重力座椅及小腿托需求"
+      ],
+      "status": "active",
+      "created_at": "2026-10-05",
+      "updated_at": "2026-10-05"
+    },
+    {
+      "pattern_key": "hardware_material_feel_quality",
+      "title": "硬件材质与手感品质问题",
+      "category": "quality_reliability",
+      "first_pattern_id": "PAT-0014",
+      "first_run_id": "run_014_2026-10-05",
+      "aliases": [
+        "LS8脚踏板脚感偏软、有弹性形变",
+        "售后配件颈托/腰托材质过硬或过软"
+      ],
+      "status": "active",
+      "created_at": "2026-10-05",
+      "updated_at": "2026-10-05"
+    },
+    {
+      "pattern_key": "sales_finance_approval_process_barrier",
+      "title": "成交流程中贷款资质审批受阻",
+      "category": "sales_service",
+      "first_pattern_id": "PAT-0015",
+      "first_run_id": "run_014_2026-10-05",
+      "aliases": [
+        "贷款资质问题阻碍成交",
+        "金融审批处理难度高"
+      ],
+      "status": "active",
+      "created_at": "2026-10-05",
+      "updated_at": "2026-10-05"
+    },
+    {
+      "pattern_key": "range_perception_benchmark_gap",
+      "title": "纯电续航对标感知差距",
+      "category": "charging",
+      "first_pattern_id": "PAT-0016",
+      "first_run_id": "run_014_2026-10-05",
+      "aliases": [
+        "对比特斯拉续航打折后偏少"
+      ],
+      "status": "active",
+      "created_at": "2026-10-05",
+      "updated_at": "2026-10-05"
+    },
+    {
+      "pattern_key": "customer_basics_over_features_attention",
+      "title": "用户关注基础信息、对特色功能兴致不高",
+      "category": "other",
+      "first_pattern_id": "PAT-0017",
+      "first_run_id": "run_014_2026-10-05",
+      "aliases": [
+        "客户只关注价格续航、不深入尝试车机",
+        "对特色功能兴致不高"
+      ],
+      "status": "active",
+      "created_at": "2026-10-05",
+      "updated_at": "2026-10-05"
+    },
+    {
+      "pattern_key": "smart_cockpit_screen_control_safety",
+      "title": "座舱屏幕控制逻辑引发安全顾虑",
+      "category": "smart_cockpit",
+      "first_pattern_id": "PAT-0014",
+      "first_run_id": "run_016_2026-10-07",
+      "aliases": [
+        "后排语音误关前排屏引发安全顾虑",
+        "跨区屏幕控制误操作导致安全质疑"
+      ],
+      "status": "active",
+      "created_at": "2026-10-07",
+      "updated_at": "2026-10-07"
+    },
+    {
+      "pattern_key": "powertrain_plugin_hybrid_interest",
+      "title": "用户对插混动力形式的关注",
+      "category": "configuration",
+      "first_pattern_id": "PAT-0015",
+      "first_run_id": "run_016_2026-10-07",
+      "aliases": [
+        "北方游客与BBA用户关注插混",
+        "询问插混与增程差异"
+      ],
+      "status": "active",
+      "created_at": "2026-10-07",
+      "updated_at": "2026-10-07"
     }
   ]
 }

@@ -28,7 +28,7 @@ APP_DIR = Path(__file__).resolve().parents[1]
 DETAIL_LIMIT = 3
 OBSERVATION_LIMIT = 3
 QUOTE_LIMIT = 3
-LOW_MENTION_COLLAPSE = 2  # 其余开放问题中，提及次数 < 2（即 1 次）的默认折叠
+LOW_MENTION_COLLAPSE = 3  # 其余开放问题中，提及次数 < 3（即 1–2 次）的默认折叠；≥3 次以标题展开
 MODELS = ["LS6", "L6"]
 OTHER_MODELS = ["LS8", "LS9", "OTHER"]
 

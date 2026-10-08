@@ -1,0 +1,591 @@
+[
+  {
+    "issue_id": "ISS-0001",
+    "title": "方向盘会挡屏幕引发客户购买异议",
+    "category": "cockpit_ergonomics",
+    "series": [
+      "LS6"
+    ],
+    "affected_function": "椭圆方向盘/仪表视野",
+    "description": "有客户因方向盘会挡屏幕而对车辆提出强烈异议；该现象在既往 run 中已有记录。",
+    "evidence_ids": [
+      "EV-0001"
+    ],
+    "evidence_count": 1,
+    "store_count": 1,
+    "stores": [
+      "重庆·南坪金菱车世界店"
+    ],
+    "severity": "medium",
+    "severity_rationale": "单店单条反馈，客户经沟通后表示理解，不能外推为普遍拒购。",
+    "business_signal": "purchase_blocker",
+    "status": "confirmed",
+    "first_seen_date": "2026/10/07",
+    "last_seen_date": "2026/10/07",
+    "review": {
+      "reviewed_by": "OpenCode",
+      "reviewed_at": "2026-10-07",
+      "decision": "confirmed",
+      "notes": "按 issue_review 去重与证据充分性检查；单店单条标记 low/medium，不外推。"
+    },
+    "pattern_ids": [
+      "PAT-0010"
+    ],
+    "created_at": "2026-10-07"
+  },
+  {
+    "issue_id": "ISS-0002",
+    "title": "门店销售服务与团队表现获一线肯定",
+    "category": "sales_service",
+    "series": [
+      "OTHER"
+    ],
+    "affected_function": "销售服务与沟通",
+    "description": "多条反馈肯定主理人/销售团队的服务态度、专业知识与配合默契，并提到真诚沟通可化解客户异议。",
+    "evidence_ids": [
+      "EV-0002",
+      "EV-0012",
+      "EV-0024"
+    ],
+    "evidence_count": 3,
+    "store_count": 3,
+    "stores": [
+      "贵阳·贵阳印象汇",
+      "重庆·南坪金菱车世界店",
+      "重庆·龙湖天街体验中心"
+    ],
+    "severity": "low",
+    "severity_rationale": "来自 3 家门店的正面自报，不代表整体服务水平。",
+    "business_signal": "positive_signal",
+    "status": "confirmed",
+    "first_seen_date": "2026/10/07",
+    "last_seen_date": "2026/10/07",
+    "review": {
+      "reviewed_by": "OpenCode",
+      "reviewed_at": "2026-10-07",
+      "decision": "confirmed",
+      "notes": "按 issue_review 去重与证据充分性检查；单店单条标记 low/medium，不外推。"
+    },
+    "pattern_ids": [
+      "PAT-0004"
+    ],
+    "created_at": "2026-10-07"
+  },
+  {
+    "issue_id": "ISS-0003",
+    "title": "品牌曝光与可验证背书需要加强",
+    "category": "sales_service",
+    "series": [
+      "OTHER"
+    ],
+    "affected_function": "品牌认知与传播",
+    "description": "一线建议提升品牌曝光、并在门店展示上汽可验证的规模化优势内容以支撑品牌认知。",
+    "evidence_ids": [
+      "EV-0003",
+      "EV-0027"
+    ],
+    "evidence_count": 2,
+    "store_count": 2,
+    "stores": [
+      "重庆·南坪金菱车世界店",
+      "重庆·龙湖天街体验中心"
+    ],
+    "severity": "medium",
+    "severity_rationale": "属建议性反馈，尚无实施与效果数据。",
+    "business_signal": "operational",
+    "status": "confirmed",
+    "first_seen_date": "2026/10/07",
+    "last_seen_date": "2026/10/07",
+    "review": {
+      "reviewed_by": "OpenCode",
+      "reviewed_at": "2026-10-07",
+      "decision": "confirmed",
+      "notes": "按 issue_review 去重与证据充分性检查；单店单条标记 low/medium，不外推。"
+    },
+    "pattern_ids": [
+      "PAT-0008"
+    ],
+    "created_at": "2026-10-07"
+  },
+  {
+    "issue_id": "ISS-0004",
+    "title": "老客户口碑与转介绍建议",
+    "category": "sales_service",
+    "series": [
+      "OTHER"
+    ],
+    "affected_function": "客户运营",
+    "description": "一线建议维护老客户口碑、发动老客户带人进店体验。",
+    "evidence_ids": [
+      "EV-0004"
+    ],
+    "evidence_count": 1,
+    "store_count": 1,
+    "stores": [
+      "重庆·南坪金菱车世界店"
+    ],
+    "severity": "low",
+    "severity_rationale": "单店单条建议，无执行结果。",
+    "business_signal": "feature_request",
+    "status": "confirmed",
+    "first_seen_date": "2026/10/07",
+    "last_seen_date": "2026/10/07",
+    "review": {
+      "reviewed_by": "OpenCode",
+      "reviewed_at": "2026-10-07",
+      "decision": "confirmed",
+      "notes": "按 issue_review 去重与证据充分性检查；单店单条标记 low/medium，不外推。"
+    },
+    "pattern_ids": [
+      "PAT-0011"
+    ],
+    "created_at": "2026-10-07"
+  },
+  {
+    "issue_id": "ISS-0005",
+    "title": "LS6 配置与底盘空间获正向反馈",
+    "category": "configuration",
+    "series": [
+      "LS6",
+      "LS8",
+      "OTHER"
+    ],
+    "affected_function": "配置价值与体验",
+    "description": "专家反馈 LS6 同级配置最全，并观察到用户正面评价集中在底盘与空间舒适度。",
+    "evidence_ids": [
+      "EV-0005",
+      "EV-0018"
+    ],
+    "evidence_count": 2,
+    "store_count": 2,
+    "stores": [
+      "遵义·播州用户中心",
+      "重庆·金菱车世界车城店"
+    ],
+    "severity": "low",
+    "severity_rationale": "两店定性反馈，不代表总体配置偏好或市场份额。",
+    "business_signal": "positive_signal",
+    "status": "confirmed",
+    "first_seen_date": "2026/10/07",
+    "last_seen_date": "2026/10/07",
+    "review": {
+      "reviewed_by": "OpenCode",
+      "reviewed_at": "2026-10-07",
+      "decision": "confirmed",
+      "notes": "按 issue_review 去重与证据充分性检查；单店单条标记 low/medium，不外推。"
+    },
+    "pattern_ids": [
+      "PAT-0003"
+    ],
+    "created_at": "2026-10-07"
+  },
+  {
+    "issue_id": "ISS-0006",
+    "title": "副驾屏动画对亲子场景有吸引力",
+    "category": "smart_cockpit",
+    "series": [
+      "OTHER"
+    ],
+    "affected_function": "副驾娱乐屏",
+    "description": "专家观察到学龄儿童对副驾屏动画片兴趣强烈、抢着上副驾体验。",
+    "evidence_ids": [
+      "EV-0025"
+    ],
+    "evidence_count": 1,
+    "store_count": 1,
+    "stores": [
+      "重庆·龙湖天街体验中心"
+    ],
+    "severity": "low",
+    "severity_rationale": "单店观察，属场景线索而非结构化结论。",
+    "business_signal": "positive_signal",
+    "status": "confirmed",
+    "first_seen_date": "2026/10/07",
+    "last_seen_date": "2026/10/07",
+    "review": {
+      "reviewed_by": "OpenCode",
+      "reviewed_at": "2026-10-07",
+      "decision": "confirmed",
+      "notes": "按 issue_review 去重与证据充分性检查；单店单条标记 low/medium，不外推。"
+    },
+    "pattern_ids": [
+      "PAT-0003"
+    ],
+    "created_at": "2026-10-07"
+  },
+  {
+    "issue_id": "ISS-0007",
+    "title": "用户偏好老款 L6 与车型热度结构变化",
+    "category": "configuration",
+    "series": [
+      "L6",
+      "LS6",
+      "LS8"
+    ],
+    "affected_function": "车型定位与库存",
+    "description": "有用户偏好老款 L6 但老款库存已近一年；另有门店反馈 LS6 热度较上市期下降、LS8 关注度与之相当，6 系价格敏感、8/9 系价格更宽容。",
+    "evidence_ids": [
+      "EV-0006",
+      "EV-0015",
+      "EV-0028"
+    ],
+    "evidence_count": 3,
+    "store_count": 3,
+    "stores": [
+      "重庆·新光里",
+      "重庆·礼嘉天街",
+      "重庆·金菱车世界车城店"
+    ],
+    "severity": "medium",
+    "severity_rationale": "来自 3 家门店的定性观察与销售自报，不作趋势外推。",
+    "business_signal": "operational",
+    "status": "confirmed",
+    "first_seen_date": "2026/10/07",
+    "last_seen_date": "2026/10/07",
+    "review": {
+      "reviewed_by": "OpenCode",
+      "reviewed_at": "2026-10-07",
+      "decision": "confirmed",
+      "notes": "按 issue_review 去重与证据充分性检查；单店单条标记 low/medium，不外推。"
+    },
+    "pattern_ids": [
+      "PAT-0005"
+    ],
+    "created_at": "2026-10-07"
+  },
+  {
+    "issue_id": "ISS-0008",
+    "title": "门店提出传播、引流与激励动作建议",
+    "category": "sales_service",
+    "series": [
+      "OTHER",
+      "LS6",
+      "L6"
+    ],
+    "affected_function": "门店获客与运营",
+    "description": "一线建议包括线上传播、门店直播、进店赠礼、后轮转向场景话术、以及销售激励措施等。",
+    "evidence_ids": [
+      "EV-0007",
+      "EV-0010",
+      "EV-0013",
+      "EV-0021",
+      "EV-0026"
+    ],
+    "evidence_count": 5,
+    "store_count": 5,
+    "stores": [
+      "贵阳·万象汇",
+      "贵阳·贵阳印象汇",
+      "重庆·重庆南岸服务中心",
+      "重庆·金菱车世界车城店",
+      "重庆·龙湖天街体验中心"
+    ],
+    "severity": "low",
+    "severity_rationale": "均为建议，尚未记录执行与效果。",
+    "business_signal": "feature_request",
+    "status": "confirmed",
+    "first_seen_date": "2026/10/07",
+    "last_seen_date": "2026/10/07",
+    "review": {
+      "reviewed_by": "OpenCode",
+      "reviewed_at": "2026-10-07",
+      "decision": "confirmed",
+      "notes": "按 issue_review 去重与证据充分性检查；单店单条标记 low/medium，不外推。"
+    },
+    "pattern_ids": [
+      "PAT-0002"
+    ],
+    "created_at": "2026-10-07"
+  },
+  {
+    "issue_id": "ISS-0009",
+    "title": "用户等待 LS8 纯电与 LS9 新款上市",
+    "category": "configuration",
+    "series": [
+      "LS8",
+      "LS9"
+    ],
+    "affected_function": "动力版本与上市节奏",
+    "description": "多店反馈部分 LS8 客户在等纯电版、部分 LS9 客户在等新款，并关注上市价格。",
+    "evidence_ids": [
+      "EV-0008",
+      "EV-0014"
+    ],
+    "evidence_count": 2,
+    "store_count": 2,
+    "stores": [
+      "重庆·礼嘉天街",
+      "重庆·重庆南岸服务中心"
+    ],
+    "severity": "medium",
+    "severity_rationale": "两条定性反馈，未记录等待比例与实际转化。",
+    "business_signal": "purchase_blocker",
+    "status": "confirmed",
+    "first_seen_date": "2026/10/07",
+    "last_seen_date": "2026/10/07",
+    "review": {
+      "reviewed_by": "OpenCode",
+      "reviewed_at": "2026-10-07",
+      "decision": "confirmed",
+      "notes": "按 issue_review 去重与证据充分性检查；单店单条标记 low/medium，不外推。"
+    },
+    "pattern_ids": [
+      "PAT-0006"
+    ],
+    "created_at": "2026-10-07"
+  },
+  {
+    "issue_id": "ISS-0010",
+    "title": "价格权益与竞品价格对标形成决策抑制",
+    "category": "configuration",
+    "series": [
+      "LS8",
+      "L6",
+      "LS6"
+    ],
+    "affected_function": "价格与权益",
+    "description": "专家建议 LS8 纯电定价不高于理想 i6，并有用户认为极氪价格更划算；价格权益是 6 系首要决策因素。",
+    "evidence_ids": [
+      "EV-0009",
+      "EV-0030"
+    ],
+    "evidence_count": 2,
+    "store_count": 2,
+    "stores": [
+      "重庆·新光里",
+      "重庆·重庆南岸服务中心"
+    ],
+    "severity": "medium",
+    "severity_rationale": "自报与个别对标，不能量化为价格敏感度。",
+    "business_signal": "purchase_blocker",
+    "status": "confirmed",
+    "first_seen_date": "2026/10/07",
+    "last_seen_date": "2026/10/07",
+    "review": {
+      "reviewed_by": "OpenCode",
+      "reviewed_at": "2026-10-07",
+      "decision": "confirmed",
+      "notes": "按 issue_review 去重与证据充分性检查；单店单条标记 low/medium，不外推。"
+    },
+    "pattern_ids": [
+      "PAT-0007"
+    ],
+    "created_at": "2026-10-07"
+  },
+  {
+    "issue_id": "ISS-0011",
+    "title": "假期尾声客流下降与到店质量分化",
+    "category": "sales_service",
+    "series": [
+      "LS6",
+      "LS8",
+      "OTHER"
+    ],
+    "affected_function": "到店客流与质量",
+    "description": "多家门店反馈假期最后一天客流明显减少、意向下降；另有一店反馈客流相当但多次到店试驾暂未锁单。",
+    "evidence_ids": [
+      "EV-0011",
+      "EV-0016",
+      "EV-0017",
+      "EV-0020",
+      "EV-0022",
+      "EV-0031"
+    ],
+    "evidence_count": 6,
+    "store_count": 4,
+    "stores": [
+      "万州·万达广场快闪",
+      "贵阳·万象汇",
+      "贵阳·贵阳印象汇",
+      "遵义·播州用户中心"
+    ],
+    "severity": "medium",
+    "severity_rationale": "国庆单日门店口径不统一，不作城市或假期因果推断。",
+    "business_signal": "operational",
+    "status": "confirmed",
+    "first_seen_date": "2026/10/07",
+    "last_seen_date": "2026/10/07",
+    "review": {
+      "reviewed_by": "OpenCode",
+      "reviewed_at": "2026-10-07",
+      "decision": "confirmed",
+      "notes": "按 issue_review 去重与证据充分性检查；单店单条标记 low/medium，不外推。"
+    },
+    "pattern_ids": [
+      "PAT-0001"
+    ],
+    "created_at": "2026-10-07"
+  },
+  {
+    "issue_id": "ISS-0012",
+    "title": "门店选址/位置可见性影响自然引流",
+    "category": "sales_service",
+    "series": [
+      "OTHER"
+    ],
+    "affected_function": "门店位置",
+    "description": "有门店反馈位置不佳；另有快闪店反馈位置合理、人流大，呈现位置维度的正反两例。",
+    "evidence_ids": [
+      "EV-0023",
+      "EV-0032"
+    ],
+    "evidence_count": 2,
+    "store_count": 2,
+    "stores": [
+      "万州·万达广场快闪",
+      "贵阳·万象汇"
+    ],
+    "severity": "low",
+    "severity_rationale": "两店定性反馈，不作选址结论。",
+    "business_signal": "operational",
+    "status": "confirmed",
+    "first_seen_date": "2026/10/07",
+    "last_seen_date": "2026/10/07",
+    "review": {
+      "reviewed_by": "OpenCode",
+      "reviewed_at": "2026-10-07",
+      "decision": "confirmed",
+      "notes": "按 issue_review 去重与证据充分性检查；单店单条标记 low/medium，不外推。"
+    },
+    "pattern_ids": [
+      "PAT-0009"
+    ],
+    "created_at": "2026-10-07"
+  },
+  {
+    "issue_id": "ISS-0013",
+    "title": "用户关心线控转向可升级实现 L3 智驾",
+    "category": "adas",
+    "series": [
+      "LS6"
+    ],
+    "affected_function": "线控转向与智驾升级",
+    "description": "有几组用户询问线控转向是否可通过升级实现 L3 智驾，反映对可升级性的关注。",
+    "evidence_ids": [
+      "EV-0019"
+    ],
+    "evidence_count": 1,
+    "store_count": 1,
+    "stores": [
+      "遵义·播州用户中心"
+    ],
+    "severity": "low",
+    "severity_rationale": "单店单条提问，不代表功能承诺。",
+    "business_signal": "feature_request",
+    "status": "confirmed",
+    "first_seen_date": "2026/10/07",
+    "last_seen_date": "2026/10/07",
+    "review": {
+      "reviewed_by": "OpenCode",
+      "reviewed_at": "2026-10-07",
+      "decision": "confirmed",
+      "notes": "按 issue_review 去重与证据充分性检查；单店单条标记 low/medium，不外推。"
+    },
+    "pattern_ids": [
+      "PAT-0012"
+    ],
+    "created_at": "2026-10-07"
+  },
+  {
+    "issue_id": "ISS-0014",
+    "title": "竞品空间感知优于智己",
+    "category": "seating_space",
+    "series": [
+      "LS6"
+    ],
+    "affected_function": "空间对比",
+    "description": "有用户认为理想的空间更舒适。",
+    "evidence_ids": [
+      "EV-0029"
+    ],
+    "evidence_count": 1,
+    "store_count": 1,
+    "stores": [
+      "重庆·新光里"
+    ],
+    "severity": "low",
+    "severity_rationale": "单条对标反馈，不代表竞品整体评价。",
+    "business_signal": "competitive_gap",
+    "status": "confirmed",
+    "first_seen_date": "2026/10/07",
+    "last_seen_date": "2026/10/07",
+    "review": {
+      "reviewed_by": "OpenCode",
+      "reviewed_at": "2026-10-07",
+      "decision": "confirmed",
+      "notes": "按 issue_review 去重与证据充分性检查；单店单条标记 low/medium，不外推。"
+    },
+    "pattern_ids": [
+      "PAT-0013"
+    ],
+    "created_at": "2026-10-07"
+  },
+  {
+    "issue_id": "ISS-0015",
+    "title": "后排语音误关前排屏引发安全顾虑",
+    "category": "smart_cockpit",
+    "series": [
+      "LS8"
+    ],
+    "affected_function": "屏幕控制逻辑",
+    "description": "有用户因后排语音误关闭前排屏幕、担心安全隐患而产生强烈抵触并离店。",
+    "evidence_ids": [
+      "EV-0033"
+    ],
+    "evidence_count": 1,
+    "store_count": 1,
+    "stores": [
+      "遵义·吾悦广场"
+    ],
+    "severity": "high",
+    "severity_rationale": "单店单条反馈；因果关系为用户自述，未复现。",
+    "business_signal": "purchase_blocker",
+    "status": "confirmed",
+    "first_seen_date": "2026/10/07",
+    "last_seen_date": "2026/10/07",
+    "review": {
+      "reviewed_by": "OpenCode",
+      "reviewed_at": "2026-10-07",
+      "decision": "confirmed",
+      "notes": "按 issue_review 去重与证据充分性检查；单店单条标记 low/medium，不外推。"
+    },
+    "pattern_ids": [
+      "PAT-0014"
+    ],
+    "created_at": "2026-10-07"
+  },
+  {
+    "issue_id": "ISS-0016",
+    "title": "北方游客与 BBA 用户关注插混动力形式",
+    "category": "configuration",
+    "series": [
+      "OTHER"
+    ],
+    "affected_function": "动力形式偏好",
+    "description": "有北方游客与 BBA（ix3）用户重点关注插混，并仔细询问插混与增程差异。",
+    "evidence_ids": [
+      "EV-0034"
+    ],
+    "evidence_count": 1,
+    "store_count": 1,
+    "stores": [
+      "遵义·吾悦广场"
+    ],
+    "severity": "low",
+    "severity_rationale": "单店单条观察，不能代表用户结构的动力形式偏好。",
+    "business_signal": "feature_request",
+    "status": "confirmed",
+    "first_seen_date": "2026/10/07",
+    "last_seen_date": "2026/10/07",
+    "review": {
+      "reviewed_by": "OpenCode",
+      "reviewed_at": "2026-10-07",
+      "decision": "confirmed",
+      "notes": "按 issue_review 去重与证据充分性检查；单店单条标记 low/medium，不外推。"
+    },
+    "pattern_ids": [
+      "PAT-0015"
+    ],
+    "created_at": "2026-10-07"
+  }
+]
