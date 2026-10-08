@@ -557,6 +557,149 @@ def test_scheduler_run_once_refresh_failure_skips_monitor(bdef):
     assert calls == ["refresh_order_data"]
 
 
+# ── scheduler business_definition 热更新 ────────────────────────────
+
+
+def _write_bdef(path: Path, payload: dict) -> None:
+    path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+
+
+def _bdef_payload(bdef: dict, key_hours: list[int]) -> dict:
+    payload = json.loads(json.dumps(bdef))
+    payload["monitor"]["freshness"]["key_day_hours"] = key_hours
+    return payload
+
+
+def _hot_loader(sched, tmp_path, payload: dict):
+    p = tmp_path / "business_definition.json"
+    _write_bdef(p, payload)
+    loader = sched.BusinessDefinitionLoader(p)
+    loader.load()  # 模拟启动时首次成功加载
+    return p, loader
+
+
+def test_scheduler_bdef_hot_reload_on_next_tick(bdef, tmp_path):
+    """启动后修改配置 → 下一轮调度读取新值，无需重启。"""
+    sched = _load_scheduler()
+    p, loader = _hot_loader(sched, tmp_path, _bdef_payload(bdef, [17]))
+    key_day = datetime(2026, 9, 10, 9, 0)  # CM3 预售首日
+    # 旧配置：09:00 不是 key day 小时 → 无动作
+    assert sched.due_actions(key_day, loader.last_good) == []
+
+    _write_bdef(p, _bdef_payload(bdef, [9]))  # 热更新：09:00 触发
+    seen: dict = {}
+    mp = pytest.MonkeyPatch()
+    mp.setattr(sched, "process_batch", lambda now, b, args, fired: seen.update(bdef=b))
+    try:
+        sched.run_tick(key_day, loader, _scheduler_args()[1], set())
+    finally:
+        mp.undo()
+    assert seen["bdef"]["monitor"]["freshness"]["key_day_hours"] == [9]
+    assert sched.due_actions(key_day, seen["bdef"]) == ["refresh_order_data", "monitor"]
+
+
+def test_scheduler_bdef_reload_failure_falls_back_to_last_good(bdef, tmp_path):
+    """JSON 非法 / 文件不可读 / 结构校验失败 → 记录 ERROR 并沿用最后一次有效配置。"""
+    sched = _load_scheduler()
+    p, loader = _hot_loader(sched, tmp_path, _bdef_payload(bdef, [17]))
+    good = loader.last_good
+
+    logs: list[str] = []
+    mp = pytest.MonkeyPatch()
+    mp.setattr(sched, "log", lambda msg, now=None: logs.append(str(msg)))
+    try:
+        # 1) JSON 格式错误
+        p.write_text("{ not json", encoding="utf-8")
+        assert loader.reload(datetime(2026, 9, 15, 8, 50)) is good
+        # 2) 文件不可读（不存在）
+        p.unlink()
+        assert loader.reload(datetime(2026, 9, 15, 8, 51)) is good
+        # 3) 结构校验失败（time_periods 为空）
+        _write_bdef(p, {"time_periods": {}})
+        assert loader.reload(datetime(2026, 9, 15, 8, 52)) is good
+        # 4) 恢复合法配置 → 正常热更新
+        _write_bdef(p, _bdef_payload(bdef, [9]))
+        recovered = loader.reload(datetime(2026, 9, 15, 8, 53))
+    finally:
+        mp.undo()
+
+    errors = [m for m in logs if "ERROR" in m]
+    assert len(errors) == 3
+    assert all("沿用最后一次有效配置" in m for m in errors)
+    assert recovered is not good
+    assert recovered["monitor"]["freshness"]["key_day_hours"] == [9]
+
+
+def test_scheduler_bdef_first_load_failure_is_fail_fast(tmp_path):
+    """从未成功加载过 → 加载/热更新都抛异常，不静默使用空配置。"""
+    sched = _load_scheduler()
+    missing = sched.BusinessDefinitionLoader(tmp_path / "missing.json")
+    with pytest.raises(FileNotFoundError):
+        missing.load()
+    with pytest.raises(FileNotFoundError):
+        missing.reload()
+
+    bad = tmp_path / "bad.json"
+    _write_bdef(bad, {"time_periods": {}})
+    structural = sched.BusinessDefinitionLoader(bad)
+    with pytest.raises(ValueError):
+        structural.load()
+    with pytest.raises(ValueError):
+        structural.reload()
+
+
+def test_scheduler_tick_uses_single_config_snapshot(bdef, tmp_path):
+    """同一轮只读取一次配置，且本轮动作全部基于该快照。"""
+    sched = _load_scheduler()
+    _p, loader = _hot_loader(sched, tmp_path, _bdef_payload(bdef, [17]))
+
+    loads: list[int] = []
+    orig_load = loader.load
+
+    def counting_load():
+        loads.append(1)
+        return orig_load()
+
+    seen: list[dict] = []
+    mp = pytest.MonkeyPatch()
+    mp.setattr(loader, "load", counting_load)
+    mp.setattr(sched, "process_batch", lambda now, b, args, fired: seen.append(b))
+    try:
+        sched.run_tick(datetime(2026, 9, 15, 8, 50), loader, _scheduler_args()[1], set())
+    finally:
+        mp.undo()
+
+    assert len(loads) == 1
+    assert len(seen) == 1
+    assert seen[0] is loader.last_good
+
+
+def test_scheduler_hot_reload_no_duplicate_dispatch(bdef, tmp_path):
+    """热更新不破坏 fired 去重：同一分钟重复进入只触发一次。"""
+    sched = _load_scheduler()
+    p, loader = _hot_loader(sched, tmp_path, _bdef_payload(bdef, [17]))
+    calls: list[str] = []
+
+    def fake_run(cmd, label, dry_run, t):
+        calls.append(label)
+        return 0
+
+    mp = pytest.MonkeyPatch()
+    mp.setattr(sched, "_run", fake_run)
+    try:
+        fired: set[str] = set()
+        now = datetime(2026, 9, 15, 8, 50)
+        sched.run_tick(now, loader, _scheduler_args()[1], fired)
+        _write_bdef(p, _bdef_payload(bdef, [9]))  # 本轮内热更新，不影响去重
+        sched.run_tick(now, loader, _scheduler_args()[1], fired)
+    finally:
+        mp.undo()
+
+    assert calls == [
+        "refresh_daily", "dataset_validate", "daily_observation_sync", "monitor",
+    ]
+
+
 # ── presale card 结构（参照 launch 精简） ────────────────────────────
 
 

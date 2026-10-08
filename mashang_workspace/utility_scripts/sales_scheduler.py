@@ -30,6 +30,12 @@ canonical 入口 `make sales-scheduler` 默认 SERIES=CM3（仅监控 CM3）；
     nohup caffeinate -i .venv/bin/python mashang_workspace/utility_scripts/sales_scheduler.py \\
         > logs/scheduler/stdout.log 2>&1 &
 
+配置热更新:
+    business_definition.json 在每轮调度决策前重新读取（不需重启 Scheduler）；
+    同一轮调度使用同一份配置快照。加载失败（JSON 非法 / 文件不可读 / 结构校验
+    不通过）时记录 ERROR 并沿用最后一次有效配置（last-known-good）；
+    若从未成功加载过则抛异常退出（fail-fast，不允许空配置静默运行）。
+
 用法:
     python mashang_workspace/utility_scripts/sales_scheduler.py --once --dry-run   # 立即跑一轮监控后退出
     python mashang_workspace/utility_scripts/sales_scheduler.py --once --as-of 2026-09-10 --dry-run
@@ -72,6 +78,52 @@ def _key_hours(bdef: dict) -> list[int]:
     mon = (bdef.get("monitor") or {}).get("freshness") or {}
     hours = mon.get("key_day_hours") or DEFAULT_KEY_HOURS
     return sorted(int(h) for h in hours)
+
+
+def validate_bdef(bdef) -> None:
+    """最小结构校验：解析成功但结构残缺的配置不视为有效。不涉及业务规则。"""
+    if not isinstance(bdef, dict):
+        raise ValueError("business_definition 顶层必须是 JSON object")
+    tp = bdef.get("time_periods")
+    if not isinstance(tp, dict) or not tp:
+        raise ValueError("business_definition.time_periods 缺失或为空")
+    if not all(isinstance(v, dict) for v in tp.values()):
+        raise ValueError("business_definition.time_periods 取值必须是 object")
+    mon = bdef.get("monitor")
+    if mon is not None and not isinstance(mon, dict):
+        raise ValueError("business_definition.monitor 必须是 object")
+
+
+class BusinessDefinitionLoader:
+    """business_definition.json 热加载器：每轮读取，失败回退 last-known-good。
+
+    load()   严格加载 + 校验，成功后更新 last-known-good，失败抛异常（启动 fail-fast）。
+    reload() 每轮调度决策前调用；失败记录 ERROR 并返回最后一次有效配置；
+             若从未成功加载过则抛异常（不静默使用空/残缺配置）。
+    """
+
+    def __init__(self, path=None):
+        self._path = path
+        self._last_good: dict | None = None
+
+    @property
+    def last_good(self) -> dict | None:
+        return self._last_good
+
+    def load(self) -> dict:
+        bdef = load_business_definition(self._path)
+        validate_bdef(bdef)
+        self._last_good = bdef
+        return bdef
+
+    def reload(self, now: datetime | None = None) -> dict:
+        try:
+            return self.load()
+        except Exception as exc:  # noqa: BLE001 —— 任何加载/校验失败都要兜底
+            if self._last_good is None:
+                raise
+            log(f"ERROR business_definition 热更新失败，沿用最后一次有效配置: {exc}", now)
+            return self._last_good
 
 
 def due_actions(now: datetime, bdef: dict) -> list[str]:
@@ -186,9 +238,19 @@ def run_once(args, bdef: dict) -> int:
     return 0
 
 
-def run_loop(args, bdef: dict) -> int:
+def run_tick(now: datetime, loader: BusinessDefinitionLoader, args, fired: set[str]) -> None:
+    """单轮调度决策：先重读配置快照，再执行本轮 due 动作。
+
+    同一轮内 is_key_day / key_day_hours / dispatch 共用同一份 bdef 快照。
+    """
+    bdef = loader.reload(now)
+    process_batch(now, bdef, args, fired)
+
+
+def run_loop(args, loader: BusinessDefinitionLoader) -> int:
     log("调度器启动", datetime.now())
-    log(f"  DailyPipeline={FULL_REFRESH_TIME}（刷新订单+下发线索→校验→同步→监控）  KeyDay={_key_hours(bdef)}时整   monitor_phase={args.phase}", datetime.now())
+    bdef0 = loader.last_good or {}
+    log(f"  DailyPipeline={FULL_REFRESH_TIME}（刷新订单+下发线索→校验→同步→监控）  KeyDay={_key_hours(bdef0)}时整   monitor_phase={args.phase}", datetime.now())
     fired: set[str] = set()
     last_minute: tuple[int, int] | None = None
 
@@ -199,7 +261,7 @@ def run_loop(args, bdef: dict) -> int:
             last_minute = minute_key
             # 每分钟重置一次去重集合（按动作名 + 当日）
             fired = {k for k in fired if k.startswith(f"{now:%Y-%m-%d} ")}
-            process_batch(now, bdef, args, fired)
+            run_tick(now, loader, args, fired)
         time.sleep(5)
 
     log("调度器停止", datetime.now())
@@ -223,10 +285,15 @@ def main() -> int:
     signal.signal(signal.SIGINT, _handle_signal)
     signal.signal(signal.SIGTERM, _handle_signal)
 
-    bdef = load_business_definition()
+    loader = BusinessDefinitionLoader()
+    try:
+        bdef = loader.load()  # 首次加载失败 → fail-fast
+    except Exception as exc:  # noqa: BLE001
+        print(f"ERROR business_definition 首次加载失败: {exc}", file=sys.stderr)
+        return 2
     if args.once:
         return run_once(args, bdef)
-    return run_loop(args, bdef)
+    return run_loop(args, loader)
 
 
 if __name__ == "__main__":
