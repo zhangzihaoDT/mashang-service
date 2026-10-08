@@ -347,7 +347,7 @@ mashang-service/
 | 监控预检 | `make sales-monitor-dry-run` | `monitor-dry-run` | read-only |
 | 数据更新+指定代际监控走廊 | `make monitor-sync SERIES=<GEN> [PHASE=launch\|presale] [DRY=1]` | `sales-monitor-sync` | local write（仅订单表）+ Feishu card |
 | 指定代际预售小订快照 | `make presale-snapshot SERIES=<GEN>`（= `sales-monitor --force-phase --phase presale`） | — | Feishu card |
-| 常驻调度（09:00 daily 刷新订单+下发线索；key day 高频刷新订单） | `make sales-scheduler` | `scheduler` | 常驻 + local + Feishu |
+| 常驻调度（08:50 daily 刷新订单+下发线索；key day 高频刷新订单） | `make sales-scheduler` | `scheduler` | 常驻 + local + Feishu |
 | 预售累计订单对比报告 | `presale_cumulative_order_compare.py` | `l6_m2_presale_report.py`（shim） | local write（可选 Feishu docx） |
 
 副作用等级定义：
@@ -371,7 +371,7 @@ mashang-service/
 - `make data-pipeline` / `daily-data-pipeline` **只刷新订单 + 下发线索**，且**不含**销售监控；如需“数据更新 + 监控推送”一体执行：用 `make daily-ops`（= daily pipeline + sales-monitor），仅订单表用 `make monitor-sync`。
 - 试驾数据 / 锁单归因等其余数据集**不在 Daily pipeline 内**，只在 `make allupdate`（全量更新 + 校验）或各自独立更新入口维护，走“更新 + 整理”路径。
 - `monitor-sync` 仅刷新订单表（`order_data`），不等价于 `make allupdate`（全量数据集）；需要全量刷新时用 `make allupdate` 或 `make data-refresh`。
-- `make sales-scheduler` 的 09:00 每日管道同样**只刷新订单 + 下发线索**（daily scope）+ 校验 + 观察同步 + 监控；key day 17–23 点仅刷新订单表。试驾 / 锁单归因不在调度器内，走 `make allupdate` 或独立更新入口。
+- `make sales-scheduler` 的 08:50 每日管道同样**只刷新订单 + 下发线索**（daily scope）+ 校验 + 观察同步 + 监控；key day 17–23 点仅刷新订单表。试驾 / 锁单归因不在调度器内，走 `make allupdate` 或独立更新入口。
 
 ## Fast Reference
 
@@ -421,7 +421,7 @@ mashang-service/
 | 当前预售/上市监控 | `make sales-monitor`（当前 active 代际 + phase；旧名 `monitor`；先 `make sales-monitor-dry-run` 预览） | monitor |
 | 数据更新+指定代际监控走廊 | `make monitor-sync SERIES=CM3 PHASE=launch|presale [DRY=1]`（仅刷新订单表 → 计算 → 推送/dry-run；旧名 `sales-monitor-sync`） | monitor |
 | 指定代际小订快照 | `make presale-snapshot SERIES=CM3`（先 `DRY=1` 预览；底层 `presale_metrics_to_feishu.py --series CM3`） | monitor |
-| 常驻调度 | `make sales-scheduler`（旧名 `scheduler`；09:00 刷新订单+下发线索，key day 仅刷新订单） | monitor |
+| 常驻调度 | `make sales-scheduler`（旧名 `scheduler`；08:50 刷新订单+下发线索，key day 仅刷新订单） | monitor |
 | 解析验证范围 | `make verify-scope`（按改动解析最小验证范围） | harness |
 | 执行验证 | `make verify`（仅 scope 内；baseline 不算回归） | harness |
 | 扩大验证 | `make verify-all`（显式全量） | harness |

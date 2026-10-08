@@ -32,6 +32,7 @@ from utils.monitors.phase import (  # noqa: E402
     launch_open_hour,
     launch_open_minute,
     load_business_definition,
+    monitor_until,
     open_hour,
     open_minute,
     presale_cohort_start_parts,
@@ -72,7 +73,18 @@ def test_cm3_presale_phase(bdef):
     assert phase_of(bdef, "CM3", pd.Timestamp("2026-09-22")) == "presale"
     assert phase_of(bdef, "CM3", pd.Timestamp("2026-09-23")) == "launch"  # end = 上市日
     assert phase_of(bdef, "CM3", pd.Timestamp("2026-09-24")) == "launch"
+    assert phase_of(bdef, "CM3", pd.Timestamp("2026-10-23")) == "launch"  # monitor_until_by_series
+    assert phase_of(bdef, "CM3", pd.Timestamp("2026-10-24")) is None
     assert phase_of(bdef, "CM3", pd.Timestamp("2026-11-01")) is None
+
+
+def test_monitor_until_overrides_launch_window(bdef):
+    # CM3 已配置显式监控截止日；其它代际不受影响（无配置）
+    mu = monitor_until(bdef, "CM3")
+    assert mu is not None
+    assert mu.isoformat() == "2026-10-23"
+    assert monitor_until(bdef, "DM2") is None
+    assert phase_of(bdef, "DM2", pd.Timestamp("2026-10-08")) == "launch"
 
 
 def test_dm2_launch_phase(bdef):
@@ -421,7 +433,7 @@ def test_scheduler_pipeline_passes_refresh_ts_to_monitor(bdef):
     mp = pytest.MonkeyPatch()
     mp.setattr(sched, "_run", fake_run)
     try:
-        sched.process_batch(datetime(2026, 9, 15, 9, 0), bdef, _scheduler_args()[1], set())
+        sched.process_batch(datetime(2026, 9, 15, 8, 50), bdef, _scheduler_args()[1], set())
     finally:
         mp.undo()
     assert "--refresh-ts" in cmds["monitor"]
@@ -439,7 +451,7 @@ def test_scheduler_refresh_failure_no_refresh_ts_and_skips_monitor(bdef):
     mp = pytest.MonkeyPatch()
     mp.setattr(sched, "_run", fake_run)
     try:
-        sched.process_batch(datetime(2026, 9, 15, 9, 0), bdef, _scheduler_args()[1], set())
+        sched.process_batch(datetime(2026, 9, 15, 8, 50), bdef, _scheduler_args()[1], set())
     finally:
         mp.undo()
     assert "monitor" not in cmds
@@ -447,10 +459,11 @@ def test_scheduler_refresh_failure_no_refresh_ts_and_skips_monitor(bdef):
 
 def test_scheduler_due_actions_key_day_gating(bdef):
     sched = _load_scheduler()
-    # 每日 09:00 数据管道末步含 monitor（09:30 不再独立触发）
-    assert sched.due_actions(datetime(2026, 9, 15, 9, 0), bdef) == [
+    # 每日 08:50 数据管道末步含 monitor；旧时间 09:00 不再触发
+    assert sched.due_actions(datetime(2026, 9, 15, 8, 50), bdef) == [
         "refresh_daily", "dataset_validate", "daily_observation_sync", "monitor",
     ]
+    assert sched.due_actions(datetime(2026, 9, 15, 9, 0), bdef) == []
     assert sched.due_actions(datetime(2026, 9, 15, 9, 30), bdef) == []
     # key day 19:00 刷新+监控串行（:30 不再单独触发 monitor）
     assert sched.due_actions(datetime(2026, 9, 10, 19, 0), bdef) == ["refresh_order_data", "monitor"]
@@ -461,9 +474,9 @@ def test_scheduler_due_actions_key_day_gating(bdef):
 
 
 def test_scheduler_daily_pipeline_serial_order(bdef):
-    """09:00 数据管道顺序 = 刷新 → 校验 → 同步 → 监控。"""
+    """08:50 数据管道顺序 = 刷新 → 校验 → 同步 → 监控。"""
     sched = _load_scheduler()
-    assert sched.due_actions(datetime(2026, 9, 15, 9, 0), bdef) == [
+    assert sched.due_actions(datetime(2026, 9, 15, 8, 50), bdef) == [
         "refresh_daily", "dataset_validate", "daily_observation_sync", "monitor",
     ]
 
@@ -487,7 +500,7 @@ def _run_chain(sched, now, bdef, result_map):
 def test_scheduler_pipeline_runs_all_in_order(bdef):
     """全链路成功后 monitor 作为末步执行。"""
     sched = _load_scheduler()
-    now = datetime(2026, 9, 15, 9, 0)
+    now = datetime(2026, 9, 15, 8, 50)
     assert _run_chain(sched, now, bdef, {}) == [
         "refresh_daily", "dataset_validate", "daily_observation_sync", "monitor",
     ]
@@ -496,14 +509,14 @@ def test_scheduler_pipeline_runs_all_in_order(bdef):
 def test_scheduler_refresh_failure_halts_pipeline(bdef):
     """refresh_daily 失败即中止整批（validate/sync/monitor 都不执行）。"""
     sched = _load_scheduler()
-    now = datetime(2026, 9, 15, 9, 0)
+    now = datetime(2026, 9, 15, 8, 50)
     assert _run_chain(sched, now, bdef, {"refresh_daily": 1}) == ["refresh_daily"]
 
 
 def test_scheduler_validate_failure_blocks_sync_and_monitor(bdef):
     """dataset_validate 失败 → 跳过 daily_observation_sync 与 monitor。"""
     sched = _load_scheduler()
-    now = datetime(2026, 9, 15, 9, 0)
+    now = datetime(2026, 9, 15, 8, 50)
     assert _run_chain(sched, now, bdef, {"dataset_validate": 1}) == [
         "refresh_daily", "dataset_validate",
     ]
@@ -512,7 +525,7 @@ def test_scheduler_validate_failure_blocks_sync_and_monitor(bdef):
 def test_scheduler_sync_failure_blocks_monitor(bdef):
     """daily_observation_sync 失败 → 跳过末步 monitor。"""
     sched = _load_scheduler()
-    now = datetime(2026, 9, 15, 9, 0)
+    now = datetime(2026, 9, 15, 8, 50)
     assert _run_chain(sched, now, bdef, {"daily_observation_sync": 1}) == [
         "refresh_daily", "dataset_validate", "daily_observation_sync",
     ]

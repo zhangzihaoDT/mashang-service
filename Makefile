@@ -368,8 +368,10 @@ monitor: sales-monitor
 monitor-dry-run: sales-monitor-dry-run
 sales-monitor-sync: monitor-sync
 
-## 常驻定时器：09:00 每日管道（刷新订单+下发线索→校验→同步→监控）+ key day 17-23 高频刷新/监控（配合 caffeinate -i）
-## 注意：常驻进程，会刷新数据、同步飞书并发送监控卡片；09:00 仅刷新订单+下发线索（试驾/锁单归因走 allupdate）
+## 常驻定时器：08:50 每日管道（刷新订单+下发线索→校验→同步→监控）+ key day 17-23 高频刷新/监控（配合 caffeinate -i）
+## 注意：常驻进程，会刷新数据、同步飞书并发送监控卡片；08:50 仅刷新订单+下发线索（试驾/锁单归因走 allupdate）
+## 监控默认仅针对 CM3（SERIES 可覆盖，如 SERIES=DM2 或 SERIES="" 恢复全部 active 代际）
+sales-scheduler: SERIES ?= CM3
 sales-scheduler:
 	$(PYTHON) mashang_workspace/utility_scripts/sales_scheduler.py \
 		$(if $(SERIES),--series $(SERIES)) \
@@ -580,7 +582,7 @@ help:
 	@echo "make monitor-sync            数据更新+监控走廊 SERIES=CM3 [PHASE=launch|presale] [DRY=1]（仅刷新订单表）"
 	@echo "make presale-snapshot        指定代际预售小订快照推送 SERIES=CM3 [DRY=1] [ALLOW_STALE=1]（写操作）"
 	@echo "make presale-funnel          预售小订转化漏斗（泛化，任意代际）SERIES=CM3 [AS_OF=] [FORMAT=]（只读）"
-	@echo "make sales-scheduler         常驻定时器（09:00 订单+下发线索刷新 + key day 高频订单刷新/监控；SERIES=CM3 限定代际）"
+	@echo "make sales-scheduler         常驻定时器（08:50 订单+下发线索刷新 + key day 高频订单刷新/监控；SERIES=CM3 限定代际）"
 	@echo "  兼容别名: monitor / monitor-dry-run / sales-monitor-sync / scheduler"
 	@echo ""
 	@echo "=== Render ==="

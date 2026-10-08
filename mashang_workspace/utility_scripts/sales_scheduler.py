@@ -4,7 +4,7 @@
 
 调度（key day = 任一 active 代际的预售首日 start 或上市日 end）：
 
-  Daily pipeline（每日 09:00）
+  Daily pipeline（每日 08:50）
     refresh_daily → dataset_validate → daily_observation_sync → monitor
     refresh_daily 仅刷新订单数据 + 下发线索（update_all_datasets.py --scope daily）；
     试驾 / 锁单归因等其余数据集走 make allupdate 或独立更新入口。
@@ -16,6 +16,8 @@
 
 监控默认推送全部 active 阶段代际（--phase presale,launch）；
 可用 --phase presale（仅预售）或 --series CM3（限定代际）收窄。
+canonical 入口 `make sales-scheduler` 默认 SERIES=CM3（仅监控 CM3）；
+可用 SERIES=DM2 收窄到其它代际，或 SERIES= 恢复全部 active 代际。
 
 启动方式：
     source .venv/bin/activate
@@ -60,7 +62,7 @@ except ImportError:
 from utils.monitors.phase import is_key_day, load_business_definition  # noqa: E402
 
 LOG_DIR = REPO_ROOT / "logs" / "scheduler"
-FULL_REFRESH_TIME = (9, 0)
+FULL_REFRESH_TIME = (8, 50)
 DEFAULT_KEY_HOURS = [17, 18, 19, 20, 21, 22, 23]
 
 _STOP = False

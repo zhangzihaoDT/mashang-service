@@ -2,7 +2,8 @@
 
 phase 规则：
   presale : start <= today < end
-  launch  : end <= today <= (finish or end + launch_window_days)
+  launch  : end <= today <= launch_end
+            launch_end = monitor_until_by_series[gen] or finish or (end + launch_window_days)
   normal  : 其他（不监控）
 
 `detect_active` 支持多代际同时 active（例如 DM2 上市窗口 + CM3 预售窗口）。
@@ -101,6 +102,13 @@ def launch_window_days(bdef: dict) -> int:
     return int(mon.get("launch_window_days", DEFAULT_LAUNCH_WINDOW_DAYS))
 
 
+def monitor_until(bdef: dict, generation: str) -> date | None:
+    """按代际显式监控截止日（monitor.monitor_until_by_series）；未配置返回 None。"""
+    mon = bdef.get("monitor") or {}
+    by = mon.get("monitor_until_by_series") or {}
+    return _as_date(by.get(generation))
+
+
 def phase_of(bdef: dict, generation: str, today) -> str | None:
     tp = (bdef.get("time_periods") or {}).get(generation) or {}
     today_d = _as_date(today)
@@ -112,7 +120,7 @@ def phase_of(bdef: dict, generation: str, today) -> str | None:
     if start and end and start <= today_d < end:
         return "presale"
     if end:
-        launch_end = finish or (end + timedelta(days=launch_window_days(bdef)))
+        launch_end = monitor_until(bdef, generation) or finish or (end + timedelta(days=launch_window_days(bdef)))
         if end <= today_d <= launch_end:
             return "launch"
     return None
