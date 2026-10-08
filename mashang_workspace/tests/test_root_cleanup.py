@@ -26,6 +26,7 @@ DOCS_ALLOWLIST = frozenset({
     "sav_exploratory_analysis.md",
     "sav_exploratory_analysis_v2.md",
     "feishu_doc_ingestion.md",
+    "architecture_baseline.md",
 })
 SCRIPTS_ALLOWLIST = frozenset({
     "__init__.py",
