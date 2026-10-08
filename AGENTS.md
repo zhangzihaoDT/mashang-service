@@ -43,6 +43,8 @@ mashang-service 是一个**汽车业务数据分析项目**，包含以下分支
 - `dataset/assign_data.csv` — 下发线索表（含渠道拆解、7/30日转化）
 - `dataset/config_attribute.parquet` — 选配属性表（配置渗透率分析）
 
+**共享数据集文件访问规则**：共享数据集统一位于仓库根目录的 `dataset/`。OpenCode 使用 `read` 等文件工具访问共享数据集时，必须依据仓库现有目录结构传入以仓库根目录为基准的正确路径；例如 `dataset/assign_data.csv`，若工具要求绝对路径则使用 `<REPO_ROOT>/dataset/assign_data.csv`。禁止只传裸文件名（如 `assign_data.csv`），也禁止将共享数据路径构造为 `mashang_workspace/dataset/assign_data.csv`。路径必须先依据已有目录结构确认，不允许猜测。
+
 ## 工作原则
 
 1. **新分析能力**：优先进入 `mashang_workspace/`
