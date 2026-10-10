@@ -57,6 +57,7 @@ mashang-service 是一个**汽车业务数据分析项目**，包含以下分支
 8. **不要在根目录创建新的 `docs/scripts/eval/tests/utils`**
 9. **新分析能力优先沉淀到 `mashang_workspace/business_scripts/ + research_scripts/ + docs/ + eval/`**
 10. **验证范围必须与改动范围匹配**：改动后先 `make verify-scope` 解析本次改动的最小验证范围，再 `make verify` 执行。**scope 外失败不算本次回归**；扩大范围必须显式（`make verify-all` / `--include`），不得把「充分验证」等价成「跑全量 pytest / `make ci`」。契约见 `.opencode/verification/README.md`。
+    同一份代码的相同检查只执行一次，不要在 `make verify` 前单独重复运行它包含的 pytest。存在其他任务的未提交改动时，两步都用 `VERIFY_CHANGED="本次修改的文件路径列表"` 限定范围。
 11. **能力产品化路径**：workspace 中验证稳定的能力先成为 `business_scripts`，供 Hub 经 `jobs/` 确定性调度；不要绕过 workspace 直接在 `jobs/` 或 Research Application 中重复实现业务分析逻辑。
 12. **`shared/` 边界**：共享 operator/schema 层，不应随意修改。如修改需说明影响范围，并同步相关测试。
 13. **MCP 边界**：MCP 能力由根目录统一提供（`.opencode/` / `opencode.jsonc`），workspace 只消费能力。不得将本地 profile、cookies、API key、incoming 原始数据等提交进仓库。

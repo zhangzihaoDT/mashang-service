@@ -61,10 +61,10 @@ ci:
 
 ## Verification Scope — 解析改动范围对应的最小验证范围
 verify-scope:  ## 解析当前工作区改动的最小验证范围（只计划，不执行）
-	$(PYTHON) .opencode/verification/resolve_verification_scope.py --worktree
+	$(PYTHON) .opencode/verification/resolve_verification_scope.py --worktree $(if $(strip $(VERIFY_CHANGED)),--changed $(VERIFY_CHANGED),)
 
 verify:  ## 解析并执行 scope 内验证（哪些算本次回归，由契约决定）
-	$(PYTHON) .opencode/verification/resolve_verification_scope.py --worktree --run
+	$(PYTHON) .opencode/verification/resolve_verification_scope.py --worktree --run $(if $(strip $(VERIFY_CHANGED)),--changed $(VERIFY_CHANGED),)
 
 verify-all:  ## 显式扩大范围：解析并执行全部 target
 	$(PYTHON) .opencode/verification/resolve_verification_scope.py --worktree --all --run

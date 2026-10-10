@@ -53,6 +53,8 @@ mashang-service/                   # 总项目根目录
 5. **所有分析结果说明数据来源、时间窗口、口径**
 6. **高频能力产品化路径**：先在 workspace 内沉淀（`business_scripts/`），供 Hub 经 `jobs/` 确定性调度；不要绕过 workspace 直接在 `jobs/` 中开发，也不把业务代码复制进 `jobs/`。
 7. **验证范围与改动范围匹配**：先 `make verify-scope` 解析最小验证范围，再 `make verify` 执行；scope 外失败不算本次回归，扩大范围必须显式（`make verify-all`）。契约见 `.opencode/verification/README.md`。
+   - 同一份代码只执行一次 scope 内检查；不要先单独运行 pytest，再让 `make verify` 重跑相同检查。只有后续代码变化、检查失败或未解决的问题才需要重跑。
+   - 工作区含其他任务的未提交改动时，两个命令均传 `VERIFY_CHANGED="本次修改的文件路径列表"`，仅纳入本次文件；默认 worktree 范围会包含所有未提交改动。
 8. **脚本分层规则**：
     - `business_scripts/`：可被 Agent 或 Makefile 调用的稳定运行脚本。
     - `research_scripts/`：研究、探索、一次性分析脚本。

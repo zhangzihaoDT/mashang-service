@@ -42,6 +42,10 @@ python .opencode/verification/resolve_verification_scope.py --worktree
 python .opencode/verification/resolve_verification_scope.py --worktree --run
 # 或 make verify
 
+# 工作区混有其他任务的改动：两步都限定为本次修改的文件
+make verify-scope VERIFY_CHANGED="mashang_workspace/business_scripts/user_profile.py"
+make verify VERIFY_CHANGED="mashang_workspace/business_scripts/user_profile.py"
+
 # 针对一次具体改动 / 一段提交
 python .opencode/verification/resolve_verification_scope.py \
   --changed Makefile docs/x.md mashang_workspace/research_scripts/y.py --run
@@ -73,6 +77,7 @@ python .opencode/verification/resolve_verification_scope.py --all --run
 - **不隐式全量**：只有 `--all` 才解析全部 target。
 - **不改动本身**：契约只回答「该验证什么」，不回答「怎么修」。
 - **worktree 模式**会纳入当前工作区全部未提交改动；只验证某次改动时用 `--changed` / `--range`。
+- **不重复执行**：计划阶段只解析范围；随后执行一次 `make verify`。不要在此前单独运行它包含的 pytest，再由 `make verify` 重跑。只有后续代码变化、检查失败或未解决的问题才需要重跑。
 
 ## 扩展
 
