@@ -15,6 +15,20 @@ mashang-service 根目录是 **Agent Harness / service 宿主层**，承载以�
 
 Agent 工作边界：**启动在根目录，工作在 `mashang_workspace/`**。
 
+## Hub Runtime Execution Policy
+
+从 mashang-hub 经 Worker 发起的任务统一为 `runtime_execution`（运行时任务），不进行软件开发；会话历史中的开发行为或旧的“只能调用已有能力”约定不改变本轮边界。
+
+- 可以调用已有脚本、Job、CLI 或 MCP，读取数据、代码和业务文档。
+- 可以使用 `python -c`、临时 SQL/Python 分析脚本完成必要的数据处理、统计分析和报告生成；临时脚本及 CSV、Markdown、图表等产物写入工作空间规定的 `scratch/` 或 `outputs/`。
+- 业务操作可以按照授权和既有契约更新业务数据，不得擅自修改程序实现。
+- 不得修改项目源代码、模板、Agent 规则、开发配置、依赖或测试文件，不得执行开发测试、重构、自动修复 Bug 或 Git 暂存、提交、推送、重置等仓库变更操作，也不得通过 bash、Python、MCP 或委派绕过边界。
+- 不运行 pytest、开发 eval、`make verify-scope`、`make verify`、`make verify-all` 或 CI。工作区已有未提交改动不触发开发验证。
+- 能力自身的数据新鲜度、字段与口径检查、刷新校验、Result Contract 错误处理和推送前 dry-run 仍须执行。
+- 现有能力不足时，可在上述边界内临时分析；若必须修改软件实现或发现程序缺陷，应报告问题及所需开发改动，转交独立开发任务，不擅自进入开发流程或宣称未完成的任务成功。
+
+以下代码开发与验证规则适用于仓库内的独立开发任务；不适用于 Hub 的运行时任务。
+
 ## 项目定位
 
 mashang-service 是一个**汽车业务数据分析项目**，包含以下分支 / 模块：

@@ -46,6 +46,8 @@ mashang-service/                   # 总项目根目录
 
 ## 工作原则
 
+**Hub 调度边界**：Hub 经 Worker 发出的任务统一为运行时任务。允许调用已有能力、读取数据/代码/文档、`python -c` 和临时 SQL/Python 分析；临时脚本及产物写入 workspace 的 `scratch/` 或 `outputs/`，业务数据按授权和既有契约更新。禁止修改项目源代码/模板/Agent 规则/开发配置/依赖/测试，禁止开发测试、重构、自动修复及 Git 变更操作。能力不足可临时分析，必须修改软件实现或遇到程序缺陷时报告问题。数据校验、业务口径检查、刷新校验、结果错误处理及推送前 dry-run 仍执行。下述代码沉淀与开发验证规则仅适用于独立开发任务；完整边界见根 `AGENTS.md` 的「Hub Runtime Execution Policy」。
+
 1. **不要修改 dataset/ 下的原始数据**
 2. **不要移动 .env 或 .venv/**
 3. **优先使用已有 business_scripts/ / research_scripts/ / utility_scripts/ 脚本**
