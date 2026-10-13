@@ -1,0 +1,34 @@
+[
+  {
+    "table": "企业 (订单)",
+    "rows": 538,
+    "latest_date": "2026-10-11",
+    "latest_rows": 14,
+    "duplicate_keys": 0,
+    "path": "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/outputs/tables/企业（订单）.csv"
+  },
+  {
+    "table": "重点车型 (订单)",
+    "rows": 889,
+    "latest_date": "2026-10-11",
+    "latest_rows": 24,
+    "duplicate_keys": 0,
+    "path": "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/outputs/tables/重点车型（订单）.csv"
+  },
+  {
+    "table": "企业 (成交)",
+    "rows": 538,
+    "latest_date": "2026-10-11",
+    "latest_rows": 14,
+    "duplicate_keys": 0,
+    "path": "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/outputs/tables/企业（成交）.csv"
+  },
+  {
+    "table": "重点车型 (成交)",
+    "rows": 865,
+    "latest_date": "2026-10-11",
+    "latest_rows": 22,
+    "duplicate_keys": 0,
+    "path": "/Users/zihao_/Documents/github/mashang-service/mashang_workspace/outputs/tables/重点车型（成交）.csv"
+  }
+]
