@@ -66,6 +66,9 @@ except ImportError:
     pass
 
 from utils.monitors.phase import is_key_day, load_business_definition  # noqa: E402
+from utility_scripts.external_daily_jobs import ExternalDailyJobs  # noqa: E402
+
+_EXTERNAL_DAILY_JOBS = ExternalDailyJobs()
 
 LOG_DIR = REPO_ROOT / "logs" / "scheduler"
 FULL_REFRESH_TIME = (8, 50)
@@ -243,6 +246,7 @@ def run_tick(now: datetime, loader: BusinessDefinitionLoader, args, fired: set[s
 
     同一轮内 is_key_day / key_day_hours / dispatch 共用同一份 bdef 快照。
     """
+    _EXTERNAL_DAILY_JOBS.tick(lambda message: log(message, now), dry_run=args.dry_run)
     bdef = loader.reload(now)
     process_batch(now, bdef, args, fired)
 

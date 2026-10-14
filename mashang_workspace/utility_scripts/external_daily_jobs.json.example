@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "jobs": [
+    {
+      "id": "aksignal-daily",
+      "enabled": false,
+      "cwd": "/Users/zihao_/Documents/github/AKsignal",
+      "argv": [
+        "/Users/zihao_/Documents/github/AKsignal/.venv/bin/python",
+        "-m", "src.daily_schedule", "--tick", "--offline"
+      ],
+      "schedule": "08:30 Asia/Shanghai; eligibility/retry owned by AKsignal"
+    }
+  ]
+}
