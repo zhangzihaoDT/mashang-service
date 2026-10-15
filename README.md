@@ -1,5 +1,7 @@
 # mashang-service
 
+> **MIIT 已于 2026-10-15 迁出至独立仓库 [`mashang-miit`](../mashang-miit)**，与 mashang-service 平级。公告采集、解析、归档、车型结构化数据及其管线报告均由该仓库维护。Service 负责利用汽车行业数据开展业务分析与产品战略研究；后续通过约定的数据产物或接口消费 MIIT 数据，对接尚未实现。Service 中残留的历史分析产物不作为 MIIT 的维护入口。
+
 `mashang-service` 是一个面向汽车业务数据分析的 AI-native Analytics Workspace + Runtime System。
 
 它不是单一的自然语言问数 Agent，而是一套从共享业务语义、分析能力孵化、能力治理，到 Runtime 产品化的完整工程体系。
@@ -13,7 +15,7 @@
   ↓
 4. Jobs（确定性执行契约，jobs/）
   ↓
-5. Research Applications（MIIT / auto_launch / nev_apeal / …）
+5. research_apps/（历史研究模块，保留原有目录）
 ```
 
 也就是说：
@@ -22,7 +24,7 @@
 - `capabilities/` 提供领域无关基础能力（OCR / Search / Notify 等），与日常业务分析能力平级，供上层复用（Base Capabilities）；
 - `mashang_workspace/` 是**日常业务分析工作区（Daily Business Analytics）**：负责分析、脚本开发、文档沉淀、Result Contract、Eval 与 Capability Registry，回答"今天要查什么/算什么"；
 - `jobs/` 是 **确定性执行契约层**：声明式 Research Application job + 参数白名单 + 状态/摘要/artifact 契约，供 **Hub（Control Plane）+ Worker（Execution Gateway）** 调用；
-- MIIT / auto_launch / nev_apeal 是承载长期研究对象的 **Research Applications**（研究单元），有自己的状态、流程、contracts、gate 与产物。
+- MIIT 已作为独立产品迁至 `../mashang-miit/`；`research_apps/` 中其他既有目录属于历史研究模块，不代表当前独立能力清单。
 
 > 运行时系统由 **Hub + Worker + OpenCode** 组成，不再是 service 内的 Python package；service 侧只保留业务能力 + 确定性 `jobs/` contract。
 
@@ -429,8 +431,8 @@ ELOE = Σ P(最终开票 | 当前仍悬置)
           ┌────────────┼────────────┬────────────┬───────
           ▼            ▼            ▼            ▼
 5. Research Applications
-        MIIT       auto_launch    nev_apeal   Project 4 ...
-   （工信部车型申报研究） （上市与竞争动态研究） （新能源用户体验研究）
+   research_apps/ 内保留的历史研究模块
+   MIIT 独立位于 ../mashang-miit/，不属于本仓库分层
 ```
 
 ```text
@@ -457,7 +459,6 @@ mashang-service/
 ├── jobs/                  # 4. 确定性执行契约层（Research Application job）
 │
 ├── research_apps/         # 5. Research Applications（研究单元归类层：只归类，不提供共享逻辑）
-│   ├── MIIT/              #    Research Application：工信部车型与申报研究
 │   ├── auto_launch/       #    Research Application：新车上市与竞争动态研究
 │   └── nev_apeal/         #    Research Application：新能源用户体验研究
 │
@@ -470,22 +471,26 @@ mashang-service/
 > 分层要点：`capabilities/`（Base Capabilities）与 `mashang_workspace/`（Daily Business Analytics）是两支平级的能力来源；
 > `jobs/`（确定性执行契约）供 Hub/Worker 调用 workspace 业务能力与长期编排 Research Applications。
 
-## Research Applications（冻结定义）
+## 独立产品与历史研究模块
 
-`MIIT / auto_launch / nev_apeal`（及未来第 4、5 个项目）不是"Feature 子项目"，而是**独立研究型子项目（Research Applications / Research Programs）**：
+| 仓库 | 职责 |
+|------|------|
+| `mashang-fetch` | 获取与整理资料 |
+| `mashang-miit` | 获取与整理工信部汽车公告 |
+| `mashang-service` | 利用汽车行业数据开展业务分析与产品战略研究 |
 
-- 解决的是一个**长期问题**，不是一次查询；
-- 拥有**自己的状态、流程、研究对象、产物、阶段与演化历史**——有自己的 engine/state 流转、contracts、QA gate 与 artifacts；
-- 是**持续存在的研究对象/研究程序**，可经 Hub 长期驱动（经 `jobs/` 契约），而不只是一个脚本。
+三个仓库平级维护。MIIT 的代码、配置、依赖、原始证据、结构化数据、管线报告与运行记录均在 `mashang-miit`；Service 不再内置 MIIT 实现，也不通过导入兄弟仓库源码运行 MIIT。
 
-| Research Application | 研究对象 |
-|----------------------|----------|
-| `MIIT` | 工信部车型与申报研究 |
-| `auto_launch` | 新车上市与竞争动态研究 |
-| `nev_apeal` | 新能源用户体验研究 |
-| `project_4 / project_5` | 未来项目（应符合上述准则再立项） |
+`research_apps/` 保留 auto_launch、nev_apeal 等历史研究目录，不将其列作当前独立能力。MIIT 的 Service 数据消费接口尚未实现。
 
-`mashang_workspace/` 与它们**不是同一概念**：workspace 是**日常业务分析工作区**，回答"今天我要查什么、算什么"；Research Applications 回答"我要持续研究的一个长期问题"。当前 `nev_apeal` 是第一个成熟、已具备 engine/state/contracts/gate/artifacts 的 Research Application，作为纳入 Hub 编排的优先候选。
+从 Service 根目录可进入独立仓库运行：
+
+```bash
+cd ../mashang-miit
+make miit-run BATCH=411
+```
+
+完整命令与数据契约以独立仓库的 README、AGENTS.md 和 workflow/ 为准。
 
 ---
 

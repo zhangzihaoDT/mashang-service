@@ -1,5 +1,7 @@
 # mashang_workspace — Daily Business Analytics Workspace
 
+> **MIIT 已于 2026-10-15 迁出至独立仓库 [`mashang-miit`](../../mashang-miit)**，与 mashang-service 平级。公告采集、解析、归档、车型结构化数据及其管线报告均由该仓库维护。Service 负责利用汽车行业数据开展业务分析与产品战略研究；后续通过约定的数据产物或接口消费 MIIT 数据，对接尚未实现。Service 中残留的历史分析产物不作为 MIIT 的维护入口。
+
 ## 定位
 
 `mashang_workspace` 是 **Daily Business Analytics Workspace（日常业务分析工作区）**：面向 OpenCode / Claude Code 等 AI Coding Agent 的标准化业务分析工具箱，解决"今天要查什么、算什么、分析什么"（锁单、库存、门店、车型、渠道等高频、相对确定的业务分析）。
@@ -13,7 +15,7 @@ mashang_workspace/
 ├── README.md              # 本文件
 ├── docs/                  # 业务文档（术语/指标/车型/时间/分析范式/追问/合同）
 ├── business_scripts/       # Core — Hub 经 jobs/ 可调度（6 个稳定分析脚本）
-├── research_scripts/      # Research — 预测/回测/释放曲线/MIIT 新车公告（7 个）
+├── research_scripts/      # Research — 预测/回测/释放曲线
 ├── utility_scripts/       # Utility — DataOps/SyncOps/工具（5 个）
 ├── (legacy_scripts/ — 已退休)  # 历史参考脚本已迁移到 business_scripts/research_scripts/utility_scripts
 ├── eval/                  # Eval 测试框架
@@ -53,10 +55,7 @@ python mashang_workspace/business_scripts/lock_city_distribution.py --date 2026-
 python mashang_workspace/research_scripts/release_curve_analysis.py
 python mashang_workspace/research_scripts/cohort_forecast.py
 
-# MIIT 公告情报（MIIT/ 模块，workspace 旧实现已迁移移除）
-python3 MIIT/scripts/07_build_wide_table.py --batch 410
-python3 MIIT/scripts/06_build_vehicle_dataset.py
-python3 MIIT/scripts/validate_eidc_batch.py
+# MIIT 已迁至平级独立仓库 mashang-miit，命令见该仓库 README
 
 # VOC 分析（utility）
 python mashang_workspace/utility_scripts/voc_theme_analysis.py

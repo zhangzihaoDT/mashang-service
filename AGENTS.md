@@ -1,5 +1,7 @@
 # AGENTS.md — mashang Service Guide
 
+> **MIIT 已于 2026-10-15 迁出至独立仓库 [`mashang-miit`](../mashang-miit)**，与 mashang-service 平级。公告采集、解析、归档、车型结构化数据及其管线报告均由该仓库维护。Service 负责利用汽车行业数据开展业务分析与产品战略研究；后续通过约定的数据产物或接口消费 MIIT 数据，对接尚未实现。Service 中残留的历史分析产物不作为 MIIT 的维护入口。
+
 ## 启动位置与宿主层
 
 **OpenCode 应从仓库根目录启动。** 根目录是所有 Agent 命令、Makefile、MCP 配置的统一执行入口。
@@ -39,7 +41,7 @@ mashang-service 是一个**汽车业务数据分析项目**，包含以下分支
 | **Workspace** | `mashang_workspace/` | **Daily Business Analytics Workspace** —— 日常业务分析工具箱（research → business → eval） |
 | **Shared** | `shared/` | Semantic Foundation —— 共享 operator/schema 层（非默认工作区） |
 | **Base Capabilities** | `capabilities/` | 领域无关基础能力层（OCR/Search/Notify 等），与日常业务分析能力平级，供 workspace / jobs / Research Application 复用 |
-| **Research Applications** | `research_apps/`（MIIT / auto_launch / nev_apeal，未来 p4/5） | 独立研究型子项目（研究单元：有自己 state/engine/contracts/gate/artifacts；仅归类不共享；由 Hub 经 `jobs/` 编排） |
+| **Research Applications** | `research_apps/`（历史研究模块；MIIT 已迁出） | 独立研究型子项目（研究单元：有自己 state/engine/contracts/gate/artifacts；仅归类不共享；由 Hub 经 `jobs/` 编排） |
 
 > 旧 `mashang_runtime/`（legacy frozen Runtime）与 `mashang_runtime_v2/`（NL 问数 Runtime）均已退役移除：
 > 运行时系统由 **Hub（Control Plane）+ Worker（Execution Gateway）+ OpenCode** 共同组成；
@@ -58,6 +60,13 @@ mashang-service 是一个**汽车业务数据分析项目**，包含以下分支
 - `dataset/config_attribute.parquet` — 选配属性表（配置渗透率分析）
 
 **共享数据集文件访问规则**：共享数据集统一位于仓库根目录的 `dataset/`。OpenCode 使用 `read` 等文件工具访问共享数据集时，必须依据仓库现有目录结构传入以仓库根目录为基准的正确路径；例如 `dataset/assign_data.csv`，若工具要求绝对路径则使用 `<REPO_ROOT>/dataset/assign_data.csv`。禁止只传裸文件名（如 `assign_data.csv`），也禁止将共享数据路径构造为 `mashang_workspace/dataset/assign_data.csv`。路径必须先依据已有目录结构确认，不允许猜测。
+
+## MIIT 独立仓库边界
+
+- MIIT 的实现、配置、依赖和数据管线统一在平级 `mashang-miit/` 维护，不在 Service 中恢复 `research_apps/MIIT/` 或复制实现。
+- 需要修改或运行 MIIT 时，进入独立仓库并遵守其 AGENTS.md；不得假设复用 Service 的虚拟环境或凭证。
+- Service 仅按后续约定消费 MIIT 数据产物或接口；当前尚无已实现的 MIIT job/API 对接。
+- 历史研究目录的存在不代表当前独立能力清单。
 
 ## 工作原则
 
@@ -327,7 +336,7 @@ mashang-service/
 │
 ├── capabilities/          ← Base Capabilities（领域无关原语：OCR/Search/Notify/Diagram/Feishu）
 │
-├── research_apps/         ← Research Applications（MIIT / auto_launch / nev_apeal）
+├── research_apps/         ← 历史研究模块（MIIT 已迁至独立仓库）
 │
 └── mashang_workspace/     ← Daily Business Analytics Workspace（日常业务分析工具箱）
     ├── AGENTS.md          ← Workspace Agent 指南

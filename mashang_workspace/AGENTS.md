@@ -1,5 +1,7 @@
 # AGENTS.md — mashang_workspace Guide
 
+> **MIIT 已于 2026-10-15 迁出至独立仓库 [`mashang-miit`](../../mashang-miit)**，与 mashang-service 平级。公告采集、解析、归档、车型结构化数据及其管线报告均由该仓库维护。Service 负责利用汽车行业数据开展业务分析与产品战略研究；后续通过约定的数据产物或接口消费 MIIT 数据，对接尚未实现。Service 中残留的历史分析产物不作为 MIIT 的维护入口。
+
 **注意：OpenCode 仍应从仓库根目录启动。** 本文件仅定义 `mashang_workspace/` 内的工作规则。
 
 - 仓库总体架构、模块边界（workspace / jobs / capabilities / research_apps）、canonical 命令入口与副作用分级，见根目录 `AGENTS.md`。
@@ -27,7 +29,7 @@ mashang-service/                   # 总项目根目录
 │
 ├── capabilities/                 # Base Capabilities（领域无关原语：OCR/Search/Notify…）
 │
-├── research_apps/MIIT|auto_launch|nev_apeal/ # Research Applications（独立研究单元；仅归类，共享走 shared/capabilities/workspace）
+├── research_apps/                        # Research Applications（独立研究单元；仅归类，共享走 shared/capabilities/workspace）
 │
 └── mashang_workspace/             # ← Daily Business Analytics Workspace（日常业务分析工具箱；当前所在目录）
 │   ├── AGENTS.md                  # 本文件
@@ -102,7 +104,7 @@ make presale-snapshot SERIES=CM3 DRY=1  # 指定代际预售小订快照预览
 
 > 数据管道 / 监控的 canonical 入口与副作用分级见根 `AGENTS.md` 的「Canonical Entry Map」。
 
-> MIIT 公告情报已迁移至 `research_apps/MIIT/` 模块（`make -C research_apps/MIIT miit-run`）；workspace 旧 `miit_new_car` 实现已移除。
+> MIIT 已迁出 Service，统一在平级独立仓库 `mashang-miit` 维护，workspace 不维护 MIIT 采集或解析实现。
 
 ## CI 门禁
 
@@ -165,16 +167,11 @@ python mashang_workspace/eval/run_eval.py --suite parser  # 单套件
 | `python eval/run_numeric_eval.py` | 数值校验 | eval |
 | `pytest tests -q` | 全量测试 | test |
 
-## MIIT 公告情报 / 工信部新车公告
+## MIIT 公告情报（已迁出）
 
-> **已迁移**：MIIT 公告情报能力已收敛到 `research_apps/MIIT/` 模块（Gov 公示 + EIDC 历史），workspace 不再维护独立实现。
-> 历史批次（401–408）数据成果归档于 `research_apps/MIIT/data/eidc/`，使用方式见 `research_apps/MIIT/README.md` 与 `research_apps/MIIT/workflow/pipeline.md`。
+MIIT 现由平级独立仓库 [mashang-miit](../../mashang-miit) 维护。Gov 公示、MIIT 正式公告、EIDC 历史来源、原始归档、车型数据和管线报告均已迁出。
 
-```bash
-make -C research_apps/MIIT miit-run BATCH=410      # 一键 P1 搜索 → P2 归档 → P4 宽表 → P4.5 Dataset → P5 报告
-make -C research_apps/MIIT miit-dataset            # 重建统一 Dataset（product_master / vehicle_parameter）
-make -C research_apps/MIIT test                    # MIIT 冒烟测试
-```
+MIIT 操作须进入其仓库根目录，读取该仓库的 AGENTS.md、README.md 与 workflow/。Service/workspace 不再提供 MIIT 内部命令入口，不重新引入源码副本。未来分析通过约定的数据产物或接口消费；当前对接尚未实现。
 
 ## TP&MIX-ways Data Asset / 乘用车上险数据资产
 

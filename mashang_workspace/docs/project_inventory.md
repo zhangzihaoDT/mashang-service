@@ -81,7 +81,7 @@ mashang-service/
 | `research_scripts/pk_weekly_ls8_ls9.py` | LS8 vs LS9 周度对比 | `research_scripts/` |
 | `research_scripts/competition_a3_flow.py` | A3 人群流转分析 | `research_scripts/` |
 
-> MIIT 新车公告监控（原 `research_scripts/miit_new_car/`）实现已随重构移除，历史数据成果归档于 `MIIT/data/eidc/`，能力在 `MIIT/scripts/` 重新实现。
+> MIIT 已于 2026-10-15 整体迁至平级独立仓库 `mashang-miit`，不再属于 Service/workspace。采集、解析、数据归档及管线报告以独立仓库为准；Service 的数据消费对接尚未实现。
 
 ## 5. 配置、业务定义、指标口径
 
