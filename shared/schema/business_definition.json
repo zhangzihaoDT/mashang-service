@@ -124,9 +124,52 @@
     "纯电": "product_name NOT LIKE '%52%' AND product_name NOT LIKE '%66%'"
   },
   "seat_count_logic": {
-    "五座": "product_name LIKE '%五座%'",
-    "六座": "product_name LIKE '%六座%'"
+    "五座": "product_name LIKE '%五座%' OR product_name LIKE '%5座%'",
+    "六座": "product_name LIKE '%六座%' OR product_name LIKE '%6座%'"
   },
+  "product_version_logic": {
+    "LS8": {
+      "52 Max+": {
+        "priority": 1,
+        "condition": "product_name LIKE '%LS8%' AND product_name LIKE '%52Max+%'"
+      },
+      "66 Ultra": {
+        "priority": 1,
+        "condition": "product_name LIKE '%LS8%' AND product_name LIKE '%66Ultra%'"
+      },
+      "93 RWD": {
+        "priority": 1,
+        "condition": "product_name LIKE '%LS8%' AND product_name LIKE '%93RWD%'"
+      }
+    },
+    "LS9": {
+      "52 Ultra 线控版": {
+        "priority": 2,
+        "condition": "product_name LIKE '%LS9%' AND product_name LIKE '%52Ultra%' AND product_name LIKE '%线控版%'"
+      },
+      "66 Ultra 线控版": {
+        "priority": 2,
+        "condition": "product_name LIKE '%LS9%' AND product_name LIKE '%66Ultra%' AND product_name LIKE '%线控版%'"
+      },
+      "52 Ultra": {
+        "priority": 1,
+        "condition": "product_name LIKE '%LS9%' AND product_name LIKE '%52Ultra%'"
+      },
+      "66 Ultra": {
+        "priority": 1,
+        "condition": "product_name LIKE '%LS9%' AND product_name LIKE '%66Ultra%'"
+      },
+      "66 Hyper": {
+        "priority": 2,
+        "condition": "product_name LIKE '%LS9%' AND product_name LIKE '%66Hyper%'"
+      },
+      "Hyper": {
+        "priority": 1,
+        "condition": "product_name LIKE '%LS9%' AND product_name LIKE '%Hyper%'"
+      }
+    }
+  },
+  "product_version_logic_semantics": "按车系读取版本规则；复用 series_group_logic 的 priority/condition 语义，priority 降序、同分按定义顺序首次命中；匹配前去除全部空白。未命中返回未分类，不按名称自动生成新版本。座位独立使用 seat_count_logic，未命中为未标座位。新增产品需在此维护，消费者不自建映射。",
   "drive_type_logic": {
     "四驱": "product_name LIKE '%LS6%' AND product_name LIKE '%Ultra%' OR product_name LIKE '%LS6%' AND product_name LIKE '%超强性能%' OR product_name LIKE '%LS6%' AND product_name LIKE '%AWD%' OR product_name LIKE '%LS6%' AND product_name LIKE '%四驱%'",
     "后驱": "product_name LIKE '%LS6%' AND product_name NOT LIKE '%Ultra%' AND product_name NOT LIKE '%超强性能%' AND product_name NOT LIKE '%AWD%' AND product_name NOT LIKE '%四驱%'"

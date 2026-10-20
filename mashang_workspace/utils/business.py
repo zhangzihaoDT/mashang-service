@@ -99,3 +99,31 @@ def list_all_series() -> list[dict]:
         ]
     except Exception:
         return []
+
+
+def classify_product_names(df, series: str, business_definition=None):
+    """按共享业务定义返回 product_version / seat_count；保留输入索引。
+
+    调用方传入含 product_name 的 DataFrame；可复用已加载的业务定义。
+    版本按 priority 降序、同分按定义顺序首次命中；未知项显式保留。
+    """
+    import pandas as pd
+    from utils.monitors.series_group import (
+        eval_series_group_logic_expr, rule_condition, rule_priority,
+    )
+
+    if business_definition is None:
+        business_definition = json.loads(BUSINESS_DEFINITION_PATH.read_text(encoding='utf-8'))
+    result = pd.DataFrame(index=df.index)
+    result['product_version'] = '未分类'
+    result['seat_count'] = '未标座位'
+    definitions = [
+        ('product_version', business_definition.get('product_version_logic', {}).get(series, {}), '未分类'),
+        ('seat_count', business_definition.get('seat_count_logic', {}), '未标座位'),
+    ]
+    for column, rules, unknown in definitions:
+        ordered = sorted(rules.items(), key=lambda item: -rule_priority(item[1]))
+        for label, rule in ordered:
+            mask = eval_series_group_logic_expr(df['product_name'], rule_condition(rule))
+            result.loc[mask & result[column].eq(unknown), column] = label
+    return result

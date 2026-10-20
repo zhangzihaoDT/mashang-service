@@ -77,8 +77,30 @@ L6  → [DM0, DM1, DM2]
 
 | 座位数 | 匹配规则 |
 |--------|----------|
-| 五座 | product_name LIKE '%五座%' |
-| 六座 | product_name LIKE '%六座%' |
+| 五座 | product_name LIKE '%五座%' OR product_name LIKE '%5座%' |
+| 六座 | product_name LIKE '%六座%' OR product_name LIKE '%6座%' |
+
+## 产品版本 (product_version_logic)
+
+Canonical 定义位于 `shared/schema/business_definition.json` 的
+`product_version_logic.{series}`，每个版本为 `{priority, condition}`。
+匹配前去除全部空白；按 priority 降序、同分按定义顺序首次命中。
+LS8 当前定义 52 Max+、66 Ultra、93 RWD；LS9 定义 Ultra 电池版本、
+线控版及 Hyper 版本。新增版本应维护共享定义，不在日报中添加匹配规则。
+未知版本返回“未分类”，未知座位返回“未标座位”，保证统计闭合。
+
+Workspace 脚本统一调用：
+
+```python
+from utils.business import classify_product_names
+
+# 输入已按车系筛选、含 product_name 的 DataFrame；结果保留输入索引。
+classified = classify_product_names(orders, "LS8")
+# 返回列：product_version、seat_count；可选传入已加载的 business_definition。
+```
+
+每日报表 LS8 按“版本 → 座位”展示，LS9 按版本横向展示、不显示座位。
+本次仅日报切换到该入口，其他历史报告的独立分类尚未迁移。
 
 ## 电池容量 (battery_capacity_logic)
 

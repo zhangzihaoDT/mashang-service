@@ -34,7 +34,7 @@ ensure_shared_on_path()
 
 from operators.mature_lock_prediction import run_mature_lock_prediction_operator
 from operators.assign_conversion import _parse_cn_date
-from utils.business import is_corporate_owner
+from utils.business import is_corporate_owner, classify_product_names
 from utils.monitors.order_filter import flag_test_orders
 from utils.monitors.series_group import apply_series_group_logic
 from capabilities.notify.notify_service import notify
@@ -143,24 +143,24 @@ def load_data(file_path):
         print(f"❌ 数据加载失败: {e}")
         return None
 
+def _lock_product_versions(model_df, model, business_definition=None):
+    """按共享业务定义汇总版本 → 座位，订单号去重。"""
+    orders = model_df[['order_number', 'product_name']].drop_duplicates('order_number')
+    classified = classify_product_names(orders, model, business_definition)
+    versions = {}
+    for version, seat in classified.itertuples(index=False, name=None):
+        seats = versions.setdefault(version, {})
+        seats[seat] = seats.get(seat, 0) + 1
+    return dict(sorted(versions.items(), key=lambda item: (item[0] == "未分类", item[0])))
+
+
 def analyze_daily_lock_orders(df, start_date, end_date):
     """
     分析锁单数据 (支持时间范围)
     """
     print(f"正在分析 {start_date} 至 {end_date} 的锁单数据...")
     
-    # 加载业务定义以获取电池容量映射
     business_def = load_business_definition(BUSINESS_DEF_FILE)
-    battery_capacity_logic = (business_def or {}).get("battery_capacity_logic") or {}
-    product_to_capacity = {}
-    if business_def and "battery_capacity" in business_def:
-        for capacity, products in business_def["battery_capacity"].items():
-            for product in products:
-                product_to_capacity[product] = capacity
-    
-    seat_count_labels = ["五座", "六座"]
-    if business_def and "seat_count_logic" in business_def:
-        seat_count_labels = [label for label in seat_count_labels if label in business_def["seat_count_logic"]] or seat_count_labels
 
     def _like(value, pattern):
         if value is None:
@@ -293,7 +293,7 @@ def analyze_daily_lock_orders(df, start_date, end_date):
 
     # 确保必要的列存在
     # 更新为新数据集的列名
-    required_columns = ['lock_time', 'order_number', 'series', 'product_name']
+    required_columns = ['lock_time', 'order_number', 'series', 'product_name', 'order_type']
     for col in required_columns:
         if col not in df.columns:
             print(f"❌ 错误: 数据缺失列 {col}")
@@ -327,44 +327,6 @@ def analyze_daily_lock_orders(df, start_date, end_date):
         count = model_df['order_number'].nunique()
         
         stats = {"count": count}
-        if model == "LS9":
-            ls9hyper_count = daily_orders[
-                (daily_orders['series'] == "LS9Hyper") &
-                (daily_orders['lock_time'].notna())
-            ]['order_number'].nunique()
-            if ls9hyper_count > 0:
-                stats["ls9hyper_count"] = ls9hyper_count
-        
-        # LS9 电池容量细分
-        if model == "LS9":
-            capacity_counts = {}
-            if battery_capacity_logic:
-                capacity_asts = {k: _parse_logic(v) for k, v in battery_capacity_logic.items()}
-                allowed_caps = [k for k in ["52kwh", "66kwh"] if k in battery_capacity_logic]
-                capacity_counts = {k: 0 for k in allowed_caps}
-                unique_orders = model_df[['order_number', 'product_name']].drop_duplicates('order_number')
-                for _, row in unique_orders.iterrows():
-                    p_name = row['product_name']
-                    if pd.isna(p_name):
-                        continue
-                    p_name = str(p_name)
-                    for cap in allowed_caps:
-                        ast = capacity_asts[cap]
-                        if _eval_ast(ast, p_name):
-                            capacity_counts[cap] += 1
-                            break
-            elif product_to_capacity:
-                capacity_counts = {"52kwh": 0, "66kwh": 0}
-                unique_orders = model_df[['order_number', 'product_name']].drop_duplicates('order_number')
-                for _, row in unique_orders.iterrows():
-                    p_name = row['product_name']
-                    cap = product_to_capacity.get(p_name)
-                    if cap in ["52kwh", "66kwh"]:
-                        capacity_counts[cap] += 1
-
-            if capacity_counts:
-                stats["details"] = capacity_counts
-
         # LS6 代际区隔（CM3/CM2/CM1/CM0）：复用共享 series_group_logic（与上市监控同源），
         # CM2 再按 product_type_logic 分增程/纯电
         if model == "LS6":
@@ -395,42 +357,17 @@ def analyze_daily_lock_orders(df, start_date, end_date):
             stats["gen_counts"] = gen_counts
             stats["cm2_ptype"] = cm2_ptype
 
-        # LS9 variant breakdown (Ultra / Hyper)
-        if model == "LS9":
-            variant_counts = {"Ultra": 0, "Hyper": 0}
-            unique_orders = model_df[['order_number', 'product_name']].drop_duplicates('order_number')
-            for _, row in unique_orders.iterrows():
-                p_name = row['product_name']
-                if pd.isna(p_name):
-                    continue
-                p_name = str(p_name)
-                if "Hyper" in p_name:
-                    variant_counts["Hyper"] += 1
-                elif "Ultra" in p_name:
-                    variant_counts["Ultra"] += 1
-            if any(v > 0 for v in variant_counts.values()):
-                stats["variant_details"] = variant_counts
+        if model in ("LS8", "LS9"):
+            stats["product_versions"] = _lock_product_versions(model_df, model, business_def)
+            stats["show_seats"] = model == "LS8"
 
-        if model == "LS8":
-            seat_counts = {label: 0 for label in seat_count_labels}
-            unique_orders = model_df[['order_number', 'product_name']].drop_duplicates('order_number')
-            for _, row in unique_orders.iterrows():
-                p_name = row['product_name']
-                if pd.isna(p_name):
-                    continue
-                p_name = str(p_name)
-                for label in seat_count_labels:
-                    if label in p_name:
-                        seat_counts[label] += 1
-                        break
-            stats["seat_details"] = seat_counts
-            
         model_stats[model] = stats
         
     return {
         "start_date": start_date,
         "end_date": end_date,
         "total": total_lock_count,
+        "total_user_car": daily_orders.loc[daily_orders["order_type"].eq("用户车"), "order_number"].nunique(),
         "models": model_stats
     }
 
@@ -599,6 +536,18 @@ def _format_lock_model_detail(stats) -> str:
     构建车型锁单明细文本（含 '｜' 前缀）。
     LS6 按代际展示：CM3/CM2(增程/纯电)/CM1，CM0>0 时追加。
     """
+    versions = stats.get("product_versions")
+    if versions is not None:
+        if not stats.get("show_seats", True):
+            detail = "，".join(f"{version}：{sum(seats.values())}" for version, seats in versions.items())
+            return "｜" + detail if detail else ""
+        parts = []
+        for version, seats in versions.items():
+            seat_text = " / ".join(
+                f"{seat}：{seats[seat]}" for seat in ("五座", "六座", "未标座位") if seats.get(seat)
+            )
+            parts.append(f"{version}：{sum(seats.values())}（{seat_text}）")
+        return "\n  " + "\n  ".join(parts) if parts else ""
     gen = stats.get("gen_counts")
     if gen:
         cm2_ptype = stats.get("cm2_ptype") or {}
@@ -949,7 +898,7 @@ def send_feishu_notification(lock_stats, invoice_stats, pred_lock=None, mom=None
                     "tag": "div",
                     "text": {
                         "tag": "lark_md",
-                        "content": f"**{lock_label}：** {lock_stats['total']}{lock_mom_note}\n{lock_model_text}\n{pred_line}{warn_line}"
+                        "content": f"**{lock_label}：** {lock_stats['total']} ({lock_stats['total_user_car']}) 台{lock_mom_note}\n{lock_model_text}\n{pred_line}{warn_line}"
                     }
                 },
                 {
@@ -1025,7 +974,7 @@ def main():
             print(f"📅 日期范围: {start_date} ~ {end_date}")
 
         lock_print_label = "本月累计锁单" if is_mtd else "总锁单数"
-        print(f" {lock_print_label}: {lock_stats['total']}{lock_mom_note}")
+        print(f" {lock_print_label}: {lock_stats['total']} ({lock_stats['total_user_car']}) 台{lock_mom_note}")
         print("   车型分布:")
         for model, stats in lock_stats['models'].items():
             count = stats["count"]
