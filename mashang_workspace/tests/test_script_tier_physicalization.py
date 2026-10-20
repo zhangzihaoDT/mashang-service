@@ -86,6 +86,7 @@ def test_capability_registry_research_scripts_paths():
     for cap in registry:
         if cap.get("tier") == "research":
             sp = cap.get("script", "")
+            assert not sp.startswith("research_apps/MIIT/"), "MIIT 已迁至独立仓库"
             assert any(p in sp for p in valid_prefixes), \
                 f"{cap['capability_id']} script path 不是 {valid_prefixes}: {sp}"
             full_path = PROJECT_ROOT / sp

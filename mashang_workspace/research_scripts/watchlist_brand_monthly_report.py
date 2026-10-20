@@ -3,7 +3,7 @@
 2026 起每月复用的 watchlist 品牌销量月报生成脚本。
 
 基于 dataset/TP&MIX-ways（乘用车上险数据）的 brand_monthly 表，按
-research_apps/MIIT/workflow/brand_watchlist.yaml 的品牌分类，对齐本品（智己）与行业整体
+mashang_workspace/configs/brand_watchlist.yaml 的品牌分类，对齐本品（智己）与行业整体
 benchmark，输出各品牌销量环比/同比及相对行业的跑赢/跑输标注。
 
 用法:
@@ -30,7 +30,6 @@ import sys
 from datetime import datetime, date, timedelta
 from pathlib import Path
 
-import yaml
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -38,10 +37,9 @@ WS_ROOT = ROOT / "mashang_workspace"
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(WS_ROOT))
 
-from utils.brand_mapping import normalize_watchlist_brands
+from utils.watchlist_brand_common import load_watchlist
 from shared.loaders.tp_and_mix_ways_loader import load_tp_and_mix_ways_table
 
-WATCHLIST_PATH = ROOT / "MIIT" / "workflow" / "brand_watchlist.yaml"
 DEFAULT_OWN_BRAND = "智己"
 
 
@@ -102,8 +100,7 @@ def note_for(r: dict, attribution_map: dict) -> str:
 
 def build_rows(brand_df: pd.DataFrame, months: dict, attribution_map: dict,
                own_brand: str = DEFAULT_OWN_BRAND) -> tuple[list[dict], dict]:
-    watchlist = yaml.safe_load(WATCHLIST_PATH.read_text(encoding="utf-8"))
-    norm = normalize_watchlist_brands(watchlist)
+    norm = load_watchlist()
     sub = brand_df[brand_df.date_month.isin(set(months.values()))]
     piv = sub.pivot_table(index="brand", columns="date_month", values="sales", aggfunc="sum")
 

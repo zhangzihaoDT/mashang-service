@@ -22,7 +22,7 @@ Browser / Parse / Render      research → business → eval
                        │
           ┌────────────┼────────────┬────────────┬───────
           ▼            ▼            ▼            ▼
-        MIIT       auto_launch    nev_apeal   Project 4 ...
+     auto_launch    nev_apeal    Project ...
             Research Applications
 ```
 
@@ -35,7 +35,7 @@ Browser / Parse / Render      research → business → eval
 - 可被多个上层（Daily Business Analytics workspace scripts、jobs、Research Applications）通过同一份接口复用。
 - 自带真实 provider + mock、自描述契约与测试，可离线验证。
 
-`mashang_workspace/`（日常业务分析）与 Research Applications（MIIT / auto_launch / nev_apeal）是**消费者**；
+`mashang_workspace/`（日常业务分析）与 Research Applications（auto_launch / nev_apeal）是**消费者**；
 Base Capabilities 是**被消费方**。
 
 ## Capability 规范（模板）
@@ -71,7 +71,7 @@ Base Capabilities 是**被消费方**。
 | 候选能力 | 当前真实落点 | 收敛说明 |
 |----------|-------------|----------|
 | Browser / Capture | Playwright MCP（根 `opencode.jsonc`）+ `dataset/incoming/` | service 级接线能力，尚未包化 |
-| Doc Parse | 部分在 `capabilities/ocr` document_parse；MIIT `eidc_doc_extract.py` 为领域内实现 | 通用文档→结构化契约待抽象 |
+| Doc Parse | `capabilities/ocr` document_parse；MIIT 领域解析由独立仓库维护 | 通用文档→结构化契约待抽象 |
 | Render | `.opencode/skills/official_document_render/` + `mashang_workspace/templates/` | 正式文档/报告渲染能力待收敛 |
 | Feishu Bitable 写入 | `mashang_workspace/utility_scripts/skills_order_observation_daily.py`（tenant token + bitable REST） | 与 `capabilities/feishu/docx` 同属飞书 app 原语，后续按需收敛到 `capabilities/feishu/` |
 
@@ -80,5 +80,5 @@ Candidate 不设迁移截止时间；**在出现真实复用需求时**按本 RE
 ## 边界声明（本轮约定）
 
 - **编排边界**：运行时系统 = **Hub（Control Plane）+ Worker（Execution Gateway）+ OpenCode**；service 侧确定性边界是根目录 `jobs/`（声明式 Research Application job + 状态/摘要/artifact 契约）。Base Capabilities 与 Daily Business Analytics（workspace 能力）供其上调用。
-- **Research Applications 现状**：MIIT / auto_launch / nev_apeal 仍是独立研究项目（各自 CLI / Makefile / state / 数据目录），经 `jobs/` 编排接入；后续按编排化路径演进。
+- **Research Applications 现状**：Service 中保留 auto_launch / nev_apeal 等模块。MIIT 已于 2026-10-15 迁至平级 `mashang-miit`，不属于 Service 的能力或 Job 清单；当前没有 MIIT 数据产物/API 对接。
 - **不要**在 capabilities/ 里放业务规则、业务脚本或领域解析逻辑——那属于 `mashang_workspace/` 或 Research Application 模块。

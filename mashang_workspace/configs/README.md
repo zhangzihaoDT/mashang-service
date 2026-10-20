@@ -87,7 +87,7 @@ python mashang_workspace/utility_scripts/validate_study_spec.py --spec <path> --
 - 无 brand 级 keywords 的子品牌继承 catalog 级 keywords
 - 同一品牌跨 catalog 出现时，models 合并，keywords 取独立条目
 
-**加载方式**: 原 `research_scripts/miit_new_car/diff_watchlist.py` 已随重构移除；当前 MIIT 模块使用 `MIIT/workflow/brand_watchlist.yaml`。
+**加载方式**: 此 JSON 为历史品牌车型参考，不是当前销量报表入口。MIIT 已迁至独立仓库 `mashang-miit`，Service 不再提供 MIIT 加载入口。
 
 **品牌一览**（24 个）:
 
@@ -117,3 +117,15 @@ python mashang_workspace/utility_scripts/validate_study_spec.py --spec <path> --
 | 文件 | 新位置 | 说明 |
 |------|--------|------|
 | `ls8_competitor_watchlist.csv` | `auto_launch/configs/ls8_competitor_watchlist.csv` | auto_launch 专属 watchlist |
+
+
+## 品牌销量分析关注清单
+
+**文件**: `brand_watchlist.yaml`；配套映射为 `brand_alias_map.yaml`。
+
+Service 自有业务配置，初始品牌与分组沿用 MIIT 迁出前的版本（`1dadb73^`），
+后续独立维护，不依赖平级仓库。月报、趋势、车型贡献拆解统一调用
+`utils.watchlist_brand_common.load_watchlist()`，返回归一化后的品牌分组。
+
+迁移后的 MIIT 公告能力以独立仓库为准，已从 Service 能力注册表和目录生成器移除；
+不通过跳过审计或恢复旧路径解决失效引用。

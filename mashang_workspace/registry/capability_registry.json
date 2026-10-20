@@ -339,64 +339,6 @@
     "notes": "依赖 dataset/wechat/*.parquet，当前为基础词频统计。"
   },
   {
-    "capability_id": "miit_vehicle_publicity_image_parser",
-    "name": "MIIT 公告图片 OCR 解析器",
-    "tier": "research",
-    "status": "retired",
-    "script": "research_apps/MIIT/scripts/06_build_vehicle_dataset.py",
-    "auto_schedulable": false,
-    "result_contract": false,
-    "numeric_eval_case": null,
-    "contract_gate": false,
-    "followup_supported": false,
-    "docs": [
-      "research_apps/MIIT/workflow/pipeline.md",
-      "research_apps/MIIT/data/eidc/README.md"
-    ],
-    "promotion": {
-      "current_stage": "retired",
-      "eligible_for_business_productization": false,
-      "eligible_for_business_script": false,
-      "blocked_reasons": [
-        "实现已迁移移除（workspace miit_new_car → MIIT/ 模块）",
-        "历史 OCR 产物归档于 MIIT/data/eidc/vehicle_publicity_detail/"
-      ],
-      "eligible_for_jobs": false,
-      "jobs_candidate": false,
-      "candidate_stage": "not_eligible"
-    },
-    "notes": "已退役：原 promptbuilders/miit_new_car 实现于 2026-08 移除，能力在 research_apps/MIIT/scripts 重新实现。"
-  },
-  {
-    "capability_id": "miit_vehicle_compare",
-    "name": "MIIT 双车对比报告",
-    "tier": "research",
-    "status": "retired",
-    "script": "research_apps/MIIT/scripts/09_generate_category_report.py",
-    "auto_schedulable": false,
-    "result_contract": false,
-    "numeric_eval_case": null,
-    "contract_gate": false,
-    "followup_supported": false,
-    "docs": [
-      "research_apps/MIIT/workflow/pipeline.md",
-      "research_apps/MIIT/workflow/docs/公告批次.md"
-    ],
-    "promotion": {
-      "current_stage": "retired",
-      "eligible_for_business_productization": false,
-      "eligible_for_business_script": false,
-      "blocked_reasons": [
-        "实现已迁移移除（workspace miit_new_car → MIIT/ 模块）",
-        "对比报告能力由 MIIT 06_generate_category_report 承接"
-      ],
-      "eligible_for_jobs": false,
-      "jobs_candidate": false,
-      "candidate_stage": "not_eligible"
-    },
-    "notes": "已退役：原 promptbuilders/miit_new_car 实现于 2026-08 移除，能力在 research_apps/MIIT/scripts 重新实现。"
-  },
-  {
     "capability_id": "current_state_diagnosis",
     "name": "当前业务状态排查（库存 × Backlog × 风险暴露）",
     "tier": "business",

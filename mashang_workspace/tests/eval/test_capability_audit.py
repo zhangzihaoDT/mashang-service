@@ -124,3 +124,12 @@ def test_eval_suite_capability():
     assert r.returncode == 0
     data = json.loads(r.stdout)
     assert "capability" in data["suites"]
+
+
+def test_migrated_miit_not_registered_as_service_capability():
+    """MIIT 迁出后不得通过失效入口重新出现在 Service 能力清单。"""
+    data = json.loads(REGISTRY_FILE.read_text())
+    assert not any(cap['capability_id'] in {
+        'miit_vehicle_publicity_image_parser', 'miit_vehicle_compare',
+    } for cap in data)
+    assert 'research_apps/MIIT/' not in json.dumps(data, ensure_ascii=False)

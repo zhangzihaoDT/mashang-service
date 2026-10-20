@@ -1,9 +1,8 @@
 """brand_watchlist 品牌名 → TP&MIX-ways 数据集品牌值 映射工具。
 
-research_apps/MIIT/workflow/brand_watchlist.yaml 中的品牌名为业务显示名（如"问界"/"爱咖"），
+mashang_workspace/configs/brand_watchlist.yaml 中的品牌名为业务显示名（如"问界"/"爱咖"），
 与数据集品牌维度实际取值（如 AITO/iCAR）不一致。在数据集上按品牌匹配
-（销量/份额等）时，先用本模块归一化。brand_watchlist.yaml 本身保持不变，
-MIIT 公告搜索仍使用其中的显示名做关键词。
+（销量/份额等）时，先用本模块归一化。Service 的品牌清单与 MIIT 独立维护，本模块不读取 MIIT 仓库。
 """
 
 from pathlib import Path

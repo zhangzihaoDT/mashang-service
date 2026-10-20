@@ -15,7 +15,7 @@ import pandas as pd
 import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
-WATCHLIST_PATH = ROOT / "MIIT" / "workflow" / "brand_watchlist.yaml"
+WATCHLIST_PATH = ROOT / "mashang_workspace" / "configs" / "brand_watchlist.yaml"
 DEFAULT_OWN_BRAND = "智己"
 
 
