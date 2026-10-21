@@ -490,7 +490,7 @@ cd ../mashang-miit
 make miit-run BATCH=411
 ```
 
-完整命令与数据契约以独立仓库的 README、AGENTS.md 和 workflow/ 为准。
+完整命令与数据契约以独立仓库的 README、AGENTS.md 和 workflow/ 为准。工作台开发交接方案已迁至 [MIIT V1 handoff](../mashang-miit/workflow/miit_workbench_v1_handoff.md)，由 MIIT 仓库维护。
 
 ---
 

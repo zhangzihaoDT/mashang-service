@@ -1,0 +1,75 @@
+{% extends "report_base.html" %}
+
+{% block content %}
+<section class="kpi-grid">
+  {% for kpi in kpis %}
+  <div class="kpi-card">
+    <div class="label">{{ kpi.label }}</div>
+    <div class="value">{{ kpi.value }}</div>
+    {% if kpi.hint %}<div class="change neutral">{{ kpi.hint }}</div>{% endif %}
+  </div>
+  {% endfor %}
+</section>
+
+{% if summary %}
+<section class="card"><p>{{ summary }}</p></section>
+{% endif %}
+
+{% for a in attrs %}
+<section class="report-section">
+  <h2 class="section-title">{{ a.attribute }}{% if a.core %} <span class="badge badge-gold">核心</span>{% endif %}</h2>
+  <p class="section-note">关联 {{ a.orders_with_value }} / {{ n }} 单（{{ a.coverage_pct }}%）</p>
+  <div class="card">
+    <div class="table-wrap">
+      <table class="report-table">
+        <thead>
+          <tr><th>配置</th><th>订单数</th><th>占比</th><th>分布</th></tr>
+        </thead>
+        <tbody>
+          {% for it in a.rows %}
+          <tr>
+            <td>{{ it.value }}</td>
+            <td class="num">{{ it.count }}</td>
+            <td class="num">{{ it.share_pct }}%</td>
+            <td><div class="barcell"><div class="bar" style="width: {{ it.bar_pct }}%;"></div><div class="txt">{{ it.share_pct }}%</div></div></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endfor %}
+
+{% if option_attrs %}
+<section class="report-section">
+  <h2 class="section-title">选装项拥有率</h2>
+  <p class="section-note">拥有率 = 已选（是）订单数 / 锁单总数 {{ n }}</p>
+  <div class="card">
+    <div class="table-wrap">
+      <table class="report-table">
+        <thead><tr><th>选装项</th><th>已选</th><th>拥有率</th></tr></thead>
+        <tbody>
+          {% for a in option_attrs %}
+          <tr><td>{{ a.attribute }}</td><td class="num">{{ a.yes_count }}</td><td class="num">{{ a.ownership_pct }}%</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<section class="report-section">
+  <h2 class="section-title">数据信息</h2>
+  <div class="card">
+    <table class="data-table scope-table">
+      <tbody>
+        <tr><td class="scope-label"><strong>数据源</strong></td><td>{{ scope.data_source }}</td></tr>
+        <tr><td class="scope-label"><strong>时间窗口</strong></td><td>{{ scope.time_window }}</td></tr>
+        <tr><td class="scope-label"><strong>口径</strong></td><td>{{ scope.filters }}</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

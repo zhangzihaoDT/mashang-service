@@ -2,7 +2,7 @@
 
 Agent Harness 能力目录
 
-生成日期：2026-08-18
+生成日期：2026-10-20
 
 本页面展示 mashang_workspace 中可被 OpenCode Agent 调用的 workspace 级 skills。
 
@@ -14,13 +14,13 @@ Agent Harness 能力目录
 |------|------|
 | Workspace Skills | 4 |
 | Skills 输出目录 | mashang_workspace/outputs/monthly_market_report/YYYY-MM/, mashang_workspace/outputs/reports/, dataset/cpca_weekly/cpca_weekly_data_capture.json   # evidence/capture 原材料 |
-| 最近更新 | 2026-08-18 |
+| 最近更新 | 2026-10-20 |
 
 ## Skills Overview
 
 | Skill | 类型 | 能力定位 | 入口文件 | 默认输出 |
 |-------|------|---------|---------|---------|
-| branded-html-report | workspace | 将汽车经营分析、预测模型、回测评估、市场洞察等结果，渲染为具有 Raccoon  | `python runtime_scripts/daily_lock_count.py --format json \` | ['mashang_workspace/outputs/reports/'] |
+| branded-html-report | workspace | 将汽车经营分析、预测模型、回测评估、市场洞察等结果，渲染为具有 Raccoon  | `python business_scripts/daily_lock_count.py --format json \` | ['mashang_workspace/outputs/reports/'] |
 | cpca-weekly-data-capture | workspace | 第一时间捕捉乘联分会/乘联会周度核心数据，比 CADA 官网更早获取 P0 早源 | `make cpca-weekly-data-capture WEEK=2026-W25` | ['dataset/cpca_weekly/cpca_weekly_data_capture.json   # evidence/capture 原材料'] |
 | monthly-market-report | workspace | monthly-market-report v0.1 是基于 `TP&MIX-w | `OpenCode Agent 自动匹配 — SKILL.md 位于 .opencode/skills/monthly-market-report/` | ['mashang_workspace/outputs/monthly_market_report/YYYY-MM/'] |
 | runtime-eval-diagnosis | workspace |  | `OpenCode Agent 自动匹配 — SKILL.md 位于 .opencode/skills/runtime-eval-diagnosis/` | — |
@@ -36,7 +36,7 @@ Agent Harness 能力目录
 | 能力定位 | 将汽车经营分析、预测模型、回测评估、市场洞察等结果，渲染为具有 Raccoon Research / mashang 风格的 HTML 数据报告。 |
 | 适用场景 | 销量预测报告、锁单释放曲线报告、模型回测报告、汽车市场洞察报告、经营复盘报告、用户反馈 / VOC 分析报告 |
 | 不适用场景 | 政府正式申报书、通知/公文风材料、Word / PDF 正式材料、简历 |
-| 入口命令 | `python runtime_scripts/daily_lock_count.py --format json \` |
+| 入口命令 | `python business_scripts/daily_lock_count.py --format json \` |
 | 默认输出 | ['mashang_workspace/outputs/reports/'] |
 
 ### cpca-weekly-data-capture

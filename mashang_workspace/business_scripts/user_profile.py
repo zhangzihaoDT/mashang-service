@@ -19,6 +19,9 @@ if str(_WS_ROOT) not in sys.path:
 
 import pandas as pd
 from datetime import datetime, timedelta
+from utils.business import get_launch_date
+from utils.monitors.series_group import apply_series_group_logic
+from utils.paths import BUSINESS_DEFINITION_PATH
 from utils.result_contract import build_success_contract, save_contract_json, contract_to_terminal
 
 ORDER_PARQUET = REPO_ROOT / "dataset" / "order_data.parquet"
@@ -28,6 +31,8 @@ COHORTS = [
     ("85后", 1985, 1989), ("80后", 1980, 1984), ("75后", 1975, 1979),
     ("70后", 1970, 1974), ("65后", 1965, 1969), ("60前", None, 1959),
 ]
+
+NON_RETAIL = {"试驾车", "大客户", "员工", "集团员工", "经销商员工", "享道", "仅批售", "项目", "展车", "海外"}
 
 TIER1 = {"北京", "上海", "广州", "深圳"}
 NEW_TIER1 = {"成都", "杭州", "重庆", "武汉", "苏州", "西安", "天津", "南京",
@@ -71,15 +76,30 @@ def parse_args():
     p.add_argument("--date", type=str, help="单日查询 (YYYY-MM-DD)")
     p.add_argument("--start-date", type=str, help="开始日期 (YYYY-MM-DD)")
     p.add_argument("--end-date", type=str, help="结束日期 (YYYY-MM-DD)")
-    p.add_argument("--series", type=str, required=True, help="车系过滤")
+    p.add_argument("--series", type=str, default=None, help="车系/代际过滤 (车系如 LS6，代际如 CM3)")
+    p.add_argument("--since-launch", type=str, default=None,
+                   help="从 business_definition 中该车系/代际的上市日开始，覆盖 --start-date；值可作为过滤标签 (如 CM3)")
     p.add_argument("--order-type", type=str, default=None, help="订单类型过滤 (如 用户车、大客户等)")
+    p.add_argument("--retail", action="store_true", help="零售口径: 仅保留 order_type ∈ {用户车, 空}，排除试驾车/员工/大客户/批售等")
     p.add_argument("--output", type=str, help="输出目录")
     p.add_argument("--format", type=str, default="terminal", choices=["terminal", "json"])
     p.add_argument("--limit", type=int, default=10, help="省份 TOPN (默认 10)")
     return p.parse_args()
 
 
+def load_business_definition() -> dict:
+    return json.loads(BUSINESS_DEFINITION_PATH.read_text(encoding="utf-8"))
+
+
 def resolve_time_range(args):
+    if args.since_launch:
+        ld = get_launch_date(args.since_launch)
+        if ld is None:
+            print(f"错误: business_definition 中未找到 {args.since_launch} 的上市时间", file=sys.stderr)
+            sys.exit(1)
+        s = pd.Timestamp(ld)
+        e = pd.Timestamp(datetime.now().date()) + timedelta(days=1)
+        return s, e, f"{ld}~now", "since_launch"
     if args.date:
         d = pd.Timestamp(args.date)
         return d, d + timedelta(days=1), args.date, "date"
@@ -133,27 +153,51 @@ def main():
     args = parse_args()
     t_start, t_end, t_label, tw_type = resolve_time_range(args)
 
+    series_filter = args.series or args.since_launch
+    bdef = None
+    if series_filter:
+        try:
+            sg_keys = set((load_business_definition().get("series_group_logic") or {}).keys())
+        except Exception:
+            sg_keys = set()
+        if series_filter in sg_keys:
+            bdef = load_business_definition()
+
     df = pd.read_parquet(str(ORDER_PARQUET))
     df["lock_time"] = pd.to_datetime(df["lock_time"], errors="coerce")
     df = df[df["lock_time"].notna()].copy()
+    if bdef is not None:
+        df = apply_series_group_logic(df, bdef)
     mask = (df["lock_time"] >= t_start) & (df["lock_time"] < t_end)
     df_f = df[mask]
-    if args.series:
-        df_f = df_f[df_f["series"] == args.series]
+    if series_filter:
+        if bdef is not None:
+            df_f = df_f[df_f["series_group_logic"] == series_filter]
+        else:
+            df_f = df_f[df_f["series"] == series_filter]
     if args.order_type:
         df_f = df_f[df_f["order_type"] == args.order_type]
+    if args.retail:
+        ot = df_f["order_type"].fillna("").astype("string")
+        df_f = df_f[ot.isin(["", "用户车"]) & ~ot.isin(NON_RETAIL)]
 
     total = len(df_f)
+    series_label = series_filter or "全部"
 
-    # 1. Gender
+    # 1. Gender (占比以已知性别 男+女 为基数，未知剔除并标注)
     g = df_f["owner_gender"].value_counts()
     male = int(g.get("男", 0))
     female = int(g.get("女", 0))
     unknown_g = total - male - female
+    gender_known = male + female
 
     # 2. Age (owner_age 优先)
     age_rows, n_age_known = age_cohort_distribution(df_f["owner_age"])
     age_unknown = total - n_age_known
+    age_vals = pd.to_numeric(df_f["owner_age"], errors="coerce")
+    known_ages = age_vals[age_vals.notna()]
+    avg_age = round(float(known_ages.mean()), 1) if len(known_ages) else None
+    median_age = round(float(known_ages.median()), 1) if len(known_ages) else None
 
     # 3. City tier
     cities = df_f["license_city"].apply(norm_city)
@@ -173,27 +217,33 @@ def main():
         time_window["date"] = t_label
         time_window["start_date"] = t_label
         time_window["end_date"] = t_label
+    elif tw_type == "since_launch":
+        time_window["start_date"] = t_start.strftime("%Y-%m-%d")
+        time_window["end_date"] = (t_end - timedelta(days=1)).strftime("%Y-%m-%d")
+        time_window["since_launch"] = args.since_launch
     else:
         time_window["start_date"] = args.start_date
         time_window["end_date"] = args.end_date
 
-    filters = {"series": args.series}
+    filters = {"series": series_filter, "gen": series_filter if bdef is not None else None}
     if args.order_type:
         filters["order_type"] = args.order_type
+    if args.retail:
+        filters["order_type"] = "用户车/NaN（零售口径）"
 
     scope = {
         "data_source": str(ORDER_PARQUET),
         "time_window": time_window,
         "filters": filters,
-        "metric_definition": "gender=owner_gender, age=owner_age(2026-owner_age), city_tier/province=license_city映射",
+        "metric_definition": "gender=owner_gender(占比以已知性别男+女为基数,未知剔除并标注), age=owner_age(2026-owner_age), city_tier/province=license_city映射",
     }
 
     gender_items = [
-        {"value": "男", "metrics": {"count": male, "share": round(male / total, 4)}},
-        {"value": "女", "metrics": {"count": female, "share": round(female / total, 4)}},
+        {"value": "男", "metrics": {"count": male, "share": round(male / gender_known, 4) if gender_known else 0}},
+        {"value": "女", "metrics": {"count": female, "share": round(female / gender_known, 4) if gender_known else 0}},
     ]
     if unknown_g:
-        gender_items.append({"value": "默认未知", "metrics": {"count": unknown_g, "share": round(unknown_g / total, 4)}})
+        gender_items.append({"value": "默认未知", "metrics": {"count": unknown_g, "share": None, "excluded": True}})
 
     age_items = [{"value": r["cohort"], "metrics": {"count": r["count"], "share_known": r["share_known"], "share_total": round(r["count"] / total, 4)}} for r in age_rows]
     if age_unknown:
@@ -208,11 +258,17 @@ def main():
         prov_items.append({"value": "（城市映射未知）", "metrics": {"count": unknown_prov, "share": round(unknown_prov / total, 4)}})
 
     result = {
-        "summary": f"{t_label} {args.series} 锁单用户 {total} 人。男性 {male/total*100:.1f}%，主力 {age_rows[3]['cohort']}~{age_rows[2]['cohort']}（{(age_rows[2]['count']+age_rows[3]['count'])/n_age_known*100:.1f}%），新一线~一线 {(tc.get('新一线',0)+tc.get('一线',0))/total*100:.1f}%",
+        "summary": f"{t_label} {series_label} 锁单用户 {total} 人。男性 {male/gender_known*100:.1f}%（占比以已知性别 {gender_known} 人为基数，剔除未知 {unknown_g} 人），平均年龄 {avg_age} 岁，主力 {age_rows[3]['cohort']}~{age_rows[2]['cohort']}（{(age_rows[2]['count']+age_rows[3]['count'])/n_age_known*100:.1f}%），一线~新一线 {(tc.get('一线',0)+tc.get('新一线',0))/total*100:.1f}%",
         "metrics": {
             "total_users": total,
-            "male_pct": round(male / total, 4),
-            "female_pct": round(female / total, 4),
+            "male_pct": round(male / gender_known, 4) if gender_known else None,
+            "female_pct": round(female / gender_known, 4) if gender_known else None,
+            "gender_known_count": gender_known,
+            "gender_unknown_count": unknown_g,
+            "gender_known_pct": round(gender_known / total, 4),
+            "avg_owner_age": avg_age,
+            "median_owner_age": median_age,
+            "age_known_count": n_age_known,
             "age_known_pct": round(n_age_known / total, 4),
             "tier1_newtier1_pct": round((tc.get("一线", 0) + tc.get("新一线", 0)) / total, 4),
         },
@@ -224,24 +280,35 @@ def main():
         ],
         "tables": [
             {
-                "title": f"{args.series} 锁单用户性别占比",
+                "title": f"{series_label} 锁单用户性别占比（占已知性别，剔除未知 {unknown_g} 人）",
                 "columns": ["性别", "人数", "占比"],
-                "rows": [{"性别": i["value"], "人数": i["metrics"]["count"], "占比": f"{i['metrics']['share']*100:.1f}%"} for i in gender_items],
+                "rows": [{"性别": i["value"], "人数": i["metrics"]["count"],
+                          "占比": (f"{i['metrics']['share']*100:.1f}%" if i["metrics"].get("share") is not None else f"—（已剔除 {unknown_g} 人）")} for i in gender_items],
             },
             {
-                "title": f"{args.series} 锁单用户年龄代际占比（owner_age）",
+                "title": f"{series_label} 锁单用户年龄代际占比（owner_age）",
                 "columns": ["代际", "人数", "占已知年龄", "占总量"],
                 "rows": [{"代际": i["value"], "人数": i["metrics"]["count"],
                           "占已知年龄": f"{i['metrics']['share_known']*100:.1f}%" if i["value"] != "未知年龄" else "-",
                           "占总量": f"{i['metrics']['share_total']*100:.1f}%"} for i in age_items],
             },
             {
-                "title": f"{args.series} 锁单用户城市线级占比",
+                "title": f"{series_label} 锁单用户年龄概览（owner_age）",
+                "columns": ["指标", "数值"],
+                "rows": [
+                    {"指标": "平均年龄(岁)", "数值": str(avg_age)},
+                    {"指标": "中位年龄(岁)", "数值": str(median_age)},
+                    {"指标": "已知年龄人数", "数值": str(n_age_known)},
+                    {"指标": "年龄缺失人数", "数值": str(age_unknown)},
+                ],
+            },
+            {
+                "title": f"{series_label} 锁单用户城市线级占比",
                 "columns": ["城市线级", "人数", "占比"],
                 "rows": [{"城市线级": i["value"], "人数": i["metrics"]["count"], "占比": f"{i['metrics']['share']*100:.1f}%"} for i in tier_items],
             },
             {
-                "title": f"{args.series} 锁单销量 TOP{args.limit} 省份",
+                "title": f"{series_label} 锁单销量 TOP{args.limit} 省份",
                 "columns": ["排名", "省份", "人数", "占比"],
                 "rows": [{"排名": str(i["metrics"]["rank"]), "省份": i["value"], "人数": str(i["metrics"]["count"]), "占比": f"{i['metrics']['share']*100:.1f}%"} for i in prov_items if "rank" in i["metrics"]]
                         + ([{"排名": "-", "省份": i["value"], "人数": str(i["metrics"]["count"]), "占比": f"{i['metrics']['share']*100:.1f}%"} for i in prov_items if "rank" not in i["metrics"]]),
@@ -253,7 +320,8 @@ def main():
                     for v, c in real_prov.head(5).items()]
 
     ctx = {
-        "metric": "user_profile", "series": args.series,
+        "metric": "user_profile", "series": series_filter,
+        "gen": series_filter if bdef is not None else None,
         "order_type": args.order_type,
         "available_dimensions": ["owner_gender", "age_cohort", "city_tier", "province"],
         "top_entities": top_entities,
@@ -261,6 +329,10 @@ def main():
     }
     if tw_type == "date":
         ctx["date"] = t_label
+    elif tw_type == "since_launch":
+        ctx.update({"since_launch": args.since_launch,
+                    "start_date": t_start.strftime("%Y-%m-%d"),
+                    "end_date": (t_end - timedelta(days=1)).strftime("%Y-%m-%d")})
     else:
         ctx.update({"start_date": args.start_date, "end_date": args.end_date})
 
@@ -273,7 +345,7 @@ def main():
         if args.output:
             out_dir = Path(args.output)
             out_dir.mkdir(parents=True, exist_ok=True)
-            save_contract_json(contract, out_dir / f"{t_label}_{args.series}_user_profile.json")
+            save_contract_json(contract, out_dir / f"{t_label}_{series_label}_user_profile.json")
         else:
             print(json.dumps(contract, ensure_ascii=False, indent=2))
     else:

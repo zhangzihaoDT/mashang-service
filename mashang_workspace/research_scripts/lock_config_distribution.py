@@ -26,11 +26,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
+from jinja2 import Environment, FileSystemLoader
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 _WS = REPO_ROOT / "mashang_workspace"
@@ -47,6 +49,9 @@ _BUSINESS_DEF = REPO_ROOT / "shared" / "schema" / "business_definition.json"
 _ORDER_DATA = REPO_ROOT / "dataset" / "order_data.parquet"
 _CONFIG_DATA = REPO_ROOT / "dataset" / "config_attribute.parquet"
 _DEFAULT_TABLE = _WS / "outputs" / "tables"
+_DEFAULT_REPORT = _WS / "outputs" / "reports"
+_TEMPLATE_DIR = _WS / "templates"
+_HTML_TEMPLATE = "config_distribution.html"
 NON_RETAIL = {"试驾车", "大客户", "员工", "集团员工", "经销商员工", "享道", "仅批售", "项目", "展车", "海外"}
 DEFAULT_GEN = "DM2"
 # 核心 5 属性槽位 → 属性名别名集合（同一槽位不同代际命名不同，如 CM3 用「激光雷达」）
@@ -171,6 +176,82 @@ def compute_lock_config_distribution(
     }
 
 
+def _resolve_attr_filter(raw: str | None) -> set[str] | None:
+    """把 --attrs 的逗号分隔输入（属性名/别名）归一为核心槽位集合；None = 不过滤。"""
+    if not raw:
+        return None
+    wanted: set[str] = set()
+    unknown: list[str] = []
+    for token in raw.replace("，", ",").split(","):
+        name = token.strip()
+        if not name:
+            continue
+        slot = _ATTR_TO_SLOT.get(name)
+        if slot:
+            wanted.add(slot)
+        else:
+            unknown.append(name)
+    if unknown:
+        print(f"⚠️ 未识别的属性（已忽略）: {', '.join(unknown)}；可选: {', '.join(CORE_ATTRS)}")
+    return wanted or None
+
+
+def _static_prefix(out_path: Path) -> str:
+    try:
+        return os.path.relpath(_WS, out_path.resolve().parent)
+    except ValueError:
+        return ".."
+
+
+def render_html(rc: dict, scope: dict, attrs: list[dict], option_attrs: list[dict],
+                out_path: Path) -> None:
+    env = Environment(loader=FileSystemLoader(str(_TEMPLATE_DIR)))
+    template = env.get_template(_HTML_TEMPLATE)
+    n = rc["n"]
+
+    def _decorate(a: dict) -> dict:
+        items = [{
+            "value": str(it["value"]),
+            "count": int(it["count"]),
+            "share_pct": round(it["share"] * 100, 1),
+            "bar_pct": round(it["share"] * 100, 2),
+        } for it in a["items"]]
+        return {
+            "attribute": a["attribute"],
+            "core": is_core_attribute(a["attribute"]),
+            "orders_with_value": a["orders_with_value"],
+            "coverage_pct": round(a["orders_with_value"] / n * 100, 1) if n else 0,
+            "rows": items,
+        }
+
+    html = template.render(
+        static_prefix=_static_prefix(out_path),
+        title=f"{rc['gen']} 上市以来锁单配置分布",
+        meta=f"{rc['gen']} · {rc['launch']} ~ {rc['hi']}",
+        hero_title=f"{rc['gen']} 上市以来锁单配置分布",
+        hero_subtitle=f"{rc['launch']} ~ {rc['hi']} · 零售锁单 {n} 单",
+        kpis=[
+            {"label": "锁单总数", "value": f"{n:,}", "hint": "零售口径，剔除测试单"},
+            {"label": "配置可关联", "value": f"{rc['covered']:,}",
+             "hint": f"{round(rc['covered'] / n * 100, 1) if n else 0}% 覆盖"},
+            {"label": "核心配置完整", "value": f"{rc['core_complete']:,}",
+             "hint": "5 核心属性齐备"},
+        ],
+        summary=rc.get("summary", ""),
+        attrs=[_decorate(a) for a in attrs],
+        option_attrs=[{
+            "attribute": a["attribute"],
+            "yes_count": a["yes_count"],
+            "ownership_pct": round(a["yes_count"] / n * 100, 1) if n else 0,
+        } for a in option_attrs],
+        n=n,
+        scope=scope,
+    )
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(html, encoding="utf-8")
+    print(f"  HTML: {out_path.resolve()}")
+
+
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(description="上市以来零售锁单配置分布（默认 DM2；--gen 指定代际）")
     p.add_argument("--gen", type=str, default=DEFAULT_GEN,
@@ -180,6 +261,10 @@ def main(argv: list[str] | None = None) -> int:
                    help="含试驾车锁单（默认零售口径：用户车/NaN）")
     p.add_argument("--format", choices=["terminal", "json"], default="terminal")
     p.add_argument("--output", type=str, default=None, help="JSON 输出目录")
+    p.add_argument("--attrs", type=str, default=None,
+                   help="仅看指定核心属性（逗号分隔），如 内饰,外饰；缺省=全部 5 核心属性")
+    p.add_argument("--html", action="store_true", help="输出品牌化 HTML 报告")
+    p.add_argument("--output-report", type=str, default=None, help="HTML 报告输出目录（默认 outputs/reports）")
     args = p.parse_args(argv)
 
     gen = args.gen
@@ -202,6 +287,11 @@ def main(argv: list[str] | None = None) -> int:
     attrs = rc["attrs"]
     option_attrs = rc["option_attrs"]
     core_total_orders = rc["core_total_orders"]
+
+    attr_filter = _resolve_attr_filter(args.attrs)
+    if attr_filter is not None:
+        attrs = [a for a in attrs if _ATTR_TO_SLOT.get(a["attribute"]) in attr_filter]
+        option_attrs = [a for a in option_attrs if _ATTR_TO_SLOT.get(a["attribute"]) in attr_filter]
 
     scope = {
         "data_source": "dataset/order_data.parquet + dataset/config_attribute.parquet",
@@ -242,9 +332,23 @@ def main(argv: list[str] | None = None) -> int:
         command="python research_scripts/lock_config_distribution.py" +
                 (f" --gen {gen}" if gen != DEFAULT_GEN else "") +
                 (" --include-test-drive" if args.include_test_drive else "") +
+                (f" --attrs {args.attrs}" if args.attrs else "") +
+                (" --html" if args.html else "") +
                 (" --format json" if args.format == "json" else ""),
         scope=scope, result=result,
     )
+
+    if args.html:
+        report_scope = {
+            "data_source": scope["data_source"],
+            "time_window": f"{launch.date()} ~ {hi.date()}（{gen} 上市以来，零售锁单）",
+            "filters": "零售口径（order_type = 用户车/NaN），剔除测试单（总部主理店 + 假身份号）；"
+                       f"配置分布 = config_attribute 中锁单订单的 Attribute/value 显示名分布，占锁单总数 {n} 单比例",
+        }
+        out_dir = Path(args.output_report) if args.output_report else _DEFAULT_REPORT
+        suffix = "_" + "_".join(s for s in CORE_ATTRS if attr_filter and s in attr_filter) if attr_filter else ""
+        render_html(rc, report_scope, attrs, option_attrs,
+                    out_dir / f"{gen}_lock_config_distribution{suffix}.html")
 
     if args.format == "json":
         out_dir = Path(args.output) if args.output else _DEFAULT_TABLE
