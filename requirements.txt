@@ -23,3 +23,5 @@ plotly
 kaleido
 statsmodels
 jinja2
+matplotlib
+Pillow
