@@ -16,7 +16,7 @@
   - 在营 = Store Create Status Desc ∈ --status（默认『开业』；可传『开业,暂停』放宽）
   - 城市分布 = 该主体在营门店按 City Name 去重计数
   - 近期主理 = 主理名册（dataset/主理信息表.csv，由 dataset/updater/store_daily_zhuli_to_csv.py
-    更新）中该店在职主理数；无独立主理的门店（如 popup 城市展厅）回落同主体同城市车城店
+    更新）中该店在职主理域账号数；无独立主理的门店（如 popup 城市展厅）回落同主体同城市车城店
   - 锁单/留存小订 = order_data.parquet；锁单窗口 = 截至 --as-of（默认订单最大锁单日）的近
     --window-days 日；留存小订 = series_group=CM3 且意向金时间 ∈ [预售开放, 截止) 且未退意向金；
     无独立订单口径的门店回落关联车城店
@@ -118,7 +118,7 @@ def load_zhuli():
 
 
 def _zhuli_count(df) -> int:
-    return int(df["主理"].nunique())
+    return int(df["域账号"].nunique())
 
 
 def resolve_zhuli(store_name: str, info: dict | None, zhuli) -> dict:
@@ -670,7 +670,7 @@ def main(argv: list[str] | None = None) -> int:
                     "leads_as_of": str(lm["as_of"].date()) if lm else None,
                     "presale_gen": om["presale_gen"] if om else None},
         "metric_definition": ("门店 → Bloc Name; 该主体门店数=COUNTD(Dealer Name Fc), status∈在营口径; "
-                              "城市分布=COUNTD by City Name; 近期主理=COUNTD(主理) by 门店, 无独立主理时回落同主体同城市车城店; "
+                              "城市分布=COUNTD by City Name; 近期主理=COUNTD(域账号) by 门店, 无独立主理时回落同主体同城市车城店; "
                               "近N日下发线索=SUM(下发线索数) by 门店(增量库); "
                               "近N日锁单=COUNTD(order_number) by store_name(窗口); "
                               "排名分母统一=该主体全部在营门店数(无数据记0), 名词=1+数值更高门店数; "

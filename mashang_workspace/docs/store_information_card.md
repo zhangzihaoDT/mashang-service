@@ -31,3 +31,16 @@ Canonical 入口：`mashang_workspace/business_scripts/store_information_card.py
 ## 产物
 
 `<门店全名>_门店信息手卡.png`、`store_information_card.json`、`national_store_population.csv`，默认落在 `mashang_workspace/outputs/reports/store_information_cards/`。
+
+## 主理名册来源与清洗
+
+`dataset/主理信息表-全.csv` 保留原始全量名册；通过以下入口生成手卡消费的规范在职表 `dataset/主理信息表.csv`：
+
+```bash
+.venv/bin/python dataset/updater/store_daily_zhuli_to_csv.py --roster-input dataset/主理信息表-全.csv --dry-run
+.venv/bin/python dataset/updater/store_daily_zhuli_to_csv.py --roster-input dataset/主理信息表-全.csv
+```
+
+规则：删除 `Unnamed: 20`，筛选 `在职状态=在职`，再按 `域账号` 去重（重复保留输入首条），最后原子写入UTF-8规范名册；缺列、在职空账号、在职人数异常过少时拒绝覆盖。计数使用域账号，不以姓名去重；同名不同账号各计一人。原全表不修改。
+
+已有 `store_daily_zhuli_to_csv.py --with-roster` 的 Tableau 导出也执行相同清洗。手卡显示规范名册文件更新时间。门店类型仍来自独立的主理在岗统计快照，其日期不随名册导入而刷新。

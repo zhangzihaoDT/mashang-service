@@ -12,13 +12,14 @@
 
 输出（仓库 dataset/，该目录 .gitignore 不提交）:
     dataset/门店日报_主理_当月.csv   ← 主理在岗统计（长表）
-    dataset/主理信息表.csv           ← 主理名册（--with-roster 时）
+    dataset/主理信息表.csv           ← 在职域账号去重名册（--with-roster 或 --roster-input）
 
 用法:
     python dataset/updater/store_daily_zhuli_to_csv.py                 # 更新主理在岗统计
     python dataset/updater/store_daily_zhuli_to_csv.py --with-roster   # 同时更新主理名册
     python dataset/updater/store_daily_zhuli_to_csv.py --timeout 600
     python dataset/updater/store_daily_zhuli_to_csv.py --dry-run
+    python dataset/updater/store_daily_zhuli_to_csv.py --roster-input dataset/主理信息表-全.csv
 """
 
 from __future__ import annotations
@@ -37,7 +38,47 @@ OUTPUT_ZHULI = DATASET_DIR / "门店日报_主理_当月.csv"
 OUTPUT_ROSTER = DATASET_DIR / "主理信息表.csv"
 
 ZHULI_REQUIRED_COLUMNS = ["门店名称", "门店编码", "姓名", "度量名称", "度量值"]
-ROSTER_REQUIRED_COLUMNS = ["主理", "门店", "门店编码", "在职状态"]
+ROSTER_REQUIRED_COLUMNS = ["主理", "域账号", "门店", "门店编码", "在职状态"]
+
+
+def normalize_roster(path: Path):
+    """全量名册 → 在职名册：删空列、先筛在职，再按域账号保留首条。"""
+    import pandas as pd
+
+    with path.open('rb') as handle:
+        bom = handle.read(2)
+    utf16 = bom in (b'\xff\xfe', b'\xfe\xff')
+    df = pd.read_csv(path, encoding='utf-16' if utf16 else 'utf-8-sig',
+                     sep=None, engine='python', dtype=str, keep_default_na=False)
+    df.columns = df.columns.str.strip()
+    df = df.drop(columns=['Unnamed: 20'], errors='ignore')
+    missing = [col for col in ROSTER_REQUIRED_COLUMNS if col not in df.columns]
+    if missing:
+        raise RuntimeError(f'主理名册缺少必需列: {missing}')
+    df = df.apply(lambda col: col.str.strip())
+    active = df[df['在职状态'] == '在职'].copy()
+    if active['域账号'].eq('').any():
+        raise RuntimeError('在职主理存在空域账号，拒绝更新')
+    active = active.drop_duplicates('域账号', keep='first').reset_index(drop=True)
+    if active.empty:
+        raise RuntimeError('筛选后没有在职主理，拒绝更新')
+    return active
+
+
+def import_roster(path: Path, *, output: Path, dry_run: bool = False) -> int:
+    roster = normalize_roster(path)
+    if len(roster) < 500:
+        raise RuntimeError(f'在职名册行数过少({len(roster)})，拒绝覆盖')
+    print(f'主理名册来源: {path} → 在职域账号去重后 {len(roster)} 行')
+    if dry_run:
+        print('✅ dry-run 通过，未覆盖正式名册')
+        return len(roster)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    tmp = output.with_suffix('.csv.write')
+    roster.to_csv(tmp, index=False, encoding='utf-8-sig')
+    tmp.replace(output)
+    print(f'✅ 已更新 {output}')
+    return len(roster)
 
 
 def load_env_file(env_path: Path) -> None:
@@ -98,6 +139,11 @@ def export_one(exporter, *, view: str, output: Path, tmp: Path, dry_run: bool,
         raise RuntimeError(f"{label} 导出失败，未做任何覆盖")
     rows = validate_csv(target_tmp, required, min_rows, label)
     print(f"  校验通过: {rows} 行")
+    if label == '主理信息表':
+        rows = import_roster(target_tmp, output=output, dry_run=dry_run)
+        if not dry_run:
+            target_tmp.unlink()
+        return rows
     if dry_run:
         print(f"  dry-run：保留临时文件 {target_tmp}")
         return rows
@@ -114,7 +160,17 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--dry-run", action="store_true", help="仅导出校验，不覆盖正式文件")
     parser.add_argument("--view", default=ZHULI_VIEW, help="主理在岗统计视图 URL")
     parser.add_argument("--with-roster", action="store_true", help="同时更新主理名册（主理信息表）")
+    parser.add_argument('--roster-input', type=Path,
+                        help='仅从本地全量名册生成在职主理信息表，不请求 Tableau')
     args = parser.parse_args(argv)
+
+    if args.roster_input:
+        try:
+            import_roster(args.roster_input, output=OUTPUT_ROSTER, dry_run=args.dry_run)
+        except (OSError, RuntimeError, ValueError) as exc:
+            print(f'❌ {exc}')
+            return 1
+        return 0
 
     load_env_file(REPO_ROOT / ".env")
     token_name = os.getenv("TABLEAU_TOKEN_NAME")
