@@ -9,15 +9,16 @@ Canonical 入口：`mashang_workspace/business_scripts/store_information_card.py
 .venv/bin/python mashang_workspace/business_scripts/store_information_card.py --store 深圳壹方城 --window-days 7 --format json
 ```
 
-## 全国样本
+## 全国样本（active_store 固定算子）
 
-- 复用 `store_info_loader` 读取主数据和 code/Bloc 身份映射。范围为主数据已登记的国内开业门店，排除海外网点/海外区及空、无、全部等占位名称。
-- 以完整门店名合并销售、交付、售后职能代码；同名任一职能处于开业状态，即计为一家门店。该样本包括独立交付/售后网点，不代表仅销售体验店。
-- 所有已登记代码先关联同名门店，再按上述门店级准入；避免同店销售码在建、售后码开业时漏掉该店数据。
-- 没有指标记录的样本门店计0；这只是无观测，不等同于核实经营无产出或停业。
-- 编码未在主数据登记的线索、已登记但不属于国内开业样本的数据不计入分布，逐条进入 JSON audit.excluded。不能据此称为所有实际营业网点的普查。
-- 在主数据已登记但关联冲突，或订单无法关联时，阻断输出完整全国分位数，不将关联失败悄悄计0。
-- 门店主数据是当前快照。as-of 控制指标窗口和可用身份观测，不重建历史门店经营状态。主理名册日期显著标注。
+- 直接消费 `shared/operators/active_store.py::get_active_store_names`。原计数算子 `_calc_active_store_count` 同样消费此名单，行为不变。
+- 统计日 D 的名单：订单创建日在 `[D-29, D]` 的原始 `store_name`，且该名称在订单表中的最早 `store_create_date <= D`；建店日期缺失不纳入。订单创建时间遵循算子 `order_create_date` 优先、`order_create_time` 补缺规则。
+- 活动判断使用全部订单类型，不要求有锁单；线索、用户车锁单则计算手卡指标窗口（默认近7日）。活动窗口固定30日，不随 `--window-days` 改变。
+- 分母按原始 `store_name` 去重，与固定算子计数完全一致。不再用主数据“开业”状态准入，不要求在职主理，不另行剔除交付/售后、海外、总部等记录，也不合并档期别名。算子数据本身的别名和虚拟门店局限在卡面注明。
+- code / Bloc 用于关联门店身份，不改变算子名单；原始名称精确命中可直接关联指标。名称不一致时仅接受唯一code对应；同code对应多个算子名称时阻断输出，避免重复分摊。
+- 未登记主数据但属于算子名单的门店仍在分母内，JSON audit.active_store.unresolved_identities 明确列出；名单外记录进入排除审计。
+- 近7日无指标记录的在营门店仍计0，不因零锁单/零线索删除样本。
+- 主体内排名同样使用上述在营名单，档案主数据仍为当前快照。
 
 ## 指标与分位数
 

@@ -17,10 +17,11 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
 WS = ROOT / 'mashang_workspace'
-for path in (ROOT, WS):
+for path in (ROOT, WS, ROOT / "shared"):
     if str(path) not in sys.path:
         sys.path.insert(0, str(path))
 from shared.loaders import store_info_loader as sl
+from operators.active_store import get_active_store_names, _calc_active_store_count
 from business_scripts import store_dealer_profile as profile
 from utils.result_contract import build_success_contract, build_error_contract
 
@@ -57,30 +58,46 @@ def histogram_data(values, max_bins=20) -> dict:
 
 
 def build_population(master, leads, orders, as_of: str, window_days: int, resolver=sl.resolve_dealer_info):
-    """国内同名职能编码并为一家；任一职能开业即纳入该店。"""
+    """原样使用 active_store 算子名单；零指标也保留，身份不改变准入。"""
     end = pd.Timestamp(as_of).normalize() + pd.Timedelta(days=1)
     start = end - pd.Timedelta(days=window_days)
-    eligible = master[(master['Store Create Status Desc'] == '开业')
-                      & ~master['store_format'].eq('海外网点')
-                      & ~master['Region Name'].eq('海外区')].copy()
-    eligible = eligible[~eligible['Dealer Name Fc'].str.strip().isin(['', '无', '全部'])]
-    population = (eligible.drop_duplicates('Dealer Name Fc')
-                  [['Dealer Name Fc', 'Bloc Name']].rename(columns={'Dealer Name Fc': 'store', 'Bloc Name': 'bloc'})
-                  .set_index('store'))
-    if population.empty:
-        raise ValueError('没有可用的国内开业门店主数据')
-    code_to_name = master[master['Dealer Name Fc'].isin(population.index)].set_index('Dealer Code')['Dealer Name Fc'].to_dict()
-    all_master_codes = set(master['Dealer Code'])
-    audit = {'leads': {'unmatched': [], 'excluded': []}, 'locks': {'unmatched': [], 'excluded': []}}
+    active_names = get_active_store_names(orders, pd.Timestamp(as_of))
+    if active_names.empty:
+        raise ValueError('active_store 算子没有返回在营门店')
+    identities = {}
+    rows = []
+    for name in active_names:
+        info = resolver(name, as_of=as_of)
+        identities[name] = info
+        rows.append({'store': name, 'bloc': (info or {}).get('bloc_name', ''),
+                     'dealer_code': (info or {}).get('dealer_code', ''),
+                     'canonical_name': (info or {}).get('dealer_name_fc', '')})
+    population = pd.DataFrame(rows).set_index('store')
+    audit = {'leads': {'unmatched': [], 'excluded': []}, 'locks': {'unmatched': [], 'excluded': []},
+             'active_store': {'operator': 'active_store', 'raw_count': len(active_names),
+                              'window_start': str((pd.Timestamp(as_of) - pd.Timedelta(days=29)).date()),
+                              'window_end': as_of, 'deduplication': '原始store_name，保持算子一致',
+                              'unresolved_identities': [name for name, info in identities.items() if info is None]}}
+    assert len(population) == _calc_active_store_count(orders, pd.Timestamp(as_of))
 
     def classify(name, info, metric, amount):
-        if info is None:
-            audit[metric]['unmatched'].append({'store': str(name), 'value': int(amount)})
-            return None
-        store = code_to_name.get(info['dealer_code'])
-        if store is None:
-            audit[metric]['excluded'].append({'store': str(name), 'code': info['dealer_code'], 'value': int(amount)})
-        return store
+        # 原始名称一致时直接关联，未登记主数据不等于不存在于算子名单。
+        if name in population.index:
+            return name
+        if info:
+            candidates = population.index[population['dealer_code'].eq(info['dealer_code'])]
+            if len(candidates) == 1:
+                return candidates[0]
+            if len(candidates) > 1:
+                audit[metric]['unmatched'].append({'store': str(name), 'value': int(amount),
+                                                  'reason': 'code对应多个算子门店名'})
+                return None
+            audit[metric]['excluded'].append({'store': str(name), 'code': info['dealer_code'],
+                                               'value': int(amount), 'reason': '不在active_store名单'})
+        else:
+            audit[metric]['excluded'].append({'store': str(name), 'value': int(amount),
+                                               'reason': '原名不在算子名单且身份无法关联'})
+        return None
 
     leads = leads.copy()
     leads['日期'] = pd.to_datetime(leads['日期'], errors='coerce')
@@ -99,9 +116,6 @@ def build_population(master, leads, orders, as_of: str, window_days: int, resolv
         bloc = str(keys.get('经销商主体', '') or '').strip()
         info = resolver(name, dealer_code=code or None, bloc_name=bloc or None, as_of=as_of)
         amount = int(group['下发线索数'].sum())
-        if info is None and code and code not in all_master_codes:
-            audit['leads']['excluded'].append({'store': str(name), 'code': code, 'value': amount, 'reason': '主数据未登记编码'})
-            continue
         store = classify(name, info, 'leads', amount)
         if store is not None:
             totals[store] = totals.get(store, 0) + amount
@@ -191,7 +205,7 @@ def render_card(path, info, master_row, profile_row, stats, histograms, start, e
     title = info['dealer_name_fc'].removesuffix('体验中心')
     title = re.sub('kkmall', 'KK MALL', title, flags=re.I)
     text(64, 105, title, 60); text(64, 190, info['dealer_name_fc'], 29, 'muted')
-    text(64, 243, f"开业  /  {info['store_format']}  /  {info['dealer_code']}", 26, 'muted')
+    text(64, 243, f"近30日在营  /  {info['store_format']}  /  {info['dealer_code']}", 26, 'muted')
     draw.line((64, 299, 1136, 299), fill='#DCE5EC', width=2)
     field(64, 329, '经营主体（Bloc）', info['bloc_name'])
     field(650, 329, '所属大区', info['region_name'])
@@ -201,7 +215,7 @@ def render_card(path, info, master_row, profile_row, stats, histograms, start, e
     text(64, 535, f"主体在营网络：{profile_row['该主体门店数(在营)']} 家 · {profile_row['城市分布']}", 26, 'muted')
     text(64, 599, f'{start} — {end}  ·  完整统计窗口', 26)
     n = stats['leads']['n']
-    text(64, 644, f'全国已登记开业门店 {n} 家 · 无记录计 0 · 含交付/售后网点', 23, 'muted')
+    text(64, 644, f'全国近30日在营门店 {n} 家 · 近7日无记录计 0', 23, 'muted')
     for metric, title, unit, x in [('leads', '下发线索', '条', 64), ('locks', '用户车锁单', '单', 608)]:
         y = 706
         summary = stats[metric]
@@ -219,13 +233,13 @@ def render_card(path, info, master_row, profile_row, stats, histograms, start, e
     text(88, 1401, f"主理配置：{profile_row['近期主理数量']} 人", 28)
     text(88, 1446, f"名册文件快照 {roster_date} · 当前人数需以最新名册为准", 23, 'orange')
     notes = [
-        '口径：国内已登记门店按全名合并职能编码，有开业记录即纳入。',
+        '样本：近30日有订单创建活动，且建店日期不晚于统计截止日。',
         '线索按日求和；用户车锁单按 lock_time 窗口去重订单号。',
         '分位数 =（低于本店的门店数 + 同值门店数 × 0.5）÷ 全部门店数。',
         '同值门店数包含本店。P 值越高，表示该指标在样本中的相对位置越高。',
         '直方图纵轴为门店频数；横轴为每店指标值，保留零值与完整长尾。',
         '来源：门店主数据、store_daily_leads.csv、order_data.parquet、主理名册。',
-        '主数据为当前快照；海外、空占位及未登记编码不纳入；无记录计 0。',
+        '按原始门店名去重，保留档期别名及总部记录；近7日无记录计 0。',
     ]
     draw.line((64, 1527, 1136, 1527), fill='#DCE5EC', width=2)
     for i, note in enumerate(notes):
@@ -259,7 +273,8 @@ def main(argv=None):
         if master is None:
             raise ValueError('缺少门店主数据')
         leads = pd.read_csv(LEADS, dtype=str, keep_default_na=False)
-        orders = pd.read_parquet(ORDERS, columns=['order_number', 'store_name', 'series', 'lock_time', 'order_type'])
+        orders = pd.read_parquet(ORDERS, columns=['order_number', 'store_name', 'series', 'lock_time', 'order_type',
+                                                        'order_create_date', 'store_create_date'])
         for label, values in [('线索', pd.to_datetime(leads['日期'])), ('锁单', pd.to_datetime(orders['lock_time']))]:
             if values.max() < pd.Timestamp(as_of):
                 raise ValueError(f'{label}数据未覆盖截止日 {as_of}')
@@ -278,9 +293,16 @@ def main(argv=None):
         roster_date = datetime.fromtimestamp(profile.ZHULI_ROSTER_CSV.stat().st_mtime, ZoneInfo('Asia/Shanghai')).strftime('%Y.%m.%d') if profile.ZHULI_ROSTER_CSV.exists() else '缺失'
         for name in names:
             info = sl.resolve_dealer_info(name, as_of=as_of)
-            if not info or info['dealer_name_fc'] not in population.index:
-                raise ValueError(f'{name} 未匹配全国国内开业门店')
-            row = population.loc[info['dealer_name_fc']]
+            if not info:
+                raise ValueError(f'{name} 未能关联门店身份')
+            candidates = population.index[population['dealer_code'].eq(info['dealer_code'])]
+            if name in population.index:
+                target_name = name
+            elif len(candidates) == 1:
+                target_name = candidates[0]
+            else:
+                raise ValueError(f'{name} 不在算子名单或对应多个算子门店名')
+            row = population.loc[target_name]
             stats, histograms = {}, {}
             for key in ('leads', 'locks'):
                 stats[key] = percentile_summary(population[key], int(row[key]))
@@ -295,19 +317,17 @@ def main(argv=None):
                 rank = 1 + int((bloc_population[metric] > stats[metric]['value']).sum())
                 details[label] = f'第{rank}/{len(bloc_population)}'
             details['该主体门店数(在营)'] = len(bloc_population)
-            source_names = []
-            for order_name in orders['store_name'].dropna().unique():
-                resolved = sl.resolve_dealer_info(order_name, as_of=as_of)
-                if resolved and resolved['dealer_name_fc'] == info['dealer_name_fc']:
-                    source_names.append(order_name)
+            cities = [sl.resolve_dealer_info(n, as_of=as_of) for n in bloc_population.index]
+            city_counts = pd.Series([(r or {}).get('city_name', '未匹配') for r in cities]).value_counts()
+            details['城市分布'] = '、'.join(f'{city} {count}' for city, count in city_counts.items())
             times = pd.to_datetime(orders['lock_time'], errors='coerce')
-            target_orders = orders[orders['store_name'].isin(source_names)
+            target_orders = orders[orders['store_name'].eq(target_name)
                                    & orders['order_type'].eq('用户车')
                                    & (times >= pd.Timestamp(start))
                                    & (times < pd.Timestamp(as_of) + pd.Timedelta(days=1))]
             series_counts = target_orders.groupby('series')['order_number'].nunique().sort_values(ascending=False)
             details['车系分布'] = ' / '.join(f'{series} {count}' for series, count in series_counts.items()) or '无锁单'
-            card = {'store': name, 'info': info, 'statistics': stats, 'histograms': histograms}
+            card = {'store': name, 'population_store_name': target_name, 'info': info, 'statistics': stats, 'histograms': histograms}
             cards.append(card)
             if args.format == 'png':
                 filename = re.sub(r'[^\w\u4e00-\u9fff.-]', '_', info['dealer_name_fc']) + '_门店信息手卡.png'
@@ -317,15 +337,15 @@ def main(argv=None):
                 artifacts[name] = str(path.resolve())
         scope = {'data_source': [str(sl.get_store_info_csv_path()), str(LEADS), str(ORDERS)],
                  'time_window': {'start': start, 'end': as_of, 'timezone': 'Asia/Shanghai'},
-                 'filters': {'stores': names, 'status': '开业', 'exclude_overseas': True, 'order_type': '用户车'},
-                 'metric_definition': '国内开业全门店，按全名合并职能编码，无记录计0；线索按日求和，锁单订单号去重；分位数=(低于+0.5同值)/N*100'}
+                 'filters': {'stores': names, 'population_operator': 'active_store', 'activity_days': 30, 'order_type': '用户车'},
+                 'metric_definition': 'active_store原始门店名名单，近30日有订单创建且建店日不晚于截止日，无记录计0；线索按日求和，锁单订单号去重；分位数=(低于+0.5同值)/N*100'}
         population.to_csv(out / 'national_store_population.csv', encoding='utf-8-sig')
         artifacts['population_csv'] = str((out / 'national_store_population.csv').resolve())
         contract = build_success_contract(SCRIPT, ' '.join(sys.argv), scope,
             {'summary': f'{len(cards)} 家门店手卡，全国样本 {len(population)} 家',
              'metrics': {'population_count': len(population)}, 'cards': cards, 'audit': audit}, artifacts,
             {'stores': names, 'as_of': as_of, 'window_days': args.window_days},
-            warnings=['无记录按0计入；国内样本含交付/售后网点，主数据状态为当前快照。'])
+            warnings=['样本原样使用active_store名单，含档期别名和总部记录；近7日无记录计0。'])
         (out / 'store_information_card.json').write_text(json.dumps(contract, ensure_ascii=False, indent=2), encoding='utf-8')
         print(json.dumps(contract, ensure_ascii=False, indent=2) if args.format == 'json'
               else f"[Summary]\n{contract['result']['summary']}\n[Output]\n" + '\n'.join(artifacts.values()))

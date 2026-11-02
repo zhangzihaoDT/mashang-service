@@ -12,24 +12,29 @@ def _to_day_series(df: pd.DataFrame) -> pd.Series:
     return pd.to_datetime(date_series, errors="coerce").dt.floor("D")
 
 
-def _calc_active_store_count(df: pd.DataFrame, target_date: pd.Timestamp) -> int:
+def get_active_store_names(df: pd.DataFrame, target_date: pd.Timestamp) -> pd.Index:
+    """返回固定30日口径的原始门店名名单，供计数和门店分布共同消费。"""
     work = df.copy()
     work["date"] = _to_day_series(work)
     work["store_create_date"] = pd.to_datetime(work.get("store_create_date"), errors="coerce")
     work = work.dropna(subset=["store_name", "date"])
     if work.empty:
-        return 0
+        return pd.Index([], dtype=object)
     open_map = work.groupby("store_name")["store_create_date"].min()
     d = pd.Timestamp(target_date).normalize()
     window_start = d - pd.Timedelta(days=29)
     activity = work[(work["date"] >= window_start) & (work["date"] <= d)]
     if activity.empty:
-        return 0
+        return pd.Index([], dtype=object)
     stores = pd.Index(activity["store_name"].dropna().unique())
     store_open_dates = open_map.reindex(stores)
     is_open = store_open_dates <= d
     open_stores = stores[is_open.fillna(False).to_numpy()]
-    return int(open_stores.size)
+    return open_stores
+
+
+def _calc_active_store_count(df: pd.DataFrame, target_date: pd.Timestamp) -> int:
+    return int(get_active_store_names(df, target_date).size)
 
 
 def run_active_store_operator(df: pd.DataFrame, start: str, end: str) -> dict:
