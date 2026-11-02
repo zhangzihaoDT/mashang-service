@@ -14,7 +14,7 @@
     每次拉取窗口数据 → 与已有 dataset 去重合并 → 逐日扩长历史。
 
 输出（仓库 dataset/，.gitignore 不提交）:
-    dataset/store_daily_leads.csv    列: 门店 / 日期 / 下发线索数
+    dataset/store_daily_leads.csv    列: 门店 / 日期 / 下发线索数 / 门店代码 / 经销商主体
 
 用法:
     python dataset/updater/store_daily_leads_to_csv.py            # 增量更新
@@ -35,10 +35,13 @@ DATASET_DIR = REPO_ROOT / "dataset"
 LEADS_VIEW = "https://tableau-hs.immotors.com/#/views/165/leads_assign_city_store2_1"
 OUTPUT_CSV = DATASET_DIR / "store_daily_leads.csv"
 
-SRC_STORE_COL = "lc_assign_1st2sales_dealer_name"
+# 2026-11：Tableau 视图门店字段由 lc_assign_1st2sales_dealer_name 切换为 lc_dealer_name
+SRC_STORE_COL = "lc_dealer_name"
 SRC_DATE_COL = "日(lc_assign_time_min)"
 SRC_VALUE_COL = "下发线索数"
-OUT_COLUMNS = ["门店", "日期", "下发线索数"]
+SRC_CODE_COL = "lc_dealer_code"
+SRC_BLOC_COL = "lc_bloc_name"
+OUT_COLUMNS = ["门店", "日期", "下发线索数", "门店代码", "经销商主体"]
 
 
 def load_env_file(env_path: Path) -> None:
@@ -78,20 +81,42 @@ def _parse_date(v: str):
 
 
 def normalize(src_path: Path):
-    """把导出的视图 CSV 规范成 [门店, 日期, 下发线索数]。"""
+    """保留 Tableau 的门店代码和主体；缺列/冲突时拒绝覆盖正式库。"""
     import pandas as pd
 
     df = pd.read_csv(src_path, encoding="utf-8-sig", dtype=str, keep_default_na=False)
-    missing = [c for c in (SRC_STORE_COL, SRC_DATE_COL, SRC_VALUE_COL) if c not in df.columns]
+    missing = [c for c in (SRC_STORE_COL, SRC_DATE_COL, SRC_VALUE_COL, SRC_CODE_COL, SRC_BLOC_COL)
+               if c not in df.columns]
     if missing:
         raise RuntimeError(f"视图缺少必需列: {missing}（实际列: {list(df.columns)}）")
     out = pd.DataFrame({
         "门店": df[SRC_STORE_COL].astype(str).str.strip(),
         "日期": df[SRC_DATE_COL].map(_parse_date),
         "下发线索数": pd.to_numeric(df[SRC_VALUE_COL], errors="coerce").fillna(0).astype(int),
+        "门店代码": df[SRC_CODE_COL].str.strip().str.upper(),
+        "经销商主体": df[SRC_BLOC_COL].str.strip(),
     })
     out = out[out["门店"].ne("") & out["日期"].notna()]
+    if out[["门店代码", "经销商主体"]].eq("").any().any():
+        raise RuntimeError("视图门店代码或经销商主体为空，拒绝覆盖")
+    out = out.drop_duplicates()
+    if out.duplicated(["门店", "日期"]).any():
+        raise RuntimeError("视图同一门店同日存在多条冲突记录，拒绝覆盖")
     return out
+
+
+def merge_history(old, fresh):
+    """滚动窗口按门店×日期更新；旧历史无身份字段保持为空，不回填未来归属。"""
+    import pandas as pd
+
+    old = old.copy()
+    for col in ("门店代码", "经销商主体"):
+        if col not in old.columns:
+            old[col] = ""
+    old["日期"] = pd.to_datetime(old["日期"], errors="coerce")
+    return (pd.concat([old, fresh], ignore_index=True)
+            .dropna(subset=["日期"])
+            .drop_duplicates(subset=["门店", "日期"], keep="last")[OUT_COLUMNS])
 
 
 def export_view(exporter, *, tmp: Path, token_name: str, token_value: str,
@@ -146,12 +171,9 @@ def main(argv: list[str] | None = None) -> int:
     if args.rebuild or not OUTPUT_CSV.exists():
         merged = fresh
     else:
-        old = pd.read_csv(OUTPUT_CSV, encoding="utf-8-sig")
-        old["日期"] = pd.to_datetime(old["日期"], errors="coerce")
+        old = pd.read_csv(OUTPUT_CSV, encoding="utf-8-sig", keep_default_na=False)
         before = len(old)
-        merged = pd.concat([old, fresh], ignore_index=True)
-        merged = merged.dropna(subset=["日期"])
-        merged = merged.drop_duplicates(subset=["门店", "日期"], keep="last")
+        merged = merge_history(old, fresh)
         print(f"历史 {before} 行 → 合并后 {len(merged)} 行（新增/更新 {len(merged) - before}）")
 
     merged = merged.sort_values(["日期", "门店"]).reset_index(drop=True)

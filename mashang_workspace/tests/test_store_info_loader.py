@@ -160,3 +160,99 @@ def test_missing_store_returns_none_graceful():
     r = sl.resolve_dealer_info("__不存在的门店__")
     assert r is None
     assert df_exists or sl.summary()["loaded"] is False
+
+
+@pytest.mark.parametrize("raw,expected", [
+    ("杭州城北万象城-换铺", "杭州城北万象城"),
+    ("南京景枫中心2026", "南京景枫中心"),
+    ("成都温江合生汇2025", "成都温江合生汇"),
+    ("popup  吴中永旺梦乐城  0829-1101", "吴中永旺梦乐城"),
+    ("苏州太仓万达  260829-261101", "苏州太仓万达"),
+    ("苏州大悦城10/15~11/15", "苏州大悦城"),
+    ("长沙北辰三角洲大悦城（换铺）", "长沙北辰三角洲大悦城"),
+    ("深圳kkmall", "深圳kkmall"),
+    ("上海2026广场", "上海2026广场"),
+])
+def test_store_suffix_cleanup_preserves_name(raw, expected):
+    assert sl._strip_noise_tokens(sl._normalize_name(raw)) == expected
+
+
+def test_resolve_cleaned_name_and_reject_ambiguity(monkeypatch):
+    monkeypatch.setattr(sl, "get_store_identity_lookup", lambda as_of=None: {})
+    def row(name):
+        return [{"dealer_name_fc": name, "bloc_name": name}]
+
+    monkeypatch.setattr(sl, "get_dealer_lookup", lambda: {
+        "杭州城北万象城体验中心": row("杭州城北万象城体验中心"),
+        "苏州吴中永旺梦乐城城市展厅": row("苏州吴中永旺梦乐城城市展厅"),
+        "南京景枫中心体验中心": row("南京景枫中心体验中心"),
+        "南京景枫中心城市展厅": row("南京景枫中心城市展厅"),
+    })
+    assert sl.resolve_dealer_info("杭州城北万象城-换铺")["dealer_name_fc"] == "杭州城北万象城体验中心"
+    assert sl.resolve_dealer_info("popup 吴中永旺梦乐城 0829-1101")["dealer_name_fc"] == "苏州吴中永旺梦乐城城市展厅"
+    assert sl.resolve_dealer_info("南京景枫中心2026") is None
+    assert sl.resolve_dealer_info("南京景枫中心体验中心")["dealer_name_fc"] == "南京景枫中心体验中心"
+    assert sl.resolve_dealer_info("") is None
+    assert sl.resolve_dealer_info("2026") is None
+
+
+def test_code_identity_precedes_name_and_checks_bloc(monkeypatch, tmp_path):
+    path = tmp_path / "leads.csv"
+    path.write_text("门店,日期,门店代码,经销商主体\n北京朝阳,2026-10-26,IMA002,正确集团\n", encoding="utf-8")
+    monkeypatch.setattr(sl, "get_store_identity_path", lambda: path)
+    monkeypatch.setattr(sl, "get_dealer_lookup", lambda: {
+        "北京朝阳公园用户中心": [{"dealer_code": "IMA001", "bloc_name": "错误集团", "dealer_name_fc": "北京朝阳公园用户中心"}],
+        "北京朝阳用户中心": [{"dealer_code": "IMA002", "bloc_name": "正确集团", "dealer_name_fc": "北京朝阳用户中心"}],
+    })
+    assert sl.resolve_dealer_info("北京朝阳")["dealer_code"] == "IMA002"
+    assert sl.resolve_dealer_info("任何名称", dealer_code="ima002", bloc_name="正确集团")["dealer_code"] == "IMA002"
+    assert sl.resolve_dealer_info("北京朝阳", dealer_code="IMA999") is None
+    assert sl.resolve_dealer_info("北京朝阳", bloc_name="错误集团") is None
+    # 不能用未来观测的 code 推断过去归属。
+    assert sl.resolve_dealer_info("北京朝阳", as_of="2026-10-25")["dealer_code"] == "IMA001"
+    path.write_text("门店,日期,门店代码,经销商主体\n北京朝阳,2026-10-26,IMA001,错误集团\n", encoding="utf-8")
+    assert sl.resolve_dealer_info("北京朝阳")["dealer_code"] == "IMA001"
+
+
+def test_conflicting_observed_codes_do_not_fall_back(monkeypatch, tmp_path):
+    path = tmp_path / "leads.csv"
+    path.write_text("门店,日期,门店代码,经销商主体\n某店,2026-10-26,IMA001,甲\n某店,2026-10-26,IMA002,乙\n", encoding="utf-8")
+    monkeypatch.setattr(sl, "get_store_identity_path", lambda: path)
+    monkeypatch.setattr(sl, "get_dealer_lookup", lambda: {"某店体验中心": [{"dealer_code": "IMA001", "bloc_name": "甲"}]})
+    assert sl.resolve_dealer_info("某店") is None
+
+
+def test_short_identity_alias_uses_code_not_first_master_row(monkeypatch):
+    monkeypatch.setattr(sl, "get_dealer_lookup", lambda: {
+        "深圳壹方城体验中心": [
+            {"dealer_code": "IMH020", "bloc_name": "深圳车易"},
+            {"dealer_code": "IMH267", "bloc_name": "深圳车易"},
+        ],
+    })
+    monkeypatch.setattr(sl, "get_store_identity_lookup", lambda as_of=None: {
+        "深圳壹方城（2025）": ("IMH267", "深圳车易"),
+    } if as_of != "2025-01-01" else {})
+    assert sl.resolve_dealer_info("深圳壹方城")["dealer_code"] == "IMH267"
+    assert sl.resolve_dealer_info(" 深圳壹方城 ")["dealer_code"] == "IMH267"
+    assert sl.resolve_dealer_info("深圳壹方城（2025）")["dealer_code"] == "IMH267"
+    assert sl.resolve_dealer_info("深圳壹方城", as_of="2025-01-01")["dealer_code"] == "IMH020"
+
+
+def test_short_alias_conflict_blocks_fuzzy_fallback_but_exact_wins(monkeypatch):
+    monkeypatch.setattr(sl, "get_dealer_lookup", lambda: {
+        "某店体验中心": [
+            {"dealer_code": "IMH001", "bloc_name": "甲"},
+            {"dealer_code": "IMH002", "bloc_name": "乙"},
+        ],
+    })
+    monkeypatch.setattr(sl, "get_store_identity_lookup", lambda as_of=None: {
+        "某店（2025）": ("IMH001", "甲"), "某店（2026）": ("IMH002", "乙"),
+    })
+    assert sl.resolve_dealer_info("某店") is None
+    assert sl.resolve_dealer_info("某店", bloc_name="乙")["dealer_code"] == "IMH002"
+    assert sl.resolve_dealer_info("某店（2025）")["dealer_code"] == "IMH001"
+
+
+def test_identity_alias_preserves_investor_and_does_not_match_substrings():
+    assert sl._identity_alias("上海长泰广场（郑隆）") != sl._identity_alias("上海长泰广场")
+    assert sl._identity_alias("深圳壹方城") != sl._identity_alias("深圳龙华壹方城")

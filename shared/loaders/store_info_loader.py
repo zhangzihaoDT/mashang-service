@@ -135,11 +135,19 @@ def _normalize_name(name: Any) -> str:
 
 def _strip_noise_tokens(sn: str) -> str:
     """去掉门店简称中的临时代际后缀（快闪档期/换铺/迁址/车城等）。"""
-    return re.sub(
-        r"车城店.*|分销店.*|换铺.*|迁址.*|换址.*|\(作废\).*|（作废）.*|.*2026|.*\d{4}-\d{4}",
-        "",
-        sn,
-    ).strip()
+    sn = re.sub(r"^popup", "", sn, flags=re.IGNORECASE)
+    # 只移除尾部标记，不能让贪婪的 .* 吞掉年份前的门店名。
+    previous = None
+    while sn != previous:
+        previous = sn
+        sn = re.sub(
+            r"(?:\d{1,2}/\d{1,2}\s*[~～至—-]\s*\d{1,2}/\d{1,2}"
+            r"|\d{6}\s*[-~～至—]\s*\d{6}"
+            r"|\d{4}\s*[-~～至—]\s*\d{4}"
+            r"|20\d{2}|车城店|分销店|换铺|迁址|换址|作废)$",
+            "", sn,
+        ).rstrip("-—_～~· ")
+    return sn
 
 
 def _clean_dealer_name_fc(name: Any) -> str:
@@ -207,9 +215,56 @@ def get_dealer_lookup() -> Dict[str, List[Dict[str, Any]]]:
     return _build_index()
 
 
-def resolve_dealer_info(store_name: str) -> Optional[Dict[str, Any]]:
+def get_store_identity_path() -> Path:
+    return get_service_root() / "dataset" / "store_daily_leads.csv"
+
+
+@functools.lru_cache(maxsize=8)
+def _load_store_identities(path: str, mtime_ns: int, size: int, as_of: str | None) -> dict:
+    """按原始简称读取最新已观测身份；不去括号，保留投资人/档期区别。"""
+    df = pd.read_csv(path, encoding="utf-8-sig", dtype=str, keep_default_na=False)
+    required = {"门店", "日期", "门店代码", "经销商主体"}
+    if not required.issubset(df.columns):
+        return {}  # 兼容尚未迁移的历史三列表。
+    df["日期"] = pd.to_datetime(df["日期"], errors="coerce")
+    df = df.dropna(subset=["日期"])
+    if as_of is not None:
+        df = df[df["日期"] <= pd.Timestamp(as_of).normalize()]
+    df["门店"] = df["门店"].str.strip()
+    df["门店代码"] = df["门店代码"].str.strip().str.upper()
+    df["经销商主体"] = df["经销商主体"].str.strip()
+    df = df[df["门店代码"].ne("")]
+    latest = df.groupby("门店")["日期"].transform("max")
+    result = {}
+    for name, group in df[df["日期"] == latest].groupby("门店"):
+        pairs = group[["门店代码", "经销商主体"]].drop_duplicates()
+        result[name] = tuple(pairs.iloc[0]) if len(pairs) == 1 else None
+    return result
+
+
+def get_store_identity_lookup(as_of: str | None = None) -> dict:
+    path = get_store_identity_path()
+    if not path.exists():
+        return {}
+    stat = path.stat()
+    return _load_store_identities(str(path), stat.st_mtime_ns, stat.st_size, as_of)
+
+
+def _identity_alias(name: str) -> str:
+    """仅清除已知档期/迁铺标记；保留括号中的投资人等身份信息。"""
+    name = re.sub(r"\s+", "", name).casefold()
+    name = re.sub(r"[（(](?:20\d{2}|换铺|迁址|换址)[）)]$", "", name)
+    return _strip_noise_tokens(name)
+
+
+def resolve_dealer_info(store_name: str, *, dealer_code: str | None = None,
+                        bloc_name: str | None = None,
+                        as_of: str | None = None) -> Optional[Dict[str, Any]]:
     """把订单侧门店简称解析为经销商信息 dict；无法解析返回 None。
 
+    code 优先（显式参数或线索库原始简称→code），Bloc 校验；无身份记录才回退名称。
+    as_of 限制使用的线索身份观测日；不代表历史门店主数据状态重建。
+    已知 code 无效/冲突时返回 None，不回退模糊名称。
     返回字段: bloc_name / dealer_type / store_format / region_name / city_name /
     dealer_code / dealer_name_fc / store_name(入参)
     """
@@ -222,17 +277,65 @@ def resolve_dealer_info(store_name: str) -> Optional[Dict[str, Any]]:
         row["store_name"] = store_name
         return row
 
+    identities = get_store_identity_lookup(as_of)
+    raw_name = str(store_name or "").strip()
+    code = str(dealer_code or "").strip().upper()
+    bloc = str(bloc_name or "").strip()
+    if not code:
+        identity_found = raw_name in identities
+        identity = identities.get(raw_name)
+        if not identity_found:
+            alias = _identity_alias(raw_name)
+            candidates = [value for name, value in identities.items()
+                          if alias and _identity_alias(name) == alias]
+            if bloc:
+                candidates = [value for value in candidates
+                              if value is None or value[1] == bloc]
+            identity_found = bool(candidates)
+            unique = set(candidates)
+            identity = next(iter(unique)) if len(unique) == 1 else None
+        if identity_found:
+            if identity is None:
+                return None
+            code, observed_bloc = identity
+            if bloc and observed_bloc and bloc != observed_bloc:
+                return None
+            bloc = bloc or observed_bloc
+    if code:
+        rows = [r for group in idx.values() for r in group if r["dealer_code"] == code]
+        if len(rows) != 1 or (bloc and rows[0]["bloc_name"] != bloc):
+            return None
+        return _first(rows)
+    if bloc:
+        idx = {k: [r for r in rows if r["bloc_name"] == bloc] for k, rows in idx.items()}
+        idx = {k: rows for k, rows in idx.items() if rows}
+
     sn = _normalize_name(store_name)
     if not sn:
         return None
+    # 全名精确匹配优先；既有简称匹配保持兼容。
+    if sn in idx:
+        return _first(idx[sn])
     for key, rows in idx.items():
-        if store_name in key or (sn and sn in key):
+        if sn and sn in key:
             return _first(rows)
-    sn2 = _strip_noise_tokens(sn)
-    if sn2 and sn2 != sn:
+    # 历史车城/分销简称常同时命中同址销售、交付、售后名称；保持原有解析顺序。
+    legacy = re.sub(r"车城店.*|分销店.*|换铺.*|迁址.*|换址.*", "", sn).strip()
+    if legacy and legacy != sn:
         for key, rows in idx.items():
-            if sn2 in key:
+            if legacy in key:
                 return _first(rows)
+    # 新增的后缀清洗匹配只接受唯一门店，避免引入新的歧义归属。
+    for candidate in (_strip_noise_tokens(sn),):
+        if not candidate:
+            continue
+        if candidate in idx:
+            return _first(idx[candidate])
+        matches = [rows for key, rows in idx.items() if candidate in key]
+        if len(matches) == 1:
+            return _first(matches[0])
+        if len(matches) > 1:
+            return None
     return None
 
 

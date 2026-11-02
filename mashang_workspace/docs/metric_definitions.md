@@ -56,6 +56,17 @@
 > - 互校：完整日两套总量应接近（如 2026-10-02 分别为 22,028 / 22,042）。
 > - 注意：`assign_data.csv` 的 `下发线索数（门店）` 是**全局中「门店」这一个渠道**，**不等于** `store_daily_leads.csv` 的门店级明细。
 
+### 门店身份关联（2026-11 code 接入）
+
+- Tableau 门店级视图必须提供 `lc_dealer_name`、`lc_dealer_code`、`lc_bloc_name`、`日(lc_assign_time_min)`、`下发线索数`。
+- `dataset/updater/store_daily_leads_to_csv.py` 保留为 `门店 / 日期 / 下发线索数 / 门店代码 / 经销商主体`；后续滚动刷新自动保留 code 和 Bloc。缺列、空身份、同店同日冲突阻断写盘。
+- 仍按门店×日期增量覆盖。旧三列历史自动兼容，身份字段留空；不得用新窗口身份回填历史主体。
+- 统一消费 `shared/loaders/store_info_loader.py::resolve_dealer_info`：显式 code 或线索库原始简称的最新已观测 code 优先关联主数据 `Dealer Code`，Bloc 做一致性校验。已知编码缺失/不唯一、主体冲突、同店最新日多编码时返回未匹配，不回退模糊名称。
+- 没有 code 观测的门店兼容原名称解析；该回退仍可能存在简称歧义。身份查找优先精确原名；简称入口可清除明确的年份、档期、换铺标记后关联已观测身份，仅接受唯一 code/Bloc 组合（传入 Bloc 可进一步限定）。多个候选或冲突观测返回未匹配；保留括号里的投资人等身份信息，不做名称子串扩展。
+- 默认身份为该简称最新已观测记录；可传 `as_of=YYYY-MM-DD` 限制观测截止日。门店主数据仍为当前快照，不代表历史状态重建。线索库无观测的日期不视为 code 归属的证明。
+- 已运行的长驻进程需重新加载修改后的程序；线索身份文件原子刷新后，loader 按文件时间和大小自动失效身份缓存。
+- 独立校验：`.venv/bin/python dataset/updater/store_daily_leads_to_csv.py --dry-run [--mobile]`；通过后去掉 `--dry-run` 执行正式增量更新。全量更新入口仍为 `make allupdate`。
+
 ### 下发线索数
 
 - **业务含义**：系统下发给门店/渠道的线索总数

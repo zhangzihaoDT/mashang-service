@@ -98,6 +98,12 @@ def load_code_map() -> dict[str, str]:
                 name, code = str(name).strip(), str(code).strip()
                 if name and name not in IGNORED_TYPE_ROWS and code and code not in IGNORED_TYPE_ROWS:
                     m[name] = code
+    # 最新线索库身份优先于历史主理快照；冲突记录不传播旧 code。
+    for name, identity in sl.get_store_identity_lookup().items():
+        if identity is None:
+            m.pop(name, None)
+        else:
+            m[name] = identity[0]
     return m
 
 
