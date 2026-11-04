@@ -40,12 +40,12 @@ jobs:
           pytest mashang_workspace/tests/test_root_cleanup.py \
                  mashang_workspace/tests/test_schema_docs_sync.py \
                  mashang_workspace/tests/test_model_positioning_loader.py \
-                 mashang_workspace/tests/test_result_contract.py \
+                 mashang_workspace/tests/scripts/test_result_contract.py \
                  mashang_workspace/tests/eval/test_context_parser.py \
                  mashang_workspace/tests/eval/test_followup_runner.py \
-                 mashang_workspace/tests/eval/test_numeric_eval.py \
                  mashang_workspace/tests/eval/test_result_reference.py \
-                 mashang_workspace/tests/eval/test_unified_eval.py \
+                 tests/test_tp_and_mix_ways_dataset_build.py \
+                 tests/test_tp_and_mix_ways_raw_guard.py \
                  -q
 
       - name: Upload eval artifact

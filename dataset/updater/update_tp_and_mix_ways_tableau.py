@@ -1,46 +1,65 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-增量更新 tp_and_mix_ways 数据集：
-1. 从 Tableau 下载 6 个视图的 CSV（仅当月数据）
-2. 解析、宽表化
-3. Upsert 到现有 parquet（按 date_month 替换）
-4. 更新 registry + quality report
+增量更新 TP&MIX-ways 数据集（staging 全链路校验 → 跨层事务发布）。
+
+安全契约：
+1. Tableau 导出先落在 dataset/TP&MIX-ways/staging/runs/<run_id>/increment/，
+   绝不直接写正式 raw_csv。
+2. 正式 raw_csv 与增量在 staging 合并：增量包含的月份整月替换（消失的键计入
+   removed_rows），未出现在增量中的历史月份保持原值；合并结果先校验列、主键、
+   月份和数值。整月删除比例超过阈值默认阻断。
+3. 派生层也从 staging merged raw 全量构建到 staging；raw、parquet、registry、
+   quality 全部校验通过后才进入发布。
+4. 发布是单次跨层事务：先快照全部目标文件到 staging/backups/<run_id>/，再逐文件
+   os.replace；任一失败恢复本次事务已修改的全部文件。os.replace 只提供文件级
+   原子性，不保证整个数据集的一致可见性；transaction manifest 是恢复依据。
+5. 运行锁防止并发更新；启动时自动回滚上次中断留下的 publishing manifest。
 
 用法:
     python dataset/updater/update_tp_and_mix_ways_tableau.py
     python dataset/updater/update_tp_and_mix_ways_tableau.py --mobile
     python dataset/updater/update_tp_and_mix_ways_tableau.py --timeout 300
+    python dataset/updater/update_tp_and_mix_ways_tableau.py --dry-run
+    python dataset/updater/update_tp_and_mix_ways_tableau.py --skip-export  # 仅从正式 raw 重建
 """
 
 from __future__ import annotations
 
-import csv
-import json
+import argparse
+import io
 import os
 import sys
-import argparse
-from datetime import datetime
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
-from urllib.parse import urlencode, quote
-from urllib.request import Request, urlopen
-from urllib.error import HTTPError, URLError
-import xml.etree.ElementTree as ET
 import zipfile
-import io
+from pathlib import Path
+from typing import Any
 
-import pandas as pd
+from urllib.error import HTTPError, URLError
+from urllib.parse import quote, urlencode
+from urllib.request import Request, urlopen
+import xml.etree.ElementTree as ET
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-RAW_CSV_DIR = REPO_ROOT / "dataset" / "TP&MIX-ways" / "raw_csv"
-PARQUET_DIR = REPO_ROOT / "dataset" / "TP&MIX-ways" / "parquet"
-REGISTRY_DIR = REPO_ROOT / "dataset" / "TP&MIX-ways" / "registry"
-QUALITY_DIR = REPO_ROOT / "dataset" / "TP&MIX-ways" / "quality"
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
-REGISTRY_PATH = REGISTRY_DIR / "tp_and_mix_ways_tables.json"
-QUALITY_MD_PATH = QUALITY_DIR / "tp_and_mix_ways_dataset_quality.md"
-QUALITY_JSON_PATH = QUALITY_DIR / "tp_and_mix_ways_dataset_quality.json"
+from scripts.build_tp_and_mix_ways_dataset import (  # noqa: E402
+    build_tp_and_mix_ways_dataset,
+)
+from dataset.updater.tp_and_mix_ways_raw_guard import (  # noqa: E402
+    DEFAULT_MAX_MONTH_DELETION_RATIO,
+    RawContractError,
+    merge_snapshot_to_staging,
+    new_run_id,
+    publish_update_transaction,
+    recover_incomplete_transactions,
+    update_lock,
+    validate_derived_baseline,
+    validate_raw_derived_consistency,
+    validate_snapshot,
+)
+
+DATASET_ROOT = REPO_ROOT / "dataset" / "TP&MIX-ways"
 
 TABLEAU_VIEWS: list[dict[str, str]] = [
     {"view_path": "-ways/market_monthly", "output": "way1_market_energy_monthly_data.csv"},
@@ -50,124 +69,6 @@ TABLEAU_VIEWS: list[dict[str, str]] = [
     {"view_path": "-ways/way5_price_segment_monthly", "output": "way5_price_segment_monthly_data.csv"},
     {"view_path": "-ways/way6_product_segment_monthly", "output": "way6_product_segment_monthly_data.csv"},
 ]
-
-# Tableau REST API 返回的列名与 build 脚本预期不一致，做归一化映射
-COLUMN_NORMALIZE: dict[str, str] = {
-    "品牌 (新势力/传统自主/自主新品牌/其他)": "品牌 (组)",
-    "品牌 (豪华分组) ": "品牌 (新豪华分组) ",
-    "自主/合资/进口": "国产/进口",
-    "前驱/后驱/四驱": "驱动形式 (组)",
-}
-
-# ---- column mappings (Chinese → English snake_case) - 与 build 脚本一致 ----
-COLUMN_MAP: Dict[str, List[Tuple[str, str]]] = {
-    "market_energy_monthly": [
-        ("日期 年/月", "date_month"),
-        ("燃料类型 (组)", "fuel_type_group"),
-        ("燃料类型", "fuel_type"),
-        ("度量名称", "_measure_name"),
-        ("度量值", "_measure_value"),
-    ],
-    "brand_monthly": [
-        ("日期 年/月", "date_month"),
-        ("品牌", "brand"),
-        ("品牌 (组)", "brand_group"),
-        ("品牌 (新豪华分组) ", "brand_luxury_group"),
-        ("厂商", "oem"),
-        ("厂商集团", "oem_group"),
-        ("品牌国别", "brand_country"),
-        ("所有权", "ownership_type"),
-        ("国产/进口", "domestic_import"),
-        ("度量名称", "_measure_name"),
-        ("度量值", "_measure_value"),
-    ],
-    "model_monthly": [
-        ("日期 年/月", "date_month"),
-        ("品牌", "brand"),
-        ("品牌系别", "brand_series"),
-        ("SUB_MODEL_ID", "sub_model_id"),
-        ("车型", "model"),
-        ("子车型", "sub_model"),
-        ("燃料类型", "fuel_type"),
-        ("燃料类型 (组)", "fuel_type_group"),
-        ("车身形式", "body_type"),
-        ("车型级别", "vehicle_level"),
-        ("车型级别 (组)", "vehicle_level_group"),
-        ("上汽细分市场", "saic_segment"),
-        ("驱动形式", "drive_type"),
-        ("驱动形式 (组)", "drive_type_group"),
-        ("度量名称", "_measure_name"),
-        ("度量值", "_measure_value"),
-    ],
-    "geo_monthly": [
-        ("日期 年/月", "date_month"),
-        ("省", "province"),
-        ("市", "city"),
-        ("区域划分", "region_group"),
-        ("燃料类型 (组)", "fuel_type_group"),
-        ("25年城市级别", "city_tier_2025"),
-        ("25年城市级别 (组)", "city_tier_group"),
-        ("度量名称", "_measure_name"),
-        ("度量值", "_measure_value"),
-    ],
-    "price_segment_monthly": [
-        ("日期 年/月", "date_month"),
-        ("TP 5万1档", "tp_bucket_5w"),
-        ("TP 10万1档", "tp_bucket_10w"),
-        ("燃料类型 (组)", "fuel_type_group"),
-        ("车身形式", "body_type"),
-        ("车型级别 (组)", "vehicle_level_group"),
-        ("度量名称", "_measure_name"),
-        ("度量值", "_measure_value"),
-    ],
-    "product_segment_monthly": [
-        ("日期 年/月", "date_month"),
-        ("上汽细分市场", "saic_segment"),
-        ("车身形式", "body_type"),
-        ("车型级别", "vehicle_level"),
-        ("车型级别 (组)", "vehicle_level_group"),
-        ("燃料类型 (组)", "fuel_type_group"),
-        ("驱动形式 (组)", "drive_type_group"),
-        ("度量名称", "_measure_name"),
-        ("度量值", "_measure_value"),
-    ],
-}
-
-GRAIN_DEFS: Dict[str, List[str]] = {
-    "market_energy_monthly": ["date_month", "fuel_type_group", "fuel_type"],
-    "brand_monthly": ["date_month", "brand"],
-    "model_monthly": ["date_month", "brand", "model", "sub_model", "sub_model_id"],
-    "geo_monthly": ["date_month", "province", "city", "city_tier_group", "fuel_type_group"],
-    "price_segment_monthly": ["date_month", "tp_bucket_5w", "tp_bucket_10w", "fuel_type_group", "body_type", "vehicle_level_group"],
-    "product_segment_monthly": ["date_month", "saic_segment", "body_type", "vehicle_level", "vehicle_level_group", "fuel_type_group", "drive_type_group"],
-}
-
-PARQUET_FILENAMES: Dict[str, str] = {
-    "market_energy_monthly": "market_energy_monthly.parquet",
-    "brand_monthly": "brand_monthly.parquet",
-    "model_monthly": "model_monthly.parquet",
-    "geo_monthly": "geo_monthly.parquet",
-    "price_segment_monthly": "price_segment_monthly.parquet",
-    "product_segment_monthly": "product_segment_monthly.parquet",
-}
-
-TABLE_NAMES = [
-    "market_energy_monthly",
-    "brand_monthly",
-    "model_monthly",
-    "geo_monthly",
-    "price_segment_monthly",
-    "product_segment_monthly",
-]
-
-SOURCE_CSV_MAP: Dict[str, str] = {
-    "market_energy_monthly": "way1_market_energy_monthly_data.csv",
-    "brand_monthly": "way2_brand_monthly_data.csv",
-    "model_monthly": "way3_model_monthly_data.csv",
-    "geo_monthly": "way4_geo_monthly_data.csv",
-    "price_segment_monthly": "way5_price_segment_monthly_data.csv",
-    "product_segment_monthly": "way6_product_segment_monthly_data.csv",
-}
 
 
 def load_env_file(env_path: Path) -> None:
@@ -423,254 +324,14 @@ def parse_tableau_view_path(view: str) -> tuple[str, str]:
 
 # ---- CSV 解析（与 build 脚本一致） ----
 
-def _parse_date_month(raw: str) -> Optional[str]:
-    raw = raw.strip()
-    try:
-        dt = datetime.strptime(raw, "%Y年%m月")
-        return dt.strftime("%Y-%m-01")
-    except ValueError:
-        try:
-            dt = datetime.strptime(raw, "%Y年%-m月")
-            return dt.strftime("%Y-%m-01")
-        except ValueError:
-            return None
-
-
-def _to_numeric(val: Any) -> Optional[float]:
-    if val is None:
-        return None
-    cleaned = str(val).strip().replace(",", "").replace(" ", "")
-    if cleaned == "" or cleaned == "-":
-        return None
-    try:
-        return float(cleaned)
-    except ValueError:
-        return None
-
-
-def normalize_csv(csv_path: Path) -> None:
-    """归一化 CSV header：列名对齐 build 脚本预期。"""
-    with open(csv_path, encoding="utf-8", newline="") as f:
-        reader = csv.reader(f)
-        rows = list(reader)
-    if not rows:
-        return
-    header = rows[0]
-    normalized_header = [COLUMN_NORMALIZE.get(col, col) for col in header]
-    tmp_path = csv_path.with_name(csv_path.name + ".norm.tmp")
-    with open(tmp_path, mode="w", encoding="utf-8", newline="") as f:
-        writer = csv.writer(f)
-        writer.writerow(normalized_header)
-        for row in rows[1:]:
-            writer.writerow(row)
-    tmp_path.replace(csv_path)
-
-
-def read_and_widen_csv(csv_path: Path, table_name: str) -> pd.DataFrame:
-    """读取归一化后的 CSV（UTF-8 逗号分隔）并宽表化。"""
-    col_map = dict(COLUMN_MAP[table_name])
-    measure_name_col = "_measure_name"
-    measure_value_col = "_measure_value"
-
-    with open(csv_path, encoding="utf-8", newline="") as f:
-        reader = csv.reader(f)
-        raw_header = next(reader)
-
-    normalized_col_map = {k.strip(): v for k, v in col_map.items()}
-    col_mapping = {}
-    for i, raw_col in enumerate(raw_header):
-        stripped = raw_col.strip()
-        if stripped in normalized_col_map:
-            col_mapping[i] = normalized_col_map[stripped]
-
-    rows = []
-    with open(csv_path, encoding="utf-8", newline="") as f:
-        reader = csv.reader(f)
-        next(reader)
-        for row in reader:
-            if len(row) < len(raw_header):
-                continue
-            parsed = {}
-            for i, val in enumerate(row):
-                if i in col_mapping:
-                    parsed[col_mapping[i]] = val.strip()
-            if parsed:
-                rows.append(parsed)
-
-    if not rows:
-        raise ValueError(f"No data rows read from {csv_path.name}")
-
-    raw_df = pd.DataFrame(rows)
-
-    wide_rows = []
-    dim_cols = [c for c in raw_df.columns if c not in (measure_name_col, measure_value_col)]
-    for (group_keys), group in raw_df.groupby(dim_cols, sort=False):
-        row_data = dict(zip(dim_cols, group_keys))
-        for _, r in group.iterrows():
-            mname = r[measure_name_col]
-            mval = r[measure_value_col]
-            row_data[mname] = mval
-        wide_rows.append(row_data)
-
-    wide_df = pd.DataFrame(wide_rows)
-
-    known_measures = {
-        "销量": "sales",
-        "TP重心": "weighted_tp",
-        "加权长(mm)": "weighted_length_mm",
-        "加权宽(mm)": "weighted_width_mm",
-        "加权高(mm)": "weighted_height_mm",
-        "加权轴距(mm)": "weighted_wheelbase_mm",
-    }
-    for cn, en in known_measures.items():
-        if cn in wide_df.columns:
-            wide_df.rename(columns={cn: en}, inplace=True)
-            wide_df[en] = wide_df[en].apply(_to_numeric)
-
-    wide_df.drop(columns=[measure_name_col, measure_value_col], inplace=True, errors="ignore")
-    wide_df["date_month"] = wide_df["date_month"].apply(_parse_date_month)
-    wide_df.dropna(subset=["date_month"], inplace=True)
-
-    for enum_col in ["sales", "weighted_tp", "weighted_length_mm",
-                     "weighted_width_mm", "weighted_height_mm", "weighted_wheelbase_mm"]:
-        if enum_col in wide_df.columns:
-            wide_df[enum_col] = pd.to_numeric(wide_df[enum_col], errors="coerce")
-
-    return wide_df
-
-
-def upsert_table(existing: pd.DataFrame, new: pd.DataFrame, grain_cols: List[str]) -> pd.DataFrame:
-    """按 date_month + grain 做 upsert。"""
-    if existing.empty:
-        return new
-
-    new_months = set(new["date_month"].dropna().unique())
-    if not new_months:
-        return existing
-
-    print(f"    new data months: {sorted(new_months)}")
-    print(f"    existing rows before: {len(existing)}")
-
-    # 移除与新数据月份重叠的行
-    existing = existing[~existing["date_month"].isin(new_months)]
-    print(f"    existing rows after removing overlap: {len(existing)}")
-
-    # 列对齐
-    all_cols = list(dict.fromkeys(list(existing.columns) + list(new.columns)))
-    for c in all_cols:
-        if c not in existing.columns:
-            existing[c] = pd.NA
-        if c not in new.columns:
-            new[c] = pd.NA
-    existing = existing[all_cols]
-    new = new[all_cols]
-
-    # 类型对齐
-    for c in existing.columns:
-        if c in new.columns and c != "date_month":
-            try:
-                new[c] = new[c].astype(existing[c].dtype)
-            except Exception:
-                pass
-
-    merged = pd.concat([existing, new], ignore_index=True, sort=False)
-    print(f"    merged rows: {len(merged)}")
-    return merged
-
-
-def build_quality_report(
-    table_name: str,
-    df: pd.DataFrame,
-    grain_cols: List[str],
-    parquet_path: Path,
-    build_status: str,
-) -> Dict[str, Any]:
-    report: Dict[str, Any] = {
-        "table_name": table_name,
-        "build_status": build_status,
-        "row_count": len(df),
-        "column_count": len(df.columns),
-        "columns": list(df.columns),
-    }
-    if "date_month" in df.columns:
-        valid_dates = df["date_month"].dropna()
-        if len(valid_dates) > 0:
-            report["date_min"] = str(valid_dates.min())
-            report["date_max"] = str(valid_dates.max())
-        else:
-            report["date_min"] = None
-            report["date_max"] = None
-    if "sales" in df.columns:
-        report["sales_null_count"] = int(df["sales"].isna().sum())
-        report["sales_negative_count"] = int((df["sales"] < 0).sum())
-    else:
-        report["sales_null_count"] = None
-        report["sales_negative_count"] = None
-    if "weighted_tp" in df.columns:
-        report["weighted_tp_null_count"] = int(df["weighted_tp"].isna().sum())
-    else:
-        report["weighted_tp_null_count"] = None
-    if grain_cols and all(c in df.columns for c in grain_cols):
-        dup_count = int(df.duplicated(subset=grain_cols, keep=False).sum())
-        report["duplicate_grain_count"] = dup_count
-        report["duplicate_grain_keys"] = []
-    else:
-        report["duplicate_grain_count"] = None
-        report["duplicate_grain_keys"] = []
-    if "date_month" in df.columns and "sales" in df.columns:
-        monthly = df.groupby("date_month")["sales"].sum().to_dict()
-        report["total_sales_by_month"] = {str(k): float(v) for k, v in sorted(monthly.items())}
-    else:
-        report["total_sales_by_month"] = {}
-    report["parquet_output_path"] = str(parquet_path.resolve())
-    return report
-
-
-def format_quality_markdown(all_reports: List[Dict[str, Any]]) -> str:
-    lines = [
-        "# TP&MIX-ways Dataset — Quality Report",
-        f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
-        "",
-        "---",
-        "",
-    ]
-    for r in all_reports:
-        dup_flag = "WARNING" if (r.get("duplicate_grain_count") or 0) > 0 else "PASS"
-        lines.append(f"## {r['table_name']} — {r['build_status']} ({dup_flag})")
-        lines.append("")
-        lines.append(f"| Metric | Value |")
-        lines.append(f"|--------|-------|")
-        lines.append(f"| row_count | {r.get('row_count', 'N/A')} |")
-        lines.append(f"| column_count | {r.get('column_count', 'N/A')} |")
-        lines.append(f"| date_min | {r.get('date_min', 'N/A')} |")
-        lines.append(f"| date_max | {r.get('date_max', 'N/A')} |")
-        lines.append(f"| sales_null_count | {r.get('sales_null_count', 'N/A')} |")
-        lines.append(f"| sales_negative_count | {r.get('sales_negative_count', 'N/A')} |")
-        lines.append(f"| weighted_tp_null_count | {r.get('weighted_tp_null_count', 'N/A')} |")
-        lines.append(f"| duplicate_grain_count | {r.get('duplicate_grain_count', 'N/A')} |")
-        lines.append(f"| parquet_output | `{r.get('parquet_output_path', 'N/A')}` |")
-        lines.append("")
-        lines.append(f"**Columns**: {', '.join(r.get('columns', []))}")
-        lines.append("")
-        if (r.get("duplicate_grain_count") or 0) > 0:
-            lines.append(f"### Duplicate Grain Keys (top {len(r.get('duplicate_grain_keys', []))})")
-            lines.append("")
-            for k in r.get("duplicate_grain_keys", []):
-                lines.append(f"- `{k}`")
-            lines.append("")
-            lines.append("> Duplicate rows detected.")
-            lines.append("")
-        lines.append("---")
-        lines.append("")
-    return "\n".join(lines)
-
-
-def step_export_all_views(mobile: bool = False, timeout: int = 600) -> bool:
+def step_export_all_views(
+    output_dir: Path, mobile: bool = False, timeout: int = 600
+) -> bool:
     print("\n" + "=" * 60)
-    print("从 Tableau 导出 TP&MIX-ways 6 个视图")
+    print("从 Tableau 导出 TP&MIX-ways 6 个视图到 staging")
     print("=" * 60)
 
-    RAW_CSV_DIR.mkdir(parents=True, exist_ok=True)
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     token_name = os.getenv("TABLEAU_TOKEN_NAME")
     token_value = os.getenv("TABLEAU_TOKEN_VALUE")
@@ -709,7 +370,7 @@ def step_export_all_views(mobile: bool = False, timeout: int = 600) -> bool:
     all_ok = True
     try:
         for v in view_defs:
-            output_path = RAW_CSV_DIR / v["output"]
+            output_path = output_dir / v["output"]
             print(f"\n  [{v['output']}] 导出 {v['workbook']}/{v['view_name']} ...")
             try:
                 view_id = tableau_find_view_id(
@@ -730,7 +391,6 @@ def step_export_all_views(mobile: bool = False, timeout: int = 600) -> bool:
                     output_path=output_path,
                     timeout=timeout,
                 )
-                normalize_csv(output_path)
                 size_kb = output_path.stat().st_size / 1024
                 print(f"  ✅ {v['output']} ({size_kb:.1f} KB)")
             except Exception as e:
@@ -740,126 +400,215 @@ def step_export_all_views(mobile: bool = False, timeout: int = 600) -> bool:
         tableau_sign_out(base_url=base_url, api_version=api_version, auth_token=auth_token, timeout=timeout)
 
     if all_ok:
-        print(f"\n✅ 全部导出成功 ({len(view_defs)}/6)")
+        print(f"\n✅ 全部导出成功 ({len(view_defs)}/6) → staging")
     else:
-        print(f"\n⚠️ 部分导出失败")
+        print("\n⚠️ 部分导出失败，正式 raw_csv 未改动")
     return all_ok
 
 
-def step_incremental_update() -> bool:
+def _rebuild_derived_layers(
+    *,
+    source_raw_dir: Path,
+    run_dir: Path,
+) -> tuple[Path, list[dict[str, Any]]]:
+    """Rebuild parquet/registry/quality from raw into a staging tree."""
+    derived_dir = run_dir / "derived"
     print("\n" + "=" * 60)
-    print("增量更新 parquet 数据集")
+    print("从 raw 全量重建 parquet / registry / quality（staging）")
     print("=" * 60)
+    try:
+        reports = build_tp_and_mix_ways_dataset(
+            raw_csv_dir=source_raw_dir,
+            parquet_dir=derived_dir / "parquet",
+            registry_dir=derived_dir / "registry",
+            quality_dir=derived_dir / "quality",
+        )
+    except SystemExit as exc:
+        raise RuntimeError("raw 快照不完整，构建中止（未发布任何派生文件）") from exc
 
-    PARQUET_DIR.mkdir(parents=True, exist_ok=True)
-    REGISTRY_DIR.mkdir(parents=True, exist_ok=True)
-    QUALITY_DIR.mkdir(parents=True, exist_ok=True)
+    errors = [r for r in reports if r.get("build_status") != "success"]
+    if errors:
+        raise RuntimeError(f"构建失败: {[r.get('table_name') for r in errors]}")
+    for report in reports:
+        print(
+            f"  {report['table_name']}: rows={report.get('row_count')} "
+            f"months={report.get('date_min')}..{report.get('date_max')} "
+            f"duplicate_grain_count={report.get('duplicate_grain_count')}"
+        )
+    return derived_dir, reports
 
-    all_reports: List[Dict[str, Any]] = []
-    registry_tables: List[Dict[str, Any]] = []
 
-    for table_name in TABLE_NAMES:
-        csv_filename = SOURCE_CSV_MAP[table_name]
-        csv_path = RAW_CSV_DIR / csv_filename
-        parquet_filename = PARQUET_FILENAMES[table_name]
-        parquet_path = PARQUET_DIR / parquet_filename
-        grain_cols = GRAIN_DEFS[table_name]
+def _print_merge_audit(plan: dict[str, Any]) -> None:
+    for table_name, stats in plan["tables"].items():
+        print(
+            f"  {table_name}: base={stats['base_rows']} inc={stats['increment_rows']} "
+            f"merged={stats['merged_rows']} added={stats['added_rows']} "
+            f"restated={stats['restated_rows']} removed={stats['removed_rows']} "
+            f"months={stats['base_month_count']}->{stats['merged_month_count']}"
+        )
+        for item in stats.get("month_audit", []):
+            if not item["removed_rows"]:
+                continue
+            print(
+                f"    {item['month']}: old={item['base_rows']} "
+                f"new={item['increment_rows']} removed={item['removed_rows']} "
+                f"ratio={item['deletion_ratio']:.2%}"
+            )
 
-        print(f"\n{'='*50}")
-        print(f"处理: {table_name}")
-        print(f"  source: {csv_path.name}")
 
-        if not csv_path.exists():
-            print(f"  ⏭️  跳过: CSV 不存在 {csv_path.name}")
-            continue
+def run_update(
+    *,
+    dataset_root: Path,
+    export: bool,
+    mobile: bool,
+    timeout: int,
+    dry_run: bool,
+    max_month_deletion_ratio: float = DEFAULT_MAX_MONTH_DELETION_RATIO,
+) -> int:
+    dataset_root = Path(dataset_root).resolve()
+    raw_dir = dataset_root / "raw_csv"
+    staging_root = dataset_root / "staging"
+    run_id = new_run_id()
+    run_dir = staging_root / "runs" / run_id
 
-        # 读取新 CSV
-        try:
-            df_new = read_and_widen_csv(csv_path, table_name)
-            print(f"  新数据: {len(df_new)} 行, 月份: {sorted(df_new['date_month'].unique())}")
-        except Exception as e:
-            print(f"  ❌ 解析 CSV 失败: {e}")
-            all_reports.append({"table_name": table_name, "build_status": "error", "error": str(e)})
-            registry_tables.append({"table_name": table_name, "source_csv": csv_filename, "parquet_path": parquet_filename, "build_status": "error"})
-            continue
+    try:
+        with update_lock(staging_root, run_id):
+            for recovered in recover_incomplete_transactions(staging_root):
+                print(
+                    f"♻️  已处理未完成事务: {recovered['manifest']} "
+                    f"-> {recovered['status']}"
+                )
 
-        # 加载现有 parquet
-        if parquet_path.exists():
-            try:
-                df_existing = pd.read_parquet(parquet_path)
-                print(f"  现有数据: {len(df_existing)} 行")
-            except Exception as e:
-                print(f"  ⚠️  读取现有 parquet 失败，将使用新数据作为底座: {e}")
-                df_existing = pd.DataFrame()
-        else:
-            print(f"  无现有 parquet，将创建新文件")
-            df_existing = pd.DataFrame()
+            baseline = validate_derived_baseline(dataset_root)
+            required_months = baseline.get("months") or {}
 
-        # Upsert
-        df_merged = upsert_table(df_existing, df_new, grain_cols)
-        df_merged.to_parquet(parquet_path, index=False)
-        print(f"  ✅ parquet 已保存: {parquet_path.name}")
+            staged_raw: Path | None = None
+            raw_validation = None
+            merge_audit = None
 
-        # 质量报告
-        report = build_quality_report(table_name, df_merged, grain_cols, parquet_path, "success")
-        dup_count = report.get("duplicate_grain_count") or 0
-        report["duplicate_status"] = "warning" if dup_count > 0 else "pass"
-        all_reports.append(report)
+            if export:
+                increment_dir = run_dir / "increment" / "raw_csv"
+                if not step_export_all_views(increment_dir, mobile=mobile, timeout=timeout):
+                    print("\n❌ Tableau 导出失败，正式数据未改动。")
+                    return 1
+                validate_snapshot(increment_dir)
+                if not raw_dir.is_dir():
+                    raise RawContractError(f"正式 raw 目录不存在: {raw_dir}")
 
-        registry_tables.append({
-            "table_name": table_name,
-            "source_csv": csv_filename,
-            "parquet_path": parquet_filename,
-            "grain": grain_cols,
-            "row_count": report["row_count"],
-            "date_min": report.get("date_min"),
-            "date_max": report.get("date_max"),
-            "build_status": "success",
-            "duplicate_grain_count": dup_count,
-            "duplicate_status": report["duplicate_status"],
-        })
+                print("\n按整月替换语义合并增量与正式 raw（历史月份保护）...")
+                plan = merge_snapshot_to_staging(
+                    raw_dir,
+                    increment_dir,
+                    run_dir / "merged" / "raw_csv",
+                    required_months_by_table=required_months,
+                    max_month_deletion_ratio=max_month_deletion_ratio,
+                )
+                staged_raw = Path(plan["merged_dir"])
+                raw_validation = plan["validation"]
+                merge_audit = plan["tables"]
+                _print_merge_audit(plan)
+            else:
+                if not raw_dir.is_dir():
+                    raise RawContractError(f"正式 raw 目录不存在: {raw_dir}")
+                print("\n跳过 Tableau 导出，直接从正式 raw 重建 staging 派生层。")
 
-    # 写 registry
-    registry = {
-        "dataset_name": "tp_and_mix_ways",
-        "description": "乘用车上险数据 TP&MIX-ways Dataset",
-        "build_timestamp": datetime.now().isoformat(),
-        "source": "Tableau API → 增量更新",
-        "tables": registry_tables,
-    }
-    REGISTRY_PATH.write_text(json.dumps(registry, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"\nRegistry written: {REGISTRY_PATH}")
+            # Build and validate every layer from the staged raw before touching
+            # any formal file. A failure here leaves the formal dataset unchanged.
+            source_raw = staged_raw if staged_raw is not None else raw_dir
+            derived_dir, reports = _rebuild_derived_layers(
+                source_raw_dir=source_raw, run_dir=run_dir
+            )
+            consistency = validate_raw_derived_consistency(source_raw, derived_dir)
+            derived_validation = {
+                report["table_name"]: {
+                    "row_count": report.get("row_count"),
+                    "date_min": report.get("date_min"),
+                    "date_max": report.get("date_max"),
+                    "duplicate_grain_count": report.get("duplicate_grain_count"),
+                }
+                for report in reports
+            }
 
-    QUALITY_MD_PATH.write_text(format_quality_markdown(all_reports), encoding="utf-8")
-    print(f"Quality MD written: {QUALITY_MD_PATH}")
+            if dry_run:
+                print(
+                    f"\n[dry-run] 导出/合并/校验/派生层构建全部通过，未发布。"
+                    f"staged: {run_dir}"
+                )
+                return 0
 
-    quality_json = {"dataset_name": "tp_and_mix_ways", "build_timestamp": datetime.now().isoformat(), "tables": all_reports}
-    QUALITY_JSON_PATH.write_text(json.dumps(quality_json, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"Quality JSON written: {QUALITY_JSON_PATH}")
-
-    success = sum(1 for r in all_reports if r.get("build_status") == "success")
-    errors = sum(1 for r in all_reports if r.get("build_status") == "error")
-    print(f"\n更新完成: {success} 成功, {errors} 失败")
-
-    return errors == 0
+            manifest = publish_update_transaction(
+                dataset_root=dataset_root,
+                run_dir=run_dir,
+                staging_root=staging_root,
+                raw_dir=staged_raw,
+                derived_dir=derived_dir,
+                validation={
+                    "raw": raw_validation,
+                    "derived": derived_validation,
+                    "cross_layer": consistency,
+                },
+                audit={"merge": merge_audit},
+            )
+            print(
+                f"\n✅ 跨层事务发布完成: layers={manifest.get('layers')} "
+                f"files={len(manifest.get('files', {}))} "
+                f"backup={staging_root / 'backups' / run_id}"
+            )
+            return 0
+    except (RawContractError, OSError, RuntimeError) as exc:
+        print(f"\n❌ 更新失败（正式数据未改动，或已按快照回滚）: {exc}")
+        return 1
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="增量更新 tp_and_mix_ways 数据集（Tableau → CSV → parquet）")
+    parser = argparse.ArgumentParser(
+        description="增量更新 TP&MIX-ways 数据集（staging 校验 → 跨层事务发布）"
+    )
     parser.add_argument("--mobile", action="store_true", help="使用移动端/非办公网络服务器地址导出")
     parser.add_argument("--timeout", type=int, default=600, help="Tableau 导出超时（秒）")
-    parser.add_argument("--skip-export", action="store_true", help="跳过 Tableau 导出，仅做增量更新（使用已有 CSV）")
+    parser.add_argument(
+        "--skip-export",
+        action="store_true",
+        help="跳过 Tableau 导出，仅从正式 raw_csv 重建并发布派生层",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="完成导出/合并/全链路构建与校验到 staging，但不发布正式文件",
+    )
+    parser.add_argument(
+        "--max-month-deletion-ratio",
+        type=float,
+        default=DEFAULT_MAX_MONTH_DELETION_RATIO,
+        help=(
+            "整月替换允许的最大删除行比例（默认 "
+            f"{DEFAULT_MAX_MONTH_DELETION_RATIO:.2f}）；超过则阻断发布"
+        ),
+    )
+    parser.add_argument(
+        "--dataset-root",
+        type=Path,
+        default=DATASET_ROOT,
+        help="TP&MIX-ways 数据根目录（默认 dataset/TP&MIX-ways，测试可覆盖）",
+    )
     args = parser.parse_args(argv)
 
+    if not 0.0 <= args.max_month_deletion_ratio <= 1.0:
+        parser.error("--max-month-deletion-ratio 必须在 [0, 1]")
+
     load_env_file(REPO_ROOT / ".env")
-
-    if not args.skip_export:
-        ok = step_export_all_views(mobile=args.mobile, timeout=args.timeout)
-        if not ok:
-            return 1
-
-    ok = step_incremental_update()
-    return 0 if ok else 1
+    try:
+        return run_update(
+            dataset_root=args.dataset_root,
+            export=not args.skip_export,
+            mobile=args.mobile,
+            timeout=args.timeout,
+            dry_run=args.dry_run,
+            max_month_deletion_ratio=args.max_month_deletion_ratio,
+        )
+    except RawContractError as exc:
+        print(f"\n❌ 数据契约校验失败: {exc}")
+        return 1
 
 
 if __name__ == "__main__":

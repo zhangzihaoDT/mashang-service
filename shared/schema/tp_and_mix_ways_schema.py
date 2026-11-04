@@ -35,7 +35,9 @@ TP_AND_MIX_WAYS_TABLES: List[TpAndMixWaysTableDef] = [
         table_name="brand_monthly",
         source_csv="way2_brand_monthly_data.csv",
         parquet_path="brand_monthly.parquet",
-        grain=["date_month", "brand"],
+        # Tableau 品牌视图按 所有权 / 厂商 / 国产进口 拆分同一品牌月销量，
+        # 三者都是实际粒度的一部分；仅 brand 会产生大量假重复。
+        grain=["date_month", "brand", "ownership_type", "oem", "domestic_import"],
         dimensions=[
             "date_month", "brand", "brand_group", "brand_luxury_group",
             "oem_group", "oem", "brand_country", "ownership_type", "domestic_import",
@@ -53,7 +55,11 @@ TP_AND_MIX_WAYS_TABLES: List[TpAndMixWaysTableDef] = [
         table_name="model_monthly",
         source_csv="way3_model_monthly_data.csv",
         parquet_path="model_monthly.parquet",
-        grain=["date_month", "brand", "model", "sub_model", "sub_model_id"],
+        # 同一车型下 燃料类型 / 驱动形式 会继续拆分销量行，属于实际粒度。
+        grain=[
+            "date_month", "brand", "model", "sub_model", "sub_model_id",
+            "drive_type", "fuel_type",
+        ],
         dimensions=[
             "date_month", "brand", "brand_series", "model", "sub_model",
             "sub_model_id", "fuel_type", "fuel_type_group", "body_type",
