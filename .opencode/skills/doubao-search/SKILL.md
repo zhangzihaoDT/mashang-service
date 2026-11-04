@@ -27,7 +27,7 @@ metadata:
 7. 去重并综合证据
 8. 区分事实与推断
 
-**本技能不包含**（这些属于 auto_launch 业务层 / capabilities，不要迁移进来）：
+**本技能不包含**（这些属于 `mashang-auto-launch` 业务层 / capabilities，不要迁移进来）：
 - compile_intent / intent 分类
 - query_profiles / search_templates（预算、模板）
 - 品牌侦察 / 事件映射

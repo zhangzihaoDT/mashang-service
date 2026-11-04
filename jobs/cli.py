@@ -2,8 +2,7 @@
 """jobs — Worker / Hub 调用入口（确定性执行，无自然语言路由）。
 
 用法:
-    python -m jobs.cli --job nev_apeal_production_golden
-    python -m jobs.cli --job nev_apeal_research_state --job-param topic=topic_x
+    python -m jobs.cli --job daily_lock_count --job-param date=2026-11-03
     python -m jobs.cli --list
 """
 

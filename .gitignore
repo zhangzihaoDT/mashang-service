@@ -9,8 +9,6 @@
 !/dataset/updater/*.py
 /daemon/
 
-# NEV-APEAL workspace: raw SAV is a local copy (root /dataset/ is also not committed)
-research_apps/nev_apeal/data/source.sav
 
 __pycache__/
 *.py[cod]
@@ -24,29 +22,7 @@ coverage.xml
 
 .DS_Store
 
-# MIIT 新车申报照片（左/右部照、后部照、选装照）
-research_apps/MIIT/409-*/*/
-research_apps/MIIT/**/*.jpg
-research_apps/MIIT/**/*.png
-research_apps/MIIT/**/*.webp
-# MIIT Playwright 临时快照
-research_apps/MIIT/*.yml
 
-# MIIT 生成产物 — 简报/扫描/报告目录，不提交
-research_apps/MIIT/report_batch_*.html
-research_apps/MIIT/scan_batch_*.md
-research_apps/MIIT/*_reports/
-research_apps/MIIT/miit_category_reports/
-research_apps/MIIT/miit_category_reports_*/
-research_apps/MIIT/工信部新车-history/
-research_apps/MIIT/**/工信部新车-history/
-# MIIT 抓取 checkpoint / 原始页面缓存（可再生产物）
-research_apps/MIIT/fetch_status_*.json
-research_apps/MIIT/raw/
-# MIIT HTML 运行报告 / 原始页面缓存 — 可再生产物，不进 Git
-research_apps/MIIT/reports/**/*.html
-research_apps/MIIT/data/raw_html/
-/miit_*.log
 
 /.query_agent_memory.json
 /agent/.query_agent_memory.json
@@ -70,7 +46,6 @@ dataset/incoming/feishu/
 # Monthly market report runtime outputs (regenerated on every run)
 mashang_workspace/outputs/monthly_market_report/
 
-# MIIT runtime outputs — regenerated on every batch fetch, not committed
 mashang_workspace/outputs/miit_new_car/raw/
 mashang_workspace/outputs/miit_new_car/diagnostics/
 mashang_workspace/outputs/miit_new_car/discovery/
@@ -81,26 +56,14 @@ mashang_workspace/outputs/miit_new_car/diff/
 mashang_workspace/outputs/miit_new_car/evidence/
 mashang_workspace/outputs/miit_new_car/state/
 
-# MIIT EIDC 历史归档：原始附件二进制（.doc）不提交，仅本地保留证据
-research_apps/MIIT/data/eidc/*/attachments/
-research_apps/MIIT/data/eidc/*/raw_detail.html
 
-# MIIT 正式公告归档：原始附件二进制（.doc）与原始页面不提交，仅本地保留证据
-research_apps/MIIT/data/miit_formal/*/attachments/
-research_apps/MIIT/data/miit_formal/*/raw_detail.html
 
-# Auto launch: all outputs are runtime-generated, not committed
-mashang_workspace/outputs/auto_launch/
-research_apps/auto_launch/outputs/
 
 # Workspace report HTMLs: runtime-generated, not committed
 #   reports/*.md 为正式研究报告（Git tracked），HTML 渲染产物不入库
 mashang_workspace/outputs/reports/**/*.html
 outputs/reports/*.html
 
-# Research apps: HTML 渲染产物不入库（md/json 源与研究报告保留）
-research_apps/nev_apeal/reports/*.html
-research_apps/auto_launch/docs/*.html
 
 # CI eval output — regenerated on every make ci, not committed
 mashang_workspace/outputs/tables/unified_eval_result.json
@@ -144,10 +107,7 @@ outputs/search/
 # Diagram base capability: rendered charts (regenerable from JSON contracts)
 outputs/diagram/
 
-research_apps/auto_launch/outputs/runs/
 
-# auto_launch migration backup
-research_apps/auto_launch/outputs_backup_*
 
 # Docx conversion media — retained locally but not committed with Markdown archives
 mashang_workspace/docs/archive/L6_M1_images/

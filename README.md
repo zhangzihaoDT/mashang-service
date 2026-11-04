@@ -14,17 +14,18 @@
 2. Base Capabilities（capabilities） +  3. Daily Business Analytics（mashang_workspace）
   ↓
 4. Jobs（确定性执行契约，jobs/）
-  ↓
-5. research_apps/（历史研究模块，保留原有目录）
 ```
+
+独立研究仓库（`mashang-auto-launch` / `mashang-product-expert` / `mashang-nev-apeal` / `mashang-miit`）
+与 Service 平级维护，不在本仓库内分层。
 
 也就是说：
 
 - `shared/` + `dataset/` 提供共享业务语义、业务算子、业务定义与原始数据（Semantic Foundation）；
 - `capabilities/` 提供领域无关基础能力（OCR / Search / Notify 等），与日常业务分析能力平级，供上层复用（Base Capabilities）；
 - `mashang_workspace/` 是**日常业务分析工作区（Daily Business Analytics）**：负责分析、脚本开发、文档沉淀、Result Contract、Eval 与 Capability Registry，回答"今天要查什么/算什么"；
-- `jobs/` 是 **确定性执行契约层**：声明式 Research Application job + 参数白名单 + 状态/摘要/artifact 契约，供 **Hub（Control Plane）+ Worker（Execution Gateway）** 调用；
-- MIIT 已作为独立产品迁至 `../mashang-miit/`；`research_apps/` 中其他既有目录属于历史研究模块，不代表当前独立能力清单。
+- `jobs/` 是 **确定性执行契约层**：声明式 job + 参数白名单 + 状态/摘要/artifact 契约，供 **Hub（Control Plane）+ Worker（Execution Gateway）** 调用；
+- 研究型应用已拆为平级仓库：`../mashang-auto-launch/`、`../mashang-product-expert/`、`../mashang-nev-apeal/`；MIIT 在 `../mashang-miit/`。Service 不再内置这些应用。
 
 > 运行时系统由 **Hub + Worker + OpenCode** 组成，不再是 service 内的 Python package；service 侧只保留业务能力 + 确定性 `jobs/` contract。
 
@@ -168,11 +169,11 @@ make data-dict
 
 ---
 
-### 运行 Research Application job
+### 运行 service job
 
 ```bash
 make jobs-list
-make jobs-run JOB=nev_apeal_production_golden
+make jobs-run JOB=daily_lock_count JOB_PARAMS="--job-param date=2026-11-03"
 ```
 
 用于验证 `jobs/` 确定性执行契约（Hub/Worker 调用入口）。
@@ -427,12 +428,10 @@ ELOE = Σ P(最终开票 | 当前仍悬置)
         └──────────────┬──────────────┘
                        ▼
 4. Jobs（确定性执行契约）          jobs/
-                       │
-          ┌────────────┼────────────┬────────────┬───────
-          ▼            ▼            ▼            ▼
-5. Research Applications
-   research_apps/ 内保留的历史研究模块
-   MIIT 独立位于 ../mashang-miit/，不属于本仓库分层
+
+5. 独立研究仓库（平级，不在本仓库内）
+   ../mashang-auto-launch / ../mashang-product-expert /
+   ../mashang-nev-apeal / ../mashang-miit
 ```
 
 ```text
@@ -456,11 +455,7 @@ mashang-service/
 │   ├── docs/
 │   └── utils/
 │
-├── jobs/                  # 4. 确定性执行契约层（Research Application job）
-│
-├── research_apps/         # 5. Research Applications（研究单元归类层：只归类，不提供共享逻辑）
-│   ├── auto_launch/       #    Research Application：新车上市与竞争动态研究
-│   └── nev_apeal/         #    Research Application：新能源用户体验研究
+├── jobs/                  # 4. 确定性执行契约层（service job）
 │
 ├── ocr/ 已迁移 → capabilities/ocr   （历史路径不再使用）
 ├── Makefile
@@ -469,19 +464,22 @@ mashang-service/
 ```
 
 > 分层要点：`capabilities/`（Base Capabilities）与 `mashang_workspace/`（Daily Business Analytics）是两支平级的能力来源；
-> `jobs/`（确定性执行契约）供 Hub/Worker 调用 workspace 业务能力与长期编排 Research Applications。
+> `jobs/`（确定性执行契约）供 Hub/Worker 调用 workspace 业务能力。
 
-## 独立产品与历史研究模块
+## 独立产品与研究仓库
 
 | 仓库 | 职责 |
 |------|------|
 | `mashang-fetch` | 获取与整理资料 |
 | `mashang-miit` | 获取与整理工信部汽车公告 |
+| `mashang-auto-launch` | 新车上市与竞争动态研究 |
+| `mashang-product-expert` | 产品专家门店支持研究 |
+| `mashang-nev-apeal` | 新能源用户体验研究（归档） |
 | `mashang-service` | 利用汽车行业数据开展业务分析与产品战略研究 |
 
-三个仓库平级维护。MIIT 的代码、配置、依赖、原始证据、结构化数据、管线报告与运行记录均在 `mashang-miit`；Service 不再内置 MIIT 实现，也不通过导入兄弟仓库源码运行 MIIT。
+以上仓库平级维护。MIIT 的代码、配置、依赖、原始证据、结构化数据、管线报告与运行记录均在 `mashang-miit`；研究应用的代码、配置、数据与产物在各自仓库。Service 不再内置这些实现，也不通过导入兄弟仓库源码运行。
 
-`research_apps/` 保留 auto_launch、nev_apeal 等历史研究目录，不将其列作当前独立能力。MIIT 的 Service 数据消费接口尚未实现。
+Service 不保留 `research_apps/` 目录；`auto_launch` / `product_expert` / `nev_apeal` 已在平级仓库独立维护。MIIT 的 Service 数据消费接口尚未实现。
 
 从 Service 根目录可进入独立仓库运行：
 
@@ -592,18 +590,18 @@ jobs/
 
 ```text
 jobs 不重新发明分析能力；
-jobs 调用 workspace 已治理能力与 Research Applications（不复制业务代码）；
+jobs 调用 workspace 已治理能力（不复制业务代码）；
 jobs 只做声明、校验、执行与结果契约，不做 NL 路由 / 会话 / 渲染 / UI。
 ```
 
-Research Application 编排见 §1「Research Applications（冻结定义）」。
+独立研究仓库的编排不在 service 内；service 只保留 workspace job 契约。
 
 ---
 
 ## 2.4 Legacy Runtime（已退役）
 
 旧 `mashang_runtime/`（legacy frozen）与 `mashang_runtime_v2/`（NL 问数 Runtime）均已**退役移除**。
-operators/schema 的 canonical 版本一直在 `shared/`；确定性的 Research Application job 能力已收敛到根目录 `jobs/`。
+operators/schema 的 canonical 版本一直在 `shared/`；确定性的 service job 能力已收敛到根目录 `jobs/`。
 
 ---
 
@@ -748,19 +746,17 @@ Eval 的目标不是测试代码本身，而是验证：
 
 # 8. Current jobs Status
 
-`jobs/` 当前声明的 Research Application job：
+`jobs/` 当前声明的 service job：
 
 ```text
-nev_apeal_production_golden   # Golden Gate（--format json → PASS/FAIL + 验收数）
-nev_apeal_research_state      # --job-param topic=<run> → topic state + artifact
+daily_lock_count   # --job-param date=YYYY-MM-DD → Result Contract JSON
 ```
 
 调用：
 
 ```bash
 make jobs-list
-make jobs-run JOB=nev_apeal_production_golden
-python -m jobs.cli --job nev_apeal_research_state --job-param topic=topic_x
+make jobs-run JOB=daily_lock_count JOB_PARAMS="--job-param date=2026-11-03"
 ```
 
 > 普通问数不由 service 内部 Runtime 承担：运行时系统 = Hub（Control Plane）+ Worker（Execution Gateway）+ OpenCode。

@@ -37,15 +37,15 @@ mashang-service 是一个**汽车业务数据分析项目**，包含以下分支
 
 | 分支 | 目录 | 定位 |
 |------|------|------|
-| **Jobs** | `jobs/` | 确定性执行契约层：声明式 Research Application job + 参数白名单 + 固定执行入口 + 状态/摘要/artifact 契约（Hub/Worker 调用） |
+| **Jobs** | `jobs/` | 确定性执行契约层：声明式 job + 参数白名单 + 固定执行入口 + 状态/摘要/artifact 契约（Hub/Worker 调用） |
 | **Workspace** | `mashang_workspace/` | **Daily Business Analytics Workspace** —— 日常业务分析工具箱（research → business → eval） |
 | **Shared** | `shared/` | Semantic Foundation —— 共享 operator/schema 层（非默认工作区） |
-| **Base Capabilities** | `capabilities/` | 领域无关基础能力层（OCR/Search/Notify 等），与日常业务分析能力平级，供 workspace / jobs / Research Application 复用 |
-| **Research Applications** | `research_apps/`（历史研究模块；MIIT 已迁出） | 独立研究型子项目（研究单元：有自己 state/engine/contracts/gate/artifacts；仅归类不共享；由 Hub 经 `jobs/` 编排） |
+| **Base Capabilities** | `capabilities/` | 领域无关基础能力层（OCR/Search/Notify 等），与日常业务分析能力平级，供 workspace / jobs / 独立研究仓库复用 |
 
 > 旧 `mashang_runtime/`（legacy frozen Runtime）与 `mashang_runtime_v2/`（NL 问数 Runtime）均已退役移除：
 > 运行时系统由 **Hub（Control Plane）+ Worker（Execution Gateway）+ OpenCode** 共同组成；
-> service 侧只保留「业务能力 + 确定性 Job Contract」，即 `mashang_workspace/` + `research_apps/` + `jobs/`。
+> service 侧只保留「业务能力 + 确定性 Job Contract」，即 `mashang_workspace/` + `jobs/`。
+> 独立研究仓库（`mashang-auto-launch` / `mashang-product-expert` / `mashang-nev-apeal` / `mashang-miit`）与 service 平级维护。
 
 **共享底座**：
 - `dataset/` — 原始数据
@@ -63,10 +63,10 @@ mashang-service 是一个**汽车业务数据分析项目**，包含以下分支
 
 ## MIIT 独立仓库边界
 
-- MIIT 的实现、配置、依赖和数据管线统一在平级 `mashang-miit/` 维护，不在 Service 中恢复 `research_apps/MIIT/` 或复制实现。
+- MIIT 的实现、配置、依赖和数据管线统一在平级 `mashang-miit/` 维护，不在 Service 中恢复 MIIT 实现或复制代码。
 - 需要修改或运行 MIIT 时，进入独立仓库并遵守其 AGENTS.md；不得假设复用 Service 的虚拟环境或凭证。
 - Service 仅按后续约定消费 MIIT 数据产物或接口；当前尚无已实现的 MIIT job/API 对接。
-- 历史研究目录的存在不代表当前独立能力清单。
+- 独立研究仓库（`mashang-auto-launch` / `mashang-product-expert` / `mashang-nev-apeal` / `mashang-miit`）不在 Service 内，也不计入 Service 能力清单。
 
 ## 工作原则
 
@@ -81,11 +81,11 @@ mashang-service 是一个**汽车业务数据分析项目**，包含以下分支
 9. **新分析能力优先沉淀到 `mashang_workspace/business_scripts/ + research_scripts/ + docs/ + eval/`**
 10. **验证范围必须与改动范围匹配**：改动后先 `make verify-scope` 解析本次改动的最小验证范围，再 `make verify` 执行。**scope 外失败不算本次回归**；扩大范围必须显式（`make verify-all` / `--include`），不得把「充分验证」等价成「跑全量 pytest / `make ci`」。契约见 `.opencode/verification/README.md`。
     同一份代码的相同检查只执行一次，不要在 `make verify` 前单独重复运行它包含的 pytest。存在其他任务的未提交改动时，两步都用 `VERIFY_CHANGED="本次修改的文件路径列表"` 限定范围。
-11. **能力产品化路径**：workspace 中验证稳定的能力先成为 `business_scripts`，供 Hub 经 `jobs/` 确定性调度；不要绕过 workspace 直接在 `jobs/` 或 Research Application 中重复实现业务分析逻辑。
+11. **能力产品化路径**：workspace 中验证稳定的能力先成为 `business_scripts`，供 Hub 经 `jobs/` 确定性调度；不要绕过 workspace 直接在 `jobs/` 或独立研究仓库中重复实现业务分析逻辑。
 12. **`shared/` 边界**：共享 operator/schema 层，不应随意修改。如修改需说明影响范围，并同步相关测试。
 13. **MCP 边界**：MCP 能力由根目录统一提供（`.opencode/` / `opencode.jsonc`），workspace 只消费能力。不得将本地 profile、cookies、API key、incoming 原始数据等提交进仓库。
 14. **`capabilities/` 边界**：Base Capabilities 是领域无关基础能力层。新基础能力先以 `capabilities/ocr/` 为样板归位并自描述（接口 + provider + mock + tests + 消费方记录）；不要在 capabilities/ 中写入业务规则或领域解析逻辑。OCR 已从历史根 `ocr/` 迁移至此（namespace `capabilities.ocr`）。
-15. **能力引用口径**：领域无关原语（OCR/检索/抓取/渲染/通知等）若未来复用于多个上层，优先沉淀到 `capabilities/`，而非内嵌在各 Research Application / 模块中复制实现。
+15. **能力引用口径**：领域无关原语（OCR/检索/抓取/渲染/通知等）若未来复用于多个上层，优先沉淀到 `capabilities/`，而非内嵌在各独立研究仓库 / 模块中复制实现。
 
 其余原则详见 `mashang_workspace/AGENTS.md`。
 
@@ -100,7 +100,7 @@ mashang-service 是一个**汽车业务数据分析项目**，包含以下分支
 5. **所有分析结果必须说明来源**：包括数据源、过滤条件、时间窗口、指标口径。
 6. **临时代码放 `scratch/` 或 `outputs/`**，稳定脚本再沉淀到 `mashang_workspace/{business_scripts,research_scripts,utility_scripts}/`。
 7. **高频能力先在 workspace 内沉淀**：高频分析路径先沉淀到 `mashang_workspace/business_scripts/`，供 Hub 经 `jobs/` 确定性调度；业务代码不复制进 `jobs/`。
-8. **回答数据问题前，先看 `docs/data_dictionary.md` 和 `docs/metric_definitions.md`**，确认字段名和口径。
+8. **回答数据问题前，先看 `mashang_workspace/docs/data_dictionary.md`、`shared/schema/schema.md` 和 `shared/schema/reference/metric_definitions.md`**，确认字段名和口径。
 9. **对标准分析问题，优先调用 `mashang_workspace/{business_scripts,research_scripts,utility_scripts}/` 下已有脚本**，不要重复造轮子。
 10. **如果脚本缺少参数，先小范围补充 CLI 参数，不要重写脚本**。
 11. **如果临时分析重复出现 2 次以上，再沉淀为 workspace 稳定脚本**。
@@ -331,12 +331,10 @@ mashang-service/
 ├── requirements.txt       ← 共享依赖
 ├── shared/        ← 共享 operator/schema（非默认工作区）
 │
-├── jobs/                  ← 确定性执行契约层（Hub/Worker 调用的 Research Application job）
+├── jobs/                  ← 确定性执行契约层（Hub/Worker 调用的 job）
 │   └── README.md          ← jobs 说明
 │
 ├── capabilities/          ← Base Capabilities（领域无关原语：OCR/Search/Notify/Diagram/Feishu）
-│
-├── research_apps/         ← 历史研究模块（MIIT 已迁至独立仓库）
 │
 └── mashang_workspace/     ← Daily Business Analytics Workspace（日常业务分析工具箱）
     ├── AGENTS.md          ← Workspace Agent 指南
@@ -403,7 +401,7 @@ mashang-service/
 
 | 查询类型 | CLI 方式 |
 |----------|----------|
-| 执行 Research Application job | `make jobs-run JOB=nev_apeal_production_golden` 或 `python -m jobs.cli --job nev_apeal_production_golden` | jobs |
+| 执行 service job | `make jobs-run JOB=daily_lock_count JOB_PARAMS="--job-param date=YYYY-MM-DD"` 或 `python -m jobs.cli --job daily_lock_count --job-param date=YYYY-MM-DD` | jobs |
 | 锁单总览 | `python mashang_workspace/business_scripts/daily_lock_count.py` | runtime |
 | 车型拆分 | `python mashang_workspace/business_scripts/lock_by_model.py --limit 5` | runtime |
 | 城市分布 | `python mashang_workspace/business_scripts/lock_city_distribution.py` | runtime |
@@ -430,11 +428,9 @@ mashang-service/
 | 开票月度预估 | `make invoice-forecast` 或 `python mashang_workspace/research_scripts/invoice_monthly_forecast.py --as-of YYYY-MM-DD --target-month YYYY-MM --lock-regime mode` | research |
 | 锁单归因分析 | `make lock-attribution START=2026-01-01 END=2026-08-31 HTML=1`(单样本;可选 `SERIES/CHANNEL`) | make |
 | 锁单归因对比 | `make lock-attribution-compare START=2024-01-01 END=2024-08-01 START_B=2026-01-01 END_B=2026-08-01 HTML=1`(两任意样本对比,差异高亮报告;可选 `LABEL/LABEL_B/SERIES_B/CHANNEL_B`) | make |
-| Auto Launch 搜索 | `PYTHONPATH=research_apps python -m auto_launch.cli search --request "看看极氪最近 7 天都有什么动作"` | service |
-| Auto Launch Daily 摄入 | `PYTHONPATH=research_apps python -m auto_launch.cli daily --input <file>` | service |
-| Auto Launch 品牌日报 | `PYTHONPATH=research_apps python -m auto_launch.cli report --type brand-daily --brand 智己` | service |
-| Auto Launch 完整日更 | `PYTHONPATH=research_apps python -m auto_launch.cli run-day --brand 智己` | service |
-| Auto Launch 测试 | `pytest research_apps/auto_launch/tests/ -q` | service |
+| Auto Launch（独立仓库） | `cd ../mashang-auto-launch && PYTHONPATH=research_apps python -m auto_launch.cli ...` | sibling |
+| Product Expert（独立仓库） | `cd ../mashang-product-expert && python scripts/build_report.py ...` | sibling |
+| NEV-APEAL（独立归档仓库） | `cd ../mashang-nev-apeal && python cli.py ...` | sibling |
 | VOC 分析 | `python mashang_workspace/utility_scripts/voc_theme_analysis.py` | utility |
 | 数据字典 | `python mashang_workspace/utility_scripts/data_dictionary.py` | utility |
 | 分组重叠审计 | `python mashang_workspace/utility_scripts/audit_series_group_overlap.py [--json] [--strict]` | utility |

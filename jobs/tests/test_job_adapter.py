@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""jobs — execution contract 测试（hermetic，不执行真实 Research Application）。
+"""jobs — execution contract 测试（hermetic，不执行真实 job）。
 
 覆盖：
   - success / failure / summary-json
@@ -42,13 +42,12 @@ class TestConfig:
     def test_declared_jobs_load(self):
         from jobs.adapter import load_jobs
         jobs = load_jobs()
-        assert "nev_apeal_production_golden" in jobs
-        assert "nev_apeal_research_state" in jobs
+        assert "daily_lock_count" in jobs
 
-    def test_research_state_requires_topic(self):
+    def test_daily_lock_count_requires_date(self):
         from jobs.adapter import load_jobs
         jobs = load_jobs()
-        assert jobs["nev_apeal_research_state"]["params"]["topic"]["required"] is True
+        assert jobs["daily_lock_count"]["params"]["date"]["required"] is True
 
 
 class TestJobExec:
@@ -155,7 +154,7 @@ class TestCli:
             capture_output=True, text=True, timeout=30,
         )
         assert r.returncode == 0
-        assert "nev_apeal_production_golden" in r.stdout
+        assert "daily_lock_count" in r.stdout
 
     def test_job_unknown_fails_fast(self):
         import subprocess

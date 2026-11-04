@@ -7,7 +7,6 @@
 ├── README.md
 ├── official_document_render/
 ├── doubao-search/
-├── nev-research/
 ├── mashang-diagram/              # 项目自有：diagram 路由 Skill（实体目录）
 │   ├── SKILL.md
 │   └── references/

@@ -20,8 +20,7 @@ service 侧目录职责：
 mashang-service/
 ├── mashang_workspace/      # 业务能力（business / research / utility tier）
 │   └── business_scripts/   # 稳定运行入口
-├── research_apps/          # Research Applications（MIIT / auto_launch / nev_apeal / …）
-├── jobs/                   # 确定性执行契约（Research Application job；Hub/Worker 调用）
+├── jobs/                   # 确定性执行契约（service job；Hub/Worker 调用）
 ├── shared/                 # 共享 operator / schema / loader
 ├── capabilities/           # 领域无关基础能力（OCR / Search / Notify / Diagram / Feishu）
 └── dataset/                # 共享原始数据
@@ -47,7 +46,7 @@ pytest:mashang_workspace/tests/{research_scripts/test_backlog_pit,test_daily_dat
   test_repurchase_operator,test_script_tier_physicalization,test_shared_operators_schema,
   test_vehicle_sales_monitor}.py,
 smoke: business_scripts/*（全部）, eval/run_eval.py, eval/run_followup_eval.py,
-  research_scripts/*（锁单归因对比等）, utility_scripts/*, research_apps/product_expert
+  research_scripts/*（锁单归因对比等）, utility_scripts/*
 ```
 
 复现：
@@ -61,8 +60,8 @@ make ci             # CI 门禁（eval.ci + 数据无关测试）
 ## 4. 关键入口
 
 ```bash
-make jobs-list                                   # 列出 Research Application job
-make jobs-run JOB=nev_apeal_production_golden    # 执行 job
+make jobs-list                                   # 列出 service job
+make jobs-run JOB=daily_lock_count JOB_PARAMS="--job-param date=2026-11-03"
 make data-pipeline                               # Daily：订单 + 下发线索 → 观察同步
 make updateall                                   # 全量更新 + 校验（别名 allupdate）
 make sales-monitor-dry-run                       # 预售/上市监控预览

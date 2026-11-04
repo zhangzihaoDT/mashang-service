@@ -7,7 +7,7 @@
 
 | 工具 | 用途 | 命令/方式 |
 |------|------|----------|
-| `auto_launch.cli search` | 豆包搜索召回相关网页 | `python3 -m auto_launch.cli search --request "..." --live --mode model_watch --query-profile deep_scan` |
+| `mashang-auto-launch` | 豆包搜索召回相关网页 | `cd ../mashang-auto-launch && PYTHONPATH=research_apps python3 -m auto_launch.cli search --request "..." --live --mode model_watch --query-profile deep_scan` |
 | `playwright_browser` | 直接浏览官方配置器及新闻页面，提取结构化价格文本 | `page.goto()`, `page.evaluate()` 提取 `document.body.innerText` |
 | `bash` + `python3` | 从搜索结果的 `normalized.json` 中筛选含官方信源的条目 | `json.load()` + 关键词过滤 |
 
@@ -30,7 +30,7 @@
 
 ### 豆包搜索召回的相关结果
 
-搜索 `auto_launch` 共执行 8 条 query（brand_watch 模板），召回 75 条结果，从中筛选出含官方价格信息的页面：
+搜索 `mashang-auto-launch` 共执行 8 条 query（brand_watch 模板），召回 75 条结果，从中筛选出含官方价格信息的页面：
 
 - `immotors.com/website/news_detail/234` — LS9 31.98万元起
 - `chejiahao.m.autohome.com.cn/info/25236810` — LS8 官方指导价 26.18-31.18万，权益价 24.98万起（二手信源，用于交叉验证）

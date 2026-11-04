@@ -42,7 +42,7 @@ def audit_capability(cap: dict) -> dict:
     script_path = cap.get("script", "")
     checks = {}
 
-    # 1. Script exists — registry 路径统一为仓库根相对路径（mashang_workspace/… 或 research_apps/…）
+    # 1. Script exists — registry 路径统一为仓库根相对路径（当前均为 mashang_workspace/…）
     checks["script_exists"] = bool(script_path) and (_PRJ_ROOT / script_path).exists()
 
     # 2. Tier valid

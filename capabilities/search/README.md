@@ -44,7 +44,7 @@
 
 - 适用：联网搜索原语、信源发现、事实核验、近期动态检索、多查询 fan-out。
 - 不适用（not for / 边界）：
-  - **查询策略与研究编排**：intent 编译、query_profile/模板、source 审计、证据链评估（auto_launch `search_agent_v2` / skill 层）。
+  - **查询策略与研究编排**：intent 编译、query_profile/模板、source 审计、证据链评估（`mashang-auto-launch` 的 `search_agent_v2` / skill 层）。
   - **不同搜索 provider**：如 `open.feedcoopapi.com/.../web_search`（cpca 早源监控在用）需按 provider 另加，不并入本 provider。
   - 搜索结果的业务解读/报告生成。
 
@@ -53,9 +53,9 @@
 | 消费方 | 用途 | 状态 |
 |--------|------|------|
 | `.opencode/skills/doubao-search/` | 豆包 Global Search 检索（skill 薄壳） | ✅ 已迁移 |
-| `auto_launch/src/volc_search_client.py` | Auto Launch 搜索管线客户端（兼容薄封装） | ✅ 已迁移 |
+| `mashang-auto-launch`（`research_apps/auto_launch/src/volc_search_client.py`） | Auto Launch 搜索管线客户端（兼容薄封装） | ✅ 已迁移；仓库已独立 |
 
 ## 历史沿革
 
-- 收敛前：同一 Global Search 原语在两处重复实现——`doubao-search` skill `scripts/search.py` 与 `auto_launch/src/volc_search_client.py`。
-- 2026-09 按 Base Capabilities 规划新增 `capabilities/search`；两份实现收敛为能力 + 消费方薄封装（skill 薄壳保留历史命令/输出形状；auto_launch 保留对外 envelope，上层缓存与业务编排不动）。
+- 收敛前：同一 Global Search 原语在两处重复实现——`doubao-search` skill `scripts/search.py` 与 `mashang-auto-launch` 的 `src/volc_search_client.py`。
+- 2026-09 按 Base Capabilities 规划新增 `capabilities/search`；两份实现收敛为能力 + 消费方薄封装（skill 薄壳保留历史命令/输出形状；`mashang-auto-launch` 保留对外 envelope，上层缓存与业务编排不动）。

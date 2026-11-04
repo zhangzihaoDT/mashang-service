@@ -3,7 +3,6 @@ PYTHON ?= .venv/bin/python
 	data-dict lock-demo parser-demo followup-demo numeric-eval reference-eval atp-demo backtest-demo \
 	lock-forecast invoice-forecast lock-attribution lock-attribution-compare \
 	inventory-status inventory-trend inventory-report \
-	auto-launch-owned-brand-daily auto-launch-owned-brand-daily-dry-run auto-launch-search auto-launch-normalize-results \
 	capability-audit shared-audit \
 	jobs-list jobs-run \
 	data-refresh data-refresh-daily allupdate updateall data-validate observe-dry-run observe-sync data-pipeline-dry-run data-pipeline daily-ops \
@@ -13,7 +12,7 @@ PYTHON ?= .venv/bin/python
 	shock-scan shock-backtest shock-research shock-check market-observe \
 	daily-sync-dry-run update-tp-and-mix-ways-dataset rebuild-tp-and-mix-ways-dataset build-tp-and-mix-ways-dataset \
 	watchlist-brand-monthly-report watchlist-brand-trend watchlist-brand-driver \
-	render-official-doc render-official-doc-smoke production-golden \
+	render-official-doc render-official-doc-smoke \
 	cpca-weekly-early-signal cpca-weekly-early-signal-html cpca-weekly-early-signal-json cpca-weekly-data-capture \
 	tesla-report tesla-report-json \
 	build-workspace-skills-catalog build-workspace-capability-inventory clean-outputs help
@@ -43,6 +42,7 @@ test:
 ci:
 	$(MAKE) eval SUITE=ci
 	$(PYTHON) -m pytest mashang_workspace/tests/test_root_cleanup.py \
+		mashang_workspace/tests/test_schema_docs_sync.py \
 		mashang_workspace/tests/test_model_positioning_loader.py \
 		mashang_workspace/tests/scripts/test_result_contract.py \
 		mashang_workspace/tests/eval/test_context_parser.py \
@@ -165,37 +165,6 @@ inventory-trend:
 inventory-report:
 	$(PYTHON) mashang_workspace/utility_scripts/generate_delivery_inventory_report.py
 
-## Auto Launch — 本品品牌日报（从 facts 库生成，报告层）
-auto-launch-owned-brand-daily:
-	PYTHONPATH=research_apps $(PYTHON) -m auto_launch.cli report --type brand-daily \
-		--brand $(or $(BRAND),im) \
-		$(if $(BRAND_NAME),--brand-name $(BRAND_NAME)) \
-		$(if $(DATE),--date $(DATE)) \
-		--window-hours $(or $(WINDOW_HOURS),24) \
-		$(if $(LIMIT),--limit $(LIMIT))
-
-auto-launch-owned-brand-daily-dry-run:
-	PYTHONPATH=research_apps $(PYTHON) -m auto_launch.cli report --type brand-daily \
-		--brand $(or $(BRAND),im) \
-		$(if $(BRAND_NAME),--brand-name $(BRAND_NAME)) \
-		$(if $(DATE),--date $(DATE)) \
-		--window-hours $(or $(WINDOW_HOURS),24)
-
-## Auto Launch — Volc Search 搜索意图转译与执行
-auto-launch-search:
-	PYTHONPATH=research_apps $(PYTHON) -m auto_launch.cli search \
-		--request "$(or $(REQUEST),看看极氪最近 7 天都有什么动作)" \
-		$(if $(DATE),--date $(DATE)) \
-		$(if $(LIVE),--live) \
-		$(if $(QUERY_PROFILE),--query-profile $(QUERY_PROFILE))
-
-## Auto Launch — 标准化搜索结果
-auto-launch-normalize-results:
-	PYTHONPATH=research_apps $(PYTHON) -m auto_launch.cli normalize \
-		--raw $(RAW) \
-		--query-plan $(QUERY_PLAN) \
-		$(if $(OUTPUT_PREFIX),--output-prefix $(OUTPUT_PREFIX))
-
 ## Capability Audit
 capability-audit:
 	$(PYTHON) mashang_workspace/eval/run_capability_audit.py --format json --output mashang_workspace/outputs/tables/capability_audit_result.json
@@ -204,15 +173,14 @@ capability-audit:
 shared-audit:
 	$(PYTHON) -c "from mashang_workspace.utils.paths import BUSINESS_DEFINITION_PATH, ensure_shared_on_path; ensure_shared_on_path(); import operators; print('shared ok:', BUSINESS_DEFINITION_PATH)"
 
-## jobs — 列出已声明 Research Application job
+## jobs — 列出已声明确定性 job
 jobs-list:
 	$(PYTHON) -m jobs.cli --list
 
 ## jobs — 执行一个 job（确定性执行契约；Hub/Worker 调用）
-## 用法: make jobs-run JOB=nev_apeal_production_golden
-##       make jobs-run JOB=nev_apeal_research_state JOB_PARAMS="--job-param topic=topic_x"
+## 用法: make jobs-run JOB=daily_lock_count JOB_PARAMS="--job-param date=2026-11-03"
 jobs-run:
-	$(PYTHON) -m jobs.cli --job $(or $(JOB),nev_apeal_production_golden) $(JOB_PARAMS)
+	$(PYTHON) -m jobs.cli --job $(or $(JOB),daily_lock_count) $(JOB_PARAMS)
 
 ## ─── Daily Data Pipeline（canonical 入口）──────────────────────────
 ##
@@ -476,12 +444,6 @@ render-official-doc:
 render-official-doc-smoke:
 	$(PYTHON) scripts/smoke_test_official_document_render.py
 
-## Production Golden Case v1（NEV-APEAL 生产链回归门）
-## 固定：10 页 deck / semantic 0·0 / evidence+signal refs 解析 / render 0·0
-## 改 Slide Contract / validator / renderer / visual identity / palette / SKILL / production routing 后必须重放
-production-golden:
-	$(PYTHON) research_apps/nev_apeal/scratch/replay_golden_case.py
-
 # === CPCA Weekly Early Signal ===
 cpca-weekly-early-signal:  ## 乘联分会周度数据早源监控（终端输出）WEEK=目标数据周（默认自动计算最近周日所在周）
 	$(PYTHON) mashang_workspace/research_scripts/cpca_weekly_early_signal.py $(if $(WEEK),--week $(WEEK)) --format terminal
@@ -540,14 +502,6 @@ help:
 	@echo "make lock-attribution       锁单归因分析（单样本）START/END/SERIES/CHANNEL/HTML"
 	@echo "make lock-attribution-compare  锁单归因对比分析（两样本，差异高亮）START/END/START_B/END_B/LABEL/LABEL_B/HTML"
 	@echo "  示例: make lock-attribution-compare START=2024-01-01 END=2024-08-01 START_B=2026-01-01 END_B=2026-08-01 HTML=1"
-	@echo "=== Auto Launch (独立 service: research_apps/auto_launch/) ==="
-	@echo "make auto-launch-owned-brand-daily         本品品牌日报（从 facts 生成，报告层）BRAND=im BRAND_NAME=智己"
-	@echo "make auto-launch-owned-brand-daily-dry-run 本品品牌日报（dry-run，同上）"
-	@echo "make auto-launch-search                    Volc Search 搜索意图转译 (REQUEST=...) [dry-run]"
-	@echo "make auto-launch-normalize-results         标准化搜索结果 (RAW=... QUERY_PLAN=...)"
-	@echo "  配置目录: research_apps/auto_launch/configs/"
-	@echo "  文档:      research_apps/auto_launch/README.md, research_apps/auto_launch/docs/workflow.md"
-	@echo ""
 	@echo "=== Inventory ==="
 	@echo "make inventory-status     查询核心库存指标（国内DC在库_未开票）"
 	@echo "make inventory-trend      生成库存趋势 HTML 报告"
@@ -558,8 +512,8 @@ help:
 	@echo "make shared-audit     Shared Layer Audit"
 	@echo ""
 	@echo "=== jobs（确定性执行契约；Hub/Worker 调用）==="
-	@echo "make jobs-list        列出已声明 Research Application job"
-	@echo "make jobs-run         JOB=nev_apeal_production_golden [JOB_PARAMS=...]"
+	@echo "make jobs-list        列出已声明确定性 job"
+	@echo "make jobs-run         JOB=daily_lock_count JOB_PARAMS=--job-param\ date=YYYY-MM-DD"
 	@echo ""
 	@echo "=== Daily Data Pipeline（canonical；旧名为兼容别名）==="
 	@echo "make data-refresh-daily      仅刷新订单数据 + 下发线索（写操作；Daily pipeline 用）"
@@ -588,10 +542,7 @@ help:
 	@echo "=== Render ==="
 	@echo "make render-official-doc       正式材料排版渲染（Markdown→PDF/HTML/DOCX）"
 	@echo "make render-official-doc-smoke 正式材料排版渲染 Smoke Test"
-	@echo ""
-	@echo "=== NEV-APEAL Production ==="
-	@echo "make production-golden         Production Golden Case v1 回归门（slide contract + semantic lint + render QA）"
-	@echo ""
+	@echo ""	@echo ""
 	@echo ""
 	@echo "=== Catalog ==="
 	@echo "make build-workspace-skills-catalog         生成 workspace skills catalog（JSON/MD/HTML）"

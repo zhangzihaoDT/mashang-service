@@ -51,7 +51,8 @@ mashang-diagram（项目自有派生路由 Skill）
 HTML / SVG artifact
 ```
 
-在 `mashang-service` 中，Research outputs 主要来自 `research_apps/*` 和
+在 `mashang-service` 中，Research outputs 主要来自平级研究仓库
+（`../mashang-auto-launch`、`../mashang-product-expert`、`../mashang-nev-apeal`）和
 `mashang_workspace/outputs/`。
 
 分层职责：

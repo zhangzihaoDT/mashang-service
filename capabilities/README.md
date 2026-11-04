@@ -20,10 +20,10 @@ Browser / Parse / Render      research → business → eval
                     jobs/
            deterministic execution contract
                        │
-          ┌────────────┼────────────┬────────────┬───────
-          ▼            ▼            ▼            ▼
-     auto_launch    nev_apeal    Project ...
-            Research Applications
+          │
+          ▼
+   独立研究仓库（sibling repos）
+   ../mashang-auto-launch / ../mashang-product-expert / ../mashang-nev-apeal
 ```
 
 ## 什么是 Base Capability
@@ -32,10 +32,10 @@ Browser / Parse / Render      research → business → eval
 
 - 接口是领域无关的原语（如 `image → text/markdown/tables`），而不是业务结论。
 - 不依赖 `dataset/` 的业务表结构，不隐含车系/城市/口径。
-- 可被多个上层（Daily Business Analytics workspace scripts、jobs、Research Applications）通过同一份接口复用。
+- 可被多个上层（Daily Business Analytics workspace scripts、jobs、独立研究仓库）通过同一份接口复用。
 - 自带真实 provider + mock、自描述契约与测试，可离线验证。
 
-`mashang_workspace/`（日常业务分析）与 Research Applications（auto_launch / nev_apeal）是**消费者**；
+`mashang_workspace/`（日常业务分析）与平级研究仓库（`mashang-auto-launch` / `mashang-product-expert` / `mashang-nev-apeal`）是**消费者**；
 Base Capabilities 是**被消费方**。
 
 ## Capability 规范（模板）
@@ -79,6 +79,6 @@ Candidate 不设迁移截止时间；**在出现真实复用需求时**按本 RE
 
 ## 边界声明（本轮约定）
 
-- **编排边界**：运行时系统 = **Hub（Control Plane）+ Worker（Execution Gateway）+ OpenCode**；service 侧确定性边界是根目录 `jobs/`（声明式 Research Application job + 状态/摘要/artifact 契约）。Base Capabilities 与 Daily Business Analytics（workspace 能力）供其上调用。
-- **Research Applications 现状**：Service 中保留 auto_launch / nev_apeal 等模块。MIIT 已于 2026-10-15 迁至平级 `mashang-miit`，不属于 Service 的能力或 Job 清单；当前没有 MIIT 数据产物/API 对接。
-- **不要**在 capabilities/ 里放业务规则、业务脚本或领域解析逻辑——那属于 `mashang_workspace/` 或 Research Application 模块。
+- **编排边界**：运行时系统 = **Hub（Control Plane）+ Worker（Execution Gateway）+ OpenCode**；service 侧确定性边界是根目录 `jobs/`（声明式 service job + 状态/摘要/artifact 契约）。Base Capabilities 与 Daily Business Analytics（workspace 能力）供其上调用。
+- **独立研究仓库现状**：`auto_launch` / `product_expert` / `nev_apeal` 已迁至平级仓库；MIIT 在 `mashang-miit`，均不属于 Service 的能力或 Job 清单。
+- **不要**在 capabilities/ 里放业务规则、业务脚本或领域解析逻辑——那属于 `mashang_workspace/` 或独立研究仓库。

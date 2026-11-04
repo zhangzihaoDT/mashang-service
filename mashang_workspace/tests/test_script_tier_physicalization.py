@@ -80,13 +80,12 @@ def test_capability_registry_business_scripts_paths():
 
 
 def test_capability_registry_research_scripts_paths():
-    """research script paths 指向 research_scripts/、promptbuilders/ 或 research_apps/。"""
-    valid_prefixes = ("research_scripts", "promptbuilders", "research_apps")
+    """research script paths 指向 research_scripts/ 或 promptbuilders/。"""
+    valid_prefixes = ("research_scripts", "promptbuilders")
     registry = json.loads(REGISTRY_PATH.read_text())
     for cap in registry:
         if cap.get("tier") == "research":
             sp = cap.get("script", "")
-            assert not sp.startswith("research_apps/MIIT/"), "MIIT 已迁至独立仓库"
             assert any(p in sp for p in valid_prefixes), \
                 f"{cap['capability_id']} script path 不是 {valid_prefixes}: {sp}"
             full_path = PROJECT_ROOT / sp

@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-"""jobs — Research Application 确定性执行契约（execution contract）。
+"""jobs — 确定性执行契约（execution contract）。
 
 通过 `jobs/config/jobs_config.json` 的 `feature_jobs` 声明式定义「调用外部
-Research Application 的 job」：固定 argv 模板 + 白名单参数 + 指定 cwd →
+能力 job」：固定 argv 模板 + 白名单参数 + 指定 cwd →
 subprocess（无 shell）→ status/duration → artifact 探测 → 结构化结果。
 
 安全约束：
@@ -10,9 +10,9 @@ subprocess（无 shell）→ status/duration → artifact 探测 → 结构化�
   - 参数经白名单校验（date/pattern），用户文本不进入 shell；
   - cwd 来自 config（相对仓库根解析），不允许任意命令注入。
 
-边界：Research Application 业务逻辑留在其各自目录（不复制进 jobs/），
-本 adapter 只负责「如何调用 + 收集状态/摘要/产物」。Hub 调度 / Worker 执行，
-service 侧只提供本契约。
+边界：业务逻辑留在各自目录（当前为 `mashang_workspace/…`），
+不复制进 jobs/；本 adapter 只负责「如何调用 + 收集状态/摘要/产物」。
+Hub 调度 / Worker 执行，service 侧只提供本契约。
 """
 
 import json

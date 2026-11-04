@@ -1,44 +1,25 @@
 {
   "feature_jobs": {
-    "nev_apeal_production_golden": {
-      "module": "nev_apeal",
-      "label": "NEV-APEAL Production Golden Gate",
-      "cwd": "{repo_root}/research_apps/nev_apeal",
-      "add_cwd_to_path": true,
+    "daily_lock_count": {
+      "module": "mashang_workspace",
+      "label": "Daily Lock Count",
+      "cwd": "{repo_root}",
       "argv_template": [
         "{python}",
-        "scratch/replay_golden_case.py",
+        "mashang_workspace/business_scripts/daily_lock_count.py",
+        "--date",
+        "{date}",
         "--format",
         "json"
       ],
-      "params": {},
-      "summary": "json",
-      "timeout_seconds": 300
-    },
-    "nev_apeal_research_state": {
-      "module": "nev_apeal",
-      "label": "NEV-APEAL Research Topic State",
-      "cwd": "{repo_root}/research_apps/nev_apeal",
-      "add_cwd_to_path": true,
-      "argv_template": [
-        "{python}",
-        "cli.py",
-        "research",
-        "state",
-        "--topic",
-        "{topic}"
-      ],
       "params": {
-        "topic": {
-          "type": "pattern",
-          "required": true,
-          "pattern": "^[A-Za-z0-9_-]+$"
+        "date": {
+          "type": "date",
+          "required": true
         }
       },
-      "summary": "text",
-      "artifacts": [
-        "research/runs/{topic}/state.yaml"
-      ]
+      "summary": "json",
+      "timeout_seconds": 120
     }
   }
 }

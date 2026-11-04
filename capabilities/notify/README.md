@@ -63,11 +63,11 @@
 | `mashang_workspace/utility_scripts/skills_order_observation_daily.py` | 每日观察推送（webhook 段；Bitable 段不动） | ✅ 已迁移 |
 | `mashang_workspace/business_scripts/vehicle_sales_monitor.py` | 预售/上市锁单监控推送（唯一实现） | ✅ 已迁移 |
 | `mashang_workspace/research_scripts/presale_metrics_to_feishu.py` | 预售小订推送（compat shim → `vehicle_sales_monitor --force-phase`） | ✅ 已迁移 |
-| `auto_launch/src/feishu_sender.py` | 竞品营销日报推送 | ✅ 已迁移（薄封装） |
+| `mashang-auto-launch`（`research_apps/auto_launch/src/feishu_sender.py`） | 竞品营销日报推送 | ✅ 已迁移（薄封装；仓库已独立） |
 
 ## 历史沿革
 
-- 收敛前：5+ 个 workspace/feature 脚本各自内嵌 `build_feishu_card` + `send_to_feishu`（requests），`auto_launch/src/feishu_sender.py` 为其一（httpx）。
+- 收敛前：5+ 个 workspace/feature 脚本各自内嵌 `build_feishu_card` + `send_to_feishu`（requests），`mashang-auto-launch` 的 `src/feishu_sender.py` 为其一（httpx）。
 - 2026-09 按 Base Capabilities 规划新增 `capabilities/notify`（传输 + 通用信封 + mock）。
-- 阶段 B 完成：消费方（workspace 脚本 + auto_launch）全部收敛，本地 POST/重试逻辑移除。
+- 阶段 B 完成：消费方（workspace 脚本 + auto_launch）全部收敛，本地 POST/重试逻辑移除。auto_launch 已迁至 `../mashang-auto-launch`，vendored 一份 capabilities。
 - 2026-09：上市/预售监控收敛到唯一入口 `business_scripts/vehicle_sales_monitor.py`；`l6_m2_launch_lock_metrics_to_feishu.py` 已删除，`presale_metrics_to_feishu.py` 降为 compat shim（统一走 `vehicle_sales_monitor --force-phase`）。

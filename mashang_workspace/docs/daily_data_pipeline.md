@@ -49,7 +49,7 @@ make data-pipeline（旧名 daily-data-pipeline）
 | 数据校验 | `utility_scripts/dataset_validate.py` | 轻量检查 dataset 状态 | ❌ |
 | 观察计算 | `utility_scripts/skills_order_observation_daily.py` | 每日锁单/开票/预测/达成率 | ❌ (dry-run) / ✅ (sync) |
 | 分析消费 | `business_scripts/` | 稳定分析能力 | ❌ |
-| 确定性执行契约 | `jobs/` | Research Application job（Hub/Worker 调用） | ❌ |
+| 确定性执行契约 | `jobs/` | service job（Hub/Worker 调用） | ❌ |
 
 > **锁单口径对齐**：`skills_order_observation_daily.py` 的锁单统计与上市/预售监控（`utils/monitors/`）同源——按 `order_number` 去重、剔除测试单（总部主理店 + 假身份号）、LS6 代际分类复用 `utils.monitors.series_group.apply_series_group_logic`。唯一差异是时间窗口：观察为**单日**（自然日）；上市监控卡片「上市至今累计锁单」自上市开放时刻起累计，并另有「当日锁单」行。开票口径不属于本次对齐范围（仍为全量开票，不剔测试单）。
 
@@ -182,7 +182,7 @@ python dataset/updater/update_all_datasets.py --mobile
 
 ## 与 jobs / Hub 的关系
 
-- `jobs/` 是确定性执行契约层（Research Application job），**不负责数据源刷新**（那是 `dataset/updater/` 的职责）
+- `jobs/` 是确定性执行契约层（service job），**不负责数据源刷新**（那是 `dataset/updater/` 的职责）
 - `jobs/` **不调度 `utility_scripts/`**（包括 dataset_validate 和 skills_order_observation_daily）
 - `jobs/` **不响应"数据更新并同步"指令**（由 Hub/Worker 调度触发）
 - runtime 已不是 service 内的 Python package：运行时系统 = **Hub + Worker + OpenCode**

@@ -4,9 +4,9 @@
 
 **注意：OpenCode 仍应从仓库根目录启动。** 本文件仅定义 `mashang_workspace/` 内的工作规则。
 
-- 仓库总体架构、模块边界（workspace / jobs / capabilities / research_apps）、canonical 命令入口与副作用分级，见根目录 `AGENTS.md`。
+- 仓库总体架构、模块边界（workspace / jobs / capabilities / shared）、canonical 命令入口与副作用分级，见根目录 `AGENTS.md`。
 - 本文件只补充 workspace 层规则：脚本分层、业务口径、canonical 脚本、输出与验证方式。
-- 两者冲突时，架构与入口以根 `AGENTS.md` 为准，业务口径以本文件与 `docs/` 为准。
+- 两者冲突时，架构与入口以根 `AGENTS.md` 为准，业务口径以本文件、`shared/schema/reference/` 与 `docs/` 为准。
 
 ## 项目结构
 
@@ -22,14 +22,12 @@ mashang-service/                   # 总项目根目录
 ├── dataset/                       # 共享原始数据
 │   └── TP&MIX-ways/       #   └── 乘用车上险数据（6 张 Parquet + registry + quality）
 ├── requirements.txt               # 共享依赖
-├── shared/               # Semantic Foundation — shared operators / schema 层，谨慎修改
+├── shared/               # Semantic Foundation — operators / schema / reference docs，谨慎修改
 │
-├── jobs/                         # 确定性执行契约层：声明式 Research Application job（Hub/Worker 调用）
+├── jobs/                         # 确定性执行契约层：声明式 service job（Hub/Worker 调用）
 │   └── README.md
 │
 ├── capabilities/                 # Base Capabilities（领域无关原语：OCR/Search/Notify…）
-│
-├── research_apps/                        # Research Applications（独立研究单元；仅归类，共享走 shared/capabilities/workspace）
 │
 └── mashang_workspace/             # ← Daily Business Analytics Workspace（日常业务分析工具箱；当前所在目录）
 │   ├── AGENTS.md                  # 本文件
@@ -151,7 +149,6 @@ python mashang_workspace/eval/run_eval.py --suite parser  # 单套件
 | `make lock-attribution-compare START=2024-01-01 END=2024-08-01 START_B=2026-01-01 END_B=2026-08-01 HTML=1` | 锁单归因**对比**分析（两任意样本，差异高亮报告；`LABEL/LABEL_B` 自定义标签，`SERIES_B/CHANNEL_B` 按样本过滤） | make |
 | `python research_scripts/lock_attribution_analysis.py --start-date … --end-date … --compare-start-date … --compare-end-date … --html` | 锁单归因对比脚本（底层，Result Contract） | research |
 | `python research_scripts/dc_showroom_age_report.py --as-of YYYY-MM-DD --html` | 待销现车库龄/下线距今分布报告（固定库存分析工作流，`--html` 品牌化报告，`--format json` Result Contract） | research |
-| `research_apps/auto_launch/prompts/` | 竞品上市事件 Prompt 工作流资产 — 已迁移至 `research_apps/auto_launch/` | prompt asset |
 | `python research_scripts/cpca_weekly_early_signal.py --week 2026-W26` | 乘联分会周度数据早源监控（WEEK=数据归属周） | research |
 | `make cpca-weekly-early-signal WEEK=2026-W26` | 早源监控（终端输出）WEEK=要监控的数据周 | make |
 | `make cpca-weekly-early-signal-html WEEK=2026-W26` | 早源监控（HTML 报告）WEEK=要监控的数据周 | make |

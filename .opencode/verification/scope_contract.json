@@ -129,13 +129,6 @@
       "note": "jobs 执行契约改动跑契约单测"
     },
     {
-      "id": "research-app",
-      "match": ["research_apps/**"],
-      "targets": [],
-      "dynamic": "nearest_tests",
-      "note": "research app 改动跑其自带 tests/"
-    },
-    {
       "id": "dataset-tp-and-mix",
       "match": ["dataset/TP&MIX-ways/**"],
       "targets": ["pytest.dataset"],

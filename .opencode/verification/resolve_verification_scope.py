@@ -61,6 +61,11 @@ def match_path(path: str, pattern: str) -> bool:
     return re.match(_glob_to_regex(pattern), path) is not None
 
 
+def _is_package_init(path: str) -> bool:
+    """`__init__.py` 不是 CLI 入口，不能直接 `python path --help` 冒烟。"""
+    return path.rsplit("/", 1)[-1] == "__init__.py"
+
+
 def load_contract(path: Path = CONTRACT_PATH) -> dict:
     return json.loads(Path(path).read_text(encoding="utf-8"))
 
@@ -142,7 +147,7 @@ def resolve_scope(contract: dict, changed: list, include: list | None = None,
                 targets[tid] = _static_target(contract, tid)
 
             dyn = rule.get("dynamic")
-            if dyn == "script_help" and path.endswith(".py"):
+            if dyn == "script_help" and path.endswith(".py") and not _is_package_init(path):
                 tid = f"smoke:{path}"
                 targets[tid] = {
                     "id": tid, "command": ["{python}", path, "--help"],
@@ -158,7 +163,7 @@ def resolve_scope(contract: dict, changed: list, include: list | None = None,
                         "data_dependency": False,
                         "description": f"改动测试文件 {path}", "source": "dynamic",
                     }
-                else:
+                elif not _is_package_init(path):
                     tid = f"smoke:{path}"
                     targets[tid] = {
                         "id": tid, "command": ["{python}", path, "--help"],
@@ -174,7 +179,7 @@ def resolve_scope(contract: dict, changed: list, include: list | None = None,
                         "data_dependency": False,
                         "description": f"{tests_dir}（{path} 所属模块 tests）", "source": "dynamic",
                     }
-                elif path.endswith(".py"):
+                elif path.endswith(".py") and not _is_package_init(path):
                     tid = f"smoke:{path}"
                     targets[tid] = {
                         "id": tid, "command": ["{python}", path, "--help"],

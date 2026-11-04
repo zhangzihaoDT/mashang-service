@@ -1,6 +1,6 @@
 # jobs — 确定性执行契约层
 
-Service 侧唯一的 **Research Application job 执行边界**。
+Service 侧唯一的 **确定性 job 执行边界**（当前承载 workspace 业务能力）。
 
 ```text
 mashang-hub (Control Plane)  ──调度──▶  Worker (Execution Gateway)  ──调用──▶  jobs/ (确定性执行契约)
@@ -10,7 +10,7 @@ mashang-hub (Control Plane)  ──调度──▶  Worker (Execution Gateway)  
 
 - **只负责** job 的声明、参数校验与确定性执行，以及状态/摘要/artifact 契约。
 - **不负责** 自然语言路由、多轮会话、答案渲染、UI/CLI 交互；这些由 Hub / Worker / OpenCode 承担。
-- Research Application 的业务逻辑留在各项目目录（`research_apps/<app>/`），不复制进本目录。
+- 业务逻辑留在各项目目录（当前为 `mashang_workspace/…`），不复制进本目录。
 
 ## 结构
 
@@ -26,9 +26,8 @@ jobs/
 
 ```bash
 python -m jobs.cli --list
-python -m jobs.cli --job nev_apeal_production_golden
-python -m jobs.cli --job nev_apeal_research_state --job-param topic=topic_x
-python -m jobs.cli --job nev_apeal_production_golden --format json
+python -m jobs.cli --job daily_lock_count --job-param date=2026-11-03
+python -m jobs.cli --job daily_lock_count --job-param date=2026-11-03 --format json
 ```
 
 ## Execution Contract

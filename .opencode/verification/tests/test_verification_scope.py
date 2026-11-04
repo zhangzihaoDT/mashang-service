@@ -76,10 +76,12 @@ def test_capability_change_uses_nearest_tests():
     assert "pytest:capabilities/ocr/tests" in ids
 
 
-def test_research_app_change_uses_nearest_tests():
-    scope = rvs.resolve_scope(_contract(), ["research_apps/auto_launch/cli.py"])
+def test_package_init_not_smoked():
+    """包的 __init__.py 不是 CLI，不应生成 `python path --help` 冒烟。"""
+    scope = rvs.resolve_scope(_contract(), ["jobs/__init__.py"])
     ids = {t["id"] for t in scope["required_targets"]}
-    assert any(i.startswith("pytest:research_apps/auto_launch") for i in ids)
+    assert "smoke:jobs/__init__.py" not in ids
+    assert "jobs.tests" in ids
 
 
 def test_changed_test_file_runs_itself():

@@ -116,7 +116,7 @@ python mashang_workspace/utility_scripts/validate_study_spec.py --spec <path> --
 
 | 文件 | 新位置 | 说明 |
 |------|--------|------|
-| `ls8_competitor_watchlist.csv` | `auto_launch/configs/ls8_competitor_watchlist.csv` | auto_launch 专属 watchlist |
+| `ls8_competitor_watchlist.csv` | `../mashang-auto-launch/research_apps/auto_launch/configs/ls8_competitor_watchlist.csv` | auto_launch 专属 watchlist（仓库已独立） |
 
 
 ## 品牌销量分析关注清单

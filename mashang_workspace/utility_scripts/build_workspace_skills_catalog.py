@@ -162,37 +162,6 @@ def scan_workspace_skills() -> list[dict]:
 # ─── Promptbuilder scan ────────────────────────────────────────
 
 PROMPTBUILDER_CAPABILITIES = {
-    "auto_launch": {
-        "name": "auto_launch",
-        "type": "Standalone Service (research_apps/auto_launch/)",
-        "directory": "research_apps/auto_launch/",
-        "description": "汽车上市/营销事件独立监控服务；搜索意图编译 → query plan → Volc Search API → 信源分级 → URL 去重 → 事件聚类 → candidate gate → Markdown 简报。",
-        "entrypoints": [
-            "PYTHONPATH=research_apps python -m auto_launch.cli report --type brand-daily --brand 智己",
-            "PYTHONPATH=research_apps python -m auto_launch.cli search --request '看看极氪最近 7 天都有什么动作'",
-            "make auto-launch-owned-brand-daily",
-        ],
-        "outputs": [
-            "research_apps/auto_launch/outputs/search/{date}/{mode}/",
-            "research_apps/auto_launch/outputs/owned_brand_daily/{date}/",
-        ],
-        "docs": [
-            "research_apps/auto_launch/README.md",
-            "research_apps/auto_launch/docs/workflow.md",
-        ],
-        "scenarios": [
-            "本品品牌每日营销事件监控",
-            "竞品车型动态追踪",
-            "搜索意图编译 → Volc Search 执行",
-            "搜索结果标准化 + 信源分级",
-            "事件聚类 + candidate gate 分桶",
-        ],
-        "not_for": [
-            "生成长篇竞品分析报告",
-            "替代完整爬虫/ETL 系统",
-            "非汽车行业的通用事件监测",
-        ],
-    },
 
 }
 
