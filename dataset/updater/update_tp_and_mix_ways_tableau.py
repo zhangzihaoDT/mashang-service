@@ -1,18 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-增量更新 TP&MIX-ways 数据集（Tableau → staging → 合并校验 → 原子发布 → 重建）。
+增量更新 TP&MIX-ways 数据集（staging 全链路校验 → 跨层事务发布）。
 
 安全契约：
 1. Tableau 导出先落在 dataset/TP&MIX-ways/staging/runs/<run_id>/increment/，
    绝不直接写正式 raw_csv。
-2. 正式 raw_csv 与增量合并：增量包含的月份整月替换正式 raw（消失的键计入
+2. 正式 raw_csv 与增量在 staging 合并：增量包含的月份整月替换（消失的键计入
    removed_rows），未出现在增量中的历史月份保持原值；合并结果先校验列、主键、
-   月份和数值。
-3. 校验通过后先快照正式 raw 到 staging/backups/<run_id>/，再逐文件
-   os.replace 原子发布；任一失败按快照回滚。
-4. 发布完成后从正式 raw 全量重建 parquet / registry / quality 到 staging，
-   校验后同样原子发布，保证 raw → parquet → registry → quality 可复现。
+   月份和数值。整月删除比例超过阈值默认阻断。
+3. 派生层也从 staging merged raw 全量构建到 staging；raw、parquet、registry、
+   quality 全部校验通过后才进入发布。
+4. 发布是单次跨层事务：先快照全部目标文件到 staging/backups/<run_id>/，再逐文件
+   os.replace；任一失败恢复本次事务已修改的全部文件。os.replace 只提供文件级
+   原子性，不保证整个数据集的一致可见性；transaction manifest 是恢复依据。
+5. 运行锁防止并发更新；启动时自动回滚上次中断留下的 publishing manifest。
 
 用法:
     python dataset/updater/update_tp_and_mix_ways_tableau.py
@@ -45,12 +47,15 @@ from scripts.build_tp_and_mix_ways_dataset import (  # noqa: E402
     build_tp_and_mix_ways_dataset,
 )
 from dataset.updater.tp_and_mix_ways_raw_guard import (  # noqa: E402
+    DEFAULT_MAX_MONTH_DELETION_RATIO,
     RawContractError,
     merge_snapshot_to_staging,
     new_run_id,
-    publish_derived_snapshot,
-    publish_raw_snapshot,
-    required_months_from_parquet,
+    publish_update_transaction,
+    recover_incomplete_transactions,
+    update_lock,
+    validate_derived_baseline,
+    validate_raw_derived_consistency,
     validate_snapshot,
 )
 
@@ -433,6 +438,24 @@ def _rebuild_derived_layers(
     return derived_dir, reports
 
 
+def _print_merge_audit(plan: dict[str, Any]) -> None:
+    for table_name, stats in plan["tables"].items():
+        print(
+            f"  {table_name}: base={stats['base_rows']} inc={stats['increment_rows']} "
+            f"merged={stats['merged_rows']} added={stats['added_rows']} "
+            f"restated={stats['restated_rows']} removed={stats['removed_rows']} "
+            f"months={stats['base_month_count']}->{stats['merged_month_count']}"
+        )
+        for item in stats.get("month_audit", []):
+            if not item["removed_rows"]:
+                continue
+            print(
+                f"    {item['month']}: old={item['base_rows']} "
+                f"new={item['increment_rows']} removed={item['removed_rows']} "
+                f"ratio={item['deletion_ratio']:.2%}"
+            )
+
+
 def run_update(
     *,
     dataset_root: Path,
@@ -440,121 +463,127 @@ def run_update(
     mobile: bool,
     timeout: int,
     dry_run: bool,
+    max_month_deletion_ratio: float = DEFAULT_MAX_MONTH_DELETION_RATIO,
 ) -> int:
     dataset_root = Path(dataset_root).resolve()
     raw_dir = dataset_root / "raw_csv"
-    parquet_dir = dataset_root / "parquet"
     staging_root = dataset_root / "staging"
     run_id = new_run_id()
     run_dir = staging_root / "runs" / run_id
 
-    if export:
-        increment_dir = run_dir / "increment" / "raw_csv"
-        if not step_export_all_views(increment_dir, mobile=mobile, timeout=timeout):
-            print("\n❌ Tableau 导出失败，未写入正式 raw，也未重建派生层。")
-            return 1
-        try:
-            validate_snapshot(increment_dir)
-        except RawContractError as exc:
-            print(f"\n❌ 增量快照校验失败，未写入正式 raw: {exc}")
-            return 1
-        if not raw_dir.is_dir():
-            print(f"\n❌ 正式 raw 目录不存在: {raw_dir}")
-            return 1
-
-        print("\n按主键合并增量与正式 raw（历史月份保护）...")
-        try:
-            required_months = required_months_from_parquet(parquet_dir)
-            plan = merge_snapshot_to_staging(
-                raw_dir,
-                increment_dir,
-                run_dir / "merged" / "raw_csv",
-                required_months_by_table=required_months,
-            )
-        except (RawContractError, OSError) as exc:
-            print(f"\n❌ 合并/校验失败，正式 raw 未改动: {exc}")
-            return 1
-
-        for table_name, stats in plan["tables"].items():
-            print(
-                f"  {table_name}: base={stats['base_rows']} inc={stats['increment_rows']} "
-                f"merged={stats['merged_rows']} added={stats['added_rows']} "
-                f"restated={stats['restated_rows']} removed={stats['removed_rows']} "
-                f"months={stats['base_month_count']}->{stats['merged_month_count']}"
-            )
-        if dry_run:
-            # Validate the whole chain from the staged merged raw; publish nothing.
-            try:
-                _rebuild_derived_layers(
-                    source_raw_dir=Path(plan["merged_dir"]), run_dir=run_dir
+    try:
+        with update_lock(staging_root, run_id):
+            for recovered in recover_incomplete_transactions(staging_root):
+                print(
+                    f"♻️  已处理未完成事务: {recovered['manifest']} "
+                    f"-> {recovered['status']}"
                 )
-            except RuntimeError as exc:
-                print(f"\n❌ [dry-run] 派生层构建失败: {exc}")
-                return 1
-            print(f"\n[dry-run] 合并与全链路构建通过，未发布。staged: {run_dir}")
-            return 0
 
-        try:
-            publish_raw_snapshot(
-                formal_raw_dir=raw_dir,
-                staged_raw_dir=Path(plan["merged_dir"]),
+            baseline = validate_derived_baseline(dataset_root)
+            required_months = baseline.get("months") or {}
+
+            staged_raw: Path | None = None
+            raw_validation = None
+            merge_audit = None
+
+            if export:
+                increment_dir = run_dir / "increment" / "raw_csv"
+                if not step_export_all_views(increment_dir, mobile=mobile, timeout=timeout):
+                    print("\n❌ Tableau 导出失败，正式数据未改动。")
+                    return 1
+                validate_snapshot(increment_dir)
+                if not raw_dir.is_dir():
+                    raise RawContractError(f"正式 raw 目录不存在: {raw_dir}")
+
+                print("\n按整月替换语义合并增量与正式 raw（历史月份保护）...")
+                plan = merge_snapshot_to_staging(
+                    raw_dir,
+                    increment_dir,
+                    run_dir / "merged" / "raw_csv",
+                    required_months_by_table=required_months,
+                    max_month_deletion_ratio=max_month_deletion_ratio,
+                )
+                staged_raw = Path(plan["merged_dir"])
+                raw_validation = plan["validation"]
+                merge_audit = plan["tables"]
+                _print_merge_audit(plan)
+            else:
+                if not raw_dir.is_dir():
+                    raise RawContractError(f"正式 raw 目录不存在: {raw_dir}")
+                print("\n跳过 Tableau 导出，直接从正式 raw 重建 staging 派生层。")
+
+            # Build and validate every layer from the staged raw before touching
+            # any formal file. A failure here leaves the formal dataset unchanged.
+            source_raw = staged_raw if staged_raw is not None else raw_dir
+            derived_dir, reports = _rebuild_derived_layers(
+                source_raw_dir=source_raw, run_dir=run_dir
+            )
+            consistency = validate_raw_derived_consistency(source_raw, derived_dir)
+            derived_validation = {
+                report["table_name"]: {
+                    "row_count": report.get("row_count"),
+                    "date_min": report.get("date_min"),
+                    "date_max": report.get("date_max"),
+                    "duplicate_grain_count": report.get("duplicate_grain_count"),
+                }
+                for report in reports
+            }
+
+            if dry_run:
+                print(
+                    f"\n[dry-run] 导出/合并/校验/派生层构建全部通过，未发布。"
+                    f"staged: {run_dir}"
+                )
+                return 0
+
+            manifest = publish_update_transaction(
+                dataset_root=dataset_root,
+                run_dir=run_dir,
                 staging_root=staging_root,
-                run_id=run_id,
-                required_months_by_table=required_months,
+                raw_dir=staged_raw,
+                derived_dir=derived_dir,
+                validation={
+                    "raw": raw_validation,
+                    "derived": derived_validation,
+                    "cross_layer": consistency,
+                },
+                audit={"merge": merge_audit},
             )
-        except (RawContractError, OSError) as exc:
-            print(f"\n❌ raw 原子发布失败，已回滚到发布前快照: {exc}")
-            return 1
-        print(f"\n✅ 正式 raw_csv 已原子发布（备份: {staging_root / 'backups' / run_id}）")
-    else:
-        if not raw_dir.is_dir():
-            print(f"\n❌ 正式 raw 目录不存在: {raw_dir}")
-            return 1
-        print("\n跳过 Tableau 导出，直接从正式 raw 重建派生层。")
-
-    try:
-        derived_dir, _ = _rebuild_derived_layers(source_raw_dir=raw_dir, run_dir=run_dir)
-    except RuntimeError as exc:
-        print(f"\n❌ 派生层构建失败: {exc}")
-        if export:
             print(
-                "⚠️ 正式 raw_csv 已发布，但 parquet/registry/quality 仍为旧版本；"
-                "可修复后执行 --skip-export 重建派生层。"
+                f"\n✅ 跨层事务发布完成: layers={manifest.get('layers')} "
+                f"files={len(manifest.get('files', {}))} "
+                f"backup={staging_root / 'backups' / run_id}"
             )
+            return 0
+    except (RawContractError, OSError, RuntimeError) as exc:
+        print(f"\n❌ 更新失败（正式数据未改动，或已按快照回滚）: {exc}")
         return 1
-    if dry_run:
-        print(f"\n[dry-run] 派生层构建与校验通过，未发布。staged: {derived_dir}")
-        return 0
-
-    try:
-        publish_derived_snapshot(
-            derived_dir=derived_dir,
-            dataset_root=dataset_root,
-            staging_root=staging_root,
-            run_id=run_id,
-        )
-    except (RawContractError, OSError) as exc:
-        print(f"\n❌ 派生层原子发布失败，已回滚: {exc}")
-        return 1
-    print(f"\n✅ 派生层已原子发布（备份: {staging_root / 'backups' / run_id}）")
-    return 0
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="增量更新 tp_and_mix_ways 数据集（Tableau → staging → 校验 → 原子发布）"
+        description="增量更新 TP&MIX-ways 数据集（staging 校验 → 跨层事务发布）"
     )
     parser.add_argument("--mobile", action="store_true", help="使用移动端/非办公网络服务器地址导出")
     parser.add_argument("--timeout", type=int, default=600, help="Tableau 导出超时（秒）")
     parser.add_argument(
         "--skip-export",
         action="store_true",
-        help="跳过 Tableau 导出，仅从正式 raw_csv 重建派生层",
+        help="跳过 Tableau 导出，仅从正式 raw_csv 重建并发布派生层",
     )
     parser.add_argument(
         "--dry-run",
         action="store_true",
-        help="完成导出/合并/校验/构建到 staging，但不发布正式文件",
+        help="完成导出/合并/全链路构建与校验到 staging，但不发布正式文件",
+    )
+    parser.add_argument(
+        "--max-month-deletion-ratio",
+        type=float,
+        default=DEFAULT_MAX_MONTH_DELETION_RATIO,
+        help=(
+            "整月替换允许的最大删除行比例（默认 "
+            f"{DEFAULT_MAX_MONTH_DELETION_RATIO:.2f}）；超过则阻断发布"
+        ),
     )
     parser.add_argument(
         "--dataset-root",
@@ -564,6 +593,9 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
+    if not 0.0 <= args.max_month_deletion_ratio <= 1.0:
+        parser.error("--max-month-deletion-ratio 必须在 [0, 1]")
+
     load_env_file(REPO_ROOT / ".env")
     try:
         return run_update(
@@ -572,6 +604,7 @@ def main(argv: list[str] | None = None) -> int:
             mobile=args.mobile,
             timeout=args.timeout,
             dry_run=args.dry_run,
+            max_month_deletion_ratio=args.max_month_deletion_ratio,
         )
     except RawContractError as exc:
         print(f"\n❌ 数据契约校验失败: {exc}")

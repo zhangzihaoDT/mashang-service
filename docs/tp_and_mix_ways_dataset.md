@@ -190,25 +190,33 @@ df = load_tp_and_mix_ways_table("geo_monthly")
 
 ---
 
-## 增量更新与发布契约
+## 增量更新与跨层发布契约
 
 正式 `raw_csv` 是历史真源，**任何 Tableau 导出不得直接覆盖它**。视图只返回一个日期
 窗口且列顺序不固定，2026-11-03 的 2 个月导出覆盖 79 个月历史即由此触发。现在统一由
-`dataset/updater/tp_and_mix_ways_raw_guard.py` 执行：
+`dataset/updater/tp_and_mix_ways_raw_guard.py` 执行，顺序是“staging 全部完成并校验
+后再一次性发布”：
 
 1. 导出写入 `staging/runs/<run_id>/increment/raw_csv/`。
-2. 与正式 raw 合并：增量中包含的月份整月替换正式 raw（消失的键计入
+2. 与正式 raw 在 staging 合并：增量中包含的月份整月替换（消失的键计入
    `removed_rows`），未出现在增量中的历史月份原样保留；重叠键值变化计为
-   restatement。
+   restatement。每表每月记录旧行数、新行数、删除行数与删除比例；超过阈值默认
+   阻断（`--max-month-deletion-ratio`，默认 0.50）。
 3. 校验 6 张表齐全、列集合与契约一致、主键无重复、月份可解析、销量非负，且合并后
-   月份覆盖当前 parquet 基线（防止 raw 在更早的事故中已经缺月）。
-4. 快照正式 raw 到 `staging/backups/<run_id>/raw_csv/`，写
-   `publish_manifest.json`，再逐文件 `os.replace` 原子发布；任一失败按快照回滚。
-5. 从已发布 raw 全量重建 parquet / registry / quality 到 staging，再原子发布。
-   raw 始终是唯一真源；派生层失败可随时用 `--skip-export` 重建。
+   月份覆盖当前 parquet 基线。正式数据集已有派生层时，parquet 6 文件 + registry +
+   quality 任一缺失都直接报错，不再静默跳过。
+4. 从 staging merged raw 全量构建 parquet / registry / quality 到 staging，并校验
+   raw 与 parquet 的月份集合一致；任何构建/校验失败都不会触碰正式文件。
+5. 全部层通过后才进入跨层事务发布：先把本次要替换的 raw + derived 文件快照到
+   `staging/backups/<run_id>/`，写 `transaction_manifest.json`，再逐文件
+   `os.replace`；任一文件失败按 manifest 恢复本次事务已修改的全部文件。
+6. `os.replace` 只提供**文件级**原子性，不保证整个数据集的一致可见性；事务
+   manifest 是恢复依据。更新入口持有 `staging/.update.lock` 运行锁，启动时会自动
+   回滚上次中断留下的 `publishing` manifest；回滚失败会标记 `recovery_failed` 并
+   阻断新的更新。
 
-`--dry-run` 只做导出/合并/校验/构建，不发布；`--skip-export` 仅从正式 raw 重建
-派生层。备份与 manifest 不自动删除。
+`--dry-run` 只做导出/合并/全链路构建与校验，不发布；`--skip-export` 仅从正式 raw
+重建派生层。备份与 manifest 不自动删除。
 
 ## 重新构建与增量更新
 
@@ -216,10 +224,10 @@ df = load_tp_and_mix_ways_table("geo_monthly")
 # 从正式 raw 全量重建 parquet / registry / quality
 make build-tp-and-mix-ways-dataset
 
-# 等价入口：updater --skip-export（staging 构建后原子发布）
+# 等价入口：updater --skip-export（staging 构建后跨层事务发布）
 make rebuild-tp-and-mix-ways-dataset
 
-# Tableau → staging → 合并校验 → 原子发布 raw → 重建派生层
+# Tableau → staging → 合并/校验/派生层构建 → 跨层事务发布
 make update-tp-and-mix-ways-dataset
 ```
 
@@ -253,7 +261,11 @@ pytest tests/test_tp_and_mix_ways_raw_guard.py -q
 - 列顺序变化 / 表头别名 / UTF-16 Tab 输入
 - 主键冲突与列集合变化被拒绝
 - 历史月份缺失时拒绝发布
-- 原子发布失败按快照回滚
+- 跨层事务失败时 raw + parquet/registry/quality 全部回滚
+- 跨层月份不一致、基线文件缺失时拒绝发布
+- 运行锁阻止并发、陈旧锁可恢复、重复运行可继续
+- 未完成 publishing manifest 的自动回滚与回滚失败告警
+- 整月大规模删除审计与可配置阈值
 - 合并后重建的一致性 / 确定性，以及 grain 修复前后的重复率
 
 `test_tp_and_mix_ways_dataset_build.py` 中依赖 `dataset/TP&MIX-ways/` 的用例在没有

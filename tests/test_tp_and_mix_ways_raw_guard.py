@@ -8,7 +8,10 @@ Coverage:
 * column order / header alias / encoding changes are tolerated
 * duplicate primary keys and column-set changes are rejected
 * missing historical months block publish
-* atomic publish rolls back on failure
+* per-month deletion audit blocks abnormal mass deletion (configurable)
+* cross-layer transaction rollback restores raw + derived files
+* incomplete manifest recovery, recovery failure, run lock, repeated runs
+* missing baseline files are errors
 * rebuild from published raw is deterministic and preserves history
 * corrected grain definitions remove false duplicate rows
 """
@@ -17,6 +20,8 @@ from __future__ import annotations
 
 import csv
 import json
+import os
+import shutil
 from pathlib import Path
 
 import pandas as pd
@@ -580,9 +585,14 @@ def test_rebuild_only_entrypoint_publishes_derived_layers(tmp_path: Path):
     assert (dataset_root / "registry" / "tp_and_mix_ways_tables.json").is_file()
     assert (dataset_root / "quality" / "tp_and_mix_ways_dataset_quality.md").is_file()
     assert {path.name: guard.sha256_file(path) for path in raw.glob("*.csv")} == before
-    manifests = list((dataset_root / "staging" / "runs").glob("*/derived_manifest.json"))
+    manifests = list(
+        (dataset_root / "staging" / "runs").glob("*/transaction_manifest.json")
+    )
     assert len(manifests) == 1
-    assert json.loads(manifests[0].read_text(encoding="utf-8"))["status"] == "published"
+    manifest = json.loads(manifests[0].read_text(encoding="utf-8"))
+    assert manifest["status"] == "published"
+    assert manifest["layers"] == ["parquet_registry_quality"]
+    assert len(manifest["files"]) == 9
 
 
 def test_dry_run_does_not_publish_derived_layers(tmp_path: Path):
@@ -594,3 +604,361 @@ def test_dry_run_does_not_publish_derived_layers(tmp_path: Path):
     assert exit_code == 0
     assert not (dataset_root / "parquet").exists()
     assert not (dataset_root / "registry").exists()
+
+
+# ── cross-layer transaction / recovery / lock ───────────────────
+
+
+def _build_baseline(raw_dir: Path, dataset_root: Path) -> None:
+    build_tp_and_mix_ways_dataset(
+        raw_csv_dir=raw_dir,
+        parquet_dir=dataset_root / "parquet",
+        registry_dir=dataset_root / "registry",
+        quality_dir=dataset_root / "quality",
+    )
+
+
+def _dataset_files() -> list[str]:
+    return [f"raw_csv/{filename}" for filename in SOURCE_MAP] + list(
+        guard.EXPECTED_DERIVED_FILES
+    )
+
+
+def _hashes(dataset_root: Path) -> dict[str, str]:
+    return {
+        relative: guard.sha256_file(dataset_root / relative)
+        for relative in _dataset_files()
+    }
+
+
+def test_build_failure_before_publish_leaves_formal_dataset_unchanged(
+    tmp_path: Path, monkeypatch
+):
+    dataset_root = tmp_path / "dataset"
+    raw_dir = dataset_root / "raw_csv"
+    write_snapshot(raw_dir, ["2026年1月"])
+    _build_baseline(raw_dir, dataset_root)
+    before = _hashes(dataset_root)
+
+    increment = tmp_path / "increment" / "raw_csv"
+    write_snapshot(increment, ["2026年2月"])
+
+    def fake_export(output_dir, mobile=False, timeout=600):
+        output_dir.mkdir(parents=True, exist_ok=True)
+        shutil.copytree(increment, output_dir, dirs_exist_ok=True)
+        return True
+
+    def fail_build(**_kwargs):
+        raise RuntimeError("simulated derived build failure")
+
+    monkeypatch.setattr(updater, "step_export_all_views", fake_export)
+    monkeypatch.setattr(updater, "_rebuild_derived_layers", fail_build)
+
+    exit_code = updater.run_update(
+        dataset_root=dataset_root, export=True, mobile=False, timeout=1, dry_run=False
+    )
+    assert exit_code == 1
+    assert _hashes(dataset_root) == before
+    assert not (dataset_root / "staging" / guard.LOCK_FILENAME).exists()
+    assert not list(
+        (dataset_root / "staging" / "runs").glob("*/transaction_manifest.json")
+    )
+
+
+def test_cross_layer_gate_rejects_missing_raw_month_in_parquet(tmp_path: Path):
+    base_raw = tmp_path / "base" / "raw_csv"
+    write_snapshot(base_raw, ["2026年1月"])
+    derived = tmp_path / "derived"
+    build_tp_and_mix_ways_dataset(
+        raw_csv_dir=base_raw,
+        parquet_dir=derived / "parquet",
+        registry_dir=derived / "registry",
+        quality_dir=derived / "quality",
+    )
+
+    staged_raw = tmp_path / "staged" / "raw_csv"
+    write_snapshot(staged_raw, ["2026年1月", "2026年2月"])
+    with pytest.raises(guard.RawContractError, match="月份不一致"):
+        guard.validate_raw_derived_consistency(staged_raw, derived)
+
+
+def test_cross_layer_publish_failure_rolls_back_every_modified_file(
+    tmp_path: Path, monkeypatch
+):
+    dataset_root = tmp_path / "dataset"
+    raw_dir = dataset_root / "raw_csv"
+    write_snapshot(raw_dir, ["2026年1月"])
+    _build_baseline(raw_dir, dataset_root)
+    before = _hashes(dataset_root)
+
+    staged_raw = tmp_path / "staged" / "raw_csv"
+    write_snapshot(staged_raw, ["2026年1月", "2026年2月"])
+    staged_derived = tmp_path / "staged_derived"
+    build_tp_and_mix_ways_dataset(
+        raw_csv_dir=staged_raw,
+        parquet_dir=staged_derived / "parquet",
+        registry_dir=staged_derived / "registry",
+        quality_dir=staged_derived / "quality",
+    )
+
+    real_replace = guard.os.replace
+
+    def flaky_replace(source, destination):
+        if Path(destination).name == "model_monthly.parquet":
+            raise OSError("simulated mid-transaction failure")
+        return real_replace(source, destination)
+
+    monkeypatch.setattr(guard.os, "replace", flaky_replace)
+    staging_root = dataset_root / "staging"
+    with pytest.raises(OSError, match="simulated mid-transaction failure"):
+        guard.publish_update_transaction(
+            dataset_root=dataset_root,
+            run_dir=staging_root / "runs" / "tx1",
+            staging_root=staging_root,
+            raw_dir=staged_raw,
+            derived_dir=staged_derived,
+            validation={"raw": "ok", "derived": "ok"},
+            audit={"merge": "ok"},
+        )
+
+    assert _hashes(dataset_root) == before
+    manifest = json.loads(
+        (
+            staging_root / "runs" / "tx1" / guard.TRANSACTION_MANIFEST_NAME
+        ).read_text(encoding="utf-8")
+    )
+    assert manifest["status"] == "failed"
+    assert manifest["published_before_failure"]
+    assert manifest["layers"] == ["raw_csv", "parquet_registry_quality"]
+
+
+def _write_incomplete_manifest(
+    dataset_root: Path,
+    staging_root: Path,
+    *,
+    run_id: str = "crashed",
+    with_backup: bool = True,
+) -> tuple[Path, Path, Path | None]:
+    relative = "raw_csv/way1_market_energy_monthly_data.csv"
+    destination = dataset_root / relative
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_text("new-content\n", encoding="utf-8")
+
+    backup: Path | None = None
+    if with_backup:
+        backup = staging_root / "backups" / run_id / relative
+        backup.parent.mkdir(parents=True, exist_ok=True)
+        backup.write_text("old-content\n", encoding="utf-8")
+
+    manifest_path = staging_root / "runs" / run_id / guard.TRANSACTION_MANIFEST_NAME
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    manifest_path.write_text(
+        json.dumps(
+            {
+                "run_id": run_id,
+                "status": "publishing",
+                "files": {
+                    relative: {
+                        "destination": str(destination),
+                        "backup": str(backup) if backup else None,
+                        "previous_sha256": guard.sha256_file(backup) if backup else "missing",
+                    }
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    return manifest_path, destination, backup
+
+
+def test_incomplete_publishing_manifest_is_recovered(tmp_path: Path):
+    dataset_root = tmp_path / "dataset"
+    staging_root = dataset_root / "staging"
+    manifest_path, destination, _ = _write_incomplete_manifest(
+        dataset_root, staging_root
+    )
+
+    recovered = guard.recover_incomplete_transactions(staging_root)
+    assert len(recovered) == 1
+    assert destination.read_text(encoding="utf-8") == "old-content\n"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    assert manifest["status"] == "recovered"
+    assert manifest["restore_errors"] == []
+
+
+def test_failed_recovery_marks_manifest_and_raises(tmp_path: Path):
+    dataset_root = tmp_path / "dataset"
+    staging_root = dataset_root / "staging"
+    manifest_path, destination, _ = _write_incomplete_manifest(
+        dataset_root, staging_root, with_backup=False
+    )
+
+    with pytest.raises(guard.RawContractError, match="恢复失败"):
+        guard.recover_incomplete_transactions(staging_root)
+    assert destination.read_text(encoding="utf-8") == "new-content\n"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    assert manifest["status"] == "recovery_failed"
+
+
+def test_update_recovers_incomplete_manifest_before_publishing(tmp_path: Path):
+    dataset_root = tmp_path / "dataset"
+    raw_dir = dataset_root / "raw_csv"
+    write_snapshot(raw_dir, ["2026年1月"])
+    _build_baseline(raw_dir, dataset_root)
+
+    relative = "raw_csv/way1_market_energy_monthly_data.csv"
+    destination = dataset_root / relative
+    original = destination.read_bytes()
+    staging_root = dataset_root / "staging"
+    backup = staging_root / "backups" / "crashed" / relative
+    backup.parent.mkdir(parents=True, exist_ok=True)
+    backup.write_bytes(original)
+    destination.write_text("corrupted-after-crash\n", encoding="utf-8")
+    manifest_path = staging_root / "runs" / "crashed" / guard.TRANSACTION_MANIFEST_NAME
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    manifest_path.write_text(
+        json.dumps(
+            {
+                "run_id": "crashed",
+                "status": "publishing",
+                "files": {
+                    relative: {
+                        "destination": str(destination),
+                        "backup": str(backup),
+                        "previous_sha256": guard.sha256_file(backup),
+                    }
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    # The crash happened after the formal file was replaced; recovery must put
+    # the pre-transaction content back before the next update proceeds.
+    assert destination.read_bytes() != original
+
+    exit_code = updater.main(["--skip-export", "--dataset-root", str(dataset_root)])
+    assert exit_code == 0
+    assert destination.read_bytes() == original
+    recovered_manifest = json.loads(
+        (staging_root / "runs" / "crashed" / guard.TRANSACTION_MANIFEST_NAME).read_text(
+            encoding="utf-8"
+        )
+    )
+    assert recovered_manifest["status"] == "recovered"
+    assert not (staging_root / guard.LOCK_FILENAME).exists()
+
+
+def test_concurrent_update_is_blocked_by_run_lock(tmp_path: Path):
+    dataset_root = tmp_path / "dataset"
+    write_snapshot(dataset_root / "raw_csv", ["2026年1月"])
+    staging_root = dataset_root / "staging"
+    staging_root.mkdir(parents=True)
+    lock_path = staging_root / guard.LOCK_FILENAME
+    lock_path.write_text(
+        json.dumps({"run_id": "other", "pid": os.getpid(), "created_at": "now"}),
+        encoding="utf-8",
+    )
+
+    exit_code = updater.main(["--skip-export", "--dataset-root", str(dataset_root)])
+    assert exit_code == 1
+    assert lock_path.exists()
+    assert not (dataset_root / "parquet").exists()
+
+
+def test_stale_run_lock_is_preserved_and_update_proceeds(tmp_path: Path):
+    dataset_root = tmp_path / "dataset"
+    write_snapshot(dataset_root / "raw_csv", ["2026年1月"])
+    staging_root = dataset_root / "staging"
+    staging_root.mkdir(parents=True)
+    lock_path = staging_root / guard.LOCK_FILENAME
+    lock_path.write_text(
+        json.dumps({"run_id": "crashed", "pid": 999999, "created_at": "old"}),
+        encoding="utf-8",
+    )
+
+    exit_code = updater.main(["--skip-export", "--dataset-root", str(dataset_root)])
+    assert exit_code == 0
+    assert not lock_path.exists()
+    assert list((staging_root / "locks").glob("stale-lock-*.json"))
+    assert (dataset_root / "parquet" / "brand_monthly.parquet").is_file()
+
+
+def test_repeated_sequential_updates_succeed(tmp_path: Path):
+    dataset_root = tmp_path / "dataset"
+    write_snapshot(dataset_root / "raw_csv", ["2026年1月"])
+
+    assert updater.main(["--skip-export", "--dataset-root", str(dataset_root)]) == 0
+    first = list(
+        (dataset_root / "staging" / "runs").glob("*/transaction_manifest.json")
+    )
+    assert len(first) == 1
+
+    assert updater.main(["--skip-export", "--dataset-root", str(dataset_root)]) == 0
+    manifests = list(
+        (dataset_root / "staging" / "runs").glob("*/transaction_manifest.json")
+    )
+    assert len(manifests) == 2
+    assert all(
+        json.loads(path.read_text(encoding="utf-8"))["status"] == "published"
+        for path in manifests
+    )
+    assert not (dataset_root / "staging" / guard.LOCK_FILENAME).exists()
+
+
+def test_mass_month_deletion_blocks_by_default_and_is_configurable(tmp_path: Path):
+    formal_raw = tmp_path / "formal" / "raw_csv"
+    write_snapshot(formal_raw, ["2026年1月", "2026年2月"])
+    increment = tmp_path / "increment" / "raw_csv"
+    write_snapshot(increment, ["2026年2月"])
+
+    # Drop 2 of the 3 model splits in the replaced month: 4 of 6 measure rows
+    # disappear, which must not pass silently.
+    model_path = increment / "way3_model_monthly_data.csv"
+    snapshot = guard.read_pivot_csv(model_path)
+    kept = [
+        row
+        for row in snapshot.rows
+        if row["燃料类型"] == "纯电" and row["驱动形式"] == "前轮驱动"
+    ]
+    assert len(kept) == 2
+    guard.write_pivot_csv(model_path, snapshot.header, kept)
+
+    with pytest.raises(guard.RawContractError, match="删除比例超过阈值"):
+        guard.merge_snapshot_to_staging(
+            formal_raw, increment, tmp_path / "merged" / "raw_csv"
+        )
+
+    plan = guard.merge_snapshot_to_staging(
+        formal_raw,
+        increment,
+        tmp_path / "merged_ok" / "raw_csv",
+        max_month_deletion_ratio=1.0,
+    )
+    stats = plan["tables"]["model_monthly"]
+    assert stats["removed_rows"] == 4
+    feb_audit = next(
+        item for item in stats["month_audit"] if item["month"] == "2026-02"
+    )
+    assert feb_audit["base_rows"] == 6
+    assert feb_audit["increment_rows"] == 2
+    assert feb_audit["removed_rows"] == 4
+    assert feb_audit["deletion_ratio"] == pytest.approx(4 / 6)
+
+
+def test_missing_baseline_file_is_an_error(tmp_path: Path):
+    dataset_root = tmp_path / "dataset"
+    raw_dir = dataset_root / "raw_csv"
+    write_snapshot(raw_dir, ["2026年1月"])
+    _build_baseline(raw_dir, dataset_root)
+
+    (dataset_root / "parquet" / "model_monthly.parquet").unlink()
+    with pytest.raises(guard.RawContractError, match="parquet 基线不完整"):
+        guard.required_months_from_parquet(dataset_root / "parquet")
+    with pytest.raises(guard.RawContractError, match="基线不完整"):
+        guard.validate_derived_baseline(dataset_root)
+
+    assert updater.main(["--skip-export", "--dataset-root", str(dataset_root)]) == 1
+    assert not (dataset_root / "staging" / guard.LOCK_FILENAME).exists()
+    assert not list(
+        (dataset_root / "staging" / "runs").glob("*/transaction_manifest.json")
+    )

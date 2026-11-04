@@ -1,18 +1,24 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Staging, merge, validation and atomic publish for TP&MIX-ways raw CSV.
+"""Staging, validation and transaction publish for the TP&MIX-ways dataset.
 
 Formal ``raw_csv`` is the historical source of truth. A Tableau export is
 date-window scoped (2026-11-03 exported only 2026-08..2026-09) and its column
 order is not stable, so an export must never replace the formal raw files
-directly. The contract implemented here is::
+directly. The update contract is::
 
-    export                -> staging/runs/<run_id>/increment/raw_csv
-    formal raw + increment-> staging/runs/<run_id>/merged/raw_csv
-    validate merged       -> columns / primary key / months / values
-    snapshot formal raw   -> staging/backups/<run_id>/raw_csv
-    os.replace per file   -> formal raw_csv (atomic per file) + manifest
-    failure               -> restore the snapshot, mark manifest failed
+    export                  -> staging/runs/<run_id>/increment/raw_csv
+    formal raw + increment  -> staging/runs/<run_id>/merged/raw_csv
+    merged raw              -> staging/runs/<run_id>/derived/{parquet,registry,quality}
+    validate every staged layer (columns / keys / months / values / cross-layer)
+    snapshot destinations   -> staging/backups/<run_id>/
+    one transaction         -> replace raw_csv + parquet + registry + quality
+    failure                 -> restore every file this transaction replaced
+
+``os.replace`` is atomic **per file**; it does not give the whole dataset a
+single atomic visibility point. The transaction manifest is the recovery
+record: an incomplete ``publishing`` manifest is rolled back from the backup
+snapshot by the next update before it starts.
 
 Readers accept the stored UTF-8 (no BOM) comma-delimited format and legacy
 UTF-16 LE / tab-delimited exports. Writers always emit UTF-8 (no BOM),
@@ -29,11 +35,13 @@ import os
 import re
 import shutil
 import sys
+import time
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import datetime
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
+from typing import Any, Dict, Iterable, Iterator, List, Mapping, Optional, Sequence, Tuple
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
@@ -60,6 +68,17 @@ KNOWN_MEASURES = {
     "加权轴距(mm)",
 }
 _MONTH_RE = re.compile(r"(\d{4})年(\d{1,2})月")
+
+DEFAULT_MAX_MONTH_DELETION_RATIO = 0.5
+LOCK_FILENAME = ".update.lock"
+STALE_LOCK_SECONDS = 24 * 60 * 60
+TRANSACTION_MANIFEST_NAME = "transaction_manifest.json"
+EXPECTED_DERIVED_FILES = [
+    *(f"parquet/{filename}" for filename in PARQUET_FILENAMES.values()),
+    "registry/tp_and_mix_ways_tables.json",
+    "quality/tp_and_mix_ways_dataset_quality.md",
+    "quality/tp_and_mix_ways_dataset_quality.json",
+]
 
 
 class RawContractError(RuntimeError):
@@ -241,11 +260,20 @@ def _normalize_required_months(
     return normalized
 
 
-def required_months_from_parquet(parquet_dir: Path) -> Dict[str, set[str]]:
-    """Current parquet month coverage is the minimum raw history we accept."""
+def required_months_from_parquet(
+    parquet_dir: Path, *, require_complete: bool = True
+) -> Dict[str, set[str]]:
+    """Read baseline month coverage; incomplete baselines are an error."""
     parquet_dir = Path(parquet_dir)
     if not parquet_dir.is_dir():
         return {}
+    missing_files = [
+        filename
+        for filename in PARQUET_FILENAMES.values()
+        if not (parquet_dir / filename).is_file()
+    ]
+    if missing_files and require_complete:
+        raise RawContractError(f"正式 parquet 基线不完整，缺少: {missing_files}")
     import pandas as pd  # local import: guard is also used by lightweight tests
 
     months_by_table: Dict[str, set[str]] = {}
@@ -258,8 +286,83 @@ def required_months_from_parquet(parquet_dir: Path) -> Dict[str, set[str]]:
         for value in frame["date_month"].dropna().unique():
             timestamp = pd.Timestamp(value)
             months.add(f"{timestamp.year:04d}-{timestamp.month:02d}")
+        if not months:
+            raise RawContractError(f"正式 parquet 基线为空: {parquet_path}")
         months_by_table[table_name] = months
     return months_by_table
+
+
+def validate_derived_baseline(dataset_root: Path) -> Dict[str, Any]:
+    """If any derived artifact exists, all expected baseline files must exist.
+
+    A partial derived layer means the formal dataset is already inconsistent;
+    silently skipping the missing files would hide that state.
+    """
+    dataset_root = Path(dataset_root)
+    artifacts_present = any(
+        (dataset_root / relative).exists() for relative in EXPECTED_DERIVED_FILES
+    ) or any(
+        (dataset_root / directory).exists()
+        for directory in ("parquet", "registry", "quality")
+    )
+    if not artifacts_present:
+        return {"present": False, "months": {}}
+
+    missing = [
+        relative
+        for relative in EXPECTED_DERIVED_FILES
+        if not (dataset_root / relative).is_file()
+    ]
+    if missing:
+        raise RawContractError(f"正式派生层基线不完整，缺少: {missing}")
+    return {
+        "present": True,
+        "months": required_months_from_parquet(dataset_root / "parquet"),
+    }
+
+
+def snapshot_months(raw_dir: Path) -> Dict[str, set[str]]:
+    raw_dir = Path(raw_dir)
+    months_by_table: Dict[str, set[str]] = {}
+    for filename, table_name in SOURCE_MAP.items():
+        snapshot = read_pivot_csv(raw_dir / filename)
+        months_by_table[table_name] = {
+            format_month(month_key(row[DATE_COLUMN])) for row in snapshot.rows
+        }
+    return months_by_table
+
+
+def validate_raw_derived_consistency(
+    raw_dir: Path, derived_dir: Path
+) -> Dict[str, Any]:
+    """Cross-layer gate: staged raw and staged parquet must cover the same months."""
+    raw_dir = Path(raw_dir)
+    derived_dir = Path(derived_dir)
+    missing_files = [
+        relative
+        for relative in EXPECTED_DERIVED_FILES
+        if not (derived_dir / relative).is_file()
+    ]
+    if missing_files:
+        raise RawContractError(f"派生层产出不完整，缺少: {missing_files}")
+
+    raw_months = snapshot_months(raw_dir)
+    derived_months = required_months_from_parquet(derived_dir / "parquet")
+    mismatches: Dict[str, Any] = {}
+    for table_name, months in raw_months.items():
+        staged = derived_months.get(table_name, set())
+        if months != staged:
+            mismatches[table_name] = {
+                "raw_only": sorted(months - staged),
+                "parquet_only": sorted(staged - months),
+            }
+    if mismatches:
+        raise RawContractError(f"raw 与 parquet 月份不一致: {mismatches}")
+
+    return {
+        table_name: {"month_count": len(months), "months": sorted(months)}
+        for table_name, months in raw_months.items()
+    }
 
 
 # ── validation ────────────────────────────────────────────────────
@@ -406,6 +509,8 @@ def merge_pivot_tables(
     table_name: str,
     base: PivotSnapshot,
     increment: PivotSnapshot,
+    *,
+    max_month_deletion_ratio: float = DEFAULT_MAX_MONTH_DELETION_RATIO,
 ) -> MergeResult:
     """Merge base + increment with month-level replacement for exported months.
 
@@ -414,7 +519,15 @@ def merge_pivot_tables(
     combinations do not linger). Historical months **not** present in the
     increment are carried over unchanged. Row order is chronological (stable),
     so output is deterministic.
+
+    A replaced month that loses more than ``max_month_deletion_ratio`` of its
+    old rows is rejected: an incomplete Tableau export must not silently wipe
+    most of a month.
     """
+    if not 0.0 <= max_month_deletion_ratio <= 1.0:
+        raise RawContractError(
+            f"max_month_deletion_ratio 必须在 [0, 1]: {max_month_deletion_ratio}"
+        )
     expected_columns = set(canonical_columns(table_name))
     for label, snapshot in (("formal raw", base), ("increment", increment)):
         missing = sorted(expected_columns - set(snapshot.header))
@@ -448,6 +561,12 @@ def merge_pivot_tables(
         format_month(month_key(row[DATE_COLUMN])) for row in increment.rows
     }
     increment_key_set = {_primary_key(table_name, row) for row in increment.rows}
+    increment_keys_by_month: Dict[str, set[Tuple[str, ...]]] = {}
+    for row in increment.rows:
+        month = format_month(month_key(row[DATE_COLUMN]))
+        increment_keys_by_month.setdefault(month, set()).add(
+            _primary_key(table_name, row)
+        )
     base_keys_by_month: Dict[str, set[Tuple[str, ...]]] = {}
     for row in base.rows:
         month = format_month(month_key(row[DATE_COLUMN]))
@@ -486,6 +605,30 @@ def merge_pivot_tables(
         for month in increment_months
     )
 
+    month_audit: List[Dict[str, Any]] = []
+    large_deletions: List[Dict[str, Any]] = []
+    for month in sorted(increment_months):
+        base_keys = base_keys_by_month.get(month, set())
+        increment_keys = increment_keys_by_month.get(month, set())
+        removed = len(base_keys - increment_keys)
+        ratio = removed / len(base_keys) if base_keys else 0.0
+        record = {
+            "month": month,
+            "base_rows": len(base_keys),
+            "increment_rows": len(increment_keys),
+            "removed_rows": removed,
+            "deletion_ratio": round(ratio, 6),
+        }
+        month_audit.append(record)
+        if ratio > max_month_deletion_ratio:
+            large_deletions.append(record)
+    if large_deletions:
+        raise RawContractError(
+            f"{table_name}: 整月替换删除比例超过阈值 "
+            f"{max_month_deletion_ratio:.2f}: {large_deletions}",
+            table=table_name,
+        )
+
     rows = list(merged.values())
     rows.sort(key=lambda row: month_key(row[DATE_COLUMN]))
 
@@ -516,6 +659,9 @@ def merge_pivot_tables(
         "merged_month_count": len(merged_months),
         "new_months": sorted(increment_months - base_months),
         "restated_months": sorted(increment_months & base_months),
+        "max_month_deletion_ratio": max_month_deletion_ratio,
+        "month_audit": month_audit,
+        "large_deletions": large_deletions,
     }
     return MergeResult(
         table_name=table_name,
@@ -532,6 +678,7 @@ def merge_snapshot_to_staging(
     staging_raw_dir: Path,
     *,
     required_months_by_table: Optional[Mapping[str, Iterable[Any]]] = None,
+    max_month_deletion_ratio: float = DEFAULT_MAX_MONTH_DELETION_RATIO,
 ) -> Dict[str, Any]:
     """Merge increment into a staging copy of the historical raw files."""
     formal_raw_dir = Path(formal_raw_dir)
@@ -544,7 +691,12 @@ def merge_snapshot_to_staging(
     for filename, table_name in SOURCE_MAP.items():
         base = read_pivot_csv(formal_raw_dir / filename)
         increment = read_pivot_csv(increment_raw_dir / filename)
-        result = merge_pivot_tables(table_name, base, increment)
+        result = merge_pivot_tables(
+            table_name,
+            base,
+            increment,
+            max_month_deletion_ratio=max_month_deletion_ratio,
+        )
         write_pivot_csv(staging_raw_dir / filename, result.header, result.rows)
         reports[table_name] = result.stats
 
@@ -628,7 +780,7 @@ def _publish_file_pairs(
                 restore_errors.append(f"{key}: {restore_exc}")
         state.update(
             {
-                "status": "failed",
+                "status": "recovery_failed" if restore_errors else "failed",
                 "error": repr(exc),
                 "restore_errors": restore_errors,
                 "published_before_failure": published,
@@ -647,6 +799,234 @@ def _publish_file_pairs(
     )
     _write_json(manifest_path, state)
     return state
+
+
+# ── run lock / incomplete transaction recovery ────────────────────
+
+
+def _read_lock(lock_path: Path) -> Dict[str, Any]:
+    try:
+        payload = json.loads(lock_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
+def _pid_alive(pid: Any) -> bool:
+    if not isinstance(pid, int) or pid <= 0:
+        return False
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:  # process exists but belongs to another user
+        return True
+    except OSError:
+        return True
+    return True
+
+
+def _lock_is_live(payload: Mapping[str, Any], lock_path: Path) -> bool:
+    pid = payload.get("pid")
+    if isinstance(pid, int) and pid > 0:
+        return _pid_alive(pid)
+    try:
+        age = time.time() - lock_path.stat().st_mtime
+    except OSError:
+        return False
+    return age < STALE_LOCK_SECONDS
+
+
+@contextmanager
+def update_lock(staging_root: Path, run_id: str) -> Iterator[Dict[str, Any]]:
+    """Prevent two update processes from touching the same dataset."""
+    staging_root = Path(staging_root)
+    staging_root.mkdir(parents=True, exist_ok=True)
+    lock_path = staging_root / LOCK_FILENAME
+    payload = {
+        "run_id": run_id,
+        "pid": os.getpid(),
+        "created_at": datetime.now().isoformat(),
+    }
+
+    attempts = 0
+    while True:
+        attempts += 1
+        try:
+            fd = os.open(lock_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+            with os.fdopen(fd, "w", encoding="utf-8") as fh:
+                json.dump(payload, fh, ensure_ascii=False, indent=2)
+            break
+        except FileExistsError:
+            existing = _read_lock(lock_path)
+            if _lock_is_live(existing, lock_path) or attempts >= 3:
+                raise RawContractError(
+                    f"另一个更新任务正在运行（lock={lock_path}, "
+                    f"run_id={existing.get('run_id')}, pid={existing.get('pid')}）"
+                ) from None
+            stale_dir = staging_root / "locks"
+            stale_dir.mkdir(parents=True, exist_ok=True)
+            stale_path = stale_dir / (
+                f"stale-lock-{existing.get('run_id', 'unknown')}-{int(time.time())}.json"
+            )
+            os.replace(lock_path, stale_path)
+
+    try:
+        yield payload
+    finally:
+        current = _read_lock(lock_path)
+        if current.get("run_id") == run_id and current.get("pid") == os.getpid():
+            try:
+                lock_path.unlink()
+            except FileNotFoundError:
+                pass
+
+
+def _restore_manifest_files(manifest: Mapping[str, Any]) -> List[str]:
+    errors: List[str] = []
+    files = manifest.get("files") or {}
+    if not isinstance(files, Mapping):
+        return [f"manifest files 格式错误: {type(files).__name__}"]
+    for key, record in files.items():
+        if not isinstance(record, Mapping):
+            errors.append(f"{key}: 文件记录格式错误")
+            continue
+        destination = Path(record.get("destination", ""))
+        backup = Path(record["backup"]) if record.get("backup") else None
+        previous_sha = record.get("previous_sha256")
+        try:
+            if backup is not None and backup.is_file():
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(backup, destination)
+            elif previous_sha is None:
+                if destination.is_file():
+                    destination.unlink()
+            else:
+                errors.append(f"{key}: 回滚备份缺失 {backup}")
+                continue
+            if previous_sha is not None and destination.is_file():
+                if sha256_file(destination) != previous_sha:
+                    errors.append(f"{key}: 回滚后 sha256 与发布前不一致")
+        except Exception as exc:  # pragma: no cover - filesystem failure
+            errors.append(f"{key}: {exc}")
+    return errors
+
+
+def recover_incomplete_transactions(staging_root: Path) -> List[Dict[str, Any]]:
+    """Roll back manifests left in ``publishing``/``recovery_failed`` state.
+
+    A crash between two per-file ``os.replace`` calls leaves the formal dataset
+    in a mixed state. The backup snapshot plus manifest let the next update
+    restore the pre-transaction content before doing anything else.
+    """
+    staging_root = Path(staging_root)
+    runs_dir = staging_root / "runs"
+    recovered: List[Dict[str, Any]] = []
+    if not runs_dir.is_dir():
+        return recovered
+
+    for manifest_path in sorted(runs_dir.glob("*/*_manifest.json")):
+        try:
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError) as exc:
+            raise RawContractError(f"无法读取未完成事务 manifest: {manifest_path}: {exc}") from exc
+        status = manifest.get("status")
+        if status not in {"publishing", "recovery_failed"}:
+            continue
+
+        errors = _restore_manifest_files(manifest)
+        manifest["status"] = "recovered" if not errors else "recovery_failed"
+        manifest["recovered_at"] = datetime.now().isoformat()
+        manifest["restore_errors"] = errors
+        _write_json(manifest_path, manifest)
+        recovered.append(
+            {
+                "manifest": str(manifest_path),
+                "status": manifest["status"],
+                "restore_errors": errors,
+            }
+        )
+        if errors:
+            raise RawContractError(
+                f"未完成事务恢复失败（需人工处理）: {manifest_path}: {errors}"
+            )
+    return recovered
+
+
+# ── cross-layer transaction publish ───────────────────────────────
+
+
+def publish_update_transaction(
+    *,
+    dataset_root: Path,
+    run_dir: Path,
+    staging_root: Path,
+    raw_dir: Path | None,
+    derived_dir: Path | None,
+    validation: Mapping[str, Any],
+    audit: Any = None,
+) -> Dict[str, Any]:
+    """Replace raw and derived files in one transaction.
+
+    ``os.replace`` is atomic per file only; readers can observe a cross-file
+    mixed state during the loop. Any failure restores every file already
+    replaced by this transaction and records the outcome in the manifest.
+    """
+    dataset_root = Path(dataset_root)
+    run_dir = Path(run_dir)
+    staging_root = Path(staging_root)
+    pairs: List[Tuple[Path, Path, str]] = []
+
+    if raw_dir is not None:
+        raw_dir = Path(raw_dir)
+        missing_raw = [
+            filename for filename in SOURCE_MAP if not (raw_dir / filename).is_file()
+        ]
+        if missing_raw:
+            raise RawContractError(f"待发布 raw 不完整，缺少: {missing_raw}")
+        pairs.extend(
+            (
+                raw_dir / filename,
+                dataset_root / "raw_csv" / filename,
+                f"raw_csv/{filename}",
+            )
+            for filename in SOURCE_MAP
+        )
+
+    if derived_dir is not None:
+        derived_dir = Path(derived_dir)
+        missing_derived = [
+            relative
+            for relative in EXPECTED_DERIVED_FILES
+            if not (derived_dir / relative).is_file()
+        ]
+        if missing_derived:
+            raise RawContractError(f"待发布派生层不完整，缺少: {missing_derived}")
+        pairs.extend(
+            (derived_dir / relative, dataset_root / relative, relative)
+            for relative in EXPECTED_DERIVED_FILES
+        )
+
+    if not pairs:
+        raise RawContractError("没有可发布的文件")
+
+    run_id = run_dir.name
+    layers = []
+    if raw_dir is not None:
+        layers.append("raw_csv")
+    if derived_dir is not None:
+        layers.append("parquet_registry_quality")
+    return _publish_file_pairs(
+        pairs,
+        backup_dir=staging_root / "backups" / run_id,
+        manifest_path=run_dir / TRANSACTION_MANIFEST_NAME,
+        manifest={
+            "run_id": run_id,
+            "layers": layers,
+            "validation": validation,
+            "audit": audit,
+        },
+    )
 
 
 def publish_raw_snapshot(
