@@ -17,7 +17,7 @@ import argparse
 import time
 import re
 import pandas as pd
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import requests
 from dotenv import load_dotenv
 from pathlib import Path
@@ -531,6 +531,44 @@ def _format_mom(pct, prev_start=None, prev_end=None):
     return f"（较上月同期 {base} {sign}{pct:.1f}%）"
 
 
+def compute_cumulative_stats(df, end_date, analyzer):
+    """
+    计算截至 end_date 的本月累计/本年累计（自然月/自然年，起点为月/年首日）。
+
+    analyzer: analyze_daily_lock_orders / analyze_daily_invoice_orders
+    返回 {"mtd": {total, total_user_car}, "ytd": {total, total_user_car}}；
+    某口径计算失败时对应值为 None（不影响其余口径）。
+    各累计口径与单日口径同源（同 analyzer、同去重/剔测试单规则），仅时间窗不同。
+    """
+    def _one(start_date):
+        stats = analyzer(df, start_date, end_date)
+        if not stats:
+            return None
+        return {
+            "total": stats.get("total", 0),
+            "total_user_car": stats.get("total_user_car", 0),
+        }
+
+    return {
+        "mtd": _one(end_date.replace(day=1)),
+        "ytd": _one(date(end_date.year, 1, 1)),
+    }
+
+
+def _format_cumulative_line(label, cum) -> str:
+    """格式化累计行：本月累计锁单 XX (XX) 台｜本年累计锁单 XX (XX) 台"""
+    if not cum:
+        return ""
+    mtd = cum.get("mtd")
+    ytd = cum.get("ytd")
+    if not mtd or not ytd:
+        return ""
+    return (
+        f"本月累计{label}{mtd['total']} ({mtd['total_user_car']}) 台"
+        f"｜本年累计{label}{ytd['total']} ({ytd['total_user_car']}) 台"
+    )
+
+
 def _format_lock_model_detail(stats) -> str:
     """
     构建车型锁单明细文本（含 '｜' 前缀）。
@@ -820,8 +858,14 @@ def upsert_bitable_observation(lock_stats, invoice_stats, pred_lock: float | Non
         return False
 
 
-def send_feishu_notification(lock_stats, invoice_stats, pred_lock=None, mom=None, is_mtd=False):
-    """发送飞书通知"""
+def send_feishu_notification(lock_stats, invoice_stats, pred_lock=None, mom=None, is_mtd=False,
+                             lock_cumulative=None, invoice_cumulative=None):
+    """发送飞书通知
+
+    lock_cumulative / invoice_cumulative: compute_cumulative_stats 结果，
+    在锁单/开票明细之后各追加一行「本月累计X｜本年累计X」；为 None 时不追加。
+    仅单日观察（昨日）模式下追加，MTD / 阶段性窗口本身已是累计口径，不重复追加。
+    """
     if not WEBHOOK_URL:
         print("❌ 错误: 未设置 FS_WEBHOOK_URL 环境变量，跳过发送消息")
         return
@@ -837,16 +881,22 @@ def send_feishu_notification(lock_stats, invoice_stats, pred_lock=None, mom=None
         title_prefix = "本月累计"
         lock_label = "本月累计锁单"
         invoice_label = "本月累计开票"
+        show_cumulative = False
     elif start_date == end_date:
         date_str = str(start_date)
         title_prefix = "每日"
         lock_label = "昨日锁单数"
         invoice_label = "昨日开票数"
+        show_cumulative = True
     else:
         date_str = f"{start_date} ~ {end_date}"
         title_prefix = "阶段性"
         lock_label = "期间锁单数"
         invoice_label = "期间开票数"
+        show_cumulative = False
+
+    lock_cumulative_line = _format_cumulative_line("锁单", lock_cumulative) if show_cumulative else ""
+    invoice_cumulative_line = _format_cumulative_line("开票", invoice_cumulative) if show_cumulative else ""
 
     # 构建锁单明细文本
     lock_model_details = []
@@ -898,7 +948,7 @@ def send_feishu_notification(lock_stats, invoice_stats, pred_lock=None, mom=None
                     "tag": "div",
                     "text": {
                         "tag": "lark_md",
-                        "content": f"**{lock_label}：** {lock_stats['total']} ({lock_stats['total_user_car']}) 台{lock_mom_note}\n{lock_model_text}\n{pred_line}{warn_line}"
+                        "content": f"**{lock_label}：** {lock_stats['total']} ({lock_stats['total_user_car']}) 台{lock_mom_note}\n{lock_model_text}\n{pred_line}{warn_line}" + (f"\n{lock_cumulative_line}" if lock_cumulative_line else "")
                     }
                 },
                 {
@@ -912,6 +962,7 @@ def send_feishu_notification(lock_stats, invoice_stats, pred_lock=None, mom=None
                             f"**{invoice_label}：** {invoice_stats['total']} ({invoice_stats['total_user_car']}) 台{invoice_mom_note}"
                             + (f"（不含对公批售 {invoice_stats.get('total_corporate', 0)} 台）" if invoice_stats.get('total_corporate', 0) > 0 else "")
                             + f"\n{invoice_model_text}"
+                            + (f"\n{invoice_cumulative_line}" if invoice_cumulative_line else "")
                         )
                     }
                 },
@@ -964,6 +1015,15 @@ def main():
         lock_mom_note = _format_mom((mom or {}).get("lock_pct"), (mom or {}).get("prev_start"), (mom or {}).get("prev_end"))
         invoice_mom_note = _format_mom((mom or {}).get("invoice_pct"), (mom or {}).get("prev_start"), (mom or {}).get("prev_end"))
 
+        # 单日观察模式追加 本月累计 / 本年累计（MTD / 阶段性窗口本身即累计口径，不重复计算）
+        lock_cumulative = invoice_cumulative = None
+        lock_cumulative_line = invoice_cumulative_line = ""
+        if not is_mtd and start_date == end_date:
+            lock_cumulative = compute_cumulative_stats(df, end_date, analyze_daily_lock_orders)
+            invoice_cumulative = compute_cumulative_stats(df, end_date, analyze_daily_invoice_orders)
+            lock_cumulative_line = _format_cumulative_line("锁单", lock_cumulative)
+            invoice_cumulative_line = _format_cumulative_line("开票", invoice_cumulative)
+
         # 打印结果到控制台
         print("\n" + "="*30)
         if is_mtd:
@@ -985,6 +1045,8 @@ def main():
             warn = " ⚠️ 低于80%" if rate < 0.8 else ""
             print(f" 预测锁单数: {pred_lock:.0f}")
             print(f" 达成率: {rate:.1%}{warn}")
+        if lock_cumulative_line:
+            print(f" {lock_cumulative_line}")
             
         print("-" * 30)
         
@@ -1006,6 +1068,8 @@ def main():
         for model, info in invoice_stats['models'].items():
             price_display = f"{info['avg_price']/10000:.1f}w" if info['avg_price'] > 0 else "N/A"
             print(f"   - {model}: {info['count']} ({info['user_car_count']}) 台｜平均开票价格：{price_display}")
+        if invoice_cumulative_line:
+            print(f" {invoice_cumulative_line}")
         print("="*30 + "\n")
 
         if dry_run:
@@ -1017,7 +1081,8 @@ def main():
         elif BITABLE_APP_TOKEN and BITABLE_TABLE_ID:
             msg = str(_LAST_BITABLE_ERROR or "").strip()
             print("⚠️ 多维表格写入失败或未授权，已跳过" + (f"（{msg[:200]}）" if msg else ""))
-        send_feishu_notification(lock_stats, invoice_stats, pred_lock, mom=mom, is_mtd=is_mtd)
+        send_feishu_notification(lock_stats, invoice_stats, pred_lock, mom=mom, is_mtd=is_mtd,
+                                 lock_cumulative=lock_cumulative, invoice_cumulative=invoice_cumulative)
 
 if __name__ == "__main__":
     main()
