@@ -1,6 +1,7 @@
 # Time Window Rules — 时间窗口规则
 
-> 来源: operators/time_windows.py (650 行时间解析引擎)
+> 权威来源: `shared/operators/time_windows.py`
+> 本文是语义视图：规则变更先改算子，再同步本文。
 
 ## 通用规则
 

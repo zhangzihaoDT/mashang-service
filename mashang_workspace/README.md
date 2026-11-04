@@ -13,7 +13,7 @@
 mashang_workspace/
 ├── AGENTS.md              # Workspace Agent 指南
 ├── README.md              # 本文件
-├── docs/                  # 业务文档（术语/指标/车型/时间/分析范式/追问/合同）
+├── docs/                  # 分析范式/追问/运营/盘点（业务定义在 shared/schema/reference/）
 ├── business_scripts/       # Core — Hub 经 jobs/ 可调度（6 个稳定分析脚本）
 ├── research_scripts/      # Research — 预测/回测/释放曲线
 ├── utility_scripts/       # Utility — DataOps/SyncOps/工具（5 个）

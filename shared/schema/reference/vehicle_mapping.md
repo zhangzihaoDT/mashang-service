@@ -1,6 +1,7 @@
 # Vehicle Mapping — 车型映射规则
 
-> 来源: schema/business_definition.json, schema/schema.md
+> 权威来源: `shared/schema/business_definition.json`、`shared/schema/schema.md`
+> 本文是语义视图：规则变更先改 `business_definition.json`，再同步本文。
 
 ## 车系 (Series)
 

@@ -1,6 +1,8 @@
 # Project Inventory — mahsang
 
 > Generated: 2026-06-11
+>
+> **历史快照**：目录与脚本路径可能已过期（`scripts/` 已删除、定义文档已迁至 `shared/schema/reference/`），不作为当前口径来源。
 
 ## 1. 当前主要目录结构
 

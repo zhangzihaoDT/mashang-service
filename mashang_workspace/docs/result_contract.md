@@ -2,15 +2,15 @@
 
 ## 用途
 
-定义脚本执行输出的标准 JSON 结构，供 follow-up runner、OpenCode、Feishu Bot、Mashang Runtime 等消费端复用。
+定义脚本执行输出的标准 JSON 结构，供 follow-up runner、OpenCode、Hub/Worker、Feishu Bot 等消费端复用。
 
 ## 标准结构
 
 ```json
 {
   "status": "success | partial_success | error",
-  "script": "scripts/lock_by_model.py",
-  "command": "python scripts/lock_by_model.py --date 2026-06-10 --format json",
+  "script": "mashang_workspace/business_scripts/lock_by_model.py",
+  "command": "python mashang_workspace/business_scripts/lock_by_model.py --date 2026-06-10 --format json",
   "generated_at": "2026-06-11T00:00:00",
 
   "scope": {
@@ -106,25 +106,25 @@
 
 | 脚本 | status | support |
 |------|--------|---------|
-| `scripts/daily_lock_count.py` | success | ✅ |
-| `scripts/lock_by_model.py` | success | ✅ |
-| `scripts/lock_city_distribution.py` | success | ✅ |
-| `scripts/cohort_forecast.py` | partial_success | ✅ |
-| `scripts/assign_conversion_analysis.py` | success | ✅ |
-| `scripts/attribute_penetration_report.py` | success | ✅ |
-| `scripts/release_curve_analysis.py` | html only | ⏳ 保持 wrapper |
+| `mashang_workspace/business_scripts/daily_lock_count.py` | success | ✅ |
+| `mashang_workspace/business_scripts/lock_by_model.py` | success | ✅ |
+| `mashang_workspace/business_scripts/lock_city_distribution.py` | success | ✅ |
+| `mashang_workspace/research_scripts/cohort_forecast.py` | partial_success | ✅ |
+| `mashang_workspace/business_scripts/assign_conversion_analysis.py` | success | ✅ |
+| `mashang_workspace/business_scripts/attribute_penetration_report.py` | success | ✅ |
+| `mashang_workspace/research_scripts/release_curve_analysis.py` | html only | ⏳ 保持 wrapper |
 
 ## 使用方式
 
 ```bash
 # 脚本直接输出 JSON contract
-python scripts/lock_by_model.py --date 2026-06-10 --format json
+python mashang_workspace/business_scripts/lock_by_model.py --date 2026-06-10 --format json
 
 # 保存到文件
-python scripts/lock_by_model.py --date 2026-06-10 --format json --output outputs/tables/
+python mashang_workspace/business_scripts/lock_by_model.py --date 2026-06-10 --format json --output outputs/tables/
 
 # followup runner 自动读取 contract（execute 模式）
-python eval/run_followup_eval.py --execute --as-of-date 2026-06-11
+python mashang_workspace/eval/run_followup_eval.py --execute --as-of-date 2026-06-11
 ```
 
 ## followup_context 的用途

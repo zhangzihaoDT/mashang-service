@@ -89,24 +89,24 @@ workspace-first 的优势：
 | 经验来源 | Workspace 对应 |
 |----------|----------------|
 | Structured Result | `utils/result_contract.py` (Phase 5) |
-| 指标注册表 | `docs/metric_definitions.md` |
-| 时间窗口解析 | `docs/time_window_rules.md` |
-| 车型映射 | `docs/vehicle_mapping.md` |
-| 追问上下文 | `eval/context_parser.py` (Phase 4) |
+| 指标注册表 | `shared/schema/reference/metric_definitions.md` |
+| 时间窗口解析 | `shared/schema/reference/time_window_rules.md` |
+| 车型映射 | `shared/schema/reference/vehicle_mapping.md` |
+| 追问上下文 | `mashang_workspace/eval/context_parser.py` (Phase 4) |
 | 追问继承 | `docs/followup_rules.md` |
 | 脚本 CLI | Phase 2 标准 |
 | 统一评测 | `eval/run_eval.py` (Phase 6) |
 | 能力注册 | `registry/capability_registry.json` (Phase 11) |
-| 晋级规则 | `docs/promotion_rules.md` (Phase 11) |
+| 晋级规则 | `mashang_workspace/docs/promotion_rules.md` (Phase 11) |
 
 ## 9. 仍可复用的旧代码
 
 | 模块 | 复用意途径 |
 |------|-----------|
-| `operators/` 中的算子 | 可被 workspace scripts 直接 import（如 `atp_price_report.py` 已复用） |
-| `schema/business_definition.json` | 车型映射、时间窗口、座位/电池容量规则 |
-| `operators/time_windows.py` | 时间语义解析（虽然后续可由 docs 替代） |
-| `schema/metrics.json` | 指标注册表参考 |
+| `shared/operators/` 中的算子 | 可被 workspace scripts 直接 import（如 `atp_price_report.py` 已复用） |
+| `shared/schema/business_definition.json` | 车型映射、时间窗口、座位/电池容量规则 |
+| `shared/operators/time_windows.py` | 时间语义解析（虽然后续可由 docs 替代） |
+| `shared/schema/metrics.json` | 指标注册表参考 |
 
 ## 10. Runtime V2 不应重复的模式
 

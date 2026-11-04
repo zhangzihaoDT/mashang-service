@@ -1,72 +1,24 @@
 # 数据集指标与维度定义
 
-本文档定义了数据集的业务逻辑、指标计算规则及可用维度，用于指导 Planning Agent 生成准确的分析计划。
+本文件是**数据集字段级 schema**：字段、类型、维度、grain。
 
-## 1. 可用指标 (Metrics)
+指标口径不在本文件重复维护：
+- 机器可读指标注册表：`metrics.json`
+- 人类可读指标口径：`reference/metric_definitions.md`
+- 业务定义（上市/预售时间、车系分组、动力/驱动）：`business_definition.json`
 
-用于计算总和、平均值、计数等数值指标。指标分为两层：
+## 1. 指标与口径（指针）
 
-| 层级              | 说明                                    | 示例                                                     |
-| :---------------- | :-------------------------------------- | :------------------------------------------------------- |
-| **原始指标**      | field + agg 直接构成，不含业务过滤条件  | sum(invoice_amount), count(order_number)                 |
-| **业务 DSL 指标** | 原始指标 + 业务口径规则（强制过滤条件） | 锁单量 = count(order_number) WHERE lock_time IS NOT NULL |
+指标定义统一维护在以下位置，本文件不再重复：
 
-### 1.1 原始指标 (Raw Metrics)
+| 内容 | 位置 |
+|---|---|
+| 指标注册表（名称 / 别名 / 聚合 / 时间字段 / 算子） | `metrics.json` |
+| 人类可读口径（业务含义 / 计算口径 / 注意事项） | `reference/metric_definitions.md` |
+| 换算关系（派生率 / 占比） | `metrics.json` 的 `metric_relations` |
+| 算子实现与注册 | `shared/operators/`、`shared/operators/registry.json` |
 
-由数据集的原始字段和聚合函数直接构成，LLM 可在此基础上附加用户查询中的过滤条件。
-
-- **订单计数**: `order_number` 计数
-- **开票金额**: `invoice_amount` 求和
-- **购车人年龄**: `buyer_age` (平均/中位数/分布)
-- **车主年龄**: `owner_age` (平均/中位数/分布)
-
-### 1.2 业务 DSL 指标 (Business DSL Metrics)
-
-在原始指标基础上附加了固定的业务口径规则。LLM 必须严格按以下 DSL 映射生成 plan。
-
-#### 1.2.1 计数类 — `order_number` count + 时间字段非空
-
-| 指标名       | 聚合                | 强制过滤条件                                                        | 时间字段                 | 说明                                             |
-| :----------- | :------------------ | :------------------------------------------------------------------ | :----------------------- | :----------------------------------------------- |
-| **锁单量**   | count(order_number) | `lock_time` IS NOT NULL                                             | `lock_time`              |                                                  |
-| **批售数量** | count(distinct vin) | `lock_time` IS NOT NULL, `order_type` NOT IN ('员工', '经销商员工') | `lock_time`              | 锁单去重 VIN，剔除内部员工订单；反映真实市场销量 |
-| **交付数**   | count(order_number) | `delivery_date` IS NOT NULL                                         | `delivery_date`          |                                                  |
-| **开票数**   | count(order_number) | `invoice_upload_time` IS NOT NULL                                   | `invoice_upload_time`    | 不要用 order_create_date                         |
-| **小订数**   | count(order_number) | `intention_payment_time` IS NOT NULL                                | `intention_payment_time` |                                                  |
-| **大定数**   | count(order_number) | `deposit_payment_time` IS NOT NULL                                  | `deposit_payment_time`   |                                                  |
-
-#### 1.2.2 均值类 — mean + 业务过滤
-
-| 指标名           | 聚合                 | 强制过滤条件                                   | 时间字段              |
-| :--------------- | :------------------- | :--------------------------------------------- | :-------------------- |
-| **平均开票价格** | mean(invoice_amount) | `order_type == '用户车'`, `invoice_amount > 0` | `invoice_upload_time` |
-
-#### 1.2.3 算子类指标
-
-算子类指标由固定算子计算（不走通用 DSL 聚合）。用户查询匹配算子时，PLAN 必须设置 `analysis_intent.type` 为对应 intent 值，让路由层自动匹配算子。
-
-各算子定义详见 `operators/registry.json` 算子注册表。
-
-#### 1.2.4 派生类 — 基于已有字段计算的二级指标
-
-- **下发线索至锁单时间间隔(天)**: `first_assign_lock_time` (平均/中位数)
-  - 定义：`(lock_time - first_assign_time)` 换算为天，负值视为无效。
-  - 用途：衡量从首次下发线索到锁单的转化时长。
-  - 时间筛选通常基于 `lock_time`。
-
-### 1.3 外部线索指标 (仅限 assign_data, 预聚合字段)
-
-这些字段已由 Tableau 数据源预计算，LLM 直接按字段名查询即可。
-
-- `下发线索数`: 下发线索总数
-- `下发线索当日试驾数`: 下发当日完成试驾的数量
-- `下发线索 7 日试驾数`: 下发 7 日内完成试驾的数量
-- `下发线索 7 日锁单数`: 下发 7 日内完成锁单的数量
-- `下发线索 30日试驾数`: 下发 30 日内完成试驾的数量
-- `下发线索 30 日锁单数`: 下发 30 日内完成锁单的数量
-- `下发门店数`: 接收线索的门店总数
-- `下发线索数 (门店)`: 门店渠道收到的线索总数
-- `下发线索当日锁单数 (门店)`: 门店渠道线索当天即锁单的数量
+数据集字段和维度见下文。
 
 ## 2. 可用维度 (Dimensions)
 
@@ -80,7 +32,7 @@
 - `product_type`: 燃料类型 / 动力形式。**注意：数据集中无此字段，需通过 product_name 模糊匹配生成。**
   - **增程**: `product_name` 包含 "52" 或 "66"。请使用正则匹配: `filters: [{"field": "product_name", "op": "matches", "value": "52|66"}]`。
   - **纯电**: `product_name` **不**包含 "52" 且 **不**包含 "66"。请使用正则匹配: `filters: [{"field": "product_name", "op": "not matches", "value": "52|66"}]`。
-  - **Planning Agent 请注意**: 对于"增程"或"纯电"查询，必须使用 `matches` 或 `not matches` 操作符，并使用正则 `52|66`。不要生成多个 `contains` 过滤器（因为它们是 AND 关系）。
+  - **注意**：增程/纯电判定使用 `product_name` 正则 `52|66`；不要拆成多个 `contains` 条件（多个条件是 AND 关系）。
 - `drive_type`: 驱动形式（四驱 / 后驱）。由 `business_definition.json: drive_type_logic` 基于 `product_name` 生成，当前仅覆盖 LS6 家族（CM0–CM3），非 LS6 车系保持未命中。
   - **四驱**: `product_name` 含 `Ultra`（CM2/CM3）、`超强性能`（CM0/CM1 老款）或 `AWD`。
   - **后驱**: LS6 且不含上述四驱标记（含 Max / Max+ / Pro Max / Pro / 限定版及全部增程）。

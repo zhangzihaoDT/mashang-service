@@ -1,6 +1,7 @@
 # Business Glossary — 业务术语表
 
-> 来源: schema/metrics.json, schema/schema.md, schema/business_definition.json, operators/registry.json
+> 权威来源: `shared/schema/metrics.json`、`shared/schema/schema.md`、`shared/schema/business_definition.json`、`shared/operators/registry.json`
+> 本文是语义视图：口径变更先改 schema，再同步本文。
 
 ## 核心术语
 
@@ -21,11 +22,11 @@
 
 | 术语 | 定义 | 来源 |
 |------|------|------|
-| Cohort | 按首次分配时间分组的用户批次 | `lock_release_curve.py` |
-| 释放曲线 | Release Curve | 每个 cohort 随时间推移的锁单释放累积比例 | `scripts/lock_release_curve.py` |
+| Cohort | 按首次分配时间分组的用户批次 | `mashang_workspace/research_scripts/lock_release_curve.py` |
+| 释放曲线 | Release Curve | 每个 cohort 随时间推移的锁单释放累积比例 | `mashang_workspace/research_scripts/lock_release_curve.py` |
 | 车型 | Product | 具体产品名称（如"全新智己LS6 52kwh 五座"） | `product_name` 字段 |
 | 车系 | Series | 车型系列（LS6/L6/LS8/LS9/LS7/L7） | `series` 字段 |
-| 系列分组 | Series Group | 二级车型分组（CM0/CM1/CM2/DM0/DM1） | `business_definition.json` |
+| 系列分组 | Series Group | 二级车型分组（CM0/CM1/CM2/DM0/DM1） | `shared/schema/business_definition.json` |
 | 城市线级 | City Tier | 城市等级（一线/新一线/二线/三线及以下） | `city_tier` 算子 |
 | 大区 | Region | 销售大区划分 | `parent_region_name` 字段 |
 | 渠道 | Channel | 线索来源（门店/平台/直播/APP小程序/快慢闪） | `assign_data` 分渠道字段 |

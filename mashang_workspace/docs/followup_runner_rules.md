@@ -1,7 +1,7 @@
 # Follow-up Runner Rules — 追问 → 脚本调度规则
 
-> 对应: eval/run_followup_eval.py
-> Context Parser: eval/context_parser.py (Phase 4)
+> 对应: mashang_workspace/eval/run_followup_eval.py
+> Context Parser: mashang_workspace/eval/context_parser.py (Phase 4)
 
 ## 用途
 
@@ -21,25 +21,25 @@
 
 ```bash
 # Expected Context 模式 (默认)
-python eval/run_followup_eval.py
+python mashang_workspace/eval/run_followup_eval.py
 
 # Parse Text 模式
-python eval/run_followup_eval.py --parse-text
-python eval/run_followup_eval.py --parse-text --format json --output outputs/tables/parse_result.json
+python mashang_workspace/eval/run_followup_eval.py --parse-text
+python mashang_workspace/eval/run_followup_eval.py --parse-text --format json --output outputs/tables/parse_result.json
 ```
 
 ## Context → Script 映射
 
 | expected_context | 推荐脚本 |
 |-----------------|----------|
-| `metric=lock_count` + `group_by=model/series/energy_type` | `scripts/lock_by_model.py` |
-| `metric=lock_count` + `group_by=city` | `scripts/lock_city_distribution.py` |
-| `metric=lock_count` (无分组) | `scripts/daily_lock_count.py` |
-| `metric=lock_count_share/share` + 任何分组 | `scripts/lock_by_model.py` |
-| `metric=reev_share_trend/share_trend` | `scripts/lock_by_model.py` |
-| `metric=lock_forecast/forecast_lock_count/cohort_forecast` | `scripts/cohort_forecast.py` |
-| `metric=release_curve/lock_release_curve` | `scripts/release_curve_analysis.py` |
-| `metric=voc_theme/jtbd_theme` | `scripts/voc_theme_analysis.py` |
+| `metric=lock_count` + `group_by=model/series/energy_type` | `mashang_workspace/business_scripts/lock_by_model.py` |
+| `metric=lock_count` + `group_by=city` | `mashang_workspace/business_scripts/lock_city_distribution.py` |
+| `metric=lock_count` (无分组) | `mashang_workspace/business_scripts/daily_lock_count.py` |
+| `metric=lock_count_share/share` + 任何分组 | `mashang_workspace/business_scripts/lock_by_model.py` |
+| `metric=reev_share_trend/share_trend` | `mashang_workspace/business_scripts/lock_by_model.py` |
+| `metric=lock_forecast/forecast_lock_count/cohort_forecast` | `mashang_workspace/research_scripts/cohort_forecast.py` |
+| `metric=release_curve/lock_release_curve` | `mashang_workspace/research_scripts/release_curve_analysis.py` |
+| `metric=voc_theme/jtbd_theme` | `mashang_workspace/utility_scripts/voc_theme_analysis.py` |
 
 ## 上下文继承规则 (多轮)
 
@@ -84,9 +84,9 @@ Turn 1: {metric: lock_count_share, time_window: last_7_days, series: LS6, group_
   "inherited_context": {},
   "overridden_context": {},
   "missing_context": {},
-  "recommended_script": "scripts/lock_by_model.py",
+  "recommended_script": "mashang_workspace/business_scripts/lock_by_model.py",
   "recommended_args": ["--date", "2026-06-10", "--format", "terminal"],
-  "recommended_command": "python scripts/lock_by_model.py --date 2026-06-10 --format terminal",
+  "recommended_command": "python mashang_workspace/business_scripts/lock_by_model.py --date 2026-06-10 --format terminal",
   "can_execute": true
 }
 ```

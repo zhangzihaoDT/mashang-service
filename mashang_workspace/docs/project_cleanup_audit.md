@@ -3,6 +3,8 @@
 > Generated: 2026-06-16
 > Scope: Service layer, workspace layer, shared layer, runtime layer, config layer
 > Constraint: Read-only audit — no files deleted, no structural changes made
+>
+> **历史快照**：审计中的路径与建议可能已过期，不作为当前口径来源。
 
 ---
 

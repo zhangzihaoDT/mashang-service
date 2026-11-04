@@ -1,5 +1,8 @@
 # Analysis Playbook — 分析范式
 
+> 说明：文中出现的 `tools/`、`CompositionTool`、`StatisticsTool` 属于已退役 Runtime，仅作历史参考；
+> 当前实现以 `shared/operators/` 与 `mashang_workspace/{business,research,utility}_scripts/` 为准。
+
 ## 锁单分析
 
 ```
@@ -14,16 +17,16 @@
 6. 观察随时间变化的趋势
 
 **参考脚本**：
-- `scripts/daily_lock_count.py` — 锁单总量查询
-- `scripts/lock_by_model.py` — 按车型/车系拆解
-- `scripts/lock_city_distribution.py` — 按城市/大区分
-- `scripts/skills_order_observation_daily.py` — 每日观察报告
+- `mashang_workspace/business_scripts/daily_lock_count.py` — 锁单总量查询
+- `mashang_workspace/business_scripts/lock_by_model.py` — 按车型/车系拆解
+- `mashang_workspace/business_scripts/lock_city_distribution.py` — 按城市/大区分
+- `mashang_workspace/utility_scripts/skills_order_observation_daily.py` — 每日观察报告
 
 **典型命令**：
 ```bash
-python scripts/daily_lock_count.py --date 2026-06-01 --series LS8
-python scripts/lock_by_model.py --start-date 2026-06-01 --end-date 2026-06-10 --limit 5
-python scripts/lock_city_distribution.py --date 2026-06-01 --series LS8 --by-region
+python mashang_workspace/business_scripts/daily_lock_count.py --date 2026-06-01 --series LS8
+python mashang_workspace/business_scripts/lock_by_model.py --start-date 2026-06-01 --end-date 2026-06-10 --limit 5
+python mashang_workspace/business_scripts/lock_city_distribution.py --date 2026-06-01 --series LS8 --by-region
 ```
 
 ## 结构分析
@@ -44,7 +47,7 @@ python scripts/lock_city_distribution.py --date 2026-06-01 --series LS8 --by-reg
 - `topn_share` — TopN 占比
 - `cumulative_share` — 累计占比
 
-**参考脚本**：`scripts/lock_by_model.py`（支持 --limit 控制 TopN）
+**参考脚本**：`mashang_workspace/business_scripts/lock_by_model.py`（支持 --limit 控制 TopN）
 
 ## 异常分析
 
@@ -75,16 +78,16 @@ assign cohort → lock day_after → cumulative rate → forecast
 5. 对未成熟 cohort 进行三段式预测
 
 **参考脚本**：
-- `scripts/release_curve_analysis.py` — 释放曲线包装器
-- `scripts/lock_release_curve.py` — 核心分析 (701 行)
-- `scripts/lock_predict_backtest.py` — 回测验证
+- `mashang_workspace/research_scripts/release_curve_analysis.py` — 释放曲线包装器
+- `mashang_workspace/research_scripts/lock_release_curve.py` — 核心分析 (701 行)
+- `mashang_workspace/research_scripts/lock_predict_backtest.py` — 回测验证
 
-**参考文档**：`scripts/lock_release_analysis.md`
+**参考文档**：`mashang_workspace/research_scripts/lock_release_analysis.md`
 
 **典型命令**：
 ```bash
-python scripts/release_curve_analysis.py
-python scripts/release_curve_analysis.py --output outputs/reports/
+python mashang_workspace/research_scripts/release_curve_analysis.py
+python mashang_workspace/research_scripts/release_curve_analysis.py --output outputs/reports/
 ```
 
 ## VOC 分析 (Voice of Customer)
@@ -101,13 +104,13 @@ python scripts/release_curve_analysis.py --output outputs/reports/
 
 **数据源**：`dataset/wechat/销售全员群.parquet` 等
 
-**参考脚本**：`scripts/voc_theme_analysis.py`（当前为骨架，含基本词频统计）
+**参考脚本**：`mashang_workspace/utility_scripts/voc_theme_analysis.py`（当前为骨架，含基本词频统计）
 
 **典型命令**：
 ```bash
-python scripts/voc_theme_analysis.py
-python scripts/voc_theme_analysis.py --model "LS8" --format csv
-python scripts/voc_theme_analysis.py --group 销售全员群 --start-date 2026-06-01
+python mashang_workspace/utility_scripts/voc_theme_analysis.py
+python mashang_workspace/utility_scripts/voc_theme_analysis.py --model "LS8" --format csv
+python mashang_workspace/utility_scripts/voc_theme_analysis.py --group 销售全员群 --start-date 2026-06-01
 ```
 
 ## ATP 价格分析
@@ -122,12 +125,12 @@ python scripts/voc_theme_analysis.py --group 销售全员群 --start-date 2026-0
 4. 按 `series_group_logic` / `product_type` / `product_name` 分组
 5. 对比各车型/系列 ATP 差异
 
-**参考脚本**：`scripts/skills_atp_price.py`
+**参考脚本**：`mashang_workspace/business_scripts/atp_price_report.py`
 
 **典型命令**：
 ```bash
-python scripts/skills_atp_price.py 2026-05
-python scripts/skills_atp_price.py 2026-05 --output outputs/reports/atp_2026-05.html
+python mashang_workspace/business_scripts/atp_price_report.py 2026-05
+python mashang_workspace/business_scripts/atp_price_report.py 2026-05 --output outputs/reports/atp_2026-05.html
 ```
 
 ## 渠道结构分析
@@ -142,8 +145,8 @@ python scripts/skills_atp_price.py 2026-05 --output outputs/reports/atp_2026-05.
 4. 计算各渠道的试驾率/锁单率
 5. 观察渠道结构随时间的变化趋势
 
-**工具**：`operators/assign_conversion.py`
-**参考脚本**：`scripts/skills_order_observation_daily.py`（含线索转化分析）
+**工具**：`shared/operators/assign_conversion.py`
+**参考脚本**：`mashang_workspace/utility_scripts/skills_order_observation_daily.py`（含线索转化分析）
 
 ## 配置拥有率分析
 
@@ -187,7 +190,7 @@ python scripts/skills_atp_price.py 2026-05 --output outputs/reports/atp_2026-05.
 - 部分历史行 value_code 为空（2874 行），但 value 显示名仍可识别，按 value 文本判断
 - `Pro` 另有"奢华智选包+520雷达"（2 单）等变体显示名
 - 分析激光雷达渗透率时，**必须下探"已选"的 value**：`已选=Stand`（超远距高精度激光雷达）即 LS8 标配激光雷达记录，不应遗漏
-- 配套脚本：`business_scripts/attribute_penetration_report.py` 已按 `(Attribute, value_code)` 归并并覆盖"已选"属性
+- 配套脚本：`mashang_workspace/business_scripts/attribute_penetration_report.py` 已按 `(Attribute, value_code)` 归并并覆盖"已选"属性
 
 ### 配置拥有率（业务逻辑驱动，不依赖官网配置页）
 
@@ -224,10 +227,10 @@ python scripts/skills_atp_price.py 2026-05 --output outputs/reports/atp_2026-05.
 - `code.order_count` 为数据自动统计（全量口径），`price` 为业务维护字段
 
 **消费方**：
-- `research_scripts/ls8_configuration_selection_report.py`：完全定义表驱动，`Attribute Name`/display value/分类均取自 `config_semantics`
+- `mashang_workspace/research_scripts/ls8_configuration_selection_report.py`：完全定义表驱动，`Attribute Name`/display value/分类均取自 `config_semantics`
 - `utils/config_semantics.py`：定义表加载器（`load_config_semantics` / `resolve_value_code` / `code_is_selected`）
 
-**维护方式**：`utility_scripts/build_config_semantics.py` 从数据抓取 codes 与 aliases，
+**维护方式**：`mashang_workspace/utility_scripts/build_config_semantics.py` 从数据抓取 codes 与 aliases，
 内置人工语义层（MANUAL_SEMANTICS）补 category/semantic/price，生成后写回
 `shared/schema/config_semantics.json`。扩展新车型时在脚本 SERIES_SCOPE 与 MANUAL_SEMANTICS 中追加。
 
@@ -237,14 +240,14 @@ python scripts/skills_atp_price.py 2026-05 --output outputs/reports/atp_2026-05.
 确认可用数据集 → 查看字段清单 → 确定字段名和类型
 ```
 
-**参考脚本**：`scripts/data_dictionary.py`
+**参考脚本**：`mashang_workspace/utility_scripts/data_dictionary.py`
 
 ```bash
 # 查看所有数据文件的字段信息
-python scripts/data_dictionary.py
+python mashang_workspace/utility_scripts/data_dictionary.py
 
 # 输出 CSV 供后续查阅
-python scripts/data_dictionary.py --format csv --output outputs/tables/
+python mashang_workspace/utility_scripts/data_dictionary.py --format csv --output outputs/tables/
 ```
 
 ## 输出文件规范

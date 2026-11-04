@@ -1,6 +1,8 @@
 # Legacy Script Contract Inventory
 
 > Generated: 2026-06-11
+>
+> **历史快照**：脚本路径可能已过期（`scripts/` 已删除），不作为当前口径来源。
 
 ## 盘点
 

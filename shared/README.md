@@ -18,11 +18,13 @@ shared/
 │   ├── effective_locked_orders.py   ELOE / Backlog 有效率 / 风险暴露量
 │   └── ...
 └── schema/          Shared business schema/config
+    ├── README.md                   Contract vs reference layout
     ├── business_definition.json   Vehicle/energy/seat mapping rules
     ├── metrics.json                Metric registry
     ├── schema.md                   Dataset field definitions
     ├── store_info_schema.json      Store/dealer master field schema
-    └── data_path.md                Data path configuration
+    ├── data_path.md                Data path configuration
+    └── reference/                  Human-readable semantic views (metrics/glossary/time windows/vehicle mapping)
 
 Loaders under `shared/loaders/` provide canonical access to shared data assets:
 - `model_positioning_loader.py`  Model positioning knowledge (yaml)

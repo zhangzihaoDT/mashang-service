@@ -44,7 +44,8 @@ SHARED_DATA_PATH_MD = SHARED_SCHEMA_DIR / "data_path.md"
 def resolve_data_path(description_keyword: str) -> Path | None:
     """从 shared/schema/data_path.md 中按描述关键词查找对应的数据路径。
 
-    data_path.md 是外部数据源的唯一登记处，每行格式：{描述}：{路径}
+    data_path.md 是数据源的唯一登记处，每行格式：{描述}：{路径}。
+    仓库内路径按 PROJECT_ROOT 解析；外部 original 路径保持绝对。
     """
     if not SHARED_DATA_PATH_MD.exists():
         return None
@@ -56,6 +57,8 @@ def resolve_data_path(description_keyword: str) -> Path | None:
             # data_path.md 是 markdown，路径中的下划线会被转义（\_ → _）
             path = path_raw.strip().replace("\\_", "_").replace("\\", "")
             p = Path(path)
+            if not p.is_absolute():
+                p = PROJECT_ROOT / p
             if p.exists():
                 return p
     return None

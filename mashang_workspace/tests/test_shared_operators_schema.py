@@ -152,3 +152,18 @@ def test_effective_locked_orders_synthetic():
     assert r["summary"]["有效锁单当量ELOE"] == 1.0
     assert r["summary"]["有效率"] == 1.0
     assert r["summary"]["风险暴露量"] == 0.0
+
+
+def test_resolve_data_path_relative(tmp_path, monkeypatch):
+    """data_path.md 中仓库内相对路径按 PROJECT_ROOT 解析。"""
+    import utils.paths as paths
+
+    (tmp_path / "dataset").mkdir()
+    target = tmp_path / "dataset" / "x.csv"
+    target.write_text("x", encoding="utf-8")
+    md = tmp_path / "data_path.md"
+    md.write_text("测试数据：dataset/x.csv\n", encoding="utf-8")
+
+    monkeypatch.setattr(paths, "SHARED_DATA_PATH_MD", md)
+    monkeypatch.setattr(paths, "PROJECT_ROOT", tmp_path)
+    assert paths.resolve_data_path("测试数据") == target
