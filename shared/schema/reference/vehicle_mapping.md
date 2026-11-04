@@ -7,7 +7,7 @@
 
 | 车系 | 系列分组 | 说明 |
 |------|----------|------|
-| LS6 | CM0 / CM1 / CM2 | 智己 LS6 (含全新/新一代) |
+| LS6 | CM0 / CM1 / CM2 / CM3 | 智己 LS6 (含全新、新一代；全新一代即 CM3) |
 | L6 | DM0 / DM1 / DM2 | 智己 L6 (含全新 / M2、Jimmy Choo) |
 | LS8 | LS8 / LS8Neo | 智己 LS8（含 NEO 纯电版；LS8Neo 为独立代际） |
 | LS9 | — | 智己 LS9 (单独模型) |
@@ -21,12 +21,13 @@
 跨车系、互不重叠的规则可共用同一档（纯 precedence，不是车型排名）。
 
 ```
+CM3 (precedence=4): product_name LIKE '%M3%' AND product_name LIKE '%LS6%' OR product_name LIKE '%全新一代智己LS6%'
 DM2 (precedence=3): product_name LIKE '%一代%' AND product_name LIKE '%L6%' OR product_name LIKE '%L6%' AND product_name LIKE '%M2%' OR product_name LIKE '%Jimmy Choo%' OR product_name LIKE '%JimmyChoo%'
 CM2 (precedence=3): product_name LIKE '%新一代%' AND product_name LIKE '%LS6%' OR product_name LIKE '%上汽一亿台限定版%' AND product_name LIKE '%LS6%'
-DM1 (precedence=2): product_name LIKE '%全新%' AND product_name LIKE '%L6%' AND NOT 一代
+DM1 (precedence=2): product_name LIKE '%全新%' AND product_name LIKE '%L6%' AND product_name NOT LIKE '%一代%'
 CM1 (precedence=2): product_name LIKE '%全新%' AND product_name LIKE '%LS6%'
-DM0 (precedence=1): product_name LIKE '%L6%' AND NOT 全新
-CM0 (precedence=1): product_name LIKE '%LS6%' AND NOT (全新/新一代)
+DM0 (precedence=1): product_name LIKE '%L6%' AND product_name NOT LIKE '%全新%'
+CM0 (precedence=1): product_name LIKE '%LS6%' AND product_name NOT LIKE '%全新%' AND product_name NOT LIKE '%新一代%'
 LS8Neo (precedence=2): product_name LIKE '%LS8NEO%'
 LS8 (precedence=1): product_name LIKE '%LS8%'
 LS9 (precedence=1): product_name LIKE '%LS9%'
@@ -36,6 +37,8 @@ L7  (precedence=1): product_name LIKE '%L7%'
 ```
 
 **注意**：
+- CM3 必须高于 CM2/CM1（否则「全新一代智己LS6」会被 CM2 的「新一代」或 CM1 的「全新」宽泛规则抢先归入旧代际）；
+  该 literal 同时含「一代」，但 L6 家族规则均要求含 `L6`，不会误命中 DM2。
 - DM2 必须高于 DM1/DM0（否则 L6 M2 / Jimmy Choo 订单会被 DM1/DM0 宽泛规则抢先归入旧代际）。
 - **DM2 的核心锚点是「一代」**：M2 代产品在订单数据里的正式命名是「全新一代智己L6 [Max/Pro Max/Ultra]」，
   不含 "M2" 字样；"L6 M2 Pro Max/Max/Ultra" 是试驾车/内部命名。故 DM2 = 一代 L6 家族 + M2 token + Jimmy Choo，
@@ -47,7 +50,7 @@ L7  (precedence=1): product_name LIKE '%L7%'
 ## 车系-系列分组关系 (model_series_mapping)
 
 ```
-LS6 → [CM0, CM1, CM2]
+LS6 → [CM0, CM1, CM2, CM3]
 L6  → [DM0, DM1, DM2]
 LS8 → [LS8, LS8Neo]
 ```
@@ -123,6 +126,8 @@ classified = classify_product_names(orders, "LS8")
 | LS8Neo | NEO103 Max+ | 纯电 | 未证实 |
 
 - 动力类型只由本表决定；新增版本先补字典，不要改 `product_type_logic`。
+- JSON 中 `product_version_series.series` 把 NEO93/NEO103 挂在 `LS8` 键下（同一车系字典）；
+  而 `product_version_logic` 用独立的 `LS8Neo` 代际组匹配 `NEO93 Max+` / `NEO103 Max+`。上表按代际分开展示以便对照。
 - `battery_kwh` 为 `null` 表示未证实，不得用版本编号（52/66/93/103）回填。
 - 版本未登记时必须返回「未知」并告警，不得默认纯电。
 
@@ -137,9 +142,9 @@ classified = classify_product_names(orders, "LS8")
 | 容量 | 匹配规则 |
 |------|----------|
 | 52kwh | product_name LIKE '%52%' |
-| 66kwh | product_name LIKE '%66%' |
-| 76kwh | LS6 AND NOT 52/66/103/Ultra/Pro Max |
-| 103kwh | LS6 AND (Ultra OR Pro Max OR 103) |
+| 66kwh | product_name LIKE '%66%' OR product_name LIKE '%Hyper%' |
+| 76kwh | product_name LIKE '%LS6%' AND product_name NOT LIKE '%52%' AND product_name NOT LIKE '%66%' AND product_name NOT LIKE '%103%' AND product_name NOT LIKE '%Ultra%' AND product_name NOT LIKE '%Pro Max%' |
+| 103kwh | product_name LIKE '%LS6%' AND product_name LIKE '%Ultra%' OR product_name LIKE '%LS6%' AND product_name LIKE '%Pro Max%' OR product_name LIKE '%LS6%' AND product_name LIKE '%103%' |
 
 ## 车型上市时间窗口 (time_periods)
 
@@ -154,9 +159,14 @@ classified = classify_product_names(orders, "LS8")
 | DM1 | 2025-04-18 | 2025-05-13 | 2025-06-15 |
 | LS9 | 2025-11-04 | 2025-11-12 | 2025-12-04 |
 | LS8 | 2026-03-26 | 2026-04-16 | 2026-05-31 |
+| LS9Hyper | — | 2026-07-16 | 2026-08-31 |
+| DM2 | 2026-08-18 | 2026-08-28 | 2026-10-08 |
+| CM3 | 2026-09-10 | 2026-09-23 | 2026-10-23 |
 | LS8Neo | 2026-10-29 | 待确认 | — |
 
 > L7/LS7 为历史存量车型，无预售期；LS8Neo 仅登记 start，`end`（上市日）未确认时按 open-ended 预售窗口（`start + monitor.presale_open_ended_window_days`，默认 3 天）处理，确认后自动按 `[start, end)` 收口。详见 `time_window_rules.md`。
+>
+> LS9Hyper 是 LS9 的 Hyper 版本上市事件（只有 `end`/`finish`，无独立预售期）；`series` 值含 `LS9Hyper` 的记录默认归入 LS9 统计，只有需要单独看 Hyper 版本上市节奏时才独立使用。详见 `metric_definitions.md`。
 
 > **上市事件业务备注**（`business_definition.json` → `business_knowledge.launch_events`）：
 > - **CM0（2023-10-12）**：上市当日发生 **APP 故障**，锁单被压制（D0 仅 11 单），需求顺延至次日（D1=2288 单）。
