@@ -62,7 +62,7 @@ mashang-service/
 | `dataset/wechat/销售全员群.parquet` | Parquet | 微信群消息 |
 | `dataset/TP&MIX-ways/` | 目录 | 乘用车上险数据资产（6 张 Parquet + registry + quality） |
 | `dataset/TP&MIX-ways/registry/tp_and_mix_ways_tables.json` | JSON | 上险数据注册表 |
-| `dataset/TP&MIX-ways/raw_csv/` | 目录 | 6 张 Tableau 导出 CSV（UTF-16 LE, tab-delimited, pivot） |
+| `dataset/TP&MIX-ways/raw_csv/` | 目录 | 6 张 Tableau 导出 CSV（Pivot；UTF-8 逗号分隔，兼容 UTF-16 LE / Tab） |
 | `logs/last_result.parquet` | Parquet | 上次查询结果缓存 |
 | `logs/query_log.jsonl` | JSONL | 查询日志 |
 | `agent/.query_agent_memory.json` | JSON | Agent 对话记忆 |

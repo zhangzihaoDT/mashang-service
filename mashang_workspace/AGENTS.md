@@ -200,8 +200,8 @@ from shared.loaders.tp_and_mix_ways_loader import (
 | Parquet | Grain | 用途 |
 |---------|-------|------|
 | `market_energy_monthly` | date_month, fuel_type_group, fuel_type | 市场总量、能源结构、新能源渗透率 |
-| `brand_monthly` | date_month, brand | 品牌排名、品牌份额、品牌价格重心 |
-| `model_monthly` | date_month, brand, model, sub_model, sub_model_id | 车型排名、车型趋势、品牌内部车型结构 |
+| `brand_monthly` | date_month, brand, ownership_type, oem, domestic_import | 品牌排名、品牌份额、品牌价格重心 |
+| `model_monthly` | date_month, brand, model, sub_model, sub_model_id, drive_type, fuel_type | 车型排名、车型趋势、品牌内部车型结构 |
 | `geo_monthly` | date_month, province, city, city_tier_group, fuel_type_group | 省市市场、城市线级、区域结构 |
 | `price_segment_monthly` | date_month, tp_bucket_5w, tp_bucket_10w, fuel_type_group, body_type, vehicle_level_group | 价格带市场、20-30 万、价格结构 |
 | `product_segment_monthly` | date_month, saic_segment, body_type, vehicle_level, vehicle_level_group, fuel_type_group, drive_type_group | 细分市场、车身结构、级别结构、驱动结构、尺寸重心 |
@@ -212,7 +212,7 @@ from shared.loaders.tp_and_mix_ways_loader import (
 - 分析探索
 - 图表输出
 - 报告生成
-- 验证后为 runtimeV2 提供查询原型
+- 验证后为 Hub（经 `jobs/`）提供查询原型
 
 **不负责**：
 - 读取 Tableau raw_csv

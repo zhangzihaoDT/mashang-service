@@ -2,9 +2,11 @@
 """
 Build TP&MIX-ways dataset from raw Tableau CSV exports.
 
-Reads 6 tab-delimited UTF-16 LE CSVs from dataset/TP&MIX-ways/raw_csv/,
-widens pivot format (度量名称/度量值 → columns), cleans & validates,
-then outputs Parquet, registry JSON, and quality reports.
+Reads 6 pivot-format CSVs from dataset/TP&MIX-ways/raw_csv/. Stored raw
+snapshots are UTF-8 (no BOM), comma-delimited, CRLF; the reader also accepts
+legacy UTF-16 LE / tab-delimited exports. Widens pivot format
+(度量名称/度量值 → columns), cleans & validates, then outputs Parquet,
+registry JSON, and quality reports.
 
 Usage:
     python scripts/build_tp_and_mix_ways_dataset.py
@@ -21,8 +23,15 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import pandas as pd
 
-# ---- paths ----
 SERVICE_ROOT = Path(__file__).resolve().parent.parent
+if str(SERVICE_ROOT) not in sys.path:
+    sys.path.insert(0, str(SERVICE_ROOT))
+
+from shared.schema.tp_and_mix_ways_schema import (  # noqa: E402
+    TP_AND_MIX_WAYS_TABLES,
+)
+
+# ---- paths ----
 RAW_CSV_DIR = SERVICE_ROOT / "dataset" / "TP&MIX-ways" / "raw_csv"
 PARQUET_DIR = SERVICE_ROOT / "dataset" / "TP&MIX-ways" / "parquet"
 REGISTRY_DIR = SERVICE_ROOT / "dataset" / "TP&MIX-ways" / "registry"
@@ -118,14 +127,21 @@ COLUMN_MAP: Dict[str, List[Tuple[str, str]]] = {
     ],
 }
 
+# ---- Tableau header aliases (renamed / trailing-space variants) ----
+# Keys and values are stripped; the raw reader normalizes by stripped name.
+COLUMN_ALIASES: Dict[str, str] = {
+    "品牌 (新势力/传统自主/自主新品牌/其他)": "品牌 (组)",
+    "品牌 (豪华分组)": "品牌 (新豪华分组)",
+    "自主/合资/进口": "国产/进口",
+    "前驱/后驱/四驱": "驱动形式 (组)",
+}
+
 # ---- grain definitions ----
+# Canonical source: shared/schema/tp_and_mix_ways_schema.py. Grain must be the
+# full natural key of the Tableau view; otherwise quality reports flag
+# legitimate dimension splits as duplicate rows.
 GRAIN_DEFS: Dict[str, List[str]] = {
-    "market_energy_monthly": ["date_month", "fuel_type_group", "fuel_type"],
-    "brand_monthly": ["date_month", "brand"],
-    "model_monthly": ["date_month", "brand", "model", "sub_model", "sub_model_id"],
-    "geo_monthly": ["date_month", "province", "city", "city_tier_group", "fuel_type_group"],
-    "price_segment_monthly": ["date_month", "tp_bucket_5w", "tp_bucket_10w", "fuel_type_group", "body_type", "vehicle_level_group"],
-    "product_segment_monthly": ["date_month", "saic_segment", "body_type", "vehicle_level", "vehicle_level_group", "fuel_type_group", "drive_type_group"],
+    t.table_name: list(t.grain) for t in TP_AND_MIX_WAYS_TABLES
 }
 
 # ---- output parquet filenames ----
@@ -191,8 +207,9 @@ def read_and_widen_csv(csv_path: Path, table_name: str) -> pd.DataFrame:
     col_mapping = {}
     for i, raw_col in enumerate(raw_header):
         stripped = raw_col.strip()
-        if stripped in normalized_col_map:
-            col_mapping[i] = normalized_col_map[stripped]
+        canonical = COLUMN_ALIASES.get(stripped, stripped)
+        if canonical in normalized_col_map:
+            col_mapping[i] = normalized_col_map[canonical]
         else:
             print(f"  [warn] unmapped column [{i}] '{raw_col}' in {csv_path.name}")
 
@@ -274,6 +291,7 @@ def _build_quality_report(
         "row_count": len(df),
         "column_count": len(df.columns),
         "columns": list(df.columns),
+        "grain": list(grain_cols),
     }
 
     if "date_month" in df.columns:
@@ -343,6 +361,7 @@ def _format_quality_markdown(all_reports: List[Dict[str, Any]]) -> str:
         lines.append(f"|--------|-------|")
         lines.append(f"| row_count | {r.get('row_count', 'N/A')} |")
         lines.append(f"| column_count | {r.get('column_count', 'N/A')} |")
+        lines.append(f"| grain | {', '.join(r.get('grain') or [])} |")
         lines.append(f"| date_min | {r.get('date_min', 'N/A')} |")
         lines.append(f"| date_max | {r.get('date_max', 'N/A')} |")
         lines.append(f"| sales_null_count | {r.get('sales_null_count', 'N/A')} |")
@@ -369,26 +388,47 @@ def _format_quality_markdown(all_reports: List[Dict[str, Any]]) -> str:
     return "\n".join(lines)
 
 
-def build_tp_and_mix_ways_dataset() -> List[Dict[str, Any]]:
-    os.makedirs(PARQUET_DIR, exist_ok=True)
-    os.makedirs(REGISTRY_DIR, exist_ok=True)
-    os.makedirs(QUALITY_DIR, exist_ok=True)
+def _write_parquet_atomic(df: pd.DataFrame, parquet_path: Path) -> None:
+    """Write parquet via replace so a failed build never leaves a partial file."""
+    tmp_path = parquet_path.with_name(parquet_path.name + ".tmp")
+    df.to_parquet(tmp_path, index=False)
+    os.replace(tmp_path, parquet_path)
 
-    raw_files = {f.name for f in RAW_CSV_DIR.iterdir() if f.is_file() and f.name.endswith(".csv")}
+
+def _build_tp_and_mix_ways_dataset(
+    *,
+    raw_csv_dir: Path,
+    parquet_dir: Path,
+    registry_dir: Path,
+    quality_dir: Path,
+) -> List[Dict[str, Any]]:
+    os.makedirs(parquet_dir, exist_ok=True)
+    os.makedirs(registry_dir, exist_ok=True)
+    os.makedirs(quality_dir, exist_ok=True)
+
+    registry_path = registry_dir / REGISTRY_PATH.name
+    quality_md_path = quality_dir / QUALITY_MD_PATH.name
+    quality_json_path = quality_dir / QUALITY_JSON_PATH.name
+
+    raw_files = (
+        {f.name for f in raw_csv_dir.iterdir() if f.is_file() and f.name.endswith(".csv")}
+        if raw_csv_dir.is_dir()
+        else set()
+    )
     expected = set(SOURCE_MAP.keys())
     missing = expected - raw_files
     if missing:
         print(f"\n[ERROR] Missing raw CSV files: {missing}")
-        print(f"Files found in {RAW_CSV_DIR}: {sorted(raw_files)}")
+        print(f"Files found in {raw_csv_dir}: {sorted(raw_files)}")
         sys.exit(1)
 
     all_reports: List[Dict[str, Any]] = []
     registry_tables: List[Dict[str, Any]] = []
 
     for csv_filename, table_name in SOURCE_MAP.items():
-        csv_path = RAW_CSV_DIR / csv_filename
+        csv_path = raw_csv_dir / csv_filename
         parquet_filename = PARQUET_FILENAMES[table_name]
-        parquet_path = PARQUET_DIR / parquet_filename
+        parquet_path = parquet_dir / parquet_filename
         grain_cols = GRAIN_DEFS[table_name]
 
         print(f"\n{'='*60}")
@@ -426,7 +466,7 @@ def build_tp_and_mix_ways_dataset() -> List[Dict[str, Any]]:
 
         all_reports.append(report)
 
-        df.to_parquet(parquet_path, index=False)
+        _write_parquet_atomic(df, parquet_path)
         print(f"  parquet written: {parquet_path} ({os.path.getsize(parquet_path) / 1024:.1f} KB)")
 
         registry_tables.append({
@@ -446,25 +486,46 @@ def build_tp_and_mix_ways_dataset() -> List[Dict[str, Any]]:
         "dataset_name": "tp_and_mix_ways",
         "description": "乘用车上险数据 TP&MIX-ways Dataset",
         "build_timestamp": datetime.now().isoformat(),
-        "source": "Tableau 导出 CSV (UTF-16 LE, tab-delimited, pivot format)",
+        "source": (
+            "Tableau 导出 CSV (pivot format; stored UTF-8 comma-delimited, "
+            "legacy UTF-16 LE tab-delimited auto-detected)"
+        ),
         "tables": registry_tables,
     }
 
-    REGISTRY_PATH.write_text(json.dumps(registry, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"\nRegistry written: {REGISTRY_PATH}")
+    registry_path.write_text(json.dumps(registry, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"\nRegistry written: {registry_path}")
 
-    QUALITY_MD_PATH.write_text(_format_quality_markdown(all_reports), encoding="utf-8")
-    print(f"Quality MD written: {QUALITY_MD_PATH}")
+    quality_md_path.write_text(_format_quality_markdown(all_reports), encoding="utf-8")
+    print(f"Quality MD written: {quality_md_path}")
 
     quality_json = {
         "dataset_name": "tp_and_mix_ways",
         "build_timestamp": datetime.now().isoformat(),
         "tables": all_reports,
     }
-    QUALITY_JSON_PATH.write_text(json.dumps(quality_json, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"Quality JSON written: {QUALITY_JSON_PATH}")
+    quality_json_path.write_text(
+        json.dumps(quality_json, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    print(f"Quality JSON written: {quality_json_path}")
 
     return all_reports
+
+
+def build_tp_and_mix_ways_dataset(
+    *,
+    raw_csv_dir: Path | str | None = None,
+    parquet_dir: Path | str | None = None,
+    registry_dir: Path | str | None = None,
+    quality_dir: Path | str | None = None,
+) -> List[Dict[str, Any]]:
+    """Build the 6 tables from a raw snapshot into explicit output dirs."""
+    return _build_tp_and_mix_ways_dataset(
+        raw_csv_dir=Path(raw_csv_dir) if raw_csv_dir is not None else RAW_CSV_DIR,
+        parquet_dir=Path(parquet_dir) if parquet_dir is not None else PARQUET_DIR,
+        registry_dir=Path(registry_dir) if registry_dir is not None else REGISTRY_DIR,
+        quality_dir=Path(quality_dir) if quality_dir is not None else QUALITY_DIR,
+    )
 
 
 def main():

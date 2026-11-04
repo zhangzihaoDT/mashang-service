@@ -26,6 +26,16 @@ from shared.loaders.tp_and_mix_ways_loader import (
     load_tp_and_mix_ways_registry,
 )
 
+DATASET_ROOT = Path(__file__).resolve().parents[1] / "dataset" / "TP&MIX-ways"
+HAS_RAW_SNAPSHOT = (DATASET_ROOT / "raw_csv").is_dir() and any(
+    (DATASET_ROOT / "raw_csv").glob("*.csv")
+)
+HAS_REGISTRY = (DATASET_ROOT / "registry" / "tp_and_mix_ways_tables.json").is_file()
+HAS_PARQUET = (DATASET_ROOT / "parquet").is_dir() and any(
+    (DATASET_ROOT / "parquet").glob("*.parquet")
+)
+DATA_SKIP_REASON = "local dataset/TP&MIX-ways asset is not present (data is gitignored)"
+
 
 # ── Schema Tests ──────────────────────────────────────────────────
 
@@ -87,19 +97,23 @@ class TestLoader:
         assert root.exists()
         assert (root / "Makefile").exists()
 
+    @pytest.mark.skipif(not HAS_RAW_SNAPSHOT, reason=DATA_SKIP_REASON)
     def test_get_tp_and_mix_ways_dataset_root(self):
         dset_root = get_tp_and_mix_ways_dataset_root()
         assert dset_root.exists()
         assert dset_root.name == "TP&MIX-ways"
 
+    @pytest.mark.skipif(not HAS_REGISTRY, reason=DATA_SKIP_REASON)
     def test_get_registry_root(self):
         reg_root = get_registry_root()
         assert reg_root.exists()
 
+    @pytest.mark.skipif(not HAS_RAW_SNAPSHOT, reason=DATA_SKIP_REASON)
     def test_get_raw_csv_root(self):
         raw_root = get_raw_csv_root()
         assert raw_root.exists()
 
+    @pytest.mark.skipif(not HAS_PARQUET, reason=DATA_SKIP_REASON)
     def test_get_parquet_root(self):
         par_root = get_parquet_root()
         assert par_root.exists()
@@ -108,6 +122,7 @@ class TestLoader:
 # ── Registry Tests ────────────────────────────────────────────────
 
 
+@pytest.mark.skipif(not HAS_REGISTRY, reason=DATA_SKIP_REASON)
 class TestRegistry:
     def test_registry_json_exists(self):
         registry_path = get_registry_root() / "tp_and_mix_ways_tables.json"
@@ -166,6 +181,7 @@ class TestBuildScript:
             "Build script appears to concatenate tables"
         )
 
+    @pytest.mark.skipif(not HAS_RAW_SNAPSHOT, reason=DATA_SKIP_REASON)
     def test_raw_csv_exists(self):
         from scripts.build_tp_and_mix_ways_dataset import RAW_CSV_DIR, SOURCE_MAP
         for csv_name in SOURCE_MAP:
@@ -192,7 +208,11 @@ class TestBuildScript:
 
     def test_error_if_raw_csv_missing(self):
         from scripts.build_tp_and_mix_ways_dataset import RAW_CSV_DIR, SOURCE_MAP
-        raw_files = {f.name for f in RAW_CSV_DIR.iterdir() if f.is_file() and f.name.endswith(".csv")}
+        raw_files = (
+            {f.name for f in RAW_CSV_DIR.iterdir() if f.is_file() and f.name.endswith(".csv")}
+            if RAW_CSV_DIR.is_dir()
+            else set()
+        )
         expected = set(SOURCE_MAP.keys())
         missing = expected - raw_files
         if missing:
@@ -204,6 +224,7 @@ class TestBuildScript:
 # ── Parquet Output Tests ──────────────────────────────────────────
 
 
+@pytest.mark.skipif(not HAS_PARQUET, reason=DATA_SKIP_REASON)
 class TestParquetOutput:
     def test_parquet_files_exist(self):
         from scripts.build_tp_and_mix_ways_dataset import PARQUET_DIR

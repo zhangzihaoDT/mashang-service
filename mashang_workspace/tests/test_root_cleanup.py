@@ -38,7 +38,10 @@ SCRIPTS_ALLOWLIST = frozenset({
     "parse_nev_apeal_questionnaire.py",
     "verify_nev_apeal_2024.py",
 })
-TESTS_ALLOWLIST = frozenset({"test_tp_and_mix_ways_dataset_build.py"})
+TESTS_ALLOWLIST = frozenset({
+    "test_tp_and_mix_ways_dataset_build.py",
+    "test_tp_and_mix_ways_raw_guard.py",
+})
 
 
 def test_root_docs_not_exists():
