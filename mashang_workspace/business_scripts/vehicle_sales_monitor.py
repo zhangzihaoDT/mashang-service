@@ -48,6 +48,8 @@ from utils.monitors.phase import (  # noqa: E402
     detect_active,
     load_business_definition,
     model_series_of,
+    phase_of,
+    presale_open_ended_window_days,
     series_label,
 )
 from utils.monitors.series_group import apply_series_group_logic  # noqa: E402
@@ -130,6 +132,8 @@ def run(args) -> int:
                 "model_series": model_series_of(bdef, g),
                 "phase": p,
                 "label": series_label(bdef, g),
+                "presale_close": None,
+                "open_ended": False,
             }
             for g in wanted
             for p in wanted_p
@@ -142,6 +146,21 @@ def run(args) -> int:
         if args.phase:
             wanted_p = {p.strip() for p in args.phase.split(",") if p.strip()}
             active = [a for a in active if a["phase"] in wanted_p]
+        if not active and args.series and args.phase == "presale":
+            # 显式指定代际的预售快照：即使已超出兜底窗口，仍按预售口径出数
+            wanted = {s.strip() for s in args.series.split(",") if s.strip()}
+            active = [
+                {
+                    "generation": g,
+                    "model_series": model_series_of(bdef, g),
+                    "phase": "presale",
+                    "label": series_label(bdef, g),
+                    "presale_close": None,
+                    "open_ended": False,
+                }
+                for g in wanted
+                if phase_of(bdef, g, today) != "launch"
+            ]
 
     live = args.as_of is None
     fresh = None
@@ -150,11 +169,22 @@ def run(args) -> int:
         refresh_ts = pd.Timestamp(args.refresh_ts) if args.refresh_ts else None
         fresh = freshness.check(now=now, bdef=bdef, refresh_ts=refresh_ts)
 
+    # 预售阶段按「start + 兜底天数（end 未确认时）」判定：
+    # 显式指定代际但尚未到预售首日时，不应推送「等待数据」卡。
+    presale_gens = {x["generation"] for x in detect_active(bdef, today, phases=("presale",))}
+    for a in active:
+        if a.get("phase") == "presale" and a["generation"] not in presale_gens:
+            a["phase"] = phase_of(bdef, a["generation"], today) or "presale"
+
     scope = {
         "data_source": "dataset/order_data.parquet",
         "time_window": {"as_of": today.date().isoformat()},
         "filters": {"series": args.series, "phase": args.phase},
         "metric_definition": "预售小订 / 上市锁单监控（business_definition.monitor）",
+        "presale_window_rule": (
+            "start <= day < end；end（上市日）未确认时按 start + "
+            f"{presale_open_ended_window_days(bdef)} 天持续输出预售监控"
+        ),
     }
 
     # ── 无 active 代际 ──

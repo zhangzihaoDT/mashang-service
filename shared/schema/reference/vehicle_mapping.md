@@ -9,7 +9,7 @@
 |------|----------|------|
 | LS6 | CM0 / CM1 / CM2 | 智己 LS6 (含全新/新一代) |
 | L6 | DM0 / DM1 / DM2 | 智己 L6 (含全新 / M2、Jimmy Choo) |
-| LS8 | — | 智己 LS8 (单独模型) |
+| LS8 | LS8 / LS8Neo | 智己 LS8（含 NEO 纯电版；LS8Neo 为独立代际） |
 | LS9 | — | 智己 LS9 (单独模型) |
 | LS7 | — | 智己 LS7 |
 | L7 | — | 智己 L7 |
@@ -27,6 +27,7 @@ DM1 (precedence=2): product_name LIKE '%全新%' AND product_name LIKE '%L6%' AN
 CM1 (precedence=2): product_name LIKE '%全新%' AND product_name LIKE '%LS6%'
 DM0 (precedence=1): product_name LIKE '%L6%' AND NOT 全新
 CM0 (precedence=1): product_name LIKE '%LS6%' AND NOT (全新/新一代)
+LS8Neo (precedence=2): product_name LIKE '%LS8NEO%'
 LS8 (precedence=1): product_name LIKE '%LS8%'
 LS9 (precedence=1): product_name LIKE '%LS9%'
 LS7 (precedence=1): product_name LIKE '%LS7%'
@@ -48,6 +49,7 @@ L7  (precedence=1): product_name LIKE '%L7%'
 ```
 LS6 → [CM0, CM1, CM2]
 L6  → [DM0, DM1, DM2]
+LS8 → [LS8, LS8Neo]
 ```
 
 ## 能源类型 (product_type_logic)
@@ -55,9 +57,12 @@ L6  → [DM0, DM1, DM2]
 | 能源类型 | 匹配规则 |
 |----------|----------|
 | 增程 (REEV) | product_name LIKE '%52%' OR product_name LIKE '%66%' |
-| 纯电 (BEV) | NOT (product_name LIKE '%52%' OR product_name LIKE '%66%') |
+| 纯电 (BEV) | product_name LIKE '%93%' OR product_name LIKE '%103%' OR NOT (product_name LIKE '%52%' OR product_name LIKE '%66%') |
 
-**注意**：数据集中无 `product_type` 字段，需通过 `product_name` 模糊匹配。使用 `matches` 操作符和正则 `52|66`。
+**注意**：
+- 本表仅适用于 LS6 / L6 / LS9 等非 LS8 车系。
+- **LS8 / LS8Neo 的动力类型由 `product_version_series` 唯一决定**，不走本表；93/103 是纯电电量段，不要再用「含 52/66 即增程」的旧规则。
+- 数据集中无 `product_type` 字段；新代码优先调用 `resolve_product_attributes`，本表只作旧脚本兼容兜底。
 
 ## 驱动形式 (drive_type_logic)
 
@@ -86,8 +91,8 @@ L6  → [DM0, DM1, DM2]
 Canonical 定义位于 `shared/schema/business_definition.json` 的
 `product_version_logic.{series}`，每个版本为 `{priority, condition}`。
 匹配前去除全部空白；按 priority 降序、同分按定义顺序首次命中。
-LS8 当前定义 52 Max+、66 Ultra、93 RWD；LS9 定义 Ultra 电池版本、
-线控版及 Hyper 版本。新增版本应维护共享定义，不在日报中添加匹配规则。
+LS8 当前定义 52 Max+、52 Lite、66 Ultra、93 RWD；LS8Neo 定义 NEO93 Max+、NEO103 Max+；
+LS9 定义 Ultra 电池版本、线控版及 Hyper 版本。新增版本应维护共享定义，不在日报中添加匹配规则。
 未知版本返回“未分类”，未知座位返回“未标座位”，保证统计闭合。
 
 Workspace 脚本统一调用：
@@ -103,6 +108,30 @@ classified = classify_product_names(orders, "LS8")
 每日报表 LS8 按“版本 → 座位”展示，LS9 按版本横向展示、不显示座位。
 本次仅日报切换到该入口，其他历史报告的独立分类尚未迁移。
 
+### 版本动力字典 (product_version_series)
+
+`business_definition.json → product_version_series` 是动力类型的**单一事实来源**：
+`product_name → series_group_logic（代际）→ product_version（版本）→ power_type（动力）`。
+
+| 车系 | 版本 | 动力 | battery_kwh |
+|------|------|------|-------------|
+| LS8 | 52 Max+ | 增程 | 未证实 |
+| LS8 | 52 Lite | 增程 | 未证实 |
+| LS8 | 66 Ultra | 增程 | 未证实 |
+| LS8 | 93 RWD | 纯电 | 未证实 |
+| LS8Neo | NEO93 Max+ | 纯电 | 未证实 |
+| LS8Neo | NEO103 Max+ | 纯电 | 未证实 |
+
+- 动力类型只由本表决定；新增版本先补字典，不要改 `product_type_logic`。
+- `battery_kwh` 为 `null` 表示未证实，不得用版本编号（52/66/93/103）回填。
+- 版本未登记时必须返回「未知」并告警，不得默认纯电。
+
+#### LS8 口径补充
+
+- **裸名 `智己LS8` 订单**：2026-10-29 审计时点，`product_name` 去空格等于 `智己LS8` 的订单全部未锁单，属预售占位定金单，不能回填具体版本；做版本/动力占比时需显式排除并标注，不得默认归入任一版本。
+- **LS8 66 Ultra 占比**：分子按 `product_version == '66 Ultra'`，不能用 `product_name` 包含 "66" 判断（例如「66周年纪念版」会误计）；分母为 LS8 代际组（`series_group_logic == 'LS8'`），不含 `LS8Neo`；窗口起点为 `time_periods.LS8.end`（上市日），不是预售 `start`。
+- **动力未知**：版本字典未登记的 LS8/LS8Neo 版本返回「未知」并告警，不得默认归为纯电或增程。
+
 ## 电池容量 (battery_capacity_logic)
 
 | 容量 | 匹配规则 |
@@ -114,8 +143,10 @@ classified = classify_product_names(orders, "LS8")
 
 ## 车型上市时间窗口 (time_periods)
 
-| 系列分组 | 预售开始 | 预售结束 | 预计成熟 |
-|----------|----------|----------|----------|
+| 系列分组 | 预售开始 | 上市日 | 预计成熟 |
+|----------|----------|--------|----------|
+| L7 | — | 2022-04-17 | — |
+| LS7 | — | 2023-02-10 | — |
 | CM0 | 2023-08-25 | 2023-10-12 | 2023-11-12 |
 | DM0 | 2024-04-08 | 2024-05-13 | 2024-06-15 |
 | CM1 | 2024-08-30 | 2024-09-26 | 2024-10-08 |
@@ -123,6 +154,9 @@ classified = classify_product_names(orders, "LS8")
 | DM1 | 2025-04-18 | 2025-05-13 | 2025-06-15 |
 | LS9 | 2025-11-04 | 2025-11-12 | 2025-12-04 |
 | LS8 | 2026-03-26 | 2026-04-16 | 2026-05-31 |
+| LS8Neo | 2026-10-29 | 待确认 | — |
+
+> L7/LS7 为历史存量车型，无预售期；LS8Neo 仅登记 start，`end`（上市日）未确认时按 open-ended 预售窗口（`start + monitor.presale_open_ended_window_days`，默认 3 天）处理，确认后自动按 `[start, end)` 收口。详见 `time_window_rules.md`。
 
 > **上市事件业务备注**（`business_definition.json` → `business_knowledge.launch_events`）：
 > - **CM0（2023-10-12）**：上市当日发生 **APP 故障**，锁单被压制（D0 仅 11 单），需求顺延至次日（D1=2288 单）。

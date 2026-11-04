@@ -19,6 +19,7 @@ from utils.monitors.phase import (
     compare_keys,
     open_hour,
     open_minute,
+    presale_open_ended_window_days,
     series_label,
 )
 from utils.monitors.order_filter import flag_test_orders
@@ -71,6 +72,7 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
         "today": today.date().isoformat(),
         "series_start": start.date().isoformat() if start is not None else None,
         "series_end": end.date().isoformat() if end is not None else None,
+        "open_ended_window_days": presale_open_ended_window_days(business_def),
         "obs": obs.isoformat(),
         "open_ts": None,
         "data_before_open": False,
@@ -359,19 +361,22 @@ def build_card(metrics: dict, show_notes: bool = False) -> dict:
     else:
         lines.append("分大区：暂无留存订单")
 
-    compare_str = " / ".join(
-        f"{k}（{v:,}）" if v is not None else f"{k}（无数据）" for k, v in metrics["compare"].items()
-    )
+    # 历史对比：剔除 0 单代际（如 CM0/DM0/DM1 无同期数据），避免噪声占位
+    compare_items = [
+        (k, v) for k, v in metrics["compare"].items()
+        if v is not None and v != 0
+    ]
+    compare_str = " / ".join(f"{k}（{v:,}）" for k, v in compare_items) or "暂无同期数据"
     lines.append(f"历史对比（自开放起同期留存，相同时长）：**{compare_str}**")
 
-    prelaunch_compare = metrics.get("prelaunch_compare") or {}
-    if prelaunch_compare:
-        prelaunch_str = " / ".join(
-            f"{k}（{v:,}）" if v is not None else f"{k}（无数据）" for k, v in prelaunch_compare.items()
+    if metrics.get("series_end"):
+        presale_line = f"预售期：{metrics.get('series_start', '—')} ~ {metrics.get('series_end', '—')}"
+    else:
+        presale_line = (
+            f"预售期：{metrics.get('series_start', '—')} 起"
+            f"（上市日未确认，按 start+{metrics.get('open_ended_window_days', 3)} 天兜底输出）"
         )
-        lines.append(f"历史上市前累计留存（上市前相同天数）：**{prelaunch_str}**")
-
-    lines += ["", f"预售期：{metrics.get('series_start', '—')} ~ {metrics.get('series_end', '—')}"]
+    lines += ["", presale_line]
     obs_raw = metrics.get("obs")
     obs_str = pd.Timestamp(obs_raw).strftime("%Y-%m-%d %H:%M") if obs_raw else "—"
     lines.append(f"观察时间：{obs_str}")
@@ -380,9 +385,6 @@ def build_card(metrics: dict, show_notes: bool = False) -> dict:
         lines.append(f"口径：自开放时刻（{open_str}）起算，不含预售日白天零星订单；小订 = 当日未退意向金订单；留存 = 意向金未退（退订晚于观测截止视为留存）")
         lines.append(f"N=0 发布会当日留存：开放 {open_str} 至当日 24:00 内支付且未退（退订晚于当日 24:00 视为留存）")
         lines.append(f"对标：各代际自开放时刻起与目标相同时长（{_elapsed_label(metrics)}）内的留存小订")
-        _db = metrics.get("days_before_launch")
-        _db_txt = f"当前上市前 {_db} 天" if _db is not None else "上市前天数未知"
-        lines.append(f"历史上市前累计留存：按「距上市天数」对齐（{_db_txt}），各代际取各自上市日前相同天数内支付、且截至该时点未退的留存小订（不受目标 elapsed 截断）")
         if metrics.get("test_orders_excluded"):
             lines.append(f"已剔除测试单：{metrics['test_orders_excluded']} 笔（总部主理店 + 假身份号）")
         lines.append("数据源：dataset/order_data.parquet + shared/schema/business_definition.json")

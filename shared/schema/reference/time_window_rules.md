@@ -28,7 +28,15 @@
 | MM月DD日 | 自动补当年 | 5月17日 → 2026-05-17 |
 | N月N日~N月N日 | 范围解析 | 5月1日~5月10日 |
 | 累计/累积 | end 截断为 today+1d | YTD 语义 |
-| 上市以来 | 按 series 取 time_periods.end 作为起点 | LS8 → 2026-04-16 |
+| 上市以来 | 按 series 取 time_periods.end（上市日）作为起点 | LS8 → 2026-04-16 |
+
+## 预售 / 上市阶段窗口
+
+- `time_periods.end` = **上市日**，不是预售结束日；`start` = 预售开始日。
+- 已确认上市日：`presale = [start, end)`；`launch = [end, launch_end]`。
+- 仅有 `start`、`end` 未确认：`presale = [start, start + monitor.presale_open_ended_window_days)`，默认 3 个自然日；phase 保持 `presale`；确认 `end` 后自动按 `[start, end)` 收口。
+- `上市以来` 的起点是 `time_periods.end`（上市日），不是预售 `start`。
+- 实现：`mashang_workspace/utils/monitors/phase.py`（`phase_of` / `presale_close_date` / `detect_active`）。
 
 ## Cohort 时间概念
 

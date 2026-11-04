@@ -16,16 +16,16 @@ def _load_business_definition() -> dict:
 
 def apply_business_logic(df: pd.DataFrame, bdef: dict) -> pd.DataFrame:
     from operators.series_group_logic import apply_series_group_logic
-    df = apply_series_group_logic(df, bdef)
-    product_name = df["product_name"].astype("string").fillna("")
+    from operators.product_attributes import resolve_product_attributes
 
-    product_type_logic = bdef.get("product_type_logic", {})
-    df["product_type"] = "未知"
-    for ptype, expr in product_type_logic.items():
-        from operators.series_group_logic import _eval_series_group_logic_expr
-        mask = _eval_series_group_logic_expr(product_name, str(expr))
-        if mask.any():
-            df.loc[mask, "product_type"] = ptype
+    df = apply_series_group_logic(df, bdef)
+
+    # 动力类型由版本字典（product_version_series）决定，不再靠 product_type_logic 猜测
+    attrs = resolve_product_attributes(df, bdef)
+    df["product_version"] = attrs.version
+    df["product_type"] = attrs.power_type
+    df["seat_count"] = attrs.seat_count
+    df["battery_kwh"] = attrs.battery_kwh
 
     model_series_mapping = bdef.get("model_series_mapping", {})
     group_to_series = {}

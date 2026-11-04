@@ -757,7 +757,8 @@ def test_presale_card_slim_no_notes_in_production():
     assert "开放后 24h 累计留存：**1,980**" in body
     assert "发布会当日留存：**1,600**（小订 1,700）" in body
     assert "历史对比（自开放起同期留存，相同时长）：**CM2（2,000） / CM1（900） / CM0（1,500） / LS8（1,100） / LS9（700）**" in body
-    assert "历史上市前累计留存（上市前相同天数）：**CM2（37,165） / CM1（18,696） / CM0（18,235） / LS8（13,814） / LS9（7,635）**" in body
+    # 「历史上市前累计留存」行已按业务要求从卡片移除（2026-10-29）
+    assert "历史上市前累计留存" not in body
     assert "预售期：2026-09-10 ~ 2026-09-23" in body
     assert "观察时间：2026-09-10 15:30" in body
 

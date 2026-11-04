@@ -348,10 +348,23 @@ class TestLaunchEvents:
         assert len(ls9h) == 1, "LS9Hyper should be parsed"
         assert ls9h["event_date"].iloc[0] == pd.Timestamp("2026-07-16")
 
-    def test_missing_end_raises(self):
-        """Missing 'end' field should raise ValueError."""
+    def test_missing_end_skips_open_ended_event(self):
+        """只有 start、上市日（end）未确认的代际 → 视为尚未上市，跳过而不报错。"""
         import json, tempfile, os
-        bad = {"time_periods": {"EVIL": {"start": "2025-01-01"}}}
+        open_ended = {"time_periods": {"PENDING": {"start": "2026-10-29"}}}
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+            json.dump(open_ended, f)
+            tmp = f.name
+        try:
+            events = self.bt.parse_launch_events(tmp)
+        finally:
+            os.unlink(tmp)
+        assert events.empty
+
+    def test_invalid_end_raises(self):
+        """end 存在但非法时仍应报错（不静默吞掉）。"""
+        import json, tempfile, os
+        bad = {"time_periods": {"EVIL": {"start": "2025-01-01", "end": "not-a-date"}}}
         with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
             json.dump(bad, f)
             tmp = f.name

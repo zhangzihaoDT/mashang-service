@@ -1,7 +1,11 @@
 """预售/上市阶段判定 — 全部口径来自 shared/schema/business_definition.json。
 
 phase 规则：
-  presale : start <= today < end
+  presale : start <= today < presale_close
+            presale_close = end（已确认上市日）or (start + presale_open_ended_window_days)
+            —— 只有 start、上市日（end）未定时，预售监控仍持续输出固定天数，
+               默认 start 起 3 个自然日（start、start+1、start+2）；确认上市日后
+               自动按 end 收口，无需删配置。
   launch  : end <= today <= launch_end
             launch_end = monitor_until_by_series[gen] or finish or (end + launch_window_days)
   normal  : 其他（不监控）
@@ -19,6 +23,8 @@ from utils.paths import BUSINESS_DEFINITION_PATH
 
 DEFAULT_OPEN_HOUR = 20
 DEFAULT_LAUNCH_WINDOW_DAYS = 14
+# 上市日（end）未确认时的预售监控兜底窗口：start 起连续 N 个自然日持续输出
+DEFAULT_PRESALE_OPEN_ENDED_WINDOW_DAYS = 3
 MONITOR_PHASES = ("presale", "launch")
 
 
@@ -109,6 +115,29 @@ def monitor_until(bdef: dict, generation: str) -> date | None:
     return _as_date(by.get(generation))
 
 
+def presale_open_ended_window_days(bdef: dict) -> int:
+    """上市日（end）未确认时的预售监控窗口天数（默认 3）。"""
+    mon = bdef.get("monitor") or {}
+    return int(mon.get("presale_open_ended_window_days", DEFAULT_PRESALE_OPEN_ENDED_WINDOW_DAYS))
+
+
+def presale_close_date(bdef: dict, generation: str) -> date | None:
+    """预售阶段收口日（不含）。
+
+    - 已确认上市日（end）：收口日 = end；
+    - 仅有 start、end 未定：收口日 = start + presale_open_ended_window_days（默认 3 天）。
+    返回 None 表示无法确定预售窗口（无 start 且无 end）。
+    """
+    tp = (bdef.get("time_periods") or {}).get(generation) or {}
+    end = _as_date(tp.get("end"))
+    if end is not None:
+        return end
+    start = _as_date(tp.get("start"))
+    if start is None:
+        return None
+    return start + timedelta(days=presale_open_ended_window_days(bdef))
+
+
 def phase_of(bdef: dict, generation: str, today) -> str | None:
     tp = (bdef.get("time_periods") or {}).get(generation) or {}
     today_d = _as_date(today)
@@ -117,7 +146,8 @@ def phase_of(bdef: dict, generation: str, today) -> str | None:
     start = _as_date(tp.get("start"))
     end = _as_date(tp.get("end"))
     finish = _as_date(tp.get("finish"))
-    if start and end and start <= today_d < end:
+    presale_close = presale_close_date(bdef, generation)
+    if start and presale_close and start <= today_d < presale_close:
         return "presale"
     if end:
         launch_end = monitor_until(bdef, generation) or finish or (end + timedelta(days=launch_window_days(bdef)))
@@ -134,6 +164,7 @@ def detect_active(bdef: dict, today, phases=MONITOR_PHASES) -> list[dict]:
         if phase is None or phase not in phases:
             continue
         tp = tp or {}
+        presale_close = presale_close_date(bdef, generation)
         out.append(
             {
                 "generation": generation,
@@ -144,6 +175,10 @@ def detect_active(bdef: dict, today, phases=MONITOR_PHASES) -> list[dict]:
                 "start": tp.get("start"),
                 "end": tp.get("end"),
                 "finish": tp.get("finish"),
+                # 预售阶段为收口日（不含）；上市阶段为上市日（= end）
+                "presale_close": presale_close.isoformat() if presale_close else None,
+                # 上市日未确认时，预售窗口由 start + 兜底天数给出，供推送标注
+                "open_ended": bool(tp.get("start") and not tp.get("end")),
             }
         )
     out.sort(key=lambda x: (x.get("start") or ""), reverse=True)

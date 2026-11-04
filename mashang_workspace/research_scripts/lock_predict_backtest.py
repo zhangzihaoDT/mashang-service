@@ -149,6 +149,8 @@ def parse_launch_events(source_path=None, as_of=None):
       - 历史代际：有 finish → 完整窗口回测；
       - 当前代际：已上市（end <= as_of）但 finish 缺失 → 窗口截断到 as_of；
       - 未来代际：尚未上市（end > as_of）且 finish 缺失 → 跳过。
+    `end`（上市日）在预售期可能尚未确认（业务只登记了 start）：此类代际视为未来代际
+    跳过，不参与上市事件回测，也不报错。
     `as_of` 缺省取当天；主流程应传入数据最新日期（cutoff）。
     """
     global HAS_EVENTS
@@ -167,9 +169,9 @@ def parse_launch_events(source_path=None, as_of=None):
     as_of_ts = pd.Timestamp(as_of).normalize() if as_of is not None else pd.Timestamp.now().normalize()
     rows = []
     for eid, info in periods.items():
-        # end is required
-        if "end" not in info:
-            raise ValueError(f"事件 {eid} 缺少必要字段 'end'")
+        # end（上市日）可能尚未确认：仅有 start 的预售期代际没有上市事件，跳过。
+        if not info.get("end"):
+            continue
         try:
             end_dt = pd.Timestamp(info["end"]).normalize()
         except Exception:

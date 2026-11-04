@@ -1,5 +1,15 @@
 {
   "time_periods": {
+    "L7": {
+      "end": "2022-04-17",
+      "listing_source": "正式上市日期（业务提供，2026-10 确认）",
+      "notes": "历史存量车型；无预售期记录故不设 start，避免影响预售窗口分析"
+    },
+    "LS7": {
+      "end": "2023-02-10",
+      "listing_source": "正式上市日期（业务提供，2026-10 确认）",
+      "notes": "历史存量车型；无预售期记录故不设 start，避免影响预售窗口分析"
+    },
     "CM0": {
       "start": "2023-08-25",
       "end": "2023-10-12",
@@ -38,6 +48,12 @@
     "LS9Hyper": {
       "end": "2026-07-16",
       "finish": "2026-08-31"
+    },
+    "LS8Neo": {
+      "start": "2026-10-29",
+      "presale_open_time": "20:00",
+      "listing_source": "上市日待业务确认（2026-10-29 数据校准：真实小订 20:00:04 起爆发，开放时刻定为 20:00）",
+      "notes": "智己 LS8 NEO 纯电版；预售期已定，end/finish 未定故暂不填写 —— phase 判定保持 presale，预售窗口末端按完整观察日截断，确认上市日后补齐 end/finish"
     },
     "DM2": {
       "start": "2026-08-18",
@@ -121,7 +137,22 @@
   },
   "product_type_logic": {
     "增程": "product_name LIKE '%52%' OR product_name LIKE '%66%'",
-    "纯电": "product_name NOT LIKE '%52%' AND product_name NOT LIKE '%66%'"
+    "纯电": "product_name LIKE '%93%' OR product_name LIKE '%103%' OR product_name NOT LIKE '%52%' AND product_name NOT LIKE '%66%'"
+  },
+  "product_type_logic_semantics": "【LS6 及非 LS8 车系专用】按 product_name 模糊匹配判定增程/纯电。LS8 车系（含 LS8Neo）不走本规则：动力类型由 product_version_series 中版本系列的 power_type 唯一决定（版本即事实来源），见 resolve_product_attributes。93/103 为新纯电电量段（如 LS8 93 RWD），判定为纯电。",
+  "product_version_series": {
+    "description": "版本系列字典（Canonical）：product_name → 代际(series_group_logic) → 版本系列(product_version) → 动力类型(product_type) 的单一事实来源。动力类型只由本表决定，渠道各自硬编码的 52|66→增程 猜测规则一律以本表为准。battery_kwh 仅登记配置已证实（官方配置表 / 公告目录）的电量；仅有版本编号（52/66/93/103）不等于实测电池容量，留空即未证实。",
+    "not_confirmed_policy": "battery_kwh 为空 ⇒ 输出「未证实」，不得用版本编号回填。",
+    "series": {
+      "LS8": {
+        "52 Max+": {"power_type": "增程", "battery_kwh": null, "seats": ["五座", "六座", "未标座位"]},
+        "52 Lite": {"power_type": "增程", "battery_kwh": null, "seats": ["五座", "六座"]},
+        "66 Ultra": {"power_type": "增程", "battery_kwh": null, "seats": ["五座", "六座", "未标座位"]},
+        "93 RWD": {"power_type": "纯电", "battery_kwh": null, "seats": ["五座", "六座"]},
+        "NEO93 Max+": {"power_type": "纯电", "battery_kwh": null, "seats": ["未标座位"]},
+        "NEO103 Max+": {"power_type": "纯电", "battery_kwh": null, "seats": ["未标座位"]}
+      }
+    }
   },
   "seat_count_logic": {
     "五座": "product_name LIKE '%五座%' OR product_name LIKE '%5座%'",
@@ -129,6 +160,10 @@
   },
   "product_version_logic": {
     "LS8": {
+      "52 Lite": {
+        "priority": 1,
+        "condition": "product_name LIKE '%LS8%' AND product_name LIKE '%52Lite%'"
+      },
       "52 Max+": {
         "priority": 1,
         "condition": "product_name LIKE '%LS8%' AND product_name LIKE '%52Max+%'"
@@ -140,6 +175,16 @@
       "93 RWD": {
         "priority": 1,
         "condition": "product_name LIKE '%LS8%' AND product_name LIKE '%93RWD%'"
+      }
+    },
+    "LS8Neo": {
+      "NEO103 Max+": {
+        "priority": 2,
+        "condition": "product_name LIKE '%LS8%' AND product_name LIKE '%103Max+%'"
+      },
+      "NEO93 Max+": {
+        "priority": 2,
+        "condition": "product_name LIKE '%LS8%' AND product_name LIKE '%93Max+%'"
       }
     },
     "LS9": {
@@ -204,6 +249,10 @@
       "priority": 3,
       "condition": "product_name LIKE '%一代%' AND product_name LIKE '%L6%' OR product_name LIKE '%L6%' AND product_name LIKE '%M2%' OR product_name LIKE '%Jimmy Choo%' OR product_name LIKE '%JimmyChoo%'"
     },
+    "LS8Neo": {
+      "priority": 2,
+      "condition": "product_name LIKE '%LS8NEO%'"
+    },
     "LS8": {
       "priority": 1,
       "condition": "product_name LIKE '%LS8%'"
@@ -228,8 +277,10 @@
   "series_group_logic_priority_semantics": "series_group_logic 每条规则为 {priority, condition}。priority 是纯优先级（precedence），仅用于重叠规则裁决：数值大的规则优先命中，同分按书写顺序（first-match-wins）；跨车系、互不重叠的规则可共用同一档（LS6 家族 3>2>1，L6 家族 3>2>1，独立车系 LS8/LS9/LS7/L7 均为 1）。执行器按 priority 降序、同分按书写顺序取首个命中。兼容旧格式：值为字符串时视为 {priority: 0, condition: 字符串}。匹配前 product_name 与规则 token 均去除全部空白字符（空格不敏感），避免「全新一代 智己LS6」等空格变体漏配到低优先级代际。",
   "model_series_mapping": {
     "LS6": ["CM0", "CM1", "CM2", "CM3"],
-    "L6": ["DM0", "DM1", "DM2"]
+    "L6": ["DM0", "DM1", "DM2"],
+    "LS8": ["LS8", "LS8Neo"]
   },
+  "model_series_mapping_semantics": "车系 → 代际分组（族）。用途：series_group_logic 重叠审计的族内判定、PK/集团映射缺省回退。同一族内的规则重叠由 priority 裁决属预期；命中不同族视为规则治理问题。LS8Neo（智己 LS8 NEO 纯电版）是 LS8 车系下的独立代际分组，与 LS8 共享 product_name 前缀（LS8 ⊂ LS8Neo 的重叠是刻意的父子关系），故登记为同一族。",
   "monitor": {
     "description": "预售/上市监控配置：open_hour_by_series = 预售开放时刻（按代际，默认 20:00；CM0=10:00、CM1=11:00 为数据校准的白天开放）；open_minute_by_series = 预售开放分钟（默认 0，用于非整点开放，如 CM2=20:55、CM3=19:45）；launch_open_hour_by_series = 上市开放时刻（历史对标用，默认 20:00）；launch_open_minute_by_series = 上市开放分钟（历史对标用，默认 0；数据校准的各代际上市日 20:00 后首笔锁单分钟，用于等时长历史对比对齐真实开放时刻）；series_labels 展示名、compare_by_series 历史对标代际、launch_window_days 上市窗口、monitor_until_by_series 按代际显式监控截止日、freshness 数据新鲜度 gate。",
     "default_open_hour": 20,
@@ -237,15 +288,18 @@
       "CM0": 10,
       "CM1": 11,
       "CM2": 20,
-      "CM3": 19
+      "CM3": 19,
+      "LS8Neo": 20
     },
     "open_minute_by_series": {
       "CM2": 55,
-      "CM3": 45
+      "CM3": 45,
+      "LS8Neo": 0
     },
     "presale_cohort_start_by_series": {
       "CM3": "start_of_day"
     },
+    "presale_open_ended_window_days": 3,
     "launch_open_hour_by_series": {},
     "launch_open_minute_by_series": {
       "CM0": 32,
@@ -264,7 +318,8 @@
     },
     "compare_by_series": {
       "LS6": ["CM2", "CM1", "CM0", "LS8", "LS9"],
-      "L6": ["DM1", "CM2", "LS9", "LS8"]
+      "L6": ["DM1", "CM2", "LS9", "LS8"],
+      "LS8": ["LS8", "LS9", "CM3", "DM2"]
     },
     "pk_series_by_generation": {
       "description": "竞争 PK 正反向排名数据中的 series 字段映射（按代际）。缺省时回退 model_series_mapping。",
