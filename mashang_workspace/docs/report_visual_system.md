@@ -14,7 +14,7 @@ mashang-service 报告视觉体系，沉淀自两个成功案例：
 
 | Class | 用途 |
 |-------|------|
-| `.report-page` | body class，浅灰背景 + 标准字体 |
+| `.report-page` | body class，纯白背景 + 标准字体 |
 | `.report-container` | 居中容器，max-width: 1360px |
 | `.report-title` | h1 标题，蓝色左侧强调线 |
 | `.report-subtitle` | 副标题/数据源说明 |

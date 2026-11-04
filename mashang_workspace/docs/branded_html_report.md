@@ -4,7 +4,7 @@
 
 - 品牌：Raccoon Research
 - 配色：清爽蓝白暖金调色板，定义见 `assets/brand/brand_palette.json`
-- 背景：暖白 cream (#FFF9EF)
+- 背景：纯白 (#FFFFFF)
 - 卡片：白色圆角 + 轻柔阴影
 - 标题：深蓝 `--zh-deep-blue`
 - 正文字体：系统字体栈（PingFang SC / Microsoft YaHei / sans-serif）

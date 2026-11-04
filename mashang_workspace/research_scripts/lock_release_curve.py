@@ -449,7 +449,7 @@ html = f"""<!DOCTYPE html>
 <title>锁单释放曲线分析 — Release Curve Analysis</title>
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
 <style>
-:root {{ --blue: #174A7C; --blue-700: #123B63; --blue-500: #2D6FA3; --deep: #06213D; --cyan: #7ECDEB; --cyan-100: #E8F8FD; --cream: #FFF9EF; --gold: #D79A36; --gold-700: #A96F1F; --gold-100: #FFF0D6; --text: #1F2D3D; --muted: #6B7280; --border: #E5EAF0; --bg: #FAFBFC; --card: #FFFFFF; --panel: #F6F8FA; --row-alt: #FAFAFA; --table-section: #F7F8FA; --grid: #EEF2F6; --zero-line: #D8DEE6; --axis-line: #C7CDD4; --axis-text: #5F6B7A; --axis-title: #374151; --positive: #2A9D8F; --negative: #D95F59; --neutral: #6B7280; }}
+:root {{ --blue: #174A7C; --blue-700: #123B63; --blue-500: #2D6FA3; --deep: #06213D; --cyan: #7ECDEB; --cyan-100: #E8F8FD; --cream: #FFFFFF; --gold: #D79A36; --gold-700: #A96F1F; --gold-100: #FFF0D6; --text: #1F2D3D; --muted: #6B7280; --border: #E5EAF0; --bg: #FFFFFF; --card: #FFFFFF; --panel: #F6F8FA; --row-alt: #FAFAFA; --table-section: #F7F8FA; --grid: #EEF2F6; --zero-line: #D8DEE6; --axis-line: #C7CDD4; --axis-text: #5F6B7A; --axis-title: #374151; --positive: #2A9D8F; --negative: #D95F59; --neutral: #6B7280; }}
 * {{ margin: 0; padding: 0; box-sizing: border-box; }}
 body {{ font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }}
 .header {{ background: linear-gradient(135deg, var(--deep), var(--blue)); color: #fff; padding: 32px 24px 24px; text-align: center; }}

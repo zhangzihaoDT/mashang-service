@@ -99,7 +99,7 @@ def render_html(model_data) -> str:
 <title>国内DC在库_未开票 库存趋势</title>
 <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
 <style>
-body {{ font-family: -apple-system, sans-serif; background: #FFF9EF; margin: 0; padding: 20px; color: #1F2D3D; }}
+body {{ font-family: -apple-system, sans-serif; background: #FFFFFF; margin: 0; padding: 20px; color: #1F2D3D; }}
 h1 {{ color: #174A7C; font-size: 22px; margin-bottom: 5px; }}
 .subtitle {{ color: #6B7C8F; font-size: 14px; margin-bottom: 20px; }}
 .summary {{ display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }}

@@ -85,12 +85,12 @@ python utility_scripts/render_html_report.py \
 基于现有模板 (`report_style.css`) 和已生成报告：
 
 - **品牌名**: Raccoon Research
-- **配色**: Raccoon Research 调色板（ZH blue/cyan/gold/cream）— 见 `brand_palette.json`
+- **配色**: Raccoon Research 调色板（ZH blue/cyan/gold/paper）— 见 `brand_palette.json`
 - **头像**: `assets/brand/raccoon_avatar_light.png` — header 左侧
 - **签名**: `assets/brand/zihao_signature_transparent.png` — footer
 - **品牌语**: 用数据、AI 和一点点常识，研究复杂世界。
-- **背景色**: `--zh-cream` (#FFF9EF) 暖白
-- **卡片**: `--zh-card` (#FFFFFF) 白色圆角卡片
+- **背景色**: `--zh-bg` (#FFFFFF) 纯白
+- **卡片**: `--zh-card` (#FFFFFF) 白色圆角卡片 + 1px `--zh-border` 描边
 - **标题**: `--zh-deep-blue` (#06213D) 深蓝标题
 - **正文**: `--zh-text` (#1F2D3D) 深灰
 - **图表**: 优先使用 Plotly CDN 交互图表 + 表格数据

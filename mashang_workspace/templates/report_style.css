@@ -14,14 +14,14 @@
   --zh-cyan: #7ECDEB;
   --zh-cyan-100: #E8F8FD;
 
-  --zh-cream: #FFF9EF;
+  --zh-cream: #FFFFFF;
   --zh-brown: #7A4A24;
 
   --zh-text: #1F2D3D;
   --zh-muted: #6B7280;
 
   --zh-border: #E5EAF0;
-  --zh-bg: #FAFBFC;
+  --zh-bg: #FFFFFF;
   --zh-card: #FFFFFF;
   --zh-panel: #F6F8FA;
   --zh-row-alt: #FAFAFA;
@@ -697,4 +697,13 @@ footer .brand-sentence {
   .kpi-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* ── White ground ── */
+/* 页面底色统一为纯白后，卡片靠 1px 描边维持边界，不再依赖底色差。 */
+.card,
+.kpi-card,
+.summary-card,
+.chart-box {
+  border: 1px solid var(--zh-border);
 }

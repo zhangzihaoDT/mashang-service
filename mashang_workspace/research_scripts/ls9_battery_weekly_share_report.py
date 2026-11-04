@@ -158,9 +158,9 @@ def main():
     :root {{
       --zh-blue: #174A7C; --zh-blue-700: #123B63; --zh-blue-500: #2D6FA3;
       --zh-deep-blue: #06213D; --zh-cyan: #7ECDEB; --zh-cyan-100: #E8F8FD;
-      --zh-cream: #FFF9EF; --zh-raccoon-gold: #D79A36; --zh-gold-700: #A96F1F; --zh-gold-100: #FFF0D6;
+      --zh-cream: #FFFFFF; --zh-raccoon-gold: #D79A36; --zh-gold-700: #A96F1F; --zh-gold-100: #FFF0D6;
       --zh-brown: #7A4A24; --zh-text: #1F2D3D; --zh-muted: #6B7280; --zh-card: #FFFFFF;
-      --zh-border: #E5EAF0; --zh-bg: #FAFBFC; --zh-panel: #F6F8FA; --zh-row-alt: #FAFAFA;
+      --zh-border: #E5EAF0; --zh-bg: #FFFFFF; --zh-panel: #F6F8FA; --zh-row-alt: #FAFAFA;
       --zh-grid: #EEF2F6; --zh-axis-line: #8A94A3; --zh-axis-text: #5F6B7A; --zh-axis-title: #374151;
       --status-positive: #2A9D8F; --status-negative: #D95F59;
     }}

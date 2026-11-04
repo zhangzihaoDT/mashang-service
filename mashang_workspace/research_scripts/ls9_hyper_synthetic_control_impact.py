@@ -42,7 +42,7 @@ ROOT = Path(__file__).resolve().parents[1]
 C_BLUE = "#174A7C"
 C_GOLD = "#D79A36"
 C_CYAN = "#7ECDEB"
-C_CREAM = "#FFF9EF"
+C_CREAM = "#FFFFFF"
 
 
 def load_data() -> tuple[pd.DataFrame, pd.DataFrame]:

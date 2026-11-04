@@ -44,7 +44,7 @@ BRAND = {
     "own": ZH["own"], "event": ZH["event"], "ash": ZH["ash"],
     "positive": ZH["positive"], "negative": ZH["negative"],
     "sky_muted": ZH["sky_muted"], "neutral": ZH["neutral"],
-    "bg": "#FFF9EF", "card": "#FFFFFF", "border": "#D8E3EA",
+    "bg": "#FFFFFF", "card": "#FFFFFF", "border": "#D8E3EA",
     "light": "#DDEFF8", "deep": "#06213D", "muted": "#6B7280",
 }
 
@@ -204,7 +204,7 @@ def generate_html(trend_df, step):
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
 <style>
 :root {{
-    --bg: #FFF9EF; --card: #FFFFFF;
+    --bg: #FFFFFF; --card: #FFFFFF;
     --deep: #06213D; --blue: #174A7C; --muted: #6B7280;
     --border: #D8E3EA; --light: #DDEFF8; --panel: #F5F8FB;
     --row-alt: #F8FAFC; --pos: #2A9D8F; --neg: #D95F59;
