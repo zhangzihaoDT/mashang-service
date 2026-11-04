@@ -1,7 +1,11 @@
 """Diagram Base Capability — domain-agnostic chart primitives."""
 
 from capabilities.diagram.schemas import (
+    CHART_TYPE_COMPARISON_LINE,
     CHART_TYPE_MILESTONE_DUMBBELL,
+    ComparisonLineChart,
+    ComparisonLineSeries,
+    ComparisonLineValidationError,
     DumbbellValidationError,
     MilestoneDumbbellChart,
     MilestoneDumbbellRow,
@@ -9,7 +13,11 @@ from capabilities.diagram.schemas import (
 )
 
 __all__ = [
+    "CHART_TYPE_COMPARISON_LINE",
     "CHART_TYPE_MILESTONE_DUMBBELL",
+    "ComparisonLineChart",
+    "ComparisonLineSeries",
+    "ComparisonLineValidationError",
     "DumbbellValidationError",
     "MilestoneDumbbellChart",
     "MilestoneDumbbellRow",

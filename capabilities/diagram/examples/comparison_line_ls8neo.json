@@ -1,0 +1,16 @@
+{
+  "title": "LS8 NEO vs CM3 / LS8 / LS9 — 预售前 4 日累计小订",
+  "subtitle": "各代际自预售开放时刻起累计，横轴为各自第 N 日末；本品为 LS8 NEO",
+  "x_label": "第 N 日末",
+  "y_label": "累计小订（单）",
+  "source_note": "数据：dataset/order_data.parquet｜意向金支付、按订单号去重、剔除测试单｜截止 2026-11-02 08:40",
+  "categories": ["N0 末", "N1 末", "N2 末", "N3 末"],
+  "series": [
+    { "name": "LS8 NEO", "role": "own", "values": [3662, 4102, 4567, 4984] },
+    { "name": "CM3", "values": [4687, 5014, 5485, 5959] },
+    { "name": "LS8", "values": [6271, 7441, 8265, 9046] },
+    { "name": "LS9", "values": [3653, 4686, 5169, 5530] }
+  ],
+  "markers": true,
+  "decimals": 0
+}

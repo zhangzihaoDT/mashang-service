@@ -13,7 +13,7 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class DumbbellTheme:
-    paper: str = "#FFF9EF"
+    paper: str = "#FFFFFF"
     ink: str = "#174A7C"
     ink_strong: str = "#06213D"
     muted: str = "#6B7C8F"
