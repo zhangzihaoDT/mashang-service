@@ -40,6 +40,11 @@ if str(_WS_ROOT) not in sys.path:
 
 from utils.plotly_theme import ZH, apply_zh_theme, GRID_COLOR, ZERO_LINE, AXIS_LINE, AXIS_TEXT, AXIS_TITLE
 
+from utils.paths import ensure_shared_on_path  # noqa: E402
+
+ensure_shared_on_path()
+from operators.product_attributes import product_type_of  # noqa: E402
+
 COLOR_DARK = "#1F2933"
 
 DEFAULT_INPUT = REPO_ROOT / "dataset" / "order_data.parquet"
@@ -66,74 +71,129 @@ def load_business_def() -> dict:
         print(f"⚠️ business_definition.json 不存在: {BUSINESS_DEF_PATH}")
     return {}
 
+def resolve_power_types(product_names: pd.Series, biz_def: dict | None = None) -> pd.Series:
+    """批量判定动力类型（增程/纯电/未知），统一走 shared 产品属性解析。"""
+    biz_def = biz_def if biz_def is not None else (load_business_def() or {})
+    names = product_names.fillna("").astype(str)
+    return pd.Series(
+        [product_type_of(name, biz_def) for name in names],
+        index=product_names.index,
+        dtype="object",
+    )
+
+
 def get_launch_date_for_product(product_name: str, biz_def: dict) -> date:
-    """根据 product_name 和业务定义获取上市日期 (end_day)。"""
+    """按 product_name 获取上市日期 — 统一走 series_group_logic + time_periods。
+
+    字段语义（见 utils/monitors/launch.py、phase.py）：
+      time_periods.{gen}.end = 上市日（不是预售结束日）；
+      start = 预售开始日；finish = 权益结束日。
+
+    本脚本不再自行维护「新一代→CM2 / 全新→CM1」的映射，一律由共享
+    series_group_logic 归类代际（空格不敏感，支持 LS8/LS8Neo/DM2/CM3 等全部代际）。
+    代际无法判定或上市日未确认时返回 None（调用方不得用预售日冒充上市日）。
+    """
     if not biz_def:
         return None
-        
-    name = str(product_name).strip()
-    series_group = None
-    
-    # 简化的 series_group 匹配逻辑 (参考 business_definition.json)
-    if "LS9" in name:
-        series_group = "LS9"
-    elif "LS6" in name:
-        if "新一代" in name:
-            series_group = "CM2"
-        elif "全新" in name:
-            series_group = "CM1"
-        else:
-            series_group = "CM0"
-    elif "L6" in name:
-        if "全新" in name:
-            series_group = "DM1"
-        else:
-            series_group = "DM0"
-    
-    if not series_group:
-        return None
-        
     try:
-        date_str = biz_def.get("time_periods", {}).get(series_group, {}).get("end")
-        if date_str:
-            return datetime.strptime(date_str, "%Y-%m-%d").date()
+        gen = _generation_of(product_name, biz_def)
+    except Exception as e:  # noqa: BLE001
+        print(f"⚠️ 代际识别失败 ({product_name!r}): {e}")
+        return None
+    if not gen or gen == "其他":
+        return None
+    end = (biz_def.get("time_periods", {}).get(gen) or {}).get("end")
+    if not end:
+        return None
+    try:
+        return datetime.strptime(end, "%Y-%m-%d").date()
     except (ValueError, TypeError):
-        pass
-        
-    return None
+        return None
 
-def get_product_type_from_name(product_name: str) -> str:
-    """根据 Product Name 派生产品类型（增程/纯电），无法识别返回“未知”。"""
+
+def _generation_of(product_name: str, biz_def: dict) -> str | None:
+    """单个 product_name 的代际（series_group_logic），无额外映射。"""
+    from operators.series_group_logic import apply_series_group_logic
+
+    name = str(product_name).strip()
+    if not name or name.lower() in {"nan", "none", "null"}:
+        return None
+    frame = pd.DataFrame({"product_name": [name]})
+    return str(apply_series_group_logic(frame, biz_def)["series_group_logic"].iloc[0])
+
+def get_product_type_from_name(product_name: str, biz_def: dict | None = None) -> str:
+    """根据 product_name 判定动力类型（增程/纯电/未知）。
+
+    统一走 shared 产品属性解析：代际 → 版本 → 动力。LS8 族（LS8/LS8Neo）以
+    product_version_series 为唯一事实来源，不再用「含 52/66 即增程」的猜测规则。
+    无法解析返回「未知」，不会被默认归为纯电。
+    """
     try:
         if product_name is None:
             return "未知"
-        # 处理 NA 与字符串
-        s = str(product_name).strip()
-        if len(s) == 0 or s.lower() in {"nan", "none", "null"}:
+        name = str(product_name).strip()
+        if len(name) == 0 or name.lower() in {"nan", "none", "null"}:
             return "未知"
-
-        # 规则：含“52”或“66”视为增程，否则纯电
-        # 参考 analyze_product_types_preference_by_city.py 逻辑
-        if any(num in s for num in ["52", "66"]):
-            return "增程"
-        else:
-            return "纯电"
-    except Exception:
+        biz_def = biz_def if biz_def is not None else load_business_def()
+        return product_type_of(name, biz_def)
+    except Exception as e:  # noqa: BLE001
+        print(f"⚠️ 动力类型解析失败 ({product_name!r}): {e}")
         return "未知"
 
+# ── 统一数据底座 ─────────────────────────────────────────────
+# 口径：本报告所有「锁单数」= order_number 去重后的有效锁单事件。
+# 审计结论（2026-10-29）：order_data 锁单行 271,462 行 / 271,462 个唯一 order_number，
+# 无跨日期、跨版本、跨状态的重复，故 .size() 与 nunique 数值等价；此处统一为 nunique
+# 仅作防御性规范化，不改变历史数值。
+
+def prepare_lock_events(df: pd.DataFrame, biz_def: dict) -> pd.DataFrame:
+    """一次性预计算锁单事件的全部派生维度（日期/年份/代际/版本/动力类型）。
+
+    所有图共用同一份结果，避免逐个产品扫描全量数据。
+    """
+    from utils.paths import ensure_shared_on_path
+
+    ensure_shared_on_path()
+    from operators.series_group_logic import apply_series_group_logic
+    from operators.product_attributes import resolve_product_attributes
+
+    df = df.copy()
+    df["lock_time"] = pd.to_datetime(df["lock_time"], errors="coerce")
+    df = df[df["lock_time"].notna()]
+    if df.empty:
+        return pd.DataFrame(columns=["order_number", "lock_date", "year",
+                                     "series_group_logic", "product_version",
+                                     "product_type", "series"])
+    df = apply_series_group_logic(df, biz_def)
+    attrs = resolve_product_attributes(df, biz_def)
+    keep = [c for c in ("order_number", "series", "product_name") if c in df.columns]
+    out = df[keep].copy()
+    if "order_number" not in out.columns:
+        out["order_number"] = range(len(out))
+    out["lock_date"] = df["lock_time"].dt.date
+    out["year"] = df["lock_time"].dt.year
+    out["series_group_logic"] = attrs.generation.values
+    out["product_version"] = attrs.version.values
+    out["product_type"] = attrs.power_type.values
+    if "series" not in out.columns:
+        out["series"] = None
+    for w in attrs.warnings:
+        print(f"⚠️ {w}")
+    return out.reset_index(drop=True)
+
+
+def daily_lock_counts(events: pd.DataFrame) -> pd.Series:
+    """全量日锁单数（order_number 去重）。"""
+    return events.groupby("lock_date")["order_number"].nunique().sort_index()
+
+
 def get_daily_counts(df: pd.DataFrame, year: int) -> pd.Series:
-    """获取指定年份的日锁单数 Series (index=date, value=count)。"""
-    # 筛选年份
-    df_year = df[df["lock_time"].dt.year == year].copy()
+    """获取指定年份的日锁单数 Series (index=date, value=去重锁单数)。"""
+    df_year = df[df["lock_time"].notna()]
+    df_year = df_year[pd.to_datetime(df_year["lock_time"]).dt.year == year]
     if df_year.empty:
         return pd.Series(dtype=int)
-    
-    # 统计每日锁单数 (order_number 去重)
-    if "order_number" in df_year.columns:
-        daily = df_year.groupby(df_year["lock_time"].dt.date)["order_number"].nunique()
-    else:
-        daily = df_year.groupby(df_year["lock_time"].dt.date).size()
-    
+    daily = df_year.groupby(pd.to_datetime(df_year["lock_time"]).dt.date)["order_number"].nunique()
     return daily.sort_index()
 
 def align_to_2025_axis(daily_series: pd.Series, target_year: int) -> pd.DataFrame:
@@ -243,211 +303,178 @@ def compute_yoy_metrics(df: pd.DataFrame) -> pd.DataFrame:
     
     return result
 
-def compute_ls6_reev_metrics(df: pd.DataFrame) -> pd.DataFrame:
-    if "lock_time" not in df.columns or "series" not in df.columns:
-        raise KeyError("缺少 lock_time 或 series 列")
-    df_ls6 = df[df["series"] == "LS6"].copy()
-    df_ls6["lock_time"] = pd.to_datetime(df_ls6["lock_time"], errors="coerce")
-    df_ls6 = df_ls6[df_ls6["lock_time"].notna()]
-    start_date = pd.Timestamp("2025-09-10")
-    df_ls6 = df_ls6[df_ls6["lock_time"] >= start_date]
-    if df_ls6.empty:
+# ── 图 3：LS6 增程占比 ─────────────────────────────────────────
+
+# LS6 家族代际组（与 model_series_mapping.LS6 一致，避免裸 series 字段漏掉 CM3 等新代际）
+LS6_GENERATIONS = ("CM0", "CM1", "CM2", "CM3")
+LS6_LOCK_START = date(2025, 9, 10)
+
+
+def compute_ls6_reev_metrics(events: pd.DataFrame, today: date | None = None) -> pd.DataFrame:
+    """LS6 日增程占比（MA7）。分子=增程锁单，分母=LS6 当日全部有效锁单。"""
+    today = today or date.today()
+    sub = events[(events["series_group_logic"].isin(LS6_GENERATIONS))
+                 & (events["lock_date"] >= LS6_LOCK_START)]
+    if sub.empty:
         return pd.DataFrame()
-    df_ls6["product_type"] = df_ls6["product_name"].apply(get_product_type_from_name)
-    df_ls6["is_reev"] = (df_ls6["product_type"] == "增程").astype(int)
-    end_date = pd.Timestamp(date.today())
-    idx = pd.date_range(start_date.date(), end_date.date(), freq="D").date
-    daily_total = df_ls6.groupby(df_ls6["lock_time"].dt.date).size().reindex(idx, fill_value=0)
-    daily_reev = df_ls6.groupby(df_ls6["lock_time"].dt.date)["is_reev"].sum().reindex(idx, fill_value=0)
-    with np.errstate(divide="ignore", invalid="ignore"):
-        ratio = (daily_reev / daily_total) * 100.0
-    ratio = ratio.replace([np.inf, -np.inf], np.nan)
-    ratio_ma7 = ratio.rolling(window=7, min_periods=1).mean()
-    total_count = int(daily_total.sum())
-    reev_count = int(daily_reev.sum())
-    avg_ratio = (reev_count / total_count * 100.0) if total_count > 0 else 0.0
-    return pd.DataFrame({
-        "axis_date": idx,
-        "daily_total": daily_total.values,
-        "daily_reev": daily_reev.values,
-        "ratio_raw": ratio.values,
-        "ratio_ma7": ratio_ma7.values,
-        "avg_ratio": [avg_ratio] * len(idx)
-    })
-
-def compute_ls8_66_metrics(df: pd.DataFrame) -> pd.DataFrame:
-    if "lock_time" not in df.columns or "series" not in df.columns:
-        raise KeyError("缺少 lock_time 或 series 列")
-    df_ls8 = df[df["series"] == "LS8"].copy()
-    df_ls8["lock_time"] = pd.to_datetime(df_ls8["lock_time"], errors="coerce")
-    df_ls8 = df_ls8[df_ls8["lock_time"].notna()]
-    launch_date = pd.Timestamp("2026-04-16")
-    df_ls8 = df_ls8[df_ls8["lock_time"] >= launch_date]
-    if df_ls8.empty:
-        return pd.DataFrame()
-    df_ls8["is_66"] = df_ls8["product_name"].apply(lambda x: "66" in str(x)).astype(int)
-    end_date = pd.Timestamp(date.today())
-    idx = pd.date_range(launch_date.date(), end_date.date(), freq="D").date
-    daily_total = df_ls8.groupby(df_ls8["lock_time"].dt.date)["order_number"].nunique().reindex(idx, fill_value=0)
-    daily_66 = df_ls8.groupby(df_ls8["lock_time"].dt.date).apply(
-        lambda g: int(g[g["is_66"] == 1]["order_number"].nunique()), include_groups=False
-    ).reindex(idx, fill_value=0)
-    with np.errstate(divide="ignore", invalid="ignore"):
-        ratio = (daily_66 / daily_total) * 100.0
-    ratio = ratio.replace([np.inf, -np.inf], np.nan)
-    ratio_ma7 = ratio.rolling(window=7, min_periods=1).mean()
-    total_count = int(daily_total.sum())
-    count_66 = int(daily_66.sum())
-    avg_ratio = (count_66 / total_count * 100.0) if total_count > 0 else 0.0
-    return pd.DataFrame({
-        "axis_date": idx,
-        "daily_total": daily_total.values,
-        "daily_66": daily_66.values,
-        "ratio_raw": ratio.values,
-        "ratio_ma7": ratio_ma7.values,
-        "avg_ratio": [avg_ratio] * len(idx)
-    })
+    idx = pd.date_range(LS6_LOCK_START, today, freq="D").date
+    daily_total = sub.groupby("lock_date")["order_number"].nunique().reindex(idx, fill_value=0)
+    daily_reev = (sub[sub["product_type"] == "增程"]
+                  .groupby("lock_date")["order_number"].nunique().reindex(idx, fill_value=0))
+    return _ratio_frame(idx, daily_total, daily_reev, "daily_reev")
 
 
-def compute_reev_product_breakdown(df: pd.DataFrame) -> dict:
-    """计算所有增程车型各配置内部占比 (2025 vs 2026) - 日销量占比 MA7。
-    分母：当日所有增程车型总销量。
-    分子：各增程 Product Name 当日销量。
-    返回: {product_name: DataFrame(axis_date, ratio_2025, ratio_2026, ...)}
+# ── 图 4：LS8 66 Ultra 锁单占比 ────────────────────────────────
+
+def compute_ls8_66_metrics(events: pd.DataFrame, biz_def: dict,
+                           today: date | None = None) -> pd.DataFrame:
+    """LS8 66 Ultra 锁单占比（MA7）。
+
+    - 分子：product_version == '66 Ultra'（按版本字典精确识别，不再用 "66" 字符串包含）；
+    - 分母：LS8 代际组（series_group_logic == 'LS8'）当日全部有效锁单，天然排除 NEO；
+    - 起点：time_periods.LS8.end（上市日），不用预售结束日。
     """
-    if "lock_time" not in df.columns:
-        raise KeyError("缺少 lock_time 列")
-        
-    # 1. 预处理：
-    df = df.copy()
-    df["lock_time"] = pd.to_datetime(df["lock_time"], errors="coerce")
-    df = df[df["lock_time"].notna()]
-    
-    # 不再限制 LS6 和 2025-09-10
-    
-    if df.empty:
-        return {}
-        
-    df["product_type"] = df["product_name"].apply(get_product_type_from_name)
-    
-    # 仅保留增程车型
-    df_reev = df[df["product_type"] == "增程"].copy()
-    
-    if df_reev.empty:
+    today = today or date.today()
+    launch = _launch_date_for_generation(biz_def, "LS8")
+    if launch is None:
+        return pd.DataFrame()
+    sub = events[(events["series_group_logic"] == "LS8") & (events["lock_date"] >= launch)]
+    if sub.empty:
+        return pd.DataFrame({"axis_date": pd.Series(dtype="object")})
+    idx = pd.date_range(launch, today, freq="D").date
+    daily_total = sub.groupby("lock_date")["order_number"].nunique().reindex(idx, fill_value=0)
+    daily_66 = (sub[sub["product_version"] == "66 Ultra"]
+                .groupby("lock_date")["order_number"].nunique().reindex(idx, fill_value=0))
+    return _ratio_frame(idx, daily_total, daily_66, "daily_66")
+
+
+def _launch_date_for_generation(biz_def: dict, gen: str) -> date | None:
+    """time_periods.{gen}.end = 上市日。"""
+    end = ((biz_def or {}).get("time_periods", {}).get(gen) or {}).get("end")
+    if not end:
+        return None
+    try:
+        return datetime.strptime(end, "%Y-%m-%d").date()
+    except (ValueError, TypeError):
+        return None
+
+
+def _ratio_frame(idx, daily_total: pd.Series, daily_part: pd.Series, part_col: str) -> pd.DataFrame:
+    with np.errstate(divide="ignore", invalid="ignore"):
+        ratio = (daily_part / daily_total) * 100.0
+    ratio = ratio.replace([np.inf, -np.inf], np.nan)
+    ratio_ma7 = ratio.rolling(window=7, min_periods=1).mean()
+    total = int(daily_total.sum())
+    part = int(daily_part.sum())
+    avg_ratio = (part / total * 100.0) if total > 0 else 0.0
+    return pd.DataFrame({
+        "axis_date": idx,
+        "daily_total": daily_total.values,
+        part_col: daily_part.values,
+        "ratio_raw": ratio.values,
+        "ratio_ma7": ratio_ma7.values,
+        "avg_ratio": [avg_ratio] * len(idx),
+    })
+
+
+# ── 图 5：增程车型配置结构 ────────────────────────────────────
+
+def compute_reev_product_breakdown(events: pd.DataFrame, biz_def: dict,
+                                   today: date | None = None) -> dict:
+    """各增程 Product Name 在「当日增程总锁单」中的贡献占比（MA7, 2025 vs 2026）。
+
+    指标定义（与计算一致）：
+      分子 = 该 product_name 当日增程锁单数（order_number 去重）
+      分母 = 当日所有增程车型锁单总数（order_number 去重）
+      比值 = 该配置对增程总盘的贡献占比（不是「配置内部份额」）。
+
+    重要语义提醒：各配置贡献占比之和通常 < 100%，因为
+      (1) 上市前各配置被置为 NaN（不展示未上市代际）；
+      (2) 但仍计入分母——分母是当日全量增程锁单。
+    故某天有代际尚未上市时，图上留存曲线之和会低于 100%（如 LS8 上市日 2026-04-16 之前）。
+    这是刻意设计，用于体现「新代际尚未贡献」；如需恒等于 100%，
+    应改用「当日已上市增程配置」为分母，属口径变更，须单独确认。
+
+    性能：一次 groupby 得到 (year, product_name, date) 计数，再按产品切片，
+    不再逐个产品扫描全量数据。
+    """
+    today = today or date.today()
+    reev = events[events["product_type"] == "增程"]
+    if reev.empty:
         print("⚠️ 警告: 未找到任何增程车型数据")
         return {}
 
-    reev_products = df_reev["product_name"].unique()
-    reev_products = [p for p in reev_products if pd.notnull(p)]
-    
-    # 加载业务定义
-    biz_def = load_business_def()
-    
-    results = {}
+    reev = reev.dropna(subset=["product_name"])
+    if reev.empty:
+        return {}
+
+    # 一次分组聚合：(年, 产品, 日) → 去重锁单数
+    counts = (reev.groupby(["year", "product_name", "lock_date"])["order_number"]
+                  .nunique().rename("n").reset_index())
+    # 分母：各年逐日增程总锁单（按订单去重，与分子同口径）
+    totals = (reev.groupby(["year", "lock_date"])["order_number"]
+                  .nunique().rename("total").reset_index())
+
     years = [2025, 2026]
-    today = date.today()
-    
-    # 预计算每年的增程总销量 (分母)
-    daily_reev_totals = {}
+    axis_2025 = pd.date_range(date(2025, 1, 1), date(2025, 12, 31), freq="D").date
+    by_product: dict[str, dict[int, pd.Series]] = {}
+    by_product_total: dict[str, dict[int, pd.Series]] = {}
+
+    for product, grp in counts.groupby("product_name"):
+        by_product[product] = {
+            y: grp.loc[grp["year"] == y].set_index("lock_date")["n"] for y in years
+        }
+    totals_by_year = {
+        y: totals.loc[totals["year"] == y].set_index("lock_date")["total"] for y in years
+    }
+
+    def _cutoff(year: int) -> date:
+        if year < today.year:
+            return date(year, 12, 31)
+        if year == today.year:
+            return today
+        return date(year, 12, 31)
+
+    results: dict[str, pd.DataFrame] = {}
+    line_cache: dict[int, tuple] = {}
     for year in years:
-        df_year = df_reev[df_reev["lock_time"].dt.year == year]
-        daily_reev_totals[year] = df_year.groupby(df_year["lock_time"].dt.date).size()
+        end = _cutoff(year)
+        full_idx = pd.date_range(date(year, 1, 1), end, freq="D").date
+        s_total = totals_by_year[year].reindex(full_idx, fill_value=0)
+        with np.errstate(divide="ignore", invalid="ignore"):
+            ratio_total = (s_total / s_total.sum() * 100.0) if s_total.sum() else s_total * np.nan
+        line_cache[year] = (full_idx, s_total, ratio_total)
 
-    # 对每个增程配置计算指标
-    for product in reev_products:
-        product_data = {}
-        
-        # 获取该车型的上市日期 (end_day)
-        launch_date = get_launch_date_for_product(product, biz_def)
-        
+    for product, per_year in by_product.items():
+        cols = {}
+        launch = get_launch_date_for_product(product, biz_def)
         for year in years:
-            df_year = df_reev[
-                (df_reev["lock_time"].dt.year == year) & 
-                (df_reev["product_name"] == product)
-            ]
-            
-            # 构造全年日期索引
-            start_date = date(year, 1, 1)
-            if year < today.year:
-                end_date = date(year, 12, 31)
-            elif year == today.year:
-                end_date = today
-            else:
-                end_date = date(year, 12, 31)
-
-            # 每日聚合 (分子)
-            daily_prod = df_year.groupby(df_year["lock_time"].dt.date).size()
-            
-            # 获取分母 (增程总销量)
-            s_total_year = daily_reev_totals.get(year, pd.Series(dtype=int))
-            
-            # Reindex to continuous range
-            full_idx = pd.date_range(start_date, end_date, freq='D').date
-            s_prod = daily_prod.reindex(full_idx, fill_value=0)
-            s_total = s_total_year.reindex(full_idx, fill_value=0)
-            
-            # 计算日占比 (分母为当日所有增程总量)
-            with np.errstate(divide='ignore', invalid='ignore'):
+            full_idx, s_total, _ = line_cache[year]
+            s_prod = per_year[year].reindex(full_idx, fill_value=0)
+            with np.errstate(divide="ignore", invalid="ignore"):
                 s_ratio = (s_prod / s_total) * 100.0
             s_ratio = s_ratio.replace([np.inf, -np.inf], np.nan)
-            
-            # 计算 MA7
             s_ma7 = s_ratio.rolling(window=7, min_periods=1).mean()
-            
-            # 对齐到 2025 轴
-            aligned_prod = align_to_2025_axis(s_prod, year)
-            aligned_ma7 = align_to_2025_axis(s_ma7, year)
-            
-            # --- Filter: Pre-launch data ---
-            if launch_date:
-                # real_date 可能是 None (比如 02-29 或未来日期在对齐时), 需要处理
-                # 只比较非 None 的 real_date
-                # 逻辑: if real_date < launch_date, set to NaN
-                
-                # 创建 mask
-                mask_pre_launch = aligned_ma7["real_date"].apply(
-                    lambda d: d < launch_date if isinstance(d, date) else False
-                )
-                
-                # 还有一种情况: real_date 是 None (e.g. 02-29 in 2024 aligned to 2025)
-                # 这种本身就是 NaN, 不需要额外处理
-                
-                # 应用 mask
-                aligned_ma7.loc[mask_pre_launch, "count"] = np.nan
-                aligned_prod.loc[mask_pre_launch, "count"] = np.nan
-            
-            # 处理未来数据 (仅针对当前年份)
+            aligned_prod = align_to_2025_axis(s_prod, year)["count"]
+            aligned_ma7 = align_to_2025_axis(s_ma7, year)["count"]
+            aligned_real = align_to_2025_axis(s_prod, year)["real_date"]
+            if launch is not None:
+                mask_pre = aligned_real.apply(lambda d: d < launch if isinstance(d, date) else False)
+                aligned_ma7[mask_pre] = np.nan
+                aligned_prod[mask_pre] = np.nan
             if year == today.year:
-                cutoff_date_2025 = date(2025, today.month, today.day)
-                mask_future = aligned_ma7.index > cutoff_date_2025
-                aligned_ma7.loc[mask_future, "count"] = np.nan
-                aligned_prod.loc[mask_future, "count"] = np.nan
+                mask_future = aligned_ma7.index > date(2025, today.month, today.day)
+                aligned_ma7[mask_future] = np.nan
+                aligned_prod[mask_future] = np.nan
+            mask_missing = aligned_real.isna()
+            aligned_ma7[mask_missing] = np.nan
+            aligned_prod[mask_missing] = np.nan
+            cols[f"date_{year}"] = aligned_real
+            cols[f"count_{year}"] = aligned_prod
+            cols[f"ratio_{year}"] = aligned_ma7
 
-            # 处理缺失数据
-            mask_missing = aligned_ma7["real_date"].isna()
-            aligned_ma7.loc[mask_missing, "count"] = np.nan
+        results[product] = pd.DataFrame({"axis_date": axis_2025, **cols})
 
-            product_data[year] = {
-                "real_date": aligned_ma7["real_date"],
-                "daily_count": aligned_prod["count"],
-                "ma7_ratio": aligned_ma7["count"]
-            }
-            
-        # 整合该 product 的结果
-        # 使用 2025 的轴作为基准
-        axis_date = product_data[2025]["real_date"].index
-        
-        results[product] = pd.DataFrame({
-            "axis_date": axis_date,
-            "date_2025": product_data[2025]["real_date"],
-            "count_2025": product_data[2025]["daily_count"],
-            "ratio_2025": product_data[2025]["ma7_ratio"],
-            
-            "date_2026": product_data[2026]["real_date"],
-            "count_2026": product_data[2026]["daily_count"],
-            "ratio_2026": product_data[2026]["ma7_ratio"]
-        })
-        
     return results
 
 def build_ma7_figure(df: pd.DataFrame) -> go.Figure:
@@ -697,7 +724,7 @@ def build_ls8_66_figure(df: pd.DataFrame) -> go.Figure:
     ))
     fig.add_trace(go.Scatter(
         x=df["axis_date"], y=df["ratio_ma7"],
-        name="LS8 66度占比 (MA7)",
+        name="LS8 66 Ultra 锁单占比 (MA7)",
         mode="lines+text",
         text=text_end, textposition="middle right",
         textfont=dict(color=ZH['event'], size=12), cliponaxis=False,
@@ -716,9 +743,9 @@ def build_ls8_66_figure(df: pd.DataFrame) -> go.Figure:
         line=dict(color=ZH['own'], width=1.5, dash="dash"), opacity=0.6, hoverinfo="skip"
     ))
     fig.update_layout(
-        title="LS8 66度电占比趋势 (MA7, 上市至今)",
+        title="LS8 66 Ultra 锁单占比（MA7，上市至今）",
         xaxis=dict(title="日期", dtick="M1", tickformat="%Y-%m-%d"),
-        yaxis=dict(title="66度占比 (MA7, %)", range=[0, 105]),
+        yaxis=dict(title="66 Ultra 锁单占比 (MA7, %)", range=[0, 105]),
         legend=dict(bordercolor=ZH['neutral'], borderwidth=1, font=dict(color=ZH['neutral']),
                     orientation="v", yanchor="top", y=1, xanchor="left", x=1.02),
         hovermode="x unified", margin=dict(l=60, r=80, t=80, b=60), height=600
@@ -848,7 +875,7 @@ def build_reev_product_breakdown_figure(metrics_dict: dict) -> go.Figure:
 
     # --- Layout ---
     fig.update_layout(
-        title="增程车型各配置内部占比趋势 (分母=增程总销量, MA7, Top2 Highlighted)",
+        title="增程车型各配置对增程总锁单的贡献占比 (分母=当日增程总锁单, MA7, Top2 Highlighted)",
         xaxis=dict(
             title="日期 (对齐到 2025 年)",
             dtick="M1",
@@ -875,86 +902,122 @@ def build_reev_product_breakdown_figure(metrics_dict: dict) -> go.Figure:
     apply_zh_theme(fig)
     return fig
 
+CHART_TITLES = {
+    1: "锁单数 MA7 对比 (2025 vs 2026)",
+    2: "锁单累计同比趋势对比 (2025 vs 2026)",
+    3: "LS6 车型日增程占比趋势 (MA7)",
+    4: "LS8 66 Ultra 锁单占比（MA7）",
+    5: "增程车型各配置对增程总锁单的贡献占比 (MA7, 2025 vs 2026)",
+}
+
+
+def _error_block(chart_no: int, title: str, exc: Exception) -> str:
+    """图表失败时的可见错误块：不允许静默缺失。"""
+    import html as _html
+    import traceback as _tb
+
+    detail = _html.escape("".join(_tb.format_exception_only(type(exc), exc)).strip())
+    return (
+        "<div style='border:2px solid #C0392B;background:#FDEDEC;padding:16px;margin:24px 0;"
+        "border-radius:6px;font-family:-apple-system,sans-serif;'>"
+        f"<h3 style='margin:0 0 8px;color:#C0392B;'>❌ 图 {chart_no} 生成失败：{_html.escape(title)}</h3>"
+        f"<p style='margin:0 0 6px;color:#333;'>错误摘要：<code>{detail}</code></p>"
+        "<p style='margin:0;color:#666;font-size:13px;'>该图表本次未生成，其余图表不受影响。</p>"
+        "</div>"
+    )
+
+
+def run_chart(chart_no: int, label: str, fn, charts: dict, errors: dict):
+    """执行单张图表；失败时记录错误并继续，不让整体报告中断。"""
+    title = CHART_TITLES[chart_no]
+    print(f"🔄 计算指标 {chart_no} ({label})...")
+    try:
+        fig = fn()
+    except Exception as e:  # noqa: BLE001
+        print(f"❌ 图 {chart_no} ({label}) 失败: {e}")
+        import traceback
+        traceback.print_exc()
+        errors[chart_no] = (title, e)
+        return
+    if fig is None:
+        errors[chart_no] = (title, RuntimeError("无可用数据（返回空结果）"))
+        print(f"⚠️ 图 {chart_no} ({label}) 无可用数据")
+        return
+    charts[chart_no] = fig
+
+
 def main():
     args = parse_args()
     input_path = Path(args.input)
     out_path = Path(args.out)
-    
+
     if not input_path.exists():
         print(f"❌ 错误: 输入文件不存在 {input_path}")
         sys.exit(1)
-        
+
     print(f"🔄 读取数据: {input_path}")
     try:
         df = pd.read_parquet(input_path)
     except Exception as e:
         print(f"❌ 读取 Parquet 失败: {e}")
         sys.exit(1)
-        
-    print("🔄 计算指标 1 (累计同比)...")
-    try:
-        metrics_df = compute_yoy_metrics(df)
-        fig_ma7 = build_ma7_figure(metrics_df)
-        fig1 = build_figure(metrics_df)
-    except Exception as e:
-        print(f"❌ 计算累计同比失败: {e}")
-        import traceback
-        traceback.print_exc()
-        fig_ma7 = None
-        fig1 = None
 
-    print("🔄 计算指标 2 (LS6 增程占比)...")
+    biz_def = load_business_def()
+    print("🔄 预计算锁单事件维度 (代际/版本/动力/年份)...")
     try:
-        ls6_metrics = compute_ls6_reev_metrics(df)
-        fig2 = build_ls6_reev_figure(ls6_metrics)
+        events = prepare_lock_events(df, biz_def)
     except Exception as e:
-        print(f"❌ 计算 LS6 增程占比失败: {e}")
+        print(f"❌ 预计算失败: {e}")
         import traceback
         traceback.print_exc()
-        fig2 = None
-        
-    print("🔄 计算指标 3 (所有增程配置占比)...")
-    try:
-        reev_prod_metrics = compute_reev_product_breakdown(df)
-        fig3 = build_reev_product_breakdown_figure(reev_prod_metrics)
-    except Exception as e:
-        print(f"❌ 计算增程配置占比失败: {e}")
-        import traceback
-        traceback.print_exc()
-        fig3 = None
+        sys.exit(1)
 
-    print("🔄 计算指标 4 (LS8 66度占比)...")
-    try:
-        ls8_metrics = compute_ls8_66_metrics(df)
-        fig4 = build_ls8_66_figure(ls8_metrics)
-    except Exception as e:
-        print(f"❌ 计算 LS8 66度占比失败: {e}")
-        import traceback
-        traceback.print_exc()
-        fig4 = None
-    
+    charts: dict = {}
+    errors: dict = {}
+
+    # 图 1/2 共用同一次累计同比计算（口径已统一为 order_number 去重）
+    _yoy_cache: dict = {}
+
+    def _yoy():
+        if "df" not in _yoy_cache:
+            _yoy_cache["df"] = compute_yoy_metrics(df)
+        return _yoy_cache["df"]
+
+    run_chart(1, "累计同比 MA7", lambda: build_ma7_figure(_yoy()), charts, errors)
+    run_chart(2, "累计同比", lambda: build_figure(_yoy()), charts, errors)
+    run_chart(3, "LS6 增程占比",
+              lambda: build_ls6_reev_figure(compute_ls6_reev_metrics(events)), charts, errors)
+    run_chart(4, "LS8 66 Ultra 锁单占比",
+              lambda: build_ls8_66_figure(compute_ls8_66_metrics(events, biz_def)), charts, errors)
+    run_chart(5, "增程配置贡献占比",
+              lambda: build_reev_product_breakdown_figure(
+                  compute_reev_product_breakdown(events, biz_def)), charts, errors)
+
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    
     print(f"💾 保存报告: {out_path}")
-    with open(out_path, 'w', encoding='utf-8') as f:
+
+    order = [1, 2, 3, 4, 5]
+    with open(out_path, "w", encoding="utf-8") as f:
         f.write("<html><head><meta charset='utf-8'><title>锁单分析报告</title></head><body>")
-        if fig_ma7:
-            f.write(fig_ma7.to_html(full_html=False, include_plotlyjs='cdn'))
-            f.write("<br><hr style='border:none;border-top:1px solid #E5EAF0;margin:24px 0;'><br>")
-        if fig1:
-            f.write(fig1.to_html(full_html=False, include_plotlyjs=False))
-        if fig2:
-            f.write("<br><hr><br>")
-            f.write(fig2.to_html(full_html=False, include_plotlyjs=False))
-        if fig3:
-            f.write("<br><hr><br>")
-            f.write(fig3.to_html(full_html=False, include_plotlyjs=False))
-        if fig4:
-            f.write("<br><hr><br>")
-            f.write(fig4.to_html(full_html=False, include_plotlyjs=False))
+        first = True
+        for no in order:
+            if not first:
+                f.write("<br><hr style='border:none;border-top:1px solid #E5EAF0;margin:24px 0;'><br>")
+            first = False
+            if no in charts:
+                # 首个图内联 plotly.js，后续复用
+                f.write(charts[no].to_html(full_html=False,
+                                           include_plotlyjs="cdn" if no == 1 else False))
+            else:
+                title, exc = errors.get(no, (CHART_TITLES[no], RuntimeError("未执行")))
+                f.write(_error_block(no, title, exc))
         f.write("</body></html>")
-        
-    print("✅ 完成!")
+
+    if errors:
+        print(f"⚠️ 完成，但有 {len(errors)} 张图失败: {sorted(errors)}（已写入 HTML 错误块）")
+    else:
+        print("✅ 完成!")
+
 
 if __name__ == "__main__":
     main()

@@ -15,6 +15,8 @@
 - **常用别名**：锁单量, 锁单, 订单锁单
 - **参考脚本**：`mashang_workspace/business_scripts/daily_lock_count.py`
 - **注意事项**：区分于"订单计数"（order_create_date），锁单以 lock_time 为准
+- **去重口径**：同一 `order_number` 多行只计一次；所有脚本统一按 `order_number` 去重，不用行数。若锁单行数与唯一 `order_number` 数不一致，先审计再出数。
+- **研究脚本**：`mashang_workspace/research_scripts/quick_lock_ratio.py` 等研究脚本复用同一去重底座。
 
 ### 交付数
 
