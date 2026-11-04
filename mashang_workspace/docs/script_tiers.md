@@ -31,7 +31,16 @@ mashang_workspace/
 | `lock_city_distribution.py` | 城市分布 | `--date --series --by-region --format` | ✅ | — |
 | `assign_conversion_analysis.py` | 线索转化 | `--start-date --end-date --format` | ✅ | — |
 | `attribute_penetration_report.py` | 配置渗透率 | `--series --attribute --limit --format` | ✅ | — |
-| `atp_price_report.py` | ATP 月报 | `--month --format` | ✅ | `make atp-demo` |
+| `atp_price_report.py` | ATP 报告（两种口径，见下） | `--month --report --state-class --format` | ✅ | `make atp-demo` |
+
+#### ATP 报告两种口径（`atp_price_report.py`）
+
+| 报告 | `--report` | 分类（`--state-class`） | 主窗口 | 产物 |
+|------|-----------|------------------------|--------|------|
+| **月度经营 monitor** | `monthly` | `legacy`（所有/已有/当年新/Sedan/SUV 12 行） | 当月；对比上月；附当年累计 | `atp_<YYYY-MM>.html/csv/json` |
+| **年度经营 monitor** | `annual` | `series`（公司销售车型 → 已有/新车型 → 轿车/SUV → 车系代际） | 本年至今（`YYYY-01-01` ~ 数据最新完整日）；对比上年同期 | `atp_annual_<YYYY>.html/csv/json` |
+
+`--report auto`（默认）按分类推断：`series` → 年度经营 monitor，`legacy` → 月度经营 monitor。年度口径自动排除"当日未入数"的半整日数据（末位日全是 00:00:00 且行数极低），并在 Result Contract `warnings` 中标注实际截止日。
 
 ### Research Scripts (6 个) — `research_scripts/`
 
