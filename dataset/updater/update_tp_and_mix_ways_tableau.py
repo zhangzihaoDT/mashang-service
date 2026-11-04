@@ -483,7 +483,15 @@ def run_update(
                 f"months={stats['base_month_count']}->{stats['merged_month_count']}"
             )
         if dry_run:
-            print(f"\n[dry-run] 合并与校验通过，未发布。staged: {plan['merged_dir']}")
+            # Validate the whole chain from the staged merged raw; publish nothing.
+            try:
+                _rebuild_derived_layers(
+                    source_raw_dir=Path(plan["merged_dir"]), run_dir=run_dir
+                )
+            except RuntimeError as exc:
+                print(f"\n❌ [dry-run] 派生层构建失败: {exc}")
+                return 1
+            print(f"\n[dry-run] 合并与全链路构建通过，未发布。staged: {run_dir}")
             return 0
 
         try:
@@ -508,6 +516,11 @@ def run_update(
         derived_dir, _ = _rebuild_derived_layers(source_raw_dir=raw_dir, run_dir=run_dir)
     except RuntimeError as exc:
         print(f"\n❌ 派生层构建失败: {exc}")
+        if export:
+            print(
+                "⚠️ 正式 raw_csv 已发布，但 parquet/registry/quality 仍为旧版本；"
+                "可修复后执行 --skip-export 重建派生层。"
+            )
         return 1
     if dry_run:
         print(f"\n[dry-run] 派生层构建与校验通过，未发布。staged: {derived_dir}")

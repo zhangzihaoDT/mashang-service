@@ -24,6 +24,7 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
+import math
 import os
 import re
 import shutil
@@ -302,7 +303,10 @@ def _validate_table(
             unknown_measures.add(measure_name)
         measure_value = row.get(MEASURE_VALUE_COLUMN, "")
         parsed = _to_float(measure_value)
-        if measure_name == REQUIRED_MEASURE:
+        if parsed is not None and not math.isfinite(parsed):
+            if len(invalid_values) < 10:
+                invalid_values.append(f"line {line_no}: {measure_name}={measure_value!r}")
+        elif measure_name == REQUIRED_MEASURE:
             if parsed is None:
                 if len(invalid_values) < 10:
                     invalid_values.append(f"line {line_no}: {measure_name}={measure_value!r}")
