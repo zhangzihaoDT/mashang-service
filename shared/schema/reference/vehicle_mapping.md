@@ -44,7 +44,7 @@ L7  (precedence=1): product_name LIKE '%L7%'
   不含 "M2" 字样；"L6 M2 Pro Max/Max/Ultra" 是试驾车/内部命名。故 DM2 = 一代 L6 家族 + M2 token + Jimmy Choo，
   且 DM1 必须排除「一代」以免把 M2 代基础版抢归旧代际。
 - 旧字符串格式（直接写 `product_name LIKE ...`）仍被执行器兼容，视为 `{priority: 0, condition: <字符串>}`。
-- 规则治理：`mashang_workspace/utility_scripts/audit_series_group_overlap.py` 可审计重叠；
+- 规则治理：`workspace/utility_scripts/audit_series_group_overlap.py` 可审计重叠；
   重叠应只发生在族内（LS6/L6 家族），跨车系重叠应视为规则 bug。
 
 ## 车系-系列分组关系 (model_series_mapping)

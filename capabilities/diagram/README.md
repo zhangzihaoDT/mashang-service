@@ -155,7 +155,7 @@ python -m capabilities.diagram.compare_line --input rows.json --format json   # 
   - 单条序列在真实时间轴上的连续趋势（Comparison Line 的横轴是有序类别，不是时间刻度）。
   - 单主体事件沿时间轴铺开（用 timeline）。
   - 事件事实核验、数据采集、搜索（属于上层独立研究仓库）。
-  - 业务口径与领域解释（属于 `mashang_workspace/` 或独立研究仓库）。
+  - 业务口径与领域解释（属于 `workspace/` 或独立研究仓库）。
 
 ## 消费方记录
 

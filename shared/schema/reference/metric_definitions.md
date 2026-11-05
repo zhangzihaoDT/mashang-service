@@ -2,7 +2,7 @@
 
 > 权威来源: `shared/schema/metrics.json`、`shared/schema/business_definition.json`、`shared/operators/registry.json`
 > 本文是语义视图：口径变更先改 schema，再同步本文。
-> 数据字典: `python mashang_workspace/utility_scripts/data_dictionary.py`
+> 数据字典: `python workspace/utility_scripts/data_dictionary.py`
 
 ## 计数类指标
 
@@ -13,10 +13,10 @@
 - **数据集**：`order_data.parquet`
 - **时间字段**：`lock_time`
 - **常用别名**：锁单量, 锁单, 订单锁单
-- **参考脚本**：`mashang_workspace/business_scripts/daily_lock_count.py`
+- **参考脚本**：`workspace/business_scripts/daily_lock_count.py`
 - **注意事项**：区分于"订单计数"（order_create_date），锁单以 lock_time 为准
 - **去重口径**：同一 `order_number` 多行只计一次；所有脚本统一按 `order_number` 去重，不用行数。若锁单行数与唯一 `order_number` 数不一致，先审计再出数。
-- **研究脚本**：`mashang_workspace/research_scripts/quick_lock_ratio.py` 等研究脚本复用同一去重底座。
+- **研究脚本**：`workspace/research_scripts/quick_lock_ratio.py` 等研究脚本复用同一去重底座。
 
 ### 交付数
 
@@ -107,7 +107,7 @@
 - **数据集**：`assign_data.csv`
 - **时间字段**：`Assign Time 年/月/日`
 - **常用别名**：线索转化率, 线索转换率
-- **参考脚本**：`mashang_workspace/business_scripts/assign_conversion_analysis.py`
+- **参考脚本**：`workspace/business_scripts/assign_conversion_analysis.py`
 
 ### 下发线索加权锁单率
 
@@ -126,7 +126,7 @@
 - **数据集**：`order_data.parquet`
 - **时间字段**：`invoice_upload_time`
 - **别名**：开票均价, 平均开票金额, 均价
-- **参考脚本**：`mashang_workspace/business_scripts/atp_price_report.py`
+- **参考脚本**：`workspace/business_scripts/atp_price_report.py`
 
 ### 实际折扣率（权益价口径）
 
@@ -143,7 +143,7 @@
   - 选装收费策略因车型、阶段而异：LS6 车漆+轮毂基本全赠送；LS8「奢华智选包」9,800 在 **2026-06-16 之前为实收**（净支付中位 +9,800），**之后不再单独加价**（净支付中位降至 0，7 月起转负）
   - 2026-11-04 起 Price 视图覆盖 2025-01 起，早期代际（CM1/DM0 及以前）仍因上市期无数据而回退近似基准
 - **数据集**：`order_data.parquet` + `dataset/incoming/tableau/price_data_view.csv`（Tableau `core_metric_observation/Price`）
-- **参考脚本**：`mashang_workspace/business_scripts/atp_price_report.py`（年度报告 `--report annual`）
+- **参考脚本**：`workspace/business_scripts/atp_price_report.py`（年度报告 `--report annual`）
 
 ## 算子类指标
 
@@ -179,7 +179,7 @@
 - **业务含义**：当前 Backlog 预计最终兑现（开票）的比例，即"这些状态订单还有多少会真正成交"
 - **计算口径**：`有效锁单当量 ÷ 待开票未退订锁单数`（Backlog realization rate）
 - **数据集**：`order_data.parquet`
-- **参考脚本**：`mashang_workspace/research_scripts/stalled_order_forecast.py`
+- **参考脚本**：`workspace/research_scripts/stalled_order_forecast.py`
 - **常用别名**：Backlog 有效率, 有效待交付率, backlog_realization_rate
 - **注意事项**：质量指标描述兑现概率，与状态指标的计数含义不同，二者不可混用。
 
@@ -190,11 +190,11 @@
 - **计算口径**：对每个待开票未退订订单估计 `P(最终开票 | Lock Age)`（v1 单变量），按 v2 扩展为 `P(最终开票 | Lock Age, Series)` 并做 sample-size shrinkage，逐单累加
 - **数据集**：`order_data.parquet`
 - **共享算子**：`shared/operators/effective_locked_orders.py`（metrics.json 中 `有效锁单当量` 的 `operator` 即指向它；生产核心在此）
-- **参考脚本**：`mashang_workspace/research_scripts/stalled_order_forecast.py`（研究层消费者：验证 / 图表 / CLI）
+- **参考脚本**：`workspace/research_scripts/stalled_order_forecast.py`（研究层消费者：验证 / 图表 / CLI）
 - **派生指标**：Backlog 有效率 = ELOE ÷ 悬置池；风险暴露量 = 悬置池 − ELOE
 - **常用别名**：ELOE, effective_locked_orders, 有效待交付当量, 有效Backlog当量
 - **模型方法**：基于历史锁单的 **conditional outcome curve / landmark probability**——在 Lock Age=t 时仍有效（未开票未退订）的历史订单中，最终开票的比例。注意：v1 的经验比例尚不等同于完整的竞争风险生存模型（cause-specific hazard / CIF），后者需按时间动态估计开票与退订两个 competing events 后才可正式命名，文档与代码注释应保持这一严谨性。
-- **注意事项**：这是预测指标，对账龄越久的订单打折越狠（如 >90 天开票概率仅个位数）。它与前端锁单预测（`mashang_workspace/research_scripts/structured_business_forecast.py`）衔接，构成 Demand → Order → Invoice/Delivery 预测链。
+- **注意事项**：这是预测指标，对账龄越久的订单打折越狠（如 >90 天开票概率仅个位数）。它与前端锁单预测（`workspace/research_scripts/structured_business_forecast.py`）衔接，构成 Demand → Order → Invoice/Delivery 预测链。
 
 
 
@@ -203,7 +203,7 @@
 - **业务含义**：基于成熟度曲线修正右删失后预测的最终30日锁单数
 - **计算口径**：三段式: age>=30d 用原始值, 7d≤age<30d 用 lock_7÷r7, age<7d 用 0.5×avg+0.5×lock0
 - **数据集**：`assign_data.csv`
-- **参考脚本**：`mashang_workspace/research_scripts/cohort_forecast.py`, `mashang_workspace/research_scripts/lock_predict_backtest.py`
+- **参考脚本**：`workspace/research_scripts/cohort_forecast.py`, `workspace/research_scripts/lock_predict_backtest.py`
 
 ### 店均锁单数
 
@@ -326,6 +326,6 @@
 运行以下命令获取所有数据集的字段清单：
 
 ```bash
-python mashang_workspace/utility_scripts/data_dictionary.py
-python mashang_workspace/utility_scripts/data_dictionary.py --format csv --output outputs/tables/
+python workspace/utility_scripts/data_dictionary.py
+python workspace/utility_scripts/data_dictionary.py --format csv --output outputs/tables/
 ```

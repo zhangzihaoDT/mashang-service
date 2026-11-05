@@ -36,7 +36,7 @@
 - 已确认上市日：`presale = [start, end)`；`launch = [end, launch_end]`。
 - 仅有 `start`、`end` 未确认：`presale = [start, start + monitor.presale_open_ended_window_days)`，默认 3 个自然日；phase 保持 `presale`；确认 `end` 后自动按 `[start, end)` 收口。
 - `上市以来` 的起点是 `time_periods.end`（上市日），不是预售 `start`。
-- 实现：`mashang_workspace/utils/monitors/phase.py`（`phase_of` / `presale_close_date` / `detect_active`）。
+- 实现：`workspace/utils/monitors/phase.py`（`phase_of` / `presale_close_date` / `detect_active`）。
 
 ## Cohort 时间概念
 

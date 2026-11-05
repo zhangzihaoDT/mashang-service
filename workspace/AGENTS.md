@@ -1,0 +1,300 @@
+# AGENTS.md — workspace Guide
+
+> **MIIT 已于 2026-10-15 迁出至独立仓库 [`mashang-miit`](../../mashang-miit)**，与 mashang-service 平级。公告采集、解析、归档、车型结构化数据及其管线报告均由该仓库维护。Service 负责利用汽车行业数据开展业务分析与产品战略研究；后续通过约定的数据产物或接口消费 MIIT 数据，对接尚未实现。Service 中残留的历史分析产物不作为 MIIT 的维护入口。
+
+**注意：OpenCode 仍应从仓库根目录启动。** 本文件仅定义 `workspace/` 内的工作规则。
+
+- 仓库总体架构、模块边界（workspace / jobs / capabilities / shared）、canonical 命令入口与副作用分级，见根目录 `AGENTS.md`。
+- 本文件只补充 workspace 层规则：脚本分层、业务口径、canonical 脚本、输出与验证方式。
+- 两者冲突时，架构与入口以根 `AGENTS.md` 为准，业务口径以本文件、`shared/schema/reference/` 与根 `docs/` 为准。
+
+## 项目结构
+
+```
+mashang-service/                   # 总项目根目录
+├── AGENTS.md                      # 根目录 Agent 指南（项目级）
+├── README.md                      # 项目主文档
+├── docs/                  # 项目文档与业务手册
+├── Makefile                       # 常用命令
+├── pyproject.toml                 # 项目配置
+├── .github/workflows/             # CI 配置
+├── .env                           # 共享环境变量
+├── .venv/                         # 共享虚拟环境
+├── dataset/                       # 共享原始数据
+│   └── TP&MIX-ways/       #   └── 乘用车上险数据（6 张 Parquet + registry + quality）
+├── requirements.txt               # 共享依赖
+├── shared/               # Semantic Foundation — operators / schema / reference docs，谨慎修改
+│
+├── jobs/                         # 确定性执行契约层：声明式 service job（Hub/Worker 调用）
+│   └── README.md
+│
+├── capabilities/                 # Base Capabilities（领域无关原语：OCR/Search/Notify…）
+│
+└── workspace/             # ← Daily Business Analytics Workspace（日常业务分析工具箱；当前所在目录）
+│   ├── AGENTS.md                  # 本文件
+│   ├── README.md
+│   ├── business_scripts/           # Core — Hub 经 jobs/ 可调度
+│   ├── research_scripts/          # Research — 预测/回测/释放曲线
+│   ├── utility_scripts/           # Utility — DataOps/SyncOps 工具
+│   ├── (scripts/ — 已删除)        # 原始混合池已删除
+│   ├── (legacy_scripts/ — 已退休)  # 历史参考脚本已迁移到 business_scripts/research_scripts/utility_scripts
+│   ├── eval/
+│   ├── tests/
+│   ├── utils/
+│   └── outputs/
+```
+
+## 工作原则
+
+**Hub 调度边界**：Hub 经 Worker 发出的任务统一为运行时任务。允许调用已有能力、读取数据/代码/文档、`python -c` 和临时 SQL/Python 分析；临时脚本及产物写入 workspace 的 `scratch/` 或 `outputs/`，业务数据按授权和既有契约更新。禁止修改项目源代码/模板/Agent 规则/开发配置/依赖/测试，禁止开发测试、重构、自动修复及 Git 变更操作。能力不足可临时分析，必须修改软件实现或遇到程序缺陷时报告问题。数据校验、业务口径检查、刷新校验、结果错误处理及推送前 dry-run 仍执行。下述代码沉淀与开发验证规则仅适用于独立开发任务；完整边界见根 `AGENTS.md` 的「Hub Runtime Execution Policy」。
+
+1. **不要修改 dataset/ 下的原始数据**
+2. **不要移动 .env 或 .venv/**
+3. **优先使用已有 business_scripts/ / research_scripts/ / utility_scripts/ 脚本**
+4. **临时分析写入 outputs/，稳定后再沉淀到 business_scripts/**
+5. **所有分析结果说明数据来源、时间窗口、口径**
+6. **高频能力产品化路径**：先在 workspace 内沉淀（`business_scripts/`），供 Hub 经 `jobs/` 确定性调度；不要绕过 workspace 直接在 `jobs/` 中开发，也不把业务代码复制进 `jobs/`。
+7. **验证范围与改动范围匹配**：先 `make verify-scope` 解析最小验证范围，再 `make verify` 执行；scope 外失败不算本次回归，扩大范围必须显式（`make verify-all`）。契约见 `.opencode/verification/README.md`。
+   - 同一份代码只执行一次 scope 内检查；不要先单独运行 pytest，再让 `make verify` 重跑相同检查。只有后续代码变化、检查失败或未解决的问题才需要重跑。
+   - 工作区含其他任务的未提交改动时，两个命令均传 `VERIFY_CHANGED="本次修改的文件路径列表"`，仅纳入本次文件；默认 worktree 范围会包含所有未提交改动。
+8. **脚本分层规则**：
+    - `business_scripts/`：可被 Agent 或 Makefile 调用的稳定运行脚本。
+    - `research_scripts/`：研究、探索、一次性分析脚本。
+    - `utility_scripts/`：workspace 管理、生成、检查类工具脚本。
+    - `legacy_scripts/`：已退休目录，不再作为有效脚本落点。发现历史脚本时应迁移到上述三类目录之一。
+
+## Service 层 MCP 能力
+
+MCP 由仓库根目录 `opencode.jsonc` 统一配置，属于 **service 层能力**，非 workspace 私有。
+
+当前已配置的 MCP：
+
+| MCP | 类型 | 定位 | 消费方式 |
+|-----|------|------|----------|
+| Playwright MCP | local (npx @playwright/mcp@latest) | service 级 browser ingestion | Agent 自动识别；浏览器 profile 在 `.local/playwright-mcp/feishu/` |
+
+工作规则：
+
+- workspace **不直接调用** Playwright MCP 浏览器 API（不写 Page.goto / page.click 等 Agent 底层操作）。
+- workspace **消费** MCP 采集后的数据文件（从 `dataset/incoming/feishu/` 或 `dataset/` 读取）。
+- workspace **不提交** `.local/`、browser profile、cookies、token。
+- 浏览器 profile / 登录态落在 `.local/playwright-mcp/feishu/`（已 `.gitignore`）。
+- 外部网页/飞书/浏览器采集结果进入 `dataset/incoming/feishu/`，再由 workspace 脚本消费。
+
+## 常用 Make 命令
+
+```bash
+make eval             # 完整 Eval（6 suites）
+make test             # 完整测试
+make ci               # CI 门禁
+make data-dict        # 数据字典
+make lock-demo        # 锁单 Demo
+make parser-demo      # Context Parser
+make followup-demo    # Follow-up Runner
+make numeric-eval     # Numeric Eval
+make reference-eval   # Reference Eval
+make data-refresh-daily  # 仅刷新订单 + 下发线索（写操作）
+make allupdate           # 全量更新 + 校验（写操作；含试驾 / 锁单归因）
+make data-validate    # 校验 dataset 完整性（只读；旧名 dataset-validate）
+make observe-dry-run  # 每日观察预检（只读；旧名 daily-observation-dry-run）
+make presale-snapshot SERIES=CM3 DRY=1  # 指定代际预售小订快照预览
+```
+
+> 数据管道 / 监控的 canonical 入口与副作用分级见根 `AGENTS.md` 的「Canonical Entry Map」。
+
+> MIIT 已迁出 Service，统一在平级独立仓库 `mashang-miit` 维护，workspace 不维护 MIIT 采集或解析实现。
+
+## CI 门禁
+
+GitHub Actions 在每次 push/PR 时自动运行：
+
+```bash
+python workspace/eval/run_eval.py --suite ci
+pytest workspace/tests/test_root_cleanup.py ... -q
+```
+
+CI-safe suites 包含 `parser + followup + reference`，不依赖真实 dataset。
+本地完整测试使用 `make eval`。
+
+## Result Contract
+
+所有脚本 `--format json` 输出统一 Result Contract，包含 scope/result/followup_context。
+详见 `docs/result_contract.md`。
+
+## Unified Eval
+
+`eval/run_eval.py` 是 workspace 健康检查入口。
+
+```bash
+python workspace/eval/run_eval.py --suite all    # 完整
+python workspace/eval/run_eval.py --suite ci     # CI-safe
+python workspace/eval/run_eval.py --suite parser  # 单套件
+```
+
+## 核心脚本速查
+
+| 命令 | 说明 | 层级 |
+|------|------|------|
+| `python business_scripts/daily_lock_count.py` | 每日锁单 | runtime |
+| `python business_scripts/daily_dc_inventory_change.py --date YYYY-MM-DD` | 单日 DC 库存变动分析 — 库存变化 × 开票流水交叉分析 | runtime |
+| `make state-diagnosis [AS_OF=YYYY-MM-DD]` 或 `python business_scripts/current_state_diagnosis.py [--as-of YYYY-MM-DD]` | 业务状态排查 — 库存 × 待开票未退订 × 风险暴露（滚动365d + 当年累计双口径，分车系 + 合计；`--as-of` 支持任意历史时点 point-in-time 重建，`--format json` Result Contract） | runtime |
+| `python business_scripts/lock_by_model.py --limit 5` | 车型拆分 | runtime |
+| `python business_scripts/lock_city_distribution.py` | 城市分布 | runtime |
+| `python research_scripts/release_curve_analysis.py` | 释放曲线 | research |
+| `python research_scripts/cohort_forecast.py` | 预测锁单 | research |
+| `python research_scripts/presale_cumulative_order_compare.py --gens DM1 CM2 LS9 LS8 DM2 --as-of YYYY-MM-DD --format html` | **预售累计订单跨代际对比（canonical）** — 通用预售固定框架；`--gens` 末位=主代际、其余对标，缺省取当前 presale 代际；`--format terminal/json/html`（Result Contract）；`--to-feishu` 额外产出飞书云文档（默认仅 HTML） | research |
+| `l6_m2_presale_report.py` | ~~L6 M2 预售汇报~~ **compatibility shim** — 默认 DM2 + HTML，转调上一条通用入口；勿再围绕本脚本扩功能 | research |
+| `python business_scripts/presale_intention_funnel.py --series CM3 --as-of YYYY-MM-DD` | **预售小订转化漏斗（泛化）** — 固定链路 series_group_logic→预售窗口→小订池→退订/留存/转大定/锁单；任意代际、多代际对比；`--list`、`--format terminal/json/csv`（Result Contract）；`make presale-funnel SERIES=CM3` | runtime |
+| `make lock-attribution START=2026-01-01 END=2026-08-31 HTML=1` | 锁单归因分析（单样本；`--series/--channel` 过滤） | make |
+| `make lock-attribution-compare START=2024-01-01 END=2024-08-01 START_B=2026-01-01 END_B=2026-08-01 HTML=1` | 锁单归因**对比**分析（两任意样本，差异高亮报告；`LABEL/LABEL_B` 自定义标签，`SERIES_B/CHANNEL_B` 按样本过滤） | make |
+| `python research_scripts/lock_attribution_analysis.py --start-date … --end-date … --compare-start-date … --compare-end-date … --html` | 锁单归因对比脚本（底层，Result Contract） | research |
+| `python research_scripts/dc_showroom_age_report.py --as-of YYYY-MM-DD --html` | 待销现车库龄/下线距今分布报告（固定库存分析工作流，`--html` 品牌化报告，`--format json` Result Contract） | research |
+| `python research_scripts/cpca_weekly_early_signal.py --week 2026-W26` | 乘联分会周度数据早源监控（WEEK=数据归属周） | research |
+| `make cpca-weekly-early-signal WEEK=2026-W26` | 早源监控（终端输出）WEEK=要监控的数据周 | make |
+| `make cpca-weekly-early-signal-html WEEK=2026-W26` | 早源监控（HTML 报告）WEEK=要监控的数据周 | make |
+| `make cpca-weekly-data-capture WEEK=2026-W26` | **[Skill] 乘联分会周度数据捕捉** → dataset/cpca_weekly/*.json（WEEK=数据归属周） | make |
+| — | Dataset Contract: `docs/datasets/cpca_weekly_data_capture.md` | doc |
+| `python utility_scripts/voc_theme_analysis.py` | VOC 分析 | utility |
+| `python utility_scripts/data_dictionary.py` | 数据字典 | utility |
+| `python utility_scripts/audit_series_group_overlap.py` | series_group_logic 规则重叠审计（`--json`/`--strict`） | utility |
+| `python utility_scripts/skills_order_observation_daily.py` | 每日数据观察(DataOps) | utility |
+| `python utility_scripts/build_workspace_capability_inventory.py` | 能力总览 | utility |
+| `python eval/parse_context_cli.py "..."` | 自然语言解析 | eval |
+| `python eval/run_followup_eval.py` | 追问 Runner | eval |
+| `python eval/run_numeric_eval.py` | 数值校验 | eval |
+| `pytest tests -q` | 全量测试 | test |
+
+## MIIT 公告情报（已迁出）
+
+MIIT 现由平级独立仓库 [mashang-miit](../../mashang-miit) 维护。Gov 公示、MIIT 正式公告、EIDC 历史来源、原始归档、车型数据和管线报告均已迁出。
+
+MIIT 操作须进入其仓库根目录，读取该仓库的 AGENTS.md、README.md 与 workflow/。Service/workspace 不再提供 MIIT 内部命令入口，不重新引入源码副本。未来分析通过约定的数据产物或接口消费；当前对接尚未实现。
+
+## TP&MIX-ways Data Asset / 乘用车上险数据资产
+
+### 资产定位
+
+TP&MIX-ways 是 **service 级共享数据资产**，不属于 workspace 私有数据。
+数据资产本体位于 `../dataset/TP&MIX-ways/`（项目根目录）。
+
+### 使用规则
+
+- workspace **不直接读取 raw_csv**
+- workspace **不复制 parquet** 到 workspace 内
+- workspace **不维护字段映射**
+- workspace 仅通过 shared loader 读取：
+
+```python
+from shared.loaders.tp_and_mix_ways_loader import (
+    load_tp_and_mix_ways_table,
+    load_tp_and_mix_ways_registry,
+    list_tp_and_mix_ways_tables,
+)
+```
+
+### 6 张可用表
+
+| Parquet | Grain | 用途 |
+|---------|-------|------|
+| `market_energy_monthly` | date_month, fuel_type_group, fuel_type | 市场总量、能源结构、新能源渗透率 |
+| `brand_monthly` | date_month, brand, ownership_type, oem, domestic_import | 品牌排名、品牌份额、品牌价格重心 |
+| `model_monthly` | date_month, brand, model, sub_model, sub_model_id, drive_type, fuel_type | 车型排名、车型趋势、品牌内部车型结构 |
+| `geo_monthly` | date_month, province, city, city_tier_group, fuel_type_group | 省市市场、城市线级、区域结构 |
+| `price_segment_monthly` | date_month, tp_bucket_5w, tp_bucket_10w, fuel_type_group, body_type, vehicle_level_group | 价格带市场、20-30 万、价格结构 |
+| `product_segment_monthly` | date_month, saic_segment, body_type, vehicle_level, vehicle_level_group, fuel_type_group, drive_type_group | 细分市场、车身结构、级别结构、驱动结构、尺寸重心 |
+
+### workspace 的职责
+
+**负责**：
+- 分析探索
+- 图表输出
+- 报告生成
+- 验证后为 Hub（经 `jobs/`）提供查询原型
+
+**不负责**：
+- 读取 Tableau raw_csv
+- 构建 Parquet
+- 修改 registry
+- 维护另一份 loader
+- 生成一张大宽表
+
+详见 `docs/tp_and_mix_ways_usage.md`。
+
+## 自然语言指令
+
+| 用户说 | 含义 | 对应操作 |
+|--------|------|----------|
+| "数据更新并同步" | DataOps 指令，非日期分析问题（仅订单 + 下发线索） | `make data-pipeline`（旧名 `daily-data-pipeline`；注意：写操作） |
+| "预检数据" | 安全预检 | `make data-pipeline-dry-run`（只读） |
+| "数据更新并同步 CM3 上市监控" | 仅刷新订单表 + 推送指定代际上市锁单监控 | `make monitor-sync SERIES=CM3 PHASE=launch`（先 `DRY=1` 预览） |
+| "数据更新并同步 CM3 小订/预售监控" | 仅刷新订单表 + 推送指定代际预售小订监控 | `make monitor-sync SERIES=CM3 PHASE=presale`（先 `DRY=1` 预览） |
+| "同步一份 CM3 小订监控" | 指定代际预售小订快照推送 | `make presale-snapshot SERIES=CM3 DRY=1` 预览 → 去掉 `DRY=1` 正式发送 |
+| "当前预售/上市监控" | 当前 active 代际 presale/launch 阶段监控 | `make sales-monitor-dry-run` → `make sales-monitor` |
+
+注意：
+- "数据更新并同步" 不是带日期条件的分析问题，不表示"只更新今天的数据"
+- "数据更新并同步 <代际> 上市/小订/预售监控" 指 `monitor-sync` 走廊：**仅刷新订单表**（非全量 `data-refresh`）→ 计算 → 推送/dry-run
+- service 的 `jobs/` 层不响应这个指令（Hub/Worker 负责调度触发）
+- "小订监控" 默认指**指定代际预售快照**（`presale-snapshot`），不是当前 active 阶段监控（`sales-monitor`）。指定代际已进入 `launch` 阶段时，仍可用 `presale-snapshot` 发送上市日最终预售快照，并标注统计截止时间、预售窗口、当前阶段。
+
+## Visual Identity Usage
+
+This project inherits the global Raccoon Research visual identity.
+
+Apply it only to user-facing outputs, including:
+
+- HTML reports
+- dashboard mockups
+- article assets
+- README screenshots
+- Agent UI pages
+
+Do not apply it to:
+
+- raw data files
+- logs
+- tests
+- CLI debug output
+- internal JSON artifacts
+- analytical chart interiors
+
+In this project, the visual system should behave as a data product style, not as a decorative mascot style.
+
+Use the raccoon avatar or brand wordmark only in report headers, footers, cover pages, empty states, and final signatures.
+
+## 上市时间查询规则
+
+**涉及"上市以来/上市至今"等时间范围时，必须使用 `business_definition.json` 中 `time_periods.{series}.end` 字段，不得从数据中取 `lock_time` 的最小值推断。**
+
+- 优先使用脚本的 `--since-launch` 参数（如 `daily_lock_count.py --since-launch LS9`）
+- 临时分析使用 `utils.business.get_launch_date(series)` 获取上市日期
+- `business_definition.json` 路径：`shared/schema/business_definition.json`
+
+Charts, tables, and metric cards should remain clean, readable, and data-first.
+
+Default output path for branded reports:
+
+```text
+outputs/reports/
+```
+
+Default template path:
+
+```text
+templates/report_base.html
+templates/report_style.css
+```
+
+### 报告视觉系统参考
+
+`docs/report_visual_system.md` 是 mashang-service 报告视觉体系的总文档，包含：
+
+- CSS 组件库（页面外壳、摘要卡片、表格、badge、barcell 数据条）
+- Plotly 图表主题（`utils/plotly_theme.py` + `apply_zh_theme` + `get_series_color`）
+- 颜色语义规则（按业务角色分配）
+- 约束规则
+
+在以下情况下**必须阅读**该文档：
+- 新建或修改 HTML 报告脚本
+- 新增 Plotly 图表
+- 调整报告视觉风格

@@ -10,7 +10,7 @@ dataset/ + shared/          Semantic Foundation（数据与业务语义底座）
         ├─────────────────────────────┐
         │                             │
         ▼                             ▼
-capabilities/                 mashang_workspace/
+capabilities/                 workspace/
 Base Capabilities             Daily Business Analytics Workspace
 OCR / Search / Notify         日常业务分析工具箱
 Browser / Parse / Render      research → business → eval
@@ -35,7 +35,7 @@ Browser / Parse / Render      research → business → eval
 - 可被多个上层（Daily Business Analytics workspace scripts、jobs、独立研究仓库）通过同一份接口复用。
 - 自带真实 provider + mock、自描述契约与测试，可离线验证。
 
-`mashang_workspace/`（日常业务分析）与平级研究仓库（`mashang-auto-launch` / `mashang-product-expert` / `mashang-nev-apeal`）是**消费者**；
+`workspace/`（日常业务分析）与平级研究仓库（`mashang-auto-launch` / `mashang-product-expert` / `mashang-nev-apeal`）是**消费者**；
 Base Capabilities 是**被消费方**。
 
 ## Capability 规范（模板）
@@ -72,8 +72,8 @@ Base Capabilities 是**被消费方**。
 |----------|-------------|----------|
 | Browser / Capture | Playwright MCP（根 `opencode.jsonc`）+ `dataset/incoming/` | service 级接线能力，尚未包化 |
 | Doc Parse | `capabilities/ocr` document_parse；MIIT 领域解析由独立仓库维护 | 通用文档→结构化契约待抽象 |
-| Render | `.opencode/skills/official_document_render/` + `mashang_workspace/templates/` | 正式文档/报告渲染能力待收敛 |
-| Feishu Bitable 写入 | `mashang_workspace/utility_scripts/skills_order_observation_daily.py`（tenant token + bitable REST） | 与 `capabilities/feishu/docx` 同属飞书 app 原语，后续按需收敛到 `capabilities/feishu/` |
+| Render | `.opencode/skills/official_document_render/` + `workspace/templates/` | 正式文档/报告渲染能力待收敛 |
+| Feishu Bitable 写入 | `workspace/utility_scripts/skills_order_observation_daily.py`（tenant token + bitable REST） | 与 `capabilities/feishu/docx` 同属飞书 app 原语，后续按需收敛到 `capabilities/feishu/` |
 
 Candidate 不设迁移截止时间；**在出现真实复用需求时**按本 README 的规范逐项收敛，不做大爆炸迁移。
 
@@ -81,4 +81,4 @@ Candidate 不设迁移截止时间；**在出现真实复用需求时**按本 RE
 
 - **编排边界**：运行时系统 = **Hub（Control Plane）+ Worker（Execution Gateway）+ OpenCode**；service 侧确定性边界是根目录 `jobs/`（声明式 service job + 状态/摘要/artifact 契约）。Base Capabilities 与 Daily Business Analytics（workspace 能力）供其上调用。
 - **独立研究仓库现状**：`auto_launch` / `product_expert` / `nev_apeal` 已迁至平级仓库；MIIT 在 `mashang-miit`，均不属于 Service 的能力或 Job 清单。
-- **不要**在 capabilities/ 里放业务规则、业务脚本或领域解析逻辑——那属于 `mashang_workspace/` 或独立研究仓库。
+- **不要**在 capabilities/ 里放业务规则、业务脚本或领域解析逻辑——那属于 `workspace/` 或独立研究仓库。

@@ -20,36 +20,36 @@ PYTHON ?= .venv/bin/python
 ## 生成 Eval 结果（显式产物 unified_eval_result.json）
 ## 用法: make eval [SUITE=default|ci|all|research|core]
 eval:
-	$(PYTHON) mashang_workspace/eval/run_eval.py --suite $(or $(SUITE),default) --format terminal --output mashang_workspace/outputs/tables/unified_eval_result.json
+	$(PYTHON) workspace/eval/run_eval.py --suite $(or $(SUITE),default) --format terminal --output workspace/outputs/tables/unified_eval_result.json
 
 ## 完整 Eval（含 research）
 full-eval:
-	$(PYTHON) mashang_workspace/eval/run_eval.py --suite all
+	$(PYTHON) workspace/eval/run_eval.py --suite all
 
 ## Core Eval（仅 core 脚本）
 core-eval:
-	$(PYTHON) mashang_workspace/eval/run_eval.py --suite core
+	$(PYTHON) workspace/eval/run_eval.py --suite core
 
 ## Research Eval（仅 research 脚本）
 research-eval:
-	$(PYTHON) mashang_workspace/eval/run_eval.py --suite research
+	$(PYTHON) workspace/eval/run_eval.py --suite research
 
 ## 完整测试
 test:
-	$(PYTHON) -m pytest mashang_workspace/tests capabilities/ocr/tests capabilities/notify/tests capabilities/search/tests capabilities/diagram/tests capabilities/feishu/tests .opencode/verification/tests jobs/tests -q
+	$(PYTHON) -m pytest workspace/tests capabilities/ocr/tests capabilities/notify/tests capabilities/search/tests capabilities/diagram/tests capabilities/feishu/tests .opencode/verification/tests jobs/tests -q
 
 ## CI 门禁 = 复用 eval(CI-safe) + 数据无关测试
 ci:
 	$(MAKE) eval SUITE=ci
-	$(PYTHON) -m pytest mashang_workspace/tests/test_root_cleanup.py \
-		mashang_workspace/tests/test_schema_docs_sync.py \
-		mashang_workspace/tests/test_model_positioning_loader.py \
-		mashang_workspace/tests/scripts/test_result_contract.py \
-		mashang_workspace/tests/eval/test_context_parser.py \
-		mashang_workspace/tests/eval/test_followup_runner.py \
-		mashang_workspace/tests/eval/test_numeric_eval.py \
-		mashang_workspace/tests/eval/test_result_reference.py \
-		mashang_workspace/tests/eval/test_unified_eval.py \
+	$(PYTHON) -m pytest workspace/tests/test_root_cleanup.py \
+		workspace/tests/test_schema_docs_sync.py \
+		workspace/tests/test_model_positioning_loader.py \
+		workspace/tests/scripts/test_result_contract.py \
+		workspace/tests/eval/test_context_parser.py \
+		workspace/tests/eval/test_followup_runner.py \
+		workspace/tests/eval/test_numeric_eval.py \
+		workspace/tests/eval/test_result_reference.py \
+		workspace/tests/eval/test_unified_eval.py \
 		capabilities/ocr/tests \
 		capabilities/notify/tests \
 		capabilities/search/tests \
@@ -71,44 +71,44 @@ verify-all:  ## 显式扩大范围：解析并执行全部 target
 
 ## 数据字典
 data-dict:
-	$(PYTHON) mashang_workspace/utility_scripts/data_dictionary.py --input dataset --output mashang_workspace/outputs/tables/data_dictionary.csv
+	$(PYTHON) workspace/utility_scripts/data_dictionary.py --input dataset --output workspace/outputs/tables/data_dictionary.csv
 
 ## 锁单分析 Demo
 lock-demo:
-	$(PYTHON) mashang_workspace/business_scripts/lock_by_model.py --date 2026-06-10 --format json
+	$(PYTHON) workspace/business_scripts/lock_by_model.py --date 2026-06-10 --format json
 
 ## Context Parser Demo
 parser-demo:
-	$(PYTHON) mashang_workspace/eval/parse_context_cli.py "昨天锁单数分车型"
+	$(PYTHON) workspace/eval/parse_context_cli.py "昨天锁单数分车型"
 
 ## Follow-up Runner Demo
 followup-demo:
-	$(PYTHON) mashang_workspace/eval/run_followup_eval.py \
-		--cases mashang_workspace/eval/cases/followup_cases.json \
+	$(PYTHON) workspace/eval/run_followup_eval.py \
+		--cases workspace/eval/cases/followup_cases.json \
 		--parse-text --as-of-date 2026-06-11
 
 ## Numeric Eval
 numeric-eval:
-	$(PYTHON) mashang_workspace/eval/run_numeric_eval.py
+	$(PYTHON) workspace/eval/run_numeric_eval.py
 
 ## Reference Eval
 reference-eval:
-	$(PYTHON) mashang_workspace/eval/run_reference_eval.py
+	$(PYTHON) workspace/eval/run_reference_eval.py
 
 ## ATP 月报 Demo
 atp-demo:
-	$(PYTHON) mashang_workspace/business_scripts/atp_price_report.py --month 2026-05 --format json
+	$(PYTHON) workspace/business_scripts/atp_price_report.py --month 2026-05 --format json
 
 ## 锁单预测回测 Demo
 backtest-demo:
-	$(PYTHON) mashang_workspace/research_scripts/lock_predict_backtest.py --format json
+	$(PYTHON) workspace/research_scripts/lock_predict_backtest.py --format json
 
 ## ─── Forecast ────────────────────────────────────────────────────
 
 ## 锁单月度预估（结构化预测 + Calendar-Regime 后验校正）
 ## 用法: make lock-forecast AS_OF=2026-07-13 TARGET_MONTH=2026-07 PRIOR_STRENGTH=30
 lock-forecast:
-	$(PYTHON) mashang_workspace/research_scripts/structured_business_forecast.py \
+	$(PYTHON) workspace/research_scripts/structured_business_forecast.py \
 		--as-of $(or $(AS_OF),$(shell date +%Y-%m-%d)) \
 		--target-month $(or $(TARGET_MONTH),$(shell date +%Y-%m)) \
 		$(if $(PRIOR_STRENGTH),--prior-strength $(PRIOR_STRENGTH))
@@ -116,7 +116,7 @@ lock-forecast:
 ## 开票月度预估（条件概率模型，与锁单预测共享 prior-strength）
 ## 用法: make invoice-forecast AS_OF=2026-07-13 TARGET_MONTH=2026-07 LOCK_REGIME=mode PRIOR_STRENGTH=30
 invoice-forecast:
-	$(PYTHON) mashang_workspace/research_scripts/invoice_monthly_forecast.py \
+	$(PYTHON) workspace/research_scripts/invoice_monthly_forecast.py \
 		--as-of $(or $(AS_OF),$(shell date +%Y-%m-%d)) \
 		--target-month $(or $(TARGET_MONTH),$(shell date +%Y-%m)) \
 		$(if $(LOCK_REGIME),--lock-regime $(LOCK_REGIME)) \
@@ -127,7 +127,7 @@ invoice-forecast:
 ## 锁单归因分析（单样本；默认 2023 全年）
 ## 用法: make lock-attribution START=2024-01-01 END=2024-12-31 SERIES=LS6 CHANNEL="新媒体-抖音" HTML=1
 lock-attribution:
-	$(PYTHON) mashang_workspace/research_scripts/lock_attribution_analysis.py \
+	$(PYTHON) workspace/research_scripts/lock_attribution_analysis.py \
 		--start-date $(or $(START),2023-01-01) \
 		--end-date $(or $(END),2023-12-31) \
 		$(if $(SERIES),--series $(SERIES)) \
@@ -139,7 +139,7 @@ lock-attribution:
 ##        LABEL="2024年01-08月" LABEL_B="2026年01-08月" HTML=1 \
 ##        [SERIES/SERIES_B/CHANNEL/CHANNEL_B 按样本过滤] [FORMAT=terminal|json]
 lock-attribution-compare:
-	$(PYTHON) mashang_workspace/research_scripts/lock_attribution_analysis.py \
+	$(PYTHON) workspace/research_scripts/lock_attribution_analysis.py \
 		--start-date $(or $(START),2024-01-01) \
 		--end-date $(or $(END),2024-08-01) \
 		--compare-start-date $(or $(START_B),2026-01-01) \
@@ -159,19 +159,19 @@ inventory-status:
 
 ## 库存趋势 HTML 报告
 inventory-trend:
-	$(PYTHON) mashang_workspace/research_scripts/dc_inventory_trend_report.py
+	$(PYTHON) workspace/research_scripts/dc_inventory_trend_report.py
 
 ## 库存详细分析报告
 inventory-report:
-	$(PYTHON) mashang_workspace/utility_scripts/generate_delivery_inventory_report.py
+	$(PYTHON) workspace/utility_scripts/generate_delivery_inventory_report.py
 
 ## Capability Audit
 capability-audit:
-	$(PYTHON) mashang_workspace/eval/run_capability_audit.py --format json --output mashang_workspace/outputs/tables/capability_audit_result.json
+	$(PYTHON) workspace/eval/run_capability_audit.py --format json --output workspace/outputs/tables/capability_audit_result.json
 
 ## Shared Audit
 shared-audit:
-	$(PYTHON) -c "from mashang_workspace.utils.paths import BUSINESS_DEFINITION_PATH, ensure_shared_on_path; ensure_shared_on_path(); import operators; print('shared ok:', BUSINESS_DEFINITION_PATH)"
+	$(PYTHON) -c "from workspace.utils.paths import BUSINESS_DEFINITION_PATH, ensure_shared_on_path; ensure_shared_on_path(); import operators; print('shared ok:', BUSINESS_DEFINITION_PATH)"
 
 ## jobs — 列出已声明确定性 job
 jobs-list:
@@ -230,15 +230,15 @@ data-status:
 
 ## 数据集完整性校验（只读）
 data-validate:
-	$(PYTHON) mashang_workspace/utility_scripts/dataset_validate.py
+	$(PYTHON) workspace/utility_scripts/dataset_validate.py
 
 ## 每日观察预检 dry-run（只读，仅本地计算，不写外部系统）
 observe-dry-run:
-	$(PYTHON) mashang_workspace/utility_scripts/skills_order_observation_daily.py --dry-run
+	$(PYTHON) workspace/utility_scripts/skills_order_observation_daily.py --dry-run
 
 ## 每日观察同步（写操作：飞书多维表格 + 机器人）
 observe-sync:
-	$(PYTHON) mashang_workspace/utility_scripts/skills_order_observation_daily.py
+	$(PYTHON) workspace/utility_scripts/skills_order_observation_daily.py
 
 ## 数据管道 dry-run（安全预检，不含写操作）
 data-pipeline-dry-run: data-validate observe-dry-run
@@ -250,7 +250,7 @@ data-pipeline: data-refresh-daily data-validate observe-sync
 ## 每日运营：数据管道 + 销售监控（写操作，会发送飞书）
 ## 监控注入本轮 refresh_ts（管道刚完成），避免 freshness gate 用 parquet mtime 误判 stale
 daily-ops: data-pipeline
-	$(PYTHON) mashang_workspace/business_scripts/vehicle_sales_monitor.py \
+	$(PYTHON) workspace/business_scripts/vehicle_sales_monitor.py \
 		$(if $(AS_OF),--as-of $(AS_OF)) \
 		$(if $(SERIES),--series $(SERIES)) \
 		$(if $(PHASE),--phase $(PHASE)) \
@@ -276,7 +276,7 @@ daily-data-pipeline: data-pipeline
 ## 统一预售/上市监控（自动判定 active 代际 + phase；写操作：飞书卡片）
 ## 用法: make sales-monitor [AS_OF=2026-09-10] [SERIES=CM3] [PHASE=presale] [FORMAT=json]
 sales-monitor:
-	$(PYTHON) mashang_workspace/business_scripts/vehicle_sales_monitor.py \
+	$(PYTHON) workspace/business_scripts/vehicle_sales_monitor.py \
 		$(if $(AS_OF),--as-of $(AS_OF)) \
 		$(if $(SERIES),--series $(SERIES)) \
 		$(if $(PHASE),--phase $(PHASE)) \
@@ -284,7 +284,7 @@ sales-monitor:
 
 ## 预售/上市监控 dry-run（只打印卡片，不发送飞书）
 sales-monitor-dry-run:
-	$(PYTHON) mashang_workspace/business_scripts/vehicle_sales_monitor.py --dry-run \
+	$(PYTHON) workspace/business_scripts/vehicle_sales_monitor.py --dry-run \
 		$(if $(AS_OF),--as-of $(AS_OF)) \
 		$(if $(SERIES),--series $(SERIES)) \
 		$(if $(PHASE),--phase $(PHASE))
@@ -293,7 +293,7 @@ sales-monitor-dry-run:
 ## 用法: make presale-snapshot SERIES=CM3            # 正式发送
 ##       make presale-snapshot SERIES=CM3 DRY=1      # 仅预览，不发送
 presale-snapshot:
-	$(PYTHON) mashang_workspace/research_scripts/presale_metrics_to_feishu.py \
+	$(PYTHON) workspace/research_scripts/presale_metrics_to_feishu.py \
 		$(if $(SERIES),--series $(SERIES)) \
 		$(if $(AS_OF),--as-of $(AS_OF)) \
 		$(if $(REFRESH_TS),--refresh-ts $(REFRESH_TS)) \
@@ -305,7 +305,7 @@ presale-snapshot:
 ## 用法: make presale-funnel SERIES=CM3 [AS_OF=2026-09-24] [FORMAT=terminal|json|csv]
 ##       make presale-funnel SERIES="CM2 CM3 DM2"   # 多代际对比
 presale-funnel:
-	$(PYTHON) mashang_workspace/business_scripts/presale_intention_funnel.py \
+	$(PYTHON) workspace/business_scripts/presale_intention_funnel.py \
 		$(if $(SERIES),--series $(SERIES)) \
 		$(if $(AS_OF),--as-of $(AS_OF)) \
 		$(if $(FORMAT),--format $(FORMAT))
@@ -323,7 +323,7 @@ presale-funnel:
 ##   - 正式推送前建议先 DRY=1 预览；ALLOW_STALE=1 可跳过 freshness gate
 monitor-sync:
 	$(PYTHON) dataset/updater/order_data_to_parquet.py $(if $(MOBILE),--mobile) && \
-	$(PYTHON) mashang_workspace/business_scripts/vehicle_sales_monitor.py \
+	$(PYTHON) workspace/business_scripts/vehicle_sales_monitor.py \
 		$(if $(SERIES),--series $(SERIES)) \
 		$(if $(PHASE),--phase $(PHASE)) \
 		$(if $(and $(SERIES),$(PHASE)),--force-phase) \
@@ -341,7 +341,7 @@ sales-monitor-sync: monitor-sync
 ## 监控默认仅针对 CM3（SERIES 可覆盖，如 SERIES=DM2 或 SERIES="" 恢复全部 active 代际）
 sales-scheduler: SERIES ?= CM3
 sales-scheduler:
-	$(PYTHON) mashang_workspace/utility_scripts/sales_scheduler.py \
+	$(PYTHON) workspace/utility_scripts/sales_scheduler.py \
 		$(if $(SERIES),--series $(SERIES)) \
 		$(if $(PHASE),--phase $(PHASE))
 
@@ -350,16 +350,16 @@ scheduler: sales-scheduler
 
 ## 单日 DC 库存变动分析（默认昨天）
 dc-inventory-change:
-	$(PYTHON) mashang_workspace/business_scripts/daily_dc_inventory_change.py
+	$(PYTHON) workspace/business_scripts/daily_dc_inventory_change.py
 
 dc-inventory-change-date:
-	$(PYTHON) mashang_workspace/business_scripts/daily_dc_inventory_change.py --date $(DATE)
+	$(PYTHON) workspace/business_scripts/daily_dc_inventory_change.py --date $(DATE)
 
 ## 业务状态排查（库存 × 待开票未退订 × 风险暴露；滚动365d + 当年累计双口径）
 ## 用法: make state-diagnosis [AS_OF=2025-04-17] [SERIES=LS8] [FORMAT=json] [OUTPUT=outputs/tables/]
 ## AS_OF 支持任意历史时点（point-in-time 重建）；缺省 = 最新数据日
 state-diagnosis:
-	$(PYTHON) mashang_workspace/business_scripts/current_state_diagnosis.py \
+	$(PYTHON) workspace/business_scripts/current_state_diagnosis.py \
 		$(if $(AS_OF),--as-of $(AS_OF)) \
 		$(if $(SERIES),--series $(SERIES)) \
 		$(if $(FORMAT),--format $(FORMAT)) \
@@ -368,7 +368,7 @@ state-diagnosis:
 ## 月度市场观察（V0.3 Runtime：市场状态评估 + 品牌化 HTML 报告）
 ## 用法: make market-observe [AS_OF=2026-07]   # 缺省 = 当前年月
 market-observe:
-	$(PYTHON) mashang_workspace/research_scripts/market_state_assessment.py \
+	$(PYTHON) workspace/research_scripts/market_state_assessment.py \
 		--as-of $(if $(AS_OF),$(AS_OF),$(shell date +%Y-%m)) \
 		--format html
 
@@ -376,20 +376,20 @@ market-observe:
 ## 用法: make shock-scan [AS_OF=2026-06] [FORMAT=json]   # 默认 FORMAT=json（Result Contract）
 shock-scan: FORMAT ?= json
 shock-scan:
-	$(PYTHON) mashang_workspace/research_scripts/shock_detector_rolling.py \
+	$(PYTHON) workspace/research_scripts/shock_detector_rolling.py \
 		$(if $(AS_OF),--as-of $(AS_OF)) \
 		--format $(FORMAT)
 
 ## Shock Detector 滚动回溯验证（历史 as-of → 后续 12M 爆款命中率）
 shock-backtest: FORMAT ?= json
 shock-backtest:
-	$(PYTHON) mashang_workspace/research_scripts/shock_detector_backtest.py \
+	$(PYTHON) workspace/research_scripts/shock_detector_backtest.py \
 		--format $(FORMAT)
 
 ## Shock Detector 早期规则研究（三期扫描，含 Market State 2×2 增量检验）
 shock-research: FORMAT ?= json
 shock-research:
-	$(PYTHON) mashang_workspace/research_scripts/shock_detector_scan.py \
+	$(PYTHON) workspace/research_scripts/shock_detector_scan.py \
 		--format $(FORMAT)
 
 ## Shock Detector 全量研究校验（修改 classifier / detector 规则后一次跑完）
@@ -417,17 +417,17 @@ build-tp-and-mix-ways-dataset:
 ## watchlist 品牌销量月报（本品智己对标 + 行业 benchmark；默认报告月=上月）
 ## 用法: make watchlist-brand-monthly-report MONTH=2026-07
 watchlist-brand-monthly-report:
-	$(PYTHON) mashang_workspace/research_scripts/watchlist_brand_monthly_report.py $(if $(MONTH),--month $(MONTH),)
+	$(PYTHON) workspace/research_scripts/watchlist_brand_monthly_report.py $(if $(MONTH),--month $(MONTH),)
 
 ## watchlist 品牌 12 个月销量趋势（含大盘与重点品牌折线图）
 ## 用法: make watchlist-brand-trend MONTH=2026-07 BRANDS=智界,方程豹
 watchlist-brand-trend:
-	$(PYTHON) mashang_workspace/research_scripts/watchlist_brand_trend.py $(if $(MONTH),--month $(MONTH),) $(if $(BRANDS),--brands $(BRANDS),)
+	$(PYTHON) workspace/research_scripts/watchlist_brand_trend.py $(if $(MONTH),--month $(MONTH),) $(if $(BRANDS),--brands $(BRANDS),)
 
 ## watchlist 异常品牌车型贡献拆解（归因分析）
 ## 用法: make watchlist-brand-driver MONTH=2026-07 THRESHOLD=0.20 BRANDS=智界,特斯拉
 watchlist-brand-driver:
-	$(PYTHON) mashang_workspace/research_scripts/watchlist_brand_driver_decomposition.py $(if $(MONTH),--month $(MONTH),) $(if $(THRESHOLD),--threshold $(THRESHOLD),) $(if $(BRANDS),--brands $(BRANDS),)
+	$(PYTHON) workspace/research_scripts/watchlist_brand_driver_decomposition.py $(if $(MONTH),--month $(MONTH),) $(if $(THRESHOLD),--threshold $(THRESHOLD),) $(if $(BRANDS),--brands $(BRANDS),)
 
 ## ─── ──────────────────────────────────────────────────────────────
 
@@ -446,34 +446,34 @@ render-official-doc-smoke:
 
 # === CPCA Weekly Early Signal ===
 cpca-weekly-early-signal:  ## 乘联分会周度数据早源监控（终端输出）WEEK=目标数据周（默认自动计算最近周日所在周）
-	$(PYTHON) mashang_workspace/research_scripts/cpca_weekly_early_signal.py $(if $(WEEK),--week $(WEEK)) --format terminal
+	$(PYTHON) workspace/research_scripts/cpca_weekly_early_signal.py $(if $(WEEK),--week $(WEEK)) --format terminal
 
 cpca-weekly-early-signal-html:  ## 乘联分会周度数据早源监控（HTML 报告）WEEK=目标数据周（默认自动计算）
-	$(PYTHON) mashang_workspace/research_scripts/cpca_weekly_early_signal.py $(if $(WEEK),--week $(WEEK)) --format html
+	$(PYTHON) workspace/research_scripts/cpca_weekly_early_signal.py $(if $(WEEK),--week $(WEEK)) --format html
 
 cpca-weekly-early-signal-json:  ## 乘联分会周度数据早源监控（JSON 输出）WEEK=目标数据周（默认自动计算）
-	$(PYTHON) mashang_workspace/research_scripts/cpca_weekly_early_signal.py $(if $(WEEK),--week $(WEEK)) --format json
+	$(PYTHON) workspace/research_scripts/cpca_weekly_early_signal.py $(if $(WEEK),--week $(WEEK)) --format json
 
 cpca-weekly-data-capture:  ## 捕捉乘联分会周度早源数据并生成 fact_result JSON（WEEK=目标数据周，默认自动计算）
-	$(PYTHON) mashang_workspace/research_scripts/cpca_weekly_early_signal.py $(if $(WEEK),--week $(WEEK)) --format html --capture-json --write-fact-result
+	$(PYTHON) workspace/research_scripts/cpca_weekly_early_signal.py $(if $(WEEK),--week $(WEEK)) --format html --capture-json --write-fact-result
 
 # === Tesla 月度批发/零售/出口 ===
 tesla-report:  ## Tesla 月度批发/零售/出口报告（HTML，SOURCE_URL=最新月份数据来源）
-	$(PYTHON) mashang_workspace/research_scripts/tesla_wholesale_export_report.py --html $(if $(SOURCE_URL),--source-url $(SOURCE_URL))
+	$(PYTHON) workspace/research_scripts/tesla_wholesale_export_report.py --html $(if $(SOURCE_URL),--source-url $(SOURCE_URL))
 
 tesla-report-json:  ## Tesla 月度批发/零售/出口（JSON Result Contract）
-	$(PYTHON) mashang_workspace/research_scripts/tesla_wholesale_export_report.py --format json $(if $(SOURCE_URL),--source-url $(SOURCE_URL))
+	$(PYTHON) workspace/research_scripts/tesla_wholesale_export_report.py --format json $(if $(SOURCE_URL),--source-url $(SOURCE_URL))
 
 # Workspace Skills Catalog
 build-workspace-skills-catalog:
-	$(PYTHON) mashang_workspace/utility_scripts/build_workspace_skills_catalog.py
+	$(PYTHON) workspace/utility_scripts/build_workspace_skills_catalog.py
 
 # Workspace Capability Inventory
 build-workspace-capability-inventory:
-	$(PYTHON) mashang_workspace/utility_scripts/build_workspace_capability_inventory.py
+	$(PYTHON) workspace/utility_scripts/build_workspace_capability_inventory.py
 
 clean-outputs:
-	find mashang_workspace/outputs -type f ! -name "README.md" -delete
+	find workspace/outputs -type f ! -name "README.md" -delete
 
 ## 帮助
 help:

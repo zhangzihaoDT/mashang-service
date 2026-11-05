@@ -1,12 +1,12 @@
 {
   "feature_jobs": {
     "daily_lock_count": {
-      "module": "mashang_workspace",
+      "module": "workspace",
       "label": "Daily Lock Count",
       "cwd": "{repo_root}",
       "argv_template": [
         "{python}",
-        "mashang_workspace/business_scripts/daily_lock_count.py",
+        "workspace/business_scripts/daily_lock_count.py",
         "--date",
         "{date}",
         "--format",

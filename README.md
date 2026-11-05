@@ -1,41 +1,43 @@
-# mashang-service
+# mashang-service · 汽车业务分析
 
-> **MIIT 已于 2026-10-15 迁出至独立仓库 [`mashang-miit`](../mashang-miit)**，与 mashang-service 平级。公告采集、解析、归档、车型结构化数据及其管线报告均由该仓库维护。Service 负责利用汽车行业数据开展业务分析与产品战略研究；后续通过约定的数据产物或接口消费 MIIT 数据，对接尚未实现。Service 中残留的历史分析产物不作为 MIIT 的维护入口。
+从仓库根目录运行命令。日常分析在 `workspace/` 开展，共享数据从根目录 `dataset/` 读取。
 
-`mashang-service` 是一个面向汽车业务数据分析的 AI-native Analytics Workspace + Runtime System。
+| 我要做什么 | 从哪里开始 |
+|---|---|
+| 查锁单、门店、库存、预售或上市；更新数据 | [业务任务索引](workspace/README.md)，按问题选命令，查看数据写入和飞书推送影响 |
+| 找数据、核对指标或上市日 | [数据集声明](dataset/updater/dataset_registry.py) · [字段与业务口径](shared/schema/README.md) |
+| 通过 Hub/Worker 运行固定任务 | [已发布 Job](jobs/config/jobs_config.json) · [调用方式与返回值](jobs/README.md) |
+| 让 dsh-superagent 查某代际上市以来锁单 | [LS9 查询示例与工单执行说明](workspace/README.md#dsh-launch-monitor) |
+| 开发业务脚本、维护共享算子或 OCR 等通用工具 | [工作区规则](workspace/AGENTS.md) · [共享层](shared/README.md) · [基础能力](capabilities/README.md) |
 
-它不是单一的自然语言问数 Agent，而是一套从共享业务语义、分析能力孵化、能力治理，到 Runtime 产品化的完整工程体系。
+**统一资料入口**　[文档索引](docs/README.md) · [Agent Skills](.opencode/skills/README.md)。
 
-当前项目主线是：
+**结果位置**　日常分析表、图、报告分别交付到 `workspace/outputs/{tables,charts,reports}/`。终端查询直接返回结果；DSH 只读查询使用工单指定的临时文件。
+
+**仓库边界**　Service 维护业务数据、计算和查询入口。Hub/Worker 负责调度，DSH 负责工单和只读工作副本。MIIT 公告采集与归档已迁至平级仓库 [mashang-miit](../mashang-miit)，Service 消费其数据的接口尚未实现。其他研究项目见下文「独立产品与研究仓库」。
+
+## 当前目录
 
 ```text
-1. Semantic Foundation（dataset + shared）
-  ↓
-2. Base Capabilities（capabilities） +  3. Daily Business Analytics（mashang_workspace）
-  ↓
-4. Jobs（确定性执行契约，jobs/）
+mashang-service/
+├── .opencode/       统一 Agent 配置、Skills 和验证契约
+├── docs/            项目架构、业务方法与操作手册
+├── workspace/       业务脚本、研究、配置、测试与临时分析
+│   └── outputs/     业务报告、表格与图表
+├── dataset/         共享数据和更新入口
+├── shared/          共享业务口径、算子与 loader
+├── capabilities/    OCR、检索、渲染与通知等基础能力
+├── jobs/            已发布的确定性任务
+└── outputs/         基础能力及既有服务级产物
 ```
 
-独立研究仓库（`mashang-auto-launch` / `mashang-product-expert` / `mashang-nev-apeal` / `mashang-miit`）
-与 Service 平级维护，不在本仓库内分层。
-
-也就是说：
-
-- `shared/` + `dataset/` 提供共享业务语义、业务算子、业务定义与原始数据（Semantic Foundation）；
-- `capabilities/` 提供领域无关基础能力（OCR / Search / Notify 等），与日常业务分析能力平级，供上层复用（Base Capabilities）；
-- `mashang_workspace/` 是**日常业务分析工作区（Daily Business Analytics）**：负责分析、脚本开发、文档沉淀、Result Contract、Eval 与 Capability Registry，回答"今天要查什么/算什么"；
-- `jobs/` 是 **确定性执行契约层**：声明式 job + 参数白名单 + 状态/摘要/artifact 契约，供 **Hub（Control Plane）+ Worker（Execution Gateway）** 调用；
-- 研究型应用已拆为平级仓库：`../mashang-auto-launch/`、`../mashang-product-expert/`、`../mashang-nev-apeal/`；MIIT 在 `../mashang-miit/`。Service 不再内置这些应用。
-
-> 运行时系统由 **Hub + Worker + OpenCode** 组成，不再是 service 内的 Python package；service 侧只保留业务能力 + 确定性 `jobs/` contract。
-
----
+命令在仓库根目录运行。项目文档和 Skills 各有一个维护位置；工作区实现采用 `workspace` Python 命名空间。
 
 # 快速开始
 
 ## 环境准备
 
-推荐使用 Python 3.10+。
+使用 Python 3.11+。
 
 项目依赖通过 `pyproject.toml` 管理。
 
@@ -91,50 +93,9 @@ dataset/
 
 ---
 
-## 验证环境
+## 检查入口
 
-执行：
-
-```bash
-make test
-```
-
-或：
-
-```bash
-make ci
-```
-
-如果能够正常运行，则说明项目环境基本可用。
-
----
-
-## 最推荐的使用方式
-
-### 日常工作：使用 Workspace
-
-绝大多数情况下，应直接在：
-
-```text
-mashang_workspace/
-```
-
-中开展工作。
-
-推荐让 OpenCode 在 Workspace 中完成：
-
-- 业务分析；
-- 数据探索；
-- 编写分析脚本；
-- 补充业务文档；
-- 沉淀 Result Contract；
-- 编写 Eval Case；
-- 注册 Capability；
-- 验证能力质量。
-
-Workspace 是能力孵化与治理中心，也是项目的主要开发入口。
-
----
+在根目录运行 `make jobs-list` 查看已发布 Job。日常查询见 [Workspace 业务任务索引](workspace/README.md)。开发改动的验证范围见 [验证契约](.opencode/verification/README.md)。
 
 ### 查看锁单分析能力
 
@@ -187,7 +148,7 @@ make jobs-run JOB=daily_lock_count JOB_PARAMS="--job-param date=2026-11-03"
 ```text
 业务问题
   ↓
-mashang_workspace
+workspace
   ↓
 分析脚本
   ↓
@@ -205,8 +166,7 @@ jobs
 其中：
 
 - Workspace 用于探索和沉淀能力；
-- Runtime 用于承载已经成熟的产品能力；
-- 不建议直接在 Runtime 中开发新业务逻辑。
+- Hub/Worker 通过已声明的 Job 调用稳定业务脚本，业务实现由 Workspace 维护。
 
 ---
 
@@ -247,10 +207,10 @@ make ci
 重点关注：
 
 ```text
-mashang_workspace/business_scripts/
-mashang_workspace/research_scripts/
-mashang_workspace/docs/
-mashang_workspace/eval/
+workspace/business_scripts/
+workspace/research_scripts/
+docs/
+workspace/eval/
 ```
 
 ---
@@ -297,7 +257,7 @@ jobs/
 在：
 
 ```text
-mashang_workspace/research_scripts/
+workspace/research_scripts/
 ```
 
 完成业务验证。
@@ -307,7 +267,7 @@ mashang_workspace/research_scripts/
 封装为：
 
 ```text
-mashang_workspace/business_scripts/
+workspace/business_scripts/
 ```
 
 标准 Runtime Script。
@@ -325,7 +285,7 @@ mashang_workspace/business_scripts/
 注册到：
 
 ```text
-mashang_workspace/registry/capability_registry.json
+workspace/registry/capability_registry.json
 ```
 
 ### Step 6
@@ -341,7 +301,7 @@ mashang_workspace/registry/capability_registry.json
 对于稳定、高频、口径清晰的能力：
 
 ```text
-mashang_workspace
+workspace
   ↓
 jobs
 ```
@@ -421,7 +381,7 @@ ELOE = Σ P(最终开票 | 当前仍悬置)
         │                             │
         ▼                             ▼
 2. Base Capabilities          3. Daily Business Analytics Workspace
-   capabilities/                 mashang_workspace/
+   capabilities/                 workspace/
    OCR / Search / Notify         日常业务分析工具箱
    Browser / Parse / Render      research → business → eval
         │                             │
@@ -445,14 +405,13 @@ mashang-service/
 │   ├── notify/            # 飞书 Webhook 通知推送
 │   └── search/            # 豆包 Global Search 检索原语
 │
-├── mashang_workspace/     # 3. Daily Business Analytics Workspace（日常业务分析工具箱）
+├── workspace/     # 3. Daily Business Analytics Workspace（日常业务分析工具箱）
 │   ├── business_scripts/   #    高频确定业务分析，成熟后经 jobs/ 被 Hub 确定性调度
 │   ├── research_scripts/
 │   ├── utility_scripts/
 │   ├── registry/
 │   ├── eval/
 │   ├── tests/
-│   ├── docs/
 │   └── utils/
 │
 ├── jobs/                  # 4. 确定性执行契约层（service job）
@@ -463,7 +422,7 @@ mashang-service/
 └── README.md
 ```
 
-> 分层要点：`capabilities/`（Base Capabilities）与 `mashang_workspace/`（Daily Business Analytics）是两支平级的能力来源；
+> 分层要点：`capabilities/`（Base Capabilities）与 `workspace/`（Daily Business Analytics）是两支平级的能力来源；
 > `jobs/`（确定性执行契约）供 Hub/Worker 调用 workspace 业务能力。
 
 ## 独立产品与研究仓库
@@ -524,7 +483,7 @@ shared/schema/business_definition.json
 被以下模块共同消费：
 
 ```text
-mashang_workspace
+workspace
 shared
 jobs
 ```
@@ -538,12 +497,12 @@ shared 只存放稳定业务原语。
 
 ---
 
-## 2.2 Daily Business Analytics Workspace（mashang_workspace）
+## 2.2 Daily Business Analytics Workspace（workspace）
 
 目录：
 
 ```text
-mashang_workspace/
+workspace/
 ```
 
 **日常业务分析工作区**：解决"今天我要查什么、算什么、分析什么"（锁单、库存、门店、车型、渠道等高频、相对确定的业务分析）。这是项目最重要的日常工作区，也是 OpenCode 的主要工作区域。
@@ -668,7 +627,7 @@ research_scripts 必须显式调用。
 注册表：
 
 ```text
-mashang_workspace/registry/capability_registry.json
+workspace/registry/capability_registry.json
 ```
 
 当前核心能力：
@@ -709,7 +668,7 @@ Registry 的核心作用是：
 文档：
 
 ```text
-mashang_workspace/docs/result_contract.md
+docs/result_contract.md
 ```
 
 ---
@@ -763,36 +722,9 @@ make jobs-run JOB=daily_lock_count JOB_PARAMS="--job-param date=2026-11-03"
 
 ---
 
-# 9. Project Roadmap
+## 拆分记录
 
-已完成：
-
-```text
-Phase 11：Promotion Gate & Capability Registry
-Phase 12：Legacy Runtime Freeze & Runtime V2 Foundation
-Phase 12.5：Legacy Runtime Packaging
-Phase 12.6：Archive Cleanup
-Phase 12.7：Shared Operators & Schema Extraction
-Phase 12.8：Rename mashang_shared to shared
-```
-
-进行中：
-
-```text
-Phase 13：Runtime V2 Minimal Implementation
-Phase 14：Runtime V2 Multi-turn & Response Quality
-Phase 15：Feishu / API Product Output
-```
-
-长期目标：
-
-```text
-Workspace 持续成长能力
-        ↓
-Eval 与 Registry 治理
-        ↓
-Runtime 产品化沉淀
-```
+旧 Runtime 的退役范围和迁移记录见 [Service 架构基线](docs/architecture_baseline.md)。
 
 ---
 
@@ -800,7 +732,7 @@ Runtime 产品化沉淀
 
 ```text
 shared              # shared business semantics
-mashang_workspace   # capability incubation and governance
+workspace   # capability incubation and governance
 jobs                # deterministic execution contract (Hub/Worker)
 ```
 
@@ -860,9 +792,9 @@ dataset/incoming/feishu/
 
 ---
 
-## mashang_workspace
+## workspace
 
-`mashang_workspace/` 是当前 Agent 工作区，负责：
+`workspace/` 是当前 Agent 工作区，负责：
 
 - 分析探索（`research_scripts/`）
 - 稳定分析脚本（`business_scripts/`）
@@ -930,8 +862,8 @@ shared/
 | `outputs/assets/brand/` | 品牌资产（logo、签名） | ✅ 提交 |
 | `outputs/reports/` | 正式渲染报告（HTML/PDF/DOCX） | 🟡 按需 |
 | `outputs/submission/` | 正式申报材料 | 🟡 按需 |
-| `mashang_workspace/outputs/reports/` | 分析报告 | 🟡 按需 |
-| `mashang_workspace/outputs/tables/` | 结构化数据 | 🟡 考虑 gitignore |
-| `mashang_workspace/outputs/charts/` | 可视化图表 | 🟡 考虑 gitignore |
+| `workspace/outputs/reports/` | 分析报告 | 🟡 按需 |
+| `workspace/outputs/tables/` | 结构化数据 | 🟡 考虑 gitignore |
+| `workspace/outputs/charts/` | 可视化图表 | 🟡 考虑 gitignore |
 
 原则：可复现产物（CSV/JSON/图表）建议不提交；展示资产（品牌 logo / 正式报告）按需提交。

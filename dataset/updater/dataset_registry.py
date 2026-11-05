@@ -5,7 +5,7 @@
 被两处共同消费，避免「更新清单 / 校验清单 / 汇总清单」三处漂移：
 
 - dataset/updater/update_all_datasets.py（刷新 + 逐数据集汇总）
-- mashang_workspace/utility_scripts/dataset_validate.py（完整性校验）
+- workspace/utility_scripts/dataset_validate.py（完整性校验）
 
 每个数据集声明：所属更新 step、是否必需、关键字段、用于表示「数据最新时点」的日期列。
 """

@@ -22,8 +22,8 @@
 
 | 术语 | 定义 | 来源 |
 |------|------|------|
-| Cohort | 按首次分配时间分组的用户批次 | `mashang_workspace/research_scripts/lock_release_curve.py` |
-| 释放曲线 | Release Curve | 每个 cohort 随时间推移的锁单释放累积比例 | `mashang_workspace/research_scripts/lock_release_curve.py` |
+| Cohort | 按首次分配时间分组的用户批次 | `workspace/research_scripts/lock_release_curve.py` |
+| 释放曲线 | Release Curve | 每个 cohort 随时间推移的锁单释放累积比例 | `workspace/research_scripts/lock_release_curve.py` |
 | 车型 | Product | 具体产品名称（如"全新智己LS6 52kwh 五座"） | `product_name` 字段 |
 | 车系 | Series | 车型系列（LS6/L6/LS8/LS9/LS7/L7） | `series` 字段 |
 | 系列分组 | Series Group | 二级车型分组（CM0/CM1/CM2/DM0/DM1） | `shared/schema/business_definition.json` |

@@ -92,4 +92,4 @@ python -m pytest capabilities/feishu/tests -q      # 离线，注入 fake HTTP
 
 | 消费方 | 用途 | 状态 |
 |--------|------|------|
-| `mashang_workspace/research_scripts/presale_cumulative_order_compare.py --to-feishu` | 预售报告 → 飞书云文档 | ✅ |
+| `workspace/research_scripts/presale_cumulative_order_compare.py --to-feishu` | 预售报告 → 飞书云文档 | ✅ |

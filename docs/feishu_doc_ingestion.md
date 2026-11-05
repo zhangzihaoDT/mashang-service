@@ -18,9 +18,9 @@
 ### 工具
 
 ```bash
-python mashang_workspace/utility_scripts/docx2md.py \
+python workspace/utility_scripts/docx2md.py \
     "~/Downloads/LS6 M2_T1产品简介Feature Book.docx" \
-    -o "mashang_workspace/docs/archive/LS6_M2_T1_FeatureBook.md" \
+    -o "docs/archive/LS6_M2_T1_FeatureBook.md" \
     --title "LS6 M2/T1 产品简介 Feature Book"
 ```
 

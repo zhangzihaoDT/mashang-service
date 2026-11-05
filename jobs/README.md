@@ -10,7 +10,7 @@ mashang-hub (Control Plane)  ──调度──▶  Worker (Execution Gateway)  
 
 - **只负责** job 的声明、参数校验与确定性执行，以及状态/摘要/artifact 契约。
 - **不负责** 自然语言路由、多轮会话、答案渲染、UI/CLI 交互；这些由 Hub / Worker / OpenCode 承担。
-- 业务逻辑留在各项目目录（当前为 `mashang_workspace/…`），不复制进本目录。
+- 业务逻辑留在各项目目录（当前为 `workspace/…`），不复制进本目录。
 
 ## 结构
 

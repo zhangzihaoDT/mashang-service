@@ -4,7 +4,7 @@
 
 **Service 级共享数据资产。**
 
-本数据集由 6 张 Tableau 导出的窄视图 CSV 构建而成，面向 mashang_workspace（及经 `jobs/` 调用的上层）提供标准化的乘用车上险数据（TP&MIX-ways Registration Data）查询能力。
+本数据集由 6 张 Tableau 导出的窄视图 CSV 构建而成，面向 workspace（及经 `jobs/` 调用的上层）提供标准化的乘用车上险数据（TP&MIX-ways Registration Data）查询能力。
 
 ### 分层
 
@@ -275,7 +275,7 @@ pytest tests/test_tp_and_mix_ways_raw_guard.py -q
 
 ## 相关文档
 
-- **workspace 使用指南**: `mashang_workspace/docs/tp_and_mix_ways_usage.md` — 6 张表的适用场景、字段速查、workspace 消费规范
+- **workspace 使用指南**: `docs/tp_and_mix_ways_usage.md` — 6 张表的适用场景、字段速查、workspace 消费规范
 - **数据集构建**: `scripts/build_tp_and_mix_ways_dataset.py` — service 级构建脚本
 - **schema 定义**: `shared/schema/tp_and_mix_ways_schema.py` — grain / dimensions / metrics
 - **loader**: `shared/loaders/tp_and_mix_ways_loader.py` — pandas / DuckDB 读取入口

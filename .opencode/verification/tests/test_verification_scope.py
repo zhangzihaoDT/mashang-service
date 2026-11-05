@@ -43,7 +43,7 @@ def test_all_rules_have_note():
 def test_glob_star_star_matches_root_and_nested_md():
     assert rvs.match_path("AGENTS.md", "**/*.md")
     assert rvs.match_path("docs/cpca_market_research.md", "**/*.md")
-    assert not rvs.match_path("mashang_workspace/x.py", "**/*.md")
+    assert not rvs.match_path("workspace/x.py", "**/*.md")
 
 
 def test_doc_only_is_noop():
@@ -54,7 +54,7 @@ def test_doc_only_is_noop():
 
 
 def test_research_script_adds_scripts_and_help_smoke():
-    path = "mashang_workspace/research_scripts/new_report.py"
+    path = "workspace/research_scripts/new_report.py"
     scope = rvs.resolve_scope(_contract(), [path])
     ids = {t["id"] for t in scope["required_targets"]}
     assert "pytest.scripts" in ids
@@ -63,7 +63,7 @@ def test_research_script_adds_scripts_and_help_smoke():
 
 def test_business_script_adds_core_eval():
     scope = rvs.resolve_scope(
-        _contract(), ["mashang_workspace/business_scripts/daily_lock_count.py"]
+        _contract(), ["workspace/business_scripts/daily_lock_count.py"]
     )
     ids = {t["id"] for t in scope["required_targets"]}
     assert "eval.core" in ids
@@ -85,14 +85,14 @@ def test_package_init_not_smoked():
 
 
 def test_changed_test_file_runs_itself():
-    path = "mashang_workspace/tests/eval/test_context_parser.py"
+    path = "workspace/tests/eval/test_context_parser.py"
     scope = rvs.resolve_scope(_contract(), [path])
     ids = {t["id"] for t in scope["required_targets"]}
     assert f"pytest:{path}" in ids
 
 
 def test_non_test_eval_script_smokes_not_pytest():
-    path = "mashang_workspace/eval/run_capability_audit.py"
+    path = "workspace/eval/run_capability_audit.py"
     scope = rvs.resolve_scope(_contract(), [path])
     ids = {t["id"] for t in scope["required_targets"]}
     assert f"smoke:{path}" in ids
@@ -105,7 +105,7 @@ def test_nearest_tests_does_not_leak_to_root_tests():
 
 
 def test_generated_outputs_are_noop_not_unclassified():
-    scope = rvs.resolve_scope(_contract(), ["mashang_workspace/outputs/tables/x.csv"])
+    scope = rvs.resolve_scope(_contract(), ["workspace/outputs/tables/x.csv"])
     assert scope["decision"] == "no-op"
     assert scope["unclassified_files"] == []
 
@@ -132,9 +132,9 @@ def test_unclassified_file_review():
 
 # ── baseline-aware verdict ──
 def test_is_baseline_suffix_match():
-    node = "mashang_workspace/tests/test_root_cleanup.py::test_root_docs_not_exists"
+    node = "workspace/tests/test_root_cleanup.py::test_root_docs_not_exists"
     assert rvs._is_baseline(node, {node})
-    assert not rvs._is_baseline("mashang_workspace/tests/other.py::test_new", {node})
+    assert not rvs._is_baseline("workspace/tests/other.py::test_new", {node})
 
 
 def test_run_marks_baseline_only_failure_as_passed():

@@ -53,7 +53,7 @@ HTML / SVG artifact
 
 在 `mashang-service` 中，Research outputs 主要来自平级研究仓库
 （`../mashang-auto-launch`、`../mashang-product-expert`、`../mashang-nev-apeal`）和
-`mashang_workspace/outputs/`。
+`workspace/outputs/`。
 
 分层职责：
 
@@ -72,7 +72,7 @@ HTML / SVG artifact
 - command：`.opencode/commands/diagram.md`（→ `mashang-diagram`）
 - project marker：`.diagram-design`
 - typography profile：`~/.diagram-design/profiles/mashang-research.md`
-- artifact target：`mashang_workspace/outputs/`
+- artifact target：`workspace/outputs/`
 
 当前 Profile 只冻结本机 `Noto Sans CJK SC` 字体策略；颜色、布局、spacing、shadow、radius 和 diagram 类型规则继续继承 upstream 默认值。
 

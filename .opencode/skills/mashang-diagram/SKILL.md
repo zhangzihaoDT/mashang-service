@@ -59,7 +59,7 @@ diagram-design visual rules / self_check
    ```bash
    python -m capabilities.diagram.dumbbell \
      --input <rows.json> --format html \
-     --output-root mashang_workspace/outputs
+     --output-root workspace/outputs
    ```
 
    Python API（需要自定义 skin 时）：
@@ -90,7 +90,7 @@ diagram-design visual rules / self_check
 ## 视觉与品牌口径
 
 - 图表内容（数据、几何、可访问性）由 capability 保证。
-- 报告版式、标题层级、卡片与皮肤，优先沿用 `mashang_workspace/docs/report_visual_system.md` 与 `diagram-design` 的视觉规则。
+- 报告版式、标题层级、卡片与皮肤，优先沿用 `docs/report_visual_system.md` 与 `diagram-design` 的视觉规则。
 - 路由层**不得写死** raccoon / 任何调色板；皮肤通过 `DumbbellTheme` 注入。
 
 ## 参考

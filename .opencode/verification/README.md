@@ -45,12 +45,12 @@ python .opencode/verification/resolve_verification_scope.py --worktree --run
 # 或 make verify
 
 # 工作区混有其他任务的改动：两步都限定为本次修改的文件
-make verify-scope VERIFY_CHANGED="mashang_workspace/business_scripts/user_profile.py"
-make verify VERIFY_CHANGED="mashang_workspace/business_scripts/user_profile.py"
+make verify-scope VERIFY_CHANGED="workspace/business_scripts/user_profile.py"
+make verify VERIFY_CHANGED="workspace/business_scripts/user_profile.py"
 
 # 针对一次具体改动 / 一段提交
 python .opencode/verification/resolve_verification_scope.py \
-  --changed Makefile docs/x.md mashang_workspace/research_scripts/y.py --run
+  --changed Makefile docs/x.md workspace/research_scripts/y.py --run
 python .opencode/verification/resolve_verification_scope.py --range origin/main..HEAD --run
 
 # 显式扩大范围（必须显式，才会跑全部 target）

@@ -58,11 +58,11 @@
 
 | 消费方 | 用途 | 状态 |
 |--------|------|------|
-| `mashang_workspace/business_scripts/monthly_sales_order_type_to_feishu.py` | 月度销量推送 | ✅ 已迁移 |
-| `mashang_workspace/business_scripts/daily_dc_inventory_change.py` | DC 库存变动推送 | ✅ 已迁移 |
-| `mashang_workspace/utility_scripts/skills_order_observation_daily.py` | 每日观察推送（webhook 段；Bitable 段不动） | ✅ 已迁移 |
-| `mashang_workspace/business_scripts/vehicle_sales_monitor.py` | 预售/上市锁单监控推送（唯一实现） | ✅ 已迁移 |
-| `mashang_workspace/research_scripts/presale_metrics_to_feishu.py` | 预售小订推送（compat shim → `vehicle_sales_monitor --force-phase`） | ✅ 已迁移 |
+| `workspace/business_scripts/monthly_sales_order_type_to_feishu.py` | 月度销量推送 | ✅ 已迁移 |
+| `workspace/business_scripts/daily_dc_inventory_change.py` | DC 库存变动推送 | ✅ 已迁移 |
+| `workspace/utility_scripts/skills_order_observation_daily.py` | 每日观察推送（webhook 段；Bitable 段不动） | ✅ 已迁移 |
+| `workspace/business_scripts/vehicle_sales_monitor.py` | 预售/上市锁单监控推送（唯一实现） | ✅ 已迁移 |
+| `workspace/research_scripts/presale_metrics_to_feishu.py` | 预售小订推送（compat shim → `vehicle_sales_monitor --force-phase`） | ✅ 已迁移 |
 | `mashang-auto-launch`（`research_apps/auto_launch/src/feishu_sender.py`） | 竞品营销日报推送 | ✅ 已迁移（薄封装；仓库已独立） |
 
 ## 历史沿革

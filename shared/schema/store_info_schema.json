@@ -167,7 +167,7 @@
     "matched_metric": "CM3 试驾车 412 台中 386 台可归属到 Bloc（26 台为 popup/新址/未登记）"
   },
   "consumers": [
-    "mashang_workspace/utility_scripts/skills_store_lock_alert.py（Bloc 级锁单活性）",
+    "workspace/utility_scripts/skills_store_lock_alert.py（Bloc 级锁单活性）",
     "门店锁单/试驾车按经销商归属分析",
     "dealer_unsold_inventory 系列库存口径的集团侧补充"
   ]

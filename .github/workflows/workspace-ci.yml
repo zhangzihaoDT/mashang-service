@@ -26,24 +26,24 @@ jobs:
           pip install pytest
 
       - name: Ensure output directory
-        run: mkdir -p mashang_workspace/outputs/tables
+        run: mkdir -p workspace/outputs/tables
 
       - name: Run unified eval (CI-safe suites)
         run: |
-          python mashang_workspace/eval/run_eval.py \
+          python workspace/eval/run_eval.py \
             --suite ci \
             --format json \
-            --output mashang_workspace/outputs/tables/unified_eval_result.json
+            --output workspace/outputs/tables/unified_eval_result.json
 
       - name: Run pytest (data-independent tests only)
         run: |
-          pytest mashang_workspace/tests/test_root_cleanup.py \
-                 mashang_workspace/tests/test_schema_docs_sync.py \
-                 mashang_workspace/tests/test_model_positioning_loader.py \
-                 mashang_workspace/tests/scripts/test_result_contract.py \
-                 mashang_workspace/tests/eval/test_context_parser.py \
-                 mashang_workspace/tests/eval/test_followup_runner.py \
-                 mashang_workspace/tests/eval/test_result_reference.py \
+          pytest workspace/tests/test_root_cleanup.py \
+                 workspace/tests/test_schema_docs_sync.py \
+                 workspace/tests/test_model_positioning_loader.py \
+                 workspace/tests/scripts/test_result_contract.py \
+                 workspace/tests/eval/test_context_parser.py \
+                 workspace/tests/eval/test_followup_runner.py \
+                 workspace/tests/eval/test_result_reference.py \
                  tests/test_tp_and_mix_ways_dataset_build.py \
                  tests/test_tp_and_mix_ways_raw_guard.py \
                  -q
@@ -53,4 +53,4 @@ jobs:
         if: always()
         with:
           name: unified-eval-result
-          path: mashang_workspace/outputs/tables/unified_eval_result.json
+          path: workspace/outputs/tables/unified_eval_result.json

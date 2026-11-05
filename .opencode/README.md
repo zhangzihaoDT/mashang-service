@@ -19,6 +19,8 @@
 - `.opencode/skills/mashang-diagram/` → 项目自有 diagram 路由 Skill
 - `.opencode/skills/diagram-design` → 独立 upstream checkout（只读消费）
 
+业务 Skills 同样位于根 `.opencode/skills/`，包括品牌报告、月报和乘联会数据采集。完整列表见 Skills 索引。
+
 ## Commands
 
 - `.opencode/commands/diagram.md` → `/diagram`

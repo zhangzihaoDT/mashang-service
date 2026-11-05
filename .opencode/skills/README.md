@@ -5,6 +5,10 @@
 ```text
 .opencode/skills/
 ├── README.md
+├── branded_html_report/         # 品牌化业务报告
+├── monthly-market-report/        # 月度市场报告
+├── cpca-weekly-data-capture/      # 乘联会周度数据采集
+├── runtime-eval-diagnosis/        # 历史 Runtime 报告诊断
 ├── official_document_render/
 ├── doubao-search/
 ├── mashang-diagram/              # 项目自有：diagram 路由 Skill（实体目录）
@@ -25,3 +29,5 @@
 当前 diagram 接入说明：
 
 `.opencode/integrations/diagram-design.md`
+
+项目从仓库根目录发现全部 Skills。业务脚本在 `workspace/`，分析方法与运营手册在根 `docs/`。

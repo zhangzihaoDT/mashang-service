@@ -19,31 +19,31 @@
       "description": "Verification Scope Contract 自测"
     },
     "eval.ci": {
-      "command": ["{python}", "mashang_workspace/eval/run_eval.py", "--suite", "ci", "--format", "terminal"],
+      "command": ["{python}", "workspace/eval/run_eval.py", "--suite", "ci", "--format", "terminal"],
       "data_dependency": false,
       "tier": "eval",
       "description": "CI-safe eval（parser + followup + reference），不依赖 dataset"
     },
     "eval.core": {
-      "command": ["{python}", "mashang_workspace/eval/run_eval.py", "--suite", "core", "--format", "terminal"],
+      "command": ["{python}", "workspace/eval/run_eval.py", "--suite", "core", "--format", "terminal"],
       "data_dependency": true,
       "tier": "eval",
       "description": "Core eval（business 脚本 numeric + contract gate），依赖 dataset"
     },
     "pytest.eval": {
-      "command": ["{python}", "-m", "pytest", "mashang_workspace/tests/eval", "-q"],
+      "command": ["{python}", "-m", "pytest", "workspace/tests/eval", "-q"],
       "data_dependency": false,
       "tier": "pytest",
       "description": "workspace eval 单测"
     },
     "pytest.scripts": {
-      "command": ["{python}", "-m", "pytest", "mashang_workspace/tests/scripts", "-q"],
+      "command": ["{python}", "-m", "pytest", "workspace/tests/scripts", "-q"],
       "data_dependency": false,
       "tier": "pytest",
       "description": "workspace 脚本 smoke / Result Contract 单测"
     },
     "pytest.workspace": {
-      "command": ["{python}", "-m", "pytest", "mashang_workspace/tests", "-q"],
+      "command": ["{python}", "-m", "pytest", "workspace/tests", "-q"],
       "data_dependency": true,
       "tier": "pytest",
       "description": "workspace 全量单测（部分依赖 dataset）"
@@ -78,7 +78,7 @@
     },
     {
       "id": "business-script",
-      "match": ["mashang_workspace/business_scripts/*.py"],
+      "match": ["workspace/business_scripts/*.py"],
       "targets": ["pytest.scripts", "eval.core"],
       "dynamic": "script_help",
       "note": "business tier 受 Result Contract + numeric gate 约束（eval.core 依赖 dataset）"
@@ -86,8 +86,8 @@
     {
       "id": "workspace-script",
       "match": [
-        "mashang_workspace/research_scripts/*.py",
-        "mashang_workspace/utility_scripts/*.py"
+        "workspace/research_scripts/*.py",
+        "workspace/utility_scripts/*.py"
       ],
       "targets": ["pytest.scripts"],
       "dynamic": "script_help",
@@ -95,14 +95,14 @@
     },
     {
       "id": "workspace-test",
-      "match": ["mashang_workspace/tests/**"],
+      "match": ["workspace/tests/**"],
       "targets": [],
       "dynamic": "pytest_file",
       "note": "直接运行改动的测试文件"
     },
     {
       "id": "workspace-eval",
-      "match": ["mashang_workspace/eval/**"],
+      "match": ["workspace/eval/**"],
       "targets": ["pytest.eval", "eval.ci"],
       "dynamic": "pytest_file",
       "note": "eval 逻辑改动跑 eval 单测 + CI-safe eval"
@@ -159,7 +159,7 @@
     },
     {
       "id": "generated-outputs",
-      "match": ["mashang_workspace/outputs/**", "outputs/**"],
+      "match": ["workspace/outputs/**", "outputs/**"],
       "targets": [],
       "dynamic": null,
       "code": false,

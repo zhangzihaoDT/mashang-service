@@ -10,7 +10,7 @@ dependencies = [
 
 [tool.pytest.ini_options]
 testpaths = [
-    "mashang_workspace/tests",
+    "workspace/tests",
     "tests",
 ]
 pythonpath = ["."]

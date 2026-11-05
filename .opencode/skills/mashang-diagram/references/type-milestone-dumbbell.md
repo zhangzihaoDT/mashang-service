@@ -59,7 +59,7 @@ delta_days   date_b − date_a（派生字段，调用方不填）
 ```bash
 python -m capabilities.diagram.dumbbell \
   --input <rows.json> --format html \
-  --output-root mashang_workspace/outputs
+  --output-root workspace/outputs
 ```
 
 `--format svg` 只出 SVG；`--format json` 出无产物的 Result Contract（含派生 `delta_days`）。
