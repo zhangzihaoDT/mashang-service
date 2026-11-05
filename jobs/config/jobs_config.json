@@ -20,6 +20,23 @@
       },
       "summary": "json",
       "timeout_seconds": 120
+    },
+    "data_refresh_daily": {
+      "module": "dataset",
+      "label": "Data refresh daily + status",
+      "cwd": "{repo_root}",
+      "argv_template": [
+        "{python}",
+        "-m",
+        "jobs.production",
+        "run",
+        "data-refresh-daily",
+        "--repo-root",
+        "{repo_root}"
+      ],
+      "params": {},
+      "summary": "json",
+      "timeout_seconds": 2100
     }
   }
 }

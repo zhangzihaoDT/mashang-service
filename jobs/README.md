@@ -18,6 +18,7 @@ mashang-hub (Control Plane)  ──调度──▶  Worker (Execution Gateway)  
 jobs/
 ├── adapter.py              # execution contract：load_jobs / validate_params / run_job
 ├── cli.py                  # Worker/Hub 调用入口（--job / --job-param / --list）
+├── production.py           # 受控生产写入：固定 job、主 checkout 校验、锁、超时、data-status 核验
 ├── config/jobs_config.json # 声明式 job 定义（argv 模板 / cwd / 参数白名单 / artifact）
 └── tests/                  # hermetic 契约测试
 ```
@@ -27,8 +28,14 @@ jobs/
 ```bash
 python -m jobs.cli --list
 python -m jobs.cli --job daily_lock_count --job-param date=2026-11-03
+python -m jobs.cli --job data_refresh_daily --format json
 python -m jobs.cli --job daily_lock_count --job-param date=2026-11-03 --format json
 ```
+
+`data_refresh_daily` 是受控生产写入：只在主 checkout 执行
+`make data-refresh-daily`，随后自动执行 `make data-status`，并比较刷新前后的
+`order_data` / `assign_data` 状态。它拒绝 linked worktree、带执行锁和 30 分钟超时，
+返回 success / no_new_data / failed / timeout / verification_failed / busy。
 
 ## Execution Contract
 
