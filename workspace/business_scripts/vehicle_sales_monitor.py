@@ -181,6 +181,10 @@ def run(args) -> int:
         "time_window": {"as_of": today.date().isoformat()},
         "filters": {"series": args.series, "phase": args.phase},
         "metric_definition": "预售小订 / 上市锁单监控（business_definition.monitor）",
+        "launch_retained_lock_rule": (
+            "上市锁单中退款审批时间（approve_refund_time）为空，按订单号去重。"
+            "款式占比以该口径的累计锁单为分母。"
+        ),
         "presale_window_rule": (
             "start <= day < end；end（上市日）未确认时按 start + "
             f"{presale_open_ended_window_days(bdef)} 天持续输出预售监控"

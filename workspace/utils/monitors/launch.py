@@ -402,7 +402,7 @@ def build_card(metrics: dict, show_notes: bool = True) -> dict:
     lines.append(
         f"上市至今累计：**{metrics['retention']:,}**，峰值小时 **{metrics['peak_count']:,}**（{peak_hour_str}）"
     )
-    lines.append(f"上市至今累计留存：**{metrics['retention_kept']:,}**")
+    lines.append(f"上市至今累计留存锁单（退款审批时间为空）：**{metrics['retention_kept']:,}**")
 
     compare_str = " / ".join(
         f"{k}（{v:,}）" if v is not None else f"{k}（无数据）" for k, v in metrics["compare"].items()
