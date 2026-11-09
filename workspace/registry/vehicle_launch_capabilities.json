@@ -1,0 +1,286 @@
+{
+  "schema_version": 1,
+  "topic_id": "vehicle_launch",
+  "title": "车型预售与上市专题能力入口",
+  "repository_root_relative": true,
+  "authority": {
+    "business_definition": "shared/schema/business_definition.json",
+    "time_periods": {
+      "start": "预售开放／资源投入起点",
+      "end": "正式上市日",
+      "finish": "上市权益结束日"
+    },
+    "generation_assignment": "series_group_logic",
+    "presale_window": "presale_periods（用于集团等特定外部车型的预售定义须区别来源）",
+    "missing_date_policy": "未定义字段不得从锁单首日推断，不得将 start 当作 end"
+  },
+  "capability_types": [
+    {
+      "id": "research_reports",
+      "label": "研究分析",
+      "entry_count": 4,
+      "side_effect": "生成报告文件/只读分析；不推送飞书"
+    },
+    {
+      "id": "monitoring",
+      "label": "业务监控",
+      "entry_count": 1,
+      "side_effect": "dry-run 预览安全；正常模式可能飞书推送"
+    }
+  ],
+  "report_entries": [
+    {
+      "id": "launch_presale_risk_snapshot",
+      "name": "预售启动风险快照",
+      "business_question": "在预售开放、资源开始投入时，现有悬置订单池质量是否足以支撑新车上市？",
+      "stage": "pre_presale",
+      "anchor": "time_periods.{generation}.start 前最近一个历史观察点（严格 < start）",
+      "script": "workspace/research_scripts/launch_risk_snapshot.py",
+      "cli": {
+        "example": ".venv/bin/python workspace/research_scripts/launch_risk_snapshot.py --format html",
+        "flags": [
+          "--as-of YYYY-MM-DD",
+          "--format terminal|json|html",
+          "--output DIR"
+        ]
+      },
+      "scope": {
+        "generation": "动态读取 time_periods 中具有 start 的所有代际；不是单车型 --series 入口",
+        "as_of": "默认订单数据最新锁单日；仅纳入 start <= as_of 的预售事件"
+      },
+      "data_sources": [
+        "dataset/order_data.parquet",
+        "shared/schema/business_definition.json"
+      ],
+      "dependencies": [
+        "workspace/research_scripts/backlog_rate_trend_report.py",
+        "shared/operators/effective_locked_orders.py",
+        "workspace/utils/data_loader.py"
+      ],
+      "outputs": {
+        "terminal": "终端表",
+        "json": "stdout JSON（非文件落盘）",
+        "html": "workspace/outputs/reports/launch_risk_snapshot_YYYYMMDD.html"
+      },
+      "metric_boundary": "At-Risk Backlog = 悬置池 - ELOE；以历史风险分位和有效率识别预售前积压风险",
+      "notes": [
+        "start 为预售开放日，不得修改为 end；本报为前置诊断，不是正式上市日风险",
+        "严格使用 start 前最后一个观察点；as-of 截断历史计算范围",
+        "现有脚本未提供单一代际筛选参数"
+      ],
+      "capability_type": "research_reports",
+      "production_job_registered": false
+    },
+    {
+      "id": "launch_cumulative_lock_compare",
+      "name": "上市后累计锁单跨代际对比",
+      "business_question": "新代际上市后第 N 天的零售锁单、漏斗、画像与门店表现相较前代如何？",
+      "stage": "post_launch",
+      "anchor": "time_periods.{generation}.end，按各代际上市后 D1..DN 对齐",
+      "script": "workspace/research_scripts/launch_cumulative_lock_compare.py",
+      "cli": {
+        "example": ".venv/bin/python workspace/research_scripts/launch_cumulative_lock_compare.py --gens DM0 DM1 DM2 --html",
+        "flags": [
+          "--gens GEN [GEN ...]",
+          "--as-of YYYY-MM-DD",
+          "--format terminal|json|html",
+          "--html",
+          "--output DIR"
+        ]
+      },
+      "scope": {
+        "generation": "默认 DM0、DM1、DM2；可用 --gens 修改，按上市先后排列",
+        "as_of": "默认当天；受锁单数据最新时点约束"
+      },
+      "data_sources": [
+        "dataset/order_data.parquet",
+        "dataset/assign_data.csv",
+        "shared/schema/business_definition.json"
+      ],
+      "dependencies": [
+        "workspace/research_scripts/store_network_compare.py",
+        "workspace/research_scripts/lock_config_distribution.py",
+        "workspace/business_scripts/user_profile.py",
+        "workspace/business_scripts/presale_intention_funnel.py",
+        "shared/operators/repurchase.py"
+      ],
+      "outputs": {
+        "terminal": "终端表",
+        "json": "workspace/outputs/tables/launch_cum_lock_compare_{gens}.json",
+        "html": "workspace/outputs/reports/launch_cum_lock_compare_YYYYMMDD.html"
+      },
+      "metric_boundary": "lock_time 非空的 order_number 去重；零售为用户车/未填 order_type，剔除测试与非零售；不同于监控卡的全口径锁单",
+      "notes": [
+        "以 end 而非最早 lock_time 对齐上市日",
+        "研究指标含门店网络、用户画像、线索与配置；部分模块依赖其他数据源",
+        "报告脚本的 JSON 结构仍需按生产 Contract Gate 单独验收"
+      ],
+      "capability_type": "research_reports",
+      "production_job_registered": false
+    },
+    {
+      "id": "launch_rhythm_incremental_analysis",
+      "name": "上市节奏与增量贡献归因",
+      "business_question": "预售、上市爆发、权益结束分别带来多少零售锁单？相对自然基线的新增量有多少？",
+      "stage": "post_launch_research",
+      "anchor": "start 预售、end 正式上市、finish 权益结束",
+      "script": "workspace/research_scripts/launch_rhythm_incremental_analysis.py",
+      "cli": {
+        "example": ".venv/bin/python workspace/research_scripts/launch_rhythm_incremental_analysis.py --html --format json",
+        "flags": [
+          "--as-of YYYY-MM-DD",
+          "--format terminal|json",
+          "--output DIR",
+          "--html",
+          "--report-output FILE"
+        ]
+      },
+      "scope": {
+        "generation": "当前代码固定 GENERATIONS = CM0/DM0/CM1/DM1/CM2/LS9/LS8，另有 DM2 当期参照；没有 --gens/--series 参数",
+        "as_of": "默认当天，按数据最新锁单日截断"
+      },
+      "data_sources": [
+        "dataset/order_data.parquet",
+        "shared/schema/business_definition.json"
+      ],
+      "dependencies": [
+        "workspace/research_scripts/launch_rhythm_incremental_html.py",
+        "workspace/utils/result_contract.py"
+      ],
+      "outputs": {
+        "csv": [
+          "workspace/outputs/tables/launch_rhythm_12m.csv",
+          "workspace/outputs/tables/launch_rhythm_6m.csv",
+          "workspace/outputs/tables/launch_rhythm_dm2_current.csv（有 DM2 时）"
+        ],
+        "json": "workspace/outputs/tables/launch_rhythm_contract.json（--format json 时）",
+        "html": "workspace/outputs/reports/launch_rhythm_incremental_analysis.html（--html 时）"
+      },
+      "metric_boundary": "阶段占比 + 双基线差值增量 + 预售池转化三条证据线；预售期 [start,end)，上市爆发 [end,end+7d)",
+      "notes": [
+        "不是实时上市监控；当前研究样本固定，新增代际需要修改研究逻辑并回归",
+        "--format json 不自动生成 HTML，需显式 --html；运行会写 CSV"
+      ],
+      "capability_type": "research_reports",
+      "production_job_registered": false
+    },
+    {
+      "id": "launch_group_order_compare",
+      "name": "集团新车上市订单横向对标",
+      "business_question": "智己 L6、MG 07 与大众 ID.ERA 5S 上市后同天数的集团全渠道每日及累计订单如何比较？",
+      "stage": "post_launch_benchmark",
+      "anchor": "各车型的 t0 比较基准；目前 GROUP_ORDER_MODELS 在脚本中配置",
+      "script": "workspace/research_scripts/group_order_launch_compare.py",
+      "cli": {
+        "example": ".venv/bin/python workspace/research_scripts/group_order_launch_compare.py --html",
+        "flags": [
+          "--models MODEL [MODEL ...]",
+          "--as-of YYYY-MM-DD",
+          "--format terminal|json|html",
+          "--html",
+          "--output DIR"
+        ]
+      },
+      "scope": {
+        "models": "当前固定集合 智己L6、MG 07、大众ID.ERA 5S；--models 只能从现有 GROUP_ORDER_MODELS 过滤",
+        "as_of": "默认集团订单数据最新快照覆盖日"
+      },
+      "data_sources": [
+        "workspace/outputs/tables/重点车型（订单）.csv"
+      ],
+      "dependencies": [
+        "workspace/research_scripts/saic_group_order_daily_parse.py",
+        "workspace/research_scripts/model_order_monthly_compare_report.py"
+      ],
+      "outputs": {
+        "terminal": "终端表",
+        "json": "workspace/outputs/tables/group_order_launch_compare.json",
+        "html": "workspace/outputs/reports/group_order_launch_compare_YYYYMMDD.html"
+      },
+      "metric_boundary": "观星台集团全渠道国内订单，含预售/试驾等，不是 order_data.parquet 的内部零售锁单，不能直接混合比较",
+      "notes": [
+        "现有脚本将智己L6 t0=2026-08-28、MG 07/ID.ERA 5S t0=2026-08-21 写在 GROUP_ORDER_MODELS；后两者是近似比较基准，不属于 business_definition 的权威上市日",
+        "该脚本是 business_definition SSOT 的明确例外，不能声称所有 t0 均从该文件读取",
+        "上游集团订单 CSV 必须先由独立数据解析流程备好；本入口不会自动刷新"
+      ],
+      "capability_type": "research_reports",
+      "production_job_registered": false
+    }
+  ],
+  "monitor_entry": {
+    "id": "vehicle_sales_monitor",
+    "name": "统一预售／上市监控",
+    "capability_type": "monitoring",
+    "script": "workspace/business_scripts/vehicle_sales_monitor.py",
+    "business_question": "当前哪些代际处于预售或上市阶段，其小订／锁单是否变化，订单数据是否新鲜？",
+    "anchor": "presale => start；launch => end（正式上市）",
+    "scope": "动态 active 代际；可用 --series、--phase 过滤；已退出 active 的历史快照可用 --force-phase 指定",
+    "data_sources": [
+      "dataset/order_data.parquet",
+      "shared/schema/business_definition.json"
+    ],
+    "dependencies": [
+      "workspace/utils/monitors/presale.py",
+      "workspace/utils/monitors/launch.py",
+      "workspace/utils/monitors/phase.py",
+      "workspace/utils/monitors/freshness.py"
+    ],
+    "cli": {
+      "safe_preview": ".venv/bin/python workspace/business_scripts/vehicle_sales_monitor.py --series CM3 --phase launch --dry-run --format json",
+      "flags": [
+        "--series CM3,DM2",
+        "--phase presale,launch",
+        "--as-of YYYY-MM-DD",
+        "--force-phase",
+        "--dry-run",
+        "--format terminal|json",
+        "--output FILE_OR_DIR",
+        "--refresh-ts ISO",
+        "--allow-stale",
+        "--now ISO"
+      ]
+    },
+    "outputs": {
+      "card": "飞书卡片；只在不加 --dry-run 且符合发送条件时发送",
+      "json": "stdout JSON（--format json），另可 --output 写 Result Contract",
+      "default_artifact": "无固定 HTML 报告；--output 为可选文件或目录"
+    },
+    "side_effects": {
+      "safe_preview": "--dry-run 不向飞书发送，也不刷新本地数据",
+      "normal": "不加 --dry-run 将尝试发送飞书卡片",
+      "refresh_and_send": "make monitor-sync SERIES=CM3 PHASE=launch：先刷新并写订单数据，后推送"
+    },
+    "notes": [
+      "无 --as-of 时执行数据新鲜度 gate；显式 --as-of 走历史口径，会跳过新鲜度 gate",
+      "--force-phase 强制 launch 之前，调用方须校验 time_periods.{generation}.end 存在；底层 resolve_launch_date 存在 finish/start 回退，不可将回退值宣称为正式上市日期",
+      "监控卡累计锁单与零售研究报告口径不同，禁止直接作数值一致性断言",
+      "目前没有专门的上市报告生产 Job；正式生产调度授权不因登记本专题入口而自动开放"
+    ]
+  },
+  "non_entries": [
+    {
+      "script": "workspace/research_scripts/launch_rhythm_incremental_html.py",
+      "reason": "渲染模块，非独立入口"
+    },
+    {
+      "script": "workspace/research_scripts/presale_cumulative_order_compare.py",
+      "reason": "预售上游研究脚本，不属于本次四份上市报告"
+    },
+    {
+      "pattern": "workspace/scratch/launch_*.py",
+      "reason": "临时分析，不纳入稳定入口"
+    }
+  ],
+  "governance": {
+    "no_change_to_algorithms": true,
+    "no_new_job_registration": true,
+    "global_maturity_registry": "workspace/registry/capability_registry.json（独立成熟度审计，当前不登记未通过其门禁的专题入口）",
+    "canonical_topic_catalog": "workspace/registry/vehicle_launch_capabilities.json",
+    "known_gaps": [
+      "launch_rhythm_incremental_analysis.py 的研究样本固定",
+      "group_order_launch_compare.py 对 t0 使用脚本内硬编码且部分为近似基准",
+      "launch.py 在 end 缺失时的上市日回退需要生产调用方拦截",
+      "四份研究报告未纳入 jobs/config/jobs_config.json"
+    ]
+  }
+}
