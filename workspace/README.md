@@ -24,6 +24,10 @@
 2. 使用 [上市监控脚本](business_scripts/vehicle_sales_monitor.py) 的 `--dry-run --format json --output`，将结果写入工单唯一的临时 JSON 文件。
 3. 从该文件读取结果。核对状态、错误、警告和筛选条件，在 `result.monitors` 中唯一匹配 LS9 和 launch；读取 `metrics.cumulative_lock_count` 与 `metrics.cumulative_user_car_lock_count`。两者应为非负整数，用户车数应小于或等于累计数。核对上市日与统计日期，答复时注明快照的实际截止时间。遇到空结果、匹配不唯一或口径冲突时按契约调查。
 
+## 车型预售与上市 · 统一入口
+
+专题入口已整理为 **一套业务时间口径、两类能力、四份独立研究报告与一项监控**。业务问题、完整 CLI、输出文件、SSOT 例外与推送风险见 [车型上市专题说明](../docs/vehicle_launch_capabilities.md)，机器可读入口见 [vehicle_launch_capabilities.json](registry/vehicle_launch_capabilities.json)。本阶段仅登记入口，不自动开放生产 Job。
+
 ## 数据更新与推送
 
 以下操作按实际授权选择。向飞书写入前先预览并核对口径，正式推送遵守对应入口的新鲜度门槛。
