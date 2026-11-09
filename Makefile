@@ -5,7 +5,7 @@ PYTHON ?= .venv/bin/python
 	inventory-status inventory-trend inventory-report \
 	capability-audit shared-audit \
 	jobs-list jobs-run \
-	data-refresh data-refresh-daily allupdate updateall data-validate observe-dry-run observe-sync data-pipeline-dry-run data-pipeline daily-ops \
+	data-refresh data-refresh-daily data-refresh-tableau-hs allupdate updateall data-validate observe-dry-run observe-sync data-pipeline-dry-run data-pipeline daily-ops \
 	dataset-update dataset-validate daily-observation-dry-run daily-observation-sync daily-data-pipeline-dry-run daily-data-pipeline \
 	sales-monitor sales-monitor-dry-run presale-snapshot presale-funnel monitor monitor-dry-run monitor-sync sales-scheduler scheduler \
 	dc-inventory-change dc-inventory-change-date state-diagnosis \
@@ -211,6 +211,14 @@ jobs-run:
 ## 办公网不可达时自动回退移动链路；可用 MOBILE=1 显式强制
 data-refresh-daily:
 	$(PYTHON) dataset/updater/update_all_datasets.py --scope daily $(if $(MOBILE),--mobile)
+
+data-refresh-tableau-hs:
+	$(PYTHON) dataset/updater/update_all_datasets.py --scope tableau-hs $(if $(MOBILE),--mobile)
+
+DATASET_REFRESH_TARGETS := data-refresh-order-data data-refresh-assign-data data-refresh-config-attribute data-refresh-lock-attribution data-refresh-delivery-inventory data-refresh-test-drive-data
+.PHONY: $(DATASET_REFRESH_TARGETS)
+$(DATASET_REFRESH_TARGETS): data-refresh-%:
+	$(PYTHON) dataset/updater/update_all_datasets.py --scope $(subst -,_,$*) $(if $(MOBILE),--mobile)
 
 ## 全量数据集刷新（写操作）：含试驾 / 锁单归因等其余数据集
 ## 办公网不可达时自动回退移动链路；可用 MOBILE=1 显式强制（如 make data-refresh MOBILE=1）

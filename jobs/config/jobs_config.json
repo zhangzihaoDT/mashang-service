@@ -37,6 +37,127 @@
       "params": {},
       "summary": "json",
       "timeout_seconds": 2100
+    },
+    "data_refresh_tableau_hs": {
+      "module": "dataset",
+      "label": "Tableau HS refresh + status",
+      "cwd": "{repo_root}",
+      "argv_template": [
+        "{python}",
+        "-m",
+        "jobs.production",
+        "run",
+        "data-refresh-tableau-hs",
+        "--repo-root",
+        "{repo_root}",
+        "--timeout",
+        "3600"
+      ],
+      "params": {},
+      "summary": "json",
+      "timeout_seconds": 3900
+    },
+    "data_refresh_order_data": {
+      "module": "dataset",
+      "label": "Refresh order_data + status",
+      "cwd": "{repo_root}",
+      "argv_template": [
+        "{python}",
+        "-m",
+        "jobs.production",
+        "run",
+        "data-refresh-order-data",
+        "--repo-root",
+        "{repo_root}"
+      ],
+      "params": {},
+      "summary": "json",
+      "timeout_seconds": 2100
+    },
+    "data_refresh_assign_data": {
+      "module": "dataset",
+      "label": "Refresh assign_data + status",
+      "cwd": "{repo_root}",
+      "argv_template": [
+        "{python}",
+        "-m",
+        "jobs.production",
+        "run",
+        "data-refresh-assign-data",
+        "--repo-root",
+        "{repo_root}"
+      ],
+      "params": {},
+      "summary": "json",
+      "timeout_seconds": 2100
+    },
+    "data_refresh_config_attribute": {
+      "module": "dataset",
+      "label": "Refresh config_attribute + status",
+      "cwd": "{repo_root}",
+      "argv_template": [
+        "{python}",
+        "-m",
+        "jobs.production",
+        "run",
+        "data-refresh-config-attribute",
+        "--repo-root",
+        "{repo_root}"
+      ],
+      "params": {},
+      "summary": "json",
+      "timeout_seconds": 2100
+    },
+    "data_refresh_lock_attribution": {
+      "module": "dataset",
+      "label": "Refresh lock_attribution + status",
+      "cwd": "{repo_root}",
+      "argv_template": [
+        "{python}",
+        "-m",
+        "jobs.production",
+        "run",
+        "data-refresh-lock-attribution",
+        "--repo-root",
+        "{repo_root}"
+      ],
+      "params": {},
+      "summary": "json",
+      "timeout_seconds": 2100
+    },
+    "data_refresh_delivery_inventory": {
+      "module": "dataset",
+      "label": "Refresh delivery_inventory + status",
+      "cwd": "{repo_root}",
+      "argv_template": [
+        "{python}",
+        "-m",
+        "jobs.production",
+        "run",
+        "data-refresh-delivery-inventory",
+        "--repo-root",
+        "{repo_root}"
+      ],
+      "params": {},
+      "summary": "json",
+      "timeout_seconds": 2100
+    },
+    "data_refresh_test_drive_data": {
+      "module": "dataset",
+      "label": "Refresh test_drive_data + status",
+      "cwd": "{repo_root}",
+      "argv_template": [
+        "{python}",
+        "-m",
+        "jobs.production",
+        "run",
+        "data-refresh-test-drive-data",
+        "--repo-root",
+        "{repo_root}"
+      ],
+      "params": {},
+      "summary": "json",
+      "timeout_seconds": 2100
     }
   }
 }

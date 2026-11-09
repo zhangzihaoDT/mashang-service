@@ -86,7 +86,9 @@ def resolve_launch_open_from_data(
     return pd.Timestamp(real_on_launch["lock_time"].min())
 
 
-def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generation: str) -> dict:
+def compute(
+    df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generation: str, *, include_checks: bool = False,
+) -> dict:
     required_cols = [
         "lock_time",
         "order_number",
@@ -313,7 +315,7 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
                 pool_slice.loc[pool_slice["intention_refund_time"].notna(), "order_number"].nunique()
             )
 
-    return {
+    result = {
         "generation": generation,
         "label": label,
         "series": generation,
@@ -343,6 +345,24 @@ def compute(df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generatio
         "presale_refunded": presale_refunded,
         "compare": compare,
     }
+    if include_checks:
+        eligible_orders = lock_rows["order_number"].dropna()
+        deduplicated = eligible_orders.drop_duplicates()
+        denominators_match = (
+            0 <= cumulative_user_car_lock_count <= order_type_filled_count <= cumulative_lock_count
+            and 0 <= retention_kept <= cumulative_lock_count
+            and sum(row["count"] for row in retention_kept_by_product) == retention_kept
+        )
+        result["lock_cutoff"] = obs.isoformat()
+        result["checks"] = {
+            "deduplication": {
+                "status": "passed" if len(deduplicated) == cumulative_lock_count else "failed",
+                "eligible_rows": len(lock_rows),
+                "distinct_orders": len(deduplicated),
+            },
+            "denominators": {"status": "passed" if denominators_match else "failed"},
+        }
+    return result
 
 
 def build_card(metrics: dict, show_notes: bool = True) -> dict:

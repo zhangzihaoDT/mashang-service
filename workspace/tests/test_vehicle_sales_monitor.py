@@ -973,3 +973,37 @@ def test_launch_card_order_type_filled_keeps_user_car_breakdown():
     )
     assert "上市至今累计锁单：**100**（用户车 87）" in body
     assert "order_type 未回填" not in body
+
+
+def test_snapshot_launch_cli_is_read_only_and_preserves_lock_metrics(tmp_path, monkeypatch, capsys):
+    from business_scripts import vehicle_sales_monitor as monitor
+
+    def forbid(*args, **kwargs):
+        pytest.fail("Snapshot query must not use live freshness or notifications")
+
+    monkeypatch.setattr(monitor.freshness, "check", forbid)
+    monkeypatch.setattr(monitor, "_send", forbid)
+    orders = tmp_path / "order_data.parquet"
+    _launch_df([
+        ("a", "2026-11-05 12:00", None, "LS8Neo", "智己LS8NEO", "用户车"),
+        ("a", "2026-11-05 12:00", None, "LS8Neo", "智己LS8NEO", "用户车"),
+    ]).assign(series="LS8").to_parquet(orders)
+    manifest = tmp_path / "snapshot.json"
+    manifest.write_text(json.dumps({"version": tmp_path.name, "datasets": {
+        "order_data": {"path": str(orders), "size_bytes": orders.stat().st_size},
+    }}))
+    monkeypatch.setattr(sys, "argv", [
+        "vehicle_sales_monitor.py", "--snapshot", str(manifest),
+        "--series", "LS8Neo", "--phase", "launch", "--force-phase", "--as-of", "2026-11-09",
+    ])
+    assert monitor.main() == 0
+    contract = json.loads(capsys.readouterr().out)
+    assert contract["scope"]["snapshot_version"] == tmp_path.name
+    metrics = contract["result"]["monitors"][0]["metrics"]
+    assert metrics["cumulative_lock_count"] == metrics["cumulative_user_car_lock_count"] == 1
+    assert metrics["checks"]["deduplication"] == {"status": "passed", "eligible_rows": 2, "distinct_orders": 1}
+    assert metrics["checks"]["denominators"]["status"] == "passed"
+
+    orders.unlink()
+    assert monitor.main() == 1
+    assert json.loads(capsys.readouterr().out)["status"] == "error"

@@ -24,6 +24,7 @@ import json
 import sys
 from datetime import datetime
 from pathlib import Path
+from time import perf_counter
 
 import pandas as pd
 
@@ -41,6 +42,7 @@ except ImportError:
     pass
 
 from capabilities.notify.notify_service import notify  # noqa: E402
+from jobs.snapshot import read_snapshot_inputs  # noqa: E402
 from utils.monitors import freshness  # noqa: E402
 from utils.monitors import launch as launch_monitor  # noqa: E402
 from utils.monitors import presale as presale_monitor  # noqa: E402
@@ -75,8 +77,8 @@ DATETIME_COLS = [
 ]
 
 
-def load_order() -> pd.DataFrame:
-    df = pd.read_parquet(ORDER_PARQUET)
+def load_order(path: Path | None = None) -> pd.DataFrame:
+    df = pd.read_parquet(path if path is not None else ORDER_PARQUET)
     for c in DATETIME_COLS:
         if c in df.columns:
             df[c] = pd.to_datetime(df[c], errors="coerce")
@@ -116,6 +118,18 @@ def build_stale_card(fresh: dict, active: list[dict]) -> dict:
 
 
 def run(args) -> int:
+    started = perf_counter()
+    snapshot = getattr(args, "snapshot", None)
+    snapshot_scope = {}
+    order_path = None
+    if snapshot:
+        args.format = "json"
+        try:
+            version, inputs = read_snapshot_inputs(snapshot, ["order_data"])
+            order_path = Path(inputs["order_data"]["path"])
+            snapshot_scope = {"data_source": "ticket_snapshot", "snapshot_version": version, "inputs": inputs}
+        except (OSError, ValueError, KeyError, TypeError) as exc:
+            return _emit(build_error_contract(SCRIPT, " ".join(sys.argv), str(exc)), args, cards=[])
     bdef = load_business_definition()
     today = pd.Timestamp(args.as_of) if args.as_of else pd.Timestamp(datetime.now().date())
 
@@ -162,7 +176,7 @@ def run(args) -> int:
                 if phase_of(bdef, g, today) != "launch"
             ]
 
-    live = args.as_of is None
+    live = args.as_of is None and not snapshot
     fresh = None
     if live:
         now = pd.Timestamp(args.now) if args.now else pd.Timestamp.now()
@@ -191,6 +205,13 @@ def run(args) -> int:
         ),
     }
 
+    if snapshot:
+        scope.update(snapshot_scope)
+        scope["launch_retained_lock_rule"] = (
+            "上市开放以来按订单号去重；累计锁单含已审批退款，留存锁单剔除已审批退款。"
+            "款式占比以留存锁单为分母。"
+        )
+
     # ── 无 active 代际 ──
     if not active:
         contract = build_success_contract(
@@ -216,7 +237,12 @@ def run(args) -> int:
         return _emit(contract, args, cards=[card])
 
     # ── 计算 ──
-    df = apply_series_group_logic(load_order(), bdef)
+    try:
+        df = apply_series_group_logic(load_order(order_path) if snapshot else load_order(), bdef)
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        if not snapshot:
+            raise
+        return _emit(build_error_contract(SCRIPT, " ".join(sys.argv), str(exc), scope=scope), args, cards=[])
     monitors: list[dict] = []
     cards: list[dict] = []
     errors: list[str] = []
@@ -225,17 +251,26 @@ def run(args) -> int:
         try:
             if phase == "presale":
                 metrics = presale_monitor.compute(df, bdef, today, gen)
-                if metrics.get("data_before_open"):
+                if snapshot:
+                    card = None
+                elif metrics.get("data_before_open"):
                     card = presale_monitor.build_waiting_card(metrics)
                 else:
                     card = presale_monitor.build_card(metrics, show_notes=args.dry_run)
             elif phase == "launch":
-                metrics = launch_monitor.compute(df, bdef, today, gen)
-                card = launch_monitor.build_card(metrics, show_notes=args.dry_run)
+                if snapshot:
+                    metrics = launch_monitor.compute(df, bdef, today, gen, include_checks=True)
+                    if any(check["status"] != "passed" for check in metrics["checks"].values()):
+                        errors.append(f"{gen}/{phase}: snapshot metric checks failed")
+                    card = None
+                else:
+                    metrics = launch_monitor.compute(df, bdef, today, gen)
+                    card = launch_monitor.build_card(metrics, show_notes=args.dry_run)
             else:
                 continue
             monitors.append({"generation": gen, "phase": phase, "label": a["label"], "metrics": metrics})
-            cards.append(card)
+            if card is not None:
+                cards.append(card)
         except Exception as exc:  # noqa: BLE001
             errors.append(f"{gen}/{phase}: {exc}")
 
@@ -256,6 +291,8 @@ def run(args) -> int:
         contract = build_error_contract(SCRIPT, " ".join(sys.argv), "; ".join(errors), scope=scope)
     else:
         contract = build_success_contract(SCRIPT, " ".join(sys.argv), scope, result)
+    if snapshot:
+        contract["timing_ms"] = {"query": round((perf_counter() - started) * 1000)}
     return _emit(contract, args, cards=cards)
 
 
@@ -286,6 +323,7 @@ def _emit(contract: dict, args, cards: list) -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="统一预售/上市监控 runner")
+    parser.add_argument("--snapshot", type=Path, help="Ticket snapshot.json；只读输出 JSON，不发送卡片")
     parser.add_argument("--as-of", default=None, help="统计基准日 YYYY-MM-DD（默认今天；给定时跳过新鲜度 gate）")
     parser.add_argument("--now", default=None, help="覆盖当前时刻（用于新鲜度 gate 测试）")
     parser.add_argument("--refresh-ts", default=None, help="本轮数据刷新完成时刻（ISO，调度器注入）；缺省回退 parquet mtime")
@@ -301,6 +339,8 @@ def main() -> int:
     parser.add_argument("--format", default="terminal", choices=["terminal", "json"])
     parser.add_argument("--output", default=None, help="Result Contract 输出路径或目录")
     args = parser.parse_args()
+    if args.snapshot and (args.output or args.refresh_ts or args.now):
+        parser.error("--snapshot cannot be combined with --output, --refresh-ts or --now")
     return run(args)
 
 

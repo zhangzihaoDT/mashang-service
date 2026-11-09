@@ -2,6 +2,9 @@
 """受控的生产数据 Job：只接受已登记的业务目标，不使用 shell，也不接受任意命令。
 
 当前登记：
+  data-refresh-tableau-hs
+    刷新订单、选配、锁单归因和交付库存，与 daily 共用生产写入锁。
+
   data-refresh-daily
     在经验证的主 checkout 中运行 `make -j1 data-refresh-daily`，
     随后自动运行 `make -j1 data-status`，并比较刷新前后的结构化数据集状态。
@@ -33,9 +36,19 @@ from pathlib import Path
 from typing import Any, Iterator, Optional
 
 JOB_ID = "data-refresh-daily"
-MAKE_TARGET = "data-refresh-daily"
+TABLEAU_HS_JOB = "data-refresh-tableau-hs"
 STATUS_TARGET = "data-status"
 DAILY_DATASETS = ("order_data", "assign_data")
+JOB_DATASETS = {
+    JOB_ID: DAILY_DATASETS,
+    TABLEAU_HS_JOB: ("order_data", "config_attribute", "lock_attribution", "delivery_inventory"),
+    "data-refresh-order-data": ("order_data",),
+    "data-refresh-assign-data": ("assign_data",),
+    "data-refresh-config-attribute": ("config_attribute",),
+    "data-refresh-lock-attribution": ("lock_attribution",),
+    "data-refresh-delivery-inventory": ("delivery_inventory",),
+    "data-refresh-test-drive-data": ("test_drive_data",),
+}
 DEFAULT_TIMEOUT = 1800
 STATUS_TIMEOUT = 180
 LOG_DIR = Path("logs") / "production-jobs"
@@ -73,7 +86,7 @@ def _git(root: Path, *args: str) -> str:
     return result.stdout.strip()
 
 
-def verify_production_root(repo_root: str | Path) -> Path:
+def verify_production_root(repo_root: str | Path, job: str = JOB_ID) -> Path:
     """验证目标是一个真实的主 checkout，而不是临时 Ticket worktree。
 
     linked worktree 的 `.git` 是文件；submodule 也是文件。两者都拒绝。
@@ -101,8 +114,8 @@ def verify_production_root(repo_root: str | Path) -> Path:
         raise ProductionJobError(f"生产仓库缺少 {', '.join(missing)}：{root}")
 
     makefile = (root / "Makefile").read_text(encoding="utf-8", errors="replace")
-    for target in (f"{MAKE_TARGET}:", f"{STATUS_TARGET}:"):
-        if target not in makefile:
+    for target in (job, STATUS_TARGET):
+        if target not in makefile.replace(":", " ").split():
             raise ProductionJobError(f"Makefile 缺少受控目标 {target}：{root}")
 
     toplevel = Path(_git(root, "rev-parse", "--show-toplevel")).resolve()
@@ -266,6 +279,7 @@ def dataset_snapshot(root: Path) -> dict[str, dict]:
             "path": item.get("path"),
             "exists": item.get("exists"),
             "rows": item.get("rows"),
+            "size_bytes": item.get("size_bytes"),
             "file_mtime": item.get("file_mtime"),
             "data_asof": item.get("data_asof"),
             "data_asof_column": item.get("data_asof_column"),
@@ -273,15 +287,15 @@ def dataset_snapshot(root: Path) -> dict[str, dict]:
     return result
 
 
-def _daily_snapshot(snapshot: dict[str, dict]) -> dict[str, dict]:
-    return {key: snapshot.get(key, {}) for key in DAILY_DATASETS}
+def _select_snapshot(snapshot: dict[str, dict], datasets: tuple[str, ...]) -> dict[str, dict]:
+    return {key: snapshot.get(key, {}) for key in datasets}
 
 
 def _compare(before: dict[str, dict], after: dict[str, dict]) -> tuple[list[str], bool, list[str]]:
     changed: list[str] = []
     new_data = False
     anomalies: list[str] = []
-    for key in DAILY_DATASETS:
+    for key in before:
         old, new = before.get(key, {}), after.get(key, {})
         old_rows, new_rows = old.get("rows"), new.get("rows")
         old_asof, new_asof = old.get("data_asof"), new.get("data_asof")
@@ -318,11 +332,11 @@ def _repo_state(root: Path) -> dict:
         return {"error": str(error)}
 
 
-def _record_paths(root: Path, run_id: str) -> tuple[Path, Path, Path, Path]:
+def _record_paths(root: Path, run_id: str, job: str = JOB_ID) -> tuple[Path, Path, Path, Path]:
     directory = root / LOG_DIR
     return (
         directory / "records" / f"{run_id}.json",
-        directory / "latest.json",
+        directory / ("latest.json" if job == JOB_ID else f"{job}-latest.json"),
         directory / f"{run_id}.log",
         directory / "events.jsonl",
     )
@@ -351,27 +365,29 @@ def _summary(record: dict) -> str:
 def run_job(
     repo_root: str | Path,
     *,
+    job: str = JOB_ID,
     timeout: int = DEFAULT_TIMEOUT,
     requested_by: str = "",
     run_id: Optional[str] = None,
 ) -> dict:
-    """执行一次 data-refresh-daily；返回结构化记录，不抛出业务失败。"""
+    """执行已登记的生产刷新并返回结构化记录。"""
+    datasets = JOB_DATASETS[job]
     root = Path(repo_root).expanduser().resolve()
     run_id = (
         run_id
         or os.getenv("MASHANG_JOB_RUN_ID", "")
-        or f"{JOB_ID}-{datetime.now().strftime('%Y%m%dT%H%M%S')}-{uuid.uuid4().hex[:8]}"
+        or f"{job}-{datetime.now().strftime('%Y%m%dT%H%M%S')}-{uuid.uuid4().hex[:8]}"
     )
     requested_by = (requested_by or os.getenv("MASHANG_JOB_REQUESTED_BY", ""))[:200]
     started_at = utc_now()
 
     # 先核验目标，再写任何文件：Ticket worktree / submodule 不得留下运行记录或日志。
     try:
-        root = verify_production_root(root)
+        root = verify_production_root(root, job)
     except ProductionJobError as error:
         return {
             "version": 1,
-            "job": JOB_ID,
+            "job": job,
             "run_id": run_id,
             "status": "failed",
             "started_at": started_at,
@@ -390,10 +406,10 @@ def run_job(
             "record_path": None,
         }
 
-    record_path, latest_path, log_path, events_path = _record_paths(root, run_id)
+    record_path, latest_path, log_path, events_path = _record_paths(root, run_id, job)
     record: dict = {
         "version": 1,
-        "job": JOB_ID,
+        "job": job,
         "run_id": run_id,
         "status": "running",
         "started_at": started_at,
@@ -422,18 +438,17 @@ def run_job(
         record["git"] = _repo_state(root)
         record["record_path"] = str(record_path)
 
-        before_all = dataset_snapshot(root)
-        record["before"] = _daily_snapshot(before_all)
-        _append_event(events_path, {"at": utc_now(), "event": "snapshot_before", "run_id": run_id})
-        _write_record(record, record_path, latest_path)
-
         try:
             with JobLock(root, run_id, requested_by):
+                before_all = dataset_snapshot(root)
+                record["before"] = _select_snapshot(before_all, datasets)
+                _append_event(events_path, {"at": utc_now(), "event": "snapshot_before", "run_id": run_id})
+                _write_record(record, record_path, latest_path)
                 refresh_code, refresh_s = run_logged(
-                    _make_command(MAKE_TARGET), root, log_path, timeout
+                    _make_command(job), root, log_path, timeout
                 )
                 record["commands"].append(
-                    {"argv": _make_command(MAKE_TARGET), "returncode": refresh_code, "duration_s": refresh_s}
+                    {"argv": _make_command(job), "returncode": refresh_code, "duration_s": refresh_s}
                 )
                 _append_event(
                     events_path,
@@ -451,18 +466,22 @@ def run_job(
                     events_path,
                     {"at": utc_now(), "event": "status_finished", "run_id": run_id, "returncode": status_code},
                 )
+                after_all = dataset_snapshot(root)
         except JobBusy as error:
             record.update(status="busy", error=str(error), finished_at=utc_now())
             _append_event(events_path, {"at": utc_now(), "event": "busy", "run_id": run_id, "error": str(error)})
             _write_record(record, record_path, latest_path)
             return record
 
-        after_all = dataset_snapshot(root)
-        record["after"] = _daily_snapshot(after_all)
+        record["after"] = _select_snapshot(after_all, datasets)
         record["latest_data_time_by_dataset"] = {
             key: item.get("data_asof") for key, item in after_all.items() if item.get("data_asof")
         }
         changed, new_data, anomalies = _compare(record["before"], record["after"])
+        if job == "data-refresh-config-attribute":
+            config = record["after"]["config_attribute"]
+            if not config.get("exists") or not config.get("rows") or not config.get("file_mtime"):
+                anomalies.append("config_attribute 缺失、为空或无法核验")
         record["changed_datasets"] = changed
         record["new_data"] = new_data
         record["latest_data_time"] = _latest_time(record["after"])
@@ -470,10 +489,10 @@ def run_job(
 
         if refresh_code == 124:
             record["status"] = "timeout"
-            record["error"] = f"{MAKE_TARGET} 超时（{timeout}s），进程组已终止"
+            record["error"] = f"{job} 超时（{timeout}s），进程组已终止"
         elif refresh_code != 0:
             record["status"] = "failed"
-            record["error"] = f"{MAKE_TARGET} 退出码 {refresh_code}"
+            record["error"] = f"{job} 退出码 {refresh_code}"
         elif status_code != 0:
             record["status"] = "verification_failed"
             record["error"] = f"{STATUS_TARGET} 退出码 {status_code}；刷新结果未完成核验"
@@ -525,13 +544,13 @@ def _read_tail(path: Path, limit: int) -> str:
         return ""
 
 
-def latest_record(repo_root: str | Path) -> dict:
-    root = verify_production_root(repo_root)
-    path = root / LOG_DIR / "latest.json"
+def latest_record(repo_root: str | Path, job: str = JOB_ID) -> dict:
+    root = verify_production_root(repo_root, job)
+    path = root / LOG_DIR / ("latest.json" if job == JOB_ID else f"{job}-latest.json")
     try:
         return json.loads(path.read_text(encoding="utf-8"))
     except FileNotFoundError:
-        return {"status": "idle", "job": JOB_ID, "summary": "暂无执行记录"}
+        return {"status": "idle", "job": job, "summary": "暂无执行记录"}
     except ValueError as error:
         raise ProductionJobError(f"最新记录无法解析：{error}") from error
 
@@ -547,17 +566,18 @@ def main(argv: Optional[list[str]] = None) -> int:
     args = parser.parse_args(argv)
 
     try:
-        if args.job != JOB_ID:
+        if args.job not in JOB_DATASETS:
             raise ProductionJobError(f"未登记的 job：{args.job}")
         if args.action == "check":
-            root = verify_production_root(args.repo_root)
-            print(json.dumps({"status": "ok", "job": JOB_ID, "repo_root": str(root)}, ensure_ascii=False))
+            root = verify_production_root(args.repo_root, args.job)
+            print(json.dumps({"status": "ok", "job": args.job, "repo_root": str(root)}, ensure_ascii=False))
             return 0
         if args.action == "status":
-            print(json.dumps(latest_record(args.repo_root), ensure_ascii=False))
+            print(json.dumps(latest_record(args.repo_root, args.job), ensure_ascii=False))
             return 0
         record = run_job(
             args.repo_root,
+            job=args.job,
             timeout=max(1, args.timeout),
             requested_by=args.requested_by,
             run_id=args.run_id or None,
@@ -567,7 +587,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             return 2
         return 0 if record["status"] in {"success", "no_new_data"} else 1
     except Exception as error:  # noqa: BLE001 - CLI prints structured failures
-        print(json.dumps({"status": "failed", "job": JOB_ID, "error": str(error)}, ensure_ascii=False))
+        print(json.dumps({"status": "failed", "job": args.job, "error": str(error)}, ensure_ascii=False))
         return 3
 
 

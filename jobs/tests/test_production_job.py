@@ -208,3 +208,19 @@ def test_adapter_contract_carries_structured_job_result(tmp_path, monkeypatch):
     assert result["summary_json"]["status"] == "success"
     assert result["summary_json"]["new_data"] is True
     assert result["summary_json"]["latest_data_time"] == "2026-11-05T09:00:00"
+
+
+@pytest.mark.parametrize("config_rows, expected", [(11, "success"), (0, "verification_failed")])
+def test_config_job_runs_only_config_target_and_verifies_only_config(tmp_path, monkeypatch, config_rows, expected):
+    root = make_repo(tmp_path, "@false")
+    with (root / "Makefile").open("a", encoding="utf-8") as handle:
+        handle.write("data-refresh-config-attribute:\n\t@echo config-only\n")
+    states = iter([
+        {"config_attribute": {"exists": True, "rows": 10, "file_mtime": "before"}, "order_data": {"rows": 100}},
+        {"config_attribute": {"exists": True, "rows": config_rows, "file_mtime": "after"}, "order_data": {"rows": 99}},
+    ])
+    monkeypatch.setattr(production, "dataset_snapshot", lambda _: next(states))
+    result = production.run_job(root, job="data-refresh-config-attribute", timeout=30)
+    assert result["status"] == expected
+    assert set(result["before"]) == set(result["after"]) == {"config_attribute"}
+    assert [command["argv"][-1] for command in result["commands"]] == ["data-refresh-config-attribute", "data-status"]

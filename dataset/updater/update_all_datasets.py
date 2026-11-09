@@ -102,6 +102,17 @@ def _header(title: str) -> None:
     print("=" * 80, flush=True)
 
 
+DATASET_UPDATERS = {
+    "order_data": "order_data_to_parquet",
+    "assign_data": "assign_data_to_csv",
+    "config_attribute": "order_config_to_parquet",
+    "lock_attribution": "lock_attribution_data_to_parquet",
+    "delivery_inventory": "delivery_inventory_to_parquet",
+    "test_drive_data": "test_drive_data_to_csv",
+}
+TABLEAU_HS_DATASETS = ("order_data", "config_attribute", "lock_attribution", "delivery_inventory")
+
+
 def build_steps(args: argparse.Namespace, mobile: bool, scope: str = "full") -> list[dict]:
     """按 step 组织更新命令；cmd=None 表示跳过。
 
@@ -151,6 +162,7 @@ def build_steps(args: argparse.Namespace, mobile: bool, scope: str = "full") -> 
                 sys.executable,
                 str(UPDATER_DIR / "order_config_to_parquet.py"),
                 "--force",
+                "--incremental",
                 "--timeout",
                 str(int(args.timeout)),
                 *(["--mobile"] if mobile else []),
@@ -244,6 +256,10 @@ def build_steps(args: argparse.Namespace, mobile: bool, scope: str = "full") -> 
         }
     )
 
+    if scope != "full":
+        selected = TABLEAU_HS_DATASETS if scope == "tableau-hs" else (scope,)
+        updaters = {DATASET_UPDATERS[key] for key in selected}
+        return [step for step in steps if step["cmd"] and Path(step["cmd"][1]).stem in updaters]
     return steps
 
 
@@ -279,9 +295,9 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument(
         "--scope",
-        choices=["full", "daily"],
+        choices=["full", "daily", "tableau-hs", *DATASET_UPDATERS],
         default="full",
-        help="full=全量数据集更新（默认）；daily=仅订单数据 + 下发线索（Daily pipeline 使用）",
+        help="full=全量数据集更新（默认）；daily=仅订单数据 + 下发线索（Daily pipeline 使用）；tableau-hs=订单、选配、锁单归因、交付库存；数据集 ID=只刷新对应数据集",
     )
     args = parser.parse_args(argv)
 

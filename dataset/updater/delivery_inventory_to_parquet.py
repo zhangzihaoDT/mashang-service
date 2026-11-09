@@ -29,7 +29,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 DATASET_DIR = REPO_ROOT / "dataset"
 
 OUTPUT_FILE = DATASET_DIR / "delivery_inventory.parquet"
-TABLEAU_OUTPUT_CSV = Path("/Users/zihao_/Documents/coding/dataset/original/vin-table_data.csv")
+TABLEAU_OUTPUT_CSV = DATASET_DIR / "tableau-hs" / "delivery" / "vin-table_data.csv"
 
 TABLEAU_VIEW = "-_17851319020730/vin-table"
 
@@ -511,6 +511,7 @@ def step_export_tableau(mobile: bool = False, timeout: int = 600) -> bool:
                 view_url_name=view_url_name,
                 timeout=timeout,
             )
+            output_path.parent.mkdir(parents=True, exist_ok=True)
             tableau_download_view_data_csv(
                 base_url=base_url,
                 api_version=api_version,

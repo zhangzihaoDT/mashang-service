@@ -3,6 +3,7 @@ import json
 import re
 import os
 import argparse
+from tempfile import NamedTemporaryFile
 from pathlib import Path
 from urllib.parse import urlencode, quote
 from urllib.request import Request, urlopen
@@ -510,40 +511,57 @@ def normalize_config_view(df_raw):
     return df.rename(columns=rename)
 
 
-def incremental_update(existing_path: Path, view_df, order_data_path: Path, dry_run: bool = False) -> dict:
-    """增量更新：视图订单用最新视图数据整体替换，非视图订单保留历史，并按订单去重。
+CONFIG_KEY = ["Order Number", "Attribute"]
 
-    按订单去重规则: 每 (Order Number, Attribute) 保留一行；
-    优先级: 带 value_code 的行 > 价格高 > 先出现。
-    """
+
+def write_config_parquet(frame, path):
+    with NamedTemporaryFile(dir=path.parent, suffix=".parquet", delete=False) as temp:
+        staged = Path(temp.name)
+    try:
+        frame.to_parquet(staged, index=False)
+        saved_keys = pd.read_parquet(staged, columns=CONFIG_KEY)
+        if not saved_keys.equals(frame[CONFIG_KEY].reset_index(drop=True)):
+            raise ValueError("配置 Parquet 写入校验失败")
+        staged.replace(path)
+    finally:
+        staged.unlink(missing_ok=True)
+
+
+def incremental_update(existing_path: Path, view_df, order_data_path: Path, dry_run: bool = False):
+    """按订单和属性更新，保留未在输入中出现的历史配置。"""
     old = pd.read_parquet(existing_path)
     old["Order Number"] = old["Order Number"].astype(str)
     old_orders = set(old["Order Number"])
 
     view = normalize_config_view(view_df)
+    if view.empty:
+        raise ValueError("配置输入无有效记录")
     view["Order Number"] = view["Order Number"].astype(str)
     view_orders = set(view["Order Number"])
 
-    kept = old[~old["Order Number"].isin(view_orders)]
+    def deduplicate(frame):
+        return frame.sort_values(
+            ["value_code", "price"], key=lambda col: col.notna() if col.name == "value_code" else col,
+            ascending=False, kind="stable",
+        ).drop_duplicates(CONFIG_KEY)
+
+    view = deduplicate(view)
+    old = deduplicate(old)
+    old_keys = pd.MultiIndex.from_frame(old[CONFIG_KEY])
+    view_keys = pd.MultiIndex.from_frame(view[CONFIG_KEY])
+    kept = old.loc[~old_keys.isin(view_keys)]
     new = pd.concat([view, kept], ignore_index=True)
+    new_keys = pd.MultiIndex.from_frame(new[CONFIG_KEY])
+    if not new_keys.is_unique or not old_keys.isin(new_keys).all():
+        raise ValueError("配置增量合并校验失败")
 
-    # 按订单去重
-    rows_before_dedup = len(new)
-    prio = new["value_code"].notna().astype(int) * 1_000_000 + new["price"].astype("Int64").fillna(-1).astype(int)
-    new = new.assign(_prio=prio).sort_values("_prio", ascending=False, kind="stable")
-    new = new.drop_duplicates(subset=["Order Number", "Attribute"], keep="first").drop(columns=["_prio"])
+    rows_before_dedup = len(view_df) + len(old)
     rows_after_dedup = len(new)
-
-    # 计算视图订单内 (订单, 属性) 的取值变化（视图值 vs 旧快照值集合）
-    old_oa = old[old["Order Number"].isin(view_orders)].groupby(["Order Number", "Attribute"])["value"].apply(
-        lambda s: set(s.astype(str))
-    ).to_dict()
-    new_oa = view.groupby(["Order Number", "Attribute"])["value"].apply(
-        lambda s: set(s.astype(str))
-    ).to_dict()
-    changed_pairs = {k for k, v in new_oa.items() if v - old_oa.get(k, set())}
-    added_pairs = {k for k in new_oa if k not in old_oa}
-    removed_pairs = {k for k in old_oa if k not in new_oa}
+    old_values = old.set_index(CONFIG_KEY)["value"]
+    view_values = view.set_index(CONFIG_KEY)["value"]
+    common_keys = view_keys.intersection(old_keys)
+    changed_pairs = (view_values.loc[common_keys] != old_values.loc[common_keys]).sum()
+    added_pairs = len(view_keys.difference(old_keys))
 
     # 重新关联 order_type / vin（先清掉旧表自带/历史合并产生的列，避免后缀重复）
     for c in [c for c in new.columns if c in ("order_type", "vin") or c.startswith(("order_type_", "vin_"))]:
@@ -560,20 +578,20 @@ def incremental_update(existing_path: Path, view_df, order_data_path: Path, dry_
         "updated_orders": len(view_orders & old_orders),
         "inserted_orders": len(view_orders - old_orders),
         "kept_orders": len(old_orders - view_orders),
-        "changed_oa_pairs": len(changed_pairs), "added_oa_pairs": len(added_pairs),
-        "removed_oa_pairs": len(removed_pairs),
+        "changed_oa_pairs": int(changed_pairs), "added_oa_pairs": added_pairs,
+        "removed_oa_pairs": 0,
     }
     if not dry_run:
-        new.to_parquet(existing_path, index=False)
+        write_config_parquet(new, existing_path)
     return diff, new
 
 
-def main(force: bool = False, mobile: bool = False, timeout: int = 600, incremental: bool = False, dry_run: bool = False):
+def main(force: bool = False, mobile: bool = False, timeout: int = 600, incremental: bool = False, dry_run: bool = False, input_csv: Path | None = None):
     tableau_url = "https://tableau-hs.immotors.com/#/views/17/config_attribute"
     
     load_env_file(REPO_ROOT / ".env")
 
-    raw_dir = DATASET_DIR / "tableau" / "configuration"
+    raw_dir = DATASET_DIR / "tableau-hs" / "configuration"
     raw_dir.mkdir(parents=True, exist_ok=True)
     config_csv_path_update = raw_dir / "config_attribute_data_update.csv"
     config_parquet_path = DATASET_DIR / "config_attribute.parquet"
@@ -581,30 +599,28 @@ def main(force: bool = False, mobile: bool = False, timeout: int = 600, incremen
     business_def_path = REPO_ROOT / "shared" / "schema" / "business_definition.json"
 
     # 1. Fetch raw data（最新视图变更数据 → config_attribute_data_update.csv）
-    if force or not config_csv_path_update.exists():
+    if incremental and not config_parquet_path.exists():
+        raise FileNotFoundError("缺少配置底表，请先运行全量构建")
+    if input_csv is None and (force or not config_csv_path_update.exists()):
         success = fetch_tableau_data(tableau_url, str(config_csv_path_update), mobile=mobile, timeout=timeout)
         if not success:
             print("❌ 无法获取 Tableau 数据，请检查权限或网络。")
-            return
+            raise SystemExit(1)
 
     # ── 增量更新模式 ──
     if incremental:
-        if not config_parquet_path.exists():
-            print("❌ 增量更新需要已存在的 config_attribute.parquet，请先跑全量构建。")
-            return
-        view_df = read_tableau_csv(config_csv_path_update, min_columns=2)
+        source = input_csv or config_csv_path_update
+        view_df = read_tableau_csv(source, min_columns=2)
         if view_df is None:
-            print("❌ 无法读取视图数据:", config_csv_path_update)
-            return
-        print(f"正在对现有 {config_parquet_path.name} 做增量更新（视图数据: {config_csv_path_update.name}）...")
+            raise ValueError(f"无法读取配置输入: {source}")
+        print(f"正在对现有 {config_parquet_path.name} 做增量更新（输入: {source.name}）...")
         diff, new = incremental_update(config_parquet_path, view_df, order_data_path, dry_run=dry_run)
         print("\n" + "=" * 70)
         print(f"{'指标':<28}{'旧':<14}{'新':<14}")
         print("-" * 70)
-        print(f"{'总行数(去重后)':<28}{diff['old_rows']:<14}{diff['new_rows']:<14}")
-        print(f"{'去重前行数':<28}{'':<14}{diff['rows_before_dedup']:<14}")
+        print(f"{'总行数':<28}{diff['old_rows']:<14}{diff['new_rows']:<14}")
         print(f"{'唯一订单数':<28}{diff['old_orders']:<14}{diff['new_orders']:<14}")
-        print(f"{'视图覆盖订单(替换)':<28}{'':<14}{diff['view_orders']:<14}")
+        print(f"{'输入覆盖订单':<28}{'':<14}{diff['view_orders']:<14}")
         print(f"{'其中订单已存在(更新)':<28}{'':<14}{diff['updated_orders']:<14}")
         print(f"{'新增订单':<28}{'':<14}{diff['inserted_orders']:<14}")
         print(f"{'保留历史订单(不在视图)':<28}{'':<14}{diff['kept_orders']:<14}")
@@ -694,7 +710,7 @@ def main(force: bool = False, mobile: bool = False, timeout: int = 600, incremen
     print(f"  order_type 非空: {config_df['order_type'].notna().sum():,}/{len(config_df):,}")
     print(f"  vin 非空: {config_df['vin'].notna().sum():,}/{len(config_df):,}")
 
-    config_df.to_parquet(config_parquet_path, index=False)
+    write_config_parquet(config_df, config_parquet_path)
     print(f"✅ 合并解析后的配置文件已保存至 {config_parquet_path}")
 
     if not order_col_name:
@@ -811,8 +827,13 @@ if __name__ == "__main__":
     parser.add_argument("--force", action="store_true", help="强制从 Tableau 导出最新配置数据并覆盖本地文件")
     parser.add_argument("--mobile", action="store_true", help="使用移动端/非办公网络服务器地址导出")
     parser.add_argument("--timeout", type=int, default=600, help="Tableau 导出超时（秒）")
-    parser.add_argument("--incremental", action="store_true", help="增量更新模式：用最新视图数据替换视图覆盖订单，保留历史订单")
+    parser.add_argument("--incremental", action="store_true", help="增量更新模式：按订单和属性更新，保留未覆盖的配置")
     parser.add_argument("--dry-run", action="store_true", help="增量更新仅预览，不写入")
+    parser.add_argument("--input-csv", type=Path, help="使用指定配置 CSV 做一次本地增量")
     args = parser.parse_args()
+    if (args.input_csv or args.dry_run) and not args.incremental:
+        parser.error("--input-csv 和 --dry-run 需要 --incremental")
+    if args.input_csv and args.force:
+        parser.error("--input-csv 与 --force 互斥")
     main(force=args.force, mobile=args.mobile, timeout=args.timeout,
-         incremental=args.incremental, dry_run=args.dry_run)
+         incremental=args.incremental, dry_run=args.dry_run, input_csv=args.input_csv)
