@@ -114,3 +114,17 @@ outputs/diagram/
 # Docx conversion media — retained locally but not committed with Markdown archives
 workspace/outputs/archive_assets/
 docs/archive/L6竞品竞争力研究/新款智己L6竞品对比大全_images/
+
+# Local backups, diagnostics, and dated verification artifacts
+/outputs/backups/
+/outputs/diagnostics/
+/outputs/tables/cm2_pure_ev_lock_validation.csv
+/scratch/
+/workspace/outputs/reports/miit_split_service_verification.log
+/workspace/outputs/reports/kkmall_card_20261102
+/workspace/outputs/reports/saic_automation_research/chrome-report.png
+/workspace/outputs/reports/saic_automation_research/platform.png
+/workspace/outputs/reports/store_cards_active_20261102
+/workspace/outputs/reports/store_cards_distribution_20261102
+/workspace/outputs/reports/tp_mix_acceptance_20261104
+/workspace/outputs/reports/yifangcheng_card_20261102
