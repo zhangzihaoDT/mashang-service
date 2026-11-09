@@ -4,9 +4,8 @@ from datetime import datetime
 import pandas as pd
 import pytest
 
-from jobs.ls8_mix import ROOT, mix
+from jobs.ls8_mix import query_snapshot
 from jobs.snapshot import copy_snapshot, verified_files
-from utils.config_semantics import get_attribute_spec, load_config_semantics
 
 
 def test_generic_snapshot_feeds_ls8_mix_and_rejects_unverified_inputs(tmp_path):
@@ -42,9 +41,11 @@ def test_generic_snapshot_feeds_ls8_mix_and_rejects_unverified_inputs(tmp_path):
     assert inputs["config_attribute"]["data_asof"] is None
     assert all((file.stat().st_mode & 0o222) == 0 for file in dest.glob("*.parquet"))
 
-    definition = json.loads((ROOT / "shared/schema/business_definition.json").read_text())
-    result = mix(pd.read_parquet(inputs["order_data"]["path"]), pd.read_parquet(inputs["config_attribute"]["path"]),
-                 definition, get_attribute_spec(load_config_semantics(), "LS8", "内饰"))
+    manifest = dest / "snapshot.json"
+    manifest.write_text(json.dumps({"version": dest.name, "datasets": inputs}))
+    contract = query_snapshot(manifest)
+    assert contract["status"] == "success"
+    result = contract["result"]
     assert result["groups"]["增程"]["total_orders"] == result["groups"]["纯电"]["total_orders"] == 1
     assert result["groups"]["增程"]["colors"][0]["share"] == result["groups"]["纯电"]["colors"][0]["share"] == 1
 

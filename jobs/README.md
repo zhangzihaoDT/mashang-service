@@ -83,8 +83,8 @@ python -m jobs.cli --job data_refresh_config_attribute --format json
 
 ## LS8 内饰订单 Mix
 
-配置刷新只写入并比较 `config_attribute`。Superagent 核验该 Job 后，通过固定的
-`python -m jobs.ls8_mix` 入口在 Ticket 状态目录创建版本化只读副本并查询。
+配置刷新只写入并比较 `config_attribute`。通用快照包含 `config_attribute` 和
+`order_data`，`python -m jobs.ls8_mix --snapshot` 只读查询该快照。
 查询按 LS8 车系（含 LS8Neo）上市以来的留存锁单统计，动力沿用版本字典。
 各动力分母包含该组所有去重订单，缺少内饰和内饰冲突单列，未知动力单独报告。
 配置表没有业务时间列，结果分别报告文件更新时间和可匹配的最新锁单时间。
@@ -94,7 +94,7 @@ python -m jobs.cli --job data_refresh_config_attribute --format json
 Superagent 的 `refresh_snapshot` 组合操作按固定 Job 清单执行刷新，
 通过 `jobs.snapshot` 核对生产运行记录，并将所需数据集复制到 Ticket 的版本化只读目录。
 快照数据集来自 registry，查询输入以本次返回的文件路径为准。编排见
-`.opencode/skills/refresh-and-analyze/SKILL.md`。原 LS8 组合入口保留到真实验收通过。
+`.opencode/skills/refresh-and-analyze/SKILL.md`。
 
 只读查询可直接接收 Superagent 返回的 `snapshot_path`，无需再次复制或刷新。例如从业务仓库根目录运行：
 

@@ -30,45 +30,13 @@ def test_mix_deduplicates_orders_and_includes_missing_configuration_in_denominat
         "total_orders": 1, "colors": [{"color": "棕色", "orders": 1, "share": 1.0}],
     }
 
-def test_snapshot_is_read_only_and_rejects_a_changed_config(tmp_path, monkeypatch):
-    from datetime import datetime
-    from importlib import import_module
-    import pytest
-
-    service = import_module("jobs.ls8_mix")
-    dataset = tmp_path / "dataset"
-    dataset.mkdir()
-    (tmp_path / "shared").symlink_to(ROOT / "shared", target_is_directory=True)
-    monkeypatch.setattr(service, "ROOT", tmp_path)
-    config = dataset / "config_attribute.parquet"
-    pd.DataFrame([("a", "内饰", "大象灰黑", "IN2-ASH")],
-                 columns=["Order Number", "Attribute", "value", "value_code"]).to_parquet(config)
-    pd.DataFrame([("LS8", "a", "智己LS8 52 Max+", "2026-04-16", None)],
-                 columns=["series", "order_number", "product_name", "lock_time", "approve_refund_time"]
-                 ).to_parquet(dataset / "order_data.parquet")
-    dest = tmp_path / "version"
-    dest.mkdir()
-    with pytest.raises(ValueError, match="已核验刷新记录不一致"):
-        service.snapshot_and_query(dest, "wrong")
-    assert not list(dest.iterdir())
-    result = service.snapshot_and_query(dest, datetime.fromtimestamp(config.stat().st_mtime).isoformat())
-    assert result["groups"]["增程"]["total_orders"] == 1
-    assert result["config_data_cutoff"] is None
-    assert result["latest_matched_config_lock_time"] == "2026-04-16T00:00:00"
-    assert all((file.stat().st_mode & 0o222) == 0 for file in dest.glob("*.parquet"))
-
-
-def test_query_reads_generic_snapshot_and_rejects_missing_or_replaced_inputs(tmp_path, monkeypatch):
+def test_query_reads_generic_snapshot_and_rejects_missing_or_replaced_inputs(tmp_path):
     import os
 
     import pytest
 
     from jobs import ls8_mix
 
-    def unexpected_copy(*args, **kwargs):
-        pytest.fail("Snapshot queries must not copy live data")
-
-    monkeypatch.setattr(ls8_mix, "copy_snapshot", unexpected_copy)
     orders = tmp_path / "order_data.parquet"
     config = tmp_path / "config_attribute.parquet"
     pd.DataFrame([
