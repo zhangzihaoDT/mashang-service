@@ -36,6 +36,7 @@
 | [promotion_rules.md](promotion_rules.md) | 脚本晋级规则 |
 | [monthly_market_report.md](monthly_market_report.md) | 月度市场报告范式 |
 | [market_state_v0_2_design.md](market_state_v0_2_design.md) | Market State V0.2 设计 |
+| [vehicle_launch_capabilities.md](vehicle_launch_capabilities.md) | **车型预售与上市统一入口**：四份报告、一项监控及时间/订单口径 |
 | [launch_rhythm_incremental_analysis.md](launch_rhythm_incremental_analysis.md) | 上市节奏增量分析方法 |
 | [launch_rhythm_incremental_research_report.md](launch_rhythm_incremental_research_report.md) | 上市节奏增量研究报告 |
 | [L6_M2_预售情况汇报分析框架.md](L6_M2_预售情况汇报分析框架.md) | L6 M2 预售汇报分析框架 |
