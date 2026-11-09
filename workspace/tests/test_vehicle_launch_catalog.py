@@ -3,7 +3,7 @@
 import json
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[3]
+ROOT = Path(__file__).resolve().parents[2]
 CATALOG = ROOT / "workspace/registry/vehicle_launch_capabilities.json"
 GLOBAL = ROOT / "workspace/registry/capability_registry.json"
 JOBS = ROOT / "jobs/config/jobs_config.json"
