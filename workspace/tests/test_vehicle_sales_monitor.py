@@ -465,9 +465,12 @@ def test_scheduler_due_actions_key_day_gating(bdef):
     ]
     assert sched.due_actions(datetime(2026, 9, 15, 9, 0), bdef) == []
     assert sched.due_actions(datetime(2026, 9, 15, 9, 30), bdef) == []
-    # key day 19:00 刷新+监控串行（:30 不再单独触发 monitor）
-    assert sched.due_actions(datetime(2026, 9, 10, 19, 0), bdef) == ["refresh_order_data", "monitor"]
-    assert sched.due_actions(datetime(2026, 9, 10, 19, 30), bdef) == []
+    # key day 仅 20–23 点整刷新+监控；此前及半点均不触发。
+    for hour in range(17, 20):
+        assert sched.due_actions(datetime(2026, 9, 10, hour, 0), bdef) == []
+    for hour in range(20, 24):
+        assert sched.due_actions(datetime(2026, 9, 10, hour, 0), bdef) == ["refresh_order_data", "monitor"]
+        assert sched.due_actions(datetime(2026, 9, 10, hour, 30), bdef) == []
     # 非 key day 晚间不触发
     assert sched.due_actions(datetime(2026, 9, 15, 19, 0), bdef) == []
     assert sched.due_actions(datetime(2026, 9, 15, 19, 30), bdef) == []
@@ -534,7 +537,7 @@ def test_scheduler_sync_failure_blocks_monitor(bdef):
 def test_scheduler_keyday_refresh_failure_blocks_monitor(bdef):
     """key day 高频 refresh_order_data 失败 → 跳过 monitor。"""
     sched = _load_scheduler()
-    now = datetime(2026, 9, 10, 19, 0)
+    now = datetime(2026, 9, 10, 20, 0)
     assert _run_chain(sched, now, bdef, {"refresh_order_data": 1}) == ["refresh_order_data"]
 
 
@@ -810,6 +813,17 @@ def _launch_df(rows) -> pd.DataFrame:
     df["buyer_identity_no"] = "310101199001011234"
     df["store_name"] = "s1"
     return df
+
+
+def test_launch_without_target_locks_returns_zero_and_builds_card(bdef):
+    df = _launch_df([
+        ("other", "2026-11-05 07:00", None, "CM3", "全新一代智己LS6", "用户车"),
+        ("new", None, "2026-10-29 20:10", "LS8Neo", "智己LS8NEO", None),
+    ])
+    metrics = launch_compute(df, bdef, pd.Timestamp("2026-11-05"), "LS8Neo")
+    assert metrics["cumulative_lock_count"] == 0
+    assert metrics["daily_lock_count"] == 0
+    assert launch_build_card(metrics)
 
 
 def test_launch_compare_window_uses_generation_launch_open_minute(bdef):

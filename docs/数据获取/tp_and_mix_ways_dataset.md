@@ -136,30 +136,9 @@ Tableau 表头别名由 `COLUMN_ALIASES` 归一化，不依赖列出现顺序。
 
 ---
 
-## workspace 如何读取
+## Workspace 如何读取
 
-```python
-from shared.loaders.tp_and_mix_ways_loader import (
-    load_tp_and_mix_ways_registry,
-    list_tp_and_mix_ways_tables,
-    load_tp_and_mix_ways_table,
-    load_tp_and_mix_ways_table_duckdb,
-)
-
-# 查看注册表
-registry = load_tp_and_mix_ways_registry()
-
-# 列出可用表
-tables = list_tp_and_mix_ways_tables()
-
-# 加载为 pandas DataFrame
-df = load_tp_and_mix_ways_table("market_energy_monthly")
-
-# 加载为 DuckDB DataFrame
-df = load_tp_and_mix_ways_table_duckdb("brand_monthly")
-```
-
-无需 `sys.path.insert`，`pyproject.toml` 已配置 `pythonpath = ["."]`，`shared/__init__.py` 确保包可正常导入。
+读取示例、字段速查和分析场景见 [Workspace 使用指南](../业务能力/市场与竞争/tp_and_mix_ways_usage.md)。
 
 ---
 
@@ -275,7 +254,7 @@ pytest tests/test_tp_and_mix_ways_raw_guard.py -q
 
 ## 相关文档
 
-- **workspace 使用指南**: `docs/tp_and_mix_ways_usage.md` — 6 张表的适用场景、字段速查、workspace 消费规范
+- **workspace 使用指南**: `docs/业务能力/市场与竞争/tp_and_mix_ways_usage.md` — 6 张表的适用场景、字段速查、workspace 消费规范
 - **数据集构建**: `scripts/build_tp_and_mix_ways_dataset.py` — service 级构建脚本
 - **schema 定义**: `shared/schema/tp_and_mix_ways_schema.py` — grain / dimensions / metrics
 - **loader**: `shared/loaders/tp_and_mix_ways_loader.py` — pandas / DuckDB 读取入口

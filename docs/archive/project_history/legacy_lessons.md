@@ -93,11 +93,11 @@ workspace-first 的优势：
 | 时间窗口解析 | `shared/schema/reference/time_window_rules.md` |
 | 车型映射 | `shared/schema/reference/vehicle_mapping.md` |
 | 追问上下文 | `workspace/eval/context_parser.py` (Phase 4) |
-| 追问继承 | `docs/followup_rules.md` |
+| 追问继承 | `docs/共享规范/followup_rules.md` |
 | 脚本 CLI | Phase 2 标准 |
 | 统一评测 | `eval/run_eval.py` (Phase 6) |
 | 能力注册 | `registry/capability_registry.json` (Phase 11) |
-| 晋级规则 | `docs/promotion_rules.md` (Phase 11) |
+| 晋级规则 | `docs/共享规范/promotion_rules.md` (Phase 11) |
 
 ## 9. 仍可复用的旧代码
 

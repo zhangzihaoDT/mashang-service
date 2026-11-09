@@ -30,8 +30,8 @@ except ImportError:
     pyreadstat = None
 
 SERVICE_ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_PDF = SERVICE_ROOT / "dataset" / "2024年中国新能源汽车产品魅力指数研究 (NEV-APEAL)_问卷.pdf"
-DEFAULT_SAV = SERVICE_ROOT / "dataset" / "24 NEV-APEAL数据片段.sav"
+DEFAULT_PDF = SERVICE_ROOT / "dataset" / "research" / "nev_apeal" / "2024年中国新能源汽车产品魅力指数研究 (NEV-APEAL)_问卷.pdf"
+DEFAULT_SAV = SERVICE_ROOT / "dataset" / "research" / "nev_apeal" / "24 NEV-APEAL数据片段.sav"
 DEFAULT_OUTPUT = SERVICE_ROOT / "outputs" / "reports" / "nev_apeal_questionnaire_map.md"
 
 # 题型关键词（中英文混合，用于从题干尾部识别）
@@ -167,7 +167,7 @@ def render_md(questions: List[Dict[str, Any]], sav: Dict[str, Any],
 
     lines = ["# NEV-APEAL 2024 问卷结构与 SAV 变量映射", ""]
     lines.append(f"> 问卷：2024 年中国新能源汽车产品魅力指数研究 (NEV-APEAL)_问卷.pdf")
-    lines.append(f"> SAV：dataset/24 NEV-APEAL数据片段.sav（{len(cols)} 个变量）")
+    lines.append(f"> SAV：dataset/research/nev_apeal/24 NEV-APEAL数据片段.sav（{len(cols)} 个变量）")
     lines.append(f"> 问卷题数：{total} | 完全匹配 {stats['exact']} | 部分匹配 {stats['partial']} | SAV 中缺失 {stats['missing']}")
     lines.append("")
 

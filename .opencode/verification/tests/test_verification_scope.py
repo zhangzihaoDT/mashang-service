@@ -112,7 +112,7 @@ def test_generated_outputs_are_noop_not_unclassified():
 
 def test_generic_dataset_asset_does_not_expand_scope():
     scope = rvs.resolve_scope(
-        _contract(), ["dataset/cpca/tesla_monthly_wholesale_retail_export.csv"]
+        _contract(), ["dataset/market/cpca/tesla_monthly_wholesale_retail_export.csv"]
     )
     assert scope["decision"] == "no-op"
     assert scope["required_targets"] == []

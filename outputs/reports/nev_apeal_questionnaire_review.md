@@ -1,6 +1,6 @@
 # NEV-APEAL 问卷结构人工评审
 
-> 评审对象：`2024年中国新能源汽车产品魅力指数研究 (NEV-APEAL)_问卷.pdf` 与 `dataset/24 NEV-APEAL数据片段.sav`
+> 评审对象：`2024年中国新能源汽车产品魅力指数研究 (NEV-APEAL)_问卷.pdf` 与 `dataset/research/nev_apeal/24 NEV-APEAL数据片段.sav`
 > 关联产出：`outputs/reports/nev_apeal_questionnaire_map.md`（自动映射表）、`nev_apeal_questionnaire_map.json`（结构化映射）
 > 评审性质：人工判断，记录对问卷与 SAV 结构关系的理解，供后续分析口径参考
 

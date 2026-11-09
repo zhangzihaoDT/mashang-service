@@ -3,7 +3,7 @@
 Tesla 月度批发 / 国内零售 / 上海工厂出口 报告。
 
 数据源:
-    dataset/cpca/tesla_monthly_wholesale_retail_export.csv（手动整理，乘联会月报口径）
+    dataset/market/cpca/tesla_monthly_wholesale_retail_export.csv（手动整理，乘联会月报口径）
 
 口径:
     批发     = Tesla 厂家月度批发量
@@ -39,7 +39,7 @@ from utils.paths import DATASET_DIR, REPORTS_DIR  # noqa: E402
 from utils.plotly_theme import apply_zh_theme, ZH  # noqa: E402
 from utils.result_contract import build_success_contract  # noqa: E402
 
-DEFAULT_CSV = DATASET_DIR / "cpca" / "tesla_monthly_wholesale_retail_export.csv"
+DEFAULT_CSV = DATASET_DIR / "market" / "cpca" / "tesla_monthly_wholesale_retail_export.csv"
 DEFAULT_OUTPUT = REPORTS_DIR
 REPORT_NAME = "tesla_wholesale_export_report"
 ROLLING_WINDOW = 6
@@ -185,7 +185,7 @@ def format_terminal(r: dict) -> str:
     )
     lines.append(
         "  口径: 出口占比 = 出口/批发 | "
-        "数据源: dataset/cpca/tesla_monthly_wholesale_retail_export.csv"
+        "数据源: dataset/market/cpca/tesla_monthly_wholesale_retail_export.csv"
     )
     return "\n".join(lines)
 
@@ -287,7 +287,7 @@ def render_html(r: dict, static_prefix: str) -> str:
 <main class="container">
   <section class="hero">
     <h1>Tesla 月度批发数量与出口占比</h1>
-    <p>数据源：乘联会（CPCA）《全国乘用车市场分析》口径 · <code>dataset/cpca/tesla_monthly_wholesale_retail_export.csv</code> · {r['start_month']} 至 {r['latest_month']}{source_html}</p>
+    <p>数据源：乘联会（CPCA）《全国乘用车市场分析》口径 · <code>dataset/market/cpca/tesla_monthly_wholesale_retail_export.csv</code> · {r['start_month']} 至 {r['latest_month']}{source_html}</p>
   </section>
 
   <section class="kpi-grid">

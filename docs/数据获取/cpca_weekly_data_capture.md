@@ -5,7 +5,7 @@
 - `cpca-weekly-data-capture` 是 **workspace Skill**（正式注册）。
 - Skill 定义位置：
   `.opencode/skills/cpca-weekly-data-capture/SKILL.md`
-- `dataset/cpca_weekly/` 是 **service-level runtime dataset asset**。
+- `dataset/market/cpca_weekly/` 是 **service-level runtime dataset asset**。
 - dataset 由 `workspace` 的 `cpca-weekly-data-capture` Skill 管理和更新。
 - 底层脚本：`workspace/research_scripts/cpca_weekly_early_signal.py`
 
@@ -47,7 +47,7 @@ make cpca-weekly-data-capture WEEK=2026-W26
 
 ## Runtime JSON 提交策略
 
-- `dataset/cpca_weekly/*.json` 是运行时产物
+- `dataset/market/cpca_weekly/*.json` 是运行时产物
 - 默认不提交 Git（`dataset/` 在 `.gitignore` 中）
 - 无需修改 `.gitignore`
 - README 已在 workspace docs 中，不依赖 dataset 目录

@@ -163,7 +163,7 @@ python .../run_monthly_market_report.py --month 2026-05 --execute
 | `workspace/research_scripts/market_report/run_monthly_market_report.py` | 查询执行入口脚本 |
 | `shared/loaders/tp_and_mix_ways_loader.py` | 数据加载器 |
 | `shared/schema/tp_and_mix_ways_schema.py` | 数据表结构定义 |
-| `docs/tp_and_mix_ways_usage.md` | 数据资产使用指南 |
+| `docs/业务能力/市场与竞争/tp_and_mix_ways_usage.md` | 数据资产使用指南 |
 | `utils/paths.py` | 路径工具 |
 | `utils/result_contract.py` | Result Contract 构建工具 |
 | `workspace/outputs/monthly_market_report/` | 月报输出目录 |

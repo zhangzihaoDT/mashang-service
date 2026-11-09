@@ -82,7 +82,7 @@
 - 均价/渗透率取期末月（2024-03 与 2025-03）时点差，避免整段平均掩盖趋势。
 - Event Cases 车型名称以车型家族匹配，验证窗口销量为该市场内匹配车型家族合计。
 
-## V0.2 Market State 回测（三层漏斗草案，见 docs/market_state_v0_2_design.md）
+## V0.2 Market State 回测（三层漏斗草案，见 docs/业务能力/市场与竞争/market_state_v0_2_design.md）
 
 DPS = 需求池（0.7·NEV替代空间+0.3·BEV/NEV）；CES = 控制松动（TOP3 是谁、是否失血/更替/被挑战/老化）；PLS = 价格杠杆（下探空间×在位者价格×低价需求）。机会集 = 非 LOCKED_STABLE。
 

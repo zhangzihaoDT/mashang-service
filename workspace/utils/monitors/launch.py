@@ -27,7 +27,7 @@ from utils.monitors.order_filter import flag_test_orders
 
 
 # 当锁单窗口内 order_type 填充率低于该阈值时，视为该代际 order_type 尚未回填
-# （新上市代际锁单初期 order_type 为空，见 docs/L6_M2_预售情况汇报分析框架.md）。
+# （新上市代际锁单初期 order_type 为空，见 docs/业务能力/车型预售与上市/L6_M2_预售情况汇报分析框架.md）。
 # 此时严格 == "用户车" 的子计数会恒为 0，展示层降级为「order_type 未回填」，避免误导。
 ORDER_TYPE_FILL_SUPPRESS_RATIO = 0.5
 
@@ -77,6 +77,8 @@ def resolve_launch_open_from_data(
     if not use_data:
         return launch_start + pd.Timedelta(hours=20)
     real = base.loc[base["series_group_logic"].eq(key)].copy()
+    if real.empty:
+        return launch_start
     real = real[real.apply(_is_real_lock, axis=1)]
     real_on_launch = real[real["lock_time"] >= launch_start]
     if real_on_launch.empty:

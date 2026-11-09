@@ -74,7 +74,7 @@ def normalize(df_raw):
 def main():
     parts = []
     for f in FILES:
-        p = DATASET_DIR / f
+        p = DATASET_DIR / "tableau" / "configuration" / f
         if not p.exists():
             print(f"⚠️ 缺文件: {f}")
             continue

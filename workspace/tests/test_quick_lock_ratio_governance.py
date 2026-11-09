@@ -63,12 +63,20 @@ def test_launch_date_comes_from_time_periods(mod, bdef):
 def test_launch_date_unknown_generation_returns_none(mod, bdef):
     """代际无法判定 / 上市日未确认 → None，不得用预售日冒充。"""
     assert mod.get_launch_date_for_product("不存在的车", bdef) is None
-    assert mod.get_launch_date_for_product("智己LS8 NEO 93 Max+", bdef) is None
+    # 使用独立配置模拟未确认上市日，不依赖实际代际的当前上市状态。
+    from copy import deepcopy
+
+    unconfirmed = deepcopy(bdef)
+    unconfirmed["time_periods"]["LS8Neo"].pop("end", None)
+    assert mod.get_launch_date_for_product("智己LS8 NEO 93 Max+", unconfirmed) is None
 
 
 def test_launch_date_supports_new_generations(mod, bdef):
     """LS8Neo / DM2 / CM3 等新代际通过 series_group_logic 识别，不依赖旧硬编码。"""
     assert mod._generation_of("智己LS8 NEO 93 Max+", bdef) == "LS8Neo"
+    assert mod.get_launch_date_for_product("智己LS8 NEO 93 Max+", bdef) == date.fromisoformat(
+        bdef["time_periods"]["LS8Neo"]["end"]
+    )
     assert mod._generation_of("全新一代智己LS6 Max", bdef) == "CM3"
     assert mod.get_launch_date_for_product("全新一代智己LS6 Max", bdef) == date.fromisoformat(
         bdef["time_periods"]["CM3"]["end"]

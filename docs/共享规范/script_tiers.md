@@ -95,7 +95,7 @@ workspace/
 | `dataset/updater/lock_attribution_data_to_parquet.py` | 刷新 lock_attribution_data.parquet | ✅ |
 | `dataset/updater/tableau_export.py` | 共享 Tableau REST 导出能力（非独立入口） | — |
 
-详见 `docs/daily_data_pipeline.md`。
+详见 `docs/数据获取/daily_data_pipeline.md`。
 
 ## 使用规则
 

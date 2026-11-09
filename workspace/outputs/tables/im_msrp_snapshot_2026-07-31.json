@@ -70,6 +70,6 @@
       "S级_配置器MSRP": ["L6", "LS6", "LS7", "L7"],
       "A级_官方新闻价": ["LS8", "LS9"]
     },
-    "doc_ref": "mashang_workspace/docs/im_official_guide_price_sourcing.md"
+    "doc_ref": "mashang_workspace/docs/数据获取/im_official_guide_price_sourcing.md"
   }
 }

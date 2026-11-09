@@ -26,13 +26,13 @@ DATASET_DIR = REPO_ROOT / "dataset"
 OUTPUT_FILE = DATASET_DIR / "order_data.parquet"
 
 TABLEAU_VIEW = "core_metric_observation/11"
-TABLEAU_OUTPUT_2026 = DATASET_DIR / "order_data_2026.csv"
+TABLEAU_OUTPUT_2026 = DATASET_DIR / "tableau" / "orders" / "order_data_2026.csv"
 
 # 稳定 View 身份配置：日常刷新直接复用这里的 view_id，只有失效时才进入 discovery。
 TABLEAU_VIEWS_CONFIG = Path(__file__).resolve().parent / "tableau_views.json"
 TABLEAU_ORDER_DATA_KEY = "order_data"
 
-INPUT_FILE_2026 = DATASET_DIR / "order_data_2026.csv"
+INPUT_FILE_2026 = DATASET_DIR / "tableau" / "orders" / "order_data_2026.csv"
 
 
 class TableauDiscoveryUnavailable(RuntimeError):
@@ -637,6 +637,7 @@ def step_export_tableau_order_data_2026(
     print("=" * 60)
 
     output_path = TABLEAU_OUTPUT_2026
+    output_path.parent.mkdir(parents=True, exist_ok=True)
     print(f"目标文件: {output_path}")
 
     token_name = os.getenv("TABLEAU_TOKEN_NAME")

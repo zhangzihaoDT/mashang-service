@@ -1,7 +1,7 @@
 # 车型预售与上市｜统一入口与业务边界
 
 > **登记不是执行授权。** 本页描述现有能力及真实 CLI；不修改算法、不创建 Job、不触发数据刷新或飞书推送。
-> 机器可读专题入口：[`workspace/registry/vehicle_launch_capabilities.json`](../workspace/registry/vehicle_launch_capabilities.json)。
+> 机器可读专题入口：[`workspace/registry/vehicle_launch_capabilities.json`](../../../workspace/registry/vehicle_launch_capabilities.json)。
 > 能力成熟度仍由全局 `workspace/registry/capability_registry.json` 管理，生产 Job 仍由 `jobs/config/jobs_config.json` 管理。
 
 ## 一套口径（SSOT）
@@ -66,3 +66,8 @@
 ## 本阶段边界与待办
 
 当前只完成**统一入口与业务说明**，没有新增业务计算、修改日期逻辑、加入全局成熟度注册表或新增生产 Job。下一阶段如果要暴露为 Agent Skill，必须映射本专题 ID 与真实 CLI，再做参数校验、数据新鲜度、输出产物登记和权限隔离；如果要通过 Hub／DSH 正式执行，必须另行注册 `jobs/` 契约并验收。不得把专题注册表中的“已登记”误认为“已授权自动执行”。
+
+## 专题方法
+
+- [上市节奏增量分析方法](launch_rhythm_incremental_analysis.md)
+- [L6 M2 预售分析框架](L6_M2_预售情况汇报分析框架.md)

@@ -2,7 +2,7 @@
 """
 explore_sav.py — .sav (SPSS) 数据集探索性分析脚本
 
-按 docs/sav_exploratory_analysis.md 流水线实现:
+按 docs/archive/research/sav_exploratory_analysis.md 流水线实现:
     .sav -> pyreadstat -> 变量字典 -> 题型识别 -> Data QC
         -> Descriptive Statistics -> 配置归因 -> 偏好题识别 -> 品牌/价位映射
         -> 自动扫描差异 -> Topic 深挖 -> 统计验证
@@ -51,7 +51,7 @@ except ImportError:
     stats = None
 
 SERVICE_ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_INPUT = SERVICE_ROOT / "dataset" / "24 NEV-APEAL数据片段.sav"
+DEFAULT_INPUT = SERVICE_ROOT / "dataset" / "research" / "nev_apeal" / "24 NEV-APEAL数据片段.sav"
 DEFAULT_OUTPUT = SERVICE_ROOT / "outputs" / "sav_apeal"
 WEIGHT_COL = "APEAL_WT"
 

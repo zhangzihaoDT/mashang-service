@@ -61,7 +61,7 @@ python eval/run_runtime_eval.py --cases eval/runtime_cases.jsonl --report eval/e
 ## Phase 3: Follow-up Runner
 
 - Runner: `eval/run_followup_eval.py`
-- 规则文档: `docs/followup_runner_rules.md`
+- 规则文档: `docs/共享规范/followup_rules.md`
 
 ### 功能
 
@@ -100,7 +100,7 @@ pytest tests/eval -q                                        # 运行 runner 单�
 
 - Parser: `eval/context_parser.py`
 - CLI: `eval/parse_context_cli.py`
-- 规则文档: `docs/context_parser_rules.md`
+- 规则文档: `docs/共享规范/followup_rules.md`
 
 ### Context Match Rate
 
@@ -120,7 +120,7 @@ context_parser 支持从文本解析结果引用:
 ## Phase 5: Result Contract & Numeric Eval
 
 - Contract 模块: `utils/result_contract.py`
-- 规范文档: `docs/result_contract.md`
+- 规范文档: `docs/共享规范/result_contract.md`
 - Numeric Runner: `eval/run_numeric_eval.py`
 - Numeric Cases: `eval/cases/numeric_cases.json`
 
@@ -180,8 +180,8 @@ context_parser 支持从文本解析结果引用:
 
 - Registry: `workspace/registry/capability_registry.json`
 - Audit Runner: `workspace/eval/run_capability_audit.py`
-- Rules: `docs/promotion_rules.md`
-- Registry Doc: `docs/capability_registry.md`
+- Rules: `docs/共享规范/promotion_rules.md`
+- Registry Doc: `docs/共享规范/capability_registry.md`
 
 ### Capability Registry
 
@@ -222,7 +222,7 @@ python workspace/eval/run_capability_audit.py
 - `daily-sync-dry-run` 已废弃，改用 `daily-observation-dry-run`
 - `Makefile` 新增 dataset-update / dataset-validate / daily-observation-dry-run / daily-observation-sync / daily-data-pipeline / daily-data-pipeline-dry-run
 - `utility_scripts/dataset_validate.py` 新增轻量校验脚本
-- `docs/daily_data_pipeline.md` 新增完整 daily data pipeline 文档
+- `docs/数据获取/daily_data_pipeline.md` 新增完整 daily data pipeline 文档
 - Makefile 所有 `python` 命令统一为 `$(PYTHON)`（`PYTHON ?= .venv/bin/python`）
 - `PYTHON` 变量可通过 `PYTHON=python3 make target` 覆盖
 - 自然语言入口统一为"数据更新并同步"，非"今天的数据更新并同步"

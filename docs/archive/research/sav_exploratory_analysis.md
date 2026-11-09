@@ -199,7 +199,7 @@ python scripts/explore_sav.py topic --group-by GENERATION2 --metric APEAL_Index
 python scripts/explore_sav.py topic --group-by CN_INCOME --metric APEAL_Index --pairwise  # 含 Tukey 两两对比
 ```
 
-- 默认输入 `dataset/24 NEV-APEAL数据片段.sav`，输出 `outputs/sav_apeal/`（可用 `--input` / `--output` 覆盖）。
+- 默认输入 `dataset/research/nev_apeal/24 NEV-APEAL数据片段.sav`，输出 `outputs/sav_apeal/`（可用 `--input` / `--output` 覆盖）。
 - `--format csv` 输出结构化 CSV（`--format json` 为默认）。
 - 权重列 `APEAL_WT` 用于加权均值/占比；统计检验用原始样本并标注效应量。
 - 品牌阵营映射（`BRAND_CAMP`）为分析假设，报告中须注明口径。

@@ -66,5 +66,5 @@ def test_default_suite_is_not_all():
 
 
 def test_script_tiers_doc_exists():
-    """docs/script_tiers.md 存在。"""
-    assert (_WS_DIR.parent / "docs" / "script_tiers.md").exists()
+    """docs/共享规范/script_tiers.md 存在。"""
+    assert (_WS_DIR.parent / "docs" / "共享规范" / "script_tiers.md").exists()

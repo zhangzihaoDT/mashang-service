@@ -12,7 +12,7 @@
 
 ## 1. Measurement & Data Contract
 
-- 数据源：`dataset/24 NEV-APEAL数据片段.sav`；样本：9,937 行 × 370 列。
+- 数据源：`dataset/research/nev_apeal/24 NEV-APEAL数据片段.sav`；样本：9,937 行 × 370 列。
 - 权重：`APEAL_WT`；指数均值使用加权均值，样本量 N 为未加权有效记录数。
 - 题型识别：multi 158；categorical 111；rating 55；numeric 30；scale7 16。
 - QC：高缺失变量（>20%）61 个；警告 8 条。
@@ -89,7 +89,7 @@ BEV 与 PHEV 内部仍可观察到相同排序方向，但仍需控制价格、�
 
 ## 方法与可追溯性
 
-- 脚本：`scripts/analyze_nev_apeal_topic.py`；框架：`docs/sav_exploratory_analysis_v2.md`。
+- 脚本：`scripts/analyze_nev_apeal_topic.py`；框架：`docs/archive/research/sav_exploratory_analysis_v2.md`。
 - 主 Topic：`YPV_01 × APEAL_Index`；检验：Welch ANOVA、两两 Welch t-test、Cohen's d。
 - 结论范围：仅限当前 SAV 数据片段与横截面口径。
 

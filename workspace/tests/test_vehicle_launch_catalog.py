@@ -66,4 +66,4 @@ def test_launch_catalog_docs_linked():
     for path in ["docs/README.md", "workspace/README.md"]:
         content = (ROOT / path).read_text(encoding="utf-8")
         assert "vehicle_launch_capabilities.md" in content
-    assert (ROOT / "docs/vehicle_launch_capabilities.md").exists()
+    assert (ROOT / "docs/业务能力/车型预售与上市/vehicle_launch_capabilities.md").exists()

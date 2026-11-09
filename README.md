@@ -22,7 +22,7 @@ mashang-service 专注汽车业务数据生产、指标与分析。Service 维�
 
 | 职责 | 主要目录 | 维护内容 |
 |---|---|---|
-| 数据生产 | [dataset/](dataset/updater/dataset_registry.py) | 数据获取、更新、校验与资产索引。Tableau 导出、外部市场数据和研究样本分区存放 |
+| 数据生产 | [dataset/](dataset/README.md) | 数据获取、更新、校验与资产索引。Tableau 导出、外部市场数据和研究样本分区存放 |
 | 指标与业务口径 | [shared/](shared/README.md) | 字段定义、业务口径、共享算子与数据读取 |
 | 业务分析 | [workspace/](workspace/README.md) | 稳定业务脚本、专题研究与分析产物 |
 | 对外执行接口 | [jobs/](jobs/README.md) | 确定性任务、参数白名单、执行状态与产物契约 |
@@ -678,7 +678,7 @@ Registry 的核心作用是：
 文档：
 
 ```text
-docs/result_contract.md
+docs/共享规范/result_contract.md
 ```
 
 ---
@@ -734,7 +734,7 @@ make jobs-run JOB=daily_lock_count JOB_PARAMS="--job-param date=2026-11-03"
 
 ## 拆分记录
 
-旧 Runtime 的退役范围和迁移记录见 [Service 架构基线](docs/architecture_baseline.md)。
+旧 Runtime 的退役范围和迁移记录见 [Service 架构基线](docs/共享规范/architecture_baseline.md)。
 
 ---
 

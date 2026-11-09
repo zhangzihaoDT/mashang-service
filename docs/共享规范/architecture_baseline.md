@@ -14,7 +14,7 @@ DSH 仓库示例 profile 已同步新查询路径。部署前须将其干净 che
 |---|---|
 | 上市监控 | `workspace/business_scripts/vehicle_sales_monitor.py` |
 | 工作区规则 | `workspace/AGENTS.md` |
-| 数据字典 | `docs/data_dictionary.md` |
+| 数据字典 | `docs/共享规范/data_dictionary.md` |
 | 字段定义 | `shared/schema/schema.md` |
 | 指标定义 | `shared/schema/reference/metric_definitions.md` |
 

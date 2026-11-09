@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Shock Detector 早期规则雏形：观测窗口末段扫描新品冲击者，验证命中率。
 
-概念见 docs/market_state_v0_2_design.md §8.7（Shock Detector / Breakout Entry）。
+概念见 docs/业务能力/市场与竞争/market_state_v0_2_design.md §8.7（Shock Detector / Breakout Entry）。
 
 早期信号（观测窗口末段可观察）：
   - 末段月均销量 ≥ RAMP_BREAKOUT（2000）

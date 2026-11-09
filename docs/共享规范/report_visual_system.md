@@ -133,3 +133,45 @@ align_dual_zero(fig, y1=y1_data, y2=y2_data)
 8. y=0 zeroline 对净流入/净流出/正负变化图表必须显著。
 9. **静态资源路径约定**：报告落在 `workspace/outputs/reports/`，模板/资产在 `workspace/templates/` 与 `assets/`，因此 `<link>/<img>` 必须用 **`../../templates/report_style.css`、`../../assets/brand/...`**（`report_base.html` 的 `static_prefix` 传 `../..`）。用 `../` 会指向不存在的 `outputs/templates/`，导致 CSS 不渲染——`market_state_observation` 曾踩此坑。
 9. 超过 6 个系列时，高亮本品/事件车型，其余竞品降为低饱和灰蓝或透明度。
+
+## 品牌 HTML 报告渲染
+
+从仓库根目录运行以下命令。
+
+## 品牌资产
+
+```
+workspace/assets/brand/
+├── brand_palette.json
+├── raccoon_avatar_light.png
+└── zihao_signature_transparent.png
+```
+
+## 模板
+
+```
+workspace/templates/
+├── report_base.html         # Jinja2 基模板
+├── report_style.css         # 品牌 CSS
+├── report_generic.html      # 通用报告
+└── forecast_report.html     # 预测报告专用
+```
+
+## 输出路径
+
+```
+workspace/outputs/reports/
+```
+
+## 渲染方式
+
+```bash
+# 从 Result Contract JSON 渲染
+python workspace/utility_scripts/render_html_report.py \
+  --input workspace/outputs/tables/result.json \
+  --output workspace/outputs/reports/report.html
+
+# 从 pipe 渲染（分析脚本 → 报告）
+python workspace/business_scripts/daily_lock_count.py --format json \
+  | python workspace/utility_scripts/render_html_report.py
+```

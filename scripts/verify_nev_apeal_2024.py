@@ -31,7 +31,7 @@ except ImportError:
     pyreadstat = None
 
 SERVICE_ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_INPUT = SERVICE_ROOT / "dataset" / "24 NEV-APEAL数据片段.sav"
+DEFAULT_INPUT = SERVICE_ROOT / "dataset" / "research" / "nev_apeal" / "24 NEV-APEAL数据片段.sav"
 DEFAULT_OUTPUT = SERVICE_ROOT / "outputs" / "reports" / "nev_apeal_2024_verify.html"
 WEIGHT_COL = "APEAL_WT"
 
@@ -677,7 +677,7 @@ def render_html(results: List[Dict[str, Any]]) -> str:
     <h1>NEV-APEAL 2024 要点 · 数据验证报告</h1>
     <div class="sub">用 24 NEV-APEAL数据片段.sav 逐条验证要点文档</div>
     <div class="meta">
-      <span>数据源: <b>dataset/24 NEV-APEAL数据片段.sav</b></span>
+      <span>数据源: <b>dataset/research/nev_apeal/24 NEV-APEAL数据片段.sav</b></span>
       <span>样本: <b>9,937 行</b>（2023 交付 {__C23__} · 2024 交付 {__C24__}）</span>
       <span>脚本: <b>scripts/verify_nev_apeal_2024.py</b></span>
       <span>要点: <b>24 条</b></span>

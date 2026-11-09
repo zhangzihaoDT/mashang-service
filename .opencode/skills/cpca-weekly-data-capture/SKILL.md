@@ -31,8 +31,8 @@ make cpca-weekly-data-capture WEEK=2026-W25
 ## 默认输出位置
 
 ```
-dataset/cpca_weekly/cpca_weekly_data_capture.json   # evidence/capture 原材料
-dataset/cpca_weekly/cpca_weekly_fact_result.json     # 事实确认后的结果资产
+dataset/market/cpca_weekly/cpca_weekly_data_capture.json   # evidence/capture 原材料
+dataset/market/cpca_weekly/cpca_weekly_fact_result.json     # 事实确认后的结果资产
 workspace/outputs/reports/cpca_weekly_early_signal.html  # HTML 报告
 ```
 

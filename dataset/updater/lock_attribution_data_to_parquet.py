@@ -3,8 +3,8 @@
 """
 锁单归因数据自动更新流水线（只管锁单归因）
 
-1. 从 Tableau 导出最新视图数据到 dataset/锁单归因_data_<year>.csv
-2. 合并 dataset/锁单归因_data_20*.csv（每年取最新的一个）并更新 Parquet
+1. 从 Tableau 导出最新视图数据到 dataset/tableau/attribution/锁单归因_data_<year>.csv
+2. 合并 dataset/tableau/attribution/锁单归因_data_20*.csv（每年取最新的一个）并更新 Parquet
 
 默认运行: python dataset/updater/lock_attribution_data_to_parquet.py
 仅做 step2: python dataset/updater/lock_attribution_data_to_parquet.py --no-export
@@ -20,7 +20,7 @@ Tableau PAT 从仓库根目录 .env 读取:
 - TABLEAU_TOKEN_VALUE="..."
 
 输入文件:
-- dataset/锁单归因_data_20*.csv（按年份分组，每年取最新的一个）
+- dataset/tableau/attribution/锁单归因_data_20*.csv（按年份分组，每年取最新的一个）
 输出文件:
 - dataset/lock_attribution_data.parquet
 """
@@ -50,7 +50,7 @@ if TYPE_CHECKING:
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DATASET_DIR = REPO_ROOT / "dataset"
-ORIGINAL_DIR = DATASET_DIR
+ORIGINAL_DIR = DATASET_DIR / "tableau" / "attribution"
 OUTPUT_FILE = DATASET_DIR / "lock_attribution_data.parquet"
 
 LOCK_ATTRIBUTION_VIEW = f"{DEFAULT_TABLEAU_URL}/#/views/1h/sheet10"
@@ -365,6 +365,7 @@ def export_lock_attribution(
     if year is None:
         year = int(datetime.now().strftime("%Y"))
 
+    ORIGINAL_DIR.mkdir(parents=True, exist_ok=True)
     output_path = ORIGINAL_DIR / f"锁单归因_data_{year}.csv"
 
     token_name = os.getenv("TABLEAU_TOKEN_NAME")

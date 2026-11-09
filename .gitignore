@@ -4,8 +4,10 @@
 .env.*
 
 /dataset/*
+!/dataset/README.md
 !/dataset/updater/
 /dataset/updater/*
+!/dataset/updater/README.md
 !/dataset/updater/*.py
 /daemon/
 
@@ -110,6 +112,5 @@ outputs/diagram/
 
 
 # Docx conversion media — retained locally but not committed with Markdown archives
-docs/archive/L6_M1_images/
-docs/archive/LS6_M2_T1_images/
+workspace/outputs/archive_assets/
 docs/archive/L6竞品竞争力研究/新款智己L6竞品对比大全_images/

@@ -245,7 +245,7 @@ bot_main()
 
 ### 6.4 Doc Confusion: root docs/ vs docs/
 
-**Finding**: `docs/tp_and_mix_ways_dataset.md` exists at root level. `docs/tp_and_mix_ways_usage.md` duplicates some content.
+**Finding**: `docs/tp_and_mix_ways_dataset.md` exists at root level. `docs/业务能力/市场与竞争/tp_and_mix_ways_usage.md` duplicates some content.
 
 **Verdict**: The root doc describes the dataset build process (service responsibility). The workspace doc describes consumption patterns. They serve different audiences but should cross-reference each other to avoid confusion.
 
@@ -377,7 +377,7 @@ mashang-service/
 | 2.1 | Update root `README.md` to mark `mashang_runtime` as frozen | 🟢 Doc only |
 | 2.2 | Update `project_inventory.md` with current directory structure | 🟢 Doc only |
 | 2.3 | Add TP&MIX-ways to root `README.md` and `AGENTS.md` | 🟢 Doc only |
-| 2.4 | Cross-reference root `docs/tp_and_mix_ways_dataset.md` from `docs/tp_and_mix_ways_usage.md` | 🟢 Doc only |
+| 2.4 | Cross-reference root `docs/tp_and_mix_ways_dataset.md` from `docs/业务能力/市场与竞争/tp_and_mix_ways_usage.md` | 🟢 Doc only |
 
 ### Phase 3 — Archive Frozen Components (Needs Confirmation)
 

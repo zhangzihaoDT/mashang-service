@@ -178,7 +178,7 @@ python workspace/research_scripts/tp_and_mix_ways/check_tp_and_mix_ways_asset.py
 
 ## 相关文档
 
-- **service 数据集说明**: `docs/tp_and_mix_ways_dataset.md` — 数据构建流程、6 张 Parquet 的 grain/metrics 定义
+- **service 数据集说明**: `docs/数据获取/tp_and_mix_ways_dataset.md` — 数据构建流程、6 张 Parquet 的 grain/metrics 定义
 - **shared schema**: `shared/schema/tp_and_mix_ways_schema.py` — grain / dimensions / metrics 的 Python 定义
 - **shared loader**: `shared/loaders/tp_and_mix_ways_loader.py` — pandas / DuckDB 统一读取入口
-- **project cleanup audit**: `docs/project_cleanup_audit.md` — 项目结构边界与清理计划
+- **project cleanup audit**: `docs/archive/project_history/project_cleanup_audit.md` — 项目结构边界与清理计划

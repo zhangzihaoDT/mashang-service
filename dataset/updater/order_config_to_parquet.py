@@ -573,8 +573,9 @@ def main(force: bool = False, mobile: bool = False, timeout: int = 600, incremen
     
     load_env_file(REPO_ROOT / ".env")
 
-    DATASET_DIR.mkdir(parents=True, exist_ok=True)
-    config_csv_path_update = DATASET_DIR / "config_attribute_data_update.csv"
+    raw_dir = DATASET_DIR / "tableau" / "configuration"
+    raw_dir.mkdir(parents=True, exist_ok=True)
+    config_csv_path_update = raw_dir / "config_attribute_data_update.csv"
     config_parquet_path = DATASET_DIR / "config_attribute.parquet"
     order_data_path = DATASET_DIR / "order_data.parquet"
     business_def_path = REPO_ROOT / "shared" / "schema" / "business_definition.json"
@@ -630,7 +631,7 @@ def main(force: bool = False, mobile: bool = False, timeout: int = 600, incremen
     processed_list = []
 
     for year, fname in year_files:
-        csv_file = DATASET_DIR / fname
+        csv_file = raw_dir / fname
 
         if not csv_file.exists():
             print(f"⚠️ 找不到文件: {csv_file.name}")

@@ -13,7 +13,7 @@
 | 某代际预售小订有多少留存、转大定或锁单？ | `make presale-funnel SERIES=CM3 AS_OF=2026-11-03` | 终端返回预售小订漏斗 |
 | 查看指定代际的预售快照或当前阶段的监控卡 | `make presale-snapshot SERIES=CM3 DRY=1` 或 `make sales-monitor-dry-run` | 前者固定预售口径，后者按活跃代际和阶段预览；两者均使用已有订单数据，不发卡 |
 
-跨代际预售对比使用 [累计订单对比脚本](research_scripts/presale_cumulative_order_compare.py)。其他常用入口包括[线索转化](business_scripts/assign_conversion_analysis.py)、[配置渗透率](business_scripts/attribute_penetration_report.py)、[ATP 月报](business_scripts/atp_price_report.py)和[上险数据使用指南](../docs/tp_and_mix_ways_usage.md)。
+跨代际预售对比使用 [累计订单对比脚本](research_scripts/presale_cumulative_order_compare.py)。其他常用入口包括[线索转化](business_scripts/assign_conversion_analysis.py)、[配置渗透率](business_scripts/attribute_penetration_report.py)、[ATP 月报](business_scripts/atp_price_report.py)和[上险数据使用指南](../docs/业务能力/市场与竞争/tp_and_mix_ways_usage.md)。
 
 <a id="dsh-launch-monitor"></a>
 ## DSH 只读查询示例 · LS9 上市以来累计锁单
@@ -26,9 +26,11 @@
 
 ## 车型预售与上市 · 统一入口
 
-专题入口已整理为 **一套业务时间口径、两类能力、四份独立研究报告与一项监控**。业务问题、完整 CLI、输出文件、SSOT 例外与推送风险见 [车型上市专题说明](../docs/vehicle_launch_capabilities.md)，机器可读入口见 [vehicle_launch_capabilities.json](registry/vehicle_launch_capabilities.json)。本阶段仅登记入口，不自动开放生产 Job。
+专题入口已整理为 **一套业务时间口径、两类能力、四份独立研究报告与一项监控**。业务问题、完整 CLI、输出文件、SSOT 例外与推送风险见 [车型上市专题说明](../docs/业务能力/车型预售与上市/vehicle_launch_capabilities.md)，机器可读入口见 [vehicle_launch_capabilities.json](registry/vehicle_launch_capabilities.json)。本阶段仅登记入口，不自动开放生产 Job。
 
 ## 数据更新与推送
+
+Scheduler、Daily pipeline、Full data update 和预售/上市监控的固定流程入口统一归类于 [plans/](plans/README.md)，机器可读目录为 [plans/catalog.json](plans/catalog.json)，供后续 DSH-superagent macOS App 对接。
 
 以下操作按实际授权选择。向飞书写入前先预览并核对口径，正式推送遵守对应入口的新鲜度门槛。
 
@@ -40,10 +42,10 @@
 | 更新订单并预览指定代际上市监控 | `make monitor-sync SERIES=CM3 PHASE=launch DRY=1` | **会先刷新并写入订单表**，随后预览卡片；不发送飞书 |
 | 更新订单并推送指定代际上市监控 | 核对上行预览后运行 `make monitor-sync SERIES=CM3 PHASE=launch` | 再次刷新订单表，并发送飞书卡片 |
 
-每日观察同步和运营组合命令见[每日数据管道](../docs/daily_data_pipeline.md)，执行步骤以根 [Makefile](../Makefile) 为准。
+每日观察同步和运营组合命令见[每日数据管道](../docs/数据获取/daily_data_pipeline.md)，执行步骤以根 [Makefile](../Makefile) 为准。
 
 ## 维护与交付
 
 - 稳定业务脚本放在 [business_scripts](business_scripts)，预测与回测放在 [research_scripts](research_scripts)，整理和同步工具放在 [utility_scripts](utility_scripts)。能力成熟度查 [Workspace 注册表](registry/capability_registry.json)，能通过 Hub/Worker 调用的 Job 查 [Job 声明](../jobs/config/jobs_config.json)。
 - 原始数据统一从根 `dataset/` 读取。临时分析写到 workspace 的 `scratch/`，业务表格、图和报告分别放在 workspace 的 `outputs/tables/`、`outputs/charts/`、`outputs/reports/`。导出时按脚本的 `--output` 约定指定位置。
-- 分析方法与专题手册见[文档索引](../docs/README.md)，结构化业务结果见 [Result Contract](../docs/result_contract.md)。任务执行边界见[根 AGENTS](../AGENTS.md)和[Workspace AGENTS](AGENTS.md)。
+- 分析方法与专题手册见[文档索引](../docs/README.md)，结构化业务结果见 [Result Contract](../docs/共享规范/result_contract.md)。任务执行边界见[根 AGENTS](../AGENTS.md)和[Workspace AGENTS](AGENTS.md)。

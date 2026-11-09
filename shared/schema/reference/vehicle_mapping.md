@@ -162,9 +162,9 @@ classified = classify_product_names(orders, "LS8")
 | LS9Hyper | — | 2026-07-16 | 2026-08-31 |
 | DM2 | 2026-08-18 | 2026-08-28 | 2026-10-08 |
 | CM3 | 2026-09-10 | 2026-09-23 | 2026-10-23 |
-| LS8Neo | 2026-10-29 | 待确认 | — |
+| LS8Neo | 2026-10-29 | 2026-11-05 | 2026-11-30 |
 
-> L7/LS7 为历史存量车型，无预售期；LS8Neo 仅登记 start，`end`（上市日）未确认时按 open-ended 预售窗口（`start + monitor.presale_open_ended_window_days`，默认 3 天）处理，确认后自动按 `[start, end)` 收口。详见 `time_window_rules.md`。
+> L7/LS7 为历史存量车型，无预售期；LS8Neo 已确认上市日为 2026-11-05，预售窗口按 `[2026-10-29, 2026-11-05)` 收口。其他仅登记 start、尚未确认 `end`（上市日）的代际，按 open-ended 预售窗口（`start + monitor.presale_open_ended_window_days`，默认 3 天）处理。详见 `time_window_rules.md`。
 >
 > LS9Hyper 是 LS9 的 Hyper 版本上市事件（只有 `end`/`finish`，无独立预售期）；`series` 值含 `LS9Hyper` 的记录默认归入 LS9 统计，只有需要单独看 Hyper 版本上市节奏时才独立使用。详见 `metric_definitions.md`。
 

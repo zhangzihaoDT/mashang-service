@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Generate a hypothesis-driven HTML report for the 2024 NEV-APEAL SAV.
 
-The report follows docs/sav_exploratory_analysis_v2.md:
+The report follows docs/archive/research/sav_exploratory_analysis_v2.md:
 Measurement Contract -> Data Contract -> Signal -> Hypothesis -> Topic.
 It deliberately treats configuration and brand differences as observational
 signals, not causal effects.
@@ -24,7 +24,7 @@ except ImportError as exc:  # pragma: no cover - dependency check for CLI users
     raise SystemExit("缺少 scipy，请先安装项目依赖") from exc
 
 SERVICE_ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_INPUT = SERVICE_ROOT / "dataset" / "24 NEV-APEAL数据片段.sav"
+DEFAULT_INPUT = SERVICE_ROOT / "dataset" / "research" / "nev_apeal" / "24 NEV-APEAL数据片段.sav"
 DEFAULT_OUTPUT = SERVICE_ROOT / "outputs" / "reports" / "nev_apeal_signal_topic_report.html"
 DEFAULT_MARKDOWN_OUTPUT = SERVICE_ROOT / "outputs" / "reports" / "nev_apeal_signal_topic_report.md"
 
@@ -204,7 +204,7 @@ def render_html(df: pd.DataFrame, meta: Any, vardict: pd.DataFrame, qc: dict[str
 <section class="card"><h2>4 · Statistical Validation & Robustness</h2><p>三组总体差异：Welch/ANOVA F = {topic['anova_f']:.2f}，p = {topic['anova_p']:.3g}。两两检验如下，作为方向性验证；未对全量扫描结果做多重比较校正，因此不把单个 p 值当作最终证明。</p>{pair_table}<h3 style="margin-top:20px">按能源类型分层</h3>{energy_table}<p class="note">如果购买任务差异只由 BEV/PHEV 构成，分层后应消失。当前 BEV 与 PHEV 内部仍可观察到相同排序方向，支持“购买任务是有价值的解释切片”，但仍需控制价格、品牌与车型结构。</p></section>
 <section class="card"><h2>5 · Insight、边界与产品问题</h2><div class="columns"><div><h3>Fact · 数据直接支持</h3><ul><li>增购组总体 APEAL 加权均值最高。</li><li>差异同时出现在多个体验子指数，而非单一题目。</li><li>在 BEV/PHEV 分层后，增购组仍保持较高方向。</li></ul></div><div><h3>Inference · 待验证解释</h3><ul><li>增购用户可能具备更成熟的新能源使用经验或更明确的产品筛选标准。</li><li>他们对产品的评价可能同时受到价格、品牌与配置结构影响。</li><li>当前数据不能区分“用户类型效应”与“车型/品牌组合效应”。</li></ul></div></div><div class="callout"><b>下一步业务问题：</b>在控制价格带、品牌阵营和车型后，增购用户仍然更重视哪些可感知体验？产品应优先优化“基本满意度”，还是为已有车辆的用户提供可感知的升级价值？</div></section>
 <section class="card"><h2>6 · Other Signals / 后续候选</h2><ul><li>城市层级与 APEAL 子指数存在差异，可研究不同城市用户的体验基准。</li><li>BEV/PHEV 在补能续航与动力性能上方向不同，适合做能源类型 Topic。</li><li>配置有/无扫描出现较大效应量，但强烈可能混合了价格、品牌和车型结构，必须先做分层或回归验证。</li><li>品牌阵营与价位段结构可用于样本画像，不可当作市场份额。</li></ul></section>
-<section class="card"><h2>方法与可追溯性</h2><p class="note">脚本：<code>scripts/analyze_nev_apeal_topic.py</code>；框架：<code>docs/sav_exploratory_analysis_v2.md</code>；输入：<code>dataset/24 NEV-APEAL数据片段.sav</code>；输出：本报告。主 Topic 使用 YPV_01 × APEAL_Index，Welch ANOVA/两两 Welch t-test，效应量为 Cohen's d。所有结论均限于当前数据片段与横截面口径。</p></section>
+<section class="card"><h2>方法与可追溯性</h2><p class="note">脚本：<code>scripts/analyze_nev_apeal_topic.py</code>；框架：<code>docs/archive/research/sav_exploratory_analysis_v2.md</code>；输入：<code>dataset/research/nev_apeal/24 NEV-APEAL数据片段.sav</code>；输出：本报告。主 Topic 使用 YPV_01 × APEAL_Index，Welch ANOVA/两两 Welch t-test，效应量为 Cohen's d。所有结论均限于当前数据片段与横截面口径。</p></section>
 <footer>Raccoon Research · 用数据、AI 和一点点常识，研究复杂世界。</footer></div></body></html>"""
 
 
@@ -221,7 +221,7 @@ def render_markdown(df: pd.DataFrame, vardict: pd.DataFrame, qc: dict[str, Any],
         f"在当前横截面样本中，增购用户 APEAL 为 **{highest['APEAL_Index']:.1f}**，比最低组（{lowest['label']}）高 **{highest['APEAL_Index'] - lowest['APEAL_Index']:+.1f}** 分。总体 APEAL 加权均值为 **{overall:.1f}**。该结果是关联性证据，不代表购买任务导致满意度变化。", "",
         "> **研究状态：REFINED。** 原始假设“购买任务决定整体满意度”过强；更稳妥的表述是“购买任务与用户感知的产品魅力结构存在稳定差异，增购用户整体评价更高”。", "",
         "## 1. Measurement & Data Contract", "",
-        f"- 数据源：`dataset/24 NEV-APEAL数据片段.sav`；样本：{len(df):,} 行 × {len(df.columns)} 列。",
+        f"- 数据源：`dataset/research/nev_apeal/24 NEV-APEAL数据片段.sav`；样本：{len(df):,} 行 × {len(df.columns)} 列。",
         "- 权重：`APEAL_WT`；指数均值使用加权均值，样本量 N 为未加权有效记录数。",
         f"- 题型识别：{type_summary}。",
         f"- QC：高缺失变量（>20%）{len(qc['checks'][0]['items'])} 个；警告 {qc['n_warnings']} 条。",
@@ -236,7 +236,7 @@ def render_markdown(df: pd.DataFrame, vardict: pd.DataFrame, qc: dict[str, Any],
     lines.extend(f"| {r['left']} - {r['right']} | {r['diff']:+.1f} | {r['p']:.3g} | {r['d']:+.3f} |" for r in topic["pairwise"])
     lines.extend(["", "### 按能源类型分层", "", "| 能源类型 | 购买任务 | 样本量 | APEAL |", "|---|---|---:|---:|"])
     lines.extend(f"| {r['energy']} | {r['label']} | {r['n']} | {r['APEAL_Index']:.1f} |" for r in topic["energy_rows"])
-    lines.extend(["", "BEV 与 PHEV 内部仍可观察到相同排序方向，但仍需控制价格、品牌与车型结构。", "", "## 5. Insight、边界与产品问题", "", "### Fact · 数据直接支持", "- 增购组总体 APEAL 加权均值最高。", "- 差异同时出现在多个体验子指数，而非单一题目。", "- 在 BEV/PHEV 分层后，增购组仍保持较高方向。", "", "### Inference · 待验证解释", "- 增购用户可能具备更成熟的新能源使用经验或更明确的产品筛选标准。", "- 评价差异可能同时受到价格、品牌与配置结构影响。", "- 当前数据不能区分用户类型效应与车型/品牌组合效应。", "", "> **下一步业务问题：** 在控制价格带、品牌阵营和车型后，增购用户仍然更重视哪些可感知体验？", "", "## 6. Other Signals / 后续候选", "", "- 城市层级与 APEAL 子指数存在差异，可研究不同城市用户的体验基准。", "- BEV/PHEV 在补能续航与动力性能上方向不同，适合做能源类型 Topic。", "- 配置有/无扫描可能混合价格、品牌和车型结构，必须先做分层或回归验证。", "- 品牌阵营与价位段结构可用于样本画像，不可当作市场份额。", "", "## 方法与可追溯性", "", "- 脚本：`scripts/analyze_nev_apeal_topic.py`；框架：`docs/sav_exploratory_analysis_v2.md`。", "- 主 Topic：`YPV_01 × APEAL_Index`；检验：Welch ANOVA、两两 Welch t-test、Cohen's d。", "- 结论范围：仅限当前 SAV 数据片段与横截面口径。", "", "---", "", "Raccoon Research · 用数据、AI 和一点点常识，研究复杂世界。", ""])
+    lines.extend(["", "BEV 与 PHEV 内部仍可观察到相同排序方向，但仍需控制价格、品牌与车型结构。", "", "## 5. Insight、边界与产品问题", "", "### Fact · 数据直接支持", "- 增购组总体 APEAL 加权均值最高。", "- 差异同时出现在多个体验子指数，而非单一题目。", "- 在 BEV/PHEV 分层后，增购组仍保持较高方向。", "", "### Inference · 待验证解释", "- 增购用户可能具备更成熟的新能源使用经验或更明确的产品筛选标准。", "- 评价差异可能同时受到价格、品牌与配置结构影响。", "- 当前数据不能区分用户类型效应与车型/品牌组合效应。", "", "> **下一步业务问题：** 在控制价格带、品牌阵营和车型后，增购用户仍然更重视哪些可感知体验？", "", "## 6. Other Signals / 后续候选", "", "- 城市层级与 APEAL 子指数存在差异，可研究不同城市用户的体验基准。", "- BEV/PHEV 在补能续航与动力性能上方向不同，适合做能源类型 Topic。", "- 配置有/无扫描可能混合价格、品牌和车型结构，必须先做分层或回归验证。", "- 品牌阵营与价位段结构可用于样本画像，不可当作市场份额。", "", "## 方法与可追溯性", "", "- 脚本：`scripts/analyze_nev_apeal_topic.py`；框架：`docs/archive/research/sav_exploratory_analysis_v2.md`。", "- 主 Topic：`YPV_01 × APEAL_Index`；检验：Welch ANOVA、两两 Welch t-test、Cohen's d。", "- 结论范围：仅限当前 SAV 数据片段与横截面口径。", "", "---", "", "Raccoon Research · 用数据、AI 和一点点常识，研究复杂世界。", ""])
     return "\n".join(lines)
 
 

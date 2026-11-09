@@ -18,7 +18,7 @@ DATASET_DIR = PROJECT_ROOT / "dataset"
 UPDATER_DIR = DATASET_DIR / "updater"
 MAKEFILE_PATH = PROJECT_ROOT / "Makefile"
 REGISTRY_PATH = WORKSPACE_ROOT / "registry" / "capability_registry.json"
-PIPELINE_DOC = PROJECT_ROOT / "docs" / "daily_data_pipeline.md"
+PIPELINE_DOC = PROJECT_ROOT / "docs" / "数据获取" / "daily_data_pipeline.md"
 
 
 def test_updater_exists():
@@ -113,7 +113,7 @@ def test_capability_registry_not_referencing_updater():
 
 
 def test_daily_data_pipeline_doc_exists():
-    """docs/daily_data_pipeline.md 存在。"""
+    """docs/数据获取/daily_data_pipeline.md 存在。"""
     assert PIPELINE_DOC.exists(), f"pipeline doc not found: {PIPELINE_DOC}"
 
 

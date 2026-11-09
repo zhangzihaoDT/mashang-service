@@ -4,7 +4,7 @@
 上市节奏增量贡献研究 — 品牌化 HTML 报告渲染
 被 launch_rhythm_incremental_analysis.py --html 调用。
 
-视觉体系：docs/report_visual_system.md（Raccoon Research）
+视觉体系：docs/共享规范/report_visual_system.md（Raccoon Research）
 """
 
 from __future__ import annotations

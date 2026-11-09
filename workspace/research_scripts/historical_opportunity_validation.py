@@ -36,7 +36,7 @@ EXPANSION_MIN = 10.0       # 扩容判定：validation 12M 销量增速 ≥ +10%
 SUCCESSFUL_MIN_SALES = 1000.0  # 成功新车型：验证窗口 12M 销量 ≥ 1000
 OPPORTUNITY_MIN_SALES = 100_000.0
 
-# V0.2 Market State 三层漏斗权重与阈值（草案 v2，见 docs/market_state_v0_2_design.md，待回测校准）
+# V0.2 Market State 三层漏斗权重与阈值（草案 v2，见 docs/业务能力/市场与竞争/market_state_v0_2_design.md，待回测校准）
 DPS_W = {"nev_substitution_space": 0.7, "bev_route_norm": 0.3}
 CES_W = {"top1_share_erosion": 0.20, "top3_share_erosion": 0.20,
          "leader_turnover": 0.15, "top3_turnover": 0.15,
@@ -323,7 +323,7 @@ def analyze_event_cases(cm: pd.DataFrame, vm: pd.DataFrame, new_model_lookup: di
 
 # ---------------------------------------------------------------------------
 # V0.2 Market State：NEV 替代空间主权重 + Disruption 维度拆分
-# 设计见 docs/market_state_v0_2_design.md（权重/阈值为初始值，待回测校准）
+# 设计见 docs/业务能力/市场与竞争/market_state_v0_2_design.md（权重/阈值为初始值，待回测校准）
 # ---------------------------------------------------------------------------
 def _bucket_bounds(pb: str) -> tuple[float, float]:
     if pb == "5万以下":
@@ -522,7 +522,7 @@ def sensitivity_v02(v02: pd.DataFrame, out: pd.DataFrame) -> pd.DataFrame:
 def build_v02_section(v02: pd.DataFrame, merged: pd.DataFrame, bt: dict, sens: pd.DataFrame) -> list[str]:
     lines = [
         "",
-        "## V0.2 Market State 回测（三层漏斗草案，见 docs/market_state_v0_2_design.md）",
+        "## V0.2 Market State 回测（三层漏斗草案，见 docs/业务能力/市场与竞争/market_state_v0_2_design.md）",
         "",
         "DPS = 需求池（0.7·NEV替代空间+0.3·BEV/NEV）；CES = 控制松动（TOP3 是谁、是否失血/更替/被挑战/老化）；PLS = 价格杠杆（下探空间×在位者价格×低价需求）。机会集 = 非 LOCKED_STABLE。",
         "",

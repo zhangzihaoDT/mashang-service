@@ -1,7 +1,7 @@
 # NEV-APEAL 2024 问卷结构与 SAV 变量映射
 
 > 问卷：2024 年中国新能源汽车产品魅力指数研究 (NEV-APEAL)_问卷.pdf
-> SAV：dataset/24 NEV-APEAL数据片段.sav（370 个变量）
+> SAV：dataset/research/nev_apeal/24 NEV-APEAL数据片段.sav（370 个变量）
 > 问卷题数：193 | 完全匹配 131 | 部分匹配 26 | SAV 中缺失 36
 
 

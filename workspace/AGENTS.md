@@ -119,7 +119,7 @@ CI-safe suites 包含 `parser + followup + reference`，不依赖真实 dataset�
 ## Result Contract
 
 所有脚本 `--format json` 输出统一 Result Contract，包含 scope/result/followup_context。
-详见 `docs/result_contract.md`。
+详见 `docs/共享规范/result_contract.md`。
 
 ## Unified Eval
 
@@ -152,8 +152,8 @@ python workspace/eval/run_eval.py --suite parser  # 单套件
 | `python research_scripts/cpca_weekly_early_signal.py --week 2026-W26` | 乘联分会周度数据早源监控（WEEK=数据归属周） | research |
 | `make cpca-weekly-early-signal WEEK=2026-W26` | 早源监控（终端输出）WEEK=要监控的数据周 | make |
 | `make cpca-weekly-early-signal-html WEEK=2026-W26` | 早源监控（HTML 报告）WEEK=要监控的数据周 | make |
-| `make cpca-weekly-data-capture WEEK=2026-W26` | **[Skill] 乘联分会周度数据捕捉** → dataset/cpca_weekly/*.json（WEEK=数据归属周） | make |
-| — | Dataset Contract: `docs/datasets/cpca_weekly_data_capture.md` | doc |
+| `make cpca-weekly-data-capture WEEK=2026-W26` | **[Skill] 乘联分会周度数据捕捉** → dataset/market/cpca_weekly/*.json（WEEK=数据归属周） | make |
+| — | Dataset Contract: `docs/数据获取/cpca_weekly_data_capture.md` | doc |
 | `python utility_scripts/voc_theme_analysis.py` | VOC 分析 | utility |
 | `python utility_scripts/data_dictionary.py` | 数据字典 | utility |
 | `python utility_scripts/audit_series_group_overlap.py` | series_group_logic 规则重叠审计（`--json`/`--strict`） | utility |
@@ -218,7 +218,7 @@ from shared.loaders.tp_and_mix_ways_loader import (
 - 维护另一份 loader
 - 生成一张大宽表
 
-详见 `docs/tp_and_mix_ways_usage.md`。
+详见 `docs/业务能力/市场与竞争/tp_and_mix_ways_usage.md`。
 
 ## 自然语言指令
 
@@ -287,7 +287,7 @@ templates/report_style.css
 
 ### 报告视觉系统参考
 
-`docs/report_visual_system.md` 是 mashang-service 报告视觉体系的总文档，包含：
+`docs/共享规范/report_visual_system.md` 是 mashang-service 报告视觉体系的总文档，包含：
 
 - CSS 组件库（页面外壳、摘要卡片、表格、badge、barcell 数据条）
 - Plotly 图表主题（`utils/plotly_theme.py` + `apply_zh_theme` + `get_series_color`）

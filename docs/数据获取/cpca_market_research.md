@@ -6,10 +6,10 @@
 
 - **乘联会官方口径**：批发（厂家批发）、国内零售、出口（含出口占比）。
 - **本地数据落点**：
-  - `dataset/cpca/` — CPCA 数据资产根目录。
-  - `dataset/cpca/AKShare/` — AKShare 拉取脚本（`fetch_cpca_data.py`、`calc_nev_penetration.py`）及其生成的 CSV。
-  - `dataset/cpca/tesla_monthly_wholesale_retail_export.csv` — **Tesla** 月度批发/零售/出口明细（手动整理数据）。数据来源：乘联会《全国乘用车市场分析》月报，2026-07 拆分值来自 2026-08-11 发布（https://www.cada.cn/Trends/info_91_10550.html），2026-08 拆分值来自 2026-09-09 发布（https://www.cada.cn/Trends/info_91_10566.html）。
-  - `dataset/cpca_weekly/` — 周度数据捕捉 JSON（`cpca_weekly_data_capture.json`、`cpca_weekly_fact_result.json`）。
+  - `dataset/market/cpca/` — CPCA 数据资产根目录。
+  - `dataset/market/cpca/AKShare/` — AKShare 拉取脚本（`fetch_cpca_data.py`、`calc_nev_penetration.py`）及其生成的 CSV。
+  - `dataset/market/cpca/tesla_monthly_wholesale_retail_export.csv` — **Tesla** 月度批发/零售/出口明细（手动整理数据）。数据来源：乘联会《全国乘用车市场分析》月报，2026-07 拆分值来自 2026-08-11 发布（https://www.cada.cn/Trends/info_91_10550.html），2026-08 拆分值来自 2026-09-09 发布（https://www.cada.cn/Trends/info_91_10566.html）。
+  - `dataset/market/cpca_weekly/` — 周度数据捕捉 JSON（`cpca_weekly_data_capture.json`、`cpca_weekly_fact_result.json`）。
   - `workspace/research_scripts/cpca_weekly_early_signal.py` — 周度数据早源监控脚本。
 
 ## 观察框架
@@ -35,7 +35,7 @@
 
 ## 数据参考
 
-`dataset/cpca/tesla_monthly_wholesale_retail_export.csv`
+`dataset/market/cpca/tesla_monthly_wholesale_retail_export.csv`
 
 | 列名 | 说明 |
 |------|------|

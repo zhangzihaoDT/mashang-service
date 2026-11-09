@@ -13,7 +13,7 @@ Agent Harness 能力目录
 | 指标 | 数值 |
 |------|------|
 | Workspace Skills | 4 |
-| Skills 输出目录 | dataset/cpca_weekly/cpca_weekly_data_capture.json   # evidence/capture 原材料, mashang_workspace/outputs/monthly_market_report/YYYY-MM/, mashang_workspace/outputs/reports/ |
+| Skills 输出目录 | dataset/market/cpca_weekly/cpca_weekly_data_capture.json   # evidence/capture 原材料, mashang_workspace/outputs/monthly_market_report/YYYY-MM/, mashang_workspace/outputs/reports/ |
 | 最近更新 | 2026-11-04 |
 
 ## Skills Overview
@@ -21,7 +21,7 @@ Agent Harness 能力目录
 | Skill | 类型 | 能力定位 | 入口文件 | 默认输出 |
 |-------|------|---------|---------|---------|
 | branded-html-report | workspace | 将汽车经营分析、预测模型、回测评估、市场洞察等结果，渲染为具有 Raccoon  | `python business_scripts/daily_lock_count.py --format json \` | ['mashang_workspace/outputs/reports/'] |
-| cpca-weekly-data-capture | workspace | 第一时间捕捉乘联分会/乘联会周度核心数据，比 CADA 官网更早获取 P0 早源 | `make cpca-weekly-data-capture WEEK=2026-W25` | ['dataset/cpca_weekly/cpca_weekly_data_capture.json   # evidence/capture 原材料'] |
+| cpca-weekly-data-capture | workspace | 第一时间捕捉乘联分会/乘联会周度核心数据，比 CADA 官网更早获取 P0 早源 | `make cpca-weekly-data-capture WEEK=2026-W25` | ['dataset/market/cpca_weekly/cpca_weekly_data_capture.json   # evidence/capture 原材料'] |
 | monthly-market-report | workspace | monthly-market-report v0.1 是基于 `TP&MIX-w | `OpenCode Agent 自动匹配 — SKILL.md 位于 .opencode/skills/monthly-market-report/` | ['mashang_workspace/outputs/monthly_market_report/YYYY-MM/'] |
 | runtime-eval-diagnosis | workspace |  | `OpenCode Agent 自动匹配 — SKILL.md 位于 .opencode/skills/runtime-eval-diagnosis/` | — |
 
@@ -49,7 +49,7 @@ Agent Harness 能力目录
 | 适用场景 | 每周三下午监控 2026-W26 等数据周的核心指标、需要比 CADA 官网更早获取乘用车零售/新能源零售/渗透率、需要结构化 JSON + 可发布文本的 fact_result、需要追踪 first_signal 与 CADA final confirmation 的时间差 |
 | 不适用场景 | 逐日高频监控（不是日内 tick 级工具）、个股/单一车型分析、非乘联分会发布的其他数据源 |
 | 入口命令 | `make cpca-weekly-data-capture WEEK=2026-W25` |
-| 默认输出 | ['dataset/cpca_weekly/cpca_weekly_data_capture.json   # evidence/capture 原材料'] |
+| 默认输出 | ['dataset/market/cpca_weekly/cpca_weekly_data_capture.json   # evidence/capture 原材料'] |
 
 ### monthly-market-report
 

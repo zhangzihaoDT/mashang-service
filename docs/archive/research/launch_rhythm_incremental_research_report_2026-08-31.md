@@ -2,7 +2,7 @@
 
 > 文档类型：研究报告（结论沉淀）
 > 数据快照：as-of 2026-08-31（`order_data.parquet`，零售口径）
-> 口径与方法细节：见 `docs/launch_rhythm_incremental_analysis.md`
+> 口径与方法细节：见 `docs/业务能力/车型预售与上市/launch_rhythm_incremental_analysis.md`
 > 报告生成：`python workspace/research_scripts/launch_rhythm_incremental_analysis.py --html`
 
 ---
@@ -36,7 +36,7 @@
 | 分析脚本（双轨方法） | `workspace/research_scripts/launch_rhythm_incremental_analysis.py` |
 | HTML 报告渲染 | `research_scripts/launch_rhythm_incremental_html.py` |
 | 品牌化研究报告 | `outputs/reports/launch_rhythm_incremental_analysis.html` |
-| 方法文档 | `docs/launch_rhythm_incremental_analysis.md` |
+| 方法文档 | `docs/业务能力/车型预售与上市/launch_rhythm_incremental_analysis.md` |
 | 中间表 + Contract | `outputs/tables/launch_rhythm_{12m,6m,dm2_current}.csv`、`launch_rhythm_contract.json` |
 
 ## 四、核心结论（as-of 2026-08-31，零售口径，12M 窗口）

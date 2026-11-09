@@ -30,7 +30,7 @@ if str(_ROOT) not in sys.path:
 _REPORT_DIR = _ROOT / "outputs" / "reports"
 _REPORT_DIR.mkdir(parents=True, exist_ok=True)
 _CONFIG_PATH = _ROOT / "configs" / "cpca_weekly_sources.json"
-_DATASET_DIR = Path(__file__).resolve().parents[2] / "dataset" / "cpca_weekly"
+_DATASET_DIR = Path(__file__).resolve().parents[2] / "dataset" / "market" / "cpca_weekly"
 _DATASET_DIR.mkdir(parents=True, exist_ok=True)
 
 

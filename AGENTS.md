@@ -102,7 +102,7 @@ mashang-service 是一个**汽车业务数据分析项目**，包含以下分支
 5. **所有分析结果必须说明来源**：包括数据源、过滤条件、时间窗口、指标口径。
 6. **临时代码放 `scratch/` 或 `outputs/`**，稳定脚本再沉淀到 `workspace/{business_scripts,research_scripts,utility_scripts}/`。
 7. **高频能力先在 workspace 内沉淀**：高频分析路径先沉淀到 `workspace/business_scripts/`，供 Hub 经 `jobs/` 确定性调度；业务代码不复制进 `jobs/`。
-8. **回答数据问题前，先看 `docs/data_dictionary.md`、`shared/schema/schema.md` 和 `shared/schema/reference/metric_definitions.md`**，确认字段名和口径。
+8. **回答数据问题前，先看 `docs/共享规范/data_dictionary.md`、`shared/schema/schema.md` 和 `shared/schema/reference/metric_definitions.md`**，确认字段名和口径。
 9. **对标准分析问题，优先调用 `workspace/{business_scripts,research_scripts,utility_scripts}/` 下已有脚本**，不要重复造轮子。
 10. **如果脚本缺少参数，先小范围补充 CLI 参数，不要重写脚本**。
 11. **如果临时分析重复出现 2 次以上，再沉淀为 workspace 稳定脚本**。
@@ -199,7 +199,7 @@ Runner 功能:
 | release_curve | `workspace/research_scripts/release_curve_analysis.py` |
 | voc_theme/jtbd_theme | `workspace/utility_scripts/voc_theme_analysis.py` |
 
-详见 `docs/followup_runner_rules.md`。
+详见 `docs/共享规范/followup_rules.md`。
 
 ### Eval Tests
 
@@ -247,7 +247,7 @@ python workspace/eval/run_followup_eval.py --parse-text --as-of-date 2026-06-11
 
 目标: context match rate >= 80%。当前: **92.9%** (13/14 turns)。
 
-详见 `docs/context_parser_rules.md` 和 `workspace/eval/context_parser.py`。
+详见 `docs/共享规范/followup_rules.md` 和 `workspace/eval/context_parser.py`。
 
 ## Phase 5: Execution Result Contract & Numeric Eval
 
@@ -276,7 +276,7 @@ python workspace/eval/run_followup_eval.py --parse-text --as-of-date 2026-06-11
 - `workspace/business_scripts/assign_conversion_analysis.py`
 - `workspace/business_scripts/attribute_penetration_report.py`
 
-详见 `docs/result_contract.md`。
+详见 `docs/共享规范/result_contract.md`。
 
 ### Numeric Eval
 
@@ -296,7 +296,7 @@ context_parser 支持解析 "这 75 个" → 自动继承上一轮 top_entities 
 python workspace/eval/parse_context_cli.py "这 75 个锁单城市分布" --previous-context '{"series":"LS8","top_entities":[{"field":"series","value":"LS8","metrics":{"lock_count":75}}]}'
 ```
 
-详见 `docs/context_parser_rules.md`。
+详见 `docs/共享规范/followup_rules.md`。
 
 ## 追问处理规则
 
@@ -308,7 +308,7 @@ python workspace/eval/parse_context_cli.py "这 75 个锁单城市分布" --prev
    - "昨天 LS8" → 继承 `series=LS8` + `time=昨天`
 4. **上下文不足时**：先输出需要澄清的字段（时间、车型、指标），不要假设业务口径。
 5. **口径一致**：同一次 session 内保持口径一致，除非用户主动要求变更。
-6. **追问→脚本映射**：根据继承的上下文选择对应脚本并传参（详见 `docs/followup_runner_rules.md`）。
+6. **追问→脚本映射**：根据继承的上下文选择对应脚本并传参（详见 `docs/共享规范/followup_rules.md`）。
 
 ## 输出规范
 

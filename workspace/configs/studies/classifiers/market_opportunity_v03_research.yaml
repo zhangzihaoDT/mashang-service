@@ -2,7 +2,7 @@
 # Classifier Spec — market_opportunity_v03_research
 #
 # V0.3 Market Opportunity Runtime（research / experimental 状态，非 production）。
-# 证据链：docs/market_state_v0_2_design.md §8.5（regime dependence）、§8.6（结构性天花板）、
+# 证据链：docs/业务能力/市场与竞争/market_state_v0_2_design.md §8.5（regime dependence）、§8.6（结构性天花板）、
 #   §8.7（Shock Detector 实证与 2×2 增量检验）。
 #
 # 两 regime：

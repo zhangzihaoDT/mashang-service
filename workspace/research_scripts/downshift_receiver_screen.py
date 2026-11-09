@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Downshift Receiver（下沉承接市场）初步验证。
 
-概念定义见 docs/market_state_v0_2_design.md §8.6（V0.3 假说，非最终规则）。
+概念定义见 docs/业务能力/市场与竞争/market_state_v0_2_design.md §8.6（V0.3 假说，非最终规则）。
 
 用三期数据识别 Downshift Receiver 候选价格带，并检验这些市场未来 12 个月是否真的继续扩容：
   - freeze 2024-03：obs 2023-04~2024-03（vs 前一期 2022-04~2023-03）→ 信号；验证 2024-04~2025-03

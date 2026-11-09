@@ -1,0 +1,233 @@
+{
+  "schema_version": 1,
+  "cwd": "repository_root",
+  "timezone": "Asia/Shanghai",
+  "integration_status": "prepared_not_connected",
+  "plans": [
+    {
+      "id": "scheduler",
+      "title": "Scheduler 常驻调度",
+      "entry": "workspace/plans/scheduler.sh",
+      "argv": [
+        "/bin/bash",
+        "workspace/plans/scheduler.sh"
+      ],
+      "make_target": "sales-scheduler",
+      "process_type": "daemon",
+      "description": "每日 08:50 daily-ops；关键日 20–23 点整刷新订单并监控（按当前配置）",
+      "side_effects": [
+        "local_write",
+        "feishu_write",
+        "feishu_card"
+      ],
+      "parameters": [
+        "SERIES",
+        "PHASE"
+      ],
+      "required_parameters": [],
+      "preview_argv": null,
+      "preview_writes_local_data": false,
+      "implementation": [
+        "workspace/utility_scripts/sales_scheduler.py"
+      ],
+      "defaults": {
+        "SERIES": "CM3"
+      }
+    },
+    {
+      "id": "daily_pipeline",
+      "title": "Daily pipeline",
+      "entry": "workspace/plans/daily_pipeline.sh",
+      "argv": [
+        "/bin/bash",
+        "workspace/plans/daily_pipeline.sh"
+      ],
+      "make_target": "data-pipeline",
+      "process_type": "oneshot",
+      "description": "订单+下发线索 → 校验 → 每日观察同步",
+      "side_effects": [
+        "local_write",
+        "feishu_write",
+        "feishu_card"
+      ],
+      "parameters": [
+        "MOBILE"
+      ],
+      "required_parameters": [],
+      "preview_argv": [
+        "make",
+        "-j1",
+        "data-pipeline-dry-run"
+      ],
+      "preview_writes_local_data": false,
+      "implementation": [
+        "dataset/updater/update_all_datasets.py",
+        "workspace/utility_scripts/dataset_validate.py",
+        "workspace/utility_scripts/skills_order_observation_daily.py"
+      ],
+      "defaults": {}
+    },
+    {
+      "id": "full_data_update",
+      "title": "Full data update",
+      "entry": "workspace/plans/full_data_update.sh",
+      "argv": [
+        "/bin/bash",
+        "workspace/plans/full_data_update.sh"
+      ],
+      "make_target": "allupdate",
+      "process_type": "oneshot",
+      "description": "全量数据更新（含试驾/锁单归因）→ 校验",
+      "side_effects": [
+        "local_write"
+      ],
+      "parameters": [
+        "MOBILE"
+      ],
+      "required_parameters": [],
+      "preview_argv": null,
+      "preview_writes_local_data": false,
+      "implementation": [
+        "dataset/updater/update_all_datasets.py",
+        "workspace/utility_scripts/dataset_validate.py"
+      ],
+      "defaults": {}
+    },
+    {
+      "id": "daily_ops",
+      "title": "每日运营（含监控）",
+      "entry": "workspace/plans/daily_ops.sh",
+      "argv": [
+        "/bin/bash",
+        "workspace/plans/daily_ops.sh"
+      ],
+      "make_target": "daily-ops",
+      "process_type": "oneshot",
+      "description": "Daily pipeline → 当前阶段销售监控",
+      "side_effects": [
+        "local_write",
+        "feishu_write",
+        "feishu_card"
+      ],
+      "parameters": [
+        "MOBILE",
+        "SERIES",
+        "PHASE",
+        "AS_OF",
+        "FORMAT"
+      ],
+      "required_parameters": [],
+      "preview_argv": null,
+      "preview_writes_local_data": false,
+      "implementation": [
+        "workspace/business_scripts/vehicle_sales_monitor.py"
+      ],
+      "defaults": {}
+    },
+    {
+      "id": "sales_monitor",
+      "title": "当前预售/上市监控",
+      "entry": "workspace/plans/sales_monitor.sh",
+      "argv": [
+        "/bin/bash",
+        "workspace/plans/sales_monitor.sh"
+      ],
+      "make_target": "sales-monitor",
+      "process_type": "oneshot",
+      "description": "使用已有订单数据；按 active 代际和阶段生成卡片",
+      "side_effects": [
+        "feishu_card"
+      ],
+      "parameters": [
+        "SERIES",
+        "PHASE",
+        "AS_OF",
+        "FORMAT"
+      ],
+      "required_parameters": [],
+      "preview_argv": [
+        "make",
+        "-j1",
+        "sales-monitor-dry-run"
+      ],
+      "preview_writes_local_data": false,
+      "implementation": [
+        "workspace/business_scripts/vehicle_sales_monitor.py"
+      ],
+      "defaults": {}
+    },
+    {
+      "id": "monitor_sync",
+      "title": "更新订单并监控指定代际",
+      "entry": "workspace/plans/monitor_sync.sh",
+      "argv": [
+        "/bin/bash",
+        "workspace/plans/monitor_sync.sh"
+      ],
+      "make_target": "monitor-sync",
+      "process_type": "oneshot",
+      "description": "仅刷新订单 → 指定代际上市/预售监控",
+      "side_effects": [
+        "local_write",
+        "feishu_card"
+      ],
+      "parameters": [
+        "SERIES",
+        "PHASE",
+        "MOBILE",
+        "DRY",
+        "ALLOW_STALE",
+        "REFRESH_TS"
+      ],
+      "required_parameters": [],
+      "preview_argv": [
+        "make",
+        "-j1",
+        "monitor-sync",
+        "DRY=1"
+      ],
+      "preview_writes_local_data": true,
+      "implementation": [
+        "dataset/updater/order_data_to_parquet.py",
+        "workspace/business_scripts/vehicle_sales_monitor.py"
+      ],
+      "defaults": {}
+    },
+    {
+      "id": "presale_snapshot",
+      "title": "指定代际预售快照",
+      "entry": "workspace/plans/presale_snapshot.sh",
+      "argv": [
+        "/bin/bash",
+        "workspace/plans/presale_snapshot.sh"
+      ],
+      "make_target": "presale-snapshot",
+      "process_type": "oneshot",
+      "description": "使用已有数据，固定预售口径（可用于上市日最终快照）",
+      "side_effects": [
+        "feishu_card"
+      ],
+      "parameters": [
+        "SERIES",
+        "AS_OF",
+        "DRY",
+        "ALLOW_STALE",
+        "REFRESH_TS"
+      ],
+      "required_parameters": [
+        "SERIES"
+      ],
+      "preview_argv": [
+        "make",
+        "-j1",
+        "presale-snapshot",
+        "DRY=1"
+      ],
+      "preview_writes_local_data": false,
+      "implementation": [
+        "workspace/research_scripts/presale_metrics_to_feishu.py"
+      ],
+      "defaults": {}
+    }
+  ]
+}

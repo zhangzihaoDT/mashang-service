@@ -61,7 +61,7 @@
         "make cpca-weekly-data-capture WEEK=2026-W25"
       ],
       "outputs": [
-        "dataset/cpca_weekly/cpca_weekly_data_capture.json   # evidence/capture 原材料"
+        "dataset/market/cpca_weekly/cpca_weekly_data_capture.json   # evidence/capture 原材料"
       ],
       "constraints": [
         "WEEK 参数代表**数据归属周**，不是运行周",

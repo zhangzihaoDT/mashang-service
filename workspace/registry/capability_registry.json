@@ -12,8 +12,8 @@
     "followup_supported": true,
     "docs": [
       "shared/schema/reference/metric_definitions.md",
-      "docs/analysis_playbook.md",
-      "docs/script_tiers.md"
+      "docs/业务能力/通用业务分析/analysis_playbook.md",
+      "docs/共享规范/script_tiers.md"
     ],
     "promotion": {
       "current_stage": "business_script",
@@ -39,8 +39,8 @@
     "followup_supported": true,
     "docs": [
       "shared/schema/reference/metric_definitions.md",
-      "docs/analysis_playbook.md",
-      "docs/script_tiers.md"
+      "docs/业务能力/通用业务分析/analysis_playbook.md",
+      "docs/共享规范/script_tiers.md"
     ],
     "promotion": {
       "current_stage": "business_script",
@@ -66,8 +66,8 @@
     "followup_supported": true,
     "docs": [
       "shared/schema/reference/metric_definitions.md",
-      "docs/analysis_playbook.md",
-      "docs/script_tiers.md"
+      "docs/业务能力/通用业务分析/analysis_playbook.md",
+      "docs/共享规范/script_tiers.md"
     ],
     "promotion": {
       "current_stage": "business_script",
@@ -93,8 +93,8 @@
     "followup_supported": true,
     "docs": [
       "shared/schema/reference/metric_definitions.md",
-      "docs/analysis_playbook.md",
-      "docs/script_tiers.md"
+      "docs/业务能力/通用业务分析/analysis_playbook.md",
+      "docs/共享规范/script_tiers.md"
     ],
     "promotion": {
       "current_stage": "business_script",
@@ -122,8 +122,8 @@
     "followup_supported": true,
     "docs": [
       "shared/schema/reference/metric_definitions.md",
-      "docs/analysis_playbook.md",
-      "docs/script_tiers.md"
+      "docs/业务能力/通用业务分析/analysis_playbook.md",
+      "docs/共享规范/script_tiers.md"
     ],
     "promotion": {
       "current_stage": "business_script",
@@ -149,8 +149,8 @@
     "followup_supported": false,
     "docs": [
       "shared/schema/reference/metric_definitions.md",
-      "docs/analysis_playbook.md",
-      "docs/script_tiers.md"
+      "docs/业务能力/通用业务分析/analysis_playbook.md",
+      "docs/共享规范/script_tiers.md"
     ],
     "promotion": {
       "current_stage": "business_script",
@@ -176,7 +176,7 @@
     "followup_supported": false,
     "docs": [
       "shared/schema/reference/metric_definitions.md",
-      "docs/script_tiers.md"
+      "docs/共享规范/script_tiers.md"
     ],
     "promotion": {
       "current_stage": "research_script",
@@ -206,7 +206,7 @@
     "followup_supported": false,
     "docs": [
       "shared/schema/reference/metric_definitions.md",
-      "docs/script_tiers.md"
+      "docs/共享规范/script_tiers.md"
     ],
     "promotion": {
       "current_stage": "research_script",
@@ -235,7 +235,7 @@
     "contract_gate": false,
     "followup_supported": false,
     "docs": [
-      "docs/script_tiers.md",
+      "docs/共享规范/script_tiers.md",
       "workspace/research_scripts/lock_release_analysis.md"
     ],
     "promotion": {
@@ -265,7 +265,7 @@
     "contract_gate": true,
     "followup_supported": false,
     "docs": [
-      "docs/script_tiers.md"
+      "docs/共享规范/script_tiers.md"
     ],
     "promotion": {
       "current_stage": "research_script",
@@ -293,8 +293,8 @@
     "contract_gate": false,
     "followup_supported": false,
     "docs": [
-      "docs/data_dictionary.md",
-      "docs/script_tiers.md"
+      "docs/共享规范/data_dictionary.md",
+      "docs/共享规范/script_tiers.md"
     ],
     "promotion": {
       "current_stage": "utility_script",
@@ -322,7 +322,7 @@
     "contract_gate": false,
     "followup_supported": false,
     "docs": [
-      "docs/analysis_playbook.md"
+      "docs/业务能力/通用业务分析/analysis_playbook.md"
     ],
     "promotion": {
       "current_stage": "utility_script",
