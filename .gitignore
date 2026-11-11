@@ -128,3 +128,11 @@ docs/archive/L6竞品竞争力研究/新款智己L6竞品对比大全_images/
 /workspace/outputs/reports/store_cards_distribution_20261102
 /workspace/outputs/reports/tp_mix_acceptance_20261104
 /workspace/outputs/reports/yifangcheng_card_20261102
+
+# Local vehicle launch research reports and configuration coverage export
+/outputs/tables/config_attribute_lock_coverage_2026.csv
+/workspace/outputs/reports/*_数据口径与差异计算说明.md
+/workspace/outputs/reports/LS8Neo_上市深度研究_会话复盘与方法沉淀.md
+/workspace/outputs/reports/vehicle-launch-deep-dive_Skill_交付说明.md
+/workspace/outputs/reports/vehicle-launch-deep-dive_v1.0_验收报告.md
+/workspace/outputs/reports/vehicle-launch-deep-dive_v1.1_缺陷修复报告.md
