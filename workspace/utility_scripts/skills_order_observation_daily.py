@@ -33,6 +33,7 @@ from utils.paths import ensure_shared_on_path
 ensure_shared_on_path()
 
 from operators.mature_lock_prediction import run_mature_lock_prediction_operator
+from operators.product_attributes import resolve_product_attributes
 from operators.assign_conversion import _parse_cn_date
 from utils.business import is_corporate_owner, classify_product_names
 from utils.monitors.order_filter import flag_test_orders
@@ -322,6 +323,8 @@ def analyze_daily_lock_orders(df, start_date, end_date):
     for model in TARGET_MODELS:
         if model == "LS9":
             model_df = daily_orders[daily_orders['series'].isin(["LS9", "LS9Hyper"])]
+        elif model == "LS8":
+            model_df = daily_orders[daily_orders['series'].isin(["LS8", "LS8Neo"])]
         else:
             model_df = daily_orders[daily_orders['series'] == model]
         count = model_df['order_number'].nunique()
@@ -339,7 +342,9 @@ def analyze_daily_lock_orders(df, start_date, end_date):
                 if cond:
                     pt_asts[pt] = _parse_logic(str(cond))
 
-            unique_orders = grouped[['order_number', 'product_name', 'series_group_logic']].drop_duplicates('order_number')
+            unique_orders = grouped.reindex(
+                columns=['order_number', 'product_name', 'series_group_logic']
+            ).drop_duplicates('order_number')
             for _, row in unique_orders.iterrows():
                 matched = row['series_group_logic']
                 if matched not in gen_counts:
@@ -356,6 +361,16 @@ def analyze_daily_lock_orders(df, start_date, end_date):
                             break
             stats["gen_counts"] = gen_counts
             stats["cm2_ptype"] = cm2_ptype
+
+        if model == "LS8":
+            stats["ls8_power_counts"] = {}
+            if count:
+                names = model_df[['order_number', 'product_name']].dropna(subset=['order_number'])
+                names = names.drop_duplicates('order_number').reset_index(drop=True)
+                attrs = resolve_product_attributes(names, business_def or {})
+                power = attrs.power_type.where(attrs.generation.eq("LS8"))
+                power = power.mask(attrs.generation.eq("LS8Neo"), "纯电")
+                stats["ls8_power_counts"] = power.value_counts().to_dict()
 
         if model in ("LS8", "LS9"):
             stats["product_versions"] = _lock_product_versions(model_df, model, business_def)
@@ -574,6 +589,14 @@ def _format_lock_model_detail(stats) -> str:
     构建车型锁单明细文本（含 '｜' 前缀）。
     LS6 按代际展示：CM3/CM2(增程/纯电)/CM1，CM0>0 时追加。
     """
+    power = stats.get("ls8_power_counts")
+    if power is not None:
+        extended = power.get("增程", 0)
+        electric = power.get("纯电", 0)
+        unknown = stats["count"] - extended - electric
+        unknown_text = f"/未知:{unknown}" if unknown else ""
+        return f"｜LS8：{stats['count']},(增程:{extended}/纯电:{electric}{unknown_text})"
+
     versions = stats.get("product_versions")
     if versions is not None:
         if not stats.get("show_seats", True):
@@ -1039,7 +1062,7 @@ def main():
         for model, stats in lock_stats['models'].items():
             count = stats["count"]
             detail_str = _format_lock_model_detail(stats)
-            print(f"   - {model}: {count}{detail_str}")
+            print(f"   - {model}: {count} 单{detail_str}")
         if pred_lock is not None and pred_lock > 0:
             rate = lock_stats['total'] / pred_lock
             warn = " ⚠️ 低于80%" if rate < 0.8 else ""

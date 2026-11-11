@@ -61,6 +61,25 @@ def test_shared_definition_controls_new_versions_and_unknowns():
     assert result['seat_count'].tolist() == ['五座', '六座', '未标座位']
 
 
+def test_ls8_lock_line_includes_neo_in_electric_split():
+    frame = pd.DataFrame([
+        ('a', 'LS8', '智己LS8 52 Max+'),
+        ('b', 'LS8', '智己LS8 NEO 93 Max+'),
+        ('b', 'LS8Neo', '智己LS8 NEO 93 Max+'),
+        ('c', 'LS8Neo', '智己LS8 NEO'),
+        ('d', 'LS8', '智己LS8 93 RWD'),
+        ('e', 'LS8', None),
+    ], columns=['order_number', 'series', 'product_name'])
+    frame['lock_time'] = '2026-11-10'
+    frame['order_type'] = '用户车'
+    day = date(2026, 11, 10)
+
+    stats = daily.analyze_daily_lock_orders(frame, day, day)['models']['LS8']
+
+    assert stats['count'] == 5
+    assert daily._format_lock_model_detail(stats) == '｜LS8：5,(增程:1/纯电:3/未知:1)'
+
+
 def test_ls9_formats_versions_on_one_line_without_seats():
     text = daily._format_lock_model_detail({
         'show_seats': False,
