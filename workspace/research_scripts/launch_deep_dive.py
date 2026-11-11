@@ -1877,8 +1877,66 @@ def compute_data_audit(df: pd.DataFrame, win: dict, bd: dict) -> dict:
 
 # ─────────────────────────── 主计算入口 ───────────────────────────
 
+def probe_research(gen: str, benchmarks: list[str], as_of: pd.Timestamp) -> dict:
+    """Gate A 用的轻量探测：只统计可得性与样本量，不做研究结论计算。"""
+    def _ok(qid: str) -> bool:
+        """Gate A 未通过的研究问题不进入计算链路。"""
+        return True if allowed is None else (qid in allowed)
+
+    bd = load_business_definition(BUSINESS_DEF)
+    main = resolve_gen(bd, gen)
+    benches = [resolve_gen(bd, b) for b in benchmarks]
+    gens = [main] + [b for b in benches if b != main]
+
+    df_all = load_orders(bd)
+    df = df_all[lock_mask(df_all, bd)]
+    df_pool = df_all[pool_mask(df_all, bd)].copy()
+    win = build_windows(bd, gens, as_of)
+
+    facts = {"main": main, "benchmarks": [g for g in gens if g != main],
+             "as_of": win["last_date"].date().isoformat(), "n_days": win["n_days"],
+             "windows": {g: [win["windows"][g]["launch"].date().isoformat(),
+                             (win["windows"][g]["window_end"] - pd.Timedelta(days=1)).date().isoformat()]
+                         for g in gens},
+             "cum": {}, "segments": {}, "province_valid": {}, "stores": {}, "pool": {}}
+
+    for g in gens:
+        w = win["windows"][g]
+        t0, hi = w["launch"], w["window_end"]
+        s = df[df["series_group_logic"].eq(g) & df["lock_time"].notna()
+               & (df["lock_time"] >= t0) & (df["lock_time"] < hi)]
+        facts["cum"][g] = int(len(s))
+        seg = {}
+        for name in ("93kWh", "103kWh", "76kWh", "52kWh", "66kWh"):
+            seg[name] = int(sum(1 for p in s["product_name"] if _battery_of(p, g) == name))
+        facts["segments"][g] = seg
+        prov = s["license_city"].map(norm_city).map(CITY_TO_PROVINCE)
+        facts["province_valid"][g] = int(prov.notna().sum())
+        facts["stores"][g] = int(s["store_name"].nunique())
+        ip = df_pool[df_pool["series_group_logic"].eq(g)]["intention_payment_time"]
+        facts["pool"][g] = int((ip.notna() & (ip < t0)).sum())
+
+    # 「座椅」字段有效覆盖率（主代际窗口内）
+    try:
+        cfg = pd.read_parquet(CONFIG_PARQUET)
+        w = win["windows"][main]
+        ids = set(df[df["series_group_logic"].eq(main) & df["lock_time"].notna()
+                     & (df["lock_time"] >= w["launch"])
+                     & (df["lock_time"] < w["window_end"])]["order_number"])
+        a = cfg[(cfg["Attribute"] == "座椅") & (cfg["Order Number"].isin(ids))]
+        facts["seat_coverage"] = round(a["Order Number"].nunique() / max(len(ids), 1), 4)
+    except Exception:
+        facts["seat_coverage"] = 0.0
+    return facts
+
+
 def build_context(gen: str, benchmarks: list[str], as_of: pd.Timestamp,
-                  context_days: int = 30) -> tuple[dict, pd.DataFrame]:
+                  context_days: int = 30, allowed: set[str] | None = None
+                  ) -> tuple[dict, pd.DataFrame]:
+    def _ok(qid: str) -> bool:
+        """Gate A 未通过的研究问题不进入计算链路。"""
+        return True if allowed is None else (qid in allowed)
+
     bd = load_business_definition(BUSINESS_DEF)
     main = resolve_gen(bd, gen)
     benches = [resolve_gen(bd, b) for b in benchmarks]
@@ -1927,11 +1985,14 @@ def build_context(gen: str, benchmarks: list[str], as_of: pd.Timestamp,
         "behavior": compute_behavior(df, win),
         "context": compute_context_curves(df, win, context_days),
         "channel": compute_channel_by_province(df, win),
-        "version_gap": compute_version_gap(df, win, provinces=prov12),
+        "version_gap": (compute_version_gap(df, win, provinces=prov12)
+                        if _ok("q8d") else {}),
         "province_mix": compute_province_model_mix(df, win),
-        "same_battery": compute_same_battery_profile(df, win, "93kWh"),
+        "same_battery": (compute_same_battery_profile(df, win, "93kWh")
+                         if _ok("q8b") else {}),
         "config_dist": compute_config_distribution(df, win),
-        "slice_compares": compute_slice_compares(df, win),
+        "slice_compares": (compute_slice_compares(df, win)
+                           if (_ok("q8b") or _ok("q8c")) else {}),
         "pk": compute_competition_pk(bd, win),
     }
     ctx["deltas"] = _compute_deltas(ctx)
@@ -2451,13 +2512,39 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--output", default=str(_WS / "outputs"), help="产物根目录")
     ap.add_argument("--context-days", type=int, default=30,
                     help="Q1 参考延长线的天数（默认 30；仅用于展示释放形状，不参与差异计算；0=关闭）")
+    ap.add_argument("--plan", action="store_true",
+                    help="只输出 ResearchPlan 与 Gate A 核验结果（不执行正式计算）")
     ap.add_argument("--export-charts", action="store_true",
                     help="额外导出 7 张图表 PNG 到 outputs/charts/（需 kaleido）")
     args = ap.parse_args(argv)
 
     as_of = pd.Timestamp(args.as_of).normalize()
     out_root = Path(args.output).resolve()
-    ctx, _df = build_context(args.gen, args.benchmarks, as_of, args.context_days)
+
+    # ── v1.2 Gate A：先规划、先核验，通过后才计算 ──
+    from research_scripts.launch_research_plan import (
+        build_research_plan, compute_findings, validate_findings,
+        validate_report, validate_research_plan,
+    )
+    facts = probe_research(args.gen, args.benchmarks, as_of)
+    plan = build_research_plan(facts)
+    gate_a = validate_research_plan(plan, facts)
+    if args.plan:
+        print(json.dumps({"plan": plan, "gate_a": gate_a}, ensure_ascii=False, indent=2))
+        return 0
+    if gate_a["verdict"] == "BLOCK":
+        print("[Gate A] BLOCK：研究计划不成立，未进入正式计算")
+        for b in gate_a["blocked"]:
+            print(f"  - {b['id']} {b['title']}：{b['reason']}")
+        return 3
+
+    allowed = set(gate_a["passed"])
+    ctx, _df = build_context(args.gen, args.benchmarks, as_of, args.context_days,
+                             allowed=allowed)
+    ctx["research_plan"] = plan
+    ctx["gate_a"] = gate_a
+    ctx["findings"] = compute_findings(ctx)
+    ctx["gate_b"] = validate_findings(ctx["findings"], ctx)
 
     tag = f"{ctx['main']}_D{ctx['n_days']}"
     table_dir = out_root / "tables" / "launch_deep_dive" / tag
@@ -2467,6 +2554,8 @@ def main(argv: list[str] | None = None) -> int:
         from research_scripts.launch_deep_dive_report import render_report  # 局部导入避免循环
         report = render_report(ctx, out_root)
         paths["report_html"] = str(report)
+        ctx["gate_c"] = validate_report(Path(report).read_text(encoding="utf-8"),
+                                        ctx["findings"], ctx)
         from research_scripts.launch_deep_dive_report import (
             export_charts, render_method_doc,
         )
@@ -2476,6 +2565,11 @@ def main(argv: list[str] | None = None) -> int:
         pngs = export_charts(ctx, out_root, prefix=f"{ctx['main']}_D{ctx['n_days']}")
         paths["charts_png"] = [str(p) for p in pngs]
 
+    (table_dir / "research_plan.json").write_text(
+        json.dumps({"plan": plan, "gate_a": gate_a,
+                    "findings": ctx["findings"], "gate_b": ctx["gate_b"],
+                    "gate_c": ctx.get("gate_c")},
+                   ensure_ascii=False, indent=2, default=str), encoding="utf-8")
     contract = build_contract(ctx, paths)
     if args.format in ("json", "all"):
         p = table_dir / "result_contract.json"

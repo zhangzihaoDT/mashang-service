@@ -1026,11 +1026,12 @@ def render_report(ctx: dict, out_root: Path) -> Path:
             A(table(hdr, rows, num_cols={1}))
             A(f'<p class="section-note">{_q6_mix_note(ctx)}</p>')
 
-        A(f'<p class="q" style="font-size:13.5px;">Q6-验证　省份差额是不是「版本缺口」<span>按电量段对齐拆解</span></p>')
-        A(f'<p class="lead">{_q6_version_lead(ctx)}</p>')
-        rows, hdr = _table_version_gap(ctx)
-        A(table(hdr, rows, num_cols={5}))
-        A(f'<p class="section-note">{_q6_version_note(ctx)}</p>')
+        if _q_allowed(ctx, "q8d"):
+            A(f'<p class="q" style="font-size:13.5px;">Q6-验证　省份差额是不是「版本缺口」<span>按电量段对齐拆解</span></p>')
+            A(f'<p class="lead">{_q6_version_lead(ctx)}</p>')
+            rows, hdr = _table_version_gap(ctx)
+            A(table(hdr, rows, num_cols={5}))
+            A(f'<p class="section-note">{_q6_version_note(ctx)}</p>')
 
 
     def _emit_q7():
@@ -1212,86 +1213,22 @@ def _context_sentence(ctx: dict, bench: str) -> str:
 
 
 def _findings(ctx: dict) -> list[tuple[str, str]]:
-    main, n = ctx["main"], ctx["n_days"]
-    b1 = ctx["benchmarks"][0]
-    b2 = ctx["benchmarks"][1] if len(ctx["benchmarks"]) > 1 else None
-    cur, dyn, pre, src = ctx["curves"]["curves"], ctx["dynamics"], ctx["presale"], ctx["source_decomp"]
-    net, fwd, d = ctx["network"], ctx["forward"], ctx["deltas"]
-    prod = ctx["product"]
-    d1 = d[b1]
-    d2 = d.get(b2) if b2 else None
+    """核心发现：只渲染本次计算产出的 ResearchFindings，不再内联任何固定判断。"""
+    fs = ctx.get("findings") or []
+    out = []
+    for i, f in enumerate(fs, start=1):
+        body = f.get("body", "")
+        out.append((f"{i}｜{f.get('title', '')}", body + "<span class='tag fact'>事实</span>"))
+    return out
 
-    f = []
-    f.append((
-        f"1｜绝对水平落后四成，且落后幅度在上市夜就基本定档",
-        f"{main} 上市 D1–D{n} 零售锁单 <b>{fi(cur[main]['cum'][-1])} 单</b>，"
-        f"为 {b1}（{fi(d1['cum_bench'])}）的 {fp(d1['cum_ratio'], 0)}"
-        + (f"、{b2}（{fi(d2['cum_bench'])}）的 {fp(d2['cum_ratio'], 0)}" if d2 else "")
-        + f"。对 {b1}：<b>{gap_narrative(d1, n)}</b>，"
-        f"D2–D{n} 的边际差异 {('/'.join(f'{v:+,}' for v in ctx['curves']['gaps'][b1]['marginal'][1:]))} 单/日。"
-        + _context_sentence(ctx, b1)
-        + f"<span class='tag fact'>事实</span>"))
 
-    if d2:
-        marg2 = ctx["curves"]["gaps"][b2]["marginal"][1:]
-        f.append((
-            f"2｜对 {b1} 是「一次性定档」，对 {b2} 是「持续失速」——两个基准不能合并看",
-            f"对 {b2}：{gap_narrative(d2, n)}，"
-            f"原因是 {b2} 上市后稳态日均 {fnum(dyn[b2]['tail_avg'])} 单，"
-            f"{main} 仅 {fnum(dyn[main]['tail_avg'])} 单（{fp(dyn[b2]['vs_main_tail_ratio'], 0)}）。"
-            f"<span class='tag fact'>事实</span>"))
-
-    f.append((
-        "3｜差额主体是预售池规模，不是预售转化效率",
-        f"预售池 {main} {fi(pre[main]['pool_total'])} 单，为 {b1} 的 {fp(pre[main]['pool_total'] / pre[b1]['pool_total'], 0)}"
-        + (f"、{b2} 的 {fp(pre[main]['pool_total'] / pre[b2]['pool_total'], 0)}" if b2 else "")
-        + f"；但 D{n} 转化率 {fp(pre[main]['pool_lock_rate'])} 已接近 {b1}（{fp(pre[b1]['pool_lock_rate'])}）"
-        f"并高于 {b2 or ''}（{fp(pre[b2]['pool_lock_rate']) if b2 else '—'}）。"
-        f"对 {b1} 的预售差额中，<b>池规模解释 {fp(src[b1]['presale_scale_share'], 0)}</b>，"
-        f"转化率仅解释 {fp(1 - src[b1]['presale_scale_share'], 0)}。<span class='tag fact'>事实</span>"))
-
-    bu = pre[main].get("buildup_vs", {})
-    bu1 = bu.get(b1, {})
-    f.append((
-        f"4｜池子小主要不是「卖得慢」，而是「卖得短」：预售期长度解释池差的 "
-        f"{fp(bu1.get('duration_share_of_gap'), 0)}",
-        f"{main} 预售首日小订 {fi(pre[main]['presale_day1'])} 单（"
-        + "、".join(f"{b} {fi(pre[b]['presale_day1'])}" for b in ctx["benchmarks"])
-        + f"），首日之后日均 {fnum(pre[main]['rest_daily_avg'])} 单"
-        + "（" + "、".join(f"{b} {fnum(pre[b]['rest_daily_avg'])}" for b in ctx["benchmarks"]) + "）；"
-        f"但预售期只有 {pre[main]['presale_days']} 天"
-        "（" + "、".join(f"{b} {pre[b]['presale_days']} 天" for b in ctx['benchmarks']) + "）。"
-        f"对 {b1} 的池差 {bu1.get('pool_diff', 0):+,} 单中，<b>预售期长度效应 "
-        f"{fnum(bu1.get('duration_effect', 0))} 单（{fp(bu1.get('duration_share_of_gap'), 0)}）</b>、"
-        f"首日爆发 {fnum(bu1.get('day1_diff', 0))} 单（{fp(bu1.get('day1_share_of_gap'), 0)}）、"
-        f"首日后日均仅 {fnum(bu1.get('rate_effect', 0))} 单。"
-        f"若 {main} 也卖满 {pre[b1]['presale_days']} 天预售期（首日与后续日均不变），"
-        f"池子约 {fi(bu1.get('pool_if_bench_duration'))} 单，接近 {b1} 的 {fi(pre[b1]['pool_total'])} 单。"
-        f"<span class='tag fact'>事实</span><span class='tag hyp'>解释</span>"))
-    po, beh = ctx["pool"], ctx["behavior"]
-    f.append((
-        "5｜网络收缩与「封盘池消耗偏慢」是两项结构性约束",
-        f"同窗口有效锁单门店 {main} {fi(net[main]['stores_with_gen'])} 家 vs "
-        f"{b1} {fi(net[b1]['stores_with_gen'])}"
-        + (f"、{b2} {fi(net[b2]['stores_with_gen'])}" if b2 else "")
-        + f"；单店产出 {fnum(net[main]['locks_per_store'], 2)} 单/店 vs "
-        f"{fnum(net[b1]['locks_per_store'], 2)}"
-        + (f" / {fnum(net[b2]['locks_per_store'], 2)}" if b2 else "")
-        + f"。网络规模解释了对 {b2 or b1} 差额的 "
-        f"{fp(net[(b2 or b1)]['vs_main_decomp']['network_share'], 0)}"
-        + (f"（对 {b1} 为 {fp(net[b1]['vs_main_decomp']['network_share'], 0)}）" if b2 else "")
-        + f"；动能看封盘池的消耗比：锁/退 = {fnum(po[main]['lock_refund_ratio_stock'], 2)}"
-        f"（{b1} {fnum(po[b1]['lock_refund_ratio_stock'], 2)}"
-        + (f"、{b2} {fnum(po[b2]['lock_refund_ratio_stock'], 2)}" if b2 else "")
-        + f"），剩余池 {fi(po[main]['remaining'])} 单（{fp(po[main]['remaining_rate'])}）；"
-        f"线索→锁单中位 {fnum(beh[main]['lead_to_lock_days_median'], 1)} 天"
-        f"（{b1} {fnum(beh[b1]['lead_to_lock_days_median'], 1)}"
-        + (f"、{b2} {fnum(beh[b2]['lead_to_lock_days_median'], 1)}" if b2 else "")
-        + f"），但去混淆后（只看上市后线索）三者都约 "
-        f"{fnum(beh[main]['lead_to_lock_days_median_postlaunch'], 2)} 天——"
-        f"决策速度没有本质差异，差距来自预售期长度与池子消耗节奏。"
-        f"<span class='tag fact'>事实</span><span class='tag hyp'>解释</span>"))
-    return f
+def _q_allowed(ctx: dict, qid: str) -> bool:
+    """Gate A 未通过的研究问题，渲染层不得输出对应区块。"""
+    gate = ctx.get("gate_a") or {}
+    for r in gate.get("results", []):
+        if r.get("id") == qid:
+            return r.get("status") == "PASS"
+    return True
 
 
 def _act1_summary(ctx: dict) -> str:
@@ -1329,14 +1266,29 @@ def _q1_lead(ctx: dict) -> str:
     b2 = ctx["benchmarks"][1] if len(ctx["benchmarks"]) > 1 else None
     d = ctx["deltas"]
     cur = ctx["curves"]["curves"]
-    return (f"{main} 同期累计 <b>{fi(cur[main]['cum'][-1])} 单</b>，"
-            f"低于 {b1} {fi(cur[b1]['cum'][-1])} 单（{d[b1]['cum_diff']:+,}，"
-            f"相对基准 {fs(d[b1]['cum_rel'])}）"
-            + (f"，低于 {b2} {fi(cur[b2]['cum'][-1])} 单（{d[b2]['cum_diff']:+,}，{fs(d[b2]['cum_rel'])}）"
-               if b2 else "")
-            + f"。两款对标的同期水平彼此接近（相差 {fi(abs(cur[b1]['cum'][-1] - cur[b2]['cum'][-1])) if b2 else '—'} 单），"
-            f"因此 {main} 相对二者的落后幅度也接近（-4 成左右），"
-            f"说明这不是「与某一款车特别不像」的偶发差异，而是一个需要解释的系统性落差。")
+    n = ctx["n_days"]
+
+    def _rel(v):
+        return "持平" if abs(v) < 0.005 else ("领先" if v > 0 else "落后")
+
+    txt = (f"{main} 同期累计 <b>{fi(cur[main]['cum'][-1])} 单</b>，"
+           f"相对 {b1}（{fi(cur[b1]['cum'][-1])} 单）{d[b1]['cum_diff']:+,} 单"
+           f"（{fs(d[b1]['cum_rel'])}，{_rel(d[b1]['cum_rel'])}）")
+    if b2:
+        txt += (f"，相对 {b2}（{fi(cur[b2]['cum'][-1])} 单）{d[b2]['cum_diff']:+,} 单"
+                f"（{fs(d[b2]['cum_rel'])}，{_rel(d[b2]['cum_rel'])}）")
+    gap12 = abs(cur[b1]['cum'][-1] - cur[b2]['cum'][-1]) if b2 else 0
+    txt += "。" + (f"两款对标同期水平接近（相差 {fi(gap12)} 单）。" if b2 else "")
+    rels = [abs(v["cum_rel"]) for v in d.values()]
+    if max(rels) < 0.05:
+        txt += (f"<b>{main} 与对标处于同一量级（最大相对差 {max(rels) * 100:.1f}%），"
+                f"总量相近，真正的差别要看释放节奏与结构。</b>")
+    elif all(v["cum_diff"] < 0 for v in d.values()):
+        txt += (f"<b>对两个基准均为落后，最大相对差 {max(rels) * 100:.0f}%，"
+                f"需要解释的是这种一致性落后。</b>")
+    else:
+        txt += f"<b>对不同基准方向不一致，必须分别解读，不能合并成一个结论。</b>"
+    return txt
 
 
 def _q1_context_note(ctx: dict) -> str:
@@ -2777,6 +2729,46 @@ def _q10_potential(ctx: dict) -> str:
         + '），不应把剩余池全部当作潜在锁单。</p></div>')
 
 
+def _verdict_level_sentence(ctx: dict) -> str:
+    """经营判断第 1 句：按本次数据的水平/形态生成，不复用历史措辞。"""
+    main, n = ctx["main"], ctx["n_days"]
+    b1 = ctx["benchmarks"][0]
+    b2 = ctx["benchmarks"][1] if len(ctx["benchmarks"]) > 1 else None
+    d = ctx["deltas"]
+    cur = ctx["curves"]["curves"]
+    d1 = d[b1]
+    ratio = d1["cum_ratio"]
+    level = ("基本持平" if 0.95 <= ratio <= 1.05 else
+             ("落后" if ratio < 1 else "领先"))
+    gap_rel = abs(ratio - 1) * 100
+    txt = (f"{main} 与 {b1} 同期累计{level}"
+           f"（{fi(cur[main]['cum'][-1])} 单 vs {fi(d1['cum_bench'])} 单，差 {gap_rel:.1f}%）")
+    if b2:
+        txt += f"，与 {b2} 的关系为{('领先' if d[b2]['cum_rel'] > 0.005 else ('落后' if d[b2]['cum_rel'] < -0.005 else '持平'))}"
+    txt += "。形态上，"
+    dm = ctx["dynamics"][main]["d1_share_of_cum"]
+    db = ctx["dynamics"][b1]["d1_share_of_cum"]
+    if abs(dm - db) < 0.03:
+        txt += f"首日集中度与 {b1} 接近（{dm:.0%} vs {db:.0%}）"
+    else:
+        txt += (f"首日集中度{'更高' if dm > db else '更低'}"
+                f"（{dm:.0%} vs {db:.0%}），"
+                f"D2–D{n} 日均 {ctx['dynamics'][main]['tail_avg']:.0f} 单 vs "
+                f"{ctx['dynamics'][b1]['tail_avg']:.0f} 单")
+    return txt + "。"
+
+
+def _dir_cn(v: float) -> str:
+    return "高" if v > 0 else ("低" if v < 0 else "持平")
+
+
+def _share_or_na(num: float, den: float, min_den: float) -> str:
+    """分母过小时不给占比，避免「占总差额 3982%」这类失真。"""
+    if not den or abs(den) < min_den:
+        return "不适用（差额过小）"
+    return fp(num / den, 0)
+
+
 def _verdict(ctx: dict) -> str:
     main, n = ctx["main"], ctx["n_days"]
     b1 = ctx["benchmarks"][0]
@@ -2787,63 +2779,63 @@ def _verdict(ctx: dict) -> str:
     po, beh = ctx["pool"], ctx["behavior"]
     prod = ctx["product"]
     d1 = d[b1]
-    tier_mix = sum(abs(r["mix_effect"])
-                   for r in ctx["geo"]["tier"]["gaps"][b1])
-    total_gap = abs(d1["cum_diff"]) or 1
+    cum_main = cur[main]["cum"][-1]
+    min_den = max(cum_main * 0.05, 1)
+
+    # 1) 水平与形态（findings 已核验，直接复用）
+    f1, f2 = (ctx.get("findings") or [{}])[0], (ctx.get("findings") or [{}, {}])[1]
+
+    # 2) 可解释项：只在分母足够大时给占比
+    size_rel = pre[main]["pool_total"] / max(pre[b1]["pool_total"], 1) - 1
+    rate_gap = pre[main]["pool_lock_rate"] - pre[b1]["pool_lock_rate"]
+    pool_note = (f"预售池{'小' if size_rel < 0 else '大'} {abs(size_rel):.0%}"
+                 f"（{fi(pre[main]['pool_total'])} vs {fi(pre[b1]['pool_total'])} 单），"
+                 f"池转化率{_dir_cn(rate_gap)} {abs(rate_gap) * 100:.1f}pp")
+    store_rel = net[main]["stores_with_gen"] / max(net[b1]["stores_with_gen"], 1) - 1
+    per_store_rel = net[main]["locks_per_store"] / max(net[b1]["locks_per_store"], 1e-9) - 1
+    net_note = (f"有效门店{'少' if store_rel < 0 else '多'} {abs(store_rel):.0%}"
+                f"（{fi(net[main]['stores_with_gen'])} vs {fi(net[b1]['stores_with_gen'])} 家），"
+                f"单店产出{_dir_cn(per_store_rel)} {abs(per_store_rel):.0%}"
+                f"（{net[main]['locks_per_store']:.2f} vs {net[b1]['locks_per_store']:.2f} 单/店）")
+    missing = (ctx.get("version_gap") or {}).get("national", {}).get("missing_segments") or []
+    vg_note = ("版本缺口：" + "、".join(missing) + " 档在主代际缺失") if missing else "无版本缺口（主代际覆盖对标全部电量段）"
+
+    # 3) 产品与网络（方向词按数据）
+    vs = prod[main]["concentration"]["versions"]
+    per_day = pre[main]["pool_per_presale_day"]
+    b1_per_day = pre[b1]["pool_per_presale_day"]
+    speed = "高于" if per_day > b1_per_day else ("低于" if per_day < b1_per_day else "接近")
+    prod_note = (f"{main} 有 {vs['n_options']} 个版型、Top1 占 {fp(vs['top1_share'], 0)}；"
+                 f"预售日均 {fnum(per_day)} 单/日，{speed} {b1} 的 {fnum(b1_per_day)} 单/日。")
+
     return (
         '<div class="verdict">'
         f'<h4>1｜{main} 相比 {b1} 与 {b2 or b1}，表现究竟有哪些显著不同？</h4>'
-        f'<p>绝对值低四成（{fi(cur[main]["cum"][-1])} 单 vs {fi(d1["cum_bench"])}'
-        + (f' / {fi(d[b2]["cum_bench"])}' if b2 else "")
-        + f'），且形态不同：对 {b1} 是 D1 一次性形成的平行落差，'
-        f'对 {b2 or b1} 是起点落后叠加每日失速。'
-        f'预售池少 '
-        + (f'{fp(pre[main]["pool_total"] / pre[b1]["pool_total"], 0)}/{fp(pre[main]["pool_total"] / pre[b2]["pool_total"], 0)}' if b2 else
-           f'{fp(pre[main]["pool_total"] / pre[b1]["pool_total"], 0)}')
-        + f'，但池转化率与 {b1} 持平、显著高于 {b2 or b1}；有效锁单门店 '
-        + (f'少 {fp(1 - net[main]["stores_with_gen"] / net[b2]["stores_with_gen"], 0)}' if b2 else "—")
-        + (f'；封盘池锁/退 = {fnum(po[main]["lock_refund_ratio_stock"], 2)}'
-           f'（{b1} {fnum(po[b1]["lock_refund_ratio_stock"], 2)}'
-           + (f'、{b2} {fnum(po[b2]["lock_refund_ratio_stock"], 2)}' if b2 else '')
-           + f'），线索→锁单中位 {fnum(beh[main]["lead_to_lock_days_median"], 1)} 天'
-             f'（去混淆后上市后线索约 {fnum(beh[main]["lead_to_lock_days_median_postlaunch"], 2)} 天）。</p>')
-        + f'<h4>2｜哪些差异可以得到数据解释？</h4>'
-        f'<p>可解释部分：预售池规模（解释对 {b1} 预售差额的 {fp(src[b1]["presale_scale_share"], 0)}）、'
-        f'门店网络规模（解释对 {b2 or b1} 总差额的 {fp(net[b2 or b1]["vs_main_decomp"]["network_share"], 0)}）、'
-        f'预售期长度（{pre[main]["presale_days"]} 天 vs '
-        + "/".join(str(pre[b]["presale_days"]) for b in ctx["benchmarks"])
-        + f' 天，解释预售池差的 {fp(pre[main]["buildup_vs"][b1]["duration_share_of_gap"], 0)}）、'
-        + f'产品线缺口（对标独有的 76kWh 入门档，占对 {b1} 差额的 '
-        + f'{fp(abs(ctx["version_gap"]["national"]["by_segment"].get("76kWh", 0)) / max(abs(d1["cum_diff"]), 1), 0)}）'
-        + f'与动力形式（' + "、".join(
-            f"{g} {_power_label(prod[g])}" for g in ctx["curves"]["gens"]) + '）。'
-        f'客群结构不是解释项：线级结构效应合计仅占总差额 {fp(tier_mix / total_gap, 0)}。'
-        f'不可由本数据解释的部分：纯电大型 SUV 与增程大型 SUV 的可寻址需求规模差异（缺少外部分市场数据）、'
-        f'单店产出比 {b1} 低 {fp(1 - net[main]["locks_per_store"] / net[b1]["locks_per_store"], 0)}'
-        f'（缺少线索/试驾的单车型维度，无法判断是客流不足还是转化能力不足）。</p>'
+        f'<p>{f1.get("title", "")}——{f1.get("body", "")}'
+        f' 节奏上：{f2.get("title", "")}（{f2.get("body", "")}）</p>'
+        f'<h4>2｜哪些差异可以得到数据解释？</h4>'
+        f'<p>{pool_note}；{net_note}；{vg_note}。'
+        f'动力形式：' + "、".join(f"{g} {_power_label(prod[g])}" for g in ctx["curves"]["gens"]) + '。'
+        f'预售差额分解：池规模效应 {fnum(src[b1]["presale_scale_effect"])} 单、'
+        f'转化率效应 {fnum(src[b1]["presale_rate_effect"])} 单'
+        f'（两者方向{"相反、部分抵消" if src[b1]["presale_scale_effect"] * src[b1]["presale_rate_effect"] < 0 else "相同"}，'
+        f'净额 {fnum(src[b1]["presale_scale_effect"] + src[b1]["presale_rate_effect"])} 单，'
+        f'故不以百分比表达贡献）。'
+        f'不可由本数据解释的部分：可寻址需求规模差异（缺少外部分市场数据）、'
+        f'单店产能差异的成因（缺少线索/试驾的单车型维度）。</p>'
         f'<h4>3｜这些差异反映了怎样的产品需求和销售网络变化？</h4>'
-        f'<p>产品端：{main} 是 {b2 or "LS8"} 的纯电版本，仅 '
-        f'{prod[main]["concentration"]["versions"]["n_options"]} 个版型、'
-        f'Top1 版型占 {fp(prod[main]["concentration"]["versions"]["top1_share"], 0)}，'
-        f'配置集中度高但首先是供给可选集窄；单位时间获客效率（预售日均 '
-        f'{fnum(pre[main]["pool_per_presale_day"])} 单/日）并不低于对标，'
-        f'说明「纯电版卖不动」不是当前数据的结论；真正的约束是池子积累时间短、可寻址需求更窄。'
-        f'网络端：活跃门店从 {b2 or b1} 窗口的 {fi(net[b2 or b1]["active_stores_all_series"])} 家'
-        f'降到 {fi(net[main]["active_stores_all_series"])} 家，'
-        f'单店产出 {fnum(net[main]["locks_per_store"], 2)} 单/店也低于对标——'
-        f'网络既是规模问题也是效率问题，且单店效率是省级差额的主因。</p>'
+        f'<p>产品端：{prod_note}'
+        f'网络端：{net_note}。</p>'
         f'<h4>4｜当前表现能否持续？</h4>'
         f'<p>封盘池 {fi(po[main]["stock_total"])} 单，已消耗 {fi(po[main]["locked"] + po[main]["refunded"])} 单，'
-        f'剩余 {fi(po[main]["remaining"])} 单（{fp(po[main]["remaining_rate"])}）。'
-        f'快变量已经走完（D1 集中转锁、D3 集中退订），剩下的是慢变量：'
+        f'剩余 {fi(po[main]["remaining"])} 单（{fp(po[main]["remaining_rate"])}）；'
         f'D2–D{n} 锁单 {fnum(po[main]["lock_tail_daily"])} 单/日、退订 '
-        f'{fnum(po[main]["refund_tail_daily"])} 单/日。'
-        f'因此后续是长尾兑现而非二次爆发；若锁/退比维持，D30 落在稳态外推与剩余池兑现之间'
-        f'（详见 Q10 情景），差距会延续而不是反转。</p>'
+        f'{fnum(po[main]["refund_tail_daily"])} 单/日，锁/退比 '
+        f'{fnum(po[main]["lock_refund_ratio_stock"], 2)}。'
+        f'后续空间取决于剩余池兑现速度，区间见 Q10。</p>'
         f'<h4>5｜下一观察周期需要重点验证什么？</h4>'
-        f'<p>见下一节清单。一句话：验证「存量兑现、进水偏弱」这一判断，'
-        f'并补齐本窗口无法回答的两个问题——单店产能低是客流问题还是转化问题、'
-        f'纯电与增程的需求池差异有多大。</p>'
+        f'<p>见下一节清单。重点验证剩余池锁/退比能否维持，以及补充「单店产能差异成因」与'
+        f'「可寻址需求规模」两类外部数据。</p>'
         '</div>')
 
 

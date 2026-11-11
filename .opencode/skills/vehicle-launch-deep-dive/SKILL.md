@@ -1,11 +1,11 @@
 ---
 name: vehicle-launch-deep-dive
-version: "1.1"
+version: "1.2"
 scope: new_vehicle_launch_deep_dive
 description: 新车上市深度研究 Skill。以目标代际 vs 历史对标代际的「等生命周期窗口」比较为主线，完成锁单表现、预售转化、区域网络、产品客群、订单质量、增长动能的数据叙事报告；内置口径纪律、证据分级、可视化规范与可复现性契约。
 ---
 
-# vehicle-launch-deep-dive v1.1
+# vehicle-launch-deep-dive v1.2
 
 ## 能力定位
 
@@ -63,6 +63,25 @@ workspace/outputs/reports/<GEN>_数据口径与差异计算说明.md
 workspace/outputs/tables/launch_deep_dive/<GEN>_D<N>/   # 10 张 CSV + metrics.json + result_contract.json
 workspace/outputs/charts/<GEN>_D<N>_*.png               # 需 --export-charts
 ```
+
+## 执行流程（v1.2：Validated Research Planning）
+
+```
+研究任务 → 数据审计 → 研究计划 → Gate A → 正式计算 → ResearchFindings
+        → Gate B → 渲染 → Gate C → 交付
+```
+
+Gate A 在**正式计算之前**逐问判定 PASS / SKIP / BLOCK：
+
+```bash
+# 只看计划与 Gate A，不做正式计算
+python workspace/research_scripts/launch_deep_dive.py \
+  --gen <GEN> --benchmarks <B1> [B2] --as-of <YYYY-MM-DD> --plan
+```
+
+- 可选专题不可比（如对标没有 93kWh 段、无「座椅」字段）→ **SKIP**，写入计划并跳过对应区块；
+- 关键问题不成立（样本不足、预售池过小）→ **BLOCK**，引擎直接退出，不产生任何研究结论；
+- 通过后才执行 `build_context`，并生成 `ResearchFindings`（每条结论绑定指标与数值）。
 
 ## 执行步骤
 
@@ -163,6 +182,12 @@ workspace/outputs/charts/<GEN>_D<N>_*.png               # 需 --export-charts
 | `shared/schema/business_definition.json` | 上市日、代际归属、版本/电池映射 |
 
 ## 变更记录
+
+- **v1.2（2026-11-11）**：引入 ResearchPlan / Gate A / ResearchFindings / Gate B / Gate C。
+  研究计划先于计算生成并核验；不可比的研究问题在计算前 SKIP；结论由本次数据生成，
+  渲染层不再内联历史固定判断；报告产出前做结论-正文一致性检查。
+
+
 
 - **v1.1（2026-11-11）**：修复同档客群空数据崩溃（按样本量判定可比，不可比则跳过并说明）；
   差额表述改为"D1 领先 X / 尾段净回吐 Y / 最终 Z"；统一「预售池待转化」与「封盘池剩余」标签并加恒等式校验；
