@@ -1,0 +1,114 @@
+{
+  "case": "CM3",
+  "as_of": "2026-09-27",
+  "input_fingerprints": {
+    "dataset/order_data.parquet": "ce17aec76813ac8c9ca3f04c15d202e31a67a0827f376cfaee75d1ecdfc6e103",
+    "shared/schema/business_definition.json": "c1310c398aa03882e29549fc1855c6885b91b3910a8d6416cd4c431102763d6f"
+  },
+  "capabilities": {
+    "q1": {
+      "status": "PASS",
+      "independent_generations": [
+        "CM3",
+        "LS8",
+        "LS9"
+      ]
+    },
+    "q2": {
+      "status": "PASS",
+      "independent_generations": [
+        "CM3",
+        "LS8",
+        "LS9"
+      ]
+    },
+    "q3": {
+      "status": "PASS",
+      "independent_generations": [
+        "CM3",
+        "LS8",
+        "LS9"
+      ]
+    },
+    "q4": {
+      "status": "PASS",
+      "independent_generations": [
+        "CM3",
+        "LS8",
+        "LS9"
+      ]
+    },
+    "q5": {
+      "status": "PASS",
+      "independent_generations": [
+        "CM3",
+        "LS8",
+        "LS9"
+      ]
+    }
+  },
+  "raw_counts": {
+    "CM3": {
+      "daily": [
+        3076,
+        155,
+        162,
+        171,
+        175
+      ],
+      "cum": 3739,
+      "pool_total": 9692,
+      "pool_locked": 2980,
+      "pool_refunded": 2158,
+      "overlap": 7,
+      "origin": {
+        "pre": 2980,
+        "launch_day": 719,
+        "none": 35,
+        "post_launch": 5
+      }
+    },
+    "LS8": {
+      "daily": [
+        2498,
+        425,
+        368,
+        339,
+        143
+      ],
+      "cum": 3773,
+      "pool_total": 17400,
+      "pool_locked": 3141,
+      "pool_refunded": 6599,
+      "overlap": 5,
+      "origin": {
+        "pre": 3141,
+        "launch_day": 381,
+        "none": 249,
+        "post_launch": 2
+      }
+    },
+    "LS9": {
+      "daily": [
+        2161,
+        363,
+        242,
+        439,
+        492
+      ],
+      "cum": 3697,
+      "pool_total": 8287,
+      "pool_locked": 2099,
+      "pool_refunded": 1776,
+      "overlap": 6,
+      "origin": {
+        "pre": 2099,
+        "launch_day": 390,
+        "none": 1208,
+        "post_launch": 0
+      }
+    }
+  },
+  "gate_b_checks": 76,
+  "gate_c_cells": 149
+}

@@ -1,0 +1,1326 @@
+{
+  "version": "1.2-stable",
+  "generated_at": "2026-11-11T15:28:19",
+  "main": "CM3",
+  "benchmarks": [
+    "LS8",
+    "LS9"
+  ],
+  "as_of": "2026-09-27",
+  "n_days": 5,
+  "n_days_intended": 5,
+  "window_capped": false,
+  "input_fingerprints": {
+    "dataset/order_data.parquet": "ce17aec76813ac8c9ca3f04c15d202e31a67a0827f376cfaee75d1ecdfc6e103",
+    "shared/schema/business_definition.json": "c1310c398aa03882e29549fc1855c6885b91b3910a8d6416cd4c431102763d6f"
+  },
+  "windows": {
+    "CM3": {
+      "launch": "2026-09-23",
+      "window_end_exclusive": "2026-09-28",
+      "presale_start": "2026-09-10"
+    },
+    "LS8": {
+      "launch": "2026-04-16",
+      "window_end_exclusive": "2026-04-21",
+      "presale_start": "2026-03-26"
+    },
+    "LS9": {
+      "launch": "2025-11-12",
+      "window_end_exclusive": "2025-11-17",
+      "presale_start": "2025-11-04"
+    }
+  },
+  "audit": {
+    "main": "CM3",
+    "benchmarks": [
+      "LS8",
+      "LS9"
+    ],
+    "as_of": "2026-09-27",
+    "n_days": 5,
+    "window_capped": false,
+    "windows": {
+      "CM3": [
+        "2026-09-23",
+        "2026-09-28"
+      ],
+      "LS8": [
+        "2026-04-16",
+        "2026-04-21"
+      ],
+      "LS9": [
+        "2025-11-12",
+        "2025-11-17"
+      ]
+    },
+    "cum": {
+      "CM3": 3739,
+      "LS8": 3773,
+      "LS9": 3697
+    },
+    "pool": {
+      "CM3": 9692,
+      "LS8": 17400,
+      "LS9": 8287
+    },
+    "days_covered": {
+      "CM3": 5,
+      "LS8": 5,
+      "LS9": 5
+    },
+    "pool_overlap": {
+      "CM3": 24,
+      "LS8": 8,
+      "LS9": 7
+    },
+    "pool_pre_open": {
+      "CM3": 0,
+      "LS8": 2,
+      "LS9": 6
+    },
+    "invalid_event_order": {
+      "CM3": 0,
+      "LS8": 0,
+      "LS9": 0
+    },
+    "order_number_dup": 0,
+    "missing_order_number": 0,
+    "data_covers_as_of": true,
+    "max_lock_time": "2026-11-11 01:18:35"
+  },
+  "exclusions": {
+    "CM3": {
+      "lock_test_orders": 8,
+      "lock_hq_orders": 2,
+      "lock_non_retail": 2,
+      "lock_blank_type": 0,
+      "pool_test_orders": 59,
+      "pool_hq_orders": 21,
+      "pool_non_retail": 1,
+      "pool_blank_type": 6525
+    },
+    "LS8": {
+      "lock_test_orders": 4,
+      "lock_hq_orders": 10,
+      "lock_non_retail": 15,
+      "lock_blank_type": 0,
+      "pool_test_orders": 76,
+      "pool_hq_orders": 62,
+      "pool_non_retail": 8,
+      "pool_blank_type": 10962
+    },
+    "LS9": {
+      "lock_test_orders": 3,
+      "lock_hq_orders": 5,
+      "lock_non_retail": 147,
+      "lock_blank_type": 0,
+      "pool_test_orders": 30,
+      "pool_hq_orders": 8,
+      "pool_non_retail": 8,
+      "pool_blank_type": 2463
+    }
+  },
+  "research_plan": {
+    "version": "1.2-stable",
+    "main": "CM3",
+    "benchmarks": [
+      "LS8",
+      "LS9"
+    ],
+    "as_of": "2026-09-27",
+    "n_days": 5,
+    "windows": {
+      "CM3": [
+        "2026-09-23",
+        "2026-09-28"
+      ],
+      "LS8": [
+        "2026-04-16",
+        "2026-04-21"
+      ],
+      "LS9": [
+        "2025-11-12",
+        "2025-11-17"
+      ]
+    },
+    "questions": [
+      {
+        "id": "q1",
+        "title": "等生命周期累计锁单",
+        "status": "PASS",
+        "needs": [
+          "locks"
+        ],
+        "outputs": [
+          "cumulative"
+        ],
+        "required": true,
+        "compares": [
+          "CM3",
+          "LS8",
+          "LS9"
+        ],
+        "data_deps": [
+          "locks"
+        ],
+        "fallback": "block"
+      },
+      {
+        "id": "q2",
+        "title": "日增与差额形成",
+        "status": "PASS",
+        "needs": [
+          "locks"
+        ],
+        "outputs": [
+          "daily",
+          "gaps"
+        ],
+        "required": true,
+        "compares": [
+          "CM3",
+          "LS8",
+          "LS9"
+        ],
+        "data_deps": [
+          "locks"
+        ],
+        "fallback": "block"
+      },
+      {
+        "id": "q3",
+        "title": "首日占比与尾段日均（描述性）",
+        "status": "PASS",
+        "needs": [
+          "locks"
+        ],
+        "outputs": [
+          "dynamics"
+        ],
+        "required": false,
+        "compares": [
+          "CM3",
+          "LS8",
+          "LS9"
+        ],
+        "data_deps": [
+          "locks"
+        ],
+        "fallback": "skip_and_record"
+      },
+      {
+        "id": "q4",
+        "title": "上市前小订池事件与算术分解",
+        "status": "PASS",
+        "needs": [
+          "presale"
+        ],
+        "outputs": [
+          "presale",
+          "decomposition"
+        ],
+        "required": true,
+        "compares": [
+          "CM3",
+          "LS8",
+          "LS9"
+        ],
+        "data_deps": [
+          "presale"
+        ],
+        "fallback": "block"
+      },
+      {
+        "id": "q5",
+        "title": "锁单来源构成（含残余）",
+        "status": "PASS",
+        "needs": [
+          "origin"
+        ],
+        "outputs": [
+          "origin"
+        ],
+        "required": true,
+        "compares": [
+          "CM3",
+          "LS8",
+          "LS9"
+        ],
+        "data_deps": [
+          "origin"
+        ],
+        "fallback": "block"
+      }
+    ],
+    "excluded": [
+      {
+        "id": "q6",
+        "title": "区域与渠道专题",
+        "status": "UNVERIFIED",
+        "reason": "未完成独立的计算、结论、呈现联合验收",
+        "disposition": "本次不提供分析"
+      },
+      {
+        "id": "q7",
+        "title": "网络与单店专题",
+        "status": "UNVERIFIED",
+        "reason": "原始描述与归因未分离；舍入后网络分解及主次判断已判 FAIL",
+        "disposition": "本次不提供分析"
+      },
+      {
+        "id": "q8",
+        "title": "产品配置与客群",
+        "status": "UNVERIFIED",
+        "reason": "局部数字核验不等于跨代际完整能力验证",
+        "disposition": "本次不提供分析"
+      },
+      {
+        "id": "q8b",
+        "title": "同档客群",
+        "status": "UNVERIFIED",
+        "reason": "相同电量不足以证明产品与客群可比，旧崩溃修复仅证明可运行",
+        "disposition": "本次不提供分析"
+      },
+      {
+        "id": "q8c",
+        "title": "座椅及跨代际六座",
+        "status": "UNVERIFIED",
+        "reason": "CM3 缺字段，未形成两个案例的有效比较证据",
+        "disposition": "本次不提供分析"
+      },
+      {
+        "id": "q8d",
+        "title": "版本缺口解释差额",
+        "status": "FAIL",
+        "reason": "把同电量存在性当版本可比依据，固定缺口及贡献占比判断不成立",
+        "disposition": "本次不提供分析"
+      },
+      {
+        "id": "q9",
+        "title": "订单质量与交付兑现",
+        "status": "UNVERIFIED",
+        "reason": "历史快照回填与事件语义未完成独立验证",
+        "disposition": "本次不提供分析"
+      },
+      {
+        "id": "q10",
+        "title": "待转化、封盘剩余池与未来潜力",
+        "status": "FAIL",
+        "reason": "锁单与小订退款事件重叠，直接相减重复扣除；流出速度混入非池锁单",
+        "disposition": "本次不提供分析"
+      },
+      {
+        "id": "pk",
+        "title": "竞争 PK",
+        "status": "UNVERIFIED",
+        "reason": "series 粒度与代际粒度不一致，观察周可越过截止日",
+        "disposition": "本次不提供分析"
+      },
+      {
+        "id": "context",
+        "title": "延长曲线与 PNG 导出",
+        "status": "UNVERIFIED",
+        "reason": "不属于本次已验证的正式交付范围",
+        "disposition": "本次不提供分析"
+      },
+      {
+        "id": "verdict",
+        "title": "经营主因、需求与购买力判断",
+        "status": "FAIL",
+        "reason": "量纲混比、由占比推断流程、历史固定文案均缺乏成立依据",
+        "disposition": "本次不提供分析"
+      }
+    ],
+    "global_constraints": {
+      "gap_values": {
+        "LS8": -34,
+        "LS9": 42
+      },
+      "small_gap_by_benchmark": {
+        "LS8": true,
+        "LS9": true
+      },
+      "disable_share_of_gap": true
+    },
+    "narrative_policy": {
+      "facts_only": true,
+      "no_preset_verdict": true,
+      "inherit_previous_findings": false
+    }
+  },
+  "gate_a": {
+    "gate": "A",
+    "verdict": "PASS",
+    "results": [
+      {
+        "id": "q1",
+        "title": "等生命周期累计锁单",
+        "status": "PASS",
+        "reason": "能力已验证；本次字段、窗口、样本与主键检查通过"
+      },
+      {
+        "id": "q2",
+        "title": "日增与差额形成",
+        "status": "PASS",
+        "reason": "能力已验证；本次字段、窗口、样本与主键检查通过"
+      },
+      {
+        "id": "q3",
+        "title": "首日占比与尾段日均（描述性）",
+        "status": "PASS",
+        "reason": "能力已验证；本次字段、窗口、样本与主键检查通过"
+      },
+      {
+        "id": "q4",
+        "title": "上市前小订池事件与算术分解",
+        "status": "PASS",
+        "reason": "能力已验证；本次字段、窗口、样本与主键检查通过"
+      },
+      {
+        "id": "q5",
+        "title": "锁单来源构成（含残余）",
+        "status": "PASS",
+        "reason": "能力已验证；本次字段、窗口、样本与主键检查通过"
+      }
+    ],
+    "passed": [
+      "q1",
+      "q2",
+      "q3",
+      "q4",
+      "q5"
+    ],
+    "skipped": [],
+    "blocked": [],
+    "notes": [
+      "能力 PASS 与本次 Gate A PASS 分别核验；未验证专题不进入计划或计算。"
+    ]
+  },
+  "curves": {
+    "curves": {
+      "CM3": {
+        "gen": "CM3",
+        "launch": "2026-09-23",
+        "dates": [
+          "2026-09-23",
+          "2026-09-24",
+          "2026-09-25",
+          "2026-09-26",
+          "2026-09-27"
+        ],
+        "weekdays": [
+          "Wed",
+          "Thu",
+          "Fri",
+          "Sat",
+          "Sun"
+        ],
+        "daily": [
+          3076,
+          155,
+          162,
+          171,
+          175
+        ],
+        "cum": [
+          3076,
+          3231,
+          3393,
+          3564,
+          3739
+        ]
+      },
+      "LS8": {
+        "gen": "LS8",
+        "launch": "2026-04-16",
+        "dates": [
+          "2026-04-16",
+          "2026-04-17",
+          "2026-04-18",
+          "2026-04-19",
+          "2026-04-20"
+        ],
+        "weekdays": [
+          "Thu",
+          "Fri",
+          "Sat",
+          "Sun",
+          "Mon"
+        ],
+        "daily": [
+          2498,
+          425,
+          368,
+          339,
+          143
+        ],
+        "cum": [
+          2498,
+          2923,
+          3291,
+          3630,
+          3773
+        ]
+      },
+      "LS9": {
+        "gen": "LS9",
+        "launch": "2025-11-12",
+        "dates": [
+          "2025-11-12",
+          "2025-11-13",
+          "2025-11-14",
+          "2025-11-15",
+          "2025-11-16"
+        ],
+        "weekdays": [
+          "Wed",
+          "Thu",
+          "Fri",
+          "Sat",
+          "Sun"
+        ],
+        "daily": [
+          2161,
+          363,
+          242,
+          439,
+          492
+        ],
+        "cum": [
+          2161,
+          2524,
+          2766,
+          3205,
+          3697
+        ]
+      }
+    },
+    "gaps": {
+      "LS8": {
+        "gen": "LS8",
+        "cum_gap": [
+          578,
+          308,
+          102,
+          -66,
+          -34
+        ],
+        "marginal": [
+          578,
+          -270,
+          -206,
+          -168,
+          32
+        ]
+      },
+      "LS9": {
+        "gen": "LS9",
+        "cum_gap": [
+          915,
+          707,
+          627,
+          359,
+          42
+        ],
+        "marginal": [
+          915,
+          -208,
+          -80,
+          -268,
+          -317
+        ]
+      }
+    },
+    "n_days": 5,
+    "main": "CM3",
+    "gens": [
+      "CM3",
+      "LS8",
+      "LS9"
+    ],
+    "benchmarks": [
+      "LS8",
+      "LS9"
+    ]
+  },
+  "presale": {
+    "CM3": {
+      "gen": "CM3",
+      "pool_total": 9692,
+      "pool_locked": 2980,
+      "pool_refunded": 2158,
+      "lock_refund_overlap": 7,
+      "presale_pre_open": 0,
+      "presale_days": 13,
+      "pool_lock_rate": 0.3074700784151878,
+      "pool_refund_rate": 0.2226578621543541
+    },
+    "LS8": {
+      "gen": "LS8",
+      "pool_total": 17400,
+      "pool_locked": 3141,
+      "pool_refunded": 6599,
+      "lock_refund_overlap": 5,
+      "presale_pre_open": 2,
+      "presale_days": 21,
+      "pool_lock_rate": 0.18051724137931036,
+      "pool_refund_rate": 0.3792528735632184
+    },
+    "LS9": {
+      "gen": "LS9",
+      "pool_total": 8287,
+      "pool_locked": 2099,
+      "pool_refunded": 1776,
+      "lock_refund_overlap": 6,
+      "presale_pre_open": 6,
+      "presale_days": 8,
+      "pool_lock_rate": 0.2532882828526608,
+      "pool_refund_rate": 0.21431157234222276
+    }
+  },
+  "origin": {
+    "CM3": {
+      "gen": "CM3",
+      "total": 3739,
+      "pre": 2980,
+      "launch_day": 719,
+      "post_launch": 5,
+      "none": 35,
+      "pre_share": 0.797,
+      "launch_day_share": 0.1923,
+      "post_launch_share": 0.0013,
+      "none_share": 0.0094,
+      "by_day": {
+        "2026-09-23": {
+          "pre": 2613,
+          "launch_day": 463,
+          "post_launch": 0,
+          "none": 0
+        },
+        "2026-09-24": {
+          "pre": 97,
+          "launch_day": 50,
+          "post_launch": 0,
+          "none": 8
+        },
+        "2026-09-25": {
+          "pre": 99,
+          "launch_day": 52,
+          "post_launch": 2,
+          "none": 9
+        },
+        "2026-09-26": {
+          "pre": 84,
+          "launch_day": 76,
+          "post_launch": 2,
+          "none": 9
+        },
+        "2026-09-27": {
+          "pre": 87,
+          "launch_day": 78,
+          "post_launch": 1,
+          "none": 9
+        }
+      }
+    },
+    "LS8": {
+      "gen": "LS8",
+      "total": 3773,
+      "pre": 3141,
+      "launch_day": 381,
+      "post_launch": 2,
+      "none": 249,
+      "pre_share": 0.8325,
+      "launch_day_share": 0.101,
+      "post_launch_share": 0.0005,
+      "none_share": 0.066,
+      "by_day": {
+        "2026-04-16": {
+          "pre": 2260,
+          "launch_day": 238,
+          "post_launch": 0,
+          "none": 0
+        },
+        "2026-04-17": {
+          "pre": 321,
+          "launch_day": 64,
+          "post_launch": 1,
+          "none": 39
+        },
+        "2026-04-18": {
+          "pre": 263,
+          "launch_day": 33,
+          "post_launch": 1,
+          "none": 71
+        },
+        "2026-04-19": {
+          "pre": 212,
+          "launch_day": 34,
+          "post_launch": 0,
+          "none": 93
+        },
+        "2026-04-20": {
+          "pre": 85,
+          "launch_day": 12,
+          "post_launch": 0,
+          "none": 46
+        }
+      }
+    },
+    "LS9": {
+      "gen": "LS9",
+      "total": 3697,
+      "pre": 2099,
+      "launch_day": 390,
+      "post_launch": 0,
+      "none": 1208,
+      "pre_share": 0.5678,
+      "launch_day_share": 0.1055,
+      "post_launch_share": 0.0,
+      "none_share": 0.3268,
+      "by_day": {
+        "2025-11-12": {
+          "pre": 1493,
+          "launch_day": 287,
+          "post_launch": 0,
+          "none": 381
+        },
+        "2025-11-13": {
+          "pre": 208,
+          "launch_day": 31,
+          "post_launch": 0,
+          "none": 124
+        },
+        "2025-11-14": {
+          "pre": 87,
+          "launch_day": 24,
+          "post_launch": 0,
+          "none": 131
+        },
+        "2025-11-15": {
+          "pre": 175,
+          "launch_day": 26,
+          "post_launch": 0,
+          "none": 238
+        },
+        "2025-11-16": {
+          "pre": 136,
+          "launch_day": 22,
+          "post_launch": 0,
+          "none": 334
+        }
+      }
+    }
+  },
+  "dynamics": {
+    "CM3": {
+      "d1": 3076,
+      "cum_total": 3739,
+      "d1_share_of_cum": 0.8226798609253811,
+      "tail_days": 4,
+      "tail_avg": 165.75
+    },
+    "LS8": {
+      "d1": 2498,
+      "cum_total": 3773,
+      "d1_share_of_cum": 0.6620726212562947,
+      "tail_days": 4,
+      "tail_avg": 318.75
+    },
+    "LS9": {
+      "d1": 2161,
+      "cum_total": 3697,
+      "d1_share_of_cum": 0.5845279956721666,
+      "tail_days": 4,
+      "tail_avg": 384.0
+    }
+  },
+  "deltas": {
+    "LS8": {
+      "cum_main": 3739,
+      "cum_bench": 3773,
+      "cum_diff": -34,
+      "cum_ratio": 0.9909886032335012,
+      "d1_diff": 578,
+      "tail_diff": -612
+    },
+    "LS9": {
+      "cum_main": 3739,
+      "cum_bench": 3697,
+      "cum_diff": 42,
+      "cum_ratio": 1.0113605626183393,
+      "d1_diff": 915,
+      "tail_diff": -873
+    }
+  },
+  "source_decomp": {
+    "LS8": {
+      "bench": "LS8",
+      "gap_total": -34,
+      "pre_diff": -161,
+      "launch_day_diff": 338,
+      "none_diff": -214,
+      "post_launch_diff": 3,
+      "presale_scale_effect": -1391.4268965517242,
+      "presale_rate_effect": 1230.4268965517242,
+      "pool_locked_diff": -161
+    },
+    "LS9": {
+      "bench": "LS9",
+      "gap_total": 42,
+      "pre_diff": 881,
+      "launch_day_diff": 329,
+      "none_diff": -1173,
+      "post_launch_diff": 5,
+      "presale_scale_effect": 355.87003740798843,
+      "presale_rate_effect": 525.1299625920117,
+      "pool_locked_diff": 881
+    }
+  },
+  "findings": [
+    {
+      "id": "q1_LS8",
+      "question": "q1",
+      "title": "CM3 对 LS8 累计差 -34 单",
+      "body": "CM3 3,739 单，LS8 3,773 单；比值 0.9910。",
+      "evidence": [
+        "deltas.LS8.cum_main",
+        "deltas.LS8.cum_bench",
+        "deltas.LS8.cum_diff",
+        "deltas.LS8.cum_ratio"
+      ],
+      "numbers": {
+        "deltas.LS8.cum_main": 3739,
+        "deltas.LS8.cum_bench": 3773,
+        "deltas.LS8.cum_diff": -34,
+        "deltas.LS8.cum_ratio": 0.9909886032335012
+      },
+      "direction": "behind",
+      "scope": "CM3 vs LS8；各自 D1–D5；当前快照事件截断"
+    },
+    {
+      "id": "q2_LS8",
+      "question": "q2",
+      "title": "对 LS8 的首日及后续差额",
+      "body": "D1 差额 +578 单，D2–D5 合计差额 -612 单；合计 -34 单。",
+      "evidence": [
+        "deltas.LS8.d1_diff",
+        "deltas.LS8.tail_diff",
+        "deltas.LS8.cum_diff"
+      ],
+      "numbers": {
+        "deltas.LS8.d1_diff": 578,
+        "deltas.LS8.tail_diff": -612,
+        "deltas.LS8.cum_diff": -34
+      },
+      "direction": "behind",
+      "scope": "CM3 vs LS8；各自 D1–D5；当前快照事件截断"
+    },
+    {
+      "id": "q3_LS8",
+      "question": "q3",
+      "title": "对 LS8 的观察期节奏",
+      "body": "D1 占比 82.3% vs 66.2%；D2–D5 日均 165.8 vs 318.8 单。",
+      "evidence": [
+        "dynamics.CM3.d1_share_of_cum",
+        "dynamics.CM3.tail_avg",
+        "dynamics.LS8.d1_share_of_cum",
+        "dynamics.LS8.tail_avg"
+      ],
+      "numbers": {
+        "dynamics.CM3.d1_share_of_cum": 0.8226798609253811,
+        "dynamics.CM3.tail_avg": 165.75,
+        "dynamics.LS8.d1_share_of_cum": 0.6620726212562947,
+        "dynamics.LS8.tail_avg": 318.75
+      },
+      "direction": "descriptive",
+      "scope": "CM3 vs LS8；各自 D1–D5；当前快照事件截断"
+    },
+    {
+      "id": "q4_LS8",
+      "question": "q4",
+      "title": "对 LS8 的上市前小订池事件分解",
+      "body": "池总量 9,692 vs 17,400；锁单事件率 30.7% vs 18.1%。规模项 -1391.4 单，率项 +1230.4 单，合计 -161 单；仅为算术分解，不判断经营主因。",
+      "evidence": [
+        "presale.CM3.pool_total",
+        "presale.CM3.pool_lock_rate",
+        "presale.LS8.pool_total",
+        "presale.LS8.pool_lock_rate",
+        "source_decomp.LS8.presale_scale_effect",
+        "source_decomp.LS8.presale_rate_effect",
+        "source_decomp.LS8.pool_locked_diff"
+      ],
+      "numbers": {
+        "presale.CM3.pool_total": 9692,
+        "presale.CM3.pool_lock_rate": 0.3074700784151878,
+        "presale.LS8.pool_total": 17400,
+        "presale.LS8.pool_lock_rate": 0.18051724137931036,
+        "source_decomp.LS8.presale_scale_effect": -1391.4268965517242,
+        "source_decomp.LS8.presale_rate_effect": 1230.4268965517242,
+        "source_decomp.LS8.pool_locked_diff": -161
+      },
+      "direction": "descriptive",
+      "scope": "CM3 vs LS8；各自 D1–D5；当前快照事件截断"
+    },
+    {
+      "id": "q5_LS8",
+      "question": "q5",
+      "title": "对 LS8 的锁单来源构成",
+      "body": "上市前小订转锁 2,980 vs 3,141；上市当日新增小订转锁 719 vs 381；无小订记录 35 vs 249；上市日后小订残余 5 vs 2。不据占比推断下单流程或需求。",
+      "evidence": [
+        "origin.CM3.pre",
+        "origin.CM3.launch_day",
+        "origin.CM3.none",
+        "origin.CM3.post_launch",
+        "origin.LS8.pre",
+        "origin.LS8.launch_day",
+        "origin.LS8.none",
+        "origin.LS8.post_launch"
+      ],
+      "numbers": {
+        "origin.CM3.pre": 2980,
+        "origin.CM3.launch_day": 719,
+        "origin.CM3.none": 35,
+        "origin.CM3.post_launch": 5,
+        "origin.LS8.pre": 3141,
+        "origin.LS8.launch_day": 381,
+        "origin.LS8.none": 249,
+        "origin.LS8.post_launch": 2
+      },
+      "direction": "descriptive",
+      "scope": "CM3 vs LS8；各自 D1–D5；当前快照事件截断"
+    },
+    {
+      "id": "q1_LS9",
+      "question": "q1",
+      "title": "CM3 对 LS9 累计差 +42 单",
+      "body": "CM3 3,739 单，LS9 3,697 单；比值 1.0114。",
+      "evidence": [
+        "deltas.LS9.cum_main",
+        "deltas.LS9.cum_bench",
+        "deltas.LS9.cum_diff",
+        "deltas.LS9.cum_ratio"
+      ],
+      "numbers": {
+        "deltas.LS9.cum_main": 3739,
+        "deltas.LS9.cum_bench": 3697,
+        "deltas.LS9.cum_diff": 42,
+        "deltas.LS9.cum_ratio": 1.0113605626183393
+      },
+      "direction": "ahead",
+      "scope": "CM3 vs LS9；各自 D1–D5；当前快照事件截断"
+    },
+    {
+      "id": "q2_LS9",
+      "question": "q2",
+      "title": "对 LS9 的首日及后续差额",
+      "body": "D1 差额 +915 单，D2–D5 合计差额 -873 单；合计 +42 单。",
+      "evidence": [
+        "deltas.LS9.d1_diff",
+        "deltas.LS9.tail_diff",
+        "deltas.LS9.cum_diff"
+      ],
+      "numbers": {
+        "deltas.LS9.d1_diff": 915,
+        "deltas.LS9.tail_diff": -873,
+        "deltas.LS9.cum_diff": 42
+      },
+      "direction": "ahead",
+      "scope": "CM3 vs LS9；各自 D1–D5；当前快照事件截断"
+    },
+    {
+      "id": "q3_LS9",
+      "question": "q3",
+      "title": "对 LS9 的观察期节奏",
+      "body": "D1 占比 82.3% vs 58.5%；D2–D5 日均 165.8 vs 384.0 单。",
+      "evidence": [
+        "dynamics.CM3.d1_share_of_cum",
+        "dynamics.CM3.tail_avg",
+        "dynamics.LS9.d1_share_of_cum",
+        "dynamics.LS9.tail_avg"
+      ],
+      "numbers": {
+        "dynamics.CM3.d1_share_of_cum": 0.8226798609253811,
+        "dynamics.CM3.tail_avg": 165.75,
+        "dynamics.LS9.d1_share_of_cum": 0.5845279956721666,
+        "dynamics.LS9.tail_avg": 384.0
+      },
+      "direction": "descriptive",
+      "scope": "CM3 vs LS9；各自 D1–D5；当前快照事件截断"
+    },
+    {
+      "id": "q4_LS9",
+      "question": "q4",
+      "title": "对 LS9 的上市前小订池事件分解",
+      "body": "池总量 9,692 vs 8,287；锁单事件率 30.7% vs 25.3%。规模项 +355.9 单，率项 +525.1 单，合计 +881 单；仅为算术分解，不判断经营主因。",
+      "evidence": [
+        "presale.CM3.pool_total",
+        "presale.CM3.pool_lock_rate",
+        "presale.LS9.pool_total",
+        "presale.LS9.pool_lock_rate",
+        "source_decomp.LS9.presale_scale_effect",
+        "source_decomp.LS9.presale_rate_effect",
+        "source_decomp.LS9.pool_locked_diff"
+      ],
+      "numbers": {
+        "presale.CM3.pool_total": 9692,
+        "presale.CM3.pool_lock_rate": 0.3074700784151878,
+        "presale.LS9.pool_total": 8287,
+        "presale.LS9.pool_lock_rate": 0.2532882828526608,
+        "source_decomp.LS9.presale_scale_effect": 355.87003740798843,
+        "source_decomp.LS9.presale_rate_effect": 525.1299625920117,
+        "source_decomp.LS9.pool_locked_diff": 881
+      },
+      "direction": "descriptive",
+      "scope": "CM3 vs LS9；各自 D1–D5；当前快照事件截断"
+    },
+    {
+      "id": "q5_LS9",
+      "question": "q5",
+      "title": "对 LS9 的锁单来源构成",
+      "body": "上市前小订转锁 2,980 vs 2,099；上市当日新增小订转锁 719 vs 390；无小订记录 35 vs 1,208；上市日后小订残余 5 vs 0。不据占比推断下单流程或需求。",
+      "evidence": [
+        "origin.CM3.pre",
+        "origin.CM3.launch_day",
+        "origin.CM3.none",
+        "origin.CM3.post_launch",
+        "origin.LS9.pre",
+        "origin.LS9.launch_day",
+        "origin.LS9.none",
+        "origin.LS9.post_launch"
+      ],
+      "numbers": {
+        "origin.CM3.pre": 2980,
+        "origin.CM3.launch_day": 719,
+        "origin.CM3.none": 35,
+        "origin.CM3.post_launch": 5,
+        "origin.LS9.pre": 2099,
+        "origin.LS9.launch_day": 390,
+        "origin.LS9.none": 1208,
+        "origin.LS9.post_launch": 0
+      },
+      "direction": "descriptive",
+      "scope": "CM3 vs LS9；各自 D1–D5；当前快照事件截断"
+    }
+  ],
+  "gate_b": {
+    "gate": "B",
+    "verdict": "PASS",
+    "checks": [
+      {
+        "check": "gate_a_pass",
+        "ok": true
+      },
+      {
+        "check": "finding_set_complete",
+        "ok": true
+      },
+      {
+        "check": "numbers_direction_text_q1_LS8",
+        "ok": true
+      },
+      {
+        "check": "numbers_direction_text_q2_LS8",
+        "ok": true
+      },
+      {
+        "check": "numbers_direction_text_q3_LS8",
+        "ok": true
+      },
+      {
+        "check": "numbers_direction_text_q4_LS8",
+        "ok": true
+      },
+      {
+        "check": "numbers_direction_text_q5_LS8",
+        "ok": true
+      },
+      {
+        "check": "numbers_direction_text_q1_LS9",
+        "ok": true
+      },
+      {
+        "check": "numbers_direction_text_q2_LS9",
+        "ok": true
+      },
+      {
+        "check": "numbers_direction_text_q3_LS9",
+        "ok": true
+      },
+      {
+        "check": "numbers_direction_text_q4_LS9",
+        "ok": true
+      },
+      {
+        "check": "numbers_direction_text_q5_LS9",
+        "ok": true
+      },
+      {
+        "check": "CM3_nonnegative_daily",
+        "ok": true
+      },
+      {
+        "check": "CM3_cumulative",
+        "ok": true
+      },
+      {
+        "check": "CM3_source_identity",
+        "ok": true
+      },
+      {
+        "check": "CM3_source_daily_pre",
+        "ok": true
+      },
+      {
+        "check": "CM3_source_share_pre",
+        "ok": true
+      },
+      {
+        "check": "CM3_source_daily_launch_day",
+        "ok": true
+      },
+      {
+        "check": "CM3_source_share_launch_day",
+        "ok": true
+      },
+      {
+        "check": "CM3_source_daily_none",
+        "ok": true
+      },
+      {
+        "check": "CM3_source_share_none",
+        "ok": true
+      },
+      {
+        "check": "CM3_source_daily_post_launch",
+        "ok": true
+      },
+      {
+        "check": "CM3_source_share_post_launch",
+        "ok": true
+      },
+      {
+        "check": "CM3_pool_rate",
+        "ok": true
+      },
+      {
+        "check": "CM3_refund_rate",
+        "ok": true
+      },
+      {
+        "check": "CM3_pool_events",
+        "ok": true
+      },
+      {
+        "check": "CM3_pool_locks_equal_window_source",
+        "ok": true
+      },
+      {
+        "check": "CM3_dynamics",
+        "ok": true
+      },
+      {
+        "check": "LS8_nonnegative_daily",
+        "ok": true
+      },
+      {
+        "check": "LS8_cumulative",
+        "ok": true
+      },
+      {
+        "check": "LS8_source_identity",
+        "ok": true
+      },
+      {
+        "check": "LS8_source_daily_pre",
+        "ok": true
+      },
+      {
+        "check": "LS8_source_share_pre",
+        "ok": true
+      },
+      {
+        "check": "LS8_source_daily_launch_day",
+        "ok": true
+      },
+      {
+        "check": "LS8_source_share_launch_day",
+        "ok": true
+      },
+      {
+        "check": "LS8_source_daily_none",
+        "ok": true
+      },
+      {
+        "check": "LS8_source_share_none",
+        "ok": true
+      },
+      {
+        "check": "LS8_source_daily_post_launch",
+        "ok": true
+      },
+      {
+        "check": "LS8_source_share_post_launch",
+        "ok": true
+      },
+      {
+        "check": "LS8_pool_rate",
+        "ok": true
+      },
+      {
+        "check": "LS8_refund_rate",
+        "ok": true
+      },
+      {
+        "check": "LS8_pool_events",
+        "ok": true
+      },
+      {
+        "check": "LS8_pool_locks_equal_window_source",
+        "ok": true
+      },
+      {
+        "check": "LS8_dynamics",
+        "ok": true
+      },
+      {
+        "check": "LS9_nonnegative_daily",
+        "ok": true
+      },
+      {
+        "check": "LS9_cumulative",
+        "ok": true
+      },
+      {
+        "check": "LS9_source_identity",
+        "ok": true
+      },
+      {
+        "check": "LS9_source_daily_pre",
+        "ok": true
+      },
+      {
+        "check": "LS9_source_share_pre",
+        "ok": true
+      },
+      {
+        "check": "LS9_source_daily_launch_day",
+        "ok": true
+      },
+      {
+        "check": "LS9_source_share_launch_day",
+        "ok": true
+      },
+      {
+        "check": "LS9_source_daily_none",
+        "ok": true
+      },
+      {
+        "check": "LS9_source_share_none",
+        "ok": true
+      },
+      {
+        "check": "LS9_source_daily_post_launch",
+        "ok": true
+      },
+      {
+        "check": "LS9_source_share_post_launch",
+        "ok": true
+      },
+      {
+        "check": "LS9_pool_rate",
+        "ok": true
+      },
+      {
+        "check": "LS9_refund_rate",
+        "ok": true
+      },
+      {
+        "check": "LS9_pool_events",
+        "ok": true
+      },
+      {
+        "check": "LS9_pool_locks_equal_window_source",
+        "ok": true
+      },
+      {
+        "check": "LS9_dynamics",
+        "ok": true
+      },
+      {
+        "check": "LS8_delta_identity",
+        "ok": true
+      },
+      {
+        "check": "LS8_d1_tail",
+        "ok": true
+      },
+      {
+        "check": "LS8_ratio",
+        "ok": true
+      },
+      {
+        "check": "LS8_marginal",
+        "ok": true
+      },
+      {
+        "check": "LS8_gap_curve",
+        "ok": true
+      },
+      {
+        "check": "LS8_source_gap",
+        "ok": true
+      },
+      {
+        "check": "LS8_pool_components",
+        "ok": true
+      },
+      {
+        "check": "LS8_pool_decomposition",
+        "ok": true
+      },
+      {
+        "check": "LS9_delta_identity",
+        "ok": true
+      },
+      {
+        "check": "LS9_d1_tail",
+        "ok": true
+      },
+      {
+        "check": "LS9_ratio",
+        "ok": true
+      },
+      {
+        "check": "LS9_marginal",
+        "ok": true
+      },
+      {
+        "check": "LS9_gap_curve",
+        "ok": true
+      },
+      {
+        "check": "LS9_source_gap",
+        "ok": true
+      },
+      {
+        "check": "LS9_pool_components",
+        "ok": true
+      },
+      {
+        "check": "LS9_pool_decomposition",
+        "ok": true
+      }
+    ],
+    "failed": [],
+    "checked": 76
+  },
+  "gate_c": {
+    "gate": "C",
+    "verdict": "PASS",
+    "issues": [],
+    "checked_findings": 10,
+    "checked_cells": 149
+  }
+}

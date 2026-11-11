@@ -1,0 +1,23 @@
+{
+  "baseline_commit": "2fded9d",
+  "files": {
+    "workspace/research_scripts/launch_deep_dive.py": {
+      "baseline_lines": 2588,
+      "stable_lines": 588,
+      "baseline_functions": 65,
+      "retained_names": 24
+    },
+    "workspace/research_scripts/launch_deep_dive_report.py": {
+      "baseline_lines": 3259,
+      "stable_lines": 108,
+      "baseline_functions": 127,
+      "retained_names": 2
+    },
+    "workspace/research_scripts/launch_research_plan.py": {
+      "baseline_lines": 430,
+      "stable_lines": 218,
+      "baseline_functions": 8,
+      "retained_names": 5
+    }
+  }
+}

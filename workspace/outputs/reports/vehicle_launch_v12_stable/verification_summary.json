@@ -1,0 +1,29 @@
+{
+  "status": "PASS",
+  "initial_run": {
+    "passed": [
+      "harness.selftest",
+      "pytest.scripts",
+      "pytest:workspace/tests/test_launch_deep_dive_stable.py",
+      "smoke:launch_deep_dive.py",
+      "smoke:launch_research_plan.py"
+    ],
+    "failed": [
+      "smoke:launch_deep_dive_report.py"
+    ],
+    "cause": "direct script import path"
+  },
+  "followup_import_fix": "PASS",
+  "final_run": {
+    "passed": [
+      "pytest.scripts",
+      "pytest:workspace/tests/test_launch_deep_dive_stable.py",
+      "smoke:launch_deep_dive_report.py"
+    ],
+    "failed": []
+  },
+  "case_tests": 16,
+  "scope_expansion": false,
+  "skill_frontmatter": "PASS",
+  "note": "Follow-up reruns scoped to actual source changes; no full pytest or CI."
+}

@@ -1,0 +1,36 @@
+.venv/bin/python .opencode/verification/resolve_verification_scope.py --worktree --changed workspace/research_scripts/launch_deep_dive.py workspace/research_scripts/launch_deep_dive_report.py workspace/research_scripts/launch_research_plan.py workspace/tests/test_launch_deep_dive_stable.py .opencode/skills/vehicle-launch-deep-dive/SKILL.md .opencode/skills/vehicle-launch-deep-dive/references/method.md .opencode/skills/vehicle-launch-deep-dive/references/metrics.md .opencode/skills/vehicle-launch-deep-dive/references/evidence.md .opencode/skills/vehicle-launch-deep-dive/references/pitfalls.md .opencode/skills/vehicle-launch-deep-dive/references/verified-capabilities.md .opencode/skills/vehicle-launch-deep-dive/templates/report-outline.md .opencode/skills/vehicle-launch-deep-dive/templates/method-doc-outline.md
+[Summary]
+  命中 4 条规则，最小验证范围: harness.selftest, pytest.scripts, pytest:workspace/tests/test_launch_deep_dive_stable.py, smoke:workspace/research_scripts/launch_deep_dive.py, smoke:workspace/research_scripts/launch_deep_dive_report.py, smoke:workspace/research_scripts/launch_research_plan.py。
+
+[Scope]
+  decision: run
+  changed: 12 个文件
+    - .opencode/skills/vehicle-launch-deep-dive/SKILL.md
+    - .opencode/skills/vehicle-launch-deep-dive/references/evidence.md
+    - .opencode/skills/vehicle-launch-deep-dive/references/method.md
+    - .opencode/skills/vehicle-launch-deep-dive/references/metrics.md
+    - .opencode/skills/vehicle-launch-deep-dive/references/pitfalls.md
+    - .opencode/skills/vehicle-launch-deep-dive/references/verified-capabilities.md
+    - .opencode/skills/vehicle-launch-deep-dive/templates/method-doc-outline.md
+    - .opencode/skills/vehicle-launch-deep-dive/templates/report-outline.md
+    - workspace/research_scripts/launch_deep_dive.py
+    - workspace/research_scripts/launch_deep_dive_report.py
+    - workspace/research_scripts/launch_research_plan.py
+    - workspace/tests/test_launch_deep_dive_stable.py
+  matched_rules: opencode-config, doc-only, workspace-script, workspace-test
+  最小验证范围:
+    • harness.selftest
+      $ python -m pytest .opencode/verification/tests -q
+    • pytest.scripts
+      $ python -m pytest workspace/tests/scripts -q
+    • pytest:workspace/tests/test_launch_deep_dive_stable.py
+      $ python -m pytest workspace/tests/test_launch_deep_dive_stable.py -q
+    • smoke:workspace/research_scripts/launch_deep_dive.py
+      $ python workspace/research_scripts/launch_deep_dive.py --help
+    • smoke:workspace/research_scripts/launch_deep_dive_report.py
+      $ python workspace/research_scripts/launch_deep_dive_report.py --help
+    • smoke:workspace/research_scripts/launch_research_plan.py
+      $ python workspace/research_scripts/launch_research_plan.py --help
+
+[Out of Scope — 未纳入，失败不算本次回归]
+  eval.ci, eval.core, jobs.tests, pytest.dataset, pytest.eval, pytest.workspace

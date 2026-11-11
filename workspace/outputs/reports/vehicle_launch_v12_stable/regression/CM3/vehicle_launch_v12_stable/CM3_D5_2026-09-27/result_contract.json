@@ -1,0 +1,403 @@
+{
+  "status": "success",
+  "script": "workspace/research_scripts/launch_deep_dive.py",
+  "scope": {
+    "data_source": "dataset/order_data.parquet + shared/schema/business_definition.json",
+    "time_window": {
+      "as_of": "2026-09-27",
+      "n_days": 5,
+      "windows": {
+        "CM3": {
+          "launch": "2026-09-23",
+          "window_end_exclusive": "2026-09-28",
+          "presale_start": "2026-09-10"
+        },
+        "LS8": {
+          "launch": "2026-04-16",
+          "window_end_exclusive": "2026-04-21",
+          "presale_start": "2026-03-26"
+        },
+        "LS9": {
+          "launch": "2025-11-12",
+          "window_end_exclusive": "2025-11-17",
+          "presale_start": "2025-11-04"
+        }
+      }
+    },
+    "filters": {
+      "locks": "用户车，剔除测试单、总部主理店与非零售",
+      "pool": "用户车或空类型，剔除测试单、总部主理店与非零售",
+      "dedup": "order_number 唯一性前置阻断"
+    },
+    "metric_definition": "按 lock_time 统计各代际上市 [T0,T0+N) 零售锁单；上市前小订池 ip<T0，事件截止各自 T0+N。"
+  },
+  "result": {
+    "summary": "CM3 D1–D5，仅提供已验证的描述性分析。",
+    "metrics": {
+      "cum_locks": {
+        "CM3": 3739,
+        "LS8": 3773,
+        "LS9": 3697
+      }
+    },
+    "findings": [
+      {
+        "id": "q1_LS8",
+        "question": "q1",
+        "title": "CM3 对 LS8 累计差 -34 单",
+        "body": "CM3 3,739 单，LS8 3,773 单；比值 0.9910。",
+        "evidence": [
+          "deltas.LS8.cum_main",
+          "deltas.LS8.cum_bench",
+          "deltas.LS8.cum_diff",
+          "deltas.LS8.cum_ratio"
+        ],
+        "numbers": {
+          "deltas.LS8.cum_main": 3739,
+          "deltas.LS8.cum_bench": 3773,
+          "deltas.LS8.cum_diff": -34,
+          "deltas.LS8.cum_ratio": 0.9909886032335012
+        },
+        "direction": "behind",
+        "scope": "CM3 vs LS8；各自 D1–D5；当前快照事件截断"
+      },
+      {
+        "id": "q2_LS8",
+        "question": "q2",
+        "title": "对 LS8 的首日及后续差额",
+        "body": "D1 差额 +578 单，D2–D5 合计差额 -612 单；合计 -34 单。",
+        "evidence": [
+          "deltas.LS8.d1_diff",
+          "deltas.LS8.tail_diff",
+          "deltas.LS8.cum_diff"
+        ],
+        "numbers": {
+          "deltas.LS8.d1_diff": 578,
+          "deltas.LS8.tail_diff": -612,
+          "deltas.LS8.cum_diff": -34
+        },
+        "direction": "behind",
+        "scope": "CM3 vs LS8；各自 D1–D5；当前快照事件截断"
+      },
+      {
+        "id": "q3_LS8",
+        "question": "q3",
+        "title": "对 LS8 的观察期节奏",
+        "body": "D1 占比 82.3% vs 66.2%；D2–D5 日均 165.8 vs 318.8 单。",
+        "evidence": [
+          "dynamics.CM3.d1_share_of_cum",
+          "dynamics.CM3.tail_avg",
+          "dynamics.LS8.d1_share_of_cum",
+          "dynamics.LS8.tail_avg"
+        ],
+        "numbers": {
+          "dynamics.CM3.d1_share_of_cum": 0.8226798609253811,
+          "dynamics.CM3.tail_avg": 165.75,
+          "dynamics.LS8.d1_share_of_cum": 0.6620726212562947,
+          "dynamics.LS8.tail_avg": 318.75
+        },
+        "direction": "descriptive",
+        "scope": "CM3 vs LS8；各自 D1–D5；当前快照事件截断"
+      },
+      {
+        "id": "q4_LS8",
+        "question": "q4",
+        "title": "对 LS8 的上市前小订池事件分解",
+        "body": "池总量 9,692 vs 17,400；锁单事件率 30.7% vs 18.1%。规模项 -1391.4 单，率项 +1230.4 单，合计 -161 单；仅为算术分解，不判断经营主因。",
+        "evidence": [
+          "presale.CM3.pool_total",
+          "presale.CM3.pool_lock_rate",
+          "presale.LS8.pool_total",
+          "presale.LS8.pool_lock_rate",
+          "source_decomp.LS8.presale_scale_effect",
+          "source_decomp.LS8.presale_rate_effect",
+          "source_decomp.LS8.pool_locked_diff"
+        ],
+        "numbers": {
+          "presale.CM3.pool_total": 9692,
+          "presale.CM3.pool_lock_rate": 0.3074700784151878,
+          "presale.LS8.pool_total": 17400,
+          "presale.LS8.pool_lock_rate": 0.18051724137931036,
+          "source_decomp.LS8.presale_scale_effect": -1391.4268965517242,
+          "source_decomp.LS8.presale_rate_effect": 1230.4268965517242,
+          "source_decomp.LS8.pool_locked_diff": -161
+        },
+        "direction": "descriptive",
+        "scope": "CM3 vs LS8；各自 D1–D5；当前快照事件截断"
+      },
+      {
+        "id": "q5_LS8",
+        "question": "q5",
+        "title": "对 LS8 的锁单来源构成",
+        "body": "上市前小订转锁 2,980 vs 3,141；上市当日新增小订转锁 719 vs 381；无小订记录 35 vs 249；上市日后小订残余 5 vs 2。不据占比推断下单流程或需求。",
+        "evidence": [
+          "origin.CM3.pre",
+          "origin.CM3.launch_day",
+          "origin.CM3.none",
+          "origin.CM3.post_launch",
+          "origin.LS8.pre",
+          "origin.LS8.launch_day",
+          "origin.LS8.none",
+          "origin.LS8.post_launch"
+        ],
+        "numbers": {
+          "origin.CM3.pre": 2980,
+          "origin.CM3.launch_day": 719,
+          "origin.CM3.none": 35,
+          "origin.CM3.post_launch": 5,
+          "origin.LS8.pre": 3141,
+          "origin.LS8.launch_day": 381,
+          "origin.LS8.none": 249,
+          "origin.LS8.post_launch": 2
+        },
+        "direction": "descriptive",
+        "scope": "CM3 vs LS8；各自 D1–D5；当前快照事件截断"
+      },
+      {
+        "id": "q1_LS9",
+        "question": "q1",
+        "title": "CM3 对 LS9 累计差 +42 单",
+        "body": "CM3 3,739 单，LS9 3,697 单；比值 1.0114。",
+        "evidence": [
+          "deltas.LS9.cum_main",
+          "deltas.LS9.cum_bench",
+          "deltas.LS9.cum_diff",
+          "deltas.LS9.cum_ratio"
+        ],
+        "numbers": {
+          "deltas.LS9.cum_main": 3739,
+          "deltas.LS9.cum_bench": 3697,
+          "deltas.LS9.cum_diff": 42,
+          "deltas.LS9.cum_ratio": 1.0113605626183393
+        },
+        "direction": "ahead",
+        "scope": "CM3 vs LS9；各自 D1–D5；当前快照事件截断"
+      },
+      {
+        "id": "q2_LS9",
+        "question": "q2",
+        "title": "对 LS9 的首日及后续差额",
+        "body": "D1 差额 +915 单，D2–D5 合计差额 -873 单；合计 +42 单。",
+        "evidence": [
+          "deltas.LS9.d1_diff",
+          "deltas.LS9.tail_diff",
+          "deltas.LS9.cum_diff"
+        ],
+        "numbers": {
+          "deltas.LS9.d1_diff": 915,
+          "deltas.LS9.tail_diff": -873,
+          "deltas.LS9.cum_diff": 42
+        },
+        "direction": "ahead",
+        "scope": "CM3 vs LS9；各自 D1–D5；当前快照事件截断"
+      },
+      {
+        "id": "q3_LS9",
+        "question": "q3",
+        "title": "对 LS9 的观察期节奏",
+        "body": "D1 占比 82.3% vs 58.5%；D2–D5 日均 165.8 vs 384.0 单。",
+        "evidence": [
+          "dynamics.CM3.d1_share_of_cum",
+          "dynamics.CM3.tail_avg",
+          "dynamics.LS9.d1_share_of_cum",
+          "dynamics.LS9.tail_avg"
+        ],
+        "numbers": {
+          "dynamics.CM3.d1_share_of_cum": 0.8226798609253811,
+          "dynamics.CM3.tail_avg": 165.75,
+          "dynamics.LS9.d1_share_of_cum": 0.5845279956721666,
+          "dynamics.LS9.tail_avg": 384.0
+        },
+        "direction": "descriptive",
+        "scope": "CM3 vs LS9；各自 D1–D5；当前快照事件截断"
+      },
+      {
+        "id": "q4_LS9",
+        "question": "q4",
+        "title": "对 LS9 的上市前小订池事件分解",
+        "body": "池总量 9,692 vs 8,287；锁单事件率 30.7% vs 25.3%。规模项 +355.9 单，率项 +525.1 单，合计 +881 单；仅为算术分解，不判断经营主因。",
+        "evidence": [
+          "presale.CM3.pool_total",
+          "presale.CM3.pool_lock_rate",
+          "presale.LS9.pool_total",
+          "presale.LS9.pool_lock_rate",
+          "source_decomp.LS9.presale_scale_effect",
+          "source_decomp.LS9.presale_rate_effect",
+          "source_decomp.LS9.pool_locked_diff"
+        ],
+        "numbers": {
+          "presale.CM3.pool_total": 9692,
+          "presale.CM3.pool_lock_rate": 0.3074700784151878,
+          "presale.LS9.pool_total": 8287,
+          "presale.LS9.pool_lock_rate": 0.2532882828526608,
+          "source_decomp.LS9.presale_scale_effect": 355.87003740798843,
+          "source_decomp.LS9.presale_rate_effect": 525.1299625920117,
+          "source_decomp.LS9.pool_locked_diff": 881
+        },
+        "direction": "descriptive",
+        "scope": "CM3 vs LS9；各自 D1–D5；当前快照事件截断"
+      },
+      {
+        "id": "q5_LS9",
+        "question": "q5",
+        "title": "对 LS9 的锁单来源构成",
+        "body": "上市前小订转锁 2,980 vs 2,099；上市当日新增小订转锁 719 vs 390；无小订记录 35 vs 1,208；上市日后小订残余 5 vs 0。不据占比推断下单流程或需求。",
+        "evidence": [
+          "origin.CM3.pre",
+          "origin.CM3.launch_day",
+          "origin.CM3.none",
+          "origin.CM3.post_launch",
+          "origin.LS9.pre",
+          "origin.LS9.launch_day",
+          "origin.LS9.none",
+          "origin.LS9.post_launch"
+        ],
+        "numbers": {
+          "origin.CM3.pre": 2980,
+          "origin.CM3.launch_day": 719,
+          "origin.CM3.none": 35,
+          "origin.CM3.post_launch": 5,
+          "origin.LS9.pre": 2099,
+          "origin.LS9.launch_day": 390,
+          "origin.LS9.none": 1208,
+          "origin.LS9.post_launch": 0
+        },
+        "direction": "descriptive",
+        "scope": "CM3 vs LS9；各自 D1–D5；当前快照事件截断"
+      }
+    ],
+    "unavailable": [
+      {
+        "id": "q6",
+        "title": "区域与渠道专题",
+        "status": "UNVERIFIED",
+        "reason": "未完成独立的计算、结论、呈现联合验收",
+        "disposition": "本次不提供分析"
+      },
+      {
+        "id": "q7",
+        "title": "网络与单店专题",
+        "status": "UNVERIFIED",
+        "reason": "原始描述与归因未分离；舍入后网络分解及主次判断已判 FAIL",
+        "disposition": "本次不提供分析"
+      },
+      {
+        "id": "q8",
+        "title": "产品配置与客群",
+        "status": "UNVERIFIED",
+        "reason": "局部数字核验不等于跨代际完整能力验证",
+        "disposition": "本次不提供分析"
+      },
+      {
+        "id": "q8b",
+        "title": "同档客群",
+        "status": "UNVERIFIED",
+        "reason": "相同电量不足以证明产品与客群可比，旧崩溃修复仅证明可运行",
+        "disposition": "本次不提供分析"
+      },
+      {
+        "id": "q8c",
+        "title": "座椅及跨代际六座",
+        "status": "UNVERIFIED",
+        "reason": "CM3 缺字段，未形成两个案例的有效比较证据",
+        "disposition": "本次不提供分析"
+      },
+      {
+        "id": "q8d",
+        "title": "版本缺口解释差额",
+        "status": "FAIL",
+        "reason": "把同电量存在性当版本可比依据，固定缺口及贡献占比判断不成立",
+        "disposition": "本次不提供分析"
+      },
+      {
+        "id": "q9",
+        "title": "订单质量与交付兑现",
+        "status": "UNVERIFIED",
+        "reason": "历史快照回填与事件语义未完成独立验证",
+        "disposition": "本次不提供分析"
+      },
+      {
+        "id": "q10",
+        "title": "待转化、封盘剩余池与未来潜力",
+        "status": "FAIL",
+        "reason": "锁单与小订退款事件重叠，直接相减重复扣除；流出速度混入非池锁单",
+        "disposition": "本次不提供分析"
+      },
+      {
+        "id": "pk",
+        "title": "竞争 PK",
+        "status": "UNVERIFIED",
+        "reason": "series 粒度与代际粒度不一致，观察周可越过截止日",
+        "disposition": "本次不提供分析"
+      },
+      {
+        "id": "context",
+        "title": "延长曲线与 PNG 导出",
+        "status": "UNVERIFIED",
+        "reason": "不属于本次已验证的正式交付范围",
+        "disposition": "本次不提供分析"
+      },
+      {
+        "id": "verdict",
+        "title": "经营主因、需求与购买力判断",
+        "status": "FAIL",
+        "reason": "量纲混比、由占比推断流程、历史固定文案均缺乏成立依据",
+        "disposition": "本次不提供分析"
+      }
+    ],
+    "tables": [
+      {
+        "name": "daily_cumulative",
+        "path": "/Users/zihao_/Documents/github/mashang-service/workspace/outputs/reports/vehicle_launch_v12_stable/regression/CM3/vehicle_launch_v12_stable/CM3_D5_2026-09-27/tables/daily_cumulative.csv"
+      },
+      {
+        "name": "gap",
+        "path": "/Users/zihao_/Documents/github/mashang-service/workspace/outputs/reports/vehicle_launch_v12_stable/regression/CM3/vehicle_launch_v12_stable/CM3_D5_2026-09-27/tables/gap.csv"
+      },
+      {
+        "name": "presale_events",
+        "path": "/Users/zihao_/Documents/github/mashang-service/workspace/outputs/reports/vehicle_launch_v12_stable/regression/CM3/vehicle_launch_v12_stable/CM3_D5_2026-09-27/tables/presale_events.csv"
+      },
+      {
+        "name": "origin",
+        "path": "/Users/zihao_/Documents/github/mashang-service/workspace/outputs/reports/vehicle_launch_v12_stable/regression/CM3/vehicle_launch_v12_stable/CM3_D5_2026-09-27/tables/origin.csv"
+      },
+      {
+        "name": "source_decomposition",
+        "path": "/Users/zihao_/Documents/github/mashang-service/workspace/outputs/reports/vehicle_launch_v12_stable/regression/CM3/vehicle_launch_v12_stable/CM3_D5_2026-09-27/tables/source_decomposition.csv"
+      }
+    ]
+  },
+  "artifacts": {
+    "daily_cumulative": "/Users/zihao_/Documents/github/mashang-service/workspace/outputs/reports/vehicle_launch_v12_stable/regression/CM3/vehicle_launch_v12_stable/CM3_D5_2026-09-27/tables/daily_cumulative.csv",
+    "gap": "/Users/zihao_/Documents/github/mashang-service/workspace/outputs/reports/vehicle_launch_v12_stable/regression/CM3/vehicle_launch_v12_stable/CM3_D5_2026-09-27/tables/gap.csv",
+    "presale_events": "/Users/zihao_/Documents/github/mashang-service/workspace/outputs/reports/vehicle_launch_v12_stable/regression/CM3/vehicle_launch_v12_stable/CM3_D5_2026-09-27/tables/presale_events.csv",
+    "origin": "/Users/zihao_/Documents/github/mashang-service/workspace/outputs/reports/vehicle_launch_v12_stable/regression/CM3/vehicle_launch_v12_stable/CM3_D5_2026-09-27/tables/origin.csv",
+    "source_decomposition": "/Users/zihao_/Documents/github/mashang-service/workspace/outputs/reports/vehicle_launch_v12_stable/regression/CM3/vehicle_launch_v12_stable/CM3_D5_2026-09-27/tables/source_decomposition.csv",
+    "metrics_json": "/Users/zihao_/Documents/github/mashang-service/workspace/outputs/reports/vehicle_launch_v12_stable/regression/CM3/vehicle_launch_v12_stable/CM3_D5_2026-09-27/tables/metrics.json",
+    "research_plan": "/Users/zihao_/Documents/github/mashang-service/workspace/outputs/reports/vehicle_launch_v12_stable/regression/CM3/vehicle_launch_v12_stable/CM3_D5_2026-09-27/tables/research_plan.json",
+    "report_html": "/Users/zihao_/Documents/github/mashang-service/workspace/outputs/reports/vehicle_launch_v12_stable/regression/CM3/vehicle_launch_v12_stable/CM3_D5_2026-09-27/report.html",
+    "method_doc": "/Users/zihao_/Documents/github/mashang-service/workspace/outputs/reports/vehicle_launch_v12_stable/regression/CM3/vehicle_launch_v12_stable/CM3_D5_2026-09-27/method.md",
+    "result_contract": "/Users/zihao_/Documents/github/mashang-service/workspace/outputs/reports/vehicle_launch_v12_stable/regression/CM3/vehicle_launch_v12_stable/CM3_D5_2026-09-27/result_contract.json"
+  },
+  "followup_context": {
+    "main_gen": "CM3",
+    "benchmarks": [
+      "LS8",
+      "LS9"
+    ],
+    "metric": "cumulative_retail_lock",
+    "available_dimensions": [
+      "lifecycle_day",
+      "presale_origin"
+    ]
+  },
+  "warnings": [
+    "历史重建使用当前订单快照与事件时间；代际、订单类型及退款等字段可能被事后回填，不等于历史冻结快照。",
+    "上市前小订池含早于配置预售开始日的记录，非严格预售期 cohort；预售天数不同，不据此判断需求强弱。",
+    "小订退款为日期粒度，只能按日比较；锁单与小订退款事件可重叠；不提供待转化、封盘剩余池、订单质量或后续潜力判断。",
+    "无小订记录只表示字段缺失，不能证明下单链路一致或直接需求强弱。",
+    "分解是指定基准下的算术恒等式，不是因果归因；不提供贡献占比或经营主次判断。"
+  ],
+  "errors": []
+}

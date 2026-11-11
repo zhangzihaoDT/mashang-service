@@ -1,0 +1,25 @@
+.venv/bin/python .opencode/verification/resolve_verification_scope.py --worktree --run --changed workspace/research_scripts/launch_deep_dive_report.py workspace/tests/test_launch_deep_dive_stable.py
+[Summary]
+  命中 2 条规则，最小验证范围: pytest.scripts, pytest:workspace/tests/test_launch_deep_dive_stable.py, smoke:workspace/research_scripts/launch_deep_dive_report.py。
+
+[Scope]
+  decision: run
+  changed: 2 个文件
+    - workspace/research_scripts/launch_deep_dive_report.py
+    - workspace/tests/test_launch_deep_dive_stable.py
+  matched_rules: workspace-script, workspace-test
+  最小验证范围:
+    • pytest.scripts
+      $ python -m pytest workspace/tests/scripts -q
+    • pytest:workspace/tests/test_launch_deep_dive_stable.py
+      $ python -m pytest workspace/tests/test_launch_deep_dive_stable.py -q
+    • smoke:workspace/research_scripts/launch_deep_dive_report.py
+      $ python workspace/research_scripts/launch_deep_dive_report.py --help
+
+[Out of Scope — 未纳入，失败不算本次回归]
+  eval.ci, eval.core, harness.selftest, jobs.tests, pytest.dataset, pytest.eval, pytest.workspace
+
+[Result]
+  passed                 pytest.scripts (rc=0)
+  passed                 pytest:workspace/tests/test_launch_deep_dive_stable.py (rc=0)
+  passed                 smoke:workspace/research_scripts/launch_deep_dive_report.py (rc=0)

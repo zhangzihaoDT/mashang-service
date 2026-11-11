@@ -1,0 +1,201 @@
+file,function,baseline_line,status,action,basis
+workspace/research_scripts/launch_deep_dive.py,_non_user_mask,94,PASS,裁剪后保留,继续保留；双案例/反例/完整报告链路覆盖，见回归记录
+workspace/research_scripts/launch_deep_dive.py,_hq_mask,99,PASS,裁剪后保留,继续保留；双案例/反例/完整报告链路覆盖，见回归记录
+workspace/research_scripts/launch_deep_dive.py,lock_mask,103,PASS,裁剪后保留,继续保留；双案例/反例/完整报告链路覆盖，见回归记录
+workspace/research_scripts/launch_deep_dive.py,pool_mask,110,PASS,裁剪后保留,继续保留；双案例/反例/完整报告链路覆盖，见回归记录
+workspace/research_scripts/launch_deep_dive.py,retail_mask,117,PASS,裁剪后保留,继续保留；双案例/反例/完整报告链路覆盖，见回归记录
+workspace/research_scripts/launch_deep_dive.py,exclusion_report,121,PASS,裁剪后保留,继续保留；双案例/反例/完整报告链路覆盖，见回归记录
+workspace/research_scripts/launch_deep_dive.py,resolve_gen,150,PASS,裁剪后保留,继续保留；双案例/反例/完整报告链路覆盖，见回归记录
+workspace/research_scripts/launch_deep_dive.py,launch_day,173,PASS,裁剪后保留,继续保留；双案例/反例/完整报告链路覆盖，见回归记录
+workspace/research_scripts/launch_deep_dive.py,presale_start_day,180,PASS,裁剪后保留,继续保留；双案例/反例/完整报告链路覆盖，见回归记录
+workspace/research_scripts/launch_deep_dive.py,_fmt_int,185,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive.py,_pct,191,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive.py,_vc,197,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive.py,_norm_zone,204,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive.py,load_orders,212,PASS,裁剪后保留,继续保留；双案例/反例/完整报告链路覆盖，见回归记录
+workspace/research_scripts/launch_deep_dive.py,build_windows,226,PASS,裁剪后保留,PASS 共同等长窗口；补阻断未来上市对标的旧边界漏洞
+workspace/research_scripts/launch_deep_dive.py,compute_curves,265,PASS,裁剪后保留,继续保留；双案例/反例/完整报告链路覆盖，见回归记录
+workspace/research_scripts/launch_deep_dive.py,compute_dynamics,303,PASS,裁剪后保留,PASS 首日占比/尾段日均；UNVERIFIED 其余衰减/稳定性/weekday_profile，已删除
+workspace/research_scripts/launch_deep_dive.py,compute_context_curves,337,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive.py,compute_launch_night,373,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive.py,compute_presale_pool,402,PASS,裁剪后保留,PASS 仅池总量/事件/重叠/率；FAIL 待转化/剩余池；UNVERIFIED 预售日均及反事实；仅保留已验证部分
+workspace/research_scripts/launch_deep_dive.py,compute_origin_split,540,PASS,裁剪后保留,继续保留；双案例/反例/完整报告链路覆盖，见回归记录
+workspace/research_scripts/launch_deep_dive.py,compute_quality,587,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive.py,compute_forward,635,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive.py,compute_pool_consumption,673,FAIL,移除当前代码,混用全部零售锁单速度与封盘小订退款速度，剩余量重复扣除锁退重叠，潜力区间不成立
+workspace/research_scripts/launch_deep_dive.py,_decompose,742,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive.py,compute_geo,764,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive.py,compute_channel_by_province,831,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive.py,compute_source_decomp,900,PASS,裁剪后保留,PASS 算术分解；补全残余项；FAIL 贡献占比，已删除
+workspace/research_scripts/launch_deep_dive.py,compute_province_model_mix,940,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive.py,compute_version_gap,988,FAIL,移除当前代码,同电量存在不能证明版本可比；缺口归因与贡献占比不成立
+workspace/research_scripts/launch_deep_dive.py,compute_config_distribution,1046,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive.py,compute_same_battery_profile,1088,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive.py,_pk_csv_path,1164,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive.py,resolve_pk_series,1176,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive.py,_week_start,1187,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive.py,compute_competition_pk,1193,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive.py,_slice_stats,1265,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive.py,_vc_color_or_tone,1309,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive.py,compute_slice_compares,1318,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive.py,compute_network,1431,FAIL,移除当前代码,使用已舍入单店均值计算精确分解，CM3 对 LS8 差 2.5 单；网络描述亦暂不认证
+workspace/research_scripts/launch_deep_dive.py,_version_of,1488,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive.py,_battery_of,1501,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive.py,_color_family,1513,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive.py,_interior_tone,1524,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive.py,_wheel_size,1535,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive.py,_hhi,1543,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive.py,_concentration,1550,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive.py,_tier_x_version,1565,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive.py,_interior_tone2,1586,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive.py,compute_behavior,1619,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive.py,_age_cohort,1679,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive.py,compute_product,1689,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive.py,validate_pool_identities,1785,PASS,裁剪后保留,保留三条旧恒等式；新增独立互斥性/非负性要求，锁退重叠时必须失败；不恢复状态报告
+workspace/research_scripts/launch_deep_dive.py,compute_data_audit,1823,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive.py,probe_research,1880,PASS,裁剪后保留,PASS 仅验证所需字段；旧配置/同档/门店探测移除
+workspace/research_scripts/launch_deep_dive.py,build_context,1933,PASS,裁剪后保留,PASS 正式入口重新核验 Gate A；只调用白名单五项，其他模块删除
+workspace/research_scripts/launch_deep_dive.py,compute_narrative,2007,FAIL,移除当前代码,固定阈值推断主线及链路一致，方向分支无法认证
+workspace/research_scripts/launch_deep_dive.py,_compute_deltas,2103,PASS,裁剪后保留,PASS 逐对标精确差/比值；FAIL d1_share_of_gap，已删除
+workspace/research_scripts/launch_deep_dive.py,gap_narrative,2128,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive.py,render_terminal,2154,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive.py,save_tables,2187,PASS,裁剪后保留,PASS 五张表+门禁+指标；旧专题表停止生成
+workspace/research_scripts/launch_deep_dive.py,build_contract,2398,PASS,裁剪后保留,PASS 只暴露已验证结果/追问维度；旧无条件 success 修正
+workspace/research_scripts/launch_deep_dive.py,_summary_text,2466,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive.py,_warnings,2475,PASS,裁剪后保留,PASS 口径、历史快照和不提供项披露；旧未计算数据依赖提示清理
+workspace/research_scripts/launch_deep_dive.py,main,2502,PASS,裁剪后保留,PASS A/B/C 失败非零退出、验证先于写出；旧记录 FAIL 仍交付路径移除
+workspace/research_scripts/launch_deep_dive_report.py,esc,27,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,fi,31,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,fp,37,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,fpp,43,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,fs,49,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,fnum,55,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,gap_narrative,61,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,delta_cls,80,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,kpi,88,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,section,95,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,table,102,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,incell_bar,121,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,incell_stack,142,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,chart_box,167,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_im_role,199,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,apply_im_theme,209,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_plotly,228,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_colors,235,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,fig_cumulative,248,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,fig_daily,311,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,fig_pool_state,334,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,fig_origin,363,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,fig_network_scale,385,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,fig_network_productivity,413,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,fig_pool_consumption,442,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_opt_share,475,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_opt_alt,486,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_opt_label,495,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_diff_items,499,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_pk_block,537,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,fig_pk_rank_table,541,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,chart_seat_combos,641,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,chart_pk_rank_table,645,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,fig_user_diff_profile,649,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,chart_cumulative,687,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,chart_daily,691,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,chart_pool_state,695,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,chart_origin,699,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,chart_network_scale,703,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,chart_network_productivity,707,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,chart_user_diff_profile,711,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,chart_pool_consumption,715,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,export_charts,719,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_plan_section,747,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,render_report,776,PASS,裁剪后保留,PASS 新版仅渲染绑定事实；旧四幕/Q6–Q10/PK/经营判断区块移除
+workspace/research_scripts/launch_deep_dive_report.py,_context_sentence,1201,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_findings,1215,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_q_allowed,1225,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_act1_summary,1234,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_power_label,1244,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_q1_lead,1263,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_q1_context_note,1294,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_table_summary,1327,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_q2_lead,1347,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_table_gap,1363,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_q2_note,1387,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_q3_lead,1409,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_table_dynamics,1428,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_act2_summary,1443,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_q4_lead,1449,FAIL,移除当前代码,固定声称转化率几乎持平、问题在预售期长度；CM3 30.7% vs LS8 18.1% 不支持该固定结论；且呈现错误待转化
+workspace/research_scripts/launch_deep_dive_report.py,_table_presale,1468,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_q4_decomp_lead,1484,FAIL,移除当前代码,历史贡献占比与经营归因未经验证
+workspace/research_scripts/launch_deep_dive_report.py,_table_rate,1505,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_table_buildup,1519,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_q5_lead,1535,FAIL,移除当前代码,来源占比被解释为需求/流程
+workspace/research_scripts/launch_deep_dive_report.py,_table_origin,1564,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_act3_summary,1578,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_q6_lead,1585,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_table_province,1613,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_table_province_mix,1643,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_q6_mix_lead,1668,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_q6_mix_note,1687,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_q6_version_lead,1697,FAIL,移除当前代码,缺口版本归因
+workspace/research_scripts/launch_deep_dive_report.py,_table_version_gap,1721,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_q6_version_note,1747,FAIL,移除当前代码,缺口归因结论
+workspace/research_scripts/launch_deep_dive_report.py,_q6_note,1761,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_table_city,1777,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_q7_lead,1799,FAIL,移除当前代码,门店/单店主次判断不由精确分解支撑
+workspace/research_scripts/launch_deep_dive_report.py,_table_network,1825,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_q8_intro,1841,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_q8a_lead,1848,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_q8b_lead,1872,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_product_rows_for,1911,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_table_product,1931,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_table_user,1938,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_table_concentration,1955,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_q8_config_lead,1969,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_table_config_distribution,1997,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_q8_config_note,2023,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_table_tier_version,2035,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_sb_status,2060,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_q8_same_battery_lead,2079,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_table_same_battery,2105,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_prov_gap_txt,2169,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_q8_same_battery_note,2182,FAIL,移除当前代码,同电量条件不足以支持控制变量解释
+workspace/research_scripts/launch_deep_dive_report.py,_table_tier_decomp,2197,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_q7_channel_lead,2208,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_q7_channel_note,2224,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_table_channel,2232,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_table_seat_cross,2248,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_q8_2c_lead,2291,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_q8_2c_note,2328,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_q8c_lead,2340,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_table_user_matrix,2369,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,fig_seat_combos,2419,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_seat_short,2445,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_q8_seat_combo_lead,2453,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_q8_slice_lead,2472,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_table_slice,2499,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_pk_lead,2557,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_pk_note,2576,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_q8c_note,2593,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_act4_summary,2607,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_q9_lead,2612,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_table_quality,2634,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_q10_lead,2650,FAIL,移除当前代码,混合池/零售速度口径
+workspace/research_scripts/launch_deep_dive_report.py,_table_pool,2673,FAIL,移除当前代码,呈现重复扣减的剩余池与潜力
+workspace/research_scripts/launch_deep_dive_report.py,_q10_note,2694,FAIL,移除当前代码,剩余池定义假定互斥
+workspace/research_scripts/launch_deep_dive_report.py,_q10_potential,2710,FAIL,移除当前代码,把状态比例机械外推为未来区间
+workspace/research_scripts/launch_deep_dive_report.py,_verdict_level_sentence,2732,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_dir_cn,2761,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_share_or_na,2765,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_verdict,2772,FAIL,移除当前代码,固定经营结论与历史案例推断
+workspace/research_scripts/launch_deep_dive_report.py,_watchlist,2842,FAIL,移除当前代码,绑定未验证经营判断与推演
+workspace/research_scripts/launch_deep_dive_report.py,_appendix_scope,2882,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,_appendix_audit,2943,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_deep_dive_report.py,render_method_doc,2984,PASS,裁剪后保留,PASS 只记录保留指标的真实边界与限制
+workspace/research_scripts/launch_research_plan.py,_fmt,59,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_research_plan.py,build_research_plan,63,PASS,裁剪后保留,PASS 五项能力白名单；原13问默认计划移除
+workspace/research_scripts/launch_research_plan.py,validate_research_plan,140,PASS,裁剪后保留,PASS 取消默认通过；白名单与前置核验 fail-closed
+workspace/research_scripts/launch_research_plan.py,_gap_narrative,237,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_research_plan.py,_dir_word,255,UNVERIFIED,移除当前代码,不具备两案例口径-计算-结论-呈现联合证据；从当前代码移除，历史留 Git
+workspace/research_scripts/launch_research_plan.py,compute_findings,259,PASS,裁剪后保留,PASS 描述性全数值绑定；FAIL 池主次/网络主次/流程一致/以占比推断后续强弱，已删除
+workspace/research_scripts/launch_research_plan.py,validate_findings,368,PASS,裁剪后保留,PASS 全部数值/方向/正文/算术校验，失败阻断
+workspace/research_scripts/launch_research_plan.py,validate_report,408,PASS,裁剪后保留,PASS 检查全部实际显示单元格与正文，不仅标题/禁用词

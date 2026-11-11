@@ -1,0 +1,130 @@
+{
+  "CM3": {
+    "CM3": {
+      "pre_open": 0,
+      "lock_refund_overlap": 24,
+      "pool_dup": 0,
+      "prelaunch_locks": 0
+    },
+    "LS8": {
+      "pre_open": 2,
+      "lock_refund_overlap": 8,
+      "pool_dup": 0,
+      "prelaunch_locks": 0
+    },
+    "LS9": {
+      "pre_open": 6,
+      "lock_refund_overlap": 7,
+      "pool_dup": 0,
+      "prelaunch_locks": 0
+    },
+    "network_identity_error": {
+      "LS8": 2.5,
+      "LS9": 2.0
+    },
+    "source_effects": {
+      "LS8": {
+        "bench": "LS8",
+        "gap_total": -34,
+        "pre_diff": -161,
+        "launch_day_diff": 338,
+        "none_diff": -214,
+        "pre_share_of_gap": 4.7353,
+        "launch_day_share_of_gap": -9.9412,
+        "none_share_of_gap": 6.2941,
+        "pool_main": 9692,
+        "pool_bench": 17400,
+        "pool_diff": -7708,
+        "pool_rel": -0.443,
+        "rate_main": 0.3075,
+        "rate_bench": 0.1805,
+        "presale_scale_effect": -1391.4,
+        "presale_rate_effect": 1230.4,
+        "presale_scale_share": 8.6424
+      },
+      "LS9": {
+        "bench": "LS9",
+        "gap_total": 42,
+        "pre_diff": 881,
+        "launch_day_diff": 329,
+        "none_diff": -1173,
+        "pre_share_of_gap": 20.9762,
+        "launch_day_share_of_gap": 7.8333,
+        "none_share_of_gap": -27.9286,
+        "pool_main": 9692,
+        "pool_bench": 8287,
+        "pool_diff": 1405,
+        "pool_rel": 0.1695,
+        "rate_main": 0.3075,
+        "rate_bench": 0.2533,
+        "presale_scale_effect": 355.9,
+        "presale_rate_effect": 525.1,
+        "presale_scale_share": 0.4039
+      }
+    }
+  },
+  "LS8Neo": {
+    "LS8Neo": {
+      "pre_open": 2,
+      "lock_refund_overlap": 9,
+      "pool_dup": 0,
+      "prelaunch_locks": 0
+    },
+    "CM3": {
+      "pre_open": 0,
+      "lock_refund_overlap": 24,
+      "pool_dup": 0,
+      "prelaunch_locks": 0
+    },
+    "LS8": {
+      "pre_open": 2,
+      "lock_refund_overlap": 8,
+      "pool_dup": 0,
+      "prelaunch_locks": 0
+    },
+    "network_identity_error": {
+      "CM3": -0.1,
+      "LS8": 2.4
+    },
+    "source_effects": {
+      "CM3": {
+        "bench": "CM3",
+        "gap_total": -1573,
+        "pre_diff": -1266,
+        "launch_day_diff": -275,
+        "none_diff": -29,
+        "pre_share_of_gap": 0.8048,
+        "launch_day_share_of_gap": 0.1748,
+        "none_share_of_gap": 0.0184,
+        "pool_main": 6100,
+        "pool_bench": 9692,
+        "pool_diff": -3592,
+        "pool_rel": -0.3706,
+        "rate_main": 0.281,
+        "rate_bench": 0.3075,
+        "presale_scale_effect": -1104.4,
+        "presale_rate_effect": -161.6,
+        "presale_scale_share": 0.8724
+      },
+      "LS8": {
+        "bench": "LS8",
+        "gap_total": -1607,
+        "pre_diff": -1427,
+        "launch_day_diff": 63,
+        "none_diff": -243,
+        "pre_share_of_gap": 0.888,
+        "launch_day_share_of_gap": -0.0392,
+        "none_share_of_gap": 0.1512,
+        "pool_main": 6100,
+        "pool_bench": 17400,
+        "pool_diff": -11300,
+        "pool_rel": -0.6494,
+        "rate_main": 0.281,
+        "rate_bench": 0.1805,
+        "presale_scale_effect": -2039.8,
+        "presale_rate_effect": 612.8,
+        "presale_scale_share": 1.4295
+      }
+    }
+  }
+}

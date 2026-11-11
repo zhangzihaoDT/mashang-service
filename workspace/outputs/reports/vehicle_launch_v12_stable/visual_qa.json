@@ -1,0 +1,20 @@
+[
+  {
+    "case": "CM3_D5_2026-09-27",
+    "tables": 9,
+    "bound_cells": 149,
+    "desktop_no_overflow": true,
+    "mobile_no_overflow": true,
+    "page_errors": [],
+    "status": "PASS"
+  },
+  {
+    "case": "LS8Neo_D5_2026-11-09",
+    "tables": 9,
+    "bound_cells": 149,
+    "desktop_no_overflow": true,
+    "mobile_no_overflow": true,
+    "page_errors": [],
+    "status": "PASS"
+  }
+]

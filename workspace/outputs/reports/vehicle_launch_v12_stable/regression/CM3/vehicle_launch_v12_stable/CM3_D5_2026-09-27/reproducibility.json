@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "compared_files": [
+    "method.md",
+    "report.html",
+    "result_contract.json",
+    "tables/daily_cumulative.csv",
+    "tables/gap.csv",
+    "tables/metrics.json",
+    "tables/origin.csv",
+    "tables/presale_events.csv",
+    "tables/research_plan.json",
+    "tables/source_decomposition.csv"
+  ],
+  "excluded_field": "generated_at"
+}
