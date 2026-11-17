@@ -39,7 +39,16 @@ JOB_ID = "data-refresh-daily"
 TABLEAU_HS_JOB = "data-refresh-tableau-hs"
 STATUS_TARGET = "data-status"
 DAILY_DATASETS = ("order_data", "assign_data")
+TP_MIX_JOB = "update-tp-and-mix-ways-dataset"
 JOB_DATASETS = {
+    TP_MIX_JOB: (
+        "tp_mix_brand_monthly",
+        "tp_mix_geo_monthly",
+        "tp_mix_market_energy_monthly",
+        "tp_mix_model_monthly",
+        "tp_mix_price_segment_monthly",
+        "tp_mix_product_segment_monthly",
+    ),
     JOB_ID: DAILY_DATASETS,
     TABLEAU_HS_JOB: ("order_data", "config_attribute", "lock_attribution", "delivery_inventory"),
     "data-refresh-order-data": ("order_data",),
@@ -482,6 +491,10 @@ def run_job(
             config = record["after"]["config_attribute"]
             if not config.get("exists") or not config.get("rows") or not config.get("file_mtime"):
                 anomalies.append("config_attribute 缺失、为空或无法核验")
+        if job == TP_MIX_JOB:
+            for key, evidence in record["after"].items():
+                if not evidence.get("exists") or not evidence.get("rows") or not evidence.get("data_asof"):
+                    anomalies.append(f"{key} 缺失、为空或无法核验业务月份")
         record["changed_datasets"] = changed
         record["new_data"] = new_data
         record["latest_data_time"] = _latest_time(record["after"])

@@ -125,6 +125,23 @@
       "summary": "json",
       "timeout_seconds": 2100
     },
+    "update_tp_and_mix_ways_dataset": {
+      "module": "dataset",
+      "label": "Refresh and verify TP&MIX-ways",
+      "cwd": "{repo_root}",
+      "argv_template": [
+        "{python}",
+        "-m",
+        "jobs.production",
+        "run",
+        "update-tp-and-mix-ways-dataset",
+        "--repo-root",
+        "{repo_root}"
+      ],
+      "params": {},
+      "summary": "json",
+      "timeout_seconds": 2100
+    },
     "data_refresh_delivery_inventory": {
       "module": "dataset",
       "label": "Refresh delivery_inventory + status",

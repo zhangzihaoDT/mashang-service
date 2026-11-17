@@ -118,6 +118,23 @@ DATASETS: tuple[DatasetSpec, ...] = (
         "6",
         date_columns=("日期",),
     ),
+    *(
+        DatasetSpec(
+            f"tp_mix_{table}",
+            f"TP&MIX-ways {table}",
+            DATASET_DIR / "TP&MIX-ways" / "parquet" / f"{table}.parquet",
+            "tp_mix",
+            date_columns=("date_month",),
+        )
+        for table in (
+            "brand_monthly",
+            "geo_monthly",
+            "market_energy_monthly",
+            "model_monthly",
+            "price_segment_monthly",
+            "product_segment_monthly",
+        )
+    ),
 )
 
 DATASETS_BY_KEY = {spec.key: spec for spec in DATASETS}
