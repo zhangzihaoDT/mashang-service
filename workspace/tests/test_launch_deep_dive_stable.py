@@ -188,3 +188,62 @@ def test_real_case_mutations_and_gates(real_case,monkeypatch,tmp_path):
     monkeypatch.setattr(engine,'build_context',lambda *a,**kw:(broken,None))
     assert engine.main(call)==3
     assert not (tmp_path/'blocked').exists()
+
+
+# --- resolve_gen：业务术语别名查表（generation_terminology_mapping） -------------
+
+def _term_bd():
+    return {'series_group_logic':{'LS8Neo':{},'LS8':{},'LS9':{},'其他':{}},
+            'model_series_mapping':{'LS8':['LS8','LS8Neo']},
+            'monitor':{'series_labels':{'CM3':'全新一代 LS6'}},
+            'generation_terminology_mapping':{'LS8Neo':['小F M1','小FM1'],
+                                              'LS8':['小F M0','小FM0'],'LS9':['大F M0']}}
+
+
+def _real_bd():
+    return json.loads((ROOT/'shared/schema/business_definition.json').read_text(encoding='utf-8'))
+
+
+@pytest.mark.parametrize('token,expected',[
+    ('小F M1','LS8Neo'),('小FM1','LS8Neo'),(' 小F  M1 ','LS8Neo'),('小f m1','LS8Neo'),
+    ('小F M0','LS8'),('小FM0','LS8'),('大F M0','LS9'),('大fm0','LS9')])
+def test_resolve_gen_accepts_business_terminology(token,expected):
+    assert engine.resolve_gen(_term_bd(),token)==expected
+
+
+def test_resolve_gen_precedence_and_unknown():
+    bd=_term_bd()
+    # 既有口径优先于术语：键 > 忽略大小写键 > series_labels > 术语
+    assert engine.resolve_gen(bd,'LS8Neo')=='LS8Neo'
+    assert engine.resolve_gen(bd,'ls8neo')=='LS8Neo'
+    assert engine.resolve_gen(bd,'LS9')=='LS9'
+    assert engine.resolve_gen(bd,'全新一代 LS6')=='CM3'
+    # 「小F」不带 M 档位、或未登记术语，必须报错而不是猜具体代际
+    for bad in ('小F','大F','小F M2','大F M1','LS8 NEO'):
+        with pytest.raises(SystemExit):
+            engine.resolve_gen(bd,bad)
+
+
+def test_resolve_gen_rejects_inconsistent_terminology_config():
+    bd=_term_bd();bd['generation_terminology_mapping']['LS9']=['小F M1']
+    with pytest.raises(ValueError):   # 同一术语指向两个代际
+        engine.resolve_gen(bd,'小F M1')
+    bd=_term_bd();bd['generation_terminology_mapping']['LS8 NEO']=['小F M1']
+    with pytest.raises(ValueError):   # 键不是已登记的 series_group_logic 代际
+        engine.resolve_gen(bd,'小F M1')
+
+
+def test_real_business_definition_terminology_mapping():
+    """真实配置守护：术语键合法、无冲突，且 launch_deep_dive 能把三条术语解析成代际。"""
+    bd=_real_bd()
+    index=engine._terminology_aliases(bd)
+    assert index['小FM1']=='LS8Neo' and index['小FM0']=='LS8' and index['大FM0']=='LS9'
+    for gen,names in bd['generation_terminology_mapping'].items():
+        assert gen in bd['series_group_logic']
+        assert gen in bd['time_periods'],f'{gen} 缺少 time_periods，报告窗口无法构建'
+        for name in names:
+            assert engine.resolve_gen(bd,name)==gen
+    # 报告标题/标签取主术语
+    assert engine._terminology_label(bd,'LS8Neo')=='小F M1'
+    assert engine._terminology_label(bd,'未知代际')=='未知代际'
+

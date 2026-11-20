@@ -55,6 +55,22 @@ L6  → [DM0, DM1, DM2]
 LS8 → [LS8, LS8Neo]
 ```
 
+## 业务术语别名 (generation_terminology_mapping)
+
+业务口语 / 内部代称 → 代际（`series_group_logic` 键）。**单向映射**：键必须是已登记的代际，术语只作解析与展示别名，不进入 `series_group_logic` 的 `product_name` 匹配。
+
+| 代际 | 业务术语 | 说明 |
+|------|----------|------|
+| LS8Neo | 小F M1 | 小F 系（LS8 车系）M1 代 = LS8 NEO 纯电版 |
+| LS8 | 小F M0 | 小F 系（LS8 车系）M0 代 = LS8 普通版（不含 NEO） |
+| LS9 | 大F M0 | 大F 系 M0 代 = 智己 LS9 |
+
+**注意**：
+- 小F / 大F 各指向一个车系（小F = LS8 车系，大F = LS9 车系），M0 / M1 是该车系内的代际档位；匹配前术语去全部空白字符，`小FM1` 与 `小F M1` 等价。
+- 「小F」单独出现（不带 M0/M1）时对应车系总称 = `model_series_mapping` 的 LS8 族，不得默认落到任一具体代际。
+- 术语解析出代际键后，仍按既有口径执行：筛选走 `series_group_logic`，时间窗走 `time_periods`，版本 / 动力走 `product_version_series`。
+- 消费者不得自建术语映射；新增术语先在 `business_definition.json` 登记，再同步本表。
+
 ## 能源类型 (product_type_logic)
 
 | 能源类型 | 匹配规则 |

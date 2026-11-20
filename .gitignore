@@ -45,6 +45,10 @@ workspace/scratch/
 # Service-level browser ingestion download directory
 dataset/incoming/feishu/
 
+# PII: 手机号级用户明细（含真实手机号/年龄/性别/购车记录），禁止入库
+/outputs/tables/person_vehicle_timeline.csv
+/outputs/tables/*_phone_*.csv
+
 # Monthly market report runtime outputs (regenerated on every run)
 workspace/outputs/monthly_market_report/
 

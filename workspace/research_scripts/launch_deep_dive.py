@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -90,11 +91,43 @@ def exclusion_report(df: pd.DataFrame, bd: dict, win: dict) -> dict:
 
 
 
-def resolve_gen(bd: dict, token: str) -> str:
-    """把用户输入的代际 token（LS8NEO / ls8neo / 显示名）解析成 series_group_logic 键。
+def _terminology_aliases(bd: dict) -> dict:
+    """business_definition.generation_terminology_mapping 的归一化索引：术语 → 代际键。
 
-    只认业务配置：先精确匹配 key，再忽略大小写匹配 key，最后匹配 model_series_mapping
-    的族名或 monitor.series_labels 显示名。不做前缀/子串猜测。
+    键必须是 series_group_logic 中已登记的代际；归一化规则与既有匹配口径一致
+    （去全部空白字符 + 忽略大小写），故「小F M1」「小fm1」等价。同一术语指向多个
+    代际视为配置错误，直接抛错而不是任选其一。
+    """
+    raw = bd.get("generation_terminology_mapping") or {}
+    keys = set((bd.get("series_group_logic") or {}).keys())
+    index: dict[str, str] = {}
+    for gen, names in raw.items():
+        if gen not in keys:
+            raise ValueError(
+                f"generation_terminology_mapping.{gen} 不是 series_group_logic 已登记的代际"
+            )
+        for name in names if isinstance(names, list) else [names]:
+            norm = re.sub(r"\s+", "", str(name)).upper()
+            if not norm:
+                continue
+            if index.setdefault(norm, gen) != gen:
+                raise ValueError(
+                    f"业务术语 '{name}' 同时指向 {index[norm]} 与 {gen}，术语映射冲突"
+                )
+    return index
+
+
+def _terminology_label(bd: dict, gen: str) -> str:
+    names = (bd.get("generation_terminology_mapping") or {}).get(gen) or []
+    return names[0] if names else gen
+
+
+def resolve_gen(bd: dict, token: str) -> str:
+    """把用户输入的代际 token（LS8NEO / ls8neo / 显示名 / 业务术语）解析成 series_group_logic 键。
+
+    只认业务配置：先精确匹配 key，再忽略大小写匹配 key，然后匹配 monitor.series_labels
+    显示名，最后匹配 generation_terminology_mapping 的业务术语（如「小F M1」→ LS8Neo）。
+    不做前缀/子串猜测。
     """
     token = str(token).strip()
     keys = list((bd.get("series_group_logic") or {}).keys())
@@ -107,9 +140,17 @@ def resolve_gen(bd: dict, token: str) -> str:
     for k, v in labels.items():
         if token == v:
             return k
+    term = _terminology_aliases(bd).get(re.sub(r"\s+", "", token).upper())
+    if term:
+        return term
+    known_terms = [
+        f"{name}→{gen}"
+        for gen, names in (bd.get("generation_terminology_mapping") or {}).items()
+        for name in (names if isinstance(names, list) else [names])
+    ]
     raise SystemExit(
         f"无法解析代际 '{token}'：不在 series_group_logic 键 {keys} 中，"
-        f"也不是已知显示名 {list(labels.values())}"
+        f"也不是已知显示名 {list(labels.values())} 或业务术语 {known_terms}"
     )
 
 

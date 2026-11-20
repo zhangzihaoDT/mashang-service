@@ -34,6 +34,10 @@
 | 留存小订 | Retained Intention | 在预售期内支付小订且窗口结束时未退款的订单 | `retained_intention` 算子 |
 | VOC | Voice of Customer | 客户声音/反馈分析 | 来源: 微信群聊/调研 |
 | JTBD | Jobs To Be Done | 用户待办任务分析框架 | VOC 分析方法论 |
+| 小F M1 | — | LS8 NEO 纯电版的业务代称（代际 `LS8Neo`） | `business_definition.json` → `generation_terminology_mapping` |
+| 小F M0 | — | LS8 普通版的业务代称（代际 `LS8`，不含 NEO） | `business_definition.json` → `generation_terminology_mapping` |
+| 大F M0 | — | 智己 LS9 的业务代称（代际 `LS9`） | `business_definition.json` → `generation_terminology_mapping` |
+| 小F / 大F | — | 车系级代称：小F = LS8 车系（含 LS8 / LS8Neo）、大F = LS9 车系 | 单独出现时不推定具体代际 |
 
 ## 订单类型
 

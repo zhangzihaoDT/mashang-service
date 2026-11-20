@@ -305,6 +305,12 @@
     "LS8": ["LS8", "LS8Neo"]
   },
   "model_series_mapping_semantics": "车系 → 代际分组（族）。用途：series_group_logic 重叠审计的族内判定、PK/集团映射缺省回退。同一族内的规则重叠由 priority 裁决属预期；命中不同族视为规则治理问题。LS8Neo（智己 LS8 NEO 纯电版）是 LS8 车系下的独立代际分组，与 LS8 共享 product_name 前缀（LS8 ⊂ LS8Neo 的重叠是刻意的父子关系），故登记为同一族。",
+  "generation_terminology_mapping": {
+    "LS8Neo": ["小F M1", "小FM1"],
+    "LS8": ["小F M0", "小FM0"],
+    "LS9": ["大F M0", "大FM0"]
+  },
+  "generation_terminology_mapping_semantics": "业务术语 → 代际（series_group_logic 键）的别名映射，用于把业务口语/内部代称解析为代际，而不是另立一套分组。方向单向：键必须是 series_group_logic 中已登记的代际，值是该代际的业务术语写法（含去空格变体：匹配前术语去全部空白字符，故「小FM1」与「小F M1」等价）。当前三条：小F M1（小F 系 M1 代）= LS8 NEO 纯电版（LS8Neo）；小F M0 = LS8 普通版；大F M0 = 大F 系（LS9）= LS9。小F / 大F 各指向一个车系（小F=LS8 车系、大F=LS9 车系），M0/M1 是该车系内的代际档位；「小F」单独出现（不带 M0/M1）时对应系列总称 = model_series_mapping 的 LS8 族，不得默认落到任一具体代际，其余无 M 档位的术语同理不推定。术语只作展示与解析别名，不进入 series_group_logic 的 product_name 匹配，也不改变 model_series_mapping 的族归属；使用方须先按本表解析出代际键，再用代际键走既有口径（筛选用 series_group_logic，时间窗用 time_periods）。新增术语在此登记，消费者不得自建术语映射；冲突（同一术语指向多个代际）视为配置错误。",
   "monitor": {
     "description": "预售/上市监控配置：open_hour_by_series = 预售开放时刻（按代际，默认 20:00；CM0=10:00、CM1=11:00 为数据校准的白天开放）；open_minute_by_series = 预售开放分钟（默认 0，用于非整点开放，如 CM2=20:55、CM3=19:45）；launch_open_hour_by_series = 上市开放时刻（历史对标用，默认 20:00）；launch_open_minute_by_series = 上市开放分钟（历史对标用，默认 0；数据校准的各代际上市日 20:00 后首笔锁单分钟，用于等时长历史对比对齐真实开放时刻）；series_labels 展示名、compare_by_series 历史对标代际、launch_window_days 上市窗口、monitor_until_by_series 按代际显式监控截止日、freshness 数据新鲜度 gate。",
     "default_open_hour": 20,

@@ -202,3 +202,54 @@ def test_battery_capacity_logic_matches_doc():
         if rows[key][1] != str(condition)
     ]
     assert not mismatched, "电池容量规则与 JSON 不一致:\n" + "\n".join(mismatched)
+
+
+# ---------------------------------------------------------------------------
+# generation_terminology_mapping（业务术语别名）的治理约束
+# ---------------------------------------------------------------------------
+
+def _terminology() -> dict[str, list[str]]:
+    return _BUSINESS_DEF.get("generation_terminology_mapping") or {}
+
+
+def test_terminology_keys_are_registered_generations():
+    """术语映射的键必须是 series_group_logic 已登记的代际，且必须有 time_periods。"""
+    expected = set(_BUSINESS_DEF["series_group_logic"])
+    periods = set(_BUSINESS_DEF["time_periods"])
+    bad = sorted(
+        f"{gen}（series_group_logic 未登记）" if gen not in expected
+        else f"{gen}（缺 time_periods）"
+        for gen in _terminology()
+        if gen not in expected or gen not in periods
+    )
+    assert not bad, "业务术语映射的键非法: " + "、".join(bad)
+
+
+def test_terminology_no_conflict_after_normalization():
+    """术语归一化（去空白 + 忽略大小写）后不得指向多个代际。"""
+    seen: dict[str, str] = {}
+    conflicts = []
+    for gen, names in _terminology().items():
+        for name in names:
+            key = _norm(str(name)).upper()
+            assert key, f"{gen} 存在空术语"
+            if key in seen and seen[key] != gen:
+                conflicts.append(f"{name}: {seen[key]} vs {gen}")
+            seen[key] = gen
+    assert not conflicts, "业务术语冲突:\n" + "\n".join(conflicts)
+
+
+def test_terminology_matches_docs():
+    """vehicle_mapping.md / business_glossary.md 必须登记 JSON 中的每个代际与主术语。"""
+    vehicles = _norm(_vehicle_doc_text())
+    glossary = _norm((_REFERENCE / "business_glossary.md").read_text(encoding="utf-8"))
+    problems = []
+    for gen, names in _terminology().items():
+        primary = names[0]
+        row = _norm(f"{gen} | {primary}")
+        if row not in vehicles:
+            problems.append(f"vehicle_mapping.md 缺「{row}」")
+        if _norm(primary) not in glossary:
+            problems.append(f"business_glossary.md 缺术语「{primary}」")
+    assert not problems, "业务术语文档与 JSON 不一致:\n" + "\n".join(problems)
+

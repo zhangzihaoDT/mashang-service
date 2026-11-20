@@ -12,7 +12,7 @@
 | 文件 | 内容 | 主要消费方 |
 |---|---|---|
 | `metrics.json` | 指标注册表（指标 / derived / relation / 别名） | `shared/schema/__init__.py`、分析脚本 |
-| `business_definition.json` | 上市/预售时间、车系分组、动力/版本/驱动规则、对公判定 | `shared/operators/*`、`workspace/utils/business.py` |
+| `business_definition.json` | 上市/预售时间、车系分组、业务术语别名（`generation_terminology_mapping`）、动力/版本/驱动规则、对公判定 | `shared/operators/*`、`workspace/utils/business.py` |
 | `config_semantics.json` | 选配语义（Attribute / value_code / category） | `workspace/utils/config_semantics.py` |
 | `model_positioning.yaml` | 车型定位知识 | `shared/loaders/model_positioning_loader.py` |
 | `store_info_schema.json` | 门店/经销商主数据字段与编码定义 | `shared/loaders/store_info_loader.py` |
