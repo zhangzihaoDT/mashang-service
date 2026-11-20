@@ -241,7 +241,7 @@ def test_dataset_validate_script_works():
     data = json.loads(r.stdout)
     assert "status" in data
     assert "files" in data
-    assert len(data["files"]) == 8
+    assert len(data["files"]) == 15
 
 
 def _load_merge_order_data():
@@ -559,12 +559,20 @@ DATASET_REGISTRY_PATH = UPDATER_DIR / "dataset_registry.py"
 ALL_DATASET_KEYS = {
     "order_data",
     "config_attribute",
+    "order_phone_map",
     "assign_data",
     "test_drive_data",
     "lock_attribution",
     "delivery_inventory",
     "store_info",
     "store_daily_leads",
+    # TP&MIX-ways 6 张上险表（registry 以 tp_mix_* 注册）
+    "tp_mix_brand_monthly",
+    "tp_mix_geo_monthly",
+    "tp_mix_market_energy_monthly",
+    "tp_mix_model_monthly",
+    "tp_mix_price_segment_monthly",
+    "tp_mix_product_segment_monthly",
 }
 
 
@@ -581,11 +589,11 @@ def _load_module(path: Path, name: str):
 
 
 def test_dataset_registry_is_single_source_of_truth():
-    """registry 唯一清单：8 个数据集、key 唯一。"""
+    """registry 唯一清单：9 个基础数据集 + TP&MIX 6 表、key 唯一。"""
     mod = _load_module(DATASET_REGISTRY_PATH, "dsreg_test")
     keys = [d.key for d in mod.DATASETS]
-    assert len(keys) == 8
-    assert len(set(keys)) == 8
+    assert len(keys) == 15
+    assert len(set(keys)) == 15
     assert set(keys) == ALL_DATASET_KEYS
 
 
@@ -631,7 +639,7 @@ def test_update_all_full_scope_includes_all_steps():
     """--scope full（默认）：覆盖 step 1-6 全量数据集（assign/test_drive/lock 各自独立）。"""
     mod = _load_module(UPDATER_DIR / "update_all_datasets.py", "uad_scope_full")
     steps = mod.build_steps(_uad_args(), mobile=False, scope="full")
-    assert [s["id"] for s in steps] == ["1", "2", "3", "3", "3", "4", "5", "6"]
+    assert [s["id"] for s in steps] == ["1", "2", "2", "3", "3", "3", "4", "5", "6"]
     cmds = " ".join(" ".join(str(c) for c in s["cmd"]) for s in steps)
     assert "assign_data_to_csv.py" in cmds
     assert "test_drive_data_to_csv.py" in cmds

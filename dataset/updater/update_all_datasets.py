@@ -106,6 +106,7 @@ DATASET_UPDATERS = {
     "order_data": "order_data_to_parquet",
     "assign_data": "assign_data_to_csv",
     "config_attribute": "order_config_to_parquet",
+    "order_phone_map": "order_phone_map_to_parquet",
     "lock_attribution": "lock_attribution_data_to_parquet",
     "delivery_inventory": "delivery_inventory_to_parquet",
     "test_drive_data": "test_drive_data_to_csv",
@@ -163,6 +164,20 @@ def build_steps(args: argparse.Namespace, mobile: bool, scope: str = "full") -> 
                 str(UPDATER_DIR / "order_config_to_parquet.py"),
                 "--force",
                 "--incremental",
+                "--timeout",
+                str(int(args.timeout)),
+                *(["--mobile"] if mobile else []),
+            ],
+        }
+    )
+
+    steps.append(
+        {
+            "id": "2",
+            "title": "STEP 2: 更新订单-手机号映射 (order_phone_map.parquet)",
+            "cmd": [
+                sys.executable,
+                str(UPDATER_DIR / "order_phone_map_to_parquet.py"),
                 "--timeout",
                 str(int(args.timeout)),
                 *(["--mobile"] if mobile else []),

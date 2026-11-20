@@ -76,6 +76,14 @@ DATASETS: tuple[DatasetSpec, ...] = (
         key_fields=("Order Number",),
     ),
     DatasetSpec(
+        "order_phone_map",
+        "订单-手机号映射（哈希）",
+        DATASET_DIR / "order_phone_map.parquet",
+        "2",
+        key_fields=("order_number",),
+        note="仅哈希无明文；md5(纯11位) 与 lock_attribution.lc_user_phone_md5 对齐",
+    ),
+    DatasetSpec(
         "assign_data",
         "下发线索",
         DATASET_DIR / "assign_data.csv",

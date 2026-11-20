@@ -17,9 +17,9 @@
   省份结构；口径字段参考 l6_m2_presale_report 用户画像模块与 business_scripts/user_profile.py）。
 
 模块 5：车主年龄分层 & 复购对比（owner_age 分年龄段 vs 历届；复购复用 shared/operators/
-  repurchase.py 算子 mode=fulfilled_repurchase（canonical）：owner_identity_no 在窗口前已完成
-  兑现购车（交付或开票早于上市日）→ 复购，排除"历史已锁未兑现"悬置误判；
-   宽松对照 mode=prior_locker 对齐 lock_attribution_analysis "Repeat Lockers (Had Prior Locks)"）。
+  repurchase.py 算子（复购口径 v2 / B 方案）：按 lead_phone_md5（手机号统计身份）判断
+  窗口前是否已完成购车（交付或开票早于上市日）→ 复购；与 ≥2 个 owner_identity_no
+  关联的共享手机号整号剔除（严格 PIT）。旧宽松口径 prior_locker 已移除。）
 
 模块 6：上市后下发线索窗口增幅对比（最新两代际 DM1/DM2，assign_data「下发线索数」整体口径，
   上市后 N 天窗口 vs 上市前等长基线，N=1/3/7；含上市后 D1..D7 每日相对前 7 日均值节奏）。
@@ -481,12 +481,13 @@ def _age_band_rows(age: pd.Series, n: int) -> list[dict]:
 def _repurchase_split(df: pd.DataFrame, gen: str, end: pd.Timestamp, n_days: int) -> dict:
     """某代际上市同期窗口内零售锁单的复购 / 首购拆分。
 
-    委托 shared/operators/repurchase.py 算子（mode=fulfilled_repurchase，canonical）：
-    - 窗口内锁单订单按 owner_identity_no（18 位有效）判其窗口前购车史
-    - prior_fulfilled（历史已兑现购车，交付/开票早于窗口开始）→ 复购 repeat
-    - prior_unfulfilled（已锁未兑现/悬置历史）→ suspended，不计复购（避免误判）
-    - no_prior_history → first；身份缺失/无效 → unknown
-    PIT：兑现事件须早于窗口开始，不穿越。对齐 lock_attribution_analysis.py 宽松语义的收紧版。
+    委托 shared/operators/repurchase.py 算子（复购口径 v2 / B 方案）：
+    - 窗口内锁单订单按 lead_phone_md5（手机号统计身份，非车主身份）判其窗口前购车史
+    - prior_fulfilled（窗口前已完成购车，交付/开票早于窗口开始）→ 复购 repeat
+    - no_prior_history → first（含历史仅锁单未兑现，v2 不细分退订/悬置）
+    - shared_phone_excluded（与 ≥2 个 owner_identity_no 关联的共享号码）→ excluded_shared
+    - unknown_identity → unknown（phone 缺失/无效）
+    PIT：兑现事件须早于窗口开始，不穿越。
     """
     lo = end
     hi = end + pd.Timedelta(days=n_days)
@@ -495,10 +496,15 @@ def _repurchase_split(df: pd.DataFrame, gen: str, end: pd.Timestamp, n_days: int
     )
     if "error" in r:
         return {"n": r.get("n", 0), "repeat": 0, "suspended": 0, "first": 0,
-                "unknown": 0, "known_pct": 0.0}
+                "unknown": 0, "known_pct": 0.0,
+                "excluded_shared": 0, "valid_base": 0, "repeat_rate": None}
     s = r["summary"]
+    rep = r.get("report", {})
     return {"n": s["n"], "repeat": s["repeat"], "suspended": s["suspended"],
-            "first": s["first"], "unknown": s["unknown"], "known_pct": s["known_pct"]}
+            "first": s["first"], "unknown": s["unknown"], "known_pct": s["known_pct"],
+            "excluded_shared": s.get("excluded_shared", 0),
+            "valid_base": rep.get("valid_base", s.get("valid_base", 0)),
+            "repeat_rate": rep.get("repeat_rate", s.get("repeat_rate"))}
 
 
 def _age_repurchase_compare(df: pd.DataFrame, gens: list[str], ends: dict,
@@ -962,7 +968,7 @@ def _age_repurchase_table(c: dict) -> str:
     return f"""
     <div class="card">
       <h2>模块 5 · 车主年龄分层 &amp; 复购对比：{b} vs {a}（上市同期 {ar['n_days']} 天窗口）</h2>
-      <p class="section-note">年龄分层按 owner_age（车主年龄，各代际窗口缺失约 5–9%）分桶，占比为各带占「已知年龄」比例；占比差 = {b} 占已知 − {a} 占已知（pp）；数据条宽度 ∝ |占比差|，绿 = {b} 更高、红 = {a} 更高。复购（老车主）复用 shared/operators/repurchase.py 算子（mode=fulfilled_repurchase，canonical）：窗口内锁单的 owner_identity_no（18 位有效，缺失/无效记无法判定）须在窗口开始前已完成过**兑现购车**——历史零售锁单的交付或开票时间早于上市日；仅历史锁单、从未交付/开票的「悬置单」不计复购，另列悬置历史，避免误判（PIT 不穿越；宽松对照 mode=prior_locker 对齐 lock_attribution_analysis.py "Repeat Lockers (Had Prior Locks)"）。复购占比按可判定业务单（复购+悬置+首购）计。</p>
+      <p class="section-note">年龄分层按 owner_age（车主年龄，各代际窗口缺失约 5–9%）分桶，占比为各带占「已知年龄」比例；占比差 = {b} 占已知 − {a} 占已知（pp）；数据条宽度 ∝ |占比差|，绿 = {b} 更高、红 = {a} 更高。复购（同号复购）复用 shared/operators/repurchase.py 算子（复购口径 v2 / B 方案）：按 lead_phone_md5 判断——该手机号为**手机号统计身份**，不等同车主身份；窗口内锁单订单的手机号须在窗口开始前已完成过**购车**（历史零售锁单的交付或开票时间早于上市日）；与 ≥2 个 owner_identity_no 关联的**共享手机号整号剔除**（严格 PIT：仅用窗口前已兑现历史判定，不穿越）；手机号缺失/无效记无法判定。四桶互斥且穷尽：复购 / 首购（含历史仅锁单未兑现）/ 共享号剔除 / 无法判定；复购率 = 复购订单数 ÷ 有效基数（剔除共享号后）。旧宽松口径 prior_locker 已废弃。</p>
       <div class="table-wrap">
       <table class="report-table">
         <thead><tr><th>年龄段</th><th>{a} 单数</th><th>{a} 占已知</th><th>{b} 单数</th><th>{b} 占已知</th><th>占比差（{b}−{a}）</th></tr></thead>

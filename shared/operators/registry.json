@@ -124,7 +124,7 @@
       "name": "复购 / 老车主拆分",
       "intent": "repurchase",
       "dataset": "order_data",
-      "description": "按 owner_identity_no 将窗口内零售锁单拆为四互斥桶（prior_fulfilled/prior_unfulfilled/no_prior_history/unknown_identity），mode=fulfilled_repurchase 仅计 prior_fulfilled 为复购（默认，canonical）；mode=prior_locker 计 prior_fulfilled+prior_unfulfilled（宽松对照）。兑现判定以事件时间早于窗口开始为界（PIT 不穿越）",
+      "description": "复购口径 v2（B 方案）：按 lead_phone_md5（手机号统计身份，非车主身份）将窗口内零售锁单拆为四互斥且穷尽桶（prior_fulfilled/no_prior_history/shared_phone_excluded/unknown_identity）；仅窗口前已完成购车（交付或开票早于窗口开始）计复购；历史与 ≥2 个 owner_identity_no 关联的共享手机号整号剔除（严格 PIT）；调用方负责 JOIN order_phone_map 与零售过滤；prior_locker 宽松口径已移除",
       "parameters": {
         "required": ["df", "window_start", "window_end"],
         "optional": ["mode", "series", "series_col", "identity_col"]
