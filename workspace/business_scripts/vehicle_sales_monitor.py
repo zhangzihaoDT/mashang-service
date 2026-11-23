@@ -48,13 +48,13 @@ from utils.monitors import launch as launch_monitor  # noqa: E402
 from utils.monitors import presale as presale_monitor  # noqa: E402
 from utils.monitors.phase import (  # noqa: E402
     detect_active,
-    load_business_definition,
     model_series_of,
     phase_of,
     presale_open_ended_window_days,
     series_label,
 )
-from utils.monitors.series_group import apply_series_group_logic  # noqa: E402
+from utils.business_definition import load_business_definition  # noqa: E402
+from utils.orders.classification import apply_series_group_logic  # noqa: E402
 from utils.result_contract import (  # noqa: E402
     build_error_contract,
     build_partial_contract,

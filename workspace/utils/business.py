@@ -4,11 +4,9 @@
 统一从 shared/schema/business_definition.json 读取上市时间等业务口径。
 """
 
-import json
-from pathlib import Path
 from typing import Optional
 
-from utils.paths import BUSINESS_DEFINITION_PATH
+from utils.business_definition import load_business_definition
 
 
 def is_corporate_owner(owner_identity_no) -> bool:
@@ -65,7 +63,7 @@ def get_launch_date(series: str) -> Optional[str]:
         launch_date = get_launch_date("LS9Hyper")  # "2026-07-16"
     """
     try:
-        bdef = json.loads(BUSINESS_DEFINITION_PATH.read_text(encoding="utf-8"))
+        bdef = load_business_definition()
         periods = bdef.get("time_periods", {})
         if series not in periods:
             return None
@@ -91,7 +89,7 @@ def list_all_series() -> list[dict]:
     返回所有已定义车系/系列分组的上市信息列表。
     """
     try:
-        bdef = json.loads(BUSINESS_DEFINITION_PATH.read_text(encoding="utf-8"))
+        bdef = load_business_definition()
         periods = bdef.get("time_periods", {})
         return [
             {"series": k, "start": v.get("start"), "end": v.get("end"), "finish": v.get("finish")}
@@ -108,12 +106,12 @@ def classify_product_names(df, series: str, business_definition=None):
     版本按 priority 降序、同分按定义顺序首次命中；未知项显式保留。
     """
     import pandas as pd
-    from utils.monitors.series_group import (
+    from utils.orders.classification import (
         eval_series_group_logic_expr, rule_condition, rule_priority,
     )
 
     if business_definition is None:
-        business_definition = json.loads(BUSINESS_DEFINITION_PATH.read_text(encoding='utf-8'))
+        business_definition = load_business_definition()
     result = pd.DataFrame(index=df.index)
     result['product_version'] = '未分类'
     result['seat_count'] = '未标座位'

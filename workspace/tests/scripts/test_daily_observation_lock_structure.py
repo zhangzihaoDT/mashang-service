@@ -3,7 +3,9 @@ from datetime import date
 
 import pandas as pd
 
-from workspace.utility_scripts import skills_order_observation_daily as daily
+from workspace.utility_scripts import skills_order_observation_daily as entry
+from utils.monitors import daily
+from utils.monitors.presenters import daily as presenter
 
 
 def test_versions_preserve_seats_unknowns_and_deduplicate():
@@ -77,12 +79,41 @@ def test_ls8_lock_line_includes_neo_in_electric_split():
     stats = daily.analyze_daily_lock_orders(frame, day, day)['models']['LS8']
 
     assert stats['count'] == 5
-    assert daily._format_lock_model_detail(stats) == '｜LS8：5,(增程:1/纯电:3/未知:1)'
+    assert presenter._format_lock_model_detail(stats) == '｜LS8：5,(增程:1/纯电:3/未知:1)'
 
 
 def test_ls9_formats_versions_on_one_line_without_seats():
-    text = daily._format_lock_model_detail({
+    text = presenter._format_lock_model_detail({
         'show_seats': False,
         'product_versions': {'52 Ultra': {'未标座位': 4}, 'Hyper': {'未标座位': 1}},
     })
     assert text == '｜52 Ultra：4，Hyper：1'
+
+
+
+def test_daily_cli_dry_run_renders_without_feishu(monkeypatch, capsys):
+    day = date(2026, 10, 19)
+    frame = pd.DataFrame([{
+        "order_number": "retail",
+        "order_type": "用户车",
+        "lock_time": pd.Timestamp(day),
+        "invoice_upload_time": pd.Timestamp(day),
+        "invoice_amount": 300000,
+        "series": "LS8",
+        "product_name": "LS8 93 RWD 5座",
+    }])
+    monkeypatch.setattr(entry, "parse_arguments", lambda: (day, day, True, False))
+    monkeypatch.setattr(entry, "load_data", lambda _: frame)
+    monkeypatch.setattr(entry, "get_predicted_lock", lambda _: (2, None, None))
+
+    def unexpected_write(*args, **kwargs):
+        raise AssertionError("dry-run must not write to Feishu")
+
+    monkeypatch.setattr(entry, "upsert_bitable_observation", unexpected_write)
+    monkeypatch.setattr(entry, "send_feishu_notification", unexpected_write)
+    entry.main()
+    output = capsys.readouterr().out
+    assert "总锁单数: 1 (1) 台" in output
+    assert "总开票数: 1 (1) 台" in output
+    assert "本月累计锁单" in output
+    assert "达成率: 50.0%" in output

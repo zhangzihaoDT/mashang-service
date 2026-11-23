@@ -54,6 +54,34 @@
       "tier": "pytest",
       "description": "根 tests/（dataset 构建契约）"
     },
+    "pytest.monitor-runtime": {
+      "command": [
+        "{python}",
+        "-m",
+        "pytest",
+        "workspace/tests/test_vehicle_sales_monitor.py",
+        "workspace/tests/test_presale_metrics_to_feishu.py",
+        "-q"
+      ],
+      "data_dependency": true,
+      "tier": "pytest",
+      "description": "监控运行和已识别的订单口径消费者回归"
+    },
+    "pytest.order-semantics": {
+      "command": [
+        "{python}",
+        "-m",
+        "pytest",
+        "workspace/tests/test_drive_type_logic.py",
+        "workspace/tests/test_series_group_logic_priority.py",
+        "workspace/tests/test_launch_deep_dive_stable.py",
+        "workspace/tests/research_scripts/test_launch_cumulative_lock_compare_user_profile.py",
+        "-q"
+      ],
+      "data_dependency": true,
+      "tier": "pytest",
+      "description": "监控运行和已识别的订单口径消费者回归"
+    },
     "jobs.tests": {
       "command": ["{python}", "-m", "pytest", "jobs/tests", "-q"],
       "data_dependency": false,
@@ -62,6 +90,49 @@
     }
   },
   "rules": [
+    {
+      "id": "daily-observation",
+      "match": [
+        "workspace/utils/monitors/daily.py",
+        "workspace/utils/monitors/presenters/daily.py"
+      ],
+      "targets": ["pytest.scripts"],
+      "dynamic": null,
+      "note": "每日观察计算和展示由脚本回归验证"
+    },
+    {
+      "id": "monitor-runtime",
+      "match": [
+        "workspace/utils/monitors/__init__.py",
+        "workspace/utils/monitors/freshness.py",
+        "workspace/utils/monitors/presale.py"
+      ],
+      "targets": [
+        "pytest.monitor-runtime"
+      ],
+      "dynamic": null,
+      "note": "预售、上市、快照及调度回归"
+    },
+    {
+      "id": "order-semantics",
+      "match": [
+        "workspace/utils/monitors/launch.py",
+        "workspace/utils/monitors/phase.py",
+        "workspace/utils/monitors/order_filter.py",
+        "workspace/utils/monitors/series_group.py",
+        "workspace/utils/monitors/drive_type.py",
+        "workspace/utils/orders/**/*.py",
+        "workspace/utils/business_definition.py",
+        "workspace/utils/business.py"
+      ],
+      "targets": [
+        "pytest.monitor-runtime",
+        "pytest.order-semantics",
+        "pytest.scripts"
+      ],
+      "dynamic": null,
+      "note": "订单口径、业务定义及其主要消费者回归"
+    },
     {
       "id": "harness-contract",
       "match": [".opencode/verification/**"],

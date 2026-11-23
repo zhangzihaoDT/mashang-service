@@ -12,12 +12,11 @@
 
 import os
 import sys
-import json
 import argparse
+from functools import partial
 import time
-import re
 import pandas as pd
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta
 import requests
 from dotenv import load_dotenv
 from pathlib import Path
@@ -33,19 +32,20 @@ from utils.paths import ensure_shared_on_path
 ensure_shared_on_path()
 
 from operators.mature_lock_prediction import run_mature_lock_prediction_operator
-from operators.product_attributes import resolve_product_attributes
-from operators.assign_conversion import _parse_cn_date
-from utils.business import is_corporate_owner, classify_product_names
-from utils.monitors.order_filter import flag_test_orders
-from utils.monitors.series_group import apply_series_group_logic
+from utils.business_definition import load_business_definition as read_business_definition
+from utils.monitors.daily import (
+    analyze_daily_invoice_orders,
+    analyze_daily_lock_orders,
+    compute_cumulative_stats,
+    compute_mtd_mom,
+)
+from utils.monitors.presenters.daily import build_bitable_values, build_card, print_summary
 from capabilities.notify.notify_service import notify
 load_dotenv(REPO_ROOT / ".env")
 
 # 配置常量
 PARQUET_FILE = str(REPO_ROOT / "dataset" / "order_data.parquet")
 BUSINESS_DEF_FILE = REPO_ROOT / "shared" / "schema" / "business_definition.json"
-# 适配新数据集的 series 值：CM2->LS6, DM1->L6
-TARGET_MODELS = ["LS6", "L6", "LS8", "LS9"]
 WEBHOOK_URL = os.getenv("FS_WEBHOOK_URL")
 BITABLE_APP_TOKEN = os.getenv("BITABLE_APP_TOKEN")
 BITABLE_TABLE_ID = os.getenv("BITABLE_TABLE_ID")
@@ -118,16 +118,12 @@ def parse_arguments():
 
 def load_business_definition(file_path):
     """加载业务定义文件"""
-    if not os.path.exists(file_path):
-        print(f"❌ 错误: 业务定义文件不存在 - {file_path}")
-        return None
-    
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except Exception as e:
-        print(f"❌ 加载业务定义失败: {e}")
+        return read_business_definition(file_path)
+    except (OSError, ValueError) as exc:
+        print(f"❌ 加载业务定义失败: {exc}")
         return None
+
 
 def load_data(file_path):
     """加载 Parquet 数据"""
@@ -143,337 +139,6 @@ def load_data(file_path):
     except Exception as e:
         print(f"❌ 数据加载失败: {e}")
         return None
-
-def _lock_product_versions(model_df, model, business_definition=None):
-    """按共享业务定义汇总版本 → 座位，订单号去重。"""
-    orders = model_df[['order_number', 'product_name']].drop_duplicates('order_number')
-    classified = classify_product_names(orders, model, business_definition)
-    versions = {}
-    for version, seat in classified.itertuples(index=False, name=None):
-        seats = versions.setdefault(version, {})
-        seats[seat] = seats.get(seat, 0) + 1
-    return dict(sorted(versions.items(), key=lambda item: (item[0] == "未分类", item[0])))
-
-
-def analyze_daily_lock_orders(df, start_date, end_date):
-    """
-    分析锁单数据 (支持时间范围)
-    """
-    print(f"正在分析 {start_date} 至 {end_date} 的锁单数据...")
-    
-    business_def = load_business_definition(BUSINESS_DEF_FILE)
-
-    def _like(value, pattern):
-        if value is None:
-            return False
-        pattern = pattern[1:-1] if len(pattern) >= 2 and pattern[0] == "'" and pattern[-1] == "'" else pattern
-        regex_parts = []
-        for ch in pattern:
-            if ch == "%":
-                regex_parts.append(".*")
-            elif ch == "_":
-                regex_parts.append(".")
-            else:
-                regex_parts.append(re.escape(ch))
-        regex = "^" + "".join(regex_parts) + "$"
-        return re.fullmatch(regex, str(value)) is not None
-
-    def _tokenize(expr):
-        tokens = []
-        i = 0
-        n = len(expr)
-        while i < n:
-            ch = expr[i]
-            if ch.isspace():
-                i += 1
-                continue
-            if ch in ("(", ")"):
-                tokens.append(ch)
-                i += 1
-                continue
-            if ch == "'":
-                j = i + 1
-                while j < n and expr[j] != "'":
-                    j += 1
-                tokens.append(expr[i : j + 1] if j < n else expr[i:])
-                i = j + 1 if j < n else n
-                continue
-            j = i
-            while j < n and (expr[j].isalnum() or expr[j] in ("_",)):
-                j += 1
-            tokens.append(expr[i:j])
-            i = j
-        return [t for t in tokens if t]
-
-    def _parse_logic(expr):
-        tokens = _tokenize(expr)
-        idx = 0
-
-        def peek():
-            return tokens[idx] if idx < len(tokens) else None
-
-        def take():
-            nonlocal idx
-            tok = tokens[idx] if idx < len(tokens) else None
-            idx += 1
-            return tok
-
-        def parse_expr():
-            node = parse_term()
-            while True:
-                tok = peek()
-                if tok and tok.upper() == "OR":
-                    take()
-                    rhs = parse_term()
-                    node = ("OR", node, rhs)
-                else:
-                    break
-            return node
-
-        def parse_term():
-            node = parse_factor()
-            while True:
-                tok = peek()
-                if tok and tok.upper() == "AND":
-                    take()
-                    rhs = parse_factor()
-                    node = ("AND", node, rhs)
-                else:
-                    break
-            return node
-
-        def parse_factor():
-            tok = peek()
-            if tok and tok.upper() == "NOT":
-                take()
-                inner = parse_factor()
-                return ("NOT", inner)
-            return parse_atom()
-
-        def parse_atom():
-            tok = peek()
-            if tok == "(":
-                take()
-                inner = parse_expr()
-                if peek() == ")":
-                    take()
-                return inner
-            left = take()
-            if not left:
-                return ("LIT", False)
-            not_flag = False
-            tok2 = peek()
-            if tok2 and tok2.upper() == "NOT":
-                take()
-                not_flag = True
-            tok3 = peek()
-            if tok3 and tok3.upper() == "LIKE":
-                take()
-            pattern = take()
-            return ("COND", not_flag, left, pattern)
-
-        return parse_expr()
-
-    def _eval_ast(ast, product_name):
-        op = ast[0]
-        if op == "OR":
-            return _eval_ast(ast[1], product_name) or _eval_ast(ast[2], product_name)
-        if op == "AND":
-            return _eval_ast(ast[1], product_name) and _eval_ast(ast[2], product_name)
-        if op == "NOT":
-            return not _eval_ast(ast[1], product_name)
-        if op == "COND":
-            not_flag, left, pattern = ast[1], ast[2], ast[3]
-            if not left or str(left) != "product_name":
-                return False
-            res = _like(product_name, pattern or "")
-            return (not res) if not_flag else res
-        if op == "LIT":
-            return bool(ast[1])
-        return False
-
-    # 确保必要的列存在
-    # 更新为新数据集的列名
-    required_columns = ['lock_time', 'order_number', 'series', 'product_name', 'order_type']
-    for col in required_columns:
-        if col not in df.columns:
-            print(f"❌ 错误: 数据缺失列 {col}")
-            return None
-
-    # 数据预处理
-    df_copy = df.copy()
-    df_copy['lock_time'] = pd.to_datetime(df_copy['lock_time'], errors='coerce').dt.date
-    
-    # 筛选目标日期范围的锁单数据
-    daily_orders = df_copy[
-        (df_copy['lock_time'] >= start_date) & 
-        (df_copy['lock_time'] <= end_date)
-    ]
-
-    # 剔除测试单（总部主理店 + 假身份号）——与上市/预售监控口径对齐
-    test_mask = flag_test_orders(daily_orders, business_def)
-    if test_mask.any():
-        daily_orders = daily_orders.loc[~test_mask].copy()
-    
-    # 1. 计算总锁单数 (基于 order_number 去重)
-    total_lock_count = daily_orders['order_number'].nunique()
-    
-    # 2. 分车型统计
-    model_stats = {}
-    for model in TARGET_MODELS:
-        if model == "LS9":
-            model_df = daily_orders[daily_orders['series'].isin(["LS9", "LS9Hyper"])]
-        elif model == "LS8":
-            model_df = daily_orders[daily_orders['series'].isin(["LS8", "LS8Neo"])]
-        else:
-            model_df = daily_orders[daily_orders['series'] == model]
-        count = model_df['order_number'].nunique()
-        
-        stats = {"count": count}
-        # LS6 代际区隔（CM3/CM2/CM1/CM0）：复用共享 series_group_logic（与上市监控同源），
-        # CM2 再按 product_type_logic 分增程/纯电
-        if model == "LS6":
-            grouped = apply_series_group_logic(model_df.copy(), business_def)
-            gen_counts = {g: 0 for g in ["CM3", "CM2", "CM1", "CM0"]}
-            cm2_ptype = {"增程": 0, "纯电": 0}
-            pt_logic = (business_def or {}).get("product_type_logic") or {}
-            pt_asts = {}
-            for pt, cond in pt_logic.items():
-                if cond:
-                    pt_asts[pt] = _parse_logic(str(cond))
-
-            unique_orders = grouped.reindex(
-                columns=['order_number', 'product_name', 'series_group_logic']
-            ).drop_duplicates('order_number')
-            for _, row in unique_orders.iterrows():
-                matched = row['series_group_logic']
-                if matched not in gen_counts:
-                    continue
-                gen_counts[matched] += 1
-                if matched == "CM2":
-                    p_name = row['product_name']
-                    if pd.isna(p_name):
-                        continue
-                    p_name = str(p_name)
-                    for pt, ast in pt_asts.items():
-                        if _eval_ast(ast, p_name):
-                            cm2_ptype[pt] += 1
-                            break
-            stats["gen_counts"] = gen_counts
-            stats["cm2_ptype"] = cm2_ptype
-
-        if model == "LS8":
-            stats["ls8_power_counts"] = {}
-            if count:
-                names = model_df[['order_number', 'product_name']].dropna(subset=['order_number'])
-                names = names.drop_duplicates('order_number').reset_index(drop=True)
-                attrs = resolve_product_attributes(names, business_def or {})
-                power = attrs.power_type.where(attrs.generation.eq("LS8"))
-                power = power.mask(attrs.generation.eq("LS8Neo"), "纯电")
-                stats["ls8_power_counts"] = power.value_counts().to_dict()
-
-        if model in ("LS8", "LS9"):
-            stats["product_versions"] = _lock_product_versions(model_df, model, business_def)
-            stats["show_seats"] = model == "LS8"
-
-        model_stats[model] = stats
-        
-    return {
-        "start_date": start_date,
-        "end_date": end_date,
-        "total": total_lock_count,
-        "total_user_car": daily_orders.loc[daily_orders["order_type"].eq("用户车"), "order_number"].nunique(),
-        "models": model_stats
-    }
-
-def analyze_daily_invoice_orders(df, start_date, end_date):
-    """
-    分析开票数据 (基于 Invoice_Upload_Time)
-    定义：有 Invoice_Upload_Time 且有 Lock_Time 的 Order Number 数
-    """
-    print(f"正在分析 {start_date} 至 {end_date} 的开票数据...")
-    
-    # 确保必要的列存在
-    # 更新为新数据集的列名
-    required_columns = ['invoice_upload_time', 'lock_time', 'order_number', 'series', 'invoice_amount', 'order_type']
-    for col in required_columns:
-        if col not in df.columns:
-            print(f"❌ 错误: 数据缺失列 {col}")
-            return None
-
-    # 数据预处理
-    df_copy = df.copy()
-    df_copy['invoice_upload_time'] = pd.to_datetime(df_copy['invoice_upload_time'], errors='coerce').dt.date
-    
-    # 第一步：全部开票记录（不锁 lock_time 过滤），用于对公批售等补充标注
-    raw_invoice_all = df_copy[
-        (df_copy['invoice_upload_time'] >= start_date) & 
-        (df_copy['invoice_upload_time'] <= end_date)
-    ]
-    total_raw_invoice = raw_invoice_all['order_number'].nunique()
-
-    # 从全量开票记录中检测对公批售订单（owner_identity_no 为统一社会信用代码的企业订单）
-    total_corporate_count = 0
-    corporate_model_count = {}
-    if len(raw_invoice_all) > 0 and 'owner_identity_no' in raw_invoice_all.columns:
-        corporate_mask = raw_invoice_all['owner_identity_no'].apply(is_corporate_owner)
-        total_corporate_count = raw_invoice_all[corporate_mask]['order_number'].nunique()
-        # 分解到车型
-        for model in TARGET_MODELS:
-            if model == "LS9":
-                m = raw_invoice_all[corporate_mask & raw_invoice_all['series'].isin(["LS9", "LS9Hyper"])]
-            else:
-                m = raw_invoice_all[corporate_mask & (raw_invoice_all['series'] == model)]
-            cnt = m['order_number'].nunique()
-            if cnt > 0:
-                corporate_model_count[model] = cnt
-
-    # 第二步：标准口径 — 有 lock_time 的开票
-    invoice_orders = raw_invoice_all[raw_invoice_all['lock_time'].notna()]
-    
-    # 1. 计算总开票数 (基于 order_number 去重)
-    total_invoice_count = invoice_orders['order_number'].nunique()
-    
-    # 计算用户车开票数
-    user_car_orders = invoice_orders[invoice_orders['order_type'] == '用户车']
-    total_user_car_count = user_car_orders['order_number'].nunique()
-    
-    # 2. 分车型统计
-    model_invoice_stats = {}
-    for model in TARGET_MODELS:
-        if model == "LS9":
-            model_df = invoice_orders[invoice_orders['series'].isin(["LS9", "LS9Hyper"])]
-        else:
-            model_df = invoice_orders[invoice_orders['series'] == model]
-        count = model_df['order_number'].nunique()
-        
-        # 用户车数量
-        model_user_car_df = model_df[model_df['order_type'] == '用户车']
-        user_car_count = model_user_car_df['order_number'].nunique()
-        
-        # 计算该车型的平均开票价格 (仅计算用户车)
-        model_valid_prices = model_user_car_df[
-            (model_user_car_df['invoice_amount'].notna()) & 
-            (model_user_car_df['invoice_amount'] > 0)
-        ]['invoice_amount']
-        avg_price = model_valid_prices.mean() if not model_valid_prices.empty else 0
-        
-        model_invoice_stats[model] = {
-            "count": count,
-            "user_car_count": user_car_count,
-            "avg_price": avg_price
-        }
-        
-    return {
-        "start_date": start_date,
-        "end_date": end_date,
-        "total": total_invoice_count,
-        "total_raw": total_raw_invoice,
-        "total_user_car": total_user_car_count,
-        "total_corporate": total_corporate_count,
-        "corporate_models": corporate_model_count,
-        "models": model_invoice_stats
-    }
 
 def get_predicted_lock(assign_date_str: str) -> tuple[float | None, float | None, str | None]:
     """
@@ -495,155 +160,6 @@ def get_predicted_lock(assign_date_str: str) -> tuple[float | None, float | None
         return pred, None, None
     except Exception as e:
         return None, None, str(e)
-
-
-def compute_mtd_mom(df, lock_stats, invoice_stats, is_mtd=False):
-    """
-    仅 MTD 模式（用户显式 --mtd）下计算上月同周期累计的锁单/开票环比。
-    返回 dict：lock_pct / invoice_pct（百分比数值，无基期时为 None）、
-    基期 prev_start / prev_end、以及 lock_prev / invoice_prev（供日志/debug 或双值文案）；
-    非 MTD 模式返回 None。
-    """
-    if not is_mtd:
-        return None
-    start_date = lock_stats["start_date"]
-    end_date = lock_stats["end_date"]
-
-    import calendar
-    prev_year = start_date.year if start_date.month > 1 else start_date.year - 1
-    prev_month = start_date.month - 1 if start_date.month > 1 else 12
-    last_day = calendar.monthrange(prev_year, prev_month)[1]
-    prev_start = datetime(prev_year, prev_month, 1).date()
-    prev_end = datetime(prev_year, prev_month, min(end_date.day, last_day)).date()
-
-    prev_lock = analyze_daily_lock_orders(df, prev_start, prev_end)
-    prev_invoice = analyze_daily_invoice_orders(df, prev_start, prev_end)
-    if not prev_lock or not prev_invoice:
-        return None
-
-    def _pct(cur, prev):
-        if prev is None or prev <= 0:
-            return None
-        return (float(cur) - float(prev)) / float(prev) * 100.0
-
-    return {
-        "lock_pct": _pct(lock_stats["total"], prev_lock["total"]),
-        "invoice_pct": _pct(invoice_stats["total"], prev_invoice["total"]),
-        "prev_start": prev_start,
-        "prev_end": prev_end,
-        "lock_prev": prev_lock["total"],
-        "invoice_prev": prev_invoice["total"],
-    }
-
-
-def _format_mom(pct, prev_start=None, prev_end=None):
-    if pct is None:
-        return ""
-    if prev_start is None or prev_end is None:
-        return ""
-    sign = "+" if pct >= 0 else ""
-    base = f"{prev_start.month}/{prev_start.day}~{prev_end.month}/{prev_end.day}"
-    return f"（较上月同期 {base} {sign}{pct:.1f}%）"
-
-
-def compute_cumulative_stats(df, end_date, analyzer):
-    """
-    计算截至 end_date 的本月累计/本年累计（自然月/自然年，起点为月/年首日）。
-
-    analyzer: analyze_daily_lock_orders / analyze_daily_invoice_orders
-    返回 {"mtd": {total, total_user_car}, "ytd": {total, total_user_car}}；
-    某口径计算失败时对应值为 None（不影响其余口径）。
-    各累计口径与单日口径同源（同 analyzer、同去重/剔测试单规则），仅时间窗不同。
-    """
-    def _one(start_date):
-        stats = analyzer(df, start_date, end_date)
-        if not stats:
-            return None
-        return {
-            "total": stats.get("total", 0),
-            "total_user_car": stats.get("total_user_car", 0),
-        }
-
-    return {
-        "mtd": _one(end_date.replace(day=1)),
-        "ytd": _one(date(end_date.year, 1, 1)),
-    }
-
-
-def _format_cumulative_line(label, cum) -> str:
-    """格式化累计行：本月累计锁单 XX (XX) 台｜本年累计锁单 XX (XX) 台"""
-    if not cum:
-        return ""
-    mtd = cum.get("mtd")
-    ytd = cum.get("ytd")
-    if not mtd or not ytd:
-        return ""
-    return (
-        f"本月累计{label}{mtd['total']} ({mtd['total_user_car']}) 台"
-        f"｜本年累计{label}{ytd['total']} ({ytd['total_user_car']}) 台"
-    )
-
-
-def _format_lock_model_detail(stats) -> str:
-    """
-    构建车型锁单明细文本（含 '｜' 前缀）。
-    LS6 按代际展示：CM3/CM2(增程/纯电)/CM1，CM0>0 时追加。
-    """
-    power = stats.get("ls8_power_counts")
-    if power is not None:
-        extended = power.get("增程", 0)
-        electric = power.get("纯电", 0)
-        unknown = stats["count"] - extended - electric
-        unknown_text = f"/未知:{unknown}" if unknown else ""
-        return f"｜LS8：{stats['count']},(增程:{extended}/纯电:{electric}{unknown_text})"
-
-    versions = stats.get("product_versions")
-    if versions is not None:
-        if not stats.get("show_seats", True):
-            detail = "，".join(f"{version}：{sum(seats.values())}" for version, seats in versions.items())
-            return "｜" + detail if detail else ""
-        parts = []
-        for version, seats in versions.items():
-            seat_text = " / ".join(
-                f"{seat}：{seats[seat]}" for seat in ("五座", "六座", "未标座位") if seats.get(seat)
-            )
-            parts.append(f"{version}：{sum(seats.values())}（{seat_text}）")
-        return "\n  " + "\n  ".join(parts) if parts else ""
-    gen = stats.get("gen_counts")
-    if gen:
-        cm2_ptype = stats.get("cm2_ptype") or {}
-        parts = []
-        if gen.get("CM3"):
-            parts.append(f"CM3：{gen.get('CM3')}")
-        if gen.get("CM2"):
-            parts.append(
-                f"CM2:{gen.get('CM2')}(增程:{cm2_ptype.get('增程', 0)}/纯电:{cm2_ptype.get('纯电', 0)})"
-            )
-        if gen.get("CM1"):
-            parts.append(f"CM1:{gen.get('CM1')}")
-        if gen.get("CM0"):
-            parts.append(f"CM0:{gen.get('CM0')}")
-        detail = ",".join(parts)
-    else:
-        detail_parts = []
-        d = stats.get("details") or {}
-        for cap, cap_count in d.items():
-            cap_label = str(cap).replace("kwh", "kw")
-            detail_parts.append(f"{cap_label}：{cap_count}")
-        sd = stats.get("seat_details") or {}
-        if "五座" in sd:
-            detail_parts.append(f"五座：{sd['五座']}")
-        if "六座" in sd:
-            detail_parts.append(f"六座：{sd['六座']}")
-        vd = stats.get("variant_details") or {}
-        for variant, v_count in vd.items():
-            detail_parts.append(f"{variant}：{v_count}")
-        detail = "，".join(detail_parts)
-    out = "｜" + detail if detail else ""
-    ls9hyper = stats.get("ls9hyper_count")
-    if ls9hyper is not None:
-        out += f"｜LS9Hyper: {ls9hyper}"
-    return out
 
 
 def _get_tenant_access_token() -> str | None:
@@ -815,50 +331,24 @@ def upsert_bitable_observation(lock_stats, invoice_stats, pred_lock: float | Non
         _LAST_BITABLE_ERROR = "tenant_access_token 获取失败（请检查 BITABLE_APP_ID/BITABLE_APP_SECRET 或 FEISHU_APP_ID/FEISHU_APP_SECRET）"
         return False
 
-    start_date = lock_stats["start_date"]
-    end_date = lock_stats["end_date"]
-    date_key = str(start_date) if start_date == end_date else f"{start_date}~{end_date}"
-
-    lock_model_details = []
-    for model, stats in (lock_stats.get("models") or {}).items():
-        count = stats.get("count", 0)
-        detail_str = _format_lock_model_detail(stats)
-        lock_model_details.append(f"- {model}: {count} 单{detail_str}")
-    lock_model_text = "\n".join(lock_model_details)
-
-    invoice_model_details = []
-    for model, info in (invoice_stats.get("models") or {}).items():
-        avg_price = float(info.get("avg_price") or 0)
-        price_str = f"{avg_price/10000:.1f}w" if avg_price > 0 else "N/A"
-        invoice_model_details.append(
-            f"- {model}: {info.get('count', 0)} ({info.get('user_car_count', 0)}) 台｜平均开票价格：{price_str}"
-        )
-    invoice_model_text = "\n".join(invoice_model_details)
-
-    corp = invoice_stats.get("total_corporate", 0)
-    if corp > 0:
-        invoice_model_text += f"\n对公批售：{corp} 台"
-
-    attainment_rate = None
-    is_warning = False
-    if pred_lock is not None and pred_lock > 0:
-        attainment_rate = float(lock_stats.get("total", 0)) / float(pred_lock)
-        is_warning = attainment_rate < 0.8
-
-    fields = {
-        BITABLE_FIELD_DATE: date_key,
-        BITABLE_FIELD_START_DATE: str(start_date),
-        BITABLE_FIELD_END_DATE: str(end_date),
-        BITABLE_FIELD_LOCK_TOTAL: int(lock_stats.get("total", 0)),
-        BITABLE_FIELD_INVOICE_TOTAL: int(invoice_stats.get("total", 0)),
-        BITABLE_FIELD_INVOICE_USER_TOTAL: int(invoice_stats.get("total_user_car", 0)),
-        BITABLE_FIELD_PRED_LOCK: (None if pred_lock is None else float(pred_lock)),
-        BITABLE_FIELD_ATTAINMENT_RATE: attainment_rate,
-        BITABLE_FIELD_IS_WARNING: bool(is_warning),
-        BITABLE_FIELD_LOCK_DETAIL: lock_model_text,
-        BITABLE_FIELD_INVOICE_DETAIL: invoice_model_text,
-        BITABLE_FIELD_GENERATED_AT: datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    values = build_bitable_values(lock_stats, invoice_stats, pred_lock, generated_at=datetime.now())
+    field_names = {
+        "date": BITABLE_FIELD_DATE,
+        "start_date": BITABLE_FIELD_START_DATE,
+        "end_date": BITABLE_FIELD_END_DATE,
+        "lock_total": BITABLE_FIELD_LOCK_TOTAL,
+        "invoice_total": BITABLE_FIELD_INVOICE_TOTAL,
+        "invoice_user_total": BITABLE_FIELD_INVOICE_USER_TOTAL,
+        "pred_lock": BITABLE_FIELD_PRED_LOCK,
+        "attainment_rate": BITABLE_FIELD_ATTAINMENT_RATE,
+        "is_warning": BITABLE_FIELD_IS_WARNING,
+        "lock_detail": BITABLE_FIELD_LOCK_DETAIL,
+        "invoice_detail": BITABLE_FIELD_INVOICE_DETAIL,
+        "generated_at": BITABLE_FIELD_GENERATED_AT,
     }
+    fields = {name: values[key] for key, name in field_names.items()}
+    date_key = values["date"]
+    start_date = lock_stats["start_date"]
     field_types = _bitable_get_field_types(BITABLE_APP_TOKEN, BITABLE_TABLE_ID, token)
     if int(field_types.get(BITABLE_FIELD_DATE, 0) or 0) == 5 and "~" in str(fields.get(BITABLE_FIELD_DATE) or ""):
         fields[BITABLE_FIELD_DATE] = str(start_date)
@@ -893,117 +383,10 @@ def send_feishu_notification(lock_stats, invoice_stats, pred_lock=None, mom=None
         print("❌ 错误: 未设置 FS_WEBHOOK_URL 环境变量，跳过发送消息")
         return
 
-    lock_mom_note = _format_mom((mom or {}).get("lock_pct"), (mom or {}).get("prev_start"), (mom or {}).get("prev_end"))
-    invoice_mom_note = _format_mom((mom or {}).get("invoice_pct"), (mom or {}).get("prev_start"), (mom or {}).get("prev_end"))
-
-    # 构建标题日期字符串（语义来源为用户运行的 --mtd 模式，而非日期形状反推）
-    start_date = lock_stats['start_date']
-    end_date = lock_stats['end_date']
-    if is_mtd:
-        date_str = f"{start_date} ~ {end_date}"
-        title_prefix = "本月累计"
-        lock_label = "本月累计锁单"
-        invoice_label = "本月累计开票"
-        show_cumulative = False
-    elif start_date == end_date:
-        date_str = str(start_date)
-        title_prefix = "每日"
-        lock_label = "昨日锁单数"
-        invoice_label = "昨日开票数"
-        show_cumulative = True
-    else:
-        date_str = f"{start_date} ~ {end_date}"
-        title_prefix = "阶段性"
-        lock_label = "期间锁单数"
-        invoice_label = "期间开票数"
-        show_cumulative = False
-
-    lock_cumulative_line = _format_cumulative_line("锁单", lock_cumulative) if show_cumulative else ""
-    invoice_cumulative_line = _format_cumulative_line("开票", invoice_cumulative) if show_cumulative else ""
-
-    # 构建锁单明细文本
-    lock_model_details = []
-    for model, stats in lock_stats['models'].items():
-        count = stats["count"]
-        detail_str = _format_lock_model_detail(stats)
-        lock_model_details.append(f"- {model}: {count} 单{detail_str}")
-    lock_model_text = "\n".join(lock_model_details)
-
-    # 构建开票明细文本
-    invoice_model_details = []
-    for model, info in invoice_stats['models'].items():
-        price_str = f"{info['avg_price']/10000:.1f}w" if info['avg_price'] > 0 else "N/A"
-        # 格式：- Model: Total (User) 台｜平均开票价格：XXw
-        invoice_model_details.append(f"- {model}: {info['count']} ({info['user_car_count']}) 台｜平均开票价格：{price_str}")
-    invoice_model_text = "\n".join(invoice_model_details)
-
-    # 构建预测锁单与达成率
-    pred_line = ""
-    warn_line = ""
-    is_warning = False
-    if pred_lock is not None and pred_lock > 0:
-        actual = lock_stats['total']
-        rate = actual / pred_lock
-        pred_line = f"预测锁单数：{pred_lock:.0f}"
-        if rate < 0.8:
-            is_warning = True
-            warn_line = (
-                f"\n\n⚠️ **达成率预警**\n"
-                f"达成率：{rate:.1%} < 80%\n"
-                f"实际锁单({actual}) 低于预测({pred_lock:.0f})，"
-                f"建议排查转化链路是否存在异常。"
-            )
-        else:
-            warn_line = f"\n达成率：{rate:.1%}（正常）"
-
-    card_content = {
-        "msg_type": "interactive",
-        "card": {
-            "header": {
-                "title": {
-                    "tag": "plain_text",
-                    "content": f"📊 {title_prefix}业务数据观察 ({date_str})"
-                },
-                "template": "red" if is_warning else "blue"
-            },
-            "elements": [
-                {
-                    "tag": "div",
-                    "text": {
-                        "tag": "lark_md",
-                        "content": f"**{lock_label}：** {lock_stats['total']} ({lock_stats['total_user_car']}) 台{lock_mom_note}\n{lock_model_text}\n{pred_line}{warn_line}" + (f"\n{lock_cumulative_line}" if lock_cumulative_line else "")
-                    }
-                },
-                {
-                    "tag": "hr"
-                },
-                {
-                    "tag": "div",
-                    "text": {
-                        "tag": "lark_md",
-                        "content": (
-                            f"**{invoice_label}：** {invoice_stats['total']} ({invoice_stats['total_user_car']}) 台{invoice_mom_note}"
-                            + (f"（不含对公批售 {invoice_stats.get('total_corporate', 0)} 台）" if invoice_stats.get('total_corporate', 0) > 0 else "")
-                            + f"\n{invoice_model_text}"
-                            + (f"\n{invoice_cumulative_line}" if invoice_cumulative_line else "")
-                        )
-                    }
-                },
-                {
-                    "tag": "hr"
-                },
-                {
-                    "tag": "note",
-                    "elements": [
-                        {
-                            "tag": "plain_text",
-                            "content": f"统计时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-                        }
-                    ]
-                }
-            ]
-        }
-    }
+    card_content = build_card(
+        lock_stats, invoice_stats, pred_lock, mom, is_mtd,
+        lock_cumulative, invoice_cumulative, generated_at=datetime.now(),
+    )
 
     # 传输收敛至 capabilities.notify（重试/频率限制/错误语义由能力统一处理）
     result = notify(raw_payload=card_content, provider_name="feishu_webhook")
@@ -1022,7 +405,9 @@ def main():
         return
 
     # 2. 分析数据
-    lock_stats = analyze_daily_lock_orders(df, start_date, end_date)
+    business_def = load_business_definition(BUSINESS_DEF_FILE) or {}
+    lock_analyzer = partial(analyze_daily_lock_orders, business_def=business_def)
+    lock_stats = lock_analyzer(df, start_date, end_date)
     invoice_stats = analyze_daily_invoice_orders(df, start_date, end_date)
     
     # 3. 获取预测锁单数
@@ -1034,66 +419,17 @@ def main():
 
     if lock_stats and invoice_stats:
         # MTD 模式下计算上月同周期环比
-        mom = compute_mtd_mom(df, lock_stats, invoice_stats, is_mtd=is_mtd)
-        lock_mom_note = _format_mom((mom or {}).get("lock_pct"), (mom or {}).get("prev_start"), (mom or {}).get("prev_end"))
-        invoice_mom_note = _format_mom((mom or {}).get("invoice_pct"), (mom or {}).get("prev_start"), (mom or {}).get("prev_end"))
-
+        mom = compute_mtd_mom(df, lock_stats, invoice_stats, is_mtd=is_mtd, lock_analyzer=lock_analyzer)
         # 单日观察模式追加 本月累计 / 本年累计（MTD / 阶段性窗口本身即累计口径，不重复计算）
         lock_cumulative = invoice_cumulative = None
-        lock_cumulative_line = invoice_cumulative_line = ""
         if not is_mtd and start_date == end_date:
-            lock_cumulative = compute_cumulative_stats(df, end_date, analyze_daily_lock_orders)
+            lock_cumulative = compute_cumulative_stats(df, end_date, lock_analyzer)
             invoice_cumulative = compute_cumulative_stats(df, end_date, analyze_daily_invoice_orders)
-            lock_cumulative_line = _format_cumulative_line("锁单", lock_cumulative)
-            invoice_cumulative_line = _format_cumulative_line("开票", invoice_cumulative)
 
-        # 打印结果到控制台
-        print("\n" + "="*30)
-        if is_mtd:
-            print(f"📅 本月累计: {start_date} ~ {end_date}")
-        elif start_date == end_date:
-            print(f"📅 日期: {start_date}")
-        else:
-            print(f"📅 日期范围: {start_date} ~ {end_date}")
-
-        lock_print_label = "本月累计锁单" if is_mtd else "总锁单数"
-        print(f" {lock_print_label}: {lock_stats['total']} ({lock_stats['total_user_car']}) 台{lock_mom_note}")
-        print("   车型分布:")
-        for model, stats in lock_stats['models'].items():
-            count = stats["count"]
-            detail_str = _format_lock_model_detail(stats)
-            print(f"   - {model}: {count} 单{detail_str}")
-        if pred_lock is not None and pred_lock > 0:
-            rate = lock_stats['total'] / pred_lock
-            warn = " ⚠️ 低于80%" if rate < 0.8 else ""
-            print(f" 预测锁单数: {pred_lock:.0f}")
-            print(f" 达成率: {rate:.1%}{warn}")
-        if lock_cumulative_line:
-            print(f" {lock_cumulative_line}")
-            
-        print("-" * 30)
-        
-        total_corp = invoice_stats.get('total_corporate', 0)
-        raw_total = invoice_stats.get('total_raw', invoice_stats['total'])
-        corp_parts = []
-        if total_corp > 0:
-            cm = invoice_stats.get('corporate_models', {})
-            for m in ['LS6', 'LS8', 'LS9', 'L6', 'LS7', 'L7']:
-                if m in cm:
-                    corp_parts.append(f"{m}：{cm[m]}")
-            corp_detail = "，".join(corp_parts) if corp_parts else ""
-            corp_note = f"，不含对公批售 {total_corp} 台" + (f"（{corp_detail}）" if corp_detail else "")
-        else:
-            corp_note = ""
-        invoice_print_label = "本月累计开票" if is_mtd else "总开票数"
-        print(f"🚚 {invoice_print_label}: {invoice_stats['total']} ({invoice_stats['total_user_car']}) 台{invoice_mom_note}{corp_note}")
-        print("   车型分布 (开票):")
-        for model, info in invoice_stats['models'].items():
-            price_display = f"{info['avg_price']/10000:.1f}w" if info['avg_price'] > 0 else "N/A"
-            print(f"   - {model}: {info['count']} ({info['user_car_count']}) 台｜平均开票价格：{price_display}")
-        if invoice_cumulative_line:
-            print(f" {invoice_cumulative_line}")
-        print("="*30 + "\n")
+        print_summary(
+            lock_stats, invoice_stats, pred_lock, mom, is_mtd,
+            lock_cumulative, invoice_cumulative,
+        )
 
         if dry_run:
             print("🧪 dry-run: 已跳过飞书通知发送")

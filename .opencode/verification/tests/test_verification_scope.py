@@ -176,3 +176,22 @@ def test_run_all_expands_and_marks_source():
     assert scope["decision"] == "run"
     assert scope["matched_rules"] == ["ALL(expanded)"]
     assert len(scope["required_targets"]) == len(_contract()["targets"])
+
+
+def test_monitor_libraries_select_behavior_checks_without_cli_smoke():
+    utils = rvs.PROJECT_ROOT / "workspace/utils"
+    paths = list((utils / "monitors").glob("*.py"))
+    paths += [
+        utils / "orders/filters.py", utils / "business_definition.py",
+        utils / "monitors/presenters/daily.py",
+    ]
+    for path in paths:
+        scope = rvs.resolve_scope(_contract(), [path.relative_to(rvs.PROJECT_ROOT).as_posix()])
+        assert scope["unclassified_files"] == []
+        assert scope["decision"] == "run"
+        ids = {target["id"] for target in scope["required_targets"]}
+        assert ids in (
+            {"pytest.monitor-runtime"},
+            {"pytest.scripts"},
+            {"pytest.monitor-runtime", "pytest.order-semantics", "pytest.scripts"},
+        )

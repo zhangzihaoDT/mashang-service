@@ -15,24 +15,15 @@ phase 规则：
 
 from __future__ import annotations
 
-import json
 from datetime import date, datetime, timedelta
-from pathlib import Path
 
-from utils.paths import BUSINESS_DEFINITION_PATH
+from utils.business_definition import load_business_definition as load_business_definition
 
 DEFAULT_OPEN_HOUR = 20
 DEFAULT_LAUNCH_WINDOW_DAYS = 14
 # 上市日（end）未确认时的预售监控兜底窗口：start 起连续 N 个自然日持续输出
 DEFAULT_PRESALE_OPEN_ENDED_WINDOW_DAYS = 3
 MONITOR_PHASES = ("presale", "launch")
-
-
-def load_business_definition(path: Path | str | None = None) -> dict:
-    p = Path(path) if path else BUSINESS_DEFINITION_PATH
-    if not p.exists():
-        raise FileNotFoundError(f"文件不存在: {p}")
-    return json.loads(p.read_text(encoding="utf-8"))
 
 
 def _as_date(value) -> date | None:
