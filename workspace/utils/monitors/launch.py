@@ -23,7 +23,7 @@ from utils.monitors.phase import (
     presale_cohort_start_parts,
     series_label,
 )
-from utils.monitors.order_filter import flag_test_orders
+from utils.monitors.order_filter import flag_test_orders, is_placeholder_identity
 
 
 # 当锁单窗口内 order_type 填充率低于该阈值时，视为该代际 order_type 尚未回填
@@ -54,21 +54,23 @@ def _norm_product_name(pname) -> str:
     return re.sub(r"\s+", " ", str(pname)).strip()
 
 
-def _is_real_lock(row) -> bool:
+def _is_real_lock(row, bdef: dict | None = None) -> bool:
     """真实用户锁单（收紧口径）：锁单前有小订支付记录且排除内部测试单。"""
     it = row.get("intention_payment_time")
     lt = row.get("lock_time")
     if not (pd.notna(it) and pd.notna(lt) and pd.Timestamp(it) <= pd.Timestamp(lt)):
         return False
-    buyer = str(row.get("buyer_identity_no", "") or "").strip()
-    owner = str(row.get("owner_identity_no", "") or "").strip()
-    if buyer == "9999999" or owner == "9999999":
+    # 占位号判定统一走 order_filter，避免与 flag_test_orders 口径分叉
+    if is_placeholder_identity(row.get("buyer_identity_no"), bdef):
+        return False
+    if is_placeholder_identity(row.get("owner_identity_no"), bdef):
         return False
     return True
 
 
 def resolve_launch_open_from_data(
-    base: pd.DataFrame, key: str, launch: pd.Timestamp | None, use_data: bool = True
+    base: pd.DataFrame, key: str, launch: pd.Timestamp | None, use_data: bool = True,
+    bdef: dict | None = None,
 ) -> pd.Timestamp | None:
     """开放时刻。目标系列用数据首个 real 锁单；历史对比用上市日 open_hour。"""
     if launch is None:
@@ -79,7 +81,7 @@ def resolve_launch_open_from_data(
     real = base.loc[base["series_group_logic"].eq(key)].copy()
     if real.empty:
         return launch_start
-    real = real[real.apply(_is_real_lock, axis=1)]
+    real = real[real.apply(lambda r: _is_real_lock(r, bdef), axis=1)]
     real_on_launch = real[real["lock_time"] >= launch_start]
     if real_on_launch.empty:
         return launch_start
@@ -169,7 +171,7 @@ def compute(
 
     open_t = None
     if launch is not None:
-        open_t = resolve_launch_open_from_data(base, generation, launch)
+        open_t = resolve_launch_open_from_data(base, generation, launch, bdef=business_def)
 
         obs_slice = base.loc[
             base["series_group_logic"].eq(generation)

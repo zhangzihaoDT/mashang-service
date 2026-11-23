@@ -67,14 +67,16 @@
 
 ### 选配信息 (仅限 config_attribute.parquet)
 
-数据结构：长表（EAV），每行一个选配项。2026 年起改为 Tableau 规范化视图。通过 `Order Number` 关联 `order_data.parquet` 补充了订单类型和 VIN。
+数据结构为长表（EAV），按 `(Order Number, Attribute)` 去重。通过 `Order Number` 关联 `order_data.parquet` 补充订单类型和 VIN。
 
 - `Order Number`: 订单号（与 `order_data.parquet` 的 `order_number` 对应，但字段名不同）
-- `Attribute`: 选配项名称（内饰、外饰、轮毂、动力电池等，共 63 种）
-- `value`: 选配项取值
+- `Attribute`: 选配项名称（内饰、外饰、轮毂、动力电池等）
+- `value`: 选配项取值显示名
 - `option_flag`: 选装标记（Y/N，Y=已选装）
 - `required`: 是否标配（Y/N，Y=标配，N=选装）
 - `price`: 选配价格（元，Int64）
+- `value_code`: 取值编码，优先取 Tableau `Attribute Value`，兼容旧列 `Value`
+- `attribute_code`: 属性编码，来自 Tableau `Attribute Code`，用于跨代际属性归并。旧数据允许为空。取值跨代际比较时仍须核对业务含义。
 - `order_type`: 订单类型（关联自 order_data，如用户车/员工/试驾车等）
 - `vin`: 车辆识别代码（关联自 order_data）
 
@@ -151,16 +153,18 @@
 | 下发门店数                       | int64     | 下发门店数量                        |
 | 主要渠道统计覆盖率               | float64   | 主要渠道统计覆盖率                  |
 
-### config_attribute.parquet (Total Rows: 4452631 · Unique Orders: 274692 · Unique Attributes: 63)
+### config_attribute.parquet
 
 | Column Name  | Data Type | Description                                           |
 | :----------- | :-------- | :---------------------------------------------------- |
 | Order Number | str       | 订单号（与 `order_data.order_number` 对应）           |
 | Attribute    | str       | 选配项名称（含内饰、外饰、轮毂、动力电池等）          |
-| value        | str       | 选配项取值                                            |
+| value        | str       | 选配项取值显示名                                      |
 | option_flag  | str       | 选装标记（Y/N，Y=已选装）                             |
 | required     | str       | 是否标配（Y/N，Y=标配，N=选装）                       |
 | price        | Int64     | 选配价格（元），空值表示无额外费用或不可单独计价      |
+| value_code   | str       | 取值编码（`Attribute Value`，旧格式为 `Value`）       |
+| attribute_code | str     | 属性编码（`Attribute Code`），旧数据可为空           |
 | order_type   | str       | 订单类型（关联自 order_data，如用户车/员工/试驾车等） |
 | vin          | str       | 车辆识别代码（关联自 order_data）                     |
 

@@ -17,7 +17,7 @@
 | 数据域 | 脚本 | 产物与处理方式 |
 |---|---|---|
 | 订单 | `order_data_to_parquet.py` | 导出近 60 日订单至 `order_data_2026.csv`，以已有 `order_data.parquet` 为底表合并 |
-| 选配 | `order_config_to_parquet.py` | 读取年度配置快照与滚动导出，更新 `config_attribute.parquet` |
+| 选配 | `order_config_to_parquet.py` | 读取年度配置快照与滚动导出，更新 `config_attribute.parquet`，保留属性与取值编码 |
 | 全局下发线索 | `assign_data_to_csv.py` | Tableau 渠道汇总导出至 `assign_data.csv` |
 | 试驾 | `test_drive_data_to_csv.py` | Tableau 试驾汇总导出至 `test_drive_data.csv` |
 | 锁单归因 | `lock_attribution_data_to_parquet.py` | 导出当年 CSV，按年度整理后发布 `lock_attribution_data.parquet`。已有原始文件时可用 `--no-export` 整理 |
@@ -29,9 +29,21 @@
 
 更新后运行 `make data-validate`，结合汇总核对该项退出状态、关键字段和数据最新时点。文件修改时间只能确认写入。全量编排默认继续处理后续步骤，出现失败时整体退出码非零。先确认失败步骤及已经写入的产物，再重试对应单项。
 
+### 选配数据
+
+原始文件位于 `dataset/tableau-hs/configuration/`，年度快照命名为
+`config_attribute_data_YYYY.csv`，滚动导出为 `config_attribute_data_update.csv`。
+全量构建需要至少覆盖 2022–2026 年的快照，也会读取目录中后续年份的同名快照。
+缺少所需文件、文件无法读取或没有有效行时，构建中止并保留现有 Parquet。
+同一 `(Order Number, Attribute)` 保留滚动导出的记录，其次按年度从新到旧取值。
+
+`Attribute Code` 写入 `attribute_code`，用于跨代际属性归并。
+`Attribute Value` 写入 `value_code`，旧格式使用 `Value`。缺失的编码保存为空。
+全量更新编排的选配步骤以增量模式运行，按订单号与属性名覆盖匹配行并保留历史记录。
+
 ## 历史重建与内部组件
 
-- `rebuild_config_parquet.py` 依赖四份年度配置快照，直接替换配置 Parquet。使用前核对快照完整性并备份现有产物。
+- `rebuild_config_parquet.py` 与选配全量构建共用同一整理逻辑，直接使用本地快照与滚动导出写入配置 Parquet。使用前核对快照完整性并备份现有产物。
 - `rebuild_order_data_parquet.py` 依赖指定年度文件，包括当前目录未见的 `order_data_2026_0428.csv`。先确认来源及完整性，再制定恢复步骤。
 - `tableau_export.py` 和 `tableau_views.json` 提供导出与视图配置。 `dataset_registry.py` 提供更新和校验清单，`tp_and_mix_ways_raw_guard.py` 支持上险原始层发布。
 

@@ -29,6 +29,7 @@ config_decision_engine.py — 通用配置判定引擎
 import argparse
 import json
 import sys
+import warnings
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -39,6 +40,12 @@ if str(_WS_ROOT) not in sys.path:
     sys.path.insert(0, str(_WS_ROOT))
 
 import pandas as pd
+from dataset.updater.order_config_to_parquet import (
+    CONFIG_ANNUAL_FILES,
+    CONFIG_SNAPSHOT_SUBDIR,
+    normalize_config_view,
+    read_tableau_csv,
+)
 from utils.result_contract import build_success_contract
 
 ORDER_PARQUET = REPO_ROOT / "dataset" / "order_data.parquet"
@@ -65,18 +72,6 @@ MULTIPLE_POSITIVE_PRICES = "MULTIPLE_POSITIVE_PRICES"
 MODEL_MAPPING_AMBIGUOUS = "MODEL_MAPPING_AMBIGUOUS"
 
 
-def _read_snapshot_csv(path):
-    """读取年度配置快照 CSV（2026=UTF-8 逗号分隔；旧年份=UTF-16 制表符分隔）。"""
-    for enc, sep in [("utf-8", ","), ("utf-16", "\t"), ("utf-16", ",")]:
-        try:
-            df = pd.read_csv(path, sep=sep, encoding=enc, low_memory=False)
-            if df.shape[1] >= 3:
-                return df
-        except Exception:
-            continue
-    return None
-
-
 class YearlySnapshotResolver:
     """按"最晚年度快照"消解互斥冲突：同一订单在不同年份快照中值不一致时，取最新年份的值。
 
@@ -84,45 +79,55 @@ class YearlySnapshotResolver:
     将快照年份视为记录时间，最新年份快照为权威值。
     """
 
-    # (年份, 文件名)：旧下划线命名已废弃，改用带 Value(code) 列的新快照
-    SNAPSHOT_FILES = [
-        ("2026", "config_attribute_data2026.csv"),
-        ("2025", "config_attribute_data2025.csv"),
-        ("2024", "config_attribute_data2024.csv"),
-        ("2023", "config_attribute_data.csv"),
-    ]
+    SNAPSHOT_FILES = CONFIG_ANNUAL_FILES
 
     def __init__(self, data_dir, option_config, snapshot_files=None):
         self.data_dir = Path(data_dir)
+        if snapshot_files is None:
+            self.data_dir /= CONFIG_SNAPSHOT_SUBDIR
         self.attribute = option_config["attribute"]
         self.target_values = set(option_config["target_values"])
-        self.snapshot_files = snapshot_files or self.SNAPSHOT_FILES
+        self.target_codes = option_config.get("target_codes") or {}
+        self.snapshot_files = self.SNAPSHOT_FILES if snapshot_files is None else snapshot_files
         self._latest = None
 
     def _load(self):
         if self._latest is not None:
             return
-        self._latest = {}
-        for year, fname in self.snapshot_files:
+        latest = {}
+        failures = []
+        read_count = 0
+        seen_orders = set()
+        for year, fname in sorted(self.snapshot_files, key=lambda snapshot: int(snapshot[0]), reverse=True):
             f = self.data_dir / fname
-            if not f.exists():
+            if not f.is_file():
+                failures.append(f"文件缺失: {f}")
                 continue
-            df = _read_snapshot_csv(f)
-            if df is None:
+            raw = read_tableau_csv(f)
+            if raw is None:
+                failures.append(f"无法读取: {f}")
                 continue
             try:
-                oc = next(c for c in df.columns if "order" in c.lower())
-                ac = next(c for c in df.columns if "attribute" in c.lower() and "name" in c.lower())
-                vc = next(c for c in df.columns if "value" in c.lower() and "display" in c.lower())
-            except StopIteration:
+                df = normalize_config_view(raw)
+            except ValueError as exc:
+                failures.append(f"{f}: {exc}")
                 continue
-            sub = df[(df[ac].astype(str) == self.attribute) & (df[vc].astype(str).isin(self.target_values))]
-            yr = int(year)
-            for onum, g in sub.groupby(oc):
-                key = str(onum)
-                vals = set(g[vc].astype(str))
-                if key not in self._latest or yr > self._latest[key][0]:
-                    self._latest[key] = (yr, vals)
+            if df.empty:
+                failures.append(f"无有效记录: {f}")
+                continue
+            read_count += 1
+            sub = df[df["Attribute"].eq(self.attribute) & ~df["Order Number"].isin(seen_orders)].copy()
+            seen_orders.update(sub["Order Number"])
+            if self.target_codes:
+                sub["value"] = sub["value_code"].map(self.target_codes).fillna(sub["value"])
+            sub = sub[sub["value"].isin(self.target_values)]
+            for onum, values in sub.groupby("Order Number")["value"]:
+                latest[onum] = (int(year), set(values))
+        if not read_count:
+            raise FileNotFoundError(f"无可用年度配置快照: {self.data_dir}。{'；'.join(failures)}")
+        if failures:
+            warnings.warn("部分年度配置快照不可用: " + "；".join(failures), stacklevel=2)
+        self._latest = latest
 
     def resolve(self, order_number):
         """返回该订单在最新快照中的目标配置值集合；无记录返回 None。"""
@@ -320,6 +325,8 @@ def determine_status(fact, option_config, conflict_resolver=None):
         if conflict_resolver is not None:
             try:
                 resolved = conflict_resolver(fact.order_number)
+            except FileNotFoundError:
+                raise
             except Exception:
                 resolved = None
         if resolved and len(resolved) == 1:

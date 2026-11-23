@@ -73,7 +73,8 @@ DATASETS: tuple[DatasetSpec, ...] = (
         DATASET_DIR / "config_attribute.parquet",
         "2",
         required=True,
-        key_fields=("Order Number",),
+        key_fields=("Order Number", "Attribute"),
+        note="EAV 长表，一单多属性；构建按订单号与属性名去重，属性编码用于分析归并",
     ),
     DatasetSpec(
         "order_phone_map",

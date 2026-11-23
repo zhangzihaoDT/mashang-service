@@ -164,7 +164,7 @@ python workspace/business_scripts/atp_price_report.py 2026-05 --output outputs/r
 
 ### 配置表 value_code 解析规则
 
-`config_attribute.parquet` 为 EAV 长表，字段：`Attribute`（属性名）、`value`（显示名）、`value_code`（配置 code）、`required`、`price`。
+`config_attribute.parquet` 为 EAV 长表，字段：`Order Number`、`Attribute`（属性显示名）、`attribute_code`（属性 code）、`value`（显示名）、`value_code`（配置 code）、`option_flag`、`required`、`price`、`order_type`、`vin`。
 
 **核心规律：`value_code` 是配置的唯一稳定标识，`value` 是显示名。**
 
@@ -175,6 +175,41 @@ python workspace/business_scripts/atp_price_report.py 2026-05 --output outputs/r
 - value_code 语义（跨属性通用档位）：`Y`=是、`N`=否、`Stand`=标准、`Pro`=高阶、`Plus`=增强
 - 原始配置含有判定：`value_code` 为 `N` 或 value 为"否/无/未选" → 未含；`Y`/`Stand`/`Pro`/`Plus` 等档位码 → 含；value_code 缺失时回退 value 文本判断
 - 配置拥有判定完全基于业务逻辑（config_semantics + config_attribute），不依赖官网配置页状态
+
+### 属性名归并：用 `attribute_code` 而非 `Attribute`
+
+**`attribute_code` 是属性的唯一稳定标识，`Attribute` 是显示名。** 跨车型/跨代际做配置对比时，**必须按 `attribute_code` 分组**，不能按 `Attribute` 中文名分组。
+
+原因：同一属性在不同代际/车型上中文命名不统一，按中文名分组会把同一配置拆成多行、分母各算各的。
+
+| attribute_code | 该编码下的中文名 |
+|---|---|
+| `OP-LASER` | 激光雷达 / 已选 / 超远距高精度激光雷达 / 超远距高精度双激光雷达 |
+| `OP-FRIDGE` | 车载冰箱 / 智能冷暖双用冰箱 |
+| `OP-Steer` | 线控转向 / 全线控转向系统 |
+| `OP-Screen` | 21.5英寸二排观影屏 / 21.5英寸4K二排观影屏 / 后排娱乐屏（仅5座可选） |
+
+实测 5 车口径下，按中文名分组有 76% 的属性只出现在单一车型（无法横向对比），按 `attribute_code` 后降至约 32%。
+
+注意：
+- 只有**属性轴**受益于 `attribute_code`。**取值轴仍不能跨车系对齐**：同一 `value_code` 在不同代际含义不同（如 `OP-LASER` 下的 `Pro` 在 LS8 是奢华智选包、在其他代际是激光雷达档位），取值归并仍需按业务语义单独处理。
+- 颜色/轮毂类编码的取值含义同样随代际变化（如 `SD-TI21` 在不同代数对应不同轮辋），轮毂按尺寸档位归并是唯一稳定的可比维度。
+- 编码缺失时（旧数据或特定导出）回退到原属性名，并可辅以同义名表兜底。
+
+### 跨车型配置对比的订单口径（`lock_config_option_compare.py`）
+
+`workspace/research_scripts/lock_config_option_compare.py` 生成多代际配置选装比例横向对比报告，订单口径为：
+
+1. **仅用户车**：`order_type == '用户车'`（严格零售，不含空值/试驾车/员工等）。
+2. **上市至今**：锁单时刻必须 ≥ **开放时刻 `open_t`**。
+   - `open_t` = 上市当天数据中**首个真实锁单的精确时刻**，不是上市日 00:00。
+   - 复用 `workspace/utils/monitors/launch.py::resolve_launch_open_from_data()`，与车型上市监控同口径。
+   - 实测各代际开放时刻均在上市当天白天/晚间（如 LS8 = 上市日 10:04、LS9 = 16:53），上市当天开售前的订单不计入。
+3. **剔除测试单**：复用 `workspace/utils/monitors/order_filter.py::flag_test_orders()`，判据为
+   总部主理店 + 假身份号，**或** buyer/owner 身份号为占位号（`9999999`）。
+4. **分母口径**：无该配置记录 = 未选，分母统一用该组全部用户车锁单。
+
+> 上市时间一律从 `shared/schema/business_definition.json` 的 `time_periods.{gen}.end` 读取，不得从数据推断。
 
 ### "已选"聚合属性（LS8 独有）
 

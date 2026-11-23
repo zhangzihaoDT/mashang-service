@@ -14,6 +14,15 @@ import io
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DATASET_DIR = REPO_ROOT / "dataset"
+CONFIG_SNAPSHOT_SUBDIR = Path("tableau-hs") / "configuration"
+CONFIG_ANNUAL_FILES = tuple(
+    (str(year), f"config_attribute_data_{year}.csv") for year in range(2026, 2021, -1)
+)
+CONFIG_UPDATE_FILE = "config_attribute_data_update.csv"
+CONFIG_KEY = ["Order Number", "Attribute"]
+CONFIG_VIEW_COLUMNS = [
+    *CONFIG_KEY, "value", "option_flag", "required", "price", "value_code", "attribute_code",
+]
 
 def parse_sql_condition(df, condition_str):
     def not_like_replacer(match):
@@ -479,39 +488,95 @@ def read_tableau_csv(csv_file, min_columns=2):
 
 
 def normalize_config_view(df_raw):
-    """把 Tableau 视图原始数据规范化为 parquet schema。
+    """规范化新旧 Tableau 视图，优先从 Attribute Value 读取取值编码。"""
+    columns = {"_".join(c.lower().split()): c for c in df_raw.columns}
+    order_col = next((columns[k] for k in ("order_number", "ordernumber", "order_no") if k in columns), None)
+    attr_col = next((c for k, c in columns.items() if "attribute" in k and "name" in k), None)
+    val_col = next((c for k, c in columns.items() if "value" in k and "display" in k), None)
+    required = {"Order Number": order_col, "Attribute": attr_col, "value": val_col}
+    missing = [name for name, source in required.items() if source is None]
+    if missing:
+        raise ValueError(f"配置输入缺少字段: {', '.join(missing)}")
 
-    输出列: Order Number, Attribute, value (显示名), value_code (配置 code, 新增 Value 列),
-    option_flag, required, price。
-    """
-    order_col = next(c for c in df_raw.columns if c.lower().replace(" ", "_") in ["order_number", "ordernumber", "order_no"])
-    attr_col = next(c for c in df_raw.columns if "attribute" in c.lower() and "name" in c.lower())
-    val_col = next(c for c in df_raw.columns if "value" in c.lower() and "display" in c.lower())
-    code_col = next((c for c in df_raw.columns if c.strip().lower() == "value"), None)
-    opt_col = next((c for c in df_raw.columns if c.lower().replace(" ", "_") == "option_flag"), None)
-    req_col = next((c for c in df_raw.columns if c.lower().replace(" ", "_") == "required"), None)
-    prc_col = next((c for c in df_raw.columns if c.lower().replace(" ", "_") == "price"), None)
-    extra = [c for c in [opt_col, req_col, prc_col, code_col] if c]
-    cols = [order_col, attr_col, val_col] + extra
-    df = df_raw[cols].dropna(subset=[order_col, attr_col, val_col]).copy()
-    df[val_col] = df[val_col].astype(str).str.strip()
-    df = df[df[val_col].ne("")]
-    rename = {order_col: "Order Number", attr_col: "Attribute", val_col: "value"}
-    if opt_col:
-        rename[opt_col] = "option_flag"
-    if req_col:
-        rename[req_col] = "required"
-    if prc_col:
-        rename[prc_col] = "price"
-        df[prc_col] = df[prc_col].astype(str).str.replace(",", "", regex=False)
-        df[prc_col] = pd.to_numeric(df[prc_col], errors="coerce").astype("Int64")
-    if code_col:
-        rename[code_col] = "value_code"
-        df[code_col] = df[code_col].astype(str).str.strip()
-    return df.rename(columns=rename)
+    sources = {**required, **{k: columns.get(k) for k in ("option_flag", "required", "price")}}
+    df = df_raw[[c for c in sources.values() if c is not None]].rename(
+        columns={source: name for name, source in sources.items() if source is not None}
+    ).dropna(subset=list(required))
+    df["Order Number"] = df["Order Number"].astype(str)
+    df["value"] = df["value"].astype(str).str.strip()
+    df = df.loc[df["value"].ne("")].reindex(columns=CONFIG_VIEW_COLUMNS)
+    df["price"] = pd.to_numeric(
+        df["price"].astype("string").str.replace(",", "", regex=False), errors="coerce"
+    ).astype("Int64")
+
+    def read_code(name):
+        if name not in columns:
+            return pd.Series(pd.NA, index=df.index, dtype="string")
+        return (df_raw.loc[df.index, columns[name]].astype("string").str.strip()
+                .replace({"": pd.NA, "nan": pd.NA, "<NA>": pd.NA, "None": pd.NA}))
+
+    df["value_code"] = read_code("attribute_value").fillna(read_code("value"))
+    df["attribute_code"] = read_code("attribute_code")
+    return df
 
 
-CONFIG_KEY = ["Order Number", "Attribute"]
+def annual_config_snapshots(raw_dir):
+    """返回已知和新发现的年度快照，按年份从新到旧排列。"""
+    files = dict(CONFIG_ANNUAL_FILES)
+    for path in raw_dir.glob("config_attribute_data_*.csv"):
+        match = re.fullmatch(r"config_attribute_data_(\d{4})\.csv", path.name)
+        if match:
+            files[match[1]] = path.name
+    return sorted(files.items(), reverse=True)
+
+
+def require_config_snapshots(raw_dir):
+    snapshots = [raw_dir / name for _, name in annual_config_snapshots(raw_dir)]
+    missing = [path.name for path in snapshots if not path.is_file()]
+    if missing:
+        raise FileNotFoundError(f"年度配置快照缺失: {', '.join(missing)}")
+    return snapshots
+
+
+def enrich_order_fields(frame, order_data_path):
+    enrich = pd.read_parquet(order_data_path, columns=["order_number", "order_type", "vin"])
+    enrich["order_number"] = enrich["order_number"].astype(str)
+    enrich = enrich.drop_duplicates(subset=["order_number"])
+    return frame.merge(enrich, left_on="Order Number", right_on="order_number", how="left").drop(
+        columns=["order_number"]
+    )
+
+
+def rebuild_config_parquet(raw_dir, order_data_path, config_parquet_path):
+    print("正在加载并处理所有年份的配置文件...")
+    paths = [raw_dir / CONFIG_UPDATE_FILE, *require_config_snapshots(raw_dir)]
+    parts = []
+    for path in paths:
+        if not path.is_file():
+            raise FileNotFoundError(f"配置输入缺失: {path}")
+        raw = read_tableau_csv(path)
+        if raw is None:
+            raise ValueError(f"无法读取配置输入: {path}")
+        try:
+            frame = normalize_config_view(raw)
+        except ValueError as exc:
+            raise ValueError(f"{path.name}: {exc}") from exc
+        if frame.empty:
+            raise ValueError(f"配置输入无有效记录: {path}")
+        parts.append(frame)
+        print(f" - 读取成功: {path.name}（{len(frame):,} 行）")
+
+    # 滚动导出优先，随后按年度从新到旧；同一订单可有多个不同属性。
+    config = pd.concat(parts, ignore_index=True)
+    rows_before = len(config)
+    config = config.drop_duplicates(CONFIG_KEY, keep="first")
+    print(f"✅ 去重前 {rows_before:,} 行 → 去重后 {len(config):,} 行")
+    config = enrich_order_fields(config, order_data_path)
+    write_config_parquet(config, config_parquet_path)
+    for col in ("attribute_code", "value_code", "order_type", "vin"):
+        print(f"  {col} 非空: {config[col].notna().sum():,}/{len(config):,}")
+    print(f"✅ 合并解析后的配置文件已保存至 {config_parquet_path}")
+    return config
 
 
 def write_config_parquet(frame, path):
@@ -519,8 +584,9 @@ def write_config_parquet(frame, path):
         staged = Path(temp.name)
     try:
         frame.to_parquet(staged, index=False)
-        saved_keys = pd.read_parquet(staged, columns=CONFIG_KEY)
-        if not saved_keys.equals(frame[CONFIG_KEY].reset_index(drop=True)):
+        checked_columns = [*CONFIG_KEY, "attribute_code", "value_code"]
+        saved = pd.read_parquet(staged, columns=checked_columns)
+        if not saved.equals(frame[checked_columns].reset_index(drop=True)):
             raise ValueError("配置 Parquet 写入校验失败")
         staged.replace(path)
     finally:
@@ -529,14 +595,13 @@ def write_config_parquet(frame, path):
 
 def incremental_update(existing_path: Path, view_df, order_data_path: Path, dry_run: bool = False):
     """按订单和属性更新，保留未在输入中出现的历史配置。"""
-    old = pd.read_parquet(existing_path)
+    old = pd.read_parquet(existing_path).reindex(columns=CONFIG_VIEW_COLUMNS)
     old["Order Number"] = old["Order Number"].astype(str)
     old_orders = set(old["Order Number"])
 
     view = normalize_config_view(view_df)
     if view.empty:
         raise ValueError("配置输入无有效记录")
-    view["Order Number"] = view["Order Number"].astype(str)
     view_orders = set(view["Order Number"])
 
     def deduplicate(frame):
@@ -549,6 +614,10 @@ def incremental_update(existing_path: Path, view_df, order_data_path: Path, dry_
     old = deduplicate(old)
     old_keys = pd.MultiIndex.from_frame(old[CONFIG_KEY])
     view_keys = pd.MultiIndex.from_frame(view[CONFIG_KEY])
+    # 旧格式滚动导出可能没有属性编码，保留同一订单属性的已有编码。
+    view["attribute_code"] = view["attribute_code"].fillna(
+        old.set_index(CONFIG_KEY)["attribute_code"].reindex(view_keys).set_axis(view.index)
+    )
     kept = old.loc[~old_keys.isin(view_keys)]
     new = pd.concat([view, kept], ignore_index=True)
     new_keys = pd.MultiIndex.from_frame(new[CONFIG_KEY])
@@ -563,12 +632,7 @@ def incremental_update(existing_path: Path, view_df, order_data_path: Path, dry_
     changed_pairs = (view_values.loc[common_keys] != old_values.loc[common_keys]).sum()
     added_pairs = len(view_keys.difference(old_keys))
 
-    # 重新关联 order_type / vin（先清掉旧表自带/历史合并产生的列，避免后缀重复）
-    for c in [c for c in new.columns if c in ("order_type", "vin") or c.startswith(("order_type_", "vin_"))]:
-        new = new.drop(columns=[c])
-    enrich = pd.read_parquet(order_data_path)[["order_number", "order_type", "vin"]].drop_duplicates(subset=["order_number"])
-    enrich["order_number"] = enrich["order_number"].astype(str)
-    new = new.merge(enrich, left_on="Order Number", right_on="order_number", how="left").drop(columns=["order_number"])
+    new = enrich_order_fields(new, order_data_path)
 
     diff = {
         "old_rows": int(len(old)), "new_rows": int(len(new)),
@@ -591,9 +655,9 @@ def main(force: bool = False, mobile: bool = False, timeout: int = 600, incremen
     
     load_env_file(REPO_ROOT / ".env")
 
-    raw_dir = DATASET_DIR / "tableau-hs" / "configuration"
+    raw_dir = DATASET_DIR / CONFIG_SNAPSHOT_SUBDIR
     raw_dir.mkdir(parents=True, exist_ok=True)
-    config_csv_path_update = raw_dir / "config_attribute_data_update.csv"
+    config_csv_path_update = raw_dir / CONFIG_UPDATE_FILE
     config_parquet_path = DATASET_DIR / "config_attribute.parquet"
     order_data_path = DATASET_DIR / "order_data.parquet"
     business_def_path = REPO_ROOT / "shared" / "schema" / "business_definition.json"
@@ -602,6 +666,8 @@ def main(force: bool = False, mobile: bool = False, timeout: int = 600, incremen
     if incremental and not config_parquet_path.exists():
         raise FileNotFoundError("缺少配置底表，请先运行全量构建")
     if input_csv is None and (force or not config_csv_path_update.exists()):
+        if not incremental:
+            require_config_snapshots(raw_dir)
         success = fetch_tableau_data(tableau_url, str(config_csv_path_update), mobile=mobile, timeout=timeout)
         if not success:
             print("❌ 无法获取 Tableau 数据，请检查权限或网络。")
@@ -634,104 +700,13 @@ def main(force: bool = False, mobile: bool = False, timeout: int = 600, incremen
             print(f"✅ 增量更新完成（按订单去重），已写入 {config_parquet_path}")
         return
 
-    # 2. Convert config data to Parquet
-    print("正在加载并处理所有年份的配置文件...")
-    # 顺序 = 去重优先级：最新 Tableau 增量 > 新年份 > 旧年份（keep="first"）
-    year_files = [
-        ("update", "config_attribute_data_update.csv"),
-        ("2026", "config_attribute_data2026.csv"),
-        ("2025", "config_attribute_data2025.csv"),
-        ("2024", "config_attribute_data2024.csv"),
-        ("2023", "config_attribute_data.csv"),
-    ]
-    processed_list = []
+    config_df = rebuild_config_parquet(raw_dir, order_data_path, config_parquet_path)
+    configured_orders = set(config_df["Order Number"])
 
-    for year, fname in year_files:
-        csv_file = raw_dir / fname
-
-        if not csv_file.exists():
-            print(f"⚠️ 找不到文件: {csv_file.name}")
-            continue
-
-        print(f" - 读取: {csv_file.name}")
-        df_raw = read_tableau_csv(csv_file, min_columns=2)
-        if df_raw is None:
-            print(f"❌ 无法读取文件: {csv_file.name}")
-            continue
-
-        order_col = next(c for c in df_raw.columns if c.lower().replace(" ", "_") in ["order_number", "ordernumber", "order_no"])
-        attr_col = next(c for c in df_raw.columns if "attribute" in c.lower() and "name" in c.lower())
-        val_col = next(c for c in df_raw.columns if "value" in c.lower() and "display" in c.lower())
-        code_col = next((c for c in df_raw.columns if c.strip().lower() == "value"), None)
-
-        extra_cols = []
-        opt_col = next((c for c in df_raw.columns if c.lower().replace(" ", "_") == "option_flag"), None)
-        req_col = next((c for c in df_raw.columns if c.lower().replace(" ", "_") == "required"), None)
-        prc_col = next((c for c in df_raw.columns if c.lower().replace(" ", "_") == "price"), None)
-        for c in [opt_col, req_col, prc_col, code_col]:
-            if c:
-                extra_cols.append(c)
-
-        cols = [order_col, attr_col, val_col] + extra_cols
-        df_year = df_raw[cols].dropna(subset=[order_col, attr_col, val_col]).copy()
-        df_year[val_col] = df_year[val_col].astype(str).str.strip()
-        df_year = df_year[df_year[val_col].ne("")]
-        rename_map = {order_col: "Order Number", attr_col: "Attribute", val_col: "value"}
-        if opt_col:
-            rename_map[opt_col] = "option_flag"
-        if req_col:
-            rename_map[req_col] = "required"
-        if prc_col:
-            rename_map[prc_col] = "price"
-            df_year[prc_col] = df_year[prc_col].astype(str).str.replace(",", "", regex=False)
-            df_year[prc_col] = pd.to_numeric(df_year[prc_col], errors="coerce").astype("Int64")
-        if code_col:
-            rename_map[code_col] = "value_code"
-            df_year[code_col] = df_year[code_col].astype(str).str.strip()
-        df_year = df_year.rename(columns=rename_map)
-        processed_list.append(df_year)
-
-    if not processed_list:
-        print("❌ 没有找到任何可处理的配置文件。")
-        return
-
-    config_df = pd.concat(processed_list, ignore_index=True)
-    # 按 (Order Number, Attribute) 去重：保持最新视图/年份优先（processed_list 顺序即优先级）
-    rows_before_dedup = len(config_df)
-    config_df = config_df.drop_duplicates(subset=["Order Number", "Attribute"], keep="first")
-    print(f"✅ 处理完成，去重前 {rows_before_dedup:,} 行 → 去重后 {len(config_df):,} 行")
-    order_col_name = "Order Number"
-
-    # Enrich with order-level info from order_data
-    print("正在关联订单表的 order_type 和 vin...")
-    order_df_enrich = pd.read_parquet(order_data_path)[["order_number", "order_type", "vin"]].drop_duplicates(subset=["order_number"])
-    order_df_enrich["order_number"] = order_df_enrich["order_number"].astype(str)
-    config_df = config_df.merge(order_df_enrich, left_on="Order Number", right_on="order_number", how="left").drop(columns=["order_number"])
-    print(f"  order_type 非空: {config_df['order_type'].notna().sum():,}/{len(config_df):,}")
-    print(f"  vin 非空: {config_df['vin'].notna().sum():,}/{len(config_df):,}")
-
-    write_config_parquet(config_df, config_parquet_path)
-    print(f"✅ 合并解析后的配置文件已保存至 {config_parquet_path}")
-
-    if not order_col_name:
-        print("⚠️ 未能在 Tableau 数据中找到订单号列（Order Number），将无法计算选配数！")
-        configured_orders = set()
-    else:
-        configured_orders = set(config_df[order_col_name].dropna().astype(str))
-
-    # 3. Load Business Definition & Order Data
     print("正在准备最终统计...")
-    # 由于前面已经读取过一次业务定义和订单数据，这里可以直接使用 order_df_temp
-    # 或者重新获取全量列以保证无副作用
-    if 'business_def' not in locals():
-        with open(business_def_path, 'r', encoding='utf-8') as f:
-            business_def = json.load(f)
-    
-    if 'order_df_temp' in locals():
-        order_df = order_df_temp
-    else:
-        order_df = pd.read_parquet(order_data_path)
-        order_df = apply_series_group_logic(order_df, business_def)
+    with open(business_def_path, encoding="utf-8") as f:
+        business_def = json.load(f)
+    order_df = apply_series_group_logic(pd.read_parquet(order_data_path), business_def)
 
     if not pd.api.types.is_datetime64_any_dtype(order_df["intention_payment_time"]):
         order_df["intention_payment_time"] = pd.to_datetime(order_df["intention_payment_time"], errors="coerce")

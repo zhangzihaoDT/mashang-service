@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""多代际「上市以来用户车锁单」配置选装比例横向对比。
+"""多代际用户车锁单的配置选装比例横向对比。
 
 被比较的 5 个车型（业务术语经 generation_terminology_mapping 解析，避免硬编码）：
   大F M0 → LS9；小F M0 → LS8；CM3 → CM3（纯电）；CM2 纯电 → CM2 按动力拆分；DM2 → DM2
 
 口径：
   - 锁单：order_data.parquet，series_group_logic 命中目标代际、lock_time 非空，order_number 去重；
-  - 时间窗：自上市日（business_definition.time_periods.<gen>.end）起至数据最新锁单日（含）；
+  - 时间窗：使用数据中已有锁单，上市日期取 business_definition.time_periods.<gen>.end；
   - 仅用户车：order_type == '用户车'（严格零售口径，不含 NaN/试驾车/员工等）；
   - CM2 纯电：CM2 内按 product_type_logic 拆分（52/66 → 增程，其余 → 纯电），只保留纯电；
-  - 配置：config_attribute.parquet 中该批订单的 (Attribute, value) 行，value 非空。
+  - 配置：config_attribute.parquet 中该批订单的配置行，按 attribute_code 对齐属性。
 
 选装比例定义（分母 = 该组全部用户车锁单；**无记录 = 未选**）：
   - 是/否型（BIN）：比例 = 显式「是」的订单数 / 全部锁单；无记录的订单计入「否」。
@@ -20,8 +20,8 @@
   - 轮毂：按尺寸档位（19/20/21/22 英寸）归并后再算——同一 value_code 在不同代际
     对应不同中文名，尺寸是唯一稳定的可比维度。
 
-同义属性合并（SYNONYM_GROUPS）：车载冰箱 ∪ 智能冷暖双用冰箱、拖挂系统 ∪ 拖挂尾勾、
-21.5英寸二排观影屏 ∪ 21.5英寸4K二排观影屏；任一为「是」即算有。合并后分母仍是全部锁单。
+缺少属性编码时使用原名称及 SYNONYM_GROUPS。属性归并后按订单去重，
+任一记录为「是」即计一次，分母仍是全部锁单。
 
 系列内拆分（SUBSERIES）：LS9 → 普通 / Hyper，DM2 → 普通 / JimChoo，CM2 → 纯电 / 增程；
 LS8 → 大五座 / 大六座（座位归属：产品名优先，2026-11-06 起改由「座椅」属性还原）。
@@ -41,6 +41,7 @@ import argparse
 import json
 import re
 import sys
+from collections import Counter
 from pathlib import Path
 
 import pandas as pd
@@ -51,6 +52,8 @@ for _p in (str(REPO_ROOT), str(_WS)):
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
+from utils.monitors.launch import resolve_launch_date, resolve_launch_open_from_data  # noqa: E402
+from utils.monitors.order_filter import filter_test_orders  # noqa: E402
 from utils.monitors.phase import load_business_definition  # noqa: E402
 from utils.monitors.series_group import apply_series_group_logic  # noqa: E402
 
@@ -94,7 +97,7 @@ DEFAULT_EXCLUDE_NAMES = ["内饰", "外饰", "方向盘", "座椅"]
 MAX_CHO_VALUES = 6
 YES, NO = "是", "否"
 
-# 同义属性组：同一配置在不同属性名下记录，统计时合并为一项（任一为「是」即算有）。
+# 缺少属性编码时，用以下名称归并同一配置。
 #   - 车载冰箱 / 智能冷暖双用冰箱：LS9 Hyper 用前者、普通版用后者，是同一台冰箱
 #   - 拖挂系统 / 拖挂尾勾：LS9 两套命名并存
 #   - 21.5英寸二排观影屏 / 21.5英寸4K二排观影屏：LS8 同一块屏的两个命名版本
@@ -102,6 +105,10 @@ SYNONYM_GROUPS: dict[str, list[str]] = {
     "冰箱": ["车载冰箱", "智能冷暖双用冰箱"],
     "拖挂": ["拖挂系统", "拖挂尾勾"],
     "21.5英寸二排观影屏": ["21.5英寸二排观影屏", "21.5英寸4K二排观影屏"],
+}
+ATTRIBUTE_NOTES = {
+    "OP-LASER": "各代际的激光雷达取值对应不同档位。LS8 按选装包档位派生。",
+    "OP-Battery": "该编码也用于「5C 超快充电池+车载冰箱」套包。套包与单独电池的选装率需分别解读。",
 }
 
 # ── 档位型属性（selection_tier）────────────────────────────────────────────
@@ -193,23 +200,73 @@ def power_type(product_name: str) -> str:
 
 
 def load_lock_universe(bd: dict) -> pd.DataFrame:
-    """用户车 + 已锁单，含代际归属与动力类型。"""
-    cols = ["order_number", "order_type", "lock_time", "product_name", "series"]
+    """用户车 + 已锁单 + 剔除测试单，含代际归属与动力类型。"""
+    cols = [
+        "order_number", "order_type", "lock_time", "product_name", "series",
+        "store_name", "buyer_identity_no", "owner_identity_no", "intention_payment_time",
+    ]
     df = pd.read_parquet(_ORDER_DATA, columns=cols)
     df["lock_time"] = pd.to_datetime(df["lock_time"], errors="coerce")
+    df["intention_payment_time"] = pd.to_datetime(df["intention_payment_time"], errors="coerce")
     df = apply_series_group_logic(df, bd)
     d = df[df["order_type"].eq("用户车") & df["lock_time"].notna()].copy()
+    # 剔除测试单（总部主理店 + 假身份号 / 占位号），与上市监控同口径
+    d = filter_test_orders(d, bd)
     d["order_number"] = d["order_number"].astype(str).str.strip()
     d = d.drop_duplicates("order_number")
     d["power_type"] = d["product_name"].map(power_type)
     return d
 
 
-def select_orders(d: pd.DataFrame, gen: str, bev_only: bool) -> pd.DataFrame:
+def launch_open_time(base: pd.DataFrame, bd: dict, gen: str) -> pd.Timestamp | None:
+    """上市开放时刻（open_t）：上市当天首个真实锁单时刻，与上市监控同口径。"""
+    launch = resolve_launch_date(bd.get("time_periods") or {}, gen)
+    if launch is None:
+        return None
+    return resolve_launch_open_from_data(base, gen, launch, bdef=bd)
+
+
+def select_orders(d: pd.DataFrame, gen: str, bev_only: bool, bd: dict,
+                  open_t: pd.Timestamp | None = None) -> pd.DataFrame:
+    """选定代际订单：上市至今（lock_time >= 开放时刻），剔除上市前锁单。"""
     s = d[d["series_group_logic"].eq(gen)]
+    if open_t is not None:
+        s = s[s["lock_time"] >= open_t]
     if bev_only:
         s = s[s["power_type"].eq("纯电")]
     return s
+
+
+def attribute_keys(cfg: pd.DataFrame) -> pd.Series:
+    names = cfg["Attribute"]
+    aliases = {alias: name for name, members in SYNONYM_GROUPS.items() for alias in members}
+    fallback = names.replace(aliases)
+    if "attribute_code" not in cfg:
+        return "name:" + fallback
+    codes = (cfg["attribute_code"].astype("string").str.strip()
+             .replace({"": pd.NA, "nan": pd.NA, "None": pd.NA, "<NA>": pd.NA}))
+    missing = codes.isna()
+    if missing.any():
+        pairs = pd.DataFrame({"name": names, "fallback": fallback, "code": codes}).dropna()
+        for name_col, labels in (("name", names), ("fallback", fallback)):
+            unique = pairs.groupby(name_col)["code"].agg(["nunique", "first"])
+            unambiguous = unique.loc[unique["nunique"].eq(1), "first"]
+            codes = codes.fillna(labels.map(unambiguous))
+    return ("code:" + codes).fillna("name:" + fallback)
+
+
+def attribute_identity(key: str, names: Counter) -> dict:
+    code = key.removeprefix("code:") if key.startswith("code:") else None
+    variants = sorted(names, key=lambda name: (-names[name], name))
+    attr = variants[0] if code else key.removeprefix("name:")
+    merged_from = variants if len(variants) > 1 else []
+    if code is None:
+        merged_from = SYNONYM_GROUPS.get(attr, merged_from)
+    return {
+        "attribute": attr, "attribute_code": code,
+        **({"merged_from": merged_from} if merged_from else {}),
+        **({"note": ATTRIBUTE_NOTES[code]} if code in ATTRIBUTE_NOTES else {}),
+    }
 
 
 def build_cell(s: pd.DataFrame, cfg_sub: pd.DataFrame, label: str, gen: str,
@@ -228,20 +285,9 @@ def build_cell(s: pd.DataFrame, cfg_sub: pd.DataFrame, label: str, gen: str,
     ex_norms = [_norm(x) for x in exclude]
     attributes = []
 
-    # 先做同义合并：同一配置在不同属性名下记录（如 车载冰箱 / 智能冷暖双用冰箱），
-    # 按「任一属性为是」合并为一项，避免同一配置被拆成两行、分母各算各的。
-    merged: dict[str, set[str]] = {}
+    if "_attribute_key" not in cfg_sub:
+        cfg_sub = cfg_sub.assign(_attribute_key=attribute_keys(cfg_sub))
     consumed: set[str] = set()
-    for name, aliases in SYNONYM_GROUPS.items():
-        present = [a for a in aliases if a in set(cfg_sub["Attribute"].astype(str))]
-        if not present:
-            continue
-        yes = set()
-        for a in present:
-            g = cfg_sub[cfg_sub["Attribute"].astype(str).eq(a)]
-            yes |= set(g.loc[g["value"].astype(str).eq(YES), "Order Number"])
-        merged[name] = yes
-        consumed |= set(present)
 
     # 旧版档位字段 → 补全为「已选」档位（同义归并，不剔除订单）
     legacy = cfg_sub[cfg_sub["Attribute"].astype(str).isin(list(LEGACY_TIER_ATTRS))]
@@ -254,25 +300,17 @@ def build_cell(s: pd.DataFrame, cfg_sub: pd.DataFrame, label: str, gen: str,
             ok = hit if ok is None else (ok & hit)
         legacy_orders = ok or set()
         consumed |= set(LEGACY_TIER_ATTRS)
-    if legacy_orders:
-        # 把这些单补一条虚拟的「已选 = Pro」，使其与正常订单同口径
-        synth = pd.DataFrame({
-            "Order Number": list(legacy_orders),
-            "Attribute": "已选",
-            "value": "奢华智选包",
-            "value_code": LEGACY_TIER_TARGET,
-        })
-        cfg_sub = pd.concat([cfg_sub, synth], ignore_index=True)
-
     # 档位型属性（已选）→ 派生为「是否含某包」的配置项，而不是并列选项
     for attr, derived in TIER_DERIVED.items():
-        if attr not in set(cfg_sub["Attribute"].astype(str)):
+        g = cfg_sub[cfg_sub["Attribute"].eq(attr)]
+        if g.empty and not legacy_orders:
             continue
-        g = cfg_sub[cfg_sub["Attribute"].astype(str).eq(attr)]
         consumed.add(attr)
-        codes = g["value_code"].astype(str)
+        codes = g.get("value_code", pd.Series(index=g.index, dtype="string"))
         for name, tiers in derived:
-            hit = set(g.loc[codes.isin(list(tiers)), "Order Number"])
+            hit = set(g.loc[codes.isin(tiers), "Order Number"])
+            if LEGACY_TIER_TARGET in tiers:
+                hit |= legacy_orders
             attributes.append({
                 "attribute": name, "kind": "BIN", "raw_variants": {},
                 "denominator_scope": "full",
@@ -285,21 +323,27 @@ def build_cell(s: pd.DataFrame, cfg_sub: pd.DataFrame, label: str, gen: str,
                 "derived_from": f"{attr} ⊆ {' ∪ '.join(tiers)}",
             })
 
-    for attr, grp in cfg_sub.groupby("Attribute"):
-        attr = str(attr)
-        if attr in consumed or any(x and x in _norm(attr) for x in ex_norms):
-            continue
-        # 该配置对本组不适用（如增程车的 5C 超快充电池）→ 整项不呈现
-        applicable = ATTR_APPLICABILITY.get(attr)
-        if applicable is not None and (gen, power_type) not in applicable:
+    visible_names = [
+        name for name in cfg_sub["Attribute"].unique()
+        if not any(x and x in _norm(name) for x in ex_norms)
+        and (name not in ATTR_APPLICABILITY or (gen, power_type) in ATTR_APPLICABILITY[name])
+    ]
+    axis = {}
+    for key, grp in cfg_sub[cfg_sub["Attribute"].isin(visible_names)].groupby("_attribute_key"):
+        names = Counter(grp["Attribute"].value_counts().to_dict())
+        axis[key] = {"names": names, "orders_with_record": int(grp["Order Number"].nunique())}
+        identity = attribute_identity(key, names)
+        grp = grp[~grp["Attribute"].isin(consumed)]
+        if grp.empty:
             continue
         with_value = int(grp["Order Number"].nunique())
         coverage = with_value / n if n else 0
-        # 轮毂按尺寸档位归并：同一 value_code 在不同代际对应不同中文名
-        # （如 SD-TI21 在 大F M0=21″星耀超多辐、CM3/CM2=21″都市出行闪耀、小F M0=21″星夜黑），
-        # 中文名与代号都无法跨车系直接对齐，尺寸是唯一稳定维度。
-        if attr == "轮毂":
+        is_wheel = key == "code:WHEEL" or identity["attribute"] == "轮毂"
+        raw_variants = {}
+        # 属性编码只对齐属性。轮毂取值仍按尺寸归并，例如 SD-TI21 在不同代际对应不同显示名。
+        if is_wheel:
             wheel = grp.drop_duplicates(["Order Number", "value"]).copy()
+            raw_variants = wheel["value"].value_counts().to_dict()
             size = wheel["value"].astype(str).str.extract(r"(\d{2})英寸")[0]
             wheel["_display"] = size.map(lambda x: f"{x}英寸" if pd.notna(x) else "")
             vc = (wheel.groupby("Order Number")["_display"]
@@ -307,10 +351,20 @@ def build_cell(s: pd.DataFrame, cfg_sub: pd.DataFrame, label: str, gen: str,
                   .value_counts())
             kind = "CHO"
         else:
-            vc = grp.drop_duplicates(["Order Number", "value"])["value"].astype(str).value_counts()
-            vals = set(vc.index)
-            kind = "BIN" if (YES in vals and NO in vals) else (
-                "SOLO" if len(vals) == 1 else "CHO")
+            values = grp.drop_duplicates(["Order Number", "value"])
+            vals = set(values["value"])
+            kind = "BIN" if vals <= {YES, NO} else ("SOLO" if len(vals) == 1 else "CHO")
+            if kind == "BIN":
+                vc = values["value"].value_counts()
+            else:
+                multiple = values["Order Number"].duplicated(keep=False)
+                vc = values.loc[~multiple, "value"].value_counts()
+                if multiple.any():
+                    combined = (values.loc[multiple].groupby("Order Number")["value"]
+                                .agg(lambda v: YES if YES in set(v) else " / ".join(sorted(v))))
+                    vc = pd.concat([vc, combined.value_counts()]).groupby(level=0).sum().sort_values(
+                        ascending=False
+                    )
         items = []
         if kind == "BIN":
             # 无记录 = 未选：显式「是」按记录数，其余全部计入「否」（含无记录订单）
@@ -327,33 +381,17 @@ def build_cell(s: pd.DataFrame, cfg_sub: pd.DataFrame, label: str, gen: str,
                 items.append({"value": f"其它（{len(vc) - MAX_CHO_VALUES} 项合计）",
                               "count": rest, "rate": round(rest / n, 4) if n else 0})
         attributes.append({
-            "attribute": attr, "kind": kind,
-            "raw_variants": ({} if attr != "轮毂" else
-                             {str(k): int(v) for k, v in
-                              grp.drop_duplicates(["Order Number", "value"])["value"]
-                              .astype(str).value_counts().items()}),
+            **identity, "_key": key, "kind": kind,
+            "raw_variants": raw_variants,
             "denominator_scope": "full",
             "orders_with_record": with_value,
             "record_coverage": round(coverage, 4),
             "items": items,
         })
 
-    # 同义合并组作为独立配置项（分母同全量）
-    for name, yes in merged.items():
-        attributes.append({
-            "attribute": name, "kind": "BIN", "raw_variants": {},
-            "denominator_scope": "full",
-            "orders_with_record": len(yes),
-            "record_coverage": round(len(yes) / n, 4) if n else 0,
-            "items": [{"value": YES, "count": len(yes),
-                       "rate": round(len(yes) / n, 4) if n else 0},
-                      {"value": NO, "count": n - len(yes),
-                       "rate": round((n - len(yes)) / n, 4) if n else 0}],
-            "merged_from": SYNONYM_GROUPS[name],
-        })
     # 排序：有「是」比例的先按该比例降序（体现拥有率高低），其余按覆盖率
     def _sort_key(a: dict):
-        if a.get("derived_from") or a.get("merged_from") or a["kind"] == "BIN":
+        if a["kind"] == "BIN":
             yes = next((i["rate"] for i in a["items"] if i["value"] == YES), 0)
             return (0, -yes, a["attribute"])
         return (1, -a["record_coverage"], a["attribute"])
@@ -364,40 +402,34 @@ def build_cell(s: pd.DataFrame, cfg_sub: pd.DataFrame, label: str, gen: str,
         "attributes_excluded": exclude,
         "attributes": attributes,
         "n_attributes": len(attributes),
+        "_attribute_axis": axis,
     }
 
 
-# 全量口径下「code 级真正同义」的属性：只有这些才允许进跨车型矩阵。
-# 判据（本份数据实测）：该属性在 ≥2 台车上覆盖率 ≥50%（即每单都有显式 是/否 或单选记录），
-# 且参与比较各车的取值都由同一套 value_code 提供。像「激光雷达」虽然各车都有 code，
-# 但同一个 code 在 大F M0/CM3/CM2 指的是不同档位（高阶+Thor vs 超远距 vs 标准+Orin），
-# 中文名与 code 都不能安全对齐，故整体不进矩阵，只在分车明细里展示。
+# 跨车型取值比较限轮毂尺寸及冰箱是否选装；旧表使用对应名称。
+# OP-LASER 在不同代际对应不同档位（含 LS8 选装包），只对齐属性。
 COMPARABLE_ATTRS: frozenset[str] = frozenset({
-    "轮毂",              # 按尺寸档位归一后可跨车比（见 build_cell）
-    "智能冷暖双用冰箱",   # 大F M0 是/否 vs CM2 是/否，code 一致
+    "code:WHEEL", "code:OP-FRIDGE", "name:轮毂", "name:冰箱", "name:智能冷暖双用冰箱",
 })
 
 
 def compare_cells(cells: list[dict]) -> list[dict]:
-    """只把「全量口径 + code 级同义」的取值放进跨车型矩阵。
-
-    修正经过：
-    - 早期版本按中文名跨车合并，会把「SD-TI21」在 大F M0(21″星耀)、CM3/CM2(21″都市出行)、
-      小F M0(21″星夜黑) 的三种含义拼成一行比较，属口径错误；
-    - 现在轮毂按尺寸档位归一，其他属性仅在 COMPARABLE_ATTRS 白名单内比较；
-    - 单值/仅选修口径（覆盖率 <50%）一律不进矩阵。
-    """
+    """在全量锁单口径下比较语义已对齐的取值。"""
     attr_map: dict[str, dict[str, dict]] = {}
     for c in cells:
         for a in c["attributes"]:
-            attr_map.setdefault(a["attribute"], {})[c["label"]] = a
+            key = a.get("_key", f"name:{a['attribute']}")
+            attr_map.setdefault(key, {})[c["label"]] = a
     rows = []
-    for attr, per_cell in attr_map.items():
-        if attr not in COMPARABLE_ATTRS or len(per_cell) < 2:
+    for key, per_cell in attr_map.items():
+        if key not in COMPARABLE_ATTRS or len(per_cell) < 2:
             continue
+        identity = next(iter(per_cell.values()))
         values: dict[str, dict[str, float]] = {}
         for label, a in per_cell.items():
             if a["denominator_scope"] != "full":
+                continue
+            if key not in {"code:WHEEL", "name:轮毂"} and a["kind"] != "BIN":
                 continue
             for it in a["items"]:
                 values.setdefault(it["value"], {})[label] = it["rate"]
@@ -406,7 +438,8 @@ def compare_cells(cells: list[dict]) -> list[dict]:
             if len(nonzero) < 2:
                 continue
             rows.append({
-                "attribute": attr,
+                "attribute": identity["attribute"],
+                "attribute_code": identity.get("attribute_code"),
                 "value": val,
                 "cells_present": sorted(per_label),
                 "denominator_scope": "full",
@@ -415,6 +448,27 @@ def compare_cells(cells: list[dict]) -> list[dict]:
             })
     rows.sort(key=lambda r: (-r["gap"], r["attribute"], r["value"]))
     return rows
+
+
+def align_attributes(cells: list[dict]) -> list[dict]:
+    """用主车型的名称频次统一显示名，并输出每个属性的记录覆盖。"""
+    names_by_key: dict[str, Counter] = {}
+    orders_by_key: dict[str, dict] = {}
+    for c in cells:
+        for key, data in c["_attribute_axis"].items():
+            names_by_key.setdefault(key, Counter()).update(data["names"])
+            orders_by_key.setdefault(key, {})[c["label"]] = data["orders_with_record"]
+    identities = {key: attribute_identity(key, names) for key, names in names_by_key.items()}
+    for c in cells:
+        for cell in [c, *c.get("children", [])]:
+            for a in cell["attributes"]:
+                key = a.get("_key")
+                if key in identities:
+                    a.update(identities[key])
+    return [
+        {**identities[key], "orders_by_cell": orders_by_key[key]}
+        for key in sorted(identities, key=lambda k: (-len(orders_by_key[k]), identities[k]["attribute"], k))
+    ]
 
 
 def assign_seat(orders: pd.DataFrame | None, cfg: pd.DataFrame
@@ -453,13 +507,15 @@ def apply_subfilter(s: pd.DataFrame, op: str, arg: str) -> pd.DataFrame:
 
 def _make_cell(d: pd.DataFrame, cfg: pd.DataFrame, label: str, gen: str,
                bev_only: bool, exclude: list[str], as_of: pd.Timestamp,
-               orders: pd.DataFrame | None = None) -> dict:
+               orders: pd.DataFrame | None = None, bd: dict | None = None,
+               open_t: pd.Timestamp | None = None) -> dict:
     """构建一个统计单元。先做录入异常审计并剔除异常单，再统计（不再含异常）。
 
     gen_cover 基于「整个代际」而非本单元的订单集合：子车型（如 LS9 Hyper）只是代际的一个切片，
     若用切片自身算覆盖率，会把代的正常属性（如 97% 覆盖的拖挂系统）误判成稀有。
     """
-    s = orders if orders is not None else select_orders(d, gen, bev_only)
+    s = orders if orders is not None else select_orders(
+        d, gen, bev_only, bd or load_business_definition(_BUSINESS_DEF), open_t)
     sub = cfg[cfg["Order Number"].isin(set(s["order_number"]))]
     audit = audit_mixed_templates(s, sub, label)
     bad = set(audit["excluded_order_numbers"])
@@ -470,6 +526,7 @@ def _make_cell(d: pd.DataFrame, cfg: pd.DataFrame, label: str, gen: str,
     audit.setdefault("n_total_before_exclusion", cell["n"] + len(bad))
     cell["audit"] = audit
     cell["_orders"] = s          # 供座位/子车型二次分组；渲染与导出时会剔除
+    cell["_open_t"] = open_t if orders is None else None   # 子车型复用同一开放时刻
     return cell
 
 
@@ -489,19 +546,22 @@ def compute(cells_arg: list[tuple[str, str]] | None = None,
     as_of = pd.Timestamp(d["lock_time"].max()).normalize()
     cfg = pd.read_parquet(_CONFIG_DATA)
     cfg["Order Number"] = cfg["Order Number"].astype(str).str.strip()
-    cfg = cfg[cfg["value"].notna()].copy()
+    cfg = cfg.dropna(subset=["Attribute", "value"]).copy()
+    cfg["_attribute_key"] = attribute_keys(cfg)
 
     out_cells = []
     for label, token in cells_arg:
         gen = resolve_token(bd, token)
         bev_only = "纯电" in label
-        cell = _make_cell(d, cfg, label, gen, bev_only, exclude, as_of)
+        open_t = launch_open_time(d, bd, gen)
+        cell = _make_cell(d, cfg, label, gen, bev_only, exclude, as_of,
+                          bd=bd, open_t=open_t)
         want_split = (not cells_only) and splits and gen in splits
         if want_split:
             children = []
             # CM2 的父级本身只取纯电（CM2 纯电），拆分要覆盖整个代际（纯电+增程）；
             # 其余（LS9/DM2）直接在父级订单池上划分。
-            pool = (select_orders(d, gen, False)
+            pool = (select_orders(d, gen, False, bd, cell.get("_open_t"))
                     if bev_only and gen in ("CM2", "LS6") else cell["_orders"])
             # 剔除集合沿用父级审计结果（父级已按 product_name 分组判定过），
             # 子切片再判会把 Hyper 等特配产品自己的模板当成异常，造成父级 ≠ 子级之和。
@@ -539,7 +599,8 @@ def compute(cells_arg: list[tuple[str, str]] | None = None,
                 if children:
                     cell["children"] = children
         out_cells.append(cell)
-    return {"cells": out_cells, "matrix": compare_cells(out_cells),
+    axis = align_attributes(out_cells)
+    return {"cells": out_cells, "matrix": compare_cells(out_cells), "attribute_axis": axis,
             "as_of": as_of.date().isoformat(),
             "excluded": sum(len(c.get("audit", {}).get("excluded_order_numbers", []))
                             for c in out_cells)}
@@ -684,8 +745,10 @@ def render_terminal(rc: dict) -> str:
             f"（剔除异常 {c['audit']['n_suspect']}）" if c["audit"].get("n_suspect") else ""))
         for ch in c.get("children") or []:
             lines.append(f"      ↪ {ch['label']}: {ch['n']:,} 单")
-    lines.append("  口径：无记录=未选（分母=该组全部用户车锁单）；同义属性已合并；"
+    lines.append("  口径：无记录=未选（分母=该组全部用户车锁单）；属性按编码归并；"
                  "排除 " + "/".join(rc["cells"][0]["attributes_excluded"]))
+    axis = rc["attribute_axis"]
+    lines.append(f"  属性维度 {len(axis)} 项，其中 {sum(len(a['orders_by_cell']) == 1 for a in axis)} 项仅一组有记录")
     for c in rc["cells"]:
         for cell in [c] + (c.get("children") or []):
             lines.append(f"\n## {cell['label']}   n={cell['n']:,}")
@@ -699,22 +762,35 @@ def render_html(rc: dict, out_path: Path) -> None:
     cells = rc["cells"]
     e = lambda x: str(x).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
+    def attribute_notes(a):
+        notes = []
+        if a.get("note"):
+            notes.append(a["note"])
+        return "".join(f"<div class='mini'>{e(note)}</div>" for note in notes)
+
+    def code_cell(a):
+        """编码列：同义合并明细收敛到 title 提示，避免逐行堆叠小字。"""
+        code = a.get("attribute_code") or "—"
+        merged = a.get("merged_from")
+        if not merged:
+            return f"<td>{e(code)}</td>"
+        detail = "同义合并：" + " ∪ ".join(merged)
+        return f"<td title='{e(detail)}'>{e(code)} ∪{len(merged) - 1}</td>"
+
     def table(cell: dict, level: int = 0) -> list[str]:
         cls = " class='sub'" if level else ""
         out = [f"<table{cls}><tr><th>配置项</th><th>取值</th><th class='num'>单数</th>"
                "<th class='num'>占该组</th><th>分布</th></tr>"]
         for a in cell["attributes"]:
             items = a["items"]
-            note = ""
+            note = attribute_notes(a)
             if a.get("derived_from"):
-                note = f"<div class='mini'>档位派生：{e(a['derived_from'])}</div>"
+                note += f"<div class='mini'>档位派生：{e(a['derived_from'])}</div>"
                 if "Stand" in a["derived_from"]:
                     note += ("<div class='mini'>Stand 档的取值名本身叫「超远距高精度激光雷达」，"
-                             "是「已选」列的一个档位名，不是独立配置项</div>")
-            elif a.get("merged_from"):
-                note = f"<div class='mini'>同义合并：{' ∪ '.join(a['merged_from'])}</div>"
+                             "对应「已选」属性的标配方案。</div>")
             elif a["record_coverage"] < 0.999 and a["attribute"] != "轮毂":
-                note = f"<div class='mini'>有记录 {a['record_coverage'] * 100:.1f}%，其余按未选计</div>"
+                note += f"<div class='mini'>有记录 {a['record_coverage'] * 100:.1f}%，其余按未选计</div>"
             for i, it in enumerate(items):
                 first = i == 0
                 out.append("<tr>"
@@ -752,7 +828,7 @@ def render_html(rc: dict, out_path: Path) -> None:
 
     parts = ["<!doctype html><html lang='zh-CN'><head><meta charset='utf-8'>",
              f"<title>5 车型配置选装比例对比</title><style>{css}</style></head><body><div class='wrap'>",
-             "<h1>5 车型 · 上市以来用户车锁单配置选装比例</h1>",
+             "<h1>5 车型 · 用户车锁单配置选装比例</h1>",
              f"<div class='sub2'>数据截至 {e(rc['as_of'])} ｜ 分母 = 该组全部用户车锁单 ｜ "
              f"排除 {'/'.join(cells[0]['attributes_excluded'])} ｜ "
              "数据源 dataset/order_data.parquet + dataset/config_attribute.parquet</div>",
@@ -766,9 +842,10 @@ def render_html(rc: dict, out_path: Path) -> None:
     parts.append("<div class='legend'><b>口径说明</b><br>"
                  "① <b>无记录 = 未选</b>：分母统一用该组全部用户车锁单。像「全线控转向系统」"
                  "只对选了它的订单落行，无记录的订单视为没选，而不是从分母剔除。<br>"
-                 "② <b>同义属性已合并</b>：<code>车载冰箱 ∪ 智能冷暖双用冰箱</code>、"
-                 "<code>拖挂系统 ∪ 拖挂尾勾</code>、<code>21.5英寸二排观影屏 ∪ 21.5英寸4K二排观影屏</code>，"
-                 "任一为「是」即算有。<br>"
+                 "①' <b>上市至今</b>：锁单时刻早于上市开放时刻（上市当天首个真实锁单，"
+                 "与上市监控同口径）的订单不计入；已剔除测试单（总部主理店 + 假身份号 / 占位号）。<br>"
+                 "② <b>按属性编码归并</b>：同一编码用主车型样本中最常见的中文名展示，"
+                 "任一记录为「是」的订单计一次。表内以「∪」标注被合并的同义名。<br>"
                  "③ <b>轮毂按尺寸档位</b>（19/20/21/22 英寸）归并后再比：同一 value_code 在不同代际"
                  "对应不同中文名（如 <code>SD-TI21</code> 在大F M0 是「21″星耀超多辐」、"
                  "CM3/CM2 是「21″都市出行闪耀」），尺寸是唯一稳定的可比维度。<br>"
@@ -778,21 +855,27 @@ def render_html(rc: dict, out_path: Path) -> None:
                  "&nbsp;&nbsp;奢华智选包 = <code>Pro ∪ Plus</code>（Plus 档同样含智选包，漏掉会低估）；"
                  "一体式超广域探射灯 = <code>Plus</code>；"
                  "不购买智选包 = <code>Stand</code>。<br>"
-                 "&nbsp;&nbsp;注意 <code>Stand</code> 档的取值名恰好叫「超远距高精度激光雷达」，"
-                 "那只是档位名，LS8 数据里并不存在独立的激光雷达属性（记录数为 0），"
-                 "故不单列「激光雷达拥有率」。<br>"
-                 "&nbsp;&nbsp;<b>旧版档位字段已同义归并</b>：LS8 早期有 70 单未用「已选」字段，"
-                 "而用 <code>舒适包=是</code>、<code>超远距高精度双激光雷达=标准</code>、"
-                 "<code>顶探照灯=否</code> 三个独立属性记录同一套选装方案。"
-                 "三者同时出现且取值唯一，等价于「已选 = Pro」（含智选包、无探射灯），"
-                 "已归并为 Pro 档计入统计，<b>这些订单保留在样本中</b>。<br>"
+                 "&nbsp;&nbsp;<b>旧版档位字段</b>：LS8 早期订单同时出现 <code>舒适包=是</code>、"
+                 "<code>超远距高精度双激光雷达=标准</code>、<code>顶探照灯=否</code> 时，"
+                 "按 Pro 档计入统计。<br>"
                  "⑤ <b>配置项按适用范围呈现</b>：某些配置只对特定动力类型可用。"
-                 "如 <code>5C 超快充电池</code> 是纯电专属配置，增程组里仅有 2 单记录"
-                 "（1 单标价 8,000 元选了纯电专属件、1 单显式记「否」），对该组不构成可选项，"
-                 "故增程组整项不呈现。<br>"
+                 "例如 CM2 的 <code>5C 超快充电池</code> 仅在纯电组统计。<br>"
                  "⑥ <b>录入异常订单已剔除</b>（见页面底部），不计入任何比例。<br>"
                  "⑦ 表内「占该组」= 该取值单数 ÷ 该组全部用户车锁单数。"
                  "</div>")
+
+    axis = rc["attribute_axis"]
+    single = sum(len(a["orders_by_cell"]) == 1 for a in axis)
+    parts.append(f"<h2>配置属性覆盖</h2><p class='mini'>{len(axis)} 项属性，{single} 项仅一组有记录。"
+                 "表中为记录订单数，选装比例见各车型明细。</p>")
+    parts.append("<table><tr><th>属性</th><th>编码</th>"
+                 + "".join(f"<th class='num'>{e(c['label'])}</th>" for c in cells) + "</tr>")
+    for a in axis:
+        parts.append(f"<tr><td>{e(a['attribute'])}{attribute_notes(a)}</td>"
+                     + code_cell(a)
+                     + "".join(f"<td class='num'>{a['orders_by_cell'].get(c['label'], 0):,}</td>" for c in cells)
+                     + "</tr>")
+    parts.append("</table>")
 
     for c in cells:
         parts.append(f"<h2>{e(c['label'])}（{e(c['gen'])}）· {c['n']:,} 单</h2>")
@@ -802,31 +885,14 @@ def render_html(rc: dict, out_path: Path) -> None:
             parts.append(
                 f"<div class='warn'>已剔除 <b>{k}</b> 单"
                 f"（占原始 {total:,} 单的 {k / total * 100:.2f}%），不计入下表："
-                + "；".join(e(g["reason"]) for g in c["audit"]["groups"])
-                + "<br><span class='mini'>对结论影响极小：剔除前后各配置项比例变化均不超过 0.6 个百分点"
-                "（LS8 差距最大的是「奢华智选包」，12,460 单口径 96.13% → 12,390 单口径 96.67%，"
-                "+0.54pp；其余项均 <0.1pp）。</span></div>")
+                + "；".join(e(g["reason"]) for g in c["audit"]["groups"]) + "</div>")
         parts.extend(table(c))
         for ch in c.get("children") or []:
             parts.append(f"<h3>↪ {e(ch['label'])} · {ch['n']:,} 单</h3>")
             parts.extend(table(ch, level=1))
 
     parts.append("<h2>已剔除的订单及原因</h2>")
-    parts.append("<div class='legend'>剔除的只有「配置记录本身不可用」的订单，"
-                 "不是消费者选择差异。当前仅 CM3 的 2 单：<br><br>"
-                 "· <b>属性被换名录入</b>（1 单）：<code>LS6 M3 76RWD</code> 把「激光雷达」写成"
-                 "「超远距高精度激光雷达」，而该属性名在全代际仅此 1 单出现。<br>"
-                 "· <b>跨代际配置串入</b>（1 单）：<code>全新一代智己LS6 Ultra</code> 整单携带 "
-                 "ISC尾灯 / 副驾屏幕及零重力座椅 / 智能冷暖双用冰箱，这三项在 CM3 全库各仅此 1 单"
-                 "（它们是 CM2 的正常配置项）。<br><br>"
-                 "<b>此前曾剔除、现已改为同义归并</b>：LS8 的 70 单携带旧版档位字段"
-                 "（<code>舒适包=是</code>、<code>超远距高精度双激光雷达=标准</code>、"
-                 "<code>顶探照灯=否</code>），三者同时出现且取值唯一，等价于「已选 = Pro」，"
-                 "已归并为 Pro 档计入统计，<b>订单保留在样本中</b>（LS8 全量 12,460 单）。<br><br>"
-                 "<b>明确不剔除</b>（曾误判、已纠正）：LS9 66 Ultra 少数单加装 Hyper 标配的"
-                 "拖挂/冰箱/线控转向属正常加装；LS8 奢享大六座缺二排屏属结构差异；"
-                 "CM2 的 Pro 版配置不同属产品差异；CM2 增程的 5C 电池记录属配置串入，改由「适用范围」处理。"
-                 "</div>")
+    parts.append("<div class='legend'>按原始配置录入模板审计，保留正常加装和产品差异。</div>")
     parts.append("<table><tr><th>车型</th><th class='num'>剔除</th><th>原因</th><th>样例订单</th></tr>")
     any_bad = False
     for c in cells:
@@ -848,7 +914,7 @@ def render_html(rc: dict, out_path: Path) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    p = argparse.ArgumentParser(description="5 车型上市以来用户车锁单配置选装比例对比")
+    p = argparse.ArgumentParser(description="5 车型用户车锁单配置选装比例对比")
     p.add_argument("--format", choices=["terminal", "json"], default="terminal")
     p.add_argument("--output", default=str(_DEFAULT_OUT), help="CSV/JSON 输出目录")
     p.add_argument("--html", action="store_true", help="输出品牌化 HTML 报告")
@@ -869,7 +935,8 @@ def main(argv: list[str] | None = None) -> int:
         for a in c["attributes"]:
             for it in a["items"]:
                 rows.append({"cell": c["label"], "parent": parent or "", "gen": c["gen"],
-                             "n_lock": c["n"], "attribute": a["attribute"], "kind": a["kind"],
+                             "n_lock": c["n"], "attribute": a["attribute"],
+                             "attribute_code": a.get("attribute_code"), "kind": a["kind"],
                              "denominator_scope": a["denominator_scope"],
                              "orders_with_record": a["orders_with_record"],
                              "record_coverage": a["record_coverage"],
@@ -887,7 +954,8 @@ def main(argv: list[str] | None = None) -> int:
     mrows = []
     for r in rc["matrix"]:
         for lb in [c["label"] for c in rc["cells"]]:
-            mrows.append({"attribute": r["attribute"], "value": r["value"], "cell": lb,
+            mrows.append({"attribute": r["attribute"], "attribute_code": r["attribute_code"],
+                          "value": r["value"], "cell": lb,
                           "rate": r["rates"].get(lb), "gap": r["gap"]})
     matrix_csv = out / "lock_config_option_compare_matrix.csv"
     pd.DataFrame(mrows).to_csv(matrix_csv, index=False, encoding="utf-8-sig")
@@ -897,12 +965,17 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.format == "json":
         def _clean(c: dict) -> dict:
-            return {k: v for k, v in c.items() if not k.startswith("_")}
+            return {
+                **{k: v for k, v in c.items() if not k.startswith("_")},
+                "attributes": [{k: v for k, v in a.items() if not k.startswith("_")}
+                               for a in c["attributes"]],
+            }
         payload = {
             "as_of": rc["as_of"], "excluded": rc["excluded"],
             "cells": [{**_clean(c), "children": [_clean(ch) for ch in c.get("children") or []]}
                       for c in rc["cells"]],
             "matrix": rc["matrix"],
+            "attribute_axis": rc["attribute_axis"],
         }
         (out / "lock_config_option_compare.json").write_text(
             json.dumps(payload, ensure_ascii=False, indent=2, default=str), encoding="utf-8")

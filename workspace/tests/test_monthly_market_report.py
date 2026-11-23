@@ -559,7 +559,7 @@ class TestAdapterQueries:
 class TestVersionAndScope:
     """v0.1 版本标记和范围边界验证。"""
 
-    DOCS_PATH = _WS_DIR.parent / "docs" / "monthly_market_report.md"
+    DOCS_PATH = _WS_DIR.parent / "docs" / "业务能力" / "市场与竞争" / "monthly_market_report.md"
 
     def test_docs_contains_version_scope(self):
         """文档包含 version 和 scope 标记。"""
