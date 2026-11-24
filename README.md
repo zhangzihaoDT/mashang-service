@@ -9,12 +9,13 @@
 | 通过 Hub/Worker 运行固定任务 | [已发布 Job](jobs/config/jobs_config.json) · [调用方式与返回值](jobs/README.md) |
 | 让 dsh-superagent 查某代际上市以来锁单 | [LS9 查询示例与工单执行说明](workspace/README.md#dsh-launch-monitor) |
 | 开发业务脚本、维护共享算子或 OCR 等通用工具 | [工作区规则](workspace/AGENTS.md) · [共享层](shared/README.md) · [基础能力](capabilities/README.md) |
+| 查看月度乘用车上险与 MIIT 公告 | [中国乘用车市场观察台](apps/market_monitor/README.md) |
 
 **统一资料入口**　[文档索引](docs/README.md) · [Agent Skills](.opencode/skills/README.md)。
 
 **结果位置**　日常分析表、图、报告分别交付到 `workspace/outputs/{tables,charts,reports}/`。终端查询直接返回结果；DSH 只读查询使用工单指定的临时文件。
 
-**仓库边界**　Service 维护业务数据、计算和查询入口。Hub/Worker 负责调度，DSH 负责工单和只读工作副本。MIIT 公告采集与归档已迁至平级仓库 [mashang-miit](../mashang-miit)，Service 消费其数据的接口尚未实现。其他研究项目见下文「独立产品与研究仓库」。
+**仓库边界**　Service 维护业务数据、计算和查询入口。Hub/Worker 负责调度，DSH 负责工单和只读工作副本。平级仓库 [mashang-miit](../mashang-miit) 维护 MIIT 公告采集、归档与 canonical 数据资产。[市场观察台](apps/market_monitor/README.md) 只读消费该数据资产。其他研究项目见下文「独立产品与研究仓库」。
 
 ## 项目定位与分层
 
@@ -25,6 +26,7 @@ mashang-service 专注汽车业务数据生产、指标与分析。Service 维�
 | 数据生产 | [dataset/](dataset/README.md) | 数据获取、更新、校验与资产索引。Tableau 导出、外部市场数据和研究样本分区存放 |
 | 指标与业务口径 | [shared/](shared/README.md) | 字段定义、业务口径、共享算子与数据读取 |
 | 业务分析 | [workspace/](workspace/README.md) | 稳定业务脚本、专题研究与分析产物 |
+| 产品应用 | [apps/market_monitor/](apps/market_monitor/README.md) | 月度市场快照、API、Web 和独立 Sealos 部署 |
 | 对外执行接口 | [jobs/](jobs/README.md) | 确定性任务、参数白名单、执行状态与产物契约 |
 | 通用支撑 | [capabilities/](capabilities/README.md) | OCR、检索、飞书、通知与图表能力 |
 | 使用与维护说明 | [docs/](docs/README.md) | 业务专题、数据获取手册、共享规范和历史归档 |
@@ -448,7 +450,7 @@ mashang-service/
 
 以上仓库平级维护。MIIT 的代码、配置、依赖、原始证据、结构化数据、管线报告与运行记录均在 `mashang-miit`；研究应用的代码、配置、数据与产物在各自仓库。Service 不再内置这些实现，也不通过导入兄弟仓库源码运行。
 
-Service 不保留 `research_apps/` 目录；`auto_launch` / `product_expert` / `nev_apeal` 已在平级仓库独立维护。MIIT 的 Service 数据消费接口尚未实现。
+Service 不保留 `research_apps/` 目录；`auto_launch` / `product_expert` / `nev_apeal` 已在平级仓库独立维护。市场观察台的 MIIT 输入为平级仓库发布的 `data/vehicle_parameters/product_master.json`。
 
 从 Service 根目录可进入独立仓库运行：
 

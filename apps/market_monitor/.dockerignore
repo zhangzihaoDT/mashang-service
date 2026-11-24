@@ -1,0 +1,14 @@
+*
+!backend/
+backend/**
+!backend/__main__.py
+!backend/snapshot.py
+!backend/web.py
+!configs/
+configs/**
+!configs/sources.json
+!frontend/
+frontend/**
+!frontend/index.html
+!frontend/app.css
+!frontend/app.js

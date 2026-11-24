@@ -90,7 +90,7 @@ def _pt_chg_str(current: float, previous: float, label: str = "") -> str:
 # ---------------------------------------------------------------------------
 
 class ReportData:
-    def __init__(self, report_month: str):
+    def __init__(self, report_month: str, *, frames: dict[str, pd.DataFrame] | None = None):
         self.month = report_month
         self.month_start = f"{report_month}-01"
         dt = datetime.strptime(report_month, "%Y-%m")
@@ -105,6 +105,11 @@ class ReportData:
         # Same month last year
         ly = dt.year - 1
         self.ly_month_start = f"{ly:04d}-{dt.month:02d}-01"
+
+        # Monthly snapshot consumers can reuse already loaded, date-normalized frames.
+        if frames is not None:
+            self.dfs = frames
+            return
 
         # Load tables
         self.dfs: dict[str, pd.DataFrame] = {}
@@ -307,8 +312,9 @@ def build_overall_market(rd: ReportData) -> dict:
     # Energy breakdown
     energy_rows = []
     for _, r in cur.iterrows():
-        prev_row = prev[prev["fuel_type"] == r["fuel_type"]]
-        prev_sale = prev_row["sales"].sum() if not prev.empty else 0
+        prev_sale = 0
+        if not prev.empty:
+            prev_sale = prev.loc[prev["fuel_type"] == r["fuel_type"], "sales"].sum()
         mom, _ = _chg(r["sales"], prev_sale)
         share = _pct(r["sales"], total_sales)
         energy_rows.append({
@@ -376,7 +382,8 @@ def build_brand_landscape(rd: ReportData) -> dict:
     if not prev.empty:
         prev_agg = prev.groupby("brand", observed=True)["sales"].sum()
         top_brands["prev_sales"] = top_brands["brand"].map(prev_agg).fillna(0).astype(int)
-        mom = top_brands["sales"] / top_brands["prev_sales"].replace(0, pd.NA) - 1
+        comparable_sales = top_brands["prev_sales"].where(top_brands["prev_sales"] != 0)
+        mom = top_brands["sales"] / comparable_sales - 1
         top_brands["mom_pct"] = (mom * 100).round(1)
     else:
         top_brands["mom_pct"] = None

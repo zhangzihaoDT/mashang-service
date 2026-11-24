@@ -1,0 +1,16 @@
+{
+  "insurance": {
+    "name": "TP&MIX-ways 上险数",
+    "cadence": "monthly",
+    "artifact": "market_energy_monthly · brand_monthly",
+    "month_basis": "上险统计月",
+    "scope": "TP&MIX-ways 乘用车上险；上险量按销售量字段 sales 汇总。新能源渗透率为新能源上险量占全部上险量的比例，市场价格重心按销量加权。"
+  },
+  "miit": {
+    "name": "MIIT 工信部公告",
+    "cadence": "monthly",
+    "artifact": "mashang-miit/data/vehicle_parameters/product_master.json",
+    "month_basis": "上游 publish_date 归属月",
+    "scope": "上游已归档的乘用车型号，身份为批次号和申报型号。公示与正式公告沿用上游状态；归档覆盖随批次和来源变化。"
+  }
+}

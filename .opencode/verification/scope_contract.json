@@ -42,6 +42,12 @@
       "tier": "pytest",
       "description": "workspace 脚本 smoke / Result Contract 单测"
     },
+    "pytest.market-monitor": {
+      "command": ["{python}", "-m", "pytest", "apps/market_monitor/tests", "-q"],
+      "data_dependency": false,
+      "tier": "pytest",
+      "description": "市场观察台快照、月报算子适配及 API 权限"
+    },
     "pytest.workspace": {
       "command": ["{python}", "-m", "pytest", "workspace/tests", "-q"],
       "data_dependency": true,
@@ -146,6 +152,17 @@
       "targets": ["harness.selftest"],
       "dynamic": null,
       "note": "OpenCode 控制面改动，跑契约自测作为基线"
+    },
+    {
+      "id": "market-monitor",
+      "match": [
+        ".github/workflows/market-monitor-ghcr.yml",
+        "apps/market_monitor/**",
+        "workspace/research_scripts/market_report/generate_monthly_brief.py"
+      ],
+      "targets": ["pytest.market-monitor"],
+      "dynamic": null,
+      "note": "独立应用及其复用的月报算子"
     },
     {
       "id": "business-script",

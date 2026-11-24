@@ -2,6 +2,7 @@
 
 | 业务问题 | 方法与入口 |
 |---|---|
+| 查看每月乘用车上险与工信部公告 | [中国乘用车市场观察台](../../../apps/market_monitor/README.md) |
 | 市场规模与结构如何变化 | [月度市场报告](monthly_market_report.md) |
 | 上险分析应该选哪张表 | [上险数据使用指南](tp_and_mix_ways_usage.md) |
 | 如何构建市场状态观察 | [Market State 设计](market_state_v0_2_design.md) |
