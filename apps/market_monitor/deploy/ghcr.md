@@ -11,12 +11,24 @@
 
 ## 1. 验证 Package 权限并发布
 
-在源仓库的 **Actions → Market Monitor GHCR** 选择 `main`。
+首次需要 Package 管理员初始化独立权限的 Private Package。试运行发现，从公开仓库首次用 `GITHUB_TOKEN` 推送的检查标记允许匿名拉取。正式发布工作流因此要求目标包已存在，并在推送前检查 Private 元数据和匿名拒绝。
 
-1. 先运行 `operation=bootstrap`。这个镜像只含访问检查标记。工作流用 `GITHUB_TOKEN` 建立 Package，并验证 REST API 报告 `private`、匿名拉取被拒绝。
-2. 在 [Package Settings](https://github.com/users/zhangzihaoDT/packages/container/package/mashang-market-monitor/settings) 确认 **Private**，关闭从公开源码仓库继承访问权限。保留仓库关联及 OCI 来源标签。在 **Manage Actions access** 直接给 `zhangzihaoDT/mashang-service` 授权写入。在 **Manage access** 仅给部署账号 Read。可见性与继承权限是单独的设置。[GitHub Package 可见性与权限](https://docs.github.com/en/packages/learn-github-packages/configuring-a-packages-access-control-and-visibility)
-3. 用部署账号的只读 PAT 拉取 `access-bootstrap` 以验证 Read。用匿名身份和一个未获授权的 GitHub 账号重复拉取，预期均拒绝。仅在权属核验通过后运行 `operation=release`、`version=0.1.0`，勾选 `access_reviewed`。
-4. 发布工作流检查构建内容、`linux/amd64`、版本标签和匿名拉取。记录运行摘要中仓库返回的 **digest reference**。后续部署使用摘要，回滚沿用历史摘要。使用已有版本标签的发布会被拒绝。
+1. Package 管理员先使用临时 classic PAT 的 `write:packages` 权限直接在 GHCR 初始化同名包。第一次只推中性的 `access-bootstrap` 标记，镜像构建时省略源码关联标签。使用系统凭据帮助程序和隐藏输入的 `docker login ghcr.io --username <包管理员账号> --password-stdin`。完成初始化后撤销临时写入 PAT。生产拉取另用下一节的只读 PAT。
+2. 在 [Package Settings](https://github.com/users/zhangzihaoDT/packages/container/package/mashang-market-monitor/settings) 确认 **Private**，再手动关联 `zhangzihaoDT/mashang-service`。保持该公开仓库的访问权限继承关闭。通过 **Manage Actions access** 单独授予源仓库 Write，在 **Manage access** 仅给部署账号 Read。可见性与继承权限是单独的设置。[GitHub Package 可见性与权限](https://docs.github.com/en/packages/learn-github-packages/configuring-a-packages-access-control-and-visibility)
+3. 在源仓库的 **Actions → Market Monitor GHCR** 选择 `main`，运行 `operation=verify`。工作流核验 Private、匿名拒绝、固定平台以及 `GITHUB_TOKEN` 的实际拉取权限。另用部署账号的只读 PAT 拉取 `access-bootstrap`，用未获授权账号核对拉取拒绝。
+4. 权限核验通过后运行 `operation=release`、`version=0.1.0`，勾选 `access_reviewed`。工作流用 `GITHUB_TOKEN` 发布正式镜像，并再次核验匿名拒绝。
+5. 保存运行摘要中的 **digest reference**。部署和回滚使用历史摘要。已有版本标签的发布会被拒绝。
+
+管理员准备标记镜像的命令如下。使用终端中已安全登录的临时写入凭据执行最后一行。
+
+```sh
+bootstrap_dir=$(mktemp -d)
+printf '%s\n' 'FROM scratch' 'COPY marker /market-monitor-ghcr-bootstrap' > "$bootstrap_dir/Dockerfile"
+printf '%s\n' 'GHCR access check only' > "$bootstrap_dir/marker"
+docker buildx build --load --platform linux/amd64 \
+  -t ghcr.io/zhangzihaodt/mashang-market-monitor:access-bootstrap "$bootstrap_dir"
+docker push ghcr.io/zhangzihaodt/mashang-market-monitor:access-bootstrap
+```
 
 构建上下文限定为 `apps/market_monitor`。`.dockerignore` 只允许已列出的 Python、配置和静态文件。发布前再次检查镜像内的应用文件，TP&MIX、MIIT 快照、kubeconfig、认证文件和其他仓库文件通过部署端的独立通道提供。
 
