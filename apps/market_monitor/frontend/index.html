@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>中国乘用车市场观察台</title>
+  <link rel="stylesheet" href="/app.css">
+  <script src="/app.js" type="module"></script>
+</head>
+<body>
+  <header class="top">
+    <div class="shell top-inner">
+      <div class="brand">
+        <span class="mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span>China Automotive Market Monitor</span>
+      </div>
+      <span class="version">V1.0</span>
+    </div>
+  </header>
+  <main class="shell">
+    <div class="masthead">
+      <div>
+        <h1>中国乘用车市场观察台</h1>
+        <div class="coverage" id="coverage" aria-label="数据覆盖"></div>
+      </div>
+      <label class="month-control" for="month">查看月份
+        <select id="month" disabled></select>
+      </label>
+    </div>
+    <nav class="views" aria-label="数据视图">
+      <button type="button" data-source="insurance" aria-current="page">上险市场</button>
+      <button type="button" data-source="miit">MIIT 公告</button>
+    </nav>
+    <div id="notice" role="status">正在读取月度快照…</div>
+    <div id="view"></div>
+    <footer id="source-note" hidden></footer>
+  </main>
+</body>
+</html>

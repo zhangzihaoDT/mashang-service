@@ -1,0 +1,131 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: market-monitor-snapshots
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: market-monitor
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: market-monitor
+  template:
+    metadata:
+      labels:
+        app: market-monitor
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+        sysctls:
+          - name: net.ipv4.ip_unprivileged_port_start
+            value: "80"
+      imagePullSecrets:
+        - name: market-monitor-ghcr
+      containers:
+        - name: web
+          image: __IMAGE__
+          env:
+            - name: MARKET_MONITOR_AUTH_FILE
+              value: /run/market-monitor-auth/accounts.json
+          ports:
+            - name: http
+              containerPort: 80
+          readinessProbe:
+            tcpSocket:
+              port: http
+          livenessProbe:
+            tcpSocket:
+              port: http
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: snapshots
+              mountPath: /var/lib/market-monitor
+              readOnly: true
+            - name: auth
+              mountPath: /run/market-monitor-auth
+              readOnly: true
+        - name: snapshot-writer
+          image: __IMAGE__
+          command: ["python", "-c", "import signal; signal.pause()"]
+          resources:
+            requests:
+              cpu: 25m
+              memory: 32Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: snapshots
+              mountPath: /var/lib/market-monitor
+      volumes:
+        - name: snapshots
+          persistentVolumeClaim:
+            claimName: market-monitor-snapshots
+        - name: auth
+          secret:
+            secretName: market-monitor-auth
+            defaultMode: 0440
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: market-monitor
+spec:
+  selector:
+    app: market-monitor
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: market-monitor
+spec:
+  ingressClassName: __INGRESS_CLASS__
+  tls:
+    - hosts: [__HOST__]
+      secretName: __TLS_SECRET__
+  rules:
+    - host: __HOST__
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: market-monitor
+                port:
+                  name: http
