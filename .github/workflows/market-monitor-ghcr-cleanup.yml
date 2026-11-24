@@ -1,0 +1,32 @@
+name: Remove Market Monitor bootstrap package
+
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  remove-bootstrap:
+    if: github.repository == 'zhangzihaoDT/mashang-service' && github.ref == 'refs/heads/main' && github.actor == 'zhangzihaoDT'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      packages: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      PACKAGE: users/zhangzihaoDT/packages/container/mashang-market-monitor
+      BOOTSTRAP_DIGEST: sha256:fe9ee8b262c445a73db612e6020d36ad370664ceb724fdbd8aa11e8fa1c0f53d
+    steps:
+      - name: Verify the only version is the public access marker and remove it
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api "$PACKAGE" --jq .visibility | grep -Fx public
+          gh api --paginate --slurp "$PACKAGE/versions" |
+            jq -e --arg digest "$BOOTSTRAP_DIGEST" '
+              add | length == 1 and
+              .[0].name == $digest and
+              .[0].metadata.container.tags == ["access-bootstrap"]
+            ' >/dev/null
+          gh api --method DELETE "$PACKAGE" >/dev/null
+          echo 'Removed the verified public access-bootstrap package.'

@@ -4,11 +4,11 @@ on:
   workflow_dispatch:
     inputs:
       operation:
-        description: Bootstrap package access or publish an application image
+        description: Verify private package access or publish an application image
         type: choice
-        options: [bootstrap, release]
+        options: [verify, release]
         required: true
-        default: bootstrap
+        default: verify
       version:
         description: Immutable application tag (release only)
         type: string
@@ -54,60 +54,37 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if [[ "$OPERATION" == bootstrap ]]; then
+          if [[ "$OPERATION" == verify ]]; then
             tag=access-bootstrap
           else
             [[ "$OPERATION" == release && "$ACCESS_REVIEWED" == true ]]
             [[ "$IMAGE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
             tag="$IMAGE_VERSION"
           fi
-
-          data="$(mktemp)"
-          trap 'rm -f "$data"' EXIT
-          status="$(printf 'Authorization: Bearer %s\n' "$GH_TOKEN" | curl -sS --retry 2 \
-            -H @- -H 'Accept: application/vnd.github+json' -o "$data" -w '%{http_code}' "$PACKAGE_API")"
-          case "$status" in
-            200)
-              jq -e '.visibility == "private"' "$data" >/dev/null
-              tags="$(gh api --paginate "${PACKAGE_API#https://api.github.com/}/versions" \
-                --jq '.[].metadata.container.tags[]?')"
-              if grep -Fxq -- "$tag" <<< "$tags"; then
-                echo "::error::Tag $tag already exists. Release tags are immutable."
-                exit 1
-              fi
-              ;;
-            404)
-              if [[ "$OPERATION" != bootstrap ]]; then
-                echo "::error::Bootstrap the private package and verify its access before publishing an application image."
-                exit 1
-              fi
-              ;;
-            *)
-              echo "::error::Could not verify GHCR package visibility (HTTP $status)."
+          bash apps/market_monitor/deploy/verify-ghcr-access.sh access-bootstrap
+          if [[ "$OPERATION" == release ]]; then
+            tags="$(gh api --paginate "${PACKAGE_API#https://api.github.com/}/versions" \
+              --jq '.[].metadata.container.tags[]?')"
+            if grep -Fxq -- "$tag" <<< "$tags"; then
+              echo "::error::Tag $tag already exists. Release tags are immutable."
               exit 1
-              ;;
-          esac
+            fi
+          fi
           printf 'tag=%s\n' "$tag" >> "$GITHUB_OUTPUT"
 
       - name: Build the image
+        if: inputs.operation == 'release'
         env:
           TAG: ${{ steps.guard.outputs.tag }}
         shell: bash
         run: |
           set -euo pipefail
           context=apps/market_monitor
-          dockerfile="$context/deploy/Dockerfile"
-          if [[ "$OPERATION" == bootstrap ]]; then
-            context="$(mktemp -d)"
-            dockerfile="$context/Dockerfile"
-            printf '%s\n' 'FROM scratch' 'COPY marker /market-monitor-ghcr-bootstrap' > "$dockerfile"
-            printf '%s\n' 'GHCR access check only' > "$context/marker"
-          fi
           docker buildx build --platform "$TARGET_PLATFORM" --load \
             --label "org.opencontainers.image.source=$SOURCE" \
             --label "org.opencontainers.image.revision=$GITHUB_SHA" \
             --label "org.opencontainers.image.version=$TAG" \
-            --tag "$IMAGE:$TAG" --file "$dockerfile" "$context"
+            --tag "$IMAGE:$TAG" --file "$context/deploy/Dockerfile" "$context"
           [[ "$(docker image inspect --format '{{.Os}}/{{.Architecture}}' "$IMAGE:$TAG")" == "$TARGET_PLATFORM" ]]
 
       - name: Verify the application image contains only expected app files
@@ -117,7 +94,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          docker run --rm -i --network none --entrypoint python "$IMAGE:$TAG" - <<'PY'
+          docker run --rm -i --platform "$TARGET_PLATFORM" --network none --entrypoint python "$IMAGE:$TAG" - <<'PY'
           from pathlib import Path
           root = Path("/opt/market-monitor")
           app = "apps/market_monitor/"
@@ -132,7 +109,7 @@ jobs:
           assert not any(path.is_symlink() for path in root.rglob("*")), "Unexpected symbolic link"
           PY
 
-      - name: Publish, then verify private access and the registry digest
+      - name: Verify authorized pulls and publish only on release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ steps.guard.outputs.tag }}
@@ -154,29 +131,21 @@ jobs:
           chmod 700 "$helper_dir/docker-credential-market-monitor-ghcr"
           export PATH="$helper_dir:$PATH"
 
-          push_log="$(docker push "$IMAGE:$TAG")"
-          printf '%s\n' "$push_log"
-          digest="$(awk '/digest: sha256:/ {for (i=1; i<NF; i++) if ($i=="digest:") print $(i+1)}' <<< "$push_log")"
+          if [[ "$OPERATION" == release ]]; then
+            bash apps/market_monitor/deploy/verify-ghcr-access.sh access-bootstrap
+            push_log="$(docker push "$IMAGE:$TAG")"
+            printf '%s\n' "$push_log"
+            digest="$(awk '/digest: sha256:/ {for (i=1; i<NF; i++) if ($i=="digest:") print $(i+1)}' <<< "$push_log")"
+          else
+            pull_log="$(docker pull --platform "$TARGET_PLATFORM" "$IMAGE:$TAG")"
+            printf '%s\n' "$pull_log"
+            digest="$(awk '$1 == "Digest:" {print $2}' <<< "$pull_log")"
+          fi
           [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]
           digest_ref="$IMAGE@$digest"
           docker pull --platform "$TARGET_PLATFORM" "$digest_ref"
           [[ "$(docker image inspect --format '{{.Os}}/{{.Architecture}}' "$digest_ref")" == "$TARGET_PLATFORM" ]]
+          bash apps/market_monitor/deploy/verify-ghcr-access.sh "$TAG"
 
-          gh api "${PACKAGE_API#https://api.github.com/}" --jq .visibility | grep -Fx private
-          anonymous_response="$(curl -sS --retry 2 -w $'\n%{http_code}' --get \
-            --data-urlencode 'service=ghcr.io' \
-            --data-urlencode "scope=repository:${IMAGE#ghcr.io/}:pull" https://ghcr.io/token)"
-          anonymous="${anonymous_response##*$'\n'}"
-          if [[ "$anonymous" == 200 ]]; then
-            anonymous_token="$(jq -er '.token // .access_token' <<< "${anonymous_response%$'\n'*}")"
-            anonymous="$(printf 'Authorization: Bearer %s\n' "$anonymous_token" | curl -sS --retry 2 \
-              -H @- -H 'Accept: application/vnd.oci.image.manifest.v1+json, application/vnd.docker.distribution.manifest.v2+json' \
-              -o /dev/null -w '%{http_code}' "https://ghcr.io/v2/${IMAGE#ghcr.io/}/manifests/$TAG")"
-          fi
-          unset anonymous_response anonymous_token
-          case "$anonymous" in
-            401|403) ;;
-            *) echo "::error::Expected anonymous pulls to be denied; received HTTP $anonymous."; exit 1 ;;
-          esac
-          printf '### GHCR publication\n\n- Tag: `%s:%s`\n- Digest: `%s`\n- Platform: `%s`\n- Package: private; anonymous pull denied.\n' \
+          printf '### GHCR verification\n\n- Tag: `%s:%s`\n- Digest: `%s`\n- Platform: `%s`\n- Package: private; anonymous pull denied.\n' \
             "$IMAGE" "$TAG" "$digest_ref" "$TARGET_PLATFORM" >> "$GITHUB_STEP_SUMMARY"

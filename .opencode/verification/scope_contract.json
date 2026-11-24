@@ -156,7 +156,7 @@
     {
       "id": "market-monitor",
       "match": [
-        ".github/workflows/market-monitor-ghcr.yml",
+        ".github/workflows/market-monitor-ghcr*.yml",
         "apps/market_monitor/**",
         "workspace/research_scripts/market_report/generate_monthly_brief.py"
       ],
