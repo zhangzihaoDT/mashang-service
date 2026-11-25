@@ -84,9 +84,17 @@ CASES = [
     ("全新一代智己LS6 Ultra", "CM3"),
     # —— 独立车系 ——
     ("智己LS9", "LS9"),
+    ("智己LS9 52 Ultra", "LS9"),
+    ("智己LS9 66 Ultra 线控版", "LS9"),
+    ("智己LS9 Hyper", "LS9"),
     ("智己LS8", "LS8"),
     ("智己LS7", "LS7"),
     ("智己L7", "L7"),
+    # —— LS9 M1（全新 LS9，市场命名「全新LS9 xx Ultra」）——
+    ("全新LS9 66 Ultra", "LS9M1"),
+    ("全新LS9 52 Ultra", "LS9M1"),
+    ("全新 LS9 66 Ultra", "LS9M1"),
+    ("全新LS9", "LS9M1"),
     # —— 兜底 ——
     ("智己LS6 M2", "CM0"),  # 收紧验证：M2 但非 L6 家族 → 不进 DM2
     ("比亚迪海豹", "其他"),
@@ -105,6 +113,8 @@ def test_dm2_precedence_higher_than_broad_rules():
     assert prio("DM2") > prio("DM1") > prio("DM0")
     assert prio("CM3") > prio("CM2") > prio("CM1") > prio("CM0")
     assert prio("DM0") == prio("CM0") == prio("LS8") > 0
+    # LS9 家族：LS9M1（全新 LS9）必须高于 LS9 宽规则
+    assert prio("LS9M1") > prio("LS9") > 0
     assert prio("其他") == 0
 
 

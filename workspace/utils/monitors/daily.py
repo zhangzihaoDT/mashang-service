@@ -14,9 +14,24 @@ from utils.orders.filters import flag_test_orders
 TARGET_MODELS = ["LS6", "L6", "LS8", "LS9"]
 
 
+def _fresh_ls9_mask(df):
+    """「全新 LS9」记录：按 product_name（去空白）识别，对应代际 LS9M1。
+
+    这些订单的 series 字段仍是 LS9，所以按 series 汇总时需按名称并入 LS9 车系池；
+    口径与共享 series_group_logic 的 LS9M1 规则（含「全新」且含「LS9」）一致。
+    """
+    names = df['product_name'].fillna('').astype(str).str.replace(r'\s+', '', regex=True)
+    return names.str.contains('全新', regex=False) & names.str.contains('LS9', regex=False)
+
+
 def _lock_product_versions(model_df, model, business_definition=None):
     """按共享业务定义汇总版本 → 座位，订单号去重。"""
-    orders = model_df[['order_number', 'product_name']].drop_duplicates('order_number')
+    keys = ['order_number', 'product_name']
+    # LS9 车系池同时含 LS9 / LS9M1 两个代际组，版本规则按代际分表，需先带出代际
+    if model == "LS9" and len(model_df):
+        model_df = apply_series_group_logic(model_df.copy(), business_definition)
+        keys.append('series_group_logic')
+    orders = model_df[keys].drop_duplicates('order_number')
     classified = classify_product_names(orders, model, business_definition)
     versions = {}
     for version, seat in classified.itertuples(index=False, name=None):
@@ -193,6 +208,11 @@ def analyze_daily_lock_orders(df, start_date, end_date, *, business_def=None):
     for model in TARGET_MODELS:
         if model == "LS9":
             model_df = daily_orders[daily_orders['series'].isin(["LS9", "LS9Hyper"])]
+            # 「全新LS9 …」是按 product_name 识别的新代际（LS9M1），没有独立 series 值；
+            # 这里按名称把 LS9M1 记录并回 LS9 车系池，与 LS8 池含 LS8Neo 的语义对齐
+            fresh = daily_orders[_fresh_ls9_mask(daily_orders)]
+            if len(fresh):
+                model_df = pd.concat([model_df, fresh]).drop_duplicates('order_number')
         elif model == "LS8":
             model_df = daily_orders[daily_orders['series'].isin(["LS8", "LS8Neo"])]
         else:
@@ -246,6 +266,20 @@ def analyze_daily_lock_orders(df, start_date, end_date, *, business_def=None):
             stats["product_versions"] = _lock_product_versions(model_df, model, business_def)
             stats["show_seats"] = model == "LS8"
 
+        # LS9 代际区隔（LS9M1=全新 LS9 / LS9=老代际）：同样复用共享 series_group_logic，
+        # 「全新LS9 …」被 priority 更高的 LS9M1 规则先命中。
+        # count 由 series 池口径给出，gen_counts 只拆分类别，剩余量在这里归「其他」保证闭合。
+        if model == "LS9":
+            grouped = apply_series_group_logic(model_df.copy(), business_def)
+            unique_orders = grouped.reindex(
+                columns=['order_number', 'product_name', 'series_group_logic']
+            ).drop_duplicates('order_number')
+            generations = sorted(
+                (business_def or {}).get("model_series_mapping", {}).get("LS9") or ["LS9"]
+            )
+            counts = unique_orders['series_group_logic'].value_counts().to_dict()
+            stats["gen_counts"] = {g: int(counts.get(g, 0)) for g in generations}
+
         model_stats[model] = stats
 
     return {
@@ -291,6 +325,9 @@ def analyze_daily_invoice_orders(df, start_date, end_date):
         for model in TARGET_MODELS:
             if model == "LS9":
                 m = raw_invoice_all[corporate_mask & raw_invoice_all['series'].isin(["LS9", "LS9Hyper"])]
+                fresh = raw_invoice_all[corporate_mask & _fresh_ls9_mask(raw_invoice_all)]
+                if len(fresh):
+                    m = pd.concat([m, fresh]).drop_duplicates('order_number')
             else:
                 m = raw_invoice_all[corporate_mask & (raw_invoice_all['series'] == model)]
             cnt = m['order_number'].nunique()
@@ -312,6 +349,10 @@ def analyze_daily_invoice_orders(df, start_date, end_date):
     for model in TARGET_MODELS:
         if model == "LS9":
             model_df = invoice_orders[invoice_orders['series'].isin(["LS9", "LS9Hyper"])]
+            # 与锁单侧同源：按 product_name 把新代际（LS9M1）记录并回 LS9 车系池
+            fresh = invoice_orders[_fresh_ls9_mask(invoice_orders)]
+            if len(fresh):
+                model_df = pd.concat([model_df, fresh]).drop_duplicates('order_number')
         else:
             model_df = invoice_orders[invoice_orders['series'] == model]
         count = model_df['order_number'].nunique()

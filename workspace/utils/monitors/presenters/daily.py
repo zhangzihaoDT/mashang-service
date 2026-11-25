@@ -24,10 +24,27 @@ def _format_cumulative_line(label, cum) -> str:
     )
 
 
+def _format_ls9_generations(stats) -> str:
+    """LS9 代际拆分文本（含 '｜' 前缀）：M0 = LS9 老代际，M1 = 全新 LS9（LS9M1）。
+
+    例：｜M0：7，M1：150。代际合计与 LS9 车系合计不等时补「其他：N」，保证闭合。
+    未登记 LS9 代际映射时返回空串。
+    """
+    gen = stats.get("gen_counts")
+    if not gen:
+        return ""
+    other = int(stats.get("count", 0)) - sum(gen.values())
+    parts = [f"M0：{int(gen.get('LS9', 0))}", f"M1：{int(gen.get('LS9M1', 0))}"]
+    if other > 0:
+        parts.append(f"其他：{other}")
+    return "｜" + "，".join(parts)
+
+
 def _format_lock_model_detail(stats) -> str:
     """
     构建车型锁单明细文本（含 '｜' 前缀）。
     LS6 按代际展示：CM3/CM2(增程/纯电)/CM1，CM0>0 时追加。
+    LS9 直接按代际展示：｜M0：LS9 老代际，M1：全新 LS9（口径同共享 series_group_logic）。
     """
     power = stats.get("ls8_power_counts")
     if power is not None:
@@ -35,12 +52,15 @@ def _format_lock_model_detail(stats) -> str:
         electric = power.get("纯电", 0)
         unknown = stats["count"] - extended - electric
         unknown_text = f"/未知:{unknown}" if unknown else ""
-        return f"｜LS8：{stats['count']},(增程:{extended}/纯电:{electric}{unknown_text})"
+        return f"｜增程:{extended}/纯电:{electric}{unknown_text}"
 
     versions = stats.get("product_versions")
     if versions is not None:
         if not stats.get("show_seats", True):
             detail = "，".join(f"{version}：{sum(seats.values())}" for version, seats in versions.items())
+            gen_text = _format_ls9_generations(stats)
+            if gen_text:
+                return gen_text
             return "｜" + detail if detail else ""
         parts = []
         for version, seats in versions.items():

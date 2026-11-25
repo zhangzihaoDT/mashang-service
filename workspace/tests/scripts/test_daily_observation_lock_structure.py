@@ -79,7 +79,7 @@ def test_ls8_lock_line_includes_neo_in_electric_split():
     stats = daily.analyze_daily_lock_orders(frame, day, day)['models']['LS8']
 
     assert stats['count'] == 5
-    assert presenter._format_lock_model_detail(stats) == '｜LS8：5,(增程:1/纯电:3/未知:1)'
+    assert presenter._format_lock_model_detail(stats) == '｜增程:1/纯电:3/未知:1'
 
 
 def test_ls9_formats_versions_on_one_line_without_seats():

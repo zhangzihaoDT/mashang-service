@@ -10,7 +10,7 @@
 | LS6 | CM0 / CM1 / CM2 / CM3 | 智己 LS6 (含全新、新一代；全新一代即 CM3) |
 | L6 | DM0 / DM1 / DM2 | 智己 L6 (含全新 / M2、Jimmy Choo) |
 | LS8 | LS8 / LS8Neo | 智己 LS8（含 NEO 纯电版；LS8Neo 为独立代际） |
-| LS9 | — | 智己 LS9 (单独模型) |
+| LS9 | LS9 / LS9M1 | 智己 LS9（LS9M1 = 全新 LS9，52 Ultra / 66 Ultra 市场命名） |
 | LS7 | — | 智己 LS7 |
 | L7 | — | 智己 L7 |
 
@@ -30,6 +30,7 @@ DM0 (precedence=1): product_name LIKE '%L6%' AND product_name NOT LIKE '%全新%
 CM0 (precedence=1): product_name LIKE '%LS6%' AND product_name NOT LIKE '%全新%' AND product_name NOT LIKE '%新一代%'
 LS8Neo (precedence=2): product_name LIKE '%LS8NEO%'
 LS8 (precedence=1): product_name LIKE '%LS8%'
+LS9M1 (precedence=2): product_name LIKE '%全新%' AND product_name LIKE '%LS9%'
 LS9 (precedence=1): product_name LIKE '%LS9%'
 LS7 (precedence=1): product_name LIKE '%LS7%'
 L7  (precedence=1): product_name LIKE '%L7%'
@@ -43,6 +44,8 @@ L7  (precedence=1): product_name LIKE '%L7%'
 - **DM2 的核心锚点是「一代」**：M2 代产品在订单数据里的正式命名是「全新一代智己L6 [Max/Pro Max/Ultra]」，
   不含 "M2" 字样；"L6 M2 Pro Max/Max/Ultra" 是试驾车/内部命名。故 DM2 = 一代 L6 家族 + M2 token + Jimmy Choo，
   且 DM1 必须排除「一代」以免把 M2 代基础版抢归旧代际。
+- LS9M1 必须高于 LS9（否则「全新LS9 52 Ultra / 全新LS9 66 Ultra」会被 LS9 的宽泛规则抢先归入老代际）；
+  LS9M1 条件（含「全新」且含「LS9」）是 LS9 宽规则的真子集，二者同属 LS9 族，LS8Neo ⊂ LS8 同理。
 - 旧字符串格式（直接写 `product_name LIKE ...`）仍被执行器兼容，视为 `{priority: 0, condition: <字符串>}`。
 - 规则治理：`workspace/utility_scripts/audit_series_group_overlap.py` 可审计重叠；
   重叠应只发生在族内（LS6/L6 家族），跨车系重叠应视为规则 bug。
@@ -53,6 +56,7 @@ L7  (precedence=1): product_name LIKE '%L7%'
 LS6 → [CM0, CM1, CM2, CM3]
 L6  → [DM0, DM1, DM2]
 LS8 → [LS8, LS8Neo]
+LS9 → [LS9, LS9M1]
 ```
 
 ## 业务术语别名 (generation_terminology_mapping)
@@ -63,11 +67,12 @@ LS8 → [LS8, LS8Neo]
 |------|----------|------|
 | LS8Neo | 小F M1 | 小F 系（LS8 车系）M1 代 = LS8 NEO 纯电版 |
 | LS8 | 小F M0 | 小F 系（LS8 车系）M0 代 = LS8 普通版（不含 NEO） |
-| LS9 | 大F M0 | 大F 系 M0 代 = 智己 LS9 |
+| LS9M1 | 大F M1 | 大F 系（LS9 车系）M1 代 = 全新 LS9（52 Ultra / 66 Ultra） |
+| LS9 | 大F M0 | 大F 系 M0 代 = 智己 LS9（不含全新 LS9） |
 
 **注意**：
 - 小F / 大F 各指向一个车系（小F = LS8 车系，大F = LS9 车系），M0 / M1 是该车系内的代际档位；匹配前术语去全部空白字符，`小FM1` 与 `小F M1` 等价。
-- 「小F」单独出现（不带 M0/M1）时对应车系总称 = `model_series_mapping` 的 LS8 族，不得默认落到任一具体代际。
+- 「小F」「大F」单独出现（不带 M0/M1）时对应车系总称 = `model_series_mapping` 的 LS8 / LS9 族，不得默认落到任一具体代际。
 - 术语解析出代际键后，仍按既有口径执行：筛选走 `series_group_logic`，时间窗走 `time_periods`，版本 / 动力走 `product_version_series`。
 - 消费者不得自建术语映射；新增术语先在 `business_definition.json` 登记，再同步本表。
 
@@ -111,7 +116,7 @@ Canonical 定义位于 `shared/schema/business_definition.json` 的
 `product_version_logic.{series}`，每个版本为 `{priority, condition}`。
 匹配前去除全部空白；按 priority 降序、同分按定义顺序首次命中。
 LS8 当前定义 52 Max+、52 Lite、66 Ultra、93 RWD；LS8Neo 定义 NEO93 Max+、NEO103 Max+；
-LS9 定义 Ultra 电池版本、线控版及 Hyper 版本。新增版本应维护共享定义，不在日报中添加匹配规则。
+LS9 定义 Ultra 电池版本、线控版及 Hyper 版本；LS9M1 定义 52 Ultra、66 Ultra（全新 LS9 市场命名）。新增版本应维护共享定义，不在日报中添加匹配规则。
 未知版本返回“未分类”，未知座位返回“未标座位”，保证统计闭合。
 
 Workspace 脚本统一调用：
@@ -179,10 +184,13 @@ classified = classify_product_names(orders, "LS8")
 | DM2 | 2026-08-18 | 2026-08-28 | 2026-10-08 |
 | CM3 | 2026-09-10 | 2026-09-23 | 2026-10-23 |
 | LS8Neo | 2026-10-29 | 2026-11-05 | 2026-11-30 |
+| LS9M1 | 2026-12-10 | 2026-12-17 | 2026-12-31 |
 
 > L7/LS7 为历史存量车型，无预售期；LS8Neo 已确认上市日为 2026-11-05，预售窗口按 `[2026-10-29, 2026-11-05)` 收口。其他仅登记 start、尚未确认 `end`（上市日）的代际，按 open-ended 预售窗口（`start + monitor.presale_open_ended_window_days`，默认 3 天）处理。详见 `time_window_rules.md`。
 >
 > LS9Hyper 是 LS9 的 Hyper 版本上市事件（只有 `end`/`finish`，无独立预售期）；`series` 值含 `LS9Hyper` 的记录默认归入 LS9 统计，只有需要单独看 Hyper 版本上市节奏时才独立使用。详见 `metric_definitions.md`。
+>
+> LS9M1（全新 LS9）是 LS9 车系的 M1 代际分组（业务术语「大F M1」）：市场命名为 `全新LS9 52 Ultra` / `全新LS9 66 Ultra`，预售 2026-12-10、上市 2026-12-17，`finish` 暂定 2026-12-31（权益结束日待业务复核）。按代际口径统计时 LS9 不再包含全新 LS9；按车系口径（`model_series_mapping` 的 LS9 族）统计时两者合并。
 
 > **上市事件业务备注**（`business_definition.json` → `business_knowledge.launch_events`）：
 > - **CM0（2023-10-12）**：上市当日发生 **APP 故障**，锁单被压制（D0 仅 11 单），需求顺延至次日（D1=2288 单）。
