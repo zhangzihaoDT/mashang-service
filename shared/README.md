@@ -30,6 +30,7 @@ Loaders under `shared/loaders/` provide canonical access to shared data assets:
 - `model_positioning_loader.py`  Model positioning knowledge (yaml)
 - `tp_and_mix_ways_loader.py`     TP&MIX-ways insurance parquet tables
 - `store_info_loader.py`          Store/dealer master CSV + store_name → dealer resolution
+- `cpca_briefing_loader.py`       CPCA official weekly briefing from mashang-data (read-only)
 ```
 
 ## Principles

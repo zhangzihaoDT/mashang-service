@@ -54,13 +54,15 @@ python -m jobs.cli --job data_refresh_config_attribute --format json
 
 可用单数据集 Job：`data_refresh_order_data`、`data_refresh_assign_data`、`data_refresh_config_attribute`、`data_refresh_lock_attribution`、`data_refresh_delivery_inventory`、`data_refresh_test_drive_data`。
 
+全国乘用车市场零售简报海报使用 `cpca-market-retail-poster`。默认预检，显式 `render` 调用固定模型，成图经人工核对后发布。参数、状态、产物和权限见 [CPCA 海报 Job 契约](../docs/数据获取/cpca_market_retail_poster_job.md)。
+
 ## Execution Contract
 
 `run_job(job_id, params)` 返回结构化结果：
 
 | 字段 | 说明 |
 |------|------|
-| `status` | `ok` / `failed` / `error` |
+| `status` | `ok` / `failed` / `error`，支持验收的 Job 可返回 `pending_review` |
 | `returncode` | 子进程退出码 |
 | `duration_s` | 执行耗时 |
 | `command` / `cwd` | 实际执行命令与目录（无 shell 注入） |

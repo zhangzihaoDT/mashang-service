@@ -12,6 +12,7 @@
 │   ├── references/               # method / metrics / pitfalls / evidence
 │   └── templates/                # 报告骨架 / 口径说明骨架
 ├── cpca-weekly-data-capture/      # 乘联会周度数据采集
+├── cpca-market-retail-poster/     # CPCA 正式零售简报海报
 ├── runtime-eval-diagnosis/        # 历史 Runtime 报告诊断
 ├── official_document_render/
 ├── doubao-search/

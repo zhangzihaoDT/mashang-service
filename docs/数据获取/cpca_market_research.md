@@ -12,6 +12,41 @@
   - `dataset/market/cpca_weekly/` — 周度数据捕捉 JSON（`cpca_weekly_data_capture.json`、`cpca_weekly_fact_result.json`）。
   - `workspace/research_scripts/cpca_weekly_early_signal.py` — 周度数据早源监控脚本。
 
+## 官方简报出口（平台契约）
+
+正式周报数据以 `mashang-data` 平台发布的只读契约为准：
+
+```text
+../mashang-data/exports/cpca/briefing.v1.json
+```
+
+官方简报数据统一通过 [`shared/loaders/cpca_briefing_loader.py`](../../shared/loaders/cpca_briefing_loader.py) 读取，不直接解析 CPCA 子模块的 CSV 或审计 JSON。路径解析顺序：
+
+1. 调用参数 `path`
+2. 环境变量 `MASHANG_DATA_CPCA_BRIEFING`
+3. 默认平级仓库路径
+
+常用入口：
+
+```python
+from shared.loaders.cpca_briefing_loader import (
+    latest_cpca_briefing,
+    get_cpca_briefing_section,
+)
+
+edition = latest_cpca_briefing()
+week = get_cpca_briefing_section(edition, "week")
+print(week["metrics"]["passenger_retail"]["value"])
+```
+
+契约字段与版本策略见 `mashang-data/docs/cpca-briefing.md`。出口只含乘用车零售和新能源零售；批发、渗透率、生产仍在 CPCA 审计 JSON 中。非首周 `week` 是累计反推值，`estimated=True`；早源捕捉 JSON 仍用于时效监控，不替代官方出口。
+
+出口文件不存在时，在 `mashang-data` 根目录运行：
+
+```bash
+make export-cpca-briefing
+```
+
 ## 观察框架
 
 研究乘用车市场，核心看三件事：

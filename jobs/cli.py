@@ -74,7 +74,7 @@ def main(argv: list[str] | None = None) -> int:
         print(body)
     else:
         print(_job_short(result))
-    return 0 if result.get("status") == "ok" else 1
+    return 0 if result.get("status") in {"ok", "pending_review"} else 1
 
 
 if __name__ == "__main__":

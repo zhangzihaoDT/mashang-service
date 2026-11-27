@@ -177,12 +177,13 @@ class JobLock:
     holder 文件只用于解释“谁在运行”，不是锁本身。
     """
 
-    def __init__(self, root: Path, run_id: str, requested_by: str):
+    def __init__(self, root: Path, run_id: str, requested_by: str, *, job: str = JOB_ID):
         self.root = root
         self.run_id = run_id
         self.requested_by = requested_by
-        self.path = root / LOG_DIR / f"{JOB_ID}.lock"
-        self.holder = root / LOG_DIR / f"{JOB_ID}.holder.json"
+        self.job = job
+        self.path = root / LOG_DIR / f"{job}.lock"
+        self.holder = root / LOG_DIR / f"{job}.holder.json"
         self._file = None
 
     def __enter__(self) -> "JobLock":
@@ -195,7 +196,7 @@ class JobLock:
             self._file.close()
             self._file = None
             raise JobBusy(
-                f"已有 {JOB_ID} 正在执行"
+                f"已有 {self.job} 正在执行"
                 + (f"（pid {holder.get('pid')}，开始于 {holder.get('started_at')}）" if holder else "")
             )
         _atomic_json(

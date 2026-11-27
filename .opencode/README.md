@@ -24,6 +24,7 @@
 ## Commands
 
 - `.opencode/commands/diagram.md` → `/diagram`
+- `.opencode/commands/cpca-market-retail-poster.md` → `/cpca-market-retail-poster`
 
 ## Integrations
 

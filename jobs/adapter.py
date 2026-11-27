@@ -209,12 +209,28 @@ def run_job(job_id: str, params: Optional[dict] = None, timeout: Optional[int] =
         p = rel if os.path.isabs(rel) else str(Path(cwd_path) / rel)
         artifacts.append(_stat_artifact(Path(p)))
 
+    # Jobs resolving an edition at runtime may declare an artifact directory.
+    artifact_root = job_cfg.get("summary_artifact_root")
+    if artifact_root and isinstance(summary_json, dict):
+        allowed = (cwd_path / artifact_root).resolve()
+        reported = summary_json.get("artifacts")
+        if isinstance(reported, dict):
+            for value in reported.values():
+                if isinstance(value, str) and value:
+                    path = (cwd_path / value).absolute()
+                    if path.resolve().is_relative_to(allowed):
+                        artifacts.append(_stat_artifact(path))
+
     ok = returncode == 0
+    status = "ok" if ok else "failed"
+    pending = job_cfg.get("pending_summary_status")
+    if ok and pending and isinstance(summary_json, dict) and summary_json.get("status") == pending:
+        status = "pending_review"
     return {
         "job_id": job_id,
         "module": job_cfg.get("module", ""),
         "label": job_cfg.get("label", ""),
-        "status": "ok" if ok else "failed",
+        "status": status,
         "returncode": returncode,
         "duration_s": round(time.time() - started, 2),
         "command": argv,

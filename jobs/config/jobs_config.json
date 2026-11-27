@@ -1,5 +1,23 @@
 {
   "feature_jobs": {
+    "cpca-market-retail-poster": {
+      "module": "workspace",
+      "label": "全国乘用车市场零售简报海报",
+      "cwd": "{repo_root}",
+      "argv_template": [
+        "{python}", "-m", "workspace.business_scripts.cpca_market_retail_poster",
+        "--date", "{date}", "--mode", "{mode}", "--redraw", "{redraw}"
+      ],
+      "params": {
+        "date": {"type": "pattern", "pattern": "latest|[0-9]{4}-[0-9]{2}-[0-9]{2}", "default": "latest"},
+        "mode": {"type": "pattern", "pattern": "dry-run|render", "default": "dry-run"},
+        "redraw": {"type": "pattern", "pattern": "none|[0-9a-f]{32}", "default": "none"}
+      },
+      "summary": "json",
+      "summary_artifact_root": "workspace/outputs/charts/cpca_market_retail_poster",
+      "pending_summary_status": "partial_success",
+      "timeout_seconds": 240
+    },
     "daily_lock_count": {
       "module": "workspace",
       "label": "Daily Lock Count",
