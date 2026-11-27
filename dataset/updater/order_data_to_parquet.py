@@ -1019,27 +1019,17 @@ def main(argv: list[str] | None = None) -> int:
         after = int(df_all.shape[0])
         print(f"✂️ 去重(order_number): {before} -> {after} (移除 {before - after})")
 
-    # --- 4. 写回 parquet ---
-    print(f"💾 保存到: {OUTPUT_FILE}")
-    df_all.to_parquet(OUTPUT_FILE, index=False)
-
-    if not OUTPUT_FILE.exists():
-        print("❌ 保存失败")
-        return 1
+    # --- 4. 验证暂存文件，再原子发布 ---
+    if __package__:
+        from .refresh_validation import publish_dataset
+    else:
+        from refresh_validation import publish_dataset
 
     try:
-        df_check = pd.read_parquet(OUTPUT_FILE, columns=None)
-        print("\n🔎 数据检查（Max 时间）")
-        for col in ["order_create_date", "intention_payment_time", "lock_time"]:
-            if col not in df_check.columns:
-                print(f" - max {col}: Column Not Found")
-                continue
-            if not pd.api.types.is_datetime64_any_dtype(df_check[col]):
-                df_check[col] = pd.to_datetime(df_check[col], errors="coerce")
-            max_val = df_check[col].max()
-            print(f" - max {col}: {str(max_val) if pd.notna(max_val) else 'None'}")
-    except Exception as e:
-        print(f"\n⚠️ 数据检查失败: {e}")
+        publish_dataset("order_data", OUTPUT_FILE, lambda staged: df_all.to_parquet(staged, index=False))
+    except (OSError, ValueError) as e:
+        print(f"❌ 订单发布失败: {e}")
+        return 1
 
     size_mb = OUTPUT_FILE.stat().st_size / (1024 * 1024)
     print(f"✅ 保存成功! 文件大小: {size_mb:.2f} MB")

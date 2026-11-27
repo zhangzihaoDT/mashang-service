@@ -30,6 +30,8 @@ from utils.orders.filters import flag_test_orders, is_placeholder_identity
 # （新上市代际锁单初期 order_type 为空，见 docs/业务能力/车型预售与上市/L6_M2_预售情况汇报分析框架.md）。
 # 此时严格 == "用户车" 的子计数会恒为 0，展示层降级为「order_type 未回填」，避免误导。
 ORDER_TYPE_FILL_SUPPRESS_RATIO = 0.5
+SNAPSHOT_REFUND_STATUS = "snapshot_refund_status"
+REFUND_APPROVAL_AS_OF = "refund_approval_as_of"
 
 
 def resolve_launch_date(time_periods: dict, key: str) -> pd.Timestamp | None:
@@ -73,24 +75,34 @@ def resolve_launch_open_from_data(
     bdef: dict | None = None,
 ) -> pd.Timestamp | None:
     """开放时刻。目标系列用数据首个 real 锁单；历史对比用上市日 open_hour。"""
+    return resolve_launch_open(base, key, launch, use_data, bdef)[0]
+
+
+def resolve_launch_open(
+    base: pd.DataFrame, key: str, launch: pd.Timestamp | None, use_data: bool = True,
+    bdef: dict | None = None,
+) -> tuple[pd.Timestamp | None, str | None]:
     if launch is None:
-        return None
+        return None, None
     launch_start = launch.normalize()
     if not use_data:
-        return launch_start + pd.Timedelta(hours=20)
+        return launch_start + pd.Timedelta(hours=20), "comparison_default"
     real = base.loc[base["series_group_logic"].eq(key)].copy()
     if real.empty:
-        return launch_start
+        return launch_start, "launch_day_start_fallback"
     real = real[real.apply(lambda r: _is_real_lock(r, bdef), axis=1)]
     real_on_launch = real[real["lock_time"] >= launch_start]
     if real_on_launch.empty:
-        return launch_start
-    return pd.Timestamp(real_on_launch["lock_time"].min())
+        return launch_start, "launch_day_start_fallback"
+    return pd.Timestamp(real_on_launch["lock_time"].min()), "first_qualifying_lock"
 
 
 def compute(
-    df: pd.DataFrame, business_def: dict, today: pd.Timestamp, generation: str, *, include_checks: bool = False,
+    df: pd.DataFrame, business_def: dict, today: pd.Timestamp | None, generation: str, *, include_checks: bool = False,
+    retention_basis: str = SNAPSHOT_REFUND_STATUS,
 ) -> dict:
+    if retention_basis not in {SNAPSHOT_REFUND_STATUS, REFUND_APPROVAL_AS_OF}:
+        raise ValueError(f"Unknown retention basis: {retention_basis}")
     required_cols = [
         "lock_time",
         "order_number",
@@ -118,8 +130,12 @@ def compute(
     if test_mask.any():
         df = df.loc[~test_mask].copy()
 
-    run_date = today.normalize()
     max_lock_time = df["lock_time"].max()
+    if today is None:
+        if pd.isna(max_lock_time):
+            raise ValueError("No valid lock timestamps in snapshot")
+        today = pd.Timestamp(max_lock_time)
+    run_date = today.normalize()
     as_of_date = run_date
     if pd.notna(max_lock_time):
         as_of_date = min(as_of_date, pd.Timestamp(max_lock_time).normalize())
@@ -170,8 +186,9 @@ def compute(
     presale_pool_order_numbers: set[str] = set()
 
     open_t = None
+    open_source = None
     if launch is not None:
-        open_t = resolve_launch_open_from_data(base, generation, launch, bdef=business_def)
+        open_t, open_source = resolve_launch_open(base, generation, launch, bdef=business_def)
 
         obs_slice = base.loc[
             base["series_group_logic"].eq(generation)
@@ -180,7 +197,10 @@ def compute(
             ["order_number", "lock_time", "approve_refund_time", "product_name"],
         ]
         retention = int(obs_slice["order_number"].nunique())
-        kept_slice = obs_slice.loc[obs_slice["approve_refund_time"].isna()]
+        retained = obs_slice["approve_refund_time"].isna()
+        if retention_basis == REFUND_APPROVAL_AS_OF:
+            retained |= obs_slice["approve_refund_time"].gt(obs)
+        kept_slice = obs_slice.loc[retained]
         retention_kept = int(kept_slice["order_number"].nunique())
         if not kept_slice.empty:
             kept_slice = kept_slice.assign(
@@ -356,6 +376,12 @@ def compute(
             and sum(row["count"] for row in retention_kept_by_product) == retention_kept
         )
         result["lock_cutoff"] = obs.isoformat()
+        first_lock = base["lock_time"].min()
+        result["lock_data_start"] = first_lock.isoformat() if pd.notna(first_lock) else None
+        result["lock_data_cutoff"] = max_lock_time.isoformat() if pd.notna(max_lock_time) else None
+        result["launch_open_at"] = open_t.isoformat() if open_t is not None else None
+        result["launch_open_source"] = open_source
+        result["retention_basis"] = retention_basis
         result["checks"] = {
             "deduplication": {
                 "status": "passed" if len(deduplicated) == cumulative_lock_count else "failed",

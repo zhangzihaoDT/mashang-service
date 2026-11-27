@@ -28,6 +28,7 @@ from tableau_export import (  # noqa: E402
     export_tableau_csv_to_original,
     load_env_file,
 )
+from refresh_validation import publish_dataset  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DATASET_DIR = REPO_ROOT / "dataset"
@@ -45,14 +46,17 @@ def export_assign(*, view: str = VIEW_ASSIGN, mobile: bool = False, timeout: int
         print("❌ 缺少 Tableau PAT。请在 .env 配置 TABLEAU_TOKEN_NAME / TABLEAU_TOKEN_VALUE")
         return False
 
-    return export_tableau_csv_to_original(
-        view=view,
-        output_path=OUTPUT_CSV,
-        token_name=token_name,
-        token_value=token_value,
-        timeout=timeout,
-        mobile=mobile,
-    )
+    def export(staged: Path) -> bool:
+        return export_tableau_csv_to_original(
+            view=view, output_path=staged, token_name=token_name,
+            token_value=token_value, timeout=timeout, mobile=mobile,
+        )
+
+    try:
+        return publish_dataset("assign_data", OUTPUT_CSV, export)
+    except (OSError, ValueError) as exc:
+        print(f"❌ 下发线索发布失败: {exc}")
+        return False
 
 
 def main(argv: list[str] | None = None) -> int:

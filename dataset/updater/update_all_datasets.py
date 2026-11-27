@@ -26,13 +26,15 @@ from __future__ import annotations
 import os
 import sys
 import argparse
+import hashlib
+import json
 import subprocess
 import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from dataset_registry import describe_all, format_report  # noqa: E402
+from dataset_registry import DATASETS, describe_all, format_report  # noqa: E402
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -112,6 +114,21 @@ DATASET_UPDATERS = {
     "test_drive_data": "test_drive_data_to_csv",
 }
 TABLEAU_HS_DATASETS = ("order_data", "config_attribute", "lock_attribution", "delivery_inventory")
+
+
+def _record_managed_step(journal: Path, dataset: str, returncode: int | None) -> None:
+    step = {"dataset": dataset, "state": "running" if returncode is None else "finished", "returncode": returncode}
+    if returncode is not None:
+        path = next(spec.path for spec in DATASETS if spec.key == dataset)
+        try:
+            with path.open("rb") as stream:
+                step["sha256"] = hashlib.file_digest(stream, "sha256").hexdigest()
+        except OSError:
+            step["sha256"] = None
+    with journal.open("a", encoding="utf-8") as stream:
+        stream.write(json.dumps(step) + "\n")
+        stream.flush()
+        os.fsync(stream.fileno())
 
 
 def build_steps(args: argparse.Namespace, mobile: bool, scope: str = "full") -> list[dict]:
@@ -320,6 +337,8 @@ def main(argv: list[str] | None = None) -> int:
         print(format_report(describe_all(), status_only=True), flush=True)
         return 0
 
+    journal_path = os.environ.pop("MASHANG_REFRESH_JOURNAL", "")
+    journal = Path(journal_path) if journal_path else None
     step_timeout = args.step_timeout or (args.timeout + 1800)
 
     DATASET_DIR.mkdir(parents=True, exist_ok=True)
@@ -338,7 +357,12 @@ def main(argv: list[str] | None = None) -> int:
             _header(f"{step['title']} —— 跳过")
             continue
         _header(step["title"])
+        if journal:
+            dataset = next(key for key, script in DATASET_UPDATERS.items() if script == Path(step["cmd"][1]).stem)
+            _record_managed_step(journal, dataset, None)
         rc = run(step["cmd"], cwd=REPO_ROOT, step_timeout=step_timeout)
+        if journal:
+            _record_managed_step(journal, dataset, rc)
         if rc != 0:
             failed_steps.append(step["id"])
             print(f"⚠️ {step['title']} 失败 (rc={rc})", flush=True)

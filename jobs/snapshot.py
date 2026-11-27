@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import shutil
@@ -15,6 +16,17 @@ sys.path.insert(0, str(ROOT))
 
 from dataset.updater.dataset_registry import DATASETS, describe
 from jobs.production import JOB_DATASETS, LOG_DIR, JobLock
+
+
+class SnapshotError(ValueError):
+    def __init__(self, code: str, message: str):
+        super().__init__(message)
+        self.code = code
+
+
+def file_sha256(path: Path) -> str:
+    with path.open("rb") as stream:
+        return hashlib.file_digest(stream, "sha256").hexdigest()
 
 
 def verified_files(root: Path, run_ids: list[str]) -> dict:
@@ -73,27 +85,102 @@ def copy_snapshot(root: Path, destination: Path, datasets: list[str], expected: 
             "rows", "size_bytes", "file_mtime", "data_asof", "data_asof_column",
         )}
         result[key]["path"] = str(spec.path.resolve())
+        result[key]["sha256"] = file_sha256(spec.path)
+        expected_hash = expected.get(key, {}).get("sha256")
+        if expected_hash and result[key]["sha256"] != expected_hash:
+            raise ValueError(f"{key} content differs from the verified refresh")
     return result
 
 
-def read_snapshot_inputs(manifest: Path, datasets: list[str]) -> tuple[str, dict]:
-    """Resolve query inputs from one published snapshot, without reading live data."""
-    manifest = manifest.resolve(strict=True)
+def _read_manifest(manifest: Path) -> tuple[Path, dict]:
+    if manifest.is_symlink():
+        raise SnapshotError("SNAPSHOT_INVALID", "Snapshot manifest must not be a symlink")
+    try:
+        manifest = manifest.resolve(strict=True)
+    except FileNotFoundError as exc:
+        raise SnapshotError("SNAPSHOT_MISSING", "Snapshot manifest is missing") from exc
     snapshot = json.loads(manifest.read_text())
-    version = snapshot["version"]
-    if manifest.name != "snapshot.json" or version != manifest.parent.name:
-        raise ValueError("Snapshot manifest does not match its version directory")
+    if not isinstance(snapshot, dict) or manifest.name != "snapshot.json" or snapshot.get("version") != manifest.parent.name:
+        raise SnapshotError("SNAPSHOT_INVALID", "Snapshot manifest does not match its version directory")
+    return manifest, snapshot
+
+
+def _dataset_inputs(manifest: Path, snapshot: dict, datasets: list[str]) -> dict:
     inputs = {}
     for key in datasets:
-        if key not in snapshot["datasets"]:
-            raise ValueError(f"Snapshot is missing required dataset: {key}")
+        if key not in snapshot.get("datasets", {}):
+            raise SnapshotError("SNAPSHOT_DEPENDENCY_MISSING", f"Snapshot is missing required dataset: {key}")
         info = snapshot["datasets"][key]
         path = Path(info["path"])
         if (not path.is_absolute() or path.parent != manifest.parent or path.is_symlink()
                 or not path.is_file() or path.stat().st_size != info["size_bytes"]):
-            raise ValueError(f"Snapshot input is invalid or changed: {key}")
+            raise SnapshotError("SNAPSHOT_INVALID", f"Snapshot input is invalid or changed: {key}")
         inputs[key] = info
-    return version, inputs
+    return inputs
+
+
+def read_snapshot_inputs(manifest: Path, datasets: list[str]) -> tuple[str, dict]:
+    """Read the original Ticket manifest used by the legacy queries."""
+    manifest, snapshot = _read_manifest(manifest)
+    return snapshot["version"], _dataset_inputs(manifest, snapshot, datasets)
+
+
+def _verified_copy(root: Path, key: str, info: dict) -> Path:
+    path = root / info["path"]
+    resolved = path.resolve(strict=True)
+    if not resolved.is_relative_to(root) or resolved != path.absolute() or not path.is_file():
+        raise SnapshotError("SNAPSHOT_INVALID", f"Snapshot requires a regular copied file: {key}")
+    stat = path.stat()
+    if stat.st_mode & 0o222 or stat.st_size != info["size_bytes"]:
+        raise SnapshotError("SNAPSHOT_INVALID", f"Snapshot file is writable or has changed size: {key}")
+    digest = info.get("sha256")
+    if not isinstance(digest, str) or not re.fullmatch(r"[a-f0-9]{64}", digest) or file_sha256(path) != digest:
+        raise SnapshotError("SNAPSHOT_HASH_MISMATCH", f"Snapshot SHA-256 missing or mismatched: {key}")
+    return path
+
+
+def read_verified_snapshot(
+    manifest: Path, datasets: list[str], definitions: list[str], expected_definition_version: str | None = None,
+) -> tuple[dict, dict, dict]:
+    """Verify the existing copy manifest and load its pinned business definitions."""
+    try:
+        manifest, snapshot = _read_manifest(manifest)
+        if snapshot.get("mode", "copy") != "copy" or snapshot.get("manifest_version", 1) != 1:
+            raise SnapshotError("SNAPSHOT_INVALID", "Only version 1 copy manifests are supported")
+        inputs = _dataset_inputs(manifest, snapshot, datasets)
+        paths = {key: _verified_copy(manifest.parent, key, info) for key, info in inputs.items()}
+        definition_inputs = snapshot.get("definitions", {})
+        missing = set(definitions) - definition_inputs.keys()
+        if missing:
+            raise SnapshotError("SNAPSHOT_DEPENDENCY_MISSING", f"Snapshot is missing definitions: {sorted(missing)}")
+        hashes = {}
+        rules = {}
+        for key, info in sorted(definition_inputs.items()):
+            path = _verified_copy(manifest.parent, key, info)
+            hashes[key] = info["sha256"]
+            if key in definitions:
+                rules[key] = json.loads(path.read_bytes())
+                if not isinstance(rules[key], dict):
+                    raise SnapshotError("SNAPSHOT_INVALID", f"Definition must be a JSON object: {key}")
+        version = hashlib.sha256(json.dumps(hashes, sort_keys=True).encode()).hexdigest()
+        for expected in (expected_definition_version, snapshot.get("definition_version")):
+            if expected is not None and expected != version:
+                raise SnapshotError("DEFINITION_VERSION_MISMATCH", "Pinned business definition version differs")
+    except SnapshotError:
+        raise
+    except (OSError, ValueError, KeyError, TypeError, AttributeError) as exc:
+        raise SnapshotError("SNAPSHOT_INVALID", f"Malformed or unreadable copy manifest: {exc}") from exc
+
+    scope = {
+        "data_source": "verified_snapshot",
+        "snapshot_version": snapshot["version"],
+        "definition_version": version,
+        "definition_hashes": hashes,
+        "inputs": {key: {field: info.get(field) for field in (
+            "sha256", "rows", "size_bytes", "data_asof", "data_asof_column", "file_mtime",
+        )} for key, info in inputs.items()},
+    }
+    return scope, paths, rules
 
 
 def main() -> None:

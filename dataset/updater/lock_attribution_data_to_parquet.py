@@ -302,14 +302,14 @@ def process_lock_attribution_parquet() -> int:
             df_existing["__file_mtime"] = float("nan")
             df_existing = transpose_metrics(df_existing)
 
-            all_cols = list(set(df_existing.columns) | set(df_new.columns))
+            all_cols = list(dict.fromkeys([*df_existing.columns, *df_new.columns]))
             df_existing = df_existing.reindex(columns=all_cols)
             df_new = df_new.reindex(columns=all_cols)
             df_final = pd.concat([df_existing, df_new], ignore_index=True)
         except Exception as e:
             print(f"❌ 读取现有 Parquet 文件失败: {e}")
-            print("   将仅使用新数据。")
-            df_final = df_new
+            print("   保留历史底座并停止发布。")
+            return 1
     else:
         print("📝 未发现现有 Parquet 文件，创建新文件...")
         df_final = df_new
@@ -338,17 +338,15 @@ def process_lock_attribution_parquet() -> int:
     if not DATASET_DIR.exists():
         DATASET_DIR.mkdir(parents=True)
 
-    print(f"💾 保存到: {OUTPUT_FILE} ...")
-    df_final.to_parquet(OUTPUT_FILE, index=False)
+    from refresh_validation import publish_dataset
 
-    if OUTPUT_FILE.exists():
-        size_mb = OUTPUT_FILE.stat().st_size / (1024 * 1024)
-        print(f"✅ 保存成功! 文件大小: {size_mb:.2f} MB")
-        print(f"   最终行数: {df_final.shape[0]}")
-        return 0
-
-    print("❌ 保存失败")
-    return 1
+    try:
+        publish_dataset("lock_attribution", OUTPUT_FILE, lambda staged: df_final.to_parquet(staged, index=False))
+    except (OSError, ValueError) as e:
+        print(f"❌ 归因发布失败: {e}")
+        return 1
+    print(f"✅ 保存成功: {OUTPUT_FILE}，{len(df_final):,} 行")
+    return 0
 
 
 def export_lock_attribution(

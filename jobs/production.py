@@ -24,6 +24,7 @@ import fcntl
 import importlib.util
 import json
 import os
+import re
 import shutil
 import signal
 import subprocess
@@ -34,6 +35,11 @@ from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterator, Optional
+
+if not __package__:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from dataset.updater.refresh_validation import MANAGED_VALIDATION, inspect_dataset, validate_output
 
 JOB_ID = "data-refresh-daily"
 TABLEAU_HS_JOB = "data-refresh-tableau-hs"
@@ -140,7 +146,7 @@ def _make_command(target: str) -> list[str]:
     return [make, "-j1", target]
 
 
-def _atomic_json(path: Path, value: Any) -> None:
+def _atomic_json(path: Path, value: Any, *, exclusive: bool = False) -> None:
     path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
     temporary = path.with_name(f"{path.name}.{os.getpid()}.{uuid.uuid4().hex}.tmp")
     with open(temporary, "x", encoding="utf-8") as handle:
@@ -148,7 +154,13 @@ def _atomic_json(path: Path, value: Any) -> None:
         json.dump(value, handle, ensure_ascii=False, indent=2)
         handle.flush()
         os.fsync(handle.fileno())
-    os.replace(temporary, path)
+    if exclusive:
+        try:
+            os.link(temporary, path)
+        finally:
+            temporary.unlink()
+    else:
+        os.replace(temporary, path)
 
 
 def _append_event(path: Path, event: dict) -> None:
@@ -203,6 +215,9 @@ class JobLock:
         except (OSError, ValueError):
             return {}
 
+    def fileno(self) -> int:
+        return self._file.fileno()
+
     def __exit__(self, *_exc) -> None:
         try:
             self.holder.unlink(missing_ok=True)
@@ -221,24 +236,30 @@ def _log_stream(path: Path) -> Iterator[Any]:
 
 
 def _terminate_group(process: subprocess.Popen) -> None:
-    for sig in (signal.SIGTERM, signal.SIGKILL):
-        try:
-            os.killpg(process.pid, sig)
-        except ProcessLookupError:
-            return
-        try:
-            process.wait(timeout=10)
-            return
-        except subprocess.TimeoutExpired:
-            continue
+    try:
+        os.killpg(process.pid, signal.SIGTERM)
+        process.wait(timeout=1)
+    except (ProcessLookupError, subprocess.TimeoutExpired):
+        pass
+    # The group can still contain children after the leader exits.
+    try:
+        os.killpg(process.pid, signal.SIGKILL)
+    except ProcessLookupError:
+        pass
+    process.wait(timeout=10)
 
 
-def run_logged(argv: list[str], cwd: Path, log_path: Path, timeout: int) -> tuple[int, float]:
+def run_logged(
+    argv: list[str], cwd: Path, log_path: Path, timeout: int, *, lock: JobLock, journal: Path | None = None,
+) -> tuple[int, float]:
     """运行固定 argv，把 stdout/stderr 写入日志，超时终止整个进程组。"""
     started = time.monotonic()
     env = os.environ.copy()
     env.pop("MAKEFLAGS", None)
     env.pop("MFLAGS", None)
+    env.pop("MASHANG_REFRESH_JOURNAL", None)
+    if journal is not None:
+        env["MASHANG_REFRESH_JOURNAL"] = str(journal)
     env["PYTHONUNBUFFERED"] = "1"
     with _log_stream(log_path) as output:
         output.write(f"\n[{utc_now()}] $ {' '.join(argv)}\n".encode())
@@ -250,6 +271,7 @@ def run_logged(argv: list[str], cwd: Path, log_path: Path, timeout: int) -> tupl
             stdout=output,
             stderr=subprocess.STDOUT,
             start_new_session=True,
+            pass_fds=(lock.fileno(),),
         )
         try:
             returncode = process.wait(timeout=timeout)
@@ -353,12 +375,16 @@ def _record_paths(root: Path, run_id: str, job: str = JOB_ID) -> tuple[Path, Pat
 
 def _write_record(record: dict, record_path: Path, latest_path: Path) -> None:
     _atomic_json(record_path, record)
-    _atomic_json(latest_path, record)
+    latest = _load_record(latest_path)
+    if not latest or latest.get("started_at", "") <= record["started_at"]:
+        _atomic_json(latest_path, record)
 
 
 def _summary(record: dict) -> str:
     status = record["status"]
     if status == "success":
+        if record.get("outcome") == "updated_existing":
+            return f"既有数据已订正；最新数据时点 {record.get('latest_data_time') or '未知'}"
         return f"数据更新完成；最新数据时点 {record.get('latest_data_time') or '未知'}"
     if status == "no_new_data":
         return f"刷新完成，但未产生新数据；最新数据时点仍为 {record.get('latest_data_time') or '未知'}"
@@ -371,6 +397,174 @@ def _summary(record: dict) -> str:
     return record.get("error") or "数据更新失败；请查看日志"
 
 
+def _load_record(path: Path) -> dict:
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        return {}
+
+
+def _validate_run_id(run_id: str) -> None:
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,127}", run_id):
+        raise ProductionJobError("Invalid run ID")
+
+
+def _matching_record(record_path: Path, job: str, run_id: str) -> dict:
+    record = _load_record(record_path)
+    if record and (record.get("job") != job or record.get("run_id") != run_id):
+        raise ProductionJobError("Run ID is already bound to a different job")
+    return record
+
+
+def _target_snapshot(root: Path, all_data: dict, job: str) -> dict:
+    target = _select_snapshot(all_data, JOB_DATASETS[job])
+    for key in MANAGED_VALIDATION.get(job, ()):
+        evidence = target[key]
+        relative = evidence.get("path")
+        if relative is None:
+            evidence.update(valid=False, validation_error="Dataset missing from registry")
+            continue
+        path = (root / relative).resolve()
+        if not path.is_relative_to(root / "dataset"):
+            evidence.update(valid=False, validation_error="Dataset path is outside the production dataset root")
+            continue
+        evidence.update(inspect_dataset(key, root / relative))
+    return target
+
+
+def _journal_steps(path: Path) -> dict:
+    latest = {}
+    try:
+        with path.open(encoding="utf-8") as stream:
+            for line in stream:
+                try:
+                    step = json.loads(line)
+                    latest[step["dataset"]] = step
+                except (ValueError, KeyError, TypeError):
+                    # A killed writer may leave a trailing partial line.
+                    continue
+    except FileNotFoundError:
+        pass
+    return latest
+
+
+def _dataset_results(record: dict, journal: Path) -> tuple[list[str], bool, list[str]]:
+    steps = _journal_steps(journal)
+    results = {}
+    changed = []
+    new_data = False
+    anomalies = []
+    for key, after in record["after"].items():
+        before = record["before"].get(key, {})
+        step = steps.get(key, {})
+        rc = step.get("returncode")
+        different = before.get("sha256") != after.get("sha256")
+        step_matches = step.get("state") == "finished" and step.get("sha256") == after.get("sha256")
+        problems = validate_output(key, before, after)
+        if step.get("state") == "finished" and not step_matches:
+            problems.append(f"{key}: current output differs from completed step")
+        if rc == 0 and not step_matches:
+            problems.append(f"{key}: completed updater has no matching output evidence")
+        if rc == 0:
+            execution = "succeeded"
+        elif rc is not None:
+            execution = "timeout" if rc == 124 else "failed"
+        else:
+            execution = "interrupted" if step else "not_started"
+
+        if not after.get("valid"):
+            publication = "invalid"
+        elif different:
+            publication = "published" if step_matches and not problems else "changed_unconfirmed"
+        else:
+            publication = "unchanged"
+
+        if different:
+            changed.append(key)
+        for field in ("validated_rows", "validated_cutoff"):
+            prior, current = before.get(field), after.get(field)
+            if publication == "published" and current is not None and (prior is None or current > prior):
+                new_data = True
+        anomalies.extend(problems)
+        results[key] = {
+            "execution_status": execution, "publish_status": publication, "returncode": rc,
+            "before_sha256": before.get("sha256"), "after_sha256": after.get("sha256"),
+            "verified": not problems, "verification_errors": problems,
+        }
+    record["dataset_results"] = results
+    return changed, new_data, anomalies
+
+
+def _collect_result(record: dict, root: Path, all_data: dict, journal: Path, *, recovered: bool = False) -> None:
+    job = record["job"]
+    record["after"] = _target_snapshot(root, all_data, job)
+    record["latest_data_time_by_dataset"] = {
+        key: item["data_asof"] for key, item in all_data.items() if item.get("data_asof")
+    }
+    refresh_rc = record.get("refresh_returncode")
+    status_rc = record.get("status_returncode")
+    if job in MANAGED_VALIDATION:
+        changed, new_data, anomalies = _dataset_results(record, journal)
+        states = {item["execution_status"] for item in record["dataset_results"].values()}
+    else:
+        changed, new_data, anomalies = _compare(record["before"], record["after"])
+        states = set()
+    if job == "data-refresh-config-attribute":
+        config = record["after"]["config_attribute"]
+        if not config.get("exists") or not config.get("rows") or not config.get("file_mtime"):
+            anomalies.append("config_attribute 缺失、为空或无法核验")
+    if job == TP_MIX_JOB:
+        for key, evidence in record["after"].items():
+            if not evidence.get("exists") or not evidence.get("rows") or not evidence.get("data_asof"):
+                anomalies.append(f"{key} 缺失、为空或无法核验业务月份")
+
+    record.update(changed_datasets=changed, new_data=new_data, latest_data_time=_latest_time(record["after"]))
+    record["warnings"].extend(anomalies)
+    if refresh_rc == 124 or "timeout" in states:
+        record.update(status="timeout", error=f"{job} 刷新超时，按运行记录核验已发布数据")
+    elif refresh_rc not in (None, 0) or "failed" in states:
+        record.update(status="failed", error=f"{job} 刷新失败（退出码 {refresh_rc}）")
+    elif status_rc not in (None, 0) or anomalies:
+        record.update(status="verification_failed", error="；".join(anomalies) or f"data-status 退出码 {status_rc}")
+    elif job in MANAGED_VALIDATION and states != {"succeeded"}:
+        record.update(status="verification_failed", error="刷新未完成，缺少目标表的完整执行记录")
+    elif recovered and job not in MANAGED_VALIDATION and (refresh_rc is None or status_rc is None):
+        record.update(status="verification_failed", error="刷新中断，缺少完成记录")
+    elif new_data or (changed and job in MANAGED_VALIDATION):
+        record["status"] = "success"
+    else:
+        record["status"] = "no_new_data"
+
+    if job in MANAGED_VALIDATION:
+        record["outcome"] = record["status"]
+        if record["status"] == "success":
+            record["outcome"] = "all_succeeded" if new_data else "updated_existing"
+        elif changed:
+            record["outcome"] = "partial_write"
+
+
+def _finish(record: dict, record_path: Path, latest_path: Path, events_path: Path) -> dict:
+    record["finished_at"] = utc_now()
+    record["duration_s"] = round(
+        (datetime.fromisoformat(record["finished_at"]) - datetime.fromisoformat(record["started_at"])).total_seconds(), 2
+    )
+    record["summary"] = _summary(record)
+    _write_record(record, record_path, latest_path)
+    _append_event(events_path, {"at": record["finished_at"], "event": "finished",
+                                "run_id": record["run_id"], "status": record["status"]})
+    return record
+
+
+def _recover_locked(root: Path, record: dict, paths: tuple[Path, Path, Path, Path]) -> dict:
+    record_path, latest_path, _, events_path = paths
+    record["recovered"] = True
+    if record.get("before"):
+        _collect_result(record, root, dataset_snapshot(root), record_path.with_suffix(".steps.jsonl"), recovered=True)
+    else:
+        record.update(status="failed", outcome="failed", error="Interrupted before the refresh scope was recorded")
+    return _finish(record, record_path, latest_path, events_path)
+
+
 def run_job(
     repo_root: str | Path,
     *,
@@ -379,172 +573,99 @@ def run_job(
     requested_by: str = "",
     run_id: Optional[str] = None,
 ) -> dict:
-    """执行已登记的生产刷新并返回结构化记录。"""
-    datasets = JOB_DATASETS[job]
+    """Execute a fixed refresh. A repeated run ID observes or recovers its first run."""
     root = Path(repo_root).expanduser().resolve()
-    run_id = (
-        run_id
-        or os.getenv("MASHANG_JOB_RUN_ID", "")
-        or f"{job}-{datetime.now().strftime('%Y%m%dT%H%M%S')}-{uuid.uuid4().hex[:8]}"
-    )
+    run_id = run_id or os.getenv("MASHANG_JOB_RUN_ID") or f"{job}-{datetime.now().strftime('%Y%m%dT%H%M%S')}-{uuid.uuid4().hex[:8]}"
     requested_by = (requested_by or os.getenv("MASHANG_JOB_REQUESTED_BY", ""))[:200]
-    started_at = utc_now()
-
-    # 先核验目标，再写任何文件：Ticket worktree / submodule 不得留下运行记录或日志。
+    record: dict = {
+        "version": 1, "job": job, "run_id": run_id, "status": "running",
+        "started_at": utc_now(), "finished_at": None, "duration_s": None,
+        "repo_root": str(root), "requested_by": requested_by, "timeout_seconds": timeout,
+        "commands": [], "before": {}, "after": {}, "changed_datasets": [], "new_data": False,
+        "latest_data_time": None, "latest_data_time_by_dataset": {}, "data_status_text": "",
+        "warnings": [], "error": None, "record_path": None,
+    }
+    if job in MANAGED_VALIDATION:
+        record.update(contract_version=2, outcome="running", dataset_results={})
     try:
+        _validate_run_id(run_id)
         root = verify_production_root(root, job)
     except ProductionJobError as error:
-        return {
-            "version": 1,
-            "job": job,
-            "run_id": run_id,
-            "status": "failed",
-            "started_at": started_at,
-            "finished_at": utc_now(),
-            "duration_s": 0,
-            "repo_root": str(root),
-            "requested_by": requested_by,
-            "before": {},
-            "after": {},
-            "changed_datasets": [],
-            "new_data": False,
-            "latest_data_time": None,
-            "warnings": [],
-            "error": str(error),
-            "summary": str(error),
-            "record_path": None,
-        }
+        record.update(status="failed", finished_at=utc_now(), duration_s=0, error=str(error), summary=str(error))
+        if job in MANAGED_VALIDATION:
+            record["outcome"] = "failed"
+        return record
 
-    record_path, latest_path, log_path, events_path = _record_paths(root, run_id, job)
-    record: dict = {
-        "version": 1,
-        "job": job,
-        "run_id": run_id,
-        "status": "running",
-        "started_at": started_at,
-        "finished_at": None,
-        "duration_s": None,
-        "repo_root": str(root),
-        "requested_by": requested_by,
-        "timeout_seconds": timeout,
-        "commands": [],
-        "before": {},
-        "after": {},
-        "changed_datasets": [],
-        "new_data": False,
-        "latest_data_time": None,
-        "latest_data_time_by_dataset": {},
-        "data_status_text": "",
-        "log_path": str(log_path),
-        "warnings": [],
-        "error": None,
-    }
-    _append_event(events_path, {"at": started_at, "event": "requested", "run_id": run_id, "requested_by": requested_by})
-    _write_record(record, record_path, latest_path)
-
+    paths = _record_paths(root, run_id, job)
+    record_path, latest_path, log_path, events_path = paths
+    journal = record_path.with_suffix(".steps.jsonl")
+    record.update(record_path=str(record_path), log_path=str(log_path))
+    existing = _matching_record(record_path, job, run_id)
+    if existing and existing["status"] != "running":
+        return existing
     try:
-        record["repo_root"] = str(root)
-        record["git"] = _repo_state(root)
-        record["record_path"] = str(record_path)
+        with JobLock(root, run_id, requested_by) as lock:
+            existing = _matching_record(record_path, job, run_id)
+            if existing:
+                return _recover_locked(root, existing, paths) if existing["status"] == "running" else existing
+            try:
+                _atomic_json(record_path, record, exclusive=True)
+            except FileExistsError:
+                return _matching_record(record_path, job, run_id)
 
-        try:
-            with JobLock(root, run_id, requested_by):
-                before_all = dataset_snapshot(root)
-                record["before"] = _select_snapshot(before_all, datasets)
+            try:
+                record["git"] = _repo_state(root)
+                record["before"] = _target_snapshot(root, dataset_snapshot(root), job)
                 _append_event(events_path, {"at": utc_now(), "event": "snapshot_before", "run_id": run_id})
                 _write_record(record, record_path, latest_path)
-                refresh_code, refresh_s = run_logged(
-                    _make_command(job), root, log_path, timeout
+                refresh_argv = _make_command(job)
+                refresh_rc, refresh_s = run_logged(
+                    refresh_argv, root, log_path, timeout, lock=lock,
+                    journal=journal if job in MANAGED_VALIDATION else None,
                 )
-                record["commands"].append(
-                    {"argv": _make_command(job), "returncode": refresh_code, "duration_s": refresh_s}
-                )
-                _append_event(
-                    events_path,
-                    {"at": utc_now(), "event": "refresh_finished", "run_id": run_id, "returncode": refresh_code},
-                )
-
-                status_code, status_s = run_logged(
-                    _make_command(STATUS_TARGET), root, log_path, STATUS_TIMEOUT
-                )
-                record["commands"].append(
-                    {"argv": _make_command(STATUS_TARGET), "returncode": status_code, "duration_s": status_s}
-                )
+                record["refresh_returncode"] = refresh_rc
+                record["commands"].append({"argv": refresh_argv, "returncode": refresh_rc, "duration_s": refresh_s})
+                _write_record(record, record_path, latest_path)
+                status_argv = _make_command(STATUS_TARGET)
+                status_rc, status_s = run_logged(status_argv, root, log_path, STATUS_TIMEOUT, lock=lock)
+                record["status_returncode"] = status_rc
+                record["commands"].append({"argv": status_argv, "returncode": status_rc, "duration_s": status_s})
                 record["data_status_text"] = _read_tail(log_path, 12000)
-                _append_event(
-                    events_path,
-                    {"at": utc_now(), "event": "status_finished", "run_id": run_id, "returncode": status_code},
-                )
-                after_all = dataset_snapshot(root)
-        except JobBusy as error:
-            record.update(status="busy", error=str(error), finished_at=utc_now())
-            _append_event(events_path, {"at": utc_now(), "event": "busy", "run_id": run_id, "error": str(error)})
-            _write_record(record, record_path, latest_path)
-            return record
-
-        record["after"] = _select_snapshot(after_all, datasets)
-        record["latest_data_time_by_dataset"] = {
-            key: item.get("data_asof") for key, item in after_all.items() if item.get("data_asof")
-        }
-        changed, new_data, anomalies = _compare(record["before"], record["after"])
-        if job == "data-refresh-config-attribute":
-            config = record["after"]["config_attribute"]
-            if not config.get("exists") or not config.get("rows") or not config.get("file_mtime"):
-                anomalies.append("config_attribute 缺失、为空或无法核验")
-        if job == TP_MIX_JOB:
-            for key, evidence in record["after"].items():
-                if not evidence.get("exists") or not evidence.get("rows") or not evidence.get("data_asof"):
-                    anomalies.append(f"{key} 缺失、为空或无法核验业务月份")
-        record["changed_datasets"] = changed
-        record["new_data"] = new_data
-        record["latest_data_time"] = _latest_time(record["after"])
-        record["warnings"].extend(anomalies)
-
-        if refresh_code == 124:
-            record["status"] = "timeout"
-            record["error"] = f"{job} 超时（{timeout}s），进程组已终止"
-        elif refresh_code != 0:
-            record["status"] = "failed"
-            record["error"] = f"{job} 退出码 {refresh_code}"
-        elif status_code != 0:
-            record["status"] = "verification_failed"
-            record["error"] = f"{STATUS_TARGET} 退出码 {status_code}；刷新结果未完成核验"
-        elif anomalies:
-            record["status"] = "verification_failed"
-            record["error"] = "；".join(anomalies)
-        elif new_data:
-            record["status"] = "success"
-        else:
-            record["status"] = "no_new_data"
-
-        record["finished_at"] = utc_now()
-        record["duration_s"] = round(
-            (datetime.fromisoformat(record["finished_at"]) - datetime.fromisoformat(started_at)).total_seconds(), 2
-        )
-        record["summary"] = _summary(record)
-        _append_event(
-            events_path,
-            {"at": record["finished_at"], "event": "finished", "run_id": run_id, "status": record["status"]},
-        )
-        _write_record(record, record_path, latest_path)
+                _collect_result(record, root, dataset_snapshot(root), journal)
+            except Exception as error:
+                record.update(status="failed", error=f"{type(error).__name__}: {error}")
+                if job in MANAGED_VALIDATION:
+                    record["outcome"] = "verification_unknown" if record.get("refresh_returncode") is not None else "failed"
+            return _finish(record, record_path, latest_path, events_path)
+    except JobBusy as error:
+        existing = _matching_record(record_path, job, run_id)
+        if existing:
+            return existing
+        record.update(status="busy", error=str(error), summary=str(error), finished_at=utc_now(), duration_s=0)
+        if job in MANAGED_VALIDATION:
+            record["outcome"] = "busy"
+        try:
+            _atomic_json(record_path, record, exclusive=True)
+        except FileExistsError:
+            return _matching_record(record_path, job, run_id)
         return record
-    except Exception as error:  # noqa: BLE001 - record every environment failure
-        finished_at = utc_now()
-        record.update(
-            status="failed",
-            error=f"{type(error).__name__}: {error}",
-            finished_at=finished_at,
-            duration_s=round(
-                (datetime.fromisoformat(finished_at) - datetime.fromisoformat(started_at)).total_seconds(), 2
-            ),
-        )
-        record["summary"] = _summary(record)
-        _append_event(
-            events_path,
-            {"at": record["finished_at"], "event": "error", "run_id": run_id, "error": record["error"]},
-        )
-        _write_record(record, record_path, latest_path)
+
+
+def run_record(repo_root: str | Path, job: str, run_id: str, *, recover: bool = False) -> dict:
+    _validate_run_id(run_id)
+    root = verify_production_root(repo_root, job)
+    paths = _record_paths(root, run_id, job)
+    record = _matching_record(paths[0], job, run_id)
+    if not record:
+        return {"job": job, "run_id": run_id, "status": "not_found", "summary": "No record for this run ID"}
+    if not recover or record["status"] != "running":
         return record
+    try:
+        with JobLock(root, run_id, "recover"):
+            current = _matching_record(paths[0], job, run_id)
+            return _recover_locked(root, current, paths) if current["status"] == "running" else current
+    except JobBusy:
+        return _matching_record(paths[0], job, run_id)
 
 
 def _read_tail(path: Path, limit: int) -> str:
@@ -570,7 +691,7 @@ def latest_record(repo_root: str | Path, job: str = JOB_ID) -> dict:
 
 def main(argv: Optional[list[str]] = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=["run", "status", "check"])
+    parser.add_argument("action", choices=["run", "status", "check", "recover"])
     parser.add_argument("job", nargs="?", default=JOB_ID)
     parser.add_argument("--repo-root", type=Path, required=True)
     parser.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT)
@@ -585,9 +706,13 @@ def main(argv: Optional[list[str]] = None) -> int:
             root = verify_production_root(args.repo_root, args.job)
             print(json.dumps({"status": "ok", "job": args.job, "repo_root": str(root)}, ensure_ascii=False))
             return 0
-        if args.action == "status":
-            print(json.dumps(latest_record(args.repo_root, args.job), ensure_ascii=False))
-            return 0
+        if args.action in {"status", "recover"}:
+            if args.action == "recover" and not args.run_id:
+                raise ProductionJobError("recover requires --run-id")
+            record = (run_record(args.repo_root, args.job, args.run_id, recover=args.action == "recover")
+                      if args.run_id else latest_record(args.repo_root, args.job))
+            print(json.dumps(record, ensure_ascii=False))
+            return int(record["status"] == "not_found")
         record = run_job(
             args.repo_root,
             job=args.job,
@@ -598,7 +723,7 @@ def main(argv: Optional[list[str]] = None) -> int:
         print(json.dumps(record, ensure_ascii=False))
         if record["status"] == "busy":
             return 2
-        return 0 if record["status"] in {"success", "no_new_data"} else 1
+        return 0 if record["status"] in {"success", "no_new_data", "running"} else 1
     except Exception as error:  # noqa: BLE001 - CLI prints structured failures
         print(json.dumps({"status": "failed", "job": args.job, "error": str(error)}, ensure_ascii=False))
         return 3

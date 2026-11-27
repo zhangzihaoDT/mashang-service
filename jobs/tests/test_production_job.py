@@ -40,6 +40,10 @@ class Dataset:
     data_asof: str
     data_asof_column: str
 
+def _parse_dates(series):
+    import pandas as pd
+    return pd.to_datetime(series, format="mixed", errors="coerce")
+
 def describe_all():
     state = json.loads((Path(__file__).resolve().parents[2] / 'state.json').read_text())
     return [
@@ -48,6 +52,43 @@ def describe_all():
         asdict(Dataset('assign_data', '下发线索', 'dataset/assign_data.csv', True,
                        state['assign_rows'], state['assign_mtime'], state['assign_asof'], 'Assign Time 年/月/日')),
     ]
+"""
+
+WRITE_DATA = """
+import hashlib
+import json
+import os
+from pathlib import Path
+
+import pandas as pd
+
+state = json.loads(Path("state.json").read_text())
+order_rows = state["order_rows"]
+keys = pd.Series([str(i) for i in range(order_rows)])
+order_time = pd.Timestamp(state["order_asof"])
+output = Path("dataset/order_data.parquet")
+orders = pd.DataFrame({
+    "order_number": keys, "lock_time": order_time, "order_create_date": order_time,
+    "product_name": "智己LS9", "series": "LS9", "order_type": "用户车",
+    "approve_refund_time": pd.NaT, "intention_payment_time": pd.NaT, "intention_refund_time": pd.NaT,
+    "deposit_payment_time": pd.NaT, "deposit_refund_time": pd.NaT,
+    "buyer_identity_no": "x", "owner_identity_no": "x", "store_name": "fixture",
+})
+if not output.exists() or len(pd.read_parquet(output)) != order_rows:
+    orders.to_parquet(output, index=False)
+assign = Path("dataset/assign_data.csv")
+assign_csv = pd.DataFrame({
+    "Assign Time 年/月/日": pd.date_range(end=state["assign_asof"], periods=state["assign_rows"]),
+    "下发线索数": 1,
+}).to_csv(index=False)
+if not assign.exists() or assign.read_text() != assign_csv:
+    assign.write_text(assign_csv)
+if journal := os.environ.get("MASHANG_REFRESH_JOURNAL"):
+    with open(journal, "a") as stream:
+        for key, path in [("order_data", output), ("assign_data", assign)]:
+            step = {"dataset": key, "state": "finished", "returncode": 0,
+                    "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
+            print(json.dumps(step), file=stream)
 """
 
 
@@ -71,8 +112,11 @@ def make_repo(tmp_path: Path, recipe: str) -> Path:
         ),
         encoding="utf-8",
     )
+    (root / "write_data.py").write_text(WRITE_DATA)
+    subprocess.run([sys.executable, "write_data.py"], cwd=root, check=True)
     (root / "Makefile").write_text(
-        "data-refresh-daily:\n" + textwrap.indent(recipe, "\t") + "\ndata-status:\n\t@echo data-status-ok\n",
+        "data-refresh-daily:\n" + textwrap.indent(recipe, "\t")
+        + "\n\t@.venv/bin/python write_data.py\ndata-status:\n\t@echo data-status-ok\n",
         encoding="utf-8",
     )
     subprocess.run(["git", "init", "-q"], cwd=root, check=True)
@@ -94,6 +138,10 @@ def test_success_records_new_data_and_status(tmp_path):
     record = production.run_job(root, timeout=30)
     assert record["status"] == "success"
     assert record["new_data"] is True
+    assert record["contract_version"] == 2
+    assert record["outcome"] == "all_succeeded"
+    assert record["dataset_results"]["order_data"]["publish_status"] == "published"
+    assert record["dataset_results"]["assign_data"]["publish_status"] == "unchanged"
     assert record["latest_data_time"] == "2026-11-05T09:00:00"
     assert record["changed_datasets"] == ["order_data"]
     assert record["before"]["order_data"]["rows"] == 100
@@ -224,3 +272,131 @@ def test_config_job_runs_only_config_target_and_verifies_only_config(tmp_path, m
     assert result["status"] == expected
     assert set(result["before"]) == set(result["after"]) == {"config_attribute"}
     assert [command["argv"][-1] for command in result["commands"]] == ["data-refresh-config-attribute", "data-status"]
+
+
+def managed_repo(tmp_path, monkeypatch, outcomes):
+    """Run the actual scoped updater dispatcher with local-only child processes."""
+    root = make_repo(tmp_path, "@true")
+    updater = root / "dataset/updater"
+    for name in ("update_all_datasets.py", "dataset_registry.py"):
+        (updater / name).write_bytes((_PRJ_ROOT / "dataset/updater" / name).read_bytes())
+    date = "2026-11-05 10:00:00"
+    for name, basename in (
+        ("order_data_to_parquet", "order_data.parquet"),
+        ("assign_data_to_csv", "assign_data.csv"),
+        ("lock_attribution_data_to_parquet", "lock_attribution_data.parquet"),
+    ):
+        action = outcomes.get(name, "raise SystemExit(9)")
+        (updater / f"{name}.py").write_text(
+            f"import sys,time\nfrom pathlib import Path\nimport pandas as pd\n"
+            f"p=Path('dataset/{basename}')\nnew_time={date!r}\n{action}\n"
+        )
+    (root / "Makefile").write_text(
+        "export MOBILE := 1\n"
+        "data-refresh-daily:\n\t@.venv/bin/python dataset/updater/update_all_datasets.py --mobile --scope daily\n"
+        "data-refresh-order-data:\n\t@.venv/bin/python dataset/updater/update_all_datasets.py --mobile --scope order_data\n"
+        "data-refresh-lock-attribution:\n\t@.venv/bin/python dataset/updater/update_all_datasets.py --mobile --scope lock_attribution\n"
+        "data-status:\n\t@.venv/bin/python dataset/updater/update_all_datasets.py --status-only\n"
+    )
+    monkeypatch.delenv("MASHANG_JOB_RUN_ID", raising=False)
+    monkeypatch.setenv("STORE_INFO_CSV", str(root / "dataset/store_info.csv"))
+    return root
+
+
+UPDATE_ORDER = """df=pd.read_parquet(p)
+df.loc[0,'lock_time']=pd.Timestamp(new_time)
+df.to_parquet(p,index=False)"""
+
+
+def test_daily_actual_dispatch_reports_partial_write(tmp_path, monkeypatch):
+    root = managed_repo(tmp_path, monkeypatch, {"order_data_to_parquet": UPDATE_ORDER})
+    record = production.run_job(root, run_id="fixture-daily-partial")
+    assert record["status"] == "failed" and record["outcome"] == "partial_write"
+    assert record["dataset_results"]["order_data"]["execution_status"] == "succeeded"
+    assert record["dataset_results"]["order_data"]["publish_status"] == "published"
+    assert record["dataset_results"]["assign_data"]["execution_status"] == "failed"
+    assert record["dataset_results"]["assign_data"]["publish_status"] == "unchanged"
+    assert production.run_job(root, run_id=record["run_id"]) == record
+
+
+def test_order_job_is_single_table_and_can_detect_corruption(tmp_path, monkeypatch):
+    root = managed_repo(tmp_path, monkeypatch, {"order_data_to_parquet": UPDATE_ORDER})
+    prior = (root / "dataset/assign_data.csv").read_bytes()
+    options = {"job": "data-refresh-order-data"}
+    result = production.run_job(root, run_id="fixture-order-update", **options)
+    assert result["status"] == "success" and result["outcome"] == "all_succeeded"
+    assert set(result["before"]) == set(result["after"]) == {"order_data"}
+    assert result["after"]["order_data"]["validated_cutoff"] == "2026-11-05T10:00:00"
+    assert (root / "dataset/assign_data.csv").read_bytes() == prior
+
+    (root / "dataset/updater/order_data_to_parquet.py").write_text(
+        "from pathlib import Path\nPath('dataset/order_data.parquet').write_bytes(b'corrupt')\n"
+    )
+    corrupt = production.run_job(root, run_id="fixture-order-corrupt", **options)
+    assert corrupt["status"] == "verification_failed"
+    assert corrupt["dataset_results"]["order_data"]["publish_status"] == "invalid"
+    assert (root / "dataset/assign_data.csv").read_bytes() == prior
+
+
+def test_attribution_job_reports_in_place_corrections_and_unchanged_replays(tmp_path, monkeypatch):
+    root = managed_repo(tmp_path, monkeypatch, {"lock_attribution_data_to_parquet": """
+df=pd.read_parquet(p)
+df['channel']='corrected'
+df.to_parquet(p,index=False)
+"""})
+    subprocess.run([sys.executable, "-c", """
+import pandas as pd
+pd.DataFrame({
+    'lc_user_phone_md5': ['fixture'],
+    'lc_main_code': ['lead'],
+    'lc_order_lock_time_min': [pd.Timestamp('2026-11-02')],
+    'channel': ['original'],
+}).to_parquet('dataset/lock_attribution_data.parquet',index=False)
+"""], cwd=root, check=True)
+    job = "data-refresh-lock-attribution"
+    order_hash = production.inspect_dataset("order_data", root / "dataset/order_data.parquet")["sha256"]
+    corrected = production.run_job(root, job=job, run_id="fixture-attribution-corrected")
+    assert corrected["status"] == "success" and corrected["outcome"] == "updated_existing"
+    assert corrected["new_data"] is False
+    assert set(corrected["dataset_results"]) == {"lock_attribution"}
+    assert corrected["dataset_results"]["lock_attribution"]["publish_status"] == "published"
+    same = production.run_job(root, job=job, run_id="fixture-attribution-same-data")
+    assert same["status"] == same["outcome"] == "no_new_data"
+    assert production.inspect_dataset("order_data", root / "dataset/order_data.parquet")["sha256"] == order_hash
+
+def test_recover_interrupted_runner_without_repeating_refresh(tmp_path, monkeypatch):
+    order_action = UPDATE_ORDER + "\nPath('ran').open('a').write('once\\n')\n"
+    root = managed_repo(tmp_path, monkeypatch, {
+        "order_data_to_parquet": order_action,
+        "assign_data_to_csv": "Path('waiting').touch(); time.sleep(1.5)",
+    })
+    run_id = "fixture-crash-recovery"
+    env = {**os.environ, "PYTHONPATH": str(_PRJ_ROOT)}
+    runner = subprocess.Popen(
+        [sys.executable, "-B", "-m", "jobs.production", "run", "--repo-root", str(root), "--run-id", run_id],
+        cwd=root, env=env, stdout=subprocess.DEVNULL,
+    )
+    try:
+        deadline = time.monotonic() + 12
+        while not (root / "waiting").exists() and time.monotonic() < deadline:
+            time.sleep(0.03)
+        assert (root / "waiting").exists()
+        runner.kill()
+        runner.wait(timeout=5)
+        # Make keeps the production lock until the updater returns, even after the runner dies.
+        assert production.run_record(root, production.JOB_ID, run_id, recover=True)["status"] == "running"
+        while time.monotonic() < deadline:
+            recovered = production.run_record(root, production.JOB_ID, run_id, recover=True)
+            if recovered["status"] != "running":
+                break
+            time.sleep(0.05)
+        assert recovered["status"] == "success"
+        assert recovered["recovered"] is True
+        assert recovered["dataset_results"]["order_data"]["publish_status"] == "published"
+        assert recovered["dataset_results"]["assign_data"]["publish_status"] == "unchanged"
+        assert production.run_job(root, run_id=run_id) == recovered
+        assert (root / "ran").read_text() == "once\n"
+    finally:
+        if runner.poll() is None:
+            runner.kill()
+            runner.wait(timeout=5)

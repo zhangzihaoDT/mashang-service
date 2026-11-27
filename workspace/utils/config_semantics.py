@@ -97,3 +97,12 @@ def build_value_to_code_map(attribute_spec: dict) -> dict:
         for alias in code_spec.get("aliases") or []:
             mapping[alias] = code
     return mapping
+
+
+def collapse_order_values(order_numbers, values):
+    """Return one unique nonempty value per order and the conflicting order IDs."""
+    import pandas as pd
+
+    pairs = pd.DataFrame({"order": order_numbers, "value": values}).dropna().drop_duplicates()
+    conflicts = pairs["order"].duplicated(keep=False)
+    return pairs.loc[~conflicts].set_index("order")["value"], set(pairs.loc[conflicts, "order"])

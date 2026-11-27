@@ -2,7 +2,7 @@
 import pandas as pd
 
 from operators.product_attributes import resolve_product_attributes
-from utils.config_semantics import resolve_value_code
+from utils.config_semantics import collapse_order_values, resolve_value_code
 
 
 def mix(orders: pd.DataFrame, config: pd.DataFrame, definition: dict, interior_spec: dict) -> dict:
@@ -32,13 +32,12 @@ def mix(orders: pd.DataFrame, config: pd.DataFrame, definition: dict, interior_s
         resolve_value_code(interior_spec, None if pd.isna(code) else code, color)[1] or color
         for code, color in zip(colors["value_code"], colors["color"])
     ]
-    colors = colors[["order_number", "color"]].drop_duplicates()
     coverage = scope.loc[scope["order_number"].isin(colors["order_number"]), "lock_time"]
     matched_cutoff = pd.to_datetime(coverage, errors="coerce").max()
-    joined = pairs.merge(colors, how="left", on="order_number")
-    conflicts = joined["order_number"].duplicated(keep=False)
+    color_by_order, conflicting_orders = collapse_order_values(colors["order_number"], colors["color"])
+    joined = pairs.assign(color=pairs["order_number"].map(color_by_order))
+    conflicts = joined["order_number"].isin(conflicting_orders)
     joined.loc[conflicts, "color"] = "配置冲突"
-    joined = joined.drop_duplicates("order_number")
     result = {}
     for power in ("增程", "纯电"):
         group = joined.loc[joined["power"].eq(power)]
