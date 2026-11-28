@@ -35,51 +35,12 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from dataset_registry import DATASETS, describe_all, format_report  # noqa: E402
+from tableau_export import load_env_file, select_tableau_mobile  # noqa: E402
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DATASET_DIR = REPO_ROOT / "dataset"
 UPDATER_DIR = DATASET_DIR / "updater"
-
-
-def load_env_file(env_path: Path) -> None:
-    if not env_path.exists():
-        return
-    try:
-        for raw in env_path.read_text(encoding="utf-8").splitlines():
-            line = raw.strip()
-            if not line or line.startswith("#") or "=" not in line:
-                continue
-            k, v = line.split("=", 1)
-            k = k.strip()
-            v = v.strip()
-            if (v.startswith('"') and v.endswith('"')) or (v.startswith("'") and v.endswith("'")):
-                v = v[1:-1]
-            if k and k not in os.environ:
-                os.environ[k] = v
-    except Exception:
-        return
-
-
-def office_tableau_reachable(timeout: float = 8.0) -> bool:
-    """探测办公网 Tableau 主机是否可达（DNS 解析 + TCP 连接）。
-
-    命中 DNS/连接失败时返回 False，供编排层整体回退移动链路（--mobile）。
-    """
-    import socket
-    from urllib.parse import urlparse
-
-    base_url = os.getenv("TABLEAU_SERVER_URL") or "https://tableau-hs.immotors.com"
-    parsed = urlparse(base_url)
-    host = parsed.hostname
-    if not host:
-        return True
-    port = parsed.port or (80 if parsed.scheme == "http" else 443)
-    try:
-        socket.create_connection((host, port), timeout=timeout).close()
-        return True
-    except OSError:
-        return False
 
 
 def run(cmd: list[str], cwd: Path, step_timeout: int | None = None) -> int:
@@ -344,10 +305,7 @@ def main(argv: list[str] | None = None) -> int:
     DATASET_DIR.mkdir(parents=True, exist_ok=True)
     load_env_file(REPO_ROOT / ".env")
 
-    mobile = args.mobile
-    if not mobile and not office_tableau_reachable():
-        print("⚠️ 办公网 Tableau 不可达，自动回退到移动链路（--mobile）", flush=True)
-        mobile = True
+    mobile = select_tableau_mobile(args.mobile)
 
     run_started = time.time()
     failed_steps: list[str] = []

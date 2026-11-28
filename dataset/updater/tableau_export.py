@@ -22,9 +22,10 @@ from __future__ import annotations
 
 import io
 import os
+import socket
 import zipfile
 from pathlib import Path
-from urllib.parse import urlencode, quote
+from urllib.parse import urlencode, quote, urlparse
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
 import xml.etree.ElementTree as ET
@@ -63,6 +64,22 @@ def resolve_tableau_base_url(mobile: bool = False) -> str:
     if mobile:
         return os.getenv("TABLEAU_SERVER_URL_MOBILE") or DEFAULT_TABLEAU_MOBILE_URL
     return os.getenv("TABLEAU_SERVER_URL") or DEFAULT_TABLEAU_URL
+
+
+def select_tableau_mobile(mobile: bool = False, timeout: float = 8.0) -> bool:
+    """Use mobile when requested explicitly or when the office endpoint is unreachable."""
+    if mobile:
+        return True
+    address = urlparse(resolve_tableau_base_url())
+    if not address.hostname:
+        return False
+    port = address.port or (80 if address.scheme == "http" else 443)
+    try:
+        with socket.create_connection((address.hostname, port), timeout=timeout):
+            return False
+    except OSError:
+        print("⚠️ 办公网 Tableau 不可达，自动回退到移动链路（--mobile）", flush=True)
+        return True
 
 
 def _http_request(

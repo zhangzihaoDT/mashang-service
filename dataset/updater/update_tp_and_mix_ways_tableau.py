@@ -46,6 +46,11 @@ if str(REPO_ROOT) not in sys.path:
 from scripts.build_tp_and_mix_ways_dataset import (  # noqa: E402
     build_tp_and_mix_ways_dataset,
 )
+from dataset.updater.tableau_export import (  # noqa: E402
+    load_env_file,
+    resolve_tableau_base_url,
+    select_tableau_mobile,
+)
 from dataset.updater.tp_and_mix_ways_raw_guard import (  # noqa: E402
     DEFAULT_MAX_MONTH_DELETION_RATIO,
     RawContractError,
@@ -69,25 +74,6 @@ TABLEAU_VIEWS: list[dict[str, str]] = [
     {"view_path": "-ways/way5_price_segment_monthly", "output": "way5_price_segment_monthly_data.csv"},
     {"view_path": "-ways/way6_product_segment_monthly", "output": "way6_product_segment_monthly_data.csv"},
 ]
-
-
-def load_env_file(env_path: Path) -> None:
-    if not env_path.exists():
-        return
-    try:
-        for raw in env_path.read_text(encoding="utf-8").splitlines():
-            line = raw.strip()
-            if not line or line.startswith("#") or "=" not in line:
-                continue
-            k, v = line.split("=", 1)
-            k = k.strip()
-            v = v.strip()
-            if (v.startswith('"') and v.endswith('"')) or (v.startswith("'") and v.endswith("'")):
-                v = v[1:-1]
-            if k and k not in os.environ:
-                os.environ[k] = v
-    except Exception:
-        return
 
 
 def _http_request(
@@ -339,10 +325,7 @@ def step_export_all_views(
         print("❌ 缺少 Tableau PAT：TABLEAU_TOKEN_NAME / TABLEAU_TOKEN_VALUE")
         return False
 
-    if mobile:
-        base_url = os.getenv("TABLEAU_SERVER_URL_MOBILE") or "https://mobile-tableau-hs.immotors.com"
-    else:
-        base_url = os.getenv("TABLEAU_SERVER_URL") or "https://tableau-hs.immotors.com"
+    base_url = resolve_tableau_base_url(select_tableau_mobile(mobile))
     site_content_url = os.getenv("TABLEAU_SITE_CONTENT_URL", "")
 
     view_defs = list(TABLEAU_VIEWS)

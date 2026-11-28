@@ -18,6 +18,7 @@ Coverage:
 
 from __future__ import annotations
 
+from contextlib import nullcontext
 import csv
 import json
 import os
@@ -27,6 +28,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
+from dataset.updater import tableau_export
 from dataset.updater import tp_and_mix_ways_raw_guard as guard
 from dataset.updater import update_tp_and_mix_ways_tableau as updater
 from scripts.build_tp_and_mix_ways_dataset import (
@@ -604,6 +606,52 @@ def test_dry_run_does_not_publish_derived_layers(tmp_path: Path):
     assert exit_code == 0
     assert not (dataset_root / "parquet").exists()
     assert not (dataset_root / "registry").exists()
+
+
+@pytest.mark.parametrize(
+    "mobile, office_reachable, expected_host",
+    [
+        (False, True, "https://office.example.test"),
+        (False, False, "https://mobile.example.test"),
+        (True, True, "https://mobile.example.test"),
+    ],
+)
+def test_export_chooses_one_tableau_connection_for_all_views(
+    tmp_path, monkeypatch, mobile, office_reachable, expected_host
+):
+    monkeypatch.setenv("TABLEAU_SERVER_URL", "https://office.example.test")
+    monkeypatch.setenv("TABLEAU_SERVER_URL_MOBILE", "https://mobile.example.test")
+    monkeypatch.setenv("TABLEAU_TOKEN_NAME", "fixture")
+    monkeypatch.setenv("TABLEAU_TOKEN_VALUE", "fixture")
+    probes = []
+    sign_ins = []
+    downloads = []
+
+    def connect(address, *, timeout):
+        probes.append(address)
+        if not office_reachable:
+            raise OSError("simulated office connection failure")
+        return nullcontext()
+
+    def sign_in(*, base_url, **kwargs):
+        sign_ins.append(base_url)
+        return "3.25", "fixture", "site"
+
+    def download(*, base_url, output_path, **kwargs):
+        downloads.append(base_url)
+        output_path.write_text("fixture")
+
+    monkeypatch.setattr(tableau_export.socket, "create_connection", connect)
+    monkeypatch.setattr(updater, "tableau_sign_in", sign_in)
+    monkeypatch.setattr(updater, "tableau_find_view_id", lambda **kwargs: "view")
+    monkeypatch.setattr(updater, "tableau_download_view_data_csv", download)
+    monkeypatch.setattr(updater, "tableau_sign_out", lambda **kwargs: None)
+
+    assert updater.step_export_all_views(tmp_path, mobile=mobile)
+    assert probes == ([] if mobile else [("office.example.test", 443)])
+    assert sign_ins == [expected_host]
+    assert downloads == [expected_host] * len(ALL_TABLES)
+    assert {path.name for path in tmp_path.iterdir()} == set(SOURCE_MAP)
 
 
 # ── cross-layer transaction / recovery / lock ───────────────────
